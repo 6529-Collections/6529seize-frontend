@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-19T00:00:00.000Z",
-  "commit_sha": "frontend-owned-curated-v1",
+  "generated_at": "2026-06-29T09:23:18.000Z",
+  "commit_sha": "01a39b18db2f",
   "base_url": "https://6529.io",
   "records": [
     {
@@ -45,6 +45,365 @@
         "ops/docs/navigation/feature-sidebar-navigation.md",
         "ops/docs/navigation/feature-app-sidebar-menu.md"
       ]
+    },
+    {
+      "id": "about.faq",
+      "kind": "route",
+      "title": "6529 FAQ",
+      "aliases": [
+        "6529 faq",
+        "what is 6529.io",
+        "about faq",
+        "what is 6529",
+        "what is 6529 trying to do",
+        "what is 6529 building",
+        "what is the goal of 6529",
+        "how do i get started",
+        "how does 6529 work",
+        "what can i do on 6529"
+      ],
+      "keywords": [
+        "faq",
+        "about",
+        "6529",
+        "started",
+        "profile",
+        "waves",
+        "memes",
+        "tdh",
+        "rep",
+        "nic",
+        "network",
+        "state",
+        "coordination",
+        "public",
+        "goods"
+      ],
+      "facts": [
+        "The 6529 FAQ lives at /about/faq.",
+        "6529 and 6529.io refer to the same product ecosystem in user questions.",
+        "6529 is building a decentralized network state: a permissionless global network society that funds, builds, and coordinates public-goods work across art, science, culture, and technology.",
+        "In product terms, 6529 is not only an NFT collection site; it is a coordination system built around wallet identity, profiles, The Memes, Meme Lab, Gradients, NextGen, Waves, voting, groups, delegation, REP/CIC reputation, TDH/xTDH network metrics, open data, minting/claims infrastructure, and help tooling such as @help6529.",
+        "The long-term goal is nation-scale positive impact.",
+        "The core idea is to extend what Bitcoin and Ethereum proved for money and code into human coordination itself, so communities can organize, allocate attention, vote, build, and distribute work permissionlessly.",
+        "Use the FAQ when users ask broad getting-started questions or ask where general 6529 product explanations live."
+      ],
+      "canonical_path": "/about/faq",
+      "related_paths": ["/", "/waves", "/network", "/about/the-memes"],
+      "tags": ["about", "faq", "getting-started"],
+      "source_refs": ["components/about/AboutFAQ.tsx"]
+    },
+    {
+      "id": "about.terms-of-service",
+      "kind": "route",
+      "title": "Terms of Service",
+      "aliases": [
+        "terms of service",
+        "terms",
+        "tos",
+        "6529 terms",
+        "6529 terms of service",
+        "platform terms",
+        "legal terms",
+        "what are terms of service"
+      ],
+      "keywords": [
+        "terms",
+        "service",
+        "legal",
+        "platform",
+        "privacy",
+        "copyright",
+        "liability",
+        "arbitration",
+        "sanctions",
+        "cc0"
+      ],
+      "facts": [
+        "The Terms of Service page lives at /about/terms-of-service.",
+        "The page defines the terms for using the 6529 platform and was last updated February 23, 2023.",
+        "The terms cover platform access, 6529 NFTs, incorporated about pages, privacy, copyright, delegation and consolidation, wallet responsibility, phishing, CC0, disclaimers, liability limits, arbitration, and related legal topics.",
+        "Use this page when users ask where the 6529 Terms of Service live or ask about the public legal terms for using 6529.io."
+      ],
+      "canonical_path": "/about/terms-of-service",
+      "related_paths": [
+        "/about/privacy-policy",
+        "/about/cookie-policy",
+        "/about/copyright",
+        "/dispute-resolution"
+      ],
+      "tags": ["about", "terms", "legal"],
+      "source_refs": [
+        "components/about/AboutTermsOfService.tsx",
+        "components/footer/Footer.tsx"
+      ]
+    },
+    {
+      "id": "about.nakamoto-threshold",
+      "kind": "route",
+      "title": "Nakamoto Threshold",
+      "aliases": [
+        "nakamoto threshold",
+        "naka threshold",
+        "what is the nakamoto threshold",
+        "card 4 lowest edition",
+        "meme card 4 edition count",
+        "lowest edition meme card",
+        "300 edition threshold",
+        "the memes threshold"
+      ],
+      "keywords": [
+        "nakamoto",
+        "threshold",
+        "naka",
+        "meme",
+        "memes",
+        "card",
+        "edition",
+        "300",
+        "lowest",
+        "cc0"
+      ],
+      "facts": [
+        "The Nakamoto Threshold page lives at /about/nakamoto-threshold.",
+        "Meme Card #4 is an homage to the first Rare Pepe and has an edition count of 300.",
+        "The Nakamoto Threshold is the commitment that Meme Card #4 remains the lowest-edition Meme Card, so other Meme Cards should exceed 300 editions.",
+        "The page frames the Nakamoto Threshold and CC0 as fixed commitments for The Memes."
+      ],
+      "canonical_path": "/about/nakamoto-threshold",
+      "related_paths": ["/about/the-memes", "/the-memes", "/about/license"],
+      "tags": ["about", "memes", "nakamoto-threshold"],
+      "source_refs": ["components/about/AboutNakamotoThreshold.tsx"]
+    },
+    {
+      "id": "about.data-decentralization",
+      "kind": "route",
+      "title": "Data Decentralization",
+      "aliases": [
+        "data decentralization",
+        "decentralized data",
+        "6529 data sources",
+        "where does 6529 data come from",
+        "can i replicate 6529 data",
+        "open data sources",
+        "public data"
+      ],
+      "keywords": [
+        "data",
+        "decentralization",
+        "decentralized",
+        "on-chain",
+        "ethereum",
+        "arweave",
+        "opensea",
+        "open",
+        "csv",
+        "tdh"
+      ],
+      "facts": [
+        "The Data Decentralization page lives at /about/data-decentralization.",
+        "6529's goal is to demonstrate how applications can be built in a decentralized manner.",
+        "The page explains that effectively all information on 6529.io comes from on-chain or public sources, or is derived transparently from those sources.",
+        "Listed data sources include Ethereum, Arweave decentralized storage, OpenSea API data, internal team-address records, computed thumbnails and TDH values, and compiled daily data exports.",
+        "The page points users to /open-data for daily compiled CSV exports."
+      ],
+      "canonical_path": "/about/data-decentralization",
+      "related_paths": ["/open-data", "/about/faq"],
+      "tags": ["about", "open-data", "decentralization"],
+      "source_refs": ["components/about/AboutDataDecentral.tsx"]
+    },
+    {
+      "id": "about.minting-meme-cards",
+      "kind": "route",
+      "title": "Minting Meme Cards",
+      "aliases": [
+        "minting meme cards",
+        "meme card minting",
+        "how do memes mint",
+        "where do memes mint",
+        "memes mint schedule",
+        "memes mint price",
+        "allowlist minting"
+      ],
+      "keywords": [
+        "minting",
+        "mint",
+        "meme",
+        "memes",
+        "allowlist",
+        "price",
+        "schedule",
+        "primary",
+        "sale"
+      ],
+      "facts": [
+        "The Minting Meme Cards page lives at /about/minting.",
+        "The Memes minting website is /the-memes/mint; there is no other official minting website for The Memes.",
+        "The page says Meme Cards are minted when the art for the next Meme Card is ready, currently about three times per week, though frequency and timing can vary.",
+        "The page says The Memes generally use an allowlist model to avoid gas wars and bot wars and to give a broad range of people a chance to mint.",
+        "Users should follow @6529collections for current mint dates and times."
+      ],
+      "canonical_path": "/about/minting",
+      "related_paths": ["/the-memes/mint", "/the-memes", "/about/the-memes"],
+      "tags": ["about", "memes", "minting"],
+      "source_refs": ["components/about/AboutMinting.tsx"]
+    },
+    {
+      "id": "about.license",
+      "kind": "route",
+      "title": "6529 License",
+      "aliases": [
+        "license",
+        "6529 license",
+        "memes license",
+        "meme lab license",
+        "gradient license",
+        "cc0",
+        "can i use meme card art",
+        "can i use gradient art"
+      ],
+      "keywords": [
+        "license",
+        "cc0",
+        "copyright",
+        "memes",
+        "meme",
+        "lab",
+        "gradient",
+        "commercial",
+        "derivative",
+        "rememes"
+      ],
+      "facts": [
+        "The License page lives at /about/license.",
+        "The Memes and Meme Lab NFTs are released by the artists under a Creative Commons 0 public-domain license to the maximum extent allowed by law.",
+        "The page says people can use The Memes and Meme Lab art for commercial or non-commercial purposes without seeking permission from the artists, subject to rights the artists do not control.",
+        "Gradient NFTs are treated differently: they have not been released under CC0, and the page warns against uses that could confuse people into thinking a product or service is offered by 6529."
+      ],
+      "canonical_path": "/about/license",
+      "related_paths": [
+        "/about/the-memes",
+        "/about/meme-lab",
+        "/about/6529-gradient"
+      ],
+      "tags": ["about", "license", "cc0"],
+      "source_refs": ["components/about/AboutLicense.tsx"]
+    },
+    {
+      "id": "about.gdrc1",
+      "kind": "route",
+      "title": "Global Digital Rights Charter",
+      "aliases": [
+        "gdrc1",
+        "gdrc 1",
+        "global digital rights charter",
+        "digital rights charter"
+      ],
+      "keywords": ["gdrc1", "gdrc", "charter", "digital", "rights", "about"],
+      "facts": [
+        "The GDRC1 page lives at /about/gdrc1.",
+        "The page states that 6529 supports the Global Digital Rights Charter 1.",
+        "The page links to digitalrightscharter.org and displays the full text of GDRC1."
+      ],
+      "canonical_path": "/about/gdrc1",
+      "related_paths": ["/about/faq"],
+      "tags": ["about", "rights", "gdrc1"],
+      "source_refs": ["components/about/AboutGDRC1.tsx"]
+    },
+    {
+      "id": "about.nft-delegation",
+      "kind": "route",
+      "title": "NFT Delegation",
+      "aliases": [
+        "nft delegation",
+        "about nft delegation",
+        "delegation about page",
+        "where do i start delegation"
+      ],
+      "keywords": [
+        "nft",
+        "delegation",
+        "delegate",
+        "wallet",
+        "center",
+        "about"
+      ],
+      "facts": [
+        "The NFT Delegation about page lives at /about/nft-delegation.",
+        "The page sends users to the Delegation Center to get started with delegation."
+      ],
+      "canonical_path": "/about/nft-delegation",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/delegation-faq"
+      ],
+      "tags": ["about", "delegation"],
+      "source_refs": ["components/about/AboutNFTDelegation.tsx"]
+    },
+    {
+      "id": "about.ens",
+      "kind": "route",
+      "title": "ENS",
+      "aliases": [
+        "ens",
+        "ens domain",
+        "ens name",
+        "register ens",
+        "set primary ens",
+        "create ens subdomain",
+        "primary name"
+      ],
+      "keywords": [
+        "ens",
+        "domain",
+        "name",
+        "primary",
+        "subdomain",
+        "subname",
+        "ethereum"
+      ],
+      "facts": [
+        "The ENS page lives at /about/ens.",
+        "The page explains how to register an ENS domain name through ens.domains.",
+        "The page explains how to set an ENS primary name and how to create a subdomain."
+      ],
+      "canonical_path": "/about/ens",
+      "related_paths": ["/about/primary-address", "/{user}/identity"],
+      "tags": ["about", "ens", "identity"],
+      "source_refs": ["public/ens.html", "components/about/AboutHTML.tsx"]
+    },
+    {
+      "id": "about.tech-updates",
+      "kind": "route",
+      "title": "Tech Updates",
+      "aliases": [
+        "tech updates",
+        "about tech",
+        "technical updates",
+        "repo updates",
+        "build reports",
+        "wallet authentication upgrade"
+      ],
+      "keywords": [
+        "tech",
+        "updates",
+        "repo",
+        "reports",
+        "bot",
+        "release",
+        "wallet",
+        "authentication"
+      ],
+      "facts": [
+        "The Tech Updates page lives at /about/tech.",
+        "It is a longer-form area for 6529 tech updates, repo work, bot notes, release context, and build reports.",
+        "Shorter live repo activity still belongs in Follow The Repo.",
+        "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
+      ],
+      "canonical_path": "/about/tech",
+      "related_paths": ["/about/tech/wallet-authentication", "/about/faq"],
+      "tags": ["about", "tech", "reports"],
+      "source_refs": ["components/about/tech/AboutTech.tsx"]
     },
     {
       "id": "navigation.search",
@@ -301,22 +660,44 @@
         "total",
         "days",
         "held",
+        "raw",
         "boost",
         "boosted",
         "unboosted",
+        "edition",
+        "weighting",
         "metric",
         "rate",
-        "hodl"
+        "hodl",
+        "category",
+        "sets",
+        "leaderboard",
+        "levels"
       ],
       "facts": [
-        "TDH stands for Total Days Held.",
+        "TDH means Total Days Held.",
         "TDH does not stand for Total Dynamic Head.",
-        "TDH is a time-weighted NFT holding metric that starts from days held and applies edition-size weighting plus active boosters.",
-        "TDH updates on a daily cadence and is used across Network surfaces.",
-        "The Memes and other NFT surfaces can show a per-card TDH or HODL rate."
+        "TDH is 6529's time-weighted holding metric for eligible NFTs.",
+        "Conceptually, TDH measures long-term participation and skin in the 6529 ecosystem.",
+        "Each eligible NFT contributes value based on how long it has been held; that base holding time is then adjusted by edition-size weighting and by collection boosters.",
+        "The calculation has three layers: unweighted days, edition weighting, and boosts.",
+        "Unweighted days means each NFT contributes 1 unit per day it is held.",
+        "Edition weighting means days held are multiplied by a HODL or edition-size rate; on the frontend TDH page, FirstGM with edition size 3,941 is the 1.0 baseline.",
+        "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
+        "The backend stores the distinctions separately: tdh__raw is raw full days held, tdh is raw days multiplied by HODL or edition weighting, and boosted_tdh is weighted TDH multiplied by the active boost.",
+        "Current TDH 1.4 rules use the higher of Category A or Category B boosters, plus Category C.",
+        "Category A is the complete Meme Card set boost, with diminishing additional-set boosts.",
+        "Category B covers season, genesis, and nakamoto set boosts.",
+        "Category C is the Gradient boost, up to 5 Gradients.",
+        "TDH is calculated daily at 00:00 UTC and is used throughout the network: profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
       ],
       "canonical_path": "/network/tdh",
-      "related_paths": ["/network/definitions", "/network/tdh/historic-boosts"],
+      "related_paths": [
+        "/network/definitions",
+        "/network/tdh/historic-boosts",
+        "/network/health/network-tdh",
+        "/network/levels"
+      ],
       "tags": ["network", "tdh", "glossary"],
       "source_refs": [
         "ops/docs/network/feature-tdh-boost-rules.md",
@@ -331,7 +712,9 @@
         "definitions",
         "network definitions",
         "tdh definitions",
-        "network glossary"
+        "network glossary",
+        "genesis set",
+        "genesis sets"
       ],
       "keywords": [
         "definitions",
@@ -340,6 +723,7 @@
         "unique",
         "memes",
         "sets",
+        "genesis",
         "tdh",
         "purchases",
         "sales",
@@ -347,11 +731,17 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
       ],
       "canonical_path": "/network/definitions",
-      "related_paths": ["/network/tdh", "/network/levels"],
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/historic-boosts",
+        "/network/health/network-tdh",
+        "/network/levels"
+      ],
       "tags": ["network", "glossary"],
       "source_refs": ["ops/docs/network/feature-network-definitions.md"]
     },
@@ -375,19 +765,52 @@
       "id": "network.xtdh",
       "kind": "glossary",
       "title": "xTDH",
-      "aliases": ["xtdh", "x tdh", "extended tdh", "grants"],
+      "aliases": [
+        "xtdh",
+        "x tdh",
+        "extended tdh",
+        "what is xtdh",
+        "what is x tdh",
+        "xtdh grants",
+        "xTDH grants",
+        "xTDH grant allocations"
+      ],
       "keywords": [
         "xtdh",
+        "tdh",
+        "extension",
+        "external",
+        "eligible",
+        "erc721",
+        "coefficient",
         "grants",
         "received",
         "granted",
+        "produced",
+        "allocation",
+        "tokens",
+        "collections",
         "network",
         "profile"
       ],
       "facts": [
-        "xTDH is an extended TDH-related surface with granted and received views on profiles.",
-        "Profile xTDH information is available under /{user}/xtdh when visible.",
-        "Network xTDH overview and formulas live under the Network area."
+        "xTDH is an extension of TDH that lets TDH-like network participation flow beyond core 6529 holders to other NFT holders and communities.",
+        "xTDH can be earned by holding eligible cards outside The Memes ecosystem.",
+        "The frontend /network/xtdh page describes xTDH as an extension of TDH that helps include other NFT holders in the 6529 ecosystem and offer them the benefits of TDH.",
+        "xTDH tracks how much xTDH your Memes produce, how much xTDH you receive from grants on tokens you own, and how much xTDH you have granted away.",
+        "Produced xTDH comes from TDH production: produced_xTDH_today = TDH gained today * xTDH_coefficient.",
+        "The current backend coefficient is 0.1.",
+        "Daily xTDH rate is xtdh_rate = produced_today - granted_out_today + received_today.",
+        "Total xTDH accumulates as xtdh_total = xtdh_total_previous + xtdh_rate.",
+        "The key idea is grants: a profile that produces xTDH can grant future xTDH flow to all tokens in an external ERC-721 collection or to a selected subset of tokens.",
+        "If you own a token with an active grant, you receive your share of that grant while you own the token.",
+        "Per-token grant flow is grant_amount_per_token = rate / denominator, where the denominator is either the collection total supply for full-collection grants or the number of selected tokens for partial grants.",
+        "Transfers inside the same consolidation group do not reset the ownership window; sales or transfers across groups do reset it.",
+        "The first grant increment requires the grant and token ownership to have matured past the required midnight or 24-hour windows.",
+        "xTDH is not simply TDH for external NFTs; it is a grant and allocation layer where TDH producers create xTDH, can grant future production outward, external token owners can receive it, and ungranted or ineligible flow remains with the grantor.",
+        "No produced xTDH is intended to disappear; it is allocated to someone.",
+        "The live xTDH allocations dashboard at /xtdh shows network-wide stats and lets users drill down through Collections, Tokens, Contributors, and Grant details.",
+        "Profile xTDH information is available under /{user}/xtdh when visible."
       ],
       "canonical_path": "/network/xtdh",
       "related_paths": ["/{user}/xtdh", "/network"],
@@ -415,9 +838,58 @@
         "A dedicated Network TDH health route exists under /network/health/network-tdh."
       ],
       "canonical_path": "/network/health",
-      "related_paths": ["/network/health/network-tdh"],
+      "related_paths": ["/network/health/network-tdh", "/network/tdh"],
       "tags": ["network", "health"],
       "source_refs": ["ops/docs/network/feature-health-dashboard.md"]
+    },
+    {
+      "id": "network.tdh-stats",
+      "kind": "route",
+      "title": "Network TDH stats",
+      "aliases": [
+        "network tdh stats",
+        "network stats",
+        "tdh stats",
+        "tdh history",
+        "tdh charts",
+        "global tdh history",
+        "network tdh health",
+        "network tdh chart",
+        "network tdh page"
+      ],
+      "keywords": [
+        "network",
+        "tdh",
+        "stats",
+        "history",
+        "charts",
+        "global",
+        "daily",
+        "change",
+        "checkpoint",
+        "health"
+      ],
+      "facts": [
+        "Network TDH stats live at /network/health/network-tdh.",
+        "The page shows global TDH history in a fixed 10-row view.",
+        "It includes summary values for Network TDH, Daily Change, and Daily % Change.",
+        "It includes checkpoint estimates for the next 250,000,000 TDH checkpoints.",
+        "It shows Total TDH, Net TDH Daily Change, Created TDH Daily Change, and Destroyed TDH Change charts.",
+        "Each chart has boosted, unboosted, and unweighted series.",
+        "Use Network TDH stats when users ask for TDH history, TDH charts, global TDH movement, or deeper Network TDH health information."
+      ],
+      "canonical_path": "/network/health/network-tdh",
+      "related_paths": [
+        "/network/tdh",
+        "/network/definitions",
+        "/network/tdh/historic-boosts",
+        "/network/health"
+      ],
+      "tags": ["network", "tdh", "stats", "health"],
+      "source_refs": [
+        "app/network/health/network-tdh/page.tsx",
+        "ops/docs/network/feature-network-stats.md"
+      ]
     },
     {
       "id": "network.activity",
@@ -1021,14 +1493,71 @@
       ]
     },
     {
-      "id": "delegation.register-consolidation",
-      "kind": "workflow",
-      "title": "Register Consolidation",
-      "link_label": "Register Consolidation",
+      "id": "delegation.wallet-checker",
+      "kind": "route",
+      "title": "Wallet Checker",
       "aliases": [
+        "wallet checker",
+        "check wallet",
+        "check my wallet",
+        "check wallet architecture",
+        "check my wallet architecture",
+        "view delegations",
+        "view consolidations",
+        "view delegations and consolidations",
+        "check delegations",
+        "check consolidations",
+        "active delegations",
+        "active consolidations"
+      ],
+      "keywords": [
+        "wallet",
+        "checker",
+        "check",
+        "view",
+        "delegation",
+        "delegations",
+        "manager",
+        "consolidation",
+        "consolidations",
+        "architecture",
+        "address",
+        "ens"
+      ],
+      "facts": [
+        "Wallet Checker lives at /delegation/wallet-checker.",
+        "Wallet Checker is a read-only diagnostics page for one wallet.",
+        "It checks delegations, delegation managers, and consolidation relationships for an entered Ethereum address or .eth ENS.",
+        "It can show Delegations, Active Minting Delegation for The Memes, Delegation Managers, Consolidations, Active Consolidation, and Incomplete Consolidation.",
+        "Use Wallet Checker when users ask how to check or view active delegations, consolidations, delegation managers, or wallet-architecture-related setup for an address."
+      ],
+      "canonical_path": "/delegation/wallet-checker",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/consolidation-use-cases",
+        "/delegation/delegation-center"
+      ],
+      "tags": ["delegation", "wallet", "checker", "diagnostics"],
+      "source_refs": [
+        "ops/docs/delegation/feature-wallet-checker.md",
+        "components/delegation/delegation-page-metadata.ts"
+      ]
+    },
+    {
+      "id": "delegation.register-consolidation-doc",
+      "kind": "workflow",
+      "title": "How to Register a Consolidation",
+      "link_label": "Register Consolidation Guide",
+      "aliases": [
+        "how to register a consolidation",
+        "how do i register a consolidation",
+        "how do i set up a consolidation",
+        "set up consolidation",
+        "setup consolidation",
+        "register consolidation docs",
+        "register consolidation faq",
         "register consolidation",
         "register a consolidation",
-        "how do i register a consolidation",
         "wallet consolidation",
         "consolidate wallets",
         "tdh consolidation",
@@ -1047,16 +1576,57 @@
         "999"
       ],
       "facts": [
-        "Register Consolidation lives at /delegation/register-consolidation and can also be opened from the Delegation Center.",
-        "Use Register Consolidation to connect wallets you control for supported 6529 metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
-        "The form requires a connected wallet, Collection, and Consolidating With address; for TDH consolidation, use Any Collection or The Memes.",
+        "A consolidation connects wallets you control so 6529 can treat them together for supported metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
+        "To register a consolidation, open Register Consolidation from the Delegation Center, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
+        "For TDH consolidation, use Any Collection or The Memes.",
         "Consolidation should be reciprocal when two wallets are intended to be treated together, and it is not a delegation and does not grant rights."
+      ],
+      "canonical_path": "/delegation/delegation-faq/register-consolidation",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/consolidation-use-cases",
+        "/delegation/register-consolidation"
+      ],
+      "tags": ["delegation", "consolidation", "wallet", "faq"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/register-consolidation.html",
+        "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md"
+      ]
+    },
+    {
+      "id": "delegation.register-consolidation",
+      "kind": "workflow",
+      "title": "Register Consolidation Form",
+      "link_label": "Register Consolidation",
+      "aliases": [
+        "register consolidation form",
+        "open register consolidation",
+        "where is register consolidation",
+        "register a consolidation form"
+      ],
+      "keywords": [
+        "consolidation",
+        "consolidate",
+        "register",
+        "wallet",
+        "wallets",
+        "tdh",
+        "primary",
+        "address",
+        "reciprocal",
+        "999"
+      ],
+      "facts": [
+        "The Register Consolidation form is the Delegation Center action for connecting wallets you control for supported 6529 metrics.",
+        "The form requires a connected wallet, Collection, and Consolidating With address.",
+        "For TDH consolidation, use Any Collection or The Memes."
       ],
       "canonical_path": "/delegation/register-consolidation",
       "related_paths": [
-        "/delegation/delegation-center",
-        "/delegation/wallet-checker",
+        "/delegation/delegation-faq/register-consolidation",
+        "/delegation/wallet-architecture",
         "/delegation/consolidation-use-cases",
+        "/delegation/delegation-center",
         "/delegation/assign-primary-address"
       ],
       "tags": ["delegation", "consolidation", "wallet"],
@@ -1064,6 +1634,353 @@
         "ops/docs/delegation/feature-delegation-action-flows.md",
         "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md",
         "ops/docs/delegation/source-of-truth-spec.md"
+      ]
+    },
+    {
+      "id": "delegation.wallet-architecture",
+      "kind": "workflow",
+      "title": "Wallet Architecture",
+      "aliases": [
+        "wallet architecture",
+        "4 wallet architecture",
+        "four wallet architecture",
+        "4 wallet consolidation",
+        "four wallet consolidation",
+        "4 wallet setup",
+        "four wallet setup",
+        "how do i set up 4 wallet consolidation",
+        "set up 4 wallet consolidation",
+        "three address protocol",
+        "what is tap",
+        "tap wallet architecture",
+        "vault wallet",
+        "transaction wallet",
+        "minting wallet",
+        "hot wallet",
+        "cold wallet",
+        "wallet setup",
+        "safe wallet architecture"
+      ],
+      "keywords": [
+        "wallet",
+        "architecture",
+        "vault",
+        "transaction",
+        "minting",
+        "hot",
+        "cold",
+        "safe",
+        "gnosis",
+        "tap",
+        "phishing",
+        "malware"
+      ],
+      "facts": [
+        "The recommended architecture separates a vault wallet for long-term NFT storage, a transaction wallet for trusted marketplace activity, and a minting wallet for unknown or higher-risk minting activity.",
+        "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
+        "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet.",
+        "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics."
+      ],
+      "canonical_path": "/delegation/wallet-architecture",
+      "related_paths": [
+        "/delegation/wallet-checker",
+        "/delegation/consolidation-use-cases",
+        "/delegation/delegation-faq/register-consolidation",
+        "/delegation/register-consolidation",
+        "/delegation/delegation-faq"
+      ],
+      "tags": ["delegation", "wallet", "security", "architecture"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/reference-overview-wallet-architecture.html",
+        "components/delegation/delegation-page-metadata.ts"
+      ]
+    },
+    {
+      "id": "delegation.consolidation-use-cases",
+      "kind": "workflow",
+      "title": "Consolidation Use Cases",
+      "aliases": [
+        "consolidation use cases",
+        "4 wallet consolidation",
+        "four wallet consolidation",
+        "three wallet consolidation",
+        "two wallet consolidation",
+        "compromised wallet consolidation",
+        "consolidation architecture",
+        "how do consolidations affect tdh"
+      ],
+      "keywords": [
+        "consolidation",
+        "wallet",
+        "wallets",
+        "tdh",
+        "cards",
+        "unique",
+        "vault",
+        "minting",
+        "transaction",
+        "compromised",
+        "reciprocal"
+      ],
+      "facts": [
+        "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
+        "The docs cover two-address and three-address patterns, plus a four-address scenario where an old hot wallet was compromised and cards moved through temporary, vault, and new minting wallets.",
+        "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
+      ],
+      "canonical_path": "/delegation/consolidation-use-cases",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/delegation-faq/register-consolidation",
+        "/delegation/register-consolidation",
+        "/delegation/delegation-faq",
+        "/consolidation-mapping-tool"
+      ],
+      "tags": ["delegation", "consolidation", "wallet", "tdh"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/consolidation-use-cases.html",
+        "public/delegation-content/delegation-docs-2026-06-16/html/reference-consolidations-3address.html",
+        "public/delegation-content/delegation-docs-2026-06-16/html/reference-consolidations-3address-del-manager.html"
+      ]
+    },
+    {
+      "id": "delegation.faq",
+      "kind": "route",
+      "title": "Delegation FAQ",
+      "aliases": [
+        "delegation faq",
+        "delegation how to",
+        "delegation docs",
+        "delegation help",
+        "delegation guide",
+        "consolidation faq",
+        "wallet delegation faq"
+      ],
+      "keywords": [
+        "delegation",
+        "faq",
+        "how",
+        "register",
+        "view",
+        "manage",
+        "revoke",
+        "lock",
+        "unlock",
+        "safe",
+        "usecase"
+      ],
+      "facts": [
+        "It indexes how-to articles for registering delegations, delegation managers, consolidations, SAFE transaction-builder flows, supported use cases, viewing records, updating, revoking, locking, and unlocking wallets.",
+        "Use it when users ask broad Delegation Center how-to questions or ask where the delegation docs live."
+      ],
+      "canonical_path": "/delegation/delegation-faq",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/wallet-architecture",
+        "/delegation/consolidation-use-cases"
+      ],
+      "tags": ["delegation", "faq", "docs"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+        "components/delegation/html/delegationContent.ts"
+      ]
+    },
+    {
+      "id": "delegation.manage-revoke-doc",
+      "kind": "workflow",
+      "title": "How to Revoke a Delegation",
+      "link_label": "Revoke Delegation",
+      "aliases": [
+        "how to revoke a delegation",
+        "how do i revoke a delegation",
+        "revoke delegation",
+        "remove delegation",
+        "cancel delegation",
+        "delete delegation",
+        "revoke a consolidation",
+        "revoke consolidation",
+        "revoke delegation manager"
+      ],
+      "keywords": [
+        "delegation",
+        "revoke",
+        "remove",
+        "cancel",
+        "delete",
+        "manager",
+        "consolidation",
+        "wallet",
+        "manage",
+        "view"
+      ],
+      "facts": [
+        "To revoke a delegation, delegation manager, or consolidation, open the Delegation Center and choose View/Manage for the relevant collection.",
+        "On the Manage/View Collection page, find the address or record you want to revoke and click Revoke.",
+        "Execute the transaction to remove the delegation, manager permission, or consolidation record."
+      ],
+      "canonical_path": "/delegation/delegation-faq/manage-revoke",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/delegation-faq",
+        "/delegation/delegation-faq/revoke-delegation-using-sub-delegation"
+      ],
+      "tags": ["delegation", "workflow", "faq", "revoke"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/manage-revoke.html"
+      ]
+    },
+    {
+      "id": "delegation.manage-update-doc",
+      "kind": "workflow",
+      "title": "How to Update a Delegation",
+      "link_label": "Update Delegation",
+      "aliases": [
+        "how to update a delegation",
+        "how do i update a delegation",
+        "update delegation",
+        "edit delegation",
+        "change delegation",
+        "update consolidation",
+        "update delegation manager"
+      ],
+      "keywords": [
+        "delegation",
+        "update",
+        "edit",
+        "change",
+        "manager",
+        "consolidation",
+        "expiry",
+        "token",
+        "wallet",
+        "manage"
+      ],
+      "facts": [
+        "To update a delegation, delegation manager, or consolidation, open View/Manage in the Delegation Center for the relevant collection.",
+        "Find the address or record you want to update, click Update, adjust the delegated wallet, expiry, or token scope, then submit.",
+        "Execute the transaction to apply the update."
+      ],
+      "canonical_path": "/delegation/delegation-faq/manage-update",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/delegation/delegation-faq"
+      ],
+      "tags": ["delegation", "workflow", "faq", "update"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/manage-update.html"
+      ]
+    },
+    {
+      "id": "delegation.register-delegation-doc",
+      "kind": "workflow",
+      "title": "How to Register a Delegation",
+      "aliases": [
+        "how to register a delegation",
+        "register delegation docs",
+        "register delegation faq",
+        "delegate a wallet",
+        "delegate hot wallet",
+        "delegate minting wallet"
+      ],
+      "keywords": [
+        "delegation",
+        "register",
+        "delegate",
+        "wallet",
+        "collection",
+        "expiry",
+        "token",
+        "utility"
+      ],
+      "facts": [
+        "To register a delegation, open Delegation Center, choose Register Delegation, choose the collection, enter the delegate wallet, select a use case such as #1 All, choose expiry and token scope, then submit and execute the transaction.",
+        "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet."
+      ],
+      "canonical_path": "/delegation/delegation-faq/register-delegation",
+      "related_paths": [
+        "/delegation/register-delegation",
+        "/delegation/delegation-center",
+        "/delegation/wallet-architecture"
+      ],
+      "tags": ["delegation", "workflow", "faq"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/register-delegation.html"
+      ]
+    },
+    {
+      "id": "delegation.delegation-manager-doc",
+      "kind": "workflow",
+      "title": "Delegation Manager",
+      "aliases": [
+        "delegation manager",
+        "sub delegation",
+        "sub-delegation",
+        "register delegation manager",
+        "delegation management rights",
+        "manager wallet",
+        "use case 998"
+      ],
+      "keywords": [
+        "delegation",
+        "manager",
+        "sub",
+        "wallet",
+        "rights",
+        "998",
+        "register",
+        "maintain",
+        "consolidations"
+      ],
+      "facts": [
+        "A delegation manager gives a manager wallet permission to maintain delegations and consolidations for another wallet.",
+        "The docs describe registering a manager from the vault wallet to a delegated wallet, then using that delegated wallet to register future delegations or consolidations."
+      ],
+      "canonical_path": "/delegation/delegation-faq/register-sub-delegation",
+      "related_paths": [
+        "/delegation/register-sub-delegation",
+        "/delegation/delegation-faq/register-delegation-using-sub-delegation",
+        "/delegation/delegation-faq/revoke-delegation-using-sub-delegation"
+      ],
+      "tags": ["delegation", "manager", "wallet", "faq"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/register-sub-delegation.html",
+        "public/delegation-content/delegation-docs-2026-06-16/html/register-delegation-using-sub-delegation.html"
+      ]
+    },
+    {
+      "id": "delegation.safe-doc",
+      "kind": "workflow",
+      "title": "Delegate using SAFE",
+      "aliases": [
+        "delegate using safe",
+        "delegate using gnosis",
+        "safe transaction builder",
+        "gnosis transaction builder",
+        "safe wallet delegation",
+        "safe delegation manager"
+      ],
+      "keywords": [
+        "safe",
+        "gnosis",
+        "delegation",
+        "transaction",
+        "builder",
+        "manager",
+        "998",
+        "contract",
+        "abi"
+      ],
+      "facts": [
+        "The docs show using the SAFE Transaction Builder with the NFTDelegation.com contract to register delegation manager rights.",
+        "The SAFE flow uses the Any Collection value, no-expiry value, use case 998 for Delegation Management, allTokens true, tokenId 0, then creates and sends the batch transaction."
+      ],
+      "canonical_path": "/delegation/delegation-faq/using-safe",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/delegation-faq/register-sub-delegation"
+      ],
+      "tags": ["delegation", "safe", "wallet", "faq"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/using-safe.html"
       ]
     },
     {
@@ -1431,12 +2348,7 @@
       "id": "nextgen.pebbles",
       "kind": "route",
       "title": "Pebbles",
-      "aliases": [
-        "pebbles",
-        "pebble",
-        "nextgen pebbles",
-        "pebbles collection"
-      ],
+      "aliases": ["pebbles", "pebble", "nextgen pebbles", "pebbles collection"],
       "keywords": [
         "pebbles",
         "pebble",
@@ -3104,7 +4016,12 @@
         "Use the main TDH page for the current TDH explanation."
       ],
       "canonical_path": "/network/tdh/historic-boosts",
-      "related_paths": ["/network/tdh"],
+      "related_paths": [
+        "/network/tdh",
+        "/network/definitions",
+        "/network/health/network-tdh",
+        "/network/levels"
+      ],
       "tags": ["network", "tdh", "historic"],
       "source_refs": [
         "app/network/tdh/historic-boosts/page.tsx",
@@ -3899,7 +4816,12 @@
       "id": "gradients.collection",
       "kind": "route",
       "title": "6529 Gradient collection",
-      "aliases": ["6529 gradient", "gradients", "gradient", "gradient collection"],
+      "aliases": [
+        "6529 gradient",
+        "gradients",
+        "gradient",
+        "gradient collection"
+      ],
       "keywords": ["gradient", "gradients", "collection", "nft"],
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",
