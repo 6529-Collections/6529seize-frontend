@@ -178,7 +178,7 @@ export default function ConsolidationMappingTool() {
     <div className={styles["toolArea"]} id="mapping-tool-form">
       <div className="tw-flex tw-flex-wrap -tw-mx-3">
         <div className="tw-w-full tw-px-3">
-          Upload File <span className="tw-text-[#9A9A9A]">(.csv)</span>
+          Upload File <span className="tw-text-iron-400">(.csv)</span>
         </div>
       </div>
       <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
@@ -207,7 +207,7 @@ export default function ConsolidationMappingTool() {
         </div>
       </div>
       {/* <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
-        <div className="tw-w-full tw-px-3 tw-text-[#9A9A9A] tw-text-[smaller]">
+        <div className="tw-w-full tw-px-3 tw-text-sm tw-text-iron-400">
           Note: If the selected collection or use case delegation is not found,
           the tool will automatically switch to using delegations for
           &quot;Any&quot; or &quot;All&quot; options respectively.
