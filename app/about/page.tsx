@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
-import { Col, Container, Row } from "react-bootstrap";
 
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "@/components/about/AboutLayout";
 import AboutIndex from "@/components/about/AboutIndex";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -16,8 +20,8 @@ export const metadata: Metadata = getAppMetadata({
 
 export default function AboutIndexPage() {
   return (
-    <main className={styles["main"]}>
-      <Container fluid className="pt-4">
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <Container fluid className="tw-pt-4">
         <Row>
           <Col>
             <AboutIndex />

@@ -1049,10 +1049,10 @@ function TweetVideo({
   readonly videoUrl: string;
 }) {
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black">
+    <div className="tw-relative tw-aspect-video tw-min-h-40 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black">
       <TwitterVideoPlayer
         captionsUrl={captionsUrl}
-        className="tw-block tw-h-auto tw-max-h-[24rem] tw-w-full tw-object-contain"
+        className="tw-h-full tw-w-full tw-object-contain"
         hlsUrl={hlsUrl}
         posterUrl={posterUrl}
         variants={variants}
@@ -1180,12 +1180,13 @@ function TweetImage({
       target="_blank"
       rel="noopener noreferrer nofollow"
       onClick={stopCardEvent}
-      className="tw-block tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-no-underline"
+      className="tw-relative tw-block tw-aspect-video tw-min-h-40 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-no-underline"
     >
+      {/* Twitter media URLs are raw embed assets; keep <img> and reserve the frame to avoid late height changes. */}
       <img
         src={imageUrl}
         alt={alt}
-        className="tw-h-auto tw-max-h-[26rem] tw-w-full tw-object-contain"
+        className="tw-h-full tw-w-full tw-object-contain"
         loading="lazy"
       />
     </Link>
