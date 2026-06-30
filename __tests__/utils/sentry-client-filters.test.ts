@@ -9,6 +9,7 @@ import {
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
@@ -29,6 +30,8 @@ describe("sentry-client-filters", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const rabbyMobileUserRejectedStack =
+    "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
@@ -293,6 +296,32 @@ describe("sentry-client-filters", () => {
       ],
       ...overrides,
     }) as any;
+
+  const createRabbyMobileUserRejectedRequestEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    ({
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileUserRejectedStack,
+        },
+      },
+      ...overrides,
+    }) as TestSentryClientEvent;
 
   const createLowValueNetworkEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -2860,6 +2889,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters RabbyMobile 4001 user-rejected object rejections without app frames", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent();
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters injected WebAssembly CSP unsafe-eval errors", () => {
     // Arrange
     const event = createInjectedWasmCspUnsafeEvalEvent();
@@ -2901,6 +2941,34 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter RabbyMobile user-rejected object rejections with app-owned frames", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "hooks/drops/useDropSignature.ts",
+                  abs_path: "hooks/drops/useDropSignature.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
 
     // Assert
     expect(result).toBe(false);
@@ -2960,6 +3028,25 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter non-4001 RabbyMobile wallet object rejections", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4100,
+          message: "Not Allowed",
+          stack: rabbyMobileUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
 
     // Assert
     expect(result).toBe(false);

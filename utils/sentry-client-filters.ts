@@ -162,6 +162,29 @@ const objectCapturedPromiseRejectionMessage =
 const providerDisconnectedCode = 4900;
 const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
+const rabbyMobileUserRejectedCode = 4001;
+const rabbyMobileUserRejectedMessage = "Not Allowed";
+const rabbyMobileStackPatterns = ["rabbymobile", "userrejectedrequest"];
+const appOwnedStackPatterns = [
+  "webpack-internal:///(app-pages-browser)",
+  "webpack://_n_e/./",
+  "/_next/static/",
+  "https://6529.io/",
+  "https://www.6529.io/",
+  "https://staging.6529.io/",
+  "http://localhost:",
+  "http://127.0.0.1:",
+  "app:///",
+  "app/",
+  "components/",
+  "contexts/",
+  "helpers/",
+  "hooks/",
+  "lib/",
+  "services/",
+  "store/",
+  "utils/",
+];
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 const RABBY_MOBILE_USER_AGENT_TOKEN = "rabbymobile";
 const RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE = "not found rainbowkit";
@@ -1049,6 +1072,26 @@ function hasNativeJsonStringifyFrame(
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
 }
 
+function hasAppOwnedStackPath(value: string | undefined): boolean {
+  const normalized = value?.toLowerCase();
+  return (
+    !!normalized &&
+    appOwnedStackPatterns.some((pattern) => normalized.includes(pattern))
+  );
+}
+
+function hasLikelyAppOwnedFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    hasAppOwnedFrame(frames) ||
+    (Array.isArray(frames) &&
+      frames.some((frame) =>
+        getFramePaths(frame).some((path) => hasAppOwnedStackPath(path))
+      ))
+  );
+}
+
 function getHintException(hint?: SentryEventHint): unknown {
   return hint?.originalException ?? hint?.syntheticException;
 }
@@ -1083,6 +1126,38 @@ function getHintExceptionStack(hint?: SentryEventHint): string {
     return exception.stack;
   }
   return "";
+}
+
+function matchesRabbyMobileUserRejectedStack(
+  value: string | undefined
+): boolean {
+  const normalized = value?.toLowerCase();
+  return (
+    !!normalized &&
+    rabbyMobileStackPatterns.every((pattern) => normalized.includes(pattern))
+  );
+}
+
+function hasRabbyMobileUserRejectedStack(
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return [serializedStack, getHintExceptionStack(hint)].some(
+    matchesRabbyMobileUserRejectedStack
+  );
+}
+
+function hasAppOwnedStackEvidence(
+  event: SentryClientEvent,
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  return (
+    hasLikelyAppOwnedFrame(frames) ||
+    hasAppOwnedStackPath(serializedStack) ||
+    hasAppOwnedStackPath(getHintExceptionStack(hint))
+  );
 }
 
 function isCoinbaseWalletLinkWebSocket1006Message(value: string): boolean {
@@ -1728,6 +1803,37 @@ export function shouldFilterDisconnectedWalletProviderRejection(
     message === providerDisconnectedMessage &&
     isThirdPartyWalletExtensionStack(stack)
   );
+}
+
+export function shouldFilterRabbyMobileUserRejectedRequest(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  if (getEventMessage(event) !== objectCapturedPromiseRejectionMessage) {
+    return false;
+  }
+
+  const serialized = getSerializedObjectRejection(event, hint);
+  if (!serialized) {
+    return false;
+  }
+
+  const code = getNumericValue(serialized["code"]);
+  const message = getStringValue(serialized["message"])?.trim();
+  const stack = getStringValue(serialized["stack"]);
+
+  if (
+    code !== rabbyMobileUserRejectedCode ||
+    message !== rabbyMobileUserRejectedMessage
+  ) {
+    return false;
+  }
+
+  if (!hasRabbyMobileUserRejectedStack(stack, hint)) {
+    return false;
+  }
+
+  return !hasAppOwnedStackEvidence(event, stack, hint);
 }
 
 export function shouldFilterReactDomInsertBeforeNotFoundError(
