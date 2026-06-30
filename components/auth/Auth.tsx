@@ -823,6 +823,7 @@ export default function Auth({
       } catch (error) {
         if (!abortSignal?.aborted) {
           logErrorSecurely("session_v2_web_session_verification", error);
+          throw error;
         }
         return false;
       }
