@@ -96,7 +96,7 @@ export function SubscriptionLinks(
       className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-blue-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-500/50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-blue-500/50"
     >
       {downloading ? (
-        <span className="d-flex gap-2 align-items-center">
+        <span className="tw-flex tw-items-center tw-gap-2">
           <CircleLoader />
           <span>Downloading</span>
         </span>

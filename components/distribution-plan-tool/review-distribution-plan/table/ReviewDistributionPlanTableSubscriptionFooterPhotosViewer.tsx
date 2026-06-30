@@ -9,7 +9,6 @@ import {
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Button } from "react-bootstrap";
 import {
   ReviewDistributionPlanTableSubscriptionFooterAlertRow,
   ReviewDistributionPlanTableSubscriptionFooterContractRow,
@@ -127,9 +126,13 @@ export function DistributionPhotosViewerModal(
         size="lg"
         bodyTestId="distribution-photos-viewer-modal"
         footer={
-          <Button variant="secondary" onClick={props.handleClose}>
+          <button
+            type="button"
+            onClick={props.handleClose}
+            className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
+          >
             Close
-          </Button>
+          </button>
         }
       >
         <ReviewDistributionPlanTableSubscriptionFooterContractRow
