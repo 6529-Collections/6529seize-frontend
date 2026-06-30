@@ -18,6 +18,8 @@ describe("instrumentation-client", () => {
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const reactDomInsertBeforeMessage =
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+  const reactDomRemoveChildMessage =
+    "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
@@ -91,8 +93,10 @@ describe("instrumentation-client", () => {
   };
 
   const createSentryRouteParameterizationEvent = (
-    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame]
+    frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame],
+    overrides: Record<string, unknown> = {}
   ) => ({
+    transaction: "/waves/:wave",
     exception: {
       values: [
         {
@@ -108,6 +112,21 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+    request: {
+      url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    contexts: {
+      app: {
+        app_name: "MetaMaskMobile",
+      },
+      browser: {
+        name: "Mobile Safari UI/WKWebView",
+      },
+    },
+    tags: {
+      browser: "Mobile Safari UI/WKWebView",
+      "browser.name": "Mobile Safari UI/WKWebView",
+    },
     breadcrumbs: [
       {
         category: "navigation",
@@ -117,6 +136,7 @@ describe("instrumentation-client", () => {
         },
       },
     ],
+    ...overrides,
   });
 
   const createAppKitCoinbaseBreadcrumbs = () => [
@@ -234,6 +254,33 @@ describe("instrumentation-client", () => {
       tags: {
         transaction: "/waves",
         url: "/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "react-dom-remove-child-event",
+      transaction: "/the-memes/mint",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/the-memes/mint",
+        url: "/the-memes/mint",
       },
     };
 
@@ -389,6 +436,28 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("keeps route parameterization cyclic JSON errors without MetaMaskMobile WKWebView context", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent(
+      [nativeJsonStringifyFrame],
+      {
+        contexts: {
+          browser: {
+            name: "Mobile Safari",
+          },
+        },
+        tags: {
+          browser: "Mobile Safari",
+          "browser.name": "Mobile Safari",
+        },
+      }
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps cyclic JSON errors with app-owned frames", () => {
