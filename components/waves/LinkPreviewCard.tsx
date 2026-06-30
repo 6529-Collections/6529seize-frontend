@@ -50,6 +50,32 @@ type ChatStableFrameKind =
   | "video"
   | "farcaster";
 
+const normalizePreviewHostname = (hostname: string): string =>
+  hostname.toLowerCase().replace(/^www\./, "");
+
+const is6529Hostname = (hostname: string): boolean => {
+  const normalizedHostname = normalizePreviewHostname(hostname);
+  return (
+    normalizedHostname === "6529.io" || normalizedHostname.endsWith(".6529.io")
+  );
+};
+
+const isKnownBarePreviewHostname = (hostname: string): boolean => {
+  const normalizedHostname = normalizePreviewHostname(hostname);
+  return (
+    is6529Hostname(normalizedHostname) ||
+    normalizedHostname === "youtu.be" ||
+    normalizedHostname === "youtube.com" ||
+    normalizedHostname.endsWith(".youtube.com") ||
+    normalizedHostname === "youtube-nocookie.com" ||
+    normalizedHostname.endsWith(".youtube-nocookie.com") ||
+    normalizedHostname === "warpcast.com" ||
+    normalizedHostname.endsWith(".warpcast.com") ||
+    normalizedHostname === "farcaster.xyz" ||
+    normalizedHostname.endsWith(".farcaster.xyz")
+  );
+};
+
 const parsePreviewHref = (href: string): URL | null => {
   const trimmedHref = href.trim();
   if (!trimmedHref) {
@@ -68,21 +94,17 @@ const parsePreviewHref = (href: string): URL | null => {
       return new URL(trimmedHref, "https://6529.io");
     }
 
-    if (/^[^\s/]+\.[^\s/]+(?:\/.*)?$/u.test(trimmedHref)) {
-      return new URL(`https://${trimmedHref}`);
+    if (/^[^\s/]+\.[^\s/]+\/\S+$/u.test(trimmedHref)) {
+      const bareUrl = new URL(`https://${trimmedHref}`);
+      if (isKnownBarePreviewHostname(bareUrl.hostname)) {
+        return bareUrl;
+      }
     }
   } catch {
     return null;
   }
 
   return null;
-};
-
-const is6529Hostname = (hostname: string): boolean => {
-  const normalizedHostname = hostname.toLowerCase();
-  return (
-    normalizedHostname === "6529.io" || normalizedHostname.endsWith(".6529.io")
-  );
 };
 
 const isNumericPathSegment = (value: string | undefined): boolean =>
@@ -115,7 +137,7 @@ const getChatStableFrameKind = (href: string): ChatStableFrameKind => {
     return "generic";
   }
 
-  const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+  const hostname = normalizePreviewHostname(parsed.hostname);
   const pathname = parsed.pathname.toLowerCase();
 
   if (
@@ -294,6 +316,8 @@ export default function LinkPreviewCard({
 
   // Chat frames must not resize after async preview resolution; resolved cards
   // clamp or scroll inside the href-classified reserve to avoid feed CLS.
+  // Unknown-host miniapps intentionally keep the generic reserve after fetch;
+  // the Farcaster miniapp preview scrolls internally instead of growing the feed.
   const stableFrameClasses = getChatStableFrameClasses(
     getChatStableFrameKind(href)
   );

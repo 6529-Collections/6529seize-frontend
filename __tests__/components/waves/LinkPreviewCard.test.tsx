@@ -367,6 +367,35 @@ describe("LinkPreviewCard", () => {
     }
   );
 
+  it.each(["6529.io", "v1.2/foo"])(
+    "does not classify bare dotted text %s as a first-party stable frame",
+    async (href) => {
+      fetchLinkPreview.mockResolvedValue({
+        title: "Dotted text",
+        url: href,
+      });
+
+      render(
+        <LinkPreviewCard
+          href={href}
+          renderFallback={() => <div data-testid="fallback">fallback</div>}
+        />
+      );
+
+      assertStableFrame();
+
+      await waitFor(() =>
+        expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            preview: expect.objectContaining({ title: "Dotted text" }),
+          })
+        )
+      );
+
+      assertStableFrame();
+    }
+  );
+
   it("uses a fixed YouTube video frame before and after preview resolution", async () => {
     fetchLinkPreview.mockResolvedValue({
       type: "youtube.video",
