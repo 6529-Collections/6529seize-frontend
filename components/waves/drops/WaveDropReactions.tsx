@@ -17,6 +17,7 @@ import {
   useCanonicalNotificationDropUpdate,
   useOptimisticNotificationDropReaction,
 } from "@/hooks/drops/useOptimisticNotificationDropReaction";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
@@ -345,6 +346,7 @@ function WaveDropReaction({
   const { applyOptimisticDropUpdate } = useMyStream();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
+  const locale = useBrowserLocale();
   const rollbackRef = useRef<OwnedOptimisticRollback>(null);
   const canReact = Boolean(connectedProfile?.handle);
   const applyOptimisticReactionToNotificationQueries =
@@ -706,7 +708,8 @@ function WaveDropReaction({
 
       const msg = getReactionErrorMessage(
         error,
-        selected ? "Error removing reaction" : "Error adding reaction"
+        selected ? "Error removing reaction" : "Error adding reaction",
+        locale
       );
       setToast({ message: msg, type: "error" });
 
@@ -724,6 +727,7 @@ function WaveDropReaction({
     drop.id,
     drop.context_profile_context?.reaction,
     longPressTriggered,
+    locale,
     reaction.reaction,
     refreshCanonicalDropAfterLatestFailure,
     selected,

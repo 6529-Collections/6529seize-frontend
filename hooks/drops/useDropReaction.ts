@@ -20,6 +20,7 @@ import {
   applyOptimisticReactionQueryCacheUpdate,
   EMPTY_DROP_CONTEXT_PROFILE_CONTEXT,
 } from "@/hooks/drops/optimisticReactionQueryCache";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
@@ -466,6 +467,7 @@ export function useDropReaction(
   const { applyOptimisticDropUpdate } = useMyStream();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
+  const locale = useBrowserLocale();
   const rollbackRef = useRef<OwnedOptimisticRollback>(null);
   const source = options?.source ?? "picker";
   const onSuccess = options?.onSuccess;
@@ -569,7 +571,8 @@ export function useDropReaction(
 
         const errorMessage = getReactionErrorMessage(
           error,
-          isRemoving ? "Error removing reaction" : "Error adding reaction"
+          isRemoving ? "Error removing reaction" : "Error adding reaction",
+          locale
         );
         setToast({ message: errorMessage, type: "error" });
         if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
@@ -591,6 +594,7 @@ export function useDropReaction(
       contextProfileContext?.reaction,
       drop.id,
       dropId,
+      locale,
       setToast,
       onSuccess,
       refreshCanonicalDropAfterLatestFailure,

@@ -19,6 +19,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useWaveData } from "@/hooks/useWaveData";
+import { formatDate, formatInteger, formatRelativeTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getDropQueryKey } from "@/services/api/drop-api";
@@ -27,6 +28,7 @@ import {
   ArrowTopRightOnSquareIcon,
   ChatBubbleLeftRightIcon,
   InboxIcon,
+  ShieldCheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useQueryClient } from "@tanstack/react-query";
@@ -75,6 +77,16 @@ const CHAT_PANEL_STYLE: React.CSSProperties = {
   height: "100%",
   maxHeight: "100%",
 };
+const QUICK_DM_POSITION_CLASS =
+  "tailwind-scope tw-fixed tw-bottom-24 tw-right-6 tw-z-[70] xl:tw-bottom-6";
+const QUICK_DM_RELATIVE_TIME_OPTIONS = {
+  numeric: "auto",
+  style: "short",
+} satisfies Intl.RelativeTimeFormatOptions;
+const QUICK_DM_RELATIVE_TIME_ALWAYS_OPTIONS = {
+  numeric: "always",
+  style: "short",
+} satisfies Intl.RelativeTimeFormatOptions;
 
 const isQuickDmState = (value: unknown): value is QuickDmState => {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
@@ -125,6 +137,112 @@ const storeState = (state: QuickDmState) => {
 
 const getUnreadCount = (wave: MinimalWave): number =>
   Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
+
+const getQuickDmLatestMessageTimestamp = (wave: MinimalWave): number | null => {
+  const timestamp = wave.newDropsCount.latestDropTimestamp;
+  return timestamp !== null && timestamp > 0 && Number.isFinite(timestamp)
+    ? timestamp
+    : null;
+};
+
+const getQuickDmTimeLabel = ({
+  locale,
+  referenceTime = Date.now(),
+  timestamp,
+}: {
+  readonly locale: SupportedLocale;
+  readonly referenceTime?: number;
+  readonly timestamp: number;
+}): string => {
+  const timeDifference = referenceTime - timestamp;
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 1) {
+    return formatDate(locale, timestamp, { month: "short", day: "numeric" });
+  }
+
+  if (days === 1) {
+    return formatRelativeTime(
+      locale,
+      -1,
+      "day",
+      QUICK_DM_RELATIVE_TIME_OPTIONS
+    );
+  }
+
+  if (hours > 0) {
+    return formatRelativeTime(
+      locale,
+      -hours,
+      "hour",
+      QUICK_DM_RELATIVE_TIME_ALWAYS_OPTIONS
+    );
+  }
+
+  if (minutes > 0) {
+    return formatRelativeTime(
+      locale,
+      -minutes,
+      "minute",
+      QUICK_DM_RELATIVE_TIME_ALWAYS_OPTIONS
+    );
+  }
+
+  return formatRelativeTime(
+    locale,
+    0,
+    "second",
+    QUICK_DM_RELATIVE_TIME_OPTIONS
+  );
+};
+
+const getQuickDmScoreLabel = (
+  wave: MinimalWave,
+  locale: SupportedLocale
+): string | null => {
+  const score = wave.waveScore?.visibility_score;
+  if (typeof score !== "number" || !Number.isFinite(score)) {
+    return null;
+  }
+
+  return formatInteger(locale, Math.round(score));
+};
+
+const getQuickDmConversationAriaLabel = ({
+  locale,
+  scoreLabel,
+  timeLabel,
+  title,
+  unreadCount,
+}: {
+  readonly locale: SupportedLocale;
+  readonly scoreLabel: string | null;
+  readonly timeLabel: string;
+  readonly title: string;
+  readonly unreadCount: number;
+}): string => {
+  const metadata = [
+    timeLabel,
+    scoreLabel === null
+      ? null
+      : t(locale, "waves.score.summary.scoreAria", {
+          visibilityScore: scoreLabel,
+        }),
+    unreadCount <= 0
+      ? null
+      : t(locale, "quickDm.unreadCountAriaLabel", {
+          count: formatInteger(locale, unreadCount),
+        }),
+  ].filter((value): value is string => value !== null);
+
+  return [
+    t(locale, "quickDm.openConversationAriaLabel", { name: title }),
+    ...metadata,
+  ].join(". ");
+};
 
 const getFormattedWaveName = (wave: Pick<MinimalWave, "name">): string => {
   const marker = "id-";
@@ -358,6 +476,19 @@ const QuickDmConversationRow = ({
   const unreadCount = getUnreadCount(wave);
   const title = getFormattedWaveName(wave);
   const displayUnreadCount = unreadCount > 99 ? "99+" : `${unreadCount}`;
+  const latestMessageTimestamp = getQuickDmLatestMessageTimestamp(wave);
+  const timeLabel =
+    latestMessageTimestamp === null
+      ? t(locale, "quickDm.noMessagesYet")
+      : getQuickDmTimeLabel({ locale, timestamp: latestMessageTimestamp });
+  const scoreLabel = getQuickDmScoreLabel(wave, locale);
+  const rowAriaLabel = getQuickDmConversationAriaLabel({
+    locale,
+    scoreLabel,
+    timeLabel,
+    title,
+    unreadCount,
+  });
 
   return (
     <button
@@ -365,10 +496,8 @@ const QuickDmConversationRow = ({
       onClick={() => onOpen(wave.id)}
       onFocus={() => onHover(wave.id)}
       onMouseEnter={() => onHover(wave.id)}
-      className="tw-group tw-flex tw-w-full tw-appearance-none tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-p-2 tw-text-left tw-text-inherit tw-ring-1 tw-ring-white/10 tw-transition hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-      aria-label={t(locale, "quickDm.openConversationAriaLabel", {
-        name: title,
-      })}
+      className="tw-group tw-flex tw-w-full tw-appearance-none tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-px-2 tw-py-2.5 tw-text-left tw-text-inherit tw-ring-1 tw-ring-white/10 tw-transition hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+      aria-label={rowAriaLabel}
     >
       <div className="tw-relative tw-size-10 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/15">
         <WavePicture
@@ -377,26 +506,39 @@ const QuickDmConversationRow = ({
           contributors={wave.contributors}
         />
         {unreadCount > 0 && (
-          <span className="tw-absolute tw-right-[-2px] tw-top-[-2px] tw-size-3 tw-rounded-full tw-bg-red tw-ring-2 tw-ring-iron-950" />
+          <span
+            className="tw-absolute tw-right-[-6px] tw-top-[-6px] tw-flex tw-h-5 tw-min-w-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-white tw-shadow-sm tw-ring-2 tw-ring-iron-950"
+            aria-hidden="true"
+          >
+            {displayUnreadCount}
+          </span>
         )}
       </div>
       <div className="tw-min-w-0 tw-flex-1">
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <span className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-100 group-hover:tw-text-white">
-            {title}
-          </span>
-          {unreadCount > 0 && (
-            <span className="tw-flex tw-h-5 tw-min-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-px-1.5 tw-text-[11px] tw-font-semibold tw-text-white">
-              {displayUnreadCount}
-            </span>
-          )}
-        </div>
+        <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-100 group-hover:tw-text-white">
+          {title}
+        </span>
         <p className="tw-mt-0.5 tw-truncate tw-text-xs tw-text-iron-400">
-          {unreadCount > 0
-            ? t(locale, "quickDm.unreadPreview")
-            : t(locale, "quickDm.openConversation")}
+          {timeLabel}
         </p>
       </div>
+      {scoreLabel !== null && (
+        <div
+          className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-iron-200"
+          title={t(locale, "waves.score.summary.scoreAria", {
+            visibilityScore: scoreLabel,
+          })}
+          aria-hidden="true"
+        >
+          <ShieldCheckIcon
+            className="tw-size-4 tw-text-iron-400"
+            aria-hidden="true"
+          />
+          <span className="tw-text-sm tw-font-semibold tw-tabular-nums">
+            {scoreLabel}
+          </span>
+        </div>
+      )}
     </button>
   );
 };
@@ -733,7 +875,7 @@ export default function QuickDirectMessages() {
 
   if (state.view === "closed") {
     return (
-      <div className="tailwind-scope tw-fixed tw-bottom-6 tw-right-6 tw-z-[70]">
+      <div className={QUICK_DM_POSITION_CLASS}>
         <button
           ref={launcherButtonRef}
           type="button"
@@ -764,7 +906,7 @@ export default function QuickDirectMessages() {
       ref={panelRef}
       role="dialog"
       tabIndex={-1}
-      className="tailwind-scope tw-fixed tw-bottom-6 tw-right-6 tw-z-[70]"
+      className={QUICK_DM_POSITION_CLASS}
       aria-label={t(locale, "quickDm.regionAriaLabel")}
       onKeyDown={(event) => {
         if (event.key !== "Escape") {
