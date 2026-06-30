@@ -1,6 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { setAuthJwt } from "@/services/auth/auth.utils";
+import { getWalletAddress, setAuthJwt } from "@/services/auth/auth.utils";
 import {
   getNativeRefreshToken,
   isNativeSecureStorageAvailable,
@@ -36,6 +36,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
+  getWalletAddress: jest.fn(),
   setAuthJwt: jest.fn(),
 }));
 
@@ -55,6 +56,7 @@ describe("session-v2.utils", () => {
     (commonApiPost as jest.Mock).mockResolvedValue(undefined);
     (getNativeRefreshToken as jest.Mock).mockResolvedValue(null);
     (isNativeSecureStorageAvailable as jest.Mock).mockReturnValue(true);
+    (getWalletAddress as jest.Mock).mockReturnValue(null);
     (setAuthJwt as jest.Mock).mockReturnValue(true);
   });
 
@@ -700,6 +702,38 @@ describe("session-v2.utils", () => {
       endpoint: "auth/connection-share",
       body: {
         target_client_type: "desktop",
+      },
+      credentials: "include",
+      signal: undefined,
+    });
+  });
+
+  it("creates a native connection share with native source-session proof", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getWalletAddress as jest.Mock).mockReturnValue("0xabc");
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(
+      "native-refresh-token"
+    );
+    const shareResponse = {
+      connection_share_code: "share-code",
+      expires_at: "2026-06-10T00:00:00.000Z",
+      address: "0xabc",
+      role: null,
+      target_client_type: "native",
+      deep_link_path:
+        "/accept-connection-sharing?connection_share_code=share-code",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(shareResponse);
+
+    await expect(createConnectionShare({})).resolves.toBe(shareResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/connection-share",
+      body: {
+        target_client_type: "native",
+        client_type: "native",
+        client_address: "0xabc",
+        native_refresh_token: "native-refresh-token",
       },
       credentials: "include",
       signal: undefined,

@@ -197,6 +197,12 @@ components:
         role:
           type: string
           nullable: true
+        client_type:
+          $ref: "#/components/schemas/RefreshTokenClientType"
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
+        native_refresh_token:
+          type: string
     SessionWebResponse:
       type: object
       required: [address, access_token, access_token_expires_at, client_type]
@@ -207,6 +213,12 @@ components:
         role:
           type: string
           nullable: true
+        client_type:
+          $ref: "#/components/schemas/RefreshTokenClientType"
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
+        native_refresh_token:
+          type: string
         access_token:
           type: string
         access_token_expires_at:

@@ -133,7 +133,7 @@ Native and desktop refresh tokens are stored only in secure OS-backed storage.
 
 ## Connection Sharing
 
-Connection sharing creates an additional session from an authenticated web session. It does not transfer, move, or disconnect the original session.
+Connection sharing creates an additional session from an authenticated session. It does not transfer, move, or disconnect the original session.
 
 Mobile/native and desktop connection sharing use session-v2 one-time codes.
 
@@ -148,6 +148,11 @@ The caller must send bearer access-token auth. The request body is:
 ```
 
 Desktop clients use `"target_client_type": "desktop"`.
+
+Web callers prove the source session with their session-v2 cookies and normally
+send only `target_client_type`. Native and desktop callers must include
+`client_type`, `client_address`, and `native_refresh_token` for the active source
+session; the backend checks that proof before issuing the share.
 
 The optional `role` field is accepted only when it matches the authenticated
 session role. The web frontend normally omits it and lets the backend bind the
@@ -181,9 +186,9 @@ The native client redeems:
 ```
 
 Desktop clients redeem the same shape with `"target_client_type": "desktop"`.
-The response is a refresh-token session response. The client persists the
-returned `native_refresh_token` in secure storage and then uses the matching
-native or desktop session-v2 refresh flow.
+The response is a refresh-token session response and includes the created
+`client_type`. The client persists the returned `native_refresh_token` in secure
+storage and then uses the matching native or desktop session-v2 refresh flow.
 
 Connection-share codes are short-lived, one-time use, and consumed atomically by the backend. Disabled-backend responses should be handled as a clean feature-unavailable state.
 
@@ -193,8 +198,9 @@ Older 6529 Desktop builds used this legacy auth endpoint during the session-v2
 rollout. New Desktop builds should use the session-v2 `desktop` client type and
 connection sharing target.
 
-The caller must send bearer access-token auth and session-v2 web cookies. The
-request body is empty in normal frontend usage:
+The caller must send bearer access-token auth plus the same source-session proof
+used for `/api/auth/connection-share`. The request body is empty in normal web
+frontend usage because the browser supplies session-v2 web cookies:
 
 ```json
 {}
