@@ -12,6 +12,7 @@
  */
 
 import { ApiOwnerBalance } from '../models/ApiOwnerBalance';
+import { HttpFile } from '../http/http';
 
 export class ApiOwnerBalancePage {
     'data': Array<ApiOwnerBalance>;

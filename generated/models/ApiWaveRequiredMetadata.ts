@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveRequiredMetadata {
     /**

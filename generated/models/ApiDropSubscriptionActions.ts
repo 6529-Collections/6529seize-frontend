@@ -12,6 +12,7 @@
  */
 
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
+import { HttpFile } from '../http/http';
 
 export class ApiDropSubscriptionActions {
     'actions': Array<ApiDropSubscriptionTargetAction>;

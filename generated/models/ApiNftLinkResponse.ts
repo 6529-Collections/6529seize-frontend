@@ -12,6 +12,7 @@
  */
 
 import { ApiNftLinkData } from '../models/ApiNftLinkData';
+import { HttpFile } from '../http/http';
 
 export class ApiNftLinkResponse {
     'is_enrichable': boolean;

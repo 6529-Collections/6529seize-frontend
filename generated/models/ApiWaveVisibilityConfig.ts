@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveScope } from '../models/ApiWaveScope';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveVisibilityConfig {
     'scope': ApiWaveScope;

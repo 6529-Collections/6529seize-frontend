@@ -18,6 +18,7 @@ import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingCo
 import { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiCreateWaveOutcome } from '../models/ApiCreateWaveOutcome';
+import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWave {
     /**

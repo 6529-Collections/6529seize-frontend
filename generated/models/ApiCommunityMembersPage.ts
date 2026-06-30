@@ -12,6 +12,7 @@
  */
 
 import { ApiCommunityMemberOverview } from '../models/ApiCommunityMemberOverview';
+import { HttpFile } from '../http/http';
 
 export class ApiCommunityMembersPage {
     'data': Array<ApiCommunityMemberOverview>;

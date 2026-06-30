@@ -11,10 +11,23 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
 
 export class ApiCreateConnectionShareRequest {
     'target_client_type': ApiCreateConnectionShareRequestTargetClientTypeEnum;
     'role'?: string | null;
+    /**
+    * Optional source session type for native or desktop callers.
+    */
+    'client_type'?: ApiCreateConnectionShareRequestClientTypeEnum;
+    /**
+    * Wallet address bound to the source native or desktop session.
+    */
+    'client_address'?: string;
+    /**
+    * Refresh token for the source native or desktop session.
+    */
+    'native_refresh_token'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,6 +45,24 @@ export class ApiCreateConnectionShareRequest {
             "baseName": "role",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "client_type",
+            "baseName": "client_type",
+            "type": "ApiCreateConnectionShareRequestClientTypeEnum",
+            "format": ""
+        },
+        {
+            "name": "client_address",
+            "baseName": "client_address",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "native_refresh_token",
+            "baseName": "native_refresh_token",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -43,6 +74,10 @@ export class ApiCreateConnectionShareRequest {
 }
 
 export enum ApiCreateConnectionShareRequestTargetClientTypeEnum {
+    Native = 'native',
+    Desktop = 'desktop'
+}
+export enum ApiCreateConnectionShareRequestClientTypeEnum {
     Native = 'native',
     Desktop = 'desktop'
 }

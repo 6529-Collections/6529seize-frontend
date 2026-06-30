@@ -12,6 +12,7 @@
  */
 
 import { ApiNotification } from '../models/ApiNotification';
+import { HttpFile } from '../http/http';
 
 export class ApiNotificationsResponse {
     'notifications': Array<ApiNotification>;

@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveRepContributorsPage } from '../models/ApiWaveRepContributorsPage';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveRepOverview {
     'total_rep': number;

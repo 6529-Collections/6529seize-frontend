@@ -12,6 +12,7 @@
  */
 
 import { ApiCurationDrop } from '../models/ApiCurationDrop';
+import { HttpFile } from '../http/http';
 
 export class ApiCurationDropsPage {
     'data': Array<ApiCurationDrop>;

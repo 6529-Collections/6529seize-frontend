@@ -4,11 +4,15 @@ import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   extractAllNumbers,
-  formatAddress,
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
 import { useRef, useState } from "react";
-import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
+import {
+  ReviewDistributionPlanTableSubscriptionFooterAlertRow,
+  ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow,
+  ReviewDistributionPlanTableSubscriptionFooterTokenIdRow,
+} from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 export function UploadDistributionPhotosModal(
   props: Readonly<{
@@ -117,120 +121,103 @@ export function UploadDistributionPhotosModal(
   };
 
   return (
-    <Modal show onHide={handleClose}>
+    <Modal show onHide={handleClose} className="tailwind-scope">
       <Modal.Header closeButton>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           Upload Distribution Photos
         </Modal.Title>
       </Modal.Header>
-      <hr className="mb-0 mt-0" />
+      <hr className="tw-my-0" />
       <Modal.Body>
-        <Container>
-          <Row className="pt-2 pb-2">
-            <Col>
-              Contract: The Memes - <span>{formatAddress(contract)}</span>
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col>
-              Token ID:{" "}
-              {props.confirmedTokenId !== undefined &&
-              props.confirmedTokenId !== null ? (
-                <span>{displayTokenId}</span>
-              ) : (
-                <input
-                  style={{
-                    color: "black",
-                    width: "100px",
-                  }}
-                  min={1}
-                  step={1}
-                  type="number"
-                  value={tokenId}
-                  onChange={(e) => {
-                    setTokenId(e.target.value);
-                  }}
-                />
-              )}
-            </Col>
-          </Row>
+        <div className="tw-container tw-mx-auto">
+          <ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow
+            contract={contract}
+          />
+          <ReviewDistributionPlanTableSubscriptionFooterTokenIdRow
+            confirmedTokenId={props.confirmedTokenId}
+            displayTokenId={displayTokenId}
+            tokenId={tokenId}
+            onTokenIdChange={setTokenId}
+          />
           {props.existingPhotosCount !== undefined &&
             props.existingPhotosCount > 0 && (
-              <Row className="pt-2 pb-2">
-                <Col>
-                  <div className="alert alert-warning mb-0 border border-dark">
-                    ⚠️ {props.existingPhotosCount} photo(s) already exist. This
-                    will replace all existing photos.
-                  </div>
-                </Col>
-              </Row>
+              <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="warning">
+                ⚠️ {props.existingPhotosCount} photo(s) already exist. This will
+                replace all existing photos.
+              </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
             )}
-          <Row className="pt-2 pb-2">
-            <Col>
+          <div className="tw-py-2">
+            <div>
               Select Photos:{" "}
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 multiple
+                aria-label="Select photos"
                 onChange={handleFileChange}
                 style={{
                   color: "black",
                 }}
               />
               {fileErrors.length > 0 && (
-                <div className="mt-2">
+                <div className="tw-mt-2">
                   {fileErrors.map((error) => (
-                    <div key={error} className="text-danger">
+                    <div key={error} className="tw-text-red">
                       {error}
                     </div>
                   ))}
                 </div>
               )}
-            </Col>
-          </Row>
+            </div>
+          </div>
           {selectedFiles.length > 0 && (
-            <Row className="pt-2 pb-2">
-              <Col>
+            <div className="tw-py-2">
+              <div>
                 Selected Files ({selectedFiles.length}):
-                <div className="mt-2">
+                <div className="tw-mt-2">
                   {selectedFiles.map((file, index) => (
                     <div
                       key={`${file.name}-${file.size}-${file.lastModified}`}
-                      className="d-flex align-items-center justify-content-between mb-2 p-2 bg-light rounded"
+                      className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-rounded tw-bg-iron-100 tw-p-2"
                     >
-                      <span className="text-truncate flex-grow-1 me-2">
+                      <span className="tw-me-2 tw-grow tw-truncate">
                         {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveFile(index)}
-                        className="btn btn-sm btn-outline-danger"
+                        className="tw-rounded-md tw-border tw-border-red tw-bg-transparent tw-px-2 tw-py-1 tw-text-sm tw-text-red"
                       >
                         Remove
                       </button>
                     </div>
                   ))}
                 </div>
-              </Col>
-            </Row>
+              </div>
+            </div>
           )}
-        </Container>
+        </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <button
+          type="button"
+          onClick={handleClose}
+          className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
+        >
           Close
-        </Button>
-        <Button
+        </button>
+        <button
+          type="button"
           disabled={
             !isValidPositiveInteger(displayTokenId) ||
             selectedFiles.length === 0
           }
-          variant="primary"
           onClick={handleUpload}
+          className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
         >
           Upload Photos
-        </Button>
+        </button>
       </Modal.Footer>
     </Modal>
   );

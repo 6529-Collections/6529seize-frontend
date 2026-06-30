@@ -15,6 +15,7 @@ import { ApiAttachmentKind } from '../models/ApiAttachmentKind';
 import { ApiAttachmentSafety } from '../models/ApiAttachmentSafety';
 import { ApiAttachmentStatus } from '../models/ApiAttachmentStatus';
 import { ApiAttachmentUploadMimeType } from '../models/ApiAttachmentUploadMimeType';
+import { HttpFile } from '../http/http';
 
 export class ApiAttachment {
     'attachment_id': string;

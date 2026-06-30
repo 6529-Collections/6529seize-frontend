@@ -12,6 +12,7 @@
  */
 
 import { MintingClaim } from '../models/MintingClaim';
+import { HttpFile } from '../http/http';
 
 export class MintingClaimsResponse {
     'claims': Array<MintingClaim>;

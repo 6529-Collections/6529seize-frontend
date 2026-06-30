@@ -12,6 +12,7 @@
  */
 
 import { DistributionPhotoCompleteRequestPhoto } from '../models/DistributionPhotoCompleteRequestPhoto';
+import { HttpFile } from '../http/http';
 
 export class DistributionPhotoCompleteRequest {
     'photos': Array<DistributionPhotoCompleteRequestPhoto>;

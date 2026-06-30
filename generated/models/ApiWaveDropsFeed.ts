@@ -14,6 +14,7 @@
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
 import { ApiWaveMin } from '../models/ApiWaveMin';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveDropsFeed {
     'wave': ApiWaveMin;

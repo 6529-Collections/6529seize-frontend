@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
 
 export enum ApiIdentitySubscriptionTargetAction {
     WaveCreated = 'WAVE_CREATED',

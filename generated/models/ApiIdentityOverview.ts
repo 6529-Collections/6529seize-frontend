@@ -14,6 +14,7 @@
 import { ApiIdentityOverviewBadges } from '../models/ApiIdentityOverviewBadges';
 import { ApiIdentityOverviewContextProfileContext } from '../models/ApiIdentityOverviewContextProfileContext';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
+import { HttpFile } from '../http/http';
 
 export class ApiIdentityOverview {
     'id': string;

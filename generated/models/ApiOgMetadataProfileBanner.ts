@@ -12,6 +12,7 @@
  */
 
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
+import { HttpFile } from '../http/http';
 
 export class ApiOgMetadataProfileBanner {
     'primary': string | null;

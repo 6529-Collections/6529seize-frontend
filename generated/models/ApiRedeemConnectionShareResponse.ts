@@ -11,12 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
 
 export class ApiRedeemConnectionShareResponse {
     'address': string;
     'role'?: string | null;
     'access_token': string;
     'access_token_expires_at': Date;
+    'client_type': ApiRedeemConnectionShareResponseClientTypeEnum;
     'native_refresh_token': string;
     'refresh_token_expires_at': Date;
 
@@ -50,6 +52,12 @@ export class ApiRedeemConnectionShareResponse {
             "format": "date-time"
         },
         {
+            "name": "client_type",
+            "baseName": "client_type",
+            "type": "ApiRedeemConnectionShareResponseClientTypeEnum",
+            "format": ""
+        },
+        {
             "name": "native_refresh_token",
             "baseName": "native_refresh_token",
             "type": "string",
@@ -69,3 +77,9 @@ export class ApiRedeemConnectionShareResponse {
     public constructor() {
     }
 }
+
+export enum ApiRedeemConnectionShareResponseClientTypeEnum {
+    Native = 'native',
+    Desktop = 'desktop'
+}
+

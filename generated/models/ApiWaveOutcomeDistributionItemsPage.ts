@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveOutcomeDistributionItemsPage {
     'data': Array<ApiWaveOutcomeDistributionItem>;

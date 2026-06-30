@@ -235,9 +235,9 @@ paths:
       description: >
         V2 wallet session nonce endpoint. Web session challenges derive their
         domain and client origin from the request Origin header and require a
-        configured first-party origin. Native challenges are selected explicitly.
-        Desktop challenges are selected explicitly and require a loopback
-        localhost Origin, which is signed into the challenge.
+        configured first-party origin. Native challenges are selected
+        explicitly. Desktop challenges are selected explicitly and require a
+        loopback localhost Origin, which is signed into the challenge.
       operationId: getWalletAuthSessionNonce
       security: []
       parameters:
@@ -268,7 +268,7 @@ paths:
             type: integer
             minimum: 1
             default: 1
-          description: >
+          description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
       x-6529-query-schema:
@@ -289,11 +289,11 @@ paths:
       summary: Authenticate and create a wallet auth session
       description: >
         V2 wallet sessions require structured authentication signatures. Web
-        cookie sessions require Session Type first_party_web; native and
-        desktop refresh-token sessions require matching Session Type values.
-        Desktop sessions also require the signed Client Origin to be a
-        localhost loopback origin. External clients should use the non-cookie
-        bearer-token login flow.
+        cookie sessions require Session Type first_party_web; native and desktop
+        refresh-token sessions require matching Session Type values. Desktop
+        sessions also require the signed Client Origin to be a localhost
+        loopback origin. External clients should use the non-cookie bearer-token
+        login flow.
       operationId: createWalletAuthSession
       security: []
       requestBody:
@@ -400,14 +400,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApiCreateLegacyDesktopConnectionShareRequest"
+              $ref: >-
+                #/components/schemas/ApiCreateLegacyDesktopConnectionShareRequest
       responses:
         "201":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiCreateLegacyDesktopConnectionShareResponse"
+                $ref: >-
+                  #/components/schemas/ApiCreateLegacyDesktopConnectionShareResponse
         "400":
           description: Invalid request
   /auth/connection-share/redeem:
@@ -10615,6 +10617,26 @@ components:
       enum:
         - application/pdf
         - text/csv
+    ApiAuthSettings:
+      type: object
+      required:
+        - structured_signatures_required
+        - session_v2_migration_deadline
+      properties:
+        structured_signatures_required:
+          type: boolean
+          description: >-
+            True when backend strict structured wallet signature enforcement is
+            enabled. Frontend clients should treat legacy auth as no longer
+            acceptable when this is true.
+        session_v2_migration_deadline:
+          type: string
+          nullable: true
+          description: >-
+            Optional global deadline for frontend v1-auth to session-v2
+            migration countdown and cutoff behavior, formatted as an ISO
+            datetime with timezone. Null means no migration prompt should be
+            shown unless strict structured signatures are required.
     ApiAvailableRatingCredit:
       type: object
       required:
@@ -11766,6 +11788,18 @@ components:
         role:
           type: string
           nullable: true
+        client_type:
+          type: string
+          description: Optional source session type for native or desktop callers.
+          enum:
+            - native
+            - desktop
+        client_address:
+          type: string
+          description: Wallet address bound to the source native or desktop session.
+        native_refresh_token:
+          type: string
+          description: Refresh token for the source native or desktop session.
     ApiCreateConnectionShareResponse:
       type: object
       required:
@@ -11792,28 +11826,21 @@ components:
             - desktop
         deep_link_path:
           type: string
-    ApiCreateLegacyDesktopConnectionShareRequest:
-      type: object
-      properties:
-        role:
-          type: string
-          nullable: true
-    ApiCreateLegacyDesktopConnectionShareResponse:
+    ApiCreateDropMedia:
       type: object
       required:
-        - refresh_token
-        - address
-        - deep_link_path
+        - url
+        - mime_type
       properties:
-        refresh_token:
+        url:
           type: string
-        address:
+          maxLength: 2000
+        mime_type:
           type: string
-        role:
+          maxLength: 100
+        media_upload_id:
           type: string
           nullable: true
-        deep_link_path:
-          type: string
     ApiCreateDropPart:
       type: object
       required:
@@ -11836,19 +11863,6 @@ components:
           default: []
           items:
             $ref: "#/components/schemas/ApiDropAttachmentReference"
-    ApiCreateDropMedia:
-      type: object
-      required:
-        - url
-        - mime_type
-      properties:
-        url:
-          type: string
-        mime_type:
-          type: string
-        media_upload_id:
-          type: string
-          nullable: true
     ApiCreateDropPollRequest:
       type: object
       required:
@@ -11953,6 +11967,40 @@ components:
         is_beneficiary_of_grant_id:
           type: string
           nullable: true
+    ApiCreateLegacyDesktopConnectionShareRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          nullable: true
+        client_type:
+          type: string
+          description: Optional source session type for native or desktop callers.
+          enum:
+            - native
+            - desktop
+        client_address:
+          type: string
+          description: Wallet address bound to the source native or desktop session.
+        native_refresh_token:
+          type: string
+          description: Refresh token for the source native or desktop session.
+    ApiCreateLegacyDesktopConnectionShareResponse:
+      type: object
+      required:
+        - refresh_token
+        - address
+        - deep_link_path
+      properties:
+        refresh_token:
+          type: string
+        address:
+          type: string
+        role:
+          type: string
+          nullable: true
+        deep_link_path:
+          type: string
     ApiCreateMediaUploadUrlRequest:
       required:
         - content_type
@@ -17020,6 +17068,7 @@ components:
         - address
         - access_token
         - access_token_expires_at
+        - client_type
         - native_refresh_token
         - refresh_token_expires_at
       properties:
@@ -17033,6 +17082,11 @@ components:
         access_token_expires_at:
           type: string
           format: date-time
+        client_type:
+          type: string
+          enum:
+            - native
+            - desktop
         native_refresh_token:
           type: string
         refresh_token_expires_at:
@@ -17238,27 +17292,6 @@ components:
         cms_package:
           type: object
           additionalProperties: true
-    ApiAuthSettings:
-      type: object
-      required:
-        - structured_signatures_required
-        - session_v2_migration_deadline
-      properties:
-        structured_signatures_required:
-          type: boolean
-          description: >-
-            True when backend strict structured wallet signature enforcement is
-            enabled. Frontend clients should treat legacy auth as no longer
-            acceptable when this is true.
-        session_v2_migration_deadline:
-          type: string
-          format: date-time
-          nullable: true
-          description: >-
-            Always-present, nullable global deadline for frontend v1-auth to
-            session-v2 migration countdown and cutoff behavior, formatted as an
-            ISO datetime with timezone. Null means no migration prompt should be
-            shown unless strict structured signatures are required.
     ApiSeizeSettings:
       type: object
       required:
@@ -17430,7 +17463,7 @@ components:
           type: integer
           minimum: 1
           default: 1
-          description: >
+          description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
     ApiSessionNonceResponse:
@@ -17474,7 +17507,7 @@ components:
           nullable: true
           description: >-
             Optional active wallet address. Web clients should include it so
-            multi-account sessions target the matching address-scoped cookie
+            multi-account sessions refresh the matching address-scoped cookie
             instead of the compatibility cookie.
     ApiSessionWebResponse:
       type: object

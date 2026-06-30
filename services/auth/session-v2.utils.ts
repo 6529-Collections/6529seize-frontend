@@ -1,7 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { setAuthJwt } from "./auth.utils";
+import { getWalletAddress, setAuthJwt } from "./auth.utils";
 import {
   getNativeRefreshToken,
   isNativeSecureStorageAvailable,
@@ -86,6 +86,12 @@ interface RedeemConnectionShareResponse {
   readonly client_type?: RefreshTokenSessionClientType | undefined;
   readonly native_refresh_token: string;
   readonly refresh_token_expires_at: string;
+}
+
+interface NativeConnectionShareSourceProof {
+  readonly client_type: RefreshTokenSessionClientType;
+  readonly client_address: string;
+  readonly native_refresh_token: string;
 }
 
 const SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS = 2000;
@@ -331,19 +337,20 @@ export async function loginWithSessionV2({
   readonly role: string | null;
 }): Promise<SessionLoginResponse> {
   const roleBody = role === null ? {} : { role };
-  const response = await commonApiPost<SessionLoginRequest, SessionLoginResponse>(
-    {
-      endpoint: "auth/session-login",
-      body: {
-        client_type: getSessionClientType(),
-        server_signature: serverSignature,
-        client_signature: clientSignature,
-        client_address: signerAddress,
-        ...roleBody,
-      },
-      credentials: getSessionCredentialsMode(),
-    }
-  );
+  const response = await commonApiPost<
+    SessionLoginRequest,
+    SessionLoginResponse
+  >({
+    endpoint: "auth/session-login",
+    body: {
+      client_type: getSessionClientType(),
+      server_signature: serverSignature,
+      client_signature: clientSignature,
+      client_address: signerAddress,
+      ...roleBody,
+    },
+    credentials: getSessionCredentialsMode(),
+  });
   clearSessionRefreshFailureForSession(response);
   return response;
 }
@@ -567,6 +574,33 @@ export async function verifyActiveSessionV2WebSession({
   return await persistSessionResponse(refreshedSession);
 }
 
+async function getNativeConnectionShareSourceProof(): Promise<NativeConnectionShareSourceProof | null> {
+  const clientType = getSessionClientType();
+  if (clientType === "web") {
+    return null;
+  }
+
+  const address = getWalletAddress();
+  if (!address) {
+    throw new Error(
+      `Connection sharing requires an active ${clientType} session`
+    );
+  }
+
+  const nativeRefreshToken = await getNativeRefreshToken(address);
+  if (!nativeRefreshToken) {
+    throw new Error(
+      `Connection sharing requires an active ${clientType} session`
+    );
+  }
+
+  return {
+    client_type: clientType,
+    client_address: address,
+    native_refresh_token: nativeRefreshToken,
+  };
+}
+
 export async function createConnectionShare({
   signal,
   targetClientType = "native",
@@ -574,15 +608,20 @@ export async function createConnectionShare({
   readonly signal?: AbortSignal | undefined;
   readonly targetClientType?: RefreshTokenSessionClientType | undefined;
 }): Promise<CreateConnectionShareResponse> {
+  const sourceProof = await getNativeConnectionShareSourceProof();
   return await commonApiPost<
     {
       readonly target_client_type: RefreshTokenSessionClientType;
+      readonly client_type?: RefreshTokenSessionClientType | undefined;
+      readonly client_address?: string | undefined;
+      readonly native_refresh_token?: string | undefined;
     },
     CreateConnectionShareResponse
   >({
     endpoint: "auth/connection-share",
     body: {
       target_client_type: targetClientType,
+      ...(sourceProof ?? {}),
     },
     credentials: getSessionCredentialsMode(),
     signal,
@@ -594,12 +633,13 @@ export async function createLegacyDesktopConnectionShare({
 }: {
   readonly signal?: AbortSignal | undefined;
 }): Promise<CreateLegacyDesktopConnectionShareResponse> {
+  const sourceProof = await getNativeConnectionShareSourceProof();
   return await commonApiPost<
-    Record<string, never>,
+    Partial<NativeConnectionShareSourceProof>,
     CreateLegacyDesktopConnectionShareResponse
   >({
     endpoint: "auth/connection-share/legacy-desktop",
-    body: {},
+    body: sourceProof ?? {},
     credentials: getSessionCredentialsMode(),
     signal,
   });

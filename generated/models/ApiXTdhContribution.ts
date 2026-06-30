@@ -13,6 +13,7 @@
 
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiXTdhGrant } from '../models/ApiXTdhGrant';
+import { HttpFile } from '../http/http';
 
 export class ApiXTdhContribution {
     'grant'?: ApiXTdhGrant;

@@ -12,6 +12,7 @@
  */
 
 import { ApiNft } from '../models/ApiNft';
+import { HttpFile } from '../http/http';
 
 export class ApiNftsPage {
     'data': Array<ApiNft>;

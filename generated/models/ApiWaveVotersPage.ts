@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveVoter } from '../models/ApiWaveVoter';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveVotersPage {
     'data': Array<ApiWaveVoter>;

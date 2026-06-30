@@ -12,6 +12,7 @@
  */
 
 import { ApiXTdhGrantToken } from '../models/ApiXTdhGrantToken';
+import { HttpFile } from '../http/http';
 
 export class ApiXTdhGrantTokensPage {
     'data': Array<ApiXTdhGrantToken>;

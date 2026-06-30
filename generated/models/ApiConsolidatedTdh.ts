@@ -13,6 +13,7 @@
 
 import { ApiTokenTdh } from '../models/ApiTokenTdh';
 import { ApiTokenTdhRank } from '../models/ApiTokenTdhRank';
+import { HttpFile } from '../http/http';
 
 export class ApiConsolidatedTdh {
     'block'?: number;

@@ -12,6 +12,7 @@
  */
 
 import { ApiDropBoost } from '../models/ApiDropBoost';
+import { HttpFile } from '../http/http';
 
 export class ApiDropBoostsPage {
     'data': Array<ApiDropBoost>;

@@ -12,6 +12,7 @@
  */
 
 import { ApiDecentralizedMediaResolution } from '../models/ApiDecentralizedMediaResolution';
+import { HttpFile } from '../http/http';
 
 export class ApiMediaResolveResponse {
     'items': Array<ApiDecentralizedMediaResolution>;

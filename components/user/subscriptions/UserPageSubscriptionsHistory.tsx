@@ -10,7 +10,7 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
-import { Accordion, Col, Container, Row } from "react-bootstrap";
+import { Accordion } from "react-bootstrap";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
@@ -27,32 +27,32 @@ export default function UserPageSubscriptionsHistory(
   }>
 ) {
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col>
-          <h5 className="mb-0 tw-font-semibold">Subscription History</h5>
-        </Col>
-      </Row>
+    <div>
+      <div>
+        <div>
+          <h5 className="tw-mb-0 tw-font-semibold">Subscription History</h5>
+        </div>
+      </div>
       <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
-      <Row className="pb-2">
-        <Col>
+      <div className="tw-pb-2">
+        <div>
           <RedeemedSubscriptionsAccordion
             history={props.redeemed}
             setPage={props.setRedeemedPage}
           />
-        </Col>
-      </Row>
-      <Row className="pt-2 pb-2">
-        <Col>
+        </div>
+      </div>
+      <div className="tw-py-2">
+        <div>
           <LogAccordion logs={props.logs} setPage={props.setLogsPage} />
-        </Col>
-      </Row>
-      <Row className="pt-2 pb-2">
-        <Col>
+        </div>
+      </div>
+      <div className="tw-py-2">
+        <div>
           <TopUpAccordion history={props.topups} setPage={props.setTopUpPage} />
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -69,7 +69,7 @@ function RedeemedSubscriptionsAccordion(
           <b>Redeemed Subscriptions</b>
         </Accordion.Button>
         <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
-          <div className="d-flex flex-column gap-2">
+          <div className="tw-flex tw-flex-col tw-gap-2">
             {props.history.data.length > 0 ? (
               props.history.data.map((redeem) => (
                 <RedeemedEntry key={redeem.transaction} redeem={redeem} />
@@ -81,7 +81,7 @@ function RedeemedSubscriptionsAccordion(
             )}
           </div>
           {props.history.count > 0 && props.history.count / 10 > 1 && (
-            <div className="text-center mt-3">
+            <div className="tw-mt-3 tw-text-center">
               <Pagination
                 page={props.history.page}
                 pageSize={10}
@@ -109,7 +109,7 @@ function LogAccordion(
           <b>Log History</b>
         </Accordion.Button>
         <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
-          <div className="d-flex flex-column gap-2">
+          <div className="tw-flex tw-flex-col tw-gap-2">
             {props.logs.data.length > 0 ? (
               props.logs.data.map((log) => (
                 <LogEntry key={`subscription-log-${log.id}`} log={log} />
@@ -118,7 +118,7 @@ function LogAccordion(
               <div className="font-color-silver">No logs found</div>
             )}
             {props.logs.count > 0 && props.logs.count / 10 > 1 && (
-              <div className="text-center mt-3">
+              <div className="tw-mt-3 tw-text-center">
                 <Pagination
                   page={props.logs.page}
                   pageSize={10}
@@ -147,7 +147,7 @@ function TopUpAccordion(
           <b>Top Up History</b>
         </Accordion.Button>
         <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
-          <div className="d-flex flex-column gap-2">
+          <div className="tw-flex tw-flex-col tw-gap-2">
             {props.history.data.length > 0 ? (
               props.history.data.map((topUp) => (
                 <TopUpEntry key={topUp.hash} topUp={topUp} />
@@ -157,7 +157,7 @@ function TopUpAccordion(
             )}
           </div>
           {props.history.count > 0 && props.history.count / 10 > 1 && (
-            <div className="text-center mt-3">
+            <div className="tw-mt-3 tw-text-center">
               <Pagination
                 page={props.history.page}
                 pageSize={10}
@@ -179,9 +179,9 @@ function TopUpEntry(
 ) {
   return (
     <div className={styles["subscriptionHistoryEntry"]}>
-      <div className="d-flex align-items-center justify-content-between gap-2">
-        <div className="d-flex align-items-center gap-3">
-          <div className="d-flex align-items-center gap-1 no-wrap">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
             <b>+ {props.topUp.amount}</b>
             <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
               <EthereumIcon />
@@ -189,13 +189,13 @@ function TopUpEntry(
           </div>
           <span>from: {props.topUp.from_wallet}</span>
         </div>
-        <div className="d-flex align-items-center gap-3">
-          <div className="font-color-silver no-wrap">
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <div className="font-color-silver tw-whitespace-nowrap">
             {getDateDisplay(new Date(props.topUp.transaction_date))}
           </div>
           <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
             <a
-              className="d-flex align-items-center"
+              className="tw-flex tw-items-center"
               target="_blank"
               rel="noopener noreferrer"
               href={getTransactionLink(mainnet.id, props.topUp.hash)}
@@ -217,8 +217,8 @@ function LogEntry(
 ) {
   return (
     <div className={styles["subscriptionHistoryEntry"]}>
-      <div className="d-flex align-items-center justify-content-between gap-2">
-        <div className="d-flex flex-column gap-1">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+        <div className="tw-flex tw-flex-col tw-gap-1">
           <div>{props.log.log}</div>
           {props.log.additional_info && (
             <div className="font-smaller font-color-silver">
@@ -226,8 +226,8 @@ function LogEntry(
             </div>
           )}
         </div>
-        <div className="d-flex align-items-center gap-3">
-          <div className="font-color-silver no-wrap">
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <div className="font-color-silver tw-whitespace-nowrap">
             {props.log.created_at &&
               getDateDisplay(new Date(props.log.created_at))}
           </div>
@@ -248,8 +248,8 @@ function RedeemedEntry(
 
   return (
     <div className={styles["subscriptionHistoryEntry"]}>
-      <div className="d-flex align-items-center justify-content-between gap-2">
-        <div className="d-flex flex-column gap-1">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+        <div className="tw-flex tw-flex-col tw-gap-1">
           <div>
             Redeemed Subscription for {contractName} #{props.redeem.token_id} x
             {props.redeem.count}
@@ -259,8 +259,8 @@ function RedeemedEntry(
             after redemption: {props.redeem.balance_after} ETH
           </div>
         </div>
-        <div className="d-flex align-items-center gap-3">
-          <div className="font-color-silver no-wrap">
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <div className="font-color-silver tw-whitespace-nowrap">
             {(props.redeem.transaction_date ?? props.redeem.created_at) &&
               getDateDisplay(
                 new Date(
@@ -271,7 +271,7 @@ function RedeemedEntry(
           </div>
           <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
             <a
-              className="d-flex align-items-center"
+              className="tw-flex tw-items-center"
               target="_blank"
               rel="noopener noreferrer"
               href={getTransactionLink(mainnet.id, props.redeem.transaction)}

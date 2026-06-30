@@ -13,6 +13,7 @@
 
 import { ApiSessionRefreshNativeRequest } from '../models/ApiSessionRefreshNativeRequest';
 import { ApiSessionRefreshWebRequest } from '../models/ApiSessionRefreshWebRequest';
+import { HttpFile } from '../http/http';
 
 /**
  * @type RefreshWalletAuthSessionRequest

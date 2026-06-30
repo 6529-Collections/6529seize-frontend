@@ -13,6 +13,7 @@
 
 import { ApiCmsSignatureEnvelope } from '../models/ApiCmsSignatureEnvelope';
 import { ApiCmsStorageLocation } from '../models/ApiCmsStorageLocation';
+import { HttpFile } from '../http/http';
 
 export class ApiCmsPublishedPackage {
     /**

@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
 
 export enum ApiGroupTdhInclusionStrategy {
     Tdh = 'TDH',

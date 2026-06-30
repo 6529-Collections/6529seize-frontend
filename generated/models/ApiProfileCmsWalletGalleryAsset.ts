@@ -13,6 +13,7 @@
 
 import { ApiProfileCmsWalletGalleryAssetFlags } from '../models/ApiProfileCmsWalletGalleryAssetFlags';
 import { ApiProfileCmsWalletGalleryMedia } from '../models/ApiProfileCmsWalletGalleryMedia';
+import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsWalletGalleryAsset {
     'contract': string;

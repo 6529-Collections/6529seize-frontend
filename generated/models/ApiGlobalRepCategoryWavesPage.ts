@@ -12,6 +12,7 @@
  */
 
 import { ApiGlobalRepCategoryWave } from '../models/ApiGlobalRepCategoryWave';
+import { HttpFile } from '../http/http';
 
 export class ApiGlobalRepCategoryWavesPage {
     'data': Array<ApiGlobalRepCategoryWave>;

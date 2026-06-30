@@ -13,6 +13,7 @@
 
 import { ApiDropV2 } from '../models/ApiDropV2';
 import { ApiWaveDecisionAward } from '../models/ApiWaveDecisionAward';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveDecisionWinnerV2 {
     'place': number;

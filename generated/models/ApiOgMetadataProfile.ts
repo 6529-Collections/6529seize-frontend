@@ -14,6 +14,7 @@
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
 import { ApiOgMetadataProfileBanner } from '../models/ApiOgMetadataProfileBanner';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
+import { HttpFile } from '../http/http';
 
 export class ApiOgMetadataProfile {
     'id': string;

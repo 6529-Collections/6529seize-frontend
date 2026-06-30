@@ -9,10 +9,6 @@ paths:
   /auth/session-nonce:
     get:
       summary: Create a session-v2 signable login message
-      description: >
-        Desktop nonce requests require an HTTP localhost loopback Origin with
-        an explicit port. The backend signs that Client Origin into the desktop
-        challenge.
       parameters:
         - name: signer_address
           in: query
@@ -40,10 +36,6 @@ paths:
   /auth/session-login:
     post:
       summary: Start a session-v2 wallet session
-      description: >
-        Desktop login requests require a signed localhost loopback Client
-        Origin and, when an Origin header is present, it must match the signed
-        origin.
       requestBody:
         required: true
         content:
@@ -205,6 +197,12 @@ components:
         role:
           type: string
           nullable: true
+        client_type:
+          $ref: "#/components/schemas/RefreshTokenClientType"
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
+        native_refresh_token:
+          type: string
     SessionWebResponse:
       type: object
       required: [address, access_token, access_token_expires_at, client_type]
@@ -215,6 +213,12 @@ components:
         role:
           type: string
           nullable: true
+        client_type:
+          $ref: "#/components/schemas/RefreshTokenClientType"
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
+        native_refresh_token:
+          type: string
         access_token:
           type: string
         access_token_expires_at:

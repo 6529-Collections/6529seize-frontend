@@ -13,6 +13,7 @@
 
 import { ApiProfileCmsValidationIssue } from '../models/ApiProfileCmsValidationIssue';
 import { ApiProfileCmsValidationResultTarget } from '../models/ApiProfileCmsValidationResultTarget';
+import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsValidationResult {
     'schema': ApiProfileCmsValidationResultSchemaEnum;

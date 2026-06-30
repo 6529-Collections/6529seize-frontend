@@ -16,6 +16,7 @@ import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisi
 import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
 import { ApiUpdateWaveParticipationConfig } from '../models/ApiUpdateWaveParticipationConfig';
+import { HttpFile } from '../http/http';
 
 export class ApiUpdateWaveRequest {
     /**

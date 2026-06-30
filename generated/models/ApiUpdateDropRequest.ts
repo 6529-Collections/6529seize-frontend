@@ -16,6 +16,7 @@ import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
+import { HttpFile } from '../http/http';
 
 export class ApiUpdateDropRequest {
     'title'?: string | null;

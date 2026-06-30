@@ -12,6 +12,7 @@
  */
 
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
+import { HttpFile } from '../http/http';
 
 export class ApiSubmissionDropVoting {
     'is_open': boolean;

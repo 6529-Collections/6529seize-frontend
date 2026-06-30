@@ -12,6 +12,7 @@
  */
 
 import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
+import { HttpFile } from '../http/http';
 
 export class ApiDropMedia {
     'url': string;

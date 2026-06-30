@@ -13,6 +13,7 @@
 
 import { ApiCreateNewWaveCardSetTdhVotingConfig } from '../models/ApiCreateNewWaveCardSetTdhVotingConfig';
 import { ApiCreateNewWaveStandardVotingConfig } from '../models/ApiCreateNewWaveStandardVotingConfig';
+import { HttpFile } from '../http/http';
 
 /**
  * @type ApiCreateNewWaveVotingConfig

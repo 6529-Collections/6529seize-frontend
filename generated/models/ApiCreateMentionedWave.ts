@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
 
 export class ApiCreateMentionedWave {
     'wave_name_in_content': string;

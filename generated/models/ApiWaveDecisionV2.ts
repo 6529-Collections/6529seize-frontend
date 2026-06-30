@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveDecisionWinnerV2 } from '../models/ApiWaveDecisionWinnerV2';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveDecisionV2 {
     'decision_time': number;

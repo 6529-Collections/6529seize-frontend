@@ -12,6 +12,7 @@
  */
 
 import { ApiIdentityOverview } from '../models/ApiIdentityOverview';
+import { HttpFile } from '../http/http';
 
 export class ApiDropPollVotersPage {
     'data': Array<ApiIdentityOverview>;

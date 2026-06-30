@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveOutcome } from '../models/ApiWaveOutcome';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveOutcomesPage {
     'data': Array<ApiWaveOutcome>;

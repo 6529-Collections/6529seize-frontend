@@ -12,6 +12,7 @@
  */
 
 import { ApiXTdhToken } from '../models/ApiXTdhToken';
+import { HttpFile } from '../http/http';
 
 export class ApiXTdhTokensPage {
     'data': Array<ApiXTdhToken>;

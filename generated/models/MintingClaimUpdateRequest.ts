@@ -12,6 +12,7 @@
  */
 
 import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
+import { HttpFile } from '../http/http';
 
 export class MintingClaimUpdateRequest {
     /**

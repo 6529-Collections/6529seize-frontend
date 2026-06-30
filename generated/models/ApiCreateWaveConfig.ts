@@ -14,6 +14,7 @@
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
 import { ApiWaveType } from '../models/ApiWaveType';
+import { HttpFile } from '../http/http';
 
 export class ApiCreateWaveConfig {
     'type': ApiWaveType;

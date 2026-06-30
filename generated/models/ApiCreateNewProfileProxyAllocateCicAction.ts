@@ -12,6 +12,7 @@
  */
 
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
+import { HttpFile } from '../http/http';
 
 export class ApiCreateNewProfileProxyAllocateCicAction {
     'action_type': ApiProfileProxyActionType;

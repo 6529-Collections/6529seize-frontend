@@ -16,7 +16,6 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
 import EthereumIcon from "../utils/icons/EthereumIcon";
@@ -279,7 +278,7 @@ export default function MemeSubscriptionRow(
     const isSubscribedView = !!props.subscribedView;
     return (
       <div className="tw-py-1">
-        <div className="d-flex align-items-center justify-content-between gap-2">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
           <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
             <span className="tw-font-medium tw-leading-none">
               {isSubscribedView ? "Subscribed" : "Subscribe"}
@@ -301,7 +300,7 @@ export default function MemeSubscriptionRow(
               {subscribedCount} / {props.eligibilityCount}
             </span>
           ) : (
-            <div className="d-flex align-items-center gap-2">
+            <div className="tw-flex tw-items-center tw-gap-2">
               {isSubmitting && <Spinner />}
               <Toggle
                 disabled={isToggleDisabled}
@@ -331,7 +330,7 @@ export default function MemeSubscriptionRow(
           </div>
         )}
         {props.minting_today && (
-          <div className="font-smaller font-color-silver d-flex align-items-center gap-2 tw-mt-2">
+          <div className="font-smaller font-color-silver tw-mt-2 tw-flex tw-items-center tw-gap-2">
             <span
               data-tooltip-id={`minting-today-${props.subscription.token_id}`}
             >
@@ -356,11 +355,11 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <Container className="no-padding pt-2 pb-2">
-      <Row>
-        <Col className="d-flex gap-2 align-items-center justify-content-between">
-          <div className="d-flex flex-column gap-2 tw-min-w-0 tw-flex-1">
-            <span className="d-flex align-items-center gap-2">
+    <div className="tw-py-2">
+      <div>
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
+            <span className="tw-flex tw-items-center tw-gap-2">
               <span className="tw-font-medium">
                 {props.title} #{props.subscription.token_id}{" "}
               </span>
@@ -408,7 +407,7 @@ export default function MemeSubscriptionRow(
               </span>
             )}
           </div>
-          <div className="d-flex align-items-center gap-2">
+          <div className="tw-flex tw-items-center tw-gap-2">
             {isSubmitting && <Spinner />}
             <Toggle
               disabled={isToggleDisabled}
@@ -426,8 +425,8 @@ export default function MemeSubscriptionRow(
               })}
             </span>
           </div>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

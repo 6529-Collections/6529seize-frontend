@@ -19,6 +19,7 @@ import { ApiCreateNewProfileProxyPublishCmsAction } from '../models/ApiCreateNew
 import { ApiCreateNewProfileProxyRateWaveDropAction } from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
 import { ApiCreateNewProfileProxyReadWaveAction } from '../models/ApiCreateNewProfileProxyReadWaveAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
+import { HttpFile } from '../http/http';
 
 export class AddActionToProxyRequest {
     'action_type': ApiProfileProxyActionType;
