@@ -21,7 +21,7 @@ export function AboutContainer({
     <div
       className={clsx(
         "tw-mx-auto tw-w-full tw-px-3",
-        !fluid && styles.container,
+        !fluid && styles["container"],
         className
       )}
       {...props}
