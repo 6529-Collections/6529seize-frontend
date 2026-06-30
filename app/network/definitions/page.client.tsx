@@ -1,5 +1,6 @@
 "use client";
 
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
@@ -21,6 +22,7 @@ export default function DefinitionsClient() {
     <Container className="tw-min-h-screen tw-pb-12 tw-pt-12">
       <Row>
         <Col>
+          <AboutContentsDropdown currentHref="/network/definitions" />
           <h1>Definitions</h1>
 
           <div className="tw-mt-6 tw-space-y-3 tw-text-base lg:tw-text-lg">

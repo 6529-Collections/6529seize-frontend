@@ -1,5 +1,6 @@
 "use client";
 
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import ProgressChart from "@/components/levels/ProgressChart";
 import TableOfLevels from "@/components/levels/TableOfLevels";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -11,6 +12,7 @@ export default function LevelsClient() {
     <div className="tailwind-scope">
       <div className="tw-pt-12 tw-pb-12">
         <div className="tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
+          <AboutContentsDropdown currentHref="/network/levels" />
           <h1 className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-0">Levels</h1>
           <div className="tw-my-6 tw-flex tw-flex-col">
             <ProgressChart />

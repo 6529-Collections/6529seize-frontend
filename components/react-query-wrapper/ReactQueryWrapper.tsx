@@ -271,6 +271,7 @@ const AUTH_SENSITIVE_QUERY_KEYS = [
   QueryKey.WAVE_SUBWAVES,
   QueryKey.OFFICIAL_WAVES,
   QueryKey.WAVES,
+  QueryKey.WAVES_PUBLIC,
   QueryKey.WAVE,
   QueryKey.DROPS,
   QueryKey.DROPS_LEADERBOARD,

@@ -7,6 +7,7 @@ import type { DropLocation } from "./drop.types";
 interface DropContextType {
   drop: ExtendedDrop | null;
   location: DropLocation;
+  reserveMediaHeight?: boolean | undefined;
   showVideoFullscreen?: boolean | undefined;
 }
 

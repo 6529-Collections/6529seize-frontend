@@ -21,7 +21,7 @@ export default function CommunityMembersMobileSortContent({
   readonly onSort: (sort: ApiCommunityMembersSortOption) => void;
 }) {
   return (
-    <div className="tw-px-4 tw-py-2">
+    <div className="tw-px-4 tw-py-4">
       <div className="tw-flex tw-flex-col tw-gap-2">
         {SORT_OPTIONS.map((option) => {
           const isActive = activeSort === option.value;
@@ -31,10 +31,10 @@ export default function CommunityMembersMobileSortContent({
               key={option.value}
               type="button"
               onClick={() => onSort(option.value)}
-              className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-transition ${
+              className={`tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-1.5 tw-rounded-xl tw-border tw-border-solid tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 active:tw-scale-[0.99] ${
                 isActive
-                  ? "tw-border-primary-500 tw-bg-primary-500/20 tw-text-primary-300"
-                  : "tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 active:tw-bg-iron-700"
+                  ? "tw-border-primary-400/30 tw-bg-primary-500/10 tw-text-iron-50"
+                  : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-100 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
               }`}
             >
               <span>{option.label}</span>

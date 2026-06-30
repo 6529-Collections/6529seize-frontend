@@ -9,7 +9,7 @@ unexpected row links.
 
 - Route: `/about/primary-address`
 - Global sidebar path: `About -> Primary Address`
-- About menu path: `Primary Address` on `/about/{section}`
+- About Contents dropdown path: `Primary Address` on `/about/{section}`
 
 ## Quick Triage
 

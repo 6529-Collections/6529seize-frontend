@@ -6,6 +6,7 @@ import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import WebSidebarNavItem from "./WebSidebarNavItem";
 import WebSidebarExpandableGroup from "./WebSidebarExpandableGroup";
 import type { SidebarSection } from "@/components/navigation/navTypes";
+import { isSidebarNavItemActive } from "./sidebarActive";
 
 interface WebSidebarExpandableProps {
   readonly section: SidebarSection;
@@ -24,11 +25,9 @@ function WebSidebarExpandable({
   pathname,
   "data-section": dataSection,
 }: WebSidebarExpandableProps) {
-  const isActive = (href: string) => pathname === href;
-
   const activeSubsection =
     section.subsections?.find((sub) =>
-      sub.items.some((item) => isActive(item.href))
+      sub.items.some((item) => isSidebarNavItemActive(item, pathname))
     )?.name ?? null;
 
   const [expandedSubsection, setExpandedSubsection] = useState<string | null>(
@@ -47,10 +46,12 @@ function WebSidebarExpandable({
   );
 
   const hasActiveItem = useMemo(() => {
-    if (section.items.some((item) => isActive(item.href))) return true;
+    if (section.items.some((item) => isSidebarNavItemActive(item, pathname))) {
+      return true;
+    }
     if (
       section.subsections?.some((sub) =>
-        sub.items.some((item) => isActive(item.href))
+        sub.items.some((item) => isSidebarNavItemActive(item, pathname))
       )
     )
       return true;
@@ -102,7 +103,7 @@ function WebSidebarExpandable({
 
               <ul className="tw-list-none tw-p-0 tw-m-0">
                 {section.items.map((item) => {
-                  const active = isActive(item.href);
+                  const active = isSidebarNavItemActive(item, pathname);
                   return (
                     <li key={item.href} className="tw-m-0 tw-p-0">
                       <Link
