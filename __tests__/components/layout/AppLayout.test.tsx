@@ -25,6 +25,12 @@ let mockLayoutSpaces = {
 jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   const loaderSource = loader.toString();
 
+  if (loaderSource.includes("../header/AppHeader")) {
+    const MockDynamicHeader = () => <div data-testid="header" />;
+    MockDynamicHeader.displayName = "MockDynamicHeader";
+    return MockDynamicHeader;
+  }
+
   if (loaderSource.includes("BrainMobileMessages")) {
     const MockDynamicMessages = () => {
       const React = require("react");
@@ -37,9 +43,7 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     return MockDynamicMessages;
   }
 
-  const MockDynamicHeader = () => <div data-testid="header" />;
-  MockDynamicHeader.displayName = "MockDynamicHeader";
-  return MockDynamicHeader;
+  throw new Error(`Unexpected dynamic import in AppLayout test: ${loaderSource}`);
 });
 jest.mock(
   "@/components/navigation/BottomNavigation",

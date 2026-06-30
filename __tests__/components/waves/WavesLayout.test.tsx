@@ -12,10 +12,6 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     return require("@/components/waves/WavesDesktop").default;
   }
 
-  if (loaderSource.includes("WavesMobile")) {
-    return require("@/components/waves/WavesMobile").default;
-  }
-
   throw new Error(`Unexpected dynamic import in WavesLayout test: ${loaderSource}`);
 });
 

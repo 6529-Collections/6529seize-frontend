@@ -5,6 +5,7 @@ import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
+import WavesMobile from "../WavesMobile";
 
 type WavesBranchProps = {
   readonly children: ReactNode;
@@ -15,10 +16,6 @@ function WavesBranchLoadingFallback() {
 }
 
 const WavesDesktop = dynamic<WavesBranchProps>(() => import("../WavesDesktop"), {
-  loading: () => <WavesBranchLoadingFallback />,
-});
-
-const WavesMobile = dynamic<WavesBranchProps>(() => import("../WavesMobile"), {
   loading: () => <WavesBranchLoadingFallback />,
 });
 
