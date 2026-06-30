@@ -12,13 +12,12 @@ import { fetchAllPages } from "@/services/6529api";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");
 
 export default function DelegationMappingTool() {
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
 
   const [file, setFile] = useState<any>();
@@ -33,7 +32,7 @@ export default function DelegationMappingTool() {
   }
 
   const handleUpload = () => {
-    (inputRef.current as any).click();
+    inputRef.current?.click();
   };
 
   const handleDrag = function (e: any) {
@@ -154,15 +153,15 @@ export default function DelegationMappingTool() {
   }, [csvData]);
 
   return (
-    <Container className={styles["toolArea"]} id="mapping-tool-form">
-      <Row>
-        <Col>
-          Upload File <span className="font-color-h">(.csv)</span>
-        </Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Container
+    <div className={styles["toolArea"]} id="mapping-tool-form">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-w-full tw-px-3">
+          Upload File <span className="tw-text-[#9A9A9A]">(.csv)</span>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+        <div className="tw-w-full tw-px-3">
+          <div
             className={`${styles["uploadArea"]} ${
               dragActive ? styles["uploadAreaActive"] : ""
             }`}
@@ -183,16 +182,16 @@ export default function DelegationMappingTool() {
             ) : (
               <div>Drag and drop your file here, or click to upload</div>
             )}
-          </Container>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>Select Collection</Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Form.Select
-            className={`${styles["formInput"]}`}
+          </div>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+        <div className="tw-w-full tw-px-3">Select Collection</div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+        <div className="tw-w-full tw-px-3">
+          <select
+            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
             value={collection}
             onChange={(e) => {
               setCollection(e.target.value);
@@ -211,16 +210,16 @@ export default function DelegationMappingTool() {
                 </option>
               );
             })}
-          </Form.Select>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>Select Use Case</Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Form.Select
-            className={`${styles["formInput"]}`}
+          </select>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+        <div className="tw-w-full tw-px-3">Select Use Case</div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+        <div className="tw-w-full tw-px-3">
+          <select
+            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
             value={useCase}
             onChange={(e) => {
               const newCase = Number.parseInt(e.target.value);
@@ -240,19 +239,20 @@ export default function DelegationMappingTool() {
                 </option>
               );
             })}
-          </Form.Select>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col className="font-color-h font-smaller">
+          </select>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+        <div className="tw-w-full tw-px-3 tw-text-[#9A9A9A] tw-text-[smaller]">
           Note: If the selected collection or use case delegation is not found,
           the tool will automatically switch to using delegations for
           &quot;Any&quot; or &quot;All&quot; options respectively.
-        </Col>
-      </Row>
-      <Row className="pt-3">
-        <Col>
-          <Button
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-3">
+        <div className="tw-w-full tw-px-3">
+          <button
+            type="button"
             className={`${styles["submitBtn"]} ${
               useCase === 0 || processing || !file
                 ? styles["submitBtnDisabled"]
@@ -262,21 +262,21 @@ export default function DelegationMappingTool() {
           >
             {processing ? "Processing" : "Submit"}
             {processing && (
-              <div className="d-inline">
+              <div className="tw-inline">
                 <div
-                  className={`spinner-border ${styles["loader"]}`}
+                  className={`tw-inline-block tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-current tw-border-r-transparent ${styles["loader"]}`}
                   role="status"
                 >
-                  <span className="sr-only"></span>
+                  <span className="tw-sr-only"></span>
                 </div>
               </div>
             )}
-          </Button>
-        </Col>
-      </Row>
-      <Form.Control
+          </button>
+        </div>
+      </div>
+      <input
         ref={inputRef}
-        className={`${styles["formInputHidden"]}`}
+        className={`tw-form-input ${styles["formInputHidden"]}`}
         type="file"
         accept=".csv"
         value={file?.fileName}
@@ -287,6 +287,6 @@ export default function DelegationMappingTool() {
           }
         }}
       />
-    </Container>
+    </div>
   );
 }
