@@ -1,7 +1,7 @@
 import { Fragment, useCallback } from "react";
-import { MenuItem } from "@headlessui/react";
+import { MenuHeading, MenuItem, MenuSection } from "@headlessui/react";
 import clsx from "clsx";
-import type { CompactMenuItem, CompactMenuProps } from "../types";
+import type { CompactMenuActionItem, CompactMenuProps } from "../types";
 import { CompactMenuItemButton } from "./CompactMenuItemButton";
 
 interface CompactMenuItemsPanelProps {
@@ -44,7 +44,7 @@ export function CompactMenuItemsPanel({
   unstyledItems = false,
 }: CompactMenuItemsPanelProps) {
   const handleItemClick = useCallback(
-    (item: CompactMenuItem) => {
+    (item: CompactMenuActionItem) => {
       if (item.disabled) {
         return;
       }
@@ -63,6 +63,22 @@ export function CompactMenuItemsPanel({
         <div className={headerClassName}>{header}</div>
       )}
       {items.map((item) => {
+        if (item.kind === "section") {
+          return (
+            <MenuSection
+              key={item.id}
+              className={clsx(
+                "tw-mt-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-3 tw-pb-1.5 tw-pt-3 first:tw-mt-0 first:tw-border-t-0 first:tw-pt-0",
+                item.className
+              )}
+            >
+              <MenuHeading className="tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-500">
+                {item.label}
+              </MenuHeading>
+            </MenuSection>
+          );
+        }
+
         const isActive = item.active ?? activeItemId === item.id;
 
         return (

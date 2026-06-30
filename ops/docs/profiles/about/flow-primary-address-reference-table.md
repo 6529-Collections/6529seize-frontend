@@ -9,7 +9,7 @@ content, and open a profile route from a table row.
 
 - Route: `/about/primary-address`
 - Global sidebar path: `About -> Primary Address`
-- In-page About menu path: `Primary Address` on `/about/{section}`
+- About Contents dropdown path: `Primary Address` on `/about/{section}`
 
 ## Preconditions
 
@@ -19,7 +19,8 @@ content, and open a profile route from a table row.
 
 - Open `/about/primary-address` directly.
 - Open `About -> Primary Address` from the global sidebar.
-- Open any `/about/{section}` page and choose `Primary Address`.
+- Open any `/about/{section}` page and choose `Primary Address` from the
+  sticky `Contents` dropdown.
 
 ## Flow Steps
 

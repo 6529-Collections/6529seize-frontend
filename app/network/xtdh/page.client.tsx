@@ -1,5 +1,6 @@
 "use client";
 
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
@@ -10,6 +11,7 @@ export default function XTDHMainPage() {
     <Container className="tw-min-h-screen tw-pt-12 tw-pb-12">
       <Row>
         <Col>
+          <AboutContentsDropdown currentHref="/network/xtdh" />
           <h1>xTDH</h1>
           <p className="tw-mt-2">
               xTDH is an extension of <Link href="/network/tdh">TDH</Link> which helps to include other NFT holders to 6529 ecosystem and offer them all the benefits of TDH.

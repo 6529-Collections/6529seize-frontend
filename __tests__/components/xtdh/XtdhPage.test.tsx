@@ -66,6 +66,10 @@ describe("XtdhPage", () => {
     render(<XtdhPage />);
 
     expect(screen.getByText("xTDH Network Overview")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "What is xTDH" })).toHaveAttribute(
+      "href",
+      "/network/xtdh"
+    );
     expect(screen.getByText("Multiplier")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getByText("xTDH Rate")).toBeInTheDocument();
