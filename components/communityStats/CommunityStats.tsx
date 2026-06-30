@@ -93,7 +93,9 @@ export default function CommunityStats() {
     const checkpoints = getNextCheckpoints(history.total_boosted_tdh);
     return checkpoints.map((x) => (
       <tr key={x}>
-        <td>Estimated days until {formatTdh(x)}</td>
+        <th scope="row" className="tw-text-left">
+          Estimated days until {formatTdh(x)}
+        </th>
         <td className="tw-text-right">
           {numberWithCommas(getEstimatedDaysUntil(history, x))}
         </td>
@@ -281,19 +283,25 @@ export default function CommunityStats() {
               <table className="tw-mb-4 tw-w-full">
                 <tbody>
                   <tr>
-                    <td>Network TDH</td>
+                    <th scope="row" className="tw-text-left">
+                      Network TDH
+                    </th>
                     <td className="tw-text-right">
                       {numberWithCommas(latestHistory!.total_boosted_tdh)}
                     </td>
                   </tr>
                   <tr>
-                    <td>Daily Change</td>
+                    <th scope="row" className="tw-text-left">
+                      Daily Change
+                    </th>
                     <td className="tw-text-right">
                       {numberWithCommas(latestHistory!.net_boosted_tdh)}
                     </td>
                   </tr>
                   <tr>
-                    <td>Daily % Change</td>
+                    <th scope="row" className="tw-text-left">
+                      Daily % Change
+                    </th>
                     <td className="tw-text-right">
                       {(
                         (latestHistory!.net_boosted_tdh /

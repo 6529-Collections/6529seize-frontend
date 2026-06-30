@@ -131,14 +131,18 @@ export default function PrenodesStatus() {
               <table className="tw-mb-0 tw-w-full">
                 <tbody>
                   <tr>
-                    <td>Register Date</td>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      Register Date
+                    </th>
                     <td>
                       <b>{createdAt.toIsoDateTimeString()}</b> (
                       {getDateDisplay(createdAt.toDate())})
                     </td>
                   </tr>
                   <tr>
-                    <td>Last Update</td>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      Last Update
+                    </th>
                     <td>
                       <b>{updatedAt.toIsoDateTimeString()}</b> (
                       {getDateDisplay(updatedAt.toDate())})
@@ -151,15 +155,21 @@ export default function PrenodesStatus() {
               <table className="tw-mb-0 tw-w-full">
                 <tbody>
                   <tr>
-                    <td>Ping Status</td>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      Ping Status
+                    </th>
                     <td>{printStatusIcon(updatedAtIcon, updatedAtStatus!)}</td>
                   </tr>
                   <tr>
-                    <td>TDH Status</td>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      TDH Status
+                    </th>
                     <td>{printStatusIcon(tdhIcon, tdhStatus!)}</td>
                   </tr>
                   <tr>
-                    <td>TDH Block Status</td>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      TDH Block Status
+                    </th>
                     <td>{printStatusIcon(blockIcon, blockStatus!)}</td>
                   </tr>
                 </tbody>
