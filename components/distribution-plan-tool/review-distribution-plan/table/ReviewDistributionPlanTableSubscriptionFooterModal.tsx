@@ -21,6 +21,17 @@ interface ReviewDistributionPlanTableSubscriptionFooterContractRowProps {
   readonly muted?: boolean;
 }
 
+interface ReviewDistributionPlanTableSubscriptionFooterContractOnlyRowProps {
+  readonly contract: string;
+}
+
+interface ReviewDistributionPlanTableSubscriptionFooterTokenIdRowProps {
+  readonly confirmedTokenId?: string | null | undefined;
+  readonly displayTokenId: string;
+  readonly tokenId: string;
+  readonly onTokenIdChange: (tokenId: string) => void;
+}
+
 interface ReviewDistributionPlanTableSubscriptionFooterMessageRowProps {
   readonly children: ReactNode;
 }
@@ -82,6 +93,51 @@ export function ReviewDistributionPlanTableSubscriptionFooterContractRow({
     <div className="tw-py-2">
       <div className={muted ? "tw-text-sm tw-text-iron-500" : undefined}>
         Contract: The Memes - {formatAddress(contract)} | Token ID: {tokenId}
+      </div>
+    </div>
+  );
+}
+
+export function ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow({
+  contract,
+}: Readonly<ReviewDistributionPlanTableSubscriptionFooterContractOnlyRowProps>) {
+  return (
+    <div className="tw-py-2">
+      <div>
+        Contract: The Memes - <span>{formatAddress(contract)}</span>
+      </div>
+    </div>
+  );
+}
+
+export function ReviewDistributionPlanTableSubscriptionFooterTokenIdRow({
+  confirmedTokenId,
+  displayTokenId,
+  tokenId,
+  onTokenIdChange,
+}: Readonly<ReviewDistributionPlanTableSubscriptionFooterTokenIdRowProps>) {
+  return (
+    <div className="tw-py-2">
+      <div>
+        Token ID:{" "}
+        {confirmedTokenId !== undefined && confirmedTokenId !== null ? (
+          <span>{displayTokenId}</span>
+        ) : (
+          <input
+            style={{
+              color: "black",
+              width: "100px",
+            }}
+            min={1}
+            step={1}
+            type="number"
+            aria-label="Token ID"
+            value={tokenId}
+            onChange={(e) => {
+              onTokenIdChange(e.target.value);
+            }}
+          />
+        )}
       </div>
     </div>
   );

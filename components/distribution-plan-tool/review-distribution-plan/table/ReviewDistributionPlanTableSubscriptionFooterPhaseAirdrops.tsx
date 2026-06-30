@@ -4,12 +4,15 @@ import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   extractAllNumbers,
-  formatAddress,
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
 import { type ChangeEvent, useRef, useState } from "react";
 import { Modal } from "react-bootstrap";
-import { ReviewDistributionPlanTableSubscriptionFooterAlertRow } from "./ReviewDistributionPlanTableSubscriptionFooterModal";
+import {
+  ReviewDistributionPlanTableSubscriptionFooterAlertRow,
+  ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow,
+  ReviewDistributionPlanTableSubscriptionFooterTokenIdRow,
+} from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 export type DistributionAirdropsPhase = "artist" | "team";
 
@@ -237,35 +240,15 @@ export function DistributionPhaseAirdropsModal(
       <hr className="tw-my-0" />
       <Modal.Body>
         <div className="tw-container tw-mx-auto">
-          <div className="tw-py-2">
-            <div>
-              Contract: The Memes - <span>{formatAddress(contract)}</span>
-            </div>
-          </div>
-          <div className="tw-py-2">
-            <div>
-              Token ID:{" "}
-              {props.confirmedTokenId !== undefined &&
-              props.confirmedTokenId !== null ? (
-                <span>{displayTokenId}</span>
-              ) : (
-                <input
-                  style={{
-                    color: "black",
-                    width: "100px",
-                  }}
-                  min={1}
-                  step={1}
-                  type="number"
-                  aria-label="Token ID"
-                  value={tokenId}
-                  onChange={(e) => {
-                    setTokenId(e.target.value);
-                  }}
-                />
-              )}
-            </div>
-          </div>
+          <ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow
+            contract={contract}
+          />
+          <ReviewDistributionPlanTableSubscriptionFooterTokenIdRow
+            confirmedTokenId={props.confirmedTokenId}
+            displayTokenId={displayTokenId}
+            tokenId={tokenId}
+            onTokenIdChange={setTokenId}
+          />
           <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="warning">
             This upload will replace the current {copy.successLabel} airdrops
             list for this token.

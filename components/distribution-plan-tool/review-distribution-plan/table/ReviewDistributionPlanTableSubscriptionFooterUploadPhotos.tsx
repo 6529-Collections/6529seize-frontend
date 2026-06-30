@@ -4,12 +4,15 @@ import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   extractAllNumbers,
-  formatAddress,
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
 import { useRef, useState } from "react";
 import { Modal } from "react-bootstrap";
-import { ReviewDistributionPlanTableSubscriptionFooterAlertRow } from "./ReviewDistributionPlanTableSubscriptionFooterModal";
+import {
+  ReviewDistributionPlanTableSubscriptionFooterAlertRow,
+  ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow,
+  ReviewDistributionPlanTableSubscriptionFooterTokenIdRow,
+} from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 export function UploadDistributionPhotosModal(
   props: Readonly<{
@@ -127,35 +130,15 @@ export function UploadDistributionPhotosModal(
       <hr className="tw-my-0" />
       <Modal.Body>
         <div className="tw-container tw-mx-auto">
-          <div className="tw-py-2">
-            <div>
-              Contract: The Memes - <span>{formatAddress(contract)}</span>
-            </div>
-          </div>
-          <div className="tw-py-2">
-            <div>
-              Token ID:{" "}
-              {props.confirmedTokenId !== undefined &&
-              props.confirmedTokenId !== null ? (
-                <span>{displayTokenId}</span>
-              ) : (
-                <input
-                  style={{
-                    color: "black",
-                    width: "100px",
-                  }}
-                  min={1}
-                  step={1}
-                  type="number"
-                  aria-label="Token ID"
-                  value={tokenId}
-                  onChange={(e) => {
-                    setTokenId(e.target.value);
-                  }}
-                />
-              )}
-            </div>
-          </div>
+          <ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow
+            contract={contract}
+          />
+          <ReviewDistributionPlanTableSubscriptionFooterTokenIdRow
+            confirmedTokenId={props.confirmedTokenId}
+            displayTokenId={displayTokenId}
+            tokenId={tokenId}
+            onTokenIdChange={setTokenId}
+          />
           {props.existingPhotosCount !== undefined &&
             props.existingPhotosCount > 0 && (
               <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="warning">
