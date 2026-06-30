@@ -8,6 +8,7 @@ import {
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -34,6 +35,8 @@ describe("sentry-client-filters", () => {
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
+  const reactDomRemoveChildMessage =
+    __testing.REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
@@ -401,6 +404,28 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createReactDomRemoveChildEvent = (
+    overrides: Partial<SentryClientEvent> = {}
+  ): SentryClientEvent => ({
+    transaction: "/the-memes/mint",
+    exception: {
+      values: [
+        {
+          type: "NotFoundError",
+          value: reactDomRemoveChildMessage,
+          stacktrace: {
+            frames: [reactDomFrame],
+          },
+        },
+      ],
+    },
+    tags: {
+      transaction: "/the-memes/mint",
+      url: "/the-memes/mint",
+    },
+    ...overrides,
+  });
+
   it("filters events when a stack frame matches a filename exception", () => {
     // Arrange
     const frames: SentryStackFrame[] = [
@@ -545,6 +570,93 @@ describe("sentry-client-filters", () => {
   it("keeps different NotFoundError messages from React DOM runtime frames", () => {
     const result = shouldFilterReactDomInsertBeforeNotFoundError(
       createReactDomInsertBeforeEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: "The requested node was not found.",
+              stacktrace: {
+                frames: [reactDomFrame],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("filters exact React DOM removeChild NotFoundError events on The Memes mint route with only runtime frames", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        tags: {
+          transaction: "/the-memes/mint",
+          url: "/the-memes/mint",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters React DOM removeChild NotFoundError events when request URL identifies a waves route", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        transaction: undefined,
+        tags: {},
+        request: {
+          url: "https://6529.io/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099?view=full",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps React DOM removeChild NotFoundError events when an app frame is present", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomRemoveChildMessage,
+              stacktrace: {
+                frames: [
+                  reactDomFrame,
+                  {
+                    filename:
+                      "webpack-internal:///(app-pages-browser)/./components/the-memes/TheMemesMint.tsx",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps React DOM removeChild NotFoundError events outside affected routes", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        transaction: "/the-memes",
+        tags: {
+          transaction: "/the-memes",
+          url: "/the-memes",
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps different removeChild NotFoundError messages from React DOM runtime frames", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
         exception: {
           values: [
             {

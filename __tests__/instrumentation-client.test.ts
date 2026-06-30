@@ -18,6 +18,8 @@ describe("instrumentation-client", () => {
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const reactDomInsertBeforeMessage =
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
+  const reactDomRemoveChildMessage =
+    "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
@@ -234,6 +236,33 @@ describe("instrumentation-client", () => {
       tags: {
         transaction: "/waves",
         url: "/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "react-dom-remove-child-event",
+      transaction: "/the-memes/mint",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/the-memes/mint",
+        url: "/the-memes/mint",
       },
     };
 
