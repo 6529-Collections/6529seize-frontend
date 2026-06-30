@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import styles from "./DelegationHTML.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -90,10 +89,10 @@ export default function DelegationHTML(props: Readonly<Props>) {
     );
   } else {
     return (
-      <Container className="pt-2">
+      <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-pt-2">
         {isFaqChildArticle && article && (
-          <Row className="pb-2">
-            <Col>
+          <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pb-2">
+            <div className="tw-w-full tw-px-3">
               <nav aria-label="Breadcrumb" className={styles["breadcrumbNav"]}>
                 <Link href="/delegation/delegation-center">
                   Delegation Center
@@ -103,22 +102,22 @@ export default function DelegationHTML(props: Readonly<Props>) {
                 <span>/</span>
                 <span aria-current="page">{article.title}</span>
               </nav>
-            </Col>
-          </Row>
+            </div>
+          </div>
         )}
         {pageTitle && (
-          <Row>
-            <Col>
+          <div className="tw-flex tw-flex-wrap -tw-mx-3">
+            <div className="tw-w-full tw-px-3">
               <h1>
                 {titleLighter && `${titleLighter} `}
                 {titleDarker}
               </h1>
-            </Col>
-          </Row>
+            </div>
+          </div>
         )}
         {isFaqChildArticle && article && (
-          <Row className="pt-2">
-            <Col>
+          <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+            <div className="tw-w-full tw-px-3">
               <p className={styles["articleSummary"]}>{article.summary}</p>
               <Link
                 href="/delegation/delegation-faq"
@@ -126,11 +125,14 @@ export default function DelegationHTML(props: Readonly<Props>) {
               >
                 Back to Delegation FAQ
               </Link>
-            </Col>
-          </Row>
+            </div>
+          </div>
         )}
-        <Row className="pt-3">
-          <Col className={styles["htmlContainer"]} aria-busy={loading}>
+        <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-3">
+          <div
+            className={`${styles["htmlContainer"]} tw-w-full tw-px-3`}
+            aria-busy={loading}
+          >
             {loading ? (
               <p role="status">Loading article...</p>
             ) : (
@@ -140,12 +142,12 @@ export default function DelegationHTML(props: Readonly<Props>) {
                 }}
               ></div>
             )}
-          </Col>
-        </Row>
+          </div>
+        </div>
         {isFaqChildArticle &&
           (articleNavigation.previous || articleNavigation.next) && (
-            <Row className="pt-4">
-              <Col>
+            <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+              <div className="tw-w-full tw-px-3">
                 <nav
                   aria-label="Delegation FAQ article navigation"
                   className={styles["articlePager"]}
@@ -165,10 +167,10 @@ export default function DelegationHTML(props: Readonly<Props>) {
                     <span></span>
                   )}
                 </nav>
-              </Col>
-            </Row>
+              </div>
+            </div>
           )}
-      </Container>
+      </div>
     );
   }
 }

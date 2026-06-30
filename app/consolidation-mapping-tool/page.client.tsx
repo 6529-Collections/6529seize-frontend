@@ -4,7 +4,6 @@ import ConsolidationMappingTool from "@/components/mapping-tools/ConsolidationMa
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 
 export default function ConsolidationMappingToolPage() {
   useSetTitle("Consolidation Mapping Tool | Tools");
@@ -24,76 +23,48 @@ export default function ConsolidationMappingToolPage() {
   }, []);
 
   return (
-    <main className={styles["main"]}>
-      <Container fluid>
-        <Row>
-          <Col>
-            <Container>
-              <Row className="pt-4">
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 10, offset: 1 }}
-                  lg={{ span: 8, offset: 2 }}>
-                  <h1 className="text-center">
-                    Consolidation Mapping
-                    Tool
-                  </h1>
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 10, offset: 1 }}
-                  lg={{ span: 8, offset: 2 }}>
-                  <h5>Overview</h5>
-                </Col>
-              </Row>
-              <Row>
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 12 }}
-                  md={{ span: 10, offset: 1 }}
-                  lg={{ span: 8, offset: 2 }}>
-                  The Consolidation Mapping tool allows anyone to easily upload
-                  a CSV file with addresses and balances to receive consolidated
-                  addresses in return (from the NFTDelegation contract).{" "}
-                  <a href="#how-to-use">How to use this tool?</a>
-                </Col>
-              </Row>
-              <Row>
-                <Col
-                  xs={{ span: 12 }}
-                  sm={{ span: 10, offset: 1 }}
-                  md={{ span: 8, offset: 2 }}
-                  lg={{ span: 6, offset: 3 }}>
-                  <Container className="pt-5 pb-5">
-                    <Row>
-                      <Col>
-                        <ConsolidationMappingTool />
-                      </Col>
-                    </Row>
-                  </Container>
-                </Col>
-              </Row>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
-      <Container id="how-to-use" className="pt-1 pb-5">
-        <Row>
-          <Col
-            className={styles["htmlContainer"]}
-            xs={{ span: 12 }}
-            sm={{ span: 10, offset: 1 }}
-            md={{ span: 8, offset: 2 }}
-            lg={{ span: 6, offset: 3 }}
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <div className="tw-w-full tw-px-3">
+        <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+          <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+            <div className="tw-w-full tw-px-3 md:tw-ml-[8.333333%] md:tw-w-10/12 lg:tw-ml-[16.666667%] lg:tw-w-8/12">
+              <h1 className="tw-text-center">Consolidation Mapping Tool</h1>
+            </div>
+          </div>
+          <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+            <div className="tw-w-full tw-px-3 md:tw-ml-[8.333333%] md:tw-w-10/12 lg:tw-ml-[16.666667%] lg:tw-w-8/12">
+              <h5>Overview</h5>
+            </div>
+          </div>
+          <div className="tw-flex tw-flex-wrap -tw-mx-3">
+            <div className="tw-w-full tw-px-3 md:tw-ml-[8.333333%] md:tw-w-10/12 lg:tw-ml-[16.666667%] lg:tw-w-8/12">
+              The Consolidation Mapping tool allows anyone to easily upload a
+              CSV file with addresses and balances to receive consolidated
+              addresses in return (from the NFTDelegation contract).{" "}
+              <a href="#how-to-use">How to use this tool?</a>
+            </div>
+          </div>
+          <div className="tw-flex tw-flex-wrap -tw-mx-3">
+            <div className="tw-w-full tw-px-3 sm:tw-ml-[8.333333%] sm:tw-w-10/12 md:tw-ml-[16.666667%] md:tw-w-8/12 lg:tw-ml-[25%] lg:tw-w-6/12">
+              <div className="tw-py-5">
+                <ConsolidationMappingTool />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        id="how-to-use"
+        className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-pt-1 tw-pb-5"
+      >
+        <div className="tw-flex tw-flex-wrap -tw-mx-3">
+          <div
+            className={`${styles["htmlContainer"]} tw-w-full tw-px-3 sm:tw-ml-[8.333333%] sm:tw-w-10/12 md:tw-ml-[16.666667%] md:tw-w-8/12 lg:tw-ml-[25%] lg:tw-w-6/12`}
             dangerouslySetInnerHTML={{
               __html: html,
-            }}></Col>
-        </Row>
-      </Container>
+            }}></div>
+        </div>
+      </div>
     </main>
   );
 }
