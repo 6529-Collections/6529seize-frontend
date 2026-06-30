@@ -5,6 +5,20 @@ import React from "react";
 const mockUseAuthenticatedContent = jest.fn();
 const mockUseDeviceInfo = jest.fn();
 
+jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
+  const loaderSource = loader.toString();
+
+  if (loaderSource.includes("WavesDesktop")) {
+    return require("@/components/waves/WavesDesktop").default;
+  }
+
+  if (loaderSource.includes("WavesMobile")) {
+    return require("@/components/waves/WavesMobile").default;
+  }
+
+  throw new Error(`Unexpected dynamic import in WavesLayout test: ${loaderSource}`);
+});
+
 jest.mock("../../../hooks/useAuthenticatedContent", () => ({
   useAuthenticatedContent: () => mockUseAuthenticatedContent(),
 }));
