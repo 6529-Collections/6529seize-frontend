@@ -1,35 +1,38 @@
-import {
-  getVideoConversions,
-  isVideoUrl,
-  checkVideoAvailability,
-} from "@/helpers/video.helpers";
-
 beforeEach(() => {
+  jest.resetModules();
   jest.resetAllMocks();
 });
 
 describe("video helpers", () => {
-  it("detects video url", () => {
+  it("detects video url", async () => {
+    const { isVideoUrl } = await import("@/helpers/video.helpers");
+
     expect(isVideoUrl("file.mp4")).toBe(true);
     expect(isVideoUrl("file.txt")).toBe(false);
   });
 
-  it("creates conversion urls", () => {
+  it("creates conversion urls", async () => {
+    const { getVideoConversions } = await import("@/helpers/video.helpers");
     const url = "https://d3lqz0a4bldqgf.cloudfront.net/drops/foo/bar.mp4";
     const result = getVideoConversions(url);
+
     expect(result).not.toBeNull();
     expect(result!.HLS).toContain("renditions");
   });
 
   it("checks availability using fetch", async () => {
+    const { checkVideoAvailability } = await import("@/helpers/video.helpers");
     const fetchMock = jest.fn().mockResolvedValue({ ok: true });
     (global as any).fetch = fetchMock;
+
     const ok = await checkVideoAvailability("u");
+
     expect(fetchMock).toHaveBeenCalled();
     expect(ok).toBe(true);
   });
 
   it("deduplicates in-flight availability checks", async () => {
+    const { checkVideoAvailability } = await import("@/helpers/video.helpers");
     const fetchMock = jest.fn().mockResolvedValue({ ok: true });
     (global as any).fetch = fetchMock;
 
@@ -44,6 +47,7 @@ describe("video helpers", () => {
   });
 
   it("briefly caches network failures", async () => {
+    const { checkVideoAvailability } = await import("@/helpers/video.helpers");
     const fetchMock = jest.fn().mockRejectedValue(new Error("network"));
     (global as any).fetch = fetchMock;
 
@@ -56,6 +60,7 @@ describe("video helpers", () => {
   });
 
   it("evicts old availability cache entries when the cache grows too large", async () => {
+    const { checkVideoAvailability } = await import("@/helpers/video.helpers");
     const fetchMock = jest.fn().mockResolvedValue({ ok: true });
     (global as any).fetch = fetchMock;
     const urls = Array.from(
