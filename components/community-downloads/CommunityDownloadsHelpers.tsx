@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { Fragment } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import styles from "./CommunityDownloads.module.scss";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
@@ -15,10 +14,10 @@ export function formatDate(dateString: string): string {
     const day = Number(dateString.substring(6, 8));
     const d = new Date(year, month, day);
     return d.toDateString();
-  } else {
-    const d = new Date(dateString);
-    return d.toDateString();
   }
+
+  const d = new Date(dateString);
+  return d.toDateString();
 }
 
 export function DownloadsLayout({
@@ -29,22 +28,10 @@ export function DownloadsLayout({
   readonly children: ReactNode;
 }) {
   return (
-    <Container fluid>
-      <Row>
-        <Col>
-          <Container className="pt-4">
-            <Row>
-              <Col>
-                <h1>
-                  {title} Downloads
-                </h1>
-              </Col>
-            </Row>
-            {children}
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+    <section className="[min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-w-full tw-px-3 tw-pt-4 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
+      <h1>{title} Downloads</h1>
+      {children}
+    </section>
   );
 }
 
@@ -66,25 +53,23 @@ export function DownloadsTable<T>({
   }
 
   return (
-    <Row className={`pt-3 ${styles["downloadsScrollContainer"]}`}>
-      <Col>
-        <Table bordered={false} className={styles["downloadsTable"]}>
-          <thead>
-            <tr>
-              {columns.map((col) => (
-                <th key={col}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, idx) => (
-              <Fragment key={getRandomObjectId()}>
-                {renderRow(item, idx)}
-              </Fragment>
+    <div className={`tw-pt-3 ${styles["downloadsScrollContainer"] ?? ""}`}>
+      <table className={`tw-w-full ${styles["downloadsTable"] ?? ""}`}>
+        <thead>
+          <tr>
+            {columns.map((col) => (
+              <th key={col}>{col}</th>
             ))}
-          </tbody>
-        </Table>
-      </Col>
-    </Row>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, idx) => (
+            <Fragment key={getRandomObjectId()}>
+              {renderRow(item, idx)}
+            </Fragment>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

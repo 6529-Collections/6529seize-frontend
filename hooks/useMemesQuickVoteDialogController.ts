@@ -32,7 +32,7 @@ type UseMemesQuickVoteDialogControllerResult = {
   readonly closeQuickVote: () => void;
   readonly dialogState: MemesQuickVoteDialogState;
   readonly isQuickVoteOpen: boolean;
-  readonly openQuickVote: () => void;
+  readonly openQuickVote: (sessionIdOverride?: number) => void;
   readonly prefetchQuickVote: () => void;
   readonly quickVoteSessionId: number;
 };
@@ -70,21 +70,29 @@ export const useMemesQuickVoteDialogController =
       setQuickVoteSessionId(sessionId);
     }, [quickVoteSessionId, reserveSessionId, retryDiscovery]);
 
-    const openQuickVote = useCallback(() => {
-      if (quickVoteSessionId > 0) {
-        retryDiscovery();
+    const openQuickVote = useCallback(
+      (sessionIdOverride?: number) => {
+        if (quickVoteSessionId > 0) {
+          retryDiscovery();
+          setIsQuickVoteOpen(true);
+          return;
+        }
+
+        const sessionId =
+          sessionIdOverride ??
+          reservedSessionIdRef.current ??
+          lastIssuedSessionIdRef.current + 1;
+
+        lastIssuedSessionIdRef.current = Math.max(
+          lastIssuedSessionIdRef.current,
+          sessionId
+        );
+        reservedSessionIdRef.current = null;
+        setQuickVoteSessionId(sessionId);
         setIsQuickVoteOpen(true);
-        return;
-      }
-
-      const sessionId =
-        reservedSessionIdRef.current ?? lastIssuedSessionIdRef.current + 1;
-
-      lastIssuedSessionIdRef.current = sessionId;
-      reservedSessionIdRef.current = null;
-      setQuickVoteSessionId(sessionId);
-      setIsQuickVoteOpen(true);
-    }, [quickVoteSessionId, retryDiscovery]);
+      },
+      [quickVoteSessionId, retryDiscovery]
+    );
 
     const closeQuickVote = useCallback(() => {
       setIsQuickVoteOpen(false);
