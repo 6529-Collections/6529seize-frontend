@@ -8,8 +8,8 @@ export default function NFTActivityPage() {
   useSetTitle("NFT Activity | Network");
 
   return (
-    <main className={styles["main"]}>
-      <section className={styles["leaderboardContainer"]}>
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <section className={`${styles["leaderboardContainer"]} tailwind-scope`}>
         <LatestActivity page={1} pageSize={50} showMore />
       </section>
     </main>

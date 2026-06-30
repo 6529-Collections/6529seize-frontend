@@ -4,8 +4,8 @@ import { getAppMetadata } from "@/components/providers/metadata";
 
 export default function PrenodesPage() {
   return (
-    <main className={styles["main"]}>
-      <section className={styles["leaderboardContainer"]}>
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <section className={`${styles["leaderboardContainer"]} tailwind-scope`}>
         <PrenodesStatus />
       </section>
     </main>
