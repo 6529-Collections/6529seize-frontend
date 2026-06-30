@@ -240,4 +240,44 @@ describe("WaveDropPartContentMedias", () => {
     expect(screen.getByText("Image unavailable")).toBeInTheDocument();
     expect(screen.queryByTestId("wave-image-media")).toBeNull();
   });
+
+  it("shows a processing placeholder for video media that is not ready", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            {
+              mime_type: "video/mp4",
+              url: "u1",
+              media_status: ApiDropMediaStatus.Processing,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Processing media")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop-media")).toBeNull();
+  });
+
+  it("shows a failed placeholder for video media that failed processing", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            {
+              mime_type: "video/mp4",
+              url: "u1",
+              media_status: ApiDropMediaStatus.Failed,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Media unavailable")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop-media")).toBeNull();
+  });
 });

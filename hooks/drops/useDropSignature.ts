@@ -15,6 +15,27 @@ import {
 const DROP_SIGNATURE_FAILED_MESSAGE =
   "Signature failed. Make sure your wallet is connected and unlocked, and that you are using the wallet linked to your 6529 account. If it still fails, log out of 6529 and log back in, then try again.";
 
+const isUserRejectedSigningError = (error: unknown): boolean => {
+  try {
+    if (error instanceof UserRejectedRequestError) {
+      return true;
+    }
+  } catch {
+    // Fall through to shape-based checks for cross-realm wallet errors.
+  }
+
+  if (error === null || error === undefined || typeof error !== "object") {
+    return false;
+  }
+
+  const errorObject = error as Record<string, unknown>;
+  return (
+    errorObject["name"] === "UserRejectedRequestError" ||
+    errorObject["code"] === 4001 ||
+    errorObject["code"] === "4001"
+  );
+};
+
 /**
  * Hook for hashing drop data and requesting user signature
  * @returns Object with signDrop function and loading state
@@ -126,7 +147,7 @@ export const useDropSignature = () => {
     } catch (e) {
       return {
         signature: null,
-        userRejected: e instanceof UserRejectedRequestError,
+        userRejected: isUserRejectedSigningError(e),
       };
     }
   };

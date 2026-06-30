@@ -87,6 +87,17 @@ describe("SeizeVideoPlayer", () => {
       .mockImplementation(() => undefined);
   });
 
+  it("reserves a stable aspect ratio before video metadata loads", () => {
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" />
+    );
+
+    const wrapper = container.firstElementChild as HTMLElement | null;
+
+    expect(wrapper).toBeTruthy();
+    expect(wrapper?.style.aspectRatio).toBe("16 / 9");
+  });
+
   it("advances through fallback sources when the direct source errors", () => {
     const { container } = render(
       <SeizeVideoPlayer

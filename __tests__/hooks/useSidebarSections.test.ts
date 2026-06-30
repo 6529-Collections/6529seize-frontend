@@ -66,9 +66,9 @@ describe("useSidebarSections", () => {
     ]);
 
     expect(allItems.some((item) => item.name === "Release Notes")).toBe(false);
-    expect(
-      allItems.some((item) => item.href === "/about/release-notes")
-    ).toBe(false);
+    expect(allItems.some((item) => item.href === "/about/release-notes")).toBe(
+      false
+    );
   });
 
   it("matches the shared About contents structure in the sidebar menu", () => {

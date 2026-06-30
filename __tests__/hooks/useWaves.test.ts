@@ -25,9 +25,7 @@ const useSeizeConnectContextMock =
 const commonApiFetchMock = commonApiFetch as jest.Mock;
 type TestAuthContext = React.ContextType<typeof AuthContext>;
 
-const createWrapper = (
-  authContextOverrides: Partial<TestAuthContext> = {}
-) => {
+const createWrapper = (authContextOverrides: Partial<TestAuthContext> = {}) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
