@@ -12,7 +12,6 @@
  */
 
 import { AllowlistNormalizedEntry } from '../models/AllowlistNormalizedEntry';
-import { HttpFile } from '../http/http';
 
 export class DistributionNormalized {
     'card_id': number;

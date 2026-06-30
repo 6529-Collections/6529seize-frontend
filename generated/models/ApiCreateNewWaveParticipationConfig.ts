@@ -16,7 +16,6 @@ import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
 import { ApiWaveParticipationSubmissionStrategy } from '../models/ApiWaveParticipationSubmissionStrategy';
 import { ApiWaveRequiredMetadata } from '../models/ApiWaveRequiredMetadata';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWaveParticipationConfig {
     'scope': ApiCreateNewWaveScope;

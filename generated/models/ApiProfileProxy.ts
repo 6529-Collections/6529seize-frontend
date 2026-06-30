@@ -13,7 +13,6 @@
 
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiProfileProxyAction } from '../models/ApiProfileProxyAction';
-import { HttpFile } from '../http/http';
 
 export class ApiProfileProxy {
     'id': string;

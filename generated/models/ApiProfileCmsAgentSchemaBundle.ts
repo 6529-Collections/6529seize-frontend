@@ -16,7 +16,6 @@ import { ApiProfileCmsAgentSchemaBundleEndpoints } from '../models/ApiProfileCms
 import { ApiProfileCmsAgentSchemaBundlePatchLimits } from '../models/ApiProfileCmsAgentSchemaBundlePatchLimits';
 import { ApiProfileCmsAgentSchemaBundleSafety } from '../models/ApiProfileCmsAgentSchemaBundleSafety';
 import { ApiProfileCmsAgentSchemaBundleSourcePacketTypesInner } from '../models/ApiProfileCmsAgentSchemaBundleSourcePacketTypesInner';
-import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsAgentSchemaBundle {
     'schema': ApiProfileCmsAgentSchemaBundleSchemaEnum;

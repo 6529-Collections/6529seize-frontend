@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
 
 export class ApiIdentityOverviewBadges {
     'artist_of_main_stage_submissions': number;

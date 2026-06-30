@@ -12,7 +12,6 @@
  */
 
 import { ApiCmsAgentPatch } from '../models/ApiCmsAgentPatch';
-import { HttpFile } from '../http/http';
 
 export class ApiValidateProfileCmsAgentPatchRequest {
     'agent_patch': ApiCmsAgentPatch;

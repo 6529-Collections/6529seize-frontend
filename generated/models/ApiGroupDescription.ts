@@ -17,7 +17,6 @@ import { ApiGroupOwnsNft } from '../models/ApiGroupOwnsNft';
 import { ApiGroupRepFilter } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter } from '../models/ApiGroupTdhFilter';
 import { ApiXTdhGrant } from '../models/ApiXTdhGrant';
-import { HttpFile } from '../http/http';
 
 export class ApiGroupDescription {
     'tdh': ApiGroupTdhFilter;

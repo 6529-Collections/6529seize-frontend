@@ -12,7 +12,6 @@
  */
 
 import { ApiXTdhGrant } from '../models/ApiXTdhGrant';
-import { HttpFile } from '../http/http';
 
 export class ApiXTdhGrantsPage {
     'data': Array<ApiXTdhGrant>;

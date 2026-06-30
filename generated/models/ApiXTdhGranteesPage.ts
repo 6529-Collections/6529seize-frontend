@@ -12,7 +12,6 @@
  */
 
 import { ApiXTdhGrantee } from '../models/ApiXTdhGrantee';
-import { HttpFile } from '../http/http';
 
 export class ApiXTdhGranteesPage {
     'data': Array<ApiXTdhGrantee>;

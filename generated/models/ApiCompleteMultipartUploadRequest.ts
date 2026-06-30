@@ -12,7 +12,6 @@
  */
 
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
-import { HttpFile } from '../http/http';
 
 export class ApiCompleteMultipartUploadRequest {
     'upload_id': string;

@@ -12,7 +12,6 @@
  */
 
 import { ApiAttachmentStatus } from '../models/ApiAttachmentStatus';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateAttachmentMultipartUploadResponse {
     'attachment_id': string;

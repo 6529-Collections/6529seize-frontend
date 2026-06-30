@@ -12,7 +12,6 @@
  */
 
 import { ApiXTdhCollection } from '../models/ApiXTdhCollection';
-import { HttpFile } from '../http/http';
 
 export class ApiXTdhCollectionsPage {
     'data': Array<ApiXTdhCollection>;

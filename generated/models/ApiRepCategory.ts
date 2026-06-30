@@ -12,7 +12,6 @@
  */
 
 import { ApiRepContributor } from '../models/ApiRepContributor';
-import { HttpFile } from '../http/http';
 
 export class ApiRepCategory {
     'category': string;

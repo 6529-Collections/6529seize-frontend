@@ -12,7 +12,6 @@
  */
 
 import { ApiCicContributor } from '../models/ApiCicContributor';
-import { HttpFile } from '../http/http';
 
 export class ApiCicContributorsPage {
     'data': Array<ApiCicContributor>;

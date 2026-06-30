@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
 
 export class ApiCommunityMetricSample {
     'period_start': number;

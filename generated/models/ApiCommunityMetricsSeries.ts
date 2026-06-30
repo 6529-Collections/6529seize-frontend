@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
 
 export class ApiCommunityMetricsSeries {
     'steps_start_times': Array<number>;

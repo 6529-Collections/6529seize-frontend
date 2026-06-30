@@ -14,7 +14,6 @@
 import { ApiAttachment } from '../models/ApiAttachment';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
-import { HttpFile } from '../http/http';
 
 export class ApiDropPart {
     /**

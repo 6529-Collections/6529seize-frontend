@@ -12,7 +12,6 @@
  */
 
 import { ApiAttachmentUploadMimeType } from '../models/ApiAttachmentUploadMimeType';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateAttachmentMultipartUploadRequest {
     'content_type': ApiAttachmentUploadMimeType;

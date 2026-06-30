@@ -12,7 +12,6 @@
  */
 
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateNewProfileProxyCreateWaveAction {
     'action_type': ApiProfileProxyActionType;

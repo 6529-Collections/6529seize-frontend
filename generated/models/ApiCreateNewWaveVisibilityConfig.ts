@@ -12,7 +12,6 @@
  */
 
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWaveVisibilityConfig {
     'scope': ApiCreateNewWaveScope;

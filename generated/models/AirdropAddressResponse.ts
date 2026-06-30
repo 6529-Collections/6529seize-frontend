@@ -12,7 +12,6 @@
  */
 
 import { AirdropAddressResponseTdhWallet } from '../models/AirdropAddressResponseTdhWallet';
-import { HttpFile } from '../http/http';
 
 export class AirdropAddressResponse {
     'tdh_wallet': AirdropAddressResponseTdhWallet;

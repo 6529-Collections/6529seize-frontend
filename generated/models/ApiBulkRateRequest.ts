@@ -12,7 +12,6 @@
  */
 
 import { ApiRateMatter } from '../models/ApiRateMatter';
-import { HttpFile } from '../http/http';
 
 export class ApiBulkRateRequest {
     'matter': ApiRateMatter;

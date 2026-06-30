@@ -16,7 +16,6 @@ import { ApiIdentityOverview } from '../models/ApiIdentityOverview';
 import { ApiNotificationAdditionalContextV2 } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiWaveOverview } from '../models/ApiWaveOverview';
-import { HttpFile } from '../http/http';
 
 export class ApiNotificationV2 {
     'id': number;

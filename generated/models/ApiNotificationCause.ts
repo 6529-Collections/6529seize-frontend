@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
 
 export enum ApiNotificationCause {
     IdentitySubscribed = 'IDENTITY_SUBSCRIBED',

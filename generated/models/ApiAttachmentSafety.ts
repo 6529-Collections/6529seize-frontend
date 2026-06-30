@@ -14,7 +14,6 @@
 import { ApiAttachmentSafetyScanner } from '../models/ApiAttachmentSafetyScanner';
 import { ApiAttachmentSafetyStatus } from '../models/ApiAttachmentSafetyStatus';
 import { ApiAttachmentSafetyValidation } from '../models/ApiAttachmentSafetyValidation';
-import { HttpFile } from '../http/http';
 
 export class ApiAttachmentSafety {
     'status': ApiAttachmentSafetyStatus;

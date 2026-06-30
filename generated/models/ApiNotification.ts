@@ -14,7 +14,6 @@
 import { ApiDrop } from '../models/ApiDrop';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiProfileMin } from '../models/ApiProfileMin';
-import { HttpFile } from '../http/http';
 
 export class ApiNotification {
     'id': number;

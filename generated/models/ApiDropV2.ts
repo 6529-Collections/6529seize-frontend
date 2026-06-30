@@ -27,7 +27,6 @@ import { ApiMentionedWaveV2 } from '../models/ApiMentionedWaveV2';
 import { ApiReplyToDropV2 } from '../models/ApiReplyToDropV2';
 import { ApiSubmissionDropContext } from '../models/ApiSubmissionDropContext';
 import { ApiWaveOverview } from '../models/ApiWaveOverview';
-import { HttpFile } from '../http/http';
 
 export class ApiDropV2 {
     'id': string;

@@ -13,7 +13,6 @@
 
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiWallet } from '../models/ApiWallet';
-import { HttpFile } from '../http/http';
 
 export class ApiIdentity {
     'id': string | null;

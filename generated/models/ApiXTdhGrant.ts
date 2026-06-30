@@ -14,7 +14,6 @@
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiXTdhGrantStatus } from '../models/ApiXTdhGrantStatus';
 import { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
-import { HttpFile } from '../http/http';
 
 export class ApiXTdhGrant {
     'id': string;

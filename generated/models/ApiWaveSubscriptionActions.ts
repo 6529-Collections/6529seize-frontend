@@ -12,7 +12,6 @@
  */
 
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveSubscriptionActions {
     'actions': Array<ApiWaveSubscriptionTargetAction>;

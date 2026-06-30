@@ -16,7 +16,6 @@ import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
-import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWaveCardSetTdhVotingConfig {
     'scope': ApiCreateNewWaveScope;

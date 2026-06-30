@@ -12,7 +12,6 @@
  */
 
 import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaProtocol';
-import { HttpFile } from '../http/http';
 
 export class ApiDecentralizedMediaResolution {
     'input': string;

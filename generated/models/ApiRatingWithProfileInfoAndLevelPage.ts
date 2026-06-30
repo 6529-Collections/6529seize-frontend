@@ -12,7 +12,6 @@
  */
 
 import { ApiRatingWithProfileInfoAndLevel } from '../models/ApiRatingWithProfileInfoAndLevel';
-import { HttpFile } from '../http/http';
 
 export class ApiRatingWithProfileInfoAndLevelPage {
     'data': Array<ApiRatingWithProfileInfoAndLevel>;

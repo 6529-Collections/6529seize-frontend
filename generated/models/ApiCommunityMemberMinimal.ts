@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
 
 export class ApiCommunityMemberMinimal {
     'profile_id': string | null;

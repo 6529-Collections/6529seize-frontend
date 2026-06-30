@@ -12,7 +12,6 @@
  */
 
 import { ApiDrop } from '../models/ApiDrop';
-import { HttpFile } from '../http/http';
 
 export class ApiUndiscoveredDrop {
     'drop': ApiDrop | null;

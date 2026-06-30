@@ -12,7 +12,6 @@
  */
 
 import { RedeemedSubscription } from '../models/RedeemedSubscription';
-import { HttpFile } from '../http/http';
 
 export class RedeemedSubscriptionPage {
     'data': Array<RedeemedSubscription>;

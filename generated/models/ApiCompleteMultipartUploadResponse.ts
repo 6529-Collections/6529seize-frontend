@@ -12,7 +12,6 @@
  */
 
 import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
-import { HttpFile } from '../http/http';
 
 export class ApiCompleteMultipartUploadResponse {
     'media_url': string;

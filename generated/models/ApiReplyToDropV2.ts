@@ -12,7 +12,6 @@
  */
 
 import { ApiReplyToDropAuthor } from '../models/ApiReplyToDropAuthor';
-import { HttpFile } from '../http/http';
 
 export class ApiReplyToDropV2 {
     'id': string;

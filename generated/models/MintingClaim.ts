@@ -14,7 +14,6 @@
 import { MintingClaimAnimationDetails } from '../models/MintingClaimAnimationDetails';
 import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
 import { MintingClaimImageDetails } from '../models/MintingClaimImageDetails';
-import { HttpFile } from '../http/http';
 
 export class MintingClaim {
     'drop_id': string;

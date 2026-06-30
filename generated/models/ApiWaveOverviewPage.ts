@@ -12,7 +12,6 @@
  */
 
 import { ApiWaveOverview } from '../models/ApiWaveOverview';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveOverviewPage {
     'data': Array<ApiWaveOverview>;
