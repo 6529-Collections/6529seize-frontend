@@ -148,7 +148,12 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Bar
+          data={data}
+          options={GRAPH_OPTIONS}
+          role="img"
+          aria-label="Bar chart comparing total boosted, unboosted, and unweighted TDH over time."
+        />
         {/* <Line data={data} /> */}
       </>
     );
@@ -187,7 +192,12 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Bar
+          data={data}
+          options={GRAPH_OPTIONS}
+          role="img"
+          aria-label="Bar chart comparing daily net boosted, unboosted, and unweighted TDH changes."
+        />
         {/* <Line data={data} /> */}
       </>
     );
@@ -226,7 +236,12 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Bar
+          data={data}
+          options={GRAPH_OPTIONS}
+          role="img"
+          aria-label="Bar chart comparing daily created boosted, unboosted, and unweighted TDH."
+        />
         {/* <Line data={data} /> */}
       </>
     );
@@ -265,7 +280,12 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Bar
+          data={data}
+          options={GRAPH_OPTIONS}
+          role="img"
+          aria-label="Bar chart comparing daily destroyed boosted, unboosted, and unweighted TDH."
+        />
         {/* <Line data={data} /> */}
       </>
     );
@@ -324,26 +344,58 @@ export default function CommunityStats() {
               )}
             </div>
           </section>
-          <section className="tw-py-4">
-            <h2 className="tw-mb-0 tw-text-white">Total TDH</h2>
+          <section
+            className="tw-py-4"
+            aria-labelledby="network-stats-total-tdh-heading"
+          >
+            <h2
+              id="network-stats-total-tdh-heading"
+              className="tw-mb-0 tw-text-white"
+            >
+              Total TDH
+            </h2>
             <div className="tw-flex tw-justify-center tw-pt-4">
               {printTotalTDH()}
             </div>
           </section>
-          <section className="tw-py-4">
-            <h2 className="tw-mb-0 tw-text-white">Net TDH Daily Change</h2>
+          <section
+            className="tw-py-4"
+            aria-labelledby="network-stats-net-tdh-heading"
+          >
+            <h2
+              id="network-stats-net-tdh-heading"
+              className="tw-mb-0 tw-text-white"
+            >
+              Net TDH Daily Change
+            </h2>
             <div className="tw-flex tw-justify-center tw-pt-4">
               {printNetTDH()}
             </div>
           </section>
-          <section className="tw-py-4">
-            <h2 className="tw-mb-0 tw-text-white">Created TDH Daily Change</h2>
+          <section
+            className="tw-py-4"
+            aria-labelledby="network-stats-created-tdh-heading"
+          >
+            <h2
+              id="network-stats-created-tdh-heading"
+              className="tw-mb-0 tw-text-white"
+            >
+              Created TDH Daily Change
+            </h2>
             <div className="tw-flex tw-justify-center tw-pt-4">
               {printCreatedTDH()}
             </div>
           </section>
-          <section className="tw-py-4">
-            <h2 className="tw-mb-0 tw-text-white">Destroyed TDH Change</h2>
+          <section
+            className="tw-py-4"
+            aria-labelledby="network-stats-destroyed-tdh-heading"
+          >
+            <h2
+              id="network-stats-destroyed-tdh-heading"
+              className="tw-mb-0 tw-text-white"
+            >
+              Destroyed TDH Change
+            </h2>
             <div className="tw-flex tw-justify-center tw-pt-4">
               {printDestroyedTDH()}
             </div>

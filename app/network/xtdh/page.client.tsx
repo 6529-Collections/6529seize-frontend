@@ -15,9 +15,9 @@ export default function XTDHMainPage() {
         to include other NFT holders to 6529 ecosystem and offer them all the
         benefits of TDH.
       </p>
-      <p className="tw-mt-2">
-        I tracks:
-        <ol>
+      <div className="tw-mt-2">
+        <p>It tracks:</p>
+        <ol className="tw-mt-2">
           <li>How much your memes produce</li>
           <li>
             How much xTDH you <b>receive</b> from grants on tokens you own
@@ -26,7 +26,7 @@ export default function XTDHMainPage() {
             How much xTDH you’ve <b>given</b> away via grants
           </li>
         </ol>
-      </p>
+      </div>
       <p className="tw-mt-2">
         Your total xTDH balance increases every day at midnight based on these
         rules.
@@ -38,9 +38,9 @@ export default function XTDHMainPage() {
           Every meme you hold that produces TDH also produces xTDH. So every
           midnight you produce TDH you also produce xTDH following this formula:
         </p>
-        <p className="tw-pt-3">
-          <pre>produced_xTDH_today = (TDH gained today) × xTDH_coefficient</pre>
-        </p>
+        <pre className="tw-pt-3">
+          produced_xTDH_today = (TDH gained today) × xTDH_coefficient
+        </pre>
         <p className="tw-mt-2">
           xTDH_coefficient is currently set to 0.1, but is subject to change in
           the future.
@@ -56,16 +56,16 @@ export default function XTDHMainPage() {
           every day.
         </p>
         <h2>How much do you receive?</h2>
-        <p className="tw-mt-2">
-          Each grant has:
-          <ol>
+        <div className="tw-mt-2">
+          <p>Each grant has:</p>
+          <ol className="tw-mt-2">
             <li>rate</li>
             <li>denominator</li>
           </ol>
-        </p>
-        <p className="tw-mt-2">
-          Denominator can be configured as:
-          <ol>
+        </div>
+        <div className="tw-mt-2">
+          <p>Denominator can be configured as:</p>
+          <ol className="tw-mt-2">
             <li>
               Full - grant every token in the collection (in which case
               denominator is total supply)
@@ -75,11 +75,11 @@ export default function XTDHMainPage() {
               case denominator is number of those tokens)
             </li>
           </ol>
-        </p>
+        </div>
         <p className="tw-mt-2">Each token receives:</p>
-        <p className="tw-pt-3">
-          <pre>grant_amount_per_token = rate / denominator</pre>
-        </p>
+        <pre className="tw-pt-3">
+          grant_amount_per_token = rate / denominator
+        </pre>
         <p className="tw-mt-2">
           You receive this amount **only for the time you actually owned the
           token**, and only while the grant was active.
@@ -108,30 +108,26 @@ export default function XTDHMainPage() {
           can give away it all or some part of it. The total amount you are
           giving away is calculated like this:
         </p>
-        <p className="tw-mt-2">
-          <ol>
-            <li>
-              sum up all grant rates which have been active for at least 24h
-            </li>
-            <li>
-              sum up all portions of grantees who have been holding the token
-              less than 24h
-            </li>
-            <li>subtract the latter from former</li>
-          </ol>
-        </p>
+        <ol className="tw-mt-2">
+          <li>
+            sum up all grant rates which have been active for at least 24h
+          </li>
+          <li>
+            sum up all portions of grantees who have been holding the token less
+            than 24h
+          </li>
+          <li>subtract the latter from former</li>
+        </ol>
       </div>
       <div className="tw-mt-8 tw-space-y-2">
         <h2>Your daily xTDH rate</h2>
-        <p className="tw-mt-2">
-          <pre>
-            xtdh_rate = produced_today - granted_out_today + received_today
-          </pre>
-        </p>
+        <pre className="tw-mt-2">
+          xtdh_rate = produced_today - granted_out_today + received_today
+        </pre>
         <p className="tw-mt-2">... and ...</p>
-        <p className="tw-mt-2">
-          <pre>xtdh_total = xtdh_total_previous + xtdh_rate</pre>
-        </p>
+        <pre className="tw-mt-2">
+          xtdh_total = xtdh_total_previous + xtdh_rate
+        </pre>
         <h2>Example:</h2>
         <p className="tw-mt-2">If today you:</p>
         <ol>
@@ -140,9 +136,7 @@ export default function XTDHMainPage() {
           <li>receive 3 xTDH from grants on tokens you own</li>
         </ol>
         <p className="tw-mt-2">Then:</p>
-        <p className="tw-mt-2">
-          <pre>xtdh_rate = 20 - 5 + 3 = 18 xTDH</pre>
-        </p>
+        <pre className="tw-mt-2">xtdh_rate = 20 - 5 + 3 = 18 xTDH</pre>
       </div>
       <div className="tw-mt-8 tw-space-y-2">
         <h2>Can xTDH ever get lost?</h2>

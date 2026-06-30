@@ -19,7 +19,7 @@ import { useAuth } from "../auth/Auth";
 
 interface Prenode {
   ip: string;
-  domain: string;
+  domain: string | null;
   city: string;
   country: string;
   tdh_sync: boolean;
@@ -73,18 +73,50 @@ export default function PrenodesStatus() {
     }
     return (
       <div className="tw-flex tw-items-center tw-gap-2 tw-pt-1">
-        <FontAwesomeIcon icon={faLocationDot} height={20} color="" />
+        <FontAwesomeIcon icon={faLocationDot} height={20} aria-hidden="true" />
         {location}
       </div>
     );
   }
 
-  function printStatusIcon(icon: IconProp, status: string) {
-    return <FontAwesomeIcon icon={icon} className={status} height={22} />;
+  function printStatusIcon(icon: IconProp, status: string, label: string) {
+    return (
+      <span aria-label={label} role="img">
+        <FontAwesomeIcon
+          icon={icon}
+          className={status}
+          height={22}
+          aria-hidden="true"
+        />
+      </span>
+    );
+  }
+
+  function getPingStatusLabel(status: Prenode["ping_status"]) {
+    switch (status) {
+      case "green":
+        return "Ping status: healthy";
+      case "orange":
+        return "Ping status: warning";
+      case "red":
+        return "Ping status: failing";
+    }
+  }
+
+  function getSyncStatusLabel(name: string, isSynced: boolean, known: boolean) {
+    if (!known) {
+      return `${name}: unknown`;
+    }
+
+    return isSynced ? `${name}: synced` : `${name}: not synced`;
   }
 
   function printPrenode(prenode: Prenode) {
-    const prenodeHost = prenode.domain.length > 0 ? prenode.domain : prenode.ip;
+    const prenodeHost =
+      prenode.domain !== null && prenode.domain.length > 0
+        ? prenode.domain
+        : prenode.ip;
+    const prenodeKey = `${prenode.ip}-${prenode.domain ?? ""}`;
     let href = `https://${prenodeHost}/oracle`;
     if (connectedProfile?.primary_wallet) {
       href += `/address/${connectedProfile.primary_wallet}`;
@@ -114,7 +146,7 @@ export default function PrenodesStatus() {
     }
 
     return (
-      <div className="tw-w-full" key={`${prenode.ip}-${prenode.domain}`}>
+      <div className="tw-w-full" key={prenodeKey}>
         <a
           href={href}
           target="_blank"
@@ -158,19 +190,45 @@ export default function PrenodesStatus() {
                     <th scope="row" className="tw-text-left tw-font-normal">
                       Ping Status
                     </th>
-                    <td>{printStatusIcon(updatedAtIcon, updatedAtStatus!)}</td>
+                    <td>
+                      {printStatusIcon(
+                        updatedAtIcon,
+                        updatedAtStatus!,
+                        getPingStatusLabel(prenode.ping_status)
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <th scope="row" className="tw-text-left tw-font-normal">
                       TDH Status
                     </th>
-                    <td>{printStatusIcon(tdhIcon, tdhStatus!)}</td>
+                    <td>
+                      {printStatusIcon(
+                        tdhIcon,
+                        tdhStatus!,
+                        getSyncStatusLabel(
+                          "TDH status",
+                          prenode.tdh_sync,
+                          prenode.ping_status === "green"
+                        )
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <th scope="row" className="tw-text-left tw-font-normal">
                       TDH Block Status
                     </th>
-                    <td>{printStatusIcon(blockIcon, blockStatus!)}</td>
+                    <td>
+                      {printStatusIcon(
+                        blockIcon,
+                        blockStatus!,
+                        getSyncStatusLabel(
+                          "TDH block status",
+                          prenode.block_sync,
+                          prenode.ping_status === "green"
+                        )
+                      )}
+                    </td>
                   </tr>
                 </tbody>
               </table>
