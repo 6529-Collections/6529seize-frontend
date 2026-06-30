@@ -114,6 +114,37 @@ describe("instrumentation-client", () => {
     ],
   });
 
+  const createAppKitCoinbaseBreadcrumbs = () => [
+    {
+      category: "console",
+      level: "debug",
+      message: "[AppKitInitialization] Initializing AppKit adapter (web) with",
+      data: {
+        arguments: [
+          "[AppKitInitialization] Initializing AppKit adapter (web) with",
+          0,
+          "AppWallets",
+        ],
+      },
+    },
+    {
+      category: "console",
+      level: "debug",
+      message: "AppKit config",
+      data: {
+        arguments: [
+          {
+            enableCoinbase: true,
+            featuredWalletIds: ["metamask", "walletConnect"],
+            features: {
+              connectMethodsOrder: ["wallet"],
+            },
+          },
+        ],
+      },
+    },
+  ];
+
   beforeEach(() => {
     jest.resetModules();
     mockInit.mockReset();
@@ -235,6 +266,61 @@ describe("instrumentation-client", () => {
     });
 
     expect(result).toBeNull();
+  });
+
+  it("drops no-frame AppKit Coinbase websocket 1006 errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps app-owned websocket 1006 errors with AppKit Coinbase breadcrumbs", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "services/websocket/WebSocketProvider.tsx",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops Sentry route parameterization cyclic JSON errors", () => {

@@ -43,6 +43,10 @@ export type InstalledReadonlyMutationGuard = {
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const STAGING_HOSTNAME = "staging.6529.io";
 const PRODUCTION_HOSTNAMES = new Set(["6529.io", "www.6529.io"]);
+const FIRST_PARTY_READONLY_ROUTE_HANDLER_PATHS = new Set([
+  "/api/open-graph",
+  "/api/twitter/preview",
+]);
 
 const IGNORED_EXTERNAL_MUTATION_HOSTS = [
   /(^|\.)mixpanel\.com$/i,
@@ -212,7 +216,7 @@ function isFirstPartyReadonlyRouteHandler(
   return (
     method === "POST" &&
     isSameOrigin(url, baseURL) &&
-    url.pathname === "/api/open-graph"
+    FIRST_PARTY_READONLY_ROUTE_HANDLER_PATHS.has(url.pathname)
   );
 }
 
