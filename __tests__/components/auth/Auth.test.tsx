@@ -338,9 +338,13 @@ function SessionUpgradeProbe() {
       <button
         type="button"
         onClick={() =>
-          void ensureActiveSessionV2WebSession?.().then((success) => {
-            setVerifyResult(String(success));
-          })
+          void ensureActiveSessionV2WebSession?.()
+            .then((success) => {
+              setVerifyResult(String(success));
+            })
+            .catch(() => {
+              setVerifyResult("error");
+            })
         }
         data-testid="verify-session"
       >
@@ -1689,8 +1693,9 @@ describe("Auth component", () => {
         >;
       mockGetAuthJwt.mockReturnValue("v2-jwt");
       mockGetWalletAddress.mockReturnValue(activeStoredAddress);
-      mockHasActiveSessionV2Auth.mockImplementation(({ address }) =>
-        address.toLowerCase() === activeStoredAddress.toLowerCase()
+      mockHasActiveSessionV2Auth.mockImplementation(
+        ({ address }) =>
+          address.toLowerCase() === activeStoredAddress.toLowerCase()
       );
       mockVerifyActiveSessionV2WebSession.mockResolvedValue(true);
 
@@ -1767,7 +1772,7 @@ describe("Auth component", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("session-verify-result")).toHaveTextContent(
-          "false"
+          "error"
         );
       });
       expect(screen.getByTestId("session-upgrade-required")).toHaveTextContent(

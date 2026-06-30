@@ -78,15 +78,16 @@ function useEnhancedWavesListCore(
   wavesData: WavesDataSource,
   options: UseEnhancedWavesListCoreOptions = DEFAULT_OPTIONS
 ) {
-  const { newDropsCounts, resetAllWavesNewDropsCount } = useNewDropCounter(
-    activeWaveId,
-    wavesData.waves,
-    wavesData.refetchAllWaves,
-    {
-      otherListWaveIds: options.otherListWaveIds,
-      unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
-    }
-  );
+  const { newDropsCounts, resetAllWavesNewDropsCount, resetWaveNewDropsCount } =
+    useNewDropCounter(
+      activeWaveId,
+      wavesData.waves,
+      wavesData.refetchAllWaves,
+      {
+        otherListWaveIds: options.otherListWaveIds,
+        unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
+      }
+    );
 
   const [clearedUnreadWaveIds, setClearedUnreadWaveIds] = useState<Set<string>>(
     new Set()
@@ -127,6 +128,14 @@ function useEnhancedWavesListCore(
     []
   );
 
+  const markWaveRead = useCallback(
+    (waveId: string) => {
+      resetWaveNewDropsCount(waveId);
+      resetWaveUnreadCount(waveId);
+    },
+    [resetWaveNewDropsCount, resetWaveUnreadCount]
+  );
+
   useEffect(() => {
     if (!activeWaveId) return;
     setForcedUnreadCounts((prev) => {
@@ -157,6 +166,12 @@ function useEnhancedWavesListCore(
         latestDropTimestamp: sidebarActivityTimestamp,
         firstUnreadSerialNo: wsData?.firstUnreadSerialNo ?? null,
       };
+      const isWsDataCoveredByApi =
+        hasNewWsDrops &&
+        wsData?.latestDropTimestamp !== null &&
+        wsData?.latestDropTimestamp !== undefined &&
+        wave.latestDropTimestamp !== null &&
+        wave.latestDropTimestamp >= wsData.latestDropTimestamp;
       const isCleared = clearedUnreadWaveIds.has(wave.id) && !hasNewWsDrops;
       const forcedCount = forcedUnreadCounts[wave.id];
       const apiFirstUnread = wave.firstUnreadDropSerialNo ?? null;
@@ -180,6 +195,10 @@ function useEnhancedWavesListCore(
         unreadDropsCount = forcedCount + (wsData?.count ?? 0);
       } else if (wasCleared && hasNewWsDrops) {
         unreadDropsCount = wsData?.count ?? 0;
+      } else if (hasNewWsDrops && isWsDataCoveredByApi) {
+        // The API can already include the same websocket drop after a refetch.
+        // Use the larger count instead of adding both sources and double-counting.
+        unreadDropsCount = Math.max(wave.unreadDropsCount, wsData?.count ?? 0);
       } else if (hasNewWsDrops) {
         unreadDropsCount = wave.unreadDropsCount + (wsData?.count ?? 0);
       } else {
@@ -270,6 +289,7 @@ function useEnhancedWavesListCore(
       prefetchSubwavesForParent: wavesData.prefetchSubwavesForParent,
       loadingSubwaveParentIds: wavesData.loadingSubwaveParentIds ?? [],
       resetAllWavesNewDropsCount,
+      markWaveRead,
       restoreWaveUnreadCount,
     }),
     [
@@ -285,6 +305,7 @@ function useEnhancedWavesListCore(
       wavesData.prefetchSubwavesForParent,
       wavesData.loadingSubwaveParentIds,
       resetAllWavesNewDropsCount,
+      markWaveRead,
       restoreWaveUnreadCount,
       options.supportsPinning,
     ]

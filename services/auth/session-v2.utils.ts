@@ -276,7 +276,9 @@ export async function verifyActiveSessionV2WebSession({
     return false;
   }
 
-  return true;
+  // Share creation needs the refreshed bearer token immediately. If local auth
+  // cannot persist, fail closed instead of minting a share with stale auth.
+  return await persistSessionResponse(refreshedSession);
 }
 
 export async function createConnectionShare({

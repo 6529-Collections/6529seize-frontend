@@ -47,6 +47,59 @@
       ]
     },
     {
+      "id": "about.index",
+      "kind": "route",
+      "title": "About 6529 index",
+      "aliases": [
+        "about",
+        "about 6529",
+        "about pages",
+        "about index",
+        "contents",
+        "about navigation"
+      ],
+      "keywords": [
+        "about",
+        "contents",
+        "navigation",
+        "collections",
+        "delegation",
+        "resources",
+        "community",
+        "legal",
+        "tdh",
+        "xtdh",
+        "network",
+        "health",
+        "definitions",
+        "levels"
+      ],
+      "facts": [
+        "The About index page lives at /about.",
+        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links that keep their canonical /network paths.",
+        "Use the About index when users want to browse all About pages or find the right policy, collection, delegation, resource, community, or technical page."
+      ],
+      "canonical_path": "/about",
+      "related_paths": [
+        "/about/the-memes",
+        "/about/faq",
+        "/about/tech",
+        "/about/terms-of-service",
+        "/network/tdh",
+        "/network/xtdh",
+        "/network/health",
+        "/network/definitions",
+        "/network/levels",
+        "/network/health/network-tdh"
+      ],
+      "tags": ["about", "navigation", "getting-started"],
+      "source_refs": [
+        "app/about/page.tsx",
+        "components/about/AboutIndex.tsx",
+        "components/about/about.routes.ts"
+      ]
+    },
+    {
       "id": "about.faq",
       "kind": "route",
       "title": "6529 FAQ",
@@ -281,7 +334,11 @@
         "Gradient NFTs are treated differently: they have not been released under CC0, and the page warns against uses that could confuse people into thinking a product or service is offered by 6529."
       ],
       "canonical_path": "/about/license",
-      "related_paths": ["/about/the-memes", "/about/meme-lab", "/about/6529-gradient"],
+      "related_paths": [
+        "/about/the-memes",
+        "/about/meme-lab",
+        "/about/6529-gradient"
+      ],
       "tags": ["about", "license", "cc0"],
       "source_refs": ["components/about/AboutLicense.tsx"]
     },
@@ -316,7 +373,14 @@
         "delegation about page",
         "where do i start delegation"
       ],
-      "keywords": ["nft", "delegation", "delegate", "wallet", "center", "about"],
+      "keywords": [
+        "nft",
+        "delegation",
+        "delegate",
+        "wallet",
+        "center",
+        "about"
+      ],
       "facts": [
         "The NFT Delegation about page lives at /about/nft-delegation.",
         "The page sends users to the Delegation Center to get started with delegation."
@@ -390,10 +454,7 @@
         "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
       ],
       "canonical_path": "/about/tech",
-      "related_paths": [
-        "/about/tech/wallet-authentication",
-        "/about/faq"
-      ],
+      "related_paths": ["/about/tech/wallet-authentication", "/about/faq"],
       "tags": ["about", "tech", "reports"],
       "source_refs": ["components/about/tech/AboutTech.tsx"]
     },
@@ -453,6 +514,61 @@
       "related_paths": ["/access"],
       "tags": ["auth", "wallet", "profiles"],
       "source_refs": ["ops/docs/navigation/feature-wallet-account-controls.md"]
+    },
+    {
+      "id": "wallet.connection-sharing",
+      "kind": "workflow",
+      "title": "Connection sharing",
+      "link_label": "Connection sharing",
+      "aliases": [
+        "share connection",
+        "share my connection",
+        "how to share connection",
+        "how do i share connection",
+        "connection sharing",
+        "share login",
+        "share session",
+        "share wallet connection",
+        "connect mobile with qr",
+        "mobile qr connection",
+        "connect desktop app",
+        "share current page",
+        "send page to mobile",
+        "send page to desktop"
+      ],
+      "keywords": [
+        "share",
+        "connection",
+        "sharing",
+        "session",
+        "login",
+        "wallet",
+        "profile",
+        "menu",
+        "qr",
+        "mobile",
+        "desktop",
+        "deep",
+        "link",
+        "current",
+        "page"
+      ],
+      "facts": [
+        "Use the profile or account menu in the header to open the Share menu.",
+        "Choose Connection when you want to share your authenticated connection to another 6529 client.",
+        "Connection sharing can show a QR code for 6529 Mobile or a deep link for 6529 Desktop.",
+        "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
+        "If the Share menu says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
+        "The same Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection."
+      ],
+      "canonical_path": "/",
+      "suppress_source_links": true,
+      "tags": ["auth", "wallet", "navigation", "mobile", "desktop"],
+      "source_refs": [
+        "components/header/share/HeaderShare.tsx",
+        "ops/docs/navigation/feature-share-modal.md",
+        "ops/contracts/wallet-auth-session-v2.md"
+      ]
     },
     {
       "id": "profiles.overview",
@@ -736,6 +852,285 @@
       ],
       "tags": ["network", "glossary"],
       "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.cards-collected",
+      "kind": "glossary",
+      "title": "Cards Collected",
+      "aliases": [
+        "cards collected",
+        "card collected",
+        "what are cards collected",
+        "what is cards collected",
+        "total cards",
+        "total meme cards"
+      ],
+      "keywords": ["cards", "collected", "total", "memes", "metric"],
+      "facts": [
+        "Cards Collected is the total number of The Memes NFTs owned.",
+        "The Network Definitions page lists Cards Collected as a core Network metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "cards"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.unique-memes",
+      "kind": "glossary",
+      "title": "Unique Memes",
+      "aliases": [
+        "unique memes",
+        "unique meme",
+        "what are unique memes",
+        "what is unique memes",
+        "unique meme cards",
+        "unique cards"
+      ],
+      "keywords": ["unique", "memes", "cards", "metric"],
+      "facts": [
+        "Unique Memes is the total number of unique Meme NFTs owned.",
+        "Use Unique Memes when comparing breadth of holdings rather than total card count."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "memes"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.meme-sets",
+      "kind": "glossary",
+      "title": "Meme Sets",
+      "aliases": [
+        "meme set",
+        "meme sets",
+        "what is meme set",
+        "what are meme sets",
+        "complete meme set",
+        "complete meme sets",
+        "season set",
+        "season sets"
+      ],
+      "keywords": ["meme", "memes", "set", "sets", "complete", "szn", "season"],
+      "facts": [
+        "Meme Sets means the number of complete sets of The Memes owned, across all SZNs or for a specific SZN.",
+        "The Network Definitions page lists Meme Sets as a core Network metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/tdh/historic-boosts"],
+      "tags": ["network", "glossary", "concept", "memes", "sets"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.meme-sets-minus",
+      "kind": "glossary",
+      "title": "Meme Sets -1 / -2",
+      "aliases": [
+        "meme sets -1",
+        "meme set -1",
+        "meme sets minus 1",
+        "meme set minus one",
+        "meme sets -2",
+        "meme set -2",
+        "meme sets minus 2",
+        "meme set minus two",
+        "sets missing one card",
+        "sets missing two cards"
+      ],
+      "keywords": [
+        "meme",
+        "memes",
+        "set",
+        "sets",
+        "minus",
+        "missing",
+        "one",
+        "two",
+        "cards"
+      ],
+      "facts": [
+        "Meme Sets -1 and Meme Sets -2 are complete Meme sets missing 1 or 2 cards respectively.",
+        "Use this definition when users ask about near-complete Meme sets."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/tdh/historic-boosts"],
+      "tags": ["network", "glossary", "concept", "memes", "sets"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.genesis-sets",
+      "kind": "glossary",
+      "title": "Genesis Sets",
+      "aliases": [
+        "genesis set",
+        "genesis sets",
+        "what is genesis set",
+        "what are genesis sets",
+        "what is a genesis set",
+        "what are genesis set",
+        "genesis meme set",
+        "genesis meme sets"
+      ],
+      "keywords": ["genesis", "set", "sets", "memes", "first", "three", "tdh"],
+      "facts": [
+        "Genesis Sets are complete sets of the first three Meme NFTs.",
+        "Genesis Sets appear in Network Definitions and are also referenced by TDH Category B boost rules."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/tdh/historic-boosts"],
+      "tags": ["network", "glossary", "concept", "memes", "tdh"],
+      "source_refs": [
+        "ops/docs/network/feature-network-definitions.md",
+        "ops/docs/network/feature-tdh-boost-rules.md"
+      ]
+    },
+    {
+      "id": "network.definitions.purchases-sales",
+      "kind": "glossary",
+      "title": "Purchases and Sales",
+      "aliases": [
+        "purchases",
+        "sales",
+        "purchases sales",
+        "purchase count",
+        "sales count",
+        "purchases eth",
+        "sales eth",
+        "eth spent",
+        "eth received"
+      ],
+      "keywords": [
+        "purchases",
+        "purchase",
+        "sales",
+        "sale",
+        "bought",
+        "sold",
+        "eth",
+        "memes",
+        "gradients"
+      ],
+      "facts": [
+        "Purchases and Sales count bought and sold NFTs for Memes or Gradients.",
+        "Purchases (ETH) and Sales (ETH) show ETH spent or received for those NFTs."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/activity", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "activity"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.transfers",
+      "kind": "glossary",
+      "title": "Transfers In / Out",
+      "aliases": [
+        "transfers",
+        "transfer in",
+        "transfer out",
+        "transfers in",
+        "transfers out",
+        "nfts transferred",
+        "moved in",
+        "moved out"
+      ],
+      "keywords": ["transfers", "transfer", "in", "out", "nfts", "moved"],
+      "facts": [
+        "Transfers In and Transfers Out are NFTs moved into or out of an address.",
+        "The Network Definitions page lists transfers as a core Network activity metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/activity", "/feed"],
+      "tags": ["network", "glossary", "concept", "activity"],
+      "source_refs": ["ops/docs/network/feature-network-definitions.md"]
+    },
+    {
+      "id": "network.definitions.tdh-unweighted",
+      "kind": "glossary",
+      "title": "TDH (unweighted)",
+      "aliases": [
+        "tdh unweighted",
+        "unweighted tdh",
+        "tdh raw",
+        "raw tdh",
+        "tdh__raw",
+        "what is tdh unweighted",
+        "what is unweighted tdh"
+      ],
+      "keywords": ["tdh", "unweighted", "raw", "days", "held", "daily"],
+      "facts": [
+        "TDH (unweighted) is Total Days Held summed daily at 00:00 UTC.",
+        "In unweighted TDH, each NFT contributes one unit per day held before edition weighting or boosters."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "tdh"],
+      "source_refs": [
+        "ops/docs/network/feature-network-definitions.md",
+        "ops/docs/network/feature-tdh-boost-rules.md"
+      ]
+    },
+    {
+      "id": "network.definitions.tdh-unboosted",
+      "kind": "glossary",
+      "title": "TDH (unboosted)",
+      "aliases": [
+        "tdh unboosted",
+        "unboosted tdh",
+        "weighted tdh",
+        "edition weighted tdh",
+        "what is tdh unboosted",
+        "what is unboosted tdh"
+      ],
+      "keywords": [
+        "tdh",
+        "unboosted",
+        "weighted",
+        "edition",
+        "hodl",
+        "firstgm",
+        "baseline"
+      ],
+      "facts": [
+        "TDH (unboosted) is TDH weighted by edition size before boosters are applied.",
+        "FirstGM with edition size 3,941 is the 1.0 baseline for edition weighting on the TDH page."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": ["/network/tdh", "/network/health/network-tdh"],
+      "tags": ["network", "glossary", "concept", "tdh"],
+      "source_refs": [
+        "ops/docs/network/feature-network-definitions.md",
+        "ops/docs/network/feature-tdh-boost-rules.md"
+      ]
+    },
+    {
+      "id": "network.tdh.nakamoto-set",
+      "kind": "glossary",
+      "title": "Nakamoto Set",
+      "aliases": [
+        "nakamoto set",
+        "nakamoto sets",
+        "what is nakamoto set",
+        "what are nakamoto sets",
+        "nakamoto tdh boost",
+        "nakamoto boost"
+      ],
+      "keywords": ["nakamoto", "set", "sets", "tdh", "boost", "szn1", "category"],
+      "facts": [
+        "Nakamoto Set is a SZN1 Category B TDH boost term.",
+        "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
+        "The current Nakamoto Set boost shown on the TDH page is 1.01x."
+      ],
+      "canonical_path": "/network/tdh",
+      "related_paths": [
+        "/network/definitions",
+        "/network/tdh/historic-boosts",
+        "/about/nakamoto-threshold"
+      ],
+      "tags": ["network", "glossary", "concept", "tdh", "boost"],
+      "source_refs": [
+        "app/network/tdh/page.client.tsx",
+        "ops/docs/network/feature-tdh-boost-rules.md"
+      ]
     },
     {
       "id": "network.levels",
@@ -1494,9 +1889,16 @@
         "check my wallet",
         "check wallet architecture",
         "check my wallet architecture",
+        "check architecture",
+        "check my architecture",
+        "check wallet setup",
+        "check my wallet setup",
+        "how can i check my architecture",
         "view delegations",
         "view consolidations",
         "view delegations and consolidations",
+        "view wallet architecture",
+        "view my architecture",
         "check delegations",
         "check consolidations",
         "active delegations",
@@ -1634,17 +2036,14 @@
       "title": "Wallet Architecture",
       "aliases": [
         "wallet architecture",
-        "4 wallet architecture",
-        "four wallet architecture",
-        "4 wallet consolidation",
-        "four wallet consolidation",
-        "4 wallet setup",
-        "four wallet setup",
-        "how do i set up 4 wallet consolidation",
-        "set up 4 wallet consolidation",
         "three address protocol",
+        "architecture",
         "what is tap",
         "tap wallet architecture",
+        "wallet roles",
+        "wallet security architecture",
+        "how does wallet architecture work",
+        "what is wallet architecture",
         "vault wallet",
         "transaction wallet",
         "minting wallet",
@@ -1671,7 +2070,8 @@
         "The recommended architecture separates a vault wallet for long-term NFT storage, a transaction wallet for trusted marketplace activity, and a minting wallet for unknown or higher-risk minting activity.",
         "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
         "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet.",
-        "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics."
+        "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics.",
+        "For consolidation metrics, 6529 currently recognizes up to 3 addresses as one consolidation group."
       ],
       "canonical_path": "/delegation/wallet-architecture",
       "related_paths": [
@@ -1695,6 +2095,15 @@
         "consolidation use cases",
         "4 wallet consolidation",
         "four wallet consolidation",
+        "4 wallet consolidation limit",
+        "four wallet consolidation limit",
+        "how do i consolidate 4 wallets",
+        "how do i consolidate four wallets",
+        "more than 3 wallet consolidation",
+        "more than three wallet consolidation",
+        "over 3 wallet consolidation",
+        "over three wallet consolidation",
+        "too many wallets consolidation",
         "three wallet consolidation",
         "two wallet consolidation",
         "compromised wallet consolidation",
@@ -1716,7 +2125,8 @@
       ],
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
-        "The docs cover two-address and three-address patterns, plus a four-address scenario where an old hot wallet was compromised and cards moved through temporary, vault, and new minting wallets.",
+        "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
+        "The docs cover two-address and three-address patterns, plus a four-address compromised-wallet scenario where the user chooses which three-address set should count.",
         "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
       ],
       "canonical_path": "/delegation/consolidation-use-cases",
@@ -2340,12 +2750,7 @@
       "id": "nextgen.pebbles",
       "kind": "route",
       "title": "Pebbles",
-      "aliases": [
-        "pebbles",
-        "pebble",
-        "nextgen pebbles",
-        "pebbles collection"
-      ],
+      "aliases": ["pebbles", "pebble", "nextgen pebbles", "pebbles collection"],
       "keywords": [
         "pebbles",
         "pebble",
@@ -4813,7 +5218,12 @@
       "id": "gradients.collection",
       "kind": "route",
       "title": "6529 Gradient collection",
-      "aliases": ["6529 gradient", "gradients", "gradient", "gradient collection"],
+      "aliases": [
+        "6529 gradient",
+        "gradients",
+        "gradient",
+        "gradient collection"
+      ],
       "keywords": ["gradient", "gradients", "collection", "nft"],
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",

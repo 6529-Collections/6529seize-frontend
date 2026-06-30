@@ -20,6 +20,11 @@ jest.mock("next/navigation", () => ({
   usePathname: () => "/network",
 }));
 
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  useCookieConsent: () => ({ country: "US" }),
+  useOptionalCookieConsent: () => ({ country: "US" }),
+}));
+
 // ✅ Mock Groups component
 jest.mock("@/components/groups/page/Groups", () => ({
   __esModule: true,

@@ -41,7 +41,8 @@ export interface SidebarSection {
     | undefined;
 }
 
-interface SidebarNavItem {
+export interface SidebarNavItem {
   name: string;
   href: string;
+  activatesSection?: boolean | undefined;
 }

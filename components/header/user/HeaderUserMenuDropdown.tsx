@@ -41,7 +41,7 @@ export default function HeaderUserMenuDropdown({
     connectedAccounts,
     connectedAccountUnreadNotifications,
     canAddConnectedAccount,
-    seizeConnect,
+    seizeConnectFresh,
     seizeAddConnectedAccount,
     seizeDisconnect,
     seizeDisconnectAndLogout,
@@ -281,7 +281,7 @@ export default function HeaderUserMenuDropdown({
                       <button
                         onClick={() => {
                           void runMenuAction({
-                            action: seizeConnect,
+                            action: seizeConnectFresh,
                             pendingKey: "connect",
                             errorMessage:
                               "Failed to open wallet connection. Please try again.",

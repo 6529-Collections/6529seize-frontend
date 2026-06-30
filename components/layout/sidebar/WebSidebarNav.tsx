@@ -27,6 +27,7 @@ import React, {
 import WebSidebarExpandable from "./nav/WebSidebarExpandable";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
+import { isSidebarNavItemActive } from "./nav/sidebarActive";
 
 interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
@@ -78,10 +79,12 @@ const WebSidebarNav = React.forwardRef<
   const activeSectionKey = useMemo(() => {
     if (!pathname) return null;
     for (const section of sections) {
-      const inItems = section.items.some((item) => pathname === item.href);
+      const inItems = section.items.some((item) =>
+        isSidebarNavItemActive(item, pathname)
+      );
       const inSubsections =
         section.subsections?.some((sub) =>
-          sub.items.some((item) => pathname === item.href)
+          sub.items.some((item) => isSidebarNavItemActive(item, pathname))
         ) ?? false;
       if (inItems || inSubsections) return section.key;
     }
