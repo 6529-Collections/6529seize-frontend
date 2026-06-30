@@ -103,9 +103,8 @@ describe("fetchTwitterPreview", () => {
       { length: 6 },
       (_value, index) => `https://x.com/user/status/${4000 + index}`
     );
-    const previews = urls.map(
-      (url, index) =>
-        createPreview(url, `${4000 + index}`, `Post ${index + 1}`)
+    const previews = urls.map((url, index) =>
+      createPreview(url, `${4000 + index}`, `Post ${index + 1}`)
     );
     fetchMock
       .mockResolvedValueOnce(createBatchSuccessResponse(previews.slice(0, 5)))
@@ -135,9 +134,8 @@ describe("fetchTwitterPreview", () => {
       { length: 11 },
       (_value, index) => `https://x.com/user/status/${5000 + index}`
     );
-    const previews = urls.map(
-      (url, index) =>
-        createPreview(url, `${5000 + index}`, `Post ${index + 1}`)
+    const previews = urls.map((url, index) =>
+      createPreview(url, `${5000 + index}`, `Post ${index + 1}`)
     );
     const batchResponse = (start: number, end: number) =>
       createBatchSuccessResponse(previews.slice(start, end));
@@ -184,9 +182,7 @@ describe("fetchTwitterPreview", () => {
     const firstUrl = "https://x.com/first/status/1001";
     const secondUrl = "https://twitter.com/second/status/1001";
     const preview = createPreview(firstUrl, "1001", "Shared post");
-    fetchMock.mockResolvedValueOnce(
-      createBatchSuccessResponse([preview])
-    );
+    fetchMock.mockResolvedValueOnce(createBatchSuccessResponse([preview]));
 
     const { fetchTwitterPreview } = await loadApi();
     const first = fetchTwitterPreview(firstUrl);

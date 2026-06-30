@@ -6,6 +6,7 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
@@ -35,11 +36,18 @@ describe("sentry-client-filters", () => {
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
+  const gifPickerTenorUndefinedTagsMessage =
+    __testing.gifPickerTenorUndefinedTagsMessage;
   const reactDomRemoveChildMessage =
     __testing.REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+  };
+  const gifPickerTenorManagerFrame = {
+    filename:
+      "node_modules/.pnpm/gif-picker-react@1.5.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/gif-picker-react/src/managers/TenorManager.ts",
+    function: "<anonymous>",
   };
   const reactDomStaticChunkFrame = (
     functionName: string
@@ -51,7 +59,8 @@ describe("sentry-client-filters", () => {
   const reactDomStaticWebpackFrame = (
     functionName: string
   ): SentryStackFrame => ({
-    filename: "https://6529.io/_next/static/webpack/1234567890abcdef.webpack.js",
+    filename:
+      "https://6529.io/_next/static/webpack/1234567890abcdef.webpack.js",
     function: functionName,
   });
   const metaMaskCircularMetaElementMessage =
@@ -68,110 +77,106 @@ describe("sentry-client-filters", () => {
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
-  ): SentryTransactionSpan =>
-    ({
-      op: "http.client",
-      data: {
-        "http.url": "https://region1.google-analytics.com/g/collect",
-        "http.response.status_code": 0,
-        "url.same_origin": false,
-      },
-      ...overrides,
-    });
+  ): SentryTransactionSpan => ({
+    op: "http.client",
+    data: {
+      "http.url": "https://region1.google-analytics.com/g/collect",
+      "http.response.status_code": 0,
+      "url.same_origin": false,
+    },
+    ...overrides,
+  });
 
   const createTwitterConfigEvent = (
     overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "ReferenceError",
-            value: "Can't find variable: CONFIG",
-            stacktrace: {
-              frames: [
-                { filename: "app:///", abs_path: "app:///" },
-                { filename: "app:///", abs_path: "app:///" },
-              ],
-            },
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "ReferenceError",
+          value: "Can't find variable: CONFIG",
+          stacktrace: {
+            frames: [
+              { filename: "app:///", abs_path: "app:///" },
+              { filename: "app:///", abs_path: "app:///" },
+            ],
           },
-        ],
-      },
-      contexts: {
-        browser: {
-          name: "Twitter",
         },
+      ],
+    },
+    contexts: {
+      browser: {
+        name: "Twitter",
       },
-      tags: {
-        browser: "Twitter 11.62",
-        "browser.name": "Twitter",
-      },
-      ...overrides,
-    });
+    },
+    tags: {
+      browser: "Twitter 11.62",
+      "browser.name": "Twitter",
+    },
+    ...overrides,
+  });
 
   const createInjectedWalletCollisionEvent = (
     overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "TypeError",
-            value:
-              "'set' on proxy: trap returned falsish for property 'tronlinkParams'",
-            stacktrace: {
-              frames: [
-                {
-                  filename: "app:///injected/injected.js",
-                  abs_path: "app:///injected/injected.js",
-                },
-              ],
-            },
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value:
+            "'set' on proxy: trap returned falsish for property 'tronlinkParams'",
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///injected/injected.js",
+                abs_path: "app:///injected/injected.js",
+              },
+            ],
           },
-        ],
-      },
-      breadcrumbs: {
-        values: [
-          {
-            category: "console",
-            message:
-              "[WagmiSetup] Failed to install safe ethereum proxy Error: Cannot set property ethereum of #<Window> which has only a getter",
-            data: {
-              arguments: [
-                "[WagmiSetup] Failed to install safe ethereum proxy Error:",
-                "Cannot set property ethereum of #<Window> which has only a getter",
-              ],
-            },
+        },
+      ],
+    },
+    breadcrumbs: {
+      values: [
+        {
+          category: "console",
+          message:
+            "[WagmiSetup] Failed to install safe ethereum proxy Error: Cannot set property ethereum of #<Window> which has only a getter",
+          data: {
+            arguments: [
+              "[WagmiSetup] Failed to install safe ethereum proxy Error:",
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            ],
           },
-        ],
-      },
-      ...overrides,
-    });
+        },
+      ],
+    },
+    ...overrides,
+  });
 
   const createCoinbaseWalletLinkWebSocketEvent = (
     overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "Error",
-            value: "websocket error 1006:",
-            stacktrace: {
-              frames: [
-                {
-                  filename:
-                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
-                  abs_path:
-                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
-                },
-              ],
-            },
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "websocket error 1006:",
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                abs_path:
+                  "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+              },
+            ],
           },
-        ],
-      },
-      ...overrides,
-    });
+        },
+      ],
+    },
+    ...overrides,
+  });
 
   const createAppKitCoinbaseBreadcrumbs = (): NonNullable<
     SentryClientEvent["breadcrumbs"]
@@ -180,7 +185,8 @@ describe("sentry-client-filters", () => {
       {
         category: "console",
         level: "debug",
-        message: "[AppKitInitialization] Initializing AppKit adapter (web) with",
+        message:
+          "[AppKitInitialization] Initializing AppKit adapter (web) with",
         data: {
           arguments: [
             "[AppKitInitialization] Initializing AppKit adapter (web) with",
@@ -210,149 +216,145 @@ describe("sentry-client-filters", () => {
 
   const createMetaMaskUpdateUrlCircularEvent = (
     overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "TypeError",
-            value: metaMaskCircularMetaElementMessage,
-            stacktrace: {
-              frames: [
-                {
-                  filename: "<anonymous>",
-                  abs_path: "<anonymous>",
-                  function: "JSON.stringify",
-                },
-                {
-                  filename: "<anonymous>",
-                  abs_path: "<anonymous>",
-                  function: "__mm__updateUrl",
-                },
-              ],
-            },
-          },
-        ],
-      },
-      ...overrides,
-    });
-
-  const createInjectedWasmCspUnsafeEvalEvent = (
-    overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "RuntimeError",
-            value: wasmCspUnsafeEvalMessage,
-            stacktrace: {
-              frames: [
-                {
-                  filename: "app:///inject.js",
-                  abs_path: "app:///inject.js",
-                },
-                {
-                  filename: "app:///inject.js",
-                  abs_path: "app:///inject.js",
-                },
-              ],
-            },
-          },
-        ],
-      },
-      breadcrumbs: {
-        values: [
-          {
-            category: "console",
-            message: [
-              "failed to asynchronously prepare wasm: CompileError:",
-              "WebAssembly.instantiate(): Compiling or instantiating",
-              "WebAssembly module violates the following Content Security",
-              "policy directive because 'unsafe-eval' is not an allowed source",
-              "of script",
-            ].join(" "),
-          },
-        ],
-      },
-      ...overrides,
-    });
-
-  const createObservedInjectedWasmCspUnsafeEvalEvent = (
-    overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      exception: {
-        values: [
-          {
-            type: "CompileError",
-            value: observedWasmModuleCspUnsafeEvalMessage,
-            stacktrace: {
-              frames: [
-                {
-                  filename: "///inject.js",
-                  abs_path: "///inject.js",
-                },
-              ],
-            },
-          },
-        ],
-      },
-      ...overrides,
-    });
-
-  const createSentryRouteParameterizationEvent = (
-    overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      transaction: "/waves/:wave",
-      exception: {
-        values: [
-          {
-            type: "TypeError",
-            value: __testing.sentryRouteParameterizationMessage,
-            mechanism: {
-              type: __testing.sentryRouteParameterizationMechanismType,
-              handled: false,
-            },
-            stacktrace: {
-              frames: [
-                {
-                  filename: "[native code]",
-                  function: "stringify",
-                  in_app: true,
-                },
-              ],
-            },
-          },
-        ],
-      },
-      request: {
-        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
-      },
-      contexts: {
-        app: {
-          app_name: "MetaMaskMobile",
-        },
-        browser: {
-          name: "Mobile Safari UI/WKWebView",
-        },
-      },
-      tags: {
-        browser: "Mobile Safari UI/WKWebView",
-        "browser.name": "Mobile Safari UI/WKWebView",
-      },
-      breadcrumbs: [
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
         {
-          category: "navigation",
-          data: {
-            from: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
-            to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          type: "TypeError",
+          value: metaMaskCircularMetaElementMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "<anonymous>",
+                abs_path: "<anonymous>",
+                function: "JSON.stringify",
+              },
+              {
+                filename: "<anonymous>",
+                abs_path: "<anonymous>",
+                function: "__mm__updateUrl",
+              },
+            ],
           },
         },
       ],
-      ...overrides,
-    });
+    },
+    ...overrides,
+  });
+
+  const createInjectedWasmCspUnsafeEvalEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "RuntimeError",
+          value: wasmCspUnsafeEvalMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///inject.js",
+                abs_path: "app:///inject.js",
+              },
+              {
+                filename: "app:///inject.js",
+                abs_path: "app:///inject.js",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: {
+      values: [
+        {
+          category: "console",
+          message: [
+            "failed to asynchronously prepare wasm: CompileError:",
+            "WebAssembly.instantiate(): Compiling or instantiating",
+            "WebAssembly module violates the following Content Security",
+            "policy directive because 'unsafe-eval' is not an allowed source",
+            "of script",
+          ].join(" "),
+        },
+      ],
+    },
+    ...overrides,
+  });
+
+  const createObservedInjectedWasmCspUnsafeEvalEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "CompileError",
+          value: observedWasmModuleCspUnsafeEvalMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "///inject.js",
+                abs_path: "///inject.js",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
+
+  const createSentryRouteParameterizationEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves/:wave",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: __testing.sentryRouteParameterizationMessage,
+          mechanism: {
+            type: __testing.sentryRouteParameterizationMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: "[native code]",
+                function: "stringify",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    request: {
+      url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    contexts: {
+      app: {
+        app_name: "MetaMaskMobile",
+      },
+      browser: {
+        name: "Mobile Safari UI/WKWebView",
+      },
+    },
+    tags: {
+      browser: "Mobile Safari UI/WKWebView",
+      "browser.name": "Mobile Safari UI/WKWebView",
+    },
+    breadcrumbs: [
+      {
+        category: "navigation",
+        data: {
+          from: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        },
+      },
+    ],
+    ...overrides,
+  });
 
   const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -382,34 +384,33 @@ describe("sentry-client-filters", () => {
 
   const createLowValueNetworkEvent = (
     overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent =>
-    ({
-      event_id: "network-drop-event",
-      exception: {
-        values: [
-          {
-            type: "TypeError",
-            value: wrappedNetworkMessage,
-          },
-        ],
-      },
-      tags: {
-        errorType: "network",
-        handled: true,
-      },
-      breadcrumbs: [
+  ): TestSentryClientEvent => ({
+    event_id: "network-drop-event",
+    exception: {
+      values: [
         {
-          type: "http",
-          category: "fetch",
-          data: {
-            status_code: 0,
-            url: "/api/waves-overview",
-            "url.is_first_party": true,
-          },
+          type: "TypeError",
+          value: wrappedNetworkMessage,
         },
       ],
-      ...overrides,
-    });
+    },
+    tags: {
+      errorType: "network",
+      handled: true,
+    },
+    breadcrumbs: [
+      {
+        type: "http",
+        category: "fetch",
+        data: {
+          status_code: 0,
+          url: "/api/waves-overview",
+          "url.is_first_party": true,
+        },
+      },
+    ],
+    ...overrides,
+  });
 
   const createReactDomInsertBeforeEvent = (
     overrides: Partial<SentryClientEvent> = {}
@@ -430,6 +431,58 @@ describe("sentry-client-filters", () => {
       transaction: "/waves",
       url: "/waves",
     },
+    ...overrides,
+  });
+
+  const createGifPickerTenorCategoriesEvent = (
+    overrides: Partial<SentryClientEvent> = {}
+  ): SentryClientEvent => ({
+    transaction: "/waves/:wave",
+    request: {
+      url: "https://6529.io/waves/b38288e6-ca9d-45ce-8323-3dc5e094f04e",
+    },
+    tags: {
+      transaction: "/waves/:wave",
+      url: "/waves/b38288e6-ca9d-45ce-8323-3dc5e094f04e",
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: gifPickerTenorUndefinedTagsMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [gifPickerTenorManagerFrame],
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        category: "console",
+        level: "error",
+        message: "[gif-picker-react] Failed to fetch data from Tenor API",
+      },
+      {
+        category: "console",
+        level: "error",
+        message: "TypeError: Load failed (tenor.googleapis.com)",
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        message: "GET: /v2/categories",
+        data: {
+          url: "/v2/categories",
+          "url.is_first_party": false,
+          "url.is_first_party_api": false,
+        },
+      },
+    ],
     ...overrides,
   });
 
@@ -556,7 +609,9 @@ describe("sentry-client-filters", () => {
                   reactDomStaticChunkFrame("insertOrAppendPlacementNode"),
                   reactDomStaticChunkFrame("commitReconciliationEffects"),
                   reactDomStaticChunkFrame("commitMutationEffectsOnFiber"),
-                  reactDomStaticChunkFrame("recursivelyTraverseMutationEffects"),
+                  reactDomStaticChunkFrame(
+                    "recursivelyTraverseMutationEffects"
+                  ),
                 ],
               },
             },
@@ -771,6 +826,111 @@ describe("sentry-client-filters", () => {
               },
             },
           ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("filters gif-picker Tenor category errors on waves routes with no app-owned frames", () => {
+    const result = shouldFilterGifPickerTenorCategoriesError(
+      createGifPickerTenorCategoriesEvent()
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters gif-picker Tenor category errors from the breadcrumb signature when source frames are unavailable", () => {
+    const event = createGifPickerTenorCategoriesEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: gifPickerTenorUndefinedTagsMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = shouldFilterGifPickerTenorCategoriesError(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps gif-picker Tenor category errors when an app-owned frame is present", () => {
+    const event = createGifPickerTenorCategoriesEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: gifPickerTenorUndefinedTagsMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                gifPickerTenorManagerFrame,
+                {
+                  filename: "https://6529.io/_next/static/chunks/app-client.js",
+                  function: "loadGifCategories",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = shouldFilterGifPickerTenorCategoriesError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps matching undefined tags errors without gif-picker or Tenor evidence", () => {
+    const event = createGifPickerTenorCategoriesEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: gifPickerTenorUndefinedTagsMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: [],
+    });
+
+    const result = shouldFilterGifPickerTenorCategoriesError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps gif-picker Tenor category errors outside waves routes", () => {
+    const result = shouldFilterGifPickerTenorCategoriesError(
+      createGifPickerTenorCategoriesEvent({
+        transaction: "/about",
+        tags: {
+          transaction: "/about",
+          url: "/about",
+        },
+        request: {
+          url: "https://6529.io/about",
         },
       })
     );
@@ -2294,8 +2454,7 @@ describe("sentry-client-filters", () => {
                   in_app: true,
                 },
                 {
-                  filename:
-                    "https://6529.io/_next/static/chunks/app-client.js",
+                  filename: "https://6529.io/_next/static/chunks/app-client.js",
                   function: "serializeWaveParams",
                   in_app: true,
                 },
