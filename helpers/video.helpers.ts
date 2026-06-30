@@ -80,25 +80,82 @@ export function isVideoUrl(url: string): boolean {
   return videoExtensions.some((ext) => lower.endsWith(ext));
 }
 
-// Simple in-memory cache for HEAD requests
-const HEAD_CACHE: Record<string, boolean> = {};
+const POSITIVE_HEAD_CACHE_TTL_MS = 10 * 60 * 1000;
+const NEGATIVE_HEAD_CACHE_TTL_MS = 60 * 1000;
+const NETWORK_FAILURE_HEAD_CACHE_TTL_MS = 15 * 1000;
+const MAX_HEAD_CACHE_ENTRIES = 500;
+
+interface HeadCacheEntry {
+  readonly ok: boolean;
+  readonly expiresAt: number;
+}
+
+const HEAD_CACHE = new Map<string, HeadCacheEntry>();
+const IN_FLIGHT_HEAD_CHECKS = new Map<string, Promise<boolean>>();
+
+function pruneHeadCache(now: number): void {
+  for (const [cachedUrl, entry] of HEAD_CACHE) {
+    if (entry.expiresAt <= now) {
+      HEAD_CACHE.delete(cachedUrl);
+    }
+  }
+
+  while (HEAD_CACHE.size > MAX_HEAD_CACHE_ENTRIES) {
+    const oldestUrl = HEAD_CACHE.keys().next().value;
+    if (oldestUrl === undefined) {
+      return;
+    }
+    HEAD_CACHE.delete(oldestUrl);
+  }
+}
+
+function setHeadCacheEntry(url: string, entry: HeadCacheEntry): void {
+  HEAD_CACHE.set(url, entry);
+  pruneHeadCache(Date.now());
+}
 
 /**
  * HEAD request to see if a URL is present (200) or missing (404).
  * Uses a small in-memory cache to avoid repeat HEAD requests.
  */
 export async function checkVideoAvailability(url: string): Promise<boolean> {
-  if (url in HEAD_CACHE) {
-    return HEAD_CACHE[url]!;
+  const now = Date.now();
+  pruneHeadCache(now);
+  const cached = HEAD_CACHE.get(url);
+  if (cached && cached.expiresAt > now) {
+    return cached.ok;
   }
-  try {
-    const response = await fetch(url, {
-      method: "HEAD",
-      cache: "no-store",
-    });
-    HEAD_CACHE[url] = response.ok;
-    return response.ok;
-  } catch {
-    return false;
+  if (cached) {
+    HEAD_CACHE.delete(url);
   }
+
+  const inFlightCheck = IN_FLIGHT_HEAD_CHECKS.get(url);
+  if (inFlightCheck) {
+    return inFlightCheck;
+  }
+
+  const check = (async () => {
+    try {
+      const response = await fetch(url, {
+        method: "HEAD",
+        cache: "no-store",
+      });
+      const ttl = response.ok
+        ? POSITIVE_HEAD_CACHE_TTL_MS
+        : NEGATIVE_HEAD_CACHE_TTL_MS;
+      setHeadCacheEntry(url, { ok: response.ok, expiresAt: Date.now() + ttl });
+      return response.ok;
+    } catch {
+      setHeadCacheEntry(url, {
+        ok: false,
+        expiresAt: Date.now() + NETWORK_FAILURE_HEAD_CACHE_TTL_MS,
+      });
+      return false;
+    } finally {
+      IN_FLIGHT_HEAD_CHECKS.delete(url);
+    }
+  })();
+
+  IN_FLIGHT_HEAD_CHECKS.set(url, check);
+  return check;
 }
