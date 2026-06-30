@@ -324,9 +324,13 @@ function SessionUpgradeProbe() {
       <button
         type="button"
         onClick={() =>
-          void ensureActiveSessionV2WebSession?.().then((success) => {
-            setVerifyResult(String(success));
-          })
+          void ensureActiveSessionV2WebSession?.()
+            .then((success) => {
+              setVerifyResult(String(success));
+            })
+            .catch(() => {
+              setVerifyResult("error");
+            })
         }
         data-testid="verify-session"
       >
@@ -1560,7 +1564,7 @@ describe("Auth component", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("session-verify-result")).toHaveTextContent(
-          "false"
+          "error"
         );
       });
       expect(screen.getByTestId("session-upgrade-required")).toHaveTextContent(

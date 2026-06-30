@@ -66,6 +66,11 @@ type DisplayContent = {
   readonly content: ReactNode;
   readonly url: string;
 };
+type ConnectionShareSessionVerificationStatus =
+  | "active"
+  | "inactive"
+  | "error"
+  | "stale";
 
 function getLocalLegacyDesktopAuth(walletAddress: string): {
   readonly refreshToken: string;
@@ -698,34 +703,21 @@ export function HeaderQRModal({
 
     try {
       setMobileConnectionShareStatus("loading");
-      let hasActiveSession = false;
-      let didVerificationError = false;
-      try {
-        if (ensureActiveSessionV2WebSession) {
-          hasActiveSession = await ensureActiveSessionV2WebSession({
-            address: walletAddress,
-            abortSignal: signal,
-          });
-        }
-      } catch (error: unknown) {
-        if (isStaleGeneration() || isAbortError(error, signal)) {
-          return "";
-        }
-
-        console.error("Failed to verify active web session", error);
-        didVerificationError = true;
-      }
-
-      if (isStaleGeneration() || signal?.aborted) {
+      const verificationStatus = await verifyConnectionShareV2Session({
+        isStaleGeneration,
+        signal,
+        walletAddress,
+      });
+      if (verificationStatus === "stale") {
         return "";
       }
 
-      if (didVerificationError) {
+      if (verificationStatus === "error") {
         setUnavailableMobileConnectionShare("error");
         return "";
       }
 
-      if (!hasActiveSession) {
+      if (verificationStatus === "inactive") {
         terminalConnectionShareFailuresRef.current.set(
           failureKey,
           "legacy-auth"
@@ -768,6 +760,38 @@ export function HeaderQRModal({
       );
       setUnavailableMobileConnectionShare(terminalStatus);
       return "";
+    }
+  }
+
+  async function verifyConnectionShareV2Session({
+    isStaleGeneration,
+    signal,
+    walletAddress,
+  }: {
+    readonly isStaleGeneration: IsStaleGeneration;
+    readonly signal?: AbortSignal | undefined;
+    readonly walletAddress: string;
+  }): Promise<ConnectionShareSessionVerificationStatus> {
+    try {
+      const hasActiveSession = ensureActiveSessionV2WebSession
+        ? await ensureActiveSessionV2WebSession({
+            address: walletAddress,
+            abortSignal: signal,
+          })
+        : false;
+
+      if (isStaleGeneration() || signal?.aborted) {
+        return "stale";
+      }
+
+      return hasActiveSession ? "active" : "inactive";
+    } catch (error: unknown) {
+      if (isStaleGeneration() || isAbortError(error, signal)) {
+        return "stale";
+      }
+
+      console.error("Failed to verify active web session", error);
+      return "error";
     }
   }
 
@@ -820,34 +844,21 @@ export function HeaderQRModal({
 
     try {
       setDesktopConnectionShareStatus("loading");
-      let hasActiveSession = false;
-      let didVerificationError = false;
-      try {
-        if (ensureActiveSessionV2WebSession) {
-          hasActiveSession = await ensureActiveSessionV2WebSession({
-            address: walletAddress,
-            abortSignal: signal,
-          });
-        }
-      } catch (error: unknown) {
-        if (isStaleGeneration() || isAbortError(error, signal)) {
-          return "";
-        }
-
-        console.error("Failed to verify active web session", error);
-        didVerificationError = true;
-      }
-
-      if (isStaleGeneration() || signal?.aborted) {
+      const verificationStatus = await verifyConnectionShareV2Session({
+        isStaleGeneration,
+        signal,
+        walletAddress,
+      });
+      if (verificationStatus === "stale") {
         return "";
       }
 
-      if (didVerificationError) {
+      if (verificationStatus === "error") {
         setUnavailableDesktopConnectionShare("error");
         return "";
       }
 
-      if (!hasActiveSession) {
+      if (verificationStatus === "inactive") {
         terminalConnectionShareFailuresRef.current.set(
           failureKey,
           "legacy-auth"
