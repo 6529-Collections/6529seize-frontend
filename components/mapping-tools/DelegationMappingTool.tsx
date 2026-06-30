@@ -9,18 +9,16 @@ import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
-import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import {
+  MappingToolSubmitButton,
+  MappingToolUpload,
+} from "./MappingToolControls";
 import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");
 
 export default function DelegationMappingTool() {
-  const inputRef = useRef(null);
-  const [dragActive, setDragActive] = useState(false);
-
   const [file, setFile] = useState<any>();
   const [collection, setCollection] = useState<string>("0");
   const [useCase, setUseCase] = useState<number>(0);
@@ -31,29 +29,6 @@ export default function DelegationMappingTool() {
   function submit() {
     setProcessing(true);
   }
-
-  const handleUpload = () => {
-    (inputRef.current as any).click();
-  };
-
-  const handleDrag = function (e: any) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = function (e: any) {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
-  };
 
   function getForAddress(address: string, collection: string, useCase: number) {
     const myDelegations = delegations.find(
@@ -154,45 +129,18 @@ export default function DelegationMappingTool() {
   }, [csvData]);
 
   return (
-    <Container className={styles["toolArea"]} id="mapping-tool-form">
-      <Row>
-        <Col>
-          Upload File <span className="font-color-h">(.csv)</span>
-        </Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Container
-            className={`${styles["uploadArea"]} ${
-              dragActive ? styles["uploadAreaActive"] : ""
-            }`}
-            onClick={handleUpload}
-            onDrop={handleDrop}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-          >
-            <div>
-              <FontAwesomeIcon
-                icon={faFileUpload}
-                className={styles["uploadIcon"]}
-              />
-            </div>
-            {file ? (
-              <div>{file.name}</div>
-            ) : (
-              <div>Drag and drop your file here, or click to upload</div>
-            )}
-          </Container>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>Select Collection</Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Form.Select
-            className={`${styles["formInput"]}`}
+    <div className={styles["toolArea"]} id="mapping-tool-form">
+      <MappingToolUpload fileName={file?.name} onFileSelected={setFile} />
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+        <label className="tw-w-full tw-px-3" htmlFor="delegation-collection">
+          Select Collection
+        </label>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+        <div className="tw-w-full tw-px-3">
+          <select
+            id="delegation-collection"
+            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
             value={collection}
             onChange={(e) => {
               setCollection(e.target.value);
@@ -211,16 +159,19 @@ export default function DelegationMappingTool() {
                 </option>
               );
             })}
-          </Form.Select>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>Select Use Case</Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>
-          <Form.Select
-            className={`${styles["formInput"]}`}
+          </select>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+        <label className="tw-w-full tw-px-3" htmlFor="delegation-use-case">
+          Select Use Case
+        </label>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+        <div className="tw-w-full tw-px-3">
+          <select
+            id="delegation-use-case"
+            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
             value={useCase}
             onChange={(e) => {
               const newCase = Number.parseInt(e.target.value);
@@ -240,53 +191,21 @@ export default function DelegationMappingTool() {
                 </option>
               );
             })}
-          </Form.Select>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col className="font-color-h font-smaller">
+          </select>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+        <div className="tw-w-full tw-px-3 tw-text-sm tw-text-iron-400">
           Note: If the selected collection or use case delegation is not found,
           the tool will automatically switch to using delegations for
           &quot;Any&quot; or &quot;All&quot; options respectively.
-        </Col>
-      </Row>
-      <Row className="pt-3">
-        <Col>
-          <Button
-            className={`${styles["submitBtn"]} ${
-              useCase === 0 || processing || !file
-                ? styles["submitBtnDisabled"]
-                : ""
-            }`}
-            onClick={() => submit()}
-          >
-            {processing ? "Processing" : "Submit"}
-            {processing && (
-              <div className="d-inline">
-                <div
-                  className={`spinner-border ${styles["loader"]}`}
-                  role="status"
-                >
-                  <span className="sr-only"></span>
-                </div>
-              </div>
-            )}
-          </Button>
-        </Col>
-      </Row>
-      <Form.Control
-        ref={inputRef}
-        className={`${styles["formInputHidden"]}`}
-        type="file"
-        accept=".csv"
-        value={file?.fileName}
-        onChange={(e: any) => {
-          if (e.target.files) {
-            const f = e.target.files[0];
-            setFile(f);
-          }
-        }}
+        </div>
+      </div>
+      <MappingToolSubmitButton
+        disabled={useCase === 0 || processing || !file}
+        processing={processing}
+        onSubmit={submit}
       />
-    </Container>
+    </div>
   );
 }

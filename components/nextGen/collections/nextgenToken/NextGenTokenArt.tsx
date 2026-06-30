@@ -11,7 +11,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Col, Container, Row } from "../NextGenTailwindLayout";
+import { Dropdown } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useIsMobileDevice from "@/hooks/isMobileDevice";

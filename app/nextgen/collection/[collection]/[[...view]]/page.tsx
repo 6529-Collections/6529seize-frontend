@@ -51,7 +51,7 @@ export default async function NextGenCollectionPage({
     view?.[0] ? `/${view[0]}` : ""
   }`;
   return (
-    <main className={styles["main"]}>
+    <main className={`${styles["main"]} tailwind-scope`}>
       <JsonLdScript
         data={buildNextgenCollectionPageJsonLd({
           collection: resolvedCollection,

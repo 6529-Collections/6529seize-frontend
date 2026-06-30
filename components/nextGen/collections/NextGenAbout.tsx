@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "./NextGenTailwindLayout";
 
 export default function NextGenAbout() {
   return (
