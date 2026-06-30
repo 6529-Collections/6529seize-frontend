@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "./NextGenTailwindLayout";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { formatNameForUrl } from "../nextgen_helpers";
 import { NextGenMintCounts } from "./collectionParts/NextGenCollectionHeader";

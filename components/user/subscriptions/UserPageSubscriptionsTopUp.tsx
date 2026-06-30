@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { parseEther } from "viem";
@@ -60,6 +59,12 @@ function getTopUpModalEmoji(
   };
   return emojiByStatus[status];
 }
+
+const TOP_UP_OPTION_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 sm:tw-gap-x-6";
+const TOP_UP_OPTION_GRID_PADDED_CLASS = `${TOP_UP_OPTION_GRID_CLASS} tw-pt-2`;
+const TOP_UP_RADIO_GRID_CLASS =
+  "tw-grid tw-grid-cols-[8.333333%_1fr] tw-items-center";
 
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
@@ -253,7 +258,7 @@ export default function UserPageSubscriptionsTopUp() {
             Transaction Submitted
             {sendTransaction.data && (
               <a
-                className="btn btn-white btn-sm tw-font-medium"
+                className="tw-rounded-md tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black"
                 href={getTransactionLink(
                   SUBSCRIPTIONS_CHAIN.id,
                   sendTransaction.data
@@ -286,7 +291,7 @@ export default function UserPageSubscriptionsTopUp() {
             Top Up Successful!
             {sendTransaction.data && (
               <a
-                className="btn btn-white btn-sm tw-font-medium"
+                className="tw-rounded-md tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black"
                 href={getTransactionLink(
                   SUBSCRIPTIONS_CHAIN.id,
                   sendTransaction.data
@@ -310,20 +315,23 @@ export default function UserPageSubscriptionsTopUp() {
   }
 
   const iOsContent = (
-    <Row className="pt-2">
-      <Col>
+    <div className="tw-pt-2">
+      <div>
         <Link
           href={window.location.href}
-          className="text-center pt-2 pb-2"
+          className="tw-block tw-py-2 tw-text-center"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <button className="btn btn-light" style={{ width: "100%" }}>
+          <button
+            className="tw-w-full tw-rounded-lg tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-2 tw-font-semibold tw-text-iron-950"
+            type="button"
+          >
             Top-up on 6529.io
           </button>
         </Link>
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 
   const printRemainingMints = (
@@ -334,7 +342,7 @@ export default function UserPageSubscriptionsTopUp() {
   ) => {
     if (count > 0) {
       return (
-        <Col xs={12} sm={6} className="pt-2">
+        <div className="tw-pt-2">
           <CardCountOption
             count={count}
             display={`Remaining ${label} ${value.toLocaleString()}`}
@@ -345,7 +353,7 @@ export default function UserPageSubscriptionsTopUp() {
               setError("");
             }}
           />
-        </Col>
+        </div>
       );
     }
     return null;
@@ -353,8 +361,8 @@ export default function UserPageSubscriptionsTopUp() {
 
   const topUpContent = (
     <>
-      <Row>
-        <Col xs={12} sm={6} className="pt-2">
+      <div className={TOP_UP_OPTION_GRID_CLASS}>
+        <div className="tw-pt-2">
           <CardCountOption
             count={1}
             selected={selectedOption === "1"}
@@ -364,16 +372,16 @@ export default function UserPageSubscriptionsTopUp() {
               setError("");
             }}
           />
-        </Col>
+        </div>
         {printRemainingMints(remainingMintsForSeason, "SZN", szn, "szn")}
-      </Row>
-      <Row>
+      </div>
+      <div className={TOP_UP_OPTION_GRID_CLASS}>
         {printRemainingMints(remainingMintsForYear, "Year", year, "year")}
         {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch, "epoch")}
-      </Row>
+      </div>
       {!showDeep && (
-        <Row className="pt-2">
-          <Col xs={12} sm={6} className="tw-text-iron-400">
+        <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
+          <div className="tw-text-iron-400">
             <div className="tw-pl-[calc(0.75rem+8.33%)]">
               <ShowMoreButton
                 expanded={showDeep}
@@ -382,12 +390,12 @@ export default function UserPageSubscriptionsTopUp() {
                 showLessLabel="Hide Deep Time Subscriptions"
               />
             </div>
-          </Col>
-        </Row>
+          </div>
+        </div>
       )}
       {showDeep && (
         <>
-          <Row>
+          <div className={TOP_UP_OPTION_GRID_CLASS}>
             {printRemainingMints(
               remainingMintsForPeriod,
               "Period",
@@ -395,12 +403,12 @@ export default function UserPageSubscriptionsTopUp() {
               "period"
             )}
             {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
-          </Row>
-          <Row>
+          </div>
+          <div className={TOP_UP_OPTION_GRID_CLASS}>
             {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
-          </Row>
-          <Row className="pt-2">
-            <Col xs={12} sm={6} className="tw-text-iron-400">
+          </div>
+          <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
+            <div className="tw-text-iron-400">
               <div className="tw-pl-[calc(0.75rem+8.33%)]">
                 <ShowMoreButton
                   expanded={showDeep}
@@ -409,12 +417,12 @@ export default function UserPageSubscriptionsTopUp() {
                   showLessLabel="Hide Deep Time Subscriptions"
                 />
               </div>
-            </Col>
-          </Row>
+            </div>
+          </div>
         </>
       )}
-      <Row className="pt-2">
-        <Col xs={12} sm={6} className="d-flex align-items-center">
+      <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
+        <div className="tw-flex tw-items-center">
           <button
             type="button"
             className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-p-3 tw-text-left tw-transition-colors ${
@@ -426,8 +434,8 @@ export default function UserPageSubscriptionsTopUp() {
             }`}
             onClick={handleSelectOther}
           >
-            <Row className="d-flex align-items-center">
-              <Col xs={1} className="d-flex tw-items-center tw-justify-center">
+            <div className={TOP_UP_RADIO_GRID_CLASS}>
+              <div className="tw-flex tw-items-center tw-justify-center">
                 <input
                   type="radio"
                   checked={selectedOption === "other"}
@@ -435,10 +443,10 @@ export default function UserPageSubscriptionsTopUp() {
                   aria-label="Other card count"
                   className={styles["radioInput"]}
                 />
-              </Col>
-              <Col xs={11} className="d-flex gap-2 tw-items-center">
+              </div>
+              <div className="tw-flex tw-items-center tw-gap-2">
                 <span>Other</span>
-                <Form.Control
+                <input
                   ref={otherInputRef}
                   type="number"
                   min={1}
@@ -460,7 +468,7 @@ export default function UserPageSubscriptionsTopUp() {
                     setSelectedOption("other");
                   }}
                 />
-                <span className="no-wrap">
+                <span className="tw-whitespace-nowrap">
                   {!Number.isNaN(Number.parseInt(memeCount, 10)) &&
                     Number.parseInt(memeCount, 10) > 0 && (
                       <>
@@ -468,16 +476,13 @@ export default function UserPageSubscriptionsTopUp() {
                       </>
                     )}
                 </span>
-              </Col>
-            </Row>
+              </div>
+            </div>
           </button>
-        </Col>
-        <Col
-          xs={12}
-          sm={6}
-          className="d-flex pt-2 pt-sm-0 tw-items-center tw-justify-center"
-        >
-          <Button
+        </div>
+        <div className="tw-flex tw-items-center tw-justify-center tw-pt-2 sm:tw-pt-0">
+          <button
+            type="button"
             className={`${styles["sendBtn"]} tw-w-full sm:tw-w-auto`}
             onClick={handleSend}
             disabled={
@@ -490,19 +495,19 @@ export default function UserPageSubscriptionsTopUp() {
             aria-label="Send top up"
           >
             Send
-          </Button>
-        </Col>
-      </Row>
+          </button>
+        </div>
+      </div>
     </>
   );
 
   return (
     <>
-      <Container className="no-padding">
-        <Row className="pb-2">
-          <Col className="d-flex align-items-end gap-2 no-wrap">
-            <h4 className="mb-0 tw-font-semibold">Top Up</h4>
-            <span className="d-flex align-items-center gap-1 font-color-h font-smaller">
+      <div>
+        <div className="tw-pb-2">
+          <div className="tw-flex tw-items-end tw-gap-2 tw-whitespace-nowrap">
+            <h4 className="tw-mb-0 tw-font-semibold">Top Up</h4>
+            <span className="font-color-h font-smaller tw-flex tw-items-center tw-gap-1">
               Sending to{" "}
               <>
                 <span data-tooltip-id="subscription-address">
@@ -521,11 +526,11 @@ export default function UserPageSubscriptionsTopUp() {
                 </Tooltip>
               </>
             </span>
-          </Col>
-        </Row>
+          </div>
+        </div>
         <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
         {isIos ? iOsContent : topUpContent}
-      </Container>
+      </div>
       {mounted &&
         createPortal(
           <AnimatePresence>
@@ -561,7 +566,7 @@ export default function UserPageSubscriptionsTopUp() {
                     {isClosable && (
                       <button
                         onClick={closeModal}
-                        className="tw--mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
+                        className="-tw-mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
                         aria-label="Close modal"
                       >
                         <FontAwesomeIcon
@@ -609,8 +614,8 @@ function CardCountOption(
       }`}
       onClick={props.onSelect}
     >
-      <Row className="d-flex align-items-center">
-        <Col xs={1} className="d-flex tw-items-center tw-justify-center">
+      <div className={TOP_UP_RADIO_GRID_CLASS}>
+        <div className="tw-flex tw-items-center tw-justify-center">
           <input
             type="radio"
             checked={props.selected}
@@ -618,13 +623,13 @@ function CardCountOption(
             aria-label={labelText}
             className={styles["radioInput"]}
           />
-        </Col>
-        <Col xs={11} className="d-flex tw-items-center">
+        </div>
+        <div className="tw-flex tw-items-center">
           {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
           {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
           {numberWithCommasFromString(getEthForCards(props.count))} ETH)
-        </Col>
-      </Row>
+        </div>
+      </div>
     </button>
   );
 }

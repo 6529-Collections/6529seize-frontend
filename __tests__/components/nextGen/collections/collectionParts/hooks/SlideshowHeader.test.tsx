@@ -38,9 +38,9 @@ describe("SlideshowHeader", () => {
   it("renders the component with correct structure", () => {
     render(<SlideshowHeader collectionName="Test Collection" />);
     
-    // Should render a Row and Col from react-bootstrap
-    const container = screen.getByRole("link").closest(".row");
-    expect(container).toBeInTheDocument();
+    // Should render the migrated Tailwind row structure
+    const row = screen.getByRole("link").closest(".tw-flex-wrap");
+    expect(row).toBeInTheDocument();
     
     // Should render the link with correct text
     expect(screen.getByText("View All")).toBeInTheDocument();
@@ -77,10 +77,10 @@ describe("SlideshowHeader", () => {
     render(<SlideshowHeader collectionName="Test" />);
     
     const link = screen.getByRole("link");
-    expect(link).toHaveClass("d-flex", "align-items-center", "gap-2", "decoration-none");
+    expect(link).toHaveClass("tw-flex", "tw-items-center", "tw-gap-2", "tw-no-underline");
     
     const heading = screen.getByRole("heading", { level: 5 });
-    expect(heading).toHaveClass("mb-0", "font-color", "d-flex", "align-items-center", "gap-2");
+    expect(heading).toHaveClass("tw-mb-0", "tw-text-white", "tw-flex", "tw-items-center", "tw-gap-2");
   });
 
   it("maintains semantic HTML structure", () => {
@@ -116,10 +116,10 @@ describe("SlideshowHeader", () => {
     const icon = screen.getByTestId("font-awesome-icon");
     expect(icon).toBeInTheDocument();
     
-    // Link should be properly nested within the Bootstrap grid
+    // Link should be properly nested within the Tailwind grid wrapper
     const link = screen.getByRole("link");
-    const col = link.closest(".col");
-    expect(col).toHaveClass("d-flex", "align-items-center", "justify-content-end");
+    const col = link.closest(".tw-relative");
+    expect(col).toHaveClass("tw-flex", "tw-items-center", "tw-justify-end");
   });
 
   it("uses correct FontAwesome icon", () => {

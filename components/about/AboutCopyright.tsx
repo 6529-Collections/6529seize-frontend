@@ -1,4 +1,8 @@
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 import styles from "./About.module.scss";
 
 export default function AboutCopyright() {
@@ -10,13 +14,13 @@ export default function AboutCopyright() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles["lastUpdateText"]} text-right pt-3 pb-3`}>
+        <Col className={`${styles["lastUpdateText"]} tw-text-right tw-pt-3 tw-pb-3`}>
           Last Updated: April 23, 2024
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <p className="font-larger font-bolder">Introduction</p>
+          <p className="tw-text-lg tw-font-bold">Introduction</p>
           <p>
             6529.io, a platform of 6529 Collection LLC, respects the
             intellectual property rights of others and expects its users to do
@@ -26,9 +30,9 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <p className="font-larger font-bolder">
+          <p className="tw-text-lg tw-font-bold">
             Copyright Infringement Notification
           </p>
           <p>
@@ -84,9 +88,9 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <p className="font-larger font-bolder">Counter-Notification</p>
+          <p className="tw-text-lg tw-font-bold">Counter-Notification</p>
           <p>
             If you believe that your content that was removed (or to which
             access was disabled) is not infringing, or that you have the
@@ -137,9 +141,9 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <p className="font-larger font-bolder">Repeat Infringer Policy</p>
+          <p className="tw-text-lg tw-font-bold">Repeat Infringer Policy</p>
           <p>
             In accordance with the DMCA and other applicable law, 6529
             Collection LLC has adopted a policy of terminating, in appropriate
@@ -152,9 +156,9 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <p className="font-larger font-bolder">Modifications to the Policy</p>
+          <p className="tw-text-lg tw-font-bold">Modifications to the Policy</p>
           <p>
             6529 Collection LLC reserves the right to modify the terms of this
             DMCA Policy at any time and for any reason. By continuing to access
@@ -163,9 +167,9 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <p className="font-larger font-bolder">Contact Information</p>
+          <p className="tw-text-lg tw-font-bold">Contact Information</p>
           <p>
             For any questions regarding this DMCA Policy, please contact our
             Copyright Agent&apos;s as follows:

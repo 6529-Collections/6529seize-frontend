@@ -1,6 +1,5 @@
 "use client";
 
-import { Col, Container, Row } from "react-bootstrap";
 import NextGenMint from "./NextGenMint";
 import { useEffect, useState } from "react";
 import { useReadContract } from "wagmi";
@@ -59,19 +58,15 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   return (
     <>
       <NextGenNavigationHeader />
-      <Container className="pt-4 pb-4">
+      <div className="tailwind-scope tw-mx-auto tw-w-full tw-px-3 tw-py-4 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] xl:tw-max-w-[1140px] 2xl:tw-max-w-[1320px]">
         {burnAmountRead.isSuccess && mintPriceRead.isSuccess && (
-          <Row>
-            <Col>
-              <NextGenMint
-                collection={props.collection}
-                mint_price={mintPrice}
-                burn_amount={burnAmount}
-              />
-            </Col>
-          </Row>
+          <NextGenMint
+            collection={props.collection}
+            mint_price={mintPrice}
+            burn_amount={burnAmount}
+          />
         )}
-      </Container>
+      </div>
     </>
   );
 }

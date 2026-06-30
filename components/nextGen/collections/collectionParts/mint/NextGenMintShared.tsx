@@ -1,7 +1,6 @@
 import styles from "@/components/nextGen/collections/NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
-import { Form, Row, Col } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
@@ -30,8 +29,8 @@ export function NextGenMintingFor(
   const account = useSeizeConnectContext();
 
   return (
-    <Form.Group as={Row} className="pb-2">
-      <Form.Label column sm={12} className="d-flex align-items-center">
+    <div className="tw-pb-2">
+      <label className="tw-flex tw-items-center">
         {props.title}
         <FontAwesomeIcon
           className={styles["infoIcon"]}
@@ -48,28 +47,45 @@ export function NextGenMintingFor(
             padding: "4px 8px",
           }}
         />
-      </Form.Label>
-      <Col sm={12}>
-        <Form.Select
-          className={styles["mintSelect"]}
-          value={props.mintForAddress}
-          onChange={(e: any) => {
-            props.setMintForAddress(e.currentTarget.value);
-          }}>
-          <option value="" disabled>
-            Select Address to {props.title}
-          </option>
-          {account.address && (
-            <NextGenMintAddressOption address={account.address} />
-          )}
-          {props.delegators.map((delegator) => (
-            <NextGenMintAddressOption
-              address={delegator}
-              key={`delegator-${delegator}`}
-            />
+      </label>
+      <select
+        className={`${styles["mintSelect"]} tw-form-select tw-block tw-w-full tw-rounded-none`}
+        value={props.mintForAddress}
+        onChange={(e) => {
+          props.setMintForAddress(e.currentTarget.value);
+        }}>
+        <option value="" disabled>
+          Select Address to {props.title}
+        </option>
+        {account.address && <NextGenMintAddressOption address={account.address} />}
+        {props.delegators.map((delegator) => (
+          <NextGenMintAddressOption
+            address={delegator}
+            key={`delegator-${delegator}`}
+          />
+        ))}
+      </select>
+    </div>
+  );
+}
+
+export function NextGenMintErrors({
+  errors,
+  className = "tw-py-2",
+}: Readonly<{
+  errors: string[];
+  className?: string;
+}>) {
+  return (
+    <div className={className}>
+      <div className="tw-flex tw-items-center">Errors</div>
+      <div className="tw-flex tw-items-center">
+        <ul className="tw-mb-0">
+          {errors.map((error) => (
+            <li key={`mint-error-${error.replaceAll(" ", "-")}`}>{error}</li>
           ))}
-        </Form.Select>
-      </Col>
-    </Form.Group>
+        </ul>
+      </div>
+    </div>
   );
 }

@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 
 export default function AboutMinting() {
   return (
@@ -11,7 +15,7 @@ export default function AboutMinting() {
           </h1>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
           <p>
             <b>Summary</b>

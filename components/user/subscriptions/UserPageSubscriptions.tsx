@@ -7,7 +7,6 @@ import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails
 import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
 import type { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import { useContext, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 
 import { AuthContext } from "@/components/auth/Auth";
 import {
@@ -265,20 +264,14 @@ export default function UserPageSubscriptions(
     return <></>;
   }
 
-  const colConfig = {
-    className: "pb-4",
-    xs: 12,
-    md: 6,
-  };
-
   return (
-    <Container className="no-padding pb-5">
-      <Row className="pt-2 pb-2">
-        <Col>
-          <Container className="no-padding">
-            <Row>
-              <Col className="d-flex align-items-center gap-2">
-                <h4 className="mb-0 tw-font-semibold">Subscribe</h4>
+    <div className="tw-pb-5">
+      <div className="tw-py-2">
+        <div>
+          <div>
+            <div>
+              <div className="tw-flex tw-items-center tw-gap-2">
+                <h4 className="tw-mb-0 tw-font-semibold">Subscribe</h4>
                 <span>
                   <Link
                     href="/about/subscriptions"
@@ -286,53 +279,53 @@ export default function UserPageSubscriptions(
                     Learn More
                   </Link>
                 </span>
-              </Col>
-            </Row>
+              </div>
+            </div>
             <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />
-            <Row>
-              <Col {...colConfig}>
+            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2">
+              <div className="tw-pb-4">
                 <UserPageSubscriptionsBalance
                   details={details}
                   fetching={isFetching}
                   refresh={refresh}
                   show_refresh={isConnectedAccount}
                 />
-              </Col>
-              <Col {...colConfig}>
+              </div>
+              <div className="tw-pb-4">
                 <UserPageSubscriptionsAirdropAddress
                   show_edit={isConnectedAccount}
                   airdrop={airdropResult}
                 />
-              </Col>
-              <Col {...colConfig}>
+              </div>
+              <div className="tw-pb-4">
                 <UserPageSubscriptionsMode
                   profileKey={profileKey}
                   details={details}
                   readonly={!isConnectedAccount}
                   refresh={refresh}
                 />
-              </Col>
-              <Col {...colConfig}>
+              </div>
+              <div className="tw-pb-4">
                 <UserPageSubscriptionsEditionPreference
                   profileKey={profileKey}
                   details={details}
                   readonly={!isConnectedAccount}
                   refresh={refresh}
                 />
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       {isConnectedAccount && (
-        <Row className="pt-4 pb-2">
-          <Col>
+        <div className="tw-pb-2 tw-pt-4">
+          <div>
             <UserPageSubscriptionsTopUp />
-          </Col>
-        </Row>
+          </div>
+        </div>
       )}
-      <Row className="pt-4 pb-2">
-        <Col>
+      <div className="tw-pb-2 tw-pt-4">
+        <div>
           <UserPageSubscriptionsUpcoming
             profileKey={profileKey}
             details={details}
@@ -340,10 +333,10 @@ export default function UserPageSubscriptions(
             readonly={!isConnectedAccount}
             refresh={refresh}
           />
-        </Col>
-      </Row>
-      <Row className="pt-4 pb-2">
-        <Col>
+        </div>
+      </div>
+      <div className="tw-pb-2 tw-pt-4">
+        <div>
           <UserPageSubscriptionsHistory
             topups={topUpHistory}
             redeemed={redeemedHistory}
@@ -358,8 +351,8 @@ export default function UserPageSubscriptions(
               fetchLogs(page);
             }}
           />
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

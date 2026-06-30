@@ -11,7 +11,7 @@ import styles from "@/styles/Home.module.scss";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "@/components/nextGen/collections/NextGenTailwindLayout";
 import { getNextGenView } from "./view-utils";
 
 export default function NextGenPageClient({

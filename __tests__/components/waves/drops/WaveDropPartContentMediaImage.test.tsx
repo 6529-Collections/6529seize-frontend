@@ -85,6 +85,27 @@ describe("WaveDropPartContentMediaImage", () => {
     expect(imageWrapper).not.toHaveStyle({ maxHeight: "16rem" });
   });
 
+  it("reserves a natural image frame before the image dimensions are known", () => {
+    const { container } = render(
+      <WaveDropPartContentMediaImage src="https://example.com/path/image.png" />
+    );
+
+    const image = screen.getByAltText("Drop media");
+    const imageWrapper = image.parentElement;
+    const outer = container.firstElementChild;
+
+    expect(outer).not.toHaveClass("tw-h-full");
+    expect(imageWrapper).toHaveClass(
+      "tw-min-h-40",
+      "tw-rounded-xl",
+      "tw-bg-iron-900/40"
+    );
+    expect(imageWrapper?.getAttribute("style")).toContain(
+      "aspect-ratio: 16 / 9"
+    );
+    expect(imageWrapper?.getAttribute("style")).toContain("max-height: 16rem");
+  });
+
   it("opens and closes the image modal", () => {
     render(
       <WaveDropPartContentMediaImage src="https://example.com/path/image.png" />

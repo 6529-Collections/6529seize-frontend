@@ -4,11 +4,15 @@ import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   extractAllNumbers,
-  formatAddress,
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
 import { type ChangeEvent, useRef, useState } from "react";
-import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
+import {
+  ReviewDistributionPlanTableSubscriptionFooterAlertRow,
+  ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow,
+  ReviewDistributionPlanTableSubscriptionFooterTokenIdRow,
+} from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 export type DistributionAirdropsPhase = "artist" | "team";
 
@@ -227,69 +231,46 @@ export function DistributionPhaseAirdropsModal(
   };
 
   return (
-    <Modal show onHide={handleClose}>
+    <Modal show onHide={handleClose} className="tailwind-scope">
       <Modal.Header closeButton={!props.isUploading}>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           {copy.title}
         </Modal.Title>
       </Modal.Header>
-      <hr className="mb-0 mt-0" />
+      <hr className="tw-my-0" />
       <Modal.Body>
-        <Container>
-          <Row className="pt-2 pb-2">
-            <Col>
-              Contract: The Memes - <span>{formatAddress(contract)}</span>
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col>
-              Token ID:{" "}
-              {props.confirmedTokenId !== undefined &&
-              props.confirmedTokenId !== null ? (
-                <span>{displayTokenId}</span>
-              ) : (
-                <input
-                  style={{
-                    color: "black",
-                    width: "100px",
-                  }}
-                  min={1}
-                  step={1}
-                  type="number"
-                  value={tokenId}
-                  onChange={(e) => {
-                    setTokenId(e.target.value);
-                  }}
-                />
-              )}
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col>
-              <div className="alert alert-warning mb-0 border border-dark">
-                This upload will replace the current {copy.successLabel}{" "}
-                airdrops list for this token.
-              </div>
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col>
-              <div className="alert alert-info mb-0 border border-dark">
-                <div className="mb-2">
+        <div className="tw-container tw-mx-auto">
+          <ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow
+            contract={contract}
+          />
+          <ReviewDistributionPlanTableSubscriptionFooterTokenIdRow
+            confirmedTokenId={props.confirmedTokenId}
+            displayTokenId={displayTokenId}
+            tokenId={tokenId}
+            onTokenIdChange={setTokenId}
+          />
+          <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="warning">
+            This upload will replace the current {copy.successLabel} airdrops
+            list for this token.
+          </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
+          <div className="tw-py-2">
+            <div>
+              <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-sky-300 tw-bg-sky-100 tw-px-4 tw-py-3 tw-text-sky-950">
+                <div className="tw-mb-2">
                   <strong>CSV format:</strong>{" "}
                   <code
-                    className="p-1 bg-dark text-light rounded"
+                    className="tw-rounded tw-bg-iron-900 tw-p-1 tw-text-iron-50"
                     style={{ fontSize: "12px" }}
                   >
                     address,count
                   </code>
                 </div>
-                <div className="mb-2">
+                <div className="tw-mb-2">
                   Do not include a header row. Each line must contain exactly
                   one wallet address and one positive integer count.
                 </div>
                 <pre
-                  className="mb-0 p-2 bg-dark text-light rounded"
+                  className="tw-mb-0 tw-rounded tw-bg-iron-900 tw-p-2 tw-text-iron-50"
                   style={{ fontSize: "12px", overflowX: "auto" }}
                 >
                   <code>
@@ -298,11 +279,11 @@ export function DistributionPhaseAirdropsModal(
                   </code>
                 </pre>
               </div>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-2">
-            <Col>
-              <label className="form-label mb-2" htmlFor="airdrop-csv-textarea">
+            </div>
+          </div>
+          <div className="tw-pb-2 tw-pt-3">
+            <div>
+              <label className="tw-mb-2 tw-block" htmlFor="airdrop-csv-textarea">
                 Paste CSV
               </label>
               <textarea
@@ -314,14 +295,14 @@ export function DistributionPhaseAirdropsModal(
                 }}
                 placeholder="0x...,2&#10;0x...,1"
                 rows={8}
-                className="form-control"
+                className="tw-block tw-w-full tw-rounded-lg tw-border tw-border-iron-300 tw-px-3 tw-py-2"
                 style={{ color: "black" }}
               />
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col>
-              <label className="form-label mb-2" htmlFor="airdrop-csv-file">
+            </div>
+          </div>
+          <div className="tw-py-2">
+            <div>
+              <label className="tw-mb-2 tw-block" htmlFor="airdrop-csv-file">
                 Or upload a CSV file
               </label>
               <input
@@ -333,40 +314,42 @@ export function DistributionPhaseAirdropsModal(
                 style={{ color: "black" }}
               />
               {selectedFileName && (
-                <div className="mt-2 text-muted">{selectedFileName}</div>
+                <div className="tw-mt-2 tw-text-iron-500">{selectedFileName}</div>
               )}
-            </Col>
-          </Row>
+            </div>
+          </div>
           {(inputError || previewError) && (
-            <Row className="pt-2 pb-2">
-              <Col>
-                <div className="text-danger">{inputError ?? previewError}</div>
-              </Col>
-            </Row>
+            <div className="tw-py-2">
+              <div>
+                <div className="tw-text-red">{inputError ?? previewError}</div>
+              </div>
+            </div>
           )}
           {parsedRows.length > 0 && !previewError && (
-            <Row className="pt-2 pb-2">
-              <Col>
-                <div className="alert alert-success mb-0 border border-dark">
+            <div className="tw-py-2">
+              <div>
+                <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-success/30 tw-bg-success/10 tw-px-4 tw-py-3 tw-text-success">
                   Ready to upload {copy.successLabel} airdrops:{" "}
                   {parsedRows.length} address(es) |{" "}
                   {parsedRows.reduce((total, row) => total + row.count, 0)}{" "}
                   count
                 </div>
-              </Col>
-            </Row>
+              </div>
+            </div>
           )}
-        </Container>
+        </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="secondary"
+        <button
+          type="button"
           onClick={handleClose}
           disabled={props.isUploading}
+          className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
         >
           Close
-        </Button>
-        <Button
+        </button>
+        <button
+          type="button"
           disabled={
             props.isUploading ||
             !isValidPositiveInteger(displayTokenId) ||
@@ -374,11 +357,11 @@ export function DistributionPhaseAirdropsModal(
             !!previewError ||
             parsedRows.length === 0
           }
-          variant="primary"
           onClick={handleUpload}
+          className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
         >
           {props.isUploading ? "Uploading..." : copy.submitLabel}
-        </Button>
+        </button>
       </Modal.Footer>
     </Modal>
   );

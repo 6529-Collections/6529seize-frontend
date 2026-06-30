@@ -2,7 +2,8 @@
 
 import styles from "./NextGenToken.module.scss";
 
-import { Accordion, Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "../NextGenTailwindLayout";
+import { Accordion } from "react-bootstrap";
 import type {
   NextGenCollection,
   NextGenToken,

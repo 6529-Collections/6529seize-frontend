@@ -6,7 +6,6 @@ import { DelegationCenterSection } from "@/types/enums";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Col, Container, Row } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
@@ -265,57 +264,63 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
 
   function printMenuRows() {
     return DELEGATION_MENU_ITEMS.map((item, index) => (
-      <Row
-        className={index === 0 ? "pt-2 pb-2" : "pt-1 pb-2"}
+      <div
+        className={`tw-flex tw-flex-wrap -tw-mx-3 ${
+          index === 0 ? "tw-pt-2" : "tw-pt-1"
+        } tw-pb-2`}
         key={item.section}
       >
-        <Col>{printMenuButton(item.section, item.label)}</Col>
-      </Row>
+        <div className="tw-w-full tw-px-3">
+          {printMenuButton(item.section, item.label)}
+        </div>
+      </div>
     ));
   }
 
   function printExternalLinkRows() {
     return [
-      <Row className="pt-2 pb-2" key="etherscan">
-        <Col>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-py-2" key="etherscan">
+        <div className="tw-w-full tw-px-3">
           <EtherscanLink />
-        </Col>
-      </Row>,
-      <Row className="pt-2 pb-2" key="github">
-        <Col>
+        </div>
+      </div>,
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-py-2" key="github">
+        <div className="tw-w-full tw-px-3">
           <GithubLink />
-        </Col>
-      </Row>,
+        </div>
+      </div>,
     ];
   }
 
   return (
-    <Container className="pt-4">
-      <Row>
-        <Col className={styles["menuLeft"]}>
-          <Container>
+    <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-pt-4">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className={`${styles["menuLeft"]} tw-px-3`}>
+          <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
             {printMenuRows()}
             {printExternalLinkRows()}
-          </Container>
-        </Col>
-        {<Col className={styles["menuRight"]}>{printContent()}</Col>}
-      </Row>
-      <Row className="pt-4">
-        <Col className={styles["menuLeftFull"]}>
-          <Container>
-            <Row>
-              <Col>
-                <Container className="no-padding">{printMenuRows()}</Container>
-              </Col>
-              <Col>
-                <Container className="no-padding">
+          </div>
+        </div>
+        <div className={`${styles["menuRight"]} tw-px-3`}>
+          {printContent()}
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+        <div className={`${styles["menuLeftFull"]} tw-px-3`}>
+          <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+            <div className="tw-flex tw-flex-wrap -tw-mx-3">
+              <div className="tw-flex-1 tw-px-3">
+                <div className="tw-w-full tw-p-0">{printMenuRows()}</div>
+              </div>
+              <div className="tw-flex-1 tw-px-3">
+                <div className="tw-w-full tw-p-0">
                   {printExternalLinkRows()}
-                </Container>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       {toast && (
         <DelegationToast
           toastRef={toastRef}
@@ -324,7 +329,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           setShowToast={setToastVisibility}
         />
       )}
-    </Container>
+    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "./NextGenTailwindLayout";
 import { NextGenTokenImage } from "./nextgenToken/NextGenTokenImage";
 import type {
   NextGenCollection,

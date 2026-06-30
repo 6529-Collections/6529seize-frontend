@@ -4,7 +4,6 @@ import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails
 import { numberWithCommas } from "@/helpers/Helpers";
 import { faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Col, Container, Row } from "react-bootstrap";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 
 export default function UserPageSubscriptionsBalance(
@@ -16,10 +15,10 @@ export default function UserPageSubscriptionsBalance(
   }>
 ) {
   return (
-    <Container className="no-padding">
-      <Row className="pb-2">
-        <Col className="d-flex align-items-center gap-2">
-          <h5 className="no-wrap mb-0">Current Balance</h5>
+    <div>
+      <div className="tw-pb-2">
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <h5 className="tw-mb-0 tw-whitespace-nowrap">Current Balance</h5>
           {props.show_refresh && (
             <>
               {props.fetching ? (
@@ -41,16 +40,16 @@ export default function UserPageSubscriptionsBalance(
               )}
             </>
           )}
-        </Col>
-      </Row>
-      <Row className="pt-1">
-        <Col>
+        </div>
+      </div>
+      <div className="tw-pt-1">
+        <div>
           {props.fetching ? (
             <DotLoader />
           ) : (
-            <span className="d-flex align-items-center gap-3">
-              <span className="d-flex align-items-center gap-2">
-                <div className="d-flex align-items-center gap-1">
+            <span className="tw-flex tw-items-center tw-gap-3">
+              <span className="tw-flex tw-items-center tw-gap-2">
+                <div className="tw-flex tw-items-center tw-gap-1">
                   <b>
                     {props.details?.balance
                       ? numberWithCommas(
@@ -77,8 +76,8 @@ export default function UserPageSubscriptionsBalance(
               </span>
             </span>
           )}
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
