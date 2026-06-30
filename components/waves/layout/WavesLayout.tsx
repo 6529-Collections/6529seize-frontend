@@ -1,11 +1,23 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
-import WavesDesktop from "../WavesDesktop";
 import WavesMobile from "../WavesMobile";
+
+type WavesBranchProps = {
+  readonly children: ReactNode;
+};
+
+function WavesBranchLoadingFallback() {
+  return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
+}
+
+const WavesDesktop = dynamic<WavesBranchProps>(() => import("../WavesDesktop"), {
+  loading: () => <WavesBranchLoadingFallback />,
+});
 
 function getConnectPrompt(
   contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
