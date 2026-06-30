@@ -12,6 +12,7 @@
  */
 
 import { ApiDropV2 } from '../models/ApiDropV2';
+import { HttpFile } from '../http/http';
 
 export class ApiDropV2Page {
     'data': Array<ApiDropV2>;

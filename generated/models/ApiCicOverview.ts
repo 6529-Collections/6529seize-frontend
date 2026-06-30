@@ -12,6 +12,7 @@
  */
 
 import { ApiCicContributorsPage } from '../models/ApiCicContributorsPage';
+import { HttpFile } from '../http/http';
 
 export class ApiCicOverview {
     'total_cic': number;

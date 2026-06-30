@@ -13,6 +13,7 @@
 
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropType } from '../models/ApiDropType';
+import { HttpFile } from '../http/http';
 
 export class ApiLightDrop {
     'id': string;

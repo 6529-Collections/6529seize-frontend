@@ -13,6 +13,7 @@
 
 import { ApiDrop } from '../models/ApiDrop';
 import { ApiDropVote } from '../models/ApiDropVote';
+import { HttpFile } from '../http/http';
 
 export class ApiDropAndDropVote {
     'drop': ApiDrop;

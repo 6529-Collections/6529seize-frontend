@@ -12,6 +12,7 @@
  */
 
 import { ApiBulkRepTarget } from '../models/ApiBulkRepTarget';
+import { HttpFile } from '../http/http';
 
 export class ApiBulkRepRequest {
     'targets': Array<ApiBulkRepTarget>;

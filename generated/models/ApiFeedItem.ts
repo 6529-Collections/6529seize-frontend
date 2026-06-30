@@ -12,6 +12,7 @@
  */
 
 import { ApiFeedItemType } from '../models/ApiFeedItemType';
+import { HttpFile } from '../http/http';
 
 export class ApiFeedItem {
     'serial_no': number;

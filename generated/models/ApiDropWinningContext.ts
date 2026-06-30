@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveDecisionAward } from '../models/ApiWaveDecisionAward';
+import { HttpFile } from '../http/http';
 
 export class ApiDropWinningContext {
     'place': number;

@@ -12,6 +12,7 @@
  */
 
 import { ApiRepCategory } from '../models/ApiRepCategory';
+import { HttpFile } from '../http/http';
 
 export class ApiRepCategoriesPage {
     'data': Array<ApiRepCategory>;

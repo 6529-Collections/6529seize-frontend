@@ -12,6 +12,7 @@
  */
 
 import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
+import { HttpFile } from '../http/http';
 
 export class ApiCommunityMetric {
     'older': ApiCommunityMetricSample;

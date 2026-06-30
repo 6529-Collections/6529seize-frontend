@@ -16,6 +16,7 @@ import { ApiDropMainType } from '../models/ApiDropMainType';
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
+import { HttpFile } from '../http/http';
 
 export class ApiOgMetadataDrop {
     'id': string;

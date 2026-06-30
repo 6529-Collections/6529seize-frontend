@@ -17,6 +17,7 @@ import { ApiWaveOverviewContributor } from '../models/ApiWaveOverviewContributor
 import { ApiWaveOverviewDescriptionDrop } from '../models/ApiWaveOverviewDescriptionDrop';
 import { ApiWaveRepSummary } from '../models/ApiWaveRepSummary';
 import { ApiWaveScore } from '../models/ApiWaveScore';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveOverview {
     'id': string;

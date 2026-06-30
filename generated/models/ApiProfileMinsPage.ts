@@ -12,6 +12,7 @@
  */
 
 import { ApiProfileMin } from '../models/ApiProfileMin';
+import { HttpFile } from '../http/http';
 
 export class ApiProfileMinsPage {
     'data': Array<ApiProfileMin>;

@@ -12,6 +12,7 @@
  */
 
 import { ApiAuthSettings } from '../models/ApiAuthSettings';
+import { HttpFile } from '../http/http';
 
 export class ApiSeizeSettings {
     'rememes_submission_tdh_threshold': number;

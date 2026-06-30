@@ -27,6 +27,7 @@ import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
+import { HttpFile } from '../http/http';
 
 export class ApiDropWithoutWave {
     'id': string;

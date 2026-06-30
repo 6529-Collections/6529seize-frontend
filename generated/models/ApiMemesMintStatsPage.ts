@@ -12,6 +12,7 @@
  */
 
 import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
+import { HttpFile } from '../http/http';
 
 export class ApiMemesMintStatsPage {
     'data': Array<ApiMemesMintStat>;

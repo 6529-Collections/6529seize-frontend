@@ -20,6 +20,7 @@ import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiReplyToDrop } from '../models/ApiReplyToDrop';
+import { HttpFile } from '../http/http';
 
 export class ApiCreateDropRequest {
     'wave_id': string;

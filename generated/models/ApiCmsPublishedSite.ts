@@ -13,6 +13,7 @@
 
 import { ApiCmsPublishedPackage } from '../models/ApiCmsPublishedPackage';
 import { ApiCmsSite } from '../models/ApiCmsSite';
+import { HttpFile } from '../http/http';
 
 export class ApiCmsPublishedSite {
     'site': ApiCmsSite;

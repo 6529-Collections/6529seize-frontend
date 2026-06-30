@@ -85,10 +85,7 @@ Web logout sends cookies and:
 ## Native And Desktop Session Flow
 
 Native callers use the same endpoints with `client_type: "native"`.
-Desktop callers use the same endpoints with `client_type: "desktop"` and must
-request/login from an HTTP localhost loopback Origin with an explicit port. The
-backend signs that Client Origin into the desktop challenge and requires the
-login request Origin to match it.
+Desktop callers use the same endpoints with `client_type: "desktop"`.
 
 Native nonce requests:
 

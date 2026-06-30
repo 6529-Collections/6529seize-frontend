@@ -12,6 +12,7 @@
  */
 
 import { ApiBulkRateSkippedIdentity } from '../models/ApiBulkRateSkippedIdentity';
+import { HttpFile } from '../http/http';
 
 export class ApiBulkRateResponse {
     'skipped': Array<ApiBulkRateSkippedIdentity>;

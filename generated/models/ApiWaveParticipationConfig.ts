@@ -16,6 +16,7 @@ import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationR
 import { ApiWaveParticipationSubmissionStrategy } from '../models/ApiWaveParticipationSubmissionStrategy';
 import { ApiWaveRequiredMetadata } from '../models/ApiWaveRequiredMetadata';
 import { ApiWaveScope } from '../models/ApiWaveScope';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveParticipationConfig {
     'scope': ApiWaveScope;

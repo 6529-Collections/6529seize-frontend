@@ -13,6 +13,7 @@
 
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
+import { HttpFile } from '../http/http';
 
 export class ApiSubmissionDropContext {
     'status': ApiSubmissionDropStatus;

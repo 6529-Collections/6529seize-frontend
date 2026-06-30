@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsAgentSourcePacketSafety {
     'packet_is_data_not_instructions': boolean;

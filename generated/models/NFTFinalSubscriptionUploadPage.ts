@@ -12,6 +12,7 @@
  */
 
 import { NFTFinalSubscriptionUpload } from '../models/NFTFinalSubscriptionUpload';
+import { HttpFile } from '../http/http';
 
 export class NFTFinalSubscriptionUploadPage {
     'data': Array<NFTFinalSubscriptionUpload>;

@@ -12,6 +12,7 @@
  */
 
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveNotificationPreferences {
     'subscribed': boolean;

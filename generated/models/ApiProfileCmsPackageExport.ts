@@ -13,6 +13,7 @@
 
 import { ApiProfileCmsPackageStatus } from '../models/ApiProfileCmsPackageStatus';
 import { ApiProfileCmsPointerEvent } from '../models/ApiProfileCmsPointerEvent';
+import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsPackageExport {
     '_package': { [key: string]: any; };

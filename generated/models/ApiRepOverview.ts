@@ -12,6 +12,7 @@
  */
 
 import { ApiRepContributorsPage } from '../models/ApiRepContributorsPage';
+import { HttpFile } from '../http/http';
 
 export class ApiRepOverview {
     'total_rep': number;

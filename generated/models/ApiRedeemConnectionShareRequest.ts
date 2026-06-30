@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
 
 export class ApiRedeemConnectionShareRequest {
     'connection_share_code': string;

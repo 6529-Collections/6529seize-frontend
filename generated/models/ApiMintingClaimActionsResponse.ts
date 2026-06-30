@@ -12,6 +12,7 @@
  */
 
 import { ApiMintingClaimAction } from '../models/ApiMintingClaimAction';
+import { HttpFile } from '../http/http';
 
 export class ApiMintingClaimActionsResponse {
     'contract': string;

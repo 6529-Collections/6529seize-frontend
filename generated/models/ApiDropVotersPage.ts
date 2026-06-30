@@ -12,6 +12,7 @@
  */
 
 import { ApiDropVoter } from '../models/ApiDropVoter';
+import { HttpFile } from '../http/http';
 
 export class ApiDropVotersPage {
     'data': Array<ApiDropVoter>;

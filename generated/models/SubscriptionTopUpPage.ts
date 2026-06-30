@@ -12,6 +12,7 @@
  */
 
 import { SubscriptionTopUp } from '../models/SubscriptionTopUp';
+import { HttpFile } from '../http/http';
 
 export class SubscriptionTopUpPage {
     'data': Array<SubscriptionTopUp>;

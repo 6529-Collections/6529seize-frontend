@@ -14,6 +14,7 @@
 import { MintingClaimAnimationDetailsGlb } from '../models/MintingClaimAnimationDetailsGlb';
 import { MintingClaimAnimationDetailsHtml } from '../models/MintingClaimAnimationDetailsHtml';
 import { MintingClaimAnimationDetailsVideo } from '../models/MintingClaimAnimationDetailsVideo';
+import { HttpFile } from '../http/http';
 
 /**
  * @type MintingClaimAnimationDetails

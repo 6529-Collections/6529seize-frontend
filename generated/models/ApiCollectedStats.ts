@@ -12,6 +12,7 @@
  */
 
 import { ApiCollectedStatsSeason } from '../models/ApiCollectedStatsSeason';
+import { HttpFile } from '../http/http';
 
 export class ApiCollectedStats {
     'boost': number;

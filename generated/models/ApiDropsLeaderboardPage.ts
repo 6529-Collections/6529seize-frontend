@@ -13,6 +13,7 @@
 
 import { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
 import { ApiWaveMin } from '../models/ApiWaveMin';
+import { HttpFile } from '../http/http';
 
 export class ApiDropsLeaderboardPage {
     'drops': Array<ApiDropWithoutWave>;

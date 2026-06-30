@@ -268,7 +268,7 @@ paths:
             type: integer
             minimum: 1
             default: 1
-          description: >
+          description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
       x-6529-query-schema:
@@ -10615,6 +10615,26 @@ components:
       enum:
         - application/pdf
         - text/csv
+    ApiAuthSettings:
+      type: object
+      required:
+        - structured_signatures_required
+        - session_v2_migration_deadline
+      properties:
+        structured_signatures_required:
+          type: boolean
+          description: >-
+            True when backend strict structured wallet signature enforcement is
+            enabled. Frontend clients should treat legacy auth as no longer
+            acceptable when this is true.
+        session_v2_migration_deadline:
+          type: string
+          nullable: true
+          description: >-
+            Optional global deadline for frontend v1-auth to session-v2
+            migration countdown and cutoff behavior, formatted as an ISO
+            datetime with timezone. Null means no migration prompt should be
+            shown unless strict structured signatures are required.
     ApiAvailableRatingCredit:
       type: object
       required:
@@ -11814,6 +11834,21 @@ components:
           nullable: true
         deep_link_path:
           type: string
+    ApiCreateDropMedia:
+      type: object
+      required:
+        - url
+        - mime_type
+      properties:
+        url:
+          type: string
+          maxLength: 2000
+        mime_type:
+          type: string
+          maxLength: 100
+        media_upload_id:
+          type: string
+          nullable: true
     ApiCreateDropPart:
       type: object
       required:
@@ -11836,19 +11871,6 @@ components:
           default: []
           items:
             $ref: "#/components/schemas/ApiDropAttachmentReference"
-    ApiCreateDropMedia:
-      type: object
-      required:
-        - url
-        - mime_type
-      properties:
-        url:
-          type: string
-        mime_type:
-          type: string
-        media_upload_id:
-          type: string
-          nullable: true
     ApiCreateDropPollRequest:
       type: object
       required:
@@ -17238,27 +17260,6 @@ components:
         cms_package:
           type: object
           additionalProperties: true
-    ApiAuthSettings:
-      type: object
-      required:
-        - structured_signatures_required
-        - session_v2_migration_deadline
-      properties:
-        structured_signatures_required:
-          type: boolean
-          description: >-
-            True when backend strict structured wallet signature enforcement is
-            enabled. Frontend clients should treat legacy auth as no longer
-            acceptable when this is true.
-        session_v2_migration_deadline:
-          type: string
-          format: date-time
-          nullable: true
-          description: >-
-            Always-present, nullable global deadline for frontend v1-auth to
-            session-v2 migration countdown and cutoff behavior, formatted as an
-            ISO datetime with timezone. Null means no migration prompt should be
-            shown unless strict structured signatures are required.
     ApiSeizeSettings:
       type: object
       required:
@@ -17430,7 +17431,7 @@ components:
           type: integer
           minimum: 1
           default: 1
-          description: >
+          description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
     ApiSessionNonceResponse:
@@ -17474,7 +17475,7 @@ components:
           nullable: true
           description: >-
             Optional active wallet address. Web clients should include it so
-            multi-account sessions target the matching address-scoped cookie
+            multi-account sessions refresh the matching address-scoped cookie
             instead of the compatibility cookie.
     ApiSessionWebResponse:
       type: object

@@ -14,6 +14,7 @@
 import { ApiProfileCmsAgentPatchValidationResultTarget } from '../models/ApiProfileCmsAgentPatchValidationResultTarget';
 import { ApiProfileCmsValidationIssue } from '../models/ApiProfileCmsValidationIssue';
 import { ApiProfileCmsValidationResult } from '../models/ApiProfileCmsValidationResult';
+import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsAgentPatchValidationResult {
     'schema': ApiProfileCmsAgentPatchValidationResultSchemaEnum;

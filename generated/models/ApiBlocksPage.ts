@@ -12,6 +12,7 @@
  */
 
 import { ApiBlockItem } from '../models/ApiBlockItem';
+import { HttpFile } from '../http/http';
 
 export class ApiBlocksPage {
     'data': Array<ApiBlockItem>;

@@ -14,6 +14,7 @@
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropV2 } from '../models/ApiDropV2';
 import { ApiWaveOverview } from '../models/ApiWaveOverview';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveDropsFeedV2 {
     'wave': ApiWaveOverview;

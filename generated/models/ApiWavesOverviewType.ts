@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
 
 export enum ApiWavesOverviewType {
     MostSubscribed = 'MOST_SUBSCRIBED',

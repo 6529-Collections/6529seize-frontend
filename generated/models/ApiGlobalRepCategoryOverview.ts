@@ -14,6 +14,7 @@
 import { ApiGlobalRepCategoryGiver } from '../models/ApiGlobalRepCategoryGiver';
 import { ApiGlobalRepCategoryRating } from '../models/ApiGlobalRepCategoryRating';
 import { ApiGlobalRepCategoryRecipient } from '../models/ApiGlobalRepCategoryRecipient';
+import { HttpFile } from '../http/http';
 
 export class ApiGlobalRepCategoryOverview {
     'category': string;

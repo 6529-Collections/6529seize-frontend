@@ -12,6 +12,7 @@
  */
 
 import { ApiGroup } from '../models/ApiGroup';
+import { HttpFile } from '../http/http';
 
 /**
 * A scope of audience

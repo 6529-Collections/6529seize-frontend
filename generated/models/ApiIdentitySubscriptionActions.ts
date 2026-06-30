@@ -12,6 +12,7 @@
  */
 
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
+import { HttpFile } from '../http/http';
 
 export class ApiIdentitySubscriptionActions {
     'actions': Array<ApiIdentitySubscriptionTargetAction>;

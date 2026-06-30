@@ -12,6 +12,7 @@
  */
 
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
+import { HttpFile } from '../http/http';
 
 export class ApiIncomingIdentitySubscriptionsPage {
     'data': Array<ApiIdentityAndSubscriptionActions>;

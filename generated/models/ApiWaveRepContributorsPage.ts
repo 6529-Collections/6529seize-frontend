@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveRepContributor } from '../models/ApiWaveRepContributor';
+import { HttpFile } from '../http/http';
 
 export class ApiWaveRepContributorsPage {
     'data': Array<ApiWaveRepContributor>;

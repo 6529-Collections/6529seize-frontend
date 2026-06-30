@@ -12,6 +12,7 @@
  */
 
 import { ApiNftLinkData } from '../models/ApiNftLinkData';
+import { HttpFile } from '../http/http';
 
 export class ApiDropNftLink {
     'url_in_text': string;
