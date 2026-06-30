@@ -367,12 +367,6 @@ function getFirstPartyOgKindFromImageUrl(
   return null;
 }
 
-export function getFirstPartyOpenGraphPreviewKind(
-  preview: OpenGraphPreviewData | null | undefined
-): FirstPartyOpenGraphPreviewKind | null {
-  return getFirstPartyOgKindFromImageUrl(extractImageUrl(preview));
-}
-
 function wrapLongUnbrokenSegments(value: string | undefined): ReactNode {
   if (!value) {
     return value ?? "";

@@ -1,9 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
-import OpenGraphPreview, {
-  getFirstPartyOpenGraphPreviewKind,
-} from "@/components/waves/OpenGraphPreview";
+import OpenGraphPreview from "@/components/waves/OpenGraphPreview";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -599,34 +597,6 @@ describe("OpenGraphPreview", () => {
       "sizes",
       "(max-width: 640px) 100vw, (max-width: 768px) 14rem, (max-width: 1024px) 18rem, 20rem"
     );
-  });
-
-  it("identifies generated first-party OpenGraph metadata", () => {
-    expect(
-      getFirstPartyOpenGraphPreviewKind({
-        image: "https://6529.io/api/og-metadata/profiles/punk6529",
-      })
-    ).toBe("profile");
-    expect(
-      getFirstPartyOpenGraphPreviewKind({
-        image: "https://staging.6529.io/api/og-metadata/drops/123",
-      })
-    ).toBe("drop");
-    expect(
-      getFirstPartyOpenGraphPreviewKind({
-        image: "https://6529.io/api/og-metadata/waves/wave-id",
-      })
-    ).toBe("wave");
-    expect(
-      getFirstPartyOpenGraphPreviewKind({
-        image: "https://example.com/preview.png",
-      })
-    ).toBeNull();
-    expect(
-      getFirstPartyOpenGraphPreviewKind({
-        image: "https://evil.example.com/api/og-metadata/profiles/x",
-      })
-    ).toBeNull();
   });
 
   it("handles external links and image arrays", () => {
