@@ -27,6 +27,7 @@ import {
   getRefreshToken,
   getWalletAddress,
   getWalletRole,
+  hasActiveSessionV2Auth,
 } from "@/services/auth/auth.utils";
 import {
   createConnectionShare,
@@ -65,6 +66,30 @@ type DisplayContent = {
   readonly content: ReactNode;
   readonly url: string;
 };
+
+function getLocalLegacyDesktopAuth(walletAddress: string): {
+  readonly refreshToken: string;
+  readonly role: string | null;
+} | null {
+  if (hasActiveSessionV2Auth({ address: walletAddress })) {
+    return null;
+  }
+
+  const activeWalletAddress = getWalletAddress();
+  if (activeWalletAddress?.toLowerCase() !== walletAddress.toLowerCase()) {
+    return null;
+  }
+
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return null;
+  }
+
+  return {
+    refreshToken,
+    role: getWalletRole(),
+  };
+}
 
 function isAbortError(error: unknown, signal?: AbortSignal): boolean {
   return (
@@ -447,9 +472,10 @@ export function HeaderQRModal({
   const [shouldRender, setShouldRender] = useState(show);
   const [isVisible, setIsVisible] = useState(show);
 
-  const { hasValidWalletAuth } = useSeizeConnectContext();
+  const { address: contextWalletAddress, hasValidWalletAuth } =
+    useSeizeConnectContext();
   const { ensureActiveSessionV2WebSession, requestSessionUpgrade } = useAuth();
-  const activeWalletAddress = getWalletAddress();
+  const activeWalletAddress = contextWalletAddress ?? getWalletAddress();
   const hasWalletAddress = Boolean(activeWalletAddress);
 
   const [activeTab, setActiveTab] = useState<Mode>(
@@ -673,9 +699,13 @@ export function HeaderQRModal({
     try {
       setMobileConnectionShareStatus("loading");
       let hasActiveSession = false;
+      let didVerificationError = false;
       try {
         if (ensureActiveSessionV2WebSession) {
-          hasActiveSession = await ensureActiveSessionV2WebSession(signal);
+          hasActiveSession = await ensureActiveSessionV2WebSession({
+            address: walletAddress,
+            abortSignal: signal,
+          });
         }
       } catch (error: unknown) {
         if (isStaleGeneration() || isAbortError(error, signal)) {
@@ -683,9 +713,15 @@ export function HeaderQRModal({
         }
 
         console.error("Failed to verify active web session", error);
+        didVerificationError = true;
       }
 
       if (isStaleGeneration() || signal?.aborted) {
+        return "";
+      }
+
+      if (didVerificationError) {
+        setUnavailableMobileConnectionShare("error");
         return "";
       }
 
@@ -753,12 +789,12 @@ export function HeaderQRModal({
       return "";
     }
 
-    const legacyRefreshToken = getRefreshToken();
-    if (legacyRefreshToken) {
+    const localLegacyDesktopAuth = getLocalLegacyDesktopAuth(walletAddress);
+    if (localLegacyDesktopAuth) {
       const legacyPath = buildLegacyDesktopConnectionSharePath({
-        token: legacyRefreshToken,
+        token: localLegacyDesktopAuth.refreshToken,
         address: walletAddress,
-        role: getWalletRole(),
+        role: localLegacyDesktopAuth.role,
       });
       const coreUrl = buildLegacyDesktopConnectionShareUrl({
         coreScheme,
@@ -784,6 +820,42 @@ export function HeaderQRModal({
 
     try {
       setDesktopConnectionShareStatus("loading");
+      let hasActiveSession = false;
+      let didVerificationError = false;
+      try {
+        if (ensureActiveSessionV2WebSession) {
+          hasActiveSession = await ensureActiveSessionV2WebSession({
+            address: walletAddress,
+            abortSignal: signal,
+          });
+        }
+      } catch (error: unknown) {
+        if (isStaleGeneration() || isAbortError(error, signal)) {
+          return "";
+        }
+
+        console.error("Failed to verify active web session", error);
+        didVerificationError = true;
+      }
+
+      if (isStaleGeneration() || signal?.aborted) {
+        return "";
+      }
+
+      if (didVerificationError) {
+        setUnavailableDesktopConnectionShare("error");
+        return "";
+      }
+
+      if (!hasActiveSession) {
+        terminalConnectionShareFailuresRef.current.set(
+          failureKey,
+          "legacy-auth"
+        );
+        setUnavailableDesktopConnectionShare("legacy-auth");
+        return "";
+      }
+
       const share = await createLegacyDesktopConnectionShare({ signal });
 
       if (isStaleGeneration()) {
