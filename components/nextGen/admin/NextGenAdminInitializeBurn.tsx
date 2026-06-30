@@ -9,7 +9,6 @@ import {
   isStructuredSignaturesEnabled,
 } from "@/services/wallet-signatures/structured-wallet-signatures";
 import { useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import { useReadContract, useSignMessage } from "wagmi";
 import {
@@ -31,8 +30,13 @@ import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
 import styles from "./NextGenAdmin.module.scss";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenAdminHeadingRow,
   NextGenAdminStatusFormGroup,
+  Row,
 } from "./NextGenAdminShared";
 
 interface Props {
@@ -288,7 +292,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
               Submit
             </Button>
           </Form>
-          {uploadError && <div className="text-danger">{uploadError}</div>}
+          {uploadError && <div className="tw-text-error">{uploadError}</div>}
           {loading && !contractWrite.isLoading && (
             <div>
               Syncing with DB... Sign Message <code>{uuid}</code> in your

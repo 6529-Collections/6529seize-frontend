@@ -2,7 +2,6 @@
 
 import { ANY_COLLECTION } from "@/components/delegation/delegation-constants";
 import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { FunctionSelectors } from "../nextgen_contracts";
 import type { MintingDetails } from "../nextgen_entities";
@@ -19,8 +18,13 @@ import {
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenAdminHeadingRow,
   NextGenCollectionIdFormGroup,
+  Row,
 } from "./NextGenAdminShared";
 
 interface Props {

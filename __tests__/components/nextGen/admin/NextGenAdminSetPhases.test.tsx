@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import NextGenAdminSetPhases from '@/components/nextGen/admin/NextGenAdminSetPhases';
 
 jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
+  ...jest.requireActual('@/components/nextGen/admin/NextGenAdminShared'),
   NextGenCollectionIdFormGroup: ({ collection_id, onChange }: any) => (
     <input data-testid="collection" value={collection_id} onChange={e=>onChange(e.target.value)} />
   ),

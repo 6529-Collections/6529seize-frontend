@@ -5,6 +5,7 @@ import NextGenAdminUpdateCollection, { UpdateType } from '@/components/nextGen/a
 jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
 
 jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
+  ...jest.requireActual('@/components/nextGen/admin/NextGenAdminShared'),
   NextGenCollectionIdFormGroup: ({ collection_id, collection_ids, onChange }: any) => (
     <select data-testid="collection" value={collection_id} onChange={e=>onChange(e.target.value)}>
       <option value="" />

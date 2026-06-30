@@ -2,7 +2,6 @@
 
 import { publicEnv } from "@/config/env";
 import { useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";
 import { postFormData } from "@/services/6529api";
@@ -22,8 +21,13 @@ import {
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenAdminHeadingRow,
   NextGenCollectionIdFormGroup,
+  Row,
 } from "./NextGenAdminShared";
 interface Props {
   close: () => void;
@@ -195,7 +199,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               }}
             />
             <Form.Group className="mb-3">
-              <span className="d-flex align-items-center gap-3">
+              <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
                   checked={type == Type.ALLOWLIST}
                   type="radio"
@@ -267,7 +271,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               />
             </Form.Group>
             {!uploading && errors.length > 0 && printAdminErrors(errors)}
-            <div className="d-flex align-items-center mt-4 gap-3">
+            <div className="tw-flex tw-items-center tw-gap-4 tw-mt-6">
               <Button
                 className="seize-btn"
                 disabled={
@@ -290,9 +294,9 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                   wallet...
                 </span>
               )}
-              {uploadSuccess && <span className="text-success">Uploaded</span>}
+              {uploadSuccess && <span className="tw-text-success">Uploaded</span>}
               {!uploading && uploadError && (
-                <span className="text-danger">{uploadError}</span>
+                <span className="tw-text-error">{uploadError}</span>
               )}
             </div>
           </Form>
