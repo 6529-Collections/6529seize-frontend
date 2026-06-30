@@ -2,10 +2,6 @@ import styles from "./AppWallet.module.scss";
 import Link from "next/link";
 import type { AppWallet } from "./AppWalletsContext";
 import AppWalletAvatar from "./AppWalletAvatar";
-import {
-  appWalletColClassName,
-  appWalletRowClassName,
-} from "./app-wallet-tailwind-classes";
 
 export default function AppWalletCard(
   props: Readonly<{
@@ -18,10 +14,8 @@ export default function AppWalletCard(
       className="tw-no-underline"
     >
       <div className={styles["appWalletCard"]}>
-        <div className={appWalletRowClassName}>
-          <div
-            className={`${appWalletColClassName} tw-flex tw-items-center tw-gap-2 tw-break-words`}
-          >
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-gap-2 tw-break-words tw-px-3">
             <AppWalletAvatar address={props.wallet.address} />
             <span className="tw-text-lg tw-font-bold">{props.wallet.name}</span>
             {props.wallet.imported ? (
@@ -31,10 +25,8 @@ export default function AppWalletCard(
             )}
           </div>
         </div>
-        <div className={`${appWalletRowClassName} tw-pt-3`}>
-          <div
-            className={`${appWalletColClassName} tw-break-words tw-text-sm tw-font-extralight`}
-          >
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3">
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-break-words tw-px-3 tw-text-sm tw-font-extralight">
             {props.wallet.address.toLowerCase()}
           </div>
         </div>

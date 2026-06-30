@@ -18,14 +18,6 @@ import {
   useAppWallets,
 } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
-import {
-  appWalletButtonClassName,
-  appWalletCol12ClassName,
-  appWalletColClassName,
-  appWalletContainerClassName,
-  appWalletPhraseColClassName,
-  appWalletRowClassName,
-} from "./app-wallet-tailwind-classes";
 
 const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE;
 const MNEMONIC_WORD_FIELD_IDS = Array.from(
@@ -44,7 +36,7 @@ export default function AppWalletImport() {
 
   if (!appWalletsSupported) {
     return (
-      <div className={appWalletContainerClassName}>
+      <div className="tw-mx-auto tw-w-full tw-px-3 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
         <AppWalletsUnsupported />
       </div>
     );
@@ -52,9 +44,9 @@ export default function AppWalletImport() {
 
   return (
     <>
-      <div className={`${appWalletContainerClassName} tw-pt-5`}>
-        <div className={appWalletRowClassName}>
-          <div className={appWalletColClassName}>
+      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-5 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
             <Link
               className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-no-underline"
               href="/tools/app-wallets"
@@ -64,32 +56,34 @@ export default function AppWalletImport() {
             </Link>
           </div>
         </div>
-        <div className={`${appWalletRowClassName} tw-pt-4`}>
-          <div className={appWalletColClassName}>
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
             <h1>Import App Wallet</h1>
           </div>
         </div>
-        <div className={`${appWalletRowClassName} tw-pt-4`}>
-          <div className={appWalletColClassName}>
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
             <button
               type="button"
               onClick={() => setIsMnemonic(true)}
-              className={appWalletButtonClassName(
-                isMnemonic ? "info" : "outline-info",
-                "tw-w-full"
-              )}
+              className={`tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65] ${
+                isMnemonic
+                  ? "tw-border-[#0dcaf0] tw-bg-[#0dcaf0] tw-text-black enabled:hover:tw-border-[#25cff2] enabled:hover:tw-bg-[#31d2f2]"
+                  : "tw-border-[#0dcaf0] tw-bg-transparent tw-text-[#0dcaf0] enabled:hover:tw-bg-[#0dcaf0] enabled:hover:tw-text-black"
+              }`}
             >
               Mnemonic
             </button>
           </div>
-          <div className={appWalletColClassName}>
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
             <button
               type="button"
               onClick={() => setIsMnemonic(false)}
-              className={appWalletButtonClassName(
-                !isMnemonic ? "info" : "outline-info",
-                "tw-w-full"
-              )}
+              className={`tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65] ${
+                isMnemonic
+                  ? "tw-border-[#0dcaf0] tw-bg-transparent tw-text-[#0dcaf0] enabled:hover:tw-bg-[#0dcaf0] enabled:hover:tw-text-black"
+                  : "tw-border-[#0dcaf0] tw-bg-[#0dcaf0] tw-text-black enabled:hover:tw-border-[#25cff2] enabled:hover:tw-bg-[#31d2f2]"
+              }`}
             >
               Private Key
             </button>
@@ -140,17 +134,17 @@ function AppWalletImportMnemonic() {
   }
 
   return (
-    <div className={`${appWalletContainerClassName} tw-pb-5 tw-pt-3`}>
-      <div className={appWalletRowClassName}>
+    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-5 tw-pt-3 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         {phrase.map((w, i) => (
           <div
-            className={`${appWalletPhraseColClassName} tw-pb-2 tw-pt-2`}
+            className="tw-relative tw-w-1/2 tw-max-w-full tw-flex-none tw-px-3 tw-pb-2 tw-pt-2 min-[576px]:tw-w-1/3 min-[768px]:tw-w-1/4"
             key={MNEMONIC_WORD_FIELD_IDS[i]}
           >
             <div className={styles["phrase"]}>
-              <div className={appWalletRowClassName}>
-                <div className={`${appWalletColClassName} tw-flex tw-gap-2`}>
-                  <span className="tw-text-iron-400 tw-font-extralight">
+              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-gap-2 tw-px-3">
+                  <span className="tw-font-extralight tw-text-iron-400">
                     {i + 1}
                   </span>
                   <span>
@@ -185,13 +179,12 @@ function AppWalletImportMnemonic() {
           </div>
         ))}
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-4`}>
-        <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
           <button
             type="button"
             onClick={clear}
-            className={appWalletButtonClassName("warning", "tw-font-bold")}
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#ffc107] tw-bg-[#ffc107] tw-px-3 tw-py-1.5 tw-text-base tw-font-bold tw-leading-6 tw-text-black tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#ffc720] enabled:hover:tw-bg-[#ffca2c] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             disabled={!phrase.some(Boolean) && !isCompletePhrase()}
           >
             Clear
@@ -200,7 +193,7 @@ function AppWalletImportMnemonic() {
             type="button"
             disabled={!isCompletePhrase() || isReadonly}
             onClick={validate}
-            className={appWalletButtonClassName("primary", "tw-font-bold")}
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-bold tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
           >
             Validate
           </button>
@@ -245,12 +238,12 @@ function AppWalletImportPrivateKey() {
   };
 
   return (
-    <div className={`${appWalletContainerClassName} tw-pb-5 tw-pt-3`}>
-      <div className={appWalletRowClassName}>
-        <div className={`${appWalletColClassName} tw-pb-2 tw-pt-2`}>
+    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-5 tw-pt-3 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3 tw-pb-2 tw-pt-2">
           <div className={styles["phrase"]}>
-            <div className={appWalletRowClassName}>
-              <div className={`${appWalletColClassName} tw-flex tw-gap-2`}>
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-gap-2 tw-px-3">
                 <input
                   ref={inputRef}
                   autoFocus
@@ -266,13 +259,12 @@ function AppWalletImportPrivateKey() {
           </div>
         </div>
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-4`}>
-        <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
           <button
             type="button"
             onClick={clear}
-            className={appWalletButtonClassName("warning", "tw-font-bold")}
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#ffc107] tw-bg-[#ffc107] tw-px-3 tw-py-1.5 tw-text-base tw-font-bold tw-leading-6 tw-text-black tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#ffc720] enabled:hover:tw-bg-[#ffca2c] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             disabled={!privateKey}
           >
             Clear
@@ -281,7 +273,7 @@ function AppWalletImportPrivateKey() {
             type="button"
             disabled={!privateKey || isReadonly}
             onClick={validate}
-            className={appWalletButtonClassName("primary", "tw-font-bold")}
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-bold tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
           >
             Validate
           </button>
@@ -300,9 +292,11 @@ function AppWalletImportPrivateKey() {
 
 function ValidationError(props: Readonly<{ error: string }>) {
   return (
-    <div className={`${appWalletRowClassName} tw-pt-3`}>
-      <div className={appWalletCol12ClassName}>{props.error}</div>
-      <div className={appWalletCol12ClassName}>
+    <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3">
+      <div className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3">
+        {props.error}
+      </div>
+      <div className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3">
         - Clear the form and try again
       </div>
     </div>
@@ -316,16 +310,15 @@ function ValidatedWallet(
   }>
 ) {
   return (
-    <div className={`${appWalletRowClassName} tw-pt-4`}>
-      <div
-        className={`${appWalletCol12ClassName} tw-flex tw-items-center tw-gap-2`}>
+    <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+      <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-none tw-items-center tw-gap-2 tw-px-3">
         <FontAwesomeIcon icon={faCheckCircle} height={22} color="#00ff00" />
         Private Key is Valid!
       </div>
-      <div className={`${appWalletCol12ClassName} tw-pt-2`}>
+      <div className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3 tw-pt-2">
         - Address: {props.wallet.address}
       </div>
-      <div className={`${appWalletCol12ClassName} tw-pt-3`}>
+      <div className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3 tw-pt-3">
         <ImportWallet wallet={props.wallet} mnemonic={props.mnemonic} />
       </div>
     </div>
@@ -360,7 +353,7 @@ function ImportWallet(
       <button
         type="button"
         onClick={() => setShowImportModal(true)}
-        className={appWalletButtonClassName("primary", "tw-gap-2")}
+        className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
       >
         <FontAwesomeIcon icon={faPlusCircle} height={16} /> Import Wallet
       </button>

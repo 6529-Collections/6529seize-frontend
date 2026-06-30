@@ -14,7 +14,6 @@ import {
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
-import { appWalletButtonClassName } from "./app-wallet-tailwind-classes";
 
 const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
 
@@ -208,14 +207,15 @@ export function CreateAppWalletModal(
       <Modal.Footer className={styles["modalContent"]}>
         <button
           type="button"
-          className={appWalletButtonClassName("secondary")}
-          onClick={() => handleHide()}>
+          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#6c757d] tw-bg-[#6c757d] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#565e64] enabled:hover:tw-bg-[#5c636a] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+          onClick={() => handleHide()}
+        >
           Cancel
         </button>
         {importData ? (
           <button
             type="button"
-            className={appWalletButtonClassName("primary")}
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             disabled={!walletName || !walletPass || isAdding}
             onClick={handleImport}
           >
@@ -224,7 +224,7 @@ export function CreateAppWalletModal(
         ) : (
           <button
             type="button"
-            className={appWalletButtonClassName("primary")}
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             disabled={!walletName || !walletPass || isAdding}
             onClick={handleCreate}
           >
@@ -395,9 +395,7 @@ export function UnlockAppWalletModal(
             <p className="tw-mb-2 tw-text-[#ffc107]">
               {sensitiveAction.warning}
             </p>
-            <label
-              className="tw-pb-1"
-              htmlFor="sensitiveActionConfirmation">
+            <label className="tw-pb-1" htmlFor="sensitiveActionConfirmation">
               Type {sensitiveAction.confirmationText} to confirm{" "}
               {sensitiveAction.label}
             </label>
@@ -421,15 +419,17 @@ export function UnlockAppWalletModal(
       <Modal.Footer className={styles["modalContent"]}>
         <button
           type="button"
-          className={appWalletButtonClassName("secondary")}
-          onClick={() => handleHide()}>
+          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#6c757d] tw-bg-[#6c757d] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#565e64] enabled:hover:tw-bg-[#5c636a] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+          onClick={() => handleHide()}
+        >
           Cancel
         </button>
         <button
           type="button"
-          className={appWalletButtonClassName("primary")}
+          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
           disabled={!canUnlock}
-          onClick={handleUnlock}>
+          onClick={handleUnlock}
+        >
           {unlocking ? "Unlocking..." : "Unlock"}
         </button>
       </Modal.Footer>

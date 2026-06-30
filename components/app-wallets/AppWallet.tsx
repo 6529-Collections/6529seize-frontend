@@ -38,14 +38,6 @@ import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 import { Share } from "@capacitor/share";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import {
-  appWalletButtonClassName,
-  appWalletCol12ClassName,
-  appWalletColClassName,
-  appWalletContainerClassName,
-  appWalletPhraseColClassName,
-  appWalletRowClassName,
-} from "./app-wallet-tailwind-classes";
 
 const SECRET_REVEAL_TIMEOUT_MS = 60000;
 const SECRET_CLIPBOARD_TTL_MS = 30000;
@@ -287,9 +279,9 @@ export default function AppWalletComponent(
 
   if (fetchingAppWallets) {
     return (
-      <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
-        <div className={appWalletRowClassName}>
-          <div className={`${appWalletColClassName} tw-flex tw-gap-2`}>
+      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-gap-2 tw-px-3">
             <span>Fetching wallet</span>
             <Spinner />
           </div>
@@ -300,7 +292,7 @@ export default function AppWalletComponent(
 
   if (!appWalletsSupported) {
     return (
-      <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
+      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
         <AppWalletsUnsupported />
       </div>
     );
@@ -308,9 +300,9 @@ export default function AppWalletComponent(
 
   if (!appWallet) {
     return (
-      <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
-        <div className={appWalletRowClassName}>
-          <div className={appWalletColClassName}>
+      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
             Wallet with address <b>{props.address}</b> not found.
           </div>
         </div>
@@ -340,9 +332,9 @@ export default function AppWalletComponent(
   }
 
   return (
-    <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
-      <div className={appWalletRowClassName}>
-        <div className={appWalletColClassName}>
+    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
           <Link
             className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-no-underline"
             href="/tools/app-wallets"
@@ -352,10 +344,8 @@ export default function AppWalletComponent(
           </Link>
         </div>
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-4`}>
-        <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}
-        >
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
           <h3 className="tw-mb-0 tw-flex tw-items-center tw-gap-2">
             <AppWalletAvatar address={appWallet.address} size={50} />
             {appWallet.name}
@@ -368,10 +358,8 @@ export default function AppWalletComponent(
           {printBalance()}
         </div>
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-4`}>
-        <div
-          className={`${appWalletColClassName} tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2`}
-        >
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3">
           <span>
             Wallet Address:{" "}
             <span className="tw-text-lg tw-font-bold">
@@ -492,10 +480,8 @@ export default function AppWalletComponent(
           </span>
         </div>
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-5`}>
-        <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}
-        >
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-5">
+        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
           <span>Mnemonic Phrase</span>
           {mnemonicAvailable && (
             <span className="tw-flex tw-items-center tw-gap-3">
@@ -578,7 +564,7 @@ export default function AppWalletComponent(
           )}
         </div>
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-2`}>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         {mnemonicAvailable ? (
           phrase.map((w, i) => (
             <AppWalletPhraseWord
@@ -589,15 +575,13 @@ export default function AppWalletComponent(
             />
           ))
         ) : (
-          <div className={`${appWalletColClassName} tw-text-iron-400`}>
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3 tw-text-iron-400">
             Mnemonic phrase not available for this wallet
           </div>
         )}
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-4`}>
-        <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}
-        >
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
           <span>Private Key</span>
           <span className="tw-flex tw-items-center tw-gap-3">
             <>
@@ -677,27 +661,25 @@ export default function AppWalletComponent(
           </span>
         </div>
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-2`}>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <AppWalletPhraseWord
           word={privateKey}
           hidden={!revealPrivateKey}
           full_width={true}
         />
       </div>
-      <div className={`${appWalletRowClassName} tw-pt-5`}>
-        <div
-          className={`${appWalletColClassName} tw-flex tw-items-center tw-gap-2`}
-        >
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-5">
+        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-gap-2 tw-px-3">
           <button
             type="button"
-            className={appWalletButtonClassName("danger")}
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#dc3545] tw-bg-[#dc3545] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#b02a37] enabled:hover:tw-bg-[#bb2d3b] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             onClick={() => doDelete(appWallet.name, appWallet.address)}
           >
             Delete
           </button>
           <button
             type="button"
-            className={appWalletButtonClassName("outline-danger")}
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#dc3545] tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-[#dc3545] tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-[#dc3545] enabled:hover:tw-text-white disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             onClick={() => setIsExportingPlaintext(true)}
           >
             Export Plaintext Recovery
@@ -719,14 +701,14 @@ function AppWalletPhraseWord(
   return (
     <div
       className={`${
-        props.full_width ? appWalletCol12ClassName : appWalletPhraseColClassName
+        props.full_width
+          ? "tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3"
+          : "tw-relative tw-w-1/2 tw-max-w-full tw-flex-none tw-px-3 min-[576px]:tw-w-1/3 min-[768px]:tw-w-1/4"
       } tw-pb-2 tw-pt-2`}
     >
       <div className={styles["phrase"]}>
-        <div className={appWalletRowClassName}>
-          <div
-            className={`${appWalletColClassName} tw-flex tw-select-none tw-gap-2`}
-          >
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-select-none tw-gap-2 tw-px-3">
             {props.index && (
               <span className="tw-font-extralight tw-text-iron-400">
                 {props.index}
