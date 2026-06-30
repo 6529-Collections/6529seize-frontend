@@ -8,7 +8,7 @@ import type { NextGenCollection } from "@/entities/INextgen";
 import { formatAddress } from "@/helpers/Helpers";
 import { NextgenCollectionView } from "@/types/enums";
 import Link from "next/link";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import { Col, Container, Row, Table } from "../NextGenTailwindLayout";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
 import { DistributionLink } from "../NextGen";

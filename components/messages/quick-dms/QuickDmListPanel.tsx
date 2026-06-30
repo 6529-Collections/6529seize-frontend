@@ -113,6 +113,7 @@ export const QuickDmListPanel = ({
   isFetching,
   locale,
   onClose,
+  onCreateDirectMessage,
   onOpenAll,
   onOpenChat,
   onRegisterWave,
@@ -121,6 +122,7 @@ export const QuickDmListPanel = ({
   readonly isFetching: boolean;
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
+  readonly onCreateDirectMessage?: (() => void) | undefined;
   readonly onOpenAll: () => void;
   readonly onOpenChat: (waveId: string) => void;
   readonly onRegisterWave: (waveId: string) => void;
@@ -155,6 +157,7 @@ export const QuickDmListPanel = ({
         locale={locale}
         title={t(locale, "quickDm.listTitle")}
         onClose={onClose}
+        onCreateDirectMessage={onCreateDirectMessage}
       />
       <div className="tw-min-h-0 tw-overflow-y-auto tw-p-2">{content}</div>
       <div className="tw-border-t tw-border-white/10 tw-p-2">

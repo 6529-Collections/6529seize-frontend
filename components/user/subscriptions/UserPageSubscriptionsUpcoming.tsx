@@ -9,7 +9,6 @@ import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import MemeSubscriptionRow from "./MemeSubscriptionRow";
 import styles from "./UserPageSubscriptions.module.scss";
 
@@ -46,15 +45,15 @@ export default function UserPageSubscriptionsUpcoming(
   );
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col>
-          <h5 className="mb-0 tw-font-semibold">Upcoming Drops</h5>
-        </Col>
-      </Row>
+    <div>
+      <div>
+        <div>
+          <h5 className="tw-mb-0 tw-font-semibold">Upcoming Drops</h5>
+        </div>
+      </div>
       <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1 tw-mb-0" />
-      <Row>
-        <Col>
+      <div>
+        <div>
           <div>
             {subscriptions.map((subscription, index) => (
               <div
@@ -79,12 +78,12 @@ export default function UserPageSubscriptionsUpcoming(
             ))}
           </div>
           {props.memes_subscriptions.length > 3 && (
-            <div className="mt-2 text-center">
+            <div className="tw-mt-2 tw-text-center">
               <ShowMoreButton expanded={expanded} setExpanded={setExpanded} />
             </div>
           )}
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

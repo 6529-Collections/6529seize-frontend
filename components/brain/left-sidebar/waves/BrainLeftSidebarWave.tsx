@@ -7,12 +7,12 @@ import {
 } from "@/components/waves/WaveTrustSignals";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { formatWaveName } from "@/helpers/waves/wave-name.helpers";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import {
   getWaveHomeRoute,
   getWaveRoute,
@@ -56,31 +56,6 @@ const MUTED_BADGE_CLASSES =
   "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm";
 const MUTED_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0";
 
-const getFormattedWaveName = (wave: MinimalWave): string => {
-  if (wave.type !== ApiWaveType.Chat) {
-    return wave.name;
-  }
-
-  const marker = "id-";
-  const addressPrefix = `${marker}0x`;
-  const markerIndex = wave.name.indexOf(addressPrefix);
-
-  if (markerIndex === -1) {
-    return wave.name;
-  }
-
-  const prefix = wave.name.slice(0, markerIndex + marker.length);
-  const addressStart = markerIndex + marker.length;
-  const candidateAddress = wave.name.slice(addressStart, addressStart + 42);
-
-  if (!isValidEthAddress(candidateAddress)) {
-    return wave.name;
-  }
-
-  const suffix = wave.name.slice(addressStart + candidateAddress.length);
-  return `${prefix}${formatAddress(candidateAddress)}${suffix}`;
-};
-
 const isModifiedAnchorClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
   event.metaKey ||
   event.ctrlKey ||
@@ -116,7 +91,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowDropTime = latestDropTimestamp !== null;
 
-  const formattedWaveName = useMemo(() => getFormattedWaveName(wave), [wave]);
+  const formattedWaveName = useMemo(() => formatWaveName(wave), [wave]);
 
   const href = useMemo(() => {
     if (activeWaveId === wave.id) {
