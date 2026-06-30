@@ -8,8 +8,9 @@ jest.mock("@/components/xtdh/received", () => ({
   default: () => <div data-testid="xtdh-received-section" />,
 }));
 
-const mockUseGlobalTdhStats =
-  useGlobalTdhStats as jest.MockedFunction<typeof useGlobalTdhStats>;
+const mockUseGlobalTdhStats = useGlobalTdhStats as jest.MockedFunction<
+  typeof useGlobalTdhStats
+>;
 
 describe("XtdhPage", () => {
   beforeEach(() => {
@@ -43,9 +44,7 @@ describe("XtdhPage", () => {
 
     render(<XtdhPage />);
 
-    expect(
-      screen.getByText(/unable to load xtdh stats/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/unable to load xtdh stats/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /retry/i }));
     expect(refetch).toHaveBeenCalled();
   });
