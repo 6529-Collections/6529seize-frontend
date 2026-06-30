@@ -1610,7 +1610,7 @@ describe("Auth component", () => {
       expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
     });
 
-    it("marks a connected local v2 session as needing upgrade when the web session is missing", async () => {
+    it("does not rotate a connected local v2 web session during immediate validation", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       const authUtils = require("@/services/auth/auth.utils");
@@ -1638,18 +1638,15 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledWith({
-          address: validAddress,
-          abortSignal: expect.objectContaining({ aborted: false }),
-        });
+        expect(mockValidateAuthImmediate).toHaveBeenCalled();
       });
       expect(screen.getByTestId("session-upgrade-required")).toHaveTextContent(
-        "true"
+        "false"
       );
       expect(
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();
-      expect(mockValidateAuthImmediate).not.toHaveBeenCalled();
+      expect(sessionV2.verifyActiveSessionV2WebSession).not.toHaveBeenCalled();
     });
 
     it("verifies the active stored v2 session when the live wallet provider address differs", async () => {
@@ -1692,8 +1689,9 @@ describe("Auth component", () => {
         >;
       mockGetAuthJwt.mockReturnValue("v2-jwt");
       mockGetWalletAddress.mockReturnValue(activeStoredAddress);
-      mockHasActiveSessionV2Auth.mockImplementation(({ address }) =>
-        address.toLowerCase() === activeStoredAddress.toLowerCase()
+      mockHasActiveSessionV2Auth.mockImplementation(
+        ({ address }) =>
+          address.toLowerCase() === activeStoredAddress.toLowerCase()
       );
       mockVerifyActiveSessionV2WebSession.mockResolvedValue(true);
 
@@ -1727,7 +1725,7 @@ describe("Auth component", () => {
       expect(verifiedAddresses).not.toContain(liveProviderAddress);
     });
 
-    it("fails closed when context web-session verification errors without changing upgrade state", async () => {
+    it("does not change session upgrade state when context web-session verification errors", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       const authUtils = require("@/services/auth/auth.utils");
@@ -1742,9 +1740,9 @@ describe("Auth component", () => {
       mockGetAuthJwt.mockReturnValue("v2-jwt");
       mockGetWalletAddress.mockReturnValue(validAddress);
       mockHasActiveSessionV2Auth.mockReturnValue(true);
-      sessionV2.verifyActiveSessionV2WebSession
-        .mockResolvedValueOnce(true)
-        .mockRejectedValueOnce(new Error("verification failed"));
+      sessionV2.verifyActiveSessionV2WebSession.mockRejectedValueOnce(
+        new Error("verification failed")
+      );
       mockValidateAuthImmediate.mockResolvedValue({
         validationCompleted: true,
         wasCancelled: false,
@@ -1762,9 +1760,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledTimes(
-          1
-        );
+        expect(mockValidateAuthImmediate).toHaveBeenCalled();
       });
 
       const user = userEvent.setup();
@@ -1783,7 +1779,7 @@ describe("Auth component", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("marks a disconnected stored v2 session as needing upgrade when the web session is missing", async () => {
+    it("does not rotate a disconnected stored v2 web session during passive validation", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = null;
       connectionState = "disconnected";
@@ -1813,12 +1809,9 @@ describe("Auth component", () => {
       await waitFor(() => {
         expect(
           screen.getByTestId("session-upgrade-required")
-        ).toHaveTextContent("true");
+        ).toHaveTextContent("false");
       });
-      expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledWith({
-        address: validAddress,
-        abortSignal: expect.objectContaining({ aborted: false }),
-      });
+      expect(sessionV2.verifyActiveSessionV2WebSession).not.toHaveBeenCalled();
       expect(
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();

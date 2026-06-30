@@ -13,6 +13,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
 } from "react";
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
@@ -20,6 +21,12 @@ import { type ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiPost } from "@/services/api/common-api";
+import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
+import {
+  AUTH_TOKEN_CHANGED_EVENT,
+  getAuthJwt,
+  isAuthJwtUsable,
+} from "@/services/auth/auth.utils";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { getStableDeviceId } from "./stable-device-id";
@@ -80,6 +87,7 @@ const RATE_LIMIT_ERROR_PATTERNS = ["rate limit", "too many requests", "429"];
 const TRANSIENT_ERROR_PATTERNS = [
   "failed to fetch",
   "load failed",
+  "network connection was lost",
   "network request failed",
   "network error",
   "timeout",
@@ -91,26 +99,76 @@ type PushRegistrationFingerprint = {
   profileId: string | null;
 };
 
-const toErrorMessage = (error: unknown): string => {
+type ErrorTelemetryExtra = {
+  error_message: string;
+  error_name?: string;
+  error_code?: string | number;
+  status_code?: number;
+};
+
+const getStringErrorField = (
+  record: Record<string, unknown>,
+  field: string
+): string | null => {
+  const value = record[field];
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
+  if (value instanceof Error && value.message.trim()) {
+    return value.message.trim();
+  }
+  if (value !== null && typeof value === "object") {
+    const nestedRecord = value as Record<string, unknown>;
+    const nestedMessage = nestedRecord["message"];
+    if (typeof nestedMessage === "string" && nestedMessage.trim()) {
+      return nestedMessage.trim();
+    }
+  }
+  return null;
+};
+
+const toErrorMessage = (
+  error: unknown,
+  fallbackMessage = "Unknown notification error"
+): string => {
   if (error instanceof Error) {
-    return error.message;
+    return error.message.trim() || fallbackMessage;
   }
   if (typeof error === "string") {
-    return error;
+    return error.trim() || fallbackMessage;
   }
-  if (typeof error === "object" && error) {
-    const typedError = error as {
-      message?: unknown;
-      error?: unknown;
-    };
-    if (typeof typedError.message === "string") {
-      return typedError.message;
-    }
-    if (typeof typedError.error === "string") {
-      return typedError.error;
-    }
+  if (error === null || error === undefined) {
+    return fallbackMessage;
   }
-  return String(error);
+  if (typeof error === "object") {
+    const typedError = error as Record<string, unknown>;
+    const extractedMessage =
+      getStringErrorField(typedError, "message") ??
+      getStringErrorField(typedError, "error") ??
+      getStringErrorField(typedError, "reason") ??
+      getStringErrorField(typedError, "localizedDescription") ??
+      getStringErrorField(typedError, "description");
+    if (extractedMessage !== null) {
+      return extractedMessage;
+    }
+    return fallbackMessage;
+  }
+
+  if (
+    typeof error === "number" ||
+    typeof error === "boolean" ||
+    typeof error === "bigint"
+  ) {
+    return String(error);
+  }
+  if (typeof error === "symbol") {
+    const symbolDescription = error.description;
+    return typeof symbolDescription === "string" && symbolDescription.length > 0
+      ? `Symbol(${symbolDescription})`
+      : fallbackMessage;
+  }
+
+  return fallbackMessage;
 };
 
 const parseStatusCode = (status: unknown): number | null => {
@@ -259,6 +317,9 @@ const isRateLimitError = (error: unknown): boolean => {
   );
 };
 
+const isUnauthorizedPushRegistrationError = (error: unknown): boolean =>
+  extractErrorStatusCode(error) === 401;
+
 const isTransientPushRegistrationError = (error: unknown): boolean => {
   if (isRateLimitError(error)) {
     return true;
@@ -292,11 +353,47 @@ const computePushRegistrationRetryDelayMs = (
   return Math.max(0, Math.round(baseDelay * jitterMultiplier));
 };
 
-const toCaptureExceptionInput = (error: unknown): Error => {
+const extractErrorCode = (error: unknown): string | number | undefined => {
+  if (error === null || typeof error !== "object") {
+    return undefined;
+  }
+
+  const typedError = error as {
+    code?: unknown;
+    errorCode?: unknown;
+  };
+  const errorCode = typedError.code ?? typedError.errorCode;
+  return typeof errorCode === "string" || typeof errorCode === "number"
+    ? errorCode
+    : undefined;
+};
+
+const createErrorTelemetryExtra = (error: unknown): ErrorTelemetryExtra => {
+  const statusCode = extractErrorStatusCode(error);
+  const telemetryExtra: ErrorTelemetryExtra = {
+    error_message: toErrorMessage(error),
+  };
+  if (error instanceof Error) {
+    telemetryExtra.error_name = error.name;
+  }
+  const errorCode = extractErrorCode(error);
+  if (errorCode !== undefined) {
+    telemetryExtra.error_code = errorCode;
+  }
+  if (statusCode !== null) {
+    telemetryExtra.status_code = statusCode;
+  }
+  return telemetryExtra;
+};
+
+const toCaptureExceptionInput = (
+  error: unknown,
+  fallbackMessage?: string
+): Error => {
   if (error instanceof Error) {
     return error;
   }
-  return new Error(toErrorMessage(error));
+  return new Error(toErrorMessage(error, fallbackMessage));
 };
 
 const createPushRegistrationFingerprint = ({
@@ -394,6 +491,14 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { isCapacitor, isIos, isActive } = useCapacitor();
   const { connectedProfile } = useAuth();
+  const forceAuthTokenRefresh = useReducer(
+    (revision: number) => revision + 1,
+    0
+  )[1];
+  const authJwt = getAuthJwt();
+  const pushRegistrationAuthKey = isAuthJwtUsable(authJwt)
+    ? getAuthTokenFingerprint(authJwt)
+    : "no-usable-auth";
   const { address, connectedAccounts, seizeSwitchConnectedAccount } =
     useSeizeConnectContext();
   const router = useRouter();
@@ -417,6 +522,27 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     activeAddressRef.current = address;
   }, [address]);
+
+  useEffect(() => {
+    if (typeof globalThis.addEventListener !== "function") {
+      return;
+    }
+
+    const handleAuthTokenChanged = () => {
+      forceAuthTokenRefresh();
+    };
+
+    globalThis.addEventListener(
+      AUTH_TOKEN_CHANGED_EVENT,
+      handleAuthTokenChanged
+    );
+    return () => {
+      globalThis.removeEventListener(
+        AUTH_TOKEN_CHANGED_EVENT,
+        handleAuthTokenChanged
+      );
+    };
+  }, [forceAuthTokenRefresh]);
 
   const removeDeliveredNotifications = useCallback(
     async (notifications: PushNotificationSchema[]) => {
@@ -625,6 +751,33 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
         attempt++
       ) {
+        const currentAuthJwt = getAuthJwt();
+        if (!isAuthJwtUsable(currentAuthJwt)) {
+          console.warn(
+            "Skipping push registration: auth token is missing or expired",
+            {
+              attempt: attempt + 1,
+              maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+              profileId,
+              platform: deviceInfo.platform,
+            }
+          );
+          Sentry.addBreadcrumb({
+            category: "notifications",
+            level: "warning",
+            message: "Push registration skipped (auth token unavailable).",
+            data: {
+              component: "NotificationsProvider",
+              operation: "registerPushNotification",
+              attempt: attempt + 1,
+              max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+              profile_id: profileId ?? undefined,
+              platform: deviceInfo.platform,
+            },
+          });
+          return false;
+        }
+
         try {
           await commonApiPost({
             endpoint: `push-notifications/register`,
@@ -641,12 +794,16 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         } catch (error) {
           const attemptNumber = attempt + 1;
           const statusCode = extractErrorStatusCode(error);
+          const unauthorized = isUnauthorizedPushRegistrationError(error);
+          const errorExtra = createErrorTelemetryExtra(error);
           const rateLimited = isRateLimitError(error);
           const retryAfterMs = extractRetryAfterMs(error);
           const hasRetriesLeft =
             attemptNumber < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
           const shouldRetry =
-            hasRetriesLeft && isTransientPushRegistrationError(error);
+            !unauthorized &&
+            hasRetriesLeft &&
+            isTransientPushRegistrationError(error);
 
           if (shouldRetry) {
             const delayMs = computePushRegistrationRetryDelayMs(
@@ -661,6 +818,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
               rateLimited,
               statusCode,
               profileId,
+              errorMessage: errorExtra.error_message,
             });
             Sentry.addBreadcrumb({
               category: "notifications",
@@ -673,7 +831,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
                 delay_ms: delayMs,
                 rate_limited: rateLimited,
-                status_code: statusCode ?? undefined,
+                ...errorExtra,
                 profile_id: profileId ?? undefined,
                 platform: deviceInfo.platform,
               },
@@ -682,12 +840,41 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             continue;
           }
 
+          if (unauthorized) {
+            console.warn(
+              "Push registration unauthorized; treating as stale auth state",
+              {
+                attempt: attemptNumber,
+                maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+                statusCode,
+                profileId,
+                platform: deviceInfo.platform,
+              }
+            );
+            Sentry.addBreadcrumb({
+              category: "notifications",
+              level: "warning",
+              message: "Push registration skipped (stale auth).",
+              data: {
+                component: "NotificationsProvider",
+                operation: "registerPushNotification",
+                attempt: attemptNumber,
+                max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+                status_code: statusCode ?? undefined,
+                profile_id: profileId ?? undefined,
+                platform: deviceInfo.platform,
+              },
+            });
+            return false;
+          }
+
           if (rateLimited) {
             console.warn("Push registration rate limited", {
               attempt: attemptNumber,
               maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
               statusCode,
               profileId,
+              errorMessage: errorExtra.error_message,
             });
             Sentry.addBreadcrumb({
               category: "notifications",
@@ -699,7 +886,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 attempt: attemptNumber,
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
                 delay_ms: retryAfterMs ?? undefined,
-                status_code: statusCode ?? undefined,
+                ...errorExtra,
                 profile_id: profileId ?? undefined,
                 platform: deviceInfo.platform,
               },
@@ -716,9 +903,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             extra: {
               attempt: attemptNumber,
               max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-              status_code: statusCode ?? undefined,
               profile_id: profileId ?? undefined,
               platform: deviceInfo.platform,
+              ...errorExtra,
             },
           });
           return false;
@@ -839,13 +1026,45 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         await PushNotifications.addListener("registrationError", (error) => {
           isRegisteredRef.current = false;
+          const statusCode = extractErrorStatusCode(error);
+          const errorExtra = createErrorTelemetryExtra(error);
+
+          if (isTransientPushRegistrationError(error)) {
+            console.warn("Transient push registration error", {
+              statusCode,
+              ...errorExtra,
+            });
+            Sentry.addBreadcrumb({
+              category: "notifications",
+              level: "warning",
+              message: "Push registration transient error.",
+              data: {
+                component: "NotificationsProvider",
+                operation: "pushRegistrationError",
+                retryable: true,
+                ...errorExtra,
+              },
+            });
+            return;
+          }
+
           console.error("Push registration error: ", error);
-          Sentry.captureException(error, {
-            tags: {
-              component: "NotificationsProvider",
-              operation: "pushRegistrationError",
-            },
-          });
+          Sentry.captureException(
+            toCaptureExceptionInput(
+              error,
+              "Push notification registration failed"
+            ),
+            {
+              tags: {
+                component: "NotificationsProvider",
+                operation: "pushRegistrationError",
+              },
+              extra: {
+                retryable: false,
+                ...errorExtra,
+              },
+            }
+          );
         });
 
         await PushNotifications.addListener(
@@ -893,20 +1112,42 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const profileId = connectedProfile?.id ?? null;
-    if (isCapacitor && isActive && initializationRef.current !== profileId) {
-      initializationRef.current = profileId;
+    const initializationKey = `${
+      profileId ?? "no-profile"
+    }:${pushRegistrationAuthKey}`;
+    if (
+      isCapacitor &&
+      isActive &&
+      initializationRef.current !== initializationKey
+    ) {
+      initializationRef.current = initializationKey;
       initializeNotifications(connectedProfile ?? undefined).catch((error) => {
         console.error("Failed to initialize push notifications", error);
-        Sentry.captureException(error, {
-          tags: {
-            component: "NotificationsProvider",
-            operation: "initializeNotifications",
-          },
-        });
-        initializationRef.current = null;
+        Sentry.captureException(
+          toCaptureExceptionInput(
+            error,
+            "Failed to initialize push notifications"
+          ),
+          {
+            tags: {
+              component: "NotificationsProvider",
+              operation: "initializeNotifications",
+            },
+            extra: createErrorTelemetryExtra(error),
+          }
+        );
+        if (initializationRef.current === initializationKey) {
+          initializationRef.current = null;
+        }
       });
     }
-  }, [connectedProfile, isCapacitor, isActive, initializeNotifications]);
+  }, [
+    connectedProfile,
+    isCapacitor,
+    isActive,
+    initializeNotifications,
+    pushRegistrationAuthKey,
+  ]);
 
   const removeWaveDeliveredNotifications = useCallback(
     async (waveId: string) => {
@@ -920,12 +1161,19 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           await removeDeliveredNotifications(waveNotifications);
         } catch (error) {
           console.error("Error removing wave delivered notifications", error);
-          Sentry.captureException(error, {
-            tags: {
-              component: "NotificationsProvider",
-              operation: "removeWaveDeliveredNotifications",
-            },
-          });
+          Sentry.captureException(
+            toCaptureExceptionInput(
+              error,
+              "Failed to remove wave delivered notifications"
+            ),
+            {
+              tags: {
+                component: "NotificationsProvider",
+                operation: "removeWaveDeliveredNotifications",
+              },
+              extra: createErrorTelemetryExtra(error),
+            }
+          );
         }
       }
     },
@@ -938,12 +1186,19 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         await PushNotifications.removeAllDeliveredNotifications();
       } catch (error) {
         console.error("Error removing all delivered notifications", error);
-        Sentry.captureException(error, {
-          tags: {
-            component: "NotificationsProvider",
-            operation: "removeAllDeliveredNotifications",
-          },
-        });
+        Sentry.captureException(
+          toCaptureExceptionInput(
+            error,
+            "Failed to remove all delivered notifications"
+          ),
+          {
+            tags: {
+              component: "NotificationsProvider",
+              operation: "removeAllDeliveredNotifications",
+            },
+            extra: createErrorTelemetryExtra(error),
+          }
+        );
       }
     }
   }, [isIos]);

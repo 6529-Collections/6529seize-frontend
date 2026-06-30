@@ -1,5 +1,6 @@
 "use client";
 
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useCommunityMetrics } from "@/hooks/useCommunityMetrics";
 import { useCommunityMetricsSeries } from "@/hooks/useCommunityMetricsSeries";
@@ -41,6 +42,7 @@ export default function MetricsPageClient() {
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-black">
       <div className="tw-mx-auto tw-max-w-6xl tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-px-8">
+        <AboutContentsDropdown currentHref="/network/health" />
         <header className="tw-mb-8">
           <h1 className="tw-text-2xl tw-font-bold tw-text-white">Health</h1>
           <p className="tw-mt-1 tw-text-sm tw-text-neutral-400">

@@ -121,20 +121,25 @@ const createDeferred = <T>() => {
 
 const createStructuredReactionError = ({
   body,
+  headers,
   message = "technical error",
   status,
 }: {
   body?: unknown;
+  headers?: unknown;
   message?: string;
   status?: number;
 }): Error & {
+  headers?: unknown;
   status?: number;
-  response: { body?: unknown; status?: number };
+  response: { body?: unknown; headers?: unknown; status?: number };
 } =>
   Object.assign(new Error(message), {
+    ...(headers !== undefined ? { headers } : {}),
     ...(status !== undefined ? { status } : {}),
     response: {
       ...(body !== undefined ? { body } : {}),
+      ...(headers !== undefined ? { headers } : {}),
       ...(status !== undefined ? { status } : {}),
     },
   });
@@ -243,9 +248,9 @@ describe("useDropReaction", () => {
   it("shows structured API error messages for quick react failures", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
-        body: JSON.stringify({ error: "Rate limited" }),
+        body: JSON.stringify({ error: "Reaction not allowed" }),
         message: "unexpected raw error",
-        status: 429,
+        status: 400,
       })
     );
 
@@ -263,7 +268,7 @@ describe("useDropReaction", () => {
       errorMode: "structured",
     });
     expect(setToastMock).toHaveBeenCalledWith({
-      message: "Rate limited",
+      message: "Reaction not allowed",
       type: "error",
     });
   });
@@ -603,9 +608,34 @@ describe("useDropReaction", () => {
     });
 
     expect(setToastMock).toHaveBeenCalledWith({
-      message: "Too Many Requests",
+      message: "You are reacting too quickly. Try again in a moment.",
       type: "error",
     });
+  });
+
+  it("includes retry-after guidance for rate-limit quick react failures", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: JSON.stringify({ error: "Rate limit exceeded" }),
+        headers: new Headers({ "retry-after": "2" }),
+        message: "Rate limit exceeded",
+        status: 429,
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "You are reacting too quickly. Try again in 2 seconds.",
+      type: "error",
+    });
+    expect(rollbackMock).toHaveBeenCalledTimes(1);
   });
 
   it("surfaces the safe status-text message when the structured body is missing", async () => {

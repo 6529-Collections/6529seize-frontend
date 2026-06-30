@@ -3,10 +3,12 @@
 import React, { useCallback, useMemo } from "react";
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import type { SidebarNavItem } from "@/components/navigation/navTypes";
+import { isSidebarNavItemActive } from "./sidebarActive";
 
 interface WebSidebarExpandableGroupProps {
   readonly name: string;
-  readonly items: ReadonlyArray<{ name: string; href: string }>;
+  readonly items: ReadonlyArray<SidebarNavItem>;
   readonly pathname: string | null;
   readonly expanded: boolean;
   readonly onToggle: (isExpanded: boolean) => void;
@@ -19,14 +21,9 @@ function WebSidebarExpandableGroup({
   expanded,
   onToggle,
 }: WebSidebarExpandableGroupProps) {
-
-  // Memoized helper to check if link is active
-  const isActive = useCallback((href: string) => pathname === href, [pathname]);
-
-  // Memoized check if any item in group is active
-  const hasActiveItem = useMemo(() =>
-    items.some((item) => isActive(item.href)),
-    [items, isActive]
+  const hasActiveItem = useMemo(
+    () => items.some((item) => isSidebarNavItemActive(item, pathname)),
+    [items, pathname]
   );
 
   // Memoized toggle handler
@@ -40,10 +37,10 @@ function WebSidebarExpandableGroup({
       <button
         type="button"
         onClick={handleToggle}
-        className={`tw-w-[calc(100%-2.75rem)] tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-pl-3 tw-pr-3 tw-ml-[2.75rem] tw-h-11 tw-justify-between tw-text-base tw-touch-action-manipulation ${
+        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border-none tw-pl-3 tw-pr-3 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
           hasActiveItem
-            ? "tw-text-white tw-bg-iron-900 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-900 active:tw-text-white"
-            : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-text-white"
+            ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+            : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
         }`}
         aria-expanded={expanded}
         aria-controls={`group-${name}`}
@@ -65,19 +62,8 @@ function WebSidebarExpandableGroup({
         <div className="tw-overflow-hidden">
           <div id={`group-${name}`} className="tw-mt-1">
             {items.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`tw-w-[calc(100%-2.75rem)] tw-flex tw-items-center tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-justify-start tw-pl-3 tw-pr-3 tw-ml-[2.75rem] tw-h-11 tw-text-base tw-touch-action-manipulation ${
-                isActive(item.href)
-                  ? "tw-text-white tw-bg-iron-900 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-900 active:tw-text-white"
-                  : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-text-white"
-              }`}
-              aria-current={isActive(item.href) ? "page" : undefined}
-            >
-              {item.name}
-            </Link>
-          ))}
+              <GroupLink key={item.name} item={item} pathname={pathname} />
+            ))}
           </div>
         </div>
       </div>
@@ -86,3 +72,27 @@ function WebSidebarExpandableGroup({
 }
 
 export default React.memo(WebSidebarExpandableGroup);
+
+function GroupLink({
+  item,
+  pathname,
+}: {
+  readonly item: SidebarNavItem;
+  readonly pathname: string | null;
+}) {
+  const active = isSidebarNavItemActive(item, pathname);
+
+  return (
+    <Link
+      href={item.href}
+      className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-pl-3 tw-pr-3 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+        active
+          ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+          : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
+      }`}
+      aria-current={active ? "page" : undefined}
+    >
+      {item.name}
+    </Link>
+  );
+}

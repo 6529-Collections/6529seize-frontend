@@ -45,6 +45,7 @@ interface WavesContextData {
   readonly loadSubwavesForParent: (parentWaveId: string) => void;
   readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
   readonly loadingSubwaveParentIds: readonly string[];
+  readonly markWaveRead: (waveId: string) => void;
   readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
@@ -313,6 +314,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       loadSubwavesForParent: wavesHookData.loadSubwavesForParent,
       prefetchSubwavesForParent: wavesHookData.prefetchSubwavesForParent,
       loadingSubwaveParentIds: wavesHookData.loadingSubwaveParentIds,
+      markWaveRead: wavesHookData.markWaveRead,
       restoreWaveUnreadCount: wavesHookData.restoreWaveUnreadCount,
     };
 
@@ -327,6 +329,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       loadSubwavesForParent: dmWavesHookData.loadSubwavesForParent,
       prefetchSubwavesForParent: dmWavesHookData.prefetchSubwavesForParent,
       loadingSubwaveParentIds: dmWavesHookData.loadingSubwaveParentIds,
+      markWaveRead: dmWavesHookData.markWaveRead,
       restoreWaveUnreadCount: dmWavesHookData.restoreWaveUnreadCount,
     };
 
@@ -366,6 +369,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     wavesHookData.loadSubwavesForParent,
     wavesHookData.prefetchSubwavesForParent,
     wavesHookData.loadingSubwaveParentIds,
+    wavesHookData.markWaveRead,
     wavesHookData.restoreWaveUnreadCount,
     dmWavesHookData.waves,
     dmWavesHookData.isFetching,
@@ -377,6 +381,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.loadSubwavesForParent,
     dmWavesHookData.prefetchSubwavesForParent,
     dmWavesHookData.loadingSubwaveParentIds,
+    dmWavesHookData.markWaveRead,
     dmWavesHookData.restoreWaveUnreadCount,
     activeWaveId,
     activeWaveData,
@@ -439,7 +444,8 @@ export function useMyStreamWaveMessages(
       // Update local state only if data actually differs
       // Use a proper comparison if needed (e.g., deep compare for complex objects)
       setData((currentData: WaveMessages | undefined) => {
-        const didChange = JSON.stringify(currentData) !== JSON.stringify(newData);
+        const didChange =
+          JSON.stringify(currentData) !== JSON.stringify(newData);
 
         if (didChange) {
           return newData;
