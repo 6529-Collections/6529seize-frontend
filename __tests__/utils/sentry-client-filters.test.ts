@@ -47,6 +47,8 @@ describe("sentry-client-filters", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const observedWasmModuleCspUnsafeEvalMessage =
+    "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
@@ -254,6 +256,29 @@ describe("sentry-client-filters", () => {
               "policy directive because 'unsafe-eval' is not an allowed source",
               "of script",
             ].join(" "),
+          },
+        ],
+      },
+      ...overrides,
+    });
+
+  const createObservedInjectedWasmCspUnsafeEvalEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    ({
+      exception: {
+        values: [
+          {
+            type: "CompileError",
+            value: observedWasmModuleCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "///inject.js",
+                  abs_path: "///inject.js",
+                },
+              ],
+            },
           },
         ],
       },
@@ -2911,6 +2936,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed injected WebAssembly.Module CSP unsafe-eval errors", () => {
+    // Arrange
+    const event = createObservedInjectedWasmCspUnsafeEvalEvent();
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter disconnected wallet-provider object rejections with app frames", () => {
     // Arrange
     const event = {
@@ -2991,6 +3027,39 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "https://6529.io/_next/static/chunks/app.js",
                   abs_path: "https://6529.io/_next/static/chunks/app.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed WebAssembly.Module CSP unsafe-eval errors with app frames", () => {
+    // Arrange
+    const event = createObservedInjectedWasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "CompileError",
+            value: observedWasmModuleCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "///inject.js",
+                  abs_path: "///inject.js",
+                },
+                {
+                  filename: "app:///components/providers/WagmiSetup.tsx",
+                  abs_path: "app:///components/providers/WagmiSetup.tsx",
+                  in_app: true,
                 },
               ],
             },
