@@ -31,6 +31,7 @@ jest.mock("@/components/nextGen/admin/NextGenAdmin", () => ({
   ),
 }));
 jest.mock("@/components/nextGen/admin/NextGenAdminShared", () => ({
+  ...jest.requireActual("@/components/nextGen/admin/NextGenAdminShared"),
   NextGenAdminHeadingRow: ({ close, title }: any) => (
     <div data-testid="heading-row">
       <h2>{title}</h2>
