@@ -1438,7 +1438,12 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     mockIsAddress = require("viem").isAddress as jest.MockedFunction<any>;
     mockGetAddress = require("viem").getAddress as jest.MockedFunction<any>;
 
-    const { useAppKit, useDisconnect } = require("@reown/appkit/react");
+    const {
+      useAppKit,
+      useAppKitAccount,
+      useDisconnect,
+    } = require("@reown/appkit/react");
+    const { useAccount } = require("wagmi");
     mockDisconnect = jest.fn().mockResolvedValue(undefined);
     mockOpen = jest.fn();
 
@@ -1446,6 +1451,12 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
       disconnect: mockDisconnect,
     });
     (useAppKit as jest.Mock).mockReturnValue({ open: mockOpen });
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: undefined,
+      isConnected: false,
+      status: "disconnected",
+    });
+    (useAccount as jest.Mock).mockReturnValue({});
 
     // Mock console methods
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -1520,6 +1531,54 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
     await userEvent.click(screen.getByTestId("connect-btn"));
     expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" });
+  });
+
+  it("should disconnect the live provider before fresh connect", async () => {
+    const liveAddress = "0x1234567890abcdef1234567890abcdef12345678";
+    const { useAppKitAccount } = require("@reown/appkit/react");
+
+    mockGetWalletAddress.mockReturnValue(null);
+    mockIsAddress.mockReturnValue(true);
+    mockGetAddress.mockImplementation((address: string) =>
+      address.toLowerCase()
+    );
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: liveAddress,
+      isConnected: true,
+      status: "connected",
+    });
+
+    const FreshConnectTestComponent: React.FC = () => {
+      const { seizeConnectFresh } = useSeizeConnectContext();
+      return (
+        <button
+          onClick={() => void seizeConnectFresh()}
+          data-testid="fresh-connect-btn"
+        >
+          Connect
+        </button>
+      );
+    };
+
+    render(
+      <SeizeConnectProvider>
+        <FreshConnectTestComponent />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("fresh-connect-btn")).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId("fresh-connect-btn"));
+
+    expect(mockDisconnect).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" });
+    });
+    expect(mockDisconnect.mock.invocationCallOrder[0]!).toBeLessThan(
+      mockOpen.mock.invocationCallOrder[0]!
+    );
   });
 
   it("should provide working disconnect functionality", async () => {

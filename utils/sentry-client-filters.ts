@@ -96,6 +96,7 @@ const filenameExceptions = [
   "inject.chrome",
 ];
 const injectedWasmCspAppUriPath = "app:///inject.js";
+const injectedWasmCspCollapsedPath = "///inject.js";
 const injectedAppUriPath = "app:///injected/injected.js";
 const walletCollisionPatterns = [
   "tronlinkparams",
@@ -162,6 +163,29 @@ const objectCapturedPromiseRejectionMessage =
 const providerDisconnectedCode = 4900;
 const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
+const rabbyMobileUserRejectedCode = 4001;
+const rabbyMobileUserRejectedMessage = "Not Allowed";
+const rabbyMobileStackPatterns = ["rabbymobile", "userrejectedrequest"];
+const appOwnedStackPatterns = [
+  "webpack-internal:///(app-pages-browser)",
+  "webpack://_n_e/./",
+  "/_next/static/",
+  "https://6529.io/",
+  "https://www.6529.io/",
+  "https://staging.6529.io/",
+  "http://localhost:",
+  "http://127.0.0.1:",
+  "app:///",
+  "app/",
+  "components/",
+  "contexts/",
+  "helpers/",
+  "hooks/",
+  "lib/",
+  "services/",
+  "store/",
+  "utils/",
+];
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 const RABBY_MOBILE_USER_AGENT_TOKEN = "rabbymobile";
 const RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE = "not found rainbowkit";
@@ -995,11 +1019,49 @@ function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
   );
 }
 
-function isInjectedWasmCspAppUriFrame(frame: SentryStackFrame): boolean {
-  return [frame.filename, frame.abs_path].some(
-    (path) =>
-      typeof path === "string" && path.includes(injectedWasmCspAppUriPath)
+function isInjectedWasmCspFramePath(path: string): boolean {
+  const normalizedPath = path.trim();
+  return (
+    normalizedPath.includes(injectedWasmCspAppUriPath) ||
+    normalizedPath === injectedWasmCspCollapsedPath ||
+    normalizedPath.startsWith(`${injectedWasmCspCollapsedPath}:`)
   );
+}
+
+function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some(isInjectedWasmCspFramePath);
+}
+
+function isFirstPartyFramePath(path: string): boolean {
+  const normalizedPath = path.trim();
+  if (!normalizedPath) {
+    return false;
+  }
+
+  if (
+    normalizedPath.startsWith("app:///") &&
+    !isInjectedWasmCspFramePath(normalizedPath)
+  ) {
+    return true;
+  }
+
+  if (normalizedPath.includes("/_next/static/")) {
+    return true;
+  }
+
+  try {
+    return isFirstPartyHost(new URL(normalizedPath).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
+  if (frame.in_app === true && !isInjectedWasmCspFrame(frame)) {
+    return true;
+  }
+
+  return getFramePaths(frame).some(isFirstPartyFramePath);
 }
 
 function hasOnlyAppUriFrames(
@@ -1016,14 +1078,18 @@ function hasInjectedAppUriFrame(
   return Array.isArray(frames) && frames.some(isInjectedAppUriFrame);
 }
 
-function hasInjectedWasmCspAppUriSignature(
+function hasInjectedWasmCspFrameSignature(
   frames: SentryStackFrame[] | undefined
 ): boolean {
-  if (!hasOnlyAppUriFrames(frames)) {
+  if (!Array.isArray(frames) || frames.length === 0) {
     return false;
   }
 
-  return frames.some(isInjectedWasmCspAppUriFrame);
+  if (frames.some(isAppOwnedWasmCspFrame)) {
+    return false;
+  }
+
+  return frames.some(isInjectedWasmCspFrame);
 }
 
 function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
@@ -1047,6 +1113,26 @@ function hasNativeJsonStringifyFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
+}
+
+function hasAppOwnedStackPath(value: string | undefined): boolean {
+  const normalized = value?.toLowerCase();
+  return (
+    !!normalized &&
+    appOwnedStackPatterns.some((pattern) => normalized.includes(pattern))
+  );
+}
+
+function hasLikelyAppOwnedFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    hasAppOwnedFrame(frames) ||
+    (Array.isArray(frames) &&
+      frames.some((frame) =>
+        getFramePaths(frame).some((path) => hasAppOwnedStackPath(path))
+      ))
+  );
 }
 
 function getHintException(hint?: SentryEventHint): unknown {
@@ -1083,6 +1169,38 @@ function getHintExceptionStack(hint?: SentryEventHint): string {
     return exception.stack;
   }
   return "";
+}
+
+function matchesRabbyMobileUserRejectedStack(
+  value: string | undefined
+): boolean {
+  const normalized = value?.toLowerCase();
+  return (
+    !!normalized &&
+    rabbyMobileStackPatterns.every((pattern) => normalized.includes(pattern))
+  );
+}
+
+function hasRabbyMobileUserRejectedStack(
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return [serializedStack, getHintExceptionStack(hint)].some(
+    matchesRabbyMobileUserRejectedStack
+  );
+}
+
+function hasAppOwnedStackEvidence(
+  event: SentryClientEvent,
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  return (
+    hasLikelyAppOwnedFrame(frames) ||
+    hasAppOwnedStackPath(serializedStack) ||
+    hasAppOwnedStackPath(getHintExceptionStack(hint))
+  );
 }
 
 function isCoinbaseWalletLinkWebSocket1006Message(value: string): boolean {
@@ -1634,8 +1752,10 @@ function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
 function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return (
-    normalizedValue.includes("webassembly.instantiate") &&
-    normalizedValue.includes("content security") &&
+    (normalizedValue.includes("webassembly.instantiate") ||
+      normalizedValue.includes("webassembly.module")) &&
+    (normalizedValue.includes("content security") ||
+      /\bcsp\b/.test(normalizedValue)) &&
     normalizedValue.includes("unsafe-eval")
   );
 }
@@ -1728,6 +1848,37 @@ export function shouldFilterDisconnectedWalletProviderRejection(
     message === providerDisconnectedMessage &&
     isThirdPartyWalletExtensionStack(stack)
   );
+}
+
+export function shouldFilterRabbyMobileUserRejectedRequest(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  if (getEventMessage(event) !== objectCapturedPromiseRejectionMessage) {
+    return false;
+  }
+
+  const serialized = getSerializedObjectRejection(event, hint);
+  if (!serialized) {
+    return false;
+  }
+
+  const code = getNumericValue(serialized["code"]);
+  const message = getStringValue(serialized["message"])?.trim();
+  const stack = getStringValue(serialized["stack"]);
+
+  if (
+    code !== rabbyMobileUserRejectedCode ||
+    message !== rabbyMobileUserRejectedMessage
+  ) {
+    return false;
+  }
+
+  if (!hasRabbyMobileUserRejectedStack(stack, hint)) {
+    return false;
+  }
+
+  return !hasAppOwnedStackEvidence(event, stack, hint);
 }
 
 export function shouldFilterReactDomInsertBeforeNotFoundError(
@@ -1856,7 +2007,7 @@ export function shouldFilterInjectedWasmCspUnsafeEval(
   hint?: SentryEventHint
 ): boolean {
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
-  if (!hasInjectedWasmCspAppUriSignature(frames)) {
+  if (!hasInjectedWasmCspFrameSignature(frames)) {
     return false;
   }
 
