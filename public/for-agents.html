@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Agents — 6529.io</title>
+<style>
+:root{--bg:#0A1929;--card:#0f1d2e;--border:#1a2d42;--text:#c9d1d9;--muted:#8b949e;--accent:#58a6ff;--gold:#f0c040;--coral:#ff7b72;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Open Sans',system-ui,sans-serif;line-height:1.6;padding:2rem;}
+.container{max-width:900px;margin:0 auto;}
+h1{font-family:'Zilla Slab',Georgia,serif;font-size:2rem;color:#fff;margin-bottom:.5rem;}
+h2{font-family:'Zilla Slab',Georgia,serif;font-size:1.3rem;color:var(--accent);margin:2rem 0 1rem;}
+.subtitle{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1rem;}
+.card h3{font-size:1rem;color:var(--gold);margin-bottom:.5rem;font-family:'Zilla Slab',Georgia,serif;}
+.card p{font-size:.9rem;color:var(--text);}
+.card .url{font-family:monospace;color:var(--accent);font-size:.85rem;margin-top:.5rem;display:block;}
+.card .meta{font-size:.8rem;color:var(--muted);margin-top:.5rem;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:1rem;}
+.section-intro{color:var(--muted);font-size:.9rem;margin-bottom:1rem;}
+.tag{display:inline-block;background:rgba(88,166,255,.15);color:var(--accent);padding:2px 8px;border-radius:4px;font-size:.75rem;margin-left:.5rem;}
+.license-tag{background:rgba(240,192,64,.15);color:var(--gold);}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem;text-align:center;}
+@media(max-width:600px){.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>For Agents &amp; Developers</h1>
+<p class="subtitle">Agent-native files for 6529.io. Discoverable, structured, and machine-readable.</p>
+
+<h2>Getting Started for Agents</h2>
+<p class="section-intro">If you are an AI agent (ChatGPT, Claude, Grok, autonomous agent), fetch these files in order:</p>
+<div class="card">
+<h3>1. llms.txt <span class="tag">start here</span></h3>
+<p>Site overview, agent instructions, ecosystem map, 28 user journeys across 8 lifecycle stages, usage policy, and links to all other files. This is the front door.</p>
+<span class="url">/llms.txt</span>
+<span class="meta">Plain text — 11KB</span>
+</div>
+<div class="card">
+<h3>2. glossary.json <span class="tag">40 terms</span></h3>
+<p>6529 ecosystem terms with beginner definitions, technical definitions, source paths, cross-references to help-index.json, and i18n translations in 7 languages (Korean, Spanish, Japanese, Swahili, Hindi, Chinese, Russian).</p>
+<span class="url">/glossary.json</span>
+<span class="meta">JSON — 67KB</span>
+</div>
+<div class="card">
+<h3>3. help-index.json <span class="tag">181 records</span></h3>
+<p>Pre-existing route and feature index maintained by the 6529 team. 181 records covering routes, UI affordances, workflows, glossary entries, and business rules. Cross-reference via glossary.json <code>help_index_id</code> fields.</p>
+<span class="url">/help-index.json</span>
+<span class="meta">JSON — pre-existing, maintained by 6529 team</span>
+</div>
+
+<h2>Getting Started for Humans</h2>
+<p class="section-intro">If you are a human developer or curious community member, these files help you understand and build on 6529.io:</p>
+
+<div class="grid">
+<div class="card">
+<h3>glossary.json</h3>
+<p>Every 6529 term explained in plain English. TDH, REP, NIC, Brain, Wave, Wave Score, TAP, CC0, and 32 more. Each with beginner definition, technical definition, and translations in 7 languages.</p>
+<span class="url">/glossary.json</span>
+</div>
+</div>
+
+<h2>API</h2>
+<div class="card">
+<h3>api.6529.io</h3>
+<p>20+ API endpoints for identities, waves, drops, NFTs, TDH, profiles, ratings, royalties. Swagger docs at <a href="https://api.6529.io/docs">api.6529.io/docs</a>. Rate limit: 30 burst, 10 sustained (unauthenticated). Full OpenAPI spec (553KB) in the <a href="https://github.com/6529-Collections/6529seize-frontend">frontend repo</a>.</p>
+<span class="url">https://api.6529.io</span>
+</div>
+
+<h2>Source Code</h2>
+<div class="card">
+<h3>github.com/6529-Collections</h3>
+<p>Frontend (Next.js, Apache-2.0), backend (Node.js, Apache-2.0), reviewbot (MIT), smart contracts (MIT), and 13 more repos. DCO signoff required for PRs. See <a href="https://github.com/6529-Collections/6529seize-frontend/blob/main/AGENTS.md">AGENTS.md</a> for agent operating rules.</p>
+<span class="url">https://github.com/6529-Collections</span>
+</div>
+
+<div class="card">
+<h3>6529.ar.io</h3>
+<p>This site is permanently available via Arweave at <a href="https://6529.ar.io">6529.ar.io</a>. Periodic snapshots of the entire site — including all agent-native files — are stored permanently on Arweave. Fetch from 6529.io for live content; fetch from 6529.ar.io to verify against a permanent, immutable copy.</p>
+<span class="url">https://6529.ar.io</span>
+</div>
+
+<footer>
+<p>6529.io — Agent-Native Files — Apache-2.0 — Generated June 30, 2026</p>
+<p>Files in this PR: llms.txt, glossary.json, for-agents.html, robots.txt</p>
+<p>Permanent: 6529.ar.io (Arweave)</p>
+</footer>
+</div>
+</body>
+</html>
