@@ -39,6 +39,18 @@ jest.mock("@/components/waves/create-wave/CreateWave", () => ({
   ),
 }));
 
+jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
+  const loaderSource = loader.toString();
+
+  if (loaderSource.includes("WavesDesktop")) {
+    return require("@/components/waves/WavesDesktop").default;
+  }
+
+  throw new Error(
+    `Unexpected dynamic import in WavesCreatePageClient test: ${loaderSource}`
+  );
+});
+
 jest.mock("@/components/waves/WavesDesktop", () => ({
   __esModule: true,
   default: ({
