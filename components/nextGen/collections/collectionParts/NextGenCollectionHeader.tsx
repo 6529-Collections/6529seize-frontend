@@ -30,7 +30,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { DistributionLink } from "../NextGen";
 import styles from "../NextGen.module.scss";
 

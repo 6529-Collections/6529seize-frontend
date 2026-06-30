@@ -3,7 +3,8 @@
 import { faDownload, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Col, Container, Row } from "../NextGenTailwindLayout";
+import { Dropdown } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import useDownloader from "@/hooks/useDownloader";
 import type { NextGenToken } from "@/entities/INextgen";

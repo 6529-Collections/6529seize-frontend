@@ -3,7 +3,7 @@
 import { faArrowCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { Col, Row } from "react-bootstrap";
+import { Col, Row } from "../../NextGenTailwindLayout";
 import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import styles from "@/components/nextGen/collections/NextGen.module.scss";
 
@@ -16,12 +16,12 @@ export default function SlideshowHeader({
 }: SlideshowHeaderProps) {
   return (
     <Row>
-      <Col className="d-flex align-items-center justify-content-end">
+      <Col className="tw-flex tw-items-center tw-justify-end">
         <Link
           href={`/nextgen/collection/${formatNameForUrl(collectionName)}/art`}
-          className={`d-flex align-items-center gap-2 decoration-none ${styles["viewAllTokens"]}`}
+          className={`tw-flex tw-items-center tw-gap-2 tw-no-underline ${styles["viewAllTokens"]}`}
         >
-          <h5 className="mb-0 font-color d-flex align-items-center gap-2">
+          <h5 className="tw-mb-0 tw-flex tw-items-center tw-gap-2 tw-text-white">
             View All
             <FontAwesomeIcon
               icon={faArrowCircleRight}

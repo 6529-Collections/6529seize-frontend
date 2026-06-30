@@ -7,7 +7,7 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
 import { useSyncExternalStore } from "react";
-import { Container } from "react-bootstrap";
+import { Container } from "./NextGenTailwindLayout";
 
 const MOBILE_HEADER_MAX_WIDTH = 750;
 const COMPACT_HEADER_MAX_WIDTH = 575;
