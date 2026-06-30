@@ -122,6 +122,17 @@ describe("About contents dropdown", () => {
     expect(screen.queryByText("Mission")).toBeNull();
   });
 
+  it("shows the menu heading without its own divider", async () => {
+    setCookieCountry("US");
+    await renderAboutSection(AboutSection.MEMES);
+
+    openContentsMenu();
+
+    const heading = screen.getByText("About");
+
+    expect(heading.parentElement).not.toHaveClass("tw-border-b");
+  });
+
   it("does not link to retired release notes page", async () => {
     setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
@@ -203,6 +214,21 @@ describe("About contents dropdown", () => {
     expect(
       screen.getByRole("menuitem", { name: /go to page: cookie policy/i })
     ).toHaveClass("!tw-no-underline");
+  });
+
+  it("keeps the active dropdown item to a checkmark and blue text", async () => {
+    setCookieCountry("US");
+    await renderAboutSection(AboutSection.MEMES);
+    openContentsMenu();
+
+    const currentItem = screen.getByRole("menuitem", {
+      name: /the memes, current page/i,
+    });
+
+    expect(currentItem).toHaveClass("tw-text-primary-300");
+    expect(currentItem).not.toHaveClass("tw-bg-primary-500/10");
+    expect(currentItem).not.toHaveClass("tw-ring-1");
+    expect(currentItem.querySelector("svg")).toBeInTheDocument();
   });
 
   it("marks tech as current on deeper tech routes", async () => {

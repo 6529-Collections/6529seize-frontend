@@ -113,11 +113,10 @@ export function AboutContentsDropdown({
         anchor={{ to: "bottom end", gap: 8, padding: 16 }}
         menuWidthClassName="tw-w-72 tw-max-w-[calc(100vw-2rem)] sm:tw-w-80"
         header={<AboutContentsDropdownHeader />}
-        headerClassName="tw-mb-1 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-px-3 tw-pb-3 tw-pt-2"
+        headerClassName="tw-mb-1 tw-px-3 tw-pb-3 tw-pt-2"
         itemsWrapperClassName="tw-pr-2"
         menuClassName="tw-[scrollbar-gutter:stable] tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-2 tw-pr-3 tw-shadow-2xl tw-backdrop-blur tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-max-h-96"
         itemClassName="!tw-no-underline hover:!tw-no-underline focus:!tw-no-underline tw-px-3 tw-py-2.5"
-        activeItemClassName="tw-bg-primary-500/10 tw-text-primary-200 tw-ring-1 tw-ring-primary-400/20"
         inactiveItemClassName="tw-text-iron-200 hover:tw-bg-iron-900 hover:tw-text-iron-50"
         focusItemClassName="tw-bg-iron-900 tw-text-iron-50"
       />
