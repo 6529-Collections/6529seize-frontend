@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useWaveDropsScrollControlsVisible } from "@/components/waves/drops/WaveDropsScrollControlsVisibility";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -78,6 +79,8 @@ export default function QuickDirectMessages() {
   const { directMessages, registerWave } = useMyStream();
   const shouldLiftLauncher = useWaveDropsScrollControlsVisible();
   const [state, setState] = useState<QuickDmState>(() => readStoredState());
+  const [isCreateDirectMessageOpen, setIsCreateDirectMessageOpen] =
+    useState(false);
   const launcherButtonRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const restoreFocusElementRef = useRef<HTMLElement | null>(null);
@@ -155,6 +158,25 @@ export default function QuickDirectMessages() {
     setAndStoreState(CLOSED_STATE);
   }, [setAndStoreState]);
 
+  const openCreateDirectMessage = useCallback(() => {
+    restoreFocusElementRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : panelRef.current;
+    setIsCreateDirectMessageOpen(true);
+  }, []);
+
+  const closeCreateDirectMessage = useCallback(() => {
+    setIsCreateDirectMessageOpen(false);
+    restoreLauncherFocus();
+  }, [restoreLauncherFocus]);
+
+  const handleCreateDirectMessageSuccess = useCallback(() => {
+    setIsCreateDirectMessageOpen(false);
+    setAndStoreState(CLOSED_STATE);
+    restoreLauncherFocus();
+  }, [restoreLauncherFocus, setAndStoreState]);
+
   useEffect(() => {
     if (!isVisible || typeof globalThis.window === "undefined") {
       return;
@@ -209,6 +231,18 @@ export default function QuickDirectMessages() {
     return null;
   }
 
+  const createDirectMessageModal = connectedProfile ? (
+    <CreateDirectMessageModal
+      isOpen={isCreateDirectMessageOpen}
+      onClose={closeCreateDirectMessage}
+      onSuccess={handleCreateDirectMessageSuccess}
+      profile={connectedProfile}
+    />
+  ) : null;
+  const createDirectMessageAction = connectedProfile
+    ? openCreateDirectMessage
+    : undefined;
+
   if (state.view === "closed") {
     const launcherPositionClassName = `${QUICK_DM_LAUNCHER_BASE_POSITION_CLASS} ${
       shouldLiftLauncher
@@ -217,71 +251,79 @@ export default function QuickDirectMessages() {
     }`;
 
     return (
-      <div className={launcherPositionClassName}>
-        <button
-          ref={launcherButtonRef}
-          type="button"
-          onClick={openList}
-          aria-label={
-            hasUnread
-              ? t(locale, "quickDm.openButtonUnreadAriaLabel", {
-                  count: displayUnreadCount,
-                })
-              : t(locale, "quickDm.openButtonAriaLabel")
-          }
-          title={t(locale, "quickDm.openButtonTitle")}
-          className="tw-relative tw-flex tw-size-14 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-100 tw-shadow-2xl tw-ring-1 tw-ring-white/15 tw-transition hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-        >
-          <ChatBubbleLeftRightIcon className="tw-size-6" aria-hidden="true" />
-          {hasUnread && (
-            <span className="tw-absolute tw-right-[-2px] tw-top-[-2px] tw-flex tw-h-5 tw-min-w-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-px-1.5 tw-text-[11px] tw-font-semibold tw-text-white tw-ring-2 tw-ring-black">
-              {displayUnreadCount}
-            </span>
-          )}
-        </button>
-      </div>
+      <>
+        <div className={launcherPositionClassName}>
+          <button
+            ref={launcherButtonRef}
+            type="button"
+            onClick={openList}
+            aria-label={
+              hasUnread
+                ? t(locale, "quickDm.openButtonUnreadAriaLabel", {
+                    count: displayUnreadCount,
+                  })
+                : t(locale, "quickDm.openButtonAriaLabel")
+            }
+            title={t(locale, "quickDm.openButtonTitle")}
+            className="tw-relative tw-flex tw-size-14 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-100 tw-shadow-2xl tw-ring-1 tw-ring-white/15 tw-transition hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          >
+            <ChatBubbleLeftRightIcon className="tw-size-6" aria-hidden="true" />
+            {hasUnread && (
+              <span className="tw-absolute tw-right-[-2px] tw-top-[-2px] tw-flex tw-h-5 tw-min-w-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-px-1.5 tw-text-[11px] tw-font-semibold tw-text-white tw-ring-2 tw-ring-black">
+                {displayUnreadCount}
+              </span>
+            )}
+          </button>
+        </div>
+        {createDirectMessageModal}
+      </>
     );
   }
 
   return (
-    <aside
-      ref={panelRef}
-      role="dialog"
-      tabIndex={-1}
-      className={QUICK_DM_PANEL_POSITION_CLASS}
-      aria-label={t(locale, "quickDm.regionAriaLabel")}
-      onKeyDown={(event) => {
-        if (event.key !== "Escape") {
-          return;
-        }
+    <>
+      <aside
+        ref={panelRef}
+        role="dialog"
+        tabIndex={-1}
+        className={QUICK_DM_PANEL_POSITION_CLASS}
+        aria-label={t(locale, "quickDm.regionAriaLabel")}
+        onKeyDown={(event) => {
+          if (event.key !== "Escape") {
+            return;
+          }
 
-        event.stopPropagation();
-        close();
-      }}
-    >
-      {shouldShowChat && state.waveId ? (
-        <Suspense fallback={<QuickDmLoadingRows locale={locale} />}>
-          <QuickDmChat
-            waveId={state.waveId}
-            hasUnreadOutsideCurrentChat={hasUnreadOutsideCurrentChat}
-            listWave={selectedWave}
+          event.stopPropagation();
+          close();
+        }}
+      >
+        {shouldShowChat && state.waveId ? (
+          <Suspense fallback={<QuickDmLoadingRows locale={locale} />}>
+            <QuickDmChat
+              waveId={state.waveId}
+              hasUnreadOutsideCurrentChat={hasUnreadOutsideCurrentChat}
+              listWave={selectedWave}
+              locale={locale}
+              onBack={openList}
+              onClose={close}
+              onCreateDirectMessage={createDirectMessageAction}
+              onOpenAll={openAll}
+            />
+          </Suspense>
+        ) : (
+          <QuickDmListPanel
+            waves={waves}
+            isFetching={directMessages.isFetching}
             locale={locale}
-            onBack={openList}
             onClose={close}
+            onCreateDirectMessage={createDirectMessageAction}
             onOpenAll={openAll}
+            onOpenChat={openChat}
+            onRegisterWave={registerWave}
           />
-        </Suspense>
-      ) : (
-        <QuickDmListPanel
-          waves={waves}
-          isFetching={directMessages.isFetching}
-          locale={locale}
-          onClose={close}
-          onOpenAll={openAll}
-          onOpenChat={openChat}
-          onRegisterWave={registerWave}
-        />
-      )}
-    </aside>
+        )}
+      </aside>
+      {createDirectMessageModal}
+    </>
   );
 }
