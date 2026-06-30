@@ -22,11 +22,6 @@ import {
   MEMES_COLLECTION,
   MEME_LAB_COLLECTION,
 } from "./delegation-constants";
-import {
-  delegationColClass,
-  delegationContainerClass,
-  delegationRowClass,
-} from "./delegation-tailwind-classes";
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 
@@ -270,10 +265,12 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   function printMenuRows() {
     return DELEGATION_MENU_ITEMS.map((item, index) => (
       <div
-        className={`${delegationRowClass} ${index === 0 ? "tw-pt-2" : "tw-pt-1"} tw-pb-2`}
+        className={`tw-flex tw-flex-wrap -tw-mx-3 ${
+          index === 0 ? "tw-pt-2" : "tw-pt-1"
+        } tw-pb-2`}
         key={item.section}
       >
-        <div className={delegationColClass}>
+        <div className="tw-w-full tw-px-3">
           {printMenuButton(item.section, item.label)}
         </div>
       </div>
@@ -282,13 +279,13 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
 
   function printExternalLinkRows() {
     return [
-      <div className={`${delegationRowClass} tw-py-2`} key="etherscan">
-        <div className={delegationColClass}>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-py-2" key="etherscan">
+        <div className="tw-w-full tw-px-3">
           <EtherscanLink />
         </div>
       </div>,
-      <div className={`${delegationRowClass} tw-py-2`} key="github">
-        <div className={delegationColClass}>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-py-2" key="github">
+        <div className="tw-w-full tw-px-3">
           <GithubLink />
         </div>
       </div>,
@@ -296,10 +293,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   }
 
   return (
-    <div className={`${delegationContainerClass} tw-pt-4`}>
-      <div className={delegationRowClass}>
+    <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-pt-4">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
         <div className={`${styles["menuLeft"]} tw-px-3`}>
-          <div className={delegationContainerClass}>
+          <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
             {printMenuRows()}
             {printExternalLinkRows()}
           </div>
@@ -308,10 +305,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           {printContent()}
         </div>
       </div>
-      <div className={`${delegationRowClass} tw-pt-4`}>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
         <div className={`${styles["menuLeftFull"]} tw-px-3`}>
-          <div className={delegationContainerClass}>
-            <div className={delegationRowClass}>
+          <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+            <div className="tw-flex tw-flex-wrap -tw-mx-3">
               <div className="tw-flex-1 tw-px-3">
                 <div className="tw-w-full tw-p-0">{printMenuRows()}</div>
               </div>

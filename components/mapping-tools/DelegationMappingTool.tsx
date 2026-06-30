@@ -9,17 +9,16 @@ import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
-import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  MappingToolSubmitButton,
+  MappingToolUpload,
+} from "./MappingToolControls";
 import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");
 
 export default function DelegationMappingTool() {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [dragActive, setDragActive] = useState(false);
-
   const [file, setFile] = useState<any>();
   const [collection, setCollection] = useState<string>("0");
   const [useCase, setUseCase] = useState<number>(0);
@@ -30,29 +29,6 @@ export default function DelegationMappingTool() {
   function submit() {
     setProcessing(true);
   }
-
-  const handleUpload = () => {
-    inputRef.current?.click();
-  };
-
-  const handleDrag = function (e: any) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = function (e: any) {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
-  };
 
   function getForAddress(address: string, collection: string, useCase: number) {
     const myDelegations = delegations.find(
@@ -154,38 +130,7 @@ export default function DelegationMappingTool() {
 
   return (
     <div className={styles["toolArea"]} id="mapping-tool-form">
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-w-full tw-px-3">
-          Upload File <span className="tw-text-iron-400">(.csv)</span>
-        </div>
-      </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
-        <div className="tw-w-full tw-px-3">
-          <button
-            type="button"
-            className={`${styles["uploadArea"]} ${
-              dragActive ? styles["uploadAreaActive"] : ""
-            }`}
-            onClick={handleUpload}
-            onDrop={handleDrop}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-          >
-            <div>
-              <FontAwesomeIcon
-                icon={faFileUpload}
-                className={styles["uploadIcon"]}
-              />
-            </div>
-            {file ? (
-              <div>{file.name}</div>
-            ) : (
-              <div>Drag and drop your file here, or click to upload</div>
-            )}
-          </button>
-        </div>
-      </div>
+      <MappingToolUpload fileName={file?.name} onFileSelected={setFile} />
       <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
         <label className="tw-w-full tw-px-3" htmlFor="delegation-collection">
           Select Collection
@@ -256,44 +201,10 @@ export default function DelegationMappingTool() {
           &quot;Any&quot; or &quot;All&quot; options respectively.
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-3">
-        <div className="tw-w-full tw-px-3">
-          <button
-            type="button"
-            className={`${styles["submitBtn"]} ${
-              useCase === 0 || processing || !file
-                ? styles["submitBtnDisabled"]
-                : ""
-            }`}
-            disabled={useCase === 0 || processing || !file}
-            onClick={() => submit()}
-          >
-            {processing ? "Processing" : "Submit"}
-            {processing && (
-              <div className="tw-inline">
-                <div
-                  className={`tw-inline-block tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-current tw-border-r-transparent ${styles["loader"]}`}
-                  role="status"
-                >
-                  <span className="tw-sr-only"></span>
-                </div>
-              </div>
-            )}
-          </button>
-        </div>
-      </div>
-      <input
-        ref={inputRef}
-        className={`tw-form-input ${styles["formInputHidden"]}`}
-        type="file"
-        accept=".csv"
-        aria-label="Upload CSV file"
-        onChange={(e: any) => {
-          if (e.target.files) {
-            const f = e.target.files[0];
-            setFile(f);
-          }
-        }}
+      <MappingToolSubmitButton
+        disabled={useCase === 0 || processing || !file}
+        processing={processing}
+        onSubmit={submit}
       />
     </div>
   );
