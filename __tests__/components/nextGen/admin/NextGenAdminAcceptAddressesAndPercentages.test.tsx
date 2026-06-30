@@ -182,11 +182,11 @@ describe('NextGenAdminAcceptAddressesAndPercentages', () => {
     const primaryRadios = screen.getAllByRole('radio');
     const acceptRadio = primaryRadios.find(radio => 
       radio.getAttribute('name') === 'primaryRadio' && 
-      radio.closest('.form-check')?.textContent?.includes('Accept')
+      radio.closest('label')?.textContent?.includes('Accept')
     );
     const rejectRadio = primaryRadios.find(radio => 
       radio.getAttribute('name') === 'primaryRadio' && 
-      radio.closest('.form-check')?.textContent?.includes('Reject')
+      radio.closest('label')?.textContent?.includes('Reject')
     );
 
     fireEvent.click(acceptRadio!);
@@ -202,11 +202,11 @@ describe('NextGenAdminAcceptAddressesAndPercentages', () => {
     const secondaryRadios = screen.getAllByRole('radio');
     const acceptRadio = secondaryRadios.find(radio => 
       radio.getAttribute('name') === 'secondaryRadio' && 
-      radio.closest('.form-check')?.textContent?.includes('Accept')
+      radio.closest('label')?.textContent?.includes('Accept')
     );
     const rejectRadio = secondaryRadios.find(radio => 
       radio.getAttribute('name') === 'secondaryRadio' && 
-      radio.closest('.form-check')?.textContent?.includes('Reject')
+      radio.closest('label')?.textContent?.includes('Reject')
     );
 
     fireEvent.click(acceptRadio!);
@@ -240,14 +240,14 @@ describe('NextGenAdminAcceptAddressesAndPercentages', () => {
     const primaryRadios = screen.getAllByRole('radio');
     const primaryAcceptRadio = primaryRadios.find(radio => 
       radio.getAttribute('name') === 'primaryRadio' && 
-      radio.closest('.form-check')?.textContent?.includes('Accept')
+      radio.closest('label')?.textContent?.includes('Accept')
     );
     fireEvent.click(primaryAcceptRadio!);
 
     // Set secondary status  
     const secondaryRejectRadio = primaryRadios.find(radio => 
       radio.getAttribute('name') === 'secondaryRadio' && 
-      radio.closest('.form-check')?.textContent?.includes('Reject')
+      radio.closest('label')?.textContent?.includes('Reject')
     );
     fireEvent.click(secondaryRejectRadio!);
 
