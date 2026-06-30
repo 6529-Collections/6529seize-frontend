@@ -2,7 +2,7 @@
 import styles from "./AppWallet.module.scss";
 import type { RefObject } from "react";
 import { useCallback, useRef, useState } from "react";
-import { Modal, Button } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -14,6 +14,7 @@ import {
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
+import { appWalletButtonClassName } from "./app-wallet-tailwind-classes";
 
 const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
 
@@ -148,7 +149,7 @@ export function CreateAppWalletModal(
         <Modal.Title>{importData ? `Import` : `Create New`} Wallet</Modal.Title>
       </Modal.Header>
       <Modal.Body className={styles["modalContent"]}>
-        <label className="pb-1" htmlFor="walletName">
+        <label className="tw-pb-1" htmlFor="walletName">
           Wallet Name
         </label>
         <input
@@ -167,8 +168,8 @@ export function CreateAppWalletModal(
             }
           }}
         />
-        <label className="pt-3 pb-1 d-flex align-items-center justify-content-between">
-          <span className="unselectable">Wallet Password</span>
+        <label className="tw-flex tw-items-center tw-justify-between tw-pb-1 tw-pt-3">
+          <span className="tw-select-none">Wallet Password</span>
           <FontAwesomeIcon
             icon={passHidden ? faEyeSlash : faEye}
             height={18}
@@ -196,34 +197,39 @@ export function CreateAppWalletModal(
             }
           }}
         />
-        <p className="mt-4 mb-1">
+        <p className="tw-mb-1 tw-mt-4">
           {error ? (
-            <span className="text-danger">{error}</span>
+            <span className="tw-text-[#dc3545]">{error}</span>
           ) : (
             <>Provide a name and password for your new wallet</>
           )}
         </p>
       </Modal.Body>
       <Modal.Footer className={styles["modalContent"]}>
-        <Button variant="secondary" onClick={() => handleHide()}>
+        <button
+          type="button"
+          className={appWalletButtonClassName("secondary")}
+          onClick={() => handleHide()}>
           Cancel
-        </Button>
+        </button>
         {importData ? (
-          <Button
-            variant="primary"
+          <button
+            type="button"
+            className={appWalletButtonClassName("primary")}
             disabled={!walletName || !walletPass || isAdding}
             onClick={handleImport}
           >
             {isAdding ? "Importing..." : "Import"}
-          </Button>
+          </button>
         ) : (
-          <Button
-            variant="primary"
+          <button
+            type="button"
+            className={appWalletButtonClassName("primary")}
             disabled={!walletName || !walletPass || isAdding}
             onClick={handleCreate}
           >
             {isAdding ? "Creating..." : "Create"}
-          </Button>
+          </button>
         )}
       </Modal.Footer>
     </Modal>
@@ -352,8 +358,8 @@ export function UnlockAppWalletModal(
         <Modal.Title>Unlock Wallet</Modal.Title>
       </Modal.Header>
       <Modal.Body className={styles["modalContent"]}>
-        <label className="pb-1 d-flex align-items-center justify-content-between">
-          <span className="unselectable">Wallet Password</span>
+        <label className="tw-flex tw-items-center tw-justify-between tw-pb-1">
+          <span className="tw-select-none">Wallet Password</span>
           <FontAwesomeIcon
             icon={passHidden ? faEyeSlash : faEye}
             height={18}
@@ -385,9 +391,13 @@ export function UnlockAppWalletModal(
           onKeyDown={handleKeyPress}
         />
         {sensitiveAction && (
-          <div className="pt-3">
-            <p className="mb-2 text-warning">{sensitiveAction.warning}</p>
-            <label className="pb-1" htmlFor="sensitiveActionConfirmation">
+          <div className="tw-pt-3">
+            <p className="tw-mb-2 tw-text-[#ffc107]">
+              {sensitiveAction.warning}
+            </p>
+            <label
+              className="tw-pb-1"
+              htmlFor="sensitiveActionConfirmation">
               Type {sensitiveAction.confirmationText} to confirm{" "}
               {sensitiveAction.label}
             </label>
@@ -400,21 +410,28 @@ export function UnlockAppWalletModal(
             />
           </div>
         )}
-        <p className="mt-4 mb-1">
+        <p className="tw-mb-1 tw-mt-4">
           {error ? (
-            <span className="text-danger">{error}</span>
+            <span className="tw-text-[#dc3545]">{error}</span>
           ) : (
             <>Provide wallet password to continue</>
           )}
         </p>
       </Modal.Body>
       <Modal.Footer className={styles["modalContent"]}>
-        <Button variant="secondary" onClick={() => handleHide()}>
+        <button
+          type="button"
+          className={appWalletButtonClassName("secondary")}
+          onClick={() => handleHide()}>
           Cancel
-        </Button>
-        <Button variant="primary" disabled={!canUnlock} onClick={handleUnlock}>
+        </button>
+        <button
+          type="button"
+          className={appWalletButtonClassName("primary")}
+          disabled={!canUnlock}
+          onClick={handleUnlock}>
           {unlocking ? "Unlocking..." : "Unlock"}
-        </Button>
+        </button>
       </Modal.Footer>
     </Modal>
   );

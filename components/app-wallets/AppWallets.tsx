@@ -1,6 +1,5 @@
 "use client";
 
-import { Container, Row, Col, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import AppWalletCard from "./AppWalletCard";
 import { CreateAppWalletModal } from "./AppWalletModal";
@@ -10,6 +9,13 @@ import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useAppWallets } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
+import {
+  appWalletButtonClassName,
+  appWalletColClassName,
+  appWalletContainerClassName,
+  appWalletRowClassName,
+  appWalletWalletCardColClassName,
+} from "./app-wallet-tailwind-classes";
 
 export default function AppWallets() {
   const { appWalletsSupported, fetchingAppWallets, appWallets } =
@@ -21,20 +27,22 @@ export default function AppWallets() {
   function printWallets() {
     if (fetchingAppWallets) {
       return (
-        <Col>
+        <div className={appWalletColClassName}>
           Fetching wallets <DotLoader />
-        </Col>
+        </div>
       );
     }
 
     if (appWallets.length === 0) {
-      return <Col>No wallets found</Col>;
+      return <div className={appWalletColClassName}>No wallets found</div>;
     }
 
     return appWallets.map((w) => (
-      <Col xs={12} sm={6} md={4} key={w.address} className="pb-3">
+      <div
+        key={w.address}
+        className={`${appWalletWalletCardColClassName} tw-pb-3`}>
         <AppWalletCard wallet={w} />
-      </Col>
+      </div>
     ));
   }
 
@@ -45,39 +53,48 @@ export default function AppWallets() {
 
     return (
       <>
-        <Row className="mt-4">{printWallets()}</Row>
-        <Row className="mt-4">
-          <Col className="d-flex align-items-center gap-3">
+        <div className={`${appWalletRowClassName} tw-mt-4`}>
+          {printWallets()}
+        </div>
+        <div className={`${appWalletRowClassName} tw-mt-4`}>
+          <div
+            className={`${appWalletColClassName} tw-flex tw-items-center tw-gap-3`}>
             <CreateAppWalletModal
               show={showCreateModal}
               onHide={() => setShowCreateModal(false)}
             />
-            <Button
-              variant="primary"
+            <button
+              type="button"
               onClick={() => setShowCreateModal(true)}
-              className="d-flex align-items-center gap-2">
+              className={appWalletButtonClassName(
+                "primary",
+                "tw-gap-2"
+              )}>
               <FontAwesomeIcon icon={faPlusCircle} height={16} /> Create Wallet
-            </Button>
-            <Button
-              variant="success"
+            </button>
+            <button
+              type="button"
               onClick={() => router.push("/tools/app-wallets/import-wallet")}
-              className="d-flex align-items-center gap-2">
+              className={appWalletButtonClassName(
+                "success",
+                "tw-gap-2"
+              )}>
               <FontAwesomeIcon icon={faPlusCircle} height={16} /> Import Wallet
-            </Button>
-          </Col>
-        </Row>
+            </button>
+          </div>
+        </div>
       </>
     );
   }
 
   return (
-    <Container className="pt-4 pb-4">
-      <Row>
-        <h1>
+    <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
+      <div className={appWalletRowClassName}>
+        <h1 className={appWalletColClassName}>
           App Wallets
         </h1>
-      </Row>
+      </div>
       {printContent()}
-    </Container>
+    </div>
   );
 }

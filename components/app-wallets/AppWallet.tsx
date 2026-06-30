@@ -12,7 +12,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
-import { Container, Row, Col, Button } from "react-bootstrap";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -39,6 +38,14 @@ import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 import { Share } from "@capacitor/share";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import {
+  appWalletButtonClassName,
+  appWalletCol12ClassName,
+  appWalletColClassName,
+  appWalletContainerClassName,
+  appWalletPhraseColClassName,
+  appWalletRowClassName,
+} from "./app-wallet-tailwind-classes";
 
 const SECRET_REVEAL_TIMEOUT_MS = 60000;
 const SECRET_CLIPBOARD_TTL_MS = 30000;
@@ -280,34 +287,34 @@ export default function AppWalletComponent(
 
   if (fetchingAppWallets) {
     return (
-      <Container className="pt-4 pb-4">
-        <Row>
-          <Col className="d-flex gap-2">
+      <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
+        <div className={appWalletRowClassName}>
+          <div className={`${appWalletColClassName} tw-flex tw-gap-2`}>
             <span>Fetching wallet</span>
             <Spinner />
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (!appWalletsSupported) {
     return (
-      <Container className="pt-4 pb-4">
+      <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
         <AppWalletsUnsupported />
-      </Container>
+      </div>
     );
   }
 
   if (!appWallet) {
     return (
-      <Container className="pt-4 pb-4">
-        <Row>
-          <Col>
+      <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
+        <div className={appWalletRowClassName}>
+          <div className={appWalletColClassName}>
             Wallet with address <b>{props.address}</b> not found.
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -321,7 +328,7 @@ export default function AppWalletComponent(
           {fromGWEI(Number(balance.data.value)).toLocaleString()}{" "}
           {balance.data?.symbol}
           {chainId === sepolia.id && (
-            <span className="font-color-h"> (sepolia)</span>
+            <span className="tw-text-iron-400"> (sepolia)</span>
           )}
         </>
       );
@@ -333,44 +340,46 @@ export default function AppWalletComponent(
   }
 
   return (
-    <Container className="pt-4 pb-4">
-      <Row>
-        <Col>
+    <div className={`${appWalletContainerClassName} tw-pb-4 tw-pt-4`}>
+      <div className={appWalletRowClassName}>
+        <div className={appWalletColClassName}>
           <Link
-            className="font-smaller d-flex align-items-center gap-2 decoration-none"
+            className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-no-underline"
             href="/tools/app-wallets"
           >
             <FontAwesomeIcon icon={faCircleArrowLeft} height={16} />
             Back to App Wallets
           </Link>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col className="d-flex align-items-center justify-content-between">
-          <h3 className="mb-0 d-flex align-items-center gap-2">
+        </div>
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-4`}>
+        <div
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
+          <h3 className="tw-mb-0 tw-flex tw-items-center tw-gap-2">
             <AppWalletAvatar address={appWallet.address} size={50} />
             {appWallet.name}
             {appWallet.imported ? (
-              <span className="font-color-h"> (imported)</span>
+              <span className="tw-text-iron-400"> (imported)</span>
             ) : (
               <></>
             )}
           </h3>
           {printBalance()}
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col className="d-flex align-items-center gap-2 justify-content-between flex-wrap">
+        </div>
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-4`}>
+        <div
+          className={`${appWalletColClassName} tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2`}>
           <span>
             Wallet Address:{" "}
-            <span className="font-larger font-bolder">
+            <span className="tw-text-[larger] tw-font-bold">
               {appWallet.address.toLowerCase()}
             </span>
           </span>
-          <span className="d-flex align-items-center gap-2">
+          <span className="tw-flex tw-items-center tw-gap-2">
             <>
               <FontAwesomeIcon
-                className="cursor-pointer unselectable"
+                className="tw-cursor-pointer tw-select-none"
                 icon={faExternalLink}
                 height={22}
                 data-tooltip-id={`etherscan-${appWallet.address}`}
@@ -395,7 +404,7 @@ export default function AppWalletComponent(
             </>
             <>
               <FontAwesomeIcon
-                className="cursor-pointer unselectable"
+                className="tw-cursor-pointer tw-select-none"
                 icon={faFileDownload}
                 height={22}
                 data-tooltip-id={`download-${appWallet.address}`}
@@ -454,7 +463,7 @@ export default function AppWalletComponent(
             />
             <>
               <FontAwesomeIcon
-                className="cursor-pointer unselectable"
+                className="tw-cursor-pointer tw-select-none"
                 icon={faCopy}
                 height={22}
                 data-tooltip-id={`copy-address-${appWallet.address}`}
@@ -479,16 +488,17 @@ export default function AppWalletComponent(
               </Tooltip>
             </>
           </span>
-        </Col>
-      </Row>
-      <Row className="pt-5">
-        <Col className="d-flex align-items-center justify-content-between">
+        </div>
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-5`}>
+        <div
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
           <span>Mnemonic Phrase</span>
           {mnemonicAvailable && (
-            <span className="d-flex gap-3 align-items-center">
+            <span className="tw-flex tw-items-center tw-gap-3">
               <>
                 <FontAwesomeIcon
-                  className="cursor-pointer unselectable"
+                  className="tw-cursor-pointer tw-select-none"
                   icon={revealPhrase ? faEye : faEyeSlash}
                   height={22}
                   data-tooltip-id={`reveal-phrase-${appWallet.address}`}
@@ -537,7 +547,7 @@ export default function AppWalletComponent(
               {revealPhrase && (
                 <>
                   <FontAwesomeIcon
-                    className="cursor-pointer unselectable"
+                    className="tw-cursor-pointer tw-select-none"
                     icon={faCopy}
                     height={22}
                     data-tooltip-id={`copy-mnemonic-${appWallet.address}`}
@@ -563,9 +573,9 @@ export default function AppWalletComponent(
               )}
             </span>
           )}
-        </Col>
-      </Row>
-      <Row className="pt-2">
+        </div>
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-2`}>
         {mnemonicAvailable ? (
           phrase.map((w, i) => (
             <AppWalletPhraseWord
@@ -576,18 +586,19 @@ export default function AppWalletComponent(
             />
           ))
         ) : (
-          <Col className="font-color-h">
+          <div className={`${appWalletColClassName} tw-text-iron-400`}>
             Mnemonic phrase not available for this wallet
-          </Col>
+          </div>
         )}
-      </Row>
-      <Row className="pt-4">
-        <Col className="d-flex align-items-center justify-content-between">
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-4`}>
+        <div
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
           <span>Private Key</span>
-          <span className="d-flex gap-3 align-items-center">
+          <span className="tw-flex tw-items-center tw-gap-3">
             <>
               <FontAwesomeIcon
-                className="cursor-pointer unselectable"
+                className="tw-cursor-pointer tw-select-none"
                 icon={revealPrivateKey ? faEye : faEyeSlash}
                 height={22}
                 data-tooltip-id={`reveal-private-key-${appWallet.address}`}
@@ -638,7 +649,7 @@ export default function AppWalletComponent(
             {revealPrivateKey && (
               <>
                 <FontAwesomeIcon
-                  className="cursor-pointer unselectable"
+                  className="tw-cursor-pointer tw-select-none"
                   icon={faCopy}
                   height={22}
                   data-tooltip-id={`copy-private-key-${appWallet.address}`}
@@ -660,32 +671,35 @@ export default function AppWalletComponent(
               </>
             )}
           </span>
-        </Col>
-      </Row>
-      <Row className="pt-2">
+        </div>
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-2`}>
         <AppWalletPhraseWord
           word={privateKey}
           hidden={!revealPrivateKey}
           full_width={true}
         />
-      </Row>
-      <Row className="pt-5">
-        <Col className="d-flex align-items-center gap-2">
-          <Button
-            variant="danger"
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-5`}>
+        <div
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-gap-2`}>
+          <button
+            type="button"
+            className={appWalletButtonClassName("danger")}
             onClick={() => doDelete(appWallet.name, appWallet.address)}
           >
             Delete
-          </Button>
-          <Button
-            variant="outline-danger"
+          </button>
+          <button
+            type="button"
+            className={appWalletButtonClassName("outline-danger")}
             onClick={() => setIsExportingPlaintext(true)}
           >
             Export Plaintext Recovery
-          </Button>
-        </Col>
-      </Row>
-    </Container>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -698,26 +712,29 @@ function AppWalletPhraseWord(
   }>
 ) {
   return (
-    <Col
-      xs={props.full_width ? 12 : 6}
-      sm={props.full_width ? 12 : 4}
-      md={props.full_width ? 12 : 3}
-      className="pt-2 pb-2"
-    >
-      <Container className={styles["phrase"]}>
-        <Row>
-          <Col className="d-flex gap-2 unselectable">
+    <div
+      className={`${
+        props.full_width ? appWalletCol12ClassName : appWalletPhraseColClassName
+      } tw-pb-2 tw-pt-2`}>
+      <div className={styles["phrase"]}>
+        <div className={appWalletRowClassName}>
+          <div
+            className={`${appWalletColClassName} tw-flex tw-select-none tw-gap-2`}>
             {props.index && (
-              <span className="font-color-h font-lighter">{props.index}</span>
+              <span className="tw-text-iron-400 tw-font-extralight">
+                {props.index}
+              </span>
             )}
             <span
-              className={`text-break ${props.hidden ? styles["blurry"] : ""}`}
+              className={`tw-break-words ${
+                props.hidden ? styles["blurry"] : ""
+              }`}
             >
               {props.word}
             </span>
-          </Col>
-        </Row>
-      </Container>
-    </Col>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

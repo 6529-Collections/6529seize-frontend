@@ -1,7 +1,6 @@
 "use client";
 
 import styles from "./AppWallet.module.scss";
-import { Container, Row, Col, Button } from "react-bootstrap";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,6 +18,14 @@ import {
   useAppWallets,
 } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
+import {
+  appWalletButtonClassName,
+  appWalletCol12ClassName,
+  appWalletColClassName,
+  appWalletContainerClassName,
+  appWalletPhraseColClassName,
+  appWalletRowClassName,
+} from "./app-wallet-tailwind-classes";
 
 const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE;
 const MNEMONIC_WORD_FIELD_IDS = Array.from(
@@ -37,52 +44,58 @@ export default function AppWalletImport() {
 
   if (!appWalletsSupported) {
     return (
-      <Container>
+      <div className={appWalletContainerClassName}>
         <AppWalletsUnsupported />
-      </Container>
+      </div>
     );
   }
 
   return (
     <>
-      <Container className="pt-5">
-        <Row>
-          <Col>
+      <div className={`${appWalletContainerClassName} tw-pt-5`}>
+        <div className={appWalletRowClassName}>
+          <div className={appWalletColClassName}>
             <Link
-              className="font-smaller d-flex align-items-center gap-2 decoration-none"
+              className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-no-underline"
               href="/tools/app-wallets"
             >
               <FontAwesomeIcon icon={faCircleArrowLeft} height={16} />
               Back to App Wallets
             </Link>
-          </Col>
-        </Row>
-        <Row className="pt-4">
-          <Col>
+          </div>
+        </div>
+        <div className={`${appWalletRowClassName} tw-pt-4`}>
+          <div className={appWalletColClassName}>
             <h1>Import App Wallet</h1>
-          </Col>
-        </Row>
-        <Row className="pt-4">
-          <Col>
-            <Button
-              variant={isMnemonic ? "info" : "outline-info"}
+          </div>
+        </div>
+        <div className={`${appWalletRowClassName} tw-pt-4`}>
+          <div className={appWalletColClassName}>
+            <button
+              type="button"
               onClick={() => setIsMnemonic(true)}
-              className="btn-block"
+              className={appWalletButtonClassName(
+                isMnemonic ? "info" : "outline-info",
+                "tw-w-full"
+              )}
             >
               Mnemonic
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              variant={!isMnemonic ? "info" : "outline-info"}
+            </button>
+          </div>
+          <div className={appWalletColClassName}>
+            <button
+              type="button"
               onClick={() => setIsMnemonic(false)}
-              className="btn-block"
+              className={appWalletButtonClassName(
+                !isMnemonic ? "info" : "outline-info",
+                "tw-w-full"
+              )}
             >
               Private Key
-            </Button>
-          </Col>
-        </Row>
-      </Container>
+            </button>
+          </div>
+        </div>
+      </div>
       {isMnemonic ? <AppWalletImportMnemonic /> : <AppWalletImportPrivateKey />}
     </>
   );
@@ -127,20 +140,19 @@ function AppWalletImportMnemonic() {
   }
 
   return (
-    <Container className="pt-3 pb-5">
-      <Row>
+    <div className={`${appWalletContainerClassName} tw-pb-5 tw-pt-3`}>
+      <div className={appWalletRowClassName}>
         {phrase.map((w, i) => (
-          <Col
-            xs={6}
-            sm={4}
-            md={3}
-            className="pt-2 pb-2"
+          <div
+            className={`${appWalletPhraseColClassName} tw-pb-2 tw-pt-2`}
             key={MNEMONIC_WORD_FIELD_IDS[i]}
           >
-            <Container className={`${styles["phrase"]}`}>
-              <Row>
-                <Col className="d-flex gap-2">
-                  <span className="font-color-h font-lighter">{i + 1}</span>
+            <div className={styles["phrase"]}>
+              <div className={appWalletRowClassName}>
+                <div className={`${appWalletColClassName} tw-flex tw-gap-2`}>
+                  <span className="tw-text-iron-400 tw-font-extralight">
+                    {i + 1}
+                  </span>
                   <span>
                     <input
                       autoFocus={i === currentFocus}
@@ -167,37 +179,38 @@ function AppWalletImportMnemonic() {
                       onFocus={() => setCurrentFocus(i)}
                     />
                   </span>
-                </Col>
-              </Row>
-            </Container>
-          </Col>
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
-      </Row>
-      <Row className="pt-4">
-        <Col className="d-flex align-items-center justify-content-between">
-          <Button
-            variant="warning"
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-4`}>
+        <div
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
+          <button
+            type="button"
             onClick={clear}
-            className="font-bolder"
+            className={appWalletButtonClassName("warning", "tw-font-bold")}
             disabled={!phrase.some(Boolean) && !isCompletePhrase()}
           >
             Clear
-          </Button>
-          <Button
-            variant="primary"
+          </button>
+          <button
+            type="button"
             disabled={!isCompletePhrase() || isReadonly}
             onClick={validate}
-            className="font-bolder"
+            className={appWalletButtonClassName("primary", "tw-font-bold")}
           >
             Validate
-          </Button>
-        </Col>
-      </Row>
+          </button>
+        </div>
+      </div>
       {error && <ValidationError error={error} />}
       {validatedWallet && (
         <ValidatedWallet wallet={validatedWallet} mnemonic={phrase.join(" ")} />
       )}
-    </Container>
+    </div>
   );
 }
 
@@ -232,12 +245,12 @@ function AppWalletImportPrivateKey() {
   };
 
   return (
-    <Container className="pt-3 pb-5">
-      <Row>
-        <Col className="pt-2 pb-2">
-          <Container className={`${styles["phrase"]}`}>
-            <Row>
-              <Col className="d-flex gap-2">
+    <div className={`${appWalletContainerClassName} tw-pb-5 tw-pt-3`}>
+      <div className={appWalletRowClassName}>
+        <div className={`${appWalletColClassName} tw-pb-2 tw-pt-2`}>
+          <div className={styles["phrase"]}>
+            <div className={appWalletRowClassName}>
+              <div className={`${appWalletColClassName} tw-flex tw-gap-2`}>
                 <input
                   ref={inputRef}
                   autoFocus
@@ -248,31 +261,32 @@ function AppWalletImportPrivateKey() {
                   className={styles["importWalletWordInput"]}
                   onChange={(e) => setPrivateKey(e.target.value)}
                 />
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col className="d-flex align-items-center justify-content-between">
-          <Button
-            variant="warning"
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className={`${appWalletRowClassName} tw-pt-4`}>
+        <div
+          className={`${appWalletColClassName} tw-flex tw-items-center tw-justify-between`}>
+          <button
+            type="button"
             onClick={clear}
-            className="font-bolder"
+            className={appWalletButtonClassName("warning", "tw-font-bold")}
             disabled={!privateKey}
           >
             Clear
-          </Button>
-          <Button
-            variant="primary"
+          </button>
+          <button
+            type="button"
             disabled={!privateKey || isReadonly}
             onClick={validate}
-            className="font-bolder"
+            className={appWalletButtonClassName("primary", "tw-font-bold")}
           >
             Validate
-          </Button>
-        </Col>
-      </Row>
+          </button>
+        </div>
+      </div>
       {error && <ValidationError error={error} />}
       {validatedWallet && (
         <ValidatedWallet
@@ -280,16 +294,18 @@ function AppWalletImportPrivateKey() {
           mnemonic={MNEMONIC_UNAVAILABLE}
         />
       )}
-    </Container>
+    </div>
   );
 }
 
 function ValidationError(props: Readonly<{ error: string }>) {
   return (
-    <Row className="pt-3">
-      <Col xs={12}>{props.error}</Col>
-      <Col xs={12}>- Clear the form and try again</Col>
-    </Row>
+    <div className={`${appWalletRowClassName} tw-pt-3`}>
+      <div className={appWalletCol12ClassName}>{props.error}</div>
+      <div className={appWalletCol12ClassName}>
+        - Clear the form and try again
+      </div>
+    </div>
   );
 }
 
@@ -300,18 +316,19 @@ function ValidatedWallet(
   }>
 ) {
   return (
-    <Row className="pt-4">
-      <Col xs={12} className="d-flex align-items-center gap-2">
+    <div className={`${appWalletRowClassName} tw-pt-4`}>
+      <div
+        className={`${appWalletCol12ClassName} tw-flex tw-items-center tw-gap-2`}>
         <FontAwesomeIcon icon={faCheckCircle} height={22} color="#00ff00" />
         Private Key is Valid!
-      </Col>
-      <Col xs={12} className="pt-2">
+      </div>
+      <div className={`${appWalletCol12ClassName} tw-pt-2`}>
         - Address: {props.wallet.address}
-      </Col>
-      <Col xs={12} className="pt-3">
+      </div>
+      <div className={`${appWalletCol12ClassName} tw-pt-3`}>
         <ImportWallet wallet={props.wallet} mnemonic={props.mnemonic} />
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 }
 
@@ -325,7 +342,7 @@ function ImportWallet(
   const [showImportModal, setShowImportModal] = useState(false);
 
   return (
-    <div className="d-flex gap-2">
+    <div className="tw-flex tw-gap-2">
       <CreateAppWalletModal
         show={showImportModal}
         onHide={(isSuccess?: boolean) => {
@@ -340,13 +357,13 @@ function ImportWallet(
           privateKey: props.wallet.privateKey,
         }}
       />
-      <Button
-        variant="primary"
+      <button
+        type="button"
         onClick={() => setShowImportModal(true)}
-        className="d-flex align-items-center gap-2"
+        className={appWalletButtonClassName("primary", "tw-gap-2")}
       >
         <FontAwesomeIcon icon={faPlusCircle} height={16} /> Import Wallet
-      </Button>
+      </button>
     </div>
   );
 }

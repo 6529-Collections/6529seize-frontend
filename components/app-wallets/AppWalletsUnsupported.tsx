@@ -1,24 +1,31 @@
-import { Row, Col } from "react-bootstrap";
 import Link from "next/link";
 import useCapacitor from "@/hooks/useCapacitor";
+import {
+  appWalletColClassName,
+  appWalletRowClassName,
+} from "./app-wallet-tailwind-classes";
 
 export default function AppWalletsUnsupported() {
   const capacitor = useCapacitor();
 
   return (
     <>
-      <Row className="mt-4">
+      <div className={`${appWalletRowClassName} tw-mt-4`}>
         {capacitor.isCapacitor ? (
-          <Col>Update to the latest version of the app to use App Wallets</Col>
+          <div className={appWalletColClassName}>
+            Update to the latest version of the app to use App Wallets
+          </div>
         ) : (
-          <Col>App Wallets are not supported on this platform</Col>
+          <div className={appWalletColClassName}>
+            App Wallets are not supported on this platform
+          </div>
         )}
-      </Row>
-      <Row className="mt-4">
-        <Col>
+      </div>
+      <div className={`${appWalletRowClassName} tw-mt-4`}>
+        <div className={appWalletColClassName}>
           <Link href="/">TAKE ME HOME</Link>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </>
   );
 }
