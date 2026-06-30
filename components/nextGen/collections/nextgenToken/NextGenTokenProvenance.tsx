@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "../NextGen.module.scss";
-import { Container, Row, Col, Table } from "react-bootstrap";
+import { Col, Container, Row, Table } from "../NextGenTailwindLayout";
 import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import Pagination from "@/components/pagination/Pagination";

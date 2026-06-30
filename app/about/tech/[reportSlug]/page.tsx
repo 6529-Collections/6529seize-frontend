@@ -11,7 +11,11 @@ import styles from "@/styles/Home.module.scss";
 import { AboutSection } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "@/components/about/AboutLayout";
 
 interface Props {
   params: Promise<{ reportSlug: string }>;
@@ -26,11 +30,11 @@ export default async function AboutTechReportRoute(props: Readonly<Props>) {
   }
 
   return (
-    <main className={styles["main"]}>
-      <Container fluid className="pt-4">
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <Container fluid className="tw-pt-4">
         <Row>
           <Col>
-            <Container className="pt-2">
+            <Container className="tw-pt-2">
               <Row>
                 <Col>
                   <AboutContentsDropdown currentSection={AboutSection.TECH} />

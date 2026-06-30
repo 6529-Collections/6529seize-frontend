@@ -3,7 +3,10 @@
 import type WavePicture from "@/components/waves/WavePicture";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { formatAddress, isValidEthAddress } from "@/helpers/Helpers";
+import {
+  formatDirectMessageWaveName,
+  formatWaveName,
+} from "@/helpers/waves/wave-name.helpers";
 import { formatDate, formatInteger, formatRelativeTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -212,26 +215,11 @@ export const getQuickDmConversationTimeLabel = (
 };
 
 export const getFormattedWaveName = (
-  wave: Pick<MinimalWave, "name">
+  wave: Pick<MinimalWave, "name"> & Partial<Pick<MinimalWave, "type">>
 ): string => {
-  const marker = "id-";
-  const addressPrefix = `${marker}0x`;
-  const markerIndex = wave.name.indexOf(addressPrefix);
-
-  if (markerIndex === -1) {
-    return wave.name;
-  }
-
-  const prefix = wave.name.slice(0, markerIndex + marker.length);
-  const addressStart = markerIndex + marker.length;
-  const candidateAddress = wave.name.slice(addressStart, addressStart + 42);
-
-  if (!isValidEthAddress(candidateAddress)) {
-    return wave.name;
-  }
-
-  const suffix = wave.name.slice(addressStart + candidateAddress.length);
-  return `${prefix}${formatAddress(candidateAddress)}${suffix}`;
+  return wave.type === undefined
+    ? formatDirectMessageWaveName(wave.name)
+    : formatWaveName({ name: wave.name, type: wave.type });
 };
 
 export const getQuickDmAvatarSource = (

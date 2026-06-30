@@ -1,4 +1,4 @@
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "../../NextGenTailwindLayout";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import NextGenCollectionArt from "../NextGenCollectionArt";
 import type { NextGenCollection } from "@/entities/INextgen";

@@ -33,6 +33,7 @@ interface QuickDmChatProps {
   readonly locale: SupportedLocale;
   readonly onBack: () => void;
   readonly onClose: () => void;
+  readonly onCreateDirectMessage?: (() => void) | undefined;
   readonly onOpenAll: () => void;
   readonly waveId: string;
 }
@@ -48,6 +49,7 @@ export const QuickDmChat = ({
   locale,
   onBack,
   onClose,
+  onCreateDirectMessage,
   onOpenAll,
   waveId,
 }: QuickDmChatProps) => {
@@ -162,6 +164,7 @@ export const QuickDmChat = ({
         openAllHref={getMessagePathRoute(waveId)}
         onBack={onBack}
         onClose={onClose}
+        onCreateDirectMessage={onCreateDirectMessage}
         onOpenAll={onOpenAll}
       />
       <div className="tw-min-h-0 tw-flex-1">{chatContent}</div>

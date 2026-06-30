@@ -8,7 +8,6 @@ import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
 
 export default function UserPageSubscriptionsEditionPreference(
@@ -78,19 +77,19 @@ export default function UserPageSubscriptionsEditionPreference(
   };
 
   return (
-    <Container className="no-padding">
-      <Row className="tw-pb-2">
-        <Col>
+    <div>
+      <div className="tw-pb-2">
+        <div>
           <h5 className="tw-mb-0">
             Edition Preference{" "}
             <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-400">
               Eligibility x{subscriptionEligibilityCount}
             </span>
           </h5>
-        </Col>
-      </Row>
-      <Row className="tw-pt-1">
-        <Col className="tw-flex tw-items-center tw-gap-2">
+        </div>
+      </div>
+      <div className="tw-pt-1">
+        <div className="tw-flex tw-items-center tw-gap-2">
           <label
             htmlFor={"subscription-all-editions-mode"}
             className="font-color"
@@ -113,17 +112,17 @@ export default function UserPageSubscriptionsEditionPreference(
           {isUpdatingAllEditions && (
             <CircleLoader size={CircleLoaderSize.MEDIUM} />
           )}
-        </Col>
-      </Row>
+        </div>
+      </div>
       {!props.readonly && (
-        <Row className="tw-pt-1">
-          <Col className="tw-whitespace-nowrap">
+        <div className="tw-pt-1">
+          <div className="tw-whitespace-nowrap">
             {isAllEditions
               ? "You will receive all editions you are eligible for"
               : "You will receive only one edition"}
-          </Col>
-        </Row>
+          </div>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 import styles from "./About.module.scss";
 
 export default function AboutFAQ() {

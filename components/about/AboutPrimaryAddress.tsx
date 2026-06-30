@@ -3,7 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import csvParser from "csv-parser";
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 
 interface PrimaryAddressData {
   profile_id: string;
@@ -45,29 +49,29 @@ export default function AboutPrimaryAddress() {
           </h1>
         </Col>
       </Row>
-      <Row className="pt-4">
-        <Col className="font-larger font-bolder">Overview</Col>
+      <Row className="tw-pt-4">
+        <Col className="tw-text-lg tw-font-bold">Overview</Col>
       </Row>
-      <Row className="pt-4">
+      <Row className="tw-pt-4">
         <Col>
-          <span className="font-bolder">Single Address</span>
+          <span className="tw-font-bold">Single Address</span>
           <ul>
-            <li className="pt-2">
+            <li className="tw-pt-2">
               Primary address is the wallet address (no other addresses
               involved)
             </li>
           </ul>
         </Col>
       </Row>
-      <Row className="pt-2">
+      <Row className="tw-pt-2">
         <Col>
-          <span className="font-bolder">Consolidations</span>
+          <span className="tw-font-bold">Consolidations</span>
           <ul>
-            <li className="pt-2">
+            <li className="tw-pt-2">
               By default, the primary address in a consolidation is the one with
               the highest individual TDH
             </li>
-            <li className="pt-2">
+            <li className="tw-pt-2">
               If any of the addresses in the consolidation has registered a
               delegation for &quot;Primary Address&quot; use case (997) to an
               address in the same consolidation, then this delegated address
@@ -76,7 +80,7 @@ export default function AboutPrimaryAddress() {
           </ul>
         </Col>
       </Row>
-      <Row className="pt-4">
+      <Row className="tw-pt-4">
         <Col xs={12}>
           The following table shows the profiles which have selected a Primary
           Address other than the default Primary Address in their consolidation,
@@ -85,11 +89,11 @@ export default function AboutPrimaryAddress() {
         </Col>
         <Col
           xs={12}
-          className="pt-3"
+          className="tw-pt-3"
           style={{
             overflowX: "auto",
           }}>
-          <table className="table">
+          <table className="tw-mb-4 tw-w-full tw-align-top">
             <thead>
               <tr>
                 <th style={tdStyle}>Profile Handle</th>
@@ -103,14 +107,14 @@ export default function AboutPrimaryAddress() {
                   <td style={tdStyle}>
                     <Link
                       href={`/${item.current_primary}`}
-                      className="decoration-hover-underline">
+                      className="tw-no-underline hover:tw-underline">
                       {item.handle}
                     </Link>
                   </td>
-                  <td style={tdStyle} className="font-smaller">
+                  <td style={tdStyle} className="tw-text-sm">
                     {item.current_primary}
                   </td>
-                  <td style={tdStyle} className="font-smaller">
+                  <td style={tdStyle} className="tw-text-sm">
                     {item.new_primary}
                   </td>
                 </tr>

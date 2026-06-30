@@ -6,13 +6,18 @@ import {
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
 import { useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import Toggle from "react-toggle";
 import {
   getCookieConsentByName,
   useCookieConsent,
 } from "../cookies/CookieConsentContext";
 import styles from "./About.module.scss";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+  AboutTable as Table,
+} from "./AboutLayout";
 
 export default function AboutCookiePolicy() {
   const { showCookieConsent, consent, reject } = useCookieConsent();
@@ -37,19 +42,19 @@ export default function AboutCookiePolicy() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles["lastUpdateText"]} text-right pt-3 pb-3`}>
+        <Col className={`${styles["lastUpdateText"]} tw-text-right tw-pt-3 tw-pb-3`}>
           Last Updated: June 04, 2024
         </Col>
       </Row>
       <Row>
         <Col>
-          <Container className="no-padding">
-            <Row className="pb-3">
+          <Container className="!tw-px-0">
+            <Row className="tw-pb-3">
               <Col>
-                <h3 className="mb-0">Cookie List</h3>
+                <h3 className="tw-mb-0">Cookie List</h3>
               </Col>
             </Row>
-            <Row className="pt-2 pb-2">
+            <Row className="tw-pt-2 tw-pb-2">
               <Col>
                 <p>
                   A cookie is a small piece of data (text file) that a website -
@@ -64,15 +69,15 @@ export default function AboutCookiePolicy() {
           </Container>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <Container className="no-padding">
-            <Row className="pb-3">
+          <Container className="!tw-px-0">
+            <Row className="tw-pb-3">
               <Col>
-                <h4 className="mb-0">Strictly Necessary Cookies</h4>
+                <h4 className="tw-mb-0">Strictly Necessary Cookies</h4>
               </Col>
             </Row>
-            <Row className="pt-2">
+            <Row className="tw-pt-2">
               <Col>
                 These cookies are necessary for the website to function and
                 cannot be switched off in our systems. They are usually only set
@@ -150,16 +155,16 @@ export default function AboutCookiePolicy() {
           </Container>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
-          <Container className="no-padding">
-            <Row className="pb-3">
-              <Col className="d-flex align-items-center justify-content-between">
-                <h4 className="mb-0">Performance Cookies</h4>
-                <span className="d-flex align-items-center gap-2">
+          <Container className="!tw-px-0">
+            <Row className="tw-pb-3">
+              <Col className="tw-flex tw-items-center tw-justify-between">
+                <h4 className="tw-mb-0">Performance Cookies</h4>
+                <span className="tw-flex tw-items-center tw-gap-2">
                   <label
                     htmlFor={"performance-cookies-toggle"}
-                    className={"font-color"}
+                    className="tw-text-white"
                   >
                     <b>
                       {isPerformanceCookiesEnabled ? "Enabled" : "Disabled"}
@@ -174,7 +179,7 @@ export default function AboutCookiePolicy() {
                 </span>
               </Col>
             </Row>
-            <Row className="pt-2">
+            <Row className="tw-pt-2">
               <Col>
                 This website utilizes performance cookies that are stored on
                 your computer. These cookies allow us to count visits and
@@ -254,12 +259,12 @@ export default function AboutCookiePolicy() {
                 </Table>
               </Col>
             </Row>
-            <Row className="pt-2">
+            <Row className="tw-pt-2">
               <Col>
-                <Container className="no-padding">
-                  <Row className="pb-3">
+                <Container className="!tw-px-0">
+                  <Row className="tw-pb-3">
                     <Col>
-                      <h5 className="mb-0">Retention Policy</h5>
+                      <h5 className="tw-mb-0">Retention Policy</h5>
                     </Col>
                   </Row>
                   <Row>

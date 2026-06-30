@@ -1,11 +1,15 @@
-import { Col, Container, Row } from "react-bootstrap";
 import Image from "next/image";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 
 export default function AboutMemeLab() {
   return (
     <Container>
       <Row>
-        <Col className="pt-2 pb-4">
+        <Col className="tw-pt-2 tw-pb-4">
           <Image
             unoptimized
             loading="eager"
@@ -18,7 +22,7 @@ export default function AboutMemeLab() {
           />
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
           <p>
             The Meme Lab is an experimental CC0 contract for artists who have

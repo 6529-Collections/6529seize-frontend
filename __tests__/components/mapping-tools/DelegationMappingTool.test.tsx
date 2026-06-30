@@ -80,6 +80,20 @@ it("processes file on submit", async () => {
   ) as HTMLInputElement;
   const file = new File(["a"], "test.csv", { type: "text/csv" });
   await userEvent.upload(input, file);
+  const collectionSelect = screen.getByLabelText(
+    "Select Collection"
+  ) as HTMLSelectElement;
+  const collectionOption = Array.from(collectionSelect.options).find(
+    (option) => !option.disabled
+  );
+  await userEvent.selectOptions(collectionSelect, collectionOption!.value);
+  const useCaseSelect = screen.getByLabelText(
+    "Select Use Case"
+  ) as HTMLSelectElement;
+  const useCaseOption = Array.from(useCaseSelect.options).find(
+    (option) => !option.disabled
+  );
+  await userEvent.selectOptions(useCaseSelect, useCaseOption!.value);
   const button = screen.getByRole("button", { name: /submit/i });
   await userEvent.click(button);
   expect(button).toHaveTextContent(/processing/i);
