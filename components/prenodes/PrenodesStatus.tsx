@@ -31,6 +31,14 @@ interface Prenode {
 
 const PAGE_SIZE = 20;
 
+function getSyncStatusLabel(name: string, isSynced: boolean, known: boolean) {
+  if (!known) {
+    return `${name}: unknown`;
+  }
+
+  return isSynced ? `${name}: synced` : `${name}: not synced`;
+}
+
 export default function PrenodesStatus() {
   useSetTitle("Prenodes | Network");
 
@@ -101,14 +109,6 @@ export default function PrenodesStatus() {
       case "red":
         return "Ping status: failing";
     }
-  }
-
-  function getSyncStatusLabel(name: string, isSynced: boolean, known: boolean) {
-    if (!known) {
-      return `${name}: unknown`;
-    }
-
-    return isSynced ? `${name}: synced` : `${name}: not synced`;
   }
 
   function printPrenode(prenode: Prenode) {
