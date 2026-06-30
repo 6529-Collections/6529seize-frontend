@@ -1,15 +1,17 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import HeaderUserConnect from '@/components/header/user/HeaderUserConnect';
-import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
-jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
 
-it('calls seizeConnect on click', async () => {
+it("calls seizeConnectFresh on click", async () => {
   const user = userEvent.setup();
-  const seizeConnect = jest.fn();
-  (useSeizeConnectContext as jest.Mock).mockReturnValue({ seizeConnect });
+  const seizeConnectFresh = jest.fn().mockResolvedValue(undefined);
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({ seizeConnectFresh });
   render(<HeaderUserConnect />);
-  await user.click(screen.getByRole('button'));
-  expect(seizeConnect).toHaveBeenCalled();
+  await user.click(screen.getByRole("button"));
+  expect(seizeConnectFresh).toHaveBeenCalled();
 });
