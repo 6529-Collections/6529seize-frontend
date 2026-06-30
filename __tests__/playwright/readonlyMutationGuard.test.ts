@@ -122,18 +122,23 @@ describe("Playwright read-only mutation guard", () => {
     });
   });
 
-  it("allows the same-origin open-graph metadata lookup in read-only mode", () => {
-    expect(
-      decideReadonlyRequest({
-        baseURL: "https://6529.io",
-        method: "POST",
-        readonly: true,
-        url: "https://6529.io/api/open-graph",
-      })
-    ).toMatchObject({
-      action: "allow",
-      reason: "first-party-readonly-route-handler",
-    });
+  it("allows same-origin read-only route handler POST lookups", () => {
+    for (const url of [
+      "https://6529.io/api/open-graph",
+      "https://6529.io/api/twitter/preview",
+    ]) {
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://6529.io",
+          method: "POST",
+          readonly: true,
+          url,
+        })
+      ).toMatchObject({
+        action: "allow",
+        reason: "first-party-readonly-route-handler",
+      });
+    }
 
     expect(
       decideReadonlyRequest({
