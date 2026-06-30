@@ -229,6 +229,13 @@ const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
   "recursivelyTraverseMutationEffects",
 ]);
 const WAVES_ROUTE_PATH = "/waves";
+const gifPickerTenorUndefinedTagsMessage =
+  "undefined is not an object (evaluating 'e.tags')";
+const gifPickerReactPackageToken = "gif-picker-react";
+const gifPickerTenorManagerPathToken = "TenorManager.ts";
+const gifPickerTenorFailureMessage =
+  "[gif-picker-react] Failed to fetch data from Tenor API";
+const tenorCategoriesPath = "/v2/categories";
 const THE_MEMES_MINT_ROUTE_PATH = "/the-memes/mint";
 
 const sentryRouteParameterizationMechanismType =
@@ -365,13 +372,9 @@ function getRoutePathFromString(value: string): string | null {
   }
 }
 
-function isRoutePathAtOrBelow(
-  path: string | null,
-  routePath: string
-): boolean {
+function isRoutePathAtOrBelow(path: string | null, routePath: string): boolean {
   return (
-    path !== null &&
-    (path === routePath || path.startsWith(`${routePath}/`))
+    path !== null && (path === routePath || path.startsWith(`${routePath}/`))
   );
 }
 
@@ -1286,6 +1289,25 @@ function hasNativeJsonStringifyFrame(
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
 }
 
+function isGifPickerTenorManagerPath(path: string | undefined): boolean {
+  return (
+    typeof path === "string" &&
+    path.includes(gifPickerReactPackageToken) &&
+    path.includes(gifPickerTenorManagerPathToken)
+  );
+}
+
+function hasGifPickerTenorManagerFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) =>
+      [frame.filename, frame.abs_path].some(isGifPickerTenorManagerPath)
+    )
+  );
+}
+
 function hasAppOwnedStackPath(value: string | undefined): boolean {
   const normalized = value?.toLowerCase();
   return (
@@ -1608,6 +1630,55 @@ function hasNavigationBreadcrumb(event: SentryClientEvent): boolean {
   });
 }
 
+function hasGifPickerTenorFailureBreadcrumb(event: SentryClientEvent): boolean {
+  return getBreadcrumbMessages(event).some((message) =>
+    message.includes(gifPickerTenorFailureMessage)
+  );
+}
+
+function isTenorCategoriesPath(value: string | undefined): boolean {
+  if (getRequestPathname(value) === tenorCategoriesPath) {
+    return true;
+  }
+
+  return typeof value === "string" && value.includes(tenorCategoriesPath);
+}
+
+function hasTenorCategoriesRequestBreadcrumb(
+  event: SentryClientEvent
+): boolean {
+  return getBreadcrumbValues(event).some((breadcrumb) => {
+    if (!isHttpBreadcrumb(breadcrumb)) {
+      return false;
+    }
+
+    if (
+      getBreadcrumbUrlIsFirstParty(breadcrumb) !== false ||
+      getBreadcrumbUrlIsFirstPartyApi(breadcrumb) !== false
+    ) {
+      return false;
+    }
+
+    if (getBreadcrumbFailureKind(breadcrumb) === null) {
+      return false;
+    }
+
+    return (
+      isTenorCategoriesPath(getBreadcrumbUrl(breadcrumb)) ||
+      isTenorCategoriesPath(breadcrumb.message)
+    );
+  });
+}
+
+function hasGifPickerTenorBreadcrumbSignature(
+  event: SentryClientEvent
+): boolean {
+  return (
+    hasGifPickerTenorFailureBreadcrumb(event) &&
+    hasTenorCategoriesRequestBreadcrumb(event)
+  );
+}
+
 function hasWavesNavigationBreadcrumb(event: SentryClientEvent): boolean {
   return getBreadcrumbValues(event).some((breadcrumb) => {
     const data = breadcrumb.data;
@@ -1641,7 +1712,9 @@ function getRouteParameterizationContextValues(
     const context = event.contexts?.[key];
     return isRecord(context) ? Object.values(context) : [];
   });
-  const tagValues = routeParameterizationTagKeys.map((key) => event.tags?.[key]);
+  const tagValues = routeParameterizationTagKeys.map(
+    (key) => event.tags?.[key]
+  );
 
   return uniqueStrings(
     [...contextValues, ...tagValues].filter(
@@ -2198,6 +2271,39 @@ export function shouldFilterRabbyMobileRainbowKitNotFoundError(
   return !hasAppOwnedFrame(value?.stacktrace?.frames);
 }
 
+export function shouldFilterGifPickerTenorCategoriesError(
+  event: SentryClientEvent
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== gifPickerTenorUndefinedTagsMessage
+  ) {
+    return false;
+  }
+
+  if (
+    value.mechanism?.type !== browserUnhandledRejectionMechanism ||
+    value.mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  if (!hasWavesRoute(event)) {
+    return false;
+  }
+
+  const frames = value.stacktrace?.frames;
+  if (hasAppOwnedFrame(frames)) {
+    return false;
+  }
+
+  return (
+    hasGifPickerTenorManagerFrame(frames) ||
+    hasGifPickerTenorBreadcrumbSignature(event)
+  );
+}
+
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -2313,6 +2419,7 @@ export const __testing = {
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
   REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
+  gifPickerTenorUndefinedTagsMessage,
   REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE,
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,

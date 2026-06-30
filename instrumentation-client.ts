@@ -20,6 +20,7 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
@@ -152,6 +153,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterReactDomRemoveChildNotFoundError(event)) {
+    return true;
+  }
+
+  if (shouldFilterGifPickerTenorCategoriesError(event)) {
     return true;
   }
 
