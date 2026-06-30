@@ -3,7 +3,6 @@
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import type { PropsWithChildren, ReactNode } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 
 function DetailsCard(props: Readonly<{ title: string; children: ReactNode }>) {
   return (
@@ -129,68 +128,61 @@ export default function TDHHistoricBoostsPage() {
   useSetTitle("TDH Historic Boosts | Network");
 
   return (
-    <Container className="tw-min-h-screen tw-pb-12 tw-pt-12">
-      <Row>
-        <Col>
-          <h1>TDH — Historic Boosts</h1>
-          <p className="tw-mb-8 tw-mt-4">
-            Previous TDH versions are archived here for reference.
-          </p>
+    <main className="[min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-min-h-screen tw-w-full tw-px-3 tw-pb-12 tw-pt-12 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
+      <h1>TDH — Historic Boosts</h1>
+      <p className="tw-mb-8 tw-mt-4">
+        Previous TDH versions are archived here for reference.
+      </p>
 
-          <div className="tw-space-y-6">
-            {/* 1.3 */}
-            <DetailsCard title="TDH 1.3 (March 29, 2024 — October 9, 2025)">
-              <IntroLine>
-                Higher of <b>Category A</b> and <b>Category B</b> Boosters, plus{" "}
-                <b>Category C</b> Boosters
-              </IntroLine>
+      <div className="tw-space-y-6">
+        {/* 1.3 */}
+        <DetailsCard title="TDH 1.3 (March 29, 2024 — October 9, 2025)">
+          <IntroLine>
+            Higher of <b>Category A</b> and <b>Category B</b> Boosters, plus{" "}
+            <b>Category C</b> Boosters
+          </IntroLine>
 
-              <CategoryAList headingVariant="p" completeSetMultiplier="1.55x" />
-              <CategoryBList maxSeason={11} includeAppliedNote />
-              <CategoryCList />
-            </DetailsCard>
+          <CategoryAList headingVariant="p" completeSetMultiplier="1.55x" />
+          <CategoryBList maxSeason={11} includeAppliedNote />
+          <CategoryCList />
+        </DetailsCard>
 
-            {/* 1.2 */}
-            <DetailsCard title="TDH 1.2 (December 30, 2023 — March 28, 2024)">
-              <IntroLine>
-                Higher of <b>Category A</b> and <b>Category B</b> boosters, plus{" "}
-                <b>Category C</b> boosters
-              </IntroLine>
+        {/* 1.2 */}
+        <DetailsCard title="TDH 1.2 (December 30, 2023 — March 28, 2024)">
+          <IntroLine>
+            Higher of <b>Category A</b> and <b>Category B</b> boosters, plus{" "}
+            <b>Category C</b> boosters
+          </IntroLine>
 
-              <CategoryAList headingVariant="p" completeSetMultiplier="1.25x" />
-              <CategoryBList maxSeason={5} />
-              <CategoryCList />
-            </DetailsCard>
+          <CategoryAList headingVariant="p" completeSetMultiplier="1.25x" />
+          <CategoryBList maxSeason={5} />
+          <CategoryCList />
+        </DetailsCard>
 
-            {/* 1.1 */}
-            <DetailsCard title="TDH 1.1 (July 14, 2023 — December 29, 2023)">
-              <IntroLine>
-                Higher of <b>Category A</b> and <b>Category B</b> Boosters, plus{" "}
-                <b>Category C</b> Boosters
-              </IntroLine>
+        {/* 1.1 */}
+        <DetailsCard title="TDH 1.1 (July 14, 2023 — December 29, 2023)">
+          <IntroLine>
+            Higher of <b>Category A</b> and <b>Category B</b> Boosters, plus{" "}
+            <b>Category C</b> Boosters
+          </IntroLine>
 
-              <CategoryAList
-                headingVariant="h3"
-                completeSetMultiplier="1.20x"
-              />
-              <CategoryBList maxSeason={4} />
-              <CategoryCList />
-            </DetailsCard>
-          </div>
+          <CategoryAList headingVariant="h3" completeSetMultiplier="1.20x" />
+          <CategoryBList maxSeason={4} />
+          <CategoryCList />
+        </DetailsCard>
+      </div>
 
-          <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-3">
-            {NAV_LINKS.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="tw-inline-block tw-w-full tw-min-w-[150px] tw-flex-1 tw-rounded-md tw-border-solid tw-border-[#222] tw-bg-[#eee] tw-px-4 tw-py-2 tw-text-center tw-font-medium tw-text-black tw-no-underline hover:tw-bg-[#ddd] hover:tw-text-black sm:tw-w-auto sm:tw-whitespace-nowrap"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </Col>
-      </Row>
-    </Container>
+      <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-3">
+        {NAV_LINKS.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className="tw-inline-block tw-w-full tw-min-w-[150px] tw-flex-1 tw-rounded-md tw-border-solid tw-border-[#222] tw-bg-[#eee] tw-px-4 tw-py-2 tw-text-center tw-font-medium tw-text-black tw-no-underline hover:tw-bg-[#ddd] hover:tw-text-black sm:tw-w-auto sm:tw-whitespace-nowrap"
+          >
+            {label}
+          </Link>
+        ))}
+      </div>
+    </main>
   );
 }
