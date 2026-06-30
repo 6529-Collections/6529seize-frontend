@@ -17,7 +17,6 @@ import {
   Tooltip,
 } from "chart.js";
 import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
 
 ChartJS.register(
@@ -94,8 +93,10 @@ export default function CommunityStats() {
     const checkpoints = getNextCheckpoints(history.total_boosted_tdh);
     return checkpoints.map((x) => (
       <tr key={x}>
-        <td>Estimated days until {formatTdh(x)}</td>
-        <td className="text-right">
+        <th scope="row" className="tw-text-left">
+          Estimated days until {formatTdh(x)}
+        </th>
+        <td className="tw-text-right">
           {numberWithCommas(getEstimatedDaysUntil(history, x))}
         </td>
       </tr>
@@ -103,13 +104,15 @@ export default function CommunityStats() {
   }
 
   useEffect(() => {
-    let url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
-    fetchUrl(url).then((response: DBResponse) => {
-      const tdhH = response.data.reverse();
-      setTdhHistory(tdhH);
-      setTdhLabels(tdhH.map((t) => t.date));
-      setLatestHistory(tdhH[tdhH.length - 1]);
-    });
+    const url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
+    void fetchUrl<DBResponse<GlobalTDHHistory>>(url)
+      .then((response) => {
+        const tdhH = response.data.reverse();
+        setTdhHistory(tdhH);
+        setTdhLabels(tdhH.map((t) => t.date));
+        setLatestHistory(tdhH[tdhH.length - 1]);
+      })
+      .catch(() => undefined);
   }, [pageSize]);
 
   function printTotalTDH() {
@@ -145,7 +148,12 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Bar
+          data={data}
+          options={GRAPH_OPTIONS}
+          role="img"
+          aria-label="Bar chart comparing total boosted, unboosted, and unweighted TDH over time."
+        />
         {/* <Line data={data} /> */}
       </>
     );
@@ -184,7 +192,12 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Bar
+          data={data}
+          options={GRAPH_OPTIONS}
+          role="img"
+          aria-label="Bar chart comparing daily net boosted, unboosted, and unweighted TDH changes."
+        />
         {/* <Line data={data} /> */}
       </>
     );
@@ -223,7 +236,12 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Bar
+          data={data}
+          options={GRAPH_OPTIONS}
+          role="img"
+          aria-label="Bar chart comparing daily created boosted, unboosted, and unweighted TDH."
+        />
         {/* <Line data={data} /> */}
       </>
     );
@@ -262,129 +280,128 @@ export default function CommunityStats() {
 
     return (
       <>
-        <Bar data={data} options={GRAPH_OPTIONS} />
+        <Bar
+          data={data}
+          options={GRAPH_OPTIONS}
+          role="img"
+          aria-label="Bar chart comparing daily destroyed boosted, unboosted, and unweighted TDH."
+        />
         {/* <Line data={data} /> */}
       </>
     );
   }
 
   return (
-    <Container>
-      <Row>
-        <Col sm={12} md={8} className="pt-4">
-          <h1 className="mb-0">Network Stats</h1>
-        </Col>
-      </Row>
+    <section className="[min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
+      <div className="tw-pt-4 md:tw-w-2/3">
+        <h1 className="tw-mb-0">Network Stats</h1>
+      </div>
       {tdhHistory.length > 0 && (
         <>
-          <Row className="pt-4 pb-4 font-bolder">
-            <Col>
-              <Container className="no-padding">
-                <Row>
-                  <Col
-                    sm={12}
-                    md={6}
-                    lg={4}
-                    className="d-flex flex-column gap-2">
-                    <Table>
-                      <tbody>
-                        <tr>
-                          <td>Network TDH</td>
-                          <td className="text-right">
-                            {numberWithCommas(latestHistory!.total_boosted_tdh)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Daily Change</td>
-                          <td className="text-right">
-                            {numberWithCommas(latestHistory!.net_boosted_tdh)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Daily % Change</td>
-                          <td className="text-right">
-                            {(
-                              (latestHistory!.net_boosted_tdh /
-                                latestHistory!.total_boosted_tdh) *
-                              100
-                            ).toFixed(2)}
-                            %
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                  </Col>
-                  <Col sm={12} md={6} lg={{ span: 4, offset: 4 }}>
-                    {latestHistory && (
-                      <Table>
-                        <tbody>
-                          {printEstimatedDaysUntilCheckpoints(latestHistory)}
-                        </tbody>
-                      </Table>
-                    )}
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-          <Row className="pt-4 pb-4">
-            <Col>
-              <Container className="no-padding">
-                <Row>
-                  <h2 className="mb-0 font-color">Total TDH</h2>
-                </Row>
-                <Row className="pt-4">
-                  <Col className="d-flex justify-content-center">
-                    {printTotalTDH()}
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-          <Row className="pt-4 pb-4">
-            <Col>
-              <Container className="no-padding">
-                <Row>
-                  <h2 className="mb-0 font-color">Net TDH Daily Change</h2>
-                </Row>
-                <Row className="pt-4">
-                  <Col className="d-flex justify-content-center">
-                    {printNetTDH()}
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-          <Row className="pt-4 pb-4">
-            <Col>
-              <Container className="no-padding">
-                <Row>
-                  <h2 className="mb-0 font-color">Created TDH Daily Change</h2>
-                </Row>
-                <Row className="pt-4">
-                  <Col className="d-flex justify-content-center">
-                    {printCreatedTDH()}
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-          <Row className="pt-4 pb-4">
-            <Col>
-              <Container className="no-padding">
-                <Row>
-                  <h2 className="mb-0 font-color">Destroyed TDH Change</h2>
-                </Row>
-                <Row className="pt-4">
-                  <Col className="d-flex justify-content-center">
-                    {printDestroyedTDH()}
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
+          <section className="tw-grid tw-grid-cols-1 tw-gap-6 tw-py-4 tw-font-bold md:tw-grid-cols-2 lg:tw-grid-cols-3">
+            <div className="tw-flex tw-flex-col tw-gap-2 lg:tw-col-span-1">
+              <table className="tw-mb-4 tw-w-full">
+                <tbody>
+                  <tr>
+                    <th scope="row" className="tw-text-left">
+                      Network TDH
+                    </th>
+                    <td className="tw-text-right">
+                      {numberWithCommas(latestHistory!.total_boosted_tdh)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row" className="tw-text-left">
+                      Daily Change
+                    </th>
+                    <td className="tw-text-right">
+                      {numberWithCommas(latestHistory!.net_boosted_tdh)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row" className="tw-text-left">
+                      Daily % Change
+                    </th>
+                    <td className="tw-text-right">
+                      {(
+                        (latestHistory!.net_boosted_tdh /
+                          latestHistory!.total_boosted_tdh) *
+                        100
+                      ).toFixed(2)}
+                      %
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="md:tw-col-span-1 lg:tw-col-start-3">
+              {latestHistory && (
+                <table className="tw-mb-4 tw-w-full">
+                  <tbody>
+                    {printEstimatedDaysUntilCheckpoints(latestHistory)}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </section>
+          <section
+            className="tw-py-4"
+            aria-labelledby="network-stats-total-tdh-heading"
+          >
+            <h2
+              id="network-stats-total-tdh-heading"
+              className="tw-mb-0 tw-text-white"
+            >
+              Total TDH
+            </h2>
+            <div className="tw-flex tw-justify-center tw-pt-4">
+              {printTotalTDH()}
+            </div>
+          </section>
+          <section
+            className="tw-py-4"
+            aria-labelledby="network-stats-net-tdh-heading"
+          >
+            <h2
+              id="network-stats-net-tdh-heading"
+              className="tw-mb-0 tw-text-white"
+            >
+              Net TDH Daily Change
+            </h2>
+            <div className="tw-flex tw-justify-center tw-pt-4">
+              {printNetTDH()}
+            </div>
+          </section>
+          <section
+            className="tw-py-4"
+            aria-labelledby="network-stats-created-tdh-heading"
+          >
+            <h2
+              id="network-stats-created-tdh-heading"
+              className="tw-mb-0 tw-text-white"
+            >
+              Created TDH Daily Change
+            </h2>
+            <div className="tw-flex tw-justify-center tw-pt-4">
+              {printCreatedTDH()}
+            </div>
+          </section>
+          <section
+            className="tw-py-4"
+            aria-labelledby="network-stats-destroyed-tdh-heading"
+          >
+            <h2
+              id="network-stats-destroyed-tdh-heading"
+              className="tw-mb-0 tw-text-white"
+            >
+              Destroyed TDH Change
+            </h2>
+            <div className="tw-flex tw-justify-center tw-pt-4">
+              {printDestroyedTDH()}
+            </div>
+          </section>
         </>
       )}
-    </Container>
+    </section>
   );
 }

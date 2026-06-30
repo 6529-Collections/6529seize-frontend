@@ -19,29 +19,14 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => {
   };
 });
 
-// Mock Bootstrap components
-jest.mock("react-bootstrap", () => ({
-  Row: ({ children, ...props }: any) => (
-    <div data-testid="row" {...props}>
-      {children}
-    </div>
-  ),
-  Col: ({ children, ...props }: any) => (
-    <div data-testid="col" {...props}>
-      {children}
-    </div>
-  ),
-  Table: ({ children, ...props }: any) => (
-    <table data-testid="table" {...props}>
-      {children}
-    </table>
-  ),
-}));
-
 // Mock helpers
 jest.mock("@/helpers/Helpers", () => ({
-  areEqualAddresses: jest.fn((a: string, b: string) => a.toLowerCase() === b.toLowerCase()),
-  isNextgenContract: jest.fn((contract: string) => contract.includes("nextgen")),
+  areEqualAddresses: jest.fn(
+    (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+  ),
+  isNextgenContract: jest.fn((contract: string) =>
+    contract.includes("nextgen")
+  ),
 }));
 
 jest.mock("@/components/nextGen/nextgen_helpers", () => ({
@@ -124,17 +109,9 @@ describe("ActivityTable", () => {
   });
 
   it("renders without crashing with empty data", () => {
-    render(
-      <ActivityTable
-        activity={[]}
-        nfts={[]}
-        nextgenCollections={[]}
-      />
-    );
-    
-    expect(screen.getByTestId("row")).toBeInTheDocument();
-    expect(screen.getByTestId("col")).toBeInTheDocument();
-    expect(screen.getByTestId("table")).toBeInTheDocument();
+    render(<ActivityTable activity={[]} nfts={[]} nextgenCollections={[]} />);
+
+    expect(screen.getByRole("table")).toBeInTheDocument();
   });
 
   it("renders activity rows when activity data is provided", () => {
@@ -179,11 +156,18 @@ describe("ActivityTable", () => {
   });
 
   it("handles NextGen contracts correctly", () => {
-    const { areEqualAddresses, isNextgenContract } = require("@/helpers/Helpers");
-    const { normalizeNextgenTokenID } = require("@/components/nextGen/nextgen_helpers");
-    
+    const {
+      areEqualAddresses,
+      isNextgenContract,
+    } = require("@/helpers/Helpers");
+    const {
+      normalizeNextgenTokenID,
+    } = require("@/components/nextGen/nextgen_helpers");
+
     // Mock NextGen contract detection
-    isNextgenContract.mockImplementation((contract: string) => contract === "0xnextgen");
+    isNextgenContract.mockImplementation(
+      (contract: string) => contract === "0xnextgen"
+    );
 
     const nextgenTransaction: Transaction = {
       contract: "0xnextgen",
@@ -242,8 +226,9 @@ describe("ActivityTable", () => {
   });
 
   it("generates correct keys for activity rows", () => {
-    const ActivityTableComponent = require("@/components/latest-activity/ActivityTable").default;
-    
+    const ActivityTableComponent =
+      require("@/components/latest-activity/ActivityTable").default;
+
     render(
       <ActivityTableComponent
         activity={mockTransactions}
@@ -259,7 +244,7 @@ describe("ActivityTable", () => {
   });
 
   it("applies correct CSS classes", () => {
-    render(
+    const { container } = render(
       <ActivityTable
         activity={mockTransactions}
         nfts={mockNFTs}
@@ -267,11 +252,8 @@ describe("ActivityTable", () => {
       />
     );
 
-    const rowElement = screen.getByTestId("row");
-    
-    expect(rowElement).toHaveClass("pt-3");
-    // The table's bordered prop is passed to the mock component correctly
-    expect(screen.getByTestId("table")).toBeInTheDocument();
+    expect(container.firstElementChild).toHaveClass("tw-pt-3");
+    expect(screen.getByRole("table")).toBeInTheDocument();
   });
 
   it("handles undefined activity gracefully", () => {
