@@ -3,7 +3,7 @@
 import { faArrowCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { Col, Row } from "react-bootstrap";
+import { Col, Row } from "../../NextGenTailwindLayout";
 import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import styles from "@/components/nextGen/collections/NextGen.module.scss";
 

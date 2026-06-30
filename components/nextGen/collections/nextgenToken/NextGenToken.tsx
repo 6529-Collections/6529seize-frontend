@@ -20,7 +20,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
 import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";

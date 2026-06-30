@@ -2,7 +2,7 @@
 
 import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "./NextGenTailwindLayout";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { areEqualAddresses } from "@/helpers/Helpers";
