@@ -9,7 +9,6 @@ import {
 } from "@/helpers/Helpers";
 import { useState } from "react";
 import { Modal } from "react-bootstrap";
-import { subscriptionFooterModalContainerClass } from "./ReviewDistributionPlanTableSubscriptionFooter.classes";
 
 export function ConfirmTokenIdModal(
   props: Readonly<{
@@ -47,7 +46,7 @@ export function ConfirmTokenIdModal(
       </Modal.Header>
       <hr className="tw-my-0" />
       <Modal.Body>
-        <div className={subscriptionFooterModalContainerClass}>
+        <div className="tw-container tw-mx-auto">
           <div className="tw-py-2">
             <div>
               Contract: The Memes - <span>{formatAddress(contract)}</span>

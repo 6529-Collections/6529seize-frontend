@@ -9,10 +9,6 @@ import {
 } from "@/helpers/Helpers";
 import { useRef, useState } from "react";
 import { Modal } from "react-bootstrap";
-import {
-  subscriptionFooterModalContainerClass,
-  subscriptionFooterWarningAlertClass,
-} from "./ReviewDistributionPlanTableSubscriptionFooter.classes";
 
 export function UploadDistributionPhotosModal(
   props: Readonly<{
@@ -129,7 +125,7 @@ export function UploadDistributionPhotosModal(
       </Modal.Header>
       <hr className="tw-my-0" />
       <Modal.Body>
-        <div className={subscriptionFooterModalContainerClass}>
+        <div className="tw-container tw-mx-auto">
           <div className="tw-py-2">
             <div>
               Contract: The Memes - <span>{formatAddress(contract)}</span>
@@ -163,7 +159,7 @@ export function UploadDistributionPhotosModal(
             props.existingPhotosCount > 0 && (
               <div className="tw-py-2">
                 <div>
-                  <div className={subscriptionFooterWarningAlertClass}>
+                  <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-yellow-700 tw-bg-yellow-100 tw-px-4 tw-py-3 tw-text-yellow-900">
                     ⚠️ {props.existingPhotosCount} photo(s) already exist. This
                     will replace all existing photos.
                   </div>

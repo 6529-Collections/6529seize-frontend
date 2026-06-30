@@ -9,10 +9,6 @@ import {
 } from "@/helpers/Helpers";
 import { type ChangeEvent, useRef, useState } from "react";
 import { Modal } from "react-bootstrap";
-import {
-  subscriptionFooterModalContainerClass,
-  subscriptionFooterWarningAlertClass,
-} from "./ReviewDistributionPlanTableSubscriptionFooter.classes";
 
 export type DistributionAirdropsPhase = "artist" | "team";
 
@@ -239,7 +235,7 @@ export function DistributionPhaseAirdropsModal(
       </Modal.Header>
       <hr className="tw-my-0" />
       <Modal.Body>
-        <div className={subscriptionFooterModalContainerClass}>
+        <div className="tw-container tw-mx-auto">
           <div className="tw-py-2">
             <div>
               Contract: The Memes - <span>{formatAddress(contract)}</span>
@@ -271,7 +267,7 @@ export function DistributionPhaseAirdropsModal(
           </div>
           <div className="tw-py-2">
             <div>
-              <div className={subscriptionFooterWarningAlertClass}>
+              <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-yellow-700 tw-bg-yellow-100 tw-px-4 tw-py-3 tw-text-yellow-900">
                 This upload will replace the current {copy.successLabel}{" "}
                 airdrops list for this token.
               </div>

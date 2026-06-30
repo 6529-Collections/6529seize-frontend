@@ -4,7 +4,6 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import Image from "next/image";
 import Link from "next/link";
 import { Modal } from "react-bootstrap";
-import { subscriptionFooterModalContainerClass } from "./ReviewDistributionPlanTableSubscriptionFooter.classes";
 
 const GITHUB_BASE =
   "https://github.com/6529-Collections/thememecards/tree/main";
@@ -57,7 +56,7 @@ export function GithubUploadModal(
       </Modal.Header>
       <hr className="tw-my-0" />
       <Modal.Body>
-        <div className={subscriptionFooterModalContainerClass}>
+        <div className="tw-container tw-mx-auto">
           {isLoading && (
             <div className="tw-flex tw-items-center tw-gap-3 tw-py-4">
               <CircleLoader />
