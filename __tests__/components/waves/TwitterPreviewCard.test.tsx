@@ -86,6 +86,11 @@ describe("TwitterPreviewCard", () => {
     expect(
       screen.getByRole("img", { name: "These jobs won't be here forever." })
     ).toHaveAttribute("src", "https://pbs.twimg.com/media/example.jpg");
+    expect(
+      screen
+        .getByRole("img", { name: "These jobs won't be here forever." })
+        .closest("a")
+    ).toHaveClass("tw-aspect-video", "tw-min-h-40");
     expect(screen.getByText(/Apr 28, 2026/)).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Like" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Reply" })).toBeNull();

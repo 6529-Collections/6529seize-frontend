@@ -28,6 +28,8 @@ const loadingPlaceholderStyle: React.CSSProperties = {
   left: "50%",
   transform: "translate(-50%, -50%)",
 };
+const INTRINSIC_IMAGE_RESERVED_ASPECT_RATIO = "16 / 9";
+const INTRINSIC_IMAGE_MAX_HEIGHT = "16rem";
 
 function LoadingPlaceholder({
   hasTouchScreen,
@@ -107,8 +109,11 @@ function DropImageContent({
 
   return intrinsicHeight ? (
     <span
-      className="tw-relative tw-block tw-min-h-px tw-w-full tw-max-w-full tw-overflow-hidden"
-      style={{ aspectRatio, maxHeight: "16rem" }}
+      className="tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/40"
+      style={{
+        aspectRatio: aspectRatio ?? INTRINSIC_IMAGE_RESERVED_ASPECT_RATIO,
+        maxHeight: INTRINSIC_IMAGE_MAX_HEIGHT,
+      }}
     >
       {/* Drop media can come from hosts outside next.config.ts image remotePatterns. */}
       <FallbackImage
@@ -243,15 +248,15 @@ function DropListItemContentMediaImageContent({
     if (errorCount >= maxRetries) return;
     const delay = 500 * 2 ** errorCount; // 0.5s, 1s, 2s …
     setTimeout(() => {
-      setErrorCount((n) => n + 1);
-      setRetryTick((t) => t + 1); // changes key -> reload
+      setErrorCount((count) => count + 1);
+      setRetryTick((tick) => tick + 1); // changes key -> reload
     }, delay);
   }, [errorCount, maxRetries]);
 
   const manualRetry = useCallback(() => {
     setErrorCount(0);
     setLoaded(false);
-    setRetryTick((t) => t + 1);
+    setRetryTick((tick) => tick + 1);
   }, []);
 
   const openModal = useCallback(() => {

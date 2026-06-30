@@ -54,14 +54,6 @@ describe("LinkPreviewCard", () => {
     );
     return frame;
   };
-  const assertFallbackFrame = () => {
-    const frame = screen.getByTestId("link-preview-card-stable-frame");
-    expect(frame).toHaveClass("tw-min-h-[4.5rem]", "tw-w-full");
-    expect(frame.className).not.toContain("tw-h-[10rem]");
-    expect(frame.className).not.toContain("tw-max-h-[10rem]");
-    expect(frame.className).not.toContain("md:tw-h-[11rem]");
-    return frame;
-  };
   const assertFirstPartyFrame = () => {
     const frame = screen.getByTestId("link-preview-card-stable-frame");
     expect(frame).toHaveClass(
@@ -71,6 +63,45 @@ describe("LinkPreviewCard", () => {
       "lg:tw-h-[11rem]",
       "lg:tw-min-h-[11rem]",
       "lg:tw-max-h-[11rem]"
+    );
+    return frame;
+  };
+  const assertCollectionFrame = () => {
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-h-[18rem]",
+      "tw-min-h-[18rem]",
+      "tw-max-h-[18rem]",
+      "sm:tw-h-[15rem]",
+      "sm:tw-min-h-[15rem]",
+      "sm:tw-max-h-[15rem]"
+    );
+    return frame;
+  };
+  const assertVideoFrame = () => {
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-h-[18rem]",
+      "tw-min-h-[18rem]",
+      "tw-max-h-[18rem]",
+      "sm:tw-h-[14rem]",
+      "sm:tw-min-h-[14rem]",
+      "sm:tw-max-h-[14rem]",
+      "md:tw-h-[15rem]",
+      "md:tw-min-h-[15rem]",
+      "md:tw-max-h-[15rem]"
+    );
+    return frame;
+  };
+  const assertFarcasterFrame = () => {
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-h-[24rem]",
+      "tw-min-h-[24rem]",
+      "tw-max-h-[24rem]",
+      "sm:tw-h-[13rem]",
+      "sm:tw-min-h-[13rem]",
+      "sm:tw-max-h-[13rem]"
     );
     return frame;
   };
@@ -130,7 +161,7 @@ describe("LinkPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
-    assertFallbackFrame();
+    assertStableFrame();
   });
 
   it("renders fallback when request fails", async () => {
@@ -146,7 +177,7 @@ describe("LinkPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
-    assertFallbackFrame();
+    assertStableFrame();
   });
 
   it("hides link actions in fallback state when requested", async () => {
@@ -184,7 +215,7 @@ describe("LinkPreviewCard", () => {
       />
     );
 
-    assertStableFrame();
+    assertFirstPartyFrame();
 
     await waitFor(() =>
       expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
@@ -223,7 +254,7 @@ describe("LinkPreviewCard", () => {
     assertStableFrame();
   });
 
-  it("lets 6529 collection previews grow beyond the generic fixed frame", async () => {
+  it("uses a fixed 6529 collection frame before and after preview resolution", async () => {
     fetchLinkPreview.mockResolvedValue({
       type: "6529.collection",
       title: "Pebbles #514",
@@ -243,6 +274,8 @@ describe("LinkPreviewCard", () => {
       />
     );
 
+    assertCollectionFrame();
+
     await waitFor(() =>
       expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -251,13 +284,119 @@ describe("LinkPreviewCard", () => {
       )
     );
 
-    const frame = screen.getByTestId("link-preview-card-stable-frame");
-    expect(frame).toHaveClass("tw-min-h-[11rem]", "md:tw-min-h-[12rem]");
-    expect(frame.className).not.toContain("tw-max-h-[11rem]");
-    expect(frame.className).not.toContain("tw-max-h-[12rem]");
+    assertCollectionFrame();
   });
 
-  it("lets YouTube video previews grow beyond the generic fixed frame", async () => {
+  it.each([
+    {
+      href: "https://6529.io/the-memes/509",
+      title: "The Collective Synapse",
+    },
+    {
+      href: "https://6529.io/rememes/0x33fd426905f149f8376e227d0c9d3340aad17af1/181",
+      title: "Rememe #181",
+    },
+  ])(
+    "uses a fixed 6529 collection frame for $href before and after preview resolution",
+    async ({ href, title }) => {
+      fetchLinkPreview.mockResolvedValue({
+        type: "6529.collection",
+        title,
+        url: href,
+        image: { url: "https://cdn.6529.io/collection.png" },
+      });
+
+      render(
+        <LinkPreviewCard
+          href={href}
+          renderFallback={() => <div data-testid="fallback">fallback</div>}
+        />
+      );
+
+      assertCollectionFrame();
+
+      await waitFor(() =>
+        expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            preview: expect.objectContaining({ type: "6529.collection" }),
+          })
+        )
+      );
+
+      assertCollectionFrame();
+    }
+  );
+
+  it.each([
+    {
+      href: "//6529.io/the-memes/509",
+      resolvedUrl: "https://6529.io/the-memes/509",
+    },
+    {
+      href: "6529.io/meme-lab/402",
+      resolvedUrl: "https://6529.io/meme-lab/402",
+    },
+  ])(
+    "uses a fixed 6529 collection frame for normalized href $href",
+    async ({ href, resolvedUrl }) => {
+      fetchLinkPreview.mockResolvedValue({
+        type: "6529.collection",
+        title: "Normalized collection",
+        url: resolvedUrl,
+        image: { url: "https://cdn.6529.io/collection.png" },
+      });
+
+      render(
+        <LinkPreviewCard
+          href={href}
+          renderFallback={() => <div data-testid="fallback">fallback</div>}
+        />
+      );
+
+      assertCollectionFrame();
+
+      await waitFor(() =>
+        expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            preview: expect.objectContaining({ type: "6529.collection" }),
+          })
+        )
+      );
+
+      assertCollectionFrame();
+    }
+  );
+
+  it.each(["6529.io", "v1.2/foo"])(
+    "does not classify bare dotted text %s as a first-party stable frame",
+    async (href) => {
+      fetchLinkPreview.mockResolvedValue({
+        title: "Dotted text",
+        url: href,
+      });
+
+      render(
+        <LinkPreviewCard
+          href={href}
+          renderFallback={() => <div data-testid="fallback">fallback</div>}
+        />
+      );
+
+      assertStableFrame();
+
+      await waitFor(() =>
+        expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            preview: expect.objectContaining({ title: "Dotted text" }),
+          })
+        )
+      );
+
+      assertStableFrame();
+    }
+  );
+
+  it("uses a fixed YouTube video frame before and after preview resolution", async () => {
     fetchLinkPreview.mockResolvedValue({
       type: "youtube.video",
       title: "A Good Video",
@@ -274,6 +413,8 @@ describe("LinkPreviewCard", () => {
       />
     );
 
+    assertVideoFrame();
+
     await waitFor(() =>
       expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -282,14 +423,67 @@ describe("LinkPreviewCard", () => {
       )
     );
 
-    const frame = screen.getByTestId("link-preview-card-stable-frame");
-    expect(frame).toHaveClass(
-      "tw-min-h-[18rem]",
-      "sm:tw-min-h-[14rem]",
-      "md:tw-min-h-[15rem]"
+    assertVideoFrame();
+  });
+
+  it("uses a fixed Farcaster frame for direct Farcaster preview URLs", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      title: "Farcaster Frame",
+      description: "Frame description",
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://warpcast.com/~/compose"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
     );
-    expect(frame.className).not.toContain("tw-max-h-[10rem]");
-    expect(frame.className).not.toContain("tw-max-h-[11rem]");
+
+    assertFarcasterFrame();
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({ title: "Farcaster Frame" }),
+        })
+      )
+    );
+
+    assertFarcasterFrame();
+  });
+
+  it("keeps the generic stable frame when an arbitrary app URL resolves to a Farcaster miniapp", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      type: "farcaster.miniapp",
+      embedKind: "miniapp",
+      title: "Example Mini",
+      appName: "Example Mini",
+      description: "Launch the example app",
+      siteName: "Example Mini",
+      buttonTitle: "Launch",
+      actionUrl: "https://mini.example/launch",
+      imageUrl: "https://mini.example/preview.png",
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://mini.example/app"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    assertStableFrame();
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          href: "https://mini.example/app",
+          preview: expect.objectContaining({ type: "farcaster.miniapp" }),
+        })
+      )
+    );
+
+    assertStableFrame();
   });
 
   it("does not enforce chat stable frame for home variant", async () => {
