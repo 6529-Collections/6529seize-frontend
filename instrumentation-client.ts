@@ -20,11 +20,15 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
+  shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
+  shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
   tagSampledLowValueNetworkError,
@@ -124,6 +128,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterRabbyMobileUserRejectedRequest(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterInjectedWasmCspUnsafeEval(event, hint)) {
     return true;
   }
@@ -132,11 +140,23 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterTalismanExtensionOnboardingError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterTwitterConfigReferenceError(event)) {
     return true;
   }
 
   if (shouldFilterReactDomInsertBeforeNotFoundError(event)) {
+    return true;
+  }
+
+  if (shouldFilterReactDomRemoveChildNotFoundError(event)) {
+    return true;
+  }
+
+  if (shouldFilterGifPickerTenorCategoriesError(event)) {
     return true;
   }
 

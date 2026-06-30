@@ -3,6 +3,7 @@
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
+
 export default function XTDHMainPage() {
   useSetTitle("xTDH | Network");
 
