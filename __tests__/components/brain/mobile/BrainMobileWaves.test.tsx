@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import BrainMobileWaves from "@/components/brain/mobile/BrainMobileWaves";
 import {
   MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME,
@@ -8,6 +8,31 @@ import { t } from "@/i18n/messages";
 
 let receivedRef: any;
 let receivedFooterProps: any;
+type MockFooterStats = {
+  readonly isAvailable: boolean;
+  readonly isReady: boolean;
+  readonly leftThisRoundCount: number;
+  readonly uncastPower: number | null;
+  readonly unratedCount: number;
+  readonly votingLabel: string | null;
+};
+const unavailableFooterStats: MockFooterStats = {
+  isAvailable: false,
+  isReady: false,
+  leftThisRoundCount: 0,
+  uncastPower: null,
+  unratedCount: 0,
+  votingLabel: null,
+};
+const availableFooterStats: MockFooterStats = {
+  isAvailable: true,
+  isReady: true,
+  leftThisRoundCount: 1,
+  uncastPower: 100,
+  unratedCount: 1,
+  votingLabel: "TDH",
+};
+let mockFooterStats: MockFooterStats = unavailableFooterStats;
 
 const setBrowserLanguages = (languages: readonly string[]) => {
   Object.defineProperty(globalThis.navigator, "languages", {
@@ -18,6 +43,7 @@ const setBrowserLanguages = (languages: readonly string[]) => {
 
 beforeEach(() => {
   setBrowserLanguages(["en-US"]);
+  mockFooterStats = unavailableFooterStats;
 });
 
 jest.mock(
@@ -33,11 +59,11 @@ jest.mock(
 
 jest.mock("@/components/brain/left-sidebar/waves/MemesWaveFooter", () => ({
   __esModule: true,
-  default: (props: {
+  MemesWaveFooterView: (props: {
     readonly floating?: boolean;
-    readonly onAvailabilityChange?: (isAvailable: boolean) => void;
     readonly onOpenQuickVote: () => void;
     readonly onPrefetchQuickVote?: () => void;
+    readonly stats: typeof unavailableFooterStats;
   }) => {
     receivedFooterProps = props;
     return (
@@ -52,13 +78,17 @@ jest.mock("@/components/brain/left-sidebar/waves/MemesWaveFooter", () => ({
   },
 }));
 
+jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
+  useMemesWaveFooterStats: () => mockFooterStats,
+}));
+
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ mobileWavesViewStyle: { height: "42px" } }),
 }));
 
 test("applies style, forwards scroll ref, and passes the quick-vote opener", () => {
   const onOpenQuickVote = jest.fn();
-  const { container } = render(
+  const { container, rerender } = render(
     <BrainMobileWaves onOpenQuickVote={onOpenQuickVote} />
   );
   const root = container.firstElementChild as HTMLElement;
@@ -80,14 +110,15 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
     MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME
   );
   expect(receivedFooterProps.floating).toBe(true);
+  expect(receivedFooterProps.stats).toBe(unavailableFooterStats);
 
-  act(() => {
-    receivedFooterProps.onAvailabilityChange?.(true);
-  });
+  mockFooterStats = availableFooterStats;
+  rerender(<BrainMobileWaves onOpenQuickVote={onOpenQuickVote} />);
 
   expect(receivedRef.current).toHaveClass(
     MEMES_WAVE_FLOATING_FOOTER_SCROLL_CLEARANCE_CLASS_NAME
   );
+  expect(receivedFooterProps.stats).toBe(availableFooterStats);
 
   fireEvent.click(screen.getByTestId("footer"));
 

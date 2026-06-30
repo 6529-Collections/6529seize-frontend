@@ -2,7 +2,6 @@
 
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { ContractFilter, TypeFilter } from "@/hooks/useActivityData";
-import { Col } from "react-bootstrap";
 
 interface ActivityFiltersProps {
   readonly typeFilter: TypeFilter;
@@ -36,11 +35,9 @@ export default function ActivityFilters({
   isMobile,
 }: ActivityFiltersProps) {
   return (
-    <Col
-      sm={12}
-      md={6}
-      className={`tailwind-scope d-flex align-items-center gap-4 tw-py-2 ${
-        isMobile ? "justify-content-center" : "justify-content-end"
+    <div
+      className={`tailwind-scope tw-flex tw-w-full tw-items-center tw-gap-4 tw-py-2 md:tw-w-1/2 ${
+        isMobile ? "tw-justify-center" : "tw-justify-end"
       }`}
     >
       <CommonDropdown
@@ -55,6 +52,6 @@ export default function ActivityFilters({
         filterLabel="Transaction Type"
         setSelected={onTypeFilterChange}
       />
-    </Col>
+    </div>
   );
 }

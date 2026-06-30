@@ -7,8 +7,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useActivityData } from "@/hooks/useActivityData";
 import { useActivityFilters } from "@/hooks/useActivityFilters";
 import { useNFTCollections } from "@/hooks/useNFTCollections";
-import { useEffect, useState } from "react";
-import { Container, Row } from "react-bootstrap";
+import { usePathname } from "next/navigation";
 import Pagination from "../pagination/Pagination";
 import ActivityFilters from "./ActivityFilters";
 import ActivityHeader from "./ActivityHeader";
@@ -27,6 +26,7 @@ interface Props {
 
 export default function LatestActivity(props: Readonly<Props>) {
   const isMobile = useIsMobileScreen();
+  const pathname = usePathname();
 
   const { typeFilter, selectedContract, setTypeFilter, setSelectedContract } =
     useActivityFilters();
@@ -53,15 +53,11 @@ export default function LatestActivity(props: Readonly<Props>) {
       : undefined
   );
 
-  const [showViewAll, setShowViewAll] = useState(false);
-
-  useEffect(() => {
-    setShowViewAll(!window.location.pathname.includes("nft-activity"));
-  }, []);
+  const showViewAll = !pathname.includes("nft-activity");
 
   return (
-    <Container className={`no-padding pt-4`}>
-      <Row className="d-flex align-items-center">
+    <section className="tw-p-0 tw-pt-4">
+      <div className="tw-flex tw-flex-wrap tw-items-center">
         <ActivityHeader showViewAll={showViewAll} fetching={fetching} />
         <ActivityFilters
           typeFilter={typeFilter}
@@ -74,14 +70,14 @@ export default function LatestActivity(props: Readonly<Props>) {
           }
           isMobile={isMobile}
         />
-      </Row>
+      </div>
       <ActivityTable
         activity={activity}
         nfts={nfts}
         nextgenCollections={nextgenCollections}
       />
       {props.showMore && totalResults > 0 && (
-        <Row className="text-center pt-2 pb-3">
+        <div className="tw-pb-3 tw-pt-2 tw-text-center">
           <Pagination
             page={page}
             pageSize={props.pageSize}
@@ -91,8 +87,8 @@ export default function LatestActivity(props: Readonly<Props>) {
               window.scrollTo(0, 0);
             }}
           />
-        </Row>
+        </div>
       )}
-    </Container>
+    </section>
   );
 }
