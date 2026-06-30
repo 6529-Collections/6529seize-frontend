@@ -29,6 +29,11 @@ export const QUICK_DM_STORAGE_KEY = "6529.quickDirectMessages.state";
 export const CLOSED_STATE: QuickDmState = { view: "closed", waveId: null };
 export const LIST_STATE: QuickDmState = { view: "list", waveId: null };
 
+const getBrowserWindow = (): Window | undefined => {
+  const browserWindow = globalThis.window as unknown;
+  return browserWindow === undefined ? undefined : (browserWindow as Window);
+};
+
 const QUICK_DM_RELATIVE_TIME_OPTIONS = {
   numeric: "auto",
   style: "short",
@@ -53,12 +58,13 @@ export const isQuickDmState = (value: unknown): value is QuickDmState => {
 };
 
 export const readStoredState = (): QuickDmState => {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow();
+  if (browserWindow === undefined) {
     return CLOSED_STATE;
   }
 
   try {
-    const raw = globalThis.window.localStorage.getItem(QUICK_DM_STORAGE_KEY);
+    const raw = browserWindow.localStorage.getItem(QUICK_DM_STORAGE_KEY);
     if (!raw) {
       return CLOSED_STATE;
     }
@@ -71,12 +77,13 @@ export const readStoredState = (): QuickDmState => {
 };
 
 export const storeState = (state: QuickDmState) => {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow();
+  if (browserWindow === undefined) {
     return;
   }
 
   try {
-    globalThis.window.localStorage.setItem(
+    browserWindow.localStorage.setItem(
       QUICK_DM_STORAGE_KEY,
       JSON.stringify(state)
     );
