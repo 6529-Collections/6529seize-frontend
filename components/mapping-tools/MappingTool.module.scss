@@ -63,12 +63,16 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: 100%;
   padding: 50px;
   background-color: variables.$very-dark-grey;
   align-items: center;
   gap: 2rem;
   border: 2px dashed variables.$lighter-grey;
+  color: inherit;
   cursor: pointer;
+  font: inherit;
+  text-align: center;
 
   &:hover {
     border: 2px dashed variables.$lightest-grey;

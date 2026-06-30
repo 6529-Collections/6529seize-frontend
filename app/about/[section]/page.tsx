@@ -1,7 +1,11 @@
 import styles from "@/styles/Home.module.scss";
-import { Col, Container, Row } from "react-bootstrap";
 
 import About from "@/components/about/About";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "@/components/about/AboutLayout";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
 import { AboutSection } from "@/types/enums";
@@ -23,8 +27,8 @@ export default async function AboutPage(props: Readonly<Props>) {
   }
 
   return (
-    <main className={styles["main"]}>
-      <Container fluid className="pt-4">
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <Container fluid className="tw-pt-4">
         <Row>
           <Col>
             <About section={section as AboutSection} />

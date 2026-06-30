@@ -1,5 +1,4 @@
 import styles from "./AppWallet.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
 import Link from "next/link";
 import type { AppWallet } from "./AppWalletsContext";
 import AppWalletAvatar from "./AppWalletAvatar";
@@ -12,25 +11,26 @@ export default function AppWalletCard(
   return (
     <Link
       href={`/tools/app-wallets/${props.wallet.address}`}
-      className="decoration-none">
-      <Container className={styles["appWalletCard"]}>
-        <Row>
-          <Col className="text-break d-flex align-items-center gap-2">
+      className="tw-no-underline"
+    >
+      <div className={styles["appWalletCard"]}>
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-gap-2 tw-break-words tw-px-3">
             <AppWalletAvatar address={props.wallet.address} />
-            <span className="font-larger font-bolder">{props.wallet.name}</span>
+            <span className="tw-text-lg tw-font-bold">{props.wallet.name}</span>
             {props.wallet.imported ? (
-              <span className="font-color-h"> (imported)</span>
+              <span className="tw-text-iron-400"> (imported)</span>
             ) : (
               <></>
             )}
-          </Col>
-        </Row>
-        <Row className="pt-3">
-          <Col className="font-smaller font-lighter text-break">
+          </div>
+        </div>
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3">
+          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-break-words tw-px-3 tw-text-sm tw-font-extralight">
             {props.wallet.address.toLowerCase()}
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }

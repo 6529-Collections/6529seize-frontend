@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 import styles from "./About.module.scss";
 import { fetchAboutSectionFile } from "./about.helpers";
 
@@ -22,7 +26,7 @@ export default function AboutGDRC1() {
         </Col>
       </Row>
       <Row>
-        <Col className="pt-2 pb-2">
+        <Col className="tw-pt-2 tw-pb-2">
           We support{" "}
           <Link
             href="https://digitalrightscharter.org/"
@@ -36,7 +40,7 @@ export default function AboutGDRC1() {
           Full text of the GDRC 1 is below.
         </Col>
       </Row>
-      <Row className="pt-1 pb-3">
+      <Row className="tw-pt-1 tw-pb-3">
         <Col
           className={styles["htmlContainer"]}
           dangerouslySetInnerHTML={{

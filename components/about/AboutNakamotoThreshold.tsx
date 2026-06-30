@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { Col, Container, Row, Image } from "react-bootstrap";
+import Image from "next/image";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 
 export default function AboutNakamotoThreshold() {
   return (
@@ -11,9 +16,9 @@ export default function AboutNakamotoThreshold() {
           </h1>
         </Col>
       </Row>
-      <Row className="pt-2">
+      <Row className="tw-pt-2">
         <Col>
-          <p className="font-larger font-bolder">
+          <p className="tw-text-lg tw-font-bold">
             What is the Nakamoto Threshold?
           </p>
           <p>
@@ -33,9 +38,8 @@ export default function AboutNakamotoThreshold() {
           <p>So Meme Card #4 had an edition count of 300.</p>
           <p>
             <Image
-            
+              unoptimized
               loading="eager"
-              
               width="0"
               height="0"
               style={{
@@ -49,6 +53,7 @@ export default function AboutNakamotoThreshold() {
               alt="6529 Gradient"
             />
             <Image
+              unoptimized
               loading="eager"
               width="0"
               height="0"
@@ -65,9 +70,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Edition Sizes Matter</p>
+          <p className="tw-text-lg tw-font-bold">Edition Sizes Matter</p>
           <p>
             The Memes were deliberately designed to be relatively low unit price
             and relatively high edition count.
@@ -88,7 +93,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             ...if the mission was &quot;maximize unit price&quot;, we could have
@@ -101,7 +106,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>OK, remind me of the mission?</p>
           <p>
@@ -114,7 +119,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             To be honest, back then it did not even seem like a hard decision.
@@ -128,9 +133,9 @@ export default function AboutNakamotoThreshold() {
           <p>The Nakamoto Threshold: all others will exceed 300 </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Testing the Threshold</p>
+          <p className="tw-text-lg tw-font-bold">Testing the Threshold</p>
           <p>Bear market came.</p>
           <p>
             Instead of people yelling me for being &quot;elitist&quot; for only
@@ -139,7 +144,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>We roughly try to match edition sizes to demand.</p>
           <p>
@@ -149,7 +154,7 @@ export default function AboutNakamotoThreshold() {
           <p>Some artists would sell out any edition size instantly.</p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             So we try to find a happy medium between the well-known artists and
@@ -162,7 +167,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             Now, low three hundreds for art editions, three times a week, across
@@ -175,7 +180,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             Let&apos;s say, depending on the artist and how the crypto world
@@ -187,7 +192,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>And, in USD terms, we are not at the bottom.</p>
           <p>
@@ -195,9 +200,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Consider the Options</p>
+          <p className="tw-text-lg tw-font-bold">Consider the Options</p>
           <p>
             If 2 years ago I had not said &quot;Card 4 will be the lowest
             edition count&quot;, we would not even be thinking about this at
@@ -205,7 +210,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             But I did say that, I said that Card 4 would be the lowest edition
@@ -215,7 +220,7 @@ export default function AboutNakamotoThreshold() {
           <p>What should we do?</p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             There was *a lot* of discussion in Discord and basically it boiled
@@ -232,7 +237,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>The first one was the easiest.</p>
           <p>
@@ -243,7 +248,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             I gave this option serious consideration because I do think, in many
@@ -256,7 +261,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             And I could see a way to do it. It would be costly to me, but I made
@@ -270,7 +275,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>But it is important that something stays fixed</p>
           <p>In BTC it is easy, it is 21M BTC.</p>
@@ -281,7 +286,7 @@ export default function AboutNakamotoThreshold() {
           <p>It is the bright line that distinguishes BTC from not-BTC.</p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>Ethereum faced an important decision of this nature in 2016.</p>
           <p>
@@ -292,6 +297,7 @@ export default function AboutNakamotoThreshold() {
           <p>History lesson below.</p>
           <p>
             <Image
+              unoptimized
               loading="eager"
               width="0"
               height="0"
@@ -308,7 +314,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             So back to The Memes. I asked myself if I had made any absolute
@@ -322,9 +328,9 @@ export default function AboutNakamotoThreshold() {
           <p>So what should we do?</p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Maintaining the Commitment</p>
+          <p className="tw-text-lg tw-font-bold">Maintaining the Commitment</p>
           <p>
             I decided that the correct answer is that those two absolutes never
             change.
@@ -337,7 +343,7 @@ export default function AboutNakamotoThreshold() {
           <p>I think it is actually much subtler than that.</p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             It is about a group of people (not just me but the artists and
@@ -350,7 +356,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             Isn&apos;t this a totally absurd arbitrary number? Of course it is!
@@ -365,9 +371,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Managing Tradeoffs</p>
+          <p className="tw-text-lg tw-font-bold">Managing Tradeoffs</p>
           <p>
             BTC sacrifices many many other things to 21M and its other ideal
             (small blocks for decentralization).
@@ -382,7 +388,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             So BTC has 21M and small blocks. The Memes have the Nakamoto
@@ -395,9 +401,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Implementation Pathways</p>
+          <p className="tw-text-lg tw-font-bold">Implementation Pathways</p>
           <p>
             Once this decision was made, we go to step 2: &quot;how do we
             implement staying above 300 edition size&quot;.
@@ -409,7 +415,7 @@ export default function AboutNakamotoThreshold() {
           <p>What if you mint 1x a week and still a card fails to hit 300?</p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             The second idea: &quot;airdrop to collectors&quot; is superficially
@@ -422,7 +428,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             But here the airdrops would be small - maybe 10 one week, maybe 50
@@ -436,7 +442,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>I am 100% sure that:</p>
           <ul>
@@ -449,7 +455,7 @@ export default function AboutNakamotoThreshold() {
           </ul>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             And, in practice, what it would mean that several times a week we
@@ -462,9 +468,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Decision Time</p>
+          <p className="tw-text-lg tw-font-bold">Decision Time</p>
           <p>
             So time was running out, I was watching a card that would not mint
             out.
@@ -476,7 +482,7 @@ export default function AboutNakamotoThreshold() {
           <p>I minted it myself over the 300 Nakamoto Threshold.</p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>And then it happened again, so I minted again.</p>
           <p>
@@ -489,9 +495,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Count the Costs</p>
+          <p className="tw-text-lg tw-font-bold">Count the Costs</p>
           <p>
             Now what are the costs (beyond ETH)? Some say it is cringe to mint
             your own drops.
@@ -506,7 +512,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             Another cost is concentration of ownership of a specific Meme Card.
@@ -518,7 +524,7 @@ export default function AboutNakamotoThreshold() {
           <p>Vs everyone else, we are uber-chads here.</p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             Many meme cards have unique ownership in the 80s-90%. The ones that
@@ -530,7 +536,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             The reasons we are so good on distributed ownership is that we are
@@ -542,9 +548,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Bigger Plans</p>
+          <p className="tw-text-lg tw-font-bold">Bigger Plans</p>
           <p>
             Now, along the way, I was still thinking about what the long-term
             solution could be.
@@ -559,7 +565,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             What we decided is that in SZN7, at the end of the public phase, any
@@ -572,7 +578,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             Specifically this account will accrue some weight within the
@@ -585,9 +591,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Research What?</p>
+          <p className="tw-text-lg tw-font-bold">Research What?</p>
           <p>
             &quot;Wait, what research does an art edition collection need?&quot;
             Imagine thinking that is the goal.
@@ -601,9 +607,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Evaluating the Outcome</p>
+          <p className="tw-text-lg tw-font-bold">Evaluating the Outcome</p>
           <p>
             I am very happy with this solution.
             <ul>
@@ -620,7 +626,7 @@ export default function AboutNakamotoThreshold() {
           <p></p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             I am also very happy with the process.
@@ -637,9 +643,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">
+          <p className="tw-text-lg tw-font-bold">
             Good Decision Making is Hard
           </p>
           <p>
@@ -652,7 +658,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>
             Building a group culture that can make good decisions is the only
@@ -665,9 +671,9 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
-          <p className="font-larger font-bolder">Stacking Goods</p>
+          <p className="tw-text-lg tw-font-bold">Stacking Goods</p>
           <p>
             Coming back to the aesthetically pleasing part, what is currently
             happening in The Memes is pure utter magic of stacking public goods
@@ -679,7 +685,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>This is the cycle:</p>
           <p>
@@ -698,7 +704,7 @@ export default function AboutNakamotoThreshold() {
           </p>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="tw-pt-3">
         <Col>
           <p>Was lowering the mint cost an option at all?</p>
           <p>
