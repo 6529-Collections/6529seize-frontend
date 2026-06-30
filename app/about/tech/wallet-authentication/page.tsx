@@ -1,7 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Col, Container, Row } from "react-bootstrap";
 
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "@/components/about/AboutLayout";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -26,11 +30,11 @@ export const metadata: Metadata = getAppMetadata({
 
 export default function WalletAuthenticationPage() {
   return (
-    <main className={styles["main"]}>
-      <Container fluid className="pt-4">
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <Container fluid className="tw-pt-4">
         <Row>
           <Col>
-            <Container className="pt-2">
+            <Container className="tw-pt-2">
               <Row>
                 <Col>
                   <AboutContentsDropdown currentSection={AboutSection.TECH} />
