@@ -96,6 +96,7 @@ const filenameExceptions = [
   "inject.chrome",
 ];
 const injectedWasmCspAppUriPath = "app:///inject.js";
+const injectedWasmCspCollapsedPath = "///inject.js";
 const injectedAppUriPath = "app:///injected/injected.js";
 const walletCollisionPatterns = [
   "tronlinkparams",
@@ -1037,11 +1038,49 @@ function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
   );
 }
 
-function isInjectedWasmCspAppUriFrame(frame: SentryStackFrame): boolean {
-  return [frame.filename, frame.abs_path].some(
-    (path) =>
-      typeof path === "string" && path.includes(injectedWasmCspAppUriPath)
+function isInjectedWasmCspFramePath(path: string): boolean {
+  const normalizedPath = path.trim();
+  return (
+    normalizedPath.includes(injectedWasmCspAppUriPath) ||
+    normalizedPath === injectedWasmCspCollapsedPath ||
+    normalizedPath.startsWith(`${injectedWasmCspCollapsedPath}:`)
   );
+}
+
+function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some(isInjectedWasmCspFramePath);
+}
+
+function isFirstPartyFramePath(path: string): boolean {
+  const normalizedPath = path.trim();
+  if (!normalizedPath) {
+    return false;
+  }
+
+  if (
+    normalizedPath.startsWith("app:///") &&
+    !isInjectedWasmCspFramePath(normalizedPath)
+  ) {
+    return true;
+  }
+
+  if (normalizedPath.includes("/_next/static/")) {
+    return true;
+  }
+
+  try {
+    return isFirstPartyHost(new URL(normalizedPath).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
+  if (frame.in_app === true && !isInjectedWasmCspFrame(frame)) {
+    return true;
+  }
+
+  return getFramePaths(frame).some(isFirstPartyFramePath);
 }
 
 function isInjectedOrThirdPartyWalletExtensionPath(value: string): boolean {
@@ -1090,14 +1129,18 @@ function hasInjectedAppUriFrame(
   return Array.isArray(frames) && frames.some(isInjectedAppUriFrame);
 }
 
-function hasInjectedWasmCspAppUriSignature(
+function hasInjectedWasmCspFrameSignature(
   frames: SentryStackFrame[] | undefined
 ): boolean {
-  if (!hasOnlyAppUriFrames(frames)) {
+  if (!Array.isArray(frames) || frames.length === 0) {
     return false;
   }
 
-  return frames.some(isInjectedWasmCspAppUriFrame);
+  if (frames.some(isAppOwnedWasmCspFrame)) {
+    return false;
+  }
+
+  return frames.some(isInjectedWasmCspFrame);
 }
 
 function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
@@ -1826,8 +1869,10 @@ function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
 function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return (
-    normalizedValue.includes("webassembly.instantiate") &&
-    normalizedValue.includes("content security") &&
+    (normalizedValue.includes("webassembly.instantiate") ||
+      normalizedValue.includes("webassembly.module")) &&
+    (normalizedValue.includes("content security") ||
+      /\bcsp\b/.test(normalizedValue)) &&
     normalizedValue.includes("unsafe-eval")
   );
 }
@@ -2095,7 +2140,7 @@ export function shouldFilterInjectedWasmCspUnsafeEval(
   hint?: SentryEventHint
 ): boolean {
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
-  if (!hasInjectedWasmCspAppUriSignature(frames)) {
+  if (!hasInjectedWasmCspFrameSignature(frames)) {
     return false;
   }
 
