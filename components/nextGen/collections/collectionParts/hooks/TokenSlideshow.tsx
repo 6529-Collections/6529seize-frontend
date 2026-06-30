@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useRef } from "react";
-import { Col, Row } from "react-bootstrap";
+import { Col, Row } from "../../NextGenTailwindLayout";
 import { A11y, Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { NextGenToken } from "@/entities/INextgen";
