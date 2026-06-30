@@ -7,7 +7,7 @@ import {
 } from "react";
 
 type ColumnSpan = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-type BreakpointSize = boolean | "auto" | ColumnSpan;
+type BreakpointSize = boolean | "auto" | number;
 type BreakpointPrefix = "base" | "sm" | "md" | "lg" | "xl" | "xxl";
 
 interface ContainerProps extends ComponentPropsWithoutRef<"div"> {
@@ -142,6 +142,10 @@ const SIZE_COL_CLASSES: Record<BreakpointPrefix, Record<ColumnSpan, string>> = {
   },
 };
 
+function isColumnSpan(size: number): size is ColumnSpan {
+  return Number.isInteger(size) && size >= 1 && size <= 12;
+}
+
 const colSizeClass = (
   size: BreakpointSize | undefined,
   prefix: BreakpointPrefix = "base"
@@ -158,7 +162,9 @@ const colSizeClass = (
     return AUTO_COL_CLASSES[prefix];
   }
 
-  return typeof size === "number" ? SIZE_COL_CLASSES[prefix][size] : undefined;
+  return typeof size === "number" && isColumnSpan(size)
+    ? SIZE_COL_CLASSES[prefix][size]
+    : undefined;
 };
 
 export const Container = forwardRef<HTMLDivElement, ContainerProps>(
