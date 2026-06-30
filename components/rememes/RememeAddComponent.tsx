@@ -219,33 +219,34 @@ export default function RememeAddComponent(props: Readonly<Props>) {
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
             {references.map((m) => (
               <span className={styles["addMemeReferenceWrapper"]} key={m.id}>
-                <>
-                  <span
-                    className={`${styles["addMemeReferenceDisplayBtn"]} ${
-                      verifying || verified
-                        ? styles["addMemeReferenceDisplayBtnDisabled"]
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setReferences((r) => r.filter((s) => s.id != m.id))
-                    }
-                    data-tooltip-id={`clear-reference-${m.id}`}
-                  >
-                    x
-                  </span>
-                  <Tooltip
-                    id={`clear-reference-${m.id}`}
-                    place="top"
-                    delayShow={250}
-                    style={{
-                      backgroundColor: "#1F2937",
-                      color: "white",
-                      padding: "4px 8px",
-                    }}
-                  >
-                    Clear
-                  </Tooltip>
-                </>
+                <button
+                  type="button"
+                  className={`${styles["addMemeReferenceDisplayBtn"]} ${
+                    verifying || verified
+                      ? styles["addMemeReferenceDisplayBtnDisabled"]
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setReferences((r) => r.filter((s) => s.id != m.id))
+                  }
+                  disabled={verifying || verified}
+                  aria-label={`Clear reference #${m.id}`}
+                  data-tooltip-id={`clear-reference-${m.id}`}
+                >
+                  x
+                </button>
+                <Tooltip
+                  id={`clear-reference-${m.id}`}
+                  place="top"
+                  delayShow={250}
+                  style={{
+                    backgroundColor: "#1F2937",
+                    color: "white",
+                    padding: "4px 8px",
+                  }}
+                >
+                  Clear
+                </Tooltip>
                 <span className={styles["addMemeReferenceDisplay"]}>
                   #{m.id} - {m.name}
                 </span>

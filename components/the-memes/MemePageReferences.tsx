@@ -348,7 +348,7 @@ export function MemePageReferencesSubMenu(props: {
       )}
       {rememesState.items.length > 0 && (
         <>
-          <div className="tw-grid tw-grid-cols-2 tw-py-2 sm:tw-grid-cols-3 md:tw-grid-cols-4">
+          <div className="tw-grid tw-grid-cols-2 tw-py-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-grid-cols-4">
             {rememesState.items.map((rememe) => {
               return (
                 <div
