@@ -1,7 +1,7 @@
 import { editSlice } from "@/store/editSlice";
 import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
 import { configureStore } from "@reduxjs/toolkit";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 
@@ -80,51 +80,16 @@ jest.mock("@/components/providers/PullToRefresh", () => ({
     return null;
   },
 }));
-jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
-  useMemesQuickVoteDialogController: () => {
-    const React = require("react");
-    const [isQuickVoteOpen, setIsQuickVoteOpen] = React.useState(false);
-    const [quickVoteSessionId, setQuickVoteSessionId] = React.useState(0);
-    const nextSessionIdRef = React.useRef(1);
-    const reservedSessionIdRef = React.useRef(null as number | null);
-
-    return {
-      closeQuickVote: () => setIsQuickVoteOpen(false),
-      dialogState: {
-        isOpen: isQuickVoteOpen,
-        onClose: () => setIsQuickVoteOpen(false),
-        sessionId: quickVoteSessionId,
-      },
-      isQuickVoteOpen,
-      openQuickVote: () => {
-        const sessionId =
-          reservedSessionIdRef.current ?? nextSessionIdRef.current;
-        reservedSessionIdRef.current = null;
-        nextSessionIdRef.current = sessionId + 1;
-        setQuickVoteSessionId(sessionId);
-        setIsQuickVoteOpen(true);
-      },
-      prefetchQuickVote: () => {
-        if (reservedSessionIdRef.current === null) {
-          reservedSessionIdRef.current = nextSessionIdRef.current;
-        }
-      },
-      quickVoteSessionId,
-    };
-  },
-}));
 jest.mock(
-  "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog",
+  "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntimeLoader",
   () => ({
     __esModule: true,
-    default: ({
-      isOpen,
-      onClose,
-      sessionId,
+    LazyMemesQuickVoteRuntime: ({
+      intent,
+      onIdle,
     }: {
-      readonly isOpen: boolean;
-      readonly sessionId: number;
-      readonly onClose: () => void;
+      readonly intent: { readonly id: number };
+      readonly onIdle: () => void;
     }) => {
       const React = require("react");
 
@@ -132,14 +97,38 @@ jest.mock(
         mockDialogMountCount += 1;
       }, []);
 
-      return isOpen ? (
+      return (
         <div data-testid="quick-vote-dialog">
-          <div>Session {sessionId}</div>
-          <button type="button" onClick={onClose}>
+          <div>Session {intent.id}</div>
+          <button
+            type="button"
+            onClick={() => {
+              onIdle();
+            }}
+          >
             Close Quick Vote
           </button>
         </div>
-      ) : null;
+      );
+    },
+    useMemesQuickVoteRuntimeLauncher: () => {
+      const React = require("react");
+      const [runtimeIntent, setRuntimeIntent] = React.useState(null);
+      const nextIntentIdRef = React.useRef(0);
+
+      return {
+        openQuickVote: () => {
+          nextIntentIdRef.current += 1;
+          setRuntimeIntent({
+            action: "open",
+            id: nextIntentIdRef.current,
+          });
+        },
+        prefetchQuickVote: jest.fn(),
+        resetQuickVoteRuntime: () => setRuntimeIntent(null),
+        runtimeIntent,
+        shouldMountRuntime: runtimeIntent !== null,
+      };
     },
   })
 );
@@ -369,17 +358,19 @@ describe("AppLayout", () => {
     expect(screen.queryByText("child")).not.toBeInTheDocument();
   });
 
-  it("owns a persistent quick-vote dialog for the waves view", () => {
+  it("loads a persistent quick-vote runtime for the waves view on demand", async () => {
     getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
 
     renderWithProvider(<AppLayout>child</AppLayout>);
 
-    expect(mockDialogMountCount).toBe(1);
+    expect(mockDialogMountCount).toBe(0);
 
     fireEvent.click(
       screen.getByRole("button", { name: "Open quick vote from app layout" })
     );
-    expect(screen.getByText("Session 1")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Session 1")).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Close Quick Vote" }));
     expect(screen.queryByTestId("quick-vote-dialog")).not.toBeInTheDocument();
@@ -387,11 +378,13 @@ describe("AppLayout", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Open quick vote from app layout" })
     );
-    expect(screen.getByText("Session 2")).toBeInTheDocument();
-    expect(mockDialogMountCount).toBe(1);
+    await waitFor(() => {
+      expect(screen.getByText("Session 2")).toBeInTheDocument();
+    });
+    expect(mockDialogMountCount).toBe(2);
   });
 
-  it("closes the quick-vote dialog when leaving the waves view", () => {
+  it("resets the quick-vote runtime when leaving the waves view", async () => {
     getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
 
     const { rerender } = renderWithProvider(<AppLayout>child</AppLayout>);
@@ -399,7 +392,9 @@ describe("AppLayout", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Open quick vote from app layout" })
     );
-    expect(screen.getByText("Session 1")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Session 1")).toBeInTheDocument();
+    });
 
     getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
     rerender(
@@ -420,11 +415,14 @@ describe("AppLayout", () => {
 
     expect(screen.getByTestId("waves")).toBeInTheDocument();
     expect(screen.queryByTestId("quick-vote-dialog")).not.toBeInTheDocument();
-    expect(mockDialogMountCount).toBe(2);
+    expect(mockDialogMountCount).toBe(1);
 
     fireEvent.click(
       screen.getByRole("button", { name: "Open quick vote from app layout" })
     );
-    expect(screen.getByText("Session 1")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Session 1")).toBeInTheDocument();
+    });
+    expect(mockDialogMountCount).toBe(2);
   });
 });
