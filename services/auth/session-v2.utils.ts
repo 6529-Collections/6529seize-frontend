@@ -39,6 +39,29 @@ interface SessionNativeResponse {
 
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
+type SessionRefreshFailureCooldown =
+  | {
+      readonly type: "empty";
+      readonly expiresAtMs: number;
+    }
+  | {
+      readonly type: "error";
+      readonly expiresAtMs: number;
+      readonly error: unknown;
+    };
+type SessionRefreshFailure =
+  | {
+      readonly type: "empty";
+    }
+  | {
+      readonly type: "error";
+      readonly error: unknown;
+    };
+type SessionRefreshInFlight = {
+  readonly controller: AbortController;
+  readonly promise: Promise<SessionRefreshResponse | null>;
+  activeConsumers: number;
+};
 
 type ApiStatusError = {
   readonly status?: unknown;
@@ -72,6 +95,13 @@ interface RedeemConnectionShareResponse {
   readonly refresh_token_expires_at: string;
 }
 
+const SESSION_REFRESH_FAILURE_COOLDOWN_MS = 2000;
+const sessionRefreshInFlight = new Map<string, SessionRefreshInFlight>();
+const sessionRefreshFailureCooldowns = new Map<
+  string,
+  SessionRefreshFailureCooldown
+>();
+
 export function getSessionClientType(): AuthSessionClientType {
   return Capacitor.isNativePlatform() ? "native" : "web";
 }
@@ -83,6 +113,121 @@ function isUnauthorizedApiError(error: unknown): boolean {
 
   const statusError = error as ApiStatusError;
   return statusError.status === 401 || statusError.response?.status === 401;
+}
+
+function getSessionRefreshKey({
+  address,
+  clientType,
+}: {
+  readonly address: string;
+  readonly clientType: AuthSessionClientType;
+}): string {
+  return `${clientType}:${address.trim().toLowerCase()}`;
+}
+
+function createAbortError(): DOMException {
+  return new DOMException("Session refresh aborted", "AbortError");
+}
+
+const isAbortError = (error: unknown): boolean =>
+  typeof error === "object" &&
+  error !== null &&
+  "name" in error &&
+  error.name === "AbortError";
+
+function getActiveFailureCooldown(
+  key: string
+): SessionRefreshFailureCooldown | null {
+  const cooldown = sessionRefreshFailureCooldowns.get(key);
+  if (!cooldown) {
+    return null;
+  }
+
+  if (cooldown.expiresAtMs <= Date.now()) {
+    sessionRefreshFailureCooldowns.delete(key);
+    return null;
+  }
+
+  return cooldown;
+}
+
+function rememberSessionRefreshFailure(
+  key: string,
+  failure: SessionRefreshFailure
+): void {
+  sessionRefreshFailureCooldowns.set(key, {
+    ...failure,
+    expiresAtMs: Date.now() + SESSION_REFRESH_FAILURE_COOLDOWN_MS,
+  });
+}
+
+function clearSessionRefreshFailure(key: string): void {
+  sessionRefreshFailureCooldowns.delete(key);
+}
+
+function settleSessionRefreshConsumer(
+  entry: SessionRefreshInFlight,
+  key: string
+): void {
+  entry.activeConsumers = Math.max(0, entry.activeConsumers - 1);
+  if (
+    entry.activeConsumers === 0 &&
+    sessionRefreshInFlight.get(key) === entry
+  ) {
+    sessionRefreshInFlight.delete(key);
+    entry.controller.abort();
+  }
+}
+
+async function withCallerAbort<T>({
+  entry,
+  key,
+  abortSignal,
+}: {
+  readonly entry: SessionRefreshInFlight;
+  readonly key: string;
+  readonly abortSignal?: AbortSignal | undefined;
+}): Promise<T> {
+  if (!abortSignal) {
+    return (await entry.promise) as T;
+  }
+
+  if (abortSignal.aborted) {
+    settleSessionRefreshConsumer(entry, key);
+    throw createAbortError();
+  }
+
+  let didSettle = false;
+  return await new Promise<T>((resolve, reject) => {
+    const onAbort = () => {
+      if (didSettle) {
+        return;
+      }
+      didSettle = true;
+      abortSignal.removeEventListener("abort", onAbort);
+      settleSessionRefreshConsumer(entry, key);
+      reject(createAbortError());
+    };
+
+    abortSignal.addEventListener("abort", onAbort, { once: true });
+    void entry.promise
+      .then((value) => {
+        if (didSettle) {
+          return;
+        }
+        didSettle = true;
+        abortSignal.removeEventListener("abort", onAbort);
+        resolve(value as T);
+      })
+      .catch((error: unknown) => {
+        if (didSettle) {
+          return;
+        }
+        didSettle = true;
+        abortSignal.removeEventListener("abort", onAbort);
+        reject(error);
+      });
+  });
 }
 
 function getSessionCredentialsMode(): RequestCredentials {
@@ -154,14 +299,15 @@ export async function loginWithSessionV2({
   });
 }
 
-export async function refreshSessionV2({
+async function executeSessionRefreshV2({
   address,
   abortSignal,
+  clientType,
 }: {
   readonly address: string;
   readonly abortSignal?: AbortSignal | undefined;
+  readonly clientType: AuthSessionClientType;
 }): Promise<SessionRefreshResponse | null> {
-  const clientType = getSessionClientType();
   if (clientType === "native") {
     const nativeRefreshToken = await getNativeRefreshToken(address);
     if (!nativeRefreshToken) {
@@ -185,6 +331,7 @@ export async function refreshSessionV2({
         signal: abortSignal,
         credentials: "include",
         errorMode: "structured",
+        includeWalletAuth: false,
       });
     } catch (error: unknown) {
       if (isUnauthorizedApiError(error)) {
@@ -210,6 +357,7 @@ export async function refreshSessionV2({
       signal: abortSignal,
       credentials: "include",
       errorMode: "structured",
+      includeWalletAuth: false,
     });
   } catch (error: unknown) {
     if (isUnauthorizedApiError(error)) {
@@ -217,6 +365,91 @@ export async function refreshSessionV2({
     }
     throw error;
   }
+}
+
+export async function refreshSessionV2({
+  address,
+  abortSignal,
+}: {
+  readonly address: string;
+  readonly abortSignal?: AbortSignal | undefined;
+}): Promise<SessionRefreshResponse | null> {
+  if (abortSignal?.aborted) {
+    throw createAbortError();
+  }
+
+  const clientType = getSessionClientType();
+  const key = getSessionRefreshKey({ address, clientType });
+  const cooldown = getActiveFailureCooldown(key);
+
+  if (cooldown?.type === "empty") {
+    return null;
+  }
+  if (cooldown?.type === "error") {
+    throw cooldown.error;
+  }
+
+  let existingEntry = sessionRefreshInFlight.get(key);
+  if (existingEntry?.controller.signal.aborted) {
+    sessionRefreshInFlight.delete(key);
+    existingEntry = undefined;
+  }
+
+  if (existingEntry) {
+    existingEntry.activeConsumers += 1;
+    return await withCallerAbort<SessionRefreshResponse | null>({
+      entry: existingEntry,
+      key,
+      abortSignal,
+    });
+  }
+
+  const controller = new AbortController();
+  const entry: SessionRefreshInFlight = {
+    controller,
+    activeConsumers: 1,
+    promise: executeSessionRefreshV2({
+      address,
+      abortSignal: abortSignal ? controller.signal : undefined,
+      clientType,
+    }),
+  };
+  sessionRefreshInFlight.set(key, entry);
+
+  void (async () => {
+    try {
+      const response = await entry.promise;
+      if (response) {
+        clearSessionRefreshFailure(key);
+        return;
+      }
+
+      rememberSessionRefreshFailure(key, { type: "empty" });
+    } catch (error: unknown) {
+      if (isAbortError(error)) {
+        return;
+      }
+      rememberSessionRefreshFailure(key, { type: "error", error });
+    } finally {
+      if (sessionRefreshInFlight.get(key) === entry) {
+        sessionRefreshInFlight.delete(key);
+      }
+    }
+  })();
+
+  return await withCallerAbort<SessionRefreshResponse | null>({
+    entry,
+    key,
+    abortSignal,
+  });
+}
+
+export function __resetSessionRefreshStateForTests(): void {
+  for (const entry of sessionRefreshInFlight.values()) {
+    entry.controller.abort();
+  }
+  sessionRefreshInFlight.clear();
+  sessionRefreshFailureCooldowns.clear();
 }
 
 export async function persistSessionResponse(
@@ -271,7 +504,7 @@ export async function verifyActiveSessionV2WebSession({
     address,
     abortSignal,
   });
-  if (!refreshedSession || refreshedSession.client_type !== "web") {
+  if (refreshedSession?.client_type !== "web") {
     return false;
   }
 

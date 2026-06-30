@@ -97,6 +97,33 @@ describe("commonApiPost", () => {
     expect(result).toEqual({ res: 1 });
   });
 
+  it("can omit wallet authorization while preserving staging auth", async () => {
+    (getStagingAuth as jest.Mock).mockReturnValue("a");
+    (getAuthJwt as jest.Mock).mockReturnValue("stale-jwt");
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ res: 1 }),
+    });
+
+    await commonApiPost<{ v: number }, { res: number }>({
+      endpoint: "e",
+      body: { v: 1 },
+      includeWalletAuth: false,
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/e",
+      expect.objectContaining({
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-6529-auth": "a",
+        },
+        body: JSON.stringify({ v: 1 }),
+      })
+    );
+  });
+
   it("rejects on error", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue(null);
     (getAuthJwt as jest.Mock).mockReturnValue(null);
