@@ -6,6 +6,7 @@ import { t } from "@/i18n/messages";
 import {
   ArrowLeftIcon,
   ArrowTopRightOnSquareIcon,
+  PaperAirplaneIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -50,6 +51,7 @@ export const QuickDmPanelHeader = ({
   title,
   onBack,
   onClose,
+  onCreateDirectMessage,
   onOpenAll,
 }: {
   readonly avatar?: React.ReactNode;
@@ -59,6 +61,7 @@ export const QuickDmPanelHeader = ({
   readonly title: string;
   readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
+  readonly onCreateDirectMessage?: (() => void) | undefined;
   readonly onOpenAll?: (() => void) | undefined;
 }) => (
   <div className="tw-flex tw-h-12 tw-flex-shrink-0 tw-items-center tw-gap-2 tw-border-b tw-border-white/10 tw-px-3">
@@ -94,6 +97,14 @@ export const QuickDmPanelHeader = ({
       >
         <ArrowTopRightOnSquareIcon className="tw-size-4" aria-hidden="true" />
       </Link>
+    )}
+    {onCreateDirectMessage && (
+      <QuickDmIconButton
+        label={t(locale, "quickDm.newDirectMessageAriaLabel")}
+        onClick={onCreateDirectMessage}
+      >
+        <PaperAirplaneIcon className="tw-size-4" aria-hidden="true" />
+      </QuickDmIconButton>
     )}
     <QuickDmIconButton
       label={t(locale, "quickDm.closeAriaLabel")}
