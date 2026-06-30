@@ -44,6 +44,7 @@ export class ApiCreateConnectionShareRequest {
 }
 
 export enum ApiCreateConnectionShareRequestTargetClientTypeEnum {
-    Native = 'native'
+    Native = 'native',
+    Desktop = 'desktop'
 }
 

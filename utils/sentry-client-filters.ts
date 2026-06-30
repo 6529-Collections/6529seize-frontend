@@ -163,6 +163,25 @@ const objectCapturedPromiseRejectionMessage =
 const providerDisconnectedCode = 4900;
 const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
+const talismanExtensionOnboardingMessage =
+  "Talisman extension has not been configured yet. Please continue with onboarding.";
+const browserExtensionUrlPrefixes = [
+  "chrome-extension://",
+  "moz-extension://",
+  "safari-web-extension://",
+];
+const appOwnedFramePathTokens = [
+  "webpack-internal:///(app-",
+  "/_next/static/",
+  "app:///app/",
+  "app:///components/",
+  "app:///contexts/",
+  "app:///hooks/",
+  "app:///lib/",
+  "app:///services/",
+  "app:///store/",
+  "app:///utils/",
+];
 const rabbyMobileUserRejectedCode = 4001;
 const rabbyMobileUserRejectedMessage = "Not Allowed";
 const rabbyMobileStackPatterns = ["rabbymobile", "userrejectedrequest"];
@@ -210,6 +229,13 @@ const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
   "recursivelyTraverseMutationEffects",
 ]);
 const WAVES_ROUTE_PATH = "/waves";
+const gifPickerTenorUndefinedTagsMessage =
+  "undefined is not an object (evaluating 'e.tags')";
+const gifPickerReactPackageToken = "gif-picker-react";
+const gifPickerTenorManagerPathToken = "TenorManager.ts";
+const gifPickerTenorFailureMessage =
+  "[gif-picker-react] Failed to fetch data from Tenor API";
+const tenorCategoriesPath = "/v2/categories";
 const THE_MEMES_MINT_ROUTE_PATH = "/the-memes/mint";
 
 const sentryRouteParameterizationMechanismType =
@@ -346,13 +372,9 @@ function getRoutePathFromString(value: string): string | null {
   }
 }
 
-function isRoutePathAtOrBelow(
-  path: string | null,
-  routePath: string
-): boolean {
+function isRoutePathAtOrBelow(path: string | null, routePath: string): boolean {
   return (
-    path !== null &&
-    (path === routePath || path.startsWith(`${routePath}/`))
+    path !== null && (path === routePath || path.startsWith(`${routePath}/`))
   );
 }
 
@@ -1152,6 +1174,38 @@ function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
   return getFramePaths(frame).some(isFirstPartyFramePath);
 }
 
+function isInjectedOrThirdPartyWalletExtensionPath(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  if (
+    normalizedValue.includes(injectedAppUriPath) ||
+    normalizedValue.includes("app:///page.js")
+  ) {
+    return true;
+  }
+
+  return (
+    browserExtensionUrlPrefixes.some((prefix) =>
+      normalizedValue.includes(prefix)
+    ) && normalizedValue.includes("/page.js")
+  );
+}
+
+function isAppOwnedFramePath(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  if (isInjectedOrThirdPartyWalletExtensionPath(normalizedValue)) {
+    return false;
+  }
+
+  return hasAppOwnedFramePathSignature(normalizedValue);
+}
+
+function hasAppOwnedFramePathSignature(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  return appOwnedFramePathTokens.some((token) =>
+    normalizedValue.includes(token)
+  );
+}
+
 function hasOnlyAppUriFrames(
   frames: SentryStackFrame[] | undefined
 ): frames is SentryStackFrame[] {
@@ -1197,10 +1251,61 @@ function hasAppOwnedFrame(frames: SentryStackFrame[] | undefined): boolean {
   );
 }
 
+function hasAppOwnedNonExtensionFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) => {
+      if (isNativeJsonStringifyFrame(frame)) {
+        return false;
+      }
+
+      const framePaths = getFramePaths(frame);
+      if (framePaths.some(isInjectedOrThirdPartyWalletExtensionPath)) {
+        return false;
+      }
+
+      return frame.in_app === true || framePaths.some(isAppOwnedFramePath);
+    })
+  );
+}
+
+function hasAppOwnedNonExtensionSignature(
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  if (hasAppOwnedNonExtensionFrame(frames)) {
+    return true;
+  }
+
+  const stack = getHintExceptionStack(hint);
+  return stack ? hasAppOwnedFramePathSignature(stack) : false;
+}
+
 function hasNativeJsonStringifyFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
+}
+
+function isGifPickerTenorManagerPath(path: string | undefined): boolean {
+  return (
+    typeof path === "string" &&
+    path.includes(gifPickerReactPackageToken) &&
+    path.includes(gifPickerTenorManagerPathToken)
+  );
+}
+
+function hasGifPickerTenorManagerFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) =>
+      [frame.filename, frame.abs_path].some(isGifPickerTenorManagerPath)
+    )
+  );
 }
 
 function hasAppOwnedStackPath(value: string | undefined): boolean {
@@ -1249,6 +1354,13 @@ function getHintExceptionMessage(hint?: SentryEventHint): string {
     return exception.message;
   }
   return "";
+}
+
+function normalizeErrorPrefix(value: string): string {
+  const trimmedValue = value.trim();
+  return trimmedValue.startsWith("Error: ")
+    ? trimmedValue.slice("Error: ".length).trim()
+    : trimmedValue;
 }
 
 function getHintExceptionStack(hint?: SentryEventHint): string {
@@ -1518,6 +1630,55 @@ function hasNavigationBreadcrumb(event: SentryClientEvent): boolean {
   });
 }
 
+function hasGifPickerTenorFailureBreadcrumb(event: SentryClientEvent): boolean {
+  return getBreadcrumbMessages(event).some((message) =>
+    message.includes(gifPickerTenorFailureMessage)
+  );
+}
+
+function isTenorCategoriesPath(value: string | undefined): boolean {
+  if (getRequestPathname(value) === tenorCategoriesPath) {
+    return true;
+  }
+
+  return typeof value === "string" && value.includes(tenorCategoriesPath);
+}
+
+function hasTenorCategoriesRequestBreadcrumb(
+  event: SentryClientEvent
+): boolean {
+  return getBreadcrumbValues(event).some((breadcrumb) => {
+    if (!isHttpBreadcrumb(breadcrumb)) {
+      return false;
+    }
+
+    if (
+      getBreadcrumbUrlIsFirstParty(breadcrumb) !== false ||
+      getBreadcrumbUrlIsFirstPartyApi(breadcrumb) !== false
+    ) {
+      return false;
+    }
+
+    if (getBreadcrumbFailureKind(breadcrumb) === null) {
+      return false;
+    }
+
+    return (
+      isTenorCategoriesPath(getBreadcrumbUrl(breadcrumb)) ||
+      isTenorCategoriesPath(breadcrumb.message)
+    );
+  });
+}
+
+function hasGifPickerTenorBreadcrumbSignature(
+  event: SentryClientEvent
+): boolean {
+  return (
+    hasGifPickerTenorFailureBreadcrumb(event) &&
+    hasTenorCategoriesRequestBreadcrumb(event)
+  );
+}
+
 function hasWavesNavigationBreadcrumb(event: SentryClientEvent): boolean {
   return getBreadcrumbValues(event).some((breadcrumb) => {
     const data = breadcrumb.data;
@@ -1551,7 +1712,9 @@ function getRouteParameterizationContextValues(
     const context = event.contexts?.[key];
     return isRecord(context) ? Object.values(context) : [];
   });
-  const tagValues = routeParameterizationTagKeys.map((key) => event.tags?.[key]);
+  const tagValues = routeParameterizationTagKeys.map(
+    (key) => event.tags?.[key]
+  );
 
   return uniqueStrings(
     [...contextValues, ...tagValues].filter(
@@ -1788,6 +1951,33 @@ function hasWalletCollisionSignature(
   return candidates.some(
     (candidate) =>
       typeof candidate === "string" && matchesWalletCollisionPattern(candidate)
+  );
+}
+
+function hasTalismanExtensionOnboardingMessage(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const candidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      normalizeErrorPrefix(candidate) === talismanExtensionOnboardingMessage
+  );
+}
+
+function hasInjectedOrThirdPartyWalletExtensionSignature(
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return getStackSignatureValues(frames, hint).some(
+    isInjectedOrThirdPartyWalletExtensionPath
   );
 }
 
@@ -2081,6 +2271,39 @@ export function shouldFilterRabbyMobileRainbowKitNotFoundError(
   return !hasAppOwnedFrame(value?.stacktrace?.frames);
 }
 
+export function shouldFilterGifPickerTenorCategoriesError(
+  event: SentryClientEvent
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== gifPickerTenorUndefinedTagsMessage
+  ) {
+    return false;
+  }
+
+  if (
+    value.mechanism?.type !== browserUnhandledRejectionMechanism ||
+    value.mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  if (!hasWavesRoute(event)) {
+    return false;
+  }
+
+  const frames = value.stacktrace?.frames;
+  if (hasAppOwnedFrame(frames)) {
+    return false;
+  }
+
+  return (
+    hasGifPickerTenorManagerFrame(frames) ||
+    hasGifPickerTenorBreadcrumbSignature(event)
+  );
+}
+
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -2110,6 +2333,22 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
       !hasAppOwnedSourceStack(hint) &&
       hasThirdPartyWalletAppKitBreadcrumbSignature(event))
   );
+}
+
+export function shouldFilterTalismanExtensionOnboardingError(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  if (!hasTalismanExtensionOnboardingMessage(event, hint)) {
+    return false;
+  }
+
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (hasAppOwnedNonExtensionSignature(frames, hint)) {
+    return false;
+  }
+
+  return hasInjectedOrThirdPartyWalletExtensionSignature(frames, hint);
 }
 
 export function shouldFilterSentryRouteParameterizationError(
@@ -2180,6 +2419,7 @@ export const __testing = {
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
   REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
+  gifPickerTenorUndefinedTagsMessage,
   REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE,
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,

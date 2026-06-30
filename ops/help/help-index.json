@@ -1114,7 +1114,15 @@
         "nakamoto tdh boost",
         "nakamoto boost"
       ],
-      "keywords": ["nakamoto", "set", "sets", "tdh", "boost", "szn1", "category"],
+      "keywords": [
+        "nakamoto",
+        "set",
+        "sets",
+        "tdh",
+        "boost",
+        "szn1",
+        "category"
+      ],
       "facts": [
         "Nakamoto Set is a SZN1 Category B TDH boost term.",
         "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",

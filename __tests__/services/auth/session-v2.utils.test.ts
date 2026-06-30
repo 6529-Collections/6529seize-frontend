@@ -136,6 +136,32 @@ describe("session-v2.utils", () => {
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
+  it("persists desktop refresh-token session responses", async () => {
+    await expect(
+      persistSessionResponse({
+        client_type: "desktop",
+        address: "0xabc",
+        role: null,
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        native_refresh_token: "desktop-refresh-token",
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      })
+    ).resolves.toBe(true);
+
+    expect(setNativeRefreshToken).toHaveBeenCalledWith({
+      address: "0xabc",
+      refreshToken: "desktop-refresh-token",
+    });
+    expect(setAuthJwt).toHaveBeenCalledWith(
+      "0xabc",
+      "access-token",
+      null,
+      undefined,
+      { authSessionVersion: "v2" }
+    );
+  });
+
   it("marks persisted web auth as session v2", async () => {
     await expect(
       persistSessionResponse({
@@ -469,6 +495,32 @@ describe("session-v2.utils", () => {
     });
   });
 
+  it("creates a desktop connection share when requested", async () => {
+    const shareResponse = {
+      connection_share_code: "share-code",
+      expires_at: "2026-06-10T00:00:00.000Z",
+      address: "0xabc",
+      role: null,
+      target_client_type: "desktop",
+      deep_link_path:
+        "/accept-connection-sharing?connection_share_code=share-code",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(shareResponse);
+
+    await expect(
+      createConnectionShare({ targetClientType: "desktop" })
+    ).resolves.toBe(shareResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/connection-share",
+      body: {
+        target_client_type: "desktop",
+      },
+      credentials: "include",
+      signal: undefined,
+    });
+  });
+
   it("creates a legacy desktop connection share with bearer auth and session credentials", async () => {
     const shareResponse = {
       refresh_token: "legacy-refresh-token",
@@ -519,6 +571,60 @@ describe("session-v2.utils", () => {
         target_client_type: "native",
       },
       credentials: "include",
+    });
+  });
+
+  it("redeems a connection share as a desktop session when requested", async () => {
+    (commonApiPost as jest.Mock).mockResolvedValueOnce({
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "desktop-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    await expect(
+      redeemConnectionShare("share-code", "desktop")
+    ).resolves.toEqual({
+      client_type: "desktop",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "desktop-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/connection-share/redeem",
+      body: {
+        connection_share_code: "share-code",
+        target_client_type: "desktop",
+      },
+      credentials: "include",
+    });
+  });
+
+  it("preserves a redeemed connection share client type returned by the backend", async () => {
+    (commonApiPost as jest.Mock).mockResolvedValueOnce({
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      client_type: "desktop",
+      native_refresh_token: "desktop-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    await expect(redeemConnectionShare("share-code")).resolves.toEqual({
+      client_type: "desktop",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "desktop-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
     });
   });
 });
