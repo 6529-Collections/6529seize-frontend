@@ -23,8 +23,10 @@ import {
   hidesMobileBottomNavigation,
 } from "@/helpers/navigation.helpers";
 import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
-import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
-import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
+import {
+  LazyMemesQuickVoteRuntime,
+  useMemesQuickVoteRuntimeLauncher,
+} from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntimeLoader";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -75,7 +77,7 @@ const contentOwnsBottomNavClearance = ({
 };
 
 function WavesQuickVoteView() {
-  const quickVote = useMemesQuickVoteDialogController();
+  const quickVote = useMemesQuickVoteRuntimeLauncher();
 
   return (
     <>
@@ -83,7 +85,12 @@ function WavesQuickVoteView() {
         onOpenQuickVote={quickVote.openQuickVote}
         onPrefetchQuickVote={quickVote.prefetchQuickVote}
       />
-      <MemesQuickVoteDialog {...quickVote.dialogState} />
+      {quickVote.shouldMountRuntime && quickVote.runtimeIntent && (
+        <LazyMemesQuickVoteRuntime
+          intent={quickVote.runtimeIntent}
+          onIdle={quickVote.resetQuickVoteRuntime}
+        />
+      )}
     </>
   );
 }

@@ -1,5 +1,6 @@
-import { renderHook } from '@testing-library/react';
-import { useInView } from '@/hooks/useInView';
+import React from "react";
+import { act, render, renderHook } from "@testing-library/react";
+import { useInView } from "@/hooks/useInView";
 
 // Mock IntersectionObserver
 const mockObserve = jest.fn();
@@ -15,114 +16,167 @@ const mockIntersectionObserver = jest.fn().mockImplementation(() => ({
 // @ts-ignore
 global.IntersectionObserver = mockIntersectionObserver;
 
-describe('useInView', () => {
+describe("useInView", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns ref and initial visibility state', () => {
+  it("returns ref and initial visibility state", () => {
     const { result } = renderHook(() => useInView());
-    
+
     const [ref, isVisible] = result.current;
-    
+
     expect(ref.current).toBeNull();
     expect(isVisible).toBe(false);
   });
 
-  it('does not create observer if ref is null', () => {
+  it("does not create observer if ref is null", () => {
     renderHook(() => useInView());
-    
+
     // Should not create observer without an element
     expect(mockIntersectionObserver).not.toHaveBeenCalled();
   });
 
-  it('returns correct initial state with custom options', () => {
+  it("returns correct initial state with custom options", () => {
     const { result } = renderHook(() => useInView({ threshold: 0.5 }));
-    
+
     const [ref, isVisible] = result.current;
-    
+
     expect(ref.current).toBeNull();
     expect(isVisible).toBe(false);
   });
 
-  it('maintains type safety for different element types', () => {
+  it("maintains type safety for different element types", () => {
     const { result } = renderHook(() => useInView<HTMLDivElement>());
-    
+
     const [ref, isVisible] = result.current;
-    
+
     expect(ref.current).toBeNull();
     expect(isVisible).toBe(false);
-    expect(typeof ref).toBe('object');
+    expect(typeof ref).toBe("object");
   });
 
-  it('provides stable reference across re-renders', () => {
+  it("provides stable reference across re-renders", () => {
     const { result, rerender } = renderHook(() => useInView());
-    
+
     const [initialRef] = result.current;
-    
+
     rerender();
-    
+
     const [rerenderRef] = result.current;
-    
+
     expect(initialRef).toBe(rerenderRef);
   });
 
-  it('accepts intersection observer options', () => {
-    const customOptions = { 
-      threshold: 0.5, 
-      rootMargin: '100px',
-      root: null 
+  it("accepts intersection observer options", () => {
+    const customOptions = {
+      threshold: 0.5,
+      rootMargin: "100px",
+      root: null,
     };
-    
+
     renderHook(() => useInView(customOptions));
-    
+
     // The hook should accept these options without error
     expect(true).toBe(true);
   });
 
-  it('handles undefined options gracefully', () => {
+  it("handles undefined options gracefully", () => {
     renderHook(() => useInView(undefined));
-    
+
     // Should work with undefined options
     expect(true).toBe(true);
   });
 
-  it('returns boolean visibility state', () => {
+  it("returns boolean visibility state", () => {
     const { result } = renderHook(() => useInView());
-    
+
     const [, isVisible] = result.current;
-    
-    expect(typeof isVisible).toBe('boolean');
+
+    expect(typeof isVisible).toBe("boolean");
     expect(isVisible).toBe(false);
   });
 
-  it('provides correct return type structure', () => {
+  it("provides correct return type structure", () => {
     const { result } = renderHook(() => useInView());
-    
+
     const hookResult = result.current;
-    
+
     expect(Array.isArray(hookResult)).toBe(true);
     expect(hookResult).toHaveLength(2);
-    expect(typeof hookResult[0]).toBe('object'); // ref
-    expect(typeof hookResult[1]).toBe('boolean'); // isVisible
+    expect(typeof hookResult[0]).toBe("object"); // ref
+    expect(typeof hookResult[1]).toBe("boolean"); // isVisible
   });
 
-  it('maintains consistent behavior across multiple instances', () => {
+  it("maintains consistent behavior across multiple instances", () => {
     const { result: result1 } = renderHook(() => useInView());
     const { result: result2 } = renderHook(() => useInView());
-    
+
     expect(result1.current[1]).toBe(result2.current[1]); // Both should start as false
     expect(result1.current[0]).not.toBe(result2.current[0]); // Should have different refs
   });
+
+  it("updates back to false when freezeOnceVisible is disabled", () => {
+    let observerCallback: IntersectionObserverCallback | undefined;
+    const observe = jest.fn();
+    const disconnect = jest.fn();
+    const IO = jest.fn((callback, opts) => {
+      observerCallback = callback;
+      return { observe, disconnect, unobserve: jest.fn(), opts };
+    });
+    // @ts-ignore
+    global.IntersectionObserver = IO;
+
+    function TestComponent() {
+      const [ref, isVisible] = useInView<HTMLDivElement>({
+        freezeOnceVisible: false,
+        threshold: 0.1,
+      });
+      return React.createElement("div", {
+        ref,
+        "data-testid": "target",
+        "data-visible": isVisible,
+      });
+    }
+
+    const { getByTestId } = render(React.createElement(TestComponent));
+
+    expect(observe).toHaveBeenCalledTimes(1);
+    expect(observerCallback).toBeDefined();
+
+    act(() => {
+      observerCallback?.(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    });
+    expect(getByTestId("target")).toHaveAttribute("data-visible", "true");
+
+    act(() => {
+      observerCallback?.(
+        [{ isIntersecting: false } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    });
+    expect(getByTestId("target")).toHaveAttribute("data-visible", "false");
+  });
 });
 
-test('uses provided options and default rootMargin', () => {
+test("uses provided options and default rootMargin", () => {
   let usedOpts: any;
-  const IO = jest.fn((cb, opts) => { usedOpts = opts; return { observe: jest.fn(), disconnect: jest.fn(), unobserve: jest.fn() }; });
+  const IO = jest.fn((cb, opts) => {
+    usedOpts = opts;
+    return { observe: jest.fn(), disconnect: jest.fn(), unobserve: jest.fn() };
+  });
   // @ts-ignore
   global.IntersectionObserver = IO;
-  const { result, rerender } = renderHook(() => useInView({ threshold: 0.2 }));
-  result.current[0].current = document.createElement('div');
-  rerender();
-  expect(usedOpts).toEqual({ rootMargin: '1000px 0px', threshold: 0.2 });
+
+  function TestComponent() {
+    const [ref] = useInView<HTMLDivElement>({ threshold: 0.2 });
+    return React.createElement("div", { ref });
+  }
+
+  render(React.createElement(TestComponent));
+
+  expect(usedOpts).toEqual({ rootMargin: "1000px 0px", threshold: 0.2 });
 });

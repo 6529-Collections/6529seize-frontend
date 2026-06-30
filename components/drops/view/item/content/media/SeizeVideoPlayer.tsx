@@ -89,6 +89,7 @@ interface SeizeVideoPlayerProps {
 
 const CONTROL_HIDE_DELAY_MS = 1800;
 const DEFAULT_CAPTIONS_LANGUAGE = DEFAULT_LOCALE;
+const DEFAULT_UNLOADED_ASPECT_RATIO = "16 / 9";
 
 function SeizeVideoControlButton({
   label,
@@ -954,9 +955,7 @@ export default function SeizeVideoPlayer({
     }
 
     const style: React.CSSProperties = {};
-    if (aspectRatio) {
-      style.aspectRatio = aspectRatio;
-    }
+    style.aspectRatio = aspectRatio ?? DEFAULT_UNLOADED_ASPECT_RATIO;
 
     if (isFullscreen) {
       return style;

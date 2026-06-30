@@ -25,6 +25,8 @@ const AUTO_RETRY_DELAY_MS = 1500;
 const MAX_AUTO_RETRY_ATTEMPTS = 40;
 const MAX_FAILED_LOAD_ATTEMPTS = MAX_AUTO_RETRY_ATTEMPTS + 1;
 const IMAGE_RETRY_QUERY_PARAM = "drop_media_retry";
+const NATURAL_IMAGE_RESERVED_ASPECT_RATIO = "16 / 9";
+const NATURAL_IMAGE_MAX_HEIGHT = "16rem";
 
 function withRetryCacheBust(src: string, retryTick: number): string {
   if (retryTick === 0) {
@@ -105,8 +107,11 @@ function NaturalHeightImage({
 
   return (
     <span
-      className="tw-relative tw-block tw-min-h-px tw-w-full tw-max-w-full tw-overflow-hidden"
-      style={{ aspectRatio, maxHeight: "16rem" }}
+      className="tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/40"
+      style={{
+        aspectRatio: aspectRatio ?? NATURAL_IMAGE_RESERVED_ASPECT_RATIO,
+        maxHeight: NATURAL_IMAGE_MAX_HEIGHT,
+      }}
     >
       {/* Drop media can come from hosts outside next.config.ts image remotePatterns. */}
       <FallbackImage

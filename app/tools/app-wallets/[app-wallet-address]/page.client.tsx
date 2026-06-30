@@ -16,7 +16,7 @@ export default function AppWalletPage(props: { readonly address: string }) {
   }, [address, setTitle]);
 
   return (
-    <main className={styles["main"]}>
+    <main className={`${styles["main"]} tailwind-scope`}>
       <AppWalletComponent address={address} />
     </main>
   );

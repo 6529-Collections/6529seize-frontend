@@ -15,7 +15,7 @@ import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useQuery } from "@tanstack/react-query";
 
-type MemesWaveFooterStats = MemesQuickVoteStats & {
+export type MemesWaveFooterStats = MemesQuickVoteStats & {
   readonly isAvailable: boolean;
   readonly isReady: boolean;
 };

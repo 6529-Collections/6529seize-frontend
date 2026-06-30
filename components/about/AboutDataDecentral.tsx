@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 
 export default function AboutDataDecentral() {
   return (
@@ -9,8 +13,8 @@ export default function AboutDataDecentral() {
           <h1>Data Decentralization</h1>
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
-        <Col className="text-left">
+      <Row className="tw-pt-3 tw-pb-3">
+        <Col className="tw-text-left">
           <p>
             One of our goals is to demonstrate how applications can be built in
             a decentralized manner.

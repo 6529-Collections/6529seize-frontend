@@ -378,39 +378,6 @@ describe("MemesWaveFooter", () => {
     await waitFor(() => expect(floatingLayer.style.bottom).toBe("78px"));
   });
 
-  it("reports footer availability changes", () => {
-    const onAvailabilityChange = jest.fn();
-    const { rerender, unmount } = render(
-      <MemesWaveFooter
-        onAvailabilityChange={onAvailabilityChange}
-        onOpenQuickVote={onOpenQuickVote}
-      />
-    );
-
-    expect(onAvailabilityChange).toHaveBeenLastCalledWith(false);
-
-    useMemesWaveFooterStatsMock.mockReturnValue({
-      isAvailable: true,
-      leftThisRoundCount: 3,
-      uncastPower: 5000,
-      unratedCount: 12,
-      votingLabel: "TDH",
-      isReady: true,
-    });
-    rerender(
-      <MemesWaveFooter
-        onAvailabilityChange={onAvailabilityChange}
-        onOpenQuickVote={onOpenQuickVote}
-      />
-    );
-
-    expect(onAvailabilityChange).toHaveBeenLastCalledWith(true);
-
-    unmount();
-
-    expect(onAvailabilityChange).toHaveBeenLastCalledWith(false);
-  });
-
   it("calls onOpenQuickVote from the expanded card", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
       isAvailable: true,

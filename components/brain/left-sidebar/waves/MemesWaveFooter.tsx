@@ -2,7 +2,10 @@
 
 import MemesWaveQuickVoteTrigger from "@/components/brain/left-sidebar/waves/MemesWaveQuickVoteTrigger";
 import MemesWaveZapIcon from "@/components/brain/left-sidebar/waves/MemesWaveZapIcon";
-import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
+import {
+  useMemesWaveFooterStats,
+  type MemesWaveFooterStats,
+} from "@/hooks/useMemesWaveFooterStats";
 import {
   formatMemesQuickVoteLeftThisRoundText,
   formatMemesQuickVoteUnratedText,
@@ -23,15 +26,18 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import React, { useEffect } from "react";
+import React from "react";
 
 interface MemesWaveFooterProps {
   readonly collapsed?: boolean | undefined;
   readonly floating?: boolean | undefined;
-  readonly onAvailabilityChange?: ((isAvailable: boolean) => void) | undefined;
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
 }
+
+type MemesWaveFooterViewProps = MemesWaveFooterProps & {
+  readonly stats: MemesWaveFooterStats;
+};
 
 const revealTransition = {
   duration: 0.22,
@@ -128,12 +134,12 @@ const getContainerStyle = ({
   >;
 };
 
-const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
+export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
   collapsed = false,
   floating = false,
-  onAvailabilityChange,
   onOpenQuickVote,
   onPrefetchQuickVote,
+  stats,
 }) => {
   const {
     isAvailable,
@@ -142,7 +148,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     uncastPower,
     unratedCount,
     votingLabel,
-  } = useMemesWaveFooterStats();
+  } = stats;
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
   const floatingFooterRef = useMeasuredMobileBottomNavDockBottom({
@@ -183,17 +189,6 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
 
     onPrefetchQuickVote?.();
   };
-
-  useEffect(() => {
-    onAvailabilityChange?.(isAvailable);
-  }, [isAvailable, onAvailabilityChange]);
-
-  useEffect(
-    () => () => {
-      onAvailabilityChange?.(false);
-    },
-    [onAvailabilityChange]
-  );
 
   const containerClassName = getContainerClassName({ collapsed, floating });
   const expandedFrameClassName = getExpandedFrameClassName(floating);
@@ -237,6 +232,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                     onClick={handleOpenQuickVote}
                     onFocus={handlePrefetchQuickVote}
                     onMouseEnter={handlePrefetchQuickVote}
+                    onPointerDown={handlePrefetchQuickVote}
                     className="tw-group tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
                   >
                     <div className="tw-relative tw-flex tw-h-full tw-items-center tw-justify-between tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#2d3753] tw-bg-[#0c1018] tw-px-4 tw-py-2.5 tw-shadow-lg tw-transition-all tw-duration-200 desktop-hover:group-hover:tw-border-[#3a4670] desktop-hover:group-hover:tw-bg-[#0f1420]">
@@ -277,6 +273,12 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
       </AnimatePresence>
     </LazyMotion>
   );
+};
+
+const MemesWaveFooter: React.FC<MemesWaveFooterProps> = (props) => {
+  const stats = useMemesWaveFooterStats();
+
+  return <MemesWaveFooterView {...props} stats={stats} />;
 };
 
 export default MemesWaveFooter;

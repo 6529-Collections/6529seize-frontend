@@ -23,7 +23,11 @@ const MediaDisplayVideo: React.FC<Props> = ({
   fillContainer = false,
 }) => {
   // Intersection observer for scroll-based triggers
-  const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const [wrapperRef, inView] = useInView<HTMLDivElement>({
+    freezeOnceVisible: false,
+    rootMargin: "400px 0px",
+    threshold: 0.1,
+  });
   const wasFullscreenRef = useRef(false);
   const { isApp } = useDeviceInfo();
   const { downloadMedia, isDownloading, openLabel, openMedia } =
@@ -36,6 +40,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
 
   // Poll for HLS → MP4 → fallback original
   const { playableUrl, isHls } = useOptimizedVideo(src, {
+    enabled: inView,
     pollInterval: 15000,
     maxRetries: 8,
     preferHls: true,
@@ -44,6 +49,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
 
   // Use HLS hook to handle the video ref, loading states, etc.
   const { videoRef, isLoading } = useHlsPlayer({
+    enabled: inView,
     src: playableUrl,
     isHls,
     fallbackSrc: src, // if HLS fails, revert to original
@@ -71,7 +77,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
       vid.pause();
     } else {
       // Attempt to play if we're in view
-      vid.play().catch(() => {});
+      void vid.play().catch(() => {});
     }
   }, [inView, isApp, isLoading, videoRef]);
 
