@@ -6,7 +6,11 @@ import { AboutSection } from "@/types/enums";
 // Section components
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 import AboutApply from "./AboutApply";
 import AboutContactUs from "./AboutContactUs";
 import AboutCookiePolicy from "./AboutCookiePolicy";
@@ -38,7 +42,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
   );
 
   return (
-    <Container className="pt-2">
+    <Container className="tw-pt-2">
       <Row>
         <Col>
           <AboutContentsDropdown currentSection={section} />

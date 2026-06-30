@@ -1,6 +1,10 @@
 import { AboutSection } from "@/types/enums";
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 import styles from "./About.module.scss";
 
 export default function AboutTermsOfService() {
@@ -12,11 +16,11 @@ export default function AboutTermsOfService() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles["lastUpdateText"]} text-right pt-3 pb-3`}>
+        <Col className={`${styles["lastUpdateText"]} tw-text-right tw-pt-3 tw-pb-3`}>
           Last Updated: February 23, 2023
         </Col>
       </Row>
-      <Row className="pt-3 pb-3">
+      <Row className="tw-pt-3 tw-pb-3">
         <Col>
           <ol>
             <li>

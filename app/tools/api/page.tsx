@@ -4,7 +4,11 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "@/components/about/AboutLayout";
 
 const API_PAGE_LOCALE = DEFAULT_LOCALE;
 
@@ -240,16 +244,16 @@ run().catch((err) => {
     process.exit(1);
 });`;
   return (
-    <main className={styles["main"]}>
-      <Container className="pt-4 pb-4">
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <Container className="tw-pt-4 tw-pb-4">
         <Row>
           <Col>
             <h1>6529.io API</h1>
           </Col>
         </Row>
-        <Row className="pt-2">
+        <Row className="tw-pt-2">
           <Col>
-            <p className="font-larger font-bolder">Introduction</p>
+            <p className="tw-text-lg tw-font-bold">Introduction</p>
             <p>
               The 6529.io website communicates with its backend via a{" "}
               <b>JSON-encoded REST API</b>.
@@ -275,7 +279,7 @@ run().catch((err) => {
             </p>
 
             <div
-              className="p-4 rounded mb-4 tw-font-medium"
+              className="tw-p-4 tw-rounded tw-mb-4 tw-font-medium"
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
@@ -287,9 +291,9 @@ run().catch((err) => {
           </Col>
         </Row>
 
-        <Row className="pt-2">
+        <Row className="tw-pt-2">
           <Col>
-            <p className="font-larger font-bolder">Key terminology</p>
+            <p className="tw-text-lg tw-font-bold">Key terminology</p>
             <p>
               This is not a comprehensive glossary, but an overview of the most
               common terms you'll encounter when working with the API:
@@ -347,9 +351,9 @@ run().catch((err) => {
             </ul>
           </Col>
         </Row>
-        <Row className="pt-2">
+        <Row className="tw-pt-2">
           <Col>
-            <p className="font-larger font-bolder">
+            <p className="tw-text-lg tw-font-bold">
               {t(API_PAGE_LOCALE, "tools.api.authentication.title")}
             </p>
             <p>
@@ -380,9 +384,9 @@ run().catch((err) => {
             <CodeExample code={nodeJsAuthExample} />
           </Col>
         </Row>
-        <Row className="pt-2">
+        <Row className="tw-pt-2">
           <Col>
-            <p className="font-larger font-bolder">
+            <p className="tw-text-lg tw-font-bold">
               Creating drops with embedded media
             </p>
 
