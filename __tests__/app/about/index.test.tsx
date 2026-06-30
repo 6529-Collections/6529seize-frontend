@@ -23,6 +23,7 @@ jest.mock("@/hooks/useCapacitor", () => ({
 let country = "US";
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country }),
+  useOptionalCookieConsent: () => ({ country }),
 }));
 
 describe("About index page", () => {
@@ -39,15 +40,14 @@ describe("About index page", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Collections")).toBeInTheDocument();
     expect(screen.getByText("Delegation")).toBeInTheDocument();
+    expect(screen.getByText("Network")).toBeInTheDocument();
     expect(screen.getByText("Resources")).toBeInTheDocument();
     expect(screen.getByText("Community")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /open page: the memes/i })
     ).toHaveAttribute("href", "/about/the-memes");
-    expect(
-      screen.getByRole("link", { name: /open page: mission/i })
-    ).toHaveAttribute("href", "/about/mission");
+    expect(screen.queryByRole("link", { name: /mission/i })).toBeNull();
     expect(
       screen.getByRole("link", { name: /open page: tdh/i })
     ).toHaveAttribute("href", "/network/tdh");
@@ -64,7 +64,7 @@ describe("About index page", () => {
       screen.getByRole("link", { name: /open page: levels/i })
     ).toHaveAttribute("href", "/network/levels");
     expect(
-      screen.getByRole("link", { name: /open page: network tdh/i })
+      screen.getByRole("link", { name: /open page: network stats/i })
     ).toHaveAttribute("href", "/network/health/network-tdh");
   });
 

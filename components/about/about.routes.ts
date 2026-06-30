@@ -5,6 +5,7 @@ import { AboutSection } from "@/types/enums";
 type AboutContentsGroupId =
   | "collections"
   | "delegation"
+  | "network"
   | "resources"
   | "community"
   | "legal";
@@ -37,11 +38,6 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     id: "collections",
     labelKey: "about.contents.groups.collections",
     items: [
-      {
-        section: AboutSection.MISSION,
-        labelKey: "about.contents.pages.mission",
-        descriptionKey: "about.contents.descriptions.mission",
-      },
       {
         section: AboutSection.MEMES,
         labelKey: "about.contents.pages.theMemes",
@@ -86,8 +82,8 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     ],
   },
   {
-    id: "resources",
-    labelKey: "about.contents.groups.resources",
+    id: "network",
+    labelKey: "about.contents.groups.network",
     items: [
       {
         id: "network-tdh",
@@ -125,6 +121,12 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
         labelKey: "about.contents.pages.networkTdhStats",
         descriptionKey: "about.contents.descriptions.networkTdhStats",
       },
+    ],
+  },
+  {
+    id: "resources",
+    labelKey: "about.contents.groups.resources",
+    items: [
       {
         section: AboutSection.FAQ,
         labelKey: "about.contents.pages.faq",
@@ -210,11 +212,11 @@ const ABOUT_CONTENTS_NAV_ITEMS = ABOUT_CONTENTS_NAV_GROUPS.flatMap(
   (group) => group.items
 );
 
-const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>([
-  ...ABOUT_CONTENTS_NAV_ITEMS.map((item) =>
-    "section" in item ? ([item.section, item.labelKey] as const) : undefined
-  ).filter((item): item is readonly [AboutSection, MessageKey] => !!item),
-]);
+const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>(
+  ABOUT_CONTENTS_NAV_ITEMS.flatMap((item) =>
+    "section" in item ? [[item.section, item.labelKey] as const] : []
+  )
+);
 
 const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
   [AboutSection.GRADIENTS, "about.contents.documentTitles.gradient"],
@@ -252,6 +254,13 @@ export function getAboutSectionDocumentTitle(
   }
 
   return getAboutSectionLabel(section, locale);
+}
+
+export function getAboutNavItemLabel(
+  item: AboutContentsNavItem,
+  locale: SupportedLocale
+): string {
+  return t(locale, item.labelKey);
 }
 
 export function getVisibleAboutNavGroups(

@@ -13,6 +13,7 @@ import {
   THE_MEMES_DETAIL_TIMELINE_MESSAGES,
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
+import aboutMessages from "@/i18n/messages/about.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
@@ -269,6 +270,19 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
   "uncastPower.visibleValue": "{power} {votingLabel}",
   "uncastPower.votes": "Votes",
   "uncastPower.votesVisible": "votes",
+} as const);
+
+const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  "rateLimit.retryAfter.moment":
+    "You are reacting too quickly. Try again in a moment.",
+  "rateLimit.retryAfter.seconds.one":
+    "You are reacting too quickly. Try again in {count} second.",
+  "rateLimit.retryAfter.seconds.other":
+    "You are reacting too quickly. Try again in {count} seconds.",
+  "rateLimit.retryAfter.minutes.one":
+    "You are reacting too quickly. Try again in {count} minute.",
+  "rateLimit.retryAfter.minutes.other":
+    "You are reacting too quickly. Try again in {count} minutes.",
 } as const);
 
 const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
@@ -554,93 +568,6 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
   "subtitle.waveRep": "give Wave REP for",
-} as const);
-
-const ABOUT_CONTENTS_MESSAGES = objectMessages("about.contents", {
-  label: "Contents",
-  aboutFallback: "About",
-  documentTitle: "{section} | About",
-  triggerAriaLabel: "Open About contents navigation. Current page: {page}",
-  currentItemAriaLabel: "{page}, current page",
-  itemAriaLabel: "Go to page: {page}",
-  "documentTitles.gradient": "6529 Gradient",
-  "groups.collections": "Collections",
-  "groups.delegation": "Delegation",
-  "groups.resources": "Resources",
-  "groups.community": "Community",
-  "groups.legal": "Legal",
-  "pages.mission": "Mission",
-  "pages.theMemes": "The Memes",
-  "pages.subscriptions": "Subscriptions",
-  "pages.memeLab": "Meme Lab",
-  "pages.gradient": "Gradient",
-  "pages.gdrc": "GDRC",
-  "pages.nftDelegation": "NFT Delegation",
-  "pages.primaryAddress": "Primary Address",
-  "pages.tdh": "TDH",
-  "pages.xtdh": "xTDH",
-  "pages.networkHealth": "Health",
-  "pages.networkDefinitions": "Definitions",
-  "pages.networkLevels": "Levels",
-  "pages.networkTdhStats": "Network TDH",
-  "pages.faq": "FAQ",
-  "pages.ens": "ENS",
-  "pages.minting": "Minting",
-  "pages.nakamotoThreshold": "Nakamoto Threshold",
-  "pages.license": "License",
-  "pages.apply": "Apply",
-  "pages.contactUs": "Contact Us",
-  "pages.tech": "Tech",
-  "pages.dataDecentralization": "Data Decentralization",
-  "pages.termsOfService": "Terms of Service",
-  "pages.privacyPolicy": "Privacy Policy",
-  "pages.cookiePolicy": "Cookie Policy",
-  "pages.copyright": "Copyright",
-  "descriptions.mission": "6529 mission and open metaverse context.",
-  "descriptions.theMemes":
-    "The core collection, mint context, and related links.",
-  "descriptions.subscriptions":
-    "Remote minting subscriptions and how they work.",
-  "descriptions.memeLab": "The Meme Lab collection and artist experiments.",
-  "descriptions.gradient": "The 6529 Gradient collection overview.",
-  "descriptions.gdrc": "Global Delegation Rights Contract notes and context.",
-  "descriptions.nftDelegation": "How NFT delegation works across 6529.",
-  "descriptions.primaryAddress": "Set and understand primary wallet addresses.",
-  "descriptions.tdh":
-    "Total Days Held, calculation rules, and network context.",
-  "descriptions.xtdh": "How xTDH extends TDH through grants and allocations.",
-  "descriptions.networkHealth":
-    "Network activity, minting, voting, and metric health.",
-  "descriptions.networkDefinitions":
-    "Definitions for cards, sets, TDH variants, and activity metrics.",
-  "descriptions.networkLevels":
-    "How Levels combine TDH and REP into an integrated score.",
-  "descriptions.networkTdhStats":
-    "Network TDH totals, daily movement, charts, and checkpoints.",
-  "descriptions.faq": "Common questions about collections, minting, and 6529.",
-  "descriptions.ens": "ENS details and 6529 naming context.",
-  "descriptions.minting": "Minting frequency, mechanics, and expectations.",
-  "descriptions.nakamotoThreshold":
-    "Why decentralization thresholds matter for 6529.",
-  "descriptions.license": "License terms for 6529 imagery and marks.",
-  "descriptions.apply": "Apply to collaborate or participate.",
-  "descriptions.contactUs": "Ways to reach the 6529 team.",
-  "descriptions.tech": "Technical notes, reports, and platform changes.",
-  "descriptions.dataDecentralization":
-    "How 6529 thinks about data, persistence, and decentralization.",
-  "descriptions.termsOfService": "Service terms for using 6529.",
-  "descriptions.privacyPolicy": "How 6529 handles privacy and data.",
-  "descriptions.cookiePolicy": "Cookie use and browser storage policy.",
-  "descriptions.copyright": "Copyright policy and reporting process.",
-} as const);
-
-const ABOUT_INDEX_MESSAGES = objectMessages("about.index", {
-  "metadata.title": "About",
-  "metadata.description": "About 6529",
-  eyebrow: "About",
-  title: "About 6529",
-  lead: "Find the right About page for collections, delegation, technical notes, policies, and ways to connect.",
-  cardAriaLabel: "Open page: {page}",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
@@ -1329,8 +1256,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
-  ...ABOUT_CONTENTS_MESSAGES,
-  ...ABOUT_INDEX_MESSAGES,
+  ...aboutMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
@@ -1340,6 +1266,7 @@ export const EN_US_MESSAGES = {
   ...NEW_VERSION_TOAST_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
+  ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
 } as const;
 
