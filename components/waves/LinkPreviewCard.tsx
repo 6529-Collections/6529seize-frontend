@@ -3,7 +3,6 @@
 import { type ReactElement, useEffect, useState } from "react";
 
 import OpenGraphPreview, {
-  getFirstPartyOpenGraphPreviewKind,
   hasOpenGraphContent,
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
@@ -34,38 +33,123 @@ type PreviewState =
   | { readonly type: "ens"; readonly href: string; readonly data: EnsPreview };
 
 const CHAT_STABLE_FRAME_CLASSES =
-  "tw-h-[10rem] tw-min-h-[10rem] tw-max-h-[10rem] tw-w-full md:tw-h-[11rem] md:tw-min-h-[11rem] md:tw-max-h-[11rem]";
-const CHAT_FALLBACK_FRAME_CLASSES = "tw-min-h-[4.5rem] tw-w-full";
+  "tw-h-[10rem] tw-min-h-[10rem] tw-max-h-[10rem] tw-w-full tw-overflow-hidden md:tw-h-[11rem] md:tw-min-h-[11rem] md:tw-max-h-[11rem]";
 const CHAT_FIRST_PARTY_FRAME_CLASSES =
-  "tw-h-[15rem] tw-min-h-[15rem] tw-max-h-[15rem] tw-w-full lg:tw-h-[11rem] lg:tw-min-h-[11rem] lg:tw-max-h-[11rem]";
+  "tw-h-[15rem] tw-min-h-[15rem] tw-max-h-[15rem] tw-w-full tw-overflow-hidden lg:tw-h-[11rem] lg:tw-min-h-[11rem] lg:tw-max-h-[11rem]";
 const CHAT_COLLECTION_FRAME_CLASSES =
-  "tw-min-h-[11rem] tw-w-full md:tw-min-h-[12rem]";
+  "tw-h-[18rem] tw-min-h-[18rem] tw-max-h-[18rem] tw-w-full tw-overflow-hidden sm:tw-h-[15rem] sm:tw-min-h-[15rem] sm:tw-max-h-[15rem] md:tw-h-[15rem] md:tw-min-h-[15rem] md:tw-max-h-[15rem]";
 const CHAT_VIDEO_FRAME_CLASSES =
-  "tw-min-h-[18rem] tw-w-full sm:tw-min-h-[14rem] md:tw-min-h-[15rem]";
+  "tw-h-[18rem] tw-min-h-[18rem] tw-max-h-[18rem] tw-w-full tw-overflow-hidden sm:tw-h-[14rem] sm:tw-min-h-[14rem] sm:tw-max-h-[14rem] md:tw-h-[15rem] md:tw-min-h-[15rem] md:tw-max-h-[15rem]";
 const CHAT_FARCASTER_FRAME_CLASSES =
-  "tw-min-h-[24rem] tw-w-full sm:tw-min-h-[13rem] md:tw-min-h-[14rem]";
+  "tw-h-[24rem] tw-min-h-[24rem] tw-max-h-[24rem] tw-w-full tw-overflow-hidden sm:tw-h-[13rem] sm:tw-min-h-[13rem] sm:tw-max-h-[13rem] md:tw-h-[14rem] md:tw-min-h-[14rem] md:tw-max-h-[14rem]";
 
-const isSeizeCollectionPreview = (
-  preview: OpenGraphPreviewData | null | undefined
-): boolean => preview?.["type"] === "6529.collection";
+type ChatStableFrameKind =
+  | "generic"
+  | "first-party"
+  | "collection"
+  | "video"
+  | "farcaster";
 
-const isYoutubeVideoPreview = (
-  preview: OpenGraphPreviewData | null | undefined
-): boolean => preview?.["type"] === "youtube.video";
+const parsePreviewHref = (href: string): URL | null => {
+  try {
+    if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("/")) {
+      return new URL(href, "https://6529.io");
+    }
+  } catch {
+    return null;
+  }
 
-const isFarcasterEmbedPreview = (
-  preview: OpenGraphPreviewData | null | undefined
-): boolean =>
-  preview?.["type"] === "farcaster.miniapp" ||
-  preview?.["type"] === "farcaster.frame";
+  return null;
+};
+
+const is6529Hostname = (hostname: string): boolean => {
+  const normalizedHostname = hostname.toLowerCase();
+  return (
+    normalizedHostname === "6529.io" || normalizedHostname.endsWith(".6529.io")
+  );
+};
+
+const isNumericPathSegment = (value: string | undefined): boolean =>
+  !!value && /^\d+$/.test(value);
+
+const isContractPathSegment = (value: string | undefined): boolean =>
+  !!value && /^0x[a-f0-9]{40}$/i.test(value);
+
+const is6529CollectionPathname = (pathname: string): boolean => {
+  const [root, first, second] = pathname.split("/").filter(Boolean);
+
+  if (root === "the-memes" || root === "meme-lab" || root === "6529-gradient") {
+    return isNumericPathSegment(first);
+  }
+
+  if (root === "nextgen" && first === "token") {
+    return isNumericPathSegment(second);
+  }
+
+  if (root === "rememes") {
+    return isContractPathSegment(first) && isNumericPathSegment(second);
+  }
+
+  return false;
+};
+
+const getChatStableFrameKind = (href: string): ChatStableFrameKind => {
+  const parsed = parsePreviewHref(href);
+  if (!parsed) {
+    return "generic";
+  }
+
+  const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+  const pathname = parsed.pathname.toLowerCase();
+
+  if (
+    hostname === "youtu.be" ||
+    hostname === "youtube.com" ||
+    hostname.endsWith(".youtube.com") ||
+    hostname === "youtube-nocookie.com" ||
+    hostname.endsWith(".youtube-nocookie.com")
+  ) {
+    return "video";
+  }
+
+  if (
+    hostname === "warpcast.com" ||
+    hostname.endsWith(".warpcast.com") ||
+    hostname === "farcaster.xyz" ||
+    hostname.endsWith(".farcaster.xyz")
+  ) {
+    return "farcaster";
+  }
+
+  if (is6529Hostname(hostname)) {
+    if (is6529CollectionPathname(pathname)) {
+      return "collection";
+    }
+
+    return "first-party";
+  }
+
+  return "generic";
+};
+
+const getChatStableFrameClasses = (kind: ChatStableFrameKind): string => {
+  switch (kind) {
+    case "first-party":
+      return CHAT_FIRST_PARTY_FRAME_CLASSES;
+    case "collection":
+      return CHAT_COLLECTION_FRAME_CLASSES;
+    case "video":
+      return CHAT_VIDEO_FRAME_CLASSES;
+    case "farcaster":
+      return CHAT_FARCASTER_FRAME_CLASSES;
+    case "generic":
+      return CHAT_STABLE_FRAME_CLASSES;
+  }
+};
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
 ): OpenGraphPreviewData => {
-  if (!response) {
-    return {};
-  }
-
   return {
     ...response,
     image: response.image ?? undefined,
@@ -192,20 +276,9 @@ export default function LinkPreviewCard({
     return content;
   }
 
-  let stableFrameClasses = CHAT_STABLE_FRAME_CLASSES;
-  if (isCurrent && state.type === "fallback") {
-    stableFrameClasses = CHAT_FALLBACK_FRAME_CLASSES;
-  } else if (isCurrent && state.type === "success") {
-    if (getFirstPartyOpenGraphPreviewKind(state.data)) {
-      stableFrameClasses = CHAT_FIRST_PARTY_FRAME_CLASSES;
-    } else if (isSeizeCollectionPreview(state.data)) {
-      stableFrameClasses = CHAT_COLLECTION_FRAME_CLASSES;
-    } else if (isYoutubeVideoPreview(state.data)) {
-      stableFrameClasses = CHAT_VIDEO_FRAME_CLASSES;
-    } else if (isFarcasterEmbedPreview(state.data)) {
-      stableFrameClasses = CHAT_FARCASTER_FRAME_CLASSES;
-    }
-  }
+  const stableFrameClasses = getChatStableFrameClasses(
+    getChatStableFrameKind(href)
+  );
 
   return (
     <div

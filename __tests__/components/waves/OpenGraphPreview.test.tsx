@@ -330,9 +330,12 @@ describe("OpenGraphPreview", () => {
       />
     );
 
-    expect(
-      screen.getByTestId("farcaster-embed-preview-card")
-    ).toBeInTheDocument();
+    const card = screen.getByTestId("farcaster-embed-preview-card");
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveClass("tw-overflow-x-hidden", "tw-overflow-y-auto");
+    expect(screen.getByTestId("farcaster-embed-preview-content")).toHaveClass(
+      "tw-min-h-full"
+    );
     expect(screen.getAllByText("Mini App").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Example Mini" })).toHaveAttribute(
       "href",
