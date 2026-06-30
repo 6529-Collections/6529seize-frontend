@@ -191,7 +191,7 @@ export const getQuickDmConversationAriaLabel = ({
     unreadCount <= 0
       ? null
       : t(locale, "quickDm.unreadCountAriaLabel", {
-          count: formatInteger(locale, unreadCount),
+          count: unreadCount,
         }),
   ].filter((value): value is string => value !== null);
 
