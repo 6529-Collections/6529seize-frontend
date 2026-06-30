@@ -14,6 +14,8 @@ describe("instrumentation-client", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const talismanOnboardingMessage =
+    "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const reactDomInsertBeforeMessage =
@@ -433,6 +435,40 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops exact Talisman onboarding errors from extension page.js frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      transaction: "/the-memes/mint",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: talismanOnboardingMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "chrome-extension://talisman-wallet/page.js",
+                  abs_path: "chrome-extension://talisman-wallet/page.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          category: "console",
+          message:
+            "Detected multiple injected wallet providers; Backpack override skipped.",
+        },
+      ],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops no-frame AppKit Coinbase websocket 1006 errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {
@@ -457,6 +493,39 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("keeps exact Talisman onboarding errors with app-owned frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      transaction: "/the-memes/mint",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: talismanOnboardingMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "chrome-extension://talisman-wallet/page.js",
+                  abs_path: "chrome-extension://talisman-wallet/page.js",
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/auth/WagmiSetup.tsx",
+                  function: "initializeWalletProviders",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps app-owned websocket 1006 errors with AppKit Coinbase breadcrumbs", () => {
