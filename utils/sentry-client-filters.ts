@@ -1379,6 +1379,17 @@ function getHintExceptionStack(hint?: SentryEventHint): string {
   if (exception instanceof Error && typeof exception.stack === "string") {
     return exception.stack;
   }
+  if (isRecord(exception) && typeof exception["stack"] === "string") {
+    return exception["stack"];
+  }
+  return "";
+}
+
+function getSerializedExceptionStack(event: SentryClientEvent): string {
+  const serialized = event.extra?.["__serialized__"];
+  if (isRecord(serialized) && typeof serialized["stack"] === "string") {
+    return serialized["stack"];
+  }
   return "";
 }
 
@@ -1415,7 +1426,9 @@ function hasAppOwnedStackEvidence(
 }
 
 function isCoinbaseWalletLinkWebSocket1006Message(value: string): boolean {
-  return coinbaseWalletLinkWebSocket1006Pattern.test(value.trim());
+  return coinbaseWalletLinkWebSocket1006Pattern.test(
+    normalizeErrorPrefix(value)
+  );
 }
 
 function isCoinbaseWalletLinkWebSocketPath(path: string | undefined): boolean {
@@ -1464,8 +1477,28 @@ function hasCoinbaseWalletLinkWebSocketCloseStack(
   );
 }
 
+function hasCoinbaseWalletLinkWebSocketSerializedStack(
+  event: SentryClientEvent
+): boolean {
+  const stack = getSerializedExceptionStack(event);
+  return (
+    stack.includes(coinbaseWalletLinkWebSocketFile) &&
+    coinbaseWalletSdkPathTokens.some((token) => stack.includes(token))
+  );
+}
+
+function hasCoinbaseWalletLinkWebSocketSerializedCloseStack(
+  event: SentryClientEvent
+): boolean {
+  return getSerializedExceptionStack(event).includes(
+    coinbaseWalletLinkWebSocketCloseFunction
+  );
+}
+
 function normalizeStackPath(value: string): string {
   const webpackPrefix = "webpack-internal:///";
+  const webpackSourcePrefix = "webpack://_n_e/./";
+  const appUriPrefix = "app:///";
   let normalized = value;
 
   if (normalized.startsWith(webpackPrefix)) {
@@ -1479,6 +1512,12 @@ function normalizeStackPath(value: string): string {
     if (normalized.startsWith("./")) {
       normalized = normalized.slice(2);
     }
+  }
+  if (normalized.startsWith(webpackSourcePrefix)) {
+    normalized = normalized.slice(webpackSourcePrefix.length);
+  }
+  if (normalized.startsWith(appUriPrefix)) {
+    normalized = normalized.slice(appUriPrefix.length);
   }
 
   while (normalized.startsWith("/")) {
@@ -1508,11 +1547,6 @@ function hasAppOwnedSourceFrame(
       [frame.filename, frame.abs_path].some(isAppOwnedStackPath)
     )
   );
-}
-
-function hasAppOwnedSourceStack(hint?: SentryEventHint): boolean {
-  const stack = getHintExceptionStack(hint);
-  return appOwnedFramePathPrefixes.some((prefix) => stack.includes(prefix));
 }
 
 function addBreadcrumbSignatureValues(
@@ -1581,13 +1615,86 @@ function hasThirdPartyWalletAppKitBreadcrumbSignature(
 
 function hasWalletLinkWebSocketUnhandledRejectionSignature(
   value: SentryExceptionValue | undefined,
+  event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
   return (
     value?.mechanism?.type === browserUnhandledRejectionMechanism &&
     value.mechanism.handled === false &&
     (hasCoinbaseWalletLinkWebSocketCloseFunction(value.stacktrace?.frames) ||
-      hasCoinbaseWalletLinkWebSocketCloseStack(hint))
+      hasCoinbaseWalletLinkWebSocketCloseStack(hint) ||
+      hasCoinbaseWalletLinkWebSocketSerializedCloseStack(event))
+  );
+}
+
+function hasBrowserUnhandledRejectionMechanism(
+  value: SentryExceptionValue | undefined
+): boolean {
+  return (
+    value?.mechanism?.type === browserUnhandledRejectionMechanism &&
+    value.mechanism.handled === false
+  );
+}
+
+function hasAppOwnedWalletLinkWebSocket1006Evidence(
+  event: SentryClientEvent,
+  value: SentryExceptionValue | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = value?.stacktrace?.frames;
+  return (
+    hasAppOwnedFrame(frames) ||
+    hasAppOwnedSourceFrame(frames) ||
+    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+  );
+}
+
+function hasAppOwnedSourceStackValue(value: string): boolean {
+  if (value.length === 0) {
+    return false;
+  }
+
+  return getStackFramePathCandidates(value).some(isAppOwnedStackPath);
+}
+
+function getStackFramePathCandidates(value: string): string[] {
+  return value
+    .split("\n")
+    .map(getStackFramePathCandidate)
+    .filter((candidate): candidate is string => !!candidate);
+}
+
+function getStackFramePathCandidate(line: string): string | null {
+  const trimmed = line.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (!trimmed.startsWith("at ")) {
+    return trimmed;
+  }
+
+  const wrapperStart = trimmed.indexOf(" (");
+  if (wrapperStart >= 0 && trimmed.endsWith(")")) {
+    return trimmed.slice(wrapperStart + 2, -1);
+  }
+
+  const withoutAt = trimmed.slice("at ".length).trim();
+  const firstSpace = withoutAt.indexOf(" ");
+  return firstSpace >= 0 ? withoutAt.slice(firstSpace + 1).trim() : withoutAt;
+}
+
+function hasThirdPartyWalletLinkWebSocket1006Evidence(
+  event: SentryClientEvent,
+  value: SentryExceptionValue | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return (
+    hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
+    hasCoinbaseWalletLinkWebSocketStack(hint) ||
+    hasCoinbaseWalletLinkWebSocketSerializedStack(event) ||
+    hasThirdPartyWalletAppKitBreadcrumbSignature(event)
   );
 }
 
@@ -2358,14 +2465,31 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     return false;
   }
 
-  return (
+  const hasExplicitCoinbaseWalletLinkStack =
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
-    hasWalletLinkWebSocketUnhandledRejectionSignature(value, hint) ||
-    (!hasAppOwnedFrame(value?.stacktrace?.frames) &&
-      !hasAppOwnedSourceFrame(value?.stacktrace?.frames) &&
-      !hasAppOwnedSourceStack(hint) &&
-      hasThirdPartyWalletAppKitBreadcrumbSignature(event))
+    hasCoinbaseWalletLinkWebSocketSerializedStack(event);
+
+  if (hasExplicitCoinbaseWalletLinkStack) {
+    return true;
+  }
+
+  const hasAppOwnedEvidence = hasAppOwnedWalletLinkWebSocket1006Evidence(
+    event,
+    value,
+    hint
+  );
+  if (
+    hasWalletLinkWebSocketUnhandledRejectionSignature(value, event, hint) &&
+    !hasAppOwnedEvidence
+  ) {
+    return true;
+  }
+
+  return (
+    hasBrowserUnhandledRejectionMechanism(value) &&
+    !hasAppOwnedEvidence &&
+    hasThirdPartyWalletLinkWebSocket1006Evidence(event, value, hint)
   );
 }
 
