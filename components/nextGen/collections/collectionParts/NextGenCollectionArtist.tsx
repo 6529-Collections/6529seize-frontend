@@ -8,7 +8,6 @@ import { commonApiFetch } from "@/services/api/common-api";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 
 interface Props {
@@ -36,12 +35,11 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
   }, []);
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col
-          sm={12}
-          md={3}
-          className="pt-4 d-flex align-items-center justify-content-center"
+    <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div
+          className="pt-4 d-flex align-items-center justify-content-center tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/4 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+          style={{ maxWidth: "100%" }}
         >
           {profile?.pfp && (
             <Image
@@ -59,24 +57,27 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
               className="cursor-pointer"
             />
           )}
-        </Col>
-        <Col sm={12} md={9} className="pt-4">
-          <Container className="no-padding">
-            <Row>
-              <Col>
+        </div>
+        <div
+          className="pt-4 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-3/4 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+          style={{ maxWidth: "100%" }}
+        >
+          <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                 <h3 className="font-color mb-0">{props.collection.artist}</h3>
-              </Col>
-            </Row>
+              </div>
+            </div>
             {profile?.handle && (
-              <Row className="pt-3">
-                <Col>
+              <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+                <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                   <Link href={`/${profile?.handle}`}>@{profile?.handle}</Link>
-                </Col>
-              </Row>
+                </div>
+              </div>
             )}
             {props.link_collections && (
-              <Row className="pt-4">
-                <Col>
+              <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+                <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                   Collection{props.link_collections.length > 1 ? "s" : ""}:{" "}
                   {props.link_collections.map((c, index) => (
                     <Fragment key={`link-collection-${c.id}`}>
@@ -89,15 +90,17 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                       </Link>
                     </Fragment>
                   ))}
-                </Col>
-              </Row>
+                </div>
+              </div>
             )}
-            <Row className="pt-4">
-              <Col>{bio}</Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+            <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+                {bio}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

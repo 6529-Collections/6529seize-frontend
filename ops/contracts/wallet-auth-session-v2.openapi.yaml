@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: 6529 Wallet Auth Session V2
   version: 1.0.0
-  description: Contract for web cookie sessions, native refresh tokens, and connection sharing.
+  description: Contract for web cookie sessions, refresh-token clients, and connection sharing.
 servers:
   - url: https://api.6529.io/api
 paths:
@@ -124,7 +124,7 @@ paths:
       description: >
         Migration bridge for 6529 Desktop builds that still redeem legacy refresh
         tokens. Requires bearer auth and a matching active session-v2 web cookie.
-        Removed when desktop moves to session-v2.
+        Kept for older desktop builds after desktop moves to session-v2.
       security:
         - bearerAuth: []
       requestBody:
@@ -151,7 +151,7 @@ paths:
               $ref: "#/components/schemas/RedeemConnectionShareRequest"
       responses:
         "201":
-          description: Native session created
+          description: Refresh-token session created
           content:
             application/json:
               schema:
@@ -165,7 +165,10 @@ components:
   schemas:
     ClientType:
       type: string
-      enum: [web, native]
+      enum: [web, native, desktop]
+    RefreshTokenClientType:
+      type: string
+      enum: [native, desktop]
     EthereumAddress:
       type: string
       pattern: "^0x[a-fA-F0-9]{40}$"
@@ -194,9 +197,45 @@ components:
         role:
           type: string
           nullable: true
+        client_type:
+          $ref: "#/components/schemas/RefreshTokenClientType"
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
+        native_refresh_token:
+          type: string
     SessionWebResponse:
       type: object
       required: [address, access_token, access_token_expires_at, client_type]
+      additionalProperties: false
+      properties:
+        address:
+          $ref: "#/components/schemas/EthereumAddress"
+        role:
+          type: string
+          nullable: true
+        client_type:
+          $ref: "#/components/schemas/RefreshTokenClientType"
+        client_address:
+          $ref: "#/components/schemas/EthereumAddress"
+        native_refresh_token:
+          type: string
+        access_token:
+          type: string
+        access_token_expires_at:
+          type: string
+          format: date-time
+        client_type:
+          type: string
+          enum: [web]
+    SessionNativeResponse:
+      type: object
+      required:
+        - address
+        - access_token
+        - access_token_expires_at
+        - client_type
+        - native_refresh_token
+        - refresh_token_expires_at
       additionalProperties: false
       properties:
         address:
@@ -210,22 +249,12 @@ components:
           type: string
           format: date-time
         client_type:
+          $ref: "#/components/schemas/RefreshTokenClientType"
+        native_refresh_token:
           type: string
-          enum: [web]
-    SessionNativeResponse:
-      allOf:
-        - $ref: "#/components/schemas/SessionWebResponse"
-        - type: object
-          required: [native_refresh_token, refresh_token_expires_at]
-          properties:
-            client_type:
-              type: string
-              enum: [native]
-            native_refresh_token:
-              type: string
-            refresh_token_expires_at:
-              type: string
-              format: date-time
+        refresh_token_expires_at:
+          type: string
+          format: date-time
     SessionRefreshWebRequest:
       type: object
       required: [client_type]
@@ -242,8 +271,7 @@ components:
       additionalProperties: false
       properties:
         client_type:
-          type: string
-          enum: [native]
+          $ref: "#/components/schemas/RefreshTokenClientType"
         client_address:
           $ref: "#/components/schemas/EthereumAddress"
         native_refresh_token:
@@ -274,8 +302,7 @@ components:
       additionalProperties: false
       properties:
         target_client_type:
-          type: string
-          enum: [native]
+          $ref: "#/components/schemas/RefreshTokenClientType"
         role:
           type: string
           nullable: true
@@ -300,8 +327,7 @@ components:
           type: string
           nullable: true
         target_client_type:
-          type: string
-          enum: [native]
+          $ref: "#/components/schemas/RefreshTokenClientType"
         deep_link_path:
           type: string
           examples:
@@ -335,7 +361,6 @@ components:
       additionalProperties: false
       properties:
         target_client_type:
-          type: string
-          enum: [native]
+          $ref: "#/components/schemas/RefreshTokenClientType"
         connection_share_code:
           type: string

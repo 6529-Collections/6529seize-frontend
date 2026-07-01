@@ -16,7 +16,7 @@ import { HttpFile } from '../http/http';
 export class ApiSessionRefreshWebRequest {
     'client_type': ApiSessionRefreshWebRequestClientTypeEnum;
     /**
-    * Optional active wallet address. Web clients should include it so multi-account sessions target the matching address-scoped cookie instead of the compatibility cookie.
+    * Optional active wallet address. Web clients should include it so multi-account sessions refresh the matching address-scoped cookie instead of the compatibility cookie.
     */
     'client_address'?: string | null;
 

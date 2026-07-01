@@ -306,7 +306,6 @@ export default function QuickDirectMessages() {
               locale={locale}
               onBack={openList}
               onClose={close}
-              onCreateDirectMessage={createDirectMessageAction}
               onOpenAll={openAll}
             />
           </Suspense>
