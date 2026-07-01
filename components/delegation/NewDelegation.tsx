@@ -187,6 +187,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
+                  label={
+                    props.subdelegation ? "Delegation Manager" : "Delegator"
+                  }
                 />
               </DelegationFormField>
             </DelegationFormRow>
@@ -212,6 +215,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               />
               <DelegationFormField>
                 <DelegationFormSelect
+                  aria-label="Use Case"
                   value={newDelegationUseCase}
                   onChange={(e) => {
                     const newCase = parseInt(e.target.value);

@@ -17,11 +17,7 @@ import {
   type ReactNode,
 } from "react";
 import { Tooltip } from "react-tooltip";
-import {
-  useEnsName,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
@@ -135,7 +131,7 @@ function getTransactionErrorToastMessage(
 }
 
 function DelegationAddressInput(
-  props: Readonly<{ setAddress: (address: string) => void }>
+  props: Readonly<{ label: string; setAddress: (address: string) => void }>
 ) {
   const { setAddress } = props;
   const { inputValue, address, handleInputChange } = useEnsResolution({
@@ -148,6 +144,7 @@ function DelegationAddressInput(
 
   return (
     <DelegationFormInput
+      aria-label={props.label}
       placeholder={"0x... or ENS"}
       type="text"
       value={inputValue}
@@ -209,6 +206,7 @@ export function DelegationFormOriginalDelegatorFormGroup(
       />
       <DelegationFormField>
         <DelegationFormInput
+          aria-label="Original Delegator"
           className={styles["formInputDisabled"]}
           type="text"
           value={
@@ -227,6 +225,7 @@ export function DelegationAddressDisabledInput(
   props: Readonly<{
     address?: string | undefined;
     ens: string | null | undefined;
+    label?: string | undefined;
   }>
 ) {
   const displayValue = props.address
@@ -237,25 +236,12 @@ export function DelegationAddressDisabledInput(
 
   return (
     <DelegationFormInput
+      aria-label={props.label ?? "Address"}
       className={styles["formInputDisabled"]}
       type="text"
       value={displayValue}
       disabled
     />
-  );
-}
-
-function DelegationAddressDisplay(props: Readonly<{ address: string }>) {
-  const ens = useEnsName({
-    address: props.address as `0x${string}`,
-    chainId: 1,
-  });
-
-  return (
-    <>
-      {props.address}
-      {ens.data && ` - ${ens.data}`}
-    </>
   );
 }
 
@@ -273,6 +259,7 @@ export function DelegationFormOptionsFormGroup(
       <DelegationFormLabel title={props.title} tooltip={props.tooltip} />
       <DelegationFormField>
         <DelegationFormSelect
+          aria-label={props.title}
           value={props.selected}
           onChange={(e) => props.setSelected(e.target.value)}
         >
@@ -281,7 +268,7 @@ export function DelegationFormOptionsFormGroup(
           </option>
           {props.options.map((o) => (
             <option key={o} value={o}>
-              <DelegationAddressDisplay address={o} />
+              {o}
             </option>
           ))}
         </DelegationFormSelect>
@@ -322,6 +309,7 @@ export function DelegationFormCollectionFormGroup(
       />
       <DelegationFormField>
         <DelegationFormSelect
+          aria-label="Collection"
           value={props.collection}
           onChange={(e) => props.setCollection(e.target.value)}
         >
@@ -354,6 +342,7 @@ export function DelegationFormDelegateAddressFormGroup(
       <DelegationFormLabel title={props.title} tooltip={props.tooltip} />
       <DelegationFormField>
         <DelegationAddressInput
+          label={props.title}
           setAddress={(address: string) => props.setAddress(address)}
         />
       </DelegationFormField>
@@ -548,6 +537,7 @@ export function DelegationExpiryCalendar(
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div className="tw-w-full tw-px-3 md:tw-w-1/2 lg:tw-w-1/3">
           <DelegationFormInput
+            aria-label="Expiry Date"
             min={new Date().toISOString().slice(0, 10)}
             type="date"
             placeholder="Expiry Date"
@@ -576,6 +566,7 @@ export function DelegationTokenSelection(
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div className="tw-w-full tw-px-3 md:tw-w-1/2 lg:tw-w-1/3">
           <DelegationFormInput
+            aria-label="Token ID"
             min={0}
             type="number"
             placeholder="Token ID"

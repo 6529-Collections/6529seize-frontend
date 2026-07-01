@@ -141,6 +141,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
+                  label="Delegator"
                 />
               </DelegationFormField>
             </DelegationFormRow>
@@ -152,6 +153,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               />
               <DelegationFormField span={8}>
                 <DelegationFormInput
+                  aria-label="Collection"
                   className={styles["formInputDisabled"]}
                   type="text"
                   value={`${props.collection.display}`}
@@ -168,6 +170,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                 />
                 <DelegationFormField span={8}>
                   <DelegationFormInput
+                    aria-label="Use Case"
                     className={styles["formInputDisabled"]}
                     type="text"
                     value={`#${props.delegation.use_case} - ${props.delegation.display}`}
@@ -184,6 +187,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               />
               <DelegationFormField span={8}>
                 <DelegationFormInput
+                  aria-label="Current Delegate Address"
                   className={styles["formInputDisabled"]}
                   type="text"
                   value={
@@ -203,6 +207,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               />
               <DelegationFormField span={8}>
                 <DelegationFormInput
+                  aria-label="New Delegate Address"
                   placeholder="Delegate to - 0x... or ENS"
                   type="text"
                   value={delegationToInput}

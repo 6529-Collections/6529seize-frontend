@@ -2,11 +2,23 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UpdateDelegationComponent from "@/components/delegation/UpdateDelegation";
 
-jest.mock("wagmi", () => ({ useEnsName: () => ({ data: null }), useEnsAddress: () => ({ data: null }) }));
+jest.mock("wagmi", () => ({
+  useEnsName: () => ({ data: null }),
+  useEnsAddress: () => ({ data: null }),
+}));
 
 jest.mock("@/components/delegation/DelegationFormParts", () => ({
   DelegationCloseButton: () => <div />,
+  DelegationFormRow: ({ children }: any) => <div>{children}</div>,
+  DelegationFormField: ({ children }: any) => <div>{children}</div>,
+  DelegationFormInput: (props: any) => <input {...props} />,
   DelegationFormLabel: (p: any) => <label>{p.title}</label>,
+  DelegationRadio: ({ label, ...props }: any) => (
+    <label>
+      <input {...props} type="radio" />
+      {label}
+    </label>
+  ),
   DelegationAddressDisabledInput: () => <div />,
   DelegationExpiryCalendar: () => <div data-testid="calendar" />,
   DelegationTokenSelection: () => <div data-testid="token-select" />,
@@ -29,7 +41,7 @@ test("toggles optional fields", async () => {
   render(<UpdateDelegationComponent {...baseProps} />);
   expect(screen.queryByTestId("calendar")).toBeNull();
   expect(screen.queryByTestId("token-select")).toBeNull();
-  const radios = screen.getAllByRole('radio');
+  const radios = screen.getAllByRole("radio");
   await user.click(radios[1]);
   expect(screen.getByTestId("calendar")).toBeInTheDocument();
   await user.click(radios[3]);

@@ -151,6 +151,9 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
+                  label={
+                    props.subdelegation ? "Delegation Manager" : "Delegator"
+                  }
                 />
               </DelegationFormField>
             </DelegationFormRow>

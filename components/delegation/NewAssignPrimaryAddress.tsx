@@ -185,7 +185,11 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
                 } the Primary Address assignment`}
               />
               <DelegationFormField>
-                <DelegationAddressDisabledInput address={address} ens={ens} />
+                <DelegationAddressDisabledInput
+                  address={address}
+                  ens={ens}
+                  label={subdelegation ? "Delegation Manager" : "Delegator"}
+                />
               </DelegationFormField>
             </DelegationFormRow>
             <DelegationFormOptionsFormGroup

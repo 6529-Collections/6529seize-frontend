@@ -69,7 +69,7 @@ export function DelegationToast(
     <div className={styles["toastWrapper"]}>
       <button
         type="button"
-        aria-label="Dismiss delegation notification"
+        aria-label="Close notification backdrop"
         className={styles["toastBackdrop"]}
         onClick={() => props.setShowToast(false)}
       />

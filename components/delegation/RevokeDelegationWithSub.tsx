@@ -117,6 +117,7 @@ export default function RevokeDelegationWithSubComponent(
               />
               <DelegationFormField>
                 <DelegationFormInput
+                  aria-label="Original Delegator"
                   className={styles["formInputDisabled"]}
                   type="text"
                   value={
@@ -137,6 +138,7 @@ export default function RevokeDelegationWithSubComponent(
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
+                  label="Delegation Manager"
                 />
               </DelegationFormField>
             </DelegationFormRow>
@@ -160,6 +162,7 @@ export default function RevokeDelegationWithSubComponent(
               />
               <DelegationFormField>
                 <DelegationFormSelect
+                  aria-label="Use Case"
                   value={newDelegationUseCase}
                   onChange={(e) => {
                     const i = parseInt(e.target.value);

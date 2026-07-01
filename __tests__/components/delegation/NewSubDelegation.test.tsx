@@ -20,6 +20,8 @@ jest.mock("@/components/delegation/DelegationFormParts", () => {
     DelegationFormOriginalDelegatorFormGroup: (p: any) => (
       <div data-testid="original">{p.subdelegation.originalDelegator}</div>
     ),
+    DelegationFormRow: ({ children }: any) => <div>{children}</div>,
+    DelegationFormField: ({ children }: any) => <div>{children}</div>,
     DelegationFormLabel: ({ title }: any) => <label>{title}</label>,
     DelegationAddressDisabledInput: ({ address }: any) => (
       <input data-testid="disabled-address" value={address} readOnly />

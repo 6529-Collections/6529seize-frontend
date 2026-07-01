@@ -7,7 +7,9 @@ import {
   useEffectEvent,
   useRef,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
 import {
   useChainId,
@@ -78,6 +80,19 @@ interface Props {
 interface Revocation {
   use_case: number;
   wallet: string;
+}
+
+function toggleDisclosureKey(
+  key: string,
+  setKeys: Dispatch<SetStateAction<string[]>>,
+  setChanged: Dispatch<SetStateAction<boolean>>
+) {
+  setKeys((keys) =>
+    keys.includes(key)
+      ? keys.filter((current) => current !== key)
+      : [...keys, key]
+  );
+  setChanged(true);
 }
 
 type TransactionHash = `0x${string}`;
@@ -884,28 +899,26 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <DelegationDisclosurePanel
             title="Outgoing Delegations"
             isOpen={delegationKeys.includes("0")}
-            onToggle={() => {
-              if (delegationKeys.includes("0")) {
-                setDelegationKeys(delegationKeys.filter((k) => k != "0"));
-              } else {
-                setDelegationKeys([...delegationKeys, "0"]);
-              }
-              setDelegationKeysChanged(true);
-            }}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "0",
+                setDelegationKeys,
+                setDelegationKeysChanged
+              )
+            }
           >
             {printOutgoingDelegations("delegations", outDelegations)}
           </DelegationDisclosurePanel>
           <DelegationDisclosurePanel
             title="Incoming Delegations"
             isOpen={delegationKeys.includes("1")}
-            onToggle={() => {
-              if (delegationKeys.includes("1")) {
-                setDelegationKeys(delegationKeys.filter((k) => k != "1"));
-              } else {
-                setDelegationKeys([...delegationKeys, "1"]);
-              }
-              setDelegationKeysChanged(true);
-            }}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "1",
+                setDelegationKeys,
+                setDelegationKeysChanged
+              )
+            }
           >
             {printIncomingDelegations("delegations", inDelegations)}
           </DelegationDisclosurePanel>
@@ -926,14 +939,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <DelegationDisclosurePanel
             title="Outgoing Manager Rights"
             isOpen={subDelegationKeys.includes("0")}
-            onToggle={() => {
-              if (subDelegationKeys.includes("0")) {
-                setSubDelegationKeys(subDelegationKeys.filter((k) => k != "0"));
-              } else {
-                setSubDelegationKeys([...subDelegationKeys, "0"]);
-              }
-              setSubDelegationKeysChanged(true);
-            }}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "0",
+                setSubDelegationKeys,
+                setSubDelegationKeysChanged
+              )
+            }
           >
             {printOutgoingDelegations(
               "Delegation Managers",
@@ -945,14 +957,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <DelegationDisclosurePanel
             title="Incoming Manager Rights"
             isOpen={subDelegationKeys.includes("1")}
-            onToggle={() => {
-              if (subDelegationKeys.includes("1")) {
-                setSubDelegationKeys(subDelegationKeys.filter((k) => k != "1"));
-              } else {
-                setSubDelegationKeys([...subDelegationKeys, "1"]);
-              }
-              setSubDelegationKeysChanged(true);
-            }}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "1",
+                setSubDelegationKeys,
+                setSubDelegationKeysChanged
+              )
+            }
           >
             {printIncomingDelegations(
               "Delegation Managers",
@@ -979,14 +990,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <DelegationDisclosurePanel
             title="Outgoing Consolidations"
             isOpen={consolidationKeys.includes("0")}
-            onToggle={() => {
-              if (consolidationKeys.includes("0")) {
-                setConsolidationKeys(consolidationKeys.filter((k) => k != "0"));
-              } else {
-                setConsolidationKeys([...consolidationKeys, "0"]);
-              }
-              setConsolidationKeysChanged(true);
-            }}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "0",
+                setConsolidationKeys,
+                setConsolidationKeysChanged
+              )
+            }
           >
             {printOutgoingDelegations(
               "consolidations",
@@ -998,14 +1008,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <DelegationDisclosurePanel
             title="Incoming Consolidations"
             isOpen={consolidationKeys.includes("1")}
-            onToggle={() => {
-              if (consolidationKeys.includes("1")) {
-                setConsolidationKeys(consolidationKeys.filter((k) => k != "1"));
-              } else {
-                setConsolidationKeys([...consolidationKeys, "1"]);
-              }
-              setConsolidationKeysChanged(true);
-            }}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "1",
+                setConsolidationKeys,
+                setConsolidationKeysChanged
+              )
+            }
           >
             {printIncomingDelegations(
               "consolidations",
@@ -1117,6 +1126,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               <span className="tw-flex tw-items-center tw-gap-3">
                 {delegations >= 2 && (
                   <input
+                    aria-label={`Select ${w.wallet} for bulk revoke`}
                     type="checkbox"
                     className={CHECKBOX_CLASS}
                     disabled={
@@ -1382,6 +1392,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             <span className="tw-flex tw-items-center tw-gap-3">
               {del.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case ? (
                 <input
+                  aria-label={`Select ${w.wallet} as original delegator`}
                   type="checkbox"
                   className={CHECKBOX_CLASS}
                   checked={areEqualAddresses(
@@ -1670,6 +1681,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-3">
           <div className="tw-w-full tw-px-3 tw-pb-2 tw-pt-2 md:tw-w-1/3">
             <select
+              aria-label="Lock or unlock use case"
               disabled={!!collectionLockRead.data}
               className={`${styles["formInputLockUseCase"]} ${LOCK_SELECT_CLASS} ${
                 collectionLockRead.data || collectionLockReadGlobal?.data
