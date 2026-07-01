@@ -236,7 +236,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const canFetchMoreDrops =
     !!waveMessages &&
-    waveMessages.hasNextPage &&
+    (waveMessages.hasMoreLocal || waveMessages.hasNextPage) &&
     !waveMessages.isLoading &&
     !waveMessages.isLoadingNextPage;
 

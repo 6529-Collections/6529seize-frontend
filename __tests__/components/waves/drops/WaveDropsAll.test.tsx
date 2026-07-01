@@ -186,6 +186,7 @@ type WaveMessagesMock = {
   isLoading?: boolean | undefined;
   isLoadingNextPage?: boolean | undefined;
   hasNextPage?: boolean | undefined;
+  hasMoreLocal?: boolean | undefined;
   drops?: ApiDrop[] | undefined;
 };
 
@@ -230,6 +231,7 @@ function setupMocks(options: MockSetupOptions = {}) {
     isLoading: false,
     isLoadingNextPage: false,
     hasNextPage: false,
+    hasMoreLocal: false,
     drops: [] as any,
   };
 
@@ -1027,6 +1029,35 @@ describe("WaveDropsAll", () => {
           type: "FULL",
         },
         "target-drop"
+      );
+    });
+
+    it("calls fetchNextPage to reveal cached local drops after server pages are exhausted", async () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+        waveMessages: {
+          drops: Array.from({ length: 25 }, (_, i) =>
+            createMockDrop({ id: `drop-${i}` })
+          ),
+          hasNextPage: false,
+          hasMoreLocal: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      renderComponent({ waveId: "test-wave", dropId: null });
+
+      await act(async () => {
+        containerProps.onTopIntersection();
+      });
+
+      expect(mockFetchNextPage).toHaveBeenCalledWith(
+        {
+          waveId: "test-wave",
+          type: "FULL",
+        },
+        null
       );
     });
 
