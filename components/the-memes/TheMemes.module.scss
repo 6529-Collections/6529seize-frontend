@@ -225,58 +225,20 @@
   overflow: hidden;
 }
 
-.memesCarousel :global(.carousel-inner),
-.memesCarousel :global(.carousel-item) {
-  height: 100%;
-}
-
-.memesCarousel :global(.carousel-item.active),
-.memesCarousel :global(.carousel-item-next),
-.memesCarousel :global(.carousel-item-prev) {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
-
-.memesCarousel :global(.carousel-item > *) {
+.memesCarousel [data-carousel-slide] > * {
   height: 100%;
   max-height: 100% !important;
 }
 
-.memesCarousel :global(.carousel-item iframe),
-.memesCarousel :global(.carousel-item video),
-.memesCarousel :global(.carousel-item model-viewer) {
+.memesCarousel [data-carousel-slide] iframe,
+.memesCarousel [data-carousel-slide] video,
+.memesCarousel [data-carousel-slide] model-viewer {
   height: 100% !important;
   max-height: 100% !important;
 }
 
-.memesCarousel :global(.carousel-item img) {
+.memesCarousel [data-carousel-slide] img {
   max-height: 100% !important;
-}
-
-.memesCarousel :global(.carousel-control-prev),
-.memesCarousel :global(.carousel-control-next) {
-  position: absolute !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  width: auto !important;
-  height: fit-content !important;
-  opacity: 1 !important;
-  z-index: 10 !important;
-}
-
-.memesCarousel :global(.carousel-control-prev) {
-  left: 0 !important;
-}
-
-.memesCarousel :global(.carousel-control-next) {
-  right: 0 !important;
-}
-
-.memesCarousel :global(.carousel-control-prev-icon),
-.memesCarousel :global(.carousel-control-next-icon) {
-  width: 1.2rem !important;
-  height: 1.2rem !important;
 }
 
 .rankSubheading {
@@ -487,10 +449,11 @@
   background-color: transparent;
   border: none;
   padding-right: 25px;
-  a {
+  a,
+  > button {
     line-height: 30px;
   }
-  button {
+  > button {
     font-size: larger !important;
     font-weight: bolder !important;
     cursor: copy;
