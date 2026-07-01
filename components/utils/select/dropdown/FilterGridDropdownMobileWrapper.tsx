@@ -7,11 +7,13 @@ export default function FilterGridDropdownMobileWrapper({
   isOpen,
   setOpen,
   label,
+  gridColumnClassName,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly label?: string | undefined;
+  readonly gridColumnClassName: string;
   readonly children: ReactNode;
 }) {
   return (
@@ -82,7 +84,9 @@ export default function FilterGridDropdownMobileWrapper({
                       </div>
                     )}
                     <div className="tw-relative tw-mt-3 tw-flex tw-flex-1 tw-flex-col tw-gap-y-6 tw-px-4 tw-pb-[env(safe-area-inset-bottom,0px)] sm:tw-px-6">
-                      <div className="tw-grid tw-grid-cols-4 tw-gap-3">
+                      <div
+                        className={`tw-grid ${gridColumnClassName} tw-gap-3`}
+                      >
                         {children}
                       </div>
                     </div>

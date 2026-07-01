@@ -106,5 +106,5 @@ export const EN_GB_MESSAGES = {
   "theMemes.filters.year.option": "Year {year}",
   "theMemes.filters.season.label": "Season",
   "theMemes.filters.season.all": "All Seasons",
-  "theMemes.filters.season.allForYear": "All Year {year} Seasons",
+  "theMemes.filters.season.allForYear": "All Year {year}",
 } satisfies Partial<Record<MessageKey, string>>;

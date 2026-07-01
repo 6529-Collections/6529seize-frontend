@@ -117,8 +117,7 @@ export const FR_FR_MESSAGES = {
   "theMemes.filters.year.option": "Année {year}",
   "theMemes.filters.season.label": "Saison",
   "theMemes.filters.season.all": "Toutes les saisons",
-  "theMemes.filters.season.allForYear":
-    "Toutes les saisons de l’année {year}",
+  "theMemes.filters.season.allForYear": "Toute l’année {year}",
   "theMemes.loading.fetching": "Chargement",
   "theMemes.empty.title": "Aucun meme trouvé",
   "theMemes.empty.description":
