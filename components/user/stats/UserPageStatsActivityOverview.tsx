@@ -9,9 +9,9 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { Fragment, useEffect, useState } from "react";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { getStatsPath } from "./userPageStats.helpers";
-import UserPageDisclosure from "../UserPageDisclosure";
 import styles from "./UserPageStats.module.scss";
 import {
   UserPageStatsTableHead,
@@ -299,6 +299,39 @@ export default function UserPageStatsActivityOverview({
   );
 }
 
+function StatsDisclosure({
+  title,
+  children,
+}: {
+  readonly title: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <Disclosure as="div" defaultOpen>
+      {({ open }) => (
+        <>
+          <DisclosureButton
+            className={`${styles["collectedAccordionButton"]} tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+          >
+            <b>{title}</b>
+            <span
+              aria-hidden="true"
+              className={`tw-h-2 tw-w-2 tw-shrink-0 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 ${
+                open ? "tw-rotate-[225deg]" : "tw-rotate-45"
+              }`}
+            />
+          </DisclosureButton>
+          <DisclosurePanel
+            className={`${styles["collectedAccordionBody"]} tw-px-5 tw-py-4`}
+          >
+            {children}
+          </DisclosurePanel>
+        </>
+      )}
+    </Disclosure>
+  );
+}
+
 function UserPageStatsActivityOverviewTotals({
   activity,
   locale,
@@ -307,9 +340,7 @@ function UserPageStatsActivityOverviewTotals({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <UserPageDisclosure
-      bodyClassName={styles["collectedAccordionBody"]}
-      buttonClassName={styles["collectedAccordionButton"]}
+    <StatsDisclosure
       title={activityMessage(
         locale,
         "user.collected.stats.activityOverview.overview"
@@ -341,7 +372,7 @@ function UserPageStatsActivityOverviewTotals({
           </tbody>
         </table>
       </div>
-    </UserPageDisclosure>
+    </StatsDisclosure>
   );
 }
 
@@ -376,9 +407,7 @@ function UserPageStatsActivityOverviewMemes({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <UserPageDisclosure
-      bodyClassName={styles["collectedAccordionBody"]}
-      buttonClassName={styles["collectedAccordionButton"]}
+    <StatsDisclosure
       title={activityMessage(
         locale,
         "user.collected.stats.activityOverview.memesBySeason"
@@ -445,6 +474,6 @@ function UserPageStatsActivityOverviewMemes({
           </p>
         )}
       </div>
-    </UserPageDisclosure>
+    </StatsDisclosure>
   );
 }

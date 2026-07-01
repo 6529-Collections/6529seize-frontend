@@ -3,8 +3,8 @@ import type { MemeSeason } from "@/entities/ISeason";
 import { formatInteger, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { Fragment, type ReactNode } from "react";
-import UserPageDisclosure from "../UserPageDisclosure";
 import styles from "./UserPageStats.module.scss";
 import {
   UserPageStatsTableHead,
@@ -151,6 +151,39 @@ export default function UserPageStatsCollected({
   );
 }
 
+function StatsDisclosure({
+  title,
+  children,
+}: {
+  readonly title: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <Disclosure as="div" defaultOpen>
+      {({ open }) => (
+        <>
+          <DisclosureButton
+            className={`${styles["collectedAccordionButton"]} tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+          >
+            <b>{title}</b>
+            <span
+              aria-hidden="true"
+              className={`tw-h-2 tw-w-2 tw-shrink-0 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 ${
+                open ? "tw-rotate-[225deg]" : "tw-rotate-45"
+              }`}
+            />
+          </DisclosureButton>
+          <DisclosurePanel
+            className={`${styles["collectedAccordionBody"]} tw-px-5 tw-py-4`}
+          >
+            {children}
+          </DisclosurePanel>
+        </>
+      )}
+    </Disclosure>
+  );
+}
+
 function UserPageStatsCollectedTotals({
   ownerBalance,
   locale,
@@ -170,9 +203,7 @@ function UserPageStatsCollectedTotals({
   );
 
   return (
-    <UserPageDisclosure
-      bodyClassName={styles["collectedAccordionBody"]}
-      buttonClassName={styles["collectedAccordionButton"]}
+    <StatsDisclosure
       title={t(locale, "user.collected.stats.details.overview")}>
       <div className={`tw-py-2 ${styles["scrollContainer"]}`}>
         <table className={`tw-w-full ${styles["collectedAccordionTable"]}`}>
@@ -249,7 +280,7 @@ function UserPageStatsCollectedTotals({
           </tbody>
         </table>
       </div>
-    </UserPageDisclosure>
+    </StatsDisclosure>
   );
 }
 
@@ -319,9 +350,7 @@ function UserPageStatsCollectedMemes({
   }
 
   return (
-    <UserPageDisclosure
-      bodyClassName={styles["collectedAccordionBody"]}
-      buttonClassName={styles["collectedAccordionButton"]}
+    <StatsDisclosure
       title={t(locale, "user.collected.stats.details.memesBySeason")}
     >
       <div className={`tw-py-2 ${styles["scrollContainer"]}`}>
@@ -386,6 +415,6 @@ function UserPageStatsCollectedMemes({
           </table>
         )}
       </div>
-    </UserPageDisclosure>
+    </StatsDisclosure>
   );
 }
