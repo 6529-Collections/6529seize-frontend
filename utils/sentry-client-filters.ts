@@ -246,8 +246,8 @@ const metaMaskMobileContextTokens = ["metamaskmobile", "metamask mobile"];
 const mobileSafariWebViewContextTokens = [
   "mobile safari ui/wkwebview",
   "wkwebview",
-  "webview",
 ];
+const webViewUserAgentTokens = ["webview", "wkwebview"];
 const routeParameterizationContextKeys = ["app", "browser", "device", "os"];
 const routeParameterizationTagKeys = [
   "app",
@@ -405,6 +405,16 @@ function hasMatchingRoute(
 
 function hasWavesRoute(event: SentryClientEvent): boolean {
   return hasMatchingRoute(event, isWavesRoutePath);
+}
+
+function isRouteParameterizationRoutePath(path: string | null): boolean {
+  return (
+    isWavesRoutePath(path) || isExactRoutePath(path, THE_MEMES_MINT_ROUTE_PATH)
+  );
+}
+
+function hasRouteParameterizationRoute(event: SentryClientEvent): boolean {
+  return hasMatchingRoute(event, isRouteParameterizationRoutePath);
 }
 
 function hasReactDomRemoveChildRoute(event: SentryClientEvent): boolean {
@@ -1620,17 +1630,6 @@ function getBreadcrumbValues(event: SentryClientEvent): SentryBreadcrumb[] {
   return [];
 }
 
-function hasNavigationBreadcrumb(event: SentryClientEvent): boolean {
-  return getBreadcrumbValues(event).some((breadcrumb) => {
-    const data = breadcrumb.data;
-    return (
-      breadcrumb.category === "navigation" &&
-      typeof data?.["from"] === "string" &&
-      typeof data?.["to"] === "string"
-    );
-  });
-}
-
 function hasGifPickerTenorFailureBreadcrumb(event: SentryClientEvent): boolean {
   return getBreadcrumbMessages(event).some((message) =>
     message.includes(gifPickerTenorFailureMessage)
@@ -1680,7 +1679,9 @@ function hasGifPickerTenorBreadcrumbSignature(
   );
 }
 
-function hasWavesNavigationBreadcrumb(event: SentryClientEvent): boolean {
+function hasRouteParameterizationNavigationBreadcrumb(
+  event: SentryClientEvent
+): boolean {
   return getBreadcrumbValues(event).some((breadcrumb) => {
     const data = breadcrumb.data;
     if (
@@ -1692,17 +1693,17 @@ function hasWavesNavigationBreadcrumb(event: SentryClientEvent): boolean {
     }
 
     return [data["from"], data["to"]].some((candidate) =>
-      isWavesRoutePath(getRoutePathFromString(candidate))
+      isRouteParameterizationRoutePath(getRoutePathFromString(candidate))
     );
   });
 }
 
-function hasRouteParameterizationNavigationSignature(
+function hasRouteParameterizationRouteEvidence(
   event: SentryClientEvent
 ): boolean {
   return (
-    hasNavigationBreadcrumb(event) &&
-    (hasWavesRoute(event) || hasWavesNavigationBreadcrumb(event))
+    hasRouteParameterizationRoute(event) ||
+    hasRouteParameterizationNavigationBreadcrumb(event)
   );
 }
 
@@ -1754,17 +1755,22 @@ function matchesContextToken(value: string, tokens: string[]): boolean {
 }
 
 function hasMetaMaskMobileWebViewContext(event: SentryClientEvent): boolean {
-  const values = uniqueStrings([
-    ...getRouteParameterizationContextValues(event),
-    ...getRouteParameterizationUserAgentValues(event),
-  ]);
-  return (
-    values.some((value) =>
+  const contextValues = getRouteParameterizationContextValues(event);
+  if (
+    contextValues.some((value) =>
       matchesContextToken(value, metaMaskMobileContextTokens)
     ) &&
-    values.some((value) =>
+    contextValues.some((value) =>
       matchesContextToken(value, mobileSafariWebViewContextTokens)
     )
+  ) {
+    return true;
+  }
+
+  return getRouteParameterizationUserAgentValues(event).some(
+    (value) =>
+      matchesContextToken(value, metaMaskMobileContextTokens) &&
+      matchesContextToken(value, webViewUserAgentTokens)
   );
 }
 
@@ -2405,7 +2411,10 @@ export function shouldFilterSentryRouteParameterizationError(
     return false;
   }
 
-  return hasMetaMaskMobileWebViewContext(event);
+  return (
+    hasRouteParameterizationRouteEvidence(event) &&
+    hasMetaMaskMobileWebViewContext(event)
+  );
 }
 
 export function shouldFilterInjectedWalletCollision(
@@ -2449,7 +2458,7 @@ export const __testing = {
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,
   hasMetaMaskMobileWebViewContext,
-  hasRouteParameterizationNavigationSignature,
+  hasRouteParameterizationRouteEvidence,
   isCoinbaseWalletLinkWebSocket1006Message,
   isCoinbaseWalletLinkWebSocketPath,
   hasCoinbaseWalletLinkWebSocketFrame,

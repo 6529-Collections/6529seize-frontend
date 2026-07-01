@@ -2682,7 +2682,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("filters MetaMaskMobile route parameterization errors outside waves routes", () => {
+  it("does not filter MetaMaskMobile route parameterization errors outside known route bounds", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
       transaction: "/about",
@@ -2704,7 +2704,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("filters MetaMaskMobile route parameterization errors when waves route appears only in navigation breadcrumbs", () => {
