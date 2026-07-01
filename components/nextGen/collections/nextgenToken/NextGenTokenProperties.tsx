@@ -93,77 +93,73 @@ function TraitAccordion(
         {props.traits && (
           <Accordion.Body className={styles["tokenPropertiesAccordionBody"]}>
             <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-              <div className="pt-2 pb-2 -tw-mx-3 tw-flex tw-flex-wrap">
-                <div
-                  className="tw-relative tw-w-5/12 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-                  style={{ maxWidth: "100%" }}
-                >
-                  Trait
-                </div>
-                <div
-                  className="text-center tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-                  style={{ maxWidth: "100%" }}
-                >
-                  Quantity
-                </div>
-                <div
-                  className="text-center tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-                  style={{ maxWidth: "100%" }}
-                >
-                  Rank
-                </div>
-                <div
-                  className="text-center tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-                  style={{ maxWidth: "100%" }}
-                >
-                  Score
-                </div>
-              </div>
-              <hr className="mb-1 mt-0" />
-              {props.traits
-                .filter((t) => t.score !== -1)
-                .map((t) => (
-                  <div
-                    className="pt-2 pb-2 -tw-mx-3 tw-flex tw-flex-wrap"
-                    key={`trait-${t.trait.replaceAll(
-                      " ",
-                      "-"
-                    )}-${t.value.replaceAll(" ", "-")}`}
-                  >
-                    <div
-                      className="tw-relative tw-w-5/12 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-                      style={{ maxWidth: "100%" }}
+              <table className="tw-w-full tw-border-collapse">
+                <thead>
+                  <tr className="tw-border-b tw-border-solid tw-border-iron-700">
+                    <th
+                      scope="col"
+                      className="tw-w-5/12 tw-px-3 tw-py-2 tw-text-left tw-font-normal"
                     >
-                      <span className="font-color-h">{t.trait}:</span>{" "}
-                      <Link
-                        href={`/nextgen/collection/${formatNameForUrl(
-                          props.collection.name
-                        )}/art?traits=${t.trait}:${t.value}`}
+                      Trait
+                    </th>
+                    <th
+                      scope="col"
+                      className="text-center tw-w-1/6 tw-px-3 tw-py-2 tw-font-normal"
+                    >
+                      Quantity
+                    </th>
+                    <th
+                      scope="col"
+                      className="text-center tw-w-1/6 tw-px-3 tw-py-2 tw-font-normal"
+                    >
+                      Rank
+                    </th>
+                    <th
+                      scope="col"
+                      className="text-center tw-w-1/6 tw-px-3 tw-py-2 tw-font-normal"
+                    >
+                      Score
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {props.traits
+                    .filter((t) => t.score !== -1)
+                    .map((t) => (
+                      <tr
+                        key={`trait-${t.trait.replaceAll(
+                          " ",
+                          "-"
+                        )}-${t.value.replaceAll(" ", "-")}`}
                       >
-                        {t.value}
-                      </Link>
-                    </div>
-                    <div
-                      className="text-center tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-                      style={{ maxWidth: "100%" }}
-                    >
-                      {t.value_count.toLocaleString()} (
-                      {((t.value_count / props.token_count) * 100).toFixed(1)}%)
-                    </div>
-                    <div
-                      className="text-center tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-                      style={{ maxWidth: "100%" }}
-                    >
-                      {t.rank}/{t.trait_count}
-                    </div>
-                    <div
-                      className="text-center tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-                      style={{ maxWidth: "100%" }}
-                    >
-                      {displayScore(t.score)}
-                    </div>
-                  </div>
-                ))}
+                        <td className="tw-w-5/12 tw-px-3 tw-py-2">
+                          <span className="font-color-h">{t.trait}:</span>{" "}
+                          <Link
+                            href={`/nextgen/collection/${formatNameForUrl(
+                              props.collection.name
+                            )}/art?traits=${t.trait}:${t.value}`}
+                          >
+                            {t.value}
+                          </Link>
+                        </td>
+                        <td className="text-center tw-w-1/6 tw-px-3 tw-py-2">
+                          {t.value_count.toLocaleString()} (
+                          {(
+                            (t.value_count / props.token_count) *
+                            100
+                          ).toFixed(1)}
+                          %)
+                        </td>
+                        <td className="text-center tw-w-1/6 tw-px-3 tw-py-2">
+                          {t.rank}/{t.trait_count}
+                        </td>
+                        <td className="text-center tw-w-1/6 tw-px-3 tw-py-2">
+                          {displayScore(t.score)}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </Accordion.Body>
         )}
