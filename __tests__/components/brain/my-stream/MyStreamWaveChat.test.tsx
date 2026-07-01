@@ -39,6 +39,49 @@ const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
   });
 };
 
+jest.mock("next/dynamic", () => ({
+  __esModule: true,
+  default: (loader: () => unknown) => {
+    const loaderSource = loader.toString();
+
+    if (loaderSource.includes("@/components/waves/gallery")) {
+      return require("@/components/waves/gallery").WaveGallery;
+    }
+
+    if (loaderSource.includes("@/components/waves/PrivilegedDropCreator")) {
+      return require("@/components/waves/PrivilegedDropCreator").default;
+    }
+
+    if (loaderSource.includes("./WaveChatSubmitDropModal")) {
+      return require("@/components/brain/my-stream/WaveChatSubmitDropModal")
+        .WaveChatSubmitDropModal;
+    }
+
+    if (
+      loaderSource.includes(
+        "@/components/waves/leaderboard/create/WaveDropCreate"
+      )
+    ) {
+      return require("@/components/waves/leaderboard/create/WaveDropCreate")
+        .WaveDropCreate;
+    }
+
+    if (
+      loaderSource.includes(
+        "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal"
+      )
+    ) {
+      return require(
+        "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal"
+      ).WaveLeaderboardCurationDropModal;
+    }
+
+    throw new Error(
+      `Unexpected next/dynamic import in MyStreamWaveChat test: ${loaderSource}`
+    );
+  },
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
   useSearchParams: () => searchParamsMock,
