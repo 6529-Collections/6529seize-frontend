@@ -8,7 +8,6 @@ import type { NextGenCollection } from "@/entities/INextgen";
 import { formatAddress } from "@/helpers/Helpers";
 import { NextgenCollectionView } from "@/types/enums";
 import Link from "next/link";
-import { Col, Container, Row, Table } from "../NextGenTailwindLayout";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
 import { DistributionLink } from "../NextGen";
@@ -38,32 +37,46 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col>
-          <Container className="no-padding">
-            <Row>
-              <Col sm={12} md={4} className="pt-2 pb-2">
+    <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div
+                className="pt-2 pb-2 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+                style={{ maxWidth: "100%" }}
+              >
                 {props.collection.artist_signature && (
                   <>
-                    <Row>
-                      <Col className="font-color-h">Artist Signature</Col>
-                    </Row>
-                    <Row className="pb-2">
-                      <Col xs={12} className="pt-2">
+                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="font-color-h tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+                        Artist Signature
+                      </div>
+                    </div>
+                    <div className="pb-2 -tw-mx-3 tw-flex tw-flex-wrap">
+                      <div
+                        className="pt-2 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                        style={{ maxWidth: "100%" }}
+                      >
                         <div className={styles["artistSignature"]}>
                           {props.collection.artist_signature}
                         </div>
-                      </Col>
-                    </Row>
+                      </div>
+                    </div>
                   </>
                 )}
-                <Row>
-                  <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
+                <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                  <div
+                    className="pt-2 pb-2 d-flex flex-column tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                    style={{ maxWidth: "100%" }}
+                  >
                     <span className="font-color-h">Allowlist</span>
                     <DistributionLink collection={props.collection} />
-                  </Col>
-                  <Col xs={12} className="pt-2 pb-2 d-flex gap-5">
+                  </div>
+                  <div
+                    className="pt-2 pb-2 d-flex gap-5 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                    style={{ maxWidth: "100%" }}
+                  >
                     <span className="d-flex flex-column">
                       <span className="font-color-h">License</span>
                       <span>{props.collection.licence}</span>
@@ -76,8 +89,11 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                           : "-"}
                       </span>
                     </span>
-                  </Col>
-                  <Col xs={12} className="pt-2 pb-2 d-flex flex-column">
+                  </div>
+                  <div
+                    className="pt-2 pb-2 d-flex flex-column tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                    style={{ maxWidth: "100%" }}
+                  >
                     <span className="font-color-h">Contract</span>
                     <span>
                       <Link
@@ -102,45 +118,48 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                         {NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}
                       </Tooltip>
                     </span>
-                  </Col>
-                </Row>
-              </Col>
-              <Col sm={12} md={8} className="pt-2 pb-2 d-flex flex-column">
+                  </div>
+                </div>
+              </div>
+              <div
+                className="pt-2 pb-2 d-flex flex-column tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-2/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+                style={{ maxWidth: "100%" }}
+              >
                 <span className="font-color-h">Collection Overview</span>
                 <span>{props.collection.description}</span>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function NextGenCollectionDetailsAbout() {
   return (
-    <Container className="no-padding pt-4">
-      <Row className="pb-3">
-        <Col>
+    <div className="no-padding pt-4 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>About Pebbles</h4>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             Pebbles aims to explore the order that can emerge from a small set
             of organically inspired elements of points, lines, textures, and
             light.
           </p>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>History of Technical Innovation</h4>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             ZeBlocks prides itself on technical innovation in its generative
             mints and on-chain work. Most ZeBlocks projects, including Pebbles,
@@ -154,15 +173,15 @@ function NextGenCollectionDetailsAbout() {
             </li>
             <li>Sensthesia: Audio-sensitive generative art NFTs</li>
           </ul>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>Pebbles: Matched To The Human Eye</h4>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             Pebble is one of the highest-resolution generative collections ever
             released
@@ -230,15 +249,15 @@ function NextGenCollectionDetailsAbout() {
               </li>
             </ul>
           </ul>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>NextGen x Pebbles</h4>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             NextGen will take the following approach to support Pebbles’s
             extraordinary resolution:
@@ -266,57 +285,73 @@ function NextGenCollectionDetailsAbout() {
               which can go fully on-chain independently.
             </li>
           </ul>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>Key Collection Parameters</h4>
-        </Col>
-      </Row>
-      <Row className="pb-3">
-        <Col>
-          <Table>
+        </div>
+      </div>
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <table className="tw-w-full tw-border-collapse">
             <tbody>
               <tr>
-                <td>Collection Size:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Collection Size:
+                </th>
                 <td>1,000 (or fewer, if fewer are minted in 24 hours)</td>
               </tr>
               <tr>
-                <td>Orientation:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Orientation:
+                </th>
                 <td>Vertical</td>
               </tr>
               <tr>
-                <td>Aspect Ratio:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Aspect Ratio:
+                </th>
                 <td>1:1.294</td>
               </tr>
               <tr>
-                <td>Script:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Script:
+                </th>
                 <td>Javascript</td>
               </tr>
               <tr>
-                <td>Script Size:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Script Size:
+                </th>
                 <td>17Kb</td>
               </tr>
               <tr>
-                <td>External libraries used:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  External libraries used:
+                </th>
                 <td>None</td>
               </tr>
               <tr>
-                <td>License:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  License:
+                </th>
                 <td>Creative Commons 0 (CC0)</td>
               </tr>
               <tr>
-                <td>Prints:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Prints:
+                </th>
                 <td>
                   An official ZeBlocks approved printing process will be
                   available in a few weeks
                 </td>
               </tr>
             </tbody>
-          </Table>
-        </Col>
-      </Row>
-    </Container>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
 
