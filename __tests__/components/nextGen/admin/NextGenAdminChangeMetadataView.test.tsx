@@ -6,6 +6,7 @@ import NextGenAdminChangeMetadataView from "@/components/nextGen/admin/NextGenAd
 jest.mock("@/components/nextGen/NextGenContractWriteStatus", () => () => <div data-testid="status" />);
 
 jest.mock("@/components/nextGen/admin/NextGenAdminShared", () => ({
+  ...jest.requireActual("@/components/nextGen/admin/NextGenAdminShared"),
   NextGenCollectionIdFormGroup: (props: any) => (
     <input
       data-testid="collection-id"

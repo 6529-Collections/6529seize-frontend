@@ -1,6 +1,5 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -14,9 +13,14 @@ import {
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
   NextGenAdminTextFormGroup,
+  Row,
 } from "./NextGenAdminShared";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
@@ -181,7 +185,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
             )}
             <Form.Group className="mb-3">
               <Form.Label>REGISTER / REVOKE</Form.Label>
-              <span className="d-flex align-items-center gap-3">
+              <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
                   checked={status}
                   type="radio"

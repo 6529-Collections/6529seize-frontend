@@ -31,11 +31,10 @@ import { fetchUrl } from "@/services/6529api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
-import { NextGenMintingFor } from "./NextGenMintShared";
+import { NextGenMintErrors, NextGenMintingFor } from "./NextGenMintShared";
 
 export function getJsonData(keccak: string, data: string) {
   const parsed = JSON.parse(data);
@@ -47,7 +46,7 @@ export function getJsonData(keccak: string, data: string) {
     });
   });
   return (
-    <ul className="mb-0">
+    <ul className="tw-mb-0">
       {results.map((r) => (
         <li key={`ul-${keccak}-${r.key}-${r.value}`}>
           {capitalizeFirstChar(r.key)}: {r.value}
@@ -427,192 +426,161 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col>
-          <Form
-            onChange={() => {
-              setErrors([]);
-              setIsMinting(false);
-            }}
-          >
-            <NextGenMintingFor
-              title={"Mint For"}
-              delegators={props.delegators}
-              mintForAddress={mintForAddress}
-              setMintForAddress={setMintForAddress}
-            />
-            <Form.Group as={Row} className="pb-2">
-              <Form.Label column sm={12} className="d-flex align-items-center">
-                Mint To
-                <FontAwesomeIcon
-                  className={styles["infoIcon"]}
-                  icon={faInfoCircle}
-                  data-tooltip-id={`mint-to-info-${props.collection.id}`}
-                ></FontAwesomeIcon>
-                <Tooltip
-                  id={`mint-to-info-${props.collection.id}`}
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  Address to receive the minted tokens
-                </Tooltip>
-              </Form.Label>
-              <Col sm={12}>
-                <Form.Control
-                  className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
-                  type="text"
-                  placeholder="0x..."
-                  disabled={!isConnected || disableMint()}
-                  value={mintToInput}
-                  onChange={(e) => {
-                    setMintToInput(e.target.value);
-                    setMintToAddress(e.target.value);
-                  }}
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pt-2">
-              <Form.Label column sm={12} className="d-flex align-items-center">
-                {getWalletMintsLabel()}
-                :&nbsp;
-                {props.fetchingMintCounts ? (
-                  <DotLoader />
-                ) : (
-                  <b>
-                    {renderAllowlistStatus()}
-                    {renderPublicStatus()}
-                  </b>
-                )}
-              </Form.Label>
-            </Form.Group>
-            {alStatus === Status.LIVE &&
-              (fetchingProofs ? (
-                <DotLoader />
-              ) : (
-                proofResponse.map((response, index) => (
-                  <Form.Group
-                    key={response.keccak}
-                    as={Row}
-                    className="pt-2 pl-2"
-                  >
-                    <Col>
-                      <Form.Check
-                        type="checkbox"
-                        label={
-                          <>
-                            Spots: {response.spots}
-                            <br />
-                            <span className="d-flex gap-1">
-                              Data:{" "}
-                              {getJsonData(response.keccak, response.info)}
-                            </span>
-                          </>
-                        }
-                        id={`${response.keccak}`}
-                        checked={currentProof && currentProof.index >= index}
-                        disabled={
-                          (currentProof && index != currentProof.index) ||
-                          disableMint()
-                        }
-                        className={`pt-1 pb-1`}
-                      ></Form.Check>
-                    </Col>
-                  </Form.Group>
-                ))
-              ))}
-            <Form.Group
-              as={Row}
-              className="pt-2 pb-2 d-flex align-items-center"
-            >
-              <Form.Label className="d-flex align-items-center">
-                Mint Count
-                <FontAwesomeIcon
-                  className={styles["infoIcon"]}
-                  icon={faInfoCircle}
-                  data-tooltip-id={`mint-count-info-${props.collection.id}`}
-                ></FontAwesomeIcon>
-                <Tooltip
-                  id={`mint-count-info-${props.collection.id}`}
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  How many tokens to mint
-                </Tooltip>
-              </Form.Label>
-              <Col xs={3}>
-                <Form.Select
-                  className={styles["mintSelect"]}
-                  value={mintCount}
-                  disabled={
-                    !isConnected ||
-                    (publicStatus !== Status.LIVE &&
-                      currentProof?.proof &&
-                      currentProof.proof.spots <= 0) ||
-                    disableMint()
-                  }
-                  onChange={(e: any) => {
-                    setMintCount(parseInt(e.currentTarget.value));
-                  }}
-                >
-                  {props.mint_counts ? (
-                    (renderAllowlistOptions() ?? renderPublicOptions())
-                  ) : (
-                    <option value={0}>n/a</option>
-                  )}
-                </Form.Select>
-              </Col>
-              <Col xs={9}>
-                <Button
-                  className={styles["mintBtn"]}
-                  disabled={disableMint()}
-                  onClick={handleMintClick}
-                >
-                  {renderButtonText()}
-                  {isMinting && <Spinner />}
-                </Button>
-              </Col>
-            </Form.Group>
-            {errors.length > 0 && (
-              <Form.Group as={Row} className={`pt-2 pb-2`}>
-                <Form.Label
-                  column
-                  sm={12}
-                  className="d-flex align-items-center"
-                >
-                  Errors
-                </Form.Label>
-                <Col sm={12} className="d-flex align-items-center">
-                  <ul className="mb-0">
-                    {errors.map((e) => (
-                      <li key={`mint-error-${e.replaceAll(" ", "-")}`}>{e}</li>
-                    ))}
-                  </ul>
-                </Col>
-              </Form.Group>
-            )}
-            <NextGenContractWriteStatus
-              isLoading={mintWrite.isPending}
-              hash={mintWrite.data}
-              error={mintWrite.error}
-              onSuccess={() => {
-                const currentProof = findActiveProof(originalProofs);
-                setCurrentProof({
-                  ...currentProof!,
-                  proof: currentProof!.proof!,
-                });
-                props.refreshMintCounts();
+    <div>
+      <form
+        onChange={() => {
+          setErrors([]);
+          setIsMinting(false);
+        }}
+      >
+        <NextGenMintingFor
+          title="Mint For"
+          delegators={props.delegators}
+          mintForAddress={mintForAddress}
+          setMintForAddress={setMintForAddress}
+        />
+        <div className="tw-pb-2">
+          <label className="tw-flex tw-items-center">
+            Mint To
+            <FontAwesomeIcon
+              className={styles["infoIcon"]}
+              icon={faInfoCircle}
+              data-tooltip-id={`mint-to-info-${props.collection.id}`}
+            ></FontAwesomeIcon>
+            <Tooltip
+              id={`mint-to-info-${props.collection.id}`}
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
               }}
-            />
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+            >
+              Address to receive the minted tokens
+            </Tooltip>
+          </label>
+          <input
+            className={`${styles["formInput"]} ${styles["formInputDisabled"]} tw-form-input tw-block tw-w-full`}
+            type="text"
+            placeholder="0x..."
+            disabled={!isConnected || disableMint()}
+            value={mintToInput}
+            onChange={(e) => {
+              setMintToInput(e.target.value);
+              setMintToAddress(e.target.value);
+            }}
+          />
+        </div>
+        <div className="tw-pt-2">
+          <label className="tw-flex tw-items-center">
+            {getWalletMintsLabel()}
+            :&nbsp;
+            {props.fetchingMintCounts ? (
+              <DotLoader />
+            ) : (
+              <b>
+                {renderAllowlistStatus()}
+                {renderPublicStatus()}
+              </b>
+            )}
+          </label>
+        </div>
+        {alStatus === Status.LIVE &&
+          (fetchingProofs ? (
+            <DotLoader />
+          ) : (
+            proofResponse.map((response, index) => (
+              <div key={response.keccak} className="tw-pl-2 tw-pt-2">
+                <label className="tw-flex tw-gap-2 tw-py-1">
+                  <input
+                    className="tw-form-checkbox"
+                    type="checkbox"
+                    id={`${response.keccak}`}
+                    checked={!!(currentProof && currentProof.index >= index)}
+                    readOnly
+                    disabled={
+                      (currentProof && index != currentProof.index) ||
+                      disableMint()
+                    }
+                  />
+                  <span>
+                    Spots: {response.spots}
+                    <br />
+                    <span className="tw-flex tw-gap-1">
+                      Data: {getJsonData(response.keccak, response.info)}
+                    </span>
+                  </span>
+                </label>
+              </div>
+            ))
+          ))}
+        <div className="tw-flex tw-items-center tw-py-2">
+          <label className="tw-flex tw-items-center">
+            Mint Count
+            <FontAwesomeIcon
+              className={styles["infoIcon"]}
+              icon={faInfoCircle}
+              data-tooltip-id={`mint-count-info-${props.collection.id}`}
+            ></FontAwesomeIcon>
+            <Tooltip
+              id={`mint-count-info-${props.collection.id}`}
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            >
+              How many tokens to mint
+            </Tooltip>
+          </label>
+          <div className="tw-w-1/4 tw-px-3">
+            <select
+              className={`${styles["mintSelect"]} tw-form-select tw-block tw-w-full tw-rounded-none`}
+              value={mintCount}
+              disabled={
+                !isConnected ||
+                (publicStatus !== Status.LIVE &&
+                  currentProof?.proof &&
+                  currentProof.proof.spots <= 0) ||
+                disableMint()
+              }
+              onChange={(e: any) => {
+                setMintCount(parseInt(e.currentTarget.value));
+              }}
+            >
+              {props.mint_counts ? (
+                (renderAllowlistOptions() ?? renderPublicOptions())
+              ) : (
+                <option value={0}>n/a</option>
+              )}
+            </select>
+          </div>
+          <div className="tw-w-3/4 tw-px-3">
+            <button
+              type="button"
+              className={styles["mintBtn"]}
+              disabled={disableMint()}
+              onClick={handleMintClick}
+            >
+              {renderButtonText()}
+              {isMinting && <Spinner />}
+            </button>
+          </div>
+        </div>
+        {errors.length > 0 && <NextGenMintErrors errors={errors} />}
+        <NextGenContractWriteStatus
+          isLoading={mintWrite.isPending}
+          hash={mintWrite.data}
+          error={mintWrite.error}
+          onSuccess={() => {
+            const currentProof = findActiveProof(originalProofs);
+            setCurrentProof({
+              ...currentProof!,
+              proof: currentProof!.proof!,
+            });
+            props.refreshMintCounts();
+          }}
+        />
+      </form>
+    </div>
   );
 }

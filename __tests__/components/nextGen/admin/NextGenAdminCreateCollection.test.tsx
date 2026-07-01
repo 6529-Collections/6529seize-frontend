@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import NextGenAdminCreateCollection from '@/components/nextGen/admin/NextGenAdminCreateCollection';
 
 jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
+  ...jest.requireActual('@/components/nextGen/admin/NextGenAdminShared'),
   NextGenAdminTextFormGroup: ({ title, value, setValue }: any) => (
     <input data-testid={title} value={value} onChange={e => setValue(e.target.value)} />
   ),
