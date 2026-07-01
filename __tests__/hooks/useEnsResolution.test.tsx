@@ -11,6 +11,7 @@ jest.mock("wagmi", () => ({
 
 describe("useEnsResolution", () => {
   const address = "0x78fb3d569650ea743fb7876312cb5ff7505dd602";
+  const secondAddress = "0x0000000000000000000000000000000000000001";
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -54,5 +55,25 @@ describe("useEnsResolution", () => {
       expect(result.current.inputValue).toBe(`0wl.eth - ${address}`);
       expect(result.current.address).toBe(address);
     });
+  });
+
+  it("syncs repeated initialValue changes without stale resolved addresses", () => {
+    const { result, rerender } = renderHook(
+      ({ initialValue }) => useEnsResolution({ initialValue }),
+      { initialProps: { initialValue: address } }
+    );
+
+    expect(result.current.inputValue).toBe(address);
+    expect(result.current.address).toBe(address);
+
+    rerender({ initialValue: secondAddress });
+
+    expect(result.current.inputValue).toBe(secondAddress);
+    expect(result.current.address).toBe(secondAddress);
+
+    rerender({ initialValue: "night0wl.eth" });
+
+    expect(result.current.inputValue).toBe("night0wl.eth");
+    expect(result.current.address).toBe("night0wl.eth");
   });
 });

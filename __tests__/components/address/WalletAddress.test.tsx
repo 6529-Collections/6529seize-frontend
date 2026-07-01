@@ -5,7 +5,13 @@ import { WalletAddress } from "@/components/address/WalletAddress";
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children }: any) => <a href={href}>{children}</a>,
+  default: ({
+    href,
+    children,
+  }: {
+    href: string;
+    children: React.ReactNode;
+  }) => <a href={href}>{children}</a>,
 }));
 
 const formatAddress = jest.fn((v: string) => `fmt-${v}`);
