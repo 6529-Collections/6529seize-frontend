@@ -6,16 +6,16 @@ Updated: 2026-06-17
 
 ## Goals
 
-- Use the backend session-v2 wallet auth flow for first-party web and native clients.
+- Use the backend session-v2 wallet auth flow for first-party web, native, and desktop clients.
 - Stop using legacy nonce/login/refresh-token auth in the frontend auth flow.
 - Keep web refresh state in backend-owned HttpOnly cookies: a compatibility
   `6529_session` cookie plus address-scoped `6529_session_<address-hash>`
   cookies for multi-account web sessions.
-- Keep native refresh state in secure storage and rotate it on every refresh.
-- Support connection sharing from an authenticated web session to a native client with a short-lived one-time code.
-- Support connection sharing from an authenticated web session to the current
-  6529 Desktop app through the legacy refresh-token handoff while Desktop
-  remains on legacy auth.
+- Keep native and desktop refresh state in secure storage and rotate it on every refresh.
+- Support connection sharing from an authenticated web session to native and
+  desktop clients with a short-lived one-time code.
+- Keep the legacy 6529 Desktop refresh-token handoff documented for older
+  Desktop builds during the rollout.
 - Keep access JWTs available for bearer-auth API calls.
 
 ## Web Session Flow
@@ -82,9 +82,10 @@ Web logout sends cookies and:
 
 `all_sessions=true` revokes all wallet auth sessions for the verified target address. Supplying `client_address` prevents logout from revoking whichever account last wrote the compatibility cookie.
 
-## Native Session Flow
+## Native And Desktop Session Flow
 
 Native callers use the same endpoints with `client_type: "native"`.
+Desktop callers use the same endpoints with `client_type: "desktop"`.
 
 Native nonce requests:
 
@@ -92,7 +93,15 @@ Native nonce requests:
 /api/auth/session-nonce?signer_address=<wallet>&client_type=native&chain_id=1
 ```
 
-Native login sends `client_type`, `client_address`, `client_signature`, `server_signature`, and optional `role`. The response includes `native_refresh_token` and `refresh_token_expires_at`.
+Desktop nonce requests:
+
+```text
+/api/auth/session-nonce?signer_address=<wallet>&client_type=desktop&chain_id=1
+```
+
+Native and desktop login send `client_type`, `client_address`,
+`client_signature`, `server_signature`, and optional `role`. The response
+includes `native_refresh_token` and `refresh_token_expires_at`.
 
 Native refresh sends:
 
@@ -104,7 +113,9 @@ Native refresh sends:
 }
 ```
 
-Native refresh rotates `native_refresh_token`; clients must replace the stored token and must not reuse the previous token.
+Desktop refresh sends the same shape with `client_type: "desktop"`.
+Native and desktop refresh rotate `native_refresh_token`; clients must replace
+the stored token and must not reuse the previous token.
 
 Native logout sends:
 
@@ -117,13 +128,14 @@ Native logout sends:
 }
 ```
 
-Native refresh tokens are stored only in secure OS-backed storage.
+Desktop logout sends the same shape with `client_type: "desktop"`.
+Native and desktop refresh tokens are stored only in secure OS-backed storage.
 
 ## Connection Sharing
 
-Connection sharing creates an additional session from an authenticated web session. It does not transfer, move, or disconnect the original session.
+Connection sharing creates an additional session from an authenticated session. It does not transfer, move, or disconnect the original session.
 
-Mobile/native connection sharing uses session-v2 one-time codes.
+Mobile/native and desktop connection sharing use session-v2 one-time codes.
 
 ### POST `/api/auth/connection-share`
 
@@ -134,6 +146,13 @@ The caller must send bearer access-token auth. The request body is:
   "target_client_type": "native"
 }
 ```
+
+Desktop clients use `"target_client_type": "desktop"`.
+
+Web callers prove the source session with their session-v2 cookies and normally
+send only `target_client_type`. Native and desktop callers must include
+`client_type`, `client_address`, and `native_refresh_token` for the active source
+session; the backend checks that proof before issuing the share.
 
 The optional `role` field is accepted only when it matches the authenticated
 session role. The web frontend normally omits it and lets the backend bind the
@@ -166,18 +185,22 @@ The native client redeems:
 }
 ```
 
-The response is a native session response. The native client persists the returned `native_refresh_token` in secure storage and then uses the native session-v2 refresh flow.
+Desktop clients redeem the same shape with `"target_client_type": "desktop"`.
+The response is a refresh-token session response and includes the created
+`client_type`. The client persists the returned `native_refresh_token` in secure
+storage and then uses the matching native or desktop session-v2 refresh flow.
 
 Connection-share codes are short-lived, one-time use, and consumed atomically by the backend. Disabled-backend responses should be handled as a clean feature-unavailable state.
 
 ### POST `/api/auth/connection-share/legacy-desktop`
 
-6529 Desktop remains on legacy auth during this rollout. The web frontend uses
-this endpoint only for the `6529 Desktop` connection target when it does not
-already have a local legacy refresh token for the active wallet.
+Older 6529 Desktop builds used this legacy auth endpoint during the session-v2
+rollout. New Desktop builds should use the session-v2 `desktop` client type and
+connection sharing target.
 
-The caller must send bearer access-token auth and session-v2 web cookies. The
-request body is empty in normal frontend usage:
+The caller must send bearer access-token auth plus the same source-session proof
+used for `/api/auth/connection-share`. The request body is empty in normal web
+frontend usage because the browser supplies session-v2 web cookies:
 
 ```json
 {}
@@ -232,9 +255,9 @@ Required rollout values:
 - Web refresh/logout include credentials and the active `client_address`.
 - Native refresh token rotation updates secure storage.
 - Connection sharing uses `/auth/connection-share`, `/auth/connection-share/redeem`, and `connection_share_code`.
-- Desktop connection sharing uses either the locally stored legacy refresh token
-  or `/auth/connection-share/legacy-desktop`, and Desktop remains legacy until a
-  separate Desktop v2 auth release.
+- Desktop connection sharing uses the session-v2 `desktop` client type. Older
+  Desktop builds may continue to use `/auth/connection-share/legacy-desktop`
+  only for compatibility.
 - Frontend auth does not use legacy wallet nonce/login/refresh-token redemption
   for normal web or native auth. The `/auth/redeem-refresh-token` exception is
   limited to accepting legacy Desktop connection-sharing links.

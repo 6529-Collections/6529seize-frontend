@@ -17,8 +17,7 @@ import { faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useReducer, useRef } from "react";
-import { Dropdown } from "react-bootstrap";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { getRememeSortLabel } from "../rememes/rememesI18n";
 import { getRememeDetailHref } from "../rememes/rememesRouteParams";
@@ -174,6 +173,8 @@ export function MemePageReferencesSubMenu(props: {
   );
 
   const rememesTarget = useRef<HTMLDivElement>(null);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
 
   function refreshRememes(memeId: number) {
     void fetchUrl(
@@ -230,6 +231,31 @@ export function MemePageReferencesSubMenu(props: {
     }
   }, [props.show, props.nft, rememesState.page, rememesState.selectedSorting]);
 
+  useEffect(() => {
+    function closeDropdown(event: MouseEvent) {
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(event.target as Node)
+      ) {
+        setSortDropdownOpen(false);
+      }
+    }
+
+    function closeDropdownOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setSortDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", closeDropdown);
+    document.addEventListener("keydown", closeDropdownOnEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", closeDropdown);
+      document.removeEventListener("keydown", closeDropdownOnEscape);
+    };
+  }, []);
+
   if (!props.show) {
     return <></>;
   }
@@ -277,31 +303,40 @@ export function MemePageReferencesSubMenu(props: {
           </h1>
           {rememesState.showSort && (
             <span className="tw-flex tw-items-center tw-gap-2 tw-pt-2">
-              <Dropdown
-                className={styles["rememesSortDropdown"]}
-                drop={"down-centered"}
+              <div
+                className={`${styles["rememesSortDropdown"]} tw-relative`}
+                ref={sortDropdownRef}
               >
-                <Dropdown.Toggle>
+                <button
+                  type="button"
+                  onClick={() => setSortDropdownOpen((open) => !open)}
+                  aria-expanded={sortDropdownOpen}
+                >
                   {t(locale, "theMemes.detail.references.sort.trigger", {
                     sort: selectedRememeSortingLabel,
                   })}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  {REMEME_SORTING.map((s) => (
-                    <Dropdown.Item
-                      key={`sorting-${s}`}
-                      onClick={() => {
-                        dispatchRememesState({
-                          type: "setSorting",
-                          sorting: s,
-                        });
-                      }}
-                    >
-                      {getRememeSortLabel(s, locale)}
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
+                </button>
+                {sortDropdownOpen && (
+                  <div className="tw-absolute tw-left-1/2 tw-top-full tw-z-50 tw-mt-0 tw-max-h-[65vh] tw-min-w-[12rem] -tw-translate-x-1/2 tw-overflow-y-auto tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-t-white tw-bg-iron-950 tw-py-2 tw-shadow-md">
+                    {REMEME_SORTING.map((s) => (
+                      <button
+                        type="button"
+                        key={`sorting-${s}`}
+                        className="tw-block tw-w-[98%] tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 focus:tw-bg-transparent"
+                        onClick={() => {
+                          dispatchRememesState({
+                            type: "setSorting",
+                            sorting: s,
+                          });
+                          setSortDropdownOpen(false);
+                        }}
+                      >
+                        {getRememeSortLabel(s, locale)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               {rememesState.selectedSorting === RememeSort.RANDOM && (
                 <>
                   <button

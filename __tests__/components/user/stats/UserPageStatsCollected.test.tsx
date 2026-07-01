@@ -63,14 +63,12 @@ test("renders collected stats", () => {
     })
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("button", {
-      name: t(DEFAULT_LOCALE, "user.collected.stats.details.overview"),
-    })
+    screen.getByText(t(DEFAULT_LOCALE, "user.collected.stats.details.overview"))
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("button", {
-      name: t(DEFAULT_LOCALE, "user.collected.stats.details.memesBySeason"),
-    })
+    screen.getByText(
+      t(DEFAULT_LOCALE, "user.collected.stats.details.memesBySeason")
+    )
   ).toBeInTheDocument();
   expect(
     screen.getByRole("table", {
