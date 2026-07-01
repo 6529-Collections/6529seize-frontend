@@ -549,6 +549,63 @@ describe("WaveDropsAll", () => {
         50
       );
     });
+
+    it("keeps the virtual page size stable when device info changes in the same all-drops view", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+      });
+
+      const renderResult = renderComponent();
+      const { props } = renderResult;
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        25
+      );
+
+      require("@/hooks/useDeviceInfo").default.mockReturnValue({
+        isAppleMobile: false,
+        isMobileDevice: false,
+        hasTouchScreen: false,
+        isApp: false,
+      });
+
+      renderResult.rerender(<WaveDropsAll {...props} />);
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        25
+      );
+    });
+
+    it("recomputes the virtual page size when the drop scope changes", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+      });
+
+      const renderResult = renderComponent();
+      const { props } = renderResult;
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        25
+      );
+
+      renderResult.rerender(<WaveDropsAll {...props} dropId="target-drop" />);
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        "target-drop",
+        undefined,
+        50
+      );
+    });
   });
 
   describe("Typing Indicator", () => {
