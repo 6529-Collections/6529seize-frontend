@@ -277,35 +277,51 @@ function NextGenCollectionDetailsAbout() {
           <table className="tw-w-full tw-border-collapse">
             <tbody>
               <tr>
-                <td>Collection Size:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Collection Size:
+                </th>
                 <td>1,000 (or fewer, if fewer are minted in 24 hours)</td>
               </tr>
               <tr>
-                <td>Orientation:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Orientation:
+                </th>
                 <td>Vertical</td>
               </tr>
               <tr>
-                <td>Aspect Ratio:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Aspect Ratio:
+                </th>
                 <td>1:1.294</td>
               </tr>
               <tr>
-                <td>Script:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Script:
+                </th>
                 <td>Javascript</td>
               </tr>
               <tr>
-                <td>Script Size:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Script Size:
+                </th>
                 <td>17Kb</td>
               </tr>
               <tr>
-                <td>External libraries used:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  External libraries used:
+                </th>
                 <td>None</td>
               </tr>
               <tr>
-                <td>License:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  License:
+                </th>
                 <td>Creative Commons 0 (CC0)</td>
               </tr>
               <tr>
-                <td>Prints:</td>
+                <th scope="row" className="tw-text-left tw-font-normal">
+                  Prints:
+                </th>
                 <td>
                   An official ZeBlocks approved printing process will be
                   available in a few weeks
