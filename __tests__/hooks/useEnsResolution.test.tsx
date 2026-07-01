@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 
 const mockUseEnsName = jest.fn();
@@ -58,6 +58,10 @@ describe("useEnsResolution", () => {
   });
 
   it("syncs repeated initialValue changes without stale resolved addresses", () => {
+    mockUseEnsAddress.mockImplementation(({ name }) => ({
+      data: name === "night0wl.eth" ? secondAddress : null,
+    }));
+
     const { result, rerender } = renderHook(
       ({ initialValue }) => useEnsResolution({ initialValue }),
       { initialProps: { initialValue: address } }
@@ -73,7 +77,26 @@ describe("useEnsResolution", () => {
 
     rerender({ initialValue: "night0wl.eth" });
 
-    expect(result.current.inputValue).toBe("night0wl.eth");
-    expect(result.current.address).toBe("night0wl.eth");
+    expect(result.current.inputValue).toBe(`night0wl.eth - ${secondAddress}`);
+    expect(result.current.address).toBe(secondAddress);
+  });
+
+  it("lets a new initialValue replace an imperative address override", () => {
+    const { result, rerender } = renderHook(
+      ({ initialValue }) => useEnsResolution({ initialValue }),
+      { initialProps: { initialValue: address } }
+    );
+
+    act(() => {
+      result.current.setAddress(secondAddress);
+    });
+
+    expect(result.current.inputValue).toBe(address);
+    expect(result.current.address).toBe(secondAddress);
+
+    rerender({ initialValue: `0wl.eth - ${address}` });
+
+    expect(result.current.inputValue).toBe(`0wl.eth - ${address}`);
+    expect(result.current.address).toBe(address);
   });
 });
