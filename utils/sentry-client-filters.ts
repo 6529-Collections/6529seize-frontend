@@ -246,6 +246,7 @@ const metaMaskMobileContextTokens = ["metamaskmobile", "metamask mobile"];
 const mobileSafariWebViewContextTokens = [
   "mobile safari ui/wkwebview",
   "wkwebview",
+  "webview",
 ];
 const routeParameterizationContextKeys = ["app", "browser", "device", "os"];
 const routeParameterizationTagKeys = [
@@ -1723,13 +1724,40 @@ function getRouteParameterizationContextValues(
   );
 }
 
+function getRuntimeUserAgent(): string | undefined {
+  try {
+    const userAgent = globalThis.navigator?.userAgent;
+    return typeof userAgent === "string" ? userAgent : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getRouteParameterizationUserAgentValues(
+  event: SentryClientEvent
+): string[] {
+  const candidates = [
+    getRequestHeaderString(event, "user-agent"),
+    getStringValue(event.tags?.["user_agent"]),
+    getStringValue(event.tags?.["userAgent"]),
+    getRuntimeUserAgent(),
+  ];
+
+  return candidates.filter(
+    (value): value is string => typeof value === "string" && value.length > 0
+  );
+}
+
 function matchesContextToken(value: string, tokens: string[]): boolean {
   const normalized = value.toLowerCase();
   return tokens.some((token) => normalized.includes(token));
 }
 
 function hasMetaMaskMobileWebViewContext(event: SentryClientEvent): boolean {
-  const values = getRouteParameterizationContextValues(event);
+  const values = uniqueStrings([
+    ...getRouteParameterizationContextValues(event),
+    ...getRouteParameterizationUserAgentValues(event),
+  ]);
   return (
     values.some((value) =>
       matchesContextToken(value, metaMaskMobileContextTokens)
@@ -2373,14 +2401,11 @@ export function shouldFilterSentryRouteParameterizationError(
   }
 
   const frames = value.stacktrace?.frames;
-  if (hasAppOwnedFrame(frames) || !hasNativeJsonStringifyFrame(frames)) {
+  if (hasLikelyAppOwnedFrame(frames) || !hasNativeJsonStringifyFrame(frames)) {
     return false;
   }
 
-  return (
-    hasRouteParameterizationNavigationSignature(event) &&
-    hasMetaMaskMobileWebViewContext(event)
-  );
+  return hasMetaMaskMobileWebViewContext(event);
 }
 
 export function shouldFilterInjectedWalletCollision(

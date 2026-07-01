@@ -68,6 +68,8 @@ describe("sentry-client-filters", () => {
   });
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
+  const metaMaskMobileWebViewUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebView MetaMaskMobile";
   const wasmCspUnsafeEvalMessage = [
     "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
     "WebAssembly module violates the following Content Security policy directive",
@@ -89,6 +91,23 @@ describe("sentry-client-filters", () => {
     },
     ...overrides,
   });
+
+  function withRuntimeUserAgent<T>(userAgent: string, callback: () => T): T {
+    const originalUserAgent = globalThis.navigator.userAgent;
+    Object.defineProperty(globalThis.navigator, "userAgent", {
+      configurable: true,
+      value: userAgent,
+    });
+
+    try {
+      return callback();
+    } finally {
+      Object.defineProperty(globalThis.navigator, "userAgent", {
+        configurable: true,
+        value: originalUserAgent,
+      });
+    }
+  }
 
   const createTwitterConfigEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -2467,6 +2486,49 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters MetaMaskMobile WebView route parameterization errors on the memes mint route", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: "/the-memes/mint",
+      request: {
+        url: "https://6529.io/the-memes/mint",
+        headers: {
+          "User-Agent": metaMaskMobileWebViewUserAgent,
+        },
+      },
+      contexts: {},
+      tags: {},
+      breadcrumbs: [],
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("uses the runtime user agent for MetaMaskMobile WebView route parameterization errors", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: "/the-memes/mint",
+      request: {
+        url: "https://6529.io/the-memes/mint",
+      },
+      contexts: {},
+      tags: {},
+      breadcrumbs: [],
+    });
+
+    // Act
+    const result = withRuntimeUserAgent(metaMaskMobileWebViewUserAgent, () =>
+      shouldFilterSentryRouteParameterizationError(event)
+    );
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter cyclic JSON errors with app-owned frames", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
@@ -2490,6 +2552,54 @@ describe("sentry-client-filters", () => {
                   filename: "https://6529.io/_next/static/chunks/app-client.js",
                   function: "serializeWaveParams",
                   in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter cyclic JSON errors with app-owned source frames", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: "/the-memes/mint",
+      request: {
+        url: "https://6529.io/the-memes/mint",
+        headers: {
+          "User-Agent": metaMaskMobileWebViewUserAgent,
+        },
+      },
+      contexts: {},
+      tags: {},
+      breadcrumbs: [],
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: true,
+                },
+                {
+                  filename:
+                    "https://6529.io/_next/static/chunks/app/the-memes/mint/page-1234567890abcdef.js",
+                  function: "submitMint",
                 },
               ],
             },
@@ -2538,7 +2648,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("does not filter cyclic JSON errors without navigation breadcrumbs", () => {
+  it("filters cyclic JSON errors without navigation breadcrumbs when MetaMaskMobile WebView context is present", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
       breadcrumbs: [],
@@ -2548,7 +2658,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
   it("does not filter cyclic JSON route parameterization errors without MetaMaskMobile WKWebView context", () => {
@@ -2572,7 +2682,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("does not filter MetaMaskMobile route parameterization errors outside waves routes", () => {
+  it("filters MetaMaskMobile route parameterization errors outside waves routes", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
       transaction: "/about",
@@ -2594,7 +2704,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
   it("filters MetaMaskMobile route parameterization errors when waves route appears only in navigation breadcrumbs", () => {
