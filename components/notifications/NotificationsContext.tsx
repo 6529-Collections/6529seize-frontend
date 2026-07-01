@@ -380,9 +380,9 @@ const isKnownLowValuePushRegistrationError = (error: unknown): boolean => {
     .toLowerCase();
   const errorRecord = toRecord(error);
   const normalizedErrorDomain =
-    errorRecord !== null
-      ? (getStringErrorField(errorRecord, "domain")?.toLowerCase() ?? "")
-      : "";
+    errorRecord === null
+      ? ""
+      : (getStringErrorField(errorRecord, "domain")?.toLowerCase() ?? "");
 
   const matchesKnownPattern = LOW_VALUE_PUSH_REGISTRATION_ERROR_PATTERNS.some(
     (pattern) => normalizedMessage.includes(pattern)
