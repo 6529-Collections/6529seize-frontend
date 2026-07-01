@@ -16,6 +16,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { useClickAway } from "react-use";
 import { Tooltip } from "react-tooltip";
 import DotLoader from "../dotLoader/DotLoader";
 import styles from "./GasRoyalties.module.scss";
@@ -51,25 +52,7 @@ function FilterDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLSpanElement>(null);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    function handlePointerDown(event: PointerEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-    };
-  }, [isOpen]);
+  useClickAway(dropdownRef, () => setIsOpen(false));
 
   return (
     <span ref={dropdownRef} className={styles["filterDropdown"]}>
