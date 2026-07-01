@@ -46,6 +46,7 @@ export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
   const inputAddress = getResolvedAddressFromInputValue(
     currentState.inputValue
   );
+  const ensInputName = getEnsInputName(currentState.inputValue);
 
   const ensNameQuery = useEnsName({
     address: inputAddress.toLowerCase().startsWith("0x")
@@ -55,12 +56,14 @@ export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
   });
 
   const ensAddressQuery = useEnsAddress({
-    name: getEnsInputName(currentState.inputValue),
+    name: ensInputName,
     chainId,
   });
 
   const resolvedAddress =
-    currentState.addressOverride ?? ensAddressQuery.data ?? inputAddress;
+    currentState.addressOverride ??
+    ensAddressQuery.data ??
+    (ensInputName ? "" : inputAddress);
   const inputValue = getDisplayInputValue({
     inputValue: currentState.inputValue,
     ensName: ensNameQuery.data,

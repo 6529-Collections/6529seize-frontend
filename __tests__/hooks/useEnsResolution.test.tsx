@@ -81,6 +81,15 @@ describe("useEnsResolution", () => {
     expect(result.current.address).toBe(secondAddress);
   });
 
+  it("does not expose a bare ENS name as an address while resolution is pending", () => {
+    const { result } = renderHook(() =>
+      useEnsResolution({ initialValue: "night0wl.eth" })
+    );
+
+    expect(result.current.inputValue).toBe("night0wl.eth");
+    expect(result.current.address).toBe("");
+  });
+
   it("lets a new initialValue replace an imperative address override", () => {
     const { result, rerender } = renderHook(
       ({ initialValue }) => useEnsResolution({ initialValue }),
