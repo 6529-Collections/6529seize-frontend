@@ -11,6 +11,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export enum ApiAttachmentSafetyValidation {
     PublicIpfsValidated = 'public_ipfs_validated'
 }
