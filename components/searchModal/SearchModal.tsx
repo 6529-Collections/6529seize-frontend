@@ -77,11 +77,11 @@ function SearchModal(props: Readonly<Props>) {
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const timer = window.setTimeout(() => inputRef.current?.focus(), 0);
+    const timer = globalThis.setTimeout(() => inputRef.current?.focus(), 0);
 
     return () => {
       document.body.style.overflow = originalOverflow;
-      window.clearTimeout(timer);
+      globalThis.clearTimeout(timer);
     };
   }, [props.show]);
 

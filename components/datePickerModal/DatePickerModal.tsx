@@ -54,11 +54,11 @@ export default function DatePickerModal(props: Readonly<Props>) {
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const timer = window.setTimeout(() => modalRef.current?.focus(), 0);
+    const timer = globalThis.setTimeout(() => modalRef.current?.focus(), 0);
 
     return () => {
       document.body.style.overflow = originalOverflow;
-      window.clearTimeout(timer);
+      globalThis.clearTimeout(timer);
     };
   }, [props.show]);
   useKeyPressEvent("Escape", () => {
@@ -97,8 +97,8 @@ export default function DatePickerModal(props: Readonly<Props>) {
   }
 
   function applyBlock() {
-    const fromBlockInt = parseInt(fromBlock, 10);
-    const toBlockInt = parseInt(toBlock, 10);
+    const fromBlockInt = Number.parseInt(fromBlock, 10);
+    const toBlockInt = Number.parseInt(toBlock, 10);
     if (isNaN(fromBlockInt) || isNaN(toBlockInt)) {
       setError("Please enter a valid start and end block.");
       return;
@@ -190,7 +190,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                     aria-invalid={Boolean(error)}
                     aria-describedby={error ? errorId : undefined}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value, 10);
+                      const value = Number.parseInt(e.target.value, 10);
                       if (isNaN(value)) {
                         setFromBlock("");
                       } else {
@@ -241,7 +241,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                     aria-invalid={Boolean(error)}
                     aria-describedby={error ? errorId : undefined}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value, 10);
+                      const value = Number.parseInt(e.target.value, 10);
                       if (isNaN(value)) {
                         setToBlock("");
                       } else {
