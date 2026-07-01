@@ -1,3 +1,10 @@
+# 6529.io robots.txt
+# Standard crawler directives plus agent-native file declarations.
+# The agent-native files below are added so crawlers and agent frameworks
+# that scan robots.txt can discover them alongside the standard sitemap.
+# Agents should prefer /llms.txt as the primary entry point — it contains
+# the full file index with descriptions and usage instructions.
+
 # *
 User-agent: *
 Allow: /
@@ -7,3 +14,12 @@ Host: https://6529.io
 
 # Sitemaps
 Sitemap: https://6529.io/sitemap.xml
+
+# Agent-Native Files
+# These static files in public/ make 6529.io discoverable to AI agents.
+# Listed here so agent frameworks that parse robots.txt find them automatically.
+# Full descriptions and usage instructions are in /llms.txt.
+# llms.txt — Agent entry point: https://6529.io/llms.txt
+# glossary.json — 6529 term definitions (40 terms, 7 languages): https://6529.io/glossary.json
+# help-index.json — Route and feature index (181 records): https://6529.io/help-index.json
+# for-agents.html — Human+agent discovery page: https://6529.io/for-agents.html

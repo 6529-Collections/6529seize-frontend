@@ -1,0 +1,1185 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-30",
+  "base_url": "https://6529.io",
+  "description": "Glossary of 6529 ecosystem terms for agents and beginners. Cross-references help-index.json records.",
+  "terms": [
+    {
+      "term": "TDH",
+      "expansion": "Total Days Held",
+      "category": "network",
+      "beginner_definition": "A score that measures how long you've held your 6529 NFTs. Higher TDH means more influence in the network.",
+      "technical_definition": "A time-weighted NFT holding metric that starts from days held and applies edition-size weighting plus active boosters. Updates on a daily cadence and is used across Network surfaces.",
+      "source_path": "/network/tdh",
+      "help_index_id": "network.tdh",
+      "related_terms": [
+        "xTDH",
+        "Boost",
+        "Hodl Rate",
+        "Network Levels"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep TDH as-is across all locales. Translate the expansion.",
+        "translations": {
+          "ko": "TDH (\ucd1d \ubcf4\uc720 \uc77c\uc218)",
+          "es": "TDH (D\u00edas Totales en Posesi\u00f3n)",
+          "ja": "TDH (\u7dcf\u4fdd\u6709\u65e5\u6570)",
+          "sw": "TDH (Jumla ya Siku za Kushikilia)",
+          "hi": "TDH (\u0915\u0941\u0932 \u0939\u094b\u0932\u094d\u0921 \u0926\u093f\u0928)",
+          "zh": "TDH (\u603b\u6301\u6709\u5929\u6570)",
+          "ru": "TDH (\u043e\u0431\u0449\u0435\u0435 \u043a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e \u0434\u043d\u0435\u0439 \u0443\u0434\u0435\u0440\u0436\u0430\u043d\u0438\u044f)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "term": "xTDH",
+      "expansion": "Extended TDH",
+      "category": "network",
+      "beginner_definition": "A view of TDH that shows what you've given to others and what you've received from others.",
+      "technical_definition": "Extended TDH-related surface with granted and received views on profiles. Profile xTDH information available at /{user}/xtdh. Network xTDH overview and formulas live under the Network area.",
+      "source_path": "/network/xtdh",
+      "help_index_id": "network.xtdh",
+      "related_terms": [
+        "TDH"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep xTDH as-is. Translate 'extended'.",
+        "translations": {
+          "ko": "xTDH (\ud655\uc7a5 TDH)",
+          "es": "xTDH (TDH extendido)",
+          "ja": "xTDH (\u62e1\u5f35TDH)",
+          "sw": "xTDH (xTDH iliyopanuliwa)",
+          "hi": "xTDH (\u0935\u093f\u0938\u094d\u0924\u093e\u0930\u093f\u0924 TDH)",
+          "zh": "xTDH (\u6269\u5c55TDH)",
+          "ru": "xTDH (\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043d\u043d\u044b\u0439 TDH)"
+        }
+      }
+    },
+    {
+      "term": "REP",
+      "expansion": "Reputation",
+      "category": "network",
+      "beginner_definition": "Points that other community members give you in categories and waves. It shows how much the community trusts your contributions.",
+      "technical_definition": "Peer-given reputation in categories and waves. REP category analytics and category-level views live under /rep/categories.",
+      "source_path": "/rep/categories",
+      "help_index_id": "rep.cic",
+      "related_terms": [
+        "CIC",
+        "NIC",
+        "Wave",
+        "Network Levels"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep REP as-is. Translate 'reputation'.",
+        "translations": {
+          "ko": "REP (\ud3c9\ud310)",
+          "es": "REP (Reputaci\u00f3n)",
+          "ja": "REP (\u8a55\u5224)",
+          "sw": "REP (Sifa)",
+          "hi": "REP (\u092a\u094d\u0930\u0924\u093f\u0937\u094d\u0920\u093e)",
+          "zh": "REP (\u58f0\u8a89)",
+          "ru": "REP (\u0440\u0435\u043f\u0443\u0442\u0430\u0446\u0438\u044f)"
+        }
+      }
+    },
+    {
+      "term": "CIC",
+      "expansion": "Community Interaction Count",
+      "category": "network",
+      "beginner_definition": "A count of how much you interact with the 6529 community. Shown on your profile and Network pages.",
+      "technical_definition": "Community interaction count signal shown on profiles and Network surfaces.",
+      "source_path": "/rep/categories",
+      "help_index_id": "rep.cic",
+      "related_terms": [
+        "REP",
+        "NIC"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep CIC as-is.",
+        "translations": {
+          "ko": "CIC (\ucee4\ubba4\ub2c8\ud2f0 \uc0c1\ud638\uc791\uc6a9 \uc218)",
+          "es": "CIC (Conteo de Interacci\u00f3n Comunitaria)",
+          "ja": "CIC (\u30b3\u30df\u30e5\u30cb\u30c6\u30a3\u76f8\u4e92\u4f5c\u7528\u30ab\u30a6\u30f3\u30c8)",
+          "sw": "CIC (Hesabu ya Mawasiliano ya Jumuiya)",
+          "hi": "CIC (\u0938\u093e\u092e\u0941\u0926\u093e\u092f\u093f\u0915 \u0938\u0902\u092a\u0930\u094d\u0915 \u0917\u0923\u0928\u093e)",
+          "zh": "CIC (\u793e\u533a\u4e92\u52a8\u8ba1\u6570)",
+          "ru": "CIC (\u0441\u0447\u0435\u0442\u0447\u0438\u043a \u0432\u0437\u0430\u0438\u043c\u043e\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044f \u0441\u043e\u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0430)"
+        }
+      }
+    },
+    {
+      "term": "NIC",
+      "expansion": "Network Identity Check",
+      "category": "identity",
+      "beginner_definition": "A trust signal answering: does the network believe this profile accurately represents its identity? Other users rate your NIC.",
+      "technical_definition": "Network Identity Credits/CHECK \u2014 the 6529 network identity trust signal shown on profile identity surfaces. App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header. Users rate each other's NIC.",
+      "source_path": "/{user}",
+      "help_index_id": "profiles.identity-tab",
+      "related_terms": [
+        "REP",
+        "Identity Statements",
+        "Profile"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep NIC as-is.",
+        "translations": {
+          "ko": "NIC (\ub124\ud2b8\uc6cc\ud06c \uc544\uc774\ub374\ud2f0\ud2f0 \ud655\uc778)",
+          "es": "NIC (Verificaci\u00f3n de Identidad de Red)",
+          "ja": "NIC (\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u30a2\u30a4\u30c7\u30f3\u30c6\u30a3\u30c6\u30a3\u30c1\u30a7\u30c3\u30af)",
+          "sw": "NIC (Ukaguzi wa Utambulisho wa Mtandao)",
+          "hi": "NIC (\u0928\u0947\u091f\u0935\u0930\u094d\u0915 \u092a\u0939\u091a\u093e\u0928 \u091c\u093e\u0902\u091a)",
+          "zh": "NIC (\u7f51\u7edc\u8eab\u4efd\u9a8c\u8bc1)",
+          "ru": "NIC (\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u0441\u0435\u0442\u0435\u0432\u043e\u0439 \u0438\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0438)"
+        }
+      }
+    },
+    {
+      "term": "Brain",
+      "expansion": "6529's social network",
+      "category": "social",
+      "beginner_definition": "Brain is 6529's social network. It surfaces your activity, wave participation, and community interactions on your profile.",
+      "technical_definition": "The Profile Brain tab surfaces Brain-related profile activity and wave context. Brain views include activity and wave sidebar surfaces. Located at /{user}/brain.",
+      "source_path": "/{user}/brain",
+      "help_index_id": "profiles.brain-tab",
+      "related_terms": [
+        "Wave",
+        "Drop",
+        "Profile"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'Brain' conceptually \u2014 it refers to social network activity, not the organ.",
+        "translations": {
+          "ko": "Brain (\ube0c\ub808\uc778 \u2014 \uc18c\uc15c \ub124\ud2b8\uc6cc\ud06c)",
+          "es": "Brain (Cerebro \u2014 red social)",
+          "ja": "Brain (\u30d6\u30ec\u30a4\u30f3 \u2014 \u30bd\u30fc\u30b7\u30e3\u30eb\u30cd\u30c3\u30c8\u30ef\u30fc\u30af)",
+          "sw": "Brain (Ubongo \u2014 mtandao wa kijamii)",
+          "hi": "Brain (\u092c\u094d\u0930\u0947\u0928 \u2014 \u0938\u093e\u092e\u093e\u091c\u093f\u0915 \u0928\u0947\u091f\u0935\u0930\u094d\u0915)",
+          "zh": "Brain (\u5927\u8111 \u2014 \u793e\u4ea4\u7f51\u7edc)",
+          "ru": "Brain (\u041c\u043e\u0437\u0433 \u2014 \u0441\u043e\u0446\u0438\u0430\u043b\u044c\u043d\u0430\u044f \u0441\u0435\u0442\u044c)"
+        }
+      }
+    },
+    {
+      "term": "Wave",
+      "expansion": "Social thread",
+      "category": "social",
+      "beginner_definition": "A Wave is a conversation thread on 6529.io where community members post messages (drops), react, vote, and share content. Types include Chat, Rank, and Approve waves.",
+      "technical_definition": "Main social threads for conversations, drops, reactions, voting, and wave-specific activity. Standard wave threads at /waves/{waveId}. Direct messages at /messages/{waveId}. Types: Chat (conversation), Rank (collect and vote/rank drops), Approve (accept/reject submissions).",
+      "source_path": "/waves",
+      "help_index_id": "waves.overview",
+      "related_terms": [
+        "Drop",
+        "Brain",
+        "Wave Score",
+        "Groups"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'wave' but note cultural context \u2014 in 6529 it means a content/curation channel, not ocean waves.",
+        "translations": {
+          "ko": "Wave (\uc6e8\uc774\ube0c \u2014 \ub300\ud654 \ucc44\ub110)",
+          "es": "Wave (Ola \u2014 canal de conversaci\u00f3n)",
+          "ja": "Wave (\u30a6\u30a7\u30a4\u30d6 \u2014 \u4f1a\u8a71\u30c1\u30e3\u30f3\u30cd\u30eb)",
+          "sw": "Wave (Wimbi \u2014 kituo cha mazungumzo)",
+          "hi": "Wave (\u0935\u0947\u0935 \u2014 \u0935\u093e\u0930\u094d\u0924\u093e \u091a\u0948\u0928\u0932)",
+          "zh": "Wave (\u6ce2 \u2014 \u5bf9\u8bdd\u9891\u9053)",
+          "ru": "Wave (\u0412\u043e\u043b\u043d\u0430 \u2014 \u043a\u0430\u043d\u0430\u043b \u043e\u0431\u0449\u0435\u043d\u0438\u044f)"
+        }
+      }
+    },
+    {
+      "term": "Wave Score",
+      "expansion": "Discovery quality score",
+      "category": "network",
+      "beginner_definition": "A score that determines how visible a Wave is in discovery. Based on 5 quality factors (creator, posters, diversity, subscriptions, REP) minus penalties.",
+      "technical_definition": "5 quality components: creator score (20%), poster level weight (20%), trusted diversity (15%), trusted subscriptions (10%), wave REP (35%). 4 penalties: single actor (max 3.5%), low trust flood (max 3.0%), cross-post pressure (max 2.0%), negative REP (max 3.5%). Safety multiplier = 1 - sum(penalties), floored at 0.25. Quality gate applies a threshold multiplier. Visibility tiers: TRUSTED_VISIBLE, EXPLORATION_NEUTRAL, DEMOTED, SUPPRESSED.",
+      "source_path": "/network/wave-score",
+      "help_index_id": "network.wave-score",
+      "related_terms": [
+        "Wave",
+        "REP",
+        "TDH",
+        "Drop",
+        "Boost"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'score' and 'wave'. Keep the component names in English.",
+        "translations": {
+          "ko": "Wave Score (\uc6e8\uc774\ube0c \uc810\uc218)",
+          "es": "Wave Score (Puntuaci\u00f3n de Wave)",
+          "ja": "Wave Score (\u30a6\u30a7\u30a4\u30d6\u30b9\u30b3\u30a2)",
+          "sw": "Wave Score (Alama ya Wave)",
+          "hi": "Wave Score (\u0935\u0947\u0935 \u0938\u094d\u0915\u094b\u0930)",
+          "zh": "Wave Score (\u6ce2\u8bc4\u5206)",
+          "ru": "Wave Score (\u043e\u0446\u0435\u043d\u043a\u0430 \u0432\u043e\u043b\u043d\u044b)"
+        }
+      }
+    },
+    {
+      "term": "Drop",
+      "expansion": "Message in a Wave",
+      "category": "social",
+      "beginner_definition": "A Drop is a message posted inside a Wave. It can contain text, markdown, images, links, and NFT references. Other users can react, reply, and boost it.",
+      "technical_definition": "Posted content within a wave. Supports markdown, mentions, NFT hashtag references, curation URLs, image uploads. Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning.",
+      "source_path": "/waves",
+      "help_index_id": "waves.composer",
+      "related_terms": [
+        "Wave",
+        "Boost",
+        "Brain"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "'Drop' in 6529 means a posted message, not a file drop or NFT drop.",
+        "translations": {
+          "ko": "Drop (\ub4dc\ub86d \u2014 \uc6e8\uc774\ube0c \ub0b4 \uba54\uc2dc\uc9c0)",
+          "es": "Drop (Mensaje en un Wave)",
+          "ja": "Drop (\u30c9\u30ed\u30c3\u30d7 \u2014 \u30a6\u30a7\u30a4\u30d6\u5185\u306e\u30e1\u30c3\u30bb\u30fc\u30b8)",
+          "sw": "Drop (Ujumbe kwenye Wave)",
+          "hi": "Drop (\u0921\u094d\u0930\u0949\u092a \u2014 \u0935\u0947\u0935 \u092e\u0947\u0902 \u0938\u0902\u0926\u0947\u0936)",
+          "zh": "Drop (\u6ce2\u4e2d\u7684\u6d88\u606f)",
+          "ru": "Drop (\u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435 \u0432 \u0432\u043e\u043b\u043d\u0435)"
+        }
+      }
+    },
+    {
+      "term": "Boost",
+      "expansion": "TDH booster",
+      "category": "network",
+      "beginner_definition": "Boosters are multipliers that increase your TDH score. Historic boost rules are documented on the site.",
+      "technical_definition": "TDH boosters apply multipliers to the base TDH calculation. Historic boost rules and version differences documented at /network/tdh/historic-boosts.",
+      "source_path": "/network/tdh/historic-boosts",
+      "help_index_id": "network.tdh-historic-boosts",
+      "related_terms": [
+        "TDH"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'boost' as amplification/enhancement.",
+        "translations": {
+          "ko": "Boost (\ubd80\uc2a4\ud2b8 \u2014 TDH \uc99d\ud3ed)",
+          "es": "Boost (Impulso \u2014 amplificador de TDH)",
+          "ja": "Boost (\u30d6\u30fc\u30b9\u30c8 \u2014 TDH\u5897\u5e45)",
+          "sw": "Boost (Nyongeza \u2014 kiongeza cha TDH)",
+          "hi": "Boost (\u092c\u0942\u0938\u094d\u091f \u2014 TDH \u092a\u094d\u0930\u0935\u0930\u094d\u0927\u0915)",
+          "zh": "Boost (\u589e\u76ca \u2014 TDH\u653e\u5927\u5668)",
+          "ru": "Boost (\u0443\u0441\u0438\u043b\u0435\u043d\u0438\u0435 \u2014 \u043c\u043d\u043e\u0436\u0438\u0442\u0435\u043b\u044c TDH)"
+        }
+      }
+    },
+    {
+      "term": "Hodl Rate",
+      "expansion": "Hold rate per card",
+      "category": "network",
+      "beginner_definition": "The percentage of a meme card's supply that is being held (not sold) by the community. Higher hodl rate means stronger commitment.",
+      "technical_definition": "Per-card HODL rate shown on The Memes and other NFT surfaces. Related to TDH \u2014 measures how much of an edition is being held vs traded.",
+      "source_path": "/network/tdh",
+      "help_index_id": "network.tdh",
+      "related_terms": [
+        "TDH",
+        "Meme Card"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "'Hodl' is a meme word \u2014 keep as-is across all locales. Translate 'rate'.",
+        "translations": {
+          "ko": "Hodl Rate (\ud640\ub51c \ube44\uc728)",
+          "es": "Hodl Rate (Tasa de Hodl)",
+          "ja": "Hodl Rate (\u30db\u30fc\u30eb\u30c9\u7387)",
+          "sw": "Hodl Rate (Kiwango cha Hodl)",
+          "hi": "Hodl Rate (\u0939\u094b\u0932\u094d\u0921 \u0926\u0930)",
+          "zh": "Hodl Rate (\u6301\u6709\u7387)",
+          "ru": "Hodl Rate (\u043a\u043e\u044d\u0444\u0444\u0438\u0446\u0438\u0435\u043d\u0442 \u0443\u0434\u0435\u0440\u0436\u0430\u043d\u0438\u044f)"
+        }
+      }
+    },
+    {
+      "term": "Consolidation",
+      "expansion": "Wallet consolidation",
+      "category": "delegation",
+      "beginner_definition": "Consolidation connects multiple wallets you control so your TDH, total cards, and unique cards are counted together across all of them.",
+      "technical_definition": "Register Consolidation connects wallets you control for supported 6529 metrics such as TDH, total cards, and unique cards. Use case #999. Should be reciprocal when two wallets are intended to be treated together. Not a delegation \u2014 does not grant rights.",
+      "source_path": "/delegation/register-consolidation",
+      "help_index_id": "delegation.register-consolidation",
+      "related_terms": [
+        "TDH",
+        "Delegation",
+        "Proxy"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate as 'combining/merging wallets'.",
+        "translations": {
+          "ko": "Consolidation (\uc9c0\uac11 \ud1b5\ud569)",
+          "es": "Consolidaci\u00f3n (combinaci\u00f3n de wallets)",
+          "ja": "Consolidation (\u30a6\u30a9\u30ec\u30c3\u30c8\u7d71\u5408)",
+          "sw": "Consolidation (Unganisho wa wallets)",
+          "hi": "Consolidation (\u0935\u0949\u0932\u0947\u091f \u090f\u0915\u0940\u0915\u0930\u0923)",
+          "zh": "Consolidation (\u94b1\u5305\u5408\u5e76)",
+          "ru": "Consolidation (\u043e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u0435 \u043a\u043e\u0448\u0435\u043b\u044c\u043a\u043e\u0432)"
+        }
+      }
+    },
+    {
+      "term": "Delegation",
+      "expansion": "Wallet authorization",
+      "category": "delegation",
+      "beginner_definition": "Delegation lets one of your wallets authorize another wallet to perform supported 6529 actions on your behalf \u2014 useful for vault/hot-wallet setups.",
+      "technical_definition": "One wallet authorizes another for supported 6529 uses. Delegation center at /delegation/delegation-center provides wallet checking, action flows, collection management. Useful for vault/hot-wallet patterns and airdrop workflows.",
+      "source_path": "/delegation/delegation-center",
+      "help_index_id": "delegation.overview",
+      "related_terms": [
+        "Consolidation",
+        "Proxy"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate as 'authorization/delegation of wallet'.",
+        "translations": {
+          "ko": "Delegation (\uc704\uc784 \u2014 \uc9c0\uac11 \uad8c\ud55c \uc704\uc784)",
+          "es": "Delegation (Delegaci\u00f3n \u2014 autorizaci\u00f3n de wallet)",
+          "ja": "Delegation (\u59d4\u4efb \u2014 \u30a6\u30a9\u30ec\u30c3\u30c8\u8a8d\u8a3c)",
+          "sw": "Delegation (Ufawida \u2014 ruhusa ya wallet)",
+          "hi": "Delegation (\u092a\u094d\u0930\u0924\u093f\u0928\u093f\u0927\u093f\u0924\u094d\u0935 \u2014 \u0935\u0949\u0932\u0947\u091f \u0905\u0927\u093f\u0915\u0943\u0924\u093f)",
+          "zh": "Delegation (\u59d4\u6258 \u2014 \u94b1\u5305\u6388\u6743)",
+          "ru": "Delegation (\u0434\u0435\u043b\u0435\u0433\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u2014 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u0430\u0446\u0438\u044f \u043a\u043e\u0448\u0435\u043b\u044c\u043a\u0430)"
+        }
+      }
+    },
+    {
+      "term": "Proxy",
+      "expansion": "Profile proxy",
+      "category": "identity",
+      "beginner_definition": "A proxy lets another account perform actions (like giving REP or NIC) on your behalf without handing over your primary wallet.",
+      "technical_definition": "Allow another account to perform supported actions without handing over the primary wallet. Current proxy actions: Allocate Rep and Allocate NIC with granted Credit amount and read-only Spent total. Separate from delegation.",
+      "source_path": "/{user}/proxy",
+      "help_index_id": "profiles.proxy-tab",
+      "related_terms": [
+        "REP",
+        "NIC",
+        "Delegation"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate as 'representative/substitute'.",
+        "translations": {
+          "ko": "Proxy (\ud504\ub85d\uc2dc \u2014 \ub300\ub9ac \uacc4\uc815)",
+          "es": "Proxy (Apoderado \u2014 cuenta representante)",
+          "ja": "Proxy (\u30d7\u30ed\u30ad\u30b7 \u2014\u4ee3\u7406\u30a2\u30ab\u30a6\u30f3\u30c8)",
+          "sw": "Proxy (Mwakilishi \u2014 akaunti ya kuwakilisha)",
+          "hi": "Proxy (\u092a\u094d\u0930\u0949\u0915\u094d\u0938\u0940 \u2014 \u092a\u094d\u0930\u0924\u093f\u0928\u093f\u0927\u093f \u0916\u093e\u0924\u093e)",
+          "zh": "Proxy (\u4ee3\u7406 \u2014 \u4ee3\u8868\u8d26\u6237)",
+          "ru": "Proxy (\u043f\u0440\u043e\u043a\u0441\u0438 \u2014 \u043f\u0440\u0435\u0434\u0441\u0442\u0430\u0432\u0438\u0442\u0435\u043b\u044c\u0441\u043a\u0438\u0439 \u0430\u043a\u043a\u0430\u0443\u043d\u0442)"
+        }
+      }
+    },
+    {
+      "term": "Subscription",
+      "expansion": "Meme Card minting subscription",
+      "category": "minting",
+      "beginner_definition": "An optional way to mint Meme Cards automatically, with potential gas savings. Does not grant extra mint eligibility.",
+      "technical_definition": "Optional way to mint Meme Cards remotely with potential gas savings or set-and-forget minting. Not a mintpass \u2014 does not create extra allowlist access. Can only mint within the phase and allowlist access the profile would otherwise have.",
+      "source_path": "/about/subscriptions",
+      "help_index_id": "subscriptions.overview",
+      "related_terms": [
+        "Meme Card",
+        "Mint Phases",
+        "EMMA"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate as 'subscription/auto-mint'.",
+        "translations": {
+          "ko": "Subscription (\uad6c\ub3c5 \u2014 \uc790\ub3d9 \ubbfc\ud305)",
+          "es": "Subscription (Suscripci\u00f3n \u2014 mint autom\u00e1tico)",
+          "ja": "Subscription (\u30b5\u30d6\u30b9\u30af\u30ea\u30d7\u30b7\u30e7\u30f3 \u2014 \u81ea\u52d5\u30df\u30f3\u30c8)",
+          "sw": "Subscription (Usajili \u2014 mint otomatiki)",
+          "hi": "Subscription (\u0938\u0926\u0938\u094d\u092f\u0924\u093e \u2014 \u0938\u094d\u0935\u0924\u0903 \u092e\u093f\u0902\u091f)",
+          "zh": "Subscription (\u8ba2\u9605 \u2014 \u81ea\u52a8\u94f8\u9020)",
+          "ru": "Subscription (\u043f\u043e\u0434\u043f\u0438\u0441\u043a\u0430 \u2014 \u0430\u0432\u0442\u043e-\u043c\u0438\u043d\u0442)"
+        }
+      }
+    },
+    {
+      "term": "Season (SZN)",
+      "expansion": "Meme card season",
+      "category": "collection",
+      "beginner_definition": "Meme cards are released in seasons. Season 1 (SZN 1) started in June 2022 with 47 cards. Each season has its own set of cards by different artists.",
+      "technical_definition": "Meme card seasons (SZN 1 through 15+). Each season has a defined set of cards with varying edition sizes, artists, and mint dates. SZN 1 had 47 cards; later seasons have ~32 cards.",
+      "source_path": "/the-memes",
+      "help_index_id": "the-memes.overview",
+      "related_terms": [
+        "Meme Card"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep SZN as abbreviation. Translate 'season'.",
+        "translations": {
+          "ko": "SZN (\uc2dc\uc98c \u2014 \ubc08 \uce74\ub4dc \uc2dc\uc98c)",
+          "es": "SZN (Temporada)",
+          "ja": "SZN (\u30b7\u30fc\u30ba\u30f3)",
+          "sw": "SZN (Msimu)",
+          "hi": "SZN (\u0938\u0940\u091c\u093c\u0928)",
+          "zh": "SZN (\u8d5b\u5b63)",
+          "ru": "SZN (\u0441\u0435\u0437\u043e\u043d)"
+        }
+      }
+    },
+    {
+      "term": "Schelling Point",
+      "expansion": "Coordination without communication",
+      "category": "philosophy",
+      "beginner_definition": "A Schelling Point is when people independently choose the same thing without talking to each other. 6529 uses this concept for how the community coordinates around shared values.",
+      "technical_definition": "A game theory concept (Thomas Schelling): people coordinate on a common choice without communication, each predicting what others will choose. Core to 6529's decentralized coordination philosophy \u2014 the network coordinates around shared values without central authority.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "Open Metaverse",
+        "CC0"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Named after Thomas Schelling. Translate 'point' and 'coordination'. Some cultures have direct equivalents (Korean nunchi, Swahili harambee).",
+        "translations": {
+          "ko": "Schelling Point (\uc170\ub9c1 \ud3ec\uc778\ud2b8 \u2014 \uc870\uc815\uc810)",
+          "es": "Schelling Point (Punto de Schelling \u2014 coordinaci\u00f3n)",
+          "ja": "Schelling Point (\u30b7\u30a7\u30ea\u30f3\u30b0\u30dd\u30a4\u30f3\u30c8 \u2014 \u8abf\u6574\u70b9)",
+          "sw": "Schelling Point (Nukta ya Schelling \u2014 uratibu)",
+          "hi": "Schelling Point (\u0936\u0947\u0932\u093f\u0902\u0917 \u092c\u093f\u0902\u0926\u0941 \u2014 \u0938\u092e\u0928\u094d\u0935\u092f)",
+          "zh": "Schelling Point (\u8c22\u6797\u70b9 \u2014 \u534f\u8c03\u70b9)",
+          "ru": "\u0422\u043e\u0447\u043a\u0430 \u0428\u0435\u043b\u043b\u0438\u043d\u0433\u0430 (\u043a\u043e\u043e\u0440\u0434\u0438\u043d\u0430\u0446\u0438\u044f \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f)"
+        }
+      }
+    },
+    {
+      "term": "CC0",
+      "expansion": "Public domain dedication",
+      "category": "license",
+      "beginner_definition": "CC0 means no rights reserved. Anyone can use, copy, modify, sell, or build on the work \u2014 commercially or not \u2014 without asking permission. 6529 meme cards use CC0 for the community tier.",
+      "technical_definition": "Creative Commons Zero \u2014 public domain dedication. No copyright, no related rights, no neighboring rights reserved. The 6529 Meme Collection community tier is CC0. This is an intentional design choice to release novel creative value into the public domain, maximizing cultural propagation.",
+      "source_path": "/about/license",
+      "help_index_id": null,
+      "related_terms": [
+        "Meme Card",
+        "Open Metaverse",
+        "Schelling Point"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep CC0 as-is. Translate 'public domain dedication'. See license-overview.json for cultural context.",
+        "translations": {
+          "ko": "CC0 (\uacf5\uc720\uc9c0 \ud5cc\uc815 \u2014 \ud37c\ube14\ub9ad \ub3c4\uba54\uc778)",
+          "es": "CC0 (Dominio p\u00fablico dedicado)",
+          "ja": "CC0 (\u30d1\u30d6\u30ea\u30c3\u30af\u30c9\u30e1\u30a4\u30f3\u63d0\u4f9b)",
+          "sw": "CC0 (Mali ya umma bila masharti)",
+          "hi": "CC0 (\u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0938\u0902\u092a\u0926\u093e \u0938\u092e\u0930\u094d\u092a\u0923)",
+          "zh": "CC0 (\u516c\u5171\u9886\u57df\u5949\u732e)",
+          "ru": "CC0 (\u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0435 \u0434\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "term": "TAP",
+      "expansion": "Three Address Protocol",
+      "category": "security",
+      "beginner_definition": "TAP is a security practice: religiously use three separate wallet addresses to protect your valuable NFTs from phishing. Three (T), Address (A), Protocol (P).",
+      "technical_definition": "Three Address Protocol \u2014 a security practice recommended by Punk6529 (Sept 2023). Use three separate addresses: one for holding (vault), one for interacting (hot wallet), one for receiving (airdrops/mints). This isolation prevents phishing from draining your entire collection if one address is compromised.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "Delegation",
+        "Consolidation",
+        "Proxy"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep TAP as-is. Translate 'Three Address Protocol' and 'security practice'.",
+        "translations": {
+          "ko": "TAP (\uc4f0\ub9ac \uc5b4\ub4dc\ub808\uc2a4 \ud504\ub85c\ud1a0\ucf5c \u2014 \ubcf4\uc548 \uad00\ud589)",
+          "es": "TAP (Protocolo de Tres Direcciones \u2014 pr\u00e1ctica de seguridad)",
+          "ja": "TAP (\u30b9\u30ea\u30fc\u30a2\u30c9\u30ec\u30b9\u30d7\u30ed\u30c8\u30b3\u30eb \u2014 \u30bb\u30ad\u30e5\u30ea\u30c6\u30a3\u6163\u884c)",
+          "sw": "TAP (Itifaki ya Anwani Tatu \u2014 mazoea ya usalama)",
+          "hi": "TAP (\u0925\u094d\u0930\u0940 \u090f\u0921\u094d\u0930\u0947\u0938 \u092a\u094d\u0930\u094b\u091f\u094b\u0915\u0949\u0932 \u2014 \u0938\u0941\u0930\u0915\u094d\u0937\u093e \u0905\u092d\u094d\u092f\u093e\u0938)",
+          "zh": "TAP (\u4e09\u5730\u5740\u534f\u8bae \u2014 \u5b89\u5168\u5b9e\u8df5)",
+          "ru": "TAP (\u041f\u0440\u043e\u0442\u043e\u043a\u043e\u043b \u0442\u0440\u0451\u0445 \u0430\u0434\u0440\u0435\u0441\u043e\u0432 \u2014 \u043f\u0440\u0430\u043a\u0442\u0438\u043a\u0430 \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0441\u0442\u0438)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "term": "EMMA",
+      "expansion": "Editor for Managing Multiphase Allowlists",
+      "category": "tools",
+      "beginner_definition": "EMMA is a tool for creating distribution plans for NFT mints \u2014 airdrops, allowlists, and public minting in phases.",
+      "technical_definition": "Editor for Managing Multiphase Allowlists and first reference implementation of Janus. Distribution plan tool for building mint plans with airdrops, allowlists, and public minting in one or more phases. Uses TDH as anti-spam/rate-limit measure for allowlist creation.",
+      "source_path": "/emma",
+      "help_index_id": "tools.emma",
+      "related_terms": [
+        "Mint Phases",
+        "Subscription",
+        "Meme Card"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": true,
+        "notes": "Keep EMMA as-is. Translate 'allowlist' and 'distribution'.",
+        "translations": {
+          "ko": "EMMA (\uba40\ud2f0\ud398\uc774\uc988 \ud5c8\uc6a9\ub9ac\uc2a4\ud2b8 \uad00\ub9ac \uc5d0\ub514\ud130)",
+          "es": "EMMA (Editor para gesti\u00f3n de allowlists multifase)",
+          "ja": "EMMA (\u30de\u30eb\u30c1\u30d5\u30a7\u30fc\u30ba\u8a31\u53ef\u30ea\u30b9\u30c8\u7ba1\u7406\u30a8\u30c7\u30a3\u30bf\u30fc)",
+          "sw": "EMMA (Mhariri wa Kusimamia Allowlists za Awamu Nyingi)",
+          "hi": "EMMA (\u092e\u0932\u094d\u091f\u0940\u092b\u0947\u091c \u0905\u0932\u093e\u0909\u0932\u093f\u0938\u094d\u091f \u092a\u094d\u0930\u092c\u0902\u0927\u0928 \u0938\u0902\u092a\u093e\u0926\u0915)",
+          "zh": "EMMA (\u591a\u9636\u6bb5\u8bb8\u53ef\u540d\u5355\u7ba1\u7406\u7f16\u8f91\u5668)",
+          "ru": "EMMA (\u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440 \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f \u043c\u043d\u043e\u0433\u043e\u0444\u0430\u0437\u043d\u044b\u043c\u0438 \u0441\u043f\u0438\u0441\u043a\u0430\u043c\u0438 \u0434\u043e\u0441\u0442\u0443\u043f\u0430)"
+        }
+      }
+    },
+    {
+      "term": "Open Data",
+      "expansion": "Public data downloads",
+      "category": "tools",
+      "beginner_definition": "Public data that anyone can download \u2014 network metrics, meme subscriptions, team info, rememes, royalties.",
+      "technical_definition": "Public data download surfaces at /open-data. Includes network metrics, meme subscriptions, team downloads, rememes downloads, and royalties downloads.",
+      "source_path": "/open-data",
+      "help_index_id": "open-data.overview",
+      "related_terms": [
+        "Meme Card",
+        "Network Levels",
+        "TDH"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate as 'open/public data'.",
+        "translations": {
+          "ko": "Open Data (\uacf5\uac1c \ub370\uc774\ud130)",
+          "es": "Open Data (Datos abiertos)",
+          "ja": "Open Data (\u30aa\u30fc\u30d7\u30f3\u30c7\u30fc\u30bf)",
+          "sw": "Open Data (Data wazi)",
+          "hi": "Open Data (\u0916\u0941\u0932\u093e \u0921\u0947\u091f\u093e)",
+          "zh": "Open Data (\u5f00\u653e\u6570\u636e)",
+          "ru": "Open Data (\u043e\u0442\u043a\u0440\u044b\u0442\u044b\u0435 \u0434\u0430\u043d\u043d\u044b\u0435)"
+        }
+      }
+    },
+    {
+      "term": "Network Levels",
+      "expansion": "Integrated TDH + REP signal",
+      "category": "network",
+      "beginner_definition": "Your Network Level combines your TDH and REP into one ranking. Higher levels unlock more influence and visibility.",
+      "technical_definition": "Integrated signal based on TDH and REP. Levels page explains current thresholds and how the displayed level is derived. Shown across profile and Network surfaces where relevant.",
+      "source_path": "/network/levels",
+      "help_index_id": "network.levels",
+      "related_terms": [
+        "TDH",
+        "REP"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'levels' as 'ranks/tiers'.",
+        "translations": {
+          "ko": "Network Levels (\ub124\ud2b8\uc6cc\ud06c \ub808\ubca8)",
+          "es": "Network Levels (Niveles de red)",
+          "ja": "Network Levels (\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u30ec\u30d9\u30eb)",
+          "sw": "Network Levels (Ngazi za mtandao)",
+          "hi": "Network Levels (\u0928\u0947\u091f\u0935\u0930\u094d\u0915 \u0938\u094d\u0924\u0930)",
+          "zh": "Network Levels (\u7f51\u7edc\u7b49\u7ea7)",
+          "ru": "Network Levels (\u0443\u0440\u043e\u0432\u043d\u0438 \u0441\u0435\u0442\u0438)"
+        }
+      }
+    },
+    {
+      "term": "Prenodes",
+      "expansion": "Network prenode status",
+      "category": "network",
+      "beginner_definition": "Prenodes are community-run nodes that calculate and verify 6529 network data like TDH. Their health status is visible on the site.",
+      "technical_definition": "Network prenode status at /network/prenodes. Documents loading, empty, error, access, and permission behavior. Prenodes run the 6529 data oracle independently.",
+      "source_path": "/network/prenodes",
+      "help_index_id": "network.prenodes",
+      "related_terms": [
+        "TDH",
+        "Network Levels",
+        "Open Data"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'prenode' as 'preliminary node/verification node'.",
+        "translations": {
+          "ko": "Prenodes (\uc0ac\uc804 \ub178\ub4dc \u2014 \uac80\uc99d \ub178\ub4dc)",
+          "es": "Prenodes (Nodos de verificaci\u00f3n)",
+          "ja": "Prenodes (\u30d7\u30ec\u30ce\u30fc\u30c9 \u2014 \u691c\u8a3c\u30ce\u30fc\u30c9)",
+          "sw": "Prenodes (Nodi za uthibitisho)",
+          "hi": "Prenodes (\u092a\u094d\u0930\u0940-\u0928\u094b\u0921\u094d\u0938 \u2014 \u0938\u0924\u094d\u092f\u093e\u092a\u0928 \u0928\u094b\u0921)",
+          "zh": "Prenodes (\u9884\u8282\u70b9 \u2014 \u9a8c\u8bc1\u8282\u70b9)",
+          "ru": "Prenodes (\u043f\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0443\u0437\u043b\u044b)"
+        }
+      }
+    },
+    {
+      "term": "6529bot",
+      "expansion": "AI PR review bot",
+      "category": "tools",
+      "beginner_definition": "6529bot is an AI that automatically reviews pull requests in 6529's GitHub repos. It reads PRs and posts comments about what it found.",
+      "technical_definition": "AI PR review bot that reviews pull requests using AI models. Posts as 6529bot on GitHub. Tracks review costs in AWS Aurora. Located at github.com/6529-Collections/6529reviewbot.",
+      "source_path": null,
+      "help_index_id": "api-tool.6529bot",
+      "related_terms": [
+        "Open Data"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Keep '6529bot' as proper name. Translate 'review bot'.",
+        "translations": {
+          "ko": "6529bot (AI PR \ub9ac\ubdf0 \ubd07)",
+          "es": "6529bot (Bot de revisi\u00f3n de PR con IA)",
+          "ja": "6529bot (AI PR\u30ec\u30d3\u30e5\u30fc\u30dc\u30c3\u30c8)",
+          "sw": "6529bot (Bot ya ukaguzi wa PR ya AI)",
+          "hi": "6529bot (AI PR \u0938\u092e\u0940\u0915\u094d\u0937\u093e \u092c\u0949\u091f)",
+          "zh": "6529bot (AI PR\u5ba1\u67e5\u673a\u5668\u4eba)",
+          "ru": "6529bot (\u0431\u043e\u0442 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 PR \u043d\u0430 \u0431\u0430\u0437\u0435 \u0418\u0418)"
+        }
+      }
+    },
+    {
+      "term": "Meme Card",
+      "expansion": "6529 NFT card",
+      "category": "collection",
+      "beginner_definition": "A Meme Card is a digital art NFT in the 6529 collection. There are 500+ cards across 15+ seasons, each created by different artists with varying edition sizes.",
+      "technical_definition": "NFT in the 6529 Meme Collection. Individual card pages at /the-memes/{id}. Each card has edition size, TDH rate, season, mint date, supply, and artist. Community tier is CC0 (public domain). Browse at /the-memes.",
+      "source_path": "/the-memes",
+      "help_index_id": "the-memes.overview",
+      "related_terms": [
+        "Season (SZN)",
+        "CC0",
+        "Hodl Rate",
+        "Mint Phases"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'meme card' as 'digital art card/NFT card'.",
+        "translations": {
+          "ko": "Meme Card (\ubc08 \uce74\ub4dc \u2014 \ub514\uc9c0\ud138 \uc544\ud2b8 NFT)",
+          "es": "Meme Card (Tarjeta Meme \u2014 NFT de arte digital)",
+          "ja": "Meme Card (\u30df\u30fc\u30e0\u30ab\u30fc\u30c9 \u2014 \u30c7\u30b8\u30bf\u30eb\u30a2\u30fc\u30c8NFT)",
+          "sw": "Meme Card (Kadi ya Meme \u2014 NFT ya sanaa ya kidijitali)",
+          "hi": "Meme Card (\u092e\u0940\u092e \u0915\u093e\u0930\u094d\u0921 \u2014 \u0921\u093f\u091c\u093f\u091f\u0932 \u0906\u0930\u094d\u091f NFT)",
+          "zh": "Meme Card (\u8ff7\u56e0\u5361 \u2014 \u6570\u5b57\u827a\u672fNFT)",
+          "ru": "Meme Card (\u043c\u0435\u043c-\u043a\u0430\u0440\u0442\u0430 \u2014 NFT \u0446\u0438\u0444\u0440\u043e\u0432\u043e\u0439 \u0430\u0440\u0442)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "term": "Open Metaverse",
+      "expansion": "6529's vision",
+      "category": "philosophy",
+      "beginner_definition": "The Open Metaverse is 6529's vision: a decentralized, open, permissionless digital world where people own their data, their identity, and their creative work.",
+      "technical_definition": "6529's overarching philosophical framework. Encompasses self-custody (not your keys not your coins), open culture (CC0), permissionless participation, and decentralized coordination (Schelling points). Documented at /about/open-metaverse.",
+      "source_path": "/about/open-metaverse",
+      "help_index_id": null,
+      "related_terms": [
+        "Schelling Point",
+        "CC0",
+        "TAP"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'open' and 'metaverse'. Some cultures may interpret 'metaverse' differently.",
+        "translations": {
+          "ko": "Open Metaverse (\uc624\ud508 \uba54\ud0c0\ubc84\uc2a4)",
+          "es": "Open Metaverse (Metaverso Abierto)",
+          "ja": "Open Metaverse (\u30aa\u30fc\u30d7\u30f3\u30e1\u30bf\u30d0\u30fc\u30b9)",
+          "sw": "Open Metaverse (Metavasi Wazi)",
+          "hi": "Open Metaverse (\u0913\u092a\u0928 \u092e\u0947\u091f\u093e\u0935\u0930\u094d\u0938)",
+          "zh": "Open Metaverse (\u5f00\u653e\u5143\u5b87\u5b99)",
+          "ru": "Open Metaverse (\u041e\u0442\u043a\u0440\u044b\u0442\u044b\u0439 \u041c\u0435\u0442\u0430\u0432\u0435\u0440\u0441)"
+        }
+      }
+    },
+    {
+      "term": "Groups vs Waves",
+      "expansion": "Organizational vs conversational",
+      "category": "social",
+      "beginner_definition": "Groups organize people; Waves are where conversations happen. A Group can contain multiple Waves. Groups manage membership; Waves manage content.",
+      "technical_definition": "Groups are organizational containers that manage membership and permissions. Waves are conversational threads within groups (or standalone). Groups are created/edited at /groups; Waves are created at /waves/create.",
+      "source_path": "/waves",
+      "help_index_id": "groups.create-edit",
+      "related_terms": [
+        "Wave",
+        "Brain",
+        "Drop"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Distinguish 'group' (organizational) from 'wave' (conversational) clearly.",
+        "translations": {
+          "ko": "Groups vs Waves (\uadf8\ub8f9 vs \uc6e8\uc774\ube0c \u2014 \uc870\uc9c1 vs \ub300\ud654)",
+          "es": "Grupos vs Waves (organizaci\u00f3n vs conversaci\u00f3n)",
+          "ja": "Groups vs Waves (\u30b0\u30eb\u30fc\u30d7 vs \u30a6\u30a7\u30a4\u30d6 \u2014 \u7d44\u7e54 vs \u4f1a\u8a71)",
+          "sw": "Groups vs Waves (makundi vs Waves \u2014 muundo vs mazungumzo)",
+          "hi": "Groups vs Waves (\u0938\u092e\u0942\u0939 vs \u0935\u0947\u0935 \u2014 \u0938\u0902\u0917\u0920\u0928 vs \u0935\u093e\u0930\u094d\u0924\u093e)",
+          "zh": "Groups vs Waves (\u7fa4\u7ec4 vs \u6ce2 \u2014 \u7ec4\u7ec7 vs \u5bf9\u8bdd)",
+          "ru": "Groups vs Waves (\u0433\u0440\u0443\u043f\u043f\u044b vs \u0432\u043e\u043b\u043d\u044b \u2014 \u043e\u0440\u0433\u0430\u043d\u0438\u0437\u0430\u0446\u0438\u044f vs \u043e\u0431\u0449\u0435\u043d\u0438\u0435)"
+        }
+      }
+    },
+    {
+      "term": "Floor Price",
+      "expansion": "Lowest secondary market price",
+      "category": "market",
+      "beginner_definition": "The floor price is the lowest price a meme card is currently selling for on secondary marketplaces like OpenSea.",
+      "technical_definition": "The lowest ask price for a meme card on secondary NFT marketplaces. Not tracked directly on 6529.io but referenced in wave leaderboards and sales tabs. Market-dependent, not network-governed.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "Meme Card",
+        "Hodl Rate"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate as 'lowest price/floor price'.",
+        "translations": {
+          "ko": "Floor Price (\ubc14\ub2e5\uac00 \u2014 \ucd5c\uc800\uac00)",
+          "es": "Floor Price (Precio m\u00ednimo)",
+          "ja": "Floor Price (\u6700\u5b89\u5024)",
+          "sw": "Floor Price (Bei ya chini)",
+          "hi": "Floor Price (\u0928\u094d\u092f\u0942\u0928\u0924\u092e \u092e\u0942\u0932\u094d\u092f)",
+          "zh": "Floor Price (\u5730\u677f\u4ef7)",
+          "ru": "Floor Price (\u043c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u0430\u044f \u0446\u0435\u043d\u0430)"
+        }
+      }
+    },
+    {
+      "term": "Mint Phases",
+      "expansion": "Allowlist and public mint phases",
+      "category": "minting",
+      "beginner_definition": "Mint phases are timed windows when different groups of people can mint (buy) a meme card. Allowlist phases come first (for eligible users), then public phases (for everyone).",
+      "technical_definition": "Distribution phases managed by EMMA (Editor for Managing Multiphase Allowlists). Phases can include airdrops, allowlisted mints, and public mints. Allowlist access is separate from subscription mode \u2014 subscriptions do not create extra eligibility.",
+      "source_path": "/emma",
+      "help_index_id": "tools.emma",
+      "related_terms": [
+        "EMMA",
+        "Subscription",
+        "Meme Card"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate 'mint' as 'create/mint digital asset' and 'phase' as 'window/stage'.",
+        "translations": {
+          "ko": "Mint Phases (\ubbfc\ud305 \ub2e8\uacc4 \u2014 \ud5c8\uc6a9\ub9ac\uc2a4\ud2b8 \ubc0f \uacf5\uac1c \ubbfc\ud305)",
+          "es": "Mint Phases (Fases de mint \u2014 allowlist y mint p\u00fablico)",
+          "ja": "Mint Phases (\u30df\u30f3\u30c8\u30d5\u30a7\u30fc\u30ba \u2014 \u8a31\u53ef\u30ea\u30b9\u30c8\u3068\u516c\u958b\u30df\u30f3\u30c8)",
+          "sw": "Mint Phases (Awamu za Mint \u2014 allowlist na mint ya umma)",
+          "hi": "Mint Phases (\u092e\u093f\u0902\u091f \u091a\u0930\u0923 \u2014 \u0905\u0932\u093e\u0909\u0932\u093f\u0938\u094d\u091f \u0914\u0930 \u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u092e\u093f\u0902\u091f)",
+          "zh": "Mint Phases (\u94f8\u9020\u9636\u6bb5 \u2014 \u8bb8\u53ef\u540d\u5355\u548c\u516c\u5f00\u94f8\u9020)",
+          "ru": "Mint Phases (\u0444\u0430\u0437\u044b \u043c\u0438\u043d\u0442\u0430 \u2014 allowlist \u0438 \u043f\u0443\u0431\u043b\u0438\u0447\u043d\u044b\u0439 \u043c\u0438\u043d\u0442)"
+        }
+      }
+    },
+    {
+      "term": "Seize.io vs 6529.io",
+      "expansion": "Same platform, different names",
+      "category": "platform",
+      "beginner_definition": "Seize.io and 6529.io are the same website. Seize.io redirects to 6529.io. Both names refer to the 6529 platform.",
+      "technical_definition": "Seize.io was the original domain name; 6529.io is the current canonical domain. Seize.io redirects to 6529.io. The platform was rebranded from 'Seize' to '6529' but both names persist in community usage.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "Meme Card",
+        "Open Metaverse"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Explain that both names refer to the same platform.",
+        "translations": {
+          "ko": "Seize.io vs 6529.io (\uac19\uc740 \ud50c\ub7ab\ud3fc, \ub2e4\ub978 \uc774\ub984)",
+          "es": "Seize.io vs 6529.io (misma plataforma, diferentes nombres)",
+          "ja": "Seize.io vs 6529.io (\u540c\u3058\u30d7\u30e9\u30c3\u30c8\u30d5\u30a9\u30fc\u30e0\u3001\u7570\u306a\u308b\u540d\u524d)",
+          "sw": "Seize.io vs 6529.io (jukwaa moja, majina tofauti)",
+          "hi": "Seize.io vs 6529.io (\u090f\u0915 \u0939\u0940 \u092a\u094d\u0932\u0947\u091f\u092b\u093c\u0949\u0930\u094d\u092e, \u0905\u0932\u0917 \u0928\u093e\u092e)",
+          "zh": "Seize.io vs 6529.io (\u540c\u4e00\u5e73\u53f0\uff0c\u4e0d\u540c\u540d\u79f0)",
+          "ru": "Seize.io vs 6529.io (\u043e\u0434\u043d\u0430 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0430, \u0440\u0430\u0437\u043d\u044b\u0435 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u044f)"
+        }
+      }
+    },
+    {
+      "term": "Network Society",
+      "expansion": null,
+      "category": "concept",
+      "beginner_definition": "A society organized around shared values and digital participation rather than geographic borders. In 6529's context, a community where your identity is your wallet, reputation comes from peers (REP), and governance emerges through Schelling points \u2014 not through elections or governments.",
+      "technical_definition": "A sociological framework where coordination is achieved through shared cryptographic infrastructure (blockchain), peer-based identity (NIC/REP/TDH), and voluntary participation (CC0, permissionless access). The 6529 ecosystem is a working example with significant on-chain economic activity over multiple years, coordinated without a central authority.",
+      "source_path": "/network",
+      "help_index_id": null,
+      "related_terms": [
+        "Decentralized Network Society",
+        "Schelling Point",
+        "Open Metaverse",
+        "TDH",
+        "REP",
+        "NIC"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate the full term. Many cultures have indigenous concepts for non-territorial community.",
+        "translations": {
+          "ko": "\ub124\ud2b8\uc6cc\ud06c \uc0ac\ud68c (neteuwokeu sahoe)",
+          "es": "Sociedad de red",
+          "ja": "\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u793e\u4f1a (nettowaaku shakai)",
+          "sw": "Jamii ya mtandao",
+          "hi": "\u0928\u0947\u091f\u0935\u0930\u094d\u0915 \u0938\u092e\u093e\u091c (network samaj)",
+          "zh": "\u7f51\u7edc\u793e\u4f1a (w\u01cenglu\u00f2 sh\u00e8hu\u00ec)",
+          "ru": "\u0421\u0435\u0442\u0435\u0432\u043e\u0435 \u043e\u0431\u0449\u0435\u0441\u0442\u0432\u043e (setevoe obshchestvo)"
+        }
+      },
+      "see_also": [
+        "/network-society.json",
+        "/cultural-mappings.json"
+      ]
+    },
+    {
+      "term": "Decentralized Network Society",
+      "expansion": null,
+      "category": "concept",
+      "beginner_definition": "A network society that operates without any central authority. Instead of a government or corporation making decisions, the community coordinates through blockchain code, shared values (CC0), and peer trust. 6529's ecosystem has produced measurable on-chain economic activity across thousands of wallets \u2014 measured on-chain, not by a central bank.",
+      "technical_definition": "A network society implementing coordination through distributed consensus (blockchain), cryptographic identity (wallets, private keys), and voluntary contribution (CC0). dGDP measures the on-chain economic output: transaction volume weighted by active participation. 6529's multi-year dGDP across 10,000+ wallets demonstrates that a decentralized network society can produce measurable economic value without taxation, central planning, or institutional intermediaries.",
+      "source_path": "/network",
+      "help_index_id": null,
+      "related_terms": [
+        "Network Society",
+        "Decentralization",
+        "TDH",
+        "CC0",
+        "Schelling Point"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Translate the full term. dGDP concept may need cultural context.",
+        "translations": {
+          "ko": "\ud0c8\uc911\uc559\ud654 \ub124\ud2b8\uc6cc\ud06c \uc0ac\ud68c (taljunganghwa neteuwokeu sahoe)",
+          "es": "Sociedad de red descentralizada",
+          "ja": "\u5206\u6563\u578b\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u793e\u4f1a (bunsangata nettowaaku shakai)",
+          "sw": "Jamii ya mtandao isiyo na kitovu",
+          "hi": "\u0935\u093f\u0915\u0947\u0928\u094d\u0926\u094d\u0930\u0940\u0915\u0943\u0924 \u0928\u0947\u091f\u0935\u0930\u094d\u0915 \u0938\u092e\u093e\u091c (vikendrikrit network samaj)",
+          "zh": "\u53bb\u4e2d\u5fc3\u5316\u7f51\u7edc\u793e\u4f1a (q\u00f9 zh\u014dngx\u012bn hu\u00e0 w\u01cenglu\u00f2 sh\u00e8hu\u00ec)",
+          "ru": "\u0414\u0435\u0446\u0435\u043d\u0442\u0440\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043d\u043e\u0435 \u0441\u0435\u0442\u0435\u0432\u043e\u0435 \u043e\u0431\u0449\u0435\u0441\u0442\u0432\u043e (detsentralizovannoe setevoe obshchestvo)"
+        }
+      },
+      "see_also": [
+        "/network-society.json",
+        "/on-chain-basics.json",
+        "/cultural-mappings.json"
+      ]
+    },
+    {
+      "term": "Decentralization",
+      "expansion": null,
+      "category": "blockchain",
+      "beginner_definition": "The distribution of power and control away from a single authority to a network of many participants. In blockchain: no single server, no single administrator \u2014 every computer in the network holds a copy of the ledger and must agree on changes.",
+      "technical_definition": "Architectural distribution of authority across a peer-to-peer network where no single node can unilaterally modify state. In blockchain systems, consensus mechanisms (proof-of-work, proof-of-stake) ensure all participants agree on the ledger state without trusting any individual participant.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "Blockchain",
+        "Network Society",
+        "Permissionlessness"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Some languages have established translations; others need cultural framing.",
+        "translations": {
+          "ko": "\ud0c8\uc911\uc559\ud654 (taljunganghwa)",
+          "es": "Descentralizaci\u00f3n",
+          "ja": "\u5206\u6563\u5316 (bunsanka)",
+          "sw": "Ugawanyaji",
+          "hi": "\u0935\u093f\u0915\u0947\u0928\u094d\u0926\u094d\u0930\u0940\u0915\u0930\u0923 (vikendrikaran)",
+          "zh": "\u53bb\u4e2d\u5fc3\u5316 (q\u00f9 zh\u014dngx\u012bn hu\u00e0)",
+          "ru": "\u0414\u0435\u0446\u0435\u043d\u0442\u0440\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u044f (detsentralizatsiya)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json",
+        "/network-society.json"
+      ]
+    },
+    {
+      "term": "Byzantine General's Problem",
+      "expansion": null,
+      "category": "blockchain",
+      "beginner_definition": "A famous problem in computer science: how can a group of people who don't trust each other reach agreement when some of them might be lying? The name comes from a thought experiment about Byzantine generals surrounding a city \u2014 they must agree to attack or retreat together, but the messengers carrying messages between them might be traitors. Bitcoin and Ethereum solve this problem, which is why they work without a central authority.",
+      "technical_definition": "A formulation of distributed consensus under adversarial conditions: how can n parties reach agreement when up to f parties may be Byzantine (arbitrarily malicious)? Solved practically by proof-of-work (Bitcoin) and proof-of-stake (Ethereum) consensus mechanisms, which make it economically costly to attack the network.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "Blockchain",
+        "Decentralization",
+        "BTC",
+        "ETH"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "The historical reference (Byzantine Empire) may resonate differently across cultures. Use the concept of trust among untrusted parties.",
+        "translations": {
+          "ko": "\ube44\uc794\ud2f4 \uc7a5\uad70 \ubb38\uc81c (bijantin janggun munje)",
+          "es": "Problema de los generales bizantinos",
+          "ja": "\u30d3\u30b6\u30f3\u30c1\u30f3\u5c06\u8ecd\u554f\u984c (bizanchin sh\u014dgun mondai)",
+          "sw": "Tatizo la majenerali wa Bizanti",
+          "hi": "\u092c\u093e\u0907\u091c\u093c\u0947\u0902\u091f\u093e\u0907\u0928 \u091c\u0928\u0930\u0932 \u0938\u092e\u0938\u094d\u092f\u093e (byzantine general samasya)",
+          "zh": "\u62dc\u5360\u5ead\u5c06\u519b\u95ee\u9898 (b\u00e0izh\u00e0nt\u00edng ji\u0101ngj\u016bn w\u00e8nt\u00ed)",
+          "ru": "\u041f\u0440\u043e\u0431\u043b\u0435\u043c\u0430 \u0432\u0438\u0437\u0430\u043d\u0442\u0438\u0439\u0441\u043a\u0438\u0445 \u0433\u0435\u043d\u0435\u0440\u0430\u043b\u043e\u0432 (problema vizantiyskikh generalov)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "term": "BTC",
+      "expansion": "Bitcoin",
+      "category": "blockchain",
+      "beginner_definition": "The first decentralized cryptocurrency, created by Satoshi Nakamoto in 2009. Bitcoin proved that money can work without a bank or government \u2014 it uses a technology called blockchain where thousands of computers agree on who owns what, with no central authority. BTC made all subsequent blockchain projects, including 6529's NFT ecosystem, possible.",
+      "technical_definition": "A peer-to-peer electronic cash system implementing proof-of-work consensus to solve the Byzantine General's Problem. Bitcoin's blockchain maintains a distributed ledger of UTXOs (unspent transaction outputs) secured by SHA-256 hashing. 21M maximum supply. In 6529's context: BTC demonstrated decentralized consensus is possible, enabling Ethereum, NFTs, and the broader ecosystem.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "ETH",
+        "Blockchain",
+        "Byzantine General's Problem",
+        "Decentralization"
+      ],
+      "i18n": {
+        "translate_concept": false,
+        "keep_acronym": true,
+        "notes": "Keep BTC as-is across all locales. Translate the expansion (Bitcoin) \u2014 most languages transliterate.",
+        "translations": {
+          "ko": "BTC (\ube44\ud2b8\ucf54\uc778 \u2014 biteukoin)",
+          "es": "BTC (Bitcoin)",
+          "ja": "BTC (\u30d3\u30c3\u30c8\u30b3\u30a4\u30f3 \u2014 bittokoin)",
+          "sw": "BTC (Bitcoin)",
+          "hi": "BTC (\u092c\u093f\u091f\u0915\u0949\u0907\u0928 \u2014 bitkoin)",
+          "zh": "BTC (\u6bd4\u7279\u5e01 \u2014 b\u01d0t\u00e8b\u00ec)",
+          "ru": "BTC (\u0411\u0438\u0442\u043a\u043e\u0438\u043d \u2014 bitkoin)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "term": "ETH",
+      "expansion": "Ether",
+      "category": "blockchain",
+      "beginner_definition": "The native cryptocurrency of the Ethereum blockchain. ETH is the fuel that powers Ethereum \u2014 you need it to pay for transactions (called 'gas'). 6529's meme cards are NFTs on Ethereum, so every mint, transfer, and trade requires ETH for gas.",
+      "technical_definition": "The native asset of the Ethereum network, required for transaction execution (gas) and smart contract deployment. Ethereum transitioned from proof-of-work to proof-of-stake (The Merge, 2022). ETH serves as: medium of exchange, store of value, and staking collateral securing the network. All 6529 meme cards are ERC-721 NFTs on Ethereum.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "BTC",
+        "Blockchain",
+        "Mint Phases",
+        "Season (SZN)"
+      ],
+      "i18n": {
+        "translate_concept": false,
+        "keep_acronym": true,
+        "notes": "Keep ETH as-is across all locales. Translate the expansion (Ether).",
+        "translations": {
+          "ko": "ETH (\uc774\ub354 \u2014 ideo)",
+          "es": "ETH (\u00c9ter)",
+          "ja": "ETH (\u30a4\u30fc\u30b5 \u2014 \u012bsa)",
+          "sw": "ETH (Etha)",
+          "hi": "ETH (\u0908\u0925\u0930 \u2014 \u012bthar)",
+          "zh": "ETH (\u4ee5\u592a\u5e01 \u2014 y\u01d0t\u00e0i b\u00ec)",
+          "ru": "ETH (\u042d\u0444\u0438\u0440 \u2014 efir)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json",
+        "/api-for-agents.json"
+      ]
+    },
+    {
+      "term": "Blockchain",
+      "expansion": null,
+      "category": "blockchain",
+      "beginner_definition": "A digital ledger that records transactions across thousands of computers so that no one can change the records after the fact. Think of it as a shared notebook that everyone agrees is accurate \u2014 once something is written, it cannot be erased. Blockchain is the technology behind Bitcoin, Ethereum, and NFTs.",
+      "technical_definition": "A distributed, append-only ledger where transactions are grouped into blocks, cryptographically linked to previous blocks, and validated through a consensus mechanism across a peer-to-peer network. Immutability is achieved through hash pointers. 6529's meme cards are ERC-721 tokens on the Ethereum blockchain.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "Decentralization",
+        "BTC",
+        "ETH",
+        "Byzantine General's Problem",
+        "Meme Card"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Most languages have established translations for blockchain.",
+        "translations": {
+          "ko": "\ube14\ub85d\uccb4\uc778 (beullokchein)",
+          "es": "Cadena de bloques (blockchain)",
+          "ja": "\u30d6\u30ed\u30c3\u30af\u30c1\u30a7\u30fc\u30f3 (burokkuch\u0113n)",
+          "sw": "Mnyororo wa vitalu",
+          "hi": "\u092c\u094d\u0932\u0949\u0915\u091a\u0947\u0928 (blockchain)",
+          "zh": "\u533a\u5757\u94fe (q\u016bku\u00e0ili\u00e0n)",
+          "ru": "\u0411\u043b\u043e\u043a\u0447\u0435\u0439\u043d (blokcheyn)"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "term": "Public Domain",
+      "expansion": null,
+      "category": "concept",
+      "beginner_definition": "Creative works that are free for anyone to use, remix, sell, or build upon \u2014 no permission needed, no attribution required. When a work is in the public domain, it belongs to everyone. In 6529, all meme card art is released as CC0 (public domain dedication) \u2014 anyone can use the art for any purpose.",
+      "technical_definition": "The legal status of creative works not protected by intellectual property rights \u2014 either because rights expired, were forfeited, or were never applicable. CC0 (Creative Commons Zero) is the most robust public domain dedication tool, waiving all rights to the extent permitted by law. 6529's meme cards are CC0, making them digital public goods.",
+      "source_path": "/cc0",
+      "help_index_id": null,
+      "related_terms": [
+        "CC0",
+        "Permissionlessness",
+        "Public-goods",
+        "Open Metaverse"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Many cultures have indigenous concepts for shared creative heritage. Map to those where possible.",
+        "translations": {
+          "ko": "\ud37c\ube14\ub9ad \ub3c4\uba54\uc778 (peobeullik domein) / \uacf5\uc720\uc9c0 (gongyuuji)",
+          "es": "Dominio p\u00fablico",
+          "ja": "\u30d1\u30d6\u30ea\u30c3\u30af\u30c9\u30e1\u30a4\u30f3 (paburikku domein) / \u516c\u6709 (k\u014dy\u016b)",
+          "sw": "Umma wa umma (mali ya umma)",
+          "hi": "\u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0938\u0902\u092a\u0926\u093e (s\u0101rvajanik sampad\u0101)",
+          "zh": "\u516c\u5171\u9886\u57df (g\u014dngg\u00f2ng l\u01d0ngy\u00f9)",
+          "ru": "\u041e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0435 \u0434\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 (obshchestvennoye dostoyaniye)"
+        }
+      },
+      "see_also": [
+        "/cultural-mappings.json",
+        "/license-overview.json"
+      ]
+    },
+    {
+      "term": "Permissionlessness",
+      "expansion": null,
+      "category": "concept",
+      "beginner_definition": "The property of a system where anyone can participate without asking for permission from a gatekeeper. Blockchain networks are permissionless \u2014 anyone with an internet connection and a wallet can join, transact, and contribute. 6529 is permissionless: anyone can buy meme cards, hold them, create waves, and contribute code.",
+      "technical_definition": "An architectural property where participation requires no authorization from a central party. In blockchain: anyone can run a node, submit transactions, or deploy contracts. Contrast with permissioned systems (banking, corporate networks) where access requires institutional approval. Permissionlessness is a prerequisite for credible decentralization.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "Decentralization",
+        "Public Domain",
+        "CC0",
+        "Network Society"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "The concept of 'no gatekeeper' exists in all cultures but has different framings.",
+        "translations": {
+          "ko": "\ud5c8\uac00 \ubd88\ud544 (heoba bulpil) / \ubb34\ud5c8\uac00\uc131 (muheogaseong)",
+          "es": "Sin permiso (permissionlessness)",
+          "ja": "\u30d1\u30fc\u30df\u30c3\u30b7\u30e7\u30f3\u30ec\u30b9\u6027 (p\u0101misshonresu-sei)",
+          "sw": "Bila ruhusa",
+          "hi": "\u0905\u0928\u0941\u092e\u0924\u093f-\u0930\u0939\u093f\u0924 (anumati-rahit)",
+          "zh": "\u65e0\u8bb8\u53ef\u6027 (w\u00fa x\u01d4k\u011b x\u00ecng)",
+          "ru": "\u0411\u0435\u0441\u043f\u0435\u0440\u043c\u0438\u0441\u0441\u0438\u043e\u043d\u043d\u043e\u0441\u0442\u044c (bespermissi\u00f3nnost') / \u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043d\u0438\u0439"
+        }
+      },
+      "see_also": [
+        "/on-chain-basics.json",
+        "/network-society.json"
+      ]
+    },
+    {
+      "term": "Public-goods",
+      "expansion": null,
+      "category": "concept",
+      "beginner_definition": "Resources that are available to everyone and that one person using them does not reduce what is available for others. In traditional life: roads, parks, clean air. In 6529's network society: CC0 art (anyone can use it, and one person using it doesn't stop others), open-source code, the prenode oracle, and the help-index are all digital public goods.",
+      "technical_definition": "Non-rivalrous, non-excludable resources. In traditional economics: national defense, infrastructure. In network society economics: CC0 creative works (non-rivalrous because copying is free and lossless), open-source software, open data, and decentralized infrastructure. dGDP measures the economic activity these public goods enable.",
+      "source_path": null,
+      "help_index_id": null,
+      "related_terms": [
+        "CC0",
+        "Public Domain",
+        "Network Society",
+        "Open Data",
+        "Prenodes"
+      ],
+      "i18n": {
+        "translate_concept": true,
+        "keep_acronym": false,
+        "notes": "Many cultures have strong traditions of communal goods and shared resources. Map to those.",
+        "translations": {
+          "ko": "\uacf5\uacf5\uc7ac (gonggongjae)",
+          "es": "Bienes p\u00fablicos",
+          "ja": "\u516c\u5171\u8ca1 (k\u014dky\u014dzai)",
+          "sw": "Mali ya umma",
+          "hi": "\u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0935\u0938\u094d\u0924\u0941\u090f\u0902 (s\u0101rvajanik vastuyein)",
+          "zh": "\u516c\u5171\u7269\u54c1 (g\u014dngg\u00f2ng w\u00f9p\u01d0n)",
+          "ru": "\u041e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0435 \u0431\u043b\u0430\u0433\u0430 (obshchestvennyye blaga)"
+        }
+      },
+      "see_also": [
+        "/cultural-mappings.json",
+        "/license-overview.json",
+        "/network-society.json"
+      ]
+    }
+  ],
+  "freshness": "stable"
+}
