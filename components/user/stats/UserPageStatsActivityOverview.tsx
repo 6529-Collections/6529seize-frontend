@@ -9,8 +9,7 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { Fragment, useEffect, useState } from "react";
-import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
+import { Fragment, type ReactNode, useEffect, useState } from "react";
 import { getStatsPath } from "./userPageStats.helpers";
 import styles from "./UserPageStats.module.scss";
 import {
@@ -274,8 +273,8 @@ export default function UserPageStatsActivityOverview({
   }, [activeAddress, profile]);
 
   return (
-    <div className="pt-2 pb-2">
-      <div className="pt-2 pb-2 tw-flex">
+    <div className="tw-py-2">
+      <div className="tw-flex tw-py-2">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
           {activityMessage(
             locale,
@@ -283,19 +282,44 @@ export default function UserPageStatsActivityOverview({
           )}
         </h3>
       </div>
-      <div className="pt-2 pb-2">
+      <div className="tw-py-2">
         <UserPageStatsActivityOverviewTotals
           activity={activity}
           locale={locale}
         />
       </div>
-      <div className="pt-2 pb-2">
+      <div className="tw-py-2">
         <UserPageStatsActivityOverviewMemes
           activity={activityMemes}
           locale={locale}
         />
       </div>
     </div>
+  );
+}
+
+function StatsDisclosure({
+  title,
+  children,
+}: {
+  readonly title: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <details className="tw-group">
+      <summary
+        className={`${styles["collectedAccordionButton"]} tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden`}
+      >
+        <b>{title}</b>
+        <span
+          aria-hidden="true"
+          className="tw-h-2 tw-w-2 tw-shrink-0 tw-rotate-45 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-[225deg]"
+        />
+      </summary>
+      <div className={`${styles["collectedAccordionBody"]} tw-px-5 tw-py-4`}>
+        {children}
+      </div>
+    </details>
   );
 }
 
@@ -307,50 +331,39 @@ function UserPageStatsActivityOverviewTotals({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <Accordion>
-      <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles["collectedAccordionButton"]}>
-          <b>
-            {activityMessage(
+    <StatsDisclosure
+      title={activityMessage(
+        locale,
+        "user.collected.stats.activityOverview.overview"
+      )}
+    >
+      <div className={`tw-py-2 ${styles["scrollContainer"]}`}>
+        <table className={`tw-w-full ${styles["collectedAccordionTable"]}`}>
+          <UserPageStatsTableHead
+            locale={locale}
+            caption={activityMessage(
               locale,
-              "user.collected.stats.activityOverview.overview"
+              "user.collected.stats.activityOverview.tables.overviewCaption"
             )}
-          </b>
-        </Accordion.Button>
-        <Accordion.Body className={styles["collectedAccordionBody"]}>
-          <Container>
-            <Row className={`pt-2 pb-2 ${styles["scrollContainer"]}`}>
-              <Col>
-                <Table className={styles["collectedAccordionTable"]}>
-                  <UserPageStatsTableHead
+          />
+          <tbody>
+            {OVERVIEW_ROW_GROUPS.map((group, groupIndex) => (
+              <Fragment key={`activity-overview-group-${groupIndex}`}>
+                <UserPageStatsTableHr span={6} />
+                {group.map((row) => (
+                  <ActivityOverviewRow
+                    key={row.labelKey}
+                    row={row}
+                    activity={activity}
                     locale={locale}
-                    caption={activityMessage(
-                      locale,
-                      "user.collected.stats.activityOverview.tables.overviewCaption"
-                    )}
                   />
-                  <tbody>
-                    {OVERVIEW_ROW_GROUPS.map((group, groupIndex) => (
-                      <Fragment key={`activity-overview-group-${groupIndex}`}>
-                        <UserPageStatsTableHr span={6} />
-                        {group.map((row) => (
-                          <ActivityOverviewRow
-                            key={row.labelKey}
-                            row={row}
-                            activity={activity}
-                            locale={locale}
-                          />
-                        ))}
-                      </Fragment>
-                    ))}
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </Container>
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
+                ))}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </StatsDisclosure>
   );
 }
 
@@ -385,86 +398,73 @@ function UserPageStatsActivityOverviewMemes({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <Accordion>
-      <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles["collectedAccordionButton"]}>
-          <b>
-            {activityMessage(
-              locale,
-              "user.collected.stats.activityOverview.memesBySeason"
-            )}
-          </b>
-        </Accordion.Button>
-        <Accordion.Body className={styles["collectedAccordionBody"]}>
-          <Container>
-            <Row className={`pt-2 pb-2 ${styles["scrollContainer"]}`}>
-              <Col>
-                {activity.length > 0 ? (
-                  <Table className={styles["collectedAccordionTable"]}>
-                    <caption className="tw-sr-only">
+    <StatsDisclosure
+      title={activityMessage(
+        locale,
+        "user.collected.stats.activityOverview.memesBySeason"
+      )}
+    >
+      <div className={`tw-py-2 ${styles["scrollContainer"]}`}>
+        {activity.length > 0 ? (
+          <table className={`tw-w-full ${styles["collectedAccordionTable"]}`}>
+            <caption className="tw-sr-only">
+              {activityMessage(
+                locale,
+                "user.collected.stats.activityOverview.tables.memesBySeasonCaption"
+              )}
+            </caption>
+            <thead>
+              <tr>
+                <th aria-hidden="true"></th>
+                {SEASON_ACTIVITY_COLUMNS.map((column) => (
+                  <th
+                    key={column.field}
+                    scope="col"
+                    className="tw-text-right !tw-text-[#93939f]"
+                  >
+                    {activityMessage(locale, column.labelKey)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {activity.map((activity) => (
+                <Fragment key={`stats-activity-memes-${activity.season}`}>
+                  <UserPageStatsTableHr span={11} />
+                  <tr>
+                    <th scope="row" className="!tw-text-[#93939f]">
                       {activityMessage(
                         locale,
-                        "user.collected.stats.activityOverview.tables.memesBySeasonCaption"
+                        "user.collected.stats.activityOverview.seasonLabel",
+                        { seasonNumber: activity.season }
                       )}
-                    </caption>
-                    <thead>
-                      <tr>
-                        <th aria-hidden="true"></th>
-                        {SEASON_ACTIVITY_COLUMNS.map((column) => (
-                          <th
-                            key={column.field}
-                            scope="col"
-                            className="text-right !tw-text-[#93939f]"
-                          >
-                            {activityMessage(locale, column.labelKey)}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activity.map((activity) => (
-                        <Fragment
-                          key={`stats-activity-memes-${activity.season}`}
-                        >
-                          <UserPageStatsTableHr span={11} />
-                          <tr>
-                            <th scope="row" className="!tw-text-[#93939f]">
-                              {activityMessage(
-                                locale,
-                                "user.collected.stats.activityOverview.seasonLabel",
-                                { seasonNumber: activity.season }
-                              )}
-                            </th>
-                            {SEASON_ACTIVITY_COLUMNS.map((column) => (
-                              <td
-                                key={column.field}
-                                className="tw-text-right !tw-text-[#fff]"
-                              >
-                                {formatActivityValue(
-                                  locale,
-                                  activity[column.field],
-                                  column.valueType
-                                )}
-                              </td>
-                            ))}
-                          </tr>
-                        </Fragment>
-                      ))}
-                    </tbody>
-                  </Table>
-                ) : (
-                  <p className="tw-mb-0 tw-px-2 tw-py-3 tw-text-sm tw-text-iron-300">
-                    {activityMessage(
-                      locale,
-                      "user.collected.stats.activityOverview.tables.memesBySeasonEmpty"
-                    )}
-                  </p>
-                )}
-              </Col>
-            </Row>
-          </Container>
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
+                    </th>
+                    {SEASON_ACTIVITY_COLUMNS.map((column) => (
+                      <td
+                        key={column.field}
+                        className="tw-text-right !tw-text-[#fff]"
+                      >
+                        {formatActivityValue(
+                          locale,
+                          activity[column.field],
+                          column.valueType
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="tw-mb-0 tw-px-2 tw-py-3 tw-text-sm tw-text-iron-300">
+            {activityMessage(
+              locale,
+              "user.collected.stats.activityOverview.tables.memesBySeasonEmpty"
+            )}
+          </p>
+        )}
+      </div>
+    </StatsDisclosure>
   );
 }

@@ -10,7 +10,7 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
-import { Accordion } from "react-bootstrap";
+import type { ReactNode } from "react";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
@@ -56,6 +56,31 @@ export default function UserPageSubscriptionsHistory(
   );
 }
 
+function HistoryDisclosure({
+  title,
+  children,
+}: {
+  readonly title: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <details className="tw-group">
+      <summary
+        className={`${styles["topUpHistoryAccordionButton"]} tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden`}
+      >
+        <b>{title}</b>
+        <span
+          aria-hidden="true"
+          className="tw-h-2 tw-w-2 tw-shrink-0 tw-rotate-45 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-[225deg]"
+        />
+      </summary>
+      <div className={`${styles["topUpHistoryAccordionBody"]} tw-px-5 tw-py-4`}>
+        {children}
+      </div>
+    </details>
+  );
+}
+
 function RedeemedSubscriptionsAccordion(
   props: Readonly<{
     history: Page<RedeemedSubscription>;
@@ -63,36 +88,29 @@ function RedeemedSubscriptionsAccordion(
   }>
 ) {
   return (
-    <Accordion>
-      <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles["topUpHistoryAccordionButton"]}>
-          <b>Redeemed Subscriptions</b>
-        </Accordion.Button>
-        <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            {props.history.data.length > 0 ? (
-              props.history.data.map((redeem) => (
-                <RedeemedEntry key={redeem.transaction} redeem={redeem} />
-              ))
-            ) : (
-              <div className="font-color-silver">
-                No Redeemed Subscriptions found
-              </div>
-            )}
+    <HistoryDisclosure title="Redeemed Subscriptions">
+      <div className="tw-flex tw-flex-col tw-gap-2">
+        {props.history.data.length > 0 ? (
+          props.history.data.map((redeem) => (
+            <RedeemedEntry key={redeem.transaction} redeem={redeem} />
+          ))
+        ) : (
+          <div className="font-color-silver">
+            No Redeemed Subscriptions found
           </div>
-          {props.history.count > 0 && props.history.count / 10 > 1 && (
-            <div className="tw-mt-3 tw-text-center">
-              <Pagination
-                page={props.history.page}
-                pageSize={10}
-                totalResults={props.history.count}
-                setPage={props.setPage}
-              />
-            </div>
-          )}
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
+        )}
+      </div>
+      {props.history.count > 0 && props.history.count / 10 > 1 && (
+        <div className="tw-mt-3 tw-text-center">
+          <Pagination
+            page={props.history.page}
+            pageSize={10}
+            totalResults={props.history.count}
+            setPage={props.setPage}
+          />
+        </div>
+      )}
+    </HistoryDisclosure>
   );
 }
 
@@ -103,34 +121,27 @@ function LogAccordion(
   }>
 ) {
   return (
-    <Accordion>
-      <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles["topUpHistoryAccordionButton"]}>
-          <b>Log History</b>
-        </Accordion.Button>
-        <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            {props.logs.data.length > 0 ? (
-              props.logs.data.map((log) => (
-                <LogEntry key={`subscription-log-${log.id}`} log={log} />
-              ))
-            ) : (
-              <div className="font-color-silver">No logs found</div>
-            )}
-            {props.logs.count > 0 && props.logs.count / 10 > 1 && (
-              <div className="tw-mt-3 tw-text-center">
-                <Pagination
-                  page={props.logs.page}
-                  pageSize={10}
-                  totalResults={props.logs.count}
-                  setPage={props.setPage}
-                />
-              </div>
-            )}
+    <HistoryDisclosure title="Log History">
+      <div className="tw-flex tw-flex-col tw-gap-2">
+        {props.logs.data.length > 0 ? (
+          props.logs.data.map((log) => (
+            <LogEntry key={`subscription-log-${log.id}`} log={log} />
+          ))
+        ) : (
+          <div className="font-color-silver">No logs found</div>
+        )}
+        {props.logs.count > 0 && props.logs.count / 10 > 1 && (
+          <div className="tw-mt-3 tw-text-center">
+            <Pagination
+              page={props.logs.page}
+              pageSize={10}
+              totalResults={props.logs.count}
+              setPage={props.setPage}
+            />
           </div>
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
+        )}
+      </div>
+    </HistoryDisclosure>
   );
 }
 
@@ -141,34 +152,27 @@ function TopUpAccordion(
   }>
 ) {
   return (
-    <Accordion>
-      <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles["topUpHistoryAccordionButton"]}>
-          <b>Top Up History</b>
-        </Accordion.Button>
-        <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            {props.history.data.length > 0 ? (
-              props.history.data.map((topUp) => (
-                <TopUpEntry key={topUp.hash} topUp={topUp} />
-              ))
-            ) : (
-              <div className="font-color-silver">No Top Ups found</div>
-            )}
-          </div>
-          {props.history.count > 0 && props.history.count / 10 > 1 && (
-            <div className="tw-mt-3 tw-text-center">
-              <Pagination
-                page={props.history.page}
-                pageSize={10}
-                totalResults={props.history.count}
-                setPage={props.setPage}
-              />
-            </div>
-          )}
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
+    <HistoryDisclosure title="Top Up History">
+      <div className="tw-flex tw-flex-col tw-gap-2">
+        {props.history.data.length > 0 ? (
+          props.history.data.map((topUp) => (
+            <TopUpEntry key={topUp.hash} topUp={topUp} />
+          ))
+        ) : (
+          <div className="font-color-silver">No Top Ups found</div>
+        )}
+      </div>
+      {props.history.count > 0 && props.history.count / 10 > 1 && (
+        <div className="tw-mt-3 tw-text-center">
+          <Pagination
+            page={props.history.page}
+            pageSize={10}
+            totalResults={props.history.count}
+            setPage={props.setPage}
+          />
+        </div>
+      )}
+    </HistoryDisclosure>
   );
 }
 
