@@ -2274,7 +2274,7 @@ export function shouldFilterRabbyMobileRainbowKitNotFoundError(
     return false;
   }
 
-  return !hasAppOwnedFrame(value?.stacktrace?.frames);
+  return !hasLikelyAppOwnedFrame(value?.stacktrace?.frames);
 }
 
 export function shouldFilterGifPickerTenorCategoriesError(

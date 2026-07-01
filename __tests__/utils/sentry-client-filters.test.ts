@@ -3695,6 +3695,35 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter RabbyMobile RainbowKit lookup errors with first-party frame paths", () => {
+    // Arrange
+    setNavigatorUserAgent(rabbyMobileUserAgent);
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "https://6529.io/_next/static/chunks/app-client.js",
+                  function: "initializeWallet",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter RainbowKit lookup errors without RabbyMobile context", () => {
     // Arrange
     setNavigatorUserAgent(
