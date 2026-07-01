@@ -40,11 +40,16 @@
 }
 
 .consolidationDropdown {
+  display: inline-flex;
+  align-items: center;
+
   button {
     text-align: left;
     padding: 0;
     background-color: transparent !important;
+    border: 0;
     border-color: transparent !important;
+    color: variables.$font-color;
     &::after {
       border: none !important;
     }
@@ -57,10 +62,14 @@
 
 .copyDropdown {
   display: inline-block;
+  position: relative;
+
   button {
     padding: 0;
     background-color: transparent !important;
+    border: 0;
     border-color: transparent !important;
+    color: variables.$font-color;
     &::after {
       border: none !important;
     }

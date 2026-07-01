@@ -519,6 +519,9 @@ import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
 import { ApiAttachment         } from '../models/ApiAttachment';
 import { ApiAttachmentKind } from '../models/ApiAttachmentKind';
 import { ApiAttachmentSafety      } from '../models/ApiAttachmentSafety';
+import { ApiAttachmentSafetyScanner } from '../models/ApiAttachmentSafetyScanner';
+import { ApiAttachmentSafetyStatus } from '../models/ApiAttachmentSafetyStatus';
+import { ApiAttachmentSafetyValidation } from '../models/ApiAttachmentSafetyValidation';
 import { ApiAttachmentStatus } from '../models/ApiAttachmentStatus';
 import { ApiAttachmentUploadMimeType } from '../models/ApiAttachmentUploadMimeType';
 import { ApiAuthSettings } from '../models/ApiAuthSettings';
@@ -571,7 +574,7 @@ import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetri
 import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
-import { ApiCreateConnectionShareRequest, ApiCreateConnectionShareRequestTargetClientTypeEnum    } from '../models/ApiCreateConnectionShareRequest';
+import { ApiCreateConnectionShareRequest, ApiCreateConnectionShareRequestTargetClientTypeEnum   , ApiCreateConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateConnectionShareRequest';
 import { ApiCreateConnectionShareResponse    , ApiCreateConnectionShareResponseTargetClientTypeEnum    } from '../models/ApiCreateConnectionShareResponse';
 import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
@@ -579,7 +582,7 @@ import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
 import { ApiCreateDropRequest                 } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
-import { ApiCreateLegacyDesktopConnectionShareRequest } from '../models/ApiCreateLegacyDesktopConnectionShareRequest';
+import { ApiCreateLegacyDesktopConnectionShareRequest , ApiCreateLegacyDesktopConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateLegacyDesktopConnectionShareRequest';
 import { ApiCreateLegacyDesktopConnectionShareResponse } from '../models/ApiCreateLegacyDesktopConnectionShareResponse';
 import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
 import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
@@ -805,7 +808,7 @@ import { ApiRateMatter } from '../models/ApiRateMatter';
 import { ApiRatingWithProfileInfoAndLevel } from '../models/ApiRatingWithProfileInfoAndLevel';
 import { ApiRatingWithProfileInfoAndLevelPage } from '../models/ApiRatingWithProfileInfoAndLevelPage';
 import { ApiRedeemConnectionShareRequest , ApiRedeemConnectionShareRequestTargetClientTypeEnum   } from '../models/ApiRedeemConnectionShareRequest';
-import { ApiRedeemConnectionShareResponse } from '../models/ApiRedeemConnectionShareResponse';
+import { ApiRedeemConnectionShareResponse    , ApiRedeemConnectionShareResponseClientTypeEnum     } from '../models/ApiRedeemConnectionShareResponse';
 import { ApiRedeemRefreshTokenRequest } from '../models/ApiRedeemRefreshTokenRequest';
 import { ApiRedeemRefreshTokenResponse } from '../models/ApiRedeemRefreshTokenResponse';
 import { ApiRegisterPushNotificationTokenRequest } from '../models/ApiRegisterPushNotificationTokenRequest';
@@ -1037,7 +1040,9 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiConsolidatedTdhMetricsSort",
     "ApiConsolidatedTdhView",
     "ApiCreateConnectionShareRequestTargetClientTypeEnum",
+    "ApiCreateConnectionShareRequestClientTypeEnum",
     "ApiCreateConnectionShareResponseTargetClientTypeEnum",
+    "ApiCreateLegacyDesktopConnectionShareRequestClientTypeEnum",
     "ApiDecentralizedMediaProtocol",
     "ApiDropGroupMention",
     "ApiDropMainType",
@@ -1081,6 +1086,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiProfileProxyActionType",
     "ApiRateMatter",
     "ApiRedeemConnectionShareRequestTargetClientTypeEnum",
+    "ApiRedeemConnectionShareResponseClientTypeEnum",
     "ApiRepDirection",
     "ApiSessionLoginRequestClientTypeEnum",
     "ApiSessionLoginRequestWalletKindHintEnum",

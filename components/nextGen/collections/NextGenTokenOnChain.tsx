@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "./NextGenTailwindLayout";
 import { useEnsName, useReadContract } from "wagmi";
 import type { NextGenCollection } from "@/entities/INextgen";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -108,17 +107,19 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   function printToken() {
     return (
       <>
-        <Container fluid className={`${styles["tokenContainer"]} pt-4 pb-4`}>
-          <Row>
-            <Col>
-              <Container>
-                <Row>
-                  <Col className="d-flex align-items-center justify-content-between">
+        <div
+          className={`tw-w-full tw-max-w-none ${styles["tokenContainer"]} pt-4 pb-4`}
+        >
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+              <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+                <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                  <div className="d-flex align-items-center justify-content-between tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                     <h2 className="mb-0">{tokenName}</h2>
-                  </Col>
-                </Row>
-                <Row className="pt-4">
-                  <Col className="text-center">
+                  </div>
+                </div>
+                <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+                  <div className="text-center tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                     <Image
                       unoptimized
                       priority
@@ -134,20 +135,20 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       src={tokenImage}
                       alt={tokenName}
                     />
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-        </Container>
-        <Container className="pt-3 pb-3">
-          <Row>
-            <Col>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="pt-3 pb-3 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <h4>About</h4>
-            </Col>
-          </Row>
-          <Row>
-            <Col className="d-flex align-items-center gap-5">
+            </div>
+          </div>
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="d-flex align-items-center gap-5 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <span className="pt-1 pb-1 d-flex flex-column">
                 <span className="font-color-h">Token ID</span>
                 <span>#{props.token_id}</span>
@@ -232,25 +233,25 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   </span>
                 </span>
               )}
-            </Col>
-          </Row>
-          <Row className="pt-3">
-            <Col>
+            </div>
+          </div>
+          <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <b>
                 Token Indexing, check back later <DotLoader />
               </b>
-            </Col>
-          </Row>
-        </Container>
+            </div>
+          </div>
+        </div>
       </>
     );
   }
 
   if (fetchingMetadata || tokenNotFound || !tokenImage) {
     return (
-      <Container className="pt-5">
-        <Row>
-          <Col className="text-center">
+      <div className="pt-5 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="text-center tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h4 className="mb-0">
               {tokenNotFound ? (
                 <>Token Not Found</>
@@ -260,9 +261,9 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 </>
               )}
             </h4>
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     );
   }
 

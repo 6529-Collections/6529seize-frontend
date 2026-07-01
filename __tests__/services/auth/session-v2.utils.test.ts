@@ -1,6 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { setAuthJwt } from "@/services/auth/auth.utils";
+import { getWalletAddress, setAuthJwt } from "@/services/auth/auth.utils";
 import {
   getNativeRefreshToken,
   isNativeSecureStorageAvailable,
@@ -36,6 +36,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
+  getWalletAddress: jest.fn(),
   setAuthJwt: jest.fn(),
 }));
 
@@ -55,6 +56,7 @@ describe("session-v2.utils", () => {
     (commonApiPost as jest.Mock).mockResolvedValue(undefined);
     (getNativeRefreshToken as jest.Mock).mockResolvedValue(null);
     (isNativeSecureStorageAvailable as jest.Mock).mockReturnValue(true);
+    (getWalletAddress as jest.Mock).mockReturnValue(null);
     (setAuthJwt as jest.Mock).mockReturnValue(true);
   });
 
@@ -136,6 +138,32 @@ describe("session-v2.utils", () => {
       parseJson: false,
     });
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
+  });
+
+  it("persists desktop refresh-token session responses", async () => {
+    await expect(
+      persistSessionResponse({
+        client_type: "desktop",
+        address: "0xabc",
+        role: null,
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        native_refresh_token: "desktop-refresh-token",
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      })
+    ).resolves.toBe(true);
+
+    expect(setNativeRefreshToken).toHaveBeenCalledWith({
+      address: "0xabc",
+      refreshToken: "desktop-refresh-token",
+    });
+    expect(setAuthJwt).toHaveBeenCalledWith(
+      "0xabc",
+      "access-token",
+      null,
+      undefined,
+      { authSessionVersion: "v2" }
+    );
   });
 
   it("marks persisted web auth as session v2", async () => {
@@ -654,6 +682,64 @@ describe("session-v2.utils", () => {
     });
   });
 
+  it("creates a desktop connection share when requested", async () => {
+    const shareResponse = {
+      connection_share_code: "share-code",
+      expires_at: "2026-06-10T00:00:00.000Z",
+      address: "0xabc",
+      role: null,
+      target_client_type: "desktop",
+      deep_link_path:
+        "/accept-connection-sharing?connection_share_code=share-code",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(shareResponse);
+
+    await expect(
+      createConnectionShare({ targetClientType: "desktop" })
+    ).resolves.toBe(shareResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/connection-share",
+      body: {
+        target_client_type: "desktop",
+      },
+      credentials: "include",
+      signal: undefined,
+    });
+  });
+
+  it("creates a native connection share with native source-session proof", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getWalletAddress as jest.Mock).mockReturnValue("0xabc");
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(
+      "native-refresh-token"
+    );
+    const shareResponse = {
+      connection_share_code: "share-code",
+      expires_at: "2026-06-10T00:00:00.000Z",
+      address: "0xabc",
+      role: null,
+      target_client_type: "native",
+      deep_link_path:
+        "/accept-connection-sharing?connection_share_code=share-code",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(shareResponse);
+
+    await expect(createConnectionShare({})).resolves.toBe(shareResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/connection-share",
+      body: {
+        target_client_type: "native",
+        client_type: "native",
+        client_address: "0xabc",
+        native_refresh_token: "native-refresh-token",
+      },
+      credentials: "include",
+      signal: undefined,
+    });
+  });
+
   it("creates a legacy desktop connection share with bearer auth and session credentials", async () => {
     const shareResponse = {
       refresh_token: "legacy-refresh-token",
@@ -704,6 +790,60 @@ describe("session-v2.utils", () => {
         target_client_type: "native",
       },
       credentials: "include",
+    });
+  });
+
+  it("redeems a connection share as a desktop session when requested", async () => {
+    (commonApiPost as jest.Mock).mockResolvedValueOnce({
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "desktop-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    await expect(
+      redeemConnectionShare("share-code", "desktop")
+    ).resolves.toEqual({
+      client_type: "desktop",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "desktop-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/connection-share/redeem",
+      body: {
+        connection_share_code: "share-code",
+        target_client_type: "desktop",
+      },
+      credentials: "include",
+    });
+  });
+
+  it("preserves a redeemed connection share client type returned by the backend", async () => {
+    (commonApiPost as jest.Mock).mockResolvedValueOnce({
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      client_type: "desktop",
+      native_refresh_token: "desktop-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    await expect(redeemConnectionShare("share-code")).resolves.toEqual({
+      client_type: "desktop",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "desktop-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
     });
   });
 });
