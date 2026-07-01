@@ -89,7 +89,13 @@ function LeaderboardDropdown({
         <span
           className={styles["contentDropdownMenu"]}
           role="menu"
+          tabIndex={-1}
           onClick={() => setIsOpen(false)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setIsOpen(false);
+            }
+          }}
         >
           {children}
         </span>

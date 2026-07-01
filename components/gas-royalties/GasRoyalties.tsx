@@ -86,7 +86,13 @@ function FilterDropdown({
         <span
           className={styles["filterDropdownMenu"]}
           role="menu"
+          tabIndex={-1}
           onClick={() => setIsOpen(false)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setIsOpen(false);
+            }
+          }}
         >
           {children}
         </span>
