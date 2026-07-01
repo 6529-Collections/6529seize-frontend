@@ -3,6 +3,81 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import BrainMobileViewContent from "@/components/brain/mobile/BrainMobileViewContent";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
+jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
+  const loaderSource = loader.toString();
+  const dynamicModules: readonly [
+    source: string,
+    modulePath: string,
+    exportName?: string,
+  ][] = [
+    ["./BrainMobileAbout", "@/components/brain/mobile/BrainMobileAbout"],
+    [
+      "@/components/community-curations/CommunityCurations",
+      "@/components/community-curations/CommunityCurations",
+    ],
+    [
+      "../my-stream/MyStreamWaveLeaderboard",
+      "@/components/brain/my-stream/MyStreamWaveLeaderboard",
+    ],
+    [
+      "../my-stream/MyStreamWaveSubmissions",
+      "@/components/brain/my-stream/MyStreamWaveSubmissions",
+    ],
+    [
+      "../my-stream/MyStreamWaveOutcome",
+      "@/components/brain/my-stream/MyStreamWaveOutcome",
+    ],
+    [
+      "../my-stream/MyStreamWaveSales",
+      "@/components/brain/my-stream/MyStreamWaveSales",
+    ],
+    [
+      "../my-stream/MyStreamWavePolls",
+      "@/components/brain/my-stream/MyStreamWavePolls",
+    ],
+    [
+      "../my-stream/votes/MyStreamWaveMyVotes",
+      "@/components/brain/my-stream/votes/MyStreamWaveMyVotes",
+    ],
+    [
+      "../my-stream/MyStreamWaveFAQ",
+      "@/components/brain/my-stream/MyStreamWaveFAQ",
+    ],
+    ["./BrainMobileMessages", "@/components/brain/mobile/BrainMobileMessages"],
+    [
+      "../notifications/NotificationsContainer",
+      "@/components/brain/notifications/NotificationsContainer",
+    ],
+    [
+      "@/components/waves/winners/WaveWinners",
+      "@/components/waves/winners/WaveWinners",
+      "WaveWinners",
+    ],
+  ];
+  const dynamicModule = dynamicModules.find(([source]) =>
+    loaderSource.includes(source)
+  );
+
+  if (!dynamicModule) {
+    throw new Error(`Unexpected dynamic import: ${loaderSource}`);
+  }
+
+  const [, modulePath, exportName] = dynamicModule;
+  const MockDynamicComponent = (props: any) => {
+    const React = require("react");
+    const loadedModule = require(modulePath);
+    const Component = exportName
+      ? loadedModule[exportName]
+      : (loadedModule.default ?? loadedModule);
+
+    return React.createElement(Component, props);
+  };
+
+  MockDynamicComponent.displayName = "MockDynamicComponent";
+
+  return MockDynamicComponent;
+});
+
 const mockBrainMobileAbout = jest.fn(() => <div data-testid="about" />);
 jest.mock("@/components/brain/mobile/BrainMobileAbout", () => ({
   __esModule: true,

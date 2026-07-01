@@ -2,24 +2,83 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import BrainMobileAbout from "./BrainMobileAbout";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import CommunityCurations from "@/components/community-curations/CommunityCurations";
-import MyStreamWaveLeaderboard from "../my-stream/MyStreamWaveLeaderboard";
-import MyStreamWaveSubmissions from "../my-stream/MyStreamWaveSubmissions";
-import MyStreamWaveOutcome from "../my-stream/MyStreamWaveOutcome";
-import MyStreamWaveSales from "../my-stream/MyStreamWaveSales";
-import MyStreamWavePolls from "../my-stream/MyStreamWavePolls";
-import MyStreamWaveMyVotes from "../my-stream/votes/MyStreamWaveMyVotes";
-import MyStreamWaveFAQ from "../my-stream/MyStreamWaveFAQ";
 import BrainMobileWaves from "./BrainMobileWaves";
-import BrainMobileMessages from "./BrainMobileMessages";
-import BrainNotifications from "../notifications/NotificationsContainer";
-import { WaveWinners } from "@/components/waves/winners/WaveWinners";
 import { BrainView } from "./brainMobileViews";
 import { useLayout } from "../my-stream/layout/LayoutContext";
+
+function BrainMobileViewLoadingFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      data-mobile-bottom-nav-scroll-target="true"
+      className="tw-h-full tw-min-h-[50dvh] tw-bg-black"
+    />
+  );
+}
+
+const BrainMobileAbout = dynamic(() => import("./BrainMobileAbout"), {
+  loading: () => <BrainMobileViewLoadingFallback />,
+});
+
+const CommunityCurations = dynamic(
+  () => import("@/components/community-curations/CommunityCurations"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const MyStreamWaveLeaderboard = dynamic(
+  () => import("../my-stream/MyStreamWaveLeaderboard"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const MyStreamWaveSubmissions = dynamic(
+  () => import("../my-stream/MyStreamWaveSubmissions"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const MyStreamWaveOutcome = dynamic(
+  () => import("../my-stream/MyStreamWaveOutcome"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const MyStreamWaveSales = dynamic(
+  () => import("../my-stream/MyStreamWaveSales"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const MyStreamWavePolls = dynamic(
+  () => import("../my-stream/MyStreamWavePolls"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const MyStreamWaveMyVotes = dynamic(
+  () => import("../my-stream/votes/MyStreamWaveMyVotes"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const MyStreamWaveFAQ = dynamic(() => import("../my-stream/MyStreamWaveFAQ"), {
+  loading: () => <BrainMobileViewLoadingFallback />,
+});
+
+const BrainMobileMessages = dynamic(() => import("./BrainMobileMessages"), {
+  loading: () => <BrainMobileViewLoadingFallback />,
+});
+
+const BrainNotifications = dynamic(
+  () => import("../notifications/NotificationsContainer"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const WaveWinners = dynamic(
+  () =>
+    import("@/components/waves/winners/WaveWinners").then(
+      (mod) => mod.WaveWinners
+    ),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
 
 interface BrainMobileViewContentProps {
   readonly activeView: BrainView;
@@ -34,6 +93,35 @@ interface BrainMobileViewContentProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
+  readonly wave: ApiWave | null | undefined;
+}
+
+interface BrainMobileWaveViewProps {
+  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly wave: ApiWave | null | undefined;
+}
+
+interface BrainMobileCompetitionWaveViewProps extends BrainMobileWaveViewProps {
+  readonly isCompetitionWave: boolean;
+}
+
+interface BrainMobileOutcomeViewProps extends BrainMobileWaveViewProps {
+  readonly isCompetitionWave: boolean;
+  readonly isCurationWave: boolean;
+  readonly outcomesVisible: boolean;
+}
+
+interface BrainMobileCurationViewProps {
+  readonly isCurationWave: boolean;
+  readonly wave: ApiWave | null | undefined;
+}
+
+interface BrainMobilePollsViewProps extends BrainMobileWaveViewProps {
+  readonly hasPolls: boolean;
+}
+
+interface BrainMobileFAQViewProps {
+  readonly isMemesWave: boolean;
   readonly wave: ApiWave | null | undefined;
 }
 
@@ -59,6 +147,114 @@ function BrainMobileProfileFeed() {
   );
 }
 
+function BrainMobileLeaderboardView({
+  isCompetitionWave,
+  onDropClick,
+  wave,
+}: BrainMobileCompetitionWaveViewProps) {
+  if (!isCompetitionWave || !wave) {
+    return null;
+  }
+
+  return (
+    <MyStreamWaveLeaderboard
+      key={wave.id}
+      wave={wave}
+      onDropClick={onDropClick}
+    />
+  );
+}
+
+function BrainMobileSubmissionsView({
+  isCompetitionWave,
+  onDropClick,
+  wave,
+}: BrainMobileCompetitionWaveViewProps) {
+  if (!isCompetitionWave || !wave) {
+    return null;
+  }
+
+  return (
+    <MyStreamWaveSubmissions
+      key={wave.id}
+      wave={wave}
+      onDropClick={onDropClick}
+    />
+  );
+}
+
+function BrainMobileWinnersView({
+  isCompetitionWave,
+  onDropClick,
+  wave,
+}: BrainMobileCompetitionWaveViewProps) {
+  if (!isCompetitionWave || !wave) {
+    return null;
+  }
+
+  return (
+    <div className="tw-px-2 sm:tw-px-4">
+      <WaveWinners wave={wave} onDropClick={onDropClick} />
+    </div>
+  );
+}
+
+function BrainMobileOutcomeView({
+  isCompetitionWave,
+  isCurationWave,
+  outcomesVisible,
+  wave,
+}: BrainMobileOutcomeViewProps) {
+  if (!isCompetitionWave || isCurationWave || !outcomesVisible || !wave) {
+    return null;
+  }
+
+  return <MyStreamWaveOutcome wave={wave} />;
+}
+
+function BrainMobileMyVotesView({
+  isCompetitionWave,
+  onDropClick,
+  wave,
+}: BrainMobileCompetitionWaveViewProps) {
+  if (!isCompetitionWave || !wave) {
+    return null;
+  }
+
+  return <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />;
+}
+
+function BrainMobileSalesView({
+  isCurationWave,
+  wave,
+}: BrainMobileCurationViewProps) {
+  if (!isCurationWave || !wave) {
+    return null;
+  }
+
+  return <MyStreamWaveSales waveId={wave.id} />;
+}
+
+function BrainMobilePollsView({
+  hasPolls,
+  onDropClick,
+  wave,
+}: BrainMobilePollsViewProps) {
+  if (!hasPolls || !wave) {
+    return null;
+  }
+
+  return <MyStreamWavePolls wave={wave} onDropClick={onDropClick} />;
+}
+
+function BrainMobileFAQView({ isMemesWave, wave }: BrainMobileFAQViewProps) {
+  if (!isMemesWave || !wave) {
+    return null;
+  }
+
+  return <MyStreamWaveFAQ wave={wave} />;
+}
+
 export default function BrainMobileViewContent({
   activeView,
   activeWaveId,
@@ -75,75 +271,84 @@ export default function BrainMobileViewContent({
   wave,
 }: BrainMobileViewContentProps) {
   const isCompetitionWave = isRankWave || isApproveWave;
-  const supportsOutcomeView =
-    isCompetitionWave && !isCurationWave && outcomesVisible;
-  const rankWave = isCompetitionWave ? (wave ?? null) : null;
-  const outcomeWave = supportsOutcomeView ? (wave ?? null) : null;
-  const curationWave = isCurationWave ? (wave ?? null) : null;
-  const faqWave = isMemesWave ? (wave ?? null) : null;
 
-  const leaderboardContent = rankWave ? (
-    <MyStreamWaveLeaderboard
-      key={rankWave.id}
-      wave={rankWave}
-      onDropClick={onDropClick}
-    />
-  ) : null;
-
-  const submissionsContent = rankWave ? (
-    <MyStreamWaveSubmissions
-      key={rankWave.id}
-      wave={rankWave}
-      onDropClick={onDropClick}
-    />
-  ) : null;
-
-  const salesContent = curationWave ? (
-    <MyStreamWaveSales waveId={curationWave.id} />
-  ) : null;
-
-  const winnersContent = rankWave ? (
-    <div className="tw-px-2 sm:tw-px-4">
-      <WaveWinners wave={rankWave} onDropClick={onDropClick} />
-    </div>
-  ) : null;
-
-  const outcomeContent = outcomeWave ? (
-    <MyStreamWaveOutcome wave={outcomeWave} />
-  ) : null;
-
-  const myVotesContent = rankWave ? (
-    <MyStreamWaveMyVotes wave={rankWave} onDropClick={onDropClick} />
-  ) : null;
-
-  const pollsContent =
-    wave && hasPolls ? (
-      <MyStreamWavePolls wave={wave} onDropClick={onDropClick} />
-    ) : null;
-
-  const faqContent = faqWave ? <MyStreamWaveFAQ wave={faqWave} /> : null;
-
-  const contentByView: Record<BrainView, ReactNode> = {
-    [BrainView.DEFAULT]: <>{children}</>,
-    [BrainView.ABOUT]: <BrainMobileAbout activeWaveId={activeWaveId} />,
-    [BrainView.LEADERBOARD]: leaderboardContent,
-    [BrainView.SUBMISSIONS]: submissionsContent,
-    [BrainView.SALES]: salesContent,
-    [BrainView.WINNERS]: winnersContent,
-    [BrainView.OUTCOME]: outcomeContent,
-    [BrainView.MY_VOTES]: myVotesContent,
-    [BrainView.POLLS]: pollsContent,
-    [BrainView.FAQ]: faqContent,
-    [BrainView.WAVES]: (
-      <BrainMobileWaves
-        onOpenQuickVote={onOpenQuickVote}
-        onPrefetchQuickVote={onPrefetchQuickVote}
-      />
-    ),
-    [BrainView.PROFILE_FEED]: <BrainMobileProfileFeed />,
-    [BrainView.MESSAGES]: <BrainMobileMessages />,
-    [BrainView.NOTIFICATIONS]: <BrainNotifications />,
-  };
-
-  return contentByView[activeView];
+  switch (activeView) {
+    case BrainView.DEFAULT:
+      return <>{children}</>;
+    case BrainView.ABOUT:
+      return <BrainMobileAbout activeWaveId={activeWaveId} />;
+    case BrainView.LEADERBOARD:
+      return (
+        <BrainMobileLeaderboardView
+          isCompetitionWave={isCompetitionWave}
+          wave={wave}
+          onDropClick={onDropClick}
+        />
+      );
+    case BrainView.SUBMISSIONS:
+      return (
+        <BrainMobileSubmissionsView
+          isCompetitionWave={isCompetitionWave}
+          wave={wave}
+          onDropClick={onDropClick}
+        />
+      );
+    case BrainView.SALES:
+      return (
+        <BrainMobileSalesView isCurationWave={isCurationWave} wave={wave} />
+      );
+    case BrainView.WINNERS:
+      return (
+        <BrainMobileWinnersView
+          isCompetitionWave={isCompetitionWave}
+          wave={wave}
+          onDropClick={onDropClick}
+        />
+      );
+    case BrainView.OUTCOME:
+      return (
+        <BrainMobileOutcomeView
+          isCompetitionWave={isCompetitionWave}
+          isCurationWave={isCurationWave}
+          outcomesVisible={outcomesVisible}
+          wave={wave}
+          onDropClick={onDropClick}
+        />
+      );
+    case BrainView.MY_VOTES:
+      return (
+        <BrainMobileMyVotesView
+          isCompetitionWave={isCompetitionWave}
+          wave={wave}
+          onDropClick={onDropClick}
+        />
+      );
+    case BrainView.POLLS:
+      return (
+        <BrainMobilePollsView
+          hasPolls={hasPolls}
+          wave={wave}
+          onDropClick={onDropClick}
+        />
+      );
+    case BrainView.FAQ:
+      return <BrainMobileFAQView isMemesWave={isMemesWave} wave={wave} />;
+    case BrainView.WAVES:
+      return (
+        <BrainMobileWaves
+          onOpenQuickVote={onOpenQuickVote}
+          onPrefetchQuickVote={onPrefetchQuickVote}
+        />
+      );
+    case BrainView.PROFILE_FEED:
+      return <BrainMobileProfileFeed />;
+    case BrainView.MESSAGES:
+      return <BrainMobileMessages />;
+    case BrainView.NOTIFICATIONS:
+      return <BrainNotifications />;
+    default: {
+      const unhandledView: never = activeView;
+      return unhandledView;
+    }
+  }
 }
