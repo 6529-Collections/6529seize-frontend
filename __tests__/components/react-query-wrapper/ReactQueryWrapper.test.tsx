@@ -177,6 +177,9 @@ describe("ReactQueryWrapper context", () => {
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
     });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVES_V2],
+    });
   });
 });
 
