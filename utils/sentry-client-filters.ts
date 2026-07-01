@@ -1486,6 +1486,8 @@ function hasCoinbaseWalletLinkWebSocketSerializedCloseStack(
 
 function normalizeStackPath(value: string): string {
   const webpackPrefix = "webpack-internal:///";
+  const webpackSourcePrefix = "webpack://_n_e/./";
+  const appUriPrefix = "app:///";
   let normalized = value;
 
   if (normalized.startsWith(webpackPrefix)) {
@@ -1499,6 +1501,12 @@ function normalizeStackPath(value: string): string {
     if (normalized.startsWith("./")) {
       normalized = normalized.slice(2);
     }
+  }
+  if (normalized.startsWith(webpackSourcePrefix)) {
+    normalized = normalized.slice(webpackSourcePrefix.length);
+  }
+  if (normalized.startsWith(appUriPrefix)) {
+    normalized = normalized.slice(appUriPrefix.length);
   }
 
   while (normalized.startsWith("/")) {
@@ -1636,17 +1644,34 @@ function hasAppOwnedSourceStackValue(value: string): boolean {
     return false;
   }
 
-  return appOwnedFramePathPrefixes.some(
-    (prefix) =>
-      value.includes(`webpack-internal:///(app-pages-browser)/./${prefix}`) ||
-      value.includes(`webpack-internal:///(app-pages-browser)/${prefix}`) ||
-      value.includes(`webpack://_n_e/./${prefix}`) ||
-      value.includes(`app:///${prefix}`) ||
-      value.startsWith(prefix) ||
-      value.includes(`(${prefix}`) ||
-      value.includes(` ${prefix}`) ||
-      value.includes(`\t${prefix}`)
-  );
+  return getStackFramePathCandidates(value).some(isAppOwnedStackPath);
+}
+
+function getStackFramePathCandidates(value: string): string[] {
+  return value
+    .split("\n")
+    .map(getStackFramePathCandidate)
+    .filter((candidate): candidate is string => !!candidate);
+}
+
+function getStackFramePathCandidate(line: string): string | null {
+  const trimmed = line.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (!trimmed.startsWith("at ")) {
+    return trimmed;
+  }
+
+  const wrapperStart = trimmed.indexOf(" (");
+  if (wrapperStart >= 0 && trimmed.endsWith(")")) {
+    return trimmed.slice(wrapperStart + 2, -1);
+  }
+
+  const withoutAt = trimmed.slice("at ".length).trim();
+  const firstSpace = withoutAt.indexOf(" ");
+  return firstSpace >= 0 ? withoutAt.slice(firstSpace + 1).trim() : withoutAt;
 }
 
 function hasThirdPartyWalletLinkWebSocket1006Evidence(
@@ -1658,7 +1683,6 @@ function hasThirdPartyWalletLinkWebSocket1006Evidence(
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
     hasCoinbaseWalletLinkWebSocketSerializedStack(event) ||
-    hasWalletLinkWebSocketUnhandledRejectionSignature(value, event, hint) ||
     hasThirdPartyWalletAppKitBreadcrumbSignature(event)
   );
 }

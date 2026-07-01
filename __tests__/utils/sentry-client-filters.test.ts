@@ -2946,6 +2946,43 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters AppKit Coinbase websocket 1006 errors when vendor stacks only contain incidental app path tokens", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+      extra: {
+        __serialized__: {
+          message: "websocket error 1006:",
+          stack: [
+            "Error: websocket error 1006:",
+            "    at onClose (https://wallet.example.invalid/vendor/(services/relay.js:1:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter app-owned websocket 1006 errors", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
