@@ -14,8 +14,8 @@ export default function SlideshowHeader({
   collectionName,
 }: SlideshowHeaderProps) {
   return (
-    <div className="tw-flex tw-flex-wrap -tw-mx-3">
-      <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 tw-flex tw-items-center tw-justify-end">
+    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-end tw-px-3">
         <Link
           href={`/nextgen/collection/${formatNameForUrl(collectionName)}/art`}
           className={`tw-flex tw-items-center tw-gap-2 tw-no-underline ${styles["viewAllTokens"]}`}

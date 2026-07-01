@@ -1,4 +1,3 @@
-import { Container, Row, Col } from "react-bootstrap";
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
 import { getLeaderboardDownloadFileName } from "./leaderboard_helpers";
 import Pagination from "../pagination/Pagination";
@@ -45,26 +44,18 @@ export default function LeaderboardFooter(
   }
 
   return (
-    <Container>
-      <Row>
-        <Col
-          xs={12}
-          sm={12}
-          md={6}
-          className="pt-4 pb-3 d-flex justify-content-center gap-4">
+    <div className="tw-container tw-mx-auto tw-px-3">
+      <div className="tw-flex tw-flex-col md:tw-flex-row">
+        <div className="tw-flex tw-w-full tw-justify-center tw-gap-4 tw-pb-3 tw-pt-4 md:tw-w-1/2">
           <LeaderboardDownload
             url={props.url}
             name="network-interactions"
             page={props.page}
             block={props.block}
           />
-        </Col>
+        </div>
         {props.totalResults > props.pageSize && (
-          <Col
-            xs={12}
-            sm={12}
-            md={6}
-            className="pt-4 pb-3 d-flex justify-content-center">
+          <div className="tw-flex tw-w-full tw-justify-center tw-pb-3 tw-pt-4 md:tw-w-1/2">
             <Pagination
               page={props.page}
               pageSize={props.pageSize}
@@ -73,9 +64,9 @@ export default function LeaderboardFooter(
                 props.setPage(newPage);
               }}
             />
-          </Col>
+          </div>
         )}
-      </Row>
-    </Container>
+      </div>
+    </div>
   );
 }
