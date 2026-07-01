@@ -1,4 +1,3 @@
-import { Col, Container, Row } from "react-bootstrap";
 import type { BaseNFT, NFTHistory } from "@/entities/INFT";
 import styles from "./Timeline.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -70,10 +69,10 @@ export default function Timeline(props: Readonly<Props>) {
     const displayValue = String(numberWithCommasFromString(value));
 
     return (
-      <Col sm={12} md={fullWidth ? 12 : 6}>
+      <div className={`tw-w-full tw-px-3 ${fullWidth ? "" : "md:tw-w-1/2"}`}>
         <b>{label}:</b>{" "}
         <div className={styles["metadataValue"]}>{displayValue}</div>
-      </Col>
+      </div>
     );
   }
 
@@ -96,12 +95,12 @@ export default function Timeline(props: Readonly<Props>) {
 
   function printLink(label: string, value: any) {
     return (
-      <Col xs={12}>
+      <div className="tw-w-full tw-px-3">
         <b>{label}:</b>{" "}
         <a href={value} target="_blank" rel="noopener noreferrer">
           {value}
         </a>
-      </Col>
+      </div>
     );
   }
 
@@ -124,7 +123,7 @@ export default function Timeline(props: Readonly<Props>) {
 
   function printImage(label: string, value: any) {
     return (
-      <Col className="d-flex align-items-start flex-column gap-1">
+      <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-1 tw-px-3 md:tw-w-1/2">
         <b>{label}:</b>
         <TimelineMediaComponent
           type={MediaType.IMAGE}
@@ -132,7 +131,7 @@ export default function Timeline(props: Readonly<Props>) {
           label={label}
           locale={locale}
         />
-      </Col>
+      </div>
     );
   }
 
@@ -155,7 +154,7 @@ export default function Timeline(props: Readonly<Props>) {
 
   function printAnimation(label: string, value: any) {
     return (
-      <Col className="d-flex align-items-start flex-column gap-1">
+      <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-1 tw-px-3 md:tw-w-1/2">
         <b>{label}:</b>
         <TimelineMediaComponent
           type={getType()}
@@ -163,7 +162,7 @@ export default function Timeline(props: Readonly<Props>) {
           label={label}
           locale={locale}
         />
-      </Col>
+      </div>
     );
   }
 
@@ -222,60 +221,64 @@ export default function Timeline(props: Readonly<Props>) {
             }`}
           >
             <div className={styles["content"]}>
-              <h5 className="m-0 mb-3">
+              <h5 className="tw-m-0 tw-mb-3">
                 {getDateDisplay(step.transaction_date)}
               </h5>
-              <Container className="no-padding">
-                <Row className="pb-1">
-                  <Col className="d-flex justify-content-between align-items-center gap-4">
-                    <b>{step.description.event}</b>
-                    <span className="d-flex gap-4">
-                      <a
-                        href={step.uri}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={t(locale, "timeline.links.uriAriaLabel")}
-                        className="d-flex align-items-center justify-content-center gap-2 decoration-none"
-                      >
-                        {t(locale, "timeline.links.uri")}
-                        <FontAwesomeIcon
-                          icon={faExternalLinkSquare}
-                          aria-hidden="true"
-                          className={styles["linkIcon"]}
-                        />
-                      </a>
-                      <a
-                        href={`https://etherscan.io/tx/${step.transaction_hash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={t(locale, "timeline.links.txnAriaLabel")}
-                        className="d-flex align-items-center justify-content-center gap-2 decoration-none"
-                      >
-                        {t(locale, "timeline.links.txn")}
-                        <FontAwesomeIcon
-                          icon={faExternalLinkSquare}
-                          aria-hidden="true"
-                          className={styles["linkIcon"]}
-                        />
-                      </a>
-                    </span>
-                  </Col>
-                </Row>
+              <div>
+                <div className="tw-pb-1">
+                  <div className="-tw-mx-3">
+                    <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-px-3">
+                      <b>{step.description.event}</b>
+                      <span className="tw-flex tw-gap-4">
+                        <a
+                          href={step.uri}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={t(locale, "timeline.links.uriAriaLabel")}
+                          className="decoration-none tw-flex tw-items-center tw-justify-center tw-gap-2"
+                        >
+                          {t(locale, "timeline.links.uri")}
+                          <FontAwesomeIcon
+                            icon={faExternalLinkSquare}
+                            aria-hidden="true"
+                            className={styles["linkIcon"]}
+                          />
+                        </a>
+                        <a
+                          href={`https://etherscan.io/tx/${step.transaction_hash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={t(locale, "timeline.links.txnAriaLabel")}
+                          className="decoration-none tw-flex tw-items-center tw-justify-center tw-gap-2"
+                        >
+                          {t(locale, "timeline.links.txn")}
+                          <FontAwesomeIcon
+                            icon={faExternalLinkSquare}
+                            aria-hidden="true"
+                            className={styles["linkIcon"]}
+                          />
+                        </a>
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 {step.description.changes.length > 0 && (
                   <ul className={styles["changesUl"]}>
                     {step.description.changes.map((change) => (
                       <li key={`timeline-table-${change.key}`}>
-                        <Row className="pt-3 pb-1">
-                          <Col>
+                        <div className="-tw-mx-3 tw-pb-1 tw-pt-3">
+                          <div className="tw-px-3">
                             <b>{getKeyDisplay(change.key)}</b>
-                          </Col>
-                        </Row>
-                        <Row className="pt-1 pb-3">{printContent(change)}</Row>
+                          </div>
+                        </div>
+                        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-gap-y-3 tw-pb-3 tw-pt-1">
+                          {printContent(change)}
+                        </div>
                       </li>
                     ))}
                   </ul>
                 )}
-              </Container>
+              </div>
             </div>
           </div>
         );

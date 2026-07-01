@@ -7,8 +7,7 @@ import {
   parseEmojis,
 } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRef, useState } from "react";
-import { Dropdown } from "react-bootstrap";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
@@ -28,7 +27,7 @@ export function WalletAddress(props: {
   const uniqueIdWallet = getRandomObjectId();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLSpanElement>(null);
   const [isCopied, setIsCopied] = useState(false);
 
   function resolveDisplay() {
@@ -85,6 +84,26 @@ export function WalletAddress(props: {
       : null
   );
 
+  useEffect(() => {
+    if (!isDropdownOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isDropdownOpen]);
+
   return (
     <span>
       {(props.hideCopy || !navigator.clipboard) &&
@@ -112,15 +131,18 @@ export function WalletAddress(props: {
             </span>
           )}
           {walletEns ? (
-            <Dropdown
+            <span
               ref={dropdownRef}
               className={`${styles["copyDropdown"]}`}
-              autoClose="outside"
               data-tooltip-id={uniqueId}
-              onToggle={(nextShow: boolean) => {
-                setIsDropdownOpen(nextShow);
-              }}>
-              <Dropdown.Toggle name={`copy-toggle`} aria-label={`copy-toggle`}>
+            >
+              <button
+                type="button"
+                name={`copy-toggle`}
+                aria-label={`copy-toggle`}
+                aria-expanded={isDropdownOpen}
+                onClick={() => setIsDropdownOpen((open) => !open)}
+              >
                 {props.isUserPage && props.display && (
                   <span
                     className={`${styles["address"]} ${
@@ -135,40 +157,51 @@ export function WalletAddress(props: {
                   aria-label={`copy-btn`}
                   className={`${styles["copy"]}`}
                 />
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {props.display && (
-                  <Dropdown.Item
-                    data-tooltip-id={uniqueIdEns}
-                    aria-label={`copy-ens-btn`}
-                    onClick={() => copy(props.displayEns ?? props.display)}
-                    dangerouslySetInnerHTML={{
-                      __html: resolveAddress(),
-                    }}></Dropdown.Item>
-                )}
+              </button>
+              {isDropdownOpen && (
+                <span
+                  className={styles["copyDropdownMenu"]}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      setIsDropdownOpen(false);
+                    }
+                  }}>
+                  {props.display && (
+                    <button
+                      type="button"
+                      data-tooltip-id={uniqueIdEns}
+                      aria-label={`copy-ens-btn`}
+                      onClick={() => copy(props.displayEns ?? props.display)}
+                      dangerouslySetInnerHTML={{
+                        __html: resolveAddress(),
+                      }}
+                    ></button>
+                  )}
 
-                <Dropdown.Item
-                  data-tooltip-id={uniqueIdWallet}
-                  className={styles["copyDropdownItem"]}
-                  aria-label={`copy-address-btn`}
-                  onClick={() => copy(props.wallet)}>
-                  {formatAddress(props.wallet as string)}
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+                  <button
+                    type="button"
+                    data-tooltip-id={uniqueIdWallet}
+                    className={styles["copyDropdownItem"]}
+                    aria-label={`copy-address-btn`}
+                    onClick={() => copy(props.wallet)}
+                  >
+                    {formatAddress(props.wallet as string)}
+                  </button>
+                </span>
+              )}
+            </span>
           ) : (
-            <Dropdown
+            <span
               ref={dropdownRef}
               className={`${styles["copyDropdown"]}`}
-              autoClose="outside"
               data-tooltip-id={uniqueId}
-              onToggle={(nextShow: boolean) => {
-                setIsDropdownOpen(nextShow);
-              }}>
-              <Dropdown.Toggle
+            >
+              <button
+                type="button"
                 name={`copy-toggle`}
                 aria-label={`copy-toggle`}
-                onClick={() => copy(props.wallet)}>
+                onClick={() => copy(props.wallet)}
+              >
                 {props.isUserPage && (
                   <span
                     className={`${styles["address"]} ${
@@ -184,8 +217,8 @@ export function WalletAddress(props: {
                   aria-label={`copy-btn`}
                   className={`${styles["copy"]}`}
                 />
-              </Dropdown.Toggle>
-            </Dropdown>
+              </button>
+            </span>
           )}
           {!isDropdownOpen ? (
             <Tooltip

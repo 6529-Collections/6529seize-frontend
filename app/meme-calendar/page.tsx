@@ -2,7 +2,6 @@ import MemesMintingCalendar from "@/components/meme-calendar/MemesMintingCalenda
 import { getAppMetadata } from "@/components/providers/metadata";
 import { normalizeLocale } from "@/i18n/locales";
 import type { Metadata } from "next";
-import { Col, Container, Row } from "react-bootstrap";
 
 type MemeCalendarPageSearchParams = Promise<{
   readonly locale?: string | string[] | undefined;
@@ -27,12 +26,8 @@ export default async function MemesMintingCalendarPage({
   const resolvedLocale = normalizeLocale(getFirstSearchParamValue(locale));
 
   return (
-    <Container className="tw-pb-8 tw-pt-6">
-      <Row>
-        <Col>
-          <MemesMintingCalendar locale={resolvedLocale} />
-        </Col>
-      </Row>
-    </Container>
+    <div className="tw-container tw-mx-auto tw-px-3 tw-pb-8 tw-pt-6">
+      <MemesMintingCalendar locale={resolvedLocale} />
+    </div>
   );
 }
