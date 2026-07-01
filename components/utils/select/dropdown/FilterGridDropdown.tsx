@@ -55,7 +55,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
   };
 
   const getMenuItemClassName = (isActive: boolean) =>
-    `tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
+    `tw-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
       isActive
         ? "tw-bg-primary-500/20 tw-border-primary-500 tw-text-primary-300"
         : "tw-bg-transparent tw-border-iron-700 tw-text-iron-200 hover:tw-bg-iron-800"
@@ -93,6 +93,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
         setOpen={setIsOpen}
         buttonRef={buttonRef}
         filterLabel={filterLabel}
+        itemCount={items.length}
       >
         <button
           type="button"
@@ -102,7 +103,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           )}`}
           role="menuitem"
         >
-          <span>{allItemLabel}</span>
+          <span className="tw-whitespace-nowrap">{allItemLabel}</span>
         </button>
         {items.map((item) => (
           <button
@@ -112,7 +113,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
             className={getMenuItemClassName(selectedValue === item.value)}
             role="menuitem"
           >
-            <span>{item.label}</span>
+            <span className="tw-whitespace-nowrap">{item.label}</span>
           </button>
         ))}
       </FilterGridDropdownItemsWrapper>

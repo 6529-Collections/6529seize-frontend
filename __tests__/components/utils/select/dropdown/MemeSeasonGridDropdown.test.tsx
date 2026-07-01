@@ -28,6 +28,17 @@ const mockSeasons: MemeSeason[] = [
     display: "SZN 3",
   },
 ];
+const fourMockSeasons: MemeSeason[] = [
+  ...mockSeasons,
+  {
+    id: 4,
+    start_index: 301,
+    end_index: 400,
+    count: 100,
+    name: "SZN4",
+    display: "SZN 4",
+  },
+];
 
 const flushPromises = () => act(() => Promise.resolve());
 
@@ -326,20 +337,45 @@ describe("MemeSeasonGridDropdown", () => {
         selected={null}
         setSelected={setSelected}
         seasons={[mockSeasons[1], mockSeasons[2]]}
-        allSeasonsLabel="All Year 1 Seasons"
+        allSeasonsLabel="All Year 1"
       />
     );
     await flushPromises();
 
     const button = screen.getByRole("button", {
-      name: /Season: All Year 1 Seasons/i,
+      name: /Season: All Year 1/i,
     });
     fireEvent.click(button);
 
     const menuItems = screen.getAllByRole("menuitem");
     expect(menuItems).toHaveLength(3);
-    expect(menuItems[0]).toHaveTextContent("All Year 1 Seasons");
+    expect(menuItems[0]).toHaveTextContent("All Year 1");
     expect(menuItems[1]).toHaveTextContent("SZN 2");
     expect(menuItems[2]).toHaveTextContent("SZN 3");
+  });
+
+  it("uses a two-column grid for four scoped seasons", async () => {
+    const setSelected = jest.fn();
+
+    render(
+      <MemeSeasonGridDropdown
+        selected={null}
+        setSelected={setSelected}
+        seasons={fourMockSeasons}
+        allSeasonsLabel="All Year 1"
+      />
+    );
+    await flushPromises();
+
+    const button = screen.getByRole("button", {
+      name: /Season: All Year 1/i,
+    });
+    fireEvent.click(button);
+
+    const grid = screen.getByRole("menu").querySelector(".tw-grid");
+    expect(grid).toHaveClass("tw-grid-cols-2");
+    expect(screen.getByRole("menuitem", { name: /SZN 1/i })).toHaveClass(
+      "tw-whitespace-nowrap"
+    );
   });
 });

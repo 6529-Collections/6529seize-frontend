@@ -16,11 +16,13 @@ export default function FilterGridDropdownDesktopWrapper({
   isOpen,
   setOpen,
   buttonRef,
+  gridColumnClassName,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement | null>;
+  readonly gridColumnClassName: string;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -104,7 +106,9 @@ export default function FilterGridDropdownDesktopWrapper({
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="tw-grid tw-grid-cols-4 tw-gap-2">{children}</div>
+            <div className={`tw-grid ${gridColumnClassName} tw-gap-2`}>
+              {children}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
