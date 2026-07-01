@@ -4,7 +4,13 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { formatAddress } from "@/helpers/Helpers";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { FocusTrap } from "focus-trap-react";
-import { type ReactNode, useEffect, useId, useRef } from "react";
+import {
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useId,
+  useRef,
+} from "react";
 import { createPortal } from "react-dom";
 import { useKeyPressEvent } from "react-use";
 
@@ -66,6 +72,66 @@ const MODAL_SIZE_CLASSNAMES: Record<
   xl: "sm:tw-max-w-[1140px]",
 };
 
+const ARIA_HIDDEN = "aria-hidden";
+
+type ModalSiblingState = {
+  element: HTMLElement;
+  ariaHidden: string | null;
+  inert: boolean;
+};
+
+let openModalCount = 0;
+let previousBodyOverflow = "";
+let modalSiblingStates: ModalSiblingState[] = [];
+
+function lockPageForModal(modalRoot: HTMLElement | null) {
+  if (openModalCount === 0) {
+    previousBodyOverflow = document.body.style.overflow;
+    modalSiblingStates = Array.from(document.body.children).flatMap((child) => {
+      if (
+        !(child instanceof HTMLElement) ||
+        child === modalRoot ||
+        (modalRoot !== null && child.contains(modalRoot)) ||
+        child.querySelector("dialog[aria-modal='true']")
+      ) {
+        return [];
+      }
+
+      const state = {
+        element: child,
+        ariaHidden: child.getAttribute(ARIA_HIDDEN),
+        inert: Boolean(child.inert),
+      };
+
+      child.setAttribute(ARIA_HIDDEN, "true");
+      child.inert = true;
+      return [state];
+    });
+    document.body.style.overflow = "hidden";
+  }
+
+  openModalCount += 1;
+
+  return () => {
+    openModalCount = Math.max(0, openModalCount - 1);
+
+    if (openModalCount > 0) {
+      return;
+    }
+
+    document.body.style.overflow = previousBodyOverflow;
+    modalSiblingStates.forEach((state) => {
+      if (state.ariaHidden === null) {
+        state.element.removeAttribute(ARIA_HIDDEN);
+      } else {
+        state.element.setAttribute(ARIA_HIDDEN, state.ariaHidden);
+      }
+      state.element.inert = state.inert;
+    });
+    modalSiblingStates = [];
+  };
+}
+
 export function ReviewDistributionPlanTableSubscriptionFooterModal({
   show = true,
   title,
@@ -81,6 +147,7 @@ export function ReviewDistributionPlanTableSubscriptionFooterModal({
     ? MODAL_SIZE_CLASSNAMES[size]
     : "sm:tw-max-w-[500px]";
   const modalRef = useRef<HTMLDialogElement>(null);
+  const modalRootRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const titleId = useId();
@@ -103,15 +170,24 @@ export function ReviewDistributionPlanTableSubscriptionFooterModal({
 
     previousActiveElement.current =
       document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    modalRef.current?.focus();
+    const unlockPage = lockPageForModal(modalRootRef.current);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
-      previousActiveElement.current?.focus();
+      unlockPage();
+      if (
+        previousActiveElement.current &&
+        document.contains(previousActiveElement.current)
+      ) {
+        previousActiveElement.current.focus();
+      }
     };
   }, [show]);
+
+  const handleOutsideClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (isDismissable && event.target === event.currentTarget) {
+      onCloseRef.current();
+    }
+  };
 
   if (!show || typeof document === "undefined") {
     return null;
@@ -122,26 +198,23 @@ export function ReviewDistributionPlanTableSubscriptionFooterModal({
       active
       focusTrapOptions={{
         allowOutsideClick: true,
+        initialFocus: () => modalRef.current ?? document.body,
         fallbackFocus: () => modalRef.current ?? document.body,
       }}
     >
-      <div className="tailwind-scope tw-relative tw-z-[1055]">
-        {isDismissable ? (
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-label="Close modal backdrop"
-            onClick={onClose}
-            className="tw-fixed tw-inset-0 tw-border-0 tw-bg-black/50 tw-p-0 tw-backdrop-blur-[1px]"
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="tw-fixed tw-inset-0 tw-bg-black/50 tw-backdrop-blur-[1px]"
-          />
-        )}
+      <div
+        ref={modalRootRef}
+        className="tailwind-scope tw-relative tw-z-[1055]"
+      >
+        <div
+          aria-hidden="true"
+          className="tw-fixed tw-inset-0 tw-bg-black/50 tw-backdrop-blur-[1px]"
+        />
         <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
-          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-px-2 tw-py-7 sm:tw-px-0 sm:tw-py-8">
+          <div
+            className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-px-2 tw-py-7 sm:tw-px-0 sm:tw-py-8"
+            onClick={handleOutsideClick}
+          >
             <dialog
               ref={modalRef}
               open
@@ -169,7 +242,7 @@ export function ReviewDistributionPlanTableSubscriptionFooterModal({
                 )}
               </div>
               <div className="tw-px-4 tw-py-3" data-testid={bodyTestId}>
-                <div className="tw-container tw-mx-auto">{children}</div>
+                <div>{children}</div>
               </div>
               {footer !== undefined && footer !== null && (
                 <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-200 tw-px-4 tw-py-3">

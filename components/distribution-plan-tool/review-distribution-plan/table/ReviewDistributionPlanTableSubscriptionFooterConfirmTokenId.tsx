@@ -7,7 +7,7 @@ import {
   formatAddress,
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ReviewDistributionPlanTableSubscriptionFooterModal } from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 export function ConfirmTokenIdModal(
@@ -22,6 +22,7 @@ export function ConfirmTokenIdModal(
   const [tokenId, setTokenId] = useState<string>(
     isValidPositiveInteger(initialTokenId) ? initialTokenId : ""
   );
+  const tokenIdHintId = useId();
 
   const isValid = isValidPositiveInteger(tokenId);
 
@@ -62,6 +63,7 @@ export function ConfirmTokenIdModal(
             step={1}
             type="number"
             aria-label="Token ID"
+            aria-describedby={tokenIdHintId}
             value={tokenId}
             onChange={(e) => {
               setTokenId(e.target.value);
@@ -72,6 +74,9 @@ export function ConfirmTokenIdModal(
               }
             }}
           />
+          <span id={tokenIdHintId} className="tw-sr-only">
+            Enter a positive token ID to continue.
+          </span>
         </div>
       </div>
     </ReviewDistributionPlanTableSubscriptionFooterModal>

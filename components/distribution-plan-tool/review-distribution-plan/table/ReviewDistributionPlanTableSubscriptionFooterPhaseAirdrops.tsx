@@ -3,7 +3,7 @@
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { extractAllNumbers, isValidPositiveInteger } from "@/helpers/Helpers";
-import { type ChangeEvent, useRef, useState } from "react";
+import { type ChangeEvent, useId, useRef, useState } from "react";
 import {
   ReviewDistributionPlanTableSubscriptionFooterAlertRow,
   ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow,
@@ -80,21 +80,21 @@ function parseCsv(csvContent: string): CsvRow[] {
       );
     }
 
-    const [address, countValue] = parts;
+    const [address = "", countValue = ""] = parts;
 
-    if (!isValidAddress(address!)) {
+    if (!isValidAddress(address)) {
       throw new Error(
         `Line ${index + 1}: Invalid Ethereum address "${address}".`
       );
     }
 
-    if (!/^[1-9]\d*$/.test(countValue!)) {
+    if (!/^[1-9]\d*$/.test(countValue)) {
       throw new Error(`Line ${index + 1}: Count must be a positive integer.`);
     }
 
     return {
-      address: address!.toLowerCase(),
-      count: Number.parseInt(countValue!, 10),
+      address: address.toLowerCase(),
+      count: Number.parseInt(countValue, 10),
     };
   });
 }
@@ -127,6 +127,7 @@ export function DistributionPhaseAirdropsModal(
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [inputError, setInputError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const csvErrorId = useId();
 
   const contract = MEMES_CONTRACT;
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -141,6 +142,7 @@ export function DistributionPhaseAirdropsModal(
       previewError = getErrorMessage(error);
     }
   }
+  const errorMessage = inputError ?? previewError;
 
   const resetState = () => {
     setCsvContent("");
@@ -309,6 +311,7 @@ export function DistributionPhaseAirdropsModal(
             }}
             placeholder="0x...,2&#10;0x...,1"
             rows={8}
+            aria-describedby={errorMessage ? csvErrorId : undefined}
             className="tw-block tw-w-full tw-rounded-lg tw-border tw-border-iron-300 tw-px-3 tw-py-2 tw-text-black"
           />
         </div>
@@ -323,6 +326,7 @@ export function DistributionPhaseAirdropsModal(
             ref={fileInputRef}
             type="file"
             accept=".csv,text/csv,text/plain"
+            aria-describedby={errorMessage ? csvErrorId : undefined}
             onChange={handleFileChange}
             className="tw-text-black"
           />
@@ -331,10 +335,12 @@ export function DistributionPhaseAirdropsModal(
           )}
         </div>
       </div>
-      {(inputError || previewError) && (
+      {errorMessage && (
         <div className="tw-py-2">
           <div>
-            <div className="tw-text-red">{inputError ?? previewError}</div>
+            <div id={csvErrorId} role="alert" className="tw-text-red">
+              {errorMessage}
+            </div>
           </div>
         </div>
       )}

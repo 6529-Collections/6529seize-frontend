@@ -3,7 +3,7 @@
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { extractAllNumbers, isValidPositiveInteger } from "@/helpers/Helpers";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import {
   ReviewDistributionPlanTableSubscriptionFooterAlertRow,
   ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow,
@@ -32,6 +32,8 @@ export function UploadDistributionPhotosModal(
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const photosInputId = useId();
+  const fileErrorsId = useId();
 
   const contract = MEMES_CONTRACT;
 
@@ -67,7 +69,7 @@ export function UploadDistributionPhotosModal(
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+    const files = Array.from(e.target.files ?? []);
     const errors = validateFiles(files);
 
     if (errors.length > 0) {
@@ -162,18 +164,20 @@ export function UploadDistributionPhotosModal(
         )}
       <div className="tw-py-2">
         <div>
-          Select Photos:{" "}
+          <label htmlFor={photosInputId}>Select Photos:</label>{" "}
           <input
+            id={photosInputId}
             ref={fileInputRef}
             type="file"
             accept="image/*"
             multiple
             aria-label="Select photos"
+            aria-describedby={fileErrors.length > 0 ? fileErrorsId : undefined}
             onChange={handleFileChange}
             className="tw-text-black"
           />
           {fileErrors.length > 0 && (
-            <div className="tw-mt-2">
+            <div id={fileErrorsId} role="alert" className="tw-mt-2">
               {fileErrors.map((error) => (
                 <div key={error} className="tw-text-red">
                   {error}

@@ -71,71 +71,76 @@ export function GithubUploadModal(
         ) : null
       }
     >
-      {isLoading && (
-        <div className="tw-flex tw-items-center tw-gap-3 tw-py-4">
-          <CircleLoader />
-          <span className="tw-text-iron-800">Uploading to GitHub…</span>
-        </div>
-      )}
-      {!isLoading && isError && (
-        <div className="tw-border-red-500/30 tw-bg-red-950/30 tw-text-red-400 tw-mb-0 tw-break-words tw-rounded tw-border tw-px-3 tw-py-2 tw-text-base">
-          {errorMessage}
-        </div>
-      )}
-      {!isLoading && result?.success && (
-        <div className="tw-flex tw-flex-col tw-gap-4 tw-pb-2 tw-pt-2">
-          {result.message && (
-            <p className="tw-mb-0 tw-text-iron-900">{result.message}</p>
-          )}
-          {result.github_folder && (
-            <div className="tw-flex tw-items-center tw-gap-2">
-              <Link
-                href={`${GITHUB_BASE}/${result.github_folder
-                  .split("/")
-                  .map((seg) => encodeURIComponent(seg))
-                  .join("/")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-ring-1 tw-ring-iron-600 tw-transition hover:tw-bg-iron-700 hover:tw-text-white hover:tw-no-underline"
-              >
-                <Image
-                  src="/github_w.png"
-                  alt=""
-                  width={18}
-                  height={18}
-                  unoptimized
-                  className="tw-shrink-0"
-                />
-                View {result.github_folder} on GitHub
-              </Link>
-            </div>
-          )}
-          {result.deleted_files && result.deleted_files.length > 0 && (
-            <div>
-              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-700">
-                Deleted files ({result.deleted_files.length})
-              </p>
-              <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
-                {result.deleted_files.map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {result.uploaded_files && result.uploaded_files.length > 0 && (
-            <div>
-              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-700">
-                Uploaded files ({result.uploaded_files.length})
-              </p>
-              <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
-                {result.uploaded_files.map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
+      <div aria-live="polite" aria-busy={isLoading}>
+        {isLoading && (
+          <div className="tw-flex tw-items-center tw-gap-3 tw-py-4">
+            <CircleLoader />
+            <span className="tw-text-iron-800">Uploading to GitHub…</span>
+          </div>
+        )}
+        {!isLoading && isError && (
+          <div
+            role="alert"
+            className="tw-border-red-500/30 tw-bg-red-950/30 tw-text-red-400 tw-mb-0 tw-break-words tw-rounded tw-border tw-px-3 tw-py-2 tw-text-base"
+          >
+            {errorMessage}
+          </div>
+        )}
+        {!isLoading && result?.success && (
+          <div className="tw-flex tw-flex-col tw-gap-4 tw-pb-2 tw-pt-2">
+            {result.message && (
+              <p className="tw-mb-0 tw-text-iron-900">{result.message}</p>
+            )}
+            {result.github_folder && (
+              <div className="tw-flex tw-items-center tw-gap-2">
+                <Link
+                  href={`${GITHUB_BASE}/${result.github_folder
+                    .split("/")
+                    .map((seg) => encodeURIComponent(seg))
+                    .join("/")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-ring-1 tw-ring-iron-600 tw-transition hover:tw-bg-iron-700 hover:tw-text-white hover:tw-no-underline"
+                >
+                  <Image
+                    src="/github_w.png"
+                    alt=""
+                    width={18}
+                    height={18}
+                    unoptimized
+                    className="tw-shrink-0"
+                  />
+                  View {result.github_folder} on GitHub
+                </Link>
+              </div>
+            )}
+            {result.deleted_files && result.deleted_files.length > 0 && (
+              <div>
+                <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-700">
+                  Deleted files ({result.deleted_files.length})
+                </p>
+                <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
+                  {result.deleted_files.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {result.uploaded_files && result.uploaded_files.length > 0 && (
+              <div>
+                <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-700">
+                  Uploaded files ({result.uploaded_files.length})
+                </p>
+                <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
+                  {result.uploaded_files.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </ReviewDistributionPlanTableSubscriptionFooterModal>
   );
 }
