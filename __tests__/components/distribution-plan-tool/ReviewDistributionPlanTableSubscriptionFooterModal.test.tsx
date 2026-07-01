@@ -34,7 +34,12 @@ describe("ReviewDistributionPlanTableSubscriptionFooterModal", () => {
     );
 
     const dialog = screen.getByRole("dialog", { name: "Distribution modal" });
-    fireEvent.click(dialog.parentElement as HTMLElement);
+    fireEvent.click(dialog);
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close modal backdrop" })
+    );
     expect(onClose).toHaveBeenCalledTimes(1);
 
     onClose.mockClear();
@@ -48,10 +53,9 @@ describe("ReviewDistributionPlanTableSubscriptionFooterModal", () => {
       </ReviewDistributionPlanTableSubscriptionFooterModal>
     );
 
-    fireEvent.click(
-      screen.getByRole("dialog", { name: "Distribution modal" })
-        .parentElement as HTMLElement
-    );
+    expect(
+      screen.queryByRole("button", { name: "Close modal backdrop" })
+    ).not.toBeInTheDocument();
 
     expect(onClose).not.toHaveBeenCalled();
   });

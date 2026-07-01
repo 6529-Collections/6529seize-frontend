@@ -49,7 +49,7 @@ export function GithubUploadModal(
       closeButton={canClose}
       isDismissable={canClose}
       footer={
-        !isLoading ? (
+        isLoading ? null : (
           <>
             {isError && onRetry && (
               <button
@@ -68,7 +68,7 @@ export function GithubUploadModal(
               Close
             </button>
           </>
-        ) : null
+        )
       }
     >
       <div aria-live="polite" aria-busy={isLoading}>
