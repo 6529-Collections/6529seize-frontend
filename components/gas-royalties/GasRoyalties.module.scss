@@ -69,7 +69,7 @@
   button {
     font-size: larger !important;
     font-weight: bolder !important;
-    cursor: copy;
+    cursor: pointer;
     padding: 0;
     background-color: transparent !important;
     border: 0;
@@ -141,6 +141,10 @@
 }
 
 .collectionFocus {
+  background-color: transparent;
+  border: 0;
+  padding: 0;
+
   &:hover {
     color: variables.$font-color;
     cursor: pointer;

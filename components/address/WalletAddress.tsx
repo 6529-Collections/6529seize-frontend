@@ -159,11 +159,16 @@ export function WalletAddress(props: {
                 />
               </button>
               {isDropdownOpen && (
-                <span className={styles["copyDropdownMenu"]} role="menu">
+                <span
+                  className={styles["copyDropdownMenu"]}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      setIsDropdownOpen(false);
+                    }
+                  }}>
                   {props.display && (
                     <button
                       type="button"
-                      role="menuitem"
                       data-tooltip-id={uniqueIdEns}
                       aria-label={`copy-ens-btn`}
                       onClick={() => copy(props.displayEns ?? props.display)}
@@ -175,7 +180,6 @@ export function WalletAddress(props: {
 
                   <button
                     type="button"
-                    role="menuitem"
                     data-tooltip-id={uniqueIdWallet}
                     className={styles["copyDropdownItem"]}
                     aria-label={`copy-address-btn`}

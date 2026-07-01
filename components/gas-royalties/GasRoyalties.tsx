@@ -77,7 +77,6 @@ function FilterDropdown({
         type="button"
         disabled={disabled}
         aria-expanded={isOpen}
-        aria-haspopup="menu"
         onClick={() => setIsOpen((open) => !open)}
       >
         {label}
@@ -85,8 +84,6 @@ function FilterDropdown({
       {isOpen && (
         <span
           className={styles["filterDropdownMenu"]}
-          role="menu"
-          tabIndex={-1}
           onClick={() => setIsOpen(false)}
           onKeyDown={(event) => {
             if (event.key === "Escape") {
@@ -212,7 +209,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               </h1>
             </span>
             <span className="tw-flex tw-items-center tw-gap-3">
-              <span
+              <button
+                type="button"
                 className={`font-larger font-bolder font-color-h ${
                   props.focus === GasRoyaltiesCollectionFocus.MEMES
                     ? styles["collectionFocusActive"]
@@ -233,8 +231,9 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 aria-label="The Memes"
               >
                 The Memes
-              </span>
-              <span
+              </button>
+              <button
+                type="button"
                 className={`font-larger font-bolder font-color-h ${
                   props.focus === GasRoyaltiesCollectionFocus.MEMELAB
                     ? styles["collectionFocusActive"]
@@ -255,7 +254,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 aria-label="Meme Lab"
               >
                 Meme Lab
-              </span>
+              </button>
             </span>
           </div>
         </div>
@@ -280,7 +279,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               >
                 <button
                   type="button"
-                  role="menuitem"
                   className={styles["filterDropdownItem"]}
                   onClick={() => {
                     props.setSelectedArtist("");
@@ -291,7 +289,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 {artists.map((a) => (
                   <button
                     type="button"
-                    role="menuitem"
                     key={`artist-${a.name.replaceAll(" ", "-")}`}
                     className={styles["filterDropdownItem"]}
                     onClick={() => {
@@ -308,7 +305,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               >
                 <button
                   type="button"
-                  role="menuitem"
                   className={styles["filterDropdownItem"]}
                   onClick={() => props.setIsPrimary(true)}
                 >
@@ -321,7 +317,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 {Object.values(DateIntervalsSelection).map((dateSelection) => (
                   <button
                     type="button"
-                    role="menuitem"
                     key={dateSelection}
                     className={styles["filterDropdownItem"]}
                     onClick={() => {
@@ -339,7 +334,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 ))}
                 <button
                   type="button"
-                  role="menuitem"
                   className={styles["filterDropdownItem"]}
                   onClick={() => {
                     setShowBlockPicker(true);

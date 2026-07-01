@@ -79,7 +79,6 @@ function LeaderboardDropdown({
         type="button"
         disabled={disabled}
         aria-expanded={isOpen}
-        aria-haspopup="menu"
         onClick={() => setIsOpen((open) => !open)}
       >
         {label}
@@ -88,8 +87,6 @@ function LeaderboardDropdown({
       {isOpen && (
         <span
           className={styles["contentDropdownMenu"]}
-          role="menu"
-          tabIndex={-1}
           onClick={() => setIsOpen(false)}
           onKeyDown={(event) => {
             if (event.key === "Escape") {
@@ -234,7 +231,6 @@ export default function Leaderboard(
         {Object.values(Collector).map((collector) => (
           <button
             type="button"
-            role="menuitem"
             className={styles["contentDropdownItem"]}
             key={collector}
             onClick={() => setCollector(collector)}
@@ -324,7 +320,6 @@ export default function Leaderboard(
         {Object.values(Content).map((content) => (
           <button
             type="button"
-            role="menuitem"
             key={content}
             className={styles["contentDropdownItem"]}
             onClick={() => setContent(content)}
@@ -348,7 +343,6 @@ export default function Leaderboard(
       >
         <button
           type="button"
-          role="menuitem"
           className={styles["contentDropdownItem"]}
           onClick={() => setSelectedSeason(0)}
         >
@@ -357,7 +351,6 @@ export default function Leaderboard(
         {seasons.map((season) => (
           <button
             type="button"
-            role="menuitem"
             key={season.display}
             className={styles["contentDropdownItem"]}
             onClick={() => setSelectedSeason(season.id)}

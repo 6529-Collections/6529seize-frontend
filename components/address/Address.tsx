@@ -113,6 +113,7 @@ export default function Address(props: Readonly<Props>) {
             type="button"
             name="consolidation-toggle"
             aria-label="consolidation-toggle"
+            aria-expanded={consolidationExpanded}
             onClick={() => {
               if (!props.isUserPage) {
                 setConsolidationExpanded(!consolidationExpanded);
