@@ -1,6 +1,7 @@
 import { createTestQueryClient } from "../../../utils/reactQuery";
 import {
   deriveMarketplaceDataHealth,
+  mergeOpenGraphFallback,
   patchFromMediaLinkUpdate,
   primeMarketplacePreviewCacheFromNftLinks,
   type MarketplacePreviewData,
@@ -506,6 +507,81 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
 
     expect(seeded?.media).toEqual({
       url: mediaUri,
+      mimeType: "image/png",
+    });
+  });
+
+  it("normalizes Manifold original media_uri images to optimized previews", () => {
+    const queryClient = createTestQueryClient();
+    const href = "https://manifold.xyz/@artist/id/123";
+    const mediaUri =
+      "https://assets.manifold.xyz/original/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184.jpg";
+
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks: [createNftLinkWithMediaUri({ href, mediaUri })],
+    });
+
+    const seeded = queryClient.getQueryData<MarketplacePreviewData>(
+      getMarketplacePreviewQueryKey(href, "default")
+    );
+
+    expect(seeded?.media).toEqual({
+      url: "https://assets.manifold.xyz/optimized/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184/w_800.jpg",
+      mimeType: "image/jpeg",
+    });
+  });
+
+  it("keeps Manifold original media_uri videos unchanged", () => {
+    const queryClient = createTestQueryClient();
+    const href = "https://manifold.xyz/@artist/id/124";
+    const mediaUri =
+      "https://assets.manifold.xyz/original/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184.mp4";
+
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks: [createNftLinkWithMediaUri({ href, mediaUri })],
+    });
+
+    const seeded = queryClient.getQueryData<MarketplacePreviewData>(
+      getMarketplacePreviewQueryKey(href, "default")
+    );
+
+    expect(seeded?.media).toEqual({
+      url: mediaUri,
+      mimeType: "video/mp4",
+    });
+  });
+
+  it("normalizes Manifold original Open Graph images to optimized previews", () => {
+    const current: MarketplacePreviewData = {
+      href: "https://manifold.xyz/@artist/id/123",
+      canonicalId: "manifold:claim:123",
+      platform: "MANIFOLD",
+      title: null,
+      description: null,
+      media: null,
+      price: null,
+      priceCurrency: null,
+      lastErrorMessage: null,
+      lastSuccessfullyUpdatedMs: null,
+      failedSinceMs: null,
+    };
+
+    const merged = mergeOpenGraphFallback({
+      href: current.href,
+      mode: "default",
+      current,
+      linkPreview: {
+        image: {
+          url: "https://assets.manifold.xyz/original/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184.png",
+          type: "image/png",
+        },
+      },
+    });
+
+    expect(merged.media).toEqual({
+      url: "https://assets.manifold.xyz/optimized/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184/w_800.png",
       mimeType: "image/png",
     });
   });

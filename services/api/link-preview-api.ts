@@ -1,6 +1,7 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
 import type { EnsPreview } from "@/components/waves/ens/types";
 import type { ExternalFileKind } from "@/lib/link-preview/fileKinds";
+import { getManifoldPreviewImageUrl } from "@/lib/link-preview/manifoldMedia";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 export interface LinkPreviewMedia {
@@ -234,6 +235,88 @@ const hasOwnRecordKey = <T>(
 ): record is Record<string, T | undefined> =>
   record !== undefined && Object.hasOwn(record, key);
 
+const normalizeLinkPreviewMedia = (
+  media: LinkPreviewMedia | null | undefined
+): LinkPreviewMedia | null | undefined => {
+  if (media === null || media === undefined) {
+    return media;
+  }
+
+  const normalizedUrl =
+    typeof media.url === "string"
+      ? getManifoldPreviewImageUrl(media.url)
+      : media.url;
+  const normalizedSecureUrl =
+    typeof media.secureUrl === "string"
+      ? getManifoldPreviewImageUrl(media.secureUrl)
+      : media.secureUrl;
+
+  if (normalizedUrl === media.url && normalizedSecureUrl === media.secureUrl) {
+    return media;
+  }
+
+  return {
+    ...media,
+    url: normalizedUrl,
+    secureUrl: normalizedSecureUrl,
+  };
+};
+
+const normalizeLinkPreviewResponse = (
+  preview: LinkPreviewResponse
+): LinkPreviewResponse => {
+  const normalizedImage = normalizeLinkPreviewMedia(preview.image);
+  const normalizedImages =
+    preview.images === null || preview.images === undefined
+      ? preview.images
+      : preview.images.map(
+          (image) => normalizeLinkPreviewMedia(image) ?? image
+        );
+  const imageChanged = normalizedImage !== preview.image;
+  const imagesChanged =
+    normalizedImages !== undefined &&
+    normalizedImages.some((image, index) => image !== preview.images?.[index]);
+
+  if (!imageChanged && !imagesChanged) {
+    return preview;
+  }
+
+  return {
+    ...preview,
+    image: normalizedImage,
+    images: normalizedImages,
+  };
+};
+
+const normalizeOpenGraphBatchResponse = (
+  response: OpenGraphBatchResponse
+): OpenGraphBatchResponse => {
+  if (response.results === undefined) {
+    return response;
+  }
+
+  let didChange = false;
+  const normalizedResults: Record<string, LinkPreviewResponse | undefined> = {};
+
+  for (const [url, preview] of Object.entries(response.results)) {
+    const normalizedPreview =
+      preview === undefined ? undefined : normalizeLinkPreviewResponse(preview);
+    normalizedResults[url] = normalizedPreview;
+    if (normalizedPreview !== preview) {
+      didChange = true;
+    }
+  }
+
+  if (!didChange) {
+    return response;
+  }
+
+  return {
+    ...response,
+    results: normalizedResults,
+  };
+};
+
 type PendingLinkPreviewRequest = {
   readonly url: string;
   readonly cacheKey: string;
@@ -335,25 +418,32 @@ const fetchSingleLinkPreview = async (
 ): Promise<LinkPreviewResponse> => {
   const params = new URLSearchParams({ url: normalizedUrl });
 
-  return fetchLinkPreviewMetadata<LinkPreviewResponse>(
+  const preview = await fetchLinkPreviewMetadata<LinkPreviewResponse>(
     `/api/open-graph?${params.toString()}`,
     {
       headers: { Accept: "application/json" },
     }
   );
+
+  return normalizeLinkPreviewResponse(preview);
 };
 
 const fetchLinkPreviewBatch = async (
   urls: readonly string[]
 ): Promise<OpenGraphBatchResponse> => {
-  return fetchLinkPreviewMetadata<OpenGraphBatchResponse>("/api/open-graph", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ urls }),
-  });
+  const response = await fetchLinkPreviewMetadata<OpenGraphBatchResponse>(
+    "/api/open-graph",
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ urls }),
+    }
+  );
+
+  return normalizeOpenGraphBatchResponse(response);
 };
 
 const chunkRequests = (

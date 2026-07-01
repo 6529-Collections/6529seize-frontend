@@ -2,6 +2,7 @@ import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
 import { getTimeAgo } from "@/helpers/Helpers";
 import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
+import { getManifoldPreviewImageUrl } from "@/lib/link-preview/manifoldMedia";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
@@ -202,7 +203,7 @@ const toPickedMedia = (candidate: MediaCandidate): PickedMedia | undefined => {
     return undefined;
   }
 
-  const url = urlCandidate.trim();
+  const url = getManifoldPreviewImageUrl(urlCandidate.trim());
   const mimeType =
     asNonEmptyString(candidate.type) ?? inferMimeTypeFromUrl(url) ?? "image/*";
 
@@ -218,9 +219,11 @@ const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
     return undefined;
   }
 
+  const previewUrl = getManifoldPreviewImageUrl(url);
+
   return {
-    url,
-    mimeType: inferMimeTypeFromUrl(url) ?? "image/*",
+    url: previewUrl,
+    mimeType: inferMimeTypeFromUrl(previewUrl) ?? "image/*",
   };
 };
 
@@ -253,12 +256,14 @@ const pickWsMediaPreview = (
     return undefined;
   }
 
+  const previewUrl = getManifoldPreviewImageUrl(url);
+
   return {
-    url,
+    url: previewUrl,
     mimeType:
       asNonEmptyString(preview?.mime_type) ??
       asNonEmptyString(update.media_preview_mime_type) ??
-      inferMimeTypeFromUrl(url) ??
+      inferMimeTypeFromUrl(previewUrl) ??
       "image/*",
   };
 };
@@ -313,11 +318,13 @@ const pickNftLinkMediaPreview = (
     return undefined;
   }
 
+  const previewUrl = getManifoldPreviewImageUrl(url);
+
   return {
-    url,
+    url: previewUrl,
     mimeType:
       asNonEmptyString(preview.mime_type) ??
-      inferMimeTypeFromUrl(url) ??
+      inferMimeTypeFromUrl(previewUrl) ??
       "image/*",
   };
 };
