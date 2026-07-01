@@ -4,6 +4,7 @@ import { formatInteger, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { Fragment, type ReactNode } from "react";
+import UserPageDisclosure from "../UserPageDisclosure";
 import styles from "./UserPageStats.module.scss";
 import {
   UserPageStatsTableHead,
@@ -150,31 +151,6 @@ export default function UserPageStatsCollected({
   );
 }
 
-function StatsDisclosure({
-  title,
-  children,
-}: {
-  readonly title: string;
-  readonly children: ReactNode;
-}) {
-  return (
-    <details className="tw-group">
-      <summary
-        className={`${styles["collectedAccordionButton"]} tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden`}
-      >
-        <b>{title}</b>
-        <span
-          aria-hidden="true"
-          className="tw-h-2 tw-w-2 tw-shrink-0 tw-rotate-45 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-[225deg]"
-        />
-      </summary>
-      <div className={`${styles["collectedAccordionBody"]} tw-px-5 tw-py-4`}>
-        {children}
-      </div>
-    </details>
-  );
-}
-
 function UserPageStatsCollectedTotals({
   ownerBalance,
   locale,
@@ -194,7 +170,10 @@ function UserPageStatsCollectedTotals({
   );
 
   return (
-    <StatsDisclosure title={t(locale, "user.collected.stats.details.overview")}>
+    <UserPageDisclosure
+      bodyClassName={styles["collectedAccordionBody"]}
+      buttonClassName={styles["collectedAccordionButton"]}
+      title={t(locale, "user.collected.stats.details.overview")}>
       <div className={`tw-py-2 ${styles["scrollContainer"]}`}>
         <table className={`tw-w-full ${styles["collectedAccordionTable"]}`}>
           <UserPageStatsTableHead
@@ -270,7 +249,7 @@ function UserPageStatsCollectedTotals({
           </tbody>
         </table>
       </div>
-    </StatsDisclosure>
+    </UserPageDisclosure>
   );
 }
 
@@ -340,7 +319,9 @@ function UserPageStatsCollectedMemes({
   }
 
   return (
-    <StatsDisclosure
+    <UserPageDisclosure
+      bodyClassName={styles["collectedAccordionBody"]}
+      buttonClassName={styles["collectedAccordionButton"]}
       title={t(locale, "user.collected.stats.details.memesBySeason")}
     >
       <div className={`tw-py-2 ${styles["scrollContainer"]}`}>
@@ -405,6 +386,6 @@ function UserPageStatsCollectedMemes({
           </table>
         )}
       </div>
-    </StatsDisclosure>
+    </UserPageDisclosure>
   );
 }

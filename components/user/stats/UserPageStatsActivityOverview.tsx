@@ -9,8 +9,9 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { Fragment, type ReactNode, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { getStatsPath } from "./userPageStats.helpers";
+import UserPageDisclosure from "../UserPageDisclosure";
 import styles from "./UserPageStats.module.scss";
 import {
   UserPageStatsTableHead,
@@ -298,31 +299,6 @@ export default function UserPageStatsActivityOverview({
   );
 }
 
-function StatsDisclosure({
-  title,
-  children,
-}: {
-  readonly title: string;
-  readonly children: ReactNode;
-}) {
-  return (
-    <details className="tw-group">
-      <summary
-        className={`${styles["collectedAccordionButton"]} tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden`}
-      >
-        <b>{title}</b>
-        <span
-          aria-hidden="true"
-          className="tw-h-2 tw-w-2 tw-shrink-0 tw-rotate-45 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-[225deg]"
-        />
-      </summary>
-      <div className={`${styles["collectedAccordionBody"]} tw-px-5 tw-py-4`}>
-        {children}
-      </div>
-    </details>
-  );
-}
-
 function UserPageStatsActivityOverviewTotals({
   activity,
   locale,
@@ -331,7 +307,9 @@ function UserPageStatsActivityOverviewTotals({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <StatsDisclosure
+    <UserPageDisclosure
+      bodyClassName={styles["collectedAccordionBody"]}
+      buttonClassName={styles["collectedAccordionButton"]}
       title={activityMessage(
         locale,
         "user.collected.stats.activityOverview.overview"
@@ -363,7 +341,7 @@ function UserPageStatsActivityOverviewTotals({
           </tbody>
         </table>
       </div>
-    </StatsDisclosure>
+    </UserPageDisclosure>
   );
 }
 
@@ -398,7 +376,9 @@ function UserPageStatsActivityOverviewMemes({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <StatsDisclosure
+    <UserPageDisclosure
+      bodyClassName={styles["collectedAccordionBody"]}
+      buttonClassName={styles["collectedAccordionButton"]}
       title={activityMessage(
         locale,
         "user.collected.stats.activityOverview.memesBySeason"
@@ -465,6 +445,6 @@ function UserPageStatsActivityOverviewMemes({
           </p>
         )}
       </div>
-    </StatsDisclosure>
+    </UserPageDisclosure>
   );
 }

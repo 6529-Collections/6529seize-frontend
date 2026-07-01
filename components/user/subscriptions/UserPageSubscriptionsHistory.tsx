@@ -10,8 +10,8 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
-import type { ReactNode } from "react";
 import { mainnet } from "wagmi/chains";
+import UserPageDisclosure from "../UserPageDisclosure";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
 import styles from "./UserPageSubscriptions.module.scss";
@@ -56,31 +56,6 @@ export default function UserPageSubscriptionsHistory(
   );
 }
 
-function HistoryDisclosure({
-  title,
-  children,
-}: {
-  readonly title: string;
-  readonly children: ReactNode;
-}) {
-  return (
-    <details className="tw-group">
-      <summary
-        className={`${styles["topUpHistoryAccordionButton"]} tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden`}
-      >
-        <b>{title}</b>
-        <span
-          aria-hidden="true"
-          className="tw-h-2 tw-w-2 tw-shrink-0 tw-rotate-45 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-[225deg]"
-        />
-      </summary>
-      <div className={`${styles["topUpHistoryAccordionBody"]} tw-px-5 tw-py-4`}>
-        {children}
-      </div>
-    </details>
-  );
-}
-
 function RedeemedSubscriptionsAccordion(
   props: Readonly<{
     history: Page<RedeemedSubscription>;
@@ -88,7 +63,10 @@ function RedeemedSubscriptionsAccordion(
   }>
 ) {
   return (
-    <HistoryDisclosure title="Redeemed Subscriptions">
+    <UserPageDisclosure
+      bodyClassName={styles["topUpHistoryAccordionBody"]}
+      buttonClassName={styles["topUpHistoryAccordionButton"]}
+      title="Redeemed Subscriptions">
       <div className="tw-flex tw-flex-col tw-gap-2">
         {props.history.data.length > 0 ? (
           props.history.data.map((redeem) => (
@@ -110,7 +88,7 @@ function RedeemedSubscriptionsAccordion(
           />
         </div>
       )}
-    </HistoryDisclosure>
+    </UserPageDisclosure>
   );
 }
 
@@ -121,7 +99,10 @@ function LogAccordion(
   }>
 ) {
   return (
-    <HistoryDisclosure title="Log History">
+    <UserPageDisclosure
+      bodyClassName={styles["topUpHistoryAccordionBody"]}
+      buttonClassName={styles["topUpHistoryAccordionButton"]}
+      title="Log History">
       <div className="tw-flex tw-flex-col tw-gap-2">
         {props.logs.data.length > 0 ? (
           props.logs.data.map((log) => (
@@ -141,7 +122,7 @@ function LogAccordion(
           </div>
         )}
       </div>
-    </HistoryDisclosure>
+    </UserPageDisclosure>
   );
 }
 
@@ -152,7 +133,10 @@ function TopUpAccordion(
   }>
 ) {
   return (
-    <HistoryDisclosure title="Top Up History">
+    <UserPageDisclosure
+      bodyClassName={styles["topUpHistoryAccordionBody"]}
+      buttonClassName={styles["topUpHistoryAccordionButton"]}
+      title="Top Up History">
       <div className="tw-flex tw-flex-col tw-gap-2">
         {props.history.data.length > 0 ? (
           props.history.data.map((topUp) => (
@@ -172,7 +156,7 @@ function TopUpAccordion(
           />
         </div>
       )}
-    </HistoryDisclosure>
+    </UserPageDisclosure>
   );
 }
 
