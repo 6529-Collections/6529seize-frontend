@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Dropdown } from "react-bootstrap";
 import styles from "./Address.module.scss";
 import { WalletAddress } from "./WalletAddress";
 
@@ -109,13 +108,16 @@ export default function Address(props: Readonly<Props>) {
           setLinkQueryAddress={props.setLinkQueryAddress}
         />
       ) : (
-        <Dropdown
-          className={`${styles["consolidationDropdown"]}`}
-          autoClose="outside"
-        >
-          <Dropdown.Toggle
-            name={`consolidation-toggle`}
-            aria-label={`consolidation-toggle`}
+        <span className={styles["consolidationDropdown"]}>
+          <button
+            type="button"
+            name="consolidation-toggle"
+            aria-label="consolidation-toggle"
+            onClick={() => {
+              if (!props.isUserPage) {
+                setConsolidationExpanded(!consolidationExpanded);
+              }
+            }}
           >
             <Image
               unoptimized
@@ -131,34 +133,29 @@ export default function Address(props: Readonly<Props>) {
                   ? "rotate(90deg)"
                   : "rotate(0deg)",
               }}
-              onClick={() => {
-                if (!props.isUserPage) {
-                  setConsolidationExpanded(!consolidationExpanded);
-                }
-              }}
             />
-            &nbsp;&nbsp;
-            <Link
-              className="decoration-none decoration-hover-underline"
-              href={getProfileLink()}
-            >
-              <span
-                className={`${styles["consolidationDisplay"]} ${
-                  props.isUserPage ? styles["consolidationDisplayUserPage"] : ""
-                }`}
-                dangerouslySetInnerHTML={{
-                  __html: props.display ? parseEmojis(props.display) : ``,
-                }}
-              ></span>
-            </Link>
-          </Dropdown.Toggle>
-        </Dropdown>
+          </button>
+          &nbsp;&nbsp;
+          <Link
+            className="decoration-none decoration-hover-underline"
+            href={getProfileLink()}
+          >
+            <span
+              className={`${styles["consolidationDisplay"]} ${
+                props.isUserPage ? styles["consolidationDisplayUserPage"] : ""
+              }`}
+              dangerouslySetInnerHTML={{
+                __html: props.display ? parseEmojis(props.display) : ``,
+              }}
+            ></span>
+          </Link>
+        </span>
       )}
       <span
         className={
           props.isUserPage
-            ? `d-flex flex-wrap align-items-center gap-2`
-            : `d-flex flex-column`
+            ? `tw-flex tw-flex-wrap tw-items-center tw-gap-2`
+            : `tw-flex tw-flex-col`
         }
       >
         {(consolidationExpanded || props.isUserPage) &&
@@ -166,7 +163,7 @@ export default function Address(props: Readonly<Props>) {
           props.wallets.map((w, index) => (
             <div
               key={w}
-              className={`d-flex align-items-center justify-content-start ${
+              className={`tw-flex tw-items-center tw-justify-start ${
                 props.isUserPage ? styles["consolidationDiv"] : ""
               }`}
             >

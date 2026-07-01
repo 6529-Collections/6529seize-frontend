@@ -7,7 +7,6 @@ import { fetchUrl } from "@/services/6529api";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import {
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
@@ -125,62 +124,58 @@ export default function GasComponent() {
         getUrl={getUrlWithParams}
         {...getSharedProps()}
       />
-      <Container className={`no-padding pt-4`}>
-        <Row className={`pt-3 ${styles["scrollContainer"]}`}>
-          <Col>
-            {gas.length > 0 && (
-              <Table bordered={false} className={styles["gasTable"]}>
-                <thead>
-                  <tr>
-                    <th>Meme Card (x{gas.length})</th>
-                    <th>Artist</th>
-                    <th className="text-center">Gas (ETH)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {gas.map((g) => (
-                    <tr key={`token-${g.token_id}`}>
-                      <td>
-                        <GasRoyaltiesTokenImage
-                          path={
-                            collectionFocus ===
-                            GasRoyaltiesCollectionFocus.MEMELAB
-                              ? "meme-lab"
-                              : "the-memes"
-                          }
-                          token_id={g.token_id}
-                          name={g.name}
-                          thumbnail={g.thumbnail}
-                        />
-                      </td>
-                      <td>{g.artist}</td>
-                      <td className="text-center">{displayDecimal(g.gas)}</td>
-                    </tr>
-                  ))}
-                  <tr key={`gas-total`}>
-                    <td colSpan={2} className="text-right">
-                      <b>TOTAL</b>
+      <div className="tw-pt-4">
+        <div className={`tw-pt-3 ${styles["scrollContainer"]}`}>
+          {gas.length > 0 && (
+            <table className={styles["gasTable"]}>
+              <thead>
+                <tr>
+                  <th>Meme Card (x{gas.length})</th>
+                  <th>Artist</th>
+                  <th className="tw-text-center">Gas (ETH)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gas.map((g) => (
+                  <tr key={`token-${g.token_id}`}>
+                    <td>
+                      <GasRoyaltiesTokenImage
+                        path={
+                          collectionFocus ===
+                          GasRoyaltiesCollectionFocus.MEMELAB
+                            ? "meme-lab"
+                            : "the-memes"
+                        }
+                        token_id={g.token_id}
+                        name={g.name}
+                        thumbnail={g.thumbnail}
+                      />
                     </td>
-                    <td className="text-center">{displayDecimal(sumGas)}</td>
+                    <td>{g.artist}</td>
+                    <td className="tw-text-center">
+                      {displayDecimal(g.gas)}
+                    </td>
                   </tr>
-                </tbody>
-              </Table>
-            )}
-          </Col>
-        </Row>
+                ))}
+                <tr key={`gas-total`}>
+                  <td colSpan={2} className="tw-text-right">
+                    <b>TOTAL</b>
+                  </td>
+                  <td className="tw-text-center">{displayDecimal(sumGas)}</td>
+                </tr>
+              </tbody>
+            </table>
+          )}
+        </div>
         {!fetching && gas.length === 0 && (
-          <Row>
-            <Col>
-              <h5>{fetchError || "No gas info found for selected dates"}</h5>
-            </Col>
-          </Row>
+          <h5>{fetchError || "No gas info found for selected dates"}</h5>
         )}
         {!fetching && gas.length > 0 && (
-          <Row className="font-color-h pt-3 pb-3">
-            <Col>All values are in ETH</Col>
-          </Row>
+          <div className="font-color-h tw-pb-3 tw-pt-3">
+            All values are in ETH
+          </div>
         )}
-      </Container>
+      </div>
     </>
   );
 }

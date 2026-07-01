@@ -14,8 +14,8 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import DotLoader from "../dotLoader/DotLoader";
 import styles from "./GasRoyalties.module.scss";
@@ -37,6 +37,62 @@ interface HeaderProps {
   setDateSelection: (dateSelection: DateIntervalsSelection) => void;
   setDates: (fromDate: Date, toDate: Date) => void;
   setBlocks: (fromBlock: number, toBlock: number) => void;
+}
+
+function FilterDropdown({
+  children,
+  disabled,
+  label,
+}: Readonly<{
+  children: ReactNode;
+  disabled?: boolean;
+  label: ReactNode;
+}>) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <span ref={dropdownRef} className={styles["filterDropdown"]}>
+      <button
+        type="button"
+        disabled={disabled}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        {label}
+      </button>
+      {isOpen && (
+        <span
+          className={styles["filterDropdownMenu"]}
+          role="menu"
+          onClick={() => setIsOpen(false)}
+        >
+          {children}
+        </span>
+      )}
+    </span>
+  );
 }
 
 function getUrlParams(
@@ -141,15 +197,15 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
 
   return (
     <>
-      <Container className="pt-4">
-        <Row className="d-flex align-items-center">
-          <Col className="d-flex align-items-center justify-content-between">
-            <span className="d-flex align-items-center gap-2">
+      <div className="tw-pt-4">
+        <div className="tw-flex tw-items-center">
+          <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
+            <span className="tw-flex tw-items-center tw-gap-2">
               <h1>
                 Meme {props.title} {props.fetching && <DotLoader />}
               </h1>
             </span>
-            <span className="d-flex align-items-center gap-3">
+            <span className="tw-flex tw-items-center tw-gap-3">
               <span
                 className={`font-larger font-bolder font-color-h ${
                   props.focus === GasRoyaltiesCollectionFocus.MEMES
@@ -195,15 +251,13 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 Meme Lab
               </span>
             </span>
-          </Col>
-        </Row>
+          </div>
+        </div>
         {props.description && (
-          <Row className="pt-3">
-            <Col>{props.description}</Col>
-          </Row>
+          <div className="tw-pt-3">{props.description}</div>
         )}
-        <Row className="pt-3">
-          <Col className="d-flex align-items-center justify-content-between">
+        <div className="tw-pt-3">
+          <div className="tw-flex tw-items-center tw-justify-between">
             <span>
               {!props.fetching && props.results_count > 0 && (
                 <DownloadUrlWidget
@@ -213,73 +267,85 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 />
               )}
             </span>
-            <span className="d-flex align-items-center gap-5">
-              <Dropdown className={styles["filterDropdown"]} drop={"down"}>
-                <Dropdown.Toggle disabled={props.fetching}>
-                  Artist: {props.selected_artist || "All"}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item
+            <span className="tw-flex tw-items-center tw-gap-12">
+              <FilterDropdown
+                disabled={props.fetching}
+                label={`Artist: ${props.selected_artist || "All"}`}
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={styles["filterDropdownItem"]}
+                  onClick={() => {
+                    props.setSelectedArtist("");
+                  }}
+                >
+                  All
+                </button>
+                {artists.map((a) => (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    key={`artist-${a.name.replaceAll(" ", "-")}`}
+                    className={styles["filterDropdownItem"]}
                     onClick={() => {
-                      props.setSelectedArtist("");
+                      props.setSelectedArtist(a.name);
                     }}
                   >
-                    All
-                  </Dropdown.Item>
-                  {artists.map((a) => (
-                    <Dropdown.Item
-                      key={`artist-${a.name.replaceAll(" ", "-")}`}
-                      onClick={() => {
-                        props.setSelectedArtist(a.name);
-                      }}
-                    >
-                      {a.name}
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
-              <Dropdown className={styles["filterDropdown"]} drop={"down"}>
-                <Dropdown.Toggle disabled={props.fetching}>
-                  {getDateSelectionLabel()}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => props.setIsPrimary(true)}>
-                    Primary Sales
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Header>Secondary Sales</Dropdown.Header>
-                  {Object.values(DateIntervalsSelection).map(
-                    (dateSelection) => (
-                      <Dropdown.Item
-                        key={dateSelection}
-                        onClick={() => {
-                          if (
-                            dateSelection ===
-                            DateIntervalsSelection.CUSTOM_DATES
-                          ) {
-                            setShowDatePicker(true);
-                          } else {
-                            props.setDateSelection(dateSelection);
-                          }
-                        }}
-                      >
-                        {dateSelection}
-                      </Dropdown.Item>
-                    )
-                  )}
-                  <Dropdown.Item
+                    {a.name}
+                  </button>
+                ))}
+              </FilterDropdown>
+              <FilterDropdown
+                disabled={props.fetching}
+                label={getDateSelectionLabel()}
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={styles["filterDropdownItem"]}
+                  onClick={() => props.setIsPrimary(true)}
+                >
+                  Primary Sales
+                </button>
+                <span className={styles["filterDropdownDivider"]} />
+                <span className={styles["filterDropdownHeader"]}>
+                  Secondary Sales
+                </span>
+                {Object.values(DateIntervalsSelection).map((dateSelection) => (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    key={dateSelection}
+                    className={styles["filterDropdownItem"]}
                     onClick={() => {
-                      setShowBlockPicker(true);
+                      if (
+                        dateSelection === DateIntervalsSelection.CUSTOM_DATES
+                      ) {
+                        setShowDatePicker(true);
+                      } else {
+                        props.setDateSelection(dateSelection);
+                      }
                     }}
                   >
-                    Custom Blocks
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+                    {dateSelection}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={styles["filterDropdownItem"]}
+                  onClick={() => {
+                    setShowBlockPicker(true);
+                  }}
+                >
+                  Custom Blocks
+                </button>
+              </FilterDropdown>
             </span>
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
       <DatePickerModal
         mode="date"
         show={showDatePicker}
@@ -323,7 +389,7 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
       target="_blank"
       rel="noopener noreferrer"
     >
-      <span className="d-flex justify-content-center aling-items-center gap-3">
+      <span className="tw-flex tw-items-center tw-justify-center tw-gap-3">
         <span>{props.token_id} -</span>
         <Image
           unoptimized
