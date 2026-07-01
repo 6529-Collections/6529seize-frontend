@@ -9,8 +9,13 @@ import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
+import {
+  useEffect,
+  useEffectEvent,
+  useState,
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+} from "react";
 import { Tooltip } from "react-tooltip";
 import {
   useEnsName,
@@ -21,6 +26,105 @@ import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
 import styles from "./Delegation.module.scss";
+
+const FORM_ROW_CLASS =
+  "tw-grid tw-grid-cols-1 tw-gap-2 tw-pb-4 sm:tw-grid-cols-12 sm:tw-gap-4";
+const FORM_ROW_COMPACT_CLASS =
+  "tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-12 sm:tw-gap-4";
+const INPUT_CLASS =
+  "tw-block tw-w-full tw-min-w-0 tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-black focus:tw-border-primary-400 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-75";
+const RADIO_CLASS =
+  "tw-mr-2 tw-h-4 tw-w-4 tw-cursor-pointer tw-border-0 tw-bg-white tw-text-black focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
+
+function getLabelSpanClass(span: number) {
+  if (span === 4) {
+    return "sm:tw-col-span-4";
+  }
+  if (span === 12) {
+    return "sm:tw-col-span-12";
+  }
+  return "sm:tw-col-span-3";
+}
+
+function getFieldSpanClass(span: number) {
+  if (span === 8) {
+    return "sm:tw-col-span-8";
+  }
+  if (span === 12) {
+    return "sm:tw-col-span-12";
+  }
+  return "sm:tw-col-span-9";
+}
+
+export function DelegationFormRow(
+  props: Readonly<{ children: ReactNode; className?: string | undefined }>
+) {
+  return (
+    <div className={`${FORM_ROW_CLASS} ${props.className ?? ""}`}>
+      {props.children}
+    </div>
+  );
+}
+
+export function DelegationFormField(
+  props: Readonly<{
+    children: ReactNode;
+    span?: 8 | 9 | 12 | undefined;
+    className?: string | undefined;
+  }>
+) {
+  return (
+    <div
+      className={`${getFieldSpanClass(props.span ?? 9)} ${
+        props.className ?? ""
+      }`}
+    >
+      {props.children}
+    </div>
+  );
+}
+
+export function DelegationFormInput(props: ComponentPropsWithoutRef<"input">) {
+  const { className, ...inputProps } = props;
+  return (
+    <input
+      {...inputProps}
+      className={`${styles["formInput"]} ${INPUT_CLASS} ${className ?? ""}`}
+    />
+  );
+}
+
+export function DelegationFormSelect(
+  props: ComponentPropsWithoutRef<"select">
+) {
+  const { className, children, ...selectProps } = props;
+  return (
+    <select
+      {...selectProps}
+      className={`${styles["formInput"]} ${INPUT_CLASS} ${className ?? ""}`}
+    >
+      {children}
+    </select>
+  );
+}
+
+export function DelegationRadio(
+  props: Readonly<
+    ComponentPropsWithoutRef<"input"> & {
+      label: ReactNode;
+    }
+  >
+) {
+  const { label, className, ...inputProps } = props;
+  return (
+    <label
+      className={`${styles["newDelegationFormToggle"]} tw-inline-flex tw-items-center ${className ?? ""}`}
+    >
+      <input {...inputProps} type="radio" className={RADIO_CLASS} />
+      <span>{label}</span>
+    </label>
+  );
+}
 
 function getTransactionErrorToastMessage(
   error: { message?: string } | null | undefined,
@@ -43,9 +147,8 @@ function DelegationAddressInput(
   }, [setAddress, address]);
 
   return (
-    <Form.Control
+    <DelegationFormInput
       placeholder={"0x... or ENS"}
-      className={`${styles["formInput"]}`}
       type="text"
       value={inputValue}
       onChange={(e) => {
@@ -63,10 +166,10 @@ export function DelegationFormLabel(
     .replace(/\s+/g, "-")}`;
 
   return (
-    <Form.Label
-      column
-      sm={props.span ?? 3}
-      className="d-flex align-items-center"
+    <label
+      className={`tw-flex tw-items-center ${getLabelSpanClass(
+        props.span ?? 3
+      )}`}
     >
       {props.title}
       <FontAwesomeIcon
@@ -85,7 +188,7 @@ export function DelegationFormLabel(
       >
         {props.tooltip}
       </Tooltip>
-    </Form.Label>
+    </label>
   );
 }
 
@@ -99,14 +202,14 @@ export function DelegationFormOriginalDelegatorFormGroup(
   });
 
   return (
-    <Form.Group as={Row} className="pb-4">
+    <DelegationFormRow>
       <DelegationFormLabel
         title="Original Delegator"
         tooltip="Original Delegator of Sub Delegation - The address the delegation will be registed for"
       />
-      <Col sm={9}>
-        <Form.Control
-          className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
+      <DelegationFormField>
+        <DelegationFormInput
+          className={styles["formInputDisabled"]}
           type="text"
           value={
             orignalDelegatorEnsResolution.data
@@ -115,8 +218,8 @@ export function DelegationFormOriginalDelegatorFormGroup(
           }
           disabled
         />
-      </Col>
-    </Form.Group>
+      </DelegationFormField>
+    </DelegationFormRow>
   );
 }
 
@@ -133,8 +236,8 @@ export function DelegationAddressDisabledInput(
     : "Connect wallet to continue";
 
   return (
-    <Form.Control
-      className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
+    <DelegationFormInput
+      className={styles["formInputDisabled"]}
       type="text"
       value={displayValue}
       disabled
@@ -166,11 +269,10 @@ export function DelegationFormOptionsFormGroup(
   }>
 ) {
   return (
-    <Form.Group as={Row} className="pb-4">
+    <DelegationFormRow>
       <DelegationFormLabel title={props.title} tooltip={props.tooltip} />
-      <Col sm={9}>
-        <Form.Select
-          className={`${styles["formInput"]}`}
+      <DelegationFormField>
+        <DelegationFormSelect
           value={props.selected}
           onChange={(e) => props.setSelected(e.target.value)}
         >
@@ -182,9 +284,9 @@ export function DelegationFormOptionsFormGroup(
               <DelegationAddressDisplay address={o} />
             </option>
           ))}
-        </Form.Select>
-      </Col>
-    </Form.Group>
+        </DelegationFormSelect>
+      </DelegationFormField>
+    </DelegationFormRow>
   );
 }
 
@@ -211,16 +313,15 @@ export function DelegationFormCollectionFormGroup(
       : [props.subdelegation.collection];
 
   return (
-    <Form.Group as={Row} className="pb-4">
+    <DelegationFormRow>
       <DelegationFormLabel
         title="Collection"
         tooltip={`Collection address for ${
           props.consolidation ? "consolidation" : "delegation"
         }`}
       />
-      <Col sm={9}>
-        <Form.Select
-          className={`${styles["formInput"]}`}
+      <DelegationFormField>
+        <DelegationFormSelect
           value={props.collection}
           onChange={(e) => props.setCollection(e.target.value)}
         >
@@ -235,9 +336,9 @@ export function DelegationFormCollectionFormGroup(
               {`${sc.display}`}
             </option>
           ))}
-        </Form.Select>
-      </Col>
-    </Form.Group>
+        </DelegationFormSelect>
+      </DelegationFormField>
+    </DelegationFormRow>
   );
 }
 
@@ -249,14 +350,14 @@ export function DelegationFormDelegateAddressFormGroup(
   }>
 ) {
   return (
-    <Form.Group as={Row} className="pb-4">
+    <DelegationFormRow>
       <DelegationFormLabel title={props.title} tooltip={props.tooltip} />
-      <Col sm={9}>
+      <DelegationFormField>
         <DelegationAddressInput
           setAddress={(address: string) => props.setAddress(address)}
         />
-      </Col>
-    </Form.Group>
+      </DelegationFormField>
+    </DelegationFormRow>
   );
 }
 
@@ -380,16 +481,9 @@ export function DelegationSubmitGroups(
 
   return (
     <>
-      <Form.Group as={Row} className="pt-2 pb-4">
-        <Form.Label
-          column
-          sm={4}
-          className="d-flex align-items-center"
-        ></Form.Label>
-        <Col
-          sm={8}
-          className="d-flex align-items-center justify-content-center"
-        >
+      <div className={`${FORM_ROW_COMPACT_CLASS} tw-pb-4 tw-pt-2`}>
+        <div className="tw-hidden sm:tw-col-span-4 sm:tw-block"></div>
+        <div className="tw-flex tw-items-center tw-justify-center sm:tw-col-span-8">
           {showCancel && (
             <button
               type="button"
@@ -412,34 +506,33 @@ export function DelegationSubmitGroups(
           >
             {submitBtnLabel ?? "Submit"}{" "}
             {isLoading() && (
-              <div className="d-inline">
-                <output className={`spinner-border ${styles["loader"]}`}>
-                  <span className="sr-only">Transaction pending</span>
+              <span className="tw-inline-block">
+                <output
+                  className={`${styles["loader"]} tw-inline-block tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-white/30 tw-border-t-white`}
+                >
+                  <span className="tw-sr-only">Transaction pending</span>
                 </output>
-              </div>
+              </span>
             )}
           </button>
-        </Col>
-      </Form.Group>
+        </div>
+      </div>
       {(errors.length > 0 || gasError) && (
-        <Form.Group
-          as={Row}
-          className={`pt-2 pb-2 ${styles["newDelegationError"]}`}
+        <div
+          className={`${FORM_ROW_COMPACT_CLASS} tw-pb-2 tw-pt-2 ${styles["newDelegationError"]}`}
           role="alert"
           aria-live="assertive"
         >
-          <Form.Label column sm={4} className="d-flex align-items-center">
-            Errors
-          </Form.Label>
-          <Col sm={8} className="d-flex align-items-center">
-            <ul className="mb-0">
+          <div className="tw-flex tw-items-center sm:tw-col-span-4">Errors</div>
+          <div className="tw-flex tw-items-center sm:tw-col-span-8">
+            <ul className="tw-mb-0">
               {errors.map((e) => (
                 <li key={getRandomObjectId()}>{e}</li>
               ))}
               {gasError && <li>{gasError}</li>}
             </ul>
-          </Col>
-        </Form.Group>
+          </div>
+        </div>
       )}
     </>
   );
@@ -451,12 +544,11 @@ export function DelegationExpiryCalendar(
   }>
 ) {
   return (
-    <Container fluid className="no-padding pt-3">
-      <Row>
-        <Col xs={12} xm={12} md={6} lg={4}>
-          <Form.Control
+    <div className="tw-w-full tw-p-0 tw-pt-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-full tw-px-3 md:tw-w-1/2 lg:tw-w-1/3">
+          <DelegationFormInput
             min={new Date().toISOString().slice(0, 10)}
-            className={`${styles["formInput"]}`}
             type="date"
             placeholder="Expiry Date"
             onChange={(e) => {
@@ -468,9 +560,9 @@ export function DelegationExpiryCalendar(
               }
             }}
           />
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -480,12 +572,11 @@ export function DelegationTokenSelection(
   }>
 ) {
   return (
-    <Container fluid className="no-padding pt-3">
-      <Row>
-        <Col xs={12} xm={12} md={6} lg={4}>
-          <Form.Control
+    <div className="tw-w-full tw-p-0 tw-pt-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-full tw-px-3 md:tw-w-1/2 lg:tw-w-1/3">
+          <DelegationFormInput
             min={0}
-            className={`${styles["formInput"]}`}
             type="number"
             placeholder="Token ID"
             onChange={(e) => {
@@ -498,9 +589,9 @@ export function DelegationTokenSelection(
               }
             }}
           />
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
 

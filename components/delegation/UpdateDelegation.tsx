@@ -2,7 +2,6 @@
 
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import styles from "./Delegation.module.scss";
 
@@ -19,7 +18,11 @@ import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
   DelegationExpiryCalendar,
+  DelegationFormField,
+  DelegationFormInput,
   DelegationFormLabel,
+  DelegationFormRow,
+  DelegationRadio,
   DelegationSubmitGroups,
   DelegationTokenSelection,
 } from "./DelegationFormParts";
@@ -107,9 +110,9 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col xs={10} className="pt-3 pb-4">
+    <div className="tw-w-full tw-p-0">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-10/12 tw-px-3 tw-pb-4 tw-pt-3">
           <h4>
             Update{" "}
             {props.delegation.use_case === CONSOLIDATION_USE_CASE.use_case
@@ -118,70 +121,70 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                 ? "Delegation Manager"
                 : "Delegation"}
           </h4>
-        </Col>
+        </div>
         {props.showCancel && (
-          <Col xs={2} className="d-flex align-items-center justify-content-end">
+          <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3">
             <DelegationCloseButton onHide={props.onHide} title="Update" />
-          </Col>
+          </div>
         )}
-      </Row>
-      <Row>
-        <Col>
-          <Form>
-            <Form.Group as={Row} className="pb-4">
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-full tw-px-3">
+          <form>
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Delegator"
                 tooltip="Original Delegator"
                 span={4}
               />
-              <Col sm={8}>
+              <DelegationFormField span={8}>
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
                 />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
+              </DelegationFormField>
+            </DelegationFormRow>
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Collection"
                 tooltip="Collection address for delegation"
                 span={4}
               />
-              <Col sm={8}>
-                <Form.Control
-                  className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
+              <DelegationFormField span={8}>
+                <DelegationFormInput
+                  className={styles["formInputDisabled"]}
                   type="text"
                   value={`${props.collection.display}`}
                   disabled
                 />
-              </Col>
-            </Form.Group>
+              </DelegationFormField>
+            </DelegationFormRow>
             {isDelegation && (
-              <Form.Group as={Row} className="pb-4">
+              <DelegationFormRow>
                 <DelegationFormLabel
                   title="Use Case"
                   tooltip="Delegation Use Case"
                   span={4}
                 />
-                <Col sm={8}>
-                  <Form.Control
-                    className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
+                <DelegationFormField span={8}>
+                  <DelegationFormInput
+                    className={styles["formInputDisabled"]}
                     type="text"
                     value={`#${props.delegation.use_case} - ${props.delegation.display}`}
                     disabled
                   />
-                </Col>
-              </Form.Group>
+                </DelegationFormField>
+              </DelegationFormRow>
             )}
-            <Form.Group as={Row} className="pb-4">
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Current Delegate Address"
                 tooltip="Current Delegate to Address"
                 span={4}
               />
-              <Col sm={8}>
-                <Form.Control
-                  className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
+              <DelegationFormField span={8}>
+                <DelegationFormInput
+                  className={styles["formInputDisabled"]}
                   type="text"
                   value={
                     previousDelegationEns.data
@@ -190,18 +193,17 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                   }
                   disabled
                 />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
+              </DelegationFormField>
+            </DelegationFormRow>
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="New Delegate Address"
                 tooltip="New Delegate to Address"
                 span={4}
               />
-              <Col sm={8}>
-                <Form.Control
+              <DelegationFormField span={8}>
+                <DelegationFormInput
                   placeholder="Delegate to - 0x... or ENS"
-                  className={`${styles["formInput"]}`}
                   type="text"
                   value={delegationToInput}
                   onChange={(e) => {
@@ -209,29 +211,25 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                     setGasError(undefined);
                   }}
                 />
-              </Col>
-            </Form.Group>
+              </DelegationFormField>
+            </DelegationFormRow>
             {isDelegation && (
-              <Form.Group as={Row} className="pb-4">
+              <DelegationFormRow>
                 <DelegationFormLabel
                   title="Expiry Date"
                   tooltip="Expiry date for delegation (optional)"
                   span={4}
                 />
-                <Col sm={8}>
-                  <Form.Check
+                <DelegationFormField span={8}>
+                  <DelegationRadio
                     checked={!showExpiryCalendar}
-                    className={styles["newDelegationFormToggle"]}
-                    type="radio"
                     label="Never"
                     name="expiryRadio"
                     onChange={() => setShowExpiryCalendar(false)}
                   />
                   &nbsp;&nbsp;
-                  <Form.Check
+                  <DelegationRadio
                     checked={showExpiryCalendar}
-                    className={styles["newDelegationFormToggle"]}
-                    type="radio"
                     label="Select Date"
                     disabled={
                       props.delegation.use_case === 16 ||
@@ -245,30 +243,26 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                       setDelegationDate={setDelegationDate}
                     />
                   )}
-                </Col>
-              </Form.Group>
+                </DelegationFormField>
+              </DelegationFormRow>
             )}
             {isDelegation && (
-              <Form.Group as={Row} className="pb-4">
+              <DelegationFormRow>
                 <DelegationFormLabel
                   title="Tokens"
                   tooltip="Tokens involved in the delegation (optional)"
                   span={4}
                 />
-                <Col sm={8}>
-                  <Form.Check
+                <DelegationFormField span={8}>
+                  <DelegationRadio
                     checked={!showTokensInput}
-                    className={styles["newDelegationFormToggle"]}
-                    type="radio"
-                    label="All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                    label="All"
                     name="tokenIdRadio"
                     onChange={() => setShowTokensInput(false)}
                   />
                   &nbsp;&nbsp;
-                  <Form.Check
+                  <DelegationRadio
                     checked={showTokensInput}
-                    className={styles["newDelegationFormToggle"]}
-                    type="radio"
                     disabled={
                       props.delegation.use_case === 16 ||
                       props.delegation.use_case === 99
@@ -282,8 +276,8 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                       setDelegationToken={setDelegationToken}
                     />
                   )}
-                </Col>
-              </Form.Group>
+                </DelegationFormField>
+              </DelegationFormRow>
             )}
             <DelegationSubmitGroups
               title={"Updating Delegation"}
@@ -294,9 +288,9 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               onHide={props.onHide}
               onSetToast={props.onSetToast}
             />
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

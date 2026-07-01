@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Toast, ToastContainer } from "react-bootstrap";
 import styles from "./Delegation.module.scss";
 
 interface DelegationToastState {
@@ -62,6 +61,10 @@ export function DelegationToast(
     setShowToast: (show: boolean) => void;
   }>
 ) {
+  if (!props.showToast) {
+    return null;
+  }
+
   return (
     <div className={styles["toastWrapper"]}>
       <button
@@ -70,20 +73,29 @@ export function DelegationToast(
         className={styles["toastBackdrop"]}
         onClick={() => props.setShowToast(false)}
       />
-      <ToastContainer
-        position={"top-center"}
-        className={styles["toast"]}
+      <div
+        className={`${styles["toast"]} tw-w-[min(92vw,420px)] tw-overflow-hidden tw-rounded-lg tw-bg-white tw-text-black tw-shadow-xl`}
         ref={props.toastRef}
+        role="status"
+        aria-live="polite"
       >
-        <Toast onClose={() => props.setShowToast(false)} show={props.showToast}>
-          <Toast.Header>
-            <span className="me-auto">{props.toast.title}</span>
-          </Toast.Header>
-          {props.toast.message && (
-            <Toast.Body>{props.toast.message}</Toast.Body>
-          )}
-        </Toast>
-      </ToastContainer>
+        <div className="tw-flex tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-black/10 tw-px-3 tw-py-2">
+          <span className="tw-mr-auto tw-font-semibold">
+            {props.toast.title}
+          </span>
+          <button
+            type="button"
+            aria-label="Dismiss delegation notification"
+            className="tw-border-0 tw-bg-transparent tw-p-1 tw-text-2xl tw-leading-none tw-text-black/60 hover:tw-text-black focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            onClick={() => props.setShowToast(false)}
+          >
+            &times;
+          </button>
+        </div>
+        {props.toast.message && (
+          <div className="tw-px-3 tw-py-3">{props.toast.message}</div>
+        )}
+      </div>
     </div>
   );
 }

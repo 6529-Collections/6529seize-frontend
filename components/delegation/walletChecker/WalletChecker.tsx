@@ -20,7 +20,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
 import {
   ALL_USE_CASES,
   MINTING_USE_CASE,
@@ -28,6 +27,13 @@ import {
   SUPPORTED_COLLECTIONS,
 } from "../delegation-constants";
 import styles from "./WalletChecker.module.scss";
+
+const TABLE_CLASS =
+  "tw-w-full tw-min-w-[720px] tw-border-separate tw-border-spacing-y-1";
+const TABLE_HEADER_CELL_CLASS =
+  "tw-px-2 tw-py-1 tw-text-left tw-font-bold tw-text-iron-200";
+const TABLE_CELL_CLASS = "tw-px-2 tw-py-1 tw-align-middle";
+const TABLE_CENTER_CELL_CLASS = `${TABLE_CELL_CLASS} tw-text-center`;
 
 interface ConsolidationDisplay {
   from: string;
@@ -465,19 +471,19 @@ export default function WalletCheckerComponent(
       !ensLoading);
 
   return (
-    <Container className="pt-3 pb-3">
-      <Row>
-        <Col>
+    <div className="tw-w-full tw-py-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-full tw-px-3">
           <h1>Wallet Checker</h1>
           <p className={styles["intro"]}>
             Check delegation, delegation manager, and consolidation records for
             a wallet. This is read-only and does not require wallet connection.
           </p>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Form
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-full tw-px-3">
+          <form
             onSubmit={(e) => {
               e.preventDefault();
               if (!formDisabled) {
@@ -485,16 +491,14 @@ export default function WalletCheckerComponent(
               }
             }}
           >
-            <Form.Group as={Row}>
-              <Form.Label
-                column
-                sm={12}
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <label
                 htmlFor="wallet-checker-address"
-                className="d-flex align-items-center"
+                className="tw-flex tw-w-full tw-items-center tw-px-3"
               >
                 Wallet address or ENS name
-              </Form.Label>
-              <Col sm={12}>
+              </label>
+              <div className="tw-w-full tw-px-3">
                 <EnsAddressInput
                   id="wallet-checker-address"
                   disabled={delegationsLoaded || consolidationsLoaded}
@@ -511,21 +515,24 @@ export default function WalletCheckerComponent(
                   onLoadingChange={setEnsLoading}
                   onError={setAddressError}
                 />
-                <Form.Text id="wallet-checker-help">
+                <div
+                  id="wallet-checker-help"
+                  className="tw-text-sm tw-text-iron-400"
+                >
                   Enter an Ethereum address or ENS name.
-                </Form.Text>
-              </Col>
-            </Form.Group>
+                </div>
+              </div>
+            </div>
             {showAddressError && (
-              <Form.Group as={Row}>
-                <Form.Text
-                  className={styles["error"]}
+              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                <div
+                  className={`${styles["error"]} tw-w-full tw-px-3`}
                   role="alert"
                   aria-live="assertive"
                 >
                   Enter a valid Ethereum address or ENS name.
-                </Form.Text>
-              </Form.Group>
+                </div>
+              </div>
             )}
             {!fetchedAddress && !showAddressError && !checking && (
               <p className={styles["statusText"]}>
@@ -549,12 +556,10 @@ export default function WalletCheckerComponent(
                 found for this wallet.
               </p>
             )}
-            <Form.Group as={Row} className="pt-3 text-center">
-              <Col
-                sm={12}
-                className="d-flex align-items-center justify-content-center gap-3"
-              >
-                <Button
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3 tw-text-center">
+              <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-3 tw-px-3">
+                <button
+                  type="button"
                   onClick={() => {
                     setWalletInputValue("");
                     setWalletAddress("");
@@ -572,109 +577,130 @@ export default function WalletCheckerComponent(
                   className={styles["clearBtn"]}
                 >
                   Clear
-                </Button>
-                <Button
+                </button>
+                <button
+                  type="button"
                   disabled={formDisabled}
                   onClick={() => setChecking(true)}
                   className={styles["checkBtn"]}
                 >
                   {checking ? `Checking...` : `Check Wallet`}
-                </Button>
-              </Col>
-            </Form.Group>
+                </button>
+              </div>
+            </div>
             {delegationsLoaded && (
               <>
-                <Form.Group as={Row} className="pt-4">
-                  <Col sm={12}>
-                    <h5 className="pt-2 pb-2">
+                <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+                  <div className="tw-w-full tw-px-3">
+                    <h5 className="tw-pb-2 tw-pt-2">
                       Delegations ({delegations.length})
                     </h5>
                     {delegations.length > 0 ? (
-                      <Table>
-                        <thead className="mb-2">
-                          <tr>
-                            <th>From</th>
-                            <th>To</th>
-                            <th>Collection</th>
-                            <th>Use Case</th>
-                            <th className="text-center">Tokens</th>
-                            <th className="text-center">Expiry</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {delegations.map((delegation, index) => (
-                            <tr key={`delegations-${index}`}>
-                              <td>
-                                {areEqualAddresses(
-                                  fetchedAddress,
-                                  delegation.from_address
-                                ) ? (
-                                  <Address
-                                    wallets={[
-                                      delegation.from_address as `0x${string}`,
-                                    ]}
-                                    display={delegation.from_display}
-                                  />
-                                ) : (
-                                  <span className={styles["supportingAddress"]}>
+                      <div className="tw-overflow-x-auto">
+                        <table className={TABLE_CLASS}>
+                          <thead>
+                            <tr>
+                              <th className={TABLE_HEADER_CELL_CLASS}>From</th>
+                              <th className={TABLE_HEADER_CELL_CLASS}>To</th>
+                              <th className={TABLE_HEADER_CELL_CLASS}>
+                                Collection
+                              </th>
+                              <th className={TABLE_HEADER_CELL_CLASS}>
+                                Use Case
+                              </th>
+                              <th
+                                className={`${TABLE_HEADER_CELL_CLASS} tw-text-center`}
+                              >
+                                Tokens
+                              </th>
+                              <th
+                                className={`${TABLE_HEADER_CELL_CLASS} tw-text-center`}
+                              >
+                                Expiry
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {delegations.map((delegation, index) => (
+                              <tr key={`delegations-${index}`}>
+                                <td className={TABLE_CELL_CLASS}>
+                                  {areEqualAddresses(
+                                    fetchedAddress,
+                                    delegation.from_address
+                                  ) ? (
                                     <Address
                                       wallets={[
                                         delegation.from_address as `0x${string}`,
                                       ]}
                                       display={delegation.from_display}
                                     />
-                                  </span>
-                                )}
-                              </td>
-                              <td>
-                                {areEqualAddresses(
-                                  fetchedAddress,
-                                  delegation.to_address
-                                ) ? (
-                                  <Address
-                                    wallets={[
-                                      delegation.to_address as `0x${string}`,
-                                    ]}
-                                    display={delegation.to_display}
-                                  />
-                                ) : (
-                                  <span className={styles["supportingAddress"]}>
+                                  ) : (
+                                    <span
+                                      className={styles["supportingAddress"]}
+                                    >
+                                      <Address
+                                        wallets={[
+                                          delegation.from_address as `0x${string}`,
+                                        ]}
+                                        display={delegation.from_display}
+                                      />
+                                    </span>
+                                  )}
+                                </td>
+                                <td className={TABLE_CELL_CLASS}>
+                                  {areEqualAddresses(
+                                    fetchedAddress,
+                                    delegation.to_address
+                                  ) ? (
                                     <Address
                                       wallets={[
                                         delegation.to_address as `0x${string}`,
                                       ]}
                                       display={delegation.to_display}
                                     />
-                                  </span>
-                                )}
-                              </td>
-                              <td>
-                                {getCollectionDisplay(delegation.collection)}
-                              </td>
-                              <td>{getUseCaseDisplay(delegation.use_case)}</td>
-                              <td className="text-center">
-                                {delegation.all_tokens
-                                  ? `All`
-                                  : delegation.token_id}
-                              </td>
-                              <td className="text-center">
-                                {getDateDisplay(delegation.expiry)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
+                                  ) : (
+                                    <span
+                                      className={styles["supportingAddress"]}
+                                    >
+                                      <Address
+                                        wallets={[
+                                          delegation.to_address as `0x${string}`,
+                                        ]}
+                                        display={delegation.to_display}
+                                      />
+                                    </span>
+                                  )}
+                                </td>
+                                <td className={TABLE_CELL_CLASS}>
+                                  {getCollectionDisplay(delegation.collection)}
+                                </td>
+                                <td className={TABLE_CELL_CLASS}>
+                                  {getUseCaseDisplay(delegation.use_case)}
+                                </td>
+                                <td className={TABLE_CENTER_CELL_CLASS}>
+                                  {delegation.all_tokens
+                                    ? `All`
+                                    : delegation.token_id}
+                                </td>
+                                <td className={TABLE_CENTER_CELL_CLASS}>
+                                  {getDateDisplay(delegation.expiry)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     ) : (
                       `No delegations found`
                     )}
-                  </Col>
-                </Form.Group>
+                  </div>
+                </section>
                 {activeDelegation && (
-                  <div className="pt-2">
-                    <h5 className="pt-2 pb-2">
+                  <div className="tw-pt-2">
+                    <h5 className="tw-pb-2 tw-pt-2">
                       Active Minting Delegation for The Memes
                     </h5>
-                    <div className="d-flex align-items-center gap-4">
+                    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
                       <span>
                         To:{" "}
                         <Address
@@ -711,148 +737,162 @@ export default function WalletCheckerComponent(
                     </div>
                   </div>
                 )}
-                <Form.Group as={Row} className="pt-4">
-                  <Col sm={12}>
-                    <h5 className="pt-2 pb-2">
+                <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+                  <div className="tw-w-full tw-px-3">
+                    <h5 className="tw-pb-2 tw-pt-2">
                       Delegation Managers ({subDelegations.length})
                     </h5>
                     {subDelegations.length > 0 ? (
-                      <Table>
-                        <thead className="mb-2">
-                          <tr>
-                            <th>From</th>
-                            <th>To</th>
-                            <th>Collection</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {subDelegations.map((delegation, index) => (
-                            <tr key={`sub-delegations-${index}`}>
-                              <td>
-                                {areEqualAddresses(
-                                  fetchedAddress,
-                                  delegation.from_address
-                                ) ? (
-                                  <Address
-                                    wallets={[
-                                      delegation.from_address as `0x${string}`,
-                                    ]}
-                                    display={delegation.from_display}
-                                  />
-                                ) : (
-                                  <span className={styles["supportingAddress"]}>
+                      <div className="tw-overflow-x-auto">
+                        <table className={TABLE_CLASS}>
+                          <thead>
+                            <tr>
+                              <th className={TABLE_HEADER_CELL_CLASS}>From</th>
+                              <th className={TABLE_HEADER_CELL_CLASS}>To</th>
+                              <th className={TABLE_HEADER_CELL_CLASS}>
+                                Collection
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {subDelegations.map((delegation, index) => (
+                              <tr key={`sub-delegations-${index}`}>
+                                <td className={TABLE_CELL_CLASS}>
+                                  {areEqualAddresses(
+                                    fetchedAddress,
+                                    delegation.from_address
+                                  ) ? (
                                     <Address
                                       wallets={[
                                         delegation.from_address as `0x${string}`,
                                       ]}
                                       display={delegation.from_display}
                                     />
-                                  </span>
-                                )}
-                              </td>
-                              <td>
-                                {areEqualAddresses(
-                                  fetchedAddress,
-                                  delegation.to_address
-                                ) ? (
-                                  <Address
-                                    wallets={[
-                                      delegation.to_address as `0x${string}`,
-                                    ]}
-                                    display={delegation.to_display}
-                                  />
-                                ) : (
-                                  <span className={styles["supportingAddress"]}>
+                                  ) : (
+                                    <span
+                                      className={styles["supportingAddress"]}
+                                    >
+                                      <Address
+                                        wallets={[
+                                          delegation.from_address as `0x${string}`,
+                                        ]}
+                                        display={delegation.from_display}
+                                      />
+                                    </span>
+                                  )}
+                                </td>
+                                <td className={TABLE_CELL_CLASS}>
+                                  {areEqualAddresses(
+                                    fetchedAddress,
+                                    delegation.to_address
+                                  ) ? (
                                     <Address
                                       wallets={[
                                         delegation.to_address as `0x${string}`,
                                       ]}
                                       display={delegation.to_display}
                                     />
-                                  </span>
-                                )}
-                              </td>
-                              <td>
-                                {getCollectionDisplay(delegation.collection)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
+                                  ) : (
+                                    <span
+                                      className={styles["supportingAddress"]}
+                                    >
+                                      <Address
+                                        wallets={[
+                                          delegation.to_address as `0x${string}`,
+                                        ]}
+                                        display={delegation.to_display}
+                                      />
+                                    </span>
+                                  )}
+                                </td>
+                                <td className={TABLE_CELL_CLASS}>
+                                  {getCollectionDisplay(delegation.collection)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     ) : (
                       `No delegation managers found`
                     )}
-                  </Col>
-                </Form.Group>
+                  </div>
+                </section>
               </>
             )}
             {consolidationsLoaded && (
-              <Form.Group as={Row} className="pt-4">
-                <Col sm={12}>
-                  <h5 className="pt-2 pb-2">
+              <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+                <div className="tw-w-full tw-px-3">
+                  <h5 className="tw-pb-2 tw-pt-2">
                     Consolidations ({consolidations.length})
                   </h5>
                   {consolidations.length > 0 ? (
-                    <Table>
-                      <tbody>
-                        {consolidations.map((consolidation, index) => (
-                          <tr key={`consolidations-${index}`}>
-                            <td className="d-flex align-items-center mt-1 mb-1">
-                              {areEqualAddresses(
-                                fetchedAddress,
-                                consolidation.from
-                              ) ? (
-                                <Address
-                                  wallets={[
-                                    consolidation.from as `0x${string}`,
-                                  ]}
-                                  display={consolidation.from_display}
-                                />
-                              ) : (
-                                <span className={styles["supportingAddress"]}>
+                    <div className="tw-overflow-x-auto">
+                      <table className="tw-w-full tw-min-w-[520px] tw-border-separate tw-border-spacing-y-1">
+                        <tbody>
+                          {consolidations.map((consolidation, index) => (
+                            <tr key={`consolidations-${index}`}>
+                              <td className="tw-flex tw-items-center tw-px-2 tw-py-1">
+                                {areEqualAddresses(
+                                  fetchedAddress,
+                                  consolidation.from
+                                ) ? (
                                   <Address
                                     wallets={[
                                       consolidation.from as `0x${string}`,
                                     ]}
                                     display={consolidation.from_display}
                                   />
+                                ) : (
+                                  <span className={styles["supportingAddress"]}>
+                                    <Address
+                                      wallets={[
+                                        consolidation.from as `0x${string}`,
+                                      ]}
+                                      display={consolidation.from_display}
+                                    />
+                                  </span>
+                                )}
+                                <span className="tw-inline-flex tw-items-center tw-justify-center">
+                                  <span className={styles["arrowBody"]}></span>
+                                  <span className={styles["arrowHead"]}></span>
                                 </span>
-                              )}
-                              <span className="d-inline-flex align-items-center justify-content-center">
-                                <span className={styles["arrowBody"]}></span>
-                                <span className={styles["arrowHead"]}></span>
-                              </span>
-                              {areEqualAddresses(
-                                fetchedAddress,
-                                consolidation.to
-                              ) ? (
-                                <Address
-                                  wallets={[consolidation.to as `0x${string}`]}
-                                  display={consolidation.to_display}
-                                />
-                              ) : (
-                                <span className={styles["supportingAddress"]}>
+                                {areEqualAddresses(
+                                  fetchedAddress,
+                                  consolidation.to
+                                ) ? (
                                   <Address
                                     wallets={[
                                       consolidation.to as `0x${string}`,
                                     ]}
                                     display={consolidation.to_display}
                                   />
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
+                                ) : (
+                                  <span className={styles["supportingAddress"]}>
+                                    <Address
+                                      wallets={[
+                                        consolidation.to as `0x${string}`,
+                                      ]}
+                                      display={consolidation.to_display}
+                                    />
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : (
                     `No consolidations found`
                   )}
                   {consolidations.length > 1 &&
                     consolidatedWallets.length > 1 && (
-                      <div className="pt-2">
-                        <h5 className="pt-2 pb-2">Active Consolidation</h5>
-                        <div className="d-flex align-items-center">
+                      <div className="tw-pt-2">
+                        <h5 className="tw-pb-2 tw-pt-2">
+                          Active Consolidation
+                        </h5>
+                        <div className="tw-flex tw-flex-wrap tw-items-center">
                           {consolidatedWallets.map((wallet, index) => (
                             <Fragment key={`consolidated-wallets-${index}`}>
                               {areEqualAddresses(
@@ -888,20 +928,22 @@ export default function WalletCheckerComponent(
                     )}
                   {consolidationActions.length > 0 && (
                     <>
-                      <div className="pt-2 pb-2 d-flex-align-items-center">
+                      <div className="tw-flex tw-items-center tw-pb-2 tw-pt-2">
                         <FontAwesomeIcon
                           icon={faXmark}
                           className={styles["consolidationRecommendationIcon"]}
                         />
                         Incomplete Consolidation
                       </div>
-                      <div className="pt-2 pb-2">
+                      <div className="tw-pb-2 tw-pt-2">
                         Recommended Actions:
-                        <ul className={`${styles["recommendationsList"]} pt-2`}>
+                        <ul
+                          className={`${styles["recommendationsList"]} tw-pt-2`}
+                        >
                           {consolidationActions.map((c, index) => (
                             <li
                               key={`consolidated-wallets-${index}`}
-                              className="d-flex align-items-center gap-2"
+                              className="tw-flex tw-items-center tw-gap-2"
                             >
                               &bull;&nbsp;Register Consolidation from{" "}
                               {areEqualAddresses(fetchedAddress, c.to) ? (
@@ -937,12 +979,12 @@ export default function WalletCheckerComponent(
                       </div>
                     </>
                   )}
-                </Col>
-              </Form.Group>
+                </div>
+              </section>
             )}
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

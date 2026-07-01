@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
 
 import { DELEGATION_ABI } from "@/abis/abis";
 import { AuthContext } from "@/components/auth/Auth";
@@ -20,9 +19,11 @@ import { getGasError } from "./delegation-shared";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
+  DelegationFormField,
   DelegationFormLabel,
   DelegationFormOptionsFormGroup,
   DelegationFormOriginalDelegatorFormGroup,
+  DelegationFormRow,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 
@@ -168,25 +169,25 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
 
   function printForm() {
     return (
-      <Row className="pt-4">
-        <Col>
-          <Form>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-w-full tw-px-3">
+          <form>
             {subdelegation && (
               <DelegationFormOriginalDelegatorFormGroup
                 subdelegation={subdelegation}
               />
             )}
-            <Form.Group as={Row} className="pb-4">
+            <DelegationFormRow>
               <DelegationFormLabel
                 title={subdelegation ? `Delegation Manager` : `Delegator`}
                 tooltip={`Address ${
                   subdelegation ? `executing` : `registering`
                 } the Primary Address assignment`}
               />
-              <Col sm={9}>
+              <DelegationFormField>
                 <DelegationAddressDisabledInput address={address} ens={ens} />
-              </Col>
-            </Form.Group>
+              </DelegationFormField>
+            </DelegationFormRow>
             <DelegationFormOptionsFormGroup
               title={"Primary Address"}
               tooltip="Address to be assigned as Primary"
@@ -204,9 +205,9 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
               onSetToast={onSetToast}
               submitBtnLabel="Assign Primary Address"
             />
-          </Form>
-        </Col>
-      </Row>
+          </form>
+        </div>
+      </div>
     );
   }
 
@@ -221,11 +222,11 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
       return <DotLoader />;
     } else if (!isValidConsolidation()) {
       return (
-        <Row>
-          <Col className="font-larger font-bolder">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="font-larger font-bolder tw-w-full tw-px-3">
             You must have a consolidation to assign a Primary Address
-          </Col>
-        </Row>
+          </div>
+        </div>
       );
     } else {
       return printForm();
@@ -233,28 +234,25 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
   }
 
   return (
-    <Container>
-      <Row className="pb-3">
-        <Col xs={10} className="pt-3 pb-1">
+    <div className="tw-w-full tw-px-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-3">
+        <div className="tw-w-10/12 tw-px-3 tw-pb-1 tw-pt-3">
           <h4>
             Assign Primary Address {subdelegation && `as Delegation Manager`}
           </h4>
-        </Col>
-        <Col
-          xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
-        >
+        </div>
+        <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3 tw-pb-1 tw-pt-3">
           <DelegationCloseButton onHide={onHide} title="Consolidation" />
-        </Col>
-      </Row>
+        </div>
+      </div>
       {!connectedProfile && (
-        <Row>
-          <Col className="d-flex align-item-center justify-content-center font-larger font-bolder">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="font-larger font-bolder tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3">
             Connect Wallet to continue
-          </Col>
-        </Row>
+          </div>
+        </div>
       )}
       {printContent()}
-    </Container>
+    </div>
   );
 }

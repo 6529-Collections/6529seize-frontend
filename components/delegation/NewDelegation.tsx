@@ -7,7 +7,6 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
 import type { DelegationCollection } from "./delegation-constants";
 import { DELEGATION_USE_CASES } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
@@ -16,10 +15,14 @@ import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
   DelegationExpiryCalendar,
+  DelegationFormField,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
   DelegationFormLabel,
   DelegationFormOriginalDelegatorFormGroup,
+  DelegationFormRow,
+  DelegationFormSelect,
+  DelegationRadio,
   DelegationSubmitGroups,
   DelegationTokenSelection,
 } from "./DelegationFormParts";
@@ -150,9 +153,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
   }
 
   return (
-    <Container>
-      <Row>
-        <Col xs={10} className="pt-3 pb-1">
+    <div className="tw-w-full tw-px-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-10/12 tw-px-3 tw-pb-1 tw-pt-3">
           <h4>
             Register Delegation {props.subdelegation && `as Delegation Manager`}
           </h4>
@@ -160,36 +163,33 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             Register utility rights for another wallet. NFTs stay in the
             delegator wallet.
           </p>
-        </Col>
-        <Col
-          xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
-        >
+        </div>
+        <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3 tw-pb-1 tw-pt-3">
           <DelegationCloseButton onHide={props.onHide} title="Delegation" />
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>
-          <Form>
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-w-full tw-px-3">
+          <form>
             {props.subdelegation && (
               <DelegationFormOriginalDelegatorFormGroup
                 subdelegation={props.subdelegation}
               />
             )}
-            <Form.Group as={Row} className="pb-4">
+            <DelegationFormRow>
               <DelegationFormLabel
                 title={props.subdelegation ? "Delegation Manager" : "Delegator"}
                 tooltip={`Address ${
                   props.subdelegation ? `executing` : `registering`
                 } the delegation`}
               />
-              <Col sm={9}>
+              <DelegationFormField>
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
                 />
-              </Col>
-            </Form.Group>
+              </DelegationFormField>
+            </DelegationFormRow>
             <DelegationFormCollectionFormGroup
               collection={newDelegationCollection}
               setCollection={(c: string) => {
@@ -205,14 +205,13 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               title="Delegate Address"
               tooltip="Delegate to Address e.g. your hot wallet"
             />
-            <Form.Group as={Row} className="pb-4">
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Use Case"
                 tooltip="Delegation Use Case"
               />
-              <Col sm={9}>
-                <Form.Select
-                  className={`${styles["formInput"]}`}
+              <DelegationFormField>
+                <DelegationFormSelect
                   value={newDelegationUseCase}
                   onChange={(e) => {
                     const newCase = parseInt(e.target.value);
@@ -236,28 +235,24 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                       </option>
                     );
                   })}
-                </Form.Select>
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
+                </DelegationFormSelect>
+              </DelegationFormField>
+            </DelegationFormRow>
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Expiry Date"
                 tooltip="Expiry date for delegation (optional)"
               />
-              <Col sm={9}>
-                <Form.Check
+              <DelegationFormField>
+                <DelegationRadio
                   checked={!showExpiryCalendar}
-                  className={styles["newDelegationFormToggle"]}
-                  type="radio"
                   label="Never"
                   name="expiryRadio"
                   onChange={() => setShowExpiryCalendar(false)}
                 />
                 &nbsp;&nbsp;
-                <Form.Check
+                <DelegationRadio
                   checked={showExpiryCalendar}
-                  className={styles["newDelegationFormToggle"]}
-                  type="radio"
                   label="Select Date"
                   name="expiryRadio"
                   onChange={() => setShowExpiryCalendar(true)}
@@ -267,27 +262,23 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                     setDelegationDate={setNewDelegationDate}
                   />
                 )}
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
+              </DelegationFormField>
+            </DelegationFormRow>
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Tokens"
                 tooltip="Tokens involved in the delegation (optional)"
               />
-              <Col sm={9}>
-                <Form.Check
+              <DelegationFormField>
+                <DelegationRadio
                   checked={!showTokensInput}
-                  className={styles["newDelegationFormToggle"]}
-                  type="radio"
-                  label="All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                  label="All"
                   name="tokenIdRadio"
                   onChange={() => setShowTokensInput(false)}
                 />
                 &nbsp;&nbsp;
-                <Form.Check
+                <DelegationRadio
                   checked={showTokensInput}
-                  className={styles["newDelegationFormToggle"]}
-                  type="radio"
                   label="Select Token ID"
                   name="tokenIdRadio"
                   onChange={() => setShowTokensInput(true)}
@@ -297,10 +288,10 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                     setDelegationToken={setNewDelegationToken}
                   />
                 )}
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={12} className="d-flex align-items-center">
+              </DelegationFormField>
+            </DelegationFormRow>
+            <DelegationFormRow>
+              <div className="tw-flex tw-items-center sm:tw-col-span-12">
                 Note: The currently supported use cases on 6529.io are: #1 -
                 All, #2 - Minting/Allowlist, #3 - Airdrops{" "}
                 <Link
@@ -313,8 +304,8 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                     icon={faInfoCircle}
                   ></FontAwesomeIcon>
                 </Link>
-              </Form.Label>
-            </Form.Group>
+              </div>
+            </DelegationFormRow>
             <DelegationSubmitGroups
               title={"Registering Delegation"}
               writeParams={contractWriteDelegationConfigParams}
@@ -325,9 +316,9 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               onSetToast={props.onSetToast}
               submitBtnLabel="Register Delegation"
             />
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
