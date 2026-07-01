@@ -10,12 +10,33 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
-import type { ReactNode } from "react";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
 import styles from "./UserPageSubscriptions.module.scss";
+
+function className(...classNames: readonly (string | undefined)[]): string {
+  return classNames
+    .filter((value): value is string => value !== undefined && value !== "")
+    .join(" ");
+}
+
+const HISTORY_DISCLOSURE_SUMMARY_CLASS = className(
+  styles["topUpHistoryAccordionButton"],
+  "tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden"
+);
+const HISTORY_DISCLOSURE_CARET_CLASS =
+  "tw-h-2 tw-w-2 tw-shrink-0 tw-rotate-45 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-[225deg]";
+const HISTORY_DISCLOSURE_BODY_CLASS = className(
+  styles["topUpHistoryAccordionBody"],
+  "tw-px-5 tw-py-4"
+);
+
+function getSubscriptionLogKey(log: SubscriptionLog): string {
+  return log.id === undefined
+    ? "subscription-log-undefined"
+    : `subscription-log-${String(log.id)}`;
+}
 
 export default function UserPageSubscriptionsHistory(
   props: Readonly<{
@@ -57,39 +78,6 @@ export default function UserPageSubscriptionsHistory(
   );
 }
 
-function HistoryDisclosure({
-  title,
-  children,
-}: {
-  readonly title: string;
-  readonly children: ReactNode;
-}) {
-  return (
-    <Disclosure as="div" defaultOpen>
-      {({ open }) => (
-        <>
-          <DisclosureButton
-            className={`${styles["topUpHistoryAccordionButton"]} tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
-          >
-            <b>{title}</b>
-            <span
-              aria-hidden="true"
-              className={`tw-h-2 tw-w-2 tw-shrink-0 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 ${
-                open ? "tw-rotate-[225deg]" : "tw-rotate-45"
-              }`}
-            />
-          </DisclosureButton>
-          <DisclosurePanel
-            className={`${styles["topUpHistoryAccordionBody"]} tw-px-5 tw-py-4`}
-          >
-            {children}
-          </DisclosurePanel>
-        </>
-      )}
-    </Disclosure>
-  );
-}
-
 function RedeemedSubscriptionsAccordion(
   props: Readonly<{
     history: Page<RedeemedSubscription>;
@@ -97,30 +85,35 @@ function RedeemedSubscriptionsAccordion(
   }>
 ) {
   return (
-    <HistoryDisclosure
-      title="Redeemed Subscriptions">
-      <div className="tw-flex tw-flex-col tw-gap-2">
-        {props.history.data.length > 0 ? (
-          props.history.data.map((redeem) => (
-            <RedeemedEntry key={redeem.transaction} redeem={redeem} />
-          ))
-        ) : (
-          <div className="font-color-silver">
-            No Redeemed Subscriptions found
+    <details className="tw-group" open>
+      <summary className={HISTORY_DISCLOSURE_SUMMARY_CLASS}>
+        <b>Redeemed Subscriptions</b>
+        <span aria-hidden="true" className={HISTORY_DISCLOSURE_CARET_CLASS} />
+      </summary>
+      <div className={HISTORY_DISCLOSURE_BODY_CLASS}>
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          {props.history.data.length > 0 ? (
+            props.history.data.map((redeem) => (
+              <RedeemedEntry key={redeem.transaction} redeem={redeem} />
+            ))
+          ) : (
+            <div className="font-color-silver">
+              No Redeemed Subscriptions found
+            </div>
+          )}
+        </div>
+        {props.history.count > 0 && props.history.count / 10 > 1 && (
+          <div className="tw-mt-3 tw-text-center">
+            <Pagination
+              page={props.history.page}
+              pageSize={10}
+              totalResults={props.history.count}
+              setPage={props.setPage}
+            />
           </div>
         )}
       </div>
-      {props.history.count > 0 && props.history.count / 10 > 1 && (
-        <div className="tw-mt-3 tw-text-center">
-          <Pagination
-            page={props.history.page}
-            pageSize={10}
-            totalResults={props.history.count}
-            setPage={props.setPage}
-          />
-        </div>
-      )}
-    </HistoryDisclosure>
+    </details>
   );
 }
 
@@ -131,28 +124,33 @@ function LogAccordion(
   }>
 ) {
   return (
-    <HistoryDisclosure
-      title="Log History">
-      <div className="tw-flex tw-flex-col tw-gap-2">
-        {props.logs.data.length > 0 ? (
-          props.logs.data.map((log) => (
-            <LogEntry key={`subscription-log-${log.id}`} log={log} />
-          ))
-        ) : (
-          <div className="font-color-silver">No logs found</div>
-        )}
-        {props.logs.count > 0 && props.logs.count / 10 > 1 && (
-          <div className="tw-mt-3 tw-text-center">
-            <Pagination
-              page={props.logs.page}
-              pageSize={10}
-              totalResults={props.logs.count}
-              setPage={props.setPage}
-            />
-          </div>
-        )}
+    <details className="tw-group" open>
+      <summary className={HISTORY_DISCLOSURE_SUMMARY_CLASS}>
+        <b>Log History</b>
+        <span aria-hidden="true" className={HISTORY_DISCLOSURE_CARET_CLASS} />
+      </summary>
+      <div className={HISTORY_DISCLOSURE_BODY_CLASS}>
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          {props.logs.data.length > 0 ? (
+            props.logs.data.map((log) => (
+              <LogEntry key={getSubscriptionLogKey(log)} log={log} />
+            ))
+          ) : (
+            <div className="font-color-silver">No logs found</div>
+          )}
+          {props.logs.count > 0 && props.logs.count / 10 > 1 && (
+            <div className="tw-mt-3 tw-text-center">
+              <Pagination
+                page={props.logs.page}
+                pageSize={10}
+                totalResults={props.logs.count}
+                setPage={props.setPage}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </HistoryDisclosure>
+    </details>
   );
 }
 
@@ -163,28 +161,33 @@ function TopUpAccordion(
   }>
 ) {
   return (
-    <HistoryDisclosure
-      title="Top Up History">
-      <div className="tw-flex tw-flex-col tw-gap-2">
-        {props.history.data.length > 0 ? (
-          props.history.data.map((topUp) => (
-            <TopUpEntry key={topUp.hash} topUp={topUp} />
-          ))
-        ) : (
-          <div className="font-color-silver">No Top Ups found</div>
+    <details className="tw-group" open>
+      <summary className={HISTORY_DISCLOSURE_SUMMARY_CLASS}>
+        <b>Top Up History</b>
+        <span aria-hidden="true" className={HISTORY_DISCLOSURE_CARET_CLASS} />
+      </summary>
+      <div className={HISTORY_DISCLOSURE_BODY_CLASS}>
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          {props.history.data.length > 0 ? (
+            props.history.data.map((topUp) => (
+              <TopUpEntry key={topUp.hash} topUp={topUp} />
+            ))
+          ) : (
+            <div className="font-color-silver">No Top Ups found</div>
+          )}
+        </div>
+        {props.history.count > 0 && props.history.count / 10 > 1 && (
+          <div className="tw-mt-3 tw-text-center">
+            <Pagination
+              page={props.history.page}
+              pageSize={10}
+              totalResults={props.history.count}
+              setPage={props.setPage}
+            />
+          </div>
         )}
       </div>
-      {props.history.count > 0 && props.history.count / 10 > 1 && (
-        <div className="tw-mt-3 tw-text-center">
-          <Pagination
-            page={props.history.page}
-            pageSize={10}
-            totalResults={props.history.count}
-            setPage={props.setPage}
-          />
-        </div>
-      )}
-    </HistoryDisclosure>
+    </details>
   );
 }
 
