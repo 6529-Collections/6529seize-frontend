@@ -2872,6 +2872,80 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters raw AppKit Coinbase websocket 1006 unhandled rejections before source-map symbolication", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "e",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Coinbase WalletLink websocket 1006 errors from serialized raw stacks", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "e",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          message: "websocket error 1006:",
+          stack:
+            "Error: websocket error 1006:\n    at webSocket.onclose (node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js:52:28)",
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter app-owned websocket 1006 errors", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
@@ -2931,6 +3005,40 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter app-owned websocket 1006 unhandled rejections with close-handler function names", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx",
+                  function: "webSocket.onclose",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter no-frame websocket 1006 errors when the original exception stack is app-owned", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
@@ -2957,6 +3065,43 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
       originalException: error,
     });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter no-frame websocket 1006 errors when the serialized stack is app-owned", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+      extra: {
+        __serialized__: {
+          message: "websocket error 1006:",
+          stack: [
+            "Error: websocket error 1006:",
+            "    at connect (webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx:10:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
 
     // Assert
     expect(result).toBe(false);

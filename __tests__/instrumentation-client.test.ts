@@ -495,6 +495,38 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops raw AppKit Coinbase websocket 1006 unhandled rejections", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "e",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("keeps exact Talisman onboarding errors with app-owned frames", () => {
     const beforeSend = loadBeforeSend();
     const event = {
