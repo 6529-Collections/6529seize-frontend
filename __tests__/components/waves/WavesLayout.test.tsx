@@ -44,11 +44,6 @@ jest.mock("@/components/common/ConnectWallet", () => ({
   default: () => <div data-testid="connect-wallet">Connect Wallet</div>,
 }));
 
-jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
-  __esModule: true,
-  default: () => <div data-testid="setup-profile">Set up profile</div>,
-}));
-
 describe("WavesLayout", () => {
   beforeEach(() => {
     mockUseAuthenticatedContent.mockReturnValue({
@@ -101,10 +96,9 @@ describe("WavesLayout", () => {
     expect(screen.getByTestId("waves-desktop")).toBeInTheDocument();
     expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("setup-profile")).not.toBeInTheDocument();
   });
 
-  it("shows setup CTA instead of Waves content when profile setup is needed", () => {
+  it("renders Waves content read-only when profile setup is needed", () => {
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "needs-profile",
     });
@@ -116,10 +110,9 @@ describe("WavesLayout", () => {
       </WavesLayout>
     );
 
-    expect(screen.getByTestId("setup-profile")).toBeInTheDocument();
-    expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
+    expect(screen.getByTestId("wave-content")).toBeInTheDocument();
     expect(screen.queryByTestId("waves-desktop")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("waves-mobile")).not.toBeInTheDocument();
+    expect(screen.getByTestId("waves-mobile")).toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 

@@ -1114,7 +1114,15 @@
         "nakamoto tdh boost",
         "nakamoto boost"
       ],
-      "keywords": ["nakamoto", "set", "sets", "tdh", "boost", "szn1", "category"],
+      "keywords": [
+        "nakamoto",
+        "set",
+        "sets",
+        "tdh",
+        "boost",
+        "szn1",
+        "category"
+      ],
       "facts": [
         "Nakamoto Set is a SZN1 Category B TDH boost term.",
         "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
@@ -1397,6 +1405,7 @@
       "facts": [
         "Waves are the main social threads for conversations, drops, reactions, voting, and wave-specific activity.",
         "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
+        "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
         "The Waves panel includes wave lists, pinned waves, highly rated waves, and create controls."
       ],
       "canonical_path": "/waves",
@@ -1573,7 +1582,8 @@
       "facts": [
         "Direct-message waves live under /messages and individual message threads use /messages/{waveId}.",
         "A direct-message creation flow is available at /messages/create.",
-        "Direct messages use wave mechanics but are surfaced separately from standard public wave routes."
+        "Direct messages use wave mechanics but are surfaced separately from standard public wave routes.",
+        "Direct-message content stays gated until wallet and profile prerequisites are resolved."
       ],
       "canonical_path": "/messages",
       "related_paths": ["/messages/create"],
@@ -1606,7 +1616,8 @@
       "facts": [
         "The wave composer is where users post drops and replies inside a wave.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
-        "Composer availability depends on the wave, groups, permissions, and current state."
+        "Composer availability depends on the wave, groups, permissions, and current state.",
+        "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

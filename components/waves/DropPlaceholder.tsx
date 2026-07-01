@@ -2,6 +2,7 @@ import {
   ChatRestriction,
   SubmissionRestriction,
 } from "@/hooks/useDropPriviledges";
+import type { ReactNode } from "react";
 
 function throwUnhandledRestriction(
   type: "chat" | "submission",
@@ -14,18 +15,22 @@ interface DropPlaceholderProps {
   readonly type: "chat" | "submission" | "both";
   readonly chatRestriction?: ChatRestriction | undefined;
   readonly submissionRestriction?: SubmissionRestriction | undefined;
+  readonly action?: ReactNode | undefined;
 }
 
 export default function DropPlaceholder({
   type,
   chatRestriction,
   submissionRestriction,
+  action,
 }: DropPlaceholderProps) {
   const getMessage = () => {
     if (type === "chat" && chatRestriction) {
       switch (chatRestriction) {
         case ChatRestriction.NOT_LOGGED_IN:
           return "Please log in to participate in chat";
+        case ChatRestriction.NEEDS_PROFILE:
+          return "Create a profile to participate in chat";
         case ChatRestriction.PROXY_USER:
           return "Proxy users cannot participate in chat";
         case ChatRestriction.SLOW_MODE:
@@ -44,6 +49,8 @@ export default function DropPlaceholder({
       switch (submissionRestriction) {
         case SubmissionRestriction.NOT_LOGGED_IN:
           return "Please log in to make submissions";
+        case SubmissionRestriction.NEEDS_PROFILE:
+          return "Create a profile to submit in this wave";
         case SubmissionRestriction.PROXY_USER:
           return "Proxy users cannot make submissions";
         case SubmissionRestriction.NO_PERMISSION:
@@ -71,6 +78,13 @@ export default function DropPlaceholder({
         return "Connect your wallet to participate in this wave";
       }
 
+      if (
+        chatRestriction === ChatRestriction.NEEDS_PROFILE &&
+        submissionRestriction === SubmissionRestriction.NEEDS_PROFILE
+      ) {
+        return "Create a profile to participate in this wave";
+      }
+
       return "You cannot participate in this wave at the moment";
     }
 
@@ -78,11 +92,25 @@ export default function DropPlaceholder({
   };
 
   const getColor = () => {
-    if (type === "chat" && chatRestriction === ChatRestriction.NOT_LOGGED_IN)
+    if (
+      type === "both" &&
+      ((chatRestriction === ChatRestriction.NOT_LOGGED_IN &&
+        submissionRestriction === SubmissionRestriction.NOT_LOGGED_IN) ||
+        (chatRestriction === ChatRestriction.NEEDS_PROFILE &&
+          submissionRestriction === SubmissionRestriction.NEEDS_PROFILE))
+    ) {
+      return "tw-text-primary-400";
+    }
+    if (
+      type === "chat" &&
+      (chatRestriction === ChatRestriction.NOT_LOGGED_IN ||
+        chatRestriction === ChatRestriction.NEEDS_PROFILE)
+    )
       return "tw-text-primary-400";
     if (type === "submission") {
       switch (submissionRestriction) {
         case SubmissionRestriction.NOT_LOGGED_IN:
+        case SubmissionRestriction.NEEDS_PROFILE:
           return "tw-text-primary-400";
         case SubmissionRestriction.NOT_STARTED:
           return "tw-text-[#FEDF89]";
@@ -99,10 +127,11 @@ export default function DropPlaceholder({
 
   return (
     <div className="tw-flex tw-min-h-[48px] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-iron-800/50 tw-bg-iron-900/50 tw-px-4 tw-py-3 tw-backdrop-blur">
-      <div className="tw-flex tw-flex-col">
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-2 tw-text-center">
         <p className={`tw-mb-0 tw-text-sm tw-font-medium ${getColor()}`}>
           {getMessage()}
         </p>
+        {action}
       </div>
     </div>
   );

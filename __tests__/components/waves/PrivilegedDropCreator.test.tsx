@@ -22,10 +22,23 @@ jest.mock("@/hooks/useDropPriviledges", () => ({
   ChatRestriction: { SLOW_MODE: "SLOW_MODE" },
 }));
 jest.mock("@/components/auth/Auth", () => ({ useAuth: () => ({}) }));
+const mockUseSeizeConnectContext = jest.fn(() => ({
+  address: undefined,
+  hasValidWalletAuth: false,
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => mockUseSeizeConnectContext(),
+}));
+jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
+  __esModule: true,
+  default: () => <button type="button">Create profile</button>,
+}));
 jest.mock("@/components/waves/DropPlaceholder", () => ({
   __esModule: true,
   default: (props: any) => (
-    <div data-testid="placeholder" data-type={props.type} />
+    <div data-testid="placeholder" data-type={props.type}>
+      {props.action}
+    </div>
   ),
 }));
 jest.mock("@/components/waves/CreateDrop", () => ({
@@ -78,6 +91,10 @@ describe("PrivilegedDropCreator", () => {
   beforeEach(() => {
     mockPriv.mockReset();
     mockInvalidateQueries.mockClear();
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: undefined,
+      hasValidWalletAuth: false,
+    });
   });
 
   it("shows both placeholder when both restricted", () => {
@@ -123,6 +140,29 @@ describe("PrivilegedDropCreator", () => {
     });
     renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
     expect(screen.getByTestId("create")).toBeInTheDocument();
+  });
+
+  it("passes needs profile state for connected wallets without a profile", () => {
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: "0xabc",
+      hasValidWalletAuth: true,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: "SUB",
+      chatRestriction: "CHAT",
+    });
+
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
+
+    expect(mockPriv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isLoggedIn: false,
+        needsProfile: true,
+      })
+    );
+    expect(
+      screen.getByRole("button", { name: "Create profile" })
+    ).toBeInTheDocument();
   });
 
   it("keeps chat composer visible during slow mode cooldown", () => {

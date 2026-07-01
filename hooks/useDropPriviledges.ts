@@ -11,6 +11,7 @@ enum SubmissionStatus {
 
 export enum SubmissionRestriction {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
+  NEEDS_PROFILE = "NEEDS_PROFILE",
   PROXY_USER = "PROXY_USER",
   NO_PERMISSION = "NO_PERMISSION",
   NOT_STARTED = "NOT_STARTED",
@@ -20,6 +21,7 @@ export enum SubmissionRestriction {
 
 export enum ChatRestriction {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
+  NEEDS_PROFILE = "NEEDS_PROFILE",
   PROXY_USER = "PROXY_USER",
   SLOW_MODE = "SLOW_MODE",
   NO_PERMISSION = "NO_PERMISSION",
@@ -28,6 +30,7 @@ export enum ChatRestriction {
 
 interface DropPrivilegesInput {
   readonly isLoggedIn: boolean;
+  readonly needsProfile?: boolean | undefined;
   readonly isProxy: boolean;
   readonly canChat: boolean;
   readonly canDrop: boolean;
@@ -48,6 +51,7 @@ export interface DropPrivileges {
 
 export function useDropPrivileges({
   isLoggedIn,
+  needsProfile = false,
   isProxy,
   canChat,
   canDrop,
@@ -141,7 +145,9 @@ export function useDropPrivileges({
       now,
     });
     let submissionRestriction: SubmissionRestriction | null = null;
-    if (!isLoggedIn) {
+    if (needsProfile) {
+      submissionRestriction = SubmissionRestriction.NEEDS_PROFILE;
+    } else if (!isLoggedIn) {
       submissionRestriction = SubmissionRestriction.NOT_LOGGED_IN;
     } else if (isProxy) {
       submissionRestriction = SubmissionRestriction.PROXY_USER;
@@ -156,7 +162,9 @@ export function useDropPrivileges({
     }
 
     let chatRestriction: ChatRestriction | null = null;
-    if (!isLoggedIn) {
+    if (needsProfile) {
+      chatRestriction = ChatRestriction.NEEDS_PROFILE;
+    } else if (!isLoggedIn) {
       chatRestriction = ChatRestriction.NOT_LOGGED_IN;
     } else if (isProxy) {
       chatRestriction = ChatRestriction.PROXY_USER;
@@ -171,6 +179,7 @@ export function useDropPrivileges({
     return { submissionRestriction, chatRestriction };
   }, [
     isLoggedIn,
+    needsProfile,
     isProxy,
     canChat,
     canDrop,

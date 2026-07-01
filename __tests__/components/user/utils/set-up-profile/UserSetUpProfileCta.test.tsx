@@ -1,37 +1,66 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import UserSetUpProfileCta from '@/components/user/utils/set-up-profile/UserSetUpProfileCta';
-import { AuthContext } from '@/components/auth/Auth';
-import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
-jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
-jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ href, children }: any) => <a href={href}>{children}</a>,
+}));
 
 const useCtx = useSeizeConnectContext as jest.Mock;
 
-function renderWithProfile(profile: any) {
+function renderWithProfile(
+  profile: any,
+  authContext: Record<string, unknown> = {}
+) {
   return render(
-    <AuthContext.Provider value={{ connectedProfile: profile } as any}>
+    <AuthContext.Provider
+      value={{ connectedProfile: profile, ...authContext } as any}
+    >
       <UserSetUpProfileCta />
     </AuthContext.Provider>
   );
 }
 
-describe('UserSetUpProfileCta', () => {
-  it('shows link when handle missing', () => {
-    useCtx.mockReturnValue({ address: '0xabc' });
+describe("UserSetUpProfileCta", () => {
+  it("shows link when handle missing", () => {
+    useCtx.mockReturnValue({ address: "0xabc", hasValidWalletAuth: true });
     renderWithProfile({ handle: null });
-    expect(screen.getByRole('button')).toBeInTheDocument();
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/0xabc');
+    expect(screen.getByRole("button")).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/0xabc");
   });
 
-  it('returns null when address missing or handle exists', () => {
+  it("shows link when connected wallet has no loaded profile", () => {
+    useCtx.mockReturnValue({ address: "0xabc", hasValidWalletAuth: true });
+    renderWithProfile(null);
+    expect(screen.getByRole("button")).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/0xabc");
+  });
+
+  it("returns null when address missing or handle exists", () => {
     useCtx.mockReturnValue({ address: null });
     const { container } = renderWithProfile({ handle: null });
     expect(container.firstChild).toBeNull();
 
-    useCtx.mockReturnValue({ address: '0x1' });
-    const { container: c2 } = renderWithProfile({ handle: 'h' });
+    useCtx.mockReturnValue({ address: "0x1", hasValidWalletAuth: true });
+    const { container: c2 } = renderWithProfile({ handle: "h" });
     expect(c2.firstChild).toBeNull();
+  });
+
+  it("returns null when wallet auth is invalid", () => {
+    useCtx.mockReturnValue({ address: "0x1", hasValidWalletAuth: false });
+    const { container } = renderWithProfile(null);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("returns null while profile state is loading", () => {
+    useCtx.mockReturnValue({ address: "0x1", hasValidWalletAuth: true });
+    const { container } = renderWithProfile(null, { fetchingProfile: true });
+    expect(container.firstChild).toBeNull();
   });
 });
