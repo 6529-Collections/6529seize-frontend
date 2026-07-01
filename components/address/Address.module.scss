@@ -75,6 +75,9 @@
 .copyMenuToggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
   margin: 0;
   padding: 0;
   color: inherit;
@@ -128,8 +131,10 @@
 }
 
 .copyMenuItem {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
+  min-height: 24px;
   padding: 4px 16px;
   color: variables.$font-color-dark;
   text-align: left;

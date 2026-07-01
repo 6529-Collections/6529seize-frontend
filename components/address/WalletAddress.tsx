@@ -336,6 +336,9 @@ export function WalletAddress(props: {
           >
             {tooltipLabel}
           </Tooltip>
+          <span className="tw-sr-only" role="status" aria-live="polite">
+            {isCopied ? COPIED_TOOLTIP_LABEL : ""}
+          </span>
           <Tooltip
             id={ensTooltipId}
             delayShow={150}

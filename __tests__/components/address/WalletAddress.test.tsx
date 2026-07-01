@@ -18,6 +18,7 @@ jest.mock("@/helpers/Helpers", () => ({
 const COPY_OPTIONS_LABEL = "Copy wallet options";
 const COPY_ENS_LABEL = "Copy ENS name";
 const COPY_WALLET_LABEL = "Copy wallet address";
+const COPIED_LABEL = "Copied";
 
 let writeTextMock: jest.Mock;
 
@@ -77,7 +78,9 @@ describe("WalletAddress", () => {
     await user.click(screen.getByRole("button", { name: COPY_WALLET_LABEL }));
     await flushAsyncClipboard();
     expect(writeTextMock).toHaveBeenCalledWith("0xabc");
+    expect(screen.getByRole("status")).toHaveTextContent(COPIED_LABEL);
     flushCopiedResetTimer();
+    expect(screen.getByRole("status")).toHaveTextContent("");
   });
 
   it("copies address when toggle clicked with fireEvent", async () => {
