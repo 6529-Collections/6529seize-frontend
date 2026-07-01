@@ -1,7 +1,6 @@
 import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenView } from "@/types/enums";
 import Link from "next/link";
-import { Col, Container, Row } from "./NextGenTailwindLayout";
 import { Status } from "../nextgen_entities";
 import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
 import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
@@ -28,22 +27,25 @@ export default function NextGen(props: Readonly<Props>) {
           className={styles["nextgenBanner"]}
           style={{ background: `url(${props.collection.banner})` }}
         />
-        <Container className="tw-z-10">
-          <Row>
-            <Col>
-              <Container className="pt-5 pb-5 no-padding">
-                <Row>
-                  <Col sm={12} md={6}>
-                    <Row>
-                      <Col>
+        <div className="tw-z-10 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+              <div className="pt-5 pb-5 no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+                <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                  <div
+                    className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+                    style={{ maxWidth: "100%" }}
+                  >
+                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         <NextGenPhases
                           collection={props.collection}
                           available={available}
                         />
-                      </Col>
-                    </Row>
-                    <Row className="pt-2">
-                      <Col>
+                      </div>
+                    </div>
+                    <div className="pt-2 -tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
@@ -53,11 +55,11 @@ export default function NextGen(props: Readonly<Props>) {
                         >
                           {props.collection.name}
                         </Link>
-                      </Col>
-                    </Row>
-                    <Row className="font-larger font-color font-bolder">
-                      <Col
-                        className="font-larger font-lighter"
+                      </div>
+                    </div>
+                    <div className="font-larger font-color font-bolder -tw-mx-3 tw-flex tw-flex-wrap">
+                      <div
+                        className="font-larger font-lighter tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
                         style={{ fontSize: "48px", lineHeight: "48px" }}
                       >
                         by{" "}
@@ -67,15 +69,15 @@ export default function NextGen(props: Readonly<Props>) {
                         >
                           {props.collection.artist}
                         </Link>
-                      </Col>
-                    </Row>
-                    <Row className="pt-3 font-larger font-color">
-                      <Col>
+                      </div>
+                    </div>
+                    <div className="pt-3 font-larger font-color -tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         <NextGenMintCounts collection={props.collection} />
-                      </Col>
-                    </Row>
-                    <Row className="pt-3">
-                      <Col>
+                      </div>
+                    </div>
+                    <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
@@ -89,30 +91,29 @@ export default function NextGen(props: Readonly<Props>) {
                             </span>
                           </button>
                         </Link>
-                      </Col>
-                    </Row>
-                    <Row className="pt-4 pb-2">
-                      <Col>
+                      </div>
+                    </div>
+                    <div className="pt-4 pb-2 -tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         <NextGenCountdown collection={props.collection} />
-                      </Col>
-                    </Row>
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-        </Container>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <Container
-        fluid
-        className="pt-5 pb-5"
+      <div
+        className="pt-5 pb-5 tw-w-full tw-max-w-none"
         style={{ backgroundColor: "black" }}
       >
-        <Row>
-          <Col>
-            <Container className="pt-3 pb-3">
-              <Row>
-                <Col className="font-larger text-center">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+            <div className="pt-3 pb-3 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                <div className="font-larger text-center tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                   <b>NextGen</b> is an on-chain generative art NFT contract. It
                   is also a tool to support the ambitious aspirations of the
                   6529 community in the areas of art experimentation and
@@ -127,36 +128,36 @@ export default function NextGen(props: Readonly<Props>) {
                   >
                     <span className="font-larger">Learn More</span>
                   </button>
-                </Col>
-              </Row>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
-      <Container className="pt-5">
-        <Row>
-          <Col>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="pt-5 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h1>Explore {props.collection.name}</h1>
-          </Col>
-        </Row>
-        <Row className="pt-3">
-          <Col>
+          </div>
+        </div>
+        <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionSlideshow collection={props.collection} />
-          </Col>
-        </Row>
-      </Container>
-      <Container className="pt-5 pb-5">
-        <Row>
-          <Col>
+          </div>
+        </div>
+      </div>
+      <div className="pt-5 pb-5 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h1>Featured Artist</h1>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
+          </div>
+        </div>
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionArtist collection={props.collection} />
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
@@ -183,9 +184,11 @@ export function DistributionLink(
     publicStatus !== Status.COMPLETE
   ) {
     return (
-      <Container className="no-padding">
-        <Row className={`pt-1 font-color ${props.class ? props.class : ""}`}>
-          <Col>
+      <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        <div
+          className={`pt-1 font-color -tw-mx-3 tw-flex tw-flex-wrap ${props.class ? props.class : ""}`}
+        >
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
@@ -193,9 +196,9 @@ export function DistributionLink(
             >
               Distribution Plan
             </Link>
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     );
   }
   return <></>;

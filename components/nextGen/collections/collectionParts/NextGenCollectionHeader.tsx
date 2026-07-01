@@ -4,12 +4,8 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DateCountdown from "@/components/date-countdown/DateCountdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
-import type {
-  CollectionWithMerkle} from "@/components/nextGen/nextgen_entities";
-import {
-  AllowlistType,
-  Status,
-} from "@/components/nextGen/nextgen_entities";
+import type { CollectionWithMerkle } from "@/components/nextGen/nextgen_entities";
+import { AllowlistType, Status } from "@/components/nextGen/nextgen_entities";
 import {
   formatNameForUrl,
   getBlurCollectionLink,
@@ -30,7 +26,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { DistributionLink } from "../NextGen";
 import styles from "../NextGen.module.scss";
 
@@ -69,8 +64,12 @@ export function NextGenBackToCollectionPageLink(
   return (
     <Link
       href={link}
-      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
-      <FontAwesomeIcon icon={faArrowCircleLeft} className={styles["backIcon"]} />
+      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2"
+    >
+      <FontAwesomeIcon
+        icon={faArrowCircleLeft}
+        className={styles["backIcon"]}
+      />
       {content}
     </Link>
   );
@@ -92,12 +91,14 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
 
   useEffect(() => {
     const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
-    fetchUrl<CollectionWithMerkle>(url).then((response: CollectionWithMerkle) => {
-      if (response) {
-        setCollection(response);
+    fetchUrl<CollectionWithMerkle>(url).then(
+      (response: CollectionWithMerkle) => {
+        if (response) {
+          setCollection(response);
+        }
+        setCollectionLoaded(true);
       }
-      setCollectionLoaded(true);
-    });
+    );
   }, [props.collection]);
 
   function getButtonLabel() {
@@ -121,9 +122,11 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           <Link
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
-            )}/mint`}>
+            )}/mint`}
+          >
             <button
-              className={`pt-2 pb-2 btn-block no-wrap ${styles["exploreBtn"]}`}>
+              className={`pt-2 pb-2 btn-block no-wrap ${styles["exploreBtn"]}`}
+            >
               {getButtonLabel()}
             </button>
           </Link>
@@ -185,7 +188,8 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles["nextgenTag"]
-          } ${getAllowlistClassName()}`}>
+          } ${getAllowlistClassName()}`}
+        >
           ALLOWLIST {alStatus}
         </span>
       )}
@@ -193,7 +197,8 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles["nextgenTag"]
-          } ${getPublicStatusClassName()}`}>
+          } ${getPublicStatusClassName()}`}
+        >
           PUBLIC PHASE {publicStatus}
         </span>
       )}
@@ -229,9 +234,9 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col className="d-flex justify-content-between align-items-center flex-wrap">
+    <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="d-flex justify-content-between align-items-center flex-wrap tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           {
             <NextGenPhases
               collection={props.collection}
@@ -246,7 +251,8 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   getOpenseaLink(NEXTGEN_CHAIN_ID)
                 }
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 <Image
                   unoptimized
                   className={styles["marketplace"]}
@@ -259,7 +265,8 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getBlurCollectionLink()}
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 <Image
                   unoptimized
                   className={styles["marketplace"]}
@@ -272,7 +279,8 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               <Link
                 href={getMagicEdenCollectionLink()}
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 <Image
                   unoptimized
                   className={styles["marketplace"]}
@@ -284,10 +292,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               </Link>
             </span>
           )}
-        </Col>
-      </Row>
-      <Row>
-        <Col className={`d-flex flex-column align-items-start pt-3 gap-3`}>
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="d-flex flex-column align-items-start pt-3 gap-3 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="d-flex flex-column align-items-start">
             <h1 className="mb-0 font-color">{props.collection.name}</h1>
             {props.collection_link && (
@@ -308,17 +316,17 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               setAvailable={setAvailable}
             />
           </span>
-        </Col>
+        </div>
         {showMint() && (
-          <Col
-            className="pt-3 d-flex flex-column align-items-center"
-            sm={12}
-            md={6}>
+          <div
+            className="pt-3 d-flex flex-column align-items-center tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+            style={{ maxWidth: "100%" }}
+          >
             <NextGenCountdown collection={props.collection} />
-          </Col>
+          </div>
         )}
-      </Row>
-    </Container>
+      </div>
+    </div>
   );
 }
 

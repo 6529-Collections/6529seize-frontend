@@ -17,8 +17,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Dropdown, Form } from "react-bootstrap";
+import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
 import type { Nft, NftContract } from "./alchemy-sdk-types";
@@ -52,6 +51,8 @@ export default function RememeAddComponent(props: Readonly<Props>) {
   const [nftResponses, setNftResponses] = useState<Nft[]>([]);
 
   const [references, setReferences] = useState<NFT[]>([]);
+  const [referencesDropdownOpen, setReferencesDropdownOpen] = useState(false);
+  const referencesDropdownRef = useRef<HTMLDivElement>(null);
 
   const [verificationErrors, setVerificationErrors] = useState<string[]>([]);
 
@@ -166,22 +167,50 @@ export default function RememeAddComponent(props: Readonly<Props>) {
     setVerifying(false);
   }
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    function closeDropdown(event: MouseEvent) {
+      if (
+        referencesDropdownRef.current &&
+        !referencesDropdownRef.current.contains(event.target as Node)
+      ) {
+        setReferencesDropdownOpen(false);
+      }
+    }
+
+    function closeDropdownOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setReferencesDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", closeDropdown);
+    document.addEventListener("keydown", closeDropdownOnEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", closeDropdown);
+      document.removeEventListener("keydown", closeDropdownOnEscape);
+    };
+  }, []);
 
   function addReference(meme: NFT) {
     setReferences([...references, meme].sort((a, b) => a.id - b.id));
+    setReferencesDropdownOpen(false);
   }
 
   return (
-    <Form className={styles["addRememeContainer"]}>
+    <form className={styles["addRememeContainer"]}>
       <div className="tw-container tw-mx-auto tw-px-3">
         <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2">
           <div>
-            <Form.Group className="tw-pb-4">
-              <Form.Label className="tw-flex tw-items-center">
+            <div className="tw-pb-4">
+              <label
+                className="tw-flex tw-items-center"
+                htmlFor="rememe-contract"
+              >
                 Contract
-              </Form.Label>
-              <Form.Control
+              </label>
+              <input
+                id="rememe-contract"
                 autoFocus
                 className={`${styles["formInput"]}`}
                 type="text"
@@ -190,14 +219,18 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 disabled={verifying || verified}
                 onChange={(e) => setContract(e.target.value)}
               />
-            </Form.Group>
+            </div>
           </div>
           <div>
-            <Form.Group className="tw-pb-4">
-              <Form.Label className="tw-flex tw-items-center">
+            <div className="tw-pb-4">
+              <label
+                className="tw-flex tw-items-center"
+                htmlFor="rememe-token-ids"
+              >
                 Token IDs
-              </Form.Label>
-              <Form.Control
+              </label>
+              <input
+                id="rememe-token-ids"
                 className={`${styles["formInput"]}`}
                 type="text"
                 placeholder="1,2,3 or 1-3 or 1,2-5 or 1-3,5"
@@ -207,7 +240,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                   setTokenIdDisplay(e.target.value);
                 }}
               />
-            </Form.Group>
+            </div>
           </div>
         </div>
         <div>
@@ -252,23 +285,37 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 </span>
               </span>
             ))}
-            <Dropdown className={styles["addMemeReferencesDropdown"]}>
-              <Dropdown.Toggle disabled={verifying || verified}>
+            <div
+              className={`${styles["addMemeReferencesDropdown"]} tw-relative`}
+              ref={referencesDropdownRef}
+            >
+              <button
+                type="button"
+                disabled={verifying || verified}
+                onClick={() => {
+                  setReferencesDropdownOpen((open) => !open);
+                }}
+                aria-expanded={referencesDropdownOpen}
+              >
                 <FontAwesomeIcon icon={faPlusCircle} />
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {props.memes
-                  .filter((m) => !references.some((r) => r.id === m.id))
-                  .map((m) => (
-                    <Dropdown.Item
-                      key={`add-rememe-meme-red-${m.id}`}
-                      onClick={() => addReference(m)}
-                    >
-                      #{m.id} - {m.name}
-                    </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
+              </button>
+              {referencesDropdownOpen && (
+                <div className="tw-absolute tw-left-0 tw-top-full tw-z-50 tw-mt-0 tw-max-h-[50vh] tw-min-w-[12rem] tw-overflow-y-auto tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-t-white tw-bg-iron-950 tw-py-2 tw-shadow-md">
+                  {props.memes
+                    .filter((m) => !references.some((r) => r.id === m.id))
+                    .map((m) => (
+                      <button
+                        type="button"
+                        key={`add-rememe-meme-red-${m.id}`}
+                        className="tw-block tw-w-[98%] tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 focus:tw-bg-transparent"
+                        onClick={() => addReference(m)}
+                      >
+                        #{m.id} - {m.name}
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         {(contractResponse || nftResponses.length > 0) && !verifying && (
@@ -428,6 +475,6 @@ export default function RememeAddComponent(props: Readonly<Props>) {
           </div>
         </div>
       </div>
-    </Form>
+    </form>
   );
 }
