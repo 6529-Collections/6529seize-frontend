@@ -1912,10 +1912,16 @@ function getRequestHeaderString(
   return typeof value === "string" ? value : undefined;
 }
 
+function getRuntimeUserAgentString(): string | undefined {
+  const userAgent = globalThis.navigator?.userAgent;
+  return typeof userAgent === "string" ? userAgent : undefined;
+}
+
 function hasRabbyMobileContext(event: SentryClientEvent): boolean {
   const candidates = [
     getContextString(event, "browser", "name"),
     getRequestHeaderString(event, "user-agent"),
+    getRuntimeUserAgentString(),
     getStringValue(event.tags?.["browser"]),
     getStringValue(event.tags?.["browser.name"]),
     getStringValue(event.tags?.["user_agent"]),
@@ -2409,7 +2415,7 @@ export function shouldFilterRabbyMobileRainbowKitNotFoundError(
     return false;
   }
 
-  return !hasAppOwnedFrame(value?.stacktrace?.frames);
+  return !hasLikelyAppOwnedFrame(value?.stacktrace?.frames);
 }
 
 export function shouldFilterGifPickerTenorCategoriesError(
