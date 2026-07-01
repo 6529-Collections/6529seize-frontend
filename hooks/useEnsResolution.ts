@@ -115,14 +115,18 @@ function getDisplayInputValue({
   resolvedAddressFromEns,
 }: {
   inputValue: string;
-  ensName: string | undefined;
-  resolvedAddressFromEns: string | undefined;
+  ensName: string | null | undefined;
+  resolvedAddressFromEns: string | null | undefined;
 }): string {
   if (!inputValue) {
     return inputValue;
   }
 
-  if (resolvedAddressFromEns) {
+  if (
+    resolvedAddressFromEns !== null &&
+    resolvedAddressFromEns !== undefined &&
+    resolvedAddressFromEns !== ""
+  ) {
     return normalizeInputWithResolvedAddress(
       inputValue,
       resolvedAddressFromEns
@@ -133,7 +137,12 @@ function getDisplayInputValue({
     return inputValue;
   }
 
-  if (ensName && inputValue.toLowerCase().startsWith("0x")) {
+  if (
+    ensName !== null &&
+    ensName !== undefined &&
+    ensName !== "" &&
+    inputValue.toLowerCase().startsWith("0x")
+  ) {
     return `${ensName}${LABEL_SEPARATOR}${inputValue}`;
   }
 
