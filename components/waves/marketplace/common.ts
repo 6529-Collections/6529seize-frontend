@@ -2,6 +2,7 @@ import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
 import { getTimeAgo } from "@/helpers/Helpers";
 import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
+import { getManifoldPreviewImageUrl } from "@/lib/link-preview/manifoldMedia";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
@@ -192,6 +193,18 @@ const inferMimeTypeFromUrl = (url: string): string | undefined => {
   }
 };
 
+const buildPickedMediaFromUrl = (
+  url: string,
+  explicitMimeType?: string
+): PickedMedia => {
+  const previewUrl = getManifoldPreviewImageUrl(url);
+
+  return {
+    url: previewUrl,
+    mimeType: explicitMimeType ?? inferMimeTypeFromUrl(previewUrl) ?? "image/*",
+  };
+};
+
 const toPickedMedia = (candidate: MediaCandidate): PickedMedia | undefined => {
   if (!candidate) {
     return undefined;
@@ -202,14 +215,10 @@ const toPickedMedia = (candidate: MediaCandidate): PickedMedia | undefined => {
     return undefined;
   }
 
-  const url = urlCandidate.trim();
-  const mimeType =
-    asNonEmptyString(candidate.type) ?? inferMimeTypeFromUrl(url) ?? "image/*";
-
-  return {
-    url,
-    mimeType,
-  };
+  return buildPickedMediaFromUrl(
+    urlCandidate.trim(),
+    asNonEmptyString(candidate.type)
+  );
 };
 
 const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
@@ -218,10 +227,7 @@ const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
     return undefined;
   }
 
-  return {
-    url,
-    mimeType: inferMimeTypeFromUrl(url) ?? "image/*",
-  };
+  return buildPickedMediaFromUrl(url);
 };
 
 const asWsMediaPreviewCandidate = (
@@ -253,14 +259,11 @@ const pickWsMediaPreview = (
     return undefined;
   }
 
-  return {
+  return buildPickedMediaFromUrl(
     url,
-    mimeType:
-      asNonEmptyString(preview?.mime_type) ??
-      asNonEmptyString(update.media_preview_mime_type) ??
-      inferMimeTypeFromUrl(url) ??
-      "image/*",
-  };
+    asNonEmptyString(preview?.mime_type) ??
+      asNonEmptyString(update.media_preview_mime_type)
+  );
 };
 
 const pickWsMediaLinkUpdatedMedia = ({
@@ -313,13 +316,7 @@ const pickNftLinkMediaPreview = (
     return undefined;
   }
 
-  return {
-    url,
-    mimeType:
-      asNonEmptyString(preview.mime_type) ??
-      inferMimeTypeFromUrl(url) ??
-      "image/*",
-  };
+  return buildPickedMediaFromUrl(url, asNonEmptyString(preview.mime_type));
 };
 
 const pickNftLinkMedia = (
