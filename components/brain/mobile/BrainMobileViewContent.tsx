@@ -260,8 +260,7 @@ function BrainMobileFAQView({ isMemesWave, wave }: BrainMobileFAQViewProps) {
   return <MyStreamWaveFAQ key={wave.id} wave={wave} />;
 }
 
-function assertUnreachable(value: never): null {
-  void value;
+function assertUnreachable(_value: never): null {
   return null;
 }
 
