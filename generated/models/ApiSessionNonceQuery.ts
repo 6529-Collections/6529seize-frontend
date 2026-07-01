@@ -20,7 +20,7 @@ export class ApiSessionNonceQuery {
     'signer_address': string;
     'client_type'?: ApiSessionNonceQueryClientTypeEnum;
     /**
-    * Backward-compatible request field. Session challenges are issued for the backend-configured auth chain, not this client-supplied value. 
+    * Backward-compatible request field. Session challenges are issued for the backend-configured auth chain, not this client-supplied value.
     */
     'chain_id'?: number;
 
@@ -58,6 +58,7 @@ export class ApiSessionNonceQuery {
 
 export enum ApiSessionNonceQueryClientTypeEnum {
     Web = 'web',
-    Native = 'native'
+    Native = 'native',
+    Desktop = 'desktop'
 }
 
