@@ -82,12 +82,25 @@ describe("useEnsResolution", () => {
   });
 
   it("does not expose a bare ENS name as an address while resolution is pending", () => {
+    mockUseEnsAddress.mockReturnValue({ data: null, isLoading: true });
+
     const { result } = renderHook(() =>
       useEnsResolution({ initialValue: "night0wl.eth" })
     );
 
     expect(result.current.inputValue).toBe("night0wl.eth");
     expect(result.current.address).toBe("");
+  });
+
+  it("returns an unresolved ENS input as invalid after resolution completes", () => {
+    mockUseEnsAddress.mockReturnValue({ data: null, isLoading: false });
+
+    const { result } = renderHook(() =>
+      useEnsResolution({ initialValue: "missing-name.eth" })
+    );
+
+    expect(result.current.inputValue).toBe("missing-name.eth");
+    expect(result.current.address).toBe("missing-name.eth");
   });
 
   it("lets a new initialValue replace an imperative address override", () => {

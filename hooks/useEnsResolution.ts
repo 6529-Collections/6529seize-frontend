@@ -26,6 +26,8 @@ export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
 
   let currentState = state;
   if (currentState.initialValue !== initialValue) {
+    // Keep this render-phase sync guarded by string content and pure helpers;
+    // otherwise prop/state feedback can reintroduce update-depth loops.
     const nextResolvedAddress = getResolvedAddressFromInputValue(initialValue);
     const nextInputValue = shouldPreserveResolvedDisplayValue({
       current: currentState.inputValue,
@@ -60,10 +62,13 @@ export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
     chainId,
   });
 
+  const resolvedEnsAddress = getResolvedEnsAddress(ensAddressQuery.data);
+  const isResolvingEnsAddress =
+    ensInputName !== undefined && ensAddressQuery.isLoading;
   const resolvedAddress =
     currentState.addressOverride ??
-    ensAddressQuery.data ??
-    (ensInputName ? "" : inputAddress);
+    resolvedEnsAddress ??
+    (isResolvingEnsAddress ? "" : inputAddress);
   const inputValue = getDisplayInputValue({
     inputValue: currentState.inputValue,
     ensName: ensNameQuery.data,
@@ -110,6 +115,16 @@ function getEnsInputName(value: string): string | undefined {
   }
 
   return value.toLowerCase().endsWith(".eth") ? value : undefined;
+}
+
+function getResolvedEnsAddress(
+  value: string | null | undefined
+): string | undefined {
+  if (value === null || value === undefined || value === "") {
+    return undefined;
+  }
+
+  return value;
 }
 
 function getDisplayInputValue({
