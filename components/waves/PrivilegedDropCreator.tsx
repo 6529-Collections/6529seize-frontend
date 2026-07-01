@@ -85,6 +85,10 @@ export default function PrivilegedDropCreator({
   }, [queryClient, wave.id]);
 
   const hasProfile = Boolean(connectedProfile?.handle);
+  const hasWalletAuth = Boolean(address && hasValidWalletAuth !== false);
+  const isProfileLoadingForWallet = Boolean(
+    hasWalletAuth && fetchingProfile && !hasProfile && !activeProfileProxy
+  );
   const shouldOfferProfileSetup =
     shouldShowUserSetUpProfileCta({
       address,
@@ -97,7 +101,7 @@ export default function PrivilegedDropCreator({
   ) : undefined;
 
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
-    isLoggedIn: hasProfile,
+    isLoggedIn: hasProfile || isProfileLoadingForWallet,
     needsProfile: shouldOfferProfileSetup,
     isProxy: !!activeProfileProxy,
     canChat: wave.chat.authenticated_user_eligible,
@@ -120,6 +124,10 @@ export default function PrivilegedDropCreator({
       authenticated_user_chat_restriction: chatRestriction,
     });
   }, [chatRestriction, updateEligibility, wave.id]);
+
+  if (isProfileLoadingForWallet) {
+    return null;
+  }
 
   if (submissionRestriction !== null && blockingChatRestriction !== null) {
     return (
