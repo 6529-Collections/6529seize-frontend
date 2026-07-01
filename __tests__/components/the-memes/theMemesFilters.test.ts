@@ -1,19 +1,32 @@
+import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   getAllSeasonsLabel,
   getMemeApiSeasonIds,
   getMemeSeasonsForYear,
+  getMemeYearFromMintNumber,
   getMemeYearFromSeason,
   getMemeYears,
   normalizeMemeFilterIds,
 } from "@/components/the-memes/theMemesFilters";
 import type { MemeSeason } from "@/entities/ISeason";
 
+function getFirstMintNumberForSeason(seasonId: number): number {
+  for (let mintNumber = 1; mintNumber <= 700; mintNumber++) {
+    if (getMintTimelineDetails(mintNumber).seasonNumber === seasonId) {
+      return mintNumber;
+    }
+  }
+
+  throw new Error(`Unable to find fixture mint for SZN ${seasonId}`);
+}
+
 const seasons = Array.from({ length: 17 }, (_, index): MemeSeason => {
   const id = index + 1;
+  const startIndex = getFirstMintNumberForSeason(id);
   return {
     id,
-    start_index: id * 10,
-    end_index: id * 10 + 9,
+    start_index: startIndex,
+    end_index: startIndex + 9,
     count: 10,
     name: `SZN${id}`,
     display: `SZN ${id}`,
@@ -23,13 +36,22 @@ const seasons = Array.from({ length: 17 }, (_, index): MemeSeason => {
 
 describe("theMemesFilters", () => {
   it("maps seasons to the existing Meme Calendar year model", () => {
-    expect(getMemeYearFromSeason(1)).toBe(0);
-    expect(getMemeYearFromSeason(2)).toBe(1);
-    expect(getMemeYearFromSeason(5)).toBe(1);
-    expect(getMemeYearFromSeason(6)).toBe(2);
-    expect(getMemeYearFromSeason(13)).toBe(3);
-    expect(getMemeYearFromSeason(14)).toBe(4);
-    expect(getMemeYearFromSeason(17)).toBe(4);
+    expect(getMemeYearFromSeason(seasons[0]!)).toBe(0);
+    expect(getMemeYearFromSeason(seasons[1]!)).toBe(1);
+    expect(getMemeYearFromSeason(seasons[4]!)).toBe(1);
+    expect(getMemeYearFromSeason(seasons[5]!)).toBe(2);
+    expect(getMemeYearFromSeason(seasons[12]!)).toBe(3);
+    expect(getMemeYearFromSeason(seasons[13]!)).toBe(4);
+    expect(getMemeYearFromSeason(seasons[16]!)).toBe(4);
+  });
+
+  it("guards invalid mint and season data before deriving years", () => {
+    expect(getMemeYearFromMintNumber(0)).toBeNull();
+    expect(getMemeYearFromMintNumber(-1)).toBeNull();
+    expect(getMemeYearFromMintNumber(1.5)).toBeNull();
+    expect(
+      getMemeYearFromSeason({ ...seasons[0]!, start_index: 0 })
+    ).toBeNull();
   });
 
   it("derives available years and scoped seasons from loaded season data", () => {

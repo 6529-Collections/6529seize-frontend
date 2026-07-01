@@ -1,3 +1,8 @@
+import {
+  dateFromMintNumber,
+  displayedYearNumberFromIndex,
+  getSeasonIndexForDate,
+} from "@/components/meme-calendar/meme-calendar.helpers";
 import type { MemeSeason } from "@/entities/ISeason";
 
 type MemeYear = {
@@ -5,20 +10,25 @@ type MemeYear = {
   readonly display: string;
 };
 
-export function getMemeYearFromSeason(seasonId: number): number {
-  if (seasonId === 1) {
-    return 0;
+export function getMemeYearFromMintNumber(mintNumber: number): number | null {
+  if (!Number.isInteger(mintNumber) || mintNumber <= 0) {
+    return null;
   }
 
-  return Math.floor((seasonId - 2) / 4) + 1;
+  return displayedYearNumberFromIndex(
+    getSeasonIndexForDate(dateFromMintNumber(mintNumber))
+  );
+}
+
+export function getMemeYearFromSeason(season: MemeSeason): number | null {
+  return getMemeYearFromMintNumber(season.start_index);
 }
 
 export function getMemeYears(seasons: readonly MemeSeason[]): MemeYear[] {
   const years = new Set(
     seasons
-      .map((season) => season.id)
-      .filter((seasonId) => seasonId > 0)
       .map(getMemeYearFromSeason)
+      .filter((year): year is number => year !== null)
   );
 
   return Array.from(years)
@@ -40,9 +50,7 @@ export function getMemeSeasonsForYear({
     return [...seasons];
   }
 
-  return seasons.filter(
-    (season) => getMemeYearFromSeason(season.id) === yearId
-  );
+  return seasons.filter((season) => getMemeYearFromSeason(season) === yearId);
 }
 
 export function getAllSeasonsLabel(yearId: number | null): string {
@@ -67,7 +75,7 @@ export function normalizeMemeFilterIds({
 
   const yearExists =
     yearId === null ||
-    seasons.some((season) => getMemeYearFromSeason(season.id) === yearId);
+    seasons.some((season) => getMemeYearFromSeason(season) === yearId);
 
   if (!yearExists) {
     return { seasonId: null, yearId: null };
@@ -83,7 +91,7 @@ export function normalizeMemeFilterIds({
     return { seasonId: null, yearId: null };
   }
 
-  if (yearId !== null && getMemeYearFromSeason(season.id) !== yearId) {
+  if (yearId !== null && getMemeYearFromSeason(season) !== yearId) {
     return { seasonId: null, yearId: null };
   }
 

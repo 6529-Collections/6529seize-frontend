@@ -26,6 +26,9 @@ export default function MemeSeasonGridDropdown({
 
   useEffect(() => {
     if (seasons !== undefined) {
+      setFetchedSeasons((currentSeasons) =>
+        currentSeasons.length === 0 ? currentSeasons : []
+      );
       return;
     }
 

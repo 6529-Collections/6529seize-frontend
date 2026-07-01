@@ -189,25 +189,7 @@ export default function TheMemesComponent({
 
   const handleYearChange = (nextYearId: number | null) => {
     setYearId(nextYearId);
-    setSeasonId((currentSeasonId) => {
-      if (nextYearId === null || currentSeasonId === null) {
-        return currentSeasonId;
-      }
-
-      const currentSeason = seasons.find(
-        (season) => season.id === currentSeasonId
-      );
-
-      if (currentSeason === undefined) {
-        return null;
-      }
-
-      return getMemeSeasonsForYear({ seasons, yearId: nextYearId }).some(
-        (season) => season.id === currentSeason.id
-      )
-        ? currentSeasonId
-        : null;
-    });
+    setSeasonId(null);
   };
 
   const [routerLoaded, setRouterLoaded] = useState(false);
