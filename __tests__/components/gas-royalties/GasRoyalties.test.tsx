@@ -150,7 +150,7 @@ describe("GasRoyaltiesHeader", () => {
     );
   });
 
-  it("handles keyboard navigation for collection tabs", () => {
+  it("renders collection controls as native buttons", () => {
     const pathname = "/meme-gas";
     const push = jest.fn();
 
@@ -178,17 +178,12 @@ describe("GasRoyaltiesHeader", () => {
       />
     );
 
-    const memeLab = screen.getByText("Meme Lab");
-
-    // Test Enter key
-    fireEvent.keyDown(memeLab, { key: "Enter" });
-    expect(push).toHaveBeenCalledWith(
-      `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
-    );
-
-    // Test Space key
-    fireEvent.keyDown(memeLab, { key: " " });
-    expect(push).toHaveBeenCalledTimes(2);
+    expect(
+      screen.getByRole("button", { name: "Meme Lab" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "The Memes" })
+    ).toBeInTheDocument();
   });
 
   it("does not render download widget when fetching or no results", () => {

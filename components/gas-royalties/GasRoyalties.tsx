@@ -16,7 +16,6 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { useClickAway } from "react-use";
 import { Tooltip } from "react-tooltip";
 import DotLoader from "../dotLoader/DotLoader";
 import styles from "./GasRoyalties.module.scss";
@@ -40,44 +39,150 @@ interface HeaderProps {
   setBlocks: (fromBlock: number, toBlock: number) => void;
 }
 
-function FilterDropdown({
-  children,
-  disabled,
+type FilterDropdownItem =
+  | {
+      type: "item";
+      key: string;
+      label: ReactNode;
+      onSelect: () => void;
+    }
+  | {
+      type: "divider";
+      key: string;
+    }
+  | {
+      type: "header";
+      key: string;
+      label: ReactNode;
+    };
+
+function GasRoyaltiesFilterDropdown({
   label,
+  ariaLabel,
+  disabled,
+  items,
 }: Readonly<{
-  children: ReactNode;
-  disabled?: boolean;
   label: ReactNode;
+  ariaLabel: string;
+  disabled: boolean;
+  items: FilterDropdownItem[];
 }>) {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLSpanElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useClickAway(dropdownRef, () => setIsOpen(false));
+  useEffect(() => {
+    if (disabled) {
+      setIsOpen(false);
+    }
+  }, [disabled]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (
+        event.target instanceof Node &&
+        dropdownRef.current?.contains(event.target)
+      ) {
+        return;
+      }
+
+      setIsOpen(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
 
   return (
-    <span ref={dropdownRef} className={styles["filterDropdown"]}>
+    <div
+      ref={dropdownRef}
+      className="tailwind-scope tw-relative tw-inline-flex"
+    >
       <button
         type="button"
         disabled={disabled}
+        aria-haspopup="true"
         aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
+        aria-label={ariaLabel}
+        onClick={() => setIsOpen((current) => !current)}
+        className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-font-bold tw-text-iron-400 tw-shadow-none tw-transition tw-duration-200 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
       >
-        {label}
+        <span className="tw-min-w-0 tw-truncate">{label}</span>
+        <svg
+          className={`tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 ${
+            isOpen ? "tw-rotate-180" : ""
+          }`}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 9L12 15L18 9"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
       {isOpen && (
-        <span
-          className={styles["filterDropdownMenu"]}
-          onClick={() => setIsOpen(false)}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              setIsOpen(false);
-            }
-          }}
-        >
-          {children}
-        </span>
+        <div className="tw-absolute tw-right-0 tw-top-full tw-z-[999] tw-mt-2 tw-min-w-[14rem] tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10">
+          <ul className="tw-mx-0 tw-mb-0 tw-max-h-80 tw-list-none tw-overflow-y-auto tw-overflow-x-hidden tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600">
+            {items.map((item) => {
+              if (item.type === "divider") {
+                return (
+                  <li key={item.key} aria-hidden="true">
+                    <hr className="tw-my-1 tw-h-px tw-border-0 tw-bg-white/10" />
+                  </li>
+                );
+              }
+
+              if (item.type === "header") {
+                return (
+                  <li key={item.key}>
+                    <div className="tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+                      {item.label}
+                    </div>
+                  </li>
+                );
+              }
+
+              return (
+                <li key={item.key}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      item.onSelect();
+                      setIsOpen(false);
+                    }}
+                    className="tw-block tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                  >
+                    {item.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
-    </span>
+    </div>
   );
 }
 
@@ -140,27 +245,30 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   }, [props.focus]);
 
   function getDateSelectionLabel() {
-    let label = "";
     if (props.is_primary) {
-      label += "Primary Sales";
-    } else if (props.is_custom_blocks) {
-      if (fromBlock) {
-        label += `from block: ${fromBlock} `;
-      }
-      if (toBlock) {
-        label += `to block: ${toBlock} `;
-      }
-    } else if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      if (fromDate) {
-        label += `from: ${fromDate.toISOString().slice(0, 10)} `;
-      }
-      if (toDate) {
-        label += `to: ${toDate.toISOString().slice(0, 10)}`;
-      }
-    } else {
-      label += `${props.date_selection}`;
+      return "Primary Sales";
     }
-    return <span>{label}</span>;
+    if (props.is_custom_blocks) {
+      return (
+        [
+          fromBlock !== undefined ? `from block: ${fromBlock}` : undefined,
+          toBlock !== undefined ? `to block: ${toBlock}` : undefined,
+        ]
+          .filter(Boolean)
+          .join(" ") || "Custom Blocks"
+      );
+    }
+    if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
+      return (
+        [
+          fromDate ? `from: ${fromDate.toISOString().slice(0, 10)}` : undefined,
+          toDate ? `to: ${toDate.toISOString().slice(0, 10)}` : undefined,
+        ]
+          .filter(Boolean)
+          .join(" ") || DateIntervalsSelection.CUSTOM_DATES
+      );
+    }
+    return props.date_selection;
   }
 
   function getFileName() {
@@ -181,20 +289,78 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     return `${title}_${focus}_${filters}.csv`;
   }
 
+  const artistItems: FilterDropdownItem[] = [
+    {
+      type: "item",
+      key: "artist-all",
+      label: "All",
+      onSelect: () => {
+        props.setSelectedArtist("");
+      },
+    },
+    ...artists.map((a) => ({
+      type: "item" as const,
+      key: `artist-${a.name.replaceAll(" ", "-")}`,
+      label: a.name,
+      onSelect: () => {
+        props.setSelectedArtist(a.name);
+      },
+    })),
+  ];
+
+  const dateItems: FilterDropdownItem[] = [
+    {
+      type: "item",
+      key: "primary-sales",
+      label: "Primary Sales",
+      onSelect: () => props.setIsPrimary(true),
+    },
+    {
+      type: "divider",
+      key: "secondary-sales-divider",
+    },
+    {
+      type: "header",
+      key: "secondary-sales-header",
+      label: "Secondary Sales",
+    },
+    ...Object.values(DateIntervalsSelection).map((dateSelection) => ({
+      type: "item" as const,
+      key: dateSelection,
+      label: dateSelection,
+      onSelect: () => {
+        if (dateSelection === DateIntervalsSelection.CUSTOM_DATES) {
+          setShowDatePicker(true);
+        } else {
+          props.setDateSelection(dateSelection);
+        }
+      },
+    })),
+    {
+      type: "item",
+      key: "custom-blocks",
+      label: "Custom Blocks",
+      onSelect: () => {
+        setShowBlockPicker(true);
+      },
+    },
+  ];
+  const dateSelectionLabel = getDateSelectionLabel();
+
   return (
     <>
-      <div className="tw-pt-4">
+      <div className="tailwind-scope tw-container tw-mx-auto tw-px-3 tw-pt-4">
         <div className="tw-flex tw-items-center">
-          <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
             <span className="tw-flex tw-items-center tw-gap-2">
-              <h1>
+              <h1 className="tw-mb-0 tw-flex tw-items-center tw-gap-2 tw-text-xl tw-font-bold tw-text-white">
                 Meme {props.title} {props.fetching && <DotLoader />}
               </h1>
             </span>
             <span className="tw-flex tw-items-center tw-gap-3">
               <button
                 type="button"
-                className={`font-larger font-bolder font-color-h ${
+                className={`tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-font-bold tw-text-iron-400 tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 ${
                   props.focus === GasRoyaltiesCollectionFocus.MEMES
                     ? styles["collectionFocusActive"]
                     : styles["collectionFocus"]
@@ -204,20 +370,14 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`
                   );
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    router.push(
-                      `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`
-                    );
-                  }
-                }}
                 aria-label="The Memes"
+                aria-pressed={props.focus === GasRoyaltiesCollectionFocus.MEMES}
               >
                 The Memes
               </button>
               <button
                 type="button"
-                className={`font-larger font-bolder font-color-h ${
+                className={`tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-font-bold tw-text-iron-400 tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 ${
                   props.focus === GasRoyaltiesCollectionFocus.MEMELAB
                     ? styles["collectionFocusActive"]
                     : styles["collectionFocus"]
@@ -227,14 +387,10 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
                   )
                 }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    router.push(
-                      `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
-                    );
-                  }
-                }}
                 aria-label="Meme Lab"
+                aria-pressed={
+                  props.focus === GasRoyaltiesCollectionFocus.MEMELAB
+                }
               >
                 Meme Lab
               </button>
@@ -242,11 +398,13 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
           </div>
         </div>
         {props.description && (
-          <div className="tw-pt-3">{props.description}</div>
+          <div className="tw-pt-3">
+            <div>{props.description}</div>
+          </div>
         )}
         <div className="tw-pt-3">
-          <div className="tw-flex tw-items-center tw-justify-between">
-            <span>
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
+            <span className="tw-min-h-6">
               {!props.fetching && props.results_count > 0 && (
                 <DownloadUrlWidget
                   preview="Download"
@@ -255,76 +413,19 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 />
               )}
             </span>
-            <span className="tw-flex tw-items-center tw-gap-12">
-              <FilterDropdown
-                disabled={props.fetching}
+            <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-4 sm:tw-gap-12">
+              <GasRoyaltiesFilterDropdown
                 label={`Artist: ${props.selected_artist || "All"}`}
-              >
-                <button
-                  type="button"
-                  className={styles["filterDropdownItem"]}
-                  onClick={() => {
-                    props.setSelectedArtist("");
-                  }}
-                >
-                  All
-                </button>
-                {artists.map((a) => (
-                  <button
-                    type="button"
-                    key={`artist-${a.name.replaceAll(" ", "-")}`}
-                    className={styles["filterDropdownItem"]}
-                    onClick={() => {
-                      props.setSelectedArtist(a.name);
-                    }}
-                  >
-                    {a.name}
-                  </button>
-                ))}
-              </FilterDropdown>
-              <FilterDropdown
+                ariaLabel={`Artist: ${props.selected_artist || "All"}`}
                 disabled={props.fetching}
-                label={getDateSelectionLabel()}
-              >
-                <button
-                  type="button"
-                  className={styles["filterDropdownItem"]}
-                  onClick={() => props.setIsPrimary(true)}
-                >
-                  Primary Sales
-                </button>
-                <span className={styles["filterDropdownDivider"]} />
-                <span className={styles["filterDropdownHeader"]}>
-                  Secondary Sales
-                </span>
-                {Object.values(DateIntervalsSelection).map((dateSelection) => (
-                  <button
-                    type="button"
-                    key={dateSelection}
-                    className={styles["filterDropdownItem"]}
-                    onClick={() => {
-                      if (
-                        dateSelection === DateIntervalsSelection.CUSTOM_DATES
-                      ) {
-                        setShowDatePicker(true);
-                      } else {
-                        props.setDateSelection(dateSelection);
-                      }
-                    }}
-                  >
-                    {dateSelection}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  className={styles["filterDropdownItem"]}
-                  onClick={() => {
-                    setShowBlockPicker(true);
-                  }}
-                >
-                  Custom Blocks
-                </button>
-              </FilterDropdown>
+                items={artistItems}
+              />
+              <GasRoyaltiesFilterDropdown
+                label={dateSelectionLabel}
+                ariaLabel={`Date selection: ${dateSelectionLabel}`}
+                disabled={props.fetching}
+                items={dateItems}
+              />
             </span>
           </div>
         </div>
@@ -372,7 +473,7 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
       target="_blank"
       rel="noopener noreferrer"
     >
-      <span className="tw-flex tw-items-center tw-justify-center tw-gap-3">
+      <span className="tailwind-scope tw-flex tw-items-center tw-justify-center tw-gap-3">
         <span>{props.token_id} -</span>
         <Image
           unoptimized
