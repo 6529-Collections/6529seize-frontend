@@ -886,6 +886,7 @@ describe("WaveDropsAll", () => {
   describe("Virtualization and Pagination", () => {
     it("passes pagination props to reverse container", async () => {
       setupMocks({
+        deviceInfo: { isMobileDevice: true },
         waveMessages: {
           drops: Array.from({ length: 30 }, (_, i) =>
             createMockDrop({ id: `drop-${i}` })
@@ -944,10 +945,51 @@ describe("WaveDropsAll", () => {
       expect(containerProps.hasNextPage).toBe(false);
     });
 
-    it("keeps hasNextPage enabled at the pagination threshold", async () => {
+    it("keeps hasNextPage enabled at the mobile pagination threshold", async () => {
       setupMocks({
+        deviceInfo: { isMobileDevice: true },
         waveMessages: {
           drops: Array.from({ length: 25 }, (_, i) =>
+            createMockDrop({ id: `drop-${i}` })
+          ),
+          hasNextPage: true,
+        },
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId("reverse-container")).toBeInTheDocument();
+      });
+
+      expect(containerProps.hasNextPage).toBe(true);
+    });
+
+    it("keeps desktop pagination gated until the desktop page size is rendered", async () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: false },
+        waveMessages: {
+          drops: Array.from({ length: 30 }, (_, i) =>
+            createMockDrop({ id: `drop-${i}` })
+          ),
+          hasNextPage: true,
+        },
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId("reverse-container")).toBeInTheDocument();
+      });
+
+      expect(containerProps.hasNextPage).toBe(false);
+    });
+
+    it("keeps hasNextPage enabled at the desktop pagination threshold", async () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: false },
+        waveMessages: {
+          drops: Array.from({ length: 50 }, (_, i) =>
             createMockDrop({ id: `drop-${i}` })
           ),
           hasNextPage: true,

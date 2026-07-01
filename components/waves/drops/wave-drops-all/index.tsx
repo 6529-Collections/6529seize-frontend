@@ -81,6 +81,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const { connectedProfile } = useAuth();
   const { isAppleMobile, isMobileDevice } = useDeviceInfo();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  // Render-window reduction applies to all mobile webviews; isAppleMobile below
+  // only gates the iOS-specific newest-drop deferral behavior.
   const virtualizedDropsPageSize =
     isMobileDevice && dropId === null
       ? MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE
@@ -295,6 +297,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         scrollContainerCallbackRef={scrollContainerCallbackRef}
         bottomAnchorRef={bottomAnchorRef}
         bottomAnchorCallbackRef={bottomAnchorCallbackRef}
+        paginationThreshold={virtualizedDropsPageSize}
         onTopIntersection={handleTopIntersection}
         onReply={onReply}
         queueSerialTarget={queueSerialTarget}
