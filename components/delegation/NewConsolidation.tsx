@@ -7,7 +7,6 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
 import type { DelegationCollection } from "./delegation-constants";
 import { CONSOLIDATION_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
@@ -15,10 +14,12 @@ import styles from "./Delegation.module.scss";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
+  DelegationFormField,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
   DelegationFormLabel,
   DelegationFormOriginalDelegatorFormGroup,
+  DelegationFormRow,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 
@@ -115,9 +116,9 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
   }
 
   return (
-    <Container>
-      <Row>
-        <Col xs={10} className="pt-3 pb-1">
+    <div className="tw-w-full tw-px-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-10/12 tw-px-3 tw-pb-1 tw-pt-3">
           <h4>
             Register Consolidation{" "}
             {props.subdelegation && `as Delegation Manager`}
@@ -126,36 +127,36 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             Register an ownership link between wallets you control. NFTs stay
             where they are.
           </p>
-        </Col>
-        <Col
-          xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
-        >
+        </div>
+        <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3 tw-pb-1 tw-pt-3">
           <DelegationCloseButton onHide={props.onHide} title="Consolidation" />
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>
-          <Form>
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-w-full tw-px-3">
+          <form>
             {props.subdelegation && (
               <DelegationFormOriginalDelegatorFormGroup
                 subdelegation={props.subdelegation}
               />
             )}
-            <Form.Group as={Row} className="pb-4">
+            <DelegationFormRow>
               <DelegationFormLabel
                 title={props.subdelegation ? `Delegation Manager` : `Delegator`}
                 tooltip={`Address ${
                   props.subdelegation ? `executing` : `registering`
                 } the consolidation`}
               />
-              <Col sm={9}>
+              <DelegationFormField>
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
+                  label={
+                    props.subdelegation ? "Delegation Manager" : "Delegator"
+                  }
                 />
-              </Col>
-            </Form.Group>
+              </DelegationFormField>
+            </DelegationFormRow>
             <DelegationFormCollectionFormGroup
               collection={newDelegationCollection}
               setCollection={setNewDelegationCollection}
@@ -167,8 +168,8 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
               title="Consolidating With"
               tooltip="Consolidate with Address e.g. your hot wallet"
             />
-            <Form.Group as={Row} className="pb-4">
-              <Form.Label column sm={12} className="d-flex align-items-center">
+            <DelegationFormRow>
+              <div className="tw-flex tw-items-center sm:tw-col-span-12">
                 Note: For TDH Consolidation use either &apos;Any
                 Collection&apos; or &apos;The Memes&apos;
                 <Link
@@ -181,8 +182,8 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
                     icon={faInfoCircle}
                   ></FontAwesomeIcon>
                 </Link>
-              </Form.Label>
-            </Form.Group>
+              </div>
+            </DelegationFormRow>
             <DelegationSubmitGroups
               title={"Registering Consolidation"}
               writeParams={contractWriteDelegationConfigParams}
@@ -193,9 +194,9 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
               onSetToast={props.onSetToast}
               submitBtnLabel="Register Consolidation"
             />
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

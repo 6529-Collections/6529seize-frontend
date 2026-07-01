@@ -9,7 +9,6 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import {
   GasRoyaltiesHeader,
@@ -129,7 +128,7 @@ export default function RoyaltiesComponent() {
       content += ` in The Memes are split 50:50 between the artist and the collection.`;
     }
     return (
-      <span className="d-flex flex-column gap-1">
+      <span className="tw-flex tw-flex-col tw-gap-1">
         <span>{content}</span>
         <span>
           6529 and 6529er have custom arrangements not reflected here for
@@ -153,170 +152,174 @@ export default function RoyaltiesComponent() {
         getUrl={getUrlWithParams}
         {...getSharedProps()}
       />
-      <Container className={`no-padding pt-4`}>
-        <Row className={`pt-4 ${styles["scrollContainer"]}`}>
-          <Col>
-            {royalties.length > 0 && (
-              <Table bordered={false} className={styles["royaltiesTable"]}>
-                <thead>
-                  <tr>
-                    <th>
-                      {collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
-                        ? "Meme Lab Card"
-                        : "Meme Card"}{" "}
-                      (x{royalties.length})
-                    </th>
-                    <th>Artist</th>
-                    <th className="text-center">Volume</th>
-                    <th className="text-center">
-                      <div className="d-flex align-items-center justify-content-center gap-2">
-                        {isPrimary ? "Primary Proceeds" : "Royalties"}
-                        {isPrimary && (
-                          <>
-                            <FontAwesomeIcon
-                              className={styles["infoIcon"]}
-                              icon={faInfoCircle}
-                              data-tooltip-id="primary-proceeds-tooltip"
-                            ></FontAwesomeIcon>
-                            <Tooltip
-                              id="primary-proceeds-tooltip"
-                              style={{
-                                backgroundColor: "#1F2937",
-                                color: "white",
-                                padding: "4px 8px",
-                              }}
-                            >
-                              Total Minter payments less the Manifold fee
-                            </Tooltip>
-                          </>
-                        )}
-                      </div>
-                    </th>
-                    {!isPrimary && (
-                      <th className="text-center">Effective Royalty %</th>
-                    )}
-                    <th className="text-center">
-                      <div className="d-flex align-items-center justify-content-center gap-2">
-                        Artist Split{" "}
+      <section className="tailwind-scope tw-container tw-mx-auto tw-px-0 tw-pt-4">
+        <div className={`tw-pt-4 ${styles["scrollContainer"]}`}>
+          {royalties.length > 0 && (
+            <table
+              className={`${styles["royaltiesTable"]} tw-mb-4 tw-w-full tw-border-collapse tw-text-inherit`}
+            >
+              <thead>
+                <tr>
+                  <th className="tw-p-2 tw-text-left">
+                    {collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
+                      ? "Meme Lab Card"
+                      : "Meme Card"}{" "}
+                    (x{royalties.length})
+                  </th>
+                  <th className="tw-p-2 tw-text-left">Artist</th>
+                  <th className="tw-p-2 tw-text-center">Volume</th>
+                  <th className="tw-p-2 tw-text-center">
+                    <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
+                      {isPrimary ? "Primary Proceeds" : "Royalties"}
+                      {isPrimary && (
                         <>
                           <FontAwesomeIcon
                             className={styles["infoIcon"]}
                             icon={faInfoCircle}
-                            data-tooltip-id="artist-split-tooltip"
+                            data-tooltip-id="primary-proceeds-tooltip"
                           ></FontAwesomeIcon>
                           <Tooltip
-                            id="artist-split-tooltip"
+                            id="primary-proceeds-tooltip"
                             style={{
                               backgroundColor: "#1F2937",
                               color: "white",
                               padding: "4px 8px",
                             }}
                           >
-                            {getTippyArtistsContent()}
+                            Total Minter payments less the Manifold fee
                           </Tooltip>
                         </>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {royalties.map((r) => (
-                    <tr key={`token-${r.token_id}`}>
-                      <td>
-                        <GasRoyaltiesTokenImage
-                          path={
-                            collectionFocus ===
-                            GasRoyaltiesCollectionFocus.MEMELAB
-                              ? "meme-lab"
-                              : "the-memes"
-                          }
-                          token_id={r.token_id}
-                          name={r.name}
-                          thumbnail={r.thumbnail}
-                          note={
-                            collectionFocus ===
-                              GasRoyaltiesCollectionFocus.MEMES &&
-                            isPrimary &&
-                            MEMES_SOLD_MANUALLY.includes(r.token_id)
-                              ? "Figures not easily calculable as card was sold manually"
-                              : undefined
-                          }
-                        />
-                      </td>
-                      <td>{r.artist}</td>
-                      <td className="text-center">
-                        {displayDecimal(r.volume)}
-                      </td>
-                      <td className="text-center">
-                        {displayDecimal(r.proceeds)}
-                      </td>
-                      {!isPrimary && (
-                        <td className="text-center">
-                          {r.proceeds > 0
-                            ? `${((r.proceeds / r.volume) * 100).toFixed(2)}%`
-                            : `-`}
-                        </td>
                       )}
-                      <td>
-                        <div className="d-flex justify-content-center">
-                          <span className="d-flex align-items-center gap-1">
-                            {displayDecimal(r.artist_take)}
-                            {collectionFocus ===
-                              GasRoyaltiesCollectionFocus.MEMELAB &&
-                              r.artist_split > 0 && (
-                                <span className="font-smaller font-color-h">
-                                  ({displayDecimal(r.artist_split * 100)}
-                                  %)
-                                </span>
-                              )}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  <tr key={`royalties-total`}>
-                    <td colSpan={2} className="text-right">
-                      <b>TOTAL</b>
+                    </div>
+                  </th>
+                  {!isPrimary && (
+                    <th className="tw-p-2 tw-text-center">
+                      Effective Royalty %
+                    </th>
+                  )}
+                  <th className="tw-p-2 tw-text-center">
+                    <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
+                      Artist Split{" "}
+                      <>
+                        <FontAwesomeIcon
+                          className={styles["infoIcon"]}
+                          icon={faInfoCircle}
+                          data-tooltip-id="artist-split-tooltip"
+                        ></FontAwesomeIcon>
+                        <Tooltip
+                          id="artist-split-tooltip"
+                          style={{
+                            backgroundColor: "#1F2937",
+                            color: "white",
+                            padding: "4px 8px",
+                          }}
+                        >
+                          {getTippyArtistsContent()}
+                        </Tooltip>
+                      </>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {royalties.map((r) => (
+                  <tr key={`token-${r.token_id}`}>
+                    <td className="tw-p-2 tw-align-middle">
+                      <GasRoyaltiesTokenImage
+                        path={
+                          collectionFocus ===
+                          GasRoyaltiesCollectionFocus.MEMELAB
+                            ? "meme-lab"
+                            : "the-memes"
+                        }
+                        token_id={r.token_id}
+                        name={r.name}
+                        thumbnail={r.thumbnail}
+                        note={
+                          collectionFocus ===
+                            GasRoyaltiesCollectionFocus.MEMES &&
+                          isPrimary &&
+                          MEMES_SOLD_MANUALLY.includes(r.token_id)
+                            ? "Figures not easily calculable as card was sold manually"
+                            : undefined
+                        }
+                      />
                     </td>
-                    <td className="text-center">{displayDecimal(sumVolume)}</td>
-                    <td className="text-center">
-                      {displayDecimal(sumProceeds)}
+                    <td className="tw-p-2 tw-align-middle">{r.artist}</td>
+                    <td className="tw-p-2 tw-text-center tw-align-middle">
+                      {displayDecimal(r.volume)}
+                    </td>
+                    <td className="tw-p-2 tw-text-center tw-align-middle">
+                      {displayDecimal(r.proceeds)}
                     </td>
                     {!isPrimary && (
-                      <td className="text-center">
-                        {sumProceeds > 0
-                          ? `${((sumProceeds / sumVolume) * 100).toFixed(2)}%`
+                      <td className="tw-p-2 tw-text-center tw-align-middle">
+                        {r.proceeds > 0
+                          ? `${((r.proceeds / r.volume) * 100).toFixed(2)}%`
                           : `-`}
                       </td>
                     )}
-                    <td className="text-center">
-                      {displayDecimal(sumArtistTake)}
-                      {collectionFocus ===
-                        GasRoyaltiesCollectionFocus.MEMELAB &&
-                        sumArtistTake > 0 &&
-                        ` (${displayDecimal(
-                          (sumArtistTake * 100) / sumProceeds
-                        )}%)`}
+                    <td className="tw-p-2 tw-align-middle">
+                      <div className="tw-flex tw-justify-center">
+                        <span className="tw-flex tw-items-center tw-gap-1">
+                          {displayDecimal(r.artist_take)}
+                          {collectionFocus ===
+                            GasRoyaltiesCollectionFocus.MEMELAB &&
+                            r.artist_split > 0 && (
+                              <span className="tw-text-sm tw-text-iron-400">
+                                ({displayDecimal(r.artist_split * 100)}
+                                %)
+                              </span>
+                            )}
+                        </span>
+                      </div>
                     </td>
                   </tr>
-                </tbody>
-              </Table>
-            )}
-          </Col>
-        </Row>
+                ))}
+                <tr key={`royalties-total`}>
+                  <td
+                    colSpan={2}
+                    className="tw-p-2 tw-text-right tw-align-middle"
+                  >
+                    <b>TOTAL</b>
+                  </td>
+                  <td className="tw-p-2 tw-text-center tw-align-middle">
+                    {displayDecimal(sumVolume)}
+                  </td>
+                  <td className="tw-p-2 tw-text-center tw-align-middle">
+                    {displayDecimal(sumProceeds)}
+                  </td>
+                  {!isPrimary && (
+                    <td className="tw-p-2 tw-text-center tw-align-middle">
+                      {sumProceeds > 0
+                        ? `${((sumProceeds / sumVolume) * 100).toFixed(2)}%`
+                        : `-`}
+                    </td>
+                  )}
+                  <td className="tw-p-2 tw-text-center tw-align-middle">
+                    {displayDecimal(sumArtistTake)}
+                    {collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB &&
+                      sumArtistTake > 0 &&
+                      ` (${displayDecimal(
+                        (sumArtistTake * 100) / sumProceeds
+                      )}%)`}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          )}
+        </div>
         {!fetching && royalties.length === 0 && (
-          <Row>
-            <Col>
-              <h5>No royalties found for selected dates</h5>
-            </Col>
-          </Row>
+          <div>
+            <h5>No royalties found for selected dates</h5>
+          </div>
         )}
         {!fetching && royalties.length > 0 && (
-          <Row className="font-color-h pt-3 pb-3">
-            <Col>All values are in ETH</Col>
-          </Row>
+          <div className="tw-pb-3 tw-pt-3 tw-text-iron-400">
+            All values are in ETH
+          </div>
         )}
-      </Container>
+      </section>
     </>
   );
 }

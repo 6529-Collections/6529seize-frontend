@@ -307,7 +307,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                       <button
                         type="button"
                         key={`add-rememe-meme-red-${m.id}`}
-                        className="tw-block tw-w-[98%] tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 focus:tw-bg-transparent"
+                        className="tw-block tw-w-[98%] tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-iron-100 focus:tw-bg-transparent desktop-hover:hover:tw-bg-iron-800"
                         onClick={() => addReference(m)}
                       >
                         #{m.id} - {m.name}

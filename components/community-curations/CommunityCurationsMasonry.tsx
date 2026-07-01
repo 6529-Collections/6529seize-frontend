@@ -31,6 +31,7 @@ const MASONRY_COLUMN_WIDTH = 300;
 const MASONRY_GUTTER = 16;
 const INFINITE_SCROLL_ROOT_MARGIN = "1200px 0px";
 const SCROLL_IDLE_DELAY_MS = 120;
+const CURATION_MASONRY_MEDIA_IMAGE_SCALE = ImageScale.AUTOx600;
 const CURATION_CARD_CLASS_NAME =
   "tw-group tw-relative tw-isolate tw-z-0 tw-rounded-xl desktop-hover:hover:tw-z-30 focus-within:tw-z-30";
 const CURATION_CARD_HOVER_FRAME_CLASS_NAME =
@@ -265,7 +266,7 @@ function CommunityCurationsMasonryItem({
           onQuoteClick={navigateToDropWave}
           onDropContentClick={navigateToDropWave}
           footer={<CurationDropFooter drop={drop} />}
-          mediaImageScale={ImageScale.AUTOx1080}
+          mediaImageScale={CURATION_MASONRY_MEDIA_IMAGE_SCALE}
           timestampLayout="inline"
           showInteractions={false}
           inlineAuthorOnDesktop={true}

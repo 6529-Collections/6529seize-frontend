@@ -182,9 +182,7 @@ export function MemePageArtViewer({
   }
 
   function goToNextSlide() {
-    setCurrentSlide((slide) =>
-      Math.min(hasMultipleSlides ? 1 : 0, slide + 1)
-    );
+    setCurrentSlide((slide) => Math.min(hasMultipleSlides ? 1 : 0, slide + 1));
   }
 
   function handleSlideTouchStart(event: TouchEvent<HTMLDivElement>) {

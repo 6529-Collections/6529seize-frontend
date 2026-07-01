@@ -58,6 +58,24 @@ describe("The Memes route params", () => {
         sortDir: "ASC",
       })
     ).toBe("/the-memes?sort=age&sort_dir=ASC&szn=1&locale=de-DE");
+    expect(
+      getTheMemesBrowseHref({
+        locale: "en-US",
+        seasonId: null,
+        sort: "age",
+        sortDir: "asc",
+        yearId: 4,
+      })
+    ).toBe("/the-memes?sort=age&sort_dir=asc&year=4");
+    expect(
+      getTheMemesBrowseHref({
+        locale: "de-DE",
+        seasonId: 16,
+        sort: "age",
+        sortDir: "asc",
+        yearId: 4,
+      })
+    ).toBe("/the-memes?sort=age&sort_dir=asc&year=4&szn=16&locale=de-DE");
     expect(getTheMemesDetailHref({ id: 6529, locale: "en-US" })).toBe(
       "/the-memes/6529"
     );

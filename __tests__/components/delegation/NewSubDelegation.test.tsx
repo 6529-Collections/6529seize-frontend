@@ -9,9 +9,13 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 const mockSubmitGroups = jest.fn(() => null);
 
 jest.mock("@/components/delegation/DelegationFormParts", () => {
-  const React = require("react");
+  const actual = jest.requireActual(
+    "@/components/delegation/DelegationFormParts"
+  );
+
   return {
     __esModule: true,
+    ...actual,
     DelegationCloseButton: (p: any) => (
       <button data-testid="close" onClick={p.onHide}>
         x
@@ -20,7 +24,6 @@ jest.mock("@/components/delegation/DelegationFormParts", () => {
     DelegationFormOriginalDelegatorFormGroup: (p: any) => (
       <div data-testid="original">{p.subdelegation.originalDelegator}</div>
     ),
-    DelegationFormLabel: ({ title }: any) => <label>{title}</label>,
     DelegationAddressDisabledInput: ({ address }: any) => (
       <input data-testid="disabled-address" value={address} readOnly />
     ),

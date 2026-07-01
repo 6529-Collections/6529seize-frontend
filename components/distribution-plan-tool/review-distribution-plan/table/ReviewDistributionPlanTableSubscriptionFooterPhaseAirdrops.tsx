@@ -2,15 +2,12 @@
 
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import {
-  extractAllNumbers,
-  isValidPositiveInteger,
-} from "@/helpers/Helpers";
-import { type ChangeEvent, useRef, useState } from "react";
-import { Modal } from "react-bootstrap";
+import { extractAllNumbers, isValidPositiveInteger } from "@/helpers/Helpers";
+import { type ChangeEvent, useId, useRef, useState } from "react";
 import {
   ReviewDistributionPlanTableSubscriptionFooterAlertRow,
   ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow,
+  ReviewDistributionPlanTableSubscriptionFooterModal,
   ReviewDistributionPlanTableSubscriptionFooterTokenIdRow,
 } from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
@@ -83,21 +80,21 @@ function parseCsv(csvContent: string): CsvRow[] {
       );
     }
 
-    const [address, countValue] = parts;
+    const [address = "", countValue = ""] = parts;
 
-    if (!isValidAddress(address!)) {
+    if (!isValidAddress(address)) {
       throw new Error(
         `Line ${index + 1}: Invalid Ethereum address "${address}".`
       );
     }
 
-    if (!/^[1-9]\d*$/.test(countValue!)) {
+    if (!/^[1-9]\d*$/.test(countValue)) {
       throw new Error(`Line ${index + 1}: Count must be a positive integer.`);
     }
 
     return {
-      address: address!.toLowerCase(),
-      count: Number.parseInt(countValue!, 10),
+      address: address.toLowerCase(),
+      count: Number.parseInt(countValue, 10),
     };
   });
 }
@@ -130,6 +127,7 @@ export function DistributionPhaseAirdropsModal(
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [inputError, setInputError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const csvErrorId = useId();
 
   const contract = MEMES_CONTRACT;
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -144,6 +142,7 @@ export function DistributionPhaseAirdropsModal(
       previewError = getErrorMessage(error);
     }
   }
+  const errorMessage = inputError ?? previewError;
 
   const resetState = () => {
     setCsvContent("");
@@ -231,138 +230,131 @@ export function DistributionPhaseAirdropsModal(
   };
 
   return (
-    <Modal show onHide={handleClose} className="tailwind-scope">
-      <Modal.Header closeButton={!props.isUploading}>
-        <Modal.Title className="tw-text-lg tw-font-semibold">
-          {copy.title}
-        </Modal.Title>
-      </Modal.Header>
-      <hr className="tw-my-0" />
-      <Modal.Body>
-        <div className="tw-container tw-mx-auto">
-          <ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow
-            contract={contract}
-          />
-          <ReviewDistributionPlanTableSubscriptionFooterTokenIdRow
-            confirmedTokenId={props.confirmedTokenId}
-            displayTokenId={displayTokenId}
-            tokenId={tokenId}
-            onTokenIdChange={setTokenId}
-          />
-          <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="warning">
-            This upload will replace the current {copy.successLabel} airdrops
-            list for this token.
-          </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
-          <div className="tw-py-2">
-            <div>
-              <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-sky-300 tw-bg-sky-100 tw-px-4 tw-py-3 tw-text-sky-950">
-                <div className="tw-mb-2">
-                  <strong>CSV format:</strong>{" "}
-                  <code
-                    className="tw-rounded tw-bg-iron-900 tw-p-1 tw-text-iron-50"
-                    style={{ fontSize: "12px" }}
-                  >
-                    address,count
-                  </code>
-                </div>
-                <div className="tw-mb-2">
-                  Do not include a header row. Each line must contain exactly
-                  one wallet address and one positive integer count.
-                </div>
-                <pre
-                  className="tw-mb-0 tw-rounded tw-bg-iron-900 tw-p-2 tw-text-iron-50"
-                  style={{ fontSize: "12px", overflowX: "auto" }}
-                >
-                  <code>
-                    {`0x33fd426905f149f8376e227d0c9d3340aad17af1,2
+    <ReviewDistributionPlanTableSubscriptionFooterModal
+      title={copy.title}
+      onClose={handleClose}
+      closeButton={!props.isUploading}
+      isDismissable={!props.isUploading}
+      footer={
+        <>
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={props.isUploading}
+            className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            disabled={
+              props.isUploading ||
+              !isValidPositiveInteger(displayTokenId) ||
+              !csvContent.trim() ||
+              !!previewError ||
+              parsedRows.length === 0
+            }
+            onClick={handleUpload}
+            className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          >
+            {props.isUploading ? "Uploading..." : copy.submitLabel}
+          </button>
+        </>
+      }
+    >
+      <ReviewDistributionPlanTableSubscriptionFooterContractOnlyRow
+        contract={contract}
+      />
+      <ReviewDistributionPlanTableSubscriptionFooterTokenIdRow
+        confirmedTokenId={props.confirmedTokenId}
+        displayTokenId={displayTokenId}
+        tokenId={tokenId}
+        onTokenIdChange={setTokenId}
+      />
+      <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="warning">
+        This upload will replace the current {copy.successLabel} airdrops list
+        for this token.
+      </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
+      <div className="tw-py-2">
+        <div>
+          <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-sky-300 tw-bg-sky-100 tw-px-4 tw-py-3 tw-text-sky-950">
+            <div className="tw-mb-2">
+              <strong>CSV format:</strong>{" "}
+              <code className="tw-rounded tw-bg-iron-900 tw-p-1 tw-text-xs tw-text-iron-50">
+                address,count
+              </code>
+            </div>
+            <div className="tw-mb-2">
+              Do not include a header row. Each line must contain exactly one
+              wallet address and one positive integer count.
+            </div>
+            <pre className="tw-mb-0 tw-overflow-x-auto tw-rounded tw-bg-iron-900 tw-p-2 tw-text-xs tw-text-iron-50">
+              <code>
+                {`0x33fd426905f149f8376e227d0c9d3340aad17af1,2
 0x9f6ae0370d74f0e591c64cec4a8ae0d627817014,1`}
-                  </code>
-                </pre>
-              </div>
-            </div>
+              </code>
+            </pre>
           </div>
-          <div className="tw-pb-2 tw-pt-3">
-            <div>
-              <label className="tw-mb-2 tw-block" htmlFor="airdrop-csv-textarea">
-                Paste CSV
-              </label>
-              <textarea
-                id="airdrop-csv-textarea"
-                value={csvContent}
-                onChange={(e) => {
-                  setCsvContent(e.target.value);
-                  setInputError(null);
-                }}
-                placeholder="0x...,2&#10;0x...,1"
-                rows={8}
-                className="tw-block tw-w-full tw-rounded-lg tw-border tw-border-iron-300 tw-px-3 tw-py-2"
-                style={{ color: "black" }}
-              />
-            </div>
-          </div>
-          <div className="tw-py-2">
-            <div>
-              <label className="tw-mb-2 tw-block" htmlFor="airdrop-csv-file">
-                Or upload a CSV file
-              </label>
-              <input
-                id="airdrop-csv-file"
-                ref={fileInputRef}
-                type="file"
-                accept=".csv,text/csv,text/plain"
-                onChange={handleFileChange}
-                style={{ color: "black" }}
-              />
-              {selectedFileName && (
-                <div className="tw-mt-2 tw-text-iron-500">{selectedFileName}</div>
-              )}
-            </div>
-          </div>
-          {(inputError || previewError) && (
-            <div className="tw-py-2">
-              <div>
-                <div className="tw-text-red">{inputError ?? previewError}</div>
-              </div>
-            </div>
-          )}
-          {parsedRows.length > 0 && !previewError && (
-            <div className="tw-py-2">
-              <div>
-                <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-success/30 tw-bg-success/10 tw-px-4 tw-py-3 tw-text-success">
-                  Ready to upload {copy.successLabel} airdrops:{" "}
-                  {parsedRows.length} address(es) |{" "}
-                  {parsedRows.reduce((total, row) => total + row.count, 0)}{" "}
-                  count
-                </div>
-              </div>
-            </div>
+        </div>
+      </div>
+      <div className="tw-pb-2 tw-pt-3">
+        <div>
+          <label className="tw-mb-2 tw-block" htmlFor="airdrop-csv-textarea">
+            Paste CSV
+          </label>
+          <textarea
+            id="airdrop-csv-textarea"
+            value={csvContent}
+            onChange={(e) => {
+              setCsvContent(e.target.value);
+              setInputError(null);
+            }}
+            placeholder="0x...,2&#10;0x...,1"
+            rows={8}
+            aria-describedby={errorMessage ? csvErrorId : undefined}
+            className="tw-block tw-w-full tw-rounded-lg tw-border tw-border-iron-300 tw-px-3 tw-py-2 tw-text-black"
+          />
+        </div>
+      </div>
+      <div className="tw-py-2">
+        <div>
+          <label className="tw-mb-2 tw-block" htmlFor="airdrop-csv-file">
+            Or upload a CSV file
+          </label>
+          <input
+            id="airdrop-csv-file"
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv,text/plain"
+            aria-describedby={errorMessage ? csvErrorId : undefined}
+            onChange={handleFileChange}
+            className="tw-text-black"
+          />
+          {selectedFileName && (
+            <div className="tw-mt-2 tw-text-iron-500">{selectedFileName}</div>
           )}
         </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <button
-          type="button"
-          onClick={handleClose}
-          disabled={props.isUploading}
-          className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-        >
-          Close
-        </button>
-        <button
-          type="button"
-          disabled={
-            props.isUploading ||
-            !isValidPositiveInteger(displayTokenId) ||
-            !csvContent.trim() ||
-            !!previewError ||
-            parsedRows.length === 0
-          }
-          onClick={handleUpload}
-          className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-        >
-          {props.isUploading ? "Uploading..." : copy.submitLabel}
-        </button>
-      </Modal.Footer>
-    </Modal>
+      </div>
+      {errorMessage && (
+        <div className="tw-py-2">
+          <div>
+            <div id={csvErrorId} role="alert" className="tw-text-red">
+              {errorMessage}
+            </div>
+          </div>
+        </div>
+      )}
+      {parsedRows.length > 0 && !previewError && (
+        <div className="tw-py-2">
+          <div>
+            <div className="tw-mb-0 tw-rounded-lg tw-border tw-border-success/30 tw-bg-success/10 tw-px-4 tw-py-3 tw-text-success">
+              Ready to upload {copy.successLabel} airdrops: {parsedRows.length}{" "}
+              address(es) |{" "}
+              {parsedRows.reduce((total, row) => total + row.count, 0)} count
+            </div>
+          </div>
+        </div>
+      )}
+    </ReviewDistributionPlanTableSubscriptionFooterModal>
   );
 }

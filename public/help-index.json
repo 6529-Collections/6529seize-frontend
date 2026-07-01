@@ -4454,12 +4454,14 @@
         "browse",
         "sort",
         "filter",
+        "year",
         "season",
         "query"
       ],
       "facts": [
         "The Memes list browsing and sorting behavior is documented under media docs.",
-        "URL query state can affect list filtering and sorting.",
+        "URL query state can affect list filtering and sorting, including year and season filters.",
+        "On The Memes list, Year scopes the Season dropdown; invalid year and season combinations reset back to the unfiltered list.",
         "Use individual Meme Card pages for card-specific details."
       ],
       "canonical_path": "/the-memes",

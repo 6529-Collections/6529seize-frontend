@@ -31,8 +31,8 @@ export default function TokenSlideshow({
   const { isInViewport, setSwiperInstance } =
     useSlideshowAutoplay(swiperContainerRef);
   return (
-    <div className="tw-flex tw-flex-wrap -tw-mx-3">
-      <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
         <div ref={swiperContainerRef}>
           <Swiper
             modules={[Navigation, A11y, Autoplay]}

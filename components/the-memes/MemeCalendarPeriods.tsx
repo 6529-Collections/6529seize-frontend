@@ -18,16 +18,20 @@ import Link from "next/link";
 const SECONDARY_PERIOD_CLASS_NAME = "tw-hidden md:tw-flex";
 const PERIOD_SEPARATOR_CLASS_NAME =
   "tw-text-xs tw-font-medium tw-text-iron-700";
+const SECONDARY_PERIOD_ITEM_CLASS_NAME =
+  "tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-text-[10.5px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500";
 
 export default function MemeCalendarPeriods({
   id,
   locale = DEFAULT_LOCALE,
   seasonHref,
+  yearHref,
   showOnlySeasonOnMobile = false,
 }: {
   readonly id: number;
   readonly locale?: SupportedLocale | undefined;
   readonly seasonHref?: string | undefined;
+  readonly yearHref?: string | undefined;
   readonly showOnlySeasonOnMobile?: boolean | undefined;
 }) {
   const d = dateFromMintNumber(id);
@@ -39,13 +43,20 @@ export default function MemeCalendarPeriods({
   const year = displayedYearNumberFromIndex(idx);
   const szn = displayedSeasonNumberFromIndex(idx);
   const formattedSeason = formatInteger(locale, szn);
+  const formattedYear = formatInteger(locale, year);
 
-  const printSecondaryPeriod = (label: string, number: number) => (
-    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-px-1.5 tw-py-0.5 tw-text-[10.5px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+  const secondaryPeriodContent = (label: string, number: number) => (
+    <>
       <span>{label}</span>
       <span className="tw-font-semibold tw-text-iron-300">
         {formatInteger(locale, number)}
       </span>
+    </>
+  );
+
+  const printSecondaryPeriod = (label: string, number: number) => (
+    <span className={SECONDARY_PERIOD_ITEM_CLASS_NAME}>
+      {secondaryPeriodContent(label, number)}
     </span>
   );
   const secondaryPeriods = [
@@ -74,13 +85,17 @@ export default function MemeCalendarPeriods({
     </>
   );
 
-  const secondaryPeriodClassName = showOnlySeasonOnMobile
+  const secondaryPeriodVisibilityClassName = showOnlySeasonOnMobile
     ? SECONDARY_PERIOD_CLASS_NAME
     : undefined;
   const seasonLinkHref =
     seasonHref === undefined
       ? undefined
       : getTheMemesRouteHrefWithLocale({ href: seasonHref, locale });
+  const yearLinkHref =
+    yearHref === undefined
+      ? undefined
+      : getTheMemesRouteHrefWithLocale({ href: yearHref, locale });
 
   return (
     <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
@@ -101,7 +116,10 @@ export default function MemeCalendarPeriods({
       )}
       <span
         aria-hidden="true"
-        className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
+        className={clsx(
+          PERIOD_SEPARATOR_CLASS_NAME,
+          secondaryPeriodVisibilityClassName
+        )}
       >
         /
       </span>
@@ -110,7 +128,7 @@ export default function MemeCalendarPeriods({
         role="group"
         className={clsx(
           "tw-flex-wrap tw-items-center tw-gap-1.5",
-          secondaryPeriodClassName
+          secondaryPeriodVisibilityClassName
         )}
       >
         {secondaryPeriods.map(({ key, label, number }, index) => (
@@ -120,7 +138,23 @@ export default function MemeCalendarPeriods({
                 /
               </span>
             )}
-            {printSecondaryPeriod(label, number)}
+            {key === "year" && yearLinkHref !== undefined ? (
+              <Link
+                href={yearLinkHref}
+                aria-label={t(
+                  locale,
+                  "memeCalendar.periods.yearLinkAriaLabel",
+                  {
+                    year: formattedYear,
+                  }
+                )}
+                className={`${SECONDARY_PERIOD_ITEM_CLASS_NAME} tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+              >
+                {secondaryPeriodContent(label, number)}
+              </Link>
+            ) : (
+              printSecondaryPeriod(label, number)
+            )}
           </span>
         ))}
       </span>
