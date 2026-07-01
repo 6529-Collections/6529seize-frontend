@@ -218,9 +218,8 @@ export default function DistributionPage(props: Readonly<Props>) {
       return (
         <div className="tw-pb-5 tw-pt-4">
           <div>
-            <div
+            <section
               className={styles["distributionCarousel"]}
-              role="group"
               aria-roledescription="carousel"
               aria-label={t(locale, "distribution.photos.carousel", {
                 collection: props.header,
@@ -305,7 +304,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   </div>
                 </>
               )}
-            </div>
+            </section>
           </div>
         </div>
       );

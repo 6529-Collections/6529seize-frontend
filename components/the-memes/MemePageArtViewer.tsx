@@ -338,9 +338,8 @@ export function MemePageArtViewer({
         {hasAnimation ? (
           <>
             <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950 tw-p-0">
-              <div
+              <section
                 className={`${styles["memesCarousel"] ?? ""} tw-w-full`}
-                role="group"
                 aria-roledescription="carousel"
                 onTouchStart={handleSlideTouchStart}
                 onTouchEnd={handleSlideTouchEnd}
@@ -384,7 +383,7 @@ export function MemePageArtViewer({
                     />
                   </div>
                 )}
-              </div>
+              </section>
               {printMediaActions()}
             </div>
             {printArtworkControls()}
