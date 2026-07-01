@@ -1114,6 +1114,11 @@ const createReactQueryContextValue = (
         queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
       })
       .catch(() => undefined);
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVES_V2],
+      })
+      .catch(() => undefined);
   };
 
   const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {
