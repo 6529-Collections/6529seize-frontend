@@ -10,6 +10,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
+import { getMemeYearFromSeason } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -592,6 +593,9 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                     id={nft.id}
                     locale={locale}
                     seasonHref={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
+                    yearHref={`/the-memes?year=${getMemeYearFromSeason(
+                      nftMeta.season
+                    )}&sort=age&sort_dir=ASC`}
                     showOnlySeasonOnMobile
                   />
                 </div>

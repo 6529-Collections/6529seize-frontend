@@ -7,9 +7,17 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
 import { getMemesSortLabel } from "@/components/the-memes/theMemesI18n";
+import {
+  getAllSeasonsLabel,
+  getMemeApiSeasonIds,
+  getMemeSeasonsForYear,
+  getMemeYears,
+  normalizeMemeFilterIds,
+} from "@/components/the-memes/theMemesFilters";
 import { getTheMemesBrowseHref } from "@/components/the-memes/theMemesRouteParams";
 import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
-import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
+import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
+import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -22,6 +30,7 @@ import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 import { MEMES_EXTENDED_SORT, MemesSort } from "@/types/enums";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -134,6 +143,16 @@ function getInitialSeasonId(searchParams: SearchParamReader): number | null {
   return !Number.isNaN(parsed) && parsed > 0 ? parsed : null;
 }
 
+function getInitialYearId(searchParams: SearchParamReader): number | null {
+  const routerYear = searchParams.get("year");
+  if (routerYear === null || routerYear === "") {
+    return null;
+  }
+
+  const parsed = Number.parseInt(routerYear, 10);
+  return !Number.isNaN(parsed) && parsed >= 0 ? parsed : null;
+}
+
 function getSortQueryParam(sort: MemesSort, volumeType: VolumeType): string {
   if (sort === MemesSort.VOLUME) {
     const volKey = Object.entries(VolumeType).find(
@@ -159,12 +178,36 @@ export default function TheMemesComponent({
 
   const { connectedProfile } = useContext(AuthContext);
 
-  const [selectedSeason, setSelectedSeason] = useState<MemeSeason | null>(null);
   const [seasonId, setSeasonId] = useState<number | null>(null);
+  const [yearId, setYearId] = useState<number | null>(null);
+  const [seasons, setSeasons] = useState<MemeSeason[]>([]);
+  const [seasonsLoaded, setSeasonsLoaded] = useState(false);
 
   const handleSeasonChange = (season: MemeSeason | null) => {
-    setSelectedSeason(season);
     setSeasonId(season?.id ?? null);
+  };
+
+  const handleYearChange = (nextYearId: number | null) => {
+    setYearId(nextYearId);
+    setSeasonId((currentSeasonId) => {
+      if (nextYearId === null || currentSeasonId === null) {
+        return currentSeasonId;
+      }
+
+      const currentSeason = seasons.find(
+        (season) => season.id === currentSeasonId
+      );
+
+      if (currentSeason === undefined) {
+        return null;
+      }
+
+      return getMemeSeasonsForYear({ seasons, yearId: nextYearId }).some(
+        (season) => season.id === currentSeason.id
+      )
+        ? currentSeasonId
+        : null;
+    });
   };
 
   const [routerLoaded, setRouterLoaded] = useState(false);
@@ -179,22 +222,106 @@ export default function TheMemesComponent({
     const { sort: initialSort, volumeType: initialVolume } =
       getInitialSortAndVolume(searchParams);
     const initialSznId = getInitialSeasonId(searchParams);
+    const initialYearId = getInitialYearId(searchParams);
 
     setSort(initialSort);
     setSortDir(initialSortDir);
     setSeasonId(initialSznId);
+    setYearId(initialYearId);
     setVolumeType(initialVolume);
     setRouterLoaded(true);
   }, [searchParams]);
 
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    commonApiFetch<MemeSeason[]>({
+      endpoint: "new_memes_seasons",
+      signal: abortController.signal,
+    })
+      .then((response) => {
+        setSeasons(response);
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to fetch meme seasons:", error);
+      })
+      .finally(() => {
+        if (!abortController.signal.aborted) {
+          setSeasonsLoaded(true);
+        }
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
+  const normalizedFilters = useMemo(
+    () =>
+      normalizeMemeFilterIds({
+        seasonId,
+        seasons,
+        yearId,
+      }),
+    [seasonId, seasons, yearId]
+  );
+
+  useEffect(() => {
+    if (!routerLoaded || !seasonsLoaded || seasons.length === 0) {
+      return;
+    }
+
+    if (
+      normalizedFilters.seasonId !== seasonId ||
+      normalizedFilters.yearId !== yearId
+    ) {
+      setSeasonId(normalizedFilters.seasonId);
+      setYearId(normalizedFilters.yearId);
+    }
+  }, [
+    normalizedFilters.seasonId,
+    normalizedFilters.yearId,
+    routerLoaded,
+    seasonId,
+    seasons.length,
+    seasonsLoaded,
+    yearId,
+  ]);
+
+  const activeSeasonId = normalizedFilters.seasonId;
+  const activeYearId = normalizedFilters.yearId;
+  const yearOptions = useMemo(() => getMemeYears(seasons), [seasons]);
+  const filteredSeasons = useMemo(
+    () => getMemeSeasonsForYear({ seasons, yearId: activeYearId }),
+    [activeYearId, seasons]
+  );
+  const activeSeason =
+    filteredSeasons.find((season) => season.id === activeSeasonId) ?? null;
+  const allSeasonsLabel = getAllSeasonsLabel(activeYearId);
+  const filtersReady = routerLoaded && seasonsLoaded;
+
   const getNftsNextPage = useCallback(() => {
     const mySort = getApiSort(sort, volumeType);
-    let seasonFilter = "";
-    if (seasonId !== null) {
-      seasonFilter = `&season=${seasonId}`;
+    const apiSeasonIds = getMemeApiSeasonIds({
+      seasonId: activeSeasonId,
+      seasons,
+      yearId: activeYearId,
+    });
+    const query = new URLSearchParams({
+      page_size: "48",
+      sort_direction: sortDir,
+      sort: mySort,
+    });
+
+    if (apiSeasonIds.length > 0) {
+      query.set("season", apiSeasonIds.join(","));
     }
-    return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
-  }, [seasonId, sort, sortDir, volumeType]);
+
+    return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?${query.toString()}`;
+  }, [activeSeasonId, activeYearId, seasons, sort, sortDir, volumeType]);
 
   const [fetching, setFetching] = useState(true);
 
@@ -208,17 +335,27 @@ export default function TheMemesComponent({
   >(new Map());
 
   useEffect(() => {
-    if (!routerLoaded) return;
+    if (!filtersReady) return;
 
     router.push(
       getTheMemesBrowseHref({
         locale,
-        seasonId,
+        seasonId: activeSeasonId,
         sort: getSortQueryParam(sort, volumeType),
         sortDir: sortDir.toLowerCase(),
+        yearId: activeYearId,
       })
     );
-  }, [locale, sort, sortDir, seasonId, volumeType, router, routerLoaded]);
+  }, [
+    activeSeasonId,
+    activeYearId,
+    filtersReady,
+    locale,
+    router,
+    sort,
+    sortDir,
+    volumeType,
+  ]);
 
   useEffect(() => {
     const memesMap = new Map<
@@ -281,18 +418,26 @@ export default function TheMemesComponent({
   }, [nftsNextPage]);
 
   useEffect(() => {
-    if (routerLoaded) {
+    if (filtersReady) {
       setNfts([]);
       setNftsNextPage(getNftsNextPage());
       setFetching(true);
     }
-  }, [getNftsNextPage, sort, sortDir, volumeType, seasonId, routerLoaded]);
+  }, [
+    activeSeasonId,
+    activeYearId,
+    filtersReady,
+    getNftsNextPage,
+    sort,
+    sortDir,
+    volumeType,
+  ]);
 
   useEffect(() => {
-    if (fetching && routerLoaded && nftsNextPage !== undefined) {
+    if (fetching && filtersReady && nftsNextPage !== undefined) {
       fetchNfts();
     }
-  }, [fetching, fetchNfts, routerLoaded, nftsNextPage]);
+  }, [fetching, fetchNfts, filtersReady, nftsNextPage]);
 
   useEffect(() => {
     if (nftsNextPage === undefined) {
@@ -314,7 +459,7 @@ export default function TheMemesComponent({
           window.innerHeight -
           window.scrollY;
 
-        if (distanceFromBottom <= 400 && routerLoaded) {
+        if (distanceFromBottom <= 400 && filtersReady) {
           setFetching(true);
         }
       }, 200);
@@ -328,7 +473,7 @@ export default function TheMemesComponent({
       }
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [routerLoaded, nftsNextPage]);
+  }, [filtersReady, nftsNextPage]);
 
   function printSortDirectionButton(
     direction: SortDirection,
@@ -437,11 +582,24 @@ export default function TheMemesComponent({
                   </h1>
                   <LFGButton contract={MEMES_CONTRACT} />
                 </div>
-                <div className="tw-w-full tw-shrink-0 sm:tw-w-40">
-                  <SeasonsGridDropdown
-                    selected={selectedSeason}
+                <div className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-1 tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]">
+                  <FilterGridDropdown
+                    ariaLabel="Year"
+                    filterLabel="Year"
+                    items={yearOptions.map((year) => ({
+                      value: year.id,
+                      label: year.display,
+                    }))}
+                    onSelect={handleYearChange}
+                    selectedValue={activeYearId}
+                    allItemLabel="All Years"
+                  />
+                  <MemeSeasonGridDropdown
+                    selected={activeSeason}
                     setSelected={handleSeasonChange}
-                    initialSeasonId={seasonId}
+                    initialSeasonId={activeSeasonId}
+                    seasons={filteredSeasons}
+                    allSeasonsLabel={allSeasonsLabel}
                   />
                 </div>
               </div>

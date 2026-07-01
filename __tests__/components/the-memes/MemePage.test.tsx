@@ -712,6 +712,9 @@ describe("MemePage navigation integration", () => {
         expect(
           screen.getByRole("link", { name: "View SZN 1 cards" })
         ).toHaveAttribute("href", "/the-memes?szn=1&sort=age&sort_dir=ASC");
+        expect(
+          screen.getByRole("link", { name: "View Year 0 cards" })
+        ).toHaveAttribute("href", "/the-memes?year=0&sort=age&sort_dir=ASC");
       },
       { timeout: 5000 }
     );
@@ -732,6 +735,12 @@ describe("MemePage navigation integration", () => {
         ).toHaveAttribute(
           "href",
           "/the-memes?szn=1&sort=age&sort_dir=ASC&locale=de-DE"
+        );
+        expect(
+          screen.getByRole("link", { name: "View Year 0 cards" })
+        ).toHaveAttribute(
+          "href",
+          "/the-memes?year=0&sort=age&sort_dir=ASC&locale=de-DE"
         );
         expect(
           screen.getByLabelText("Meme calendar position")

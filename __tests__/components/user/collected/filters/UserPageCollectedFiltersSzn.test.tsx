@@ -5,7 +5,7 @@ import { render } from "@testing-library/react";
 let capturedProps: any = null;
 
 jest.mock(
-  "@/components/utils/select/dropdown/SeasonsGridDropdown",
+  "@/components/utils/select/dropdown/MemeSeasonGridDropdown",
   () => (props: any) => {
     capturedProps = props;
     return <div data-testid="seasons-grid-dropdown" />;
@@ -17,7 +17,7 @@ describe("UserPageCollectedFiltersSzn", () => {
     capturedProps = null;
   });
 
-  it("passes props to SeasonsGridDropdown", () => {
+  it("passes props to MemeSeasonGridDropdown", () => {
     const mockSeason: MemeSeason = {
       id: 1,
       start_index: 1,

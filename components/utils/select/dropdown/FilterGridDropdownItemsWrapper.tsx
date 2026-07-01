@@ -1,14 +1,14 @@
 "use client";
 
-import type { ReactNode, RefObject} from "react";
+import type { ReactNode, RefObject } from "react";
 import { useEffect, useState } from "react";
 import { createBreakpoint } from "react-use";
-import SeasonsGridDropdownDesktopWrapper from "./SeasonsGridDropdownDesktopWrapper";
-import SeasonsGridDropdownMobileWrapper from "./SeasonsGridDropdownMobileWrapper";
+import FilterGridDropdownDesktopWrapper from "./FilterGridDropdownDesktopWrapper";
+import FilterGridDropdownMobileWrapper from "./FilterGridDropdownMobileWrapper";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-export default function SeasonsGridDropdownItemsWrapper({
+export default function FilterGridDropdownItemsWrapper({
   isOpen,
   filterLabel,
   buttonRef,
@@ -33,19 +33,21 @@ export default function SeasonsGridDropdownItemsWrapper({
   return (
     <>
       {isMobile ? (
-        <SeasonsGridDropdownMobileWrapper
+        <FilterGridDropdownMobileWrapper
           isOpen={isOpen}
           label={filterLabel}
-          setOpen={setOpen}>
+          setOpen={setOpen}
+        >
           {children}
-        </SeasonsGridDropdownMobileWrapper>
+        </FilterGridDropdownMobileWrapper>
       ) : (
-        <SeasonsGridDropdownDesktopWrapper
+        <FilterGridDropdownDesktopWrapper
           isOpen={isOpen}
           setOpen={setOpen}
-          buttonRef={buttonRef}>
+          buttonRef={buttonRef}
+        >
           {children}
-        </SeasonsGridDropdownDesktopWrapper>
+        </FilterGridDropdownDesktopWrapper>
       )}
     </>
   );
