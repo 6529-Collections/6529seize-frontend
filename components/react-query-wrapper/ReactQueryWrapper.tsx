@@ -982,6 +982,14 @@ const createReactQueryContextValue = (
     });
   };
 
+  const invalidateWavesV2 = () => {
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVES_V2],
+      })
+      .catch(() => undefined);
+  };
+
   const invalidateAllWaves = () => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES_OVERVIEW],
@@ -989,11 +997,7 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC],
     });
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.WAVES_V2],
-      })
-      .catch(() => undefined);
+    invalidateWavesV2();
     queryClient
       .invalidateQueries({
         queryKey: [QueryKey.WAVE_SUBWAVES],
@@ -1114,6 +1118,7 @@ const createReactQueryContextValue = (
         queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
       })
       .catch(() => undefined);
+    invalidateWavesV2();
   };
 
   const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {
