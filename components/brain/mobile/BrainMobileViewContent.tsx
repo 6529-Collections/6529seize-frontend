@@ -105,10 +105,11 @@ interface BrainMobileCompetitionWaveViewProps extends BrainMobileWaveViewProps {
   readonly isCompetitionWave: boolean;
 }
 
-interface BrainMobileOutcomeViewProps extends BrainMobileWaveViewProps {
+interface BrainMobileOutcomeViewProps {
   readonly isCompetitionWave: boolean;
   readonly isCurationWave: boolean;
   readonly outcomesVisible: boolean;
+  readonly wave: ApiWave | null | undefined;
 }
 
 interface BrainMobileCurationViewProps {
@@ -312,7 +313,6 @@ export default function BrainMobileViewContent({
           isCurationWave={isCurationWave}
           outcomesVisible={outcomesVisible}
           wave={wave}
-          onDropClick={onDropClick}
         />
       );
     case BrainView.MY_VOTES:
