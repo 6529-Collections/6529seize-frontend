@@ -96,7 +96,7 @@ const LOW_VALUE_PUSH_REGISTRATION_ERROR_PATTERNS = [
   "com.google.iid error -25291",
 ];
 const LOW_VALUE_PUSH_REGISTRATION_ERROR_DOMAIN = "com.google.iid";
-const LOW_VALUE_PUSH_REGISTRATION_ERROR_CODES = new Set(["-25291"]);
+const LOW_VALUE_PUSH_REGISTRATION_ERROR_CODE_STRINGS = new Set(["-25291"]);
 
 type PushRegistrationFingerprint = {
   deviceId: string;
@@ -381,19 +381,17 @@ const isKnownLowValuePushRegistrationError = (error: unknown): boolean => {
   const errorRecord = toRecord(error);
   const normalizedErrorDomain =
     errorRecord !== null
-      ? getStringErrorField(errorRecord, "domain")?.toLowerCase() ?? ""
+      ? (getStringErrorField(errorRecord, "domain")?.toLowerCase() ?? "")
       : "";
 
   const matchesKnownPattern = LOW_VALUE_PUSH_REGISTRATION_ERROR_PATTERNS.some(
-    (pattern) =>
-      normalizedMessage.includes(pattern) ||
-      normalizedErrorCode.includes(pattern)
+    (pattern) => normalizedMessage.includes(pattern)
   );
 
   return (
     matchesKnownPattern ||
     (normalizedErrorDomain === LOW_VALUE_PUSH_REGISTRATION_ERROR_DOMAIN &&
-      LOW_VALUE_PUSH_REGISTRATION_ERROR_CODES.has(normalizedErrorCode))
+      LOW_VALUE_PUSH_REGISTRATION_ERROR_CODE_STRINGS.has(normalizedErrorCode))
   );
 };
 
