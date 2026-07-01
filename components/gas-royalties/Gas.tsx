@@ -124,21 +124,25 @@ export default function GasComponent() {
         getUrl={getUrlWithParams}
         {...getSharedProps()}
       />
-      <div className="tw-pt-4">
+      <section className="tailwind-scope tw-container tw-mx-auto tw-px-0 tw-pt-4">
         <div className={`tw-pt-3 ${styles["scrollContainer"]}`}>
           {gas.length > 0 && (
-            <table className={styles["gasTable"]}>
+            <table
+              className={`${styles["gasTable"]} tw-mb-4 tw-w-full tw-border-collapse tw-text-inherit`}
+            >
               <thead>
                 <tr>
-                  <th>Meme Card (x{gas.length})</th>
-                  <th>Artist</th>
-                  <th className="tw-text-center">Gas (ETH)</th>
+                  <th className="tw-p-2 tw-text-left">
+                    Meme Card (x{gas.length})
+                  </th>
+                  <th className="tw-p-2 tw-text-left">Artist</th>
+                  <th className="tw-p-2 tw-text-center">Gas (ETH)</th>
                 </tr>
               </thead>
               <tbody>
                 {gas.map((g) => (
                   <tr key={`token-${g.token_id}`}>
-                    <td>
+                    <td className="tw-p-2 tw-align-middle">
                       <GasRoyaltiesTokenImage
                         path={
                           collectionFocus ===
@@ -151,31 +155,38 @@ export default function GasComponent() {
                         thumbnail={g.thumbnail}
                       />
                     </td>
-                    <td>{g.artist}</td>
-                    <td className="tw-text-center">
+                    <td className="tw-p-2 tw-align-middle">{g.artist}</td>
+                    <td className="tw-p-2 tw-text-center tw-align-middle">
                       {displayDecimal(g.gas)}
                     </td>
                   </tr>
                 ))}
                 <tr key={`gas-total`}>
-                  <td colSpan={2} className="tw-text-right">
+                  <td
+                    colSpan={2}
+                    className="tw-p-2 tw-text-right tw-align-middle"
+                  >
                     <b>TOTAL</b>
                   </td>
-                  <td className="tw-text-center">{displayDecimal(sumGas)}</td>
+                  <td className="tw-p-2 tw-text-center tw-align-middle">
+                    {displayDecimal(sumGas)}
+                  </td>
                 </tr>
               </tbody>
             </table>
           )}
         </div>
         {!fetching && gas.length === 0 && (
-          <h5>{fetchError || "No gas info found for selected dates"}</h5>
+          <div>
+            <h5>{fetchError || "No gas info found for selected dates"}</h5>
+          </div>
         )}
         {!fetching && gas.length > 0 && (
-          <div className="font-color-h tw-pb-3 tw-pt-3">
+          <div className="tw-pb-3 tw-pt-3 tw-text-iron-400">
             All values are in ETH
           </div>
         )}
-      </div>
+      </section>
     </>
   );
 }
