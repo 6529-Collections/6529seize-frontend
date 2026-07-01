@@ -1530,11 +1530,6 @@ function hasAppOwnedSourceFrame(
   );
 }
 
-function hasAppOwnedSourceStack(hint?: SentryEventHint): boolean {
-  const stack = getHintExceptionStack(hint);
-  return appOwnedFramePathPrefixes.some((prefix) => stack.includes(prefix));
-}
-
 function addBreadcrumbSignatureValues(
   value: unknown,
   values: string[],
