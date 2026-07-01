@@ -1,6 +1,5 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import {
   useCollectionIndex,
@@ -13,8 +12,13 @@ import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  Row,
 } from "./NextGenAdminShared";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 

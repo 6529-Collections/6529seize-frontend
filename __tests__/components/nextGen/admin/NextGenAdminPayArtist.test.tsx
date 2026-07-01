@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import NextGenAdminPayArtist from '@/components/nextGen/admin/NextGenAdminPayArtist';
 
 jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
+  ...jest.requireActual('@/components/nextGen/admin/NextGenAdminShared'),
   NextGenCollectionIdFormGroup: ({ onChange }: any) => <input data-testid="col" onChange={e=>onChange(e.target.value)} />,
   NextGenAdminHeadingRow: () => <div data-testid="heading" />,
   NextGenAdminTextFormGroup: ({ title, value, setValue }: any) => <input data-testid={title} value={value} onChange={e=>setValue(e.target.value)} />

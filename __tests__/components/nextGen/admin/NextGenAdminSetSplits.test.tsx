@@ -12,6 +12,7 @@ jest.mock('@/components/nextGen/nextgen_helpers', () => ({
 }));
 
 jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
+  ...jest.requireActual('@/components/nextGen/admin/NextGenAdminShared'),
   NextGenCollectionIdFormGroup: ({ onChange }: any) => <input data-testid="collection" onChange={e => onChange(e.target.value)} />,
   NextGenAdminHeadingRow: () => <div />,
   NextGenAdminTextFormGroup: ({ title, value, setValue }: any) => <input aria-label={title} value={value} onChange={e=>setValue(e.target.value)} />,

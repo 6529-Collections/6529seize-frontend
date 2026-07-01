@@ -14,6 +14,7 @@ jest.mock('@/components/nextGen/nextgen_helpers', () => ({
 }));
 
 jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
+  ...jest.requireActual('@/components/nextGen/admin/NextGenAdminShared'),
   NextGenCollectionIdFormGroup: ({ collection_id, onChange }: any) => (
     <input data-testid="collection" value={collection_id} onChange={e=>onChange(e.target.value)} />
   ),

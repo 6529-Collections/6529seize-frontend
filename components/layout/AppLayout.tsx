@@ -11,7 +11,6 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "@/contexts/HeaderContext";
 import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
-import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
 import { useSelector } from "react-redux";
 import { selectEditingDropId } from "@/store/editSlice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -56,6 +55,27 @@ const streamRouteLoadingReserveVisibleStyle: StreamRouteLoadingReserveStyle = {
   [STREAM_ROUTE_LOADING_HEADER_RESERVE]:
     STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE,
 };
+
+const mobileBranchLoadingStyle: CSSProperties = {
+  minHeight: `calc(100dvh - var(${STREAM_ROUTE_LOADING_HEADER_RESERVE}) - var(${STREAM_ROUTE_LOADING_BOTTOM_RESERVE}))`,
+};
+
+function MobileBranchLoadingFallback() {
+  return (
+    <div
+      data-mobile-bottom-nav-scroll-target="true"
+      className="tw-bg-black"
+      style={mobileBranchLoadingStyle}
+    />
+  );
+}
+
+const BrainMobileMessages = dynamic(
+  () => import("../brain/mobile/BrainMobileMessages"),
+  {
+    loading: () => <MobileBranchLoadingFallback />,
+  }
+);
 
 const contentOwnsBottomNavClearance = ({
   activeView,

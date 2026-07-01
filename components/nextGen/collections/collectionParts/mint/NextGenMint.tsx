@@ -32,7 +32,6 @@ import { fetchUrl } from "@/services/6529api";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import { useReadContract, useReadContracts } from "wagmi";
 import {
   NextGenCountdown,
@@ -50,8 +49,10 @@ interface Props {
 
 export function Spinner() {
   return (
-    <div className="d-inline">
-      <output className={`spinner-border ${styles["loader"]}`}></output>
+    <div className="tw-inline">
+      <output
+        className={`${styles["loader"]} tw-inline-block tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-current tw-border-r-transparent tw-align-[-0.125em]`}
+      ></output>
     </div>
   );
 }
@@ -331,7 +332,7 @@ export default function NextGenMint(props: Readonly<Props>) {
         return printMintWidget(collection.al_type);
       }
       return (
-        <span className="d-flex gap-1 align-items-center">
+        <span className="tw-flex tw-items-center tw-gap-1">
           <Image
             unoptimized
             loading="eager"
@@ -349,9 +350,9 @@ export default function NextGenMint(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
-      <Row className="pt-2">
-        <Col sm={12} md={6} className="d-flex flex-column">
+    <div>
+      <div className="tw-grid tw-grid-cols-1 tw-pt-2 md:tw-grid-cols-2">
+        <div className="tw-flex tw-flex-col tw-px-3">
           <NextGenPhases collection={props.collection} available={available} />
           <Link
             href={`/nextgen/collection/${formatNameForUrl(
@@ -359,7 +360,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             )}`}
             className="decoration-hover-underline"
           >
-            <h1 className="mb-0 font-color">{props.collection.name}</h1>
+            <h1 className="font-color tw-mb-0">{props.collection.name}</h1>
           </Link>
           <span className="font-larger">
             by{" "}
@@ -369,7 +370,7 @@ export default function NextGenMint(props: Readonly<Props>) {
               </Link>
             </b>
           </span>
-          <span className="pt-2 font-larger d-inline-flex align-items-center">
+          <span className="font-larger tw-inline-flex tw-items-center tw-pt-2">
             <NextGenMintCounts
               collection={props.collection}
               setAvailable={setAvailable}
@@ -377,17 +378,13 @@ export default function NextGenMint(props: Readonly<Props>) {
               setShouldRefetchMintCounts={setShouldRefetchMintCounts}
             />
           </span>
-        </Col>
-        <Col sm={12} md={6} className="pt-1 pb-1 d-flex align-items-center">
+        </div>
+        <div className="tw-flex tw-items-center tw-px-3 tw-py-1">
           <NextGenCountdown collection={props.collection} />
-        </Col>
-      </Row>
-      <Row className="pt-4 pb-4">
-        <Col
-          sm={12}
-          md={6}
-          className="no-padding d-flex align-items-start justify-content-start gap-3"
-        >
+        </div>
+      </div>
+      <div className="tw-grid tw-grid-cols-1 tw-py-4 tw-pt-4 md:tw-grid-cols-2">
+        <div className="tw-flex tw-items-start tw-justify-start tw-gap-3 tw-px-0">
           <Image
             unoptimized
             loading="eager"
@@ -406,13 +403,13 @@ export default function NextGenMint(props: Readonly<Props>) {
               e.currentTarget.src = "/pebbles-loading.jpeg";
             }}
           />
-        </Col>
-        <Col sm={12} md={6}>
-          <Container className="no-padding">
-            <Row className="pt-2">
-              <Col className="d-flex gap-2">
+        </div>
+        <div className="tw-px-3">
+          <div>
+            <div className="tw-pt-2">
+              <div className="tw-flex tw-gap-2">
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles["nextgenTag"]}`}
+                  className={`tw-mb-0 tw-flex tw-items-center tw-gap-2 no-wrap ${styles["nextgenTag"]}`}
                 >
                   <span>Mint Cost:</span>
                   <span className="font-bolder">
@@ -421,19 +418,17 @@ export default function NextGenMint(props: Readonly<Props>) {
                   </span>
                 </span>
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles["nextgenTag"]}`}
+                  className={`tw-mb-0 tw-flex tw-items-center tw-gap-2 no-wrap ${styles["nextgenTag"]}`}
                 >
                   <span>Sales Model:</span>
                   <span className="font-bolder">{getSalesModel()}</span>
                 </span>
-              </Col>
-            </Row>
-            <Row className="pt-3">
-              <Col>{printMintWidgetContent()}</Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+              </div>
+            </div>
+            <div className="tw-pt-3">{printMintWidgetContent()}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -18,10 +17,15 @@ import {
 import type { Info, LibraryScript } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
+  Button,
+  Col,
+  Container,
+  Form,
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
+  Row,
 } from "./NextGenAdminShared";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 

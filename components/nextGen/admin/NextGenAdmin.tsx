@@ -1,9 +1,9 @@
 "use client";
 
-import { Container, Row, Col, Button } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import styles from "./NextGenAdmin.module.scss";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button, Col, Container, Row } from "./NextGenAdminShared";
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -89,12 +89,12 @@ enum ArtistFocus {
 
 export function printAdminErrors(errors: string[]) {
   return (
-    <div className="mb-3">
+    <div className="tw-mb-4">
       <ul>
         {errors.map((error) => (
           <li
             key={`error-${error.replaceAll("", " ")}`}
-            className="text-danger">
+            className="tw-text-error">
             {error}
           </li>
         ))}
@@ -260,10 +260,10 @@ export default function NextGenAdmin() {
       <Container className="no-padding">
         <Row className="pt-2">
           <Col className="d-flex flex-column align-items-center gap-3">
-            <h4 className="font-color">
+            <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
               ONLY ADMIN WALLETS CAN USE THIS dAPP.
             </h4>
-            <h4 className="font-color">
+            <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
               PLEASE USE AN ADMIN WALLET TO CONTINUE.
             </h4>
           </Col>
@@ -378,7 +378,9 @@ export default function NextGenAdmin() {
         <>
           <Row className="pt-4">
             <Col xs={12}>
-              <h4>COLLECTION ACTIONS</h4>
+              <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
+                COLLECTION ACTIONS
+              </h4>
             </Col>
             <Col
               xs={12}
@@ -516,7 +518,9 @@ export default function NextGenAdmin() {
         <>
           <Row className="pt-4">
             <Col xs={12}>
-              <h4>PAY</h4>
+              <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
+                PAY
+              </h4>
             </Col>
             <Col
               xs={12}
@@ -591,7 +595,9 @@ export default function NextGenAdmin() {
           <>
             <Row className="pt-4">
               <Col xs={12}>
-                <h4>REGISTER / REVOKE ADMINS</h4>
+                <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
+                  REGISTER / REVOKE ADMINS
+                </h4>
               </Col>
               <Col
                 xs={12}
@@ -648,7 +654,9 @@ export default function NextGenAdmin() {
           <>
             <Row className="pt-4">
               <Col xs={12}>
-                <h4>CONTRACT ACTIONS</h4>
+                <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
+                  CONTRACT ACTIONS
+                </h4>
               </Col>
               <Col
                 xs={12}
@@ -686,7 +694,9 @@ export default function NextGenAdmin() {
         <>
           <Row className="pt-4">
             <Col xs={12}>
-              <h4>SET DATA</h4>
+              <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
+                SET DATA
+              </h4>
             </Col>
             <Col
               xs={12}
@@ -761,7 +771,9 @@ export default function NextGenAdmin() {
         <>
           <Row className="pt-4">
             <Col xs={12}>
-              <h4>UPDATE COLLECTION</h4>
+              <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
+                UPDATE COLLECTION
+              </h4>
             </Col>
             <Col
               xs={12}
@@ -869,7 +881,7 @@ export default function NextGenAdmin() {
         <Container>
           <Row className="pt-2">
             <Col className="d-flex flex-column align-items-center gap-3">
-              <h4 className="font-color">
+              <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
                 ONLY COLLECTION ARTISTS CAN USE THIS SECTION.
               </h4>
             </Col>
@@ -881,7 +893,9 @@ export default function NextGenAdmin() {
       <Container>
         <Row>
           <Col xs={12}>
-            <h4>SELECT ACTION</h4>
+            <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
+              SELECT ACTION
+            </h4>
           </Col>
         </Row>
         <Row className="pt-2">
