@@ -1,12 +1,85 @@
 "use client";
 
 import styles from "./Address.module.scss";
-import { containsEmojis, formatAddress, parseEmojis } from "@/helpers/Helpers";
+import { containsEmojis, formatAddress } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { type FocusEvent, useId, useRef, useState } from "react";
+import {
+  type FocusEvent,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Link from "next/link";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+
+const CODE_POINT_NOTATION = /U\+([\dA-Fa-f]{1,6})/g;
+const COPY_OPTIONS_ARIA_LABEL = t(
+  DEFAULT_LOCALE,
+  "walletAddress.copy.optionsAriaLabel"
+);
+const COPY_ENS_ARIA_LABEL = t(
+  DEFAULT_LOCALE,
+  "walletAddress.copy.ensAriaLabel"
+);
+const COPY_WALLET_ARIA_LABEL = t(
+  DEFAULT_LOCALE,
+  "walletAddress.copy.walletAriaLabel"
+);
+const COPY_TOOLTIP_LABEL = t(DEFAULT_LOCALE, "walletAddress.copy.tooltip");
+const COPIED_TOOLTIP_LABEL = t(
+  DEFAULT_LOCALE,
+  "walletAddress.copy.copiedTooltip"
+);
+
+function formatDisplayText(value: string) {
+  if (!containsEmojis(value)) {
+    return formatAddress(value);
+  }
+
+  return value.replaceAll(CODE_POINT_NOTATION, (_, hexValue: string) => {
+    const codePoint = Number.parseInt(hexValue, 16);
+    try {
+      return String.fromCodePoint(codePoint);
+    } catch {
+      return `U+${hexValue}`;
+    }
+  });
+}
+
+function subscribeToClipboardAvailability() {
+  return () => undefined;
+}
+
+function getClipboardWriteText(): ((text: string) => Promise<void>) | null {
+  if (typeof navigator === "undefined") {
+    return null;
+  }
+
+  const clipboard = Reflect.get(navigator, "clipboard") as unknown;
+  if (typeof clipboard !== "object" || clipboard === null) {
+    return null;
+  }
+
+  const writeText = Reflect.get(clipboard, "writeText") as unknown;
+  if (typeof writeText !== "function") {
+    return null;
+  }
+
+  return writeText.bind(clipboard) as (text: string) => Promise<void>;
+}
+
+function getClipboardAvailabilitySnapshot() {
+  return getClipboardWriteText() !== null;
+}
+
+function getServerClipboardAvailabilitySnapshot() {
+  return false;
+}
 
 export function WalletAddress(props: {
   wallet: string;
@@ -23,7 +96,16 @@ export function WalletAddress(props: {
   const ensTooltipId = `${tooltipIdBase}-ens`;
   const walletTooltipId = `${tooltipIdBase}-wallet`;
   const copyMenuRef = useRef<HTMLDetailsElement>(null);
+  const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const isMountedRef = useRef(false);
   const [isCopied, setIsCopied] = useState(false);
+  const hasClipboard = useSyncExternalStore(
+    subscribeToClipboardAvailability,
+    getClipboardAvailabilitySnapshot,
+    getServerClipboardAvailabilitySnapshot
+  );
   const addressClassName = styles["address"] ?? "";
   const addressUserPageClassName = styles["addressUserPage"] ?? "";
   const copyClassName = styles["copy"] ?? "";
@@ -36,7 +118,6 @@ export function WalletAddress(props: {
   const disableLink = props.disableLink === true;
   const hideCopy = props.hideCopy === true;
   const setLinkQueryAddress = props.setLinkQueryAddress === true;
-  const hasClipboard = Boolean(navigator.clipboard);
 
   let walletEns: string | null = null;
   if (props.display?.endsWith(".eth")) {
@@ -44,14 +125,22 @@ export function WalletAddress(props: {
   } else if (props.displayEns?.endsWith(".eth")) {
     walletEns = props.displayEns;
   }
-  const ensCopyText = props.displayEns ?? props.display;
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      if (copyResetTimeoutRef.current !== null) {
+        globalThis.clearTimeout(copyResetTimeoutRef.current);
+        copyResetTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   function resolveDisplay() {
     if (props.display) {
-      if (containsEmojis(props.display)) {
-        return parseEmojis(props.display);
-      }
-      return formatAddress(props.display);
+      return formatDisplayText(props.display);
     }
 
     return formatAddress(props.wallet);
@@ -59,10 +148,7 @@ export function WalletAddress(props: {
 
   function resolveAddress() {
     if (props.displayEns) {
-      if (containsEmojis(props.displayEns)) {
-        return parseEmojis(props.displayEns);
-      }
-      return formatAddress(props.displayEns);
+      return formatDisplayText(props.displayEns);
     }
 
     return resolveDisplay();
@@ -91,14 +177,31 @@ export function WalletAddress(props: {
   }
 
   async function copy(text: string) {
+    const writeText = getClipboardWriteText();
+    if (writeText === null) {
+      return;
+    }
+
     try {
-      await navigator.clipboard.writeText(text);
+      await writeText(text);
     } catch (error: unknown) {
       console.error("Failed to copy wallet address", error);
+      return;
+    }
+
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    if (copyResetTimeoutRef.current !== null) {
+      globalThis.clearTimeout(copyResetTimeoutRef.current);
     }
     setIsCopied(true);
-    setTimeout(() => {
-      setIsCopied(false);
+    copyResetTimeoutRef.current = globalThis.setTimeout(() => {
+      if (isMountedRef.current) {
+        setIsCopied(false);
+        copyResetTimeoutRef.current = null;
+      }
     }, 1000);
     closeCopyMenu();
   }
@@ -114,13 +217,13 @@ export function WalletAddress(props: {
   }
 
   function copyEns() {
-    if (typeof ensCopyText !== "string") {
+    if (walletEns === null) {
       return;
     }
-    void copy(ensCopyText);
+    void copy(walletEns);
   }
 
-  const tooltipLabel = isCopied ? "Copied" : "Copy";
+  const tooltipLabel = isCopied ? COPIED_TOOLTIP_LABEL : COPY_TOOLTIP_LABEL;
 
   return (
     <span>
@@ -160,7 +263,7 @@ export function WalletAddress(props: {
               <summary
                 className={copyMenuToggleClassName}
                 data-tooltip-id={copyTooltipId}
-                aria-label="Copy wallet options"
+                aria-label={COPY_OPTIONS_ARIA_LABEL}
               >
                 {isUserPage && props.display && (
                   <span
@@ -176,24 +279,21 @@ export function WalletAddress(props: {
                 />
               </summary>
               <span className={copyMenuItemsClassName}>
-                {typeof ensCopyText === "string" && ensCopyText.length > 0 && (
-                  <button
-                    type="button"
-                    data-tooltip-id={ensTooltipId}
-                    className={copyMenuItemClassName}
-                    aria-label="Copy ENS name"
-                    onClick={copyEns}
-                    dangerouslySetInnerHTML={{
-                      __html: resolveAddress(),
-                    }}
-                  ></button>
-                )}
+                <button
+                  type="button"
+                  data-tooltip-id={ensTooltipId}
+                  className={copyMenuItemClassName}
+                  aria-label={COPY_ENS_ARIA_LABEL}
+                  onClick={copyEns}
+                >
+                  {resolveAddress()}
+                </button>
 
                 <button
                   type="button"
                   data-tooltip-id={walletTooltipId}
                   className={copyMenuItemClassName}
-                  aria-label="Copy wallet address"
+                  aria-label={COPY_WALLET_ARIA_LABEL}
                   onClick={() => {
                     void copy(props.wallet);
                   }}
@@ -207,7 +307,7 @@ export function WalletAddress(props: {
               type="button"
               className={copyButtonClassName}
               data-tooltip-id={copyTooltipId}
-              aria-label="Copy wallet address"
+              aria-label={COPY_WALLET_ARIA_LABEL}
               onClick={() => {
                 void copy(props.wallet);
               }}
@@ -215,10 +315,9 @@ export function WalletAddress(props: {
               {isUserPage && (
                 <span
                   className={`${addressClassName} ${addressUserPageClassName}`}
-                  dangerouslySetInnerHTML={{
-                    __html: resolveAddress(),
-                  }}
-                ></span>
+                >
+                  {resolveAddress()}
+                </span>
               )}
               <FontAwesomeIcon
                 icon={faCopy}
