@@ -71,9 +71,8 @@ jest.mock("next/dynamic", () => ({
         "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal"
       )
     ) {
-      return require(
-        "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal"
-      ).WaveLeaderboardCurationDropModal;
+      return require("@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal")
+        .WaveLeaderboardCurationDropModal;
     }
 
     throw new Error(

@@ -1,29 +1,9 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 
-let inputGroupProps: any = {};
-jest.mock("react-bootstrap", () => {
-  const Modal = (props: any) => <div>{props.children}</div>;
-  Modal.Header = (props: any) => <div>{props.children}</div>;
-  Modal.Title = (props: any) => <div>{props.children}</div>;
-  Modal.Body = (props: any) => <div>{props.children}</div>;
-  
-  const Form = { Control: (props: any) => <input {...props} /> };
-  
-  return {
-    Modal,
-    InputGroup: (props: any) => {
-      inputGroupProps = props;
-      return <div {...props} />;
-    },
-    Form,
-    Button: (props: any) => <button {...props}>{props.children}</button>,
-  };
-});
-
-
 jest.mock("@/helpers/Helpers", () => ({
-  formatAddress: (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`
+  formatAddress: (address: string) =>
+    `${address.slice(0, 6)}...${address.slice(-4)}`,
 }));
 
 jest.mock("@/components/searchModal/SearchModal.module.scss", () => ({
@@ -39,25 +19,33 @@ jest.mock("@/components/searchModal/SearchModal.module.scss", () => ({
   searchWalletDisplay: "search-wallet-display",
   clearSearchBtnIcon: "clear-search-btn-icon",
   searchBtn: "search-btn",
-  searchBtnActive: "search-btn-active"
+  searchBtnActive: "search-btn-active",
 }));
 
 jest.mock("@fortawesome/free-solid-svg-icons", () => ({
   faSearch: "fa-search",
   faSquareXmark: "fa-square-xmark",
-  faTimesCircle: "fa-times-circle"
+  faTimesCircle: "fa-times-circle",
 }));
 
-import { SearchWalletsDisplay, SearchModalDisplay } from "@/components/searchModal/SearchModal";
-
-
+import {
+  SearchWalletsDisplay,
+  SearchModalDisplay,
+} from "@/components/searchModal/SearchModal";
 
 describe("SearchWalletsDisplay", () => {
   it("formats addresses", () => {
     function Wrapper() {
-      const [wallets, setWallets] = React.useState(["0x1234567890abcdef1234567890abcdef12345678", "bob.eth"]);
+      const [wallets, setWallets] = React.useState([
+        "0x1234567890abcdef1234567890abcdef12345678",
+        "bob.eth",
+      ]);
       return (
-        <SearchWalletsDisplay searchWallets={wallets} setSearchWallets={setWallets} setShowSearchModal={jest.fn()} />
+        <SearchWalletsDisplay
+          searchWallets={wallets}
+          setSearchWallets={setWallets}
+          setShowSearchModal={jest.fn()}
+        />
       );
     }
     render(<Wrapper />);
@@ -69,10 +57,6 @@ describe("SearchWalletsDisplay", () => {
 });
 
 describe("SearchModalDisplay", () => {
-  beforeEach(() => {
-    inputGroupProps = {};
-  });
-
   function Wrapper({ initial }: { initial: string[] }) {
     const [wallets, setWallets] = React.useState(initial);
     return (
@@ -103,7 +87,7 @@ describe("SearchModalDisplay", () => {
     fireEvent.change(input, { target: { value: "dup" } });
     fireEvent.click(screen.getByLabelText("Add search wallet"));
     expect(screen.getAllByText("dup").length).toBe(1);
-    expect(inputGroupProps.className).toContain("shakeWalletInput");
+    expect(input.closest("form")).toHaveClass("shakeWalletInput");
   });
 
   it("clears all wallets", () => {

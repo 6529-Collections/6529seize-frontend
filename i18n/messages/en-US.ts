@@ -1243,6 +1243,11 @@ export const EN_US_MESSAGES = {
   "drop.media.saveDialogTitle": "Save image",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  "walletAddress.copy.optionsAriaLabel": "Copy wallet options",
+  "walletAddress.copy.ensAriaLabel": "Copy ENS name",
+  "walletAddress.copy.walletAriaLabel": "Copy wallet address",
+  "walletAddress.copy.tooltip": "Copy",
+  "walletAddress.copy.copiedTooltip": "Copied",
   ...QR_SCANNER_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
