@@ -58,8 +58,11 @@
 }
 
 .distributionCarousel {
+  position: relative;
   width: 90%;
   margin-left: 5%;
+  overflow: hidden;
+
   img {
     width: 80%;
     margin-left: 10%;
