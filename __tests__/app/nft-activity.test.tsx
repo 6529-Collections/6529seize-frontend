@@ -33,17 +33,6 @@ jest.mock("@/components/latest-activity/LatestActivity", () => {
   };
 });
 
-// Mock react-bootstrap components
-jest.mock("react-bootstrap", () => ({
-  Container: ({ children, fluid, className }: any) => (
-    <div data-testid="container" className={className} data-fluid={fluid}>
-      {children}
-    </div>
-  ),
-  Row: ({ children }: any) => <div data-testid="row">{children}</div>,
-  Col: ({ children }: any) => <div data-testid="col">{children}</div>,
-}));
-
 // Mock styles
 jest.mock("@/styles/Modules.module.scss", () => ({
   main: "main-class",
@@ -84,11 +73,10 @@ describe("NFTActivityPage", () => {
   };
 
   it("renders the main layout structure", () => {
-    renderComponent();
+    const { container } = renderComponent();
 
-    expect(screen.getByTestId("container")).toBeInTheDocument();
-    expect(screen.getByTestId("row")).toBeInTheDocument();
-    expect(screen.getByTestId("col")).toBeInTheDocument();
+    expect(container.querySelector("main")).toBeInTheDocument();
+    expect(container.querySelector("main > section")).toBeInTheDocument();
   });
 
   it("renders the LatestActivity component with correct props", () => {
@@ -101,11 +89,11 @@ describe("NFTActivityPage", () => {
   });
 
   it("applies correct CSS classes", () => {
-    renderComponent();
+    const { container } = renderComponent();
 
-    const container = screen.getByTestId("container");
-    expect(container).toHaveClass("leaderboard-container-class");
-    expect(container).toHaveAttribute("data-fluid", "true");
+    const section = container.querySelector("main > section");
+    expect(section).toHaveClass("leaderboard-container-class");
+    expect(section).toHaveClass("tailwind-scope");
   });
 
   it("sets the page title on mount", () => {

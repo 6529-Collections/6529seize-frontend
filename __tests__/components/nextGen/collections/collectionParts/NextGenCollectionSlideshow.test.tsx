@@ -33,11 +33,11 @@ const mockTokens: NextGenToken[] = [
 ] as NextGenToken[];
 
 describe("NextGenCollectionSlideshow", () => {
-  it("renders slideshow container with Bootstrap classes", () => {
+  it("renders slideshow container with Tailwind classes", () => {
     const { container } = render(<NextGenCollectionSlideshow collection={mockCollection} />);
     
-    // Should render the main container structure 
-    const fluidContainer = container.querySelector(".container-fluid");
+    // Should render the main fluid container structure
+    const fluidContainer = container.querySelector(".tw-max-w-none");
     expect(fluidContainer).toBeInTheDocument();
   });
 

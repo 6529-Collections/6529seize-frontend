@@ -1,7 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { setAuthJwt } from "./auth.utils";
+import { getWalletAddress, setAuthJwt } from "./auth.utils";
 import {
   getNativeRefreshToken,
   isNativeSecureStorageAvailable,
@@ -9,7 +9,8 @@ import {
   setNativeRefreshToken,
 } from "./native-refresh-token-storage";
 
-type AuthSessionClientType = "web" | "native";
+type AuthSessionClientType = "web" | "native" | "desktop";
+type RefreshTokenSessionClientType = Exclude<AuthSessionClientType, "web">;
 
 interface SessionLoginRequest {
   readonly client_type: AuthSessionClientType;
@@ -32,13 +33,27 @@ interface SessionNativeResponse {
   readonly role: string | null;
   readonly access_token: string;
   readonly access_token_expires_at: string;
-  readonly client_type: "native";
+  readonly client_type: RefreshTokenSessionClientType;
   readonly native_refresh_token: string;
   readonly refresh_token_expires_at: string;
 }
 
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
+type SessionRefreshFailureCooldown =
+  | {
+      readonly type: "empty";
+      readonly expiresAtMs: number;
+    }
+  | {
+      readonly type: "retry";
+      readonly expiresAtMs: number;
+    };
+type SessionRefreshInFlight = {
+  readonly controller: AbortController;
+  readonly promise: Promise<SessionRefreshResponse | null>;
+  activeConsumers: number;
+};
 
 type ApiStatusError = {
   readonly status?: unknown;
@@ -52,7 +67,7 @@ interface CreateConnectionShareResponse {
   readonly expires_at: string;
   readonly address: string;
   readonly role: string | null;
-  readonly target_client_type: "native";
+  readonly target_client_type: RefreshTokenSessionClientType;
   readonly deep_link_path: string;
 }
 
@@ -68,9 +83,24 @@ interface RedeemConnectionShareResponse {
   readonly role: string | null;
   readonly access_token: string;
   readonly access_token_expires_at: string;
+  readonly client_type?: RefreshTokenSessionClientType | undefined;
   readonly native_refresh_token: string;
   readonly refresh_token_expires_at: string;
 }
+
+interface NativeConnectionShareSourceProof {
+  readonly client_type: RefreshTokenSessionClientType;
+  readonly client_address: string;
+  readonly native_refresh_token: string;
+}
+
+const SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS = 2000;
+const SESSION_REFRESH_RETRY_COOLDOWN_MS = 250;
+const sessionRefreshInFlight = new Map<string, SessionRefreshInFlight>();
+const sessionRefreshFailureCooldowns = new Map<
+  string,
+  SessionRefreshFailureCooldown
+>();
 
 export function getSessionClientType(): AuthSessionClientType {
   return Capacitor.isNativePlatform() ? "native" : "web";
@@ -83,6 +113,172 @@ function isUnauthorizedApiError(error: unknown): boolean {
 
   const statusError = error as ApiStatusError;
   return statusError.status === 401 || statusError.response?.status === 401;
+}
+
+function getSessionRefreshKey({
+  address,
+  clientType,
+}: {
+  readonly address: string;
+  readonly clientType: AuthSessionClientType;
+}): string {
+  return `${clientType}:${address.trim().toLowerCase()}`;
+}
+
+function createAbortError(): DOMException {
+  return new DOMException("Session refresh aborted", "AbortError");
+}
+
+const isAbortError = (error: unknown): boolean =>
+  typeof error === "object" &&
+  error !== null &&
+  "name" in error &&
+  error.name === "AbortError";
+
+function getActiveFailureCooldown(
+  key: string
+): SessionRefreshFailureCooldown | null {
+  const cooldown = sessionRefreshFailureCooldowns.get(key);
+  if (!cooldown) {
+    return null;
+  }
+
+  if (cooldown.expiresAtMs <= Date.now()) {
+    sessionRefreshFailureCooldowns.delete(key);
+    return null;
+  }
+
+  return cooldown;
+}
+
+function rememberSessionRefreshFailure(
+  key: string,
+  type: SessionRefreshFailureCooldown["type"]
+): void {
+  sessionRefreshFailureCooldowns.set(key, {
+    type,
+    expiresAtMs:
+      Date.now() +
+      (type === "empty"
+        ? SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS
+        : SESSION_REFRESH_RETRY_COOLDOWN_MS),
+  });
+}
+
+function clearSessionRefreshFailure(key: string): void {
+  sessionRefreshFailureCooldowns.delete(key);
+}
+
+function clearSessionRefreshFailureForSession(
+  response: SessionLoginResponse | SessionRefreshResponse
+): void {
+  clearSessionRefreshFailure(
+    getSessionRefreshKey({
+      address: response.address,
+      clientType: response.client_type,
+    })
+  );
+}
+
+async function waitForSessionRefreshRetryCooldown({
+  cooldown,
+  abortSignal,
+}: {
+  readonly cooldown: SessionRefreshFailureCooldown;
+  readonly abortSignal?: AbortSignal | undefined;
+}): Promise<void> {
+  const delayMs = Math.max(0, cooldown.expiresAtMs - Date.now());
+  if (delayMs === 0) {
+    return;
+  }
+  if (abortSignal?.aborted) {
+    throw createAbortError();
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined = undefined;
+    const cleanup = () => {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+      abortSignal?.removeEventListener("abort", onAbort);
+    };
+    const onAbort = () => {
+      cleanup();
+      reject(createAbortError());
+    };
+
+    timeoutId = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, delayMs);
+    abortSignal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+function settleSessionRefreshConsumer(
+  entry: SessionRefreshInFlight,
+  key: string
+): void {
+  entry.activeConsumers = Math.max(0, entry.activeConsumers - 1);
+  if (
+    entry.activeConsumers === 0 &&
+    sessionRefreshInFlight.get(key) === entry
+  ) {
+    sessionRefreshInFlight.delete(key);
+    entry.controller.abort();
+  }
+}
+
+async function withCallerAbort<T>({
+  entry,
+  key,
+  abortSignal,
+}: {
+  readonly entry: SessionRefreshInFlight;
+  readonly key: string;
+  readonly abortSignal?: AbortSignal | undefined;
+}): Promise<T> {
+  if (!abortSignal) {
+    return (await entry.promise) as T;
+  }
+
+  if (abortSignal.aborted) {
+    settleSessionRefreshConsumer(entry, key);
+    throw createAbortError();
+  }
+
+  let didSettle = false;
+  return await new Promise<T>((resolve, reject) => {
+    const onAbort = () => {
+      if (didSettle) {
+        return;
+      }
+      didSettle = true;
+      abortSignal.removeEventListener("abort", onAbort);
+      settleSessionRefreshConsumer(entry, key);
+      reject(createAbortError());
+    };
+
+    abortSignal.addEventListener("abort", onAbort, { once: true });
+    void entry.promise
+      .then((value) => {
+        if (didSettle) {
+          return;
+        }
+        didSettle = true;
+        abortSignal.removeEventListener("abort", onAbort);
+        resolve(value as T);
+      })
+      .catch((error: unknown) => {
+        if (didSettle) {
+          return;
+        }
+        didSettle = true;
+        abortSignal.removeEventListener("abort", onAbort);
+        reject(error);
+      });
+  });
 }
 
 function getSessionCredentialsMode(): RequestCredentials {
@@ -141,7 +337,10 @@ export async function loginWithSessionV2({
   readonly role: string | null;
 }): Promise<SessionLoginResponse> {
   const roleBody = role === null ? {} : { role };
-  return await commonApiPost<SessionLoginRequest, SessionLoginResponse>({
+  const response = await commonApiPost<
+    SessionLoginRequest,
+    SessionLoginResponse
+  >({
     endpoint: "auth/session-login",
     body: {
       client_type: getSessionClientType(),
@@ -152,17 +351,20 @@ export async function loginWithSessionV2({
     },
     credentials: getSessionCredentialsMode(),
   });
+  clearSessionRefreshFailureForSession(response);
+  return response;
 }
 
-export async function refreshSessionV2({
+async function executeSessionRefreshV2({
   address,
   abortSignal,
+  clientType,
 }: {
   readonly address: string;
   readonly abortSignal?: AbortSignal | undefined;
+  readonly clientType: AuthSessionClientType;
 }): Promise<SessionRefreshResponse | null> {
-  const clientType = getSessionClientType();
-  if (clientType === "native") {
+  if (clientType !== "web") {
     const nativeRefreshToken = await getNativeRefreshToken(address);
     if (!nativeRefreshToken) {
       return null;
@@ -170,7 +372,7 @@ export async function refreshSessionV2({
     try {
       return await commonApiPost<
         {
-          readonly client_type: "native";
+          readonly client_type: RefreshTokenSessionClientType;
           readonly client_address: string;
           readonly native_refresh_token: string;
         },
@@ -178,13 +380,14 @@ export async function refreshSessionV2({
       >({
         endpoint: "auth/session-refresh",
         body: {
-          client_type: "native",
+          client_type: clientType,
           client_address: address,
           native_refresh_token: nativeRefreshToken,
         },
         signal: abortSignal,
-        credentials: "include",
+        credentials: getSessionCredentialsMode(),
         errorMode: "structured",
+        includeWalletAuth: false,
       });
     } catch (error: unknown) {
       if (isUnauthorizedApiError(error)) {
@@ -208,8 +411,9 @@ export async function refreshSessionV2({
         client_address: address,
       },
       signal: abortSignal,
-      credentials: "include",
+      credentials: getSessionCredentialsMode(),
       errorMode: "structured",
+      includeWalletAuth: false,
     });
   } catch (error: unknown) {
     if (isUnauthorizedApiError(error)) {
@@ -219,11 +423,99 @@ export async function refreshSessionV2({
   }
 }
 
+export async function refreshSessionV2({
+  address,
+  abortSignal,
+}: {
+  readonly address: string;
+  readonly abortSignal?: AbortSignal | undefined;
+}): Promise<SessionRefreshResponse | null> {
+  if (abortSignal?.aborted) {
+    throw createAbortError();
+  }
+
+  const clientType = getSessionClientType();
+  const key = getSessionRefreshKey({ address, clientType });
+  const cooldown = getActiveFailureCooldown(key);
+
+  if (cooldown?.type === "empty") {
+    return null;
+  }
+  if (cooldown?.type === "retry") {
+    await waitForSessionRefreshRetryCooldown({ cooldown, abortSignal });
+    if (sessionRefreshFailureCooldowns.get(key) === cooldown) {
+      sessionRefreshFailureCooldowns.delete(key);
+    }
+  }
+
+  let existingEntry = sessionRefreshInFlight.get(key);
+  if (existingEntry?.controller.signal.aborted) {
+    sessionRefreshInFlight.delete(key);
+    existingEntry = undefined;
+  }
+
+  if (existingEntry) {
+    existingEntry.activeConsumers += 1;
+    return await withCallerAbort<SessionRefreshResponse | null>({
+      entry: existingEntry,
+      key,
+      abortSignal,
+    });
+  }
+
+  const controller = new AbortController();
+  const entry: SessionRefreshInFlight = {
+    controller,
+    activeConsumers: 1,
+    promise: executeSessionRefreshV2({
+      address,
+      abortSignal: abortSignal ? controller.signal : undefined,
+      clientType,
+    }),
+  };
+  sessionRefreshInFlight.set(key, entry);
+
+  void (async () => {
+    try {
+      const response = await entry.promise;
+      if (response) {
+        clearSessionRefreshFailure(key);
+        return;
+      }
+
+      rememberSessionRefreshFailure(key, "empty");
+    } catch (error: unknown) {
+      if (isAbortError(error)) {
+        return;
+      }
+      rememberSessionRefreshFailure(key, "retry");
+    } finally {
+      if (sessionRefreshInFlight.get(key) === entry) {
+        sessionRefreshInFlight.delete(key);
+      }
+    }
+  })();
+
+  return await withCallerAbort<SessionRefreshResponse | null>({
+    entry,
+    key,
+    abortSignal,
+  });
+}
+
+export function __resetSessionRefreshStateForTests(): void {
+  for (const entry of sessionRefreshInFlight.values()) {
+    entry.controller.abort();
+  }
+  sessionRefreshInFlight.clear();
+  sessionRefreshFailureCooldowns.clear();
+}
+
 export async function persistSessionResponse(
   response: SessionLoginResponse | SessionRefreshResponse
 ): Promise<boolean> {
   let didPersistNativeRefreshToken = false;
-  if (response.client_type === "native") {
+  if (response.client_type !== "web") {
     if (!isNativeSecureStorageAvailable()) {
       return false;
     }
@@ -249,11 +541,13 @@ export async function persistSessionResponse(
     throw error;
   }
 
-  if (!didPersistAuth) {
-    await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
+  if (didPersistAuth) {
+    clearSessionRefreshFailureForSession(response);
+    return true;
   }
 
-  return didPersistAuth;
+  await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
+  return false;
 }
 
 export async function verifyActiveSessionV2WebSession({
@@ -271,7 +565,7 @@ export async function verifyActiveSessionV2WebSession({
     address,
     abortSignal,
   });
-  if (!refreshedSession || refreshedSession.client_type !== "web") {
+  if (refreshedSession?.client_type !== "web") {
     return false;
   }
 
@@ -280,21 +574,61 @@ export async function verifyActiveSessionV2WebSession({
   return await persistSessionResponse(refreshedSession);
 }
 
+async function getNativeConnectionShareSourceProof(): Promise<NativeConnectionShareSourceProof | null> {
+  const clientType = getSessionClientType();
+  if (clientType === "web") {
+    return null;
+  }
+
+  const address = getWalletAddress();
+  if (!address) {
+    throw new Error(
+      `Connection sharing requires an active ${clientType} session`
+    );
+  }
+
+  const nativeRefreshToken = await getNativeRefreshToken(address);
+  if (!nativeRefreshToken) {
+    throw new Error(
+      `Connection sharing requires an active ${clientType} session`
+    );
+  }
+
+  return {
+    client_type: clientType,
+    client_address: address,
+    native_refresh_token: nativeRefreshToken,
+  };
+}
+
 export async function createConnectionShare({
   signal,
+  targetClientType = "native",
 }: {
   readonly signal?: AbortSignal | undefined;
+  readonly targetClientType?: RefreshTokenSessionClientType | undefined;
 }): Promise<CreateConnectionShareResponse> {
+  const sourceProof = await getNativeConnectionShareSourceProof();
+  const body = sourceProof
+    ? {
+        target_client_type: targetClientType,
+        ...sourceProof,
+      }
+    : {
+        target_client_type: targetClientType,
+      };
+
   return await commonApiPost<
     {
-      readonly target_client_type: "native";
+      readonly target_client_type: RefreshTokenSessionClientType;
+      readonly client_type?: RefreshTokenSessionClientType | undefined;
+      readonly client_address?: string | undefined;
+      readonly native_refresh_token?: string | undefined;
     },
     CreateConnectionShareResponse
   >({
     endpoint: "auth/connection-share",
-    body: {
-      target_client_type: "native",
-    },
+    body,
     credentials: getSessionCredentialsMode(),
     signal,
   });
@@ -305,12 +639,13 @@ export async function createLegacyDesktopConnectionShare({
 }: {
   readonly signal?: AbortSignal | undefined;
 }): Promise<CreateLegacyDesktopConnectionShareResponse> {
+  const sourceProof = await getNativeConnectionShareSourceProof();
   return await commonApiPost<
-    Record<string, never>,
+    Partial<NativeConnectionShareSourceProof>,
     CreateLegacyDesktopConnectionShareResponse
   >({
     endpoint: "auth/connection-share/legacy-desktop",
-    body: {},
+    body: sourceProof ?? {},
     credentials: getSessionCredentialsMode(),
     signal,
   });
@@ -324,7 +659,7 @@ export async function logoutSessionV2({
   readonly allSessions?: boolean | undefined;
 }): Promise<void> {
   const clientType = getSessionClientType();
-  if (clientType === "native") {
+  if (clientType !== "web") {
     if (!address) {
       return;
     }
@@ -335,7 +670,7 @@ export async function logoutSessionV2({
     try {
       await commonApiPost<
         {
-          readonly client_type: "native";
+          readonly client_type: RefreshTokenSessionClientType;
           readonly client_address: string;
           readonly native_refresh_token: string;
           readonly all_sessions: boolean;
@@ -344,7 +679,7 @@ export async function logoutSessionV2({
       >({
         endpoint: "auth/session-logout",
         body: {
-          client_type: "native",
+          client_type: clientType,
           client_address: address,
           native_refresh_token: nativeRefreshToken,
           all_sessions: allSessions,
@@ -378,25 +713,26 @@ export async function logoutSessionV2({
 }
 
 export async function redeemConnectionShare(
-  connectionShareCode: string
+  connectionShareCode: string,
+  targetClientType: RefreshTokenSessionClientType = "native"
 ): Promise<SessionNativeResponse> {
   const response = await commonApiPost<
     {
       readonly connection_share_code: string;
-      readonly target_client_type: "native";
+      readonly target_client_type: RefreshTokenSessionClientType;
     },
     RedeemConnectionShareResponse
   >({
     endpoint: "auth/connection-share/redeem",
     body: {
       connection_share_code: connectionShareCode,
-      target_client_type: "native",
+      target_client_type: targetClientType,
     },
     credentials: getSessionCredentialsMode(),
   });
 
   return {
     ...response,
-    client_type: "native",
+    client_type: response.client_type ?? targetClientType,
   };
 }

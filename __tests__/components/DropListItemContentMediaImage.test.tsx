@@ -213,9 +213,17 @@ describe("DropListItemContentMediaImage", () => {
 
     const wrapper = container.querySelector(".tw-relative.tw-flex");
     const img = screen.getByAltText("Drop media");
+    const imageFrame = img.parentElement;
 
     expect(wrapper).toHaveClass("tw-w-full", "tw-min-h-40");
     expect(wrapper).not.toHaveClass("tw-h-full");
+    expect(imageFrame).toHaveClass(
+      "tw-min-h-40",
+      "tw-rounded-xl",
+      "tw-bg-iron-900/40"
+    );
+    expect(imageFrame?.getAttribute("style")).toContain("aspect-ratio: 16 / 9");
+    expect(imageFrame?.getAttribute("style")).toContain("max-height: 16rem");
     expect(img).toHaveClass(
       "tw-object-contain",
       "tw-max-h-64",

@@ -11,7 +11,6 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "@/contexts/HeaderContext";
 import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
-import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
 import { useSelector } from "react-redux";
 import { selectEditingDropId } from "@/store/editSlice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -22,8 +21,10 @@ import {
   hidesMobileBottomNavigation,
 } from "@/helpers/navigation.helpers";
 import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
-import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
-import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
+import {
+  LazyMemesQuickVoteRuntime,
+  useMemesQuickVoteRuntimeLauncher,
+} from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntimeLoader";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -55,6 +56,27 @@ const streamRouteLoadingReserveVisibleStyle: StreamRouteLoadingReserveStyle = {
     STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE,
 };
 
+const mobileBranchLoadingStyle: CSSProperties = {
+  minHeight: `calc(100dvh - var(${STREAM_ROUTE_LOADING_HEADER_RESERVE}) - var(${STREAM_ROUTE_LOADING_BOTTOM_RESERVE}))`,
+};
+
+function MobileBranchLoadingFallback() {
+  return (
+    <div
+      data-mobile-bottom-nav-scroll-target="true"
+      className="tw-bg-black"
+      style={mobileBranchLoadingStyle}
+    />
+  );
+}
+
+const BrainMobileMessages = dynamic(
+  () => import("../brain/mobile/BrainMobileMessages"),
+  {
+    loading: () => <MobileBranchLoadingFallback />,
+  }
+);
+
 const contentOwnsBottomNavClearance = ({
   activeView,
   pathname,
@@ -74,7 +96,7 @@ const contentOwnsBottomNavClearance = ({
 };
 
 function WavesQuickVoteView() {
-  const quickVote = useMemesQuickVoteDialogController();
+  const quickVote = useMemesQuickVoteRuntimeLauncher();
 
   return (
     <>
@@ -82,7 +104,12 @@ function WavesQuickVoteView() {
         onOpenQuickVote={quickVote.openQuickVote}
         onPrefetchQuickVote={quickVote.prefetchQuickVote}
       />
-      <MemesQuickVoteDialog {...quickVote.dialogState} />
+      {quickVote.shouldMountRuntime && quickVote.runtimeIntent && (
+        <LazyMemesQuickVoteRuntime
+          intent={quickVote.runtimeIntent}
+          onIdle={quickVote.resetQuickVoteRuntime}
+        />
+      )}
     </>
   );
 }

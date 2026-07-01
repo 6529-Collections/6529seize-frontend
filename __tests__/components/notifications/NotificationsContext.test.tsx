@@ -216,10 +216,7 @@ describe("push registration behavior", () => {
     let registrationErrorCallback: ((error: unknown) => void) | null = null;
 
     PushNotifications.addListener.mockImplementation(
-      (
-        event: string,
-        callback: (arg: unknown) => void | Promise<void>
-      ) => {
+      (event: string, callback: (arg: unknown) => void | Promise<void>) => {
         if (event === "registration") {
           registrationCallback = callback as (token: {
             value: string;
@@ -575,6 +572,63 @@ describe("push registration behavior", () => {
           operation: "pushRegistrationError",
           retryable: true,
           error_message: "The network connection was lost.",
+        }),
+      })
+    );
+  });
+
+  it("records known low-value native registration errors as info breadcrumbs", async () => {
+    const sentry = require("@sentry/nextjs");
+    const nativeError = new Error(
+      "The operation couldn't be completed. (com.google.iid error -25291.)"
+    );
+    const { registrationErrorCallback } = await setupRegistrationCallback();
+
+    act(() => {
+      registrationErrorCallback(nativeError);
+    });
+
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        level: "info",
+        message: "Push registration low-value native error.",
+        data: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "pushRegistrationError",
+          retryable: false,
+          known_low_value: true,
+          error_message:
+            "The operation couldn't be completed. (com.google.iid error -25291.)",
+        }),
+      })
+    );
+  });
+
+  it("records low-value native registration errors by domain and code", async () => {
+    const sentry = require("@sentry/nextjs");
+    const nativeError = {
+      domain: "com.google.iid",
+      code: -25291,
+    };
+    const { registrationErrorCallback } = await setupRegistrationCallback();
+
+    act(() => {
+      registrationErrorCallback(nativeError);
+    });
+
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        level: "info",
+        message: "Push registration low-value native error.",
+        data: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "pushRegistrationError",
+          retryable: false,
+          known_low_value: true,
+          error_code: -25291,
+          error_message: "Unknown notification error",
         }),
       })
     );

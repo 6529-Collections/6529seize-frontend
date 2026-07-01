@@ -255,7 +255,7 @@ function SubscriptionFooterMain({
           className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-border-none tw-bg-white tw-text-sm tw-font-medium tw-text-iron-900 ${softControlHoverClasses}`}
         >
           {isUploadingThisPhase ? (
-            <span className="d-flex align-items-center justify-content-center">
+            <span className="tw-flex tw-items-center tw-justify-center">
               <CircleLoader />
             </span>
           ) : (
@@ -277,7 +277,7 @@ function SubscriptionFooterMain({
           {renderStableButtonContent({
             isLoading: isViewingThisPhase,
             loadingContent: (
-              <span className="d-flex gap-2 align-items-center">
+              <span className="tw-flex tw-items-center tw-gap-2">
                 <CircleLoader />
                 <span>Loading</span>
               </span>
@@ -302,7 +302,7 @@ function SubscriptionFooterMain({
           className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-border-0 tw-bg-white tw-text-sm tw-font-medium tw-text-iron-900 ${softControlHoverClasses}`}
         >
           {isDownloadingThisPhase ? (
-            <span className="d-flex align-items-center justify-content-center">
+            <span className="tw-flex tw-items-center tw-justify-center">
               <CircleLoader />
             </span>
           ) : (
@@ -314,13 +314,13 @@ function SubscriptionFooterMain({
   };
 
   return (
-    <div className="pt-3 pb-3 d-flex flex-column align-items-end gap-2">
-      <div className="w-100 d-flex align-items-center justify-content-between gap-2 flex-wrap">
+    <div className="tw-flex tw-flex-col tw-items-end tw-gap-2 tw-py-3">
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
         <span className="tw-text-sm tw-text-iron-400">
           Contract: The Memes - {formatAddress(contract)} | Token ID:{" "}
           {confirmedTokenId}
         </span>
-        <div className="d-flex align-items-center gap-2">
+        <div className="tw-flex tw-items-center tw-gap-2">
           <button
             onClick={onChangeTokenId}
             type="button"
@@ -335,7 +335,7 @@ function SubscriptionFooterMain({
             className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-[#f87171] tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-[#f87171]/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-[#7f1d1d] hover:tw-text-iron-100"
           >
             {isResetting ? (
-              <span className="d-flex gap-2 align-items-center">
+              <span className="tw-flex tw-items-center tw-gap-2">
                 <CircleLoader />
                 <span>Resetting</span>
               </span>
@@ -345,11 +345,11 @@ function SubscriptionFooterMain({
           </button>
         </div>
       </div>
-      <div className="mt-5 d-flex align-items-center justify-content-end gap-2 flex-wrap">
+      <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
         {renderAirdropsButtonGroup("artist")}
         {renderAirdropsButtonGroup("team")}
       </div>
-      <div className="mt-2 d-flex align-items-center justify-content-end gap-2 flex-wrap">
+      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
         <div className="tw-flex tw-h-9 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-iron-400/20">
           <button
             onClick={onShowUploadPhotos}
@@ -360,7 +360,7 @@ function SubscriptionFooterMain({
             className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-border-none tw-bg-white tw-text-sm tw-font-medium tw-text-iron-900 ${softControlHoverClasses}`}
           >
             {isUploading ? (
-              <span className="d-flex align-items-center justify-content-center">
+              <span className="tw-flex tw-items-center tw-justify-center">
                 <CircleLoader />
               </span>
             ) : (
@@ -379,7 +379,7 @@ function SubscriptionFooterMain({
             {renderStableButtonContent({
               isLoading: viewingPhotos,
               loadingContent: (
-                <span className="d-flex gap-2 align-items-center">
+                <span className="tw-flex tw-items-center tw-gap-2">
                   <CircleLoader />
                   <span>Loading</span>
                 </span>
@@ -402,7 +402,7 @@ function SubscriptionFooterMain({
           </button>
         </div>
       </div>
-      <div className="mt-2 d-flex align-items-center justify-content-end gap-2 flex-wrap">
+      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
         <button
           onClick={onFinalize}
           disabled={isFinalizing}
@@ -412,7 +412,7 @@ function SubscriptionFooterMain({
           {renderStableButtonContent({
             isLoading: isFinalizing,
             loadingContent: (
-              <span className="d-flex gap-2 align-items-center">
+              <span className="tw-flex tw-items-center tw-gap-2">
                 <CircleLoader />
                 <span>Finalizing</span>
               </span>
@@ -449,7 +449,7 @@ function SubscriptionFooterMain({
             {renderStableButtonContent({
               isLoading: isUploadingToGithub,
               loadingContent: (
-                <span className="d-flex gap-2 align-items-center">
+                <span className="tw-flex tw-items-center tw-gap-2">
                   <CircleLoader />
                   <span>Publishing…</span>
                 </span>

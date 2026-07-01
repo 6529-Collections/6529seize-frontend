@@ -6,7 +6,8 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { fetchUrl } from "@/services/6529api";
 import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Col, Container, Row } from "./NextGenTailwindLayout";
+import { Dropdown } from "react-bootstrap";
 import styles from "./NextGen.module.scss";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
 

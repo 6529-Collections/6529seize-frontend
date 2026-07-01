@@ -3,14 +3,18 @@
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
 import Image from "next/image";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "@/components/about/AboutLayout";
 
 export default function BuidlPage() {
   useSetTitle("BUIDL");
 
   return (
-    <main className={styles["main"]}>
-      <Container fluid className={`${styles["pageNotFound"]} text-center`}>
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <Container fluid className={`${styles["pageNotFound"]} tw-text-center`}>
         <Row>
           <Col>
             <Image

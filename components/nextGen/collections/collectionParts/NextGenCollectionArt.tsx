@@ -11,14 +11,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
-import {
-  Accordion,
-  Col,
-  Container,
-  Dropdown,
-  Form,
-  Row,
-} from "react-bootstrap";
+import { Col, Container, Row } from "../NextGenTailwindLayout";
+import { Accordion, Dropdown, Form } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import type {
   NextGenCollection,

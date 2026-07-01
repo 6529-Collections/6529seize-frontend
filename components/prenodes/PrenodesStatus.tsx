@@ -2,7 +2,6 @@
 
 import styles from "./Prenodes.module.scss";
 import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import Pagination from "../pagination/Pagination";
 import { Time } from "@/helpers/time";
 import {
@@ -20,7 +19,7 @@ import { useAuth } from "../auth/Auth";
 
 interface Prenode {
   ip: string;
-  domain: string;
+  domain: string | null;
   city: string;
   country: string;
   tdh_sync: boolean;
@@ -32,6 +31,14 @@ interface Prenode {
 
 const PAGE_SIZE = 20;
 
+function getSyncStatusLabel(name: string, isSynced: boolean, known: boolean) {
+  if (!known) {
+    return `${name}: unknown`;
+  }
+
+  return isSynced ? `${name}: synced` : `${name}: not synced`;
+}
+
 export default function PrenodesStatus() {
   useSetTitle("Prenodes | Network");
 
@@ -42,18 +49,19 @@ export default function PrenodesStatus() {
   const [prenodes, setPrenodes] = useState<Prenode[]>([]);
   const [totalResults, setTotalResults] = useState(0);
 
-  function fetchResults() {
-    const url = `https://api.6529.io/oracle/prenodes?page=${page}&page_size=${PAGE_SIZE}`;
-    fetch(url).then((response) => {
-      response.json().then((response: { data: Prenode[]; count: number }) => {
-        setPrenodes(response.data);
-        setTotalResults(response.count);
-      });
-    });
-  }
-
   useEffect(() => {
-    fetchResults();
+    const fetchResults = async () => {
+      const url = `https://api.6529.io/oracle/prenodes?page=${page}&page_size=${PAGE_SIZE}`;
+      const response = await fetch(url);
+      const result = (await response.json()) as {
+        data: Prenode[];
+        count: number;
+      };
+      setPrenodes(result.data);
+      setTotalResults(result.count);
+    };
+
+    void fetchResults().catch(() => undefined);
   }, [page]);
 
   function printLocation(prenode: Prenode) {
@@ -72,21 +80,44 @@ export default function PrenodesStatus() {
       location = "Unknown";
     }
     return (
-      <Row className="pt-1">
-        <Col className="d-flex align-items-center gap-2">
-          <FontAwesomeIcon icon={faLocationDot} height={20} color="" />
-          {location}
-        </Col>
-      </Row>
+      <div className="tw-flex tw-items-center tw-gap-2 tw-pt-1">
+        <FontAwesomeIcon icon={faLocationDot} height={20} aria-hidden="true" />
+        {location}
+      </div>
     );
   }
 
-  function printStatusIcon(icon: IconProp, status: string) {
-    return <FontAwesomeIcon icon={icon} className={status} height={22} />;
+  function printStatusIcon(icon: IconProp, status: string, label: string) {
+    return (
+      <span aria-label={label} role="img">
+        <FontAwesomeIcon
+          icon={icon}
+          className={status}
+          height={22}
+          aria-hidden="true"
+        />
+      </span>
+    );
+  }
+
+  function getPingStatusLabel(status: Prenode["ping_status"]) {
+    switch (status) {
+      case "green":
+        return "Ping status: healthy";
+      case "orange":
+        return "Ping status: warning";
+      case "red":
+        return "Ping status: failing";
+    }
   }
 
   function printPrenode(prenode: Prenode) {
-    let href = `https://${prenode.domain ?? prenode.ip}/oracle`;
+    const prenodeHost =
+      prenode.domain !== null && prenode.domain.length > 0
+        ? prenode.domain
+        : prenode.ip;
+    const prenodeKey = `${prenode.ip}-${prenode.domain ?? ""}`;
+    let href = `https://${prenodeHost}/oracle`;
     if (connectedProfile?.primary_wallet) {
       href += `/address/${connectedProfile.primary_wallet}`;
     } else {
@@ -115,74 +146,96 @@ export default function PrenodesStatus() {
     }
 
     return (
-      <Col
-        xs={12}
-        sm={12}
-        md={6}
-        className="pt-2 pb-2"
-        key={`${prenode.ip}-${prenode.domain}`}>
+      <div className="tw-w-full" key={prenodeKey}>
         <a
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="decoration-none">
-          <Container className={`no-padding ${styles["prenode"]}`}>
-            <Row>
-              <Col>
-                <h5>{prenode.domain ?? prenode.ip}</h5>
-              </Col>
-            </Row>
-            <Row>
-              <Col className="font-lighter">
-                <i>{prenode.ip}</i>
-              </Col>
-            </Row>
+          className="tw-no-underline"
+        >
+          <div className={styles["prenode"]}>
+            <h5>{prenodeHost}</h5>
+            <div className="tw-font-extralight">
+              <i>{prenode.ip}</i>
+            </div>
             {printLocation(prenode)}
-            <Row className="pt-3">
-              <Col>
-                <Table>
-                  <tbody>
-                    <tr>
-                      <td>Register Date</td>
-                      <td>
-                        <b>{createdAt.toIsoDateTimeString()}</b> (
-                        {getDateDisplay(createdAt.toDate())})
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Last Update</td>
-                      <td>
-                        <b>{updatedAt.toIsoDateTimeString()}</b> (
-                        {getDateDisplay(updatedAt.toDate())})
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-            <Row className="pt-3">
-              <Col>
-                <Table>
-                  <tbody>
-                    <tr>
-                      <td>Ping Status</td>
-                      <td>{printStatusIcon(updatedAtIcon, updatedAtStatus!)}</td>
-                    </tr>
-                    <tr>
-                      <td>TDH Status</td>
-                      <td>{printStatusIcon(tdhIcon, tdhStatus!)}</td>
-                    </tr>
-                    <tr>
-                      <td>TDH Block Status</td>
-                      <td>{printStatusIcon(blockIcon, blockStatus!)}</td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </Container>
+            <div className="tw-pt-3">
+              <table className="tw-mb-0 tw-w-full">
+                <tbody>
+                  <tr>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      Register Date
+                    </th>
+                    <td>
+                      <b>{createdAt.toIsoDateTimeString()}</b> (
+                      {getDateDisplay(createdAt.toDate())})
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      Last Update
+                    </th>
+                    <td>
+                      <b>{updatedAt.toIsoDateTimeString()}</b> (
+                      {getDateDisplay(updatedAt.toDate())})
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="tw-pt-3">
+              <table className="tw-mb-0 tw-w-full">
+                <tbody>
+                  <tr>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      Ping Status
+                    </th>
+                    <td>
+                      {printStatusIcon(
+                        updatedAtIcon,
+                        updatedAtStatus!,
+                        getPingStatusLabel(prenode.ping_status)
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      TDH Status
+                    </th>
+                    <td>
+                      {printStatusIcon(
+                        tdhIcon,
+                        tdhStatus!,
+                        getSyncStatusLabel(
+                          "TDH status",
+                          prenode.tdh_sync,
+                          prenode.ping_status === "green"
+                        )
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row" className="tw-text-left tw-font-normal">
+                      TDH Block Status
+                    </th>
+                    <td>
+                      {printStatusIcon(
+                        blockIcon,
+                        blockStatus!,
+                        getSyncStatusLabel(
+                          "TDH block status",
+                          prenode.block_sync,
+                          prenode.ping_status === "green"
+                        )
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </a>
-      </Col>
+      </div>
     );
   }
 
@@ -192,27 +245,21 @@ export default function PrenodesStatus() {
     }
 
     return (
-      <Row className="pt-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-pt-2 md:tw-grid-cols-2">
         {prenodes.map((prenode: Prenode) => printPrenode(prenode))}
-      </Row>
+      </div>
     );
   }
 
   return (
-    <Container className={`no-padding pt-4 pb-4`}>
-      <Row className="pb-3">
-        <Col>
-          <h1>
-            Prenodes Status{" "}
-          </h1>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="font-color-h">* All times are in UTC</Col>
-      </Row>
+    <section className="tw-p-0 tw-py-4">
+      <div className="tw-pb-3">
+        <h1>Prenodes Status </h1>
+      </div>
+      <div className="tw-text-[#9a9a9a]">* All times are in UTC</div>
       {printPrenodes()}
       {totalResults > 0 && totalResults / PAGE_SIZE > 1 && (
-        <Row className="text-center pt-2 pb-3">
+        <div className="tw-pb-3 tw-pt-2 tw-text-center">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
@@ -222,8 +269,8 @@ export default function PrenodesStatus() {
               window.scrollTo(0, 0);
             }}
           />
-        </Row>
+        </div>
       )}
-    </Container>
+    </section>
   );
 }

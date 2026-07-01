@@ -188,6 +188,19 @@ describe("MemesQuickVoteDialog", () => {
     });
   });
 
+  it("does not render active drop content while closed", () => {
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          isOpen: false,
+        })}
+      />
+    );
+
+    expect(screen.queryByTestId("drop-media")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
   it("keeps signed draft values from submitting", async () => {
     const activeDrop = createDrop({ minRating: -5_000 });
     const submitVote = jest.fn().mockResolvedValue(true);

@@ -24,6 +24,7 @@ jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => {
 });
 
 jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
+  ...jest.requireActual('@/components/nextGen/admin/NextGenAdminShared'),
   NextGenCollectionIdFormGroup: ({ collection_id, collection_ids, onChange }: any) => (
     <div data-testid="collection-form-group">
       <select

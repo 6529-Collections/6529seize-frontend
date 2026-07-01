@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+import { Carousel } from "react-bootstrap";
 import { mainnet } from "viem/chains";
 import Address from "@/components/address/Address";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -155,8 +155,8 @@ export default function DistributionPage(props: Readonly<Props>) {
   function printDistributionPhotos() {
     if (distributionPhotos.length > 0) {
       return (
-        <Row className="pt-4 pb-5">
-          <Col>
+        <div className="tw-pb-5 tw-pt-4">
+          <div>
             <Carousel
               interval={null}
               wrap={false}
@@ -184,8 +184,8 @@ export default function DistributionPage(props: Readonly<Props>) {
                 </Carousel.Item>
               ))}
             </Carousel>
-          </Col>
-        </Row>
+          </div>
+        </div>
       );
     }
     return <></>;
@@ -233,21 +233,21 @@ export default function DistributionPage(props: Readonly<Props>) {
     return (
       <>
         <ScrollToButton threshold={500} to="distribution-table" offset={0} />
-        <Container className="pt-5 pb-3" id={`distribution-table`}>
-          <Row>
-            <Col className={`d-flex justify-content-end align-items-center`}>
+        <div className="tw-container tw-mx-auto tw-pb-3 tw-pt-5" id={`distribution-table`}>
+          <div>
+            <div className="tw-flex tw-items-center tw-justify-end">
               <SearchWalletsDisplay
                 searchWallets={searchWallets}
                 setSearchWallets={setSearchWallets}
                 setShowSearchModal={setShowSearchModal}
               />
-            </Col>
-          </Row>
-        </Container>
-        <Container>
-          <Row className={styles["distributionsScrollContainer"]}>
-            <Col className="no-padding">
-              <Table className={styles["distributionsTable"]}>
+            </div>
+          </div>
+        </div>
+        <div className="tw-container tw-mx-auto">
+          <div className={styles["distributionsScrollContainer"]}>
+            <div>
+              <table className={styles["distributionsTable"]}>
                 <caption className="tw-sr-only">
                   {t(locale, "distribution.table.caption", {
                     collection: props.header,
@@ -266,12 +266,12 @@ export default function DistributionPage(props: Readonly<Props>) {
                     </th>
                     <th
                       colSpan={distributionsPhases.length}
-                      className="text-center"
+                      className="tw-text-center"
                       scope="colgroup"
                     >
                       {t(locale, "distribution.table.allowlistSpots")}
                     </th>
-                    <th colSpan={2} className="text-center" scope="colgroup">
+                    <th colSpan={2} className="tw-text-center" scope="colgroup">
                       {t(locale, "distribution.table.actual")}
                     </th>
                   </tr>
@@ -291,16 +291,16 @@ export default function DistributionPage(props: Readonly<Props>) {
                     {distributionsPhases.map((p) => (
                       <th
                         key={`${p}-header`}
-                        className="text-center"
+                        className="tw-text-center"
                         scope="col"
                       >
                         {capitalizeEveryWord(p.replaceAll("_", " "))}
                       </th>
                     ))}
-                    <th className="text-center" scope="col">
+                    <th className="tw-text-center" scope="col">
                       {t(locale, "distribution.table.minted")}
                     </th>
-                    <th className="text-center" scope="col">
+                    <th className="tw-text-center" scope="col">
                       {t(locale, "distribution.table.total")}
                     </th>
                   </tr>
@@ -319,15 +319,15 @@ export default function DistributionPage(props: Readonly<Props>) {
                         />
                       </td>
                       {distributionsPhases.map((p) => (
-                        <td key={`${p}-${d.wallet}`} className="text-center">
+                        <td key={`${p}-${d.wallet}`} className="tw-text-center">
                           {getCountForPhase(d, p)}&nbsp;&nbsp;
                           {getSpotsForPhase(d, p)}
                         </td>
                       ))}
-                      <td className="text-center">
+                      <td className="tw-text-center">
                         {d.minted === 0 ? "-" : formatInteger(locale, d.minted)}
                       </td>
-                      <td className="text-center">
+                      <td className="tw-text-center">
                         {d.total_count
                           ? formatInteger(locale, d.total_count)
                           : "-"}
@@ -335,10 +335,10 @@ export default function DistributionPage(props: Readonly<Props>) {
                     </tr>
                   ))}
                 </tbody>
-              </Table>
-            </Col>
-          </Row>
-        </Container>
+              </table>
+            </div>
+          </div>
+        </div>
       </>
     );
   }
@@ -365,13 +365,13 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   function printEmpty() {
     return (
-      <Row>
+      <div>
         {nftId && (
-          <Col xs={12}>
+          <div className="tw-w-full">
             <UpcomingMemePage id={nftId} />
-          </Col>
+          </div>
         )}
-        <Col xs={12}>
+        <div className="tw-w-full">
           <Image
             unoptimized
             loading="eager"
@@ -383,8 +383,8 @@ export default function DistributionPage(props: Readonly<Props>) {
             aria-hidden="true"
           />{" "}
           {t(locale, "distribution.empty.soon")}
-        </Col>
-        <Col xs={12} className="tw-flex tw-flex-wrap tw-gap-x-1">
+        </div>
+        <div className="tw-flex tw-w-full tw-flex-wrap tw-gap-x-1">
           <span>{t(locale, "distribution.empty.checkBack")}</span>
           <span>{t(locale, "distribution.empty.dropUpdates")}</span>
           <a
@@ -395,16 +395,16 @@ export default function DistributionPage(props: Readonly<Props>) {
           >
             &#64;6529Collections
           </a>
-        </Col>
-      </Row>
+        </div>
+      </div>
     );
   }
 
   function printNotFound() {
     return (
-      <Row>
-        <Col xs={12}>{t(locale, "distribution.empty.noResults")}</Col>
-      </Row>
+      <div>
+        <div className="tw-w-full">{t(locale, "distribution.empty.noResults")}</div>
+      </div>
     );
   }
 
@@ -414,16 +414,15 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   return (
     <>
-      <Container
-        fluid
-        className={`${styles["mainContainer"]} tw-pb-10 tw-pt-6`}
+      <div
+        className={`tailwind-scope ${styles["mainContainer"]} tw-pb-10 tw-pt-6`}
       >
-        <Row>
-          <Col>
-            <Container>
-              <Row>
-                <Col className={`${styles["distributionHeader"]} pb-1`}>
-                  <h1 className="text-center mb-0">
+        <div>
+          <div>
+            <div className="tw-container tw-mx-auto tw-px-3">
+              <div>
+                <div className={`${styles["distributionHeader"]} tw-pb-1`}>
+                  <h1 className="tw-mb-0 tw-text-center">
                     {t(locale, "distribution.heading", {
                       collection: props.header,
                       tokenId: formatInteger(
@@ -433,31 +432,31 @@ export default function DistributionPage(props: Readonly<Props>) {
                     })}
                   </h1>
                   {printMintingLink()}
-                </Col>
-              </Row>
+                </div>
+              </div>
               {printDistributionPhotos()}
-              <Row>
-                <Col>
+              <div>
+                <div>
                   {nftId &&
                     (distributions.length > 0 || searchWallets.length > 0) &&
                     printDistribution()}
-                </Col>
-              </Row>
+                </div>
+              </div>
               {!fetching && distributions.length === 0 && (
                 <>{searchWallets.length > 0 ? printNotFound() : printEmpty()}</>
               )}
               {distributions.length > 0 && (
-                <Row>
-                  <Col>
+                <div>
+                  <div>
                     <span className="tw-text-sm tw-text-iron-400">
                       {t(locale, "distribution.table.note")}
                     </span>
-                  </Col>
-                </Row>
+                  </div>
+                </div>
               )}
               {totalResults > pageProps.pageSize && (
-                <Row className="text-center pt-4">
-                  <Col>
+                <div className="tw-pt-4 tw-text-center">
+                  <div>
                     <Pagination
                       page={pageProps.page}
                       pageSize={pageProps.pageSize}
@@ -466,13 +465,13 @@ export default function DistributionPage(props: Readonly<Props>) {
                         setPageProps({ ...pageProps, page: newPage });
                       }}
                     />
-                  </Col>
-                </Row>
+                  </div>
+                </div>
               )}
-            </Container>
-          </Col>
-        </Row>
-      </Container>
+            </div>
+          </div>
+        </div>
+      </div>
       <SearchModalDisplay
         show={showSearchModal}
         setShow={setShowSearchModal}
