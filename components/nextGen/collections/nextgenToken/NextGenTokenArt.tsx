@@ -11,7 +11,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
-import { Dropdown } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -82,24 +81,34 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
   const [showLightbox, setShowLightbox] = useState<boolean>(false);
+  const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState<boolean>(false);
 
   const [zoomScale, setZoomScale] = useState(1);
   const [showZoomControls, setShowZoomControls] = useState(false);
 
   const tokenImageRef = useRef(null);
+  const downloadMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
       if (event.key === "Escape") {
         setShowLightbox(false);
         setShowBlackbox(false);
+        setIsDownloadMenuOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
 
-    const handleClick = () => {
+    const handleClick = (event: MouseEvent) => {
       setShowLightbox(false);
       setShowBlackbox(false);
+      if (
+        downloadMenuRef.current &&
+        event.target instanceof Node &&
+        !downloadMenuRef.current.contains(event.target)
+      ) {
+        setIsDownloadMenuOpen(false);
+      }
     };
     window.addEventListener("mousedown", handleClick);
 
@@ -127,6 +136,9 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     return s;
   }
 
+  const iconButtonClassName =
+    "tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
+
   function getCurrentHref() {
     if (mode === Mode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
@@ -152,12 +164,13 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     return (
       <>
         <div
-          className={`tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} pt-2 pb-2 d-flex gap-3 align-items-center ${
-            isMobileScreen ? "justify-content-center" : "justify-content-start"
+          className={`tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-items-center tw-gap-4 tw-px-3 tw-py-2 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} ${
+            isMobileScreen ? "tw-justify-center" : "tw-justify-start"
           }`}
           style={{ maxWidth: "100%" }}
         >
           <button
+            type="button"
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.IMAGE ? styles["imageResolutionBtnSelected"] : ""
             }`}
@@ -166,6 +179,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             2K
           </button>
           <button
+            type="button"
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.HIGH_RES ? styles["imageResolutionBtnSelected"] : ""
             }`}
@@ -173,12 +187,20 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           >
             {isMobileDevice ? "8K" : "16K"}
           </button>
-          <FontAwesomeIcon
-            className={getModeStyle(Mode.LIVE)}
+          <button
+            type="button"
+            aria-label="Live mode"
+            aria-pressed={mode === Mode.LIVE}
+            className={iconButtonClassName}
             onClick={() => setMode(Mode.LIVE)}
-            icon={faPlayCircle}
             data-tooltip-id={`live-tooltip-${props.token.id}`}
-          />
+          >
+            <FontAwesomeIcon
+              className={getModeStyle(Mode.LIVE)}
+              icon={faPlayCircle}
+              aria-hidden
+            />
+          </button>
           <Tooltip
             id={`live-tooltip-${props.token.id}`}
             place="bottom"
@@ -193,99 +215,147 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
         </div>
         {mode === Mode.HIGH_RES && (
           <div
-            className="pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center tw-relative tw-w-1/2 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-1/3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto"
+            className="tw-relative tw-flex tw-w-1/2 tw-shrink-0 tw-grow-0 tw-basis-auto tw-items-center tw-justify-center tw-gap-1 tw-px-3 tw-py-2 min-[576px]:tw-w-1/3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto"
             style={{ maxWidth: "100%" }}
           >
             {showZoomControls && (
               <>
-                <FontAwesomeIcon
-                  className={styles["modeIcon"]}
-                  icon={faMinusSquare}
+                <button
+                  type="button"
+                  aria-label="Zoom out"
+                  className={iconButtonClassName}
                   onClick={handleScaleDown}
-                  style={{
-                    color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
-                  }}
-                />
+                >
+                  <FontAwesomeIcon
+                    className={styles["modeIcon"]}
+                    icon={faMinusSquare}
+                    aria-hidden
+                    style={{
+                      color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
+                    }}
+                  />
+                </button>
                 <span className="unselectable">Scale: {zoomScale}</span>
-                <FontAwesomeIcon
-                  className={styles["modeIcon"]}
-                  icon={faPlusSquare}
+                <button
+                  type="button"
+                  aria-label="Zoom in"
+                  className={iconButtonClassName}
                   onClick={handleScaleUp}
-                  style={{
-                    color: zoomScale === MAX_ZOOM_SCALE ? "#9a9a9a" : "white",
-                  }}
-                />
-                <FontAwesomeIcon
-                  className={styles["modeIcon"]}
-                  icon={faRefresh}
+                >
+                  <FontAwesomeIcon
+                    className={styles["modeIcon"]}
+                    icon={faPlusSquare}
+                    aria-hidden
+                    style={{
+                      color: zoomScale === MAX_ZOOM_SCALE ? "#9a9a9a" : "white",
+                    }}
+                  />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Reset zoom"
+                  className={iconButtonClassName}
                   onClick={() => setZoomScale(MIN_ZOOM_SCALE)}
-                  style={{
-                    paddingLeft: "5px",
-                    color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
-                  }}
-                />
+                >
+                  <FontAwesomeIcon
+                    className={styles["modeIcon"]}
+                    icon={faRefresh}
+                    aria-hidden
+                    style={{
+                      paddingLeft: "5px",
+                      color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
+                    }}
+                  />
+                </button>
               </>
             )}
           </div>
         )}
         <div
-          className={`tw-relative tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto ${mode === Mode.HIGH_RES ? "tw-w-1/2" : "tw-w-full"} ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} pt-2 pb-2 d-flex gap-3 align-items-center ${
-            isMobileScreen ? "justify-content-center" : "justify-content-end"
+          className={`tw-relative tw-flex tw-shrink-0 tw-grow-0 tw-basis-auto tw-items-center tw-gap-4 tw-px-3 tw-py-2 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto ${mode === Mode.HIGH_RES ? "tw-w-1/2" : "tw-w-full"} ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} ${
+            isMobileScreen ? "tw-justify-center" : "tw-justify-end"
           }`}
           style={{ maxWidth: "100%" }}
         >
-          <Lightbulb
-            mode="black"
-            className={styles["modeIcon"]!}
+          <button
+            type="button"
+            aria-label="Open blackbox"
+            className={iconButtonClassName}
             onClick={() => setShowBlackbox(true)}
-          />
-          <Lightbulb
-            mode="light"
-            className={styles["modeIcon"]!}
+          >
+            <Lightbulb mode="black" className={styles["modeIcon"]!} />
+          </button>
+          <button
+            type="button"
+            aria-label="Open lightbox"
+            className={iconButtonClassName}
             onClick={() => setShowLightbox(true)}
-          />
-          <Dropdown drop={"down-centered"} className="d-flex">
-            <Dropdown.Toggle className={styles["downloadBtn"]}>
+          >
+            <Lightbulb mode="light" className={styles["modeIcon"]!} />
+          </button>
+          <div className="tw-relative tw-flex" ref={downloadMenuRef}>
+            <button
+              type="button"
+              className={`${styles["downloadBtn"]} tw-rounded-md focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
+              aria-haspopup="true"
+              aria-expanded={isDownloadMenuOpen}
+              aria-label="Download token image"
+              onClick={() => setIsDownloadMenuOpen((isOpen) => !isOpen)}
+            >
               <FontAwesomeIcon
                 className={styles["modeIcon"]}
                 icon={faDownload}
                 data-tooltip-id={`download-tooltip-${props.token.id}`}
               />
-              <Tooltip
-                id={`download-tooltip-${props.token.id}`}
-                place="bottom"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
+            </button>
+            <Tooltip
+              id={`download-tooltip-${props.token.id}`}
+              place="bottom"
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            >
+              Download
+            </Tooltip>
+            {isDownloadMenuOpen && (
+              <ul
+                aria-label="Download token image options"
+                className="tw-[margin-top:0.5rem] tw-absolute tw-right-0 tw-top-full tw-z-50 tw-min-w-[180px] tw-list-none tw-rounded-md tw-bg-iron-900 tw-p-1 tw-shadow-lg tw-ring-1 tw-ring-white/10"
               >
-                Download
-              </Tooltip>
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {Object.values(Resolution)
-                .filter(
-                  (r) => ![Resolution["0.5K"], Resolution.Thumbnail].includes(r)
-                )
-                .map((resolution) => (
-                  <NextGenTokenDownloadDropdownItem
-                    resolution={resolution}
-                    token={props.token}
-                    key={resolution}
-                  />
-                ))}
-            </Dropdown.Menu>
-          </Dropdown>
-          <FontAwesomeIcon
-            className={styles["modeIcon"]}
+                {Object.values(Resolution)
+                  .filter(
+                    (r) =>
+                      ![Resolution["0.5K"], Resolution.Thumbnail].includes(r)
+                  )
+                  .map((resolution) => (
+                    <NextGenTokenDownloadDropdownItem
+                      resolution={resolution}
+                      token={props.token}
+                      key={resolution}
+                      onSelect={() => setIsDownloadMenuOpen(false)}
+                    />
+                  ))}
+              </ul>
+            )}
+          </div>
+          <button
+            type="button"
+            aria-label="Open token image in new tab"
+            className={iconButtonClassName}
             onClick={() => {
               const href = getCurrentHref();
               window.open(href, "_blank");
             }}
-            icon={faExternalLink}
             data-tooltip-id={`external-tooltip-${props.token.id}`}
-          />
+          >
+            <FontAwesomeIcon
+              className={styles["modeIcon"]}
+              icon={faExternalLink}
+              aria-hidden
+            />
+          </button>
           <Tooltip
             id={`external-tooltip-${props.token.id}`}
             place="bottom"
@@ -297,12 +367,19 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           >
             Open in new tab
           </Tooltip>
-          <FontAwesomeIcon
-            className={styles["modeIcon"]}
-            icon={faMaximize}
+          <button
+            type="button"
+            aria-label="Toggle fullscreen"
+            className={iconButtonClassName}
             onClick={toggleFullScreen}
             data-tooltip-id={`fullscreen-tooltip-${props.token.id}`}
-          />
+          >
+            <FontAwesomeIcon
+              className={styles["modeIcon"]}
+              icon={faMaximize}
+              aria-hidden
+            />
+          </button>
           <Tooltip
             id={`fullscreen-tooltip-${props.token.id}`}
             place="bottom"
@@ -340,7 +417,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     if (showBlackbox) {
       return styles["blackBox"];
     }
-    return `row ${styles["modeRow"]}`;
+    return `tw-flex tw-flex-wrap ${styles["modeRow"]}`;
   }
 
   useEffect(() => {
@@ -359,7 +436,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                     className={
                       showLightbox || showBlackbox
                         ? styles["lightBoxContent"]
-                        : "col pt-3"
+                        : "tw-[padding-top:1rem] tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
                     }
                     ref={tokenImageRef}
                   >
@@ -385,14 +462,14 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           <div
             className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["modeRow"]}`}
           >
-            <div className="pt-2 pb-1 -tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="tw-[padding-bottom:0.25rem] tw-[padding-top:0.5rem] -tw-mx-3 tw-flex tw-flex-wrap">
               {printModeIcons()}
             </div>
           </div>
         </div>
       </div>
       {mode === Mode.LIVE && (
-        <div className="pt-2 font-color-h font-smaller -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="font-color-h font-smaller tw-[padding-top:0.5rem] -tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             * Live view generates the image dynamically from scratch in your
             browser. Pebbles have a computationally expensive script and the
