@@ -11,6 +11,7 @@ import {
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
@@ -37,6 +38,10 @@ describe("sentry-client-filters", () => {
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const rabbyMobileUserRejectedStack =
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
+  const rabbyMobileUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 RabbyMobileIOS/1.0 Mobile/15E148";
+  const rainbowKitNotFoundMessage = "not found rainbowkit";
+  const originalNavigatorUserAgent = globalThis.navigator.userAgent;
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const gifPickerTenorUndefinedTagsMessage =
@@ -415,6 +420,36 @@ describe("sentry-client-filters", () => {
       ...overrides,
     }) as TestSentryClientEvent;
 
+  const createRabbyMobileRainbowKitNotFoundEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    ({
+      event_id: "rabby-mobile-rainbowkit-not-found",
+      transaction: "/about/the-memes",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    }) as TestSentryClientEvent;
+
   const createLowValueNetworkEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -443,6 +478,17 @@ describe("sentry-client-filters", () => {
       },
     ],
     ...overrides,
+  });
+
+  const setNavigatorUserAgent = (userAgent: string): void => {
+    Object.defineProperty(globalThis.navigator, "userAgent", {
+      value: userAgent,
+      configurable: true,
+    });
+  };
+
+  afterEach(() => {
+    setNavigatorUserAgent(originalNavigatorUserAgent);
   });
 
   const createReactDomInsertBeforeEvent = (
@@ -3522,6 +3568,18 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters exact RabbyMobile RainbowKit lookup errors from the runtime user agent", () => {
+    // Arrange
+    setNavigatorUserAgent(rabbyMobileUserAgent);
+    const event = createRabbyMobileRainbowKitNotFoundEvent();
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters injected WebAssembly CSP unsafe-eval errors", () => {
     // Arrange
     const event = createInjectedWasmCspUnsafeEvalEvent();
@@ -3602,6 +3660,50 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter RabbyMobile RainbowKit lookup errors with app-owned frames", () => {
+    // Arrange
+    setNavigatorUserAgent(rabbyMobileUserAgent);
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "https://6529.io/_next/static/chunks/app-client.js",
+                  function: "initializeWallet",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter RainbowKit lookup errors without RabbyMobile context", () => {
+    // Arrange
+    setNavigatorUserAgent(
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile Safari/605.1.15"
+    );
+    const event = createRabbyMobileRainbowKitNotFoundEvent();
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
 
     // Assert
     expect(result).toBe(false);
