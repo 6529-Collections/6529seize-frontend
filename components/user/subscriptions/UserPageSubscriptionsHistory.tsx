@@ -32,9 +32,9 @@ const HISTORY_DISCLOSURE_BODY_CLASS = className(
   "tw-px-5 tw-py-4"
 );
 
-function getSubscriptionLogKey(log: SubscriptionLog): string {
+function getSubscriptionLogKey(log: SubscriptionLog, index: number): string {
   return log.id === undefined
-    ? "subscription-log-undefined"
+    ? `subscription-log-${index}`
     : `subscription-log-${String(log.id)}`;
 }
 
@@ -132,8 +132,8 @@ function LogAccordion(
       <div className={HISTORY_DISCLOSURE_BODY_CLASS}>
         <div className="tw-flex tw-flex-col tw-gap-2">
           {props.logs.data.length > 0 ? (
-            props.logs.data.map((log) => (
-              <LogEntry key={getSubscriptionLogKey(log)} log={log} />
+            props.logs.data.map((log, index) => (
+              <LogEntry key={getSubscriptionLogKey(log, index)} log={log} />
             ))
           ) : (
             <div className="font-color-silver">No logs found</div>
