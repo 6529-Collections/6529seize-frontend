@@ -3,7 +3,6 @@
 import { faDownload, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Dropdown } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import useDownloader from "@/hooks/useDownloader";
 import type { NextGenToken } from "@/entities/INextgen";
@@ -39,6 +38,7 @@ function getUrl(token: NextGenToken, resolution: Resolution) {
 type NextGenTokenProps = Readonly<{
   token: NextGenToken;
   resolution: Resolution;
+  onSelect?: (() => void) | undefined;
 }>;
 
 function useImageChecker(token: NextGenToken, resolution: Resolution) {
@@ -76,23 +76,31 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
   const downloader = useDownloader();
 
   return (
-    <Dropdown.Item
-      key={props.resolution}
-      disabled={!imageExists}
-      onClick={() => {
-        if (imageExists) {
-          downloader.download(
-            getUrl(props.token, props.resolution),
-            `${props.token.id}_${props.resolution.toUpperCase()}.png`
-          );
-        }
-      }}
-    >
-      {props.resolution}
-      {imageExists && imageSize > 0
-        ? ` (${numberWithCommas(imageSize)} MB)`
-        : " Coming Soon"}
-    </Dropdown.Item>
+    <li>
+      <button
+        type="button"
+        disabled={!imageExists}
+        onClick={() => {
+          if (imageExists) {
+            downloader.download(
+              getUrl(props.token, props.resolution),
+              `${props.token.id}_${props.resolution.toUpperCase()}.png`
+            );
+            props.onSelect?.();
+          }
+        }}
+        className={`tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
+          imageExists
+            ? "tw-cursor-pointer tw-text-white hover:tw-bg-iron-800"
+            : "tw-cursor-not-allowed tw-text-iron-500"
+        }`}
+      >
+        {props.resolution}
+        {imageExists && imageSize > 0
+          ? ` (${numberWithCommas(imageSize)} MB)`
+          : " Coming Soon"}
+      </button>
+    </li>
   );
 }
 
@@ -109,7 +117,7 @@ export default function NextGenTokenDownload(
 
   function printResolution(quality: Resolution) {
     return (
-      <span className="d-flex gap-3 align-items-center no-wrap">
+      <span className="no-wrap tw-flex tw-items-center tw-gap-4">
         <FontAwesomeIcon
           data-tooltip-id={`external-link-${props.token.id}-${quality}`}
           style={{ cursor: "pointer", height: "20px", width: "20px" }}
@@ -147,8 +155,8 @@ export default function NextGenTokenDownload(
   }
 
   return (
-    <div className="no-padding pt-1 pb-1 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="d-flex flex-wrap align-items-center -tw-mx-3 tw-flex tw-flex-wrap">
+    <div className="tw-mx-auto tw-w-full tw-px-3 tw-py-1 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-items-center">
         <div
           className="tw-relative tw-w-1/3 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
           style={{ maxWidth: "100%" }}
