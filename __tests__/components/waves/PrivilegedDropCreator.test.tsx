@@ -21,7 +21,10 @@ jest.mock("@/hooks/useDropPriviledges", () => ({
   useDropPrivileges: jest.fn(),
   ChatRestriction: { SLOW_MODE: "SLOW_MODE" },
 }));
-jest.mock("@/components/auth/Auth", () => ({ useAuth: () => ({}) }));
+const mockUseAuth = jest.fn(() => ({}));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => mockUseAuth(),
+}));
 const mockUseSeizeConnectContext = jest.fn(() => ({
   address: undefined,
   hasValidWalletAuth: false,
@@ -32,6 +35,18 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
   __esModule: true,
   default: () => <button type="button">Create profile</button>,
+  shouldShowUserSetUpProfileCta: ({
+    address,
+    connectedProfileHandle,
+    fetchingProfile,
+    hasValidWalletAuth,
+  }: any) =>
+    Boolean(
+      !fetchingProfile &&
+        hasValidWalletAuth &&
+        !connectedProfileHandle &&
+        address
+    ),
 }));
 jest.mock("@/components/waves/DropPlaceholder", () => ({
   __esModule: true,
@@ -91,6 +106,11 @@ describe("PrivilegedDropCreator", () => {
   beforeEach(() => {
     mockPriv.mockReset();
     mockInvalidateQueries.mockClear();
+    mockUseAuth.mockReturnValue({
+      connectedProfile: undefined,
+      activeProfileProxy: undefined,
+      fetchingProfile: false,
+    });
     mockUseSeizeConnectContext.mockReturnValue({
       address: undefined,
       hasValidWalletAuth: false,
@@ -163,6 +183,62 @@ describe("PrivilegedDropCreator", () => {
     expect(
       screen.getByRole("button", { name: "Create profile" })
     ).toBeInTheDocument();
+  });
+
+  it("does not request profile setup while the profile is loading", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: undefined,
+      activeProfileProxy: undefined,
+      fetchingProfile: true,
+    });
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: "0xabc",
+      hasValidWalletAuth: true,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: "SUB",
+      chatRestriction: "CHAT",
+    });
+
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
+
+    expect(mockPriv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isLoggedIn: false,
+        needsProfile: false,
+      })
+    );
+    expect(
+      screen.queryByRole("button", { name: "Create profile" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps proxy sessions out of the profile setup path", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: undefined,
+      activeProfileProxy: { created_by: { handle: "proxy" } },
+      fetchingProfile: false,
+    });
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: "0xabc",
+      hasValidWalletAuth: true,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: "SUB",
+      chatRestriction: "CHAT",
+    });
+
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
+
+    expect(mockPriv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isProxy: true,
+        needsProfile: false,
+      })
+    );
+    expect(
+      screen.queryByRole("button", { name: "Create profile" })
+    ).not.toBeInTheDocument();
   });
 
   it("keeps chat composer visible during slow mode cooldown", () => {

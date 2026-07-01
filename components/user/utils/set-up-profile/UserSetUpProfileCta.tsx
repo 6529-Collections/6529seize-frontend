@@ -9,20 +9,41 @@ interface UserSetUpProfileCtaProps {
   readonly className?: string | undefined;
 }
 
+interface UserSetUpProfileCtaVisibilityInput {
+  readonly address?: string | null | undefined;
+  readonly connectedProfileHandle?: string | null | undefined;
+  readonly fetchingProfile?: boolean | undefined;
+  readonly hasValidWalletAuth?: boolean | undefined;
+}
+
+export function shouldShowUserSetUpProfileCta({
+  address,
+  connectedProfileHandle,
+  fetchingProfile,
+  hasValidWalletAuth,
+}: UserSetUpProfileCtaVisibilityInput): boolean {
+  return Boolean(
+    !fetchingProfile &&
+      hasValidWalletAuth &&
+      !connectedProfileHandle &&
+      address
+  );
+}
+
 export default function UserSetUpProfileCta({
   className,
 }: UserSetUpProfileCtaProps) {
   const { connectedProfile, fetchingProfile } = useContext(AuthContext);
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
 
-  const show = Boolean(
-    !fetchingProfile &&
-    hasValidWalletAuth &&
-    !connectedProfile?.handle &&
-    address
-  );
+  const show = shouldShowUserSetUpProfileCta({
+    address,
+    connectedProfileHandle: connectedProfile?.handle,
+    fetchingProfile,
+    hasValidWalletAuth,
+  });
 
-  if (!address || !show) return null;
+  if (!show || !address) return null;
 
   const wrapperClassName =
     className === undefined

@@ -8,7 +8,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import UserSetUpProfileCta from "../user/utils/set-up-profile/UserSetUpProfileCta";
+import UserSetUpProfileCta, {
+  shouldShowUserSetUpProfileCta,
+} from "../user/utils/set-up-profile/UserSetUpProfileCta";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
 import {
@@ -71,7 +73,7 @@ export default function PrivilegedDropCreator({
   forceStandardDropComposer = false,
 }: PrivilegedDropCreatorProps) {
   const queryClient = useQueryClient();
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const { updateEligibility } = useWaveEligibility();
   const refreshWaveAfterSlowModeExpires = useCallback(() => {
@@ -83,14 +85,20 @@ export default function PrivilegedDropCreator({
   }, [queryClient, wave.id]);
 
   const hasProfile = Boolean(connectedProfile?.handle);
-  const needsProfile = Boolean(address && hasValidWalletAuth && !hasProfile);
-  const profileAction = needsProfile ? (
+  const shouldOfferProfileSetup =
+    shouldShowUserSetUpProfileCta({
+      address,
+      connectedProfileHandle: connectedProfile?.handle,
+      fetchingProfile,
+      hasValidWalletAuth,
+    }) && !activeProfileProxy;
+  const profileAction = shouldOfferProfileSetup ? (
     <UserSetUpProfileCta className="tw-mt-1" />
   ) : undefined;
 
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile,
-    needsProfile,
+    needsProfile: shouldOfferProfileSetup,
     isProxy: !!activeProfileProxy,
     canChat: wave.chat.authenticated_user_eligible,
     canDrop: wave.participation.authenticated_user_eligible,

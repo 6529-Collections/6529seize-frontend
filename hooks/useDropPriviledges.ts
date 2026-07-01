@@ -145,12 +145,12 @@ export function useDropPrivileges({
       now,
     });
     let submissionRestriction: SubmissionRestriction | null = null;
-    if (needsProfile) {
+    if (isProxy) {
+      submissionRestriction = SubmissionRestriction.PROXY_USER;
+    } else if (needsProfile) {
       submissionRestriction = SubmissionRestriction.NEEDS_PROFILE;
     } else if (!isLoggedIn) {
       submissionRestriction = SubmissionRestriction.NOT_LOGGED_IN;
-    } else if (isProxy) {
-      submissionRestriction = SubmissionRestriction.PROXY_USER;
     } else if (!canDrop) {
       submissionRestriction = SubmissionRestriction.NO_PERMISSION;
     } else if (hasReachedMaxDrops) {
@@ -162,12 +162,12 @@ export function useDropPrivileges({
     }
 
     let chatRestriction: ChatRestriction | null = null;
-    if (needsProfile) {
+    if (isProxy) {
+      chatRestriction = ChatRestriction.PROXY_USER;
+    } else if (needsProfile) {
       chatRestriction = ChatRestriction.NEEDS_PROFILE;
     } else if (!isLoggedIn) {
       chatRestriction = ChatRestriction.NOT_LOGGED_IN;
-    } else if (isProxy) {
-      chatRestriction = ChatRestriction.PROXY_USER;
     } else if (chatDisabled) {
       chatRestriction = ChatRestriction.DISABLED;
     } else if (isChatCoolingDown) {

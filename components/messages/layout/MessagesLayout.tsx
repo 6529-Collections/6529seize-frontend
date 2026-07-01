@@ -57,7 +57,7 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
         <ConnectWallet
           title="You need to set up a profile to continue."
           description="Create a profile to access messages."
-          action={<UserSetUpProfileCta className="" />}
+          action={<UserSetUpProfileCta />}
         />
       );
     }

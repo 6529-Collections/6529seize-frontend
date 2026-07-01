@@ -56,6 +56,30 @@ describe("useDropPrivileges", () => {
     expect(result.current.chatRestriction).toBe(ChatRestriction.NEEDS_PROFILE);
   });
 
+  it("returns proxy restrictions before needs profile restrictions", () => {
+    const { result } = renderHook(() =>
+      useDropPrivileges({
+        isLoggedIn: false,
+        needsProfile: true,
+        isProxy: true,
+        canChat: true,
+        canDrop: true,
+        chatDisabled: false,
+        slowModeCooldownMs: null,
+        nextDropAllowed: null,
+        submissionStarts: null,
+        submissionEnds: null,
+        maxDropsCount: null,
+        identityDropsCount: null,
+      })
+    );
+
+    expect(result.current.submissionRestriction).toBe(
+      SubmissionRestriction.PROXY_USER
+    );
+    expect(result.current.chatRestriction).toBe(ChatRestriction.PROXY_USER);
+  });
+
   it("handles submission ended and chat disabled", () => {
     const now = Date.now();
     const { result } = renderHook(() =>
