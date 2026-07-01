@@ -144,10 +144,9 @@ function TraitAccordion(
                         </td>
                         <td className="text-center tw-w-1/6 tw-px-3 tw-py-2">
                           {t.value_count.toLocaleString()} (
-                          {(
-                            (t.value_count / props.token_count) *
-                            100
-                          ).toFixed(1)}
+                          {((t.value_count / props.token_count) * 100).toFixed(
+                            1
+                          )}
                           %)
                         </td>
                         <td className="text-center tw-w-1/6 tw-px-3 tw-py-2">

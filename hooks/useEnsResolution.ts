@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useEnsAddress, useEnsName } from "wagmi";
 
 const LABEL_SEPARATOR = " - ";
@@ -10,74 +10,93 @@ type UseEnsResolutionOptions = Readonly<{
   chainId?: number | undefined;
 }>;
 
+type EnsResolutionState = Readonly<{
+  inputValue: string;
+  initialValue: string;
+  addressOverride: string | undefined;
+}>;
+
 export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
   const { initialValue = "", chainId = 1 } = options;
-  const [inputValue, setInputValue] = useState(initialValue);
-  const [resolvedAddress, setResolvedAddress] = useState(initialValue);
+  const [state, setState] = useState<EnsResolutionState>(() => ({
+    inputValue: initialValue,
+    initialValue,
+    addressOverride: undefined,
+  }));
 
-  useEffect(() => {
-    setInputValue(initialValue);
-    setResolvedAddress(initialValue);
-  }, [initialValue]);
+  let currentState = state;
+  if (currentState.initialValue !== initialValue) {
+    // Keep this render-phase sync guarded by string content and pure helpers;
+    // otherwise prop/state feedback can reintroduce update-depth loops.
+    const nextResolvedAddress = getResolvedAddressFromInputValue(initialValue);
+    const nextInputValue = shouldPreserveResolvedDisplayValue({
+      current: currentState.inputValue,
+      initialValue,
+      nextResolvedAddress,
+    })
+      ? currentState.inputValue
+      : initialValue;
+
+    currentState = {
+      inputValue: nextInputValue,
+      initialValue,
+      addressOverride: undefined,
+    };
+    setState(currentState);
+  }
+
+  const inputAddress = getResolvedAddressFromInputValue(
+    currentState.inputValue
+  );
+  const ensInputName = getEnsInputName(currentState.inputValue);
 
   const ensNameQuery = useEnsName({
-    address: inputValue?.toLowerCase().startsWith("0x")
-      ? (inputValue as `0x${string}`)
+    address: inputAddress.toLowerCase().startsWith("0x")
+      ? (inputAddress as `0x${string}`)
       : undefined,
     chainId,
   });
 
   const ensAddressQuery = useEnsAddress({
-    name: inputValue?.toLowerCase().endsWith(".eth") ? inputValue : undefined,
+    name: ensInputName,
     chainId,
   });
 
-  useEffect(() => {
-    const ensName = ensNameQuery.data;
-    if (!ensName) {
-      return;
-    }
+  const resolvedEnsAddress = getResolvedEnsAddress(ensAddressQuery.data);
+  const isResolvingEnsAddress =
+    ensInputName !== undefined && ensAddressQuery.isLoading;
+  const resolvedAddress =
+    currentState.addressOverride ??
+    resolvedEnsAddress ??
+    (isResolvingEnsAddress ? "" : inputAddress);
+  const inputValue = getDisplayInputValue({
+    inputValue: currentState.inputValue,
+    ensName: ensNameQuery.data,
+    resolvedAddressFromEns: ensAddressQuery.data,
+  });
 
-    let pendingAddress: string | null = null;
+  const setInputValue = useCallback(
+    (value: string) => {
+      setState((current) => ({
+        inputValue: value,
+        initialValue: current.initialValue,
+        addressOverride: undefined,
+      }));
+    },
+    [setState]
+  );
 
-    setInputValue((current) => {
-      if (!current || current.includes(LABEL_SEPARATOR)) {
-        return current;
-      }
+  const handleInputChange = setInputValue;
 
-      if (!current.startsWith("0x")) {
-        return current;
-      }
-
-      pendingAddress = current;
-      return `${ensName}${LABEL_SEPARATOR}${current}`;
-    });
-
-    if (pendingAddress) {
-      setResolvedAddress(pendingAddress);
-    }
-  }, [ensNameQuery.data]);
-
-  useEffect(() => {
-    const resolvedAddressFromEns = ensAddressQuery.data;
-    if (!resolvedAddressFromEns) {
-      return;
-    }
-
-    setResolvedAddress(resolvedAddressFromEns);
-    setInputValue((current) =>
-      normalizeInputWithResolvedAddress(current, resolvedAddressFromEns)
-    );
-  }, [ensAddressQuery.data]);
-
-  const handleInputChange = useCallback((value: string) => {
-    setInputValue(value);
-    setResolvedAddress(value);
-  }, []);
-
-  const setAddress = useCallback((value: string) => {
-    setResolvedAddress(value);
-  }, []);
+  const setAddress = useCallback(
+    (value: string) => {
+      setState((current) => ({
+        ...current,
+        addressOverride: getResolvedAddressFromInputValue(value),
+      }));
+    },
+    [setState]
+  );
 
   return {
     inputValue,
@@ -88,6 +107,101 @@ export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
     ensNameQuery,
     ensAddressQuery,
   };
+}
+
+function getEnsInputName(value: string): string | undefined {
+  if (value.includes(LABEL_SEPARATOR)) {
+    return undefined;
+  }
+
+  return value.toLowerCase().endsWith(".eth") ? value : undefined;
+}
+
+function getResolvedEnsAddress(
+  value: string | null | undefined
+): string | undefined {
+  if (value === null || value === undefined || value === "") {
+    return undefined;
+  }
+
+  return value;
+}
+
+function getDisplayInputValue({
+  inputValue,
+  ensName,
+  resolvedAddressFromEns,
+}: {
+  inputValue: string;
+  ensName: string | null | undefined;
+  resolvedAddressFromEns: string | null | undefined;
+}): string {
+  if (!inputValue) {
+    return inputValue;
+  }
+
+  if (
+    resolvedAddressFromEns !== null &&
+    resolvedAddressFromEns !== undefined &&
+    resolvedAddressFromEns !== ""
+  ) {
+    return normalizeInputWithResolvedAddress(
+      inputValue,
+      resolvedAddressFromEns
+    );
+  }
+
+  if (inputValue.includes(LABEL_SEPARATOR)) {
+    return inputValue;
+  }
+
+  if (
+    ensName !== null &&
+    ensName !== undefined &&
+    ensName !== "" &&
+    inputValue.toLowerCase().startsWith("0x")
+  ) {
+    return `${ensName}${LABEL_SEPARATOR}${inputValue}`;
+  }
+
+  return inputValue;
+}
+
+function getResolvedAddressFromInputValue(value: string): string {
+  const parts = value.split(LABEL_SEPARATOR);
+  if (parts.length < 2) {
+    return value;
+  }
+
+  const trailingValue = parts[parts.length - 1]?.trim();
+  if (trailingValue?.toLowerCase().startsWith("0x")) {
+    return trailingValue;
+  }
+
+  return value;
+}
+
+function shouldPreserveResolvedDisplayValue({
+  current,
+  initialValue,
+  nextResolvedAddress,
+}: {
+  current: string;
+  initialValue: string;
+  nextResolvedAddress: string;
+}): boolean {
+  if (!current.includes(LABEL_SEPARATOR)) {
+    return false;
+  }
+
+  if (!initialValue.toLowerCase().startsWith("0x")) {
+    return false;
+  }
+
+  const currentResolvedAddress = getResolvedAddressFromInputValue(current);
+  return (
+    currentResolvedAddress.toLowerCase() === nextResolvedAddress.toLowerCase()
+  );
 }
 
 function normalizeInputWithResolvedAddress(
@@ -109,7 +223,7 @@ function normalizeInputWithResolvedAddress(
   }
 
   const lastIndex = parts.length - 1;
-  if (parts[lastIndex]?.toLowerCase()?.startsWith("0x")) {
+  if (parts[lastIndex]?.toLowerCase().startsWith("0x")) {
     parts[lastIndex] = resolvedAddress;
     return parts.join(LABEL_SEPARATOR);
   }

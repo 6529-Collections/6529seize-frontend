@@ -255,7 +255,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                 <>
                   <button
                     type="button"
-                    className="tw-absolute tw-left-0 tw-top-1/2 tw-flex tw-h-10 tw-w-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-4xl tw-leading-none tw-text-white tw-opacity-70 tw-transition-opacity desktop-hover:hover:tw-opacity-100 disabled:tw-opacity-30"
+                    className="tw-absolute tw-left-0 tw-top-1/2 tw-flex tw-h-10 tw-w-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-4xl tw-leading-none tw-text-white tw-opacity-70 tw-transition-opacity disabled:tw-opacity-30 desktop-hover:hover:tw-opacity-100"
                     onClick={goToPreviousDistributionPhoto}
                     disabled={activeDistributionPhotoIndex === 0}
                     aria-label={t(locale, "distribution.photos.previous")}
@@ -264,7 +264,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   </button>
                   <button
                     type="button"
-                    className="tw-absolute tw-right-0 tw-top-1/2 tw-flex tw-h-10 tw-w-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-4xl tw-leading-none tw-text-white tw-opacity-70 tw-transition-opacity desktop-hover:hover:tw-opacity-100 disabled:tw-opacity-30"
+                    className="tw-absolute tw-right-0 tw-top-1/2 tw-flex tw-h-10 tw-w-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-4xl tw-leading-none tw-text-white tw-opacity-70 tw-transition-opacity disabled:tw-opacity-30 desktop-hover:hover:tw-opacity-100"
                     onClick={goToNextDistributionPhoto}
                     disabled={
                       activeDistributionPhotoIndex ===
@@ -354,7 +354,10 @@ export default function DistributionPage(props: Readonly<Props>) {
     return (
       <>
         <ScrollToButton threshold={500} to="distribution-table" offset={0} />
-        <div className="tw-container tw-mx-auto tw-pb-3 tw-pt-5" id={`distribution-table`}>
+        <div
+          className="tw-container tw-mx-auto tw-pb-3 tw-pt-5"
+          id={`distribution-table`}
+        >
           <div>
             <div className="tw-flex tw-items-center tw-justify-end">
               <SearchWalletsDisplay
@@ -524,7 +527,9 @@ export default function DistributionPage(props: Readonly<Props>) {
   function printNotFound() {
     return (
       <div>
-        <div className="tw-w-full">{t(locale, "distribution.empty.noResults")}</div>
+        <div className="tw-w-full">
+          {t(locale, "distribution.empty.noResults")}
+        </div>
       </div>
     );
   }

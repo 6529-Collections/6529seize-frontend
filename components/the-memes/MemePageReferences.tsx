@@ -322,7 +322,7 @@ export function MemePageReferencesSubMenu(props: {
                       <button
                         type="button"
                         key={`sorting-${s}`}
-                        className="tw-block tw-w-[98%] tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 focus:tw-bg-transparent"
+                        className="tw-block tw-w-[98%] tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-iron-100 focus:tw-bg-transparent desktop-hover:hover:tw-bg-iron-800"
                         onClick={() => {
                           dispatchRememesState({
                             type: "setSorting",
@@ -419,10 +419,7 @@ export function MemePageReferencesSubMenu(props: {
                                 OPENSEA_STORE_FRONT_CONTRACT
                               ) ? (
                                 <>
-                                  {
-                                    rememe.contract_opensea_data
-                                      .collectionName
-                                  }
+                                  {rememe.contract_opensea_data.collectionName}
                                 </>
                               ) : (
                                 <>
