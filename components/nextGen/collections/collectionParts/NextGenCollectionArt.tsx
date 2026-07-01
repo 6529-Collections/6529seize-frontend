@@ -39,6 +39,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sortMenuRef = useRef<HTMLDivElement>(null);
+  const initializedTraitFilterOpen = useRef(false);
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -210,6 +211,10 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   }, [selectedTraitValues]);
 
   useEffect(() => {
+    if (!routerLoaded || initializedTraitFilterOpen.current) {
+      return;
+    }
+
     const selectedTraits = traits
       .filter((trait) =>
         selectedTraitValues.some((selected) => selected.trait === trait.trait)
@@ -217,11 +222,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       .map((trait) => trait.trait);
 
     if (selectedTraits.length > 0) {
-      setOpenTraitFilters((current) =>
-        Array.from(new Set([...current, ...selectedTraits]))
-      );
+      setOpenTraitFilters(selectedTraits);
     }
-  }, [selectedTraitValues, traits]);
+
+    initializedTraitFilterOpen.current = true;
+  }, [routerLoaded, selectedTraitValues, traits]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
