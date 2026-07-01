@@ -17,7 +17,10 @@ jest.mock('@/helpers/Helpers', () => ({
 
 describe('WalletAddress', () => {
   beforeEach(() => {
-    (global as any).navigator.clipboard = { writeText: jest.fn() };
+    Object.defineProperty(globalThis.navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: jest.fn().mockResolvedValue(undefined) },
+    });
   });
 
   it('renders address link without copy', () => {
@@ -35,18 +38,82 @@ describe('WalletAddress', () => {
 
   it('copies wallet address on click with userEvent', async () => {
     render(<WalletAddress wallet="0xabc" display="display" />);
-    await userEvent.click(screen.getByLabelText('copy-toggle'));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Copy wallet address' })
+    );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('0xabc');
   });
 
   it('copies address when toggle clicked with fireEvent', () => {
     render(<WalletAddress wallet="0xabc" display="Bob" />);
-    fireEvent.click(screen.getByLabelText('copy-toggle'));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Copy wallet address' })
+    );
     expect((navigator.clipboard.writeText as jest.Mock).mock.calls[0][0]).toBe('0xabc');
   });
 
   it('parses emoji display names', () => {
     render(<WalletAddress wallet="0x1" display="U+1F60A" hideCopy />);
     expect(parseEmojis).toHaveBeenCalledWith('U+1F60A');
+  });
+
+  it('keeps tooltip ids stable across rerenders', () => {
+    const { rerender } = render(
+      <WalletAddress wallet="0xabc" display="display" />
+    );
+    const copyButton = screen.getByRole('button', {
+      name: 'Copy wallet address',
+    });
+    const tooltipId = copyButton.getAttribute('data-tooltip-id');
+
+    rerender(<WalletAddress wallet="0xabc" display="display" />);
+
+    expect(
+      screen
+        .getByRole('button', { name: 'Copy wallet address' })
+        .getAttribute('data-tooltip-id')
+    ).toBe(tooltipId);
+  });
+
+  it('renders accessible ENS copy choices', async () => {
+    render(
+      <WalletAddress
+        wallet="0xabc"
+        display="vitalik.eth"
+        displayEns="vitalik.eth"
+      />
+    );
+
+    const copyOptions = screen.getByLabelText('Copy wallet options');
+    expect(copyOptions.tagName.toLowerCase()).toBe('summary');
+
+    await userEvent.click(copyOptions);
+    fireEvent.click(screen.getByLabelText('Copy ENS name'));
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('vitalik.eth');
+    expect(screen.getByLabelText('Copy wallet address')).toBeInTheDocument();
+  });
+
+  it('does not emit max update depth errors for copyable addresses', () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      const { rerender } = render(
+        <WalletAddress wallet="0xabc" display="display" />
+      );
+
+      rerender(<WalletAddress wallet="0xabc" display="display" />);
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Copy wallet address' })
+      );
+
+      const maxDepthErrors = errorSpy.mock.calls.filter(([message]) =>
+        String(message).includes('Maximum update depth exceeded')
+      );
+
+      expect(maxDepthErrors).toHaveLength(0);
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 });

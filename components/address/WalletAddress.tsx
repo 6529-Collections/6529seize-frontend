@@ -7,12 +7,10 @@ import {
   parseEmojis,
 } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRef, useState } from "react";
-import { Dropdown } from "react-bootstrap";
+import { type FocusEvent, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export function WalletAddress(props: {
   wallet: string;
@@ -23,13 +21,19 @@ export function WalletAddress(props: {
   hideCopy?: boolean | undefined;
   setLinkQueryAddress?: boolean | undefined;
 }) {
-  const uniqueId = getRandomObjectId();
-  const uniqueIdEns = getRandomObjectId();
-  const uniqueIdWallet = getRandomObjectId();
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const reactId = useId();
+  const tooltipIdBase = `wallet-address-${reactId.replace(/:/g, "")}`;
+  const copyTooltipId = `${tooltipIdBase}-copy`;
+  const ensTooltipId = `${tooltipIdBase}-ens`;
+  const walletTooltipId = `${tooltipIdBase}-wallet`;
+  const copyMenuRef = useRef<HTMLDetailsElement>(null);
   const [isCopied, setIsCopied] = useState(false);
+
+  const walletEns = props.display?.endsWith(".eth")
+    ? props.display
+    : props.displayEns?.endsWith(".eth")
+      ? props.displayEns
+      : null;
 
   function resolveDisplay() {
     if (props.display) {
@@ -69,21 +73,34 @@ export function WalletAddress(props: {
     return `/${encodeURIComponent(path)}`;
   }
 
-  function copy(text: any) {
-    navigator.clipboard.writeText(text);
+  function closeCopyMenu() {
+    if (copyMenuRef.current) {
+      copyMenuRef.current.open = false;
+    }
+  }
+
+  function copy(text: string) {
+    void navigator.clipboard.writeText(text).catch((error: unknown) => {
+      console.error("Failed to copy wallet address", error);
+    });
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
     }, 1000);
+    closeCopyMenu();
   }
 
-  const [walletEns] = useState(
-    props.display?.endsWith(".eth")
-      ? props.display
-      : props.displayEns?.endsWith(".eth")
-      ? props.displayEns
-      : null
-  );
+  function handleCopyMenuBlur(event: FocusEvent<HTMLDetailsElement>) {
+    const nextFocusedElement = event.relatedTarget;
+    if (
+      !(nextFocusedElement instanceof Node) ||
+      !event.currentTarget.contains(nextFocusedElement)
+    ) {
+      closeCopyMenu();
+    }
+  }
+
+  const tooltipLabel = isCopied ? "Copied" : "Copy";
 
   return (
     <span>
@@ -112,15 +129,20 @@ export function WalletAddress(props: {
             </span>
           )}
           {walletEns ? (
-            <Dropdown
-              ref={dropdownRef}
-              className={`${styles["copyDropdown"]}`}
-              autoClose="outside"
-              data-tooltip-id={uniqueId}
-              onToggle={(nextShow: boolean) => {
-                setIsDropdownOpen(nextShow);
+            <details
+              ref={copyMenuRef}
+              className={styles["copyMenu"]}
+              onBlur={handleCopyMenuBlur}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  closeCopyMenu();
+                }
               }}>
-              <Dropdown.Toggle name={`copy-toggle`} aria-label={`copy-toggle`}>
+              <summary
+                className={styles["copyMenuToggle"]}
+                data-tooltip-id={copyTooltipId}
+                aria-label="Copy wallet options">
                 {props.isUserPage && props.display && (
                   <span
                     className={`${styles["address"]} ${
@@ -131,94 +153,83 @@ export function WalletAddress(props: {
                 )}
                 <FontAwesomeIcon
                   icon={faCopy}
-                  name={`copy-btn`}
-                  aria-label={`copy-btn`}
+                  aria-hidden={true}
                   className={`${styles["copy"]}`}
                 />
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
+              </summary>
+              <span className={styles["copyMenuItems"]}>
                 {props.display && (
-                  <Dropdown.Item
-                    data-tooltip-id={uniqueIdEns}
-                    aria-label={`copy-ens-btn`}
+                  <button
+                    type="button"
+                    data-tooltip-id={ensTooltipId}
+                    className={styles["copyMenuItem"]}
+                    aria-label="Copy ENS name"
                     onClick={() => copy(props.displayEns ?? props.display)}
                     dangerouslySetInnerHTML={{
                       __html: resolveAddress(),
-                    }}></Dropdown.Item>
+                    }}></button>
                 )}
 
-                <Dropdown.Item
-                  data-tooltip-id={uniqueIdWallet}
-                  className={styles["copyDropdownItem"]}
-                  aria-label={`copy-address-btn`}
+                <button
+                  type="button"
+                  data-tooltip-id={walletTooltipId}
+                  className={styles["copyMenuItem"]}
+                  aria-label="Copy wallet address"
                   onClick={() => copy(props.wallet)}>
                   {formatAddress(props.wallet as string)}
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+                </button>
+              </span>
+            </details>
           ) : (
-            <Dropdown
-              ref={dropdownRef}
-              className={`${styles["copyDropdown"]}`}
-              autoClose="outside"
-              data-tooltip-id={uniqueId}
-              onToggle={(nextShow: boolean) => {
-                setIsDropdownOpen(nextShow);
-              }}>
-              <Dropdown.Toggle
-                name={`copy-toggle`}
-                aria-label={`copy-toggle`}
-                onClick={() => copy(props.wallet)}>
-                {props.isUserPage && (
-                  <span
-                    className={`${styles["address"]} ${
-                      props.isUserPage ? styles["addressUserPage"] : ""
-                    }`}
-                    dangerouslySetInnerHTML={{
-                      __html: resolveAddress(),
-                    }}></span>
-                )}
-                <FontAwesomeIcon
-                  icon={faCopy}
-                  name={`copy-btn`}
-                  aria-label={`copy-btn`}
-                  className={`${styles["copy"]}`}
-                />
-              </Dropdown.Toggle>
-            </Dropdown>
+            <button
+              type="button"
+              className={styles["copyButton"]}
+              data-tooltip-id={copyTooltipId}
+              aria-label="Copy wallet address"
+              onClick={() => copy(props.wallet)}>
+              {props.isUserPage && (
+                <span
+                  className={`${styles["address"]} ${
+                    props.isUserPage ? styles["addressUserPage"] : ""
+                  }`}
+                  dangerouslySetInnerHTML={{
+                    __html: resolveAddress(),
+                  }}></span>
+              )}
+              <FontAwesomeIcon
+                icon={faCopy}
+                aria-hidden={true}
+                className={`${styles["copy"]}`}
+              />
+            </button>
           )}
-          {!isDropdownOpen ? (
-            <Tooltip
-              id={uniqueId}
-              delayShow={150}
-              place="right"
-              opacity={1}
-              variant="light"
-              className="tw-leading-tight">
-              {isCopied ? "Copied" : "Copy"}
-            </Tooltip>
-          ) : (
-            <>
-              <Tooltip
-                id={uniqueIdEns}
-                delayShow={150}
-                place="right"
-                opacity={1}
-                variant="light"
-                className="tw-leading-tight">
-                {isCopied ? "Copied" : "Copy"}
-              </Tooltip>
-              <Tooltip
-                id={uniqueIdWallet}
-                delayShow={150}
-                place="right"
-                opacity={1}
-                variant="light"
-                className="tw-leading-tight">
-                {isCopied ? "Copied" : "Copy"}
-              </Tooltip>
-            </>
-          )}
+          <Tooltip
+            id={copyTooltipId}
+            delayShow={150}
+            place="right"
+            opacity={1}
+            variant="light"
+            className="tw-leading-tight">
+            {tooltipLabel}
+          </Tooltip>
+          <Tooltip
+            id={ensTooltipId}
+            delayShow={150}
+            place="right"
+            opacity={1}
+            variant="light"
+            className="tw-leading-tight">
+            {tooltipLabel}
+          </Tooltip>
+          <Tooltip
+            id={walletTooltipId}
+            delayShow={150}
+            place="right"
+            opacity={1}
+            variant="light"
+            className="tw-leading-tight">
+            {tooltipLabel}
+          </Tooltip>
         </>
       )}
     </span>
