@@ -193,6 +193,18 @@ const inferMimeTypeFromUrl = (url: string): string | undefined => {
   }
 };
 
+const buildPickedMediaFromUrl = (
+  url: string,
+  explicitMimeType?: string
+): PickedMedia => {
+  const previewUrl = getManifoldPreviewImageUrl(url);
+
+  return {
+    url: previewUrl,
+    mimeType: explicitMimeType ?? inferMimeTypeFromUrl(previewUrl) ?? "image/*",
+  };
+};
+
 const toPickedMedia = (candidate: MediaCandidate): PickedMedia | undefined => {
   if (!candidate) {
     return undefined;
@@ -203,14 +215,10 @@ const toPickedMedia = (candidate: MediaCandidate): PickedMedia | undefined => {
     return undefined;
   }
 
-  const url = getManifoldPreviewImageUrl(urlCandidate.trim());
-  const mimeType =
-    asNonEmptyString(candidate.type) ?? inferMimeTypeFromUrl(url) ?? "image/*";
-
-  return {
-    url,
-    mimeType,
-  };
+  return buildPickedMediaFromUrl(
+    urlCandidate.trim(),
+    asNonEmptyString(candidate.type)
+  );
 };
 
 const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
@@ -219,12 +227,7 @@ const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
     return undefined;
   }
 
-  const previewUrl = getManifoldPreviewImageUrl(url);
-
-  return {
-    url: previewUrl,
-    mimeType: inferMimeTypeFromUrl(previewUrl) ?? "image/*",
-  };
+  return buildPickedMediaFromUrl(url);
 };
 
 const asWsMediaPreviewCandidate = (
@@ -256,16 +259,11 @@ const pickWsMediaPreview = (
     return undefined;
   }
 
-  const previewUrl = getManifoldPreviewImageUrl(url);
-
-  return {
-    url: previewUrl,
-    mimeType:
-      asNonEmptyString(preview?.mime_type) ??
-      asNonEmptyString(update.media_preview_mime_type) ??
-      inferMimeTypeFromUrl(previewUrl) ??
-      "image/*",
-  };
+  return buildPickedMediaFromUrl(
+    url,
+    asNonEmptyString(preview?.mime_type) ??
+      asNonEmptyString(update.media_preview_mime_type)
+  );
 };
 
 const pickWsMediaLinkUpdatedMedia = ({
@@ -318,15 +316,7 @@ const pickNftLinkMediaPreview = (
     return undefined;
   }
 
-  const previewUrl = getManifoldPreviewImageUrl(url);
-
-  return {
-    url: previewUrl,
-    mimeType:
-      asNonEmptyString(preview.mime_type) ??
-      inferMimeTypeFromUrl(previewUrl) ??
-      "image/*",
-  };
+  return buildPickedMediaFromUrl(url, asNonEmptyString(preview.mime_type));
 };
 
 const pickNftLinkMedia = (

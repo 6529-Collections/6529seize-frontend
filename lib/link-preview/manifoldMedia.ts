@@ -17,8 +17,8 @@ export const getManifoldPreviewImageUrl = (url: string): string => {
       return url;
     }
 
-    const extension =
-      extensionCandidate.toLowerCase() === "jpeg" ? "jpg" : extensionCandidate;
+    const lowerExtension = extensionCandidate.toLowerCase();
+    const extension = lowerExtension === "jpeg" ? "jpg" : lowerExtension;
     parsed.pathname = `/optimized/${assetId}/w_${MANIFOLD_PREVIEW_IMAGE_WIDTH}.${extension}`;
     return parsed.toString();
   } catch {

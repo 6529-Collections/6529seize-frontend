@@ -532,6 +532,27 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
     });
   });
 
+  it("normalizes Manifold original media_uri image extensions to lowercase", () => {
+    const queryClient = createTestQueryClient();
+    const href = "https://manifold.xyz/@artist/id/125";
+    const mediaUri =
+      "https://assets.manifold.xyz/original/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184.PNG";
+
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks: [createNftLinkWithMediaUri({ href, mediaUri })],
+    });
+
+    const seeded = queryClient.getQueryData<MarketplacePreviewData>(
+      getMarketplacePreviewQueryKey(href, "default")
+    );
+
+    expect(seeded?.media).toEqual({
+      url: "https://assets.manifold.xyz/optimized/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184/w_800.png",
+      mimeType: "image/png",
+    });
+  });
+
   it("keeps Manifold original media_uri videos unchanged", () => {
     const queryClient = createTestQueryClient();
     const href = "https://manifold.xyz/@artist/id/124";

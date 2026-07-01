@@ -200,6 +200,39 @@ describe("fetchLinkPreview", () => {
     );
   });
 
+  it("preserves null image arrays while normalizing batch response images", async () => {
+    const preview: LinkPreviewResponse = {
+      requestUrl: "https://manifold.xyz/@artist/id/123",
+      title: "Manifold listing",
+      image: {
+        url: "https://assets.manifold.xyz/original/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184.JPEG",
+      },
+      images: null,
+    };
+    fetchMock.mockResolvedValueOnce(
+      createResponse({
+        results: {
+          "https://manifold.xyz/@artist/id/123": preview,
+        },
+        errors: {},
+      })
+    );
+
+    const { fetchLinkPreview } = await loadApi();
+    const request = fetchLinkPreview("https://manifold.xyz/@artist/id/123");
+
+    jest.runOnlyPendingTimers();
+
+    await expect(request).resolves.toEqual(
+      expect.objectContaining({
+        image: {
+          url: "https://assets.manifold.xyz/optimized/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184/w_800.jpg",
+        },
+        images: null,
+      })
+    );
+  });
+
   it("splits same-tick calls into POST chunks of 5 urls", async () => {
     const urls = [
       "https://one.example/article",
