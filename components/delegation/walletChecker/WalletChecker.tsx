@@ -419,6 +419,32 @@ export default function WalletCheckerComponent(
     return resolved ? resolved.title : collection;
   }
 
+  function DelegationAddressCells(
+    cellProps: Readonly<{ checkedAddress: string; delegation: Delegation }>
+  ) {
+    return (
+      <>
+        <td className={TABLE_CELL_CLASS}>
+          <CheckedWalletAddress
+            checkedAddress={cellProps.checkedAddress}
+            address={cellProps.delegation.from_address}
+            display={cellProps.delegation.from_display}
+          />
+        </td>
+        <td className={TABLE_CELL_CLASS}>
+          <CheckedWalletAddress
+            checkedAddress={cellProps.checkedAddress}
+            address={cellProps.delegation.to_address}
+            display={cellProps.delegation.to_display}
+          />
+        </td>
+        <td className={TABLE_CELL_CLASS}>
+          {getCollectionDisplay(cellProps.delegation.collection)}
+        </td>
+      </>
+    );
+  }
+
   function formatExpiry(myDate: number) {
     const date = new Date(myDate * 1000);
     const year = date.getUTCFullYear();
@@ -644,23 +670,10 @@ export default function WalletCheckerComponent(
                           <tbody>
                             {delegations.map((delegation, index) => (
                               <tr key={`delegations-${index}`}>
-                                <td className={TABLE_CELL_CLASS}>
-                                  <CheckedWalletAddress
-                                    checkedAddress={fetchedAddress}
-                                    address={delegation.from_address}
-                                    display={delegation.from_display}
-                                  />
-                                </td>
-                                <td className={TABLE_CELL_CLASS}>
-                                  <CheckedWalletAddress
-                                    checkedAddress={fetchedAddress}
-                                    address={delegation.to_address}
-                                    display={delegation.to_display}
-                                  />
-                                </td>
-                                <td className={TABLE_CELL_CLASS}>
-                                  {getCollectionDisplay(delegation.collection)}
-                                </td>
+                                <DelegationAddressCells
+                                  checkedAddress={fetchedAddress}
+                                  delegation={delegation}
+                                />
                                 <td className={TABLE_CELL_CLASS}>
                                   {getUseCaseDisplay(delegation.use_case)}
                                 </td>
@@ -744,23 +757,10 @@ export default function WalletCheckerComponent(
                           <tbody>
                             {subDelegations.map((delegation, index) => (
                               <tr key={`sub-delegations-${index}`}>
-                                <td className={TABLE_CELL_CLASS}>
-                                  <CheckedWalletAddress
-                                    checkedAddress={fetchedAddress}
-                                    address={delegation.from_address}
-                                    display={delegation.from_display}
-                                  />
-                                </td>
-                                <td className={TABLE_CELL_CLASS}>
-                                  <CheckedWalletAddress
-                                    checkedAddress={fetchedAddress}
-                                    address={delegation.to_address}
-                                    display={delegation.to_display}
-                                  />
-                                </td>
-                                <td className={TABLE_CELL_CLASS}>
-                                  {getCollectionDisplay(delegation.collection)}
-                                </td>
+                                <DelegationAddressCells
+                                  checkedAddress={fetchedAddress}
+                                  delegation={delegation}
+                                />
                               </tr>
                             ))}
                           </tbody>
