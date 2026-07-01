@@ -577,6 +577,38 @@ describe("push registration behavior", () => {
     );
   });
 
+  it("records known low-value native registration errors as info breadcrumbs", async () => {
+    const sentry = require("@sentry/nextjs");
+    const nativeError = {
+      domain: "com.google.iid",
+      code: -25291,
+      localizedDescription:
+        "The operation couldn't be completed. (com.google.iid error -25291.)",
+    };
+    const { registrationErrorCallback } = await setupRegistrationCallback();
+
+    act(() => {
+      registrationErrorCallback(nativeError);
+    });
+
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        level: "info",
+        message: "Push registration low-value native error.",
+        data: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "pushRegistrationError",
+          retryable: false,
+          known_low_value: true,
+          error_code: -25291,
+          error_message:
+            "The operation couldn't be completed. (com.google.iid error -25291.)",
+        }),
+      })
+    );
+  });
+
   it("captures non-transient native registration objects as Error instances", async () => {
     const sentry = require("@sentry/nextjs");
     const nativeError = {

@@ -92,6 +92,11 @@ const TRANSIENT_ERROR_PATTERNS = [
   "network error",
   "timeout",
 ];
+const LOW_VALUE_PUSH_REGISTRATION_ERROR_PATTERNS = [
+  "com.google.iid error -25291",
+];
+const LOW_VALUE_PUSH_REGISTRATION_ERROR_DOMAIN = "com.google.iid";
+const LOW_VALUE_PUSH_REGISTRATION_ERROR_CODES = new Set(["-25291"]);
 
 type PushRegistrationFingerprint = {
   deviceId: string;
@@ -366,6 +371,30 @@ const extractErrorCode = (error: unknown): string | number | undefined => {
   return typeof errorCode === "string" || typeof errorCode === "number"
     ? errorCode
     : undefined;
+};
+
+const isKnownLowValuePushRegistrationError = (error: unknown): boolean => {
+  const normalizedMessage = toErrorMessage(error).toLowerCase();
+  const normalizedErrorCode = String(extractErrorCode(error) ?? "")
+    .trim()
+    .toLowerCase();
+  const errorRecord = toRecord(error);
+  const normalizedErrorDomain =
+    errorRecord !== null
+      ? getStringErrorField(errorRecord, "domain")?.toLowerCase() ?? ""
+      : "";
+
+  const matchesKnownPattern = LOW_VALUE_PUSH_REGISTRATION_ERROR_PATTERNS.some(
+    (pattern) =>
+      normalizedMessage.includes(pattern) ||
+      normalizedErrorCode.includes(pattern)
+  );
+
+  return (
+    matchesKnownPattern ||
+    (normalizedErrorDomain === LOW_VALUE_PUSH_REGISTRATION_ERROR_DOMAIN &&
+      LOW_VALUE_PUSH_REGISTRATION_ERROR_CODES.has(normalizedErrorCode))
+  );
 };
 
 const createErrorTelemetryExtra = (error: unknown): ErrorTelemetryExtra => {
@@ -1028,6 +1057,26 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           isRegisteredRef.current = false;
           const statusCode = extractErrorStatusCode(error);
           const errorExtra = createErrorTelemetryExtra(error);
+
+          if (isKnownLowValuePushRegistrationError(error)) {
+            console.warn("Known low-value push registration error", {
+              statusCode,
+              ...errorExtra,
+            });
+            Sentry.addBreadcrumb({
+              category: "notifications",
+              level: "info",
+              message: "Push registration low-value native error.",
+              data: {
+                component: "NotificationsProvider",
+                operation: "pushRegistrationError",
+                retryable: false,
+                known_low_value: true,
+                ...errorExtra,
+              },
+            });
+            return;
+          }
 
           if (isTransientPushRegistrationError(error)) {
             console.warn("Transient push registration error", {
