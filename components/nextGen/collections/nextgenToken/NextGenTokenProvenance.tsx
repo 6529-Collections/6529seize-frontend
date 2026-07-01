@@ -1,7 +1,6 @@
 "use client";
 
 import styles from "../NextGen.module.scss";
-import { Col, Container, Row, Table } from "../NextGenTailwindLayout";
 import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import Pagination from "@/components/pagination/Pagination";
@@ -77,15 +76,22 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
 
   return (
     <>
-      <Container className="no-padding" ref={scrollTarget}>
-        <Row>
-          <Col>
+      <div
+        className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
+        ref={scrollTarget}
+      >
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h3>Token Provenance</h3>
-          </Col>
-        </Row>
-        <Row className={`pt-2 ${styles["logsScrollContainer"]}`}>
-          <Col>
-            <Table bordered={false} className={styles["logsTable"]}>
+          </div>
+        </div>
+        <div
+          className={`pt-2 -tw-mx-3 tw-flex tw-flex-wrap ${styles["logsScrollContainer"]}`}
+        >
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+            <table
+              className={`tw-w-full tw-border-collapse ${styles["logsTable"]}`}
+            >
               <tbody>
                 {transactions.map((tr) => (
                   <LatestActivityRow
@@ -95,11 +101,11 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
                   />
                 ))}
               </tbody>
-            </Table>
-          </Col>
-        </Row>
+            </table>
+          </div>
+        </div>
         {totalResults > PAGE_SIZE && transactionsLoaded && (
-          <Row className="text-center pt-4 pb-4">
+          <div className="text-center pt-4 pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
             <Pagination
               page={page}
               pageSize={PAGE_SIZE}
@@ -113,17 +119,20 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
                 }
               }}
             />
-          </Row>
+          </div>
         )}
-      </Container>
-      <Container className="pt-4 no-padding" ref={logsScrollTarget}>
-        <Row>
-          <Col>
+      </div>
+      <div
+        className="pt-4 no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
+        ref={logsScrollTarget}
+      >
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h3>Collection Provenance</h3>
-          </Col>
-        </Row>
-        <Row className="pt-2">
-          <Col>
+          </div>
+        </div>
+        <div className="pt-2 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             {logs.map((log, index) => (
               <NextGenCollectionProvenanceRow
                 collection={props.collection}
@@ -133,10 +142,10 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
                 odd={index % 2 !== 0}
               />
             ))}
-          </Col>
-        </Row>
+          </div>
+        </div>
         {logsTotalResults > PAGE_SIZE && logsLoaded && (
-          <Row className="text-center pt-4 pb-4">
+          <div className="text-center pt-4 pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
             <Pagination
               page={logsPage}
               pageSize={PAGE_SIZE}
@@ -150,9 +159,9 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
                 }
               }}
             />
-          </Row>
+          </div>
         )}
-      </Container>
+      </div>
     </>
   );
 }

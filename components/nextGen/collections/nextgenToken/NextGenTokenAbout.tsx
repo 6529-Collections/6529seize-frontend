@@ -33,7 +33,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { Tooltip } from "react-tooltip";
 import { displayScore } from "./NextGenTokenProperties";
 
@@ -69,32 +68,32 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
   }, [props.token.owner, connectedProfile?.wallets]);
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col className="pb-3">
+    <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3 className="mb-0">About</h3>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Collection Token ID:</span>
           <span>{props.token.normalised_id}</span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Contract Token ID:</span>
           <span>{props.token.id}</span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Minted:</span>
           <span>{printMintDate(props.token.mint_date)}</span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Mint Price:</span>
           <span>
             {props.token.mint_price ? (
@@ -108,10 +107,10 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
               "Free"
             )}
           </span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-2">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-2 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Collector:</span>
           <span className="d-flex gap-1 align-items-center">
             {(props.token.burnt || isNullAddress(props.token.owner)) && (
@@ -156,19 +155,19 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             )}
             {isOwner && <YouOwnNftBadge />}
           </span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-2">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-2 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Collector TDH:</span>
           <span className="d-flex gap-1 align-items-center">
             {numberWithCommas(Math.round((profile?.tdh ?? 0) * 100) / 100)}
           </span>
-        </Col>
-      </Row>
+        </div>
+      </div>
       {(!capacitor.isIos || country === "US") && (
-        <Row>
-          <Col className="pb-3 d-flex flex-column">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="pb-3 d-flex flex-column tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <span className="font-color-h">Listed:</span>
             <span className="d-flex flex-column align-items-start gap-2 pt-1">
               <span>
@@ -222,21 +221,23 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     padding: "4px 8px",
                   }}
                 >
-                  <Container>
-                    <Row>
-                      <Col>
+                  <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         Opensea:{" "}
                         {props.token.opensea_price > 0
                           ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
                           : "Not Listed"}
-                      </Col>
-                    </Row>
+                      </div>
+                    </div>
                     {props.token.opensea_price > 0 && (
-                      <Row>
-                        <Col>Royalties: {props.token.opensea_royalty}%</Col>
-                      </Row>
+                      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+                          Royalties: {props.token.opensea_royalty}%
+                        </div>
+                      </div>
                     )}
-                  </Container>
+                  </div>
                 </Tooltip>
               </span>
               <span>
@@ -277,16 +278,16 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     padding: "4px 8px",
                   }}
                 >
-                  <Container>
-                    <Row>
-                      <Col>
+                  <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         Blur:{" "}
                         {props.token.blur_price > 0
                           ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
                           : "Not Listed"}
-                      </Col>
-                    </Row>
-                  </Container>
+                      </div>
+                    </div>
+                  </div>
                 </Tooltip>
               </span>
               <span>
@@ -340,29 +341,31 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     padding: "4px 8px",
                   }}
                 >
-                  <Container>
-                    <Row>
-                      <Col>
+                  <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         Magic Eden:{" "}
                         {props.token.me_price > 0
                           ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
                           : "Not Listed"}
-                      </Col>
-                    </Row>
+                      </div>
+                    </div>
                     {props.token.me_price > 0 && (
-                      <Row>
-                        <Col>Royalties: {props.token.me_royalty}%</Col>
-                      </Row>
+                      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+                          Royalties: {props.token.me_royalty}%
+                        </div>
+                      </div>
                     )}
-                  </Container>
+                  </div>
                 </Tooltip>
               </span>
             </span>
-          </Col>
-        </Row>
+          </div>
+        </div>
       )}
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Collection:</span>
           <span>
             <Link
@@ -373,20 +376,20 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
               {props.collection.name}
             </Link>
           </span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Artist:</span>
           <span>
             <Link href={`/${props.collection.artist_address}`}>
               {props.collection.artist}
             </Link>
           </span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">TDH Rate:</span>
           <span>
             {numberWithCommas(Math.round(props.token.hodl_rate * 100) / 100)}
@@ -394,15 +397,15 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           &nbsp;&nbsp;|&nbsp;&nbsp;
           <span className="font-color-h">TDH:</span>
           <span>{numberWithCommas(Math.round(tdh * 100) / 100)}</span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="pb-3 d-flex gap-1">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 d-flex gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Image Licence:</span>
           <span>{props.collection.licence}</span>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
 
