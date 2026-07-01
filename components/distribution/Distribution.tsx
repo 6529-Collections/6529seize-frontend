@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { Carousel } from "react-bootstrap";
+import type { TouchEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { mainnet } from "viem/chains";
 import Address from "@/components/address/Address";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -55,6 +55,9 @@ export default function DistributionPage(props: Readonly<Props>) {
   const [distributionPhotos, setDistributionPhotos] = useState<
     DistributionPhoto[]
   >([]);
+  const [activeDistributionPhotoIndex, setActiveDistributionPhotoIndex] =
+    useState(0);
+  const distributionPhotoTouchStartX = useRef<number | null>(null);
 
   const [totalResults, setTotalResults] = useState(0);
 
@@ -152,20 +155,77 @@ export default function DistributionPage(props: Readonly<Props>) {
     }
   }, [pageProps]);
 
+  useEffect(() => {
+    setActiveDistributionPhotoIndex(0);
+  }, [distributionPhotos]);
+
+  function goToPreviousDistributionPhoto() {
+    setActiveDistributionPhotoIndex((activeIndex) =>
+      Math.max(activeIndex - 1, 0)
+    );
+  }
+
+  function goToNextDistributionPhoto() {
+    setActiveDistributionPhotoIndex((activeIndex) =>
+      Math.min(activeIndex + 1, distributionPhotos.length - 1)
+    );
+  }
+
+  function handleDistributionPhotoTouchStart(
+    event: TouchEvent<HTMLDivElement>
+  ) {
+    distributionPhotoTouchStartX.current = event.touches[0]?.clientX ?? null;
+  }
+
+  function handleDistributionPhotoTouchEnd(event: TouchEvent<HTMLDivElement>) {
+    const startX = distributionPhotoTouchStartX.current;
+    distributionPhotoTouchStartX.current = null;
+
+    if (startX === null) {
+      return;
+    }
+
+    const endX = event.changedTouches[0]?.clientX;
+    if (endX === undefined) {
+      return;
+    }
+
+    const swipeDelta = endX - startX;
+    const minSwipeDistance = 40;
+
+    if (Math.abs(swipeDelta) < minSwipeDistance) {
+      return;
+    }
+
+    if (swipeDelta > 0) {
+      goToPreviousDistributionPhoto();
+    } else {
+      goToNextDistributionPhoto();
+    }
+  }
+
   function printDistributionPhotos() {
     if (distributionPhotos.length > 0) {
       return (
         <div className="tw-pb-5 tw-pt-4">
           <div>
-            <Carousel
-              interval={null}
-              wrap={false}
-              touch={true}
-              fade={true}
+            <div
               className={styles["distributionCarousel"]}
+              role="group"
+              aria-roledescription="carousel"
+              onTouchStart={handleDistributionPhotoTouchStart}
+              onTouchEnd={handleDistributionPhotoTouchEnd}
             >
               {distributionPhotos.map((dp, index) => (
-                <Carousel.Item key={dp.id}>
+                <div
+                  key={dp.id}
+                  className={`tw-transition-opacity tw-duration-300 ${
+                    index === activeDistributionPhotoIndex
+                      ? "tw-block tw-opacity-100"
+                      : "tw-hidden tw-opacity-0"
+                  }`}
+                  aria-hidden={index !== activeDistributionPhotoIndex}
+                >
                   <Image
                     unoptimized
                     priority={index === 0}
@@ -181,9 +241,54 @@ export default function DistributionPage(props: Readonly<Props>) {
                       photoNumber: formatInteger(locale, index + 1),
                     })}
                   />
-                </Carousel.Item>
+                </div>
               ))}
-            </Carousel>
+              {distributionPhotos.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    className="tw-absolute tw-left-0 tw-top-1/2 tw-flex tw-h-10 tw-w-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-4xl tw-leading-none tw-text-white tw-opacity-70 tw-transition-opacity desktop-hover:hover:tw-opacity-100 disabled:tw-opacity-30"
+                    onClick={goToPreviousDistributionPhoto}
+                    disabled={activeDistributionPhotoIndex === 0}
+                    aria-label="Previous"
+                  >
+                    <span aria-hidden="true">&#8249;</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="tw-absolute tw-right-0 tw-top-1/2 tw-flex tw-h-10 tw-w-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-4xl tw-leading-none tw-text-white tw-opacity-70 tw-transition-opacity desktop-hover:hover:tw-opacity-100 disabled:tw-opacity-30"
+                    onClick={goToNextDistributionPhoto}
+                    disabled={
+                      activeDistributionPhotoIndex ===
+                      distributionPhotos.length - 1
+                    }
+                    aria-label="Next"
+                  >
+                    <span aria-hidden="true">&#8250;</span>
+                  </button>
+                  <div className="tw-absolute tw-bottom-2 tw-left-0 tw-right-0 tw-flex tw-justify-center tw-gap-2">
+                    {distributionPhotos.map((dp, index) => (
+                      <button
+                        key={`distribution-photo-indicator-${dp.id}`}
+                        type="button"
+                        className={`tw-h-1 tw-w-8 tw-border-0 tw-p-0 tw-transition-opacity ${
+                          index === activeDistributionPhotoIndex
+                            ? "tw-bg-white tw-opacity-100"
+                            : "tw-bg-white tw-opacity-50"
+                        }`}
+                        onClick={() => setActiveDistributionPhotoIndex(index)}
+                        aria-label={`Slide ${index + 1}`}
+                        aria-current={
+                          index === activeDistributionPhotoIndex
+                            ? "true"
+                            : undefined
+                        }
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       );

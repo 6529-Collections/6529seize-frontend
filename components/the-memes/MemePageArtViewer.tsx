@@ -18,8 +18,8 @@ import {
   getImageMimeTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
-import { Carousel } from "react-bootstrap";
+import type { TouchEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import styles from "./TheMemes.module.scss";
 
@@ -85,6 +85,7 @@ export function MemePageArtViewer({
   const [fullscreenOriginalTargetId, setFullscreenOriginalTargetId] = useState<
     string | null
   >(null);
+  const slideTouchStartX = useRef<number | null>(null);
 
   const animationHref = getResolvedAnimationSrc(nft);
   const hasAnimation = Boolean(animationHref);
@@ -170,16 +171,60 @@ export function MemePageArtViewer({
     };
   }, []);
 
-  function carouselHandlerSlide(event: number) {
-    setCurrentSlide(event);
-  }
+  useEffect(() => {
+    if (!hasMultipleSlides) {
+      setCurrentSlide(0);
+    }
+  }, [hasMultipleSlides]);
 
   function goToPreviousSlide() {
     setCurrentSlide((slide) => Math.max(0, slide - 1));
   }
 
   function goToNextSlide() {
-    setCurrentSlide((slide) => Math.min(1, slide + 1));
+    setCurrentSlide((slide) =>
+      Math.min(hasMultipleSlides ? 1 : 0, slide + 1)
+    );
+  }
+
+  function handleSlideTouchStart(event: TouchEvent<HTMLDivElement>) {
+    if (!hasMultipleSlides) {
+      return;
+    }
+
+    slideTouchStartX.current = event.touches[0]?.clientX ?? null;
+  }
+
+  function handleSlideTouchEnd(event: TouchEvent<HTMLDivElement>) {
+    if (!hasMultipleSlides) {
+      slideTouchStartX.current = null;
+      return;
+    }
+
+    const startX = slideTouchStartX.current;
+    slideTouchStartX.current = null;
+
+    if (startX === null) {
+      return;
+    }
+
+    const endX = event.changedTouches[0]?.clientX;
+    if (endX === undefined) {
+      return;
+    }
+
+    const swipeDelta = endX - startX;
+    const minSwipeDistance = 40;
+
+    if (Math.abs(swipeDelta) < minSwipeDistance) {
+      return;
+    }
+
+    if (swipeDelta > 0) {
+      goToPreviousSlide();
+    } else {
+      goToNextSlide();
+    }
   }
 
   function enterActiveMediaFullScreen() {
@@ -293,16 +338,20 @@ export function MemePageArtViewer({
         {hasAnimation ? (
           <>
             <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950 tw-p-0">
-              <Carousel
+              <div
                 className={`${styles["memesCarousel"] ?? ""} tw-w-full`}
-                activeIndex={currentSlide}
-                controls={false}
-                interval={null}
-                indicators={false}
-                wrap={false}
-                onSelect={carouselHandlerSlide}
+                role="group"
+                aria-roledescription="carousel"
+                onTouchStart={handleSlideTouchStart}
+                onTouchEnd={handleSlideTouchEnd}
               >
-                <Carousel.Item className="tw-text-center">
+                <div
+                  data-carousel-slide
+                  className={`tw-h-full tw-items-center tw-justify-center tw-text-center ${
+                    currentSlide === 0 ? "tw-flex" : "tw-hidden"
+                  }`}
+                  aria-hidden={currentSlide !== 0}
+                >
                   <NFTImage
                     nft={nft}
                     animation={true}
@@ -315,9 +364,15 @@ export function MemePageArtViewer({
                     }
                     id="the-art-fullscreen-animation"
                   />
-                </Carousel.Item>
+                </div>
                 {hasImage && (
-                  <Carousel.Item className="tw-text-center">
+                  <div
+                    data-carousel-slide
+                    className={`tw-h-full tw-items-center tw-justify-center tw-text-center ${
+                      currentSlide === 1 ? "tw-flex" : "tw-hidden"
+                    }`}
+                    aria-hidden={currentSlide !== 1}
+                  >
                     <NFTImage
                       nft={nft}
                       animation={false}
@@ -329,9 +384,9 @@ export function MemePageArtViewer({
                       transparentBG={true}
                       id="the-art-fullscreen-img"
                     />
-                  </Carousel.Item>
+                  </div>
                 )}
-              </Carousel>
+              </div>
               {printMediaActions()}
             </div>
             {printArtworkControls()}
