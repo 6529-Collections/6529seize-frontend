@@ -1,15 +1,10 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
-import { WaveGallery } from "@/components/waves/gallery";
-import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
-import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
-import PrivilegedDropCreator, {
-  DropMode,
-} from "@/components/waves/PrivilegedDropCreator";
-import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { DropMode } from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -33,6 +28,7 @@ import {
   ACCEPTED_FILE_TYPE_LABELS,
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
   useCallback,
@@ -44,7 +40,6 @@ import React, {
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
 import { useWaveChatLeaveCleanup } from "./useWaveChatLeaveCleanup";
-import { WaveChatSubmitDropModal } from "./WaveChatSubmitDropModal";
 import type {
   ChatSubmitDropAction,
   ChatSubmitDropState,
@@ -72,8 +67,92 @@ interface WaveChatLeaveHandlerProps {
   readonly waveId: string;
 }
 
+interface WaveGalleryProps {
+  readonly wave: ApiWave;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
+}
+
+interface PrivilegedDropCreatorProps {
+  readonly activeDrop: ActiveDropState | null;
+  readonly onCancelReplyQuote: () => void;
+  readonly onDropAddedToQueue: () => void;
+  readonly wave: ApiWave;
+  readonly dropId: string | null;
+  readonly fixedDropMode: DropMode;
+  readonly externalAttachmentDrop?:
+    | {
+        readonly token: number;
+        readonly files: File[];
+      }
+    | null
+    | undefined;
+  readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
+  readonly onSubmitCurationUrl?: ((url: string) => void) | undefined;
+  readonly canSubmitCurationUrl?: boolean | undefined;
+  readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
+}
+
+interface WaveChatSubmitDropModalProps {
+  readonly isOpen: boolean;
+  readonly wave: ApiWave;
+  readonly title: string;
+  readonly onClose: () => void;
+  readonly initialCurationUrl?: string | null | undefined;
+}
+
+interface WaveDropCreateProps {
+  readonly wave: ApiWave;
+  readonly onCancel?: (() => void) | undefined;
+  readonly onSuccess: () => void;
+  readonly isModalContent?: boolean | undefined;
+  readonly onExitFixedDropMode?: (() => void) | undefined;
+}
+
+interface WaveLeaderboardCurationDropModalProps {
+  readonly isOpen: boolean;
+  readonly wave: ApiWave;
+  readonly onClose: () => void;
+  readonly initialUrl?: string | null | undefined;
+}
+
 const MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST = 3;
 const noop = () => {};
+
+const WaveGallery = dynamic<WaveGalleryProps>(
+  () => import("@/components/waves/gallery").then((mod) => mod.WaveGallery),
+  { loading: () => null }
+);
+
+const PrivilegedDropCreator = dynamic<PrivilegedDropCreatorProps>(
+  () => import("@/components/waves/PrivilegedDropCreator"),
+  { loading: () => null }
+);
+
+const WaveChatSubmitDropModal = dynamic<WaveChatSubmitDropModalProps>(
+  () =>
+    import("./WaveChatSubmitDropModal").then(
+      (mod) => mod.WaveChatSubmitDropModal
+    ),
+  { loading: () => null }
+);
+
+const WaveDropCreate = dynamic<WaveDropCreateProps>(
+  () =>
+    import("@/components/waves/leaderboard/create/WaveDropCreate").then(
+      (mod) => mod.WaveDropCreate
+    ),
+  { loading: () => null }
+);
+
+const WaveLeaderboardCurationDropModal =
+  dynamic<WaveLeaderboardCurationDropModalProps>(
+    () =>
+      import(
+        "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal"
+      ).then((mod) => mod.WaveLeaderboardCurationDropModal),
+    { loading: () => null }
+  );
 
 const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   enabled,
