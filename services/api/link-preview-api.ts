@@ -274,7 +274,7 @@ const normalizeLinkPreviewResponse = (
         );
   const imageChanged = normalizedImage !== preview.image;
   const imagesChanged =
-    normalizedImages !== undefined &&
+    Array.isArray(normalizedImages) &&
     normalizedImages.some((image, index) => image !== preview.images?.[index]);
 
   if (!imageChanged && !imagesChanged) {
