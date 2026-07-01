@@ -107,5 +107,12 @@ describe("theMemesFilters", () => {
     expect(getAllSeasonsLabel(null)).toBe("All Seasons");
     expect(getAllSeasonsLabel(0)).toBe("All Year 0 Seasons");
     expect(getAllSeasonsLabel(4)).toBe("All Year 4 Seasons");
+    expect(getAllSeasonsLabel(4, "es-ES")).toBe(
+      "Todas las temporadas del año 4"
+    );
+    expect(getMemeYears(seasons.slice(0, 2), "de-DE")).toEqual([
+      { id: 0, display: "Jahr 0" },
+      { id: 1, display: "Jahr 1" },
+    ]);
   });
 });

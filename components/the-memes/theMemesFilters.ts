@@ -4,6 +4,9 @@ import {
   getSeasonIndexForDate,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { MemeSeason } from "@/entities/ISeason";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 type MemeYear = {
   readonly id: number;
@@ -24,7 +27,10 @@ export function getMemeYearFromSeason(season: MemeSeason): number | null {
   return getMemeYearFromMintNumber(season.start_index);
 }
 
-export function getMemeYears(seasons: readonly MemeSeason[]): MemeYear[] {
+export function getMemeYears(
+  seasons: readonly MemeSeason[],
+  locale: SupportedLocale = DEFAULT_LOCALE
+): MemeYear[] {
   const years = new Set(
     seasons
       .map(getMemeYearFromSeason)
@@ -35,7 +41,9 @@ export function getMemeYears(seasons: readonly MemeSeason[]): MemeYear[] {
     .toSorted((a, b) => a - b)
     .map((year) => ({
       id: year,
-      display: `Year ${year}`,
+      display: t(locale, "theMemes.filters.year.option", {
+        year: formatInteger(locale, year),
+      }),
     }));
 }
 
@@ -53,8 +61,15 @@ export function getMemeSeasonsForYear({
   return seasons.filter((season) => getMemeYearFromSeason(season) === yearId);
 }
 
-export function getAllSeasonsLabel(yearId: number | null): string {
-  return yearId === null ? "All Seasons" : `All Year ${yearId} Seasons`;
+export function getAllSeasonsLabel(
+  yearId: number | null,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string {
+  return yearId === null
+    ? t(locale, "theMemes.filters.season.all")
+    : t(locale, "theMemes.filters.season.allForYear", {
+        year: formatInteger(locale, yearId),
+      });
 }
 
 export function normalizeMemeFilterIds({

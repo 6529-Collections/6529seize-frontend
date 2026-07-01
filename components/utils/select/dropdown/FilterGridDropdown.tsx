@@ -11,7 +11,6 @@ interface FilterGridDropdownItem<TValue extends string | number> {
 }
 
 export default function FilterGridDropdown<TValue extends string | number>({
-  ariaLabel,
   disabled = false,
   filterLabel,
   items,
@@ -19,8 +18,8 @@ export default function FilterGridDropdown<TValue extends string | number>({
   selectedValue,
   allItemLabel,
   triggerLabel,
+  triggerAriaLabel,
 }: {
-  readonly ariaLabel: string;
   readonly disabled?: boolean | undefined;
   readonly filterLabel: string;
   readonly items: readonly FilterGridDropdownItem<TValue>[];
@@ -28,6 +27,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
   readonly selectedValue: TValue | null;
   readonly allItemLabel: string;
   readonly triggerLabel?: string | undefined;
+  readonly triggerAriaLabel: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -68,7 +68,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           ref={buttonRef}
           type="button"
           aria-haspopup="true"
-          aria-label={`${ariaLabel}: ${activeLabel}`}
+          aria-label={triggerAriaLabel}
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}

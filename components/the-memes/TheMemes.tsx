@@ -275,14 +275,22 @@ export default function TheMemesComponent({
 
   const activeSeasonId = normalizedFilters.seasonId;
   const activeYearId = normalizedFilters.yearId;
-  const yearOptions = useMemo(() => getMemeYears(seasons), [seasons]);
+  const yearOptions = useMemo(
+    () => getMemeYears(seasons, locale),
+    [locale, seasons]
+  );
   const filteredSeasons = useMemo(
     () => getMemeSeasonsForYear({ seasons, yearId: activeYearId }),
     [activeYearId, seasons]
   );
   const activeSeason =
     filteredSeasons.find((season) => season.id === activeSeasonId) ?? null;
-  const allSeasonsLabel = getAllSeasonsLabel(activeYearId);
+  const yearFilterLabel = t(locale, "theMemes.filters.year.label");
+  const allYearsLabel = t(locale, "theMemes.filters.year.all");
+  const activeYearLabel =
+    yearOptions.find((year) => year.id === activeYearId)?.display ??
+    allYearsLabel;
+  const allSeasonsLabel = getAllSeasonsLabel(activeYearId, locale);
   const filtersReady = routerLoaded && seasonsLoaded;
 
   const getNftsNextPage = useCallback(() => {
@@ -566,15 +574,22 @@ export default function TheMemesComponent({
                 </div>
                 <div className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-1 tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]">
                   <FilterGridDropdown
-                    ariaLabel="Year"
-                    filterLabel="Year"
+                    filterLabel={yearFilterLabel}
                     items={yearOptions.map((year) => ({
                       value: year.id,
                       label: year.display,
                     }))}
                     onSelect={handleYearChange}
                     selectedValue={activeYearId}
-                    allItemLabel="All Years"
+                    allItemLabel={allYearsLabel}
+                    triggerAriaLabel={t(
+                      locale,
+                      "theMemes.filters.triggerAriaLabel",
+                      {
+                        filter: yearFilterLabel,
+                        value: activeYearLabel,
+                      }
+                    )}
                   />
                   <MemeSeasonGridDropdown
                     selected={activeSeason}
@@ -582,6 +597,7 @@ export default function TheMemesComponent({
                     initialSeasonId={activeSeasonId}
                     seasons={filteredSeasons}
                     allSeasonsLabel={allSeasonsLabel}
+                    locale={locale}
                   />
                 </div>
               </div>

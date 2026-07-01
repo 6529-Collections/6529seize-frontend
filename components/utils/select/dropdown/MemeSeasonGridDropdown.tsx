@@ -1,6 +1,8 @@
 "use client";
 
 import type { MemeSeason } from "@/entities/ISeason";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useMemo, useState } from "react";
 import FilterGridDropdown from "./FilterGridDropdown";
@@ -12,6 +14,7 @@ interface MemeSeasonGridDropdownProps {
   readonly disabled?: boolean | undefined;
   readonly seasons?: readonly MemeSeason[] | undefined;
   readonly allSeasonsLabel?: string | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }
 
 export default function MemeSeasonGridDropdown({
@@ -20,12 +23,14 @@ export default function MemeSeasonGridDropdown({
   initialSeasonId,
   disabled = false,
   seasons,
-  allSeasonsLabel = "All Seasons",
+  allSeasonsLabel,
+  locale = DEFAULT_LOCALE,
 }: MemeSeasonGridDropdownProps) {
   const [fetchedSeasons, setFetchedSeasons] = useState<MemeSeason[]>([]);
 
   useEffect(() => {
     if (seasons !== undefined) {
+      // Drop any API-fetched list once the parent provides scoped seasons.
       setFetchedSeasons((currentSeasons) =>
         currentSeasons.length === 0 ? currentSeasons : []
       );
@@ -59,12 +64,15 @@ export default function MemeSeasonGridDropdown({
       availableSeasons.find((season) => season.id === activeSeasonId) ?? null,
     [activeSeasonId, availableSeasons]
   );
+  const seasonFilterLabel = t(locale, "theMemes.filters.season.label");
+  const resolvedAllSeasonsLabel =
+    allSeasonsLabel ?? t(locale, "theMemes.filters.season.all");
+  const activeLabel = activeSeason?.display ?? resolvedAllSeasonsLabel;
 
   return (
     <FilterGridDropdown
-      ariaLabel="Season"
       disabled={disabled}
-      filterLabel="Season"
+      filterLabel={seasonFilterLabel}
       items={availableSeasons.map((season) => ({
         value: season.id,
         label: season.display,
@@ -75,8 +83,12 @@ export default function MemeSeasonGridDropdown({
         );
       }}
       selectedValue={activeSeasonId}
-      allItemLabel={allSeasonsLabel}
-      triggerLabel={activeSeason?.display ?? allSeasonsLabel}
+      allItemLabel={resolvedAllSeasonsLabel}
+      triggerLabel={activeLabel}
+      triggerAriaLabel={t(locale, "theMemes.filters.triggerAriaLabel", {
+        filter: seasonFilterLabel,
+        value: activeLabel,
+      })}
     />
   );
 }
