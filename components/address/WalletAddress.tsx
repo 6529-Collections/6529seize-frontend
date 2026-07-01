@@ -1,11 +1,7 @@
 "use client";
 
 import styles from "./Address.module.scss";
-import {
-  containsEmojis,
-  formatAddress,
-  parseEmojis,
-} from "@/helpers/Helpers";
+import { containsEmojis, formatAddress, parseEmojis } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type FocusEvent, useId, useRef, useState } from "react";
 import Link from "next/link";
@@ -28,12 +24,27 @@ export function WalletAddress(props: {
   const walletTooltipId = `${tooltipIdBase}-wallet`;
   const copyMenuRef = useRef<HTMLDetailsElement>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const addressClassName = styles["address"] ?? "";
+  const addressUserPageClassName = styles["addressUserPage"] ?? "";
+  const copyClassName = styles["copy"] ?? "";
+  const copyButtonClassName = styles["copyButton"] ?? "";
+  const copyMenuClassName = styles["copyMenu"] ?? "";
+  const copyMenuToggleClassName = styles["copyMenuToggle"] ?? "";
+  const copyMenuItemsClassName = styles["copyMenuItems"] ?? "";
+  const copyMenuItemClassName = styles["copyMenuItem"] ?? "";
+  const isUserPage = props.isUserPage === true;
+  const disableLink = props.disableLink === true;
+  const hideCopy = props.hideCopy === true;
+  const setLinkQueryAddress = props.setLinkQueryAddress === true;
+  const hasClipboard = Boolean(navigator.clipboard);
 
-  const walletEns = props.display?.endsWith(".eth")
-    ? props.display
-    : props.displayEns?.endsWith(".eth")
-      ? props.displayEns
-      : null;
+  let walletEns: string | null = null;
+  if (props.display?.endsWith(".eth")) {
+    walletEns = props.display;
+  } else if (props.displayEns?.endsWith(".eth")) {
+    walletEns = props.displayEns;
+  }
+  const ensCopyText = props.displayEns ?? props.display;
 
   function resolveDisplay() {
     if (props.display) {
@@ -64,7 +75,7 @@ export function WalletAddress(props: {
     } else {
       path = props.wallet;
     }
-    if (props.setLinkQueryAddress) {
+    if (setLinkQueryAddress) {
       return `/${encodeURIComponent(path)}?address=${encodeURIComponent(
         props.displayEns ?? props.wallet
       )}`;
@@ -79,10 +90,12 @@ export function WalletAddress(props: {
     }
   }
 
-  function copy(text: string) {
-    void navigator.clipboard.writeText(text).catch((error: unknown) => {
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error: unknown) {
       console.error("Failed to copy wallet address", error);
-    });
+    }
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
@@ -100,29 +113,33 @@ export function WalletAddress(props: {
     }
   }
 
+  function copyEns() {
+    if (typeof ensCopyText !== "string") {
+      return;
+    }
+    void copy(ensCopyText);
+  }
+
   const tooltipLabel = isCopied ? "Copied" : "Copy";
 
   return (
     <span>
-      {(props.hideCopy || !navigator.clipboard) &&
-        (props.disableLink ? (
-          <span className={styles["address"]}>{resolveDisplay()}</span>
+      {(hideCopy || !hasClipboard) &&
+        (disableLink ? (
+          <span className={addressClassName}>{resolveDisplay()}</span>
         ) : (
-          <Link href={getLink()} className={styles["address"]}>
+          <Link href={getLink()} className={addressClassName}>
             {resolveDisplay()}
           </Link>
         ))}
-      {!props.hideCopy && navigator.clipboard && (
+      {!hideCopy && hasClipboard && (
         <>
-          {!props.isUserPage && (
-            <span
-              className={`${styles["address"]} ${
-                props.isUserPage ? styles["addressUserPage"] : ""
-              }`}>
-              {props.disableLink ? (
-                <span className={styles["address"]}>{resolveDisplay()}</span>
+          {!isUserPage && (
+            <span className={addressClassName}>
+              {disableLink ? (
+                <span className={addressClassName}>{resolveDisplay()}</span>
               ) : (
-                <Link href={getLink()} className={styles["address"]}>
+                <Link href={getLink()} className={addressClassName}>
                   {resolveDisplay()}
                 </Link>
               )}
@@ -131,75 +148,82 @@ export function WalletAddress(props: {
           {walletEns ? (
             <details
               ref={copyMenuRef}
-              className={styles["copyMenu"]}
+              className={copyMenuClassName}
               onBlur={handleCopyMenuBlur}
               onKeyDown={(event) => {
                 if (event.key === "Escape") {
                   event.preventDefault();
                   closeCopyMenu();
                 }
-              }}>
+              }}
+            >
               <summary
-                className={styles["copyMenuToggle"]}
+                className={copyMenuToggleClassName}
                 data-tooltip-id={copyTooltipId}
-                aria-label="Copy wallet options">
-                {props.isUserPage && props.display && (
+                aria-label="Copy wallet options"
+              >
+                {isUserPage && props.display && (
                   <span
-                    className={`${styles["address"]} ${
-                      props.isUserPage ? styles["addressUserPage"] : ""
-                    }`}>
+                    className={`${addressClassName} ${addressUserPageClassName}`}
+                  >
                     {formatAddress(props.display)}
                   </span>
                 )}
                 <FontAwesomeIcon
                   icon={faCopy}
                   aria-hidden={true}
-                  className={`${styles["copy"]}`}
+                  className={copyClassName}
                 />
               </summary>
-              <span className={styles["copyMenuItems"]}>
-                {props.display && (
+              <span className={copyMenuItemsClassName}>
+                {typeof ensCopyText === "string" && ensCopyText.length > 0 && (
                   <button
                     type="button"
                     data-tooltip-id={ensTooltipId}
-                    className={styles["copyMenuItem"]}
+                    className={copyMenuItemClassName}
                     aria-label="Copy ENS name"
-                    onClick={() => copy(props.displayEns ?? props.display)}
+                    onClick={copyEns}
                     dangerouslySetInnerHTML={{
                       __html: resolveAddress(),
-                    }}></button>
+                    }}
+                  ></button>
                 )}
 
                 <button
                   type="button"
                   data-tooltip-id={walletTooltipId}
-                  className={styles["copyMenuItem"]}
+                  className={copyMenuItemClassName}
                   aria-label="Copy wallet address"
-                  onClick={() => copy(props.wallet)}>
-                  {formatAddress(props.wallet as string)}
+                  onClick={() => {
+                    void copy(props.wallet);
+                  }}
+                >
+                  {formatAddress(props.wallet)}
                 </button>
               </span>
             </details>
           ) : (
             <button
               type="button"
-              className={styles["copyButton"]}
+              className={copyButtonClassName}
               data-tooltip-id={copyTooltipId}
               aria-label="Copy wallet address"
-              onClick={() => copy(props.wallet)}>
-              {props.isUserPage && (
+              onClick={() => {
+                void copy(props.wallet);
+              }}
+            >
+              {isUserPage && (
                 <span
-                  className={`${styles["address"]} ${
-                    props.isUserPage ? styles["addressUserPage"] : ""
-                  }`}
+                  className={`${addressClassName} ${addressUserPageClassName}`}
                   dangerouslySetInnerHTML={{
                     __html: resolveAddress(),
-                  }}></span>
+                  }}
+                ></span>
               )}
               <FontAwesomeIcon
                 icon={faCopy}
                 aria-hidden={true}
-                className={`${styles["copy"]}`}
+                className={copyClassName}
               />
             </button>
           )}
@@ -209,7 +233,8 @@ export function WalletAddress(props: {
             place="right"
             opacity={1}
             variant="light"
-            className="tw-leading-tight">
+            className="tw-leading-tight"
+          >
             {tooltipLabel}
           </Tooltip>
           <Tooltip
@@ -218,7 +243,8 @@ export function WalletAddress(props: {
             place="right"
             opacity={1}
             variant="light"
-            className="tw-leading-tight">
+            className="tw-leading-tight"
+          >
             {tooltipLabel}
           </Tooltip>
           <Tooltip
@@ -227,7 +253,8 @@ export function WalletAddress(props: {
             place="right"
             opacity={1}
             variant="light"
-            className="tw-leading-tight">
+            className="tw-leading-tight"
+          >
             {tooltipLabel}
           </Tooltip>
         </>
