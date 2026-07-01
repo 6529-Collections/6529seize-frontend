@@ -152,9 +152,7 @@ export default function GasComponent() {
                       />
                     </td>
                     <td>{g.artist}</td>
-                    <td className="tw-text-center">
-                      {displayDecimal(g.gas)}
-                    </td>
+                    <td className="tw-text-center">{displayDecimal(g.gas)}</td>
                   </tr>
                 ))}
                 <tr key={`gas-total`}>
