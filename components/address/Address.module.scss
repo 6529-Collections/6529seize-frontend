@@ -40,11 +40,16 @@
 }
 
 .consolidationDropdown {
+  display: inline-flex;
+  align-items: center;
+
   button {
     text-align: left;
     padding: 0;
     background-color: transparent !important;
+    border: 0;
     border-color: transparent !important;
+    color: variables.$font-color;
     &::after {
       border: none !important;
     }
@@ -57,10 +62,14 @@
 
 .copyDropdown {
   display: inline-block;
+  position: relative;
+
   button {
     padding: 0;
     background-color: transparent !important;
+    border: 0;
     border-color: transparent !important;
+    color: variables.$font-color;
     &::after {
       border: none !important;
     }
@@ -68,6 +77,89 @@
   div {
     width: 100%;
     min-width: fit-content;
+  }
+}
+
+.copyButton,
+.copyMenuToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  line-height: 1;
+  background-color: transparent;
+  border: 0;
+
+  &:focus-visible {
+    outline: 2px solid variables.$focus-outline;
+    outline-offset: 2px;
+  }
+}
+
+.copyButton {
+  cursor: pointer;
+}
+
+.copyMenu {
+  position: relative;
+  display: inline-block;
+
+  &[open] .copyMenuItems {
+    display: flex;
+  }
+}
+
+.copyMenuToggle {
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+}
+
+.copyMenuItems {
+  position: absolute;
+  z-index: 1000;
+  top: 100%;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  width: max-content;
+  min-width: 100%;
+  padding: 4px 0;
+  margin-top: 2px;
+  background-color: variables.$white;
+  border: 1px solid rgb(0 0 0 / 15%);
+  border-radius: 4px;
+  box-shadow: 0 8px 16px rgb(0 0 0 / 18%);
+}
+
+.copyMenuItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 24px;
+  padding: 4px 16px;
+  color: variables.$font-color-dark;
+  text-align: left;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+
+  &:hover,
+  &:focus {
+    color: variables.$font-color-dark;
+    background-color: variables.$off-white;
+  }
+
+  &:focus-visible {
+    outline: 2px solid variables.$focus-outline;
+    outline-offset: -2px;
   }
 }
 
