@@ -5,6 +5,9 @@ import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
 jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   const loaderSource = loader.toString();
+  const dynamicImportSource =
+    loaderSource.match(/import\(\s*["']([^"']+)["']\s*\)/)?.[1] ??
+    loaderSource.match(/require\(\s*["']([^"']+)["']\s*\)/)?.[1];
   const dynamicModules: readonly [
     source: string,
     modulePath: string,
@@ -54,8 +57,8 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
       "WaveWinners",
     ],
   ];
-  const dynamicModule = dynamicModules.find(([source]) =>
-    loaderSource.includes(source)
+  const dynamicModule = dynamicModules.find(
+    ([source]) => source === dynamicImportSource
   );
 
   if (!dynamicModule) {
@@ -63,17 +66,19 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   }
 
   const [, modulePath, exportName] = dynamicModule;
-  const MockDynamicComponent = (props: any) => {
+  const MockDynamicComponent = (props: Record<string, unknown>) => {
     const React = require("react");
     const loadedModule = require(modulePath);
-    const Component = exportName
-      ? loadedModule[exportName]
-      : (loadedModule.default ?? loadedModule);
+    const Component = (
+      exportName
+        ? loadedModule[exportName]
+        : (loadedModule.default ?? loadedModule)
+    ) as React.ComponentType<Record<string, unknown>>;
 
     return React.createElement(Component, props);
   };
 
-  MockDynamicComponent.displayName = "MockDynamicComponent";
+  MockDynamicComponent.displayName = `MockDynamicComponent(${exportName ?? modulePath})`;
 
   return MockDynamicComponent;
 });

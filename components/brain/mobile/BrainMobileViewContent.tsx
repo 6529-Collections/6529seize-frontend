@@ -194,7 +194,7 @@ function BrainMobileWinnersView({
   }
 
   return (
-    <div className="tw-px-2 sm:tw-px-4">
+    <div key={wave.id} className="tw-px-2 sm:tw-px-4">
       <WaveWinners wave={wave} onDropClick={onDropClick} />
     </div>
   );
@@ -210,7 +210,7 @@ function BrainMobileOutcomeView({
     return null;
   }
 
-  return <MyStreamWaveOutcome wave={wave} />;
+  return <MyStreamWaveOutcome key={wave.id} wave={wave} />;
 }
 
 function BrainMobileMyVotesView({
@@ -222,7 +222,9 @@ function BrainMobileMyVotesView({
     return null;
   }
 
-  return <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />;
+  return (
+    <MyStreamWaveMyVotes key={wave.id} wave={wave} onDropClick={onDropClick} />
+  );
 }
 
 function BrainMobileSalesView({
@@ -233,7 +235,7 @@ function BrainMobileSalesView({
     return null;
   }
 
-  return <MyStreamWaveSales waveId={wave.id} />;
+  return <MyStreamWaveSales key={wave.id} waveId={wave.id} />;
 }
 
 function BrainMobilePollsView({
@@ -245,7 +247,9 @@ function BrainMobilePollsView({
     return null;
   }
 
-  return <MyStreamWavePolls wave={wave} onDropClick={onDropClick} />;
+  return (
+    <MyStreamWavePolls key={wave.id} wave={wave} onDropClick={onDropClick} />
+  );
 }
 
 function BrainMobileFAQView({ isMemesWave, wave }: BrainMobileFAQViewProps) {
@@ -253,7 +257,12 @@ function BrainMobileFAQView({ isMemesWave, wave }: BrainMobileFAQViewProps) {
     return null;
   }
 
-  return <MyStreamWaveFAQ wave={wave} />;
+  return <MyStreamWaveFAQ key={wave.id} wave={wave} />;
+}
+
+function assertUnreachable(value: never): null {
+  void value;
+  return null;
 }
 
 export default function BrainMobileViewContent({
@@ -275,7 +284,7 @@ export default function BrainMobileViewContent({
 
   switch (activeView) {
     case BrainView.DEFAULT:
-      return <>{children}</>;
+      return children;
     case BrainView.ABOUT:
       return <BrainMobileAbout activeWaveId={activeWaveId} />;
     case BrainView.LEADERBOARD:
@@ -346,9 +355,7 @@ export default function BrainMobileViewContent({
       return <BrainMobileMessages />;
     case BrainView.NOTIFICATIONS:
       return <BrainNotifications />;
-    default: {
-      const unhandledView: never = activeView;
-      return unhandledView;
-    }
+    default:
+      return assertUnreachable(activeView);
   }
 }
