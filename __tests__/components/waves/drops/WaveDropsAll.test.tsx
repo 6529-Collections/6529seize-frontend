@@ -502,6 +502,53 @@ describe("WaveDropsAll", () => {
     });
   });
 
+  describe("Virtualized Drop Page Size", () => {
+    it("uses a smaller virtual page size for mobile all-drops views", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+      });
+
+      renderComponent();
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        25
+      );
+    });
+
+    it("keeps the default virtual page size for desktop all-drops views", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: false },
+      });
+
+      renderComponent();
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        50
+      );
+    });
+
+    it("keeps the default virtual page size for mobile drop-scoped views", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+      });
+
+      renderComponent({ dropId: "target-drop" });
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        "target-drop",
+        undefined,
+        50
+      );
+    });
+  });
+
   describe("Typing Indicator", () => {
     it("displays typing message when user is typing", () => {
       setupMocks({
@@ -895,6 +942,25 @@ describe("WaveDropsAll", () => {
       });
 
       expect(containerProps.hasNextPage).toBe(false);
+    });
+
+    it("keeps hasNextPage enabled at the pagination threshold", async () => {
+      setupMocks({
+        waveMessages: {
+          drops: Array.from({ length: 25 }, (_, i) =>
+            createMockDrop({ id: `drop-${i}` })
+          ),
+          hasNextPage: true,
+        },
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId("reverse-container")).toBeInTheDocument();
+      });
+
+      expect(containerProps.hasNextPage).toBe(true);
     });
 
     it("calls fetchNextPage when top intersection is triggered", async () => {

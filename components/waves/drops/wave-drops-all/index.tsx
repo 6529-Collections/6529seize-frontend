@@ -32,6 +32,8 @@ import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 
 const EMPTY_DROPS: Drop[] = [];
+const DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE = 50;
+const MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE = 25;
 
 interface WaveDropsAllProps {
   readonly waveId: string;
@@ -77,11 +79,15 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
-  const { isAppleMobile } = useDeviceInfo();
+  const { isAppleMobile, isMobileDevice } = useDeviceInfo();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const virtualizedDropsPageSize =
+    isMobileDevice && dropId === null
+      ? MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE
+      : DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE;
 
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
-    useVirtualizedWaveDrops(waveId, dropId, wave);
+    useVirtualizedWaveDrops(waveId, dropId, wave, virtualizedDropsPageSize);
 
   const { setUnreadDividerSerialNo } = useUnreadDivider();
 
