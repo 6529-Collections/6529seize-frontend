@@ -124,16 +124,17 @@ describe("CollectionDelegationComponent", () => {
     ).toBeTruthy();
   });
 
-  it("shows fetching messages initially", () => {
+  it("shows fetching messages when opened", () => {
     render(
       <CollectionDelegationComponent
         collection={collection}
         setSection={setSection}
       />
     );
-    expect(
-      screen.getAllByText(/Fetching outgoing delegations/i)[0]
-    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: /Outgoing Delegations/i })
+    );
+    expect(screen.getAllByText(/Fetching outgoing/i)[0]).toBeInTheDocument();
   });
 
   it("keys collection scope descriptions from the contract address", () => {
