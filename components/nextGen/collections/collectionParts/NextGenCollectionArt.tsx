@@ -43,7 +43,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const screenSize = window.innerWidth;
+    const screenSize = globalThis.innerWidth;
     if (screenSize <= 750) {
       setShowFilters(false);
       setIsMobile(true);
@@ -239,12 +239,12 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       }
     };
 
-    window.addEventListener("mousedown", handlePointerDown);
-    window.addEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener("mousedown", handlePointerDown);
+    globalThis.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("mousedown", handlePointerDown);
-      window.removeEventListener("keydown", handleKeyDown);
+      globalThis.removeEventListener("mousedown", handlePointerDown);
+      globalThis.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -396,8 +396,6 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 {isSortMenuOpen && (
                   <div
                     id={sortMenuId}
-                    role="group"
-                    aria-label="Sort options"
                     className="tw-[margin-top:0.5rem] tw-absolute tw-right-0 tw-top-full tw-z-50 tw-min-w-[240px] tw-rounded-md tw-bg-iron-900 tw-p-1 tw-shadow-lg tw-ring-1 tw-ring-white/10"
                   >
                     <div>
