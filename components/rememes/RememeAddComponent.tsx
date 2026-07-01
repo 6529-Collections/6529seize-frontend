@@ -296,15 +296,11 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                   setReferencesDropdownOpen((open) => !open);
                 }}
                 aria-expanded={referencesDropdownOpen}
-                aria-haspopup="menu"
               >
                 <FontAwesomeIcon icon={faPlusCircle} />
               </button>
               {referencesDropdownOpen && (
-                <div
-                  className="tw-absolute tw-left-0 tw-top-full tw-z-50 tw-mt-0 tw-max-h-[50vh] tw-min-w-[12rem] tw-overflow-y-auto tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-t-white tw-bg-iron-950 tw-py-2 tw-shadow-md"
-                  role="menu"
-                >
+                <div className="tw-absolute tw-left-0 tw-top-full tw-z-50 tw-mt-0 tw-max-h-[50vh] tw-min-w-[12rem] tw-overflow-y-auto tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-t-white tw-bg-iron-950 tw-py-2 tw-shadow-md">
                   {props.memes
                     .filter((m) => !references.some((r) => r.id === m.id))
                     .map((m) => (
@@ -313,7 +309,6 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                         key={`add-rememe-meme-red-${m.id}`}
                         className="tw-block tw-w-[98%] tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 focus:tw-bg-transparent"
                         onClick={() => addReference(m)}
-                        role="menuitem"
                       >
                         #{m.id} - {m.name}
                       </button>

@@ -350,7 +350,6 @@ export function MemePageArtViewer({
                   className={`tw-h-full tw-items-center tw-justify-center tw-text-center ${
                     currentSlide === 0 ? "tw-flex" : "tw-hidden"
                   }`}
-                  aria-hidden={currentSlide !== 0}
                 >
                   <NFTImage
                     nft={nft}
@@ -371,7 +370,6 @@ export function MemePageArtViewer({
                     className={`tw-h-full tw-items-center tw-justify-center tw-text-center ${
                       currentSlide === 1 ? "tw-flex" : "tw-hidden"
                     }`}
-                    aria-hidden={currentSlide !== 1}
                   >
                     <NFTImage
                       nft={nft}

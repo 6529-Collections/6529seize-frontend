@@ -194,7 +194,7 @@ describe("MemePageArtViewer", () => {
       "utf8"
     );
 
-    expect(styles).toContain(".memesCarousel :global(.carousel-item > *)");
+    expect(styles).toContain(".memesCarousel [data-carousel-slide] > *");
     expect(styles).not.toContain(
       ".memesCarousel :global(.carousel-item > .col)"
     );

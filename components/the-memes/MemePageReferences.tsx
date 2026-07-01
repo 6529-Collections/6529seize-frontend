@@ -311,17 +311,13 @@ export function MemePageReferencesSubMenu(props: {
                   type="button"
                   onClick={() => setSortDropdownOpen((open) => !open)}
                   aria-expanded={sortDropdownOpen}
-                  aria-haspopup="menu"
                 >
                   {t(locale, "theMemes.detail.references.sort.trigger", {
                     sort: selectedRememeSortingLabel,
                   })}
                 </button>
                 {sortDropdownOpen && (
-                  <div
-                    className="tw-absolute tw-left-1/2 tw-top-full tw-z-50 tw-mt-0 tw-max-h-[65vh] tw-min-w-[12rem] -tw-translate-x-1/2 tw-overflow-y-auto tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-t-white tw-bg-iron-950 tw-py-2 tw-shadow-md"
-                    role="menu"
-                  >
+                  <div className="tw-absolute tw-left-1/2 tw-top-full tw-z-50 tw-mt-0 tw-max-h-[65vh] tw-min-w-[12rem] -tw-translate-x-1/2 tw-overflow-y-auto tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-t-white tw-bg-iron-950 tw-py-2 tw-shadow-md">
                     {REMEME_SORTING.map((s) => (
                       <button
                         type="button"
@@ -334,7 +330,6 @@ export function MemePageReferencesSubMenu(props: {
                           });
                           setSortDropdownOpen(false);
                         }}
-                        role="menuitem"
                       >
                         {getRememeSortLabel(s, locale)}
                       </button>

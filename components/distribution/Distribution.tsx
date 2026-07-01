@@ -206,6 +206,15 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   function printDistributionPhotos() {
     if (distributionPhotos.length > 0) {
+      const formattedTokenId = formatInteger(
+        locale,
+        Number.parseInt(nftId ?? "0", 10)
+      );
+      const formattedPhotoCount = formatInteger(
+        locale,
+        distributionPhotos.length
+      );
+
       return (
         <div className="tw-pb-5 tw-pt-4">
           <div>
@@ -213,6 +222,10 @@ export default function DistributionPage(props: Readonly<Props>) {
               className={styles["distributionCarousel"]}
               role="group"
               aria-roledescription="carousel"
+              aria-label={t(locale, "distribution.photos.carousel", {
+                collection: props.header,
+                tokenId: formattedTokenId,
+              })}
               onTouchStart={handleDistributionPhotoTouchStart}
               onTouchEnd={handleDistributionPhotoTouchEnd}
             >
@@ -224,7 +237,6 @@ export default function DistributionPage(props: Readonly<Props>) {
                       ? "tw-block tw-opacity-100"
                       : "tw-hidden tw-opacity-0"
                   }`}
-                  aria-hidden={index !== activeDistributionPhotoIndex}
                 >
                   <Image
                     unoptimized
@@ -234,10 +246,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                     src={dp.link}
                     alt={t(locale, "distribution.photos.alt", {
                       collection: props.header,
-                      tokenId: formatInteger(
-                        locale,
-                        Number.parseInt(nftId ?? "0", 10)
-                      ),
+                      tokenId: formattedTokenId,
                       photoNumber: formatInteger(locale, index + 1),
                     })}
                   />
@@ -250,7 +259,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                     className="tw-absolute tw-left-0 tw-top-1/2 tw-flex tw-h-10 tw-w-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-4xl tw-leading-none tw-text-white tw-opacity-70 tw-transition-opacity desktop-hover:hover:tw-opacity-100 disabled:tw-opacity-30"
                     onClick={goToPreviousDistributionPhoto}
                     disabled={activeDistributionPhotoIndex === 0}
-                    aria-label="Previous"
+                    aria-label={t(locale, "distribution.photos.previous")}
                   >
                     <span aria-hidden="true">&#8249;</span>
                   </button>
@@ -262,28 +271,36 @@ export default function DistributionPage(props: Readonly<Props>) {
                       activeDistributionPhotoIndex ===
                       distributionPhotos.length - 1
                     }
-                    aria-label="Next"
+                    aria-label={t(locale, "distribution.photos.next")}
                   >
                     <span aria-hidden="true">&#8250;</span>
                   </button>
-                  <div className="tw-absolute tw-bottom-2 tw-left-0 tw-right-0 tw-flex tw-justify-center tw-gap-2">
+                  <div className="tw-absolute tw-bottom-2 tw-left-0 tw-right-0 tw-flex tw-justify-center tw-gap-1">
                     {distributionPhotos.map((dp, index) => (
                       <button
                         key={`distribution-photo-indicator-${dp.id}`}
                         type="button"
-                        className={`tw-h-1 tw-w-8 tw-border-0 tw-p-0 tw-transition-opacity ${
-                          index === activeDistributionPhotoIndex
-                            ? "tw-bg-white tw-opacity-100"
-                            : "tw-bg-white tw-opacity-50"
-                        }`}
+                        className="tw-flex tw-h-7 tw-w-11 tw-items-center tw-justify-center tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                         onClick={() => setActiveDistributionPhotoIndex(index)}
-                        aria-label={`Slide ${index + 1}`}
+                        aria-label={t(locale, "distribution.photos.slide", {
+                          photoNumber: formatInteger(locale, index + 1),
+                          photoCount: formattedPhotoCount,
+                        })}
                         aria-current={
                           index === activeDistributionPhotoIndex
                             ? "true"
                             : undefined
                         }
-                      />
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={`tw-block tw-h-1 tw-w-8 tw-transition-opacity ${
+                            index === activeDistributionPhotoIndex
+                              ? "tw-bg-white tw-opacity-100"
+                              : "tw-bg-white tw-opacity-50"
+                          }`}
+                        />
+                      </button>
                     ))}
                   </div>
                 </>

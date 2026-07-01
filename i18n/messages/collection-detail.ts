@@ -79,6 +79,10 @@ export const DISTRIBUTION_MESSAGES = namespaceMessages("distribution", [
     "photos.alt",
     "{collection} Card #{tokenId} distribution photo {photoNumber}",
   ],
+  ["photos.carousel", "{collection} Card #{tokenId} distribution photos"],
+  ["photos.previous", "Show previous distribution photo"],
+  ["photos.next", "Show next distribution photo"],
+  ["photos.slide", "Show distribution photo {photoNumber} of {photoCount}"],
   [
     "table.caption",
     "{collection} Card #{tokenId} distribution wallet allocations",
