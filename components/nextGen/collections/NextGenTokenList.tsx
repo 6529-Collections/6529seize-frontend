@@ -1,6 +1,5 @@
 "use client";
 
-import { Col, Container, Row } from "./NextGenTailwindLayout";
 import { NextGenTokenImage } from "./nextgenToken/NextGenTokenImage";
 import type {
   NextGenCollection,
@@ -150,19 +149,13 @@ export default function NextGenTokenList(props: Readonly<Props>) {
   }, [props.sort, props.show_normalised, props.show_trait_count]);
 
   return (
-    <Container className="no-padding">
-      <Row>
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
         {(() => {
           if (tokensLoaded) {
             if (tokens.length > 0) {
               return tokens.map((t) => (
-                <Col
-                  xs={6}
-                  sm={4}
-                  md={4}
-                  key={getRandomObjectId()}
-                  className="pt-3 pb-3"
-                >
+                <div key={getRandomObjectId()} className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-1/2 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-1/3 md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/3 pt-3 pb-3" style={{ maxWidth: "100%" }}>
                   <NextGenTokenImage
                     token={t}
                     rarity_type={rarityType}
@@ -176,22 +169,22 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                     show_last_sale={props.sort === NextGenListFilters.LAST_SALE}
                     show_owner_info={true}
                   />
-                </Col>
+                </div>
               ));
             } else {
-              return <Col className="pt-2 pb-2">No results found</Col>;
+              return <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pt-2 pb-2">No results found</div>;
             }
           } else {
             return (
-              <Col className="pt-2 pb-2">
+              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pt-2 pb-2">
                 <DotLoader />
-              </Col>
+              </div>
             );
           }
         })()}
-      </Row>
+      </div>
       {totalResults > pageSize && tokensLoaded && props.show_pagination && (
-        <Row className="text-center pt-4 pb-4">
+        <div className="tw-flex tw-flex-wrap -tw-mx-3 text-center pt-4 pb-4">
           <Pagination
             page={page}
             pageSize={pageSize}
@@ -201,8 +194,8 @@ export default function NextGenTokenList(props: Readonly<Props>) {
               window.scrollTo(0, 0);
             }}
           />
-        </Row>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }

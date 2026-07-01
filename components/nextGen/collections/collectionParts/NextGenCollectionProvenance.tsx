@@ -20,7 +20,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { Accordion } from "react-bootstrap";
 import styles from "../NextGen.module.scss";
 import {
@@ -63,9 +62,9 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
   }, [page]);
 
   return (
-    <Container className="no-padding" ref={scrollTarget}>
-      <Row className="pt-2">
-        <Col>
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding" ref={scrollTarget}>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-2">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
           {logs.map((log, index) => (
             <NextGenCollectionProvenanceRow
               collection={props.collection}
@@ -74,10 +73,10 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
               odd={index % 2 !== 0}
             />
           ))}
-        </Col>
-      </Row>
+        </div>
+      </div>
       {totalResults > PAGE_SIZE && logsLoaded && (
-        <Row className="text-center pt-4 pb-4">
+        <div className="tw-flex tw-flex-wrap -tw-mx-3 text-center pt-4 pb-4">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
@@ -91,9 +90,9 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
               }
             }}
           />
-        </Row>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }
 
@@ -260,9 +259,9 @@ export function NextGenCollectionProvenanceRow(
               : ""
           }`}
         >
-          <Container className={styles["collectionProvenanceAccordionButton"]}>
-            <Row>
-              <Col>
+          <div className={`tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl ${styles["collectionProvenanceAccordionButton"]}`}>
+            <div className="tw-flex tw-flex-wrap -tw-mx-3">
+              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
                 <span className="d-flex align-items-center justify-content-between">
                   <span className="d-flex align-items-center gap-4">
                     <span className="no-wrap">
@@ -300,9 +299,9 @@ export function NextGenCollectionProvenanceRow(
                     </Link>
                   </span>
                 </span>
-              </Col>
-            </Row>
-          </Container>
+              </div>
+            </div>
+          </div>
         </Accordion.Button>
         {!isTransaction && (
           <Accordion.Body
@@ -312,11 +311,11 @@ export function NextGenCollectionProvenanceRow(
                 : styles["collectionProvenanceAccordionBody"]
             }
           >
-            <Container className="no-padding">
-              <Row className="pt-2 pb-2">
-                <Col>{printBody()}</Col>
-              </Row>
-            </Container>
+            <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding">
+              <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-2 pb-2">
+                <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">{printBody()}</div>
+              </div>
+            </div>
           </Accordion.Body>
         )}
       </Accordion.Item>

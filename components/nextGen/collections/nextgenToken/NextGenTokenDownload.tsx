@@ -3,7 +3,6 @@
 import { faDownload, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { Dropdown } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import useDownloader from "@/hooks/useDownloader";
@@ -148,19 +147,19 @@ export default function NextGenTokenDownload(
   }
 
   return (
-    <Container className="no-padding pt-1 pb-1">
-      <Row className="d-flex flex-wrap align-items-center">
-        <Col xs={4}>
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding pt-1 pb-1">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 d-flex flex-wrap align-items-center">
+        <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-1/3" style={{ maxWidth: "100%" }}>
           <span className="no-wrap">
             <span>{props.resolution}</span>
             {imageExists &&
               imageSize > 0 &&
               ` (${numberWithCommas(imageSize)} MB)`}
           </span>
-        </Col>
-        <Col>{getDisplay()}</Col>
-      </Row>
-    </Container>
+        </div>
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">{getDisplay()}</div>
+      </div>
+    </div>
   );
 }
 

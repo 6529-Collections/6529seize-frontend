@@ -11,7 +11,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { Dropdown } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
@@ -153,12 +152,9 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   function printModeIcons() {
     return (
       <>
-        <Col
-          xs={12}
-          sm={mode === Mode.HIGH_RES ? 4 : 6}
-          className={`pt-2 pb-2 d-flex gap-3 align-items-center ${
+        <div className={`tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-full min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} pt-2 pb-2 d-flex gap-3 align-items-center ${
             isMobileScreen ? "justify-content-center" : "justify-content-start"
-          }`}>
+          }`} style={{ maxWidth: "100%" }}>
           <button
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.IMAGE ? styles["imageResolutionBtnSelected"] : ""
@@ -189,12 +185,9 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             }}>
             Live
           </Tooltip>
-        </Col>
+        </div>
         {mode === Mode.HIGH_RES && (
-          <Col
-            xs={6}
-            sm={4}
-            className="pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center">
+          <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-1/2 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-1/3 pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center" style={{ maxWidth: "100%" }}>
             {showZoomControls && (
               <>
                 <FontAwesomeIcon
@@ -225,14 +218,11 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                 />
               </>
             )}
-          </Col>
+          </div>
         )}
-        <Col
-          xs={mode === Mode.HIGH_RES ? 6 : 12}
-          sm={mode === Mode.HIGH_RES ? 4 : 6}
-          className={`pt-2 pb-2 d-flex gap-3 align-items-center ${
+        <div className={`tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 ${mode === Mode.HIGH_RES ? "tw-w-1/2" : "tw-w-full"} ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} pt-2 pb-2 d-flex gap-3 align-items-center ${
             isMobileScreen ? "justify-content-center" : "justify-content-end"
-          }`}>
+          }`} style={{ maxWidth: "100%" }}>
           <Lightbulb
             mode="black"
             className={styles["modeIcon"]!}
@@ -310,7 +300,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             }}>
             Fullscreen
           </Tooltip>
-        </Col>
+        </div>
       </>
     );
   }
@@ -344,12 +334,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   }, [mode]);
 
   return (
-    <Container>
-      <Row>
-        <Col>
-          <Container>
-            <Row>
-              <Col>
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+          <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
+            <div className="tw-flex tw-flex-wrap -tw-mx-3">
+              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
                 <div className={getBoxStyle()}>
                   <div
                     className={
@@ -370,28 +360,28 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                     />
                   </div>
                 </div>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Container className={styles["modeRow"]}>
-            <Row className="pt-2 pb-1">{printModeIcons()}</Row>
-          </Container>
-        </Col>
-      </Row>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+          <div className={`tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl ${styles["modeRow"]}`}>
+            <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-2 pb-1">{printModeIcons()}</div>
+          </div>
+        </div>
+      </div>
       {mode === Mode.LIVE && (
-        <Row className="pt-2 font-color-h font-smaller">
-          <Col>
+        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-2 font-color-h font-smaller">
+          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
             * Live view generates the image dynamically from scratch in your
             browser. Pebbles have a computationally expensive script and the
             live view may take several minutes to render on your computer or
             phone. &quot;Image view&quot; will download faster.
-          </Col>
-        </Row>
+          </div>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }

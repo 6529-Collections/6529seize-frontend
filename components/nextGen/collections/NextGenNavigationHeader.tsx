@@ -7,7 +7,6 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
 import { useSyncExternalStore } from "react";
-import { Container } from "./NextGenTailwindLayout";
 
 const MOBILE_HEADER_MAX_WIDTH = 750;
 const COMPACT_HEADER_MAX_WIDTH = 575;
@@ -107,15 +106,12 @@ export default function NextGenNavigationHeader(
 
   return (
     <>
-      <Container
-        className={`${styles["navigationHeader"]} ${
+      <div className={`tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl ${styles["navigationHeader"]} ${
           isStackedHeader ? `flex-column gap-2` : `justify-content-between`
-        }`}
-        style={{
+        }`} style={{
           height: isStackedHeader ? "auto" : "90px",
           paddingTop: headerPaddingTop,
-        }}
-      >
+        }}>
         <div className={`d-flex align-items-center ${headerControlsClassName}`}>
           <span className="d-xl-none flex-shrink-1 overflow-hidden">
             <CollectionsDropdown
@@ -176,7 +172,7 @@ export default function NextGenNavigationHeader(
             {printView(NextgenView.ABOUT)}
           </span>
         </div>
-      </Container>
+      </div>
 
       <hr className={styles["navigationHeaderHr"]} />
     </>

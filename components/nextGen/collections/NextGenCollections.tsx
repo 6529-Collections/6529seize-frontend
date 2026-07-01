@@ -6,7 +6,6 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { fetchUrl } from "@/services/6529api";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "./NextGenTailwindLayout";
 import { Dropdown } from "react-bootstrap";
 import styles from "./NextGen.module.scss";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
@@ -58,9 +57,9 @@ export default function NextGenCollections() {
   }, [page]);
 
   return (
-    <Container className="no-padding pt-4 pb-4">
-      <Row className="pb-3">
-        <Col className="d-flex justify-content-between">
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding pt-4 pb-4">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex justify-content-between">
           <h1>Collections</h1>
           <Dropdown className={styles["filterDropdown"]} drop={"down-centered"}>
             <Dropdown.Toggle>Status: {selectedStatus}</Dropdown.Toggle>
@@ -74,32 +73,26 @@ export default function NextGenCollections() {
               ))}
             </Dropdown.Menu>
           </Dropdown>
-        </Col>
-      </Row>
+        </div>
+      </div>
 
-      <Row className="pt-4 pb-4">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-4 pb-4">
         {collections.map((collection) => (
-          <Col
-            className="pb-3"
-            xs={12}
-            sm={12}
-            md={6}
-            lg={4}
-            key={`collection-preview-${collection.id}`}>
+          <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-full min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/2 min-[992px]:tw-basis-auto min-[992px]:tw-grow-0 min-[992px]:tw-shrink-0 min-[992px]:tw-w-1/3 pb-3" key={`collection-preview-${collection.id}`} style={{ maxWidth: "100%" }}>
             <NextGenCollectionPreview
               collection={collection}
               key={`gen-memes-collection-${collection.id}`}
             />
-          </Col>
+          </div>
         ))}
         {collectionsLoaded && collections.length === 0 && (
-          <Col className="text-center">
+          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 text-center">
             <h4>No collections found</h4>
-          </Col>
+          </div>
         )}
-      </Row>
+      </div>
       {totalResults > PAGE_SIZE && collectionsLoaded && (
-        <Row className="text-center pt-4 pb-4">
+        <div className="tw-flex tw-flex-wrap -tw-mx-3 text-center pt-4 pb-4">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
@@ -109,8 +102,8 @@ export default function NextGenCollections() {
               window.scrollTo(0, 0);
             }}
           />
-        </Row>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }

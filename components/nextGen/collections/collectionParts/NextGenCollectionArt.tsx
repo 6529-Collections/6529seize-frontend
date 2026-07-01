@@ -11,7 +11,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { Accordion, Dropdown, Form } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import type {
@@ -220,9 +219,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding pt-2">
-      <Row>
-        <Col className="d-flex align-items-center justify-content-between no-wrap">
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding pt-2">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex align-items-center justify-content-between no-wrap">
           <h3 className="mb-0">
             The Art{" "}
             {totalResultsSet ? (
@@ -233,9 +232,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               <DotLoader />
             )}
           </h3>
-        </Col>
-        <Col
-          className={`d-flex align-items-center ${
+        </div>
+        <div className={`tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex align-items-center ${
             isMobile ? "pt-3 justify-content-between" : "justify-content-end"
           }`}>
           {props.show_view_all ? (
@@ -363,17 +361,15 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               </span>
             </>
           )}
-        </Col>
-      </Row>
+        </div>
+      </div>
       <hr />
-      <Row>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
         {!props.show_view_all && showFilters && (
-          <Col sm={12} md={3}>
-            <Container>
-              <Row>
-                <Col
-                  xs={12}
-                  className="no-padding d-flex justify-content-between align-items-center">
+          <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/4" style={{ maxWidth: "100%" }}>
+            <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
+              <div className="tw-flex tw-flex-wrap -tw-mx-3">
+                <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-full no-padding d-flex justify-content-between align-items-center" style={{ maxWidth: "100%" }}>
                   <span className="d-flex flex-column">
                     <span className="font-color-h font-bolder font-larger">
                       Traits
@@ -391,10 +387,10 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                       Clear
                     </button>
                   )}
-                </Col>
-              </Row>
-              <Row>
-                <Col className="d-flex flex-column pt-2 no-padding">
+                </div>
+              </div>
+              <div className="tw-flex tw-flex-wrap -tw-mx-3">
+                <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex flex-column pt-2 no-padding">
                   {routerLoaded &&
                     traits.map((tr, index) => (
                       <Accordion
@@ -468,13 +464,13 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                         </Accordion.Item>
                       </Accordion>
                     ))}
-                </Col>
-              </Row>
-            </Container>
-          </Col>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
         {(routerLoaded || totalResultsSet) && (
-          <Col sm={12} md={props.show_view_all || !showFilters ? 12 : 9}>
+          <div className={`tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 ${props.show_view_all || !showFilters ? "md:tw-w-full" : "md:tw-w-3/4"}`} style={{ maxWidth: "100%" }}>
             <NextGenTokenList
               limit={props.show_view_all ? 6 : undefined}
               collection={props.collection}
@@ -490,9 +486,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               }}
               show_pagination={!props.show_view_all}
             />
-          </Col>
+          </div>
         )}
-      </Row>
-    </Container>
+      </div>
+    </div>
   );
 }

@@ -10,7 +10,6 @@ import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import styles from "../NextGen.module.scss";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
@@ -89,11 +88,11 @@ export default function NextGenCollectionComponent({
       {collection.mint_count > 0 && (
         <NextGenCollectionSlideshow collection={collection} />
       )}
-      <Container className="pt-3 pb-2">
+      <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl pt-3 pb-2">
         <>
           <NextGenCollectionHeader collection={collection} show_links={true} />
-          <Row className="pt-5">
-            <Col className="d-flex gap-4">
+          <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-5">
+            <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex gap-4">
               {printViewButton(
                 view,
                 NextgenCollectionView.OVERVIEW,
@@ -110,35 +109,35 @@ export default function NextGenCollectionComponent({
                 NextgenCollectionView.TOP_TRAIT_SETS,
                 updateView
               )}
-            </Col>
-          </Row>
-          <Row className="pt-3">
-            <Col>
+            </div>
+          </div>
+          <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3">
+            <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
               <NextGenCollectionDetails collection={collection} view={view} />
-            </Col>
-          </Row>
-          <Row className="pt-4">
-            <Col>
+            </div>
+          </div>
+          <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-4">
+            <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
               <NextGenCollectionArt
                 collection={collection}
                 show_view_all={true}
               />
-            </Col>
-          </Row>
+            </div>
+          </div>
         </>
-      </Container>
-      <Container className="pt-4 pb-4">
-        <Row>
-          <Col>
+      </div>
+      <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl pt-4 pb-4">
+        <div className="tw-flex tw-flex-wrap -tw-mx-3">
+          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
             <h4>About the Artist</h4>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
+          </div>
+        </div>
+        <div className="tw-flex tw-flex-wrap -tw-mx-3">
+          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
             <NextGenCollectionArtist collection={collection} />
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

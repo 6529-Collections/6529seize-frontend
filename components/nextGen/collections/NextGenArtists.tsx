@@ -2,7 +2,6 @@
 
 import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "./NextGenTailwindLayout";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -44,26 +43,26 @@ export default function NextGenArtists() {
   }, []);
 
   return (
-    <Container className="no-padding pt-4 pb-4">
-      <Row className="pb-3">
-        <Col>
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding pt-4 pb-4">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
           <h1>Artists</h1>
-        </Col>
-      </Row>
+        </div>
+      </div>
       {artistCollections.map(
         (ac: { address: string; collections: NextGenCollection[] }) => {
           return (
-            <Row key={`nextgen-artist-${ac.address}`}>
-              <Col>
+            <div className="tw-flex tw-flex-wrap -tw-mx-3" key={`nextgen-artist-${ac.address}`}>
+              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
                 <NextGenCollectionArtist
                   collection={ac.collections[0]!}
                   link_collections={ac.collections}
                 />
-              </Col>
-            </Row>
+              </div>
+            </div>
           );
         }
       )}
-    </Container>
+    </div>
   );
 }

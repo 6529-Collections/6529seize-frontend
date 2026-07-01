@@ -6,7 +6,6 @@ import type { NextGenToken } from "@/entities/INextgen";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { Dropdown } from "react-bootstrap";
 import { mainnet } from "wagmi/chains";
 import styles from "./NextGenToken.module.scss";
@@ -16,14 +15,14 @@ export default function NextgenTokenRenderCenter(
   props: Readonly<{ token: NextGenToken }>
 ) {
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col className="pb-3">
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pb-3">
           <h3 className="mb-0">Display Center</h3>
-        </Col>
-      </Row>
-      <Row>
-        <Col sm={12} md={6} className="pb-3 d-flex flex-wrap gap-2">
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/2 pb-3 d-flex flex-wrap gap-2" style={{ maxWidth: "100%" }}>
           <span className="font-color-h">Rendered Versions:</span>
           <NextGenTokenDownload
             token={props.token}
@@ -45,8 +44,8 @@ export default function NextgenTokenRenderCenter(
             token={props.token}
             resolution={Resolution["16K"]}
           />
-        </Col>
-        <Col sm={12} md={6} className="pb-3 d-flex flex-column gap-2">
+        </div>
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/2 pb-3 d-flex flex-column gap-2" style={{ maxWidth: "100%" }}>
           <span className="font-color-h">For Thumbnail Use Only :</span>
           <NextGenTokenDownload
             token={props.token}
@@ -56,12 +55,12 @@ export default function NextgenTokenRenderCenter(
             token={props.token}
             resolution={Resolution["0.5K"]}
           />
-        </Col>
-      </Row>
-      <Row className="pt-3">
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3">
         <CustomRender token={props.token} />
-      </Row>
-    </Container>
+      </div>
+    </div>
   );
 }
 
@@ -104,18 +103,16 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
   }
 
   return (
-    <Container
-      style={{
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl" style={{
         minHeight: "150px",
-      }}
-    >
-      <Row>
-        <Col>
+      }}>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
           <span className="font-color-h">Custom Render:</span>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="d-flex flex-wrap gap-2">
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex flex-wrap gap-2">
           <Dropdown
             drop={"down-centered"}
             className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}
@@ -199,8 +196,8 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           >
             <span>GO!</span>
           </button>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

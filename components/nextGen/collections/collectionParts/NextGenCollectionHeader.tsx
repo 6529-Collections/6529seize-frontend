@@ -30,7 +30,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "../NextGenTailwindLayout";
 import { DistributionLink } from "../NextGen";
 import styles from "../NextGen.module.scss";
 
@@ -229,9 +228,9 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col className="d-flex justify-content-between align-items-center flex-wrap">
+    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding">
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex justify-content-between align-items-center flex-wrap">
           {
             <NextGenPhases
               collection={props.collection}
@@ -284,10 +283,10 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               </Link>
             </span>
           )}
-        </Col>
-      </Row>
-      <Row>
-        <Col className={`d-flex flex-column align-items-start pt-3 gap-3`}>
+        </div>
+      </div>
+      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex flex-column align-items-start pt-3 gap-3">
           <span className="d-flex flex-column align-items-start">
             <h1 className="mb-0 font-color">{props.collection.name}</h1>
             {props.collection_link && (
@@ -308,17 +307,14 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               setAvailable={setAvailable}
             />
           </span>
-        </Col>
+        </div>
         {showMint() && (
-          <Col
-            className="pt-3 d-flex flex-column align-items-center"
-            sm={12}
-            md={6}>
+          <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/2 pt-3 d-flex flex-column align-items-center" style={{ maxWidth: "100%" }}>
             <NextGenCountdown collection={props.collection} />
-          </Col>
+          </div>
         )}
-      </Row>
-    </Container>
+      </div>
+    </div>
   );
 }
 
