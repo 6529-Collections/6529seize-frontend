@@ -11,8 +11,7 @@ jest.mock("@/services/6529api", () => ({
 jest.mock(
   "@/components/nextGen/collections/NextGenCollectionPreview",
   () =>
-    ({ collection }: any) =>
-      <div data-testid="preview">{collection.name}</div>
+    ({ collection }: any) => <div data-testid="preview">{collection.name}</div>
 );
 
 jest.mock("@/components/pagination/Pagination", () => (props: any) => (
@@ -67,7 +66,10 @@ it("filters by status and resets page", async () => {
   render(<NextGenCollections />);
   await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
 
-  await userEvent.click(screen.getByRole("button", { name: "LIVE" }));
+  await userEvent.selectOptions(
+    screen.getByRole("combobox", { name: /status/i }),
+    "LIVE"
+  );
 
   await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(3));
   expect(fetchUrl).toHaveBeenLastCalledWith(
