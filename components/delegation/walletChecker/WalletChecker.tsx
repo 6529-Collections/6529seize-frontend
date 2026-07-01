@@ -61,6 +61,27 @@ function resolveConsolidationDisplay(
   return fallback;
 }
 
+function CheckedWalletAddress(
+  props: Readonly<{
+    checkedAddress: string;
+    address: string;
+    display: string | undefined;
+  }>
+) {
+  const address = (
+    <Address
+      wallets={[props.address as `0x${string}`]}
+      display={props.display}
+    />
+  );
+
+  if (areEqualAddresses(props.checkedAddress, props.address)) {
+    return address;
+  }
+
+  return <span className={styles["supportingAddress"]}>{address}</span>;
+}
+
 export default function WalletCheckerComponent(
   props: Readonly<{
     address_query: string;
@@ -624,52 +645,18 @@ export default function WalletCheckerComponent(
                             {delegations.map((delegation, index) => (
                               <tr key={`delegations-${index}`}>
                                 <td className={TABLE_CELL_CLASS}>
-                                  {areEqualAddresses(
-                                    fetchedAddress,
-                                    delegation.from_address
-                                  ) ? (
-                                    <Address
-                                      wallets={[
-                                        delegation.from_address as `0x${string}`,
-                                      ]}
-                                      display={delegation.from_display}
-                                    />
-                                  ) : (
-                                    <span
-                                      className={styles["supportingAddress"]}
-                                    >
-                                      <Address
-                                        wallets={[
-                                          delegation.from_address as `0x${string}`,
-                                        ]}
-                                        display={delegation.from_display}
-                                      />
-                                    </span>
-                                  )}
+                                  <CheckedWalletAddress
+                                    checkedAddress={fetchedAddress}
+                                    address={delegation.from_address}
+                                    display={delegation.from_display}
+                                  />
                                 </td>
                                 <td className={TABLE_CELL_CLASS}>
-                                  {areEqualAddresses(
-                                    fetchedAddress,
-                                    delegation.to_address
-                                  ) ? (
-                                    <Address
-                                      wallets={[
-                                        delegation.to_address as `0x${string}`,
-                                      ]}
-                                      display={delegation.to_display}
-                                    />
-                                  ) : (
-                                    <span
-                                      className={styles["supportingAddress"]}
-                                    >
-                                      <Address
-                                        wallets={[
-                                          delegation.to_address as `0x${string}`,
-                                        ]}
-                                        display={delegation.to_display}
-                                      />
-                                    </span>
-                                  )}
+                                  <CheckedWalletAddress
+                                    checkedAddress={fetchedAddress}
+                                    address={delegation.to_address}
+                                    display={delegation.to_display}
+                                  />
                                 </td>
                                 <td className={TABLE_CELL_CLASS}>
                                   {getCollectionDisplay(delegation.collection)}
@@ -758,52 +745,18 @@ export default function WalletCheckerComponent(
                             {subDelegations.map((delegation, index) => (
                               <tr key={`sub-delegations-${index}`}>
                                 <td className={TABLE_CELL_CLASS}>
-                                  {areEqualAddresses(
-                                    fetchedAddress,
-                                    delegation.from_address
-                                  ) ? (
-                                    <Address
-                                      wallets={[
-                                        delegation.from_address as `0x${string}`,
-                                      ]}
-                                      display={delegation.from_display}
-                                    />
-                                  ) : (
-                                    <span
-                                      className={styles["supportingAddress"]}
-                                    >
-                                      <Address
-                                        wallets={[
-                                          delegation.from_address as `0x${string}`,
-                                        ]}
-                                        display={delegation.from_display}
-                                      />
-                                    </span>
-                                  )}
+                                  <CheckedWalletAddress
+                                    checkedAddress={fetchedAddress}
+                                    address={delegation.from_address}
+                                    display={delegation.from_display}
+                                  />
                                 </td>
                                 <td className={TABLE_CELL_CLASS}>
-                                  {areEqualAddresses(
-                                    fetchedAddress,
-                                    delegation.to_address
-                                  ) ? (
-                                    <Address
-                                      wallets={[
-                                        delegation.to_address as `0x${string}`,
-                                      ]}
-                                      display={delegation.to_display}
-                                    />
-                                  ) : (
-                                    <span
-                                      className={styles["supportingAddress"]}
-                                    >
-                                      <Address
-                                        wallets={[
-                                          delegation.to_address as `0x${string}`,
-                                        ]}
-                                        display={delegation.to_display}
-                                      />
-                                    </span>
-                                  )}
+                                  <CheckedWalletAddress
+                                    checkedAddress={fetchedAddress}
+                                    address={delegation.to_address}
+                                    display={delegation.to_display}
+                                  />
                                 </td>
                                 <td className={TABLE_CELL_CLASS}>
                                   {getCollectionDisplay(delegation.collection)}
@@ -833,50 +786,20 @@ export default function WalletCheckerComponent(
                           {consolidations.map((consolidation, index) => (
                             <tr key={`consolidations-${index}`}>
                               <td className="tw-flex tw-items-center tw-px-2 tw-py-1">
-                                {areEqualAddresses(
-                                  fetchedAddress,
-                                  consolidation.from
-                                ) ? (
-                                  <Address
-                                    wallets={[
-                                      consolidation.from as `0x${string}`,
-                                    ]}
-                                    display={consolidation.from_display}
-                                  />
-                                ) : (
-                                  <span className={styles["supportingAddress"]}>
-                                    <Address
-                                      wallets={[
-                                        consolidation.from as `0x${string}`,
-                                      ]}
-                                      display={consolidation.from_display}
-                                    />
-                                  </span>
-                                )}
+                                <CheckedWalletAddress
+                                  checkedAddress={fetchedAddress}
+                                  address={consolidation.from}
+                                  display={consolidation.from_display}
+                                />
                                 <span className="tw-inline-flex tw-items-center tw-justify-center">
                                   <span className={styles["arrowBody"]}></span>
                                   <span className={styles["arrowHead"]}></span>
                                 </span>
-                                {areEqualAddresses(
-                                  fetchedAddress,
-                                  consolidation.to
-                                ) ? (
-                                  <Address
-                                    wallets={[
-                                      consolidation.to as `0x${string}`,
-                                    ]}
-                                    display={consolidation.to_display}
-                                  />
-                                ) : (
-                                  <span className={styles["supportingAddress"]}>
-                                    <Address
-                                      wallets={[
-                                        consolidation.to as `0x${string}`,
-                                      ]}
-                                      display={consolidation.to_display}
-                                    />
-                                  </span>
-                                )}
+                                <CheckedWalletAddress
+                                  checkedAddress={fetchedAddress}
+                                  address={consolidation.to}
+                                  display={consolidation.to_display}
+                                />
                               </td>
                             </tr>
                           ))}
