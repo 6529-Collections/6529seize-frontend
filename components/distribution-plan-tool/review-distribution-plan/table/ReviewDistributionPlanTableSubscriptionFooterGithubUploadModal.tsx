@@ -3,7 +3,7 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Image from "next/image";
 import Link from "next/link";
-import { Modal } from "react-bootstrap";
+import { ReviewDistributionPlanTableSubscriptionFooterModal } from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 const GITHUB_BASE =
   "https://github.com/6529-Collections/thememecards/tree/main";
@@ -42,108 +42,100 @@ export function GithubUploadModal(
   }
 
   return (
-    <Modal
+    <ReviewDistributionPlanTableSubscriptionFooterModal
       show={show}
-      onHide={canClose ? onClose : () => {}}
-      backdrop={isLoading ? "static" : true}
-      keyboard={canClose}
-      className="tailwind-scope"
+      title={modalTitle}
+      onClose={onClose}
+      closeButton={canClose}
+      isDismissable={canClose}
+      footer={
+        !isLoading ? (
+          <>
+            {isError && onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
+              >
+                Retry
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
+            >
+              Close
+            </button>
+          </>
+        ) : null
+      }
     >
-      <Modal.Header closeButton={canClose}>
-        <Modal.Title className="tw-text-lg tw-font-semibold">
-          {modalTitle}
-        </Modal.Title>
-      </Modal.Header>
-      <hr className="tw-my-0" />
-      <Modal.Body>
-        <div className="tw-container tw-mx-auto">
-          {isLoading && (
-            <div className="tw-flex tw-items-center tw-gap-3 tw-py-4">
-              <CircleLoader />
-              <span className="tw-text-iron-800">Uploading to GitHub…</span>
+      {isLoading && (
+        <div className="tw-flex tw-items-center tw-gap-3 tw-py-4">
+          <CircleLoader />
+          <span className="tw-text-iron-800">Uploading to GitHub…</span>
+        </div>
+      )}
+      {!isLoading && isError && (
+        <div className="tw-border-red-500/30 tw-bg-red-950/30 tw-text-red-400 tw-mb-0 tw-break-words tw-rounded tw-border tw-px-3 tw-py-2 tw-text-base">
+          {errorMessage}
+        </div>
+      )}
+      {!isLoading && result?.success && (
+        <div className="tw-flex tw-flex-col tw-gap-4 tw-pb-2 tw-pt-2">
+          {result.message && (
+            <p className="tw-mb-0 tw-text-iron-900">{result.message}</p>
+          )}
+          {result.github_folder && (
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <Link
+                href={`${GITHUB_BASE}/${result.github_folder
+                  .split("/")
+                  .map((seg) => encodeURIComponent(seg))
+                  .join("/")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-ring-1 tw-ring-iron-600 tw-transition hover:tw-bg-iron-700 hover:tw-text-white hover:tw-no-underline"
+              >
+                <Image
+                  src="/github_w.png"
+                  alt=""
+                  width={18}
+                  height={18}
+                  unoptimized
+                  className="tw-shrink-0"
+                />
+                View {result.github_folder} on GitHub
+              </Link>
             </div>
           )}
-          {!isLoading && isError && (
-            <div className="tw-border-red-500/30 tw-bg-red-950/30 tw-text-red-400 tw-mb-0 tw-break-words tw-rounded tw-border tw-px-3 tw-py-2 tw-text-base">
-              {errorMessage}
+          {result.deleted_files && result.deleted_files.length > 0 && (
+            <div>
+              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-700">
+                Deleted files ({result.deleted_files.length})
+              </p>
+              <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
+                {result.deleted_files.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
             </div>
           )}
-          {!isLoading && result?.success && (
-            <div className="tw-flex tw-flex-col tw-gap-4 tw-pb-2 tw-pt-2">
-              {result.message && (
-                <p className="tw-mb-0 tw-text-iron-900">{result.message}</p>
-              )}
-              {result.github_folder && (
-                <div className="tw-flex tw-items-center tw-gap-2">
-                  <Link
-                    href={`${GITHUB_BASE}/${result.github_folder
-                      .split("/")
-                      .map((seg) => encodeURIComponent(seg))
-                      .join("/")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-ring-1 tw-ring-iron-600 tw-transition hover:tw-bg-iron-700 hover:tw-text-white hover:tw-no-underline"
-                  >
-                    <Image
-                      src="/github_w.png"
-                      alt=""
-                      width={18}
-                      height={18}
-                      unoptimized
-                      className="tw-shrink-0"
-                    />
-                    View {result.github_folder} on GitHub
-                  </Link>
-                </div>
-              )}
-              {result.deleted_files && result.deleted_files.length > 0 && (
-                <div>
-                  <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-700">
-                    Deleted files ({result.deleted_files.length})
-                  </p>
-                  <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
-                    {result.deleted_files.map((f) => (
-                      <li key={f}>{f}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {result.uploaded_files && result.uploaded_files.length > 0 && (
-                <div>
-                  <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-700">
-                    Uploaded files ({result.uploaded_files.length})
-                  </p>
-                  <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
-                    {result.uploaded_files.map((f) => (
-                      <li key={f}>{f}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {result.uploaded_files && result.uploaded_files.length > 0 && (
+            <div>
+              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-700">
+                Uploaded files ({result.uploaded_files.length})
+              </p>
+              <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
+                {result.uploaded_files.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
-      </Modal.Body>
-      {!isLoading && (
-        <Modal.Footer>
-          {isError && onRetry && (
-            <button
-              type="button"
-              onClick={onRetry}
-              className="tw-me-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
-            >
-              Retry
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onClose}
-            className="tw-rounded-lg tw-border-0 tw-bg-iron-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white"
-          >
-            Close
-          </button>
-        </Modal.Footer>
       )}
-    </Modal>
+    </ReviewDistributionPlanTableSubscriptionFooterModal>
   );
 }
