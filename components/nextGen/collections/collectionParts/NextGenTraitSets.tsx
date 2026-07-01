@@ -15,7 +15,6 @@ import type {
   NextgenTraitSet,
   TraitValues,
 } from "@/entities/INextgen";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -135,7 +134,6 @@ export default function NextGenTraitSets(
         }}
       >
         <button
-          key={getRandomObjectId()}
           className={`${styles["collectorSetPill"]} ${
             t === selectedTrait ? styles["collectorSetPillSelected"] : ""
           }`}
@@ -201,7 +199,7 @@ export default function NextGenTraitSets(
           }}
         >
           {sets.map((s) => (
-            <UltimateOwner key={getRandomObjectId()} set={s} />
+            <UltimateOwner key={`ultimate-owner-${s.owner}`} set={s} />
           ))}
         </div>
       );
@@ -398,7 +396,7 @@ function UltimateOwner(props: Readonly<{ set: NextgenTraitSet }>) {
               </span>
               <span className="tw-flex tw-gap-4">
                 {keys.map((k) => (
-                  <span key={getRandomObjectId()}>
+                  <span key={`ultimate-owner-${set.owner}-${k.key}`}>
                     <b>{k.key}</b> Sets: {k.count}
                   </span>
                 ))}

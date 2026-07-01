@@ -18,7 +18,6 @@ import type {
   TraitValues,
 } from "@/entities/INextgen";
 import { SortDirection } from "@/entities/ISort";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -74,6 +73,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
   const [listedType, setListedType] = useState(NextGenTokenListedType.ALL);
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  const [openTraitFilters, setOpenTraitFilters] = useState<string[]>([]);
 
   function isRaritySort(s: NextGenListFilters) {
     return [
@@ -209,15 +209,19 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     }
   }, [selectedTraitValues]);
 
-  function getDefaultActiveKeys() {
-    const activeKeys: string[] = [];
-    traits.forEach((t, index) => {
-      if (selectedTraitValues.some((st) => st.trait === t.trait)) {
-        activeKeys.push(index.toString());
-      }
-    });
-    return activeKeys;
-  }
+  useEffect(() => {
+    const selectedTraits = traits
+      .filter((trait) =>
+        selectedTraitValues.some((selected) => selected.trait === trait.trait)
+      )
+      .map((trait) => trait.trait);
+
+    if (selectedTraits.length > 0) {
+      setOpenTraitFilters((current) =>
+        Array.from(new Set([...current, ...selectedTraits]))
+      );
+    }
+  }, [selectedTraitValues, traits]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -271,12 +275,21 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     }
   }
 
+  function setTraitFilterOpen(trait: string, isOpen: boolean) {
+    setOpenTraitFilters((current) =>
+      isOpen
+        ? Array.from(new Set([...current, trait]))
+        : current.filter((currentTrait) => currentTrait !== trait)
+    );
+  }
+
   const selectClassName =
     "tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-py-1 tw-pl-1 tw-pr-8 tw-font-bold tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
   const sortButtonClassName =
     "tw-rounded-md tw-border-0 tw-bg-transparent tw-px-5 tw-py-1.5 tw-text-white hover:tw-text-iron-350 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
   const sortMenuItemClassName =
     "tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-white tw-transition hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
+  const sortMenuId = `nextgen-collection-art-sort-${props.collection.id}`;
 
   return (
     <div className="tw-[padding-top:0.5rem] tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
@@ -373,14 +386,20 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 <button
                   type="button"
                   className={sortButtonClassName}
-                  aria-haspopup="dialog"
+                  aria-haspopup="true"
+                  aria-controls={isSortMenuOpen ? sortMenuId : undefined}
                   aria-expanded={isSortMenuOpen}
                   onClick={() => setIsSortMenuOpen((isOpen) => !isOpen)}
                 >
                   Sort: {sort}
                 </button>
                 {isSortMenuOpen && (
-                  <div className="tw-[margin-top:0.5rem] tw-absolute tw-right-0 tw-top-full tw-z-50 tw-min-w-[240px] tw-rounded-md tw-bg-iron-900 tw-p-1 tw-shadow-lg tw-ring-1 tw-ring-white/10">
+                  <div
+                    id={sortMenuId}
+                    role="group"
+                    aria-label="Sort options"
+                    className="tw-[margin-top:0.5rem] tw-absolute tw-right-0 tw-top-full tw-z-50 tw-min-w-[240px] tw-rounded-md tw-bg-iron-900 tw-p-1 tw-shadow-lg tw-ring-1 tw-ring-white/10"
+                  >
                     <div>
                       {Object.values(NextGenListFilters).map((lf) => (
                         <Fragment key={`sort-filter-${lf}`}>
@@ -501,11 +520,14 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               <div className="-tw-mx-3 tw-flex tw-flex-wrap">
                 <div className="tw-[padding-top:0.5rem] tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-flex-col tw-px-3">
                   {routerLoaded &&
-                    traits.map((tr, index) => (
+                    traits.map((tr) => (
                       <details
-                        key={getRandomObjectId()}
+                        key={`trait-filter-${tr.trait}`}
                         className={`${styles["traitsAccordion"]} ${styles["traitsAccordionItem"]}`}
-                        open={getDefaultActiveKeys().includes(index.toString())}
+                        open={openTraitFilters.includes(tr.trait)}
+                        onToggle={(event) =>
+                          setTraitFilterOpen(tr.trait, event.currentTarget.open)
+                        }
                       >
                         <summary className="tw-cursor-pointer tw-bg-[rgb(34,34,34)] tw-py-2 tw-font-bold focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400">
                           <span>{tr.trait}</span>&nbsp;&nbsp;
@@ -526,7 +548,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
                           return (
                             <div
-                              key={getRandomObjectId()}
+                              key={`trait-filter-${tr.trait}-${v.key}`}
                               className={`${styles["traitsAccordionBody"]} tw-py-1`}
                             >
                               <label

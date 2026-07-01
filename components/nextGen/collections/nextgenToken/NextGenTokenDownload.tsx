@@ -76,10 +76,9 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
   const downloader = useDownloader();
 
   return (
-    <li role="none">
+    <li>
       <button
         type="button"
-        role="menuitem"
         disabled={!imageExists}
         onClick={() => {
           if (imageExists) {

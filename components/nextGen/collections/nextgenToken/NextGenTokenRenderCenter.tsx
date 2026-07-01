@@ -176,13 +176,18 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
               </span>
               <input
                 type="number"
+                min={1}
                 placeholder="enter height"
                 aria-label="Custom render height in pixels"
                 className={`${styles["customRenderInput"]} tw-rounded-md tw-border-0 tw-px-2 tw-py-1 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
                 value={height ?? ""}
                 onChange={(e) => {
-                  const nextHeight = parseInt(e.target.value, 10);
-                  setHeight(Number.isNaN(nextHeight) ? null : nextHeight);
+                  const nextHeight = Number.parseInt(e.target.value, 10);
+                  setHeight(
+                    Number.isNaN(nextHeight) || nextHeight < 1
+                      ? null
+                      : nextHeight
+                  );
                 }}
               />
             </span>

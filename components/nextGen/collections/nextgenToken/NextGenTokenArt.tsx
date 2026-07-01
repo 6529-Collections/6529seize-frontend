@@ -136,6 +136,9 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     return s;
   }
 
+  const iconButtonClassName =
+    "tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
+
   function getCurrentHref() {
     if (mode === Mode.LIVE) {
       return props.token.animation_url ?? props.token.generator?.html;
@@ -167,6 +170,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           style={{ maxWidth: "100%" }}
         >
           <button
+            type="button"
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.IMAGE ? styles["imageResolutionBtnSelected"] : ""
             }`}
@@ -175,6 +179,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             2K
           </button>
           <button
+            type="button"
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.HIGH_RES ? styles["imageResolutionBtnSelected"] : ""
             }`}
@@ -182,12 +187,20 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           >
             {isMobileDevice ? "8K" : "16K"}
           </button>
-          <FontAwesomeIcon
-            className={getModeStyle(Mode.LIVE)}
+          <button
+            type="button"
+            aria-label="Live mode"
+            aria-pressed={mode === Mode.LIVE}
+            className={iconButtonClassName}
             onClick={() => setMode(Mode.LIVE)}
-            icon={faPlayCircle}
             data-tooltip-id={`live-tooltip-${props.token.id}`}
-          />
+          >
+            <FontAwesomeIcon
+              className={getModeStyle(Mode.LIVE)}
+              icon={faPlayCircle}
+              aria-hidden
+            />
+          </button>
           <Tooltip
             id={`live-tooltip-${props.token.id}`}
             place="bottom"
@@ -207,32 +220,53 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           >
             {showZoomControls && (
               <>
-                <FontAwesomeIcon
-                  className={styles["modeIcon"]}
-                  icon={faMinusSquare}
+                <button
+                  type="button"
+                  aria-label="Zoom out"
+                  className={iconButtonClassName}
                   onClick={handleScaleDown}
-                  style={{
-                    color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
-                  }}
-                />
+                >
+                  <FontAwesomeIcon
+                    className={styles["modeIcon"]}
+                    icon={faMinusSquare}
+                    aria-hidden
+                    style={{
+                      color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
+                    }}
+                  />
+                </button>
                 <span className="unselectable">Scale: {zoomScale}</span>
-                <FontAwesomeIcon
-                  className={styles["modeIcon"]}
-                  icon={faPlusSquare}
+                <button
+                  type="button"
+                  aria-label="Zoom in"
+                  className={iconButtonClassName}
                   onClick={handleScaleUp}
-                  style={{
-                    color: zoomScale === MAX_ZOOM_SCALE ? "#9a9a9a" : "white",
-                  }}
-                />
-                <FontAwesomeIcon
-                  className={styles["modeIcon"]}
-                  icon={faRefresh}
+                >
+                  <FontAwesomeIcon
+                    className={styles["modeIcon"]}
+                    icon={faPlusSquare}
+                    aria-hidden
+                    style={{
+                      color: zoomScale === MAX_ZOOM_SCALE ? "#9a9a9a" : "white",
+                    }}
+                  />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Reset zoom"
+                  className={iconButtonClassName}
                   onClick={() => setZoomScale(MIN_ZOOM_SCALE)}
-                  style={{
-                    paddingLeft: "5px",
-                    color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
-                  }}
-                />
+                >
+                  <FontAwesomeIcon
+                    className={styles["modeIcon"]}
+                    icon={faRefresh}
+                    aria-hidden
+                    style={{
+                      paddingLeft: "5px",
+                      color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
+                    }}
+                  />
+                </button>
               </>
             )}
           </div>
@@ -243,21 +277,27 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           }`}
           style={{ maxWidth: "100%" }}
         >
-          <Lightbulb
-            mode="black"
-            className={styles["modeIcon"]!}
+          <button
+            type="button"
+            aria-label="Open blackbox"
+            className={iconButtonClassName}
             onClick={() => setShowBlackbox(true)}
-          />
-          <Lightbulb
-            mode="light"
-            className={styles["modeIcon"]!}
+          >
+            <Lightbulb mode="black" className={styles["modeIcon"]!} />
+          </button>
+          <button
+            type="button"
+            aria-label="Open lightbox"
+            className={iconButtonClassName}
             onClick={() => setShowLightbox(true)}
-          />
+          >
+            <Lightbulb mode="light" className={styles["modeIcon"]!} />
+          </button>
           <div className="tw-relative tw-flex" ref={downloadMenuRef}>
             <button
               type="button"
               className={`${styles["downloadBtn"]} tw-rounded-md focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
-              aria-haspopup="menu"
+              aria-haspopup="true"
               aria-expanded={isDownloadMenuOpen}
               aria-label="Download token image"
               onClick={() => setIsDownloadMenuOpen((isOpen) => !isOpen)}
@@ -281,8 +321,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             </Tooltip>
             {isDownloadMenuOpen && (
               <ul
-                role="menu"
-                aria-label="Download token image"
+                aria-label="Download token image options"
                 className="tw-[margin-top:0.5rem] tw-absolute tw-right-0 tw-top-full tw-z-50 tw-min-w-[180px] tw-list-none tw-rounded-md tw-bg-iron-900 tw-p-1 tw-shadow-lg tw-ring-1 tw-ring-white/10"
               >
                 {Object.values(Resolution)
@@ -301,15 +340,22 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               </ul>
             )}
           </div>
-          <FontAwesomeIcon
-            className={styles["modeIcon"]}
+          <button
+            type="button"
+            aria-label="Open token image in new tab"
+            className={iconButtonClassName}
             onClick={() => {
               const href = getCurrentHref();
               window.open(href, "_blank");
             }}
-            icon={faExternalLink}
             data-tooltip-id={`external-tooltip-${props.token.id}`}
-          />
+          >
+            <FontAwesomeIcon
+              className={styles["modeIcon"]}
+              icon={faExternalLink}
+              aria-hidden
+            />
+          </button>
           <Tooltip
             id={`external-tooltip-${props.token.id}`}
             place="bottom"
@@ -321,12 +367,19 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           >
             Open in new tab
           </Tooltip>
-          <FontAwesomeIcon
-            className={styles["modeIcon"]}
-            icon={faMaximize}
+          <button
+            type="button"
+            aria-label="Toggle fullscreen"
+            className={iconButtonClassName}
             onClick={toggleFullScreen}
             data-tooltip-id={`fullscreen-tooltip-${props.token.id}`}
-          />
+          >
+            <FontAwesomeIcon
+              className={styles["modeIcon"]}
+              icon={faMaximize}
+              aria-hidden
+            />
+          </button>
           <Tooltip
             id={`fullscreen-tooltip-${props.token.id}`}
             place="bottom"
