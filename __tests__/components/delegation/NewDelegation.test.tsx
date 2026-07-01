@@ -2,38 +2,33 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NewDelegation from "@/components/delegation/NewDelegation";
 
-jest.mock("@/components/delegation/DelegationFormParts", () => ({
-  DelegationExpiryCalendar: () => <div data-testid="calendar" />,
-  DelegationTokenSelection: () => <div data-testid="token" />,
-  DelegationCloseButton: () => <div />,
-  DelegationFormOriginalDelegatorFormGroup: () => <div />,
-  DelegationFormRow: ({ children }: any) => <div>{children}</div>,
-  DelegationFormField: ({ children }: any) => <div>{children}</div>,
-  DelegationFormLabel: ({ title }: any) => <label>{title}</label>,
-  DelegationFormSelect: ({ children, ...props }: any) => (
-    <select {...props}>{children}</select>
-  ),
-  DelegationRadio: ({ label, ...props }: any) => (
-    <label>
-      <input {...props} type="radio" />
-      {label}
-    </label>
-  ),
-  DelegationAddressDisabledInput: () => <input disabled />,
-  DelegationFormCollectionFormGroup: ({ setCollection }: any) => (
-    <input
-      data-testid="collection"
-      onChange={(e) => setCollection(e.target.value)}
-    />
-  ),
-  DelegationFormDelegateAddressFormGroup: ({ setAddress }: any) => (
-    <input
-      data-testid="delegate"
-      onChange={(e) => setAddress(e.target.value)}
-    />
-  ),
-  DelegationSubmitGroups: () => <div />,
-}));
+jest.mock("@/components/delegation/DelegationFormParts", () => {
+  const actual = jest.requireActual(
+    "@/components/delegation/DelegationFormParts"
+  );
+
+  return {
+    ...actual,
+    DelegationExpiryCalendar: () => <div data-testid="calendar" />,
+    DelegationTokenSelection: () => <div data-testid="token" />,
+    DelegationCloseButton: () => <div />,
+    DelegationFormOriginalDelegatorFormGroup: () => <div />,
+    DelegationAddressDisabledInput: () => <input disabled />,
+    DelegationFormCollectionFormGroup: ({ setCollection }: any) => (
+      <input
+        data-testid="collection"
+        onChange={(e) => setCollection(e.target.value)}
+      />
+    ),
+    DelegationFormDelegateAddressFormGroup: ({ setAddress }: any) => (
+      <input
+        data-testid="delegate"
+        onChange={(e) => setAddress(e.target.value)}
+      />
+    ),
+    DelegationSubmitGroups: () => <div />,
+  };
+});
 
 describe("NewDelegation component", () => {
   it("toggles expiry calendar and token input", async () => {

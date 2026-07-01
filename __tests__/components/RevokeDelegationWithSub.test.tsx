@@ -3,54 +3,54 @@ import userEvent from "@testing-library/user-event";
 import RevokeDelegationWithSub from "@/components/delegation/RevokeDelegationWithSub";
 import React from "react";
 
-jest.mock("@/components/delegation/DelegationFormParts", () => ({
-  DelegationCloseButton: (props: any) => (
-    <button onClick={props.onHide}>close</button>
-  ),
-  DelegationFormRow: ({ children }: any) => <div>{children}</div>,
-  DelegationFormField: ({ children }: any) => <div>{children}</div>,
-  DelegationFormInput: (props: any) => <input {...props} />,
-  DelegationFormSelect: ({ children, ...props }: any) => (
-    <select {...props}>{children}</select>
-  ),
-  DelegationFormLabel: ({ title }: any) => <div>{title}</div>,
-  DelegationAddressDisabledInput: ({ address, ens }: any) => (
-    <div data-testid="disabled-address">
-      {ens ? `${ens} - ${address}` : address}
-    </div>
-  ),
-  DelegationFormCollectionFormGroup: ({ collection, setCollection }: any) => (
-    <select
-      data-testid="collection-select"
-      value={collection}
-      onChange={(e) => setCollection(e.target.value)}
-    >
-      <option value="0">Select Collection</option>
-      <option value="test-collection">Test Collection</option>
-    </select>
-  ),
-  DelegationFormDelegateAddressFormGroup: ({ setAddress, title }: any) => (
-    <div>
-      <label>{title}</label>
-      <input
-        data-testid="address-input"
-        onChange={(e) => setAddress(e.target.value)}
-      />
-    </div>
-  ),
-  DelegationSubmitGroups: (props: any) => (
-    <div>
-      <button
-        data-testid="submit-button"
-        onClick={() => props.validate()}
-        disabled={props.validate().length > 0}
+jest.mock("@/components/delegation/DelegationFormParts", () => {
+  const actual = jest.requireActual(
+    "@/components/delegation/DelegationFormParts"
+  );
+
+  return {
+    ...actual,
+    DelegationCloseButton: (props: any) => (
+      <button onClick={props.onHide}>close</button>
+    ),
+    DelegationAddressDisabledInput: ({ address, ens }: any) => (
+      <div data-testid="disabled-address">
+        {ens ? `${ens} - ${address}` : address}
+      </div>
+    ),
+    DelegationFormCollectionFormGroup: ({ collection, setCollection }: any) => (
+      <select
+        data-testid="collection-select"
+        value={collection}
+        onChange={(e) => setCollection(e.target.value)}
       >
-        {props.submitBtnLabel || "Submit"}
-      </button>
-      {props.gasError && <div data-testid="gas-error">{props.gasError}</div>}
-    </div>
-  ),
-}));
+        <option value="0">Select Collection</option>
+        <option value="test-collection">Test Collection</option>
+      </select>
+    ),
+    DelegationFormDelegateAddressFormGroup: ({ setAddress, title }: any) => (
+      <div>
+        <label>{title}</label>
+        <input
+          data-testid="address-input"
+          onChange={(e) => setAddress(e.target.value)}
+        />
+      </div>
+    ),
+    DelegationSubmitGroups: (props: any) => (
+      <div>
+        <button
+          data-testid="submit-button"
+          onClick={() => props.validate()}
+          disabled={props.validate().length > 0}
+        >
+          {props.submitBtnLabel || "Submit"}
+        </button>
+        {props.gasError && <div data-testid="gas-error">{props.gasError}</div>}
+      </div>
+    ),
+  };
+});
 
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: null }) }));
 

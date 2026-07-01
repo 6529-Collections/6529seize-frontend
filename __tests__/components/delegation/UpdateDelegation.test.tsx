@@ -7,23 +7,20 @@ jest.mock("wagmi", () => ({
   useEnsAddress: () => ({ data: null }),
 }));
 
-jest.mock("@/components/delegation/DelegationFormParts", () => ({
-  DelegationCloseButton: () => <div />,
-  DelegationFormRow: ({ children }: any) => <div>{children}</div>,
-  DelegationFormField: ({ children }: any) => <div>{children}</div>,
-  DelegationFormInput: (props: any) => <input {...props} />,
-  DelegationFormLabel: (p: any) => <label>{p.title}</label>,
-  DelegationRadio: ({ label, ...props }: any) => (
-    <label>
-      <input {...props} type="radio" />
-      {label}
-    </label>
-  ),
-  DelegationAddressDisabledInput: () => <div />,
-  DelegationExpiryCalendar: () => <div data-testid="calendar" />,
-  DelegationTokenSelection: () => <div data-testid="token-select" />,
-  DelegationSubmitGroups: () => <div />,
-}));
+jest.mock("@/components/delegation/DelegationFormParts", () => {
+  const actual = jest.requireActual(
+    "@/components/delegation/DelegationFormParts"
+  );
+
+  return {
+    ...actual,
+    DelegationCloseButton: () => <div />,
+    DelegationAddressDisabledInput: () => <div />,
+    DelegationExpiryCalendar: () => <div data-testid="calendar" />,
+    DelegationTokenSelection: () => <div data-testid="token-select" />,
+    DelegationSubmitGroups: () => <div />,
+  };
+});
 
 const baseProps = {
   address: "0x1",
