@@ -7,17 +7,10 @@ import {
   useEffectEvent,
   useRef,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
-import {
-  Accordion,
-  Col,
-  Container,
-  Form,
-  FormCheck,
-  Row,
-  Table,
-} from "react-bootstrap";
 import {
   useChainId,
   useEnsName,
@@ -87,6 +80,19 @@ interface Props {
 interface Revocation {
   use_case: number;
   wallet: string;
+}
+
+function toggleDisclosureKey(
+  key: string,
+  setKeys: Dispatch<SetStateAction<string[]>>,
+  setChanged: Dispatch<SetStateAction<boolean>>
+) {
+  setKeys((keys) =>
+    keys.includes(key)
+      ? keys.filter((current) => current !== key)
+      : [...keys, key]
+  );
+  setChanged(true);
 }
 
 type TransactionHash = `0x${string}`;
@@ -206,6 +212,42 @@ function getCollectionScopeDescription(collection: DelegationCollection) {
   }
 
   return "Records here apply to the selected collection scope.";
+}
+
+const CHECKBOX_CLASS =
+  "tw-h-4 tw-w-4 tw-cursor-pointer tw-border-0 tw-bg-white tw-text-black focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
+const LOCK_SELECT_CLASS =
+  "tw-block tw-w-full tw-min-w-0 tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-black focus:tw-border-primary-400 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-75";
+
+function DelegationDisclosurePanel(
+  props: Readonly<{
+    title: string;
+    isOpen: boolean;
+    onToggle: () => void;
+    children: ReactNode;
+    className?: string | undefined;
+  }>
+) {
+  return (
+    <section
+      className={`tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 ${props.className ?? ""}`}
+    >
+      <h6 className="tw-m-0">
+        <button
+          type="button"
+          className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-left tw-font-bold tw-text-iron-50 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          aria-expanded={props.isOpen}
+          onClick={props.onToggle}
+        >
+          <span>{props.title}</span>
+          <span aria-hidden="true">{props.isOpen ? "-" : "+"}</span>
+        </button>
+      </h6>
+      {props.isOpen && (
+        <div className="tw-bg-iron-950 tw-p-3">{props.children}</div>
+      )}
+    </section>
+  );
 }
 
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
@@ -848,57 +890,39 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     );
     return (
       <>
-        <h5 className="pt-3 pb-1">Delegations</h5>
+        <h5 className="tw-pb-1 tw-pt-3">Delegations</h5>
         <p className={styles["collectionSectionIntro"]}>
           Delegations let another wallet use NFT utility for this collection
           scope without moving the NFT.
         </p>
-        <Accordion
-          alwaysOpen
-          className={styles["collectionDelegationsAccordion"]}
-          activeKey={delegationKeys}
-        >
-          <Accordion.Item
-            className={`${styles["collectionDelegationsAccordionItem"]}`}
-            eventKey={"0"}
+        <div className="tw-space-y-3">
+          <DelegationDisclosurePanel
+            title="Outgoing Delegations"
+            isOpen={delegationKeys.includes("0")}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "0",
+                setDelegationKeys,
+                setDelegationKeysChanged
+              )
+            }
           >
-            <Accordion.Header
-              onClick={() => {
-                if (delegationKeys.includes("0")) {
-                  setDelegationKeys(delegationKeys.filter((k) => k != "0"));
-                } else {
-                  setDelegationKeys([...delegationKeys, "0"]);
-                }
-                setDelegationKeysChanged(true);
-              }}
-            >
-              Outgoing Delegations
-            </Accordion.Header>
-            <Accordion.Body>
-              {printOutgoingDelegations("delegations", outDelegations)}
-            </Accordion.Body>
-          </Accordion.Item>
-          <Accordion.Item
-            className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
-            eventKey={"1"}
+            {printOutgoingDelegations("delegations", outDelegations)}
+          </DelegationDisclosurePanel>
+          <DelegationDisclosurePanel
+            title="Incoming Delegations"
+            isOpen={delegationKeys.includes("1")}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "1",
+                setDelegationKeys,
+                setDelegationKeysChanged
+              )
+            }
           >
-            <Accordion.Header
-              onClick={() => {
-                if (delegationKeys.includes("1")) {
-                  setDelegationKeys(delegationKeys.filter((k) => k != "1"));
-                } else {
-                  setDelegationKeys([...delegationKeys, "1"]);
-                }
-                setDelegationKeysChanged(true);
-              }}
-            >
-              Incoming Delegations
-            </Accordion.Header>
-            <Accordion.Body>
-              {printIncomingDelegations("delegations", inDelegations)}
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+            {printIncomingDelegations("delegations", inDelegations)}
+          </DelegationDisclosurePanel>
+        </div>
       </>
     );
   }
@@ -906,72 +930,50 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="pt-4 pb-1">Delegation Managers</h5>
+        <h5 className="tw-pb-1 tw-pt-4">Delegation Managers</h5>
         <p className={styles["collectionSectionIntro"]}>
           Manager rights let another wallet maintain delegations or
           consolidations for this collection scope.
         </p>
-        <Accordion
-          alwaysOpen
-          className={`${styles["collectionDelegationsAccordion"]} `}
-          activeKey={subDelegationKeys}
-        >
-          <Accordion.Item
-            className={`${styles["collectionDelegationsAccordionItem"]}`}
-            eventKey={"0"}
+        <div className="tw-space-y-3">
+          <DelegationDisclosurePanel
+            title="Outgoing Manager Rights"
+            isOpen={subDelegationKeys.includes("0")}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "0",
+                setSubDelegationKeys,
+                setSubDelegationKeysChanged
+              )
+            }
           >
-            <Accordion.Header
-              onClick={() => {
-                if (subDelegationKeys.includes("0")) {
-                  setSubDelegationKeys(
-                    subDelegationKeys.filter((k) => k != "0")
-                  );
-                } else {
-                  setSubDelegationKeys([...subDelegationKeys, "0"]);
-                }
-                setSubDelegationKeysChanged(true);
-              }}
-            >
-              Outgoing Manager Rights
-            </Accordion.Header>
-            <Accordion.Body>
-              {printOutgoingDelegations(
-                "Delegation Managers",
-                [...outgoingDelegations].filter(
-                  (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
-                )
-              )}
-            </Accordion.Body>
-          </Accordion.Item>
-          <Accordion.Item
-            className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
-            eventKey={"1"}
+            {printOutgoingDelegations(
+              "Delegation Managers",
+              [...outgoingDelegations].filter(
+                (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
+              )
+            )}
+          </DelegationDisclosurePanel>
+          <DelegationDisclosurePanel
+            title="Incoming Manager Rights"
+            isOpen={subDelegationKeys.includes("1")}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "1",
+                setSubDelegationKeys,
+                setSubDelegationKeysChanged
+              )
+            }
           >
-            <Accordion.Header
-              onClick={() => {
-                if (subDelegationKeys.includes("1")) {
-                  setSubDelegationKeys(
-                    subDelegationKeys.filter((k) => k != "1")
-                  );
-                } else {
-                  setSubDelegationKeys([...subDelegationKeys, "1"]);
-                }
-                setSubDelegationKeysChanged(true);
-              }}
-            >
-              Incoming Manager Rights
-            </Accordion.Header>
-            <Accordion.Body>
-              {printIncomingDelegations(
-                "Delegation Managers",
-                [...incomingDelegations].filter(
-                  (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
-                ),
-                true
-              )}
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+            {printIncomingDelegations(
+              "Delegation Managers",
+              [...incomingDelegations].filter(
+                (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
+              ),
+              true
+            )}
+          </DelegationDisclosurePanel>
+        </div>
       </>
     );
   }
@@ -979,71 +981,49 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printConsolidations() {
     return (
       <>
-        <h5 className="pt-4 pb-1">Consolidations</h5>
+        <h5 className="tw-pb-1 tw-pt-4">Consolidations</h5>
         <p className={styles["collectionSectionIntro"]}>
           Consolidations link wallets you control so 6529 can treat them
           together for collection metrics.
         </p>
-        <Accordion
-          alwaysOpen
-          className={`${styles["collectionDelegationsAccordion"]}`}
-          activeKey={consolidationKeys}
-        >
-          <Accordion.Item
-            className={`${styles["collectionDelegationsAccordionItem"]}`}
-            eventKey={"0"}
+        <div className="tw-space-y-3">
+          <DelegationDisclosurePanel
+            title="Outgoing Consolidations"
+            isOpen={consolidationKeys.includes("0")}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "0",
+                setConsolidationKeys,
+                setConsolidationKeysChanged
+              )
+            }
           >
-            <Accordion.Header
-              onClick={() => {
-                if (consolidationKeys.includes("0")) {
-                  setConsolidationKeys(
-                    consolidationKeys.filter((k) => k != "0")
-                  );
-                } else {
-                  setConsolidationKeys([...consolidationKeys, "0"]);
-                }
-                setConsolidationKeysChanged(true);
-              }}
-            >
-              Outgoing Consolidations
-            </Accordion.Header>
-            <Accordion.Body>
-              {printOutgoingDelegations(
-                "consolidations",
-                [...outgoingDelegations].filter(
-                  (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
-                )
-              )}
-            </Accordion.Body>
-          </Accordion.Item>
-          <Accordion.Item
-            className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
-            eventKey={"1"}
+            {printOutgoingDelegations(
+              "consolidations",
+              [...outgoingDelegations].filter(
+                (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
+              )
+            )}
+          </DelegationDisclosurePanel>
+          <DelegationDisclosurePanel
+            title="Incoming Consolidations"
+            isOpen={consolidationKeys.includes("1")}
+            onToggle={() =>
+              toggleDisclosureKey(
+                "1",
+                setConsolidationKeys,
+                setConsolidationKeysChanged
+              )
+            }
           >
-            <Accordion.Header
-              onClick={() => {
-                if (consolidationKeys.includes("1")) {
-                  setConsolidationKeys(
-                    consolidationKeys.filter((k) => k != "1")
-                  );
-                } else {
-                  setConsolidationKeys([...consolidationKeys, "1"]);
-                }
-                setConsolidationKeysChanged(true);
-              }}
-            >
-              Incoming Consolidations
-            </Accordion.Header>
-            <Accordion.Body>
-              {printIncomingDelegations(
-                "consolidations",
-                [...incomingDelegations].filter(
-                  (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
-                )
-              )}
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+            {printIncomingDelegations(
+              "consolidations",
+              [...incomingDelegations].filter(
+                (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
+              )
+            )}
+          </DelegationDisclosurePanel>
+        </div>
       </>
     );
   }
@@ -1056,9 +1036,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     isConsolidation: boolean
   ) {
     return (
-      <span className="d-flex flex-column gap-1">
+      <span className="tw-flex tw-flex-col tw-gap-1">
         <DelegationWallet address={w.wallet} />
-        <span className="d-flex align-items-center gap-3">
+        <span className="tw-flex tw-items-center tw-gap-3">
           <span className="font-color-h">
             {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
           </span>
@@ -1141,13 +1121,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         key={`outgoing-${del.useCase.use_case}-${delegationIndex}-${walletIndex}-${w.wallet}`}
       >
         <td>
-          <div
-            className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}
-          >
-            <span className="d-flex align-items-center justify-content-between">
-              <span className="d-flex gap-3 align-items-center">
+          <div className="tw-flex tw-flex-col tw-gap-2 tw-bg-[rgb(34,34,34)] tw-px-[15px] tw-pb-2.5 tw-pt-3">
+            <span className="tw-flex tw-items-center tw-justify-between">
+              <span className="tw-flex tw-items-center tw-gap-3">
                 {delegations >= 2 && (
-                  <FormCheck
+                  <input
+                    aria-label={`Select ${w.wallet} for bulk revoke`}
+                    type="checkbox"
+                    className={CHECKBOX_CLASS}
                     disabled={
                       bulkRevocations.length == MAX_BULK_ACTIONS &&
                       !bulkRevocations.some(
@@ -1178,7 +1159,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   isConsolidation
                 )}
               </span>
-              <span className="d-flex align-items-center gap-2">
+              <span className="tw-flex tw-items-center tw-gap-2">
                 <>
                   <FontAwesomeIcon
                     icon={faEdit}
@@ -1271,10 +1252,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     });
 
     return (
-      <Container className="no-padding">
-        <Row className={styles["delegationsTableScrollContainer"]}>
-          <Col>
-            <Table className={styles["delegationsTable"]}>
+      <div className="tw-w-full tw-p-0">
+        <div className={styles["delegationsTableScrollContainer"]}>
+          <div className="tw-w-full">
+            <table className={`${styles["delegationsTable"]} tw-w-full`}>
               <tbody>
                 {delegations > 0 ? (
                   myDelegations.map((del, index: number) => {
@@ -1329,7 +1310,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 )}
                 {delegations > 1 && (
                   <tr>
-                    <td colSpan={4} className="pt-3">
+                    <td colSpan={4} className="tw-pt-3">
                       selected:{" "}
                       {bulkRevocations.length === MAX_BULK_ACTIONS
                         ? `${MAX_BULK_ACTIONS} (max)`
@@ -1371,24 +1352,25 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                         Batch Revoke
                         {(contractWriteBatchRevoke.isPending ||
                           waitContractWriteBatchRevoke.isLoading) && (
-                          <div className="d-inline">
-                            <div
-                              className={`spinner-border ${styles["loader"]}`}
-                              role="status"
-                            >
-                              <span className="sr-only"></span>
-                            </div>
-                          </div>
+                          <span
+                            className="tw-inline-flex tw-items-center"
+                            role="status"
+                          >
+                            <Spinner dimension={20} />
+                            <span className="tw-sr-only">
+                              Transaction pending
+                            </span>
+                          </span>
                         )}
                       </button>
                     </td>
                   </tr>
                 )}
               </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
+            </table>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -1406,12 +1388,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         key={`incoming-${del.useCase.use_case}-${delegationIndex}-${walletIndex}-${w.wallet}`}
       >
         <td>
-          <div
-            className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}
-          >
-            <span className="d-flex align-items-center gap-3">
+          <div className="tw-flex tw-flex-col tw-gap-2 tw-bg-[rgb(34,34,34)] tw-px-[15px] tw-pb-2.5 tw-pt-3">
+            <span className="tw-flex tw-items-center tw-gap-3">
               {del.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case ? (
-                <FormCheck
+                <input
+                  aria-label={`Select ${w.wallet} as original delegator`}
+                  type="checkbox"
+                  className={CHECKBOX_CLASS}
                   checked={areEqualAddresses(
                     subDelegationOriginalDelegator,
                     w.wallet
@@ -1454,10 +1437,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     });
 
     return (
-      <Container className="no-padding">
-        <Row className={styles["delegationsTableScrollContainer"]}>
-          <Col>
-            <Table className={styles["delegationsTable"]}>
+      <div className="tw-w-full tw-p-0">
+        <div className={styles["delegationsTableScrollContainer"]}>
+          <div className="tw-w-full">
+            <table className={`${styles["delegationsTable"]} tw-w-full`}>
               <tbody>
                 {delegations > 0 ? (
                   myDelegations.map((del, index: number) => {
@@ -1514,8 +1497,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   isSubdelegation &&
                   delegations > 0 && (
                     <tr>
-                      <td colSpan={2} className="pt-3">
-                        <span className="d-flex flex-wrap align-items-center gap-2">
+                      <td colSpan={2} className="tw-pt-3">
+                        <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                           <button
                             className={`${styles["useCaseWalletUpdate"]} ${
                               subDelegationOriginalDelegator === undefined
@@ -1611,18 +1594,18 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     </tr>
                   )}
               </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
+            </table>
+          </div>
+        </div>
+      </div>
     );
   }
 
   function printLocks() {
     return (
-      <Container className="no-padding">
-        <Row className="pt-5 pb-2">
-          <Col>
+      <div className="tw-w-full tw-p-0">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-5">
+          <div className="tw-w-full tw-px-3">
             <h4>
               Locks{" "}
               <>
@@ -1648,10 +1631,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               Locks block incoming delegations for this collection scope. They
               do not stop delegations you already made to other wallets.
             </p>
-          </Col>
-        </Row>
-        <Row className="pt-2 pb-2">
-          <Col>
+          </div>
+        </div>
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-2">
+          <div className="tw-w-full tw-px-3">
             <button
               className={`${styles["lockDelegationBtn"]} ${
                 collectionLockReadGlobal?.data
@@ -1693,13 +1676,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               {(collectionLockWrite.isPending ||
                 waitCollectionLockWrite.isLoading) && <Spinner />}
             </button>
-          </Col>
-        </Row>
-        <Row className="pt-3 pb-2">
-          <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
-            <Form.Select
+          </div>
+        </div>
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-3">
+          <div className="tw-w-full tw-px-3 tw-pb-2 tw-pt-2 md:tw-w-1/3">
+            <select
+              aria-label="Lock or unlock use case"
               disabled={!!collectionLockRead.data}
-              className={`${styles["formInputLockUseCase"]} ${
+              className={`${styles["formInputLockUseCase"]} ${LOCK_SELECT_CLASS} ${
                 collectionLockRead.data || collectionLockReadGlobal?.data
                   ? styles["formInputDisabled"]
                   : ""
@@ -1748,16 +1732,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   </option>
                 );
               })}
-            </Form.Select>
-          </Col>
+            </select>
+          </div>
           {lockUseCaseValue != 0 && (
-            <Col
-              xs={12}
-              sm={12}
-              md={8}
-              lg={8}
-              className="pt-2 pb-2 d-flex align-items-center"
-            >
+            <div className="tw-flex tw-w-full tw-items-center tw-px-3 tw-pb-2 tw-pt-2 md:tw-w-2/3">
               {!useCaseLockStatusesGlobal.data ||
               (useCaseLockStatusesGlobal?.data &&
                 (useCaseLockStatusesGlobal?.data[
@@ -1819,40 +1797,42 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   </Link>
                 </div>
               )}
-            </Col>
+            </div>
           )}
-        </Row>
+        </div>
         {collectionLockRead.data ? (
-          <Row className="pb-3">
-            <Col>
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-3">
+            <div className="tw-w-full tw-px-3">
               <span className={styles["hint"]}>* Note:</span> Unlock Wallet to
               lock/unlock specific use cases
-            </Col>
-          </Row>
+            </div>
+          </div>
         ) : null}
         {collectionLockReadGlobal?.data ? (
-          <Row className="pb-3">
-            <Col>
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-3">
+            <div className="tw-w-full tw-px-3">
               <span className={styles["hint"]}>* Note:</span> Unlock Wallet on{" "}
               <Link href={`/delegation/${ANY_COLLECTION_PATH}`}>
                 All Collections
               </Link>{" "}
               to lock/unlock specific collections and use cases
-            </Col>
-          </Row>
+            </div>
+          </div>
         ) : null}
-      </Container>
+      </div>
     );
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col>
+    <div className="tw-w-full tw-p-0">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-full tw-px-3">
           {props.collection && (
-            <Container>
-              <Row className={styles["collectionDelegationBackRow"]}>
-                <Col>
+            <div className="tw-mx-auto tw-w-full">
+              <div
+                className={`-tw-mx-3 tw-flex tw-flex-wrap ${styles["collectionDelegationBackRow"]}`}
+              >
+                <div className="tw-w-full tw-px-3">
                   <button
                     className={styles["backBtn"]}
                     onClick={() =>
@@ -1864,16 +1844,18 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       Back to Delegation Center
                     </span>
                   </button>
-                </Col>
-              </Row>
-              <Row className={styles["collectionDelegationTitleRow"]}>
-                <Col>
-                  <h1 className="mb-0">{props.collection.title}</h1>
+                </div>
+              </div>
+              <div
+                className={`-tw-mx-3 tw-flex tw-flex-wrap ${styles["collectionDelegationTitleRow"]}`}
+              >
+                <div className="tw-w-full tw-px-3">
+                  <h1 className="tw-mb-0">{props.collection.title}</h1>
                   <p className={styles["collectionIntro"]}>
                     {getCollectionScopeDescription(props.collection)}
                   </p>
-                </Col>
-              </Row>
+                </div>
+              </div>
               {!showUpdateDelegation &&
                 !showCreateNewDelegationWithSub &&
                 !showCreateNewSubDelegationWithSub &&
@@ -1907,9 +1889,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                         {printConsolidations()}
                         {printSubDelegations()}
                         {printLocks()}
-                        <Container className="no-padding">
-                          <Row className="pt-5 pb-3">
-                            <Col className="d-flex align-items-center justify-content-start">
+                        <div className="tw-w-full tw-p-0">
+                          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-3 tw-pt-5">
+                            <div className="tw-flex tw-w-full tw-items-center tw-justify-start tw-px-3">
                               <button
                                 className={styles["backBtn"]}
                                 onClick={() =>
@@ -1923,9 +1905,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                                   Back to Delegation Center
                                 </span>
                               </button>
-                            </Col>
-                          </Row>
-                        </Container>
+                            </div>
+                          </div>
+                        </div>
                       </>
                     )}
                   </>
@@ -2028,10 +2010,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     onSetToast={showDelegationToast}
                   />
                 )}
-            </Container>
+            </div>
           )}
-        </Col>
-      </Row>
+        </div>
+      </div>
       {toast && (
         <DelegationToast
           toastRef={toastRef}
@@ -2040,6 +2022,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           setShowToast={setCollectionToastVisibility}
         />
       )}
-    </Container>
+    </div>
   );
 }

@@ -245,27 +245,30 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   }, [props.focus]);
 
   function getDateSelectionLabel() {
-    let label = "";
     if (props.is_primary) {
-      label += "Primary Sales";
-    } else if (props.is_custom_blocks) {
-      if (fromBlock) {
-        label += `from block: ${fromBlock} `;
-      }
-      if (toBlock) {
-        label += `to block: ${toBlock} `;
-      }
-    } else if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      if (fromDate) {
-        label += `from: ${fromDate.toISOString().slice(0, 10)} `;
-      }
-      if (toDate) {
-        label += `to: ${toDate.toISOString().slice(0, 10)}`;
-      }
-    } else {
-      label += `${props.date_selection}`;
+      return "Primary Sales";
     }
-    return label;
+    if (props.is_custom_blocks) {
+      return (
+        [
+          fromBlock !== undefined ? `from block: ${fromBlock}` : undefined,
+          toBlock !== undefined ? `to block: ${toBlock}` : undefined,
+        ]
+          .filter(Boolean)
+          .join(" ") || "Custom Blocks"
+      );
+    }
+    if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
+      return (
+        [
+          fromDate ? `from: ${fromDate.toISOString().slice(0, 10)}` : undefined,
+          toDate ? `to: ${toDate.toISOString().slice(0, 10)}` : undefined,
+        ]
+          .filter(Boolean)
+          .join(" ") || DateIntervalsSelection.CUSTOM_DATES
+      );
+    }
+    return props.date_selection;
   }
 
   function getFileName() {

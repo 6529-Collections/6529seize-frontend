@@ -7,8 +7,8 @@ import {
   formatAddress,
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
-import { useState } from "react";
-import { Modal } from "react-bootstrap";
+import { useId, useState } from "react";
+import { ReviewDistributionPlanTableSubscriptionFooterModal } from "./ReviewDistributionPlanTableSubscriptionFooterModal";
 
 export function ConfirmTokenIdModal(
   props: Readonly<{
@@ -22,6 +22,7 @@ export function ConfirmTokenIdModal(
   const [tokenId, setTokenId] = useState<string>(
     isValidPositiveInteger(initialTokenId) ? initialTokenId : ""
   );
+  const tokenIdHintId = useId();
 
   const isValid = isValidPositiveInteger(tokenId);
 
@@ -32,53 +33,12 @@ export function ConfirmTokenIdModal(
   };
 
   return (
-    <Modal
-      show
-      onHide={() => {}}
-      backdrop="static"
-      keyboard={false}
-      className="tailwind-scope"
-    >
-      <Modal.Header>
-        <Modal.Title className="tw-text-lg tw-font-semibold">
-          Confirm Token ID
-        </Modal.Title>
-      </Modal.Header>
-      <hr className="tw-my-0" />
-      <Modal.Body>
-        <div className="tw-container tw-mx-auto">
-          <div className="tw-py-2">
-            <div>
-              Contract: The Memes - <span>{formatAddress(contract)}</span>
-            </div>
-          </div>
-          <div className="tw-py-2">
-            <div>
-              Token ID:{" "}
-              <input
-                style={{
-                  color: "black",
-                  width: "100px",
-                }}
-                min={1}
-                step={1}
-                type="number"
-                aria-label="Token ID"
-                value={tokenId}
-                onChange={(e) => {
-                  setTokenId(e.target.value);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && isValid) {
-                    handleConfirm();
-                  }
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </Modal.Body>
-      <Modal.Footer>
+    <ReviewDistributionPlanTableSubscriptionFooterModal
+      title="Confirm Token ID"
+      onClose={() => {}}
+      closeButton={false}
+      isDismissable={false}
+      footer={
         <button
           disabled={!isValid}
           onClick={handleConfirm}
@@ -87,7 +47,38 @@ export function ConfirmTokenIdModal(
         >
           Confirm
         </button>
-      </Modal.Footer>
-    </Modal>
+      }
+    >
+      <div className="tw-py-2">
+        <div>
+          Contract: The Memes - <span>{formatAddress(contract)}</span>
+        </div>
+      </div>
+      <div className="tw-py-2">
+        <div>
+          Token ID:{" "}
+          <input
+            className="tw-w-[100px] tw-text-black"
+            min={1}
+            step={1}
+            type="number"
+            aria-label="Token ID"
+            aria-describedby={tokenIdHintId}
+            value={tokenId}
+            onChange={(e) => {
+              setTokenId(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && isValid) {
+                handleConfirm();
+              }
+            }}
+          />
+          <span id={tokenIdHintId} className="tw-sr-only">
+            Enter a positive token ID to continue.
+          </span>
+        </div>
+      </div>
+    </ReviewDistributionPlanTableSubscriptionFooterModal>
   );
 }

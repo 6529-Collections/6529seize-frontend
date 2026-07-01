@@ -148,9 +148,9 @@ const WaveDropCreate = dynamic<WaveDropCreateProps>(
 const WaveLeaderboardCurationDropModal =
   dynamic<WaveLeaderboardCurationDropModalProps>(
     () =>
-      import(
-        "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal"
-      ).then((mod) => mod.WaveLeaderboardCurationDropModal),
+      import("@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal").then(
+        (mod) => mod.WaveLeaderboardCurationDropModal
+      ),
     { loading: () => null }
   );
 
