@@ -2,16 +2,14 @@ import Link from "next/link";
 
 export default function NextGenAbout() {
   return (
-    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding pt-4">
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
-          <h1>
-            About NextGen
-          </h1>
+    <div className="no-padding pt-4 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <h1>About NextGen</h1>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             NextGen is an on-chain generative art NFT contract. It is also a
             tool to support the ambitious aspirations of the 6529 community in
@@ -44,13 +42,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Overall Approach</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             The fundamental structure of the NextGen contract follows the
             overall approach pioneered by Art Blocks in 2020-2021.
@@ -74,13 +72,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Native Allowlists</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             We believe that allowlists are the best approach for most in-demand
             mints. They support fairness and transparency in minting
@@ -93,13 +91,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Native Delegation</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             We have been a leading voice for wallet safety for a long time and
             design all our systems to encourage 6529 collectors and community
@@ -118,13 +116,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Personalization, Customization and Collector Provenance</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             The classic approach to a generative mint is that the algorithm is
             fully randomly (or pseudo-randomly, to be precise) determined at the
@@ -154,13 +152,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Extra On-Chain&#8482;</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             Most generative collections, even the on-chain ones, serve an
             off-chain URI with metadata and potentially rendered images, to
@@ -185,13 +183,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Artist Provenance</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             NextGen allows the artist to cryptographically sign a NextGen
             collection from an ethereum address or ENS of their choice.
@@ -203,13 +201,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Multiple Randomization Methods</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             NextGen supports three different randomization methods with the
             capacity to integrate more approaches in the future.
@@ -222,13 +220,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Phases / Periodicity</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             NextGen supports a wide range of phased and periodic minting
             approaches, from simple mints to periodic mints that can stretch for
@@ -236,13 +234,13 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>Minting Sales Models</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             NextGen supports all widely used (and some not-widely used) minting
             sales models
@@ -264,42 +262,43 @@ export default function NextGenAbout() {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>On-Chain Libraries</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             NextGen supports the ability for collections to reference on-chain
             libraries to have no off-chain dependencies in rendering.
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>More Information</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           Additional technical information can be found here:{" "}
           <Link
             href="https://seize-io.gitbook.io/nextgen/"
             target="_blank"
-            rel="noopener noreferrer">
+            rel="noopener noreferrer"
+          >
             https://seize-io.gitbook.io/nextgen/
           </Link>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3>NextGen Collections Model</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             We do not have a fixed plan in place post the genesis Pebbles
             collection and will develop and refine our approach over time.

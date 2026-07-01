@@ -88,15 +88,11 @@ export default function NextGenCollectionComponent({
       {collection.mint_count > 0 && (
         <NextGenCollectionSlideshow collection={collection} />
       )}
-      <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl pt-3 pb-2">
+      <div className="pt-3 pb-2 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
         <NextGenCollectionHeader collection={collection} show_links={true} />
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-5">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex gap-4">
-            {printViewButton(
-              view,
-              NextgenCollectionView.OVERVIEW,
-              updateView
-            )}
+        <div className="pt-5 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="d-flex gap-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+            {printViewButton(view, NextgenCollectionView.OVERVIEW, updateView)}
             {printViewButton(view, NextgenCollectionView.ABOUT, updateView)}
             {printViewButton(
               view,
@@ -110,13 +106,13 @@ export default function NextGenCollectionComponent({
             )}
           </div>
         </div>
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+        <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionDetails collection={collection} view={view} />
           </div>
         </div>
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-4">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+        <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionArt
               collection={collection}
               show_view_all={true}
@@ -124,14 +120,14 @@ export default function NextGenCollectionComponent({
           </div>
         </div>
       </div>
-      <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl pt-4 pb-4">
-        <div className="tw-flex tw-flex-wrap -tw-mx-3">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      <div className="pt-4 pb-4 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h4>About the Artist</h4>
           </div>
         </div>
-        <div className="tw-flex tw-flex-wrap -tw-mx-3">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionArtist collection={collection} />
           </div>
         </div>

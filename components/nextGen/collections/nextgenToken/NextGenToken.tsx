@@ -81,9 +81,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
 
   function printDetails() {
     return (
-      <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl pt-4">
-        <div className="tw-flex tw-flex-wrap -tw-mx-3">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex gap-4">
+      <div className="pt-4 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="d-flex gap-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             {printViewButton(
               props.view,
               NextgenCollectionView.ABOUT,
@@ -106,17 +106,28 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             )}
           </div>
         </div>
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-4 pb-4">
+        <div className="pt-4 pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
           {props.view === NextgenCollectionView.ABOUT && (
             <>
-              <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-full" style={{ maxWidth: "100%" }}>{isMdUp ? null : transferSingle}</div>
-              <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/2" style={{ maxWidth: "100%" }}>
+              <div
+                className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                style={{ maxWidth: "100%" }}
+              >
+                {isMdUp ? null : transferSingle}
+              </div>
+              <div
+                className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+                style={{ maxWidth: "100%" }}
+              >
                 <NextGenTokenAbout
                   collection={props.collection}
                   token={props.token}
                 />
               </div>
-              <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/2" style={{ maxWidth: "100%" }}>
+              <div
+                className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+                style={{ maxWidth: "100%" }}
+              >
                 {isMdUp ? transferSingle : null}
                 <NextgenTokenTraits
                   collection={props.collection}
@@ -130,7 +141,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             </>
           )}
           {props.view === NextgenCollectionView.PROVENANCE && (
-            <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pt-4 pb-4">
+            <div className="pt-4 pb-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <NextGenTokenProvenance
                 token_id={props.token.id}
                 collection={props.collection}
@@ -138,12 +149,12 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             </div>
           )}
           {props.view === NextgenCollectionView.DISPLAY_CENTER && (
-            <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pt-4 pb-4">
+            <div className="pt-4 pb-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <NextGenTokenRenderCenter token={props.token} />
             </div>
           )}
           {props.view === NextgenCollectionView.RARITY && (
-            <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pt-4 pb-4">
+            <div className="pt-4 pb-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <NextgenTokenRarity
                 collection={props.collection}
                 token={props.token}
@@ -254,12 +265,14 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
   function printToken() {
     return (
       <>
-        <div className={`tw-w-full tw-max-w-none ${styles["tokenContainer"]} pt-4 pb-4`}>
-          <div className="tw-flex tw-flex-wrap -tw-mx-3">
-            <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
-              <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
-                <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-2">
-                  <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex align-items-center justify-content-between">
+        <div
+          className={`tw-w-full tw-max-w-none ${styles["tokenContainer"]} pt-4 pb-4`}
+        >
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+              <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+                <div className="pb-2 -tw-mx-3 tw-flex tw-flex-wrap">
+                  <div className="d-flex align-items-center justify-content-between tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                     <span className="d-flex flex-column">
                       <span className="d-flex gap-3">
                         <h1 className="mb-0 font-color">{props.token.name}</h1>

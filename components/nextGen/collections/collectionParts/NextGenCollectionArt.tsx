@@ -219,9 +219,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding pt-2">
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex align-items-center justify-content-between no-wrap">
+    <div className="no-padding pt-2 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="d-flex align-items-center justify-content-between no-wrap tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3 className="mb-0">
             The Art{" "}
             {totalResultsSet ? (
@@ -233,15 +233,18 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             )}
           </h3>
         </div>
-        <div className={`tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex align-items-center ${
+        <div
+          className={`d-flex align-items-center tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 ${
             isMobile ? "pt-3 justify-content-between" : "justify-content-end"
-          }`}>
+          }`}
+        >
           {props.show_view_all ? (
             <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/art`}
-              className={`d-flex align-items-center gap-2 decoration-none ${styles["viewAllTokens"]}`}>
+              className={`d-flex align-items-center gap-2 decoration-none ${styles["viewAllTokens"]}`}
+            >
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All
                 <FontAwesomeIcon
@@ -270,33 +273,42 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   padding: "4px 8px",
                 }}
                 place="bottom"
-                delayShow={250}>
+                delayShow={250}
+              >
                 {`${showFilters ? "Hide" : "Show"} Filters${
                   selectedTraitValues.length > 0
                     ? ` (${selectedTraitValues.length} selected)`
                     : ""
                 }`}
               </Tooltip>
-              <Dropdown className={styles["rarityDropdown"]} drop="down-centered">
+              <Dropdown
+                className={styles["rarityDropdown"]}
+                drop="down-centered"
+              >
                 <Dropdown.Toggle>Listing Status: {listedType}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {Object.values(NextGenTokenListedType).map((lt) => (
                     <Dropdown.Item
                       key={getRandomObjectId()}
-                      onClick={() => setListedType(lt)}>
+                      onClick={() => setListedType(lt)}
+                    >
                       {lt}
                     </Dropdown.Item>
                   ))}
                 </Dropdown.Menu>
               </Dropdown>
-              <Dropdown className={styles["rarityDropdown"]} drop="down-centered">
+              <Dropdown
+                className={styles["rarityDropdown"]}
+                drop="down-centered"
+              >
                 <Dropdown.Toggle>Sort: {sort}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {Object.values(NextGenListFilters).map((lf) => (
                     <Fragment key={getRandomObjectId()}>
                       <Dropdown.Item
                         key={getRandomObjectId()}
-                        onClick={() => setSort(lf)}>
+                        onClick={() => setSort(lf)}
+                      >
                         {lf}
                       </Dropdown.Item>
                       {(lf === NextGenListFilters.ID ||
@@ -312,7 +324,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                         setShowNormalised(!showNormalised);
                       }
                     }}
-                    className="px-2 d-flex align-items-center gap-2">
+                    className="px-2 d-flex align-items-center gap-2"
+                  >
                     <NextgenRarityToggle
                       disabled={!isRaritySort(sort)}
                       title={"Trait Normalization"}
@@ -326,7 +339,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                         setShowTraitCount(!showTraitCount);
                       }
                     }}
-                    className="px-2 d-flex align-items-center gap-2">
+                    className="px-2 d-flex align-items-center gap-2"
+                  >
                     <NextgenRarityToggle
                       title={"Trait Count"}
                       show={showTraitCount}
@@ -339,7 +353,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 className="d-flex align-items-center gap-2"
                 style={{
                   paddingLeft: "15px",
-                }}>
+                }}
+              >
                 <FontAwesomeIcon
                   icon={faChevronCircleUp}
                   style={{
@@ -364,12 +379,18 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         </div>
       </div>
       <hr />
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         {!props.show_view_all && showFilters && (
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/4" style={{ maxWidth: "100%" }}>
-            <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
-              <div className="tw-flex tw-flex-wrap -tw-mx-3">
-                <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-full no-padding d-flex justify-content-between align-items-center" style={{ maxWidth: "100%" }}>
+          <div
+            className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/4 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+            style={{ maxWidth: "100%" }}
+          >
+            <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                <div
+                  className="no-padding d-flex justify-content-between align-items-center tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                  style={{ maxWidth: "100%" }}
+                >
                   <span className="d-flex flex-column">
                     <span className="font-color-h font-bolder font-larger">
                       Traits
@@ -383,24 +404,27 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   {selectedTraitValues.length > 0 && (
                     <button
                       className="btn-link font-cmaller cursor-pointer decoration-hover-underline"
-                      onClick={() => setSelectedTraitValues([])}>
+                      onClick={() => setSelectedTraitValues([])}
+                    >
                       Clear
                     </button>
                   )}
                 </div>
               </div>
-              <div className="tw-flex tw-flex-wrap -tw-mx-3">
-                <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex flex-column pt-2 no-padding">
+              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+                <div className="d-flex flex-column pt-2 no-padding tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                   {routerLoaded &&
                     traits.map((tr, index) => (
                       <Accordion
                         key={getRandomObjectId()}
                         className={styles["traitsAccordion"]}
-                        defaultActiveKey={getDefaultActiveKeys()}>
+                        defaultActiveKey={getDefaultActiveKeys()}
+                      >
                         <Accordion.Item
                           defaultChecked={true}
                           className={styles["traitsAccordionItem"]}
-                          eventKey={index.toString()}>
+                          eventKey={index.toString()}
+                        >
                           <Accordion.Button className="d-flex">
                             <span>{tr.trait}</span>&nbsp;&nbsp;
                             <span className="font-color-h">
@@ -410,7 +434,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                           {tr.value_counts.map((v) => (
                             <Accordion.Body
                               key={getRandomObjectId()}
-                              className={styles["traitsAccordionBody"]}>
+                              className={styles["traitsAccordionBody"]}
+                            >
                               <Form.Check
                                 type="checkbox"
                                 label={
@@ -470,7 +495,10 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           </div>
         )}
         {(routerLoaded || totalResultsSet) && (
-          <div className={`tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 ${props.show_view_all || !showFilters ? "md:tw-w-full" : "md:tw-w-3/4"}`} style={{ maxWidth: "100%" }}>
+          <div
+            className={`tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto ${props.show_view_all || !showFilters ? "md:tw-w-full" : "md:tw-w-3/4"}`}
+            style={{ maxWidth: "100%" }}
+          >
             <NextGenTokenList
               limit={props.show_view_all ? 6 : undefined}
               collection={props.collection}

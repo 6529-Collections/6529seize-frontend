@@ -106,12 +106,15 @@ export default function NextGenNavigationHeader(
 
   return (
     <>
-      <div className={`tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl ${styles["navigationHeader"]} ${
+      <div
+        className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["navigationHeader"]} ${
           isStackedHeader ? `flex-column gap-2` : `justify-content-between`
-        }`} style={{
+        }`}
+        style={{
           height: isStackedHeader ? "auto" : "90px",
           paddingTop: headerPaddingTop,
-        }}>
+        }}
+      >
         <div className={`d-flex align-items-center ${headerControlsClassName}`}>
           <span className="d-xl-none flex-shrink-1 overflow-hidden">
             <CollectionsDropdown

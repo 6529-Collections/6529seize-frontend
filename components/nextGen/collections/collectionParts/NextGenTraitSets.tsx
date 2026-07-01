@@ -127,7 +127,14 @@ export default function NextGenTraitSets(
 
   function printTraitPill(t: string) {
     return (
-      <div key={t} className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 no-padding" style={{ maxWidth: "100%", width: `${(12 / (availableTraits.length + 1)) / 12 * 100}%` }}>
+      <div
+        key={t}
+        className="no-padding tw-relative tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+        style={{
+          maxWidth: "100%",
+          width: `${(12 / (availableTraits.length + 1) / 12) * 100}%`,
+        }}
+      >
         <button
           key={getRandomObjectId()}
           className={`${styles["collectorSetPill"]} ${
@@ -151,17 +158,23 @@ export default function NextGenTraitSets(
     let content;
     if (!setsLoaded) {
       content = (
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0" style={{
+        <div
+          className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
+          style={{
             minHeight: "50vh",
-          }}>
+          }}
+        >
           <DotLoader />
         </div>
       );
     } else if (totalResults == 0) {
       content = (
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex flex-column gap-2" style={{
+        <div
+          className="d-flex flex-column gap-2 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
+          style={{
             minHeight: "50vh",
-          }}>
+          }}
+        >
           <span>None!</span>
           <span>
             <Image
@@ -182,23 +195,26 @@ export default function NextGenTraitSets(
       );
     } else {
       content = (
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0" style={{
+        <div
+          className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
+          style={{
             minHeight: "50vh",
-          }}>
+          }}
+        >
           {sets.map((s) => (
             <UltimateOwner key={getRandomObjectId()} set={s} />
           ))}
         </div>
       );
     }
-    return <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3">{content}</div>;
+    return <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">{content}</div>;
   }
 
   return (
-    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding pt-2 pb-5">
+    <div className="no-padding pt-2 pb-5 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       {!props.preview && (
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pb-4">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+        <div className="pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionHeader
               collection={props.collection}
               collection_link={true}
@@ -206,11 +222,9 @@ export default function NextGenTraitSets(
           </div>
         </div>
       )}
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex align-items-center justify-content-between gap-3">
-          <h1 className="no-wrap">
-            Trait Sets
-          </h1>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="d-flex align-items-center justify-content-between gap-3 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <h1 className="no-wrap">Trait Sets</h1>
           {props.preview && (
             <Link
               href={`/nextgen/collection/${formatNameForUrl(
@@ -236,10 +250,10 @@ export default function NextGenTraitSets(
           )}
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
-          <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
-            <div className="tw-flex tw-flex-wrap -tw-mx-3">
+      <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
               {availableTraits.map((trait) => printTraitPill(trait))}
               {printTraitPill(ULTIMATE)}
             </div>
@@ -247,8 +261,8 @@ export default function NextGenTraitSets(
         </div>
       </div>
       {selectedTrait !== ULTIMATE && (
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-4">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex align-items-center justify-content-between">
+        <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="d-flex align-items-center justify-content-between tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <span>
               {traitsLoaded ? (
                 <>
@@ -270,18 +284,27 @@ export default function NextGenTraitSets(
         </div>
       )}
       {selectedTrait === ULTIMATE && (
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-4">
-          <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-full font-larger font-bolder" style={{ maxWidth: "100%" }}>
+        <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div
+            className="font-larger font-bolder tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+            style={{ maxWidth: "100%" }}
+          >
             <u>{ULTIMATE} Set</u>
           </div>
-          <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-full" style={{ maxWidth: "100%" }}>{`All ${availableTraits.join(", All ")} Types`}</div>
+          <div
+            className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+            style={{ maxWidth: "100%" }}
+          >{`All ${availableTraits.join(", All ")} Types`}</div>
         </div>
       )}
       {selectedTrait !== ULTIMATE && (
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0" style={{
+        <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div
+            className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
+            style={{
               minHeight: "50vh",
-            }}>
+            }}
+          >
             {!setsLoaded ? (
               <DotLoader />
             ) : (
@@ -306,7 +329,7 @@ export default function NextGenTraitSets(
         totalResults > 0 &&
         totalResults / PAGE_SIZE > 1 &&
         setsLoaded && (
-          <div className="tw-flex tw-flex-wrap -tw-mx-3 text-center pt-2 pb-3">
+          <div className="text-center pt-2 pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
             <Pagination
               page={page}
               pageSize={PAGE_SIZE}
@@ -326,8 +349,8 @@ export default function NextGenTraitSets(
         />
       ) : (
         setsLoaded && (
-          <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3">
-            <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+          <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
@@ -367,9 +390,9 @@ function UltimateOwner(props: Readonly<{ set: NextgenTraitSet }>) {
         <Accordion.Button
           className={styles["collectorSetAccordionButtonUltimate"]}
         >
-          <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
-            <div className="tw-flex tw-flex-wrap -tw-mx-3">
-              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex aling-items-center justify-content-between">
+          <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="d-flex aling-items-center justify-content-between tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                 <span>
                   <Owner set={set} />
                 </span>
@@ -410,8 +433,7 @@ function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
       onClick={(e) => e.stopPropagation()}
       href={`/${props.set.handle ?? props.set.owner}`}
     >
-      <UserCICAndLevel level={props.set.level} />{" "}
-      {getOwnerDisplay()}
+      <UserCICAndLevel level={props.set.level} /> {getOwnerDisplay()}
     </Link>
   );
 }
@@ -433,9 +455,9 @@ function TraitSetAccordion(
     <Accordion className="pt-1 pb-1">
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button className="d-flex justify-content-between">
-          <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
-            <div className="tw-flex tw-flex-wrap -tw-mx-3">
-              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex aling-items-center gap-3">
+          <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="d-flex aling-items-center gap-3 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                 <span>
                   <b>{set.distinct_values_count}</b>
                 </span>
@@ -467,11 +489,14 @@ function TraitSetAccordion(
           </div>
         </Accordion.Button>
         <Accordion.Body className={styles["collectorSetAccordionBody"]}>
-          <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
+          <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
             {props.values.length > 0 &&
               props.set.token_values?.map((tv) => (
-                <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3 pb-3" key={`accordion-${props.trait}-${tv.value}`}>
-                  <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex flex-wrap align-items-center gap-3">
+                <div
+                  className="pt-3 pb-3 -tw-mx-3 tw-flex tw-flex-wrap"
+                  key={`accordion-${props.trait}-${tv.value}`}
+                >
+                  <div className="d-flex flex-wrap align-items-center gap-3 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                     <span className="d-flex align-items-center gap-3">
                       <FontAwesomeIcon
                         style={{ height: "1.5em", color: "#00aa00" }}
@@ -540,8 +565,8 @@ function TraitSetAccordion(
                   </div>
                 </div>
               ))}
-            <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-4">
-              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+            <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                 {missingValues.length > 0 ? (
                   <>
                     Not Seized:{" "}

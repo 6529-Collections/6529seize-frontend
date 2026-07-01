@@ -61,7 +61,6 @@ function NextGenTokenArtImage(
       />
     );
   }
-  
 
   return (
     <NextGenTokenImage
@@ -152,21 +151,26 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   function printModeIcons() {
     return (
       <>
-        <div className={`tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-full min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} pt-2 pb-2 d-flex gap-3 align-items-center ${
+        <div
+          className={`tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} pt-2 pb-2 d-flex gap-3 align-items-center ${
             isMobileScreen ? "justify-content-center" : "justify-content-start"
-          }`} style={{ maxWidth: "100%" }}>
+          }`}
+          style={{ maxWidth: "100%" }}
+        >
           <button
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.IMAGE ? styles["imageResolutionBtnSelected"] : ""
             }`}
-            onClick={() => setMode(Mode.IMAGE)}>
+            onClick={() => setMode(Mode.IMAGE)}
+          >
             2K
           </button>
           <button
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.HIGH_RES ? styles["imageResolutionBtnSelected"] : ""
             }`}
-            onClick={() => setMode(Mode.HIGH_RES)}>
+            onClick={() => setMode(Mode.HIGH_RES)}
+          >
             {isMobileDevice ? "8K" : "16K"}
           </button>
           <FontAwesomeIcon
@@ -182,12 +186,16 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}>
+            }}
+          >
             Live
           </Tooltip>
         </div>
         {mode === Mode.HIGH_RES && (
-          <div className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-1/2 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-1/3 pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center" style={{ maxWidth: "100%" }}>
+          <div
+            className="pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center tw-relative tw-w-1/2 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-1/3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto"
+            style={{ maxWidth: "100%" }}
+          >
             {showZoomControls && (
               <>
                 <FontAwesomeIcon
@@ -220,9 +228,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             )}
           </div>
         )}
-        <div className={`tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 ${mode === Mode.HIGH_RES ? "tw-w-1/2" : "tw-w-full"} ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} pt-2 pb-2 d-flex gap-3 align-items-center ${
+        <div
+          className={`tw-relative tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto ${mode === Mode.HIGH_RES ? "tw-w-1/2" : "tw-w-full"} ${mode === Mode.HIGH_RES ? "min-[576px]:tw-w-1/3" : "min-[576px]:tw-w-1/2"} pt-2 pb-2 d-flex gap-3 align-items-center ${
             isMobileScreen ? "justify-content-center" : "justify-content-end"
-          }`} style={{ maxWidth: "100%" }}>
+          }`}
+          style={{ maxWidth: "100%" }}
+        >
           <Lightbulb
             mode="black"
             className={styles["modeIcon"]!}
@@ -247,7 +258,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                   backgroundColor: "#1F2937",
                   color: "white",
                   padding: "4px 8px",
-                }}>
+                }}
+              >
                 Download
               </Tooltip>
             </Dropdown.Toggle>
@@ -281,7 +293,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}>
+            }}
+          >
             Open in new tab
           </Tooltip>
           <FontAwesomeIcon
@@ -297,7 +310,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}>
+            }}
+          >
             Fullscreen
           </Tooltip>
         </div>
@@ -334,12 +348,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   }, [mode]);
 
   return (
-    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
-          <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl">
-            <div className="tw-flex tw-flex-wrap -tw-mx-3">
-              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+    <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                 <div className={getBoxStyle()}>
                   <div
                     className={
@@ -347,7 +361,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                         ? styles["lightBoxContent"]
                         : "col pt-3"
                     }
-                    ref={tokenImageRef}>
+                    ref={tokenImageRef}
+                  >
                     <NextGenTokenArtImage
                       token={props.token}
                       mode={mode}
@@ -365,16 +380,20 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           </div>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
-          <div className={`tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl ${styles["modeRow"]}`}>
-            <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-2 pb-1">{printModeIcons()}</div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <div
+            className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["modeRow"]}`}
+          >
+            <div className="pt-2 pb-1 -tw-mx-3 tw-flex tw-flex-wrap">
+              {printModeIcons()}
+            </div>
           </div>
         </div>
       </div>
       {mode === Mode.LIVE && (
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-2 font-color-h font-smaller">
-          <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+        <div className="pt-2 font-color-h font-smaller -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             * Live view generates the image dynamically from scratch in your
             browser. Pebbles have a computationally expensive script and the
             live view may take several minutes to render on your computer or

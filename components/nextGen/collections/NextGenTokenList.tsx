@@ -149,13 +149,17 @@ export default function NextGenTokenList(props: Readonly<Props>) {
   }, [props.sort, props.show_normalised, props.show_trait_count]);
 
   return (
-    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding">
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+    <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         {(() => {
           if (tokensLoaded) {
             if (tokens.length > 0) {
               return tokens.map((t) => (
-                <div key={getRandomObjectId()} className="tw-relative tw-px-3 tw-basis-auto tw-grow-0 tw-shrink-0 tw-w-1/2 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-1/3 md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/3 pt-3 pb-3" style={{ maxWidth: "100%" }}>
+                <div
+                  key={getRandomObjectId()}
+                  className="pt-3 pb-3 tw-relative tw-w-1/2 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-1/3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+                  style={{ maxWidth: "100%" }}
+                >
                   <NextGenTokenImage
                     token={t}
                     rarity_type={rarityType}
@@ -172,11 +176,15 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                 </div>
               ));
             } else {
-              return <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pt-2 pb-2">No results found</div>;
+              return (
+                <div className="pt-2 pb-2 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+                  No results found
+                </div>
+              );
             }
           } else {
             return (
-              <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pt-2 pb-2">
+              <div className="pt-2 pb-2 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                 <DotLoader />
               </div>
             );
@@ -184,7 +192,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
         })()}
       </div>
       {totalResults > pageSize && tokensLoaded && props.show_pagination && (
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 text-center pt-4 pb-4">
+        <div className="text-center pt-4 pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
           <Pagination
             page={page}
             pageSize={pageSize}

@@ -15,14 +15,17 @@ export default function NextgenTokenRenderCenter(
   props: Readonly<{ token: NextGenToken }>
 ) {
   return (
-    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl no-padding">
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 pb-3">
+    <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="pb-3 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3 className="mb-0">Display Center</h3>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/2 pb-3 d-flex flex-wrap gap-2" style={{ maxWidth: "100%" }}>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div
+          className="pb-3 d-flex flex-wrap gap-2 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+          style={{ maxWidth: "100%" }}
+        >
           <span className="font-color-h">Rendered Versions:</span>
           <NextGenTokenDownload
             token={props.token}
@@ -45,7 +48,10 @@ export default function NextgenTokenRenderCenter(
             resolution={Resolution["16K"]}
           />
         </div>
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-auto tw-grow-0 tw-shrink-0 min-[576px]:tw-basis-auto min-[576px]:tw-grow-0 min-[576px]:tw-shrink-0 min-[576px]:tw-w-full md:tw-basis-auto md:tw-grow-0 md:tw-shrink-0 md:tw-w-1/2 pb-3 d-flex flex-column gap-2" style={{ maxWidth: "100%" }}>
+        <div
+          className="pb-3 d-flex flex-column gap-2 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+          style={{ maxWidth: "100%" }}
+        >
           <span className="font-color-h">For Thumbnail Use Only :</span>
           <NextGenTokenDownload
             token={props.token}
@@ -57,7 +63,7 @@ export default function NextgenTokenRenderCenter(
           />
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 pt-3">
+      <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
         <CustomRender token={props.token} />
       </div>
     </div>
@@ -103,16 +109,19 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
   }
 
   return (
-    <div className="tw-w-full tw-mx-auto tw-px-3 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-7xl" style={{
+    <div
+      className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
+      style={{
         minHeight: "150px",
-      }}>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0">
+      }}
+    >
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="font-color-h">Custom Render:</span>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
-        <div className="tw-relative tw-px-3 tw-w-full tw-basis-0 tw-grow tw-shrink-0 d-flex flex-wrap gap-2">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="d-flex flex-wrap gap-2 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <Dropdown
             drop={"down-centered"}
             className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}
