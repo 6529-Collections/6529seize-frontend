@@ -609,6 +609,15 @@ export async function createConnectionShare({
   readonly targetClientType?: RefreshTokenSessionClientType | undefined;
 }): Promise<CreateConnectionShareResponse> {
   const sourceProof = await getNativeConnectionShareSourceProof();
+  const body = sourceProof
+    ? {
+        target_client_type: targetClientType,
+        ...sourceProof,
+      }
+    : {
+        target_client_type: targetClientType,
+      };
+
   return await commonApiPost<
     {
       readonly target_client_type: RefreshTokenSessionClientType;
@@ -619,10 +628,7 @@ export async function createConnectionShare({
     CreateConnectionShareResponse
   >({
     endpoint: "auth/connection-share",
-    body: {
-      target_client_type: targetClientType,
-      ...(sourceProof ?? {}),
-    },
+    body,
     credentials: getSessionCredentialsMode(),
     signal,
   });
