@@ -1,23 +1,5 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import NextgenCollectionMintingPlan from '@/components/nextGen/collections/collectionParts/mint/NextgenCollectionMintingPlan';
-
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const Dropdown: any = (p: any) => <div {...p} />;
-  Dropdown.Toggle = (p: any) => <button {...p} />;
-  Dropdown.Menu = (p: any) => <div {...p} />;
-  Dropdown.Item = (p: any) => <button {...p} />;
-  const Table: any = (p: any) => <table>{p.children}</table>;
-  return {
-    Container: (p: any) => <div {...p} />,
-    Row: (p: any) => <div {...p} />,
-    Col: (p: any) => <div {...p} />,
-    Dropdown,
-    Table,
-    Form: { Control: (p: any) => <input {...p} /> },
-  };
-});
 
 jest.mock('next/dynamic', () => () => () => <div data-testid='pdf' />);
 

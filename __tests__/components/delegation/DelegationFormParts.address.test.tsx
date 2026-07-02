@@ -1,22 +1,9 @@
 import { render } from "@testing-library/react";
-import React from "react";
 import { DelegationAddressDisabledInput } from "@/components/delegation/DelegationFormParts";
 
 jest.mock("wagmi", () => ({
   useEnsName: () => ({ data: "alice.eth" }),
   useEnsAddress: () => ({ data: "0x123" }),
-}));
-
-jest.mock("react-bootstrap", () => ({
-  Form: {
-    Control: (p: React.ComponentProps<"input">) => <input {...p} />,
-    Label: (p: React.ComponentProps<"label">) => <label {...p} />,
-    Group: (p: React.ComponentProps<"div">) => <div {...p} />,
-    Select: (p: React.ComponentProps<"select">) => <select {...p} />,
-    Row: (p: React.ComponentProps<"div">) => <div {...p} />,
-    Col: (p: React.ComponentProps<"div">) => <div {...p} />,
-  },
-  Container: (p: React.ComponentProps<"div">) => <div {...p} />,
 }));
 
 describe("Delegation address inputs", () => {

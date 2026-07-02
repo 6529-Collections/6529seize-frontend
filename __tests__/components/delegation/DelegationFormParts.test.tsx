@@ -5,19 +5,6 @@ import {
   DelegationCloseButton,
 } from '@/components/delegation/DelegationFormParts';
 
-jest.mock('react-bootstrap', () => ({
-  __esModule: true,
-  Container: (p:any)=> <div {...p} />,
-  Row: (p:any)=> <div {...p} />,
-  Col: (p:any)=> <div {...p} />,
-  Form: {
-    Control: (p:any)=> <input {...p}/>,
-    Label:(p:any)=> <label {...p}/>,
-    Group:(p:any)=> <div {...p}/>,
-    Select:(p:any)=> <select {...p}/>,
-  },
-}));
-
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid="icon" onClick={p.onClick} {...p}/> }));
 
 jest.mock('react-tooltip', () => ({

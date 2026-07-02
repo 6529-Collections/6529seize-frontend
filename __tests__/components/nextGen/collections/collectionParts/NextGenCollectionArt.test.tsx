@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import NextGenCollectionArt from '@/components/nextGen/collections/collectionParts/NextGenCollectionArt';
 
@@ -15,32 +14,9 @@ jest.mock('@/components/nextGen/collections/NextGenTokenList', () => (props: any
   <div data-testid="token-list" data-limit={String(props.limit)} />
 ));
 
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const RB: any = {
-    Container: (p: any) => <div {...p} />,
-    Row: (p: any) => <div {...p} />,
-    Col: (p: any) => <div {...p} />,
-    Form: (p: any) => <form {...p} />,
-  };
-  const Dropdown: any = (p: any) => <div {...p} />;
-  Dropdown.Toggle = (p: any) => <button {...p} />;
-  Dropdown.Menu = (p: any) => <div {...p} />;
-  Dropdown.Item = (p: any) => <div {...p} />;
-  Dropdown.Divider = (p: any) => <div {...p} />;
-  RB.Dropdown = Dropdown;
-  const Accordion: any = (p: any) => <div {...p} />;
-  Accordion.Item = (p: any) => <div {...p} />;
-  Accordion.Button = (p: any) => <button {...p} />;
-  Accordion.Body = (p: any) => <div {...p} />;
-  RB.Accordion = Accordion;
-  return RB;
-});
-
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: (p: any) => <svg {...p} />,
 }));
-
 
 jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   getRandomObjectId: () => 'id',

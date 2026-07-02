@@ -4,14 +4,6 @@ import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInpu
 const mockHandleInputChange = jest.fn();
 const mockSetInputValue = jest.fn();
 
-jest.mock("react-bootstrap", () => ({
-  Form: {
-    Control: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-      <input data-testid="form-control" {...props} />
-    ),
-  },
-}));
-
 jest.mock("@/hooks/useEnsResolution", () => ({
   useEnsResolution: jest.fn(() => ({
     inputValue: "",

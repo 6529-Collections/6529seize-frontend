@@ -1,16 +1,6 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import NextGenCollectionMint from '@/components/nextGen/collections/collectionParts/mint/NextGenCollectionMint';
 import { useReadContract } from 'wagmi';
-
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  return {
-    Container: (p: any) => <div data-testid="container" {...p} />,
-    Row: (p: any) => <div data-testid="row" {...p} />,
-    Col: (p: any) => <div data-testid="col" {...p} />,
-  };
-});
 
 const MockNextGenMint = jest.fn((props: any) => (
   <div data-testid="mint-props">{props.mint_price}:{props.burn_amount}</div>
@@ -69,4 +59,3 @@ describe('NextGenCollectionMint', () => {
     expect(screen.getByTestId('mint-props').textContent).toBe('0:3');
   });
 });
-
