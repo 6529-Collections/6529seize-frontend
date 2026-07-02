@@ -297,13 +297,13 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   const sortMenuId = `nextgen-collection-art-sort-${props.collection.id}`;
 
   return (
-    <div className="tw-pt-2 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-2 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-whitespace-nowrap tw-min-w-fit tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-between tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-min-w-fit tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-between tw-whitespace-nowrap tw-px-3">
           <h3 className="tw-mb-0">
             The Art{" "}
             {totalResultsSet ? (
-              <span className="tw-text-[#9a9a9a] tw-text-sm">
+              <span className="tw-text-sm tw-text-[#9a9a9a]">
                 (x{totalResults.toLocaleString()})
               </span>
             ) : (
@@ -313,9 +313,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         </div>
         <div
           className={`tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-px-3 ${
-            isMobile
-              ? "tw-pt-4 tw-justify-between"
-              : "tw-justify-end"
+            isMobile ? "tw-justify-between tw-pt-4" : "tw-justify-end"
           }`}
         >
           {props.show_view_all ? (
@@ -323,9 +321,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/art`}
-              className={`tw-no-underline tw-flex tw-items-center tw-gap-2 ${styles["viewAllTokens"]}`}
+              className={`tw-flex tw-items-center tw-gap-2 tw-no-underline ${styles["viewAllTokens"]}`}
             >
-              <h5 className="tw-text-white tw-mb-0 tw-flex tw-items-center tw-gap-2">
+              <h5 className="tw-mb-0 tw-flex tw-items-center tw-gap-2 tw-text-white">
                 View All
                 <FontAwesomeIcon
                   icon={faArrowCircleRight}
@@ -501,18 +499,18 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   style={{ maxWidth: "100%" }}
                 >
                   <span className="tw-flex tw-flex-col">
-                    <span className="tw-text-[#9a9a9a] tw-font-bold tw-text-lg">
+                    <span className="tw-text-lg tw-font-bold tw-text-[#9a9a9a]">
                       Traits
                     </span>
                     {selectedTraitValues.length > 0 && (
-                      <span className="tw-text-[#9a9a9a] tw-text-sm">
+                      <span className="tw-text-sm tw-text-[#9a9a9a]">
                         ({selectedTraitValues.length} selected)
                       </span>
                     )}
                   </span>
                   {selectedTraitValues.length > 0 && (
                     <button
-                      className="tw-no-underline hover:tw-underline tw-cursor-pointer tw-border-0 tw-bg-transparent !tw-p-0 tw-text-inherit tw-underline"
+                      className="tw-cursor-pointer tw-border-0 tw-bg-transparent !tw-p-0 tw-text-inherit tw-underline"
                       onClick={() => setSelectedTraitValues([])}
                     >
                       Clear
@@ -521,7 +519,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 </div>
               </div>
               <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                <div className="tw-pt-2 tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-flex-col tw-px-3">
+                <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-flex-col tw-px-3 tw-pt-2">
                   {routerLoaded &&
                     traits.map((tr) => (
                       <details
