@@ -1853,16 +1853,21 @@ export default function Auth({
   };
 
   useEffect(() => {
-    if (
-      !enableWalletAuthentication ||
-      !shouldShowSignModal ||
-      typeof document === "undefined"
-    ) {
+    if (!enableWalletAuthentication || typeof document === "undefined") {
       return undefined;
     }
 
     const dialog = signDialogRef.current;
     if (!dialog) {
+      return undefined;
+    }
+
+    if (!shouldShowSignModal) {
+      if (dialog.open) {
+        dialog.close();
+      } else {
+        dialog.removeAttribute("open");
+      }
       return undefined;
     }
 
@@ -1910,7 +1915,6 @@ export default function Auth({
       {children}
       <AppToastContainer />
       {enableWalletAuthentication &&
-        shouldShowSignModal &&
         typeof document !== "undefined" &&
         createPortal(
           <dialog

@@ -36,12 +36,21 @@ function AppWalletModalShell(
   const { children, footer, onHide, show, title } = props;
 
   useEffect(() => {
-    if (!show || typeof document === "undefined") {
+    if (typeof document === "undefined") {
       return undefined;
     }
 
     const dialog = dialogRef.current;
     if (!dialog) {
+      return undefined;
+    }
+
+    if (!show) {
+      if (dialog.open) {
+        dialog.close();
+      } else {
+        dialog.removeAttribute("open");
+      }
       return undefined;
     }
 
@@ -71,7 +80,7 @@ function AppWalletModalShell(
     [onHide]
   );
 
-  if (!show || typeof document === "undefined") {
+  if (typeof document === "undefined") {
     return null;
   }
 
@@ -255,61 +264,61 @@ export function CreateAppWalletModal(
         </>
       }
     >
-        <label className="tw-pb-1" htmlFor="walletName">
-          Wallet Name
-        </label>
-        <input
-          id="walletName"
-          autoFocus
-          type="text"
-          placeholder="My Wallet..."
-          value={walletName}
-          className={styles["newWalletInput"]}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (/^[a-zA-Z0-9 ]*$/.test(value)) {
-              setWalletName(value);
-            } else {
-              showAppWalletError(timeoutRef, setError, getAppWalletNameError());
-            }
+      <label className="tw-pb-1" htmlFor="walletName">
+        Wallet Name
+      </label>
+      <input
+        id="walletName"
+        autoFocus
+        type="text"
+        placeholder="My Wallet..."
+        value={walletName}
+        className={styles["newWalletInput"]}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (/^[a-zA-Z0-9 ]*$/.test(value)) {
+            setWalletName(value);
+          } else {
+            showAppWalletError(timeoutRef, setError, getAppWalletNameError());
+          }
+        }}
+      />
+      <label className="tw-flex tw-items-center tw-justify-between tw-pb-1 tw-pt-3">
+        <span className="tw-select-none">Wallet Password</span>
+        <FontAwesomeIcon
+          icon={passHidden ? faEyeSlash : faEye}
+          height={18}
+          onClick={() => setPassHidden(!passHidden)}
+          style={{
+            cursor: "pointer",
           }}
         />
-        <label className="tw-flex tw-items-center tw-justify-between tw-pb-1 tw-pt-3">
-          <span className="tw-select-none">Wallet Password</span>
-          <FontAwesomeIcon
-            icon={passHidden ? faEyeSlash : faEye}
-            height={18}
-            onClick={() => setPassHidden(!passHidden)}
-            style={{
-              cursor: "pointer",
-            }}
-          />
-        </label>
-        <input
-          type={passHidden ? "password" : "text"}
-          placeholder="******"
-          value={walletPass}
-          className={styles["newWalletInput"]}
-          onChange={(e: any) => {
-            const value = e.target.value;
-            if (/^\S*$/.test(value)) {
-              setWalletPass(value);
-            } else {
-              showAppWalletError(
-                timeoutRef,
-                setError,
-                getAppWalletPassphraseWhitespaceError()
-              );
-            }
-          }}
-        />
-        <p className="tw-mb-1 tw-mt-4">
-          {error ? (
-            <span className="tw-text-[#dc3545]">{error}</span>
-          ) : (
-            <>Provide a name and password for your new wallet</>
-          )}
-        </p>
+      </label>
+      <input
+        type={passHidden ? "password" : "text"}
+        placeholder="******"
+        value={walletPass}
+        className={styles["newWalletInput"]}
+        onChange={(e: any) => {
+          const value = e.target.value;
+          if (/^\S*$/.test(value)) {
+            setWalletPass(value);
+          } else {
+            showAppWalletError(
+              timeoutRef,
+              setError,
+              getAppWalletPassphraseWhitespaceError()
+            );
+          }
+        }}
+      />
+      <p className="tw-mb-1 tw-mt-4">
+        {error ? (
+          <span className="tw-text-[#dc3545]">{error}</span>
+        ) : (
+          <>Provide a name and password for your new wallet</>
+        )}
+      </p>
     </AppWalletModalShell>
   );
 }
@@ -449,63 +458,61 @@ export function UnlockAppWalletModal(
         </>
       }
     >
-        <label className="tw-flex tw-items-center tw-justify-between tw-pb-1">
-          <span className="tw-select-none">Wallet Password</span>
-          <FontAwesomeIcon
-            icon={passHidden ? faEyeSlash : faEye}
-            height={18}
-            onClick={() => setPassHidden(!passHidden)}
-            style={{
-              cursor: "pointer",
-            }}
-          />
-        </label>
-        <input
-          ref={inputRef}
-          autoFocus
-          type={passHidden ? "password" : "text"}
-          placeholder="******"
-          value={walletPass}
-          className={styles["newWalletInput"]}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (/^\S*$/.test(value)) {
-              setWalletPass(value);
-            } else {
-              showAppWalletError(
-                timeoutRef,
-                setError,
-                getAppWalletPassphraseWhitespaceError()
-              );
-            }
+      <label className="tw-flex tw-items-center tw-justify-between tw-pb-1">
+        <span className="tw-select-none">Wallet Password</span>
+        <FontAwesomeIcon
+          icon={passHidden ? faEyeSlash : faEye}
+          height={18}
+          onClick={() => setPassHidden(!passHidden)}
+          style={{
+            cursor: "pointer",
           }}
-          onKeyDown={handleKeyPress}
         />
-        {sensitiveAction && (
-          <div className="tw-pt-3">
-            <p className="tw-mb-2 tw-text-[#ffc107]">
-              {sensitiveAction.warning}
-            </p>
-            <label className="tw-pb-1" htmlFor="sensitiveActionConfirmation">
-              Type {sensitiveAction.confirmationText} to confirm{" "}
-              {sensitiveAction.label}
-            </label>
-            <input
-              id="sensitiveActionConfirmation"
-              type="text"
-              value={confirmation}
-              className={styles["newWalletInput"]}
-              onChange={(e) => setConfirmation(e.target.value)}
-            />
-          </div>
+      </label>
+      <input
+        ref={inputRef}
+        autoFocus
+        type={passHidden ? "password" : "text"}
+        placeholder="******"
+        value={walletPass}
+        className={styles["newWalletInput"]}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (/^\S*$/.test(value)) {
+            setWalletPass(value);
+          } else {
+            showAppWalletError(
+              timeoutRef,
+              setError,
+              getAppWalletPassphraseWhitespaceError()
+            );
+          }
+        }}
+        onKeyDown={handleKeyPress}
+      />
+      {sensitiveAction && (
+        <div className="tw-pt-3">
+          <p className="tw-mb-2 tw-text-[#ffc107]">{sensitiveAction.warning}</p>
+          <label className="tw-pb-1" htmlFor="sensitiveActionConfirmation">
+            Type {sensitiveAction.confirmationText} to confirm{" "}
+            {sensitiveAction.label}
+          </label>
+          <input
+            id="sensitiveActionConfirmation"
+            type="text"
+            value={confirmation}
+            className={styles["newWalletInput"]}
+            onChange={(e) => setConfirmation(e.target.value)}
+          />
+        </div>
+      )}
+      <p className="tw-mb-1 tw-mt-4">
+        {error ? (
+          <span className="tw-text-[#dc3545]">{error}</span>
+        ) : (
+          <>Provide wallet password to continue</>
         )}
-        <p className="tw-mb-1 tw-mt-4">
-          {error ? (
-            <span className="tw-text-[#dc3545]">{error}</span>
-          ) : (
-            <>Provide wallet password to continue</>
-          )}
-        </p>
+      </p>
     </AppWalletModalShell>
   );
 }
