@@ -1,5 +1,6 @@
-import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
+import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
 import type { MemeSeason } from "@/entities/ISeason";
+import { commonApiFetch } from "@/services/api/common-api";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
 const mockSeasons: MemeSeason[] = [
@@ -26,6 +27,17 @@ const mockSeasons: MemeSeason[] = [
     count: 100,
     name: "SZN3",
     display: "SZN 3",
+  },
+];
+const fourMockSeasons: MemeSeason[] = [
+  ...mockSeasons,
+  {
+    id: 4,
+    start_index: 301,
+    end_index: 400,
+    count: 100,
+    name: "SZN4",
+    display: "SZN 4",
   },
 ];
 
@@ -63,7 +75,7 @@ Object.defineProperty(globalThis, "matchMedia", {
   })),
 });
 
-describe("SeasonsGridDropdown", () => {
+describe("MemeSeasonGridDropdown", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -71,7 +83,9 @@ describe("SeasonsGridDropdown", () => {
   it("renders with 'All Seasons' label when nothing is selected", async () => {
     const setSelected = jest.fn();
 
-    render(<SeasonsGridDropdown selected={null} setSelected={setSelected} />);
+    render(
+      <MemeSeasonGridDropdown selected={null} setSelected={setSelected} />
+    );
     await flushPromises();
 
     expect(
@@ -84,7 +98,7 @@ describe("SeasonsGridDropdown", () => {
     const selectedSeason = mockSeasons[1];
 
     render(
-      <SeasonsGridDropdown
+      <MemeSeasonGridDropdown
         selected={selectedSeason}
         setSelected={setSelected}
       />
@@ -99,7 +113,9 @@ describe("SeasonsGridDropdown", () => {
   it("opens dropdown on button click", async () => {
     const setSelected = jest.fn();
 
-    render(<SeasonsGridDropdown selected={null} setSelected={setSelected} />);
+    render(
+      <MemeSeasonGridDropdown selected={null} setSelected={setSelected} />
+    );
     await flushPromises();
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
@@ -111,7 +127,9 @@ describe("SeasonsGridDropdown", () => {
   it("fetches and displays seasons from API", async () => {
     const setSelected = jest.fn();
 
-    render(<SeasonsGridDropdown selected={null} setSelected={setSelected} />);
+    render(
+      <MemeSeasonGridDropdown selected={null} setSelected={setSelected} />
+    );
     await flushPromises();
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
@@ -131,7 +149,7 @@ describe("SeasonsGridDropdown", () => {
     const setSelected = jest.fn();
 
     render(
-      <SeasonsGridDropdown
+      <MemeSeasonGridDropdown
         selected={mockSeasons[0]}
         setSelected={setSelected}
       />
@@ -152,7 +170,9 @@ describe("SeasonsGridDropdown", () => {
   it("calls setSelected with season when a season is clicked", async () => {
     const setSelected = jest.fn();
 
-    render(<SeasonsGridDropdown selected={null} setSelected={setSelected} />);
+    render(
+      <MemeSeasonGridDropdown selected={null} setSelected={setSelected} />
+    );
     await flushPromises();
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
@@ -167,7 +187,9 @@ describe("SeasonsGridDropdown", () => {
   it("applies selected styles to 'All Seasons' when selected is null", async () => {
     const setSelected = jest.fn();
 
-    render(<SeasonsGridDropdown selected={null} setSelected={setSelected} />);
+    render(
+      <MemeSeasonGridDropdown selected={null} setSelected={setSelected} />
+    );
     await flushPromises();
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
@@ -185,7 +207,7 @@ describe("SeasonsGridDropdown", () => {
     const setSelected = jest.fn();
 
     render(
-      <SeasonsGridDropdown
+      <MemeSeasonGridDropdown
         selected={mockSeasons[0]}
         setSelected={setSelected}
       />
@@ -205,7 +227,7 @@ describe("SeasonsGridDropdown", () => {
     const setSelected = jest.fn();
 
     render(
-      <SeasonsGridDropdown
+      <MemeSeasonGridDropdown
         selected={mockSeasons[0]}
         setSelected={setSelected}
       />
@@ -225,7 +247,7 @@ describe("SeasonsGridDropdown", () => {
     const setSelected = jest.fn();
 
     render(
-      <SeasonsGridDropdown
+      <MemeSeasonGridDropdown
         selected={null}
         setSelected={setSelected}
         initialSeasonId={2}
@@ -243,7 +265,7 @@ describe("SeasonsGridDropdown", () => {
     const setSelected = jest.fn();
 
     render(
-      <SeasonsGridDropdown
+      <MemeSeasonGridDropdown
         selected={null}
         setSelected={setSelected}
         initialSeasonId={null}
@@ -261,7 +283,11 @@ describe("SeasonsGridDropdown", () => {
     const setSelected = jest.fn();
 
     render(
-      <SeasonsGridDropdown selected={null} setSelected={setSelected} disabled />
+      <MemeSeasonGridDropdown
+        selected={null}
+        setSelected={setSelected}
+        disabled
+      />
     );
     await flushPromises();
 
@@ -273,7 +299,9 @@ describe("SeasonsGridDropdown", () => {
   it("closes dropdown when selecting an item", async () => {
     const setSelected = jest.fn();
 
-    render(<SeasonsGridDropdown selected={null} setSelected={setSelected} />);
+    render(
+      <MemeSeasonGridDropdown selected={null} setSelected={setSelected} />
+    );
     await flushPromises();
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
@@ -288,7 +316,9 @@ describe("SeasonsGridDropdown", () => {
   it("has correct aria attributes", async () => {
     const setSelected = jest.fn();
 
-    render(<SeasonsGridDropdown selected={null} setSelected={setSelected} />);
+    render(
+      <MemeSeasonGridDropdown selected={null} setSelected={setSelected} />
+    );
     await flushPromises();
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
@@ -298,5 +328,56 @@ describe("SeasonsGridDropdown", () => {
     fireEvent.click(button);
 
     expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("uses provided scoped seasons and all-seasons label without fetching", async () => {
+    const setSelected = jest.fn();
+
+    render(
+      <MemeSeasonGridDropdown
+        selected={null}
+        setSelected={setSelected}
+        seasons={[mockSeasons[1], mockSeasons[2]]}
+        allSeasonsLabel="All Year 1"
+      />
+    );
+    await flushPromises();
+
+    const button = screen.getByRole("button", {
+      name: /Season: All Year 1/i,
+    });
+    fireEvent.click(button);
+
+    const menuItems = screen.getAllByRole("menuitem");
+    expect(menuItems).toHaveLength(3);
+    expect(menuItems[0]).toHaveTextContent("All Year 1");
+    expect(menuItems[1]).toHaveTextContent("SZN 2");
+    expect(menuItems[2]).toHaveTextContent("SZN 3");
+    expect(commonApiFetch).not.toHaveBeenCalled();
+  });
+
+  it("uses a two-column grid for four scoped seasons", async () => {
+    const setSelected = jest.fn();
+
+    render(
+      <MemeSeasonGridDropdown
+        selected={null}
+        setSelected={setSelected}
+        seasons={fourMockSeasons}
+        allSeasonsLabel="All Year 1"
+      />
+    );
+    await flushPromises();
+
+    const button = screen.getByRole("button", {
+      name: /Season: All Year 1/i,
+    });
+    fireEvent.click(button);
+
+    const grid = screen.getByRole("menu").querySelector(".tw-grid");
+    expect(grid).toHaveClass("tw-grid-cols-2");
+    expect(screen.getByRole("menuitem", { name: /SZN 1/i })).toHaveClass(
+      "tw-whitespace-nowrap"
+    );
   });
 });

@@ -11,6 +11,7 @@ export type TheMemesSearchParams = {
   readonly sort?: SearchParamValue;
   readonly sort_dir?: SearchParamValue;
   readonly szn?: SearchParamValue;
+  readonly year?: SearchParamValue;
   readonly locale?: SearchParamValue;
 };
 
@@ -55,16 +56,22 @@ export function getTheMemesBrowseHref({
   seasonId,
   sort,
   sortDir,
+  yearId,
 }: {
   readonly locale: SupportedLocale;
   readonly seasonId?: number | null | undefined;
   readonly sort: string;
   readonly sortDir: string;
+  readonly yearId?: number | null | undefined;
 }): string {
   const query = new URLSearchParams({
     sort,
     sort_dir: sortDir,
   });
+
+  if (yearId !== null && yearId !== undefined) {
+    query.set("year", yearId.toString());
+  }
 
   if (seasonId !== null && seasonId !== undefined) {
     query.set("szn", seasonId.toString());

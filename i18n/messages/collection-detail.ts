@@ -207,6 +207,7 @@ export const MEME_CALENDAR_MESSAGES = namespaceMessages("memeCalendar", [
   ["invites.addToGoogleCalendar", "Add to Google Calendar"],
   ["periods.seasonShort", "SZN"],
   ["periods.seasonLinkAriaLabel", "View SZN {season} cards"],
+  ["periods.yearLinkAriaLabel", "View Year {year} cards"],
   ["periods.positionLabel", "Meme calendar position"],
   ["periods.year", "YEAR"],
   ["periods.epoch", "EPOCH"],
