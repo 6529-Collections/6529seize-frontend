@@ -73,14 +73,15 @@ describe("SidebarSubwavesToggle", () => {
     expect(wrapper).toHaveClass("tw-min-h-[42px]");
     expect(wrapper).toHaveClass("tw-pb-2");
     expect(wrapper).not.toHaveClass("tw-px-5");
-    expect(button).toHaveClass("tw-h-8");
+    expect(button).not.toHaveClass("tw-h-8");
     expect(button).toHaveClass("tw-rounded-lg");
     expect(button).toHaveClass("tw-border-iron-800");
     expect(button).toHaveClass("tw-bg-iron-950");
     expect(button).toHaveClass("tw-px-3");
+    expect(button).toHaveClass("tw-py-1");
     expect(button).toHaveClass("tw-text-xs");
     expect(button).toHaveClass("tw-font-medium");
-    expect(button).toHaveClass("tw-text-iron-400");
+    expect(button).toHaveClass("tw-text-iron-350");
     expect(button).not.toHaveClass(
       "tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
     );
