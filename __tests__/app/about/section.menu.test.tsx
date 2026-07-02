@@ -1,13 +1,25 @@
 import { AuthContext } from "@/components/auth/Auth";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React, { useMemo } from "react";
 /* eslint-disable react/display-name */
 import AboutPage from "@/app/about/[section]/page";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
+import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptionsProfileButton";
 import { AboutSection } from "@/types/enums";
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({
+    push: (...args: Parameters<typeof mockRouterPush>) =>
+      mockRouterPush(...args),
+  }),
+}));
+
+const mockRouterPush = jest.fn();
+const mockSeizeConnectFresh = jest.fn();
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    seizeConnectFresh: mockSeizeConnectFresh,
+  }),
 }));
 
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -77,6 +89,8 @@ describe("About contents dropdown", () => {
 
   beforeEach(() => {
     setCookieCountry("DE");
+    mockRouterPush.mockClear();
+    mockSeizeConnectFresh.mockClear();
   });
 
   it("hides subscriptions row when iOS users are not in the US", async () => {
@@ -204,6 +218,109 @@ describe("About contents dropdown", () => {
     expect(
       screen.getByRole("menuitem", { name: /go to page: subscriptions/i })
     ).toHaveAttribute("href", "/about/subscriptions");
+  });
+
+  it("shows connected subscriptions action before the subscriptions dropdown", () => {
+    setCookieCountry("US");
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: {
+              handle: "test-handle",
+              normalised_handle: "test-handle",
+              primary_wallet: "0x123",
+              wallets: [],
+            },
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+
+    const profileLink = screen.getByRole("link", {
+      name: /my subscriptions/i,
+    });
+    const trigger = screen.getByRole("button", {
+      name: /open about contents navigation/i,
+    });
+
+    expect(profileLink).toHaveAttribute("href", "/test-handle/subscriptions");
+    expect(
+      profileLink.compareDocumentPosition(trigger) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("opens wallet connection from disconnected subscriptions action", () => {
+    setCookieCountry("US");
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: null,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /connect to subscribe/i,
+      })
+    );
+
+    expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it("routes to profile subscriptions after connecting from subscriptions action", async () => {
+    setCookieCountry("US");
+    const setToast = jest.fn();
+    const renderButton = (connectedProfile: unknown) => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile,
+            setToast,
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(renderButton(null));
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /connect to subscribe/i,
+      })
+    );
+    rerender(
+      renderButton({
+        handle: "test-handle",
+        normalised_handle: "test-handle",
+        primary_wallet: "0x123",
+        wallets: [],
+      })
+    );
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
+    });
   });
 
   it("uses dropdown item styling without link underlines", async () => {

@@ -786,6 +786,27 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  "home.mintSubscriptions.balanceLabel": "Balance",
+  "home.mintSubscriptions.infoLinkAriaLabel":
+    "Learn more about The Memes subscriptions",
+  "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
+  "home.mintSubscriptions.connectToSubscribe": "Connect to Subscribe",
+  "home.mintSubscriptions.connectFailed":
+    "Failed to open wallet connection. Please try again.",
+  "home.mintSubscriptions.subscribeLabel": "Subscribe",
+  "home.mintSubscriptions.subscribedLabel": "Subscribed",
+  "home.mintSubscriptions.subscribersCount": "Subscribers count {count}",
+  "home.mintSubscriptions.tooltip.connect": "Connect to subscribe",
+  "home.mintSubscriptions.tooltip.dropped":
+    "This card has already dropped and can no longer be subscribed to.",
+  "home.mintSubscriptions.tooltip.manage":
+    "Manage this in profile subscriptions.",
+  "home.mintSubscriptions.tooltip.mintDay":
+    "Subscriptions cannot be changed on mint day.",
+  "home.mintSubscriptions.tooltip.profileSubscribe":
+    "Go to profile subscriptions to subscribe.",
+  "home.mintSubscriptions.tooltip.proxy":
+    "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":
     "Choose how inserted boosted-drop cards appear in wave chat on this device.",
   "waveChat.boostedDrops.display.expanded": "Expanded",

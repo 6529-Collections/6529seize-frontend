@@ -35,7 +35,11 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           mediaMimeType={fileMimeType}
         />
         <NowMintingStatsGrid nftId={nft.id} floorPrice={floorPrice} />
-        <LatestDropNextMintSubscribe showOnlyWhenSubscribed readonly />
+        <LatestDropNextMintSubscribe
+          tokenId={nft.id}
+          readonly
+          statusSource="none"
+        />
         <NowMintingDetailsAccordion
           nftId={nft.id}
           mintDate={nft.mint_date ?? undefined}

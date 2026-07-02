@@ -1,14 +1,33 @@
 import NowMintingDetails from "@/components/home/now-minting/NowMintingDetails";
 import { render, screen } from "@testing-library/react";
 
-jest.mock("next/link", () => ({
-  __esModule: true,
-  default: ({ href, children, ...props }: any) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
+type LatestDropNextMintSubscribeMockProps = {
+  readonly?: boolean;
+  statusSource?: "none" | "upcoming";
+  tokenId?: number;
+};
+
+const mockLatestDropNextMintSubscribe = jest.fn(
+  (props: LatestDropNextMintSubscribeMockProps) => (
+    <div
+      data-testid="subscribe-section"
+      data-token-id={props.tokenId}
+      data-readonly={String(props.readonly)}
+      data-status-source={props.statusSource}
+    />
+  )
+);
+
+jest.mock("next/link", () => {
+  const { mockNextLinkComponent } = jest.requireActual(
+    "@/__tests__/utils/nextLinkMock"
+  );
+
+  return {
+    __esModule: true,
+    default: mockNextLinkComponent,
+  };
+});
 
 jest.mock("@/components/home/now-minting/NowMintingHeader", () => ({
   __esModule: true,
@@ -22,7 +41,8 @@ jest.mock("@/components/home/now-minting/NowMintingStatsGrid", () => ({
 
 jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
   __esModule: true,
-  default: () => <div data-testid="subscribe-section" />,
+  default: (props: LatestDropNextMintSubscribeMockProps) =>
+    mockLatestDropNextMintSubscribe(props),
 }));
 
 jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
@@ -42,6 +62,10 @@ const baseNft = {
 };
 
 describe("NowMintingDetails", () => {
+  beforeEach(() => {
+    mockLatestDropNextMintSubscribe.mockClear();
+  });
+
   it("omits file metadata rows when media metadata is missing", () => {
     render(
       <NowMintingDetails
@@ -58,7 +82,18 @@ describe("NowMintingDetails", () => {
     expect(screen.queryByText("Dimensions")).not.toBeInTheDocument();
     expect(screen.getByText("Collection")).toBeInTheDocument();
     expect(screen.getByText("Season")).toBeInTheDocument();
-    expect(screen.getByTestId("subscribe-section")).toBeInTheDocument();
+    expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
+      "data-token-id",
+      "667"
+    );
+    expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
+      "data-readonly",
+      "true"
+    );
+    expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
+      "data-status-source",
+      "none"
+    );
   });
 
   it("renders file metadata rows when image metadata is present", () => {

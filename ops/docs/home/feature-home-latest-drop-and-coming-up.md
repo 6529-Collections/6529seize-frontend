@@ -17,10 +17,17 @@ Use this page for visibility rules, state switches, and route targets.
   - Artist handles: `/{handle}` (can render multiple handle pills)
   - Distribution plan link (inside `Edition Details`): `/the-memes/{id}/distribution`
   - Mint action: `/the-memes/mint` (countdown state only)
+  - Subscription info link: `/about/subscriptions`
+  - Connected profile subscription link: `/{user}/subscriptions`
 - `Next Drop` actions (top-section replacement mode):
   - Drop title: `/waves?wave={waveId}&drop={dropId}`
   - Wave row link: `/waves/{waveId}`
   - Artist link: `/{handle}` (only when handle exists)
+  - Subscription info link: `/about/subscriptions`
+  - Connected profile subscription link: `/{user}/subscriptions`
+- Current The Memes detail page:
+  - Subscription info link: `/about/subscriptions`
+  - Connected profile subscription link: `/{user}/subscriptions`
 - `Coming up` actions:
   - Card title: `/waves/{waveId}?drop={dropId}`
   - Card author: `/{handle}` or `/{primaryAddress}`
@@ -40,8 +47,8 @@ Use this page for visibility rules, state switches, and route targets.
    - `Latest Drop` when the current mint is not ended, or when no next winner
      is available.
    - `Next Drop` when the current mint is ended and a next winner exists.
-4. `Latest Drop` shows artwork, stats, edition details, and countdown states:
-   `Upcoming`, `Live`, `Mint Complete`, or `Error`.
+4. `Latest Drop` shows artwork, stats, subscription awareness, edition details,
+   and countdown states: `Upcoming`, `Live`, `Mint Complete`, or `Error`.
 5. `Coming up` resolves after app settings load and `memes_wave_id` is
    available.
 6. `Coming up` then shows:
@@ -60,6 +67,8 @@ Use this page for visibility rules, state switches, and route targets.
   - `Coming up`: up to 3 leaders.
 - Mint ended, next winner available:
   - Top section switches from `Latest Drop` to `Next Drop`.
+  - The `Next Drop` panel can show subscription awareness or controls for the
+    canonical next mint.
   - `Coming up` hides `NEXT MINT` and shows up to 3 leaders.
 - Leaderboard still loading while `NEXT MINT` is ready:
   - `Coming up` can render with only the `NEXT MINT` card.
@@ -78,6 +87,28 @@ Use this page for visibility rules, state switches, and route targets.
 - If next-winner title matches current mint title (case-insensitive and
   trimmed), `Coming up` suppresses the `NEXT MINT` card.
 - On iOS outside the US, the countdown `Mint` button is hidden.
+- On iOS outside the US, The Memes subscription row is hidden.
+- Latest Drop subscription awareness is read-only and links to subscription
+  info/profile subscriptions without querying the upcoming-meme status endpoint
+  for the current or already-dropped card.
+- The current/latest `/the-memes/{id}` detail page uses the same awareness-only
+  subscription row beside the mint countdown.
+- Awareness-only rows do not embed the profile subscription editor. They show a
+  blue read-only `Subscribed` strip with a disabled switch, optional user
+  subscribed count, optional subscriber total, an icon-only profile
+  subscriptions link when connected, and a right-edge question-mark info link.
+- Balance, eligibility, quantity selectors, and subscription mutation controls
+  are intentionally not shown in home/latest-card awareness rows.
+- Without a connected profile, the subscription row can still show a
+  non-actionable disabled switch awareness state with a link to
+  `/about/subscriptions`.
+- With a connected profile, the subscription row can link to
+  `/{user}/subscriptions`; profile-specific subscription status/count only
+  render when the related read-only APIs return data.
+- On `/about/subscriptions`, connected users see a primary `My subscriptions`
+  action on the left side of the about-section navigation row. Disconnected
+  users see a primary `Connect to Subscribe` action that opens wallet
+  connection and then routes to their profile subscriptions once connected.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.
