@@ -58,6 +58,16 @@ async function loadMobileLaunchTiming({
   return { timing, sentry };
 }
 
+function flushLaunchTiming(
+  timing: MobileLaunchTimingModule,
+  reason: Parameters<
+    MobileLaunchTimingModule["scheduleMobileLaunchFlush"]
+  >[0] = "manual"
+): void {
+  timing.scheduleMobileLaunchFlush(reason, 0);
+  jest.advanceTimersByTime(0);
+}
+
 describe("mobileLaunchTiming", () => {
   beforeEach(() => {
     currentNow = 0;
@@ -81,7 +91,7 @@ describe("mobileLaunchTiming", () => {
 
     timing.startMobileLaunchTiming();
     currentNow = 100;
-    timing.flushMobileLaunchTiming("manual");
+    flushLaunchTiming(timing, "manual");
 
     expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -106,8 +116,8 @@ describe("mobileLaunchTiming", () => {
 
     timing.startMobileLaunchTiming();
     currentNow = 100;
-    timing.flushMobileLaunchTiming("manual");
-    timing.flushMobileLaunchTiming("manual");
+    flushLaunchTiming(timing, "manual");
+    flushLaunchTiming(timing, "manual");
 
     expect(sentry.logger.info).toHaveBeenCalledTimes(1);
     expect(sentry.logger.warn).not.toHaveBeenCalled();
@@ -128,7 +138,7 @@ describe("mobileLaunchTiming", () => {
       wallet_connection_state: "connected",
     });
     currentNow = 400;
-    timing.flushMobileLaunchTiming("manual");
+    flushLaunchTiming(timing, "manual");
 
     expect(sentry.logger.info).toHaveBeenCalledWith(
       "mobile_launch_timing",
@@ -155,7 +165,7 @@ describe("mobileLaunchTiming", () => {
     currentNow = 650;
     timing.markMobileLaunchStep("first_useful_app_shell");
     currentNow = 900;
-    timing.flushMobileLaunchTiming("manual");
+    flushLaunchTiming(timing, "manual");
 
     expect(sentry.logger.info).toHaveBeenCalledWith(
       "mobile_launch_timing",
@@ -199,7 +209,7 @@ describe("mobileLaunchTiming", () => {
     timing.startMobileLaunchTiming();
     currentNow = 3000;
     timing.markMobileLaunchStep("first_useful_app_shell");
-    timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(timing, "shell_paint");
 
     expect(sentry.logger.warn).toHaveBeenCalledTimes(1);
     expect(sentry.logger.warn).toHaveBeenCalledWith(
@@ -220,7 +230,7 @@ describe("mobileLaunchTiming", () => {
     globalThis.history.pushState({}, "", "/alice?jwt=secret");
     timing.startMobileLaunchTiming();
     currentNow = 3000;
-    timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(timing, "shell_paint");
 
     expect(sentry.logger.warn).toHaveBeenCalledWith(
       "mobile_launch_timing",
@@ -236,7 +246,7 @@ describe("mobileLaunchTiming", () => {
 
     first.timing.startMobileLaunchTiming();
     currentNow = 100;
-    first.timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(first.timing, "shell_paint");
 
     expect(first.sentry.logger.info).not.toHaveBeenCalled();
     expect(first.sentry.logger.warn).not.toHaveBeenCalled();
@@ -247,7 +257,7 @@ describe("mobileLaunchTiming", () => {
 
     second.timing.startMobileLaunchTiming();
     currentNow = 100;
-    second.timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(second.timing, "shell_paint");
 
     expect(second.sentry.logger.info).toHaveBeenCalledTimes(1);
     expect(second.sentry.logger.warn).not.toHaveBeenCalled();
@@ -316,7 +326,7 @@ describe("mobileLaunchTiming", () => {
     }
 
     currentNow = 3500;
-    timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(timing, "shell_paint");
 
     expect(sentry.logger.warn).toHaveBeenCalledWith(
       "mobile_launch_timing",
@@ -364,7 +374,7 @@ describe("mobileLaunchTiming", () => {
     });
 
     currentNow = 3500;
-    timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(timing, "shell_paint");
 
     expect(sentry.logger.warn).toHaveBeenCalledWith(
       "mobile_launch_timing",

@@ -33,14 +33,14 @@ export type MobileLaunchAuthState =
   | "stored_auth_disconnected"
   | "wallet_auth_disabled";
 
-export type MobileLaunchWalletConnectionState =
+type MobileLaunchWalletConnectionState =
   | "initializing"
   | "disconnected"
   | "connecting"
   | "connected"
   | "error";
 
-export type MobileLaunchAppWalletsState =
+type MobileLaunchAppWalletsState =
   | "supported_empty"
   | "supported_with_wallets"
   | "unsupported";
@@ -75,7 +75,7 @@ type DeviceInfoAttrs = {
   readonly web_view_version?: string;
 };
 
-export type MobileLaunchContext = {
+type MobileLaunchContext = {
   readonly app_wallet_count_bucket?: MobileLaunchAppWalletCountBucket;
   readonly app_wallets_state?: MobileLaunchAppWalletsState;
   readonly auth_state?: MobileLaunchAuthState;
@@ -259,7 +259,7 @@ export function scheduleMobileLaunchFlush(
   );
 }
 
-export function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
+function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
   const state = getActiveState();
   if (!state) {
     return;
