@@ -128,9 +128,9 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (
-    <Container className="no-padding">
+    <Container className="!tw-p-0">
       <NextGenAdminHeadingRow title="Airdrop Tokens" close={props.close} />
-      <Row className="pt-3">
+      <Row className="tw-pt-4">
         <Col>
           <Form>
             <NextGenCollectionIdFormGroup
@@ -140,7 +140,7 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Recipients {recipients.length > 0 && `x${recipients.length}`}
               </Form.Label>
@@ -158,7 +158,7 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
                 }}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Token Data {tokenData.length > 0 && `x${tokenData.length}`}
               </Form.Label>
@@ -176,7 +176,7 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
                 }}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Salts {salts.length > 0 && `x${salts.length}`}
               </Form.Label>
@@ -194,7 +194,7 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
                 }}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Token Counts{" "}
                 {tokenCounts.length > 0 && `x${tokenCounts.length}`}
@@ -215,12 +215,13 @@ export default function NextGenAdminAirdropTokens(props: Readonly<Props>) {
             </Form.Group>
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
-              className={`mt-3 mb-3 seize-btn`}
+              className={`tw-mb-4 tw-mt-4 tw-rounded-none tw-border-0 tw-px-5 tw-py-1.5 tw-font-bold disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
               disabled={submitting || loading}
               onClick={() => {
                 setLoading(true);
                 submit();
-              }}>
+              }}
+            >
               Submit
             </Button>
           </Form>

@@ -104,13 +104,13 @@ export default function NextGenAdminArtistSignCollection(
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (
-    <Container className="no-padding">
+    <Container className="!tw-p-0">
       <NextGenAdminHeadingRow
         close={props.close}
         title="Sign Collection As Artist"
       />
       {isArtist ? (
-        <Row className="pt-3">
+        <Row className="tw-pt-4">
           <Col>
             <Form>
               <NextGenCollectionIdFormGroup
@@ -120,7 +120,7 @@ export default function NextGenAdminArtistSignCollection(
                   setCollectionID(id);
                 }}
               />
-              <Form.Group className="mb-3">
+              <Form.Group className="tw-mb-4">
                 <Form.Label>Signature</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -134,9 +134,10 @@ export default function NextGenAdminArtistSignCollection(
               </Form.Group>
               {!loading && errors.length > 0 && printAdminErrors(errors)}
               <Button
-                className={`mt-3 mb-3 seize-btn`}
+                className={`tw-mb-4 tw-mt-4 tw-rounded-none tw-border-0 tw-px-5 tw-py-1.5 tw-font-bold disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
                 disabled={submitting || loading}
-                onClick={() => submit()}>
+                onClick={() => submit()}
+              >
                 Submit
               </Button>
             </Form>
@@ -148,7 +149,7 @@ export default function NextGenAdminArtistSignCollection(
           </Col>
         </Row>
       ) : (
-        <Row className="pt-3">
+        <Row className="tw-pt-4">
           <Col>
             <b>ONLY COLLECTION ARTISTS CAN USE THIS SECTION.</b>
           </Col>
