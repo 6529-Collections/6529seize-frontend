@@ -4030,6 +4030,49 @@
       "source_refs": ["ops/docs/waves/header/feature-wave-header-controls.md"]
     },
     {
+      "id": "waves.notification-controls",
+      "kind": "ui_affordance",
+      "title": "Wave notification and mute controls",
+      "aliases": [
+        "wave notifications",
+        "wave mute",
+        "mute wave",
+        "unmute wave",
+        "bell slash",
+        "crossed out bell",
+        "speaker button",
+        "all message notifications"
+      ],
+      "keywords": [
+        "waves",
+        "notifications",
+        "mute",
+        "unmute",
+        "bell",
+        "speaker",
+        "all",
+        "messages",
+        "ALL"
+      ],
+      "facts": [
+        "The speaker button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
+        "The speaker menu has an @ALL option for @ALL mention notifications.",
+        "The speaker menu has a Notify for all messages option for every-message notifications.",
+        "When all-message notifications are unavailable and not already enabled, the speaker menu keeps that option visible but disabled.",
+        "The bell-slash button mutes waves before or after joining.",
+        "When a wave is muted, the bell-slash Muted control unmutes it.",
+        "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/messages"],
+      "tags": ["waves", "notifications", "mute"],
+      "source_refs": [
+        "components/waves/specs/WaveNotificationSettings.tsx",
+        "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
+        "ops/docs/waves/sidebars/feature-wave-notification-controls.md"
+      ]
+    },
+    {
       "id": "waves.header.share-link",
       "kind": "ui_affordance",
       "title": "Wave link share and copy",
