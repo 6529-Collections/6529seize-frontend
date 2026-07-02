@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import styles from "./Delegation.module.scss";
 
@@ -14,9 +13,13 @@ import { getGasError } from "./delegation-shared";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
+  DelegationFormField,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
+  DelegationFormInput,
   DelegationFormLabel,
+  DelegationFormRow,
+  DelegationFormSelect,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 
@@ -95,29 +98,27 @@ export default function RevokeDelegationWithSubComponent(
   }
 
   return (
-    <Container className="no-padding">
-      <Row className="pt-2">
-        <Col xs={10} className="pt-3 pb-1">
+    <div className="tw-w-full tw-p-0">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
+        <div className="tw-w-10/12 tw-px-3 tw-pb-1 tw-pt-3">
           <h4>Revoke as Delegation Manager</h4>
-        </Col>
-        <Col
-          xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
-        >
+        </div>
+        <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3 tw-pb-1 tw-pt-3">
           <DelegationCloseButton onHide={props.onHide} title="Revocation" />
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>
-          <Form>
-            <Form.Group as={Row} className="pb-4">
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-w-full tw-px-3">
+          <form>
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Original Delegator"
                 tooltip="Original Delegator of Sub Delegation - The address the delegation will be revoked for"
               />
-              <Col sm={9}>
-                <Form.Control
-                  className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
+              <DelegationFormField>
+                <DelegationFormInput
+                  aria-label="Original Delegator"
+                  className={styles["formInputDisabled"]}
                   type="text"
                   value={
                     orignalDelegatorEnsResolution.data
@@ -126,20 +127,21 @@ export default function RevokeDelegationWithSubComponent(
                   }
                   disabled
                 />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="pb-4">
+              </DelegationFormField>
+            </DelegationFormRow>
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Delegation Manager"
                 tooltip="Address executing the revocation"
               />
-              <Col sm={9}>
+              <DelegationFormField>
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
+                  label="Delegation Manager"
                 />
-              </Col>
-            </Form.Group>
+              </DelegationFormField>
+            </DelegationFormRow>
             <DelegationFormCollectionFormGroup
               collection={newDelegationCollection}
               setCollection={setNewDelegationCollection}
@@ -153,14 +155,14 @@ export default function RevokeDelegationWithSubComponent(
               title="Revoke Address"
               tooltip="Revoke wallet Address"
             />
-            <Form.Group as={Row} className="pb-4">
+            <DelegationFormRow>
               <DelegationFormLabel
                 title="Use Case"
                 tooltip="Delegation Use Case"
               />
-              <Col sm={9}>
-                <Form.Select
-                  className={`${styles["formInput"]}`}
+              <DelegationFormField>
+                <DelegationFormSelect
+                  aria-label="Use Case"
                   value={newDelegationUseCase}
                   onChange={(e) => {
                     const i = parseInt(e.target.value);
@@ -183,9 +185,9 @@ export default function RevokeDelegationWithSubComponent(
                       #{uc.use_case} - {uc.display}
                     </option>
                   ))}
-                </Form.Select>
-              </Col>
-            </Form.Group>
+                </DelegationFormSelect>
+              </DelegationFormField>
+            </DelegationFormRow>
             <DelegationSubmitGroups
               title={`Revoking #${newDelegationUseCase} - ${newDelegationUseCaseDisplay} as Delegation Manager`}
               writeParams={contractWriteDelegationConfigParams}
@@ -196,9 +198,9 @@ export default function RevokeDelegationWithSubComponent(
               onSetToast={props.onSetToast}
               submitBtnLabel={"Revoke"}
             />
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

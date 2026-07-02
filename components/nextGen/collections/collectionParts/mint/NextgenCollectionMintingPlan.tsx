@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Dropdown } from "react-bootstrap";
 import type {
   NextGenCollection,
   NextgenAllowlist,
@@ -119,12 +118,10 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     const startTime = Time.seconds(start);
     const endTime = Time.seconds(end);
     return (
-      <div
-        key={getRandomObjectId()}
-        className="tw-flex tw-flex-col tw-py-2">
+      <div key={getRandomObjectId()} className="tw-flex tw-flex-col tw-py-2">
         <div className={styles["phaseBox"]}>
-          <span className="tw-flex tw-items-center tw-justify-center tw-pb-4">
-            <h4 className="font-color tw-mb-0">{phaseName}</h4>
+          <span className="tw-[padding-bottom:1rem] tw-flex tw-items-center tw-justify-center">
+            <h4 className="font-color tw-[margin-bottom:0]">{phaseName}</h4>
           </span>
           <table className="tw-w-full">
             <tbody>
@@ -153,17 +150,17 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
 
   return (
     <div className="tailwind-scope tw-mx-auto tw-w-full tw-px-3 tw-py-4 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] xl:tw-max-w-[1140px] 2xl:tw-max-w-[1320px]">
-      <div className="tw-pb-4">
+      <div className="tw-[padding-bottom:1rem]">
         <NextGenCollectionHeader
           collection={props.collection}
           collection_link={true}
         />
       </div>
-      <div className="tw-pt-4">
-        <h3 className="tw-mb-0">Distribution Plan</h3>
+      <div className="tw-[padding-top:1rem]">
+        <h3 className="tw-[margin-bottom:0]">Distribution Plan</h3>
       </div>
       <hr />
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-6 tw-pt-3 sm:tw-grid-cols-2 md:tw-grid-cols-3">
+      <div className="tw-[padding-top:0.75rem] tw-grid tw-grid-cols-1 tw-gap-x-6 sm:tw-grid-cols-2 md:tw-grid-cols-3">
         <div className="tw-col-span-full">
           <h2>Phases</h2>
         </div>
@@ -178,32 +175,44 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           )}
       </div>
       {props.collection.distribution_plan && (
-        <div className="tw-pt-3">
+        <div className="tw-[padding-top:0.75rem]">
           <PdfViewer
             file={props.collection.distribution_plan}
             name={`${props.collection.name} Distribution Plan`}
           />
         </div>
       )}
-      <div className="tw-pt-4" ref={allowlistScrollTarget}>
+      <div className="tw-[padding-top:1rem]" ref={allowlistScrollTarget}>
         <div className="tw-flex tw-items-center tw-justify-between">
-          <Dropdown className={styles["filterDropdown"]} drop={"down-centered"}>
-            <Dropdown.Toggle>
-              {selectedPhase?.phase ?? "All Phases"}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={() => setSelectedPhase(undefined)}>
+          <label
+            className={`${styles["filterDropdown"]} tw-flex tw-items-center tw-gap-2`}
+          >
+            <span className="tw-sr-only">Phase</span>
+            <select
+              value={selectedPhase?.phase ?? ""}
+              onChange={(event) => {
+                const nextPhase = phases.find(
+                  (phase) => phase.phase === event.target.value
+                );
+                setSelectedPhase(nextPhase);
+              }}
+              className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-py-1 tw-pl-1 tw-pr-8 tw-text-lg tw-font-bold tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+              style={{ colorScheme: "dark" }}
+            >
+              <option value="" className="tw-bg-black tw-text-white">
                 All Phases
-              </Dropdown.Item>
+              </option>
               {phases.map((p) => (
-                <Dropdown.Item
+                <option
                   key={`filter-${p.phase}`}
-                  onClick={() => setSelectedPhase(p)}>
+                  value={p.phase}
+                  className="tw-bg-black tw-text-white"
+                >
                   {p.phase}
-                </Dropdown.Item>
+                </option>
               ))}
-            </Dropdown.Menu>
-          </Dropdown>
+            </select>
+          </label>
           <SearchWalletsDisplay
             searchWallets={searchWallets}
             setSearchWallets={setSearchWallets}
@@ -229,7 +238,8 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                     href={`/${al.address}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="decoration-hover-underline">
+                    className="decoration-hover-underline"
+                  >
                     {al.wallet_display && `${al.wallet_display} - `}
                     {al.address}
                   </Link>
