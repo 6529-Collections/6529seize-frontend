@@ -14,6 +14,7 @@ import {
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
+import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
@@ -646,6 +647,7 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 ] as const);
 
 export const EN_US_MESSAGES = {
+  ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
