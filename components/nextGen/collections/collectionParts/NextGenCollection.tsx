@@ -26,13 +26,13 @@ export function printViewButton(
   return (
     <button
       onClick={() => setView(v)}
-      className={`btn-link decoration-none ${
+      className={`tw-border-0 tw-bg-transparent !tw-p-0 tw-font-[inherit] tw-text-inherit tw-cursor-pointer tw-outline-[inherit] hover:tw-bg-transparent focus:tw-bg-transparent active:tw-bg-transparent hover:tw-text-[#9a9a9a] focus:tw-text-[#9a9a9a] active:tw-text-[#9a9a9a] tw-no-underline ${
         v === currentView ? styles["nextgenTokenDetailsLinkSelected"] : ""
       }`}
     >
       <h4
         className={
-          v === currentView ? "font-color" : "font-color-h cursor-pointer"
+          v === currentView ? "tw-text-white" : "tw-text-[#9a9a9a] tw-cursor-pointer"
         }
       >
         {v}
@@ -88,10 +88,10 @@ export default function NextGenCollectionComponent({
       {collection.mint_count > 0 && (
         <NextGenCollectionSlideshow collection={collection} />
       )}
-      <div className="pt-3 pb-2 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="tw-pt-4 tw-pb-2 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
         <NextGenCollectionHeader collection={collection} show_links={true} />
-        <div className="pt-5 -tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="d-flex gap-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-pt-12 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-flex tw-gap-6 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             {printViewButton(view, NextgenCollectionView.OVERVIEW, updateView)}
             {printViewButton(view, NextgenCollectionView.ABOUT, updateView)}
             {printViewButton(
@@ -106,12 +106,12 @@ export default function NextGenCollectionComponent({
             )}
           </div>
         </div>
-        <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionDetails collection={collection} view={view} />
           </div>
         </div>
-        <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-pt-6 -tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionArt
               collection={collection}
@@ -120,7 +120,7 @@ export default function NextGenCollectionComponent({
           </div>
         </div>
       </div>
-      <div className="pt-4 pb-4 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="tw-pt-6 tw-pb-6 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h4>About the Artist</h4>

@@ -357,10 +357,10 @@ test("renders with proper container structure for regular mode", () => {
   render(<NextGenTokenImage token={token} />);
   let imageContainer = screen.getByAltText("token").parentElement;
   expect(imageContainer).toHaveClass(
-    "d-flex",
-    "flex-column",
-    "align-items-center",
-    "justify-content-center"
+    "tw-flex",
+    "tw-flex-col",
+    "tw-items-center",
+    "tw-justify-center"
   );
 });
 

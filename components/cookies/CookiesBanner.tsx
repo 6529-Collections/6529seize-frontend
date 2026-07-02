@@ -22,11 +22,11 @@ export default function CookiesBanner() {
     <div
       className={`${styles["banner"]} ${isApp ? styles["bannerMobile"] : ""} ${
         isApp && isAppleMobile ? styles["bannerIOS"] : ""
-      } d-flex align-items-center justify-content-between gap-2 ${
-        isApp ? `flex-column` : ""
+      } tw-flex tw-items-center tw-justify-between tw-gap-2 ${
+        isApp ? `tw-flex-col` : ""
       }`}
     >
-      <span className="d-flex align-items-center gap-2">
+      <span className="tw-flex tw-items-center tw-gap-2">
         <Image
           unoptimized
           src="/intern.png"
@@ -34,17 +34,17 @@ export default function CookiesBanner() {
           width={isMobile ? 22 : 40}
           height={isMobile ? 22 : 40}
         />
-        <span className="font-bolder">seize the cookies of consent</span>
+        <span className="tw-font-bold">seize the cookies of consent</span>
       </span>
-      <span className="d-flex align-items-center justify-content-between gap-3">
+      <span className="tw-flex tw-items-center tw-justify-between tw-gap-4">
         <button className={styles["accept"]} onClick={consent}>
           Accept
         </button>
         <button className={styles["reject"]} onClick={reject}>
-          <span className="font-smaller">Reject Non-Essential</span>
+          <span className="tw-text-sm">Reject Non-Essential</span>
         </button>
         <Link className={styles["learnMore"]} href="/about/cookie-policy">
-          <span className="font-smaller">Learn more</span>
+          <span className="tw-text-sm">Learn more</span>
         </Link>
       </span>
     </div>
