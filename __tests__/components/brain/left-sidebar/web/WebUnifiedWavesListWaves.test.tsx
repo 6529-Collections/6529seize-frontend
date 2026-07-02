@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import WebUnifiedWavesListWaves from "@/components/brain/left-sidebar/web/WebUnifiedWavesListWaves";
-import { SIDEBAR_SUBWAVE_ROW_TRANSITION_MS } from "@/hooks/useAnimatedSidebarWaveRows";
+import { SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS } from "@/hooks/useAnimatedSidebarWaveRows";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
@@ -106,6 +106,12 @@ const baseWaves = [
   createMockMinimalWave({ id: "f1", isFollowing: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
+
+const flushAnimatedSidebarRows = async () => {
+  await act(async () => {
+    await Promise.resolve();
+  });
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -417,7 +423,7 @@ it("passes pin controls through for pinned announcement waves", () => {
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "true");
 });
 
-it("expands regular subwaves and keeps child rows unpinned", () => {
+it("expands regular subwaves and keeps child rows unpinned", async () => {
   renderWebWaves({
     waves: [
       createMockMinimalWave({
@@ -453,6 +459,7 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
       name: "View 1 subwave for Mock Wave",
     })
   );
+  await flushAnimatedSidebarRows();
 
   expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
   expect(
@@ -482,7 +489,7 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
   expect(screen.getByTestId("wave-child")).toHaveAttribute("data-pin", "false");
 });
 
-it("hides expanded child rows immediately while the sidebar is collapsed", () => {
+it("hides expanded child rows immediately while the sidebar is collapsed", async () => {
   const waves = [
     createMockMinimalWave({
       id: "parent",
@@ -510,6 +517,7 @@ it("hides expanded child rows immediately while the sidebar is collapsed", () =>
       name: "View 1 subwave for Mock Wave",
     })
   );
+  await flushAnimatedSidebarRows();
 
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 
@@ -560,7 +568,7 @@ it("hides expanded child rows immediately while the sidebar is collapsed", () =>
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 });
 
-it("keeps child rows mounted while collapse animation runs", () => {
+it("keeps child rows mounted while collapse animation runs", async () => {
   jest.useFakeTimers();
 
   try {
@@ -588,6 +596,7 @@ it("keeps child rows mounted while collapse animation runs", () => {
         name: "View 1 subwave for Mock Wave",
       })
     );
+    await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
     expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 
@@ -596,6 +605,7 @@ it("keeps child rows mounted while collapse animation runs", () => {
         name: "Hide Mock Wave subwaves",
       })
     );
+    await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledTimes(1);
 
     expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
@@ -604,7 +614,7 @@ it("keeps child rows mounted while collapse animation runs", () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
+      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
     });
 
     expect(screen.queryByTestId("wave-child")).toBeNull();
@@ -613,7 +623,7 @@ it("keeps child rows mounted while collapse animation runs", () => {
   }
 });
 
-it("keeps highly rated child rows mounted while the section exit animation runs", () => {
+it("drops highly rated child rows when their parent leaves the section", async () => {
   jest.useFakeTimers();
 
   try {
@@ -644,6 +654,7 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
         name: "View 1 subwave for Mock Wave",
       })
     );
+    await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
     expect(
       screen.getByLabelText("Worth checking out waves")
@@ -659,19 +670,9 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
         hideHeaders
       />
     );
+    await flushAnimatedSidebarRows();
 
     expect(screen.queryByTestId("wave-highly-rated-parent")).toBeNull();
-    expect(
-      screen.getByLabelText("Worth checking out waves")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("wave-highly-rated-child").parentElement
-    ).toHaveAttribute("data-sidebar-subwave-row-state", "exiting");
-
-    act(() => {
-      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
-    });
-
     expect(screen.queryByTestId("wave-highly-rated-child")).toBeNull();
     expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   } finally {

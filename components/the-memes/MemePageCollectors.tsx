@@ -1,12 +1,13 @@
 import NFTLeaderboard from "@/components/leaderboard/NFTLeaderboard";
-import type { MemesExtendedData, NFT } from "@/entities/INFT";
+import type { NFT } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { MemeCollectorsStats } from "./MemePageLiveStats";
 
 export function MemePageCollectorsSubMenu(props: {
   show: boolean;
   nft: NFT | undefined;
-  nftMeta?: MemesExtendedData | undefined;
+  nftMeta?: ApiMemesExtendedData | undefined;
   locale?: SupportedLocale;
 }) {
   if (props.show && props.nft) {
