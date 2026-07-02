@@ -174,7 +174,7 @@ export default function BlockFinderClient() {
   return (
     <div className="tw-bg-iron-900">
       <div className="tailwind-scope tw-relative tw-mx-auto tw-min-h-screen tw-overflow-y-auto tw-px-4 tw-pb-12 tw-pt-8 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-        <h1 className="pb-4 tw-text-white">Block Finder</h1>
+        <h1 className="tw-pb-6 tw-text-white">Block Finder</h1>
         <div className="tw-mb-5 tw-mt-3 tw-flex tw-w-full tw-gap-x-4 tw-gap-y-5">
           <div className="tw-w-1/2">
             <BlockPickerDateSelect

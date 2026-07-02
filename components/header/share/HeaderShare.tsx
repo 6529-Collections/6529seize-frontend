@@ -1076,7 +1076,7 @@ export function HeaderQRModal({
       <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
         <a
           href={url}
-          className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8"
+          className="tw-flex tw-flex-col tw-items-center tw-gap-8 tw-no-underline"
         >
           <Image
             unoptimized
@@ -1090,7 +1090,7 @@ export function HeaderQRModal({
           />
           <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-200 tw-px-4 tw-py-3 tw-text-iron-900">
             <FontAwesomeIcon icon={faExternalLink} />
-            <div className="no-wrap">
+            <div className="tw-min-w-fit tw-whitespace-nowrap">
               {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
             </div>
           </div>
@@ -1573,7 +1573,7 @@ function CoreAppDownload({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="decoration-none tw-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-black tw-px-5 tw-py-3 tw-transition-all tw-duration-300 tw-ease-out hover:tw-scale-[1.03]"
+      className="tw-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-black tw-px-5 tw-py-3 tw-no-underline tw-transition-all tw-duration-300 tw-ease-out hover:tw-scale-[1.03]"
     >
       <div className="tw-rounded-full tw-bg-white tw-p-4">
         <Image
@@ -1588,7 +1588,7 @@ function CoreAppDownload({
         />
       </div>
       <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
-        <div className="no-wrap tw-text-lg tw-font-medium">
+        <div className="tw-min-w-fit tw-whitespace-nowrap tw-text-lg tw-font-medium">
           {platform} v{version}
         </div>
       </div>
