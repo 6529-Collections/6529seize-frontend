@@ -33,6 +33,8 @@ export default function ClaimTransactionModal({
   const txUrl = state.txHash
     ? getTransactionLink(chain.id, state.txHash)
     : null;
+  const txLinkClassName =
+    "tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black tw-no-underline tw-transition hover:tw-bg-[#d7d7d7]";
   const modalTitle = state.actionLabel ?? "Onchain Action";
 
   if (typeof document === "undefined") return null;
@@ -99,7 +101,7 @@ export default function ClaimTransactionModal({
               </div>
               {txUrl ? (
                 <a
-                  className="btn btn-white btn-sm tw-mt-3 tw-font-medium"
+                  className={`${txLinkClassName} tw-mt-3`}
                   href={txUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -135,7 +137,7 @@ export default function ClaimTransactionModal({
                 Transaction Submitted
                 {txUrl ? (
                   <a
-                    className="btn btn-white btn-sm tw-font-medium"
+                    className={txLinkClassName}
                     href={txUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -162,7 +164,7 @@ export default function ClaimTransactionModal({
                 Transaction Successful!
                 {txUrl ? (
                   <a
-                    className="btn btn-white btn-sm tw-font-medium"
+                    className={txLinkClassName}
                     href={txUrl}
                     target="_blank"
                     rel="noopener noreferrer"

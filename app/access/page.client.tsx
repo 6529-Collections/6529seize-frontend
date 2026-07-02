@@ -61,7 +61,7 @@ export default function AccessPage() {
         <input
           disabled={inputDisabled}
           type="text"
-          className={inputDisabled ? "text-center" : ""}
+          className={inputDisabled ? "tw-text-center" : ""}
           defaultValue={inputDisabled ? "Go to 6529.io" : ""}
           aria-label="Team access code"
           placeholder={inputDisabled ? "Go to 6529.io" : "Team Login"}

@@ -57,9 +57,9 @@ export default function TokenSlideshow({
             {displayTokens.map((token, index) => (
               <SwiperSlide
                 key={`${token.id}-${index}`}
-                className="pt-4 pb-4 unselectable"
+                className="tw-pt-6 tw-pb-6 tw-select-none"
               >
-                <MemoizedTokenImage token={token} info_class="font-smaller" />
+                <MemoizedTokenImage token={token} info_class="tw-text-sm" />
               </SwiperSlide>
             ))}
           </Swiper>
