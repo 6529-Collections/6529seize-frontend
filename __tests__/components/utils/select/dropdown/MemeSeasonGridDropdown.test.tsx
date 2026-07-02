@@ -1,5 +1,6 @@
 import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
 import type { MemeSeason } from "@/entities/ISeason";
+import { commonApiFetch } from "@/services/api/common-api";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
 const mockSeasons: MemeSeason[] = [
@@ -352,6 +353,7 @@ describe("MemeSeasonGridDropdown", () => {
     expect(menuItems[0]).toHaveTextContent("All Year 1");
     expect(menuItems[1]).toHaveTextContent("SZN 2");
     expect(menuItems[2]).toHaveTextContent("SZN 3");
+    expect(commonApiFetch).not.toHaveBeenCalled();
   });
 
   it("uses a two-column grid for four scoped seasons", async () => {

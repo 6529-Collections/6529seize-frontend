@@ -84,6 +84,12 @@ describe("theMemesFilters", () => {
       yearId: 4,
     });
     expect(
+      normalizeMemeFilterIds({ seasonId: 999, seasons, yearId: 4 })
+    ).toEqual({
+      seasonId: null,
+      yearId: 4,
+    });
+    expect(
       normalizeMemeFilterIds({ seasonId: null, seasons, yearId: 99 })
     ).toEqual({
       seasonId: null,

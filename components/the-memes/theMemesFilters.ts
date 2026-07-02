@@ -103,7 +103,7 @@ export function normalizeMemeFilterIds({
   const season = seasons.find((candidate) => candidate.id === seasonId);
 
   if (season === undefined) {
-    return { seasonId: null, yearId: null };
+    return { seasonId: null, yearId };
   }
 
   if (yearId !== null && getMemeYearFromSeason(season) !== yearId) {

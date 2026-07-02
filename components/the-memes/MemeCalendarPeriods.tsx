@@ -18,6 +18,9 @@ import Link from "next/link";
 const SECONDARY_PERIOD_CLASS_NAME = "tw-hidden md:tw-flex";
 const PERIOD_SEPARATOR_CLASS_NAME =
   "tw-text-xs tw-font-medium tw-text-iron-700";
+const PRIMARY_PERIOD_CHIP_CLASS_NAME =
+  "tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100";
+const PRIMARY_PERIOD_CHIP_LINK_CLASS_NAME = `${PRIMARY_PERIOD_CHIP_CLASS_NAME} tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`;
 const SECONDARY_PERIOD_ITEM_CLASS_NAME =
   "tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-text-[10.5px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500";
 
@@ -105,14 +108,12 @@ export default function MemeCalendarPeriods({
           aria-label={t(locale, "memeCalendar.periods.seasonLinkAriaLabel", {
             season: formattedSeason,
           })}
-          className="tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          className={PRIMARY_PERIOD_CHIP_LINK_CLASS_NAME}
         >
           {seasonContent}
         </Link>
       ) : (
-        <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100">
-          {seasonContent}
-        </span>
+        <span className={PRIMARY_PERIOD_CHIP_CLASS_NAME}>{seasonContent}</span>
       )}
       <span
         aria-hidden="true"
@@ -148,7 +149,7 @@ export default function MemeCalendarPeriods({
                     year: formattedYear,
                   }
                 )}
-                className={`${SECONDARY_PERIOD_ITEM_CLASS_NAME} tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+                className={PRIMARY_PERIOD_CHIP_LINK_CLASS_NAME}
               >
                 {secondaryPeriodContent(label, number)}
               </Link>
