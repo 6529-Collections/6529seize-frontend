@@ -1,10 +1,6 @@
 "use client";
 import styles from "./AppWallet.module.scss";
-import type {
-  MouseEvent as ReactMouseEvent,
-  ReactNode,
-  RefObject,
-} from "react";
+import type { ReactNode, RefObject } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
@@ -87,15 +83,6 @@ function AppWalletModalShell(
     };
   }, [show]);
 
-  const handleDialogMouseDown = useCallback(
-    (event: ReactMouseEvent<HTMLDialogElement>) => {
-      if (event.target === event.currentTarget) {
-        onHide();
-      }
-    },
-    [onHide]
-  );
-
   if (typeof document === "undefined") {
     return null;
   }
@@ -105,27 +92,35 @@ function AppWalletModalShell(
       ref={dialogRef}
       aria-modal="true"
       aria-labelledby={titleId}
-      className="tailwind-scope tw-m-0 tw-flex tw-h-[100dvh] tw-max-h-none tw-w-screen tw-max-w-none tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-4 tw-text-inherit backdrop:tw-bg-black/50"
+      className="tailwind-scope tw-relative tw-m-0 tw-h-[100dvh] tw-max-h-none tw-w-screen tw-max-w-none tw-border-none tw-bg-transparent tw-p-0 tw-text-inherit backdrop:tw-bg-black/50"
       onCancel={(event) => event.preventDefault()}
-      onMouseDown={handleDialogMouseDown}
     >
-      <div className="tw-w-full tw-max-w-[500px]">
-        <div className={styles["modalHeader"]}>
-          <h2
-            id={titleId}
-            className="tw-m-0 tw-text-xl tw-font-medium tw-leading-[1.2]"
+      <button
+        type="button"
+        aria-label={`Close ${title}`}
+        className="tw-absolute tw-inset-0 tw-cursor-default tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0"
+        onClick={onHide}
+        tabIndex={-1}
+      />
+      <div className="tw-relative tw-z-10 tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-p-4">
+        <div className="tw-w-full tw-max-w-[500px]">
+          <div className={styles["modalHeader"]}>
+            <h2
+              id={titleId}
+              className="tw-m-0 tw-text-xl tw-font-medium tw-leading-[1.2]"
+            >
+              {title}
+            </h2>
+          </div>
+          <div className={styles["modalContent"]}>{children}</div>
+          <div
+            className={clsx(
+              styles["modalContent"],
+              "tw-flex tw-justify-end tw-gap-2"
+            )}
           >
-            {title}
-          </h2>
-        </div>
-        <div className={styles["modalContent"]}>{children}</div>
-        <div
-          className={clsx(
-            styles["modalContent"],
-            "tw-flex tw-justify-end tw-gap-2"
-          )}
-        >
-          {footer}
+            {footer}
+          </div>
         </div>
       </div>
     </dialog>,
