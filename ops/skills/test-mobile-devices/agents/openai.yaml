@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Mobile Devices"
+  short_description: "Run native iOS simulator and real-device QA evidence."
+  default_prompt: "Use $test-mobile-devices to plan and report native iOS simulator or real iPhone QA evidence for this frontend change."

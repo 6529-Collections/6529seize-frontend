@@ -129,7 +129,7 @@ export default function MetricCard({
         </div>
       </div>
 
-      <div className="tw-grid tw-grid-cols-[1fr_auto_1fr] tw-items-start tw-gap-6">
+      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 min-[420px]:tw-grid-cols-[1fr_auto_1fr] min-[420px]:tw-gap-6">
         <StatBlock
           label="Last 24h"
           currentValue={getCount(dailyData, "current")}
@@ -140,7 +140,7 @@ export default function MetricCard({
           isPrimary
           suffix={suffix}
         />
-        <div className="tw-h-full tw-w-px tw-bg-iron-700/50" />
+        <div className="tw-hidden tw-h-full tw-w-px tw-bg-iron-700/50 min-[420px]:tw-block" />
         <StatBlock
           label="Last 7 Days"
           currentValue={getCount(weeklyData, "current")}
