@@ -12,8 +12,10 @@ const renderToggle = (
       isExpanded={false}
       isLoading={false}
       knownSubwavesCount={null}
+      layoutVariant="app"
       onClick={onClick}
       parentWaveName="Parent Wave"
+      showConnector={false}
       unreadDropsCount={0}
       {...props}
     />
@@ -65,7 +67,8 @@ describe("SidebarSubwavesToggle", () => {
     const unreadBadge = screen.getByText("5 new");
     const wrapper = button.parentElement;
 
-    expect(wrapper).toHaveClass("tw-pl-[16.5px]");
+    expect(wrapper).toHaveClass("tw-pl-[74px]");
+    expect(wrapper).toHaveClass("md:tw-pl-[70px]");
     expect(wrapper).toHaveClass("tw-pr-5");
     expect(wrapper).toHaveClass("tw-min-h-[42px]");
     expect(wrapper).toHaveClass("tw-pb-2");
