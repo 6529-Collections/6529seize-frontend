@@ -77,7 +77,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   return (
     <>
       <div
-        className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
+        className="!tw-p-0 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
         ref={scrollTarget}
       >
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
@@ -86,7 +86,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
           </div>
         </div>
         <div
-          className={`pt-2 -tw-mx-3 tw-flex tw-flex-wrap ${styles["logsScrollContainer"]}`}
+          className={`tw-pt-2 -tw-mx-3 tw-flex tw-flex-wrap ${styles["logsScrollContainer"]}`}
         >
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <table
@@ -105,7 +105,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
           </div>
         </div>
         {totalResults > PAGE_SIZE && transactionsLoaded && (
-          <div className="text-center pt-4 pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-text-center tw-pt-6 tw-pb-6 -tw-mx-3 tw-flex tw-flex-wrap">
             <Pagination
               page={page}
               pageSize={PAGE_SIZE}
@@ -123,7 +123,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
         )}
       </div>
       <div
-        className="pt-4 no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
+        className="tw-pt-6 !tw-p-0 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
         ref={logsScrollTarget}
       >
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
@@ -131,7 +131,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
             <h3>Collection Provenance</h3>
           </div>
         </div>
-        <div className="pt-2 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-pt-2 -tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             {logs.map((log, index) => (
               <NextGenCollectionProvenanceRow
@@ -145,7 +145,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
           </div>
         </div>
         {logsTotalResults > PAGE_SIZE && logsLoaded && (
-          <div className="text-center pt-4 pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
+          <div className="tw-text-center tw-pt-6 tw-pb-6 -tw-mx-3 tw-flex tw-flex-wrap">
             <Pagination
               page={logsPage}
               pageSize={PAGE_SIZE}

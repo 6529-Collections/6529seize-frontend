@@ -77,7 +77,7 @@ export default function ProxyCreateTargetSearch({
 
   return (
     <Combobox as="div" value={null} onChange={onTargetSelect}>
-      <Combobox.Label className="mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+      <Combobox.Label className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
         Assigned to
       </Combobox.Label>
       {profileProxy ? (

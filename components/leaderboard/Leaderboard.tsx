@@ -418,7 +418,7 @@ export default function Leaderboard(
               ) : (
                 <>
                   {numberWithCommas(selectedNetworkTdhChange)}{" "}
-                  <span className="font-smaller">
+                  <span className="tw-text-sm">
                     ({selectedGlobalTdhRateChangeLabel})
                   </span>
                 </>

@@ -14,7 +14,7 @@ describe("printViewButton", () => {
     );
     const button = screen.getByRole("button");
     expect(button.className).toMatch(/nextgenTokenDetailsLinkSelected/);
-    expect(screen.getByText("About")).toHaveClass("font-color");
+    expect(screen.getByText("About")).toHaveClass("tw-text-white");
     fireEvent.click(button);
     expect(setView).toHaveBeenCalledWith(NextgenCollectionView.ABOUT);
   });
@@ -31,7 +31,8 @@ describe("printViewButton", () => {
     const button = screen.getByRole("button");
     expect(button.className).not.toMatch(/nextgenTokenDetailsLinkSelected/);
     expect(screen.getByText("Provenance")).toHaveClass(
-      "font-color-h cursor-pointer"
+      "tw-text-[#9a9a9a]",
+      "tw-cursor-pointer"
     );
     fireEvent.click(button);
     expect(setView).toHaveBeenCalledWith(NextgenCollectionView.PROVENANCE);

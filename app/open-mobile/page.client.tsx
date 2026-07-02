@@ -69,7 +69,10 @@ export default function OpenMobilePage() {
             {printShareMobileApps()}
           </div>
         </div>
-        <button onClick={handleBack} className="tw-mt-10 btn-link">
+        <button
+          onClick={handleBack}
+          className="tw-mt-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit hover:tw-text-[#9a9a9a]"
+        >
           Back to 6529.io
         </button>
       </div>
