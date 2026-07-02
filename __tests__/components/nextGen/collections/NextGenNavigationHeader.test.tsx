@@ -45,13 +45,17 @@ describe("NextGenNavigationHeader", () => {
 
     const row = screen.getByTestId("collections-dropdown").parentElement
       ?.parentElement;
-    expect(row).toHaveClass("flex-nowrap", "justify-content-between", "w-100");
-    expect(row).not.toHaveClass("flex-wrap");
+    expect(row).toHaveClass(
+      "tw-flex-nowrap",
+      "tw-justify-between",
+      "tw-w-full"
+    );
+    expect(row).not.toHaveClass("tw-flex-wrap");
     expect(
       screen.getByRole("button", { name: "LFG: Start the Show!" }).parentElement
-    ).toHaveClass("flex-shrink-0");
+    ).toHaveClass("tw-shrink-0");
     expect(screen.getByText("Featured").closest("span")).not.toHaveClass(
-      "flex-wrap"
+      "tw-flex-wrap"
     );
     expect(
       screen.getByRole("button", { name: "LFG: Start the Show!" })
@@ -69,9 +73,13 @@ describe("NextGenNavigationHeader", () => {
     await waitFor(() => {
       const row = screen.getByTestId("collections-dropdown").parentElement
         ?.parentElement;
-      expect(row).toHaveClass("flex-nowrap", "justify-content-start", "w-100");
-      expect(row).not.toHaveClass("justify-content-between");
-      expect(row?.parentElement).toHaveClass("flex-column");
+      expect(row).toHaveClass(
+        "tw-flex-nowrap",
+        "tw-justify-start",
+        "tw-w-full"
+      );
+      expect(row).not.toHaveClass("tw-justify-between");
+      expect(row?.parentElement).toHaveClass("tw-flex-col");
     });
 
     const logo = within(
@@ -80,9 +88,9 @@ describe("NextGenNavigationHeader", () => {
     expect(logo.getAttribute("style")).toContain("width: 250px");
     expect(
       screen.getByRole("button", { name: "LFG: Start the Show!" }).parentElement
-    ).toHaveClass("flex-shrink-0");
+    ).toHaveClass("tw-shrink-0");
     expect(screen.getByText("Featured").closest("span")).not.toHaveClass(
-      "flex-wrap"
+      "tw-flex-wrap"
     );
   });
 });

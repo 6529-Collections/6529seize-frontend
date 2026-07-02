@@ -11,10 +11,16 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
 import Image from "next/image";
-import React, { useCallback, useMemo, useSyncExternalStore } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { Tooltip } from "react-tooltip";
 
 const MAX_QUICK_REACTIONS = 3;
+const DEFAULT_QUICK_REACTION_ID = "+1";
 
 const WaveDropActionsQuickReact: React.FC<{
   readonly drop: ExtendedDrop;
@@ -27,17 +33,13 @@ const WaveDropActionsQuickReact: React.FC<{
   });
 
   // Subscribe to localStorage changes (hydration-safe)
-  const reactionSnapshot = useSyncExternalStore(
+  useSyncExternalStore(
     subscribeToReactionStore,
     getReactionSnapshot,
     getReactionSnapshotServer
   );
 
-  // Derive top reactions; re-computes when the store changes
-  const topReactionCodes = useMemo(
-    () => getTopReactions(MAX_QUICK_REACTIONS),
-    [reactionSnapshot]
-  );
+  const topReactionCodes = getTopReactions(MAX_QUICK_REACTIONS);
 
   const buttons = topReactionCodes.map((code) => (
     <QuickReactButton
@@ -68,15 +70,24 @@ const QuickReactButton: React.FC<{
   readonly onReact: (code: string) => void;
   readonly isMobile?: boolean;
 }> = ({ reactionCode, dropId, canReact, onReact, isMobile = false }) => {
-  const { emojiMap, findNativeEmoji } = useEmoji();
+  const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
 
   const emojiId = useMemo(
     () => reactionCode.replaceAll(":", ""),
     [reactionCode]
   );
 
+  useEffect(() => {
+    if (emojiId === DEFAULT_QUICK_REACTION_ID) {
+      return;
+    }
+
+    void loadEmojiData();
+  }, [emojiId, loadEmojiData]);
+
   const emojiSize = isMobile ? "tw-size-7" : "tw-size-5";
   const textSize = isMobile ? "tw-text-[1.625rem]" : "tw-text-[1.25rem]";
+  const emojiLabel = useMemo(() => emojiId.replaceAll("_", " "), [emojiId]);
 
   const emojiNode = useMemo(() => {
     const fallback = (
@@ -99,7 +110,7 @@ const QuickReactButton: React.FC<{
         <div className={`tw-relative ${emojiSize}`}>
           <Image
             src={customSrc}
-            alt={emojiId}
+            alt={emojiLabel}
             fill
             sizes={isMobile ? "28px" : "20px"}
             unoptimized
@@ -121,7 +132,15 @@ const QuickReactButton: React.FC<{
     }
 
     return fallback;
-  }, [emojiId, emojiMap, findNativeEmoji, emojiSize, textSize]);
+  }, [
+    emojiId,
+    emojiLabel,
+    emojiMap,
+    findNativeEmoji,
+    emojiSize,
+    isMobile,
+    textSize,
+  ]);
 
   const handleClick = useCallback(() => {
     onReact(reactionCode);
