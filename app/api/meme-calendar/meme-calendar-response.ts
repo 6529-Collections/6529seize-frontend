@@ -46,7 +46,7 @@ interface MemeCalendarMintResponse extends MemeCalendarMintPositionFields {
   readonly mint_path: string;
 }
 
-function isSznOneRange(range: MintTimelineRange): boolean {
+function isHistoricalIntroRange(range: MintTimelineRange): boolean {
   return (
     range.start.getTime() === SZN1_RANGE.start.getTime() &&
     range.end.getTime() === SZN1_RANGE.end.getTime()
@@ -54,11 +54,15 @@ function isSznOneRange(range: MintTimelineRange): boolean {
 }
 
 function getFirstMintNumberInRange(range: MintTimelineRange): number {
-  if (isSznOneRange(range)) {
+  if (isHistoricalIntroRange(range)) {
     return 1;
   }
 
   const firstMintDate = nextMintDateOnOrAfter(range.start);
+  if (firstMintDate.getTime() > range.end.getTime()) {
+    throw new Error("Calendar range does not contain a scheduled mint");
+  }
+
   return getMintNumberForMintDate(firstMintDate);
 }
 

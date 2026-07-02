@@ -11,15 +11,6 @@ import {
 } from "@/app/api/meme-calendar/meme-calendar-response";
 import { GET } from "@/app/api/meme-calendar/next/route";
 
-const EXPECTED_POSITION_FIELDS = {
-  position_in_season: expect.any(Number),
-  position_in_year: expect.any(Number),
-  position_in_epoch: expect.any(Number),
-  position_in_period: expect.any(Number),
-  position_in_era: expect.any(Number),
-  position_in_eon: expect.any(Number),
-};
-
 describe("/api/meme-calendar/next", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -55,7 +46,12 @@ describe("/api/meme-calendar/next", () => {
         period: expected.periodNumber,
         era: expected.eraNumber,
         eon: expected.eonNumber,
-        ...EXPECTED_POSITION_FIELDS,
+        position_in_season: 2,
+        position_in_year: 67,
+        position_in_epoch: 200,
+        position_in_period: 200,
+        position_in_era: 200,
+        position_in_eon: 200,
         calendar_path: "/meme-calendar",
         mint_path: `/the-memes/${expected.mintNumber}`,
       },
