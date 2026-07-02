@@ -12,8 +12,10 @@ const renderToggle = (
       isExpanded={false}
       isLoading={false}
       knownSubwavesCount={null}
+      layoutVariant="app"
       onClick={onClick}
       parentWaveName="Parent Wave"
+      showConnector={false}
       unreadDropsCount={0}
       {...props}
     />
@@ -65,21 +67,27 @@ describe("SidebarSubwavesToggle", () => {
     const unreadBadge = screen.getByText("5 new");
     const wrapper = button.parentElement;
 
-    expect(wrapper).toHaveClass("tw-pl-[16.5px]");
+    expect(wrapper).toHaveClass("tw-pl-[74px]");
+    expect(wrapper).toHaveClass("md:tw-pl-[70px]");
     expect(wrapper).toHaveClass("tw-pr-5");
     expect(wrapper).toHaveClass("tw-min-h-[42px]");
     expect(wrapper).toHaveClass("tw-pb-2");
     expect(wrapper).not.toHaveClass("tw-px-5");
-    expect(button).toHaveClass("tw-h-8");
-    expect(button).toHaveClass("tw-rounded-lg");
-    expect(button).toHaveClass("tw-border-iron-800");
-    expect(button).toHaveClass("tw-bg-iron-950");
-    expect(button).toHaveClass("tw-px-3");
+    expect(button).not.toHaveClass("tw-h-8");
+    expect(button).toHaveClass("tw-rounded-xl");
+    expect(button).toHaveClass("tw-border-white/10");
+    expect(button).toHaveClass("tw-bg-iron-900/40");
+    expect(button).toHaveClass("tw-px-2.5");
+    expect(button).toHaveClass("tw-py-1");
     expect(button).toHaveClass("tw-text-xs");
-    expect(button).toHaveClass("tw-text-iron-400");
-    expect(button).toHaveClass("desktop-hover:hover:tw-border-iron-700");
-    expect(button).toHaveClass("desktop-hover:hover:tw-bg-iron-900");
-    expect(button).toHaveClass("desktop-hover:hover:tw-text-iron-300");
+    expect(button).toHaveClass("tw-font-medium");
+    expect(button).toHaveClass("tw-text-iron-350");
+    expect(button).toHaveClass(
+      "tw-shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+    );
+    expect(button).toHaveClass("desktop-hover:hover:tw-border-white/15");
+    expect(button).toHaveClass("desktop-hover:hover:tw-bg-iron-800/45");
+    expect(button).toHaveClass("desktop-hover:hover:tw-text-iron-200");
     expect(button).toHaveClass("focus-visible:tw-outline-primary-400");
     expect(button).not.toHaveClass("tw-bg-primary-500/10");
     expect(unreadBadge).toHaveClass("tw-h-[18px]");
@@ -87,6 +95,9 @@ describe("SidebarSubwavesToggle", () => {
     expect(unreadBadge).toHaveClass("tw-rounded-full");
     expect(unreadBadge).toHaveClass("tw-bg-indigo-600");
     expect(unreadBadge).toHaveClass("tw-text-[10px]");
+    expect(unreadBadge).not.toHaveClass(
+      "tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+    );
   });
 
   it("renders the loading state", () => {

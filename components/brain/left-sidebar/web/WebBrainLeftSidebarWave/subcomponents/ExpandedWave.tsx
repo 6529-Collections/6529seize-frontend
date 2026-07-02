@@ -3,8 +3,14 @@ import type { RefObject } from "react";
 import Link from "next/link";
 import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
-import { SidebarSubwaveConnector } from "@/components/brain/left-sidebar/waves/SidebarSubwaveConnector";
-import { getSidebarWaveRowLayoutClasses } from "@/components/brain/left-sidebar/waves/sidebarWaveRowLayout";
+import {
+  SidebarParentSubwaveConnector,
+  SidebarSubwaveConnector,
+} from "@/components/brain/left-sidebar/waves/SidebarSubwaveConnector";
+import {
+  getSidebarWaveRowLayoutClasses,
+  SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
+} from "@/components/brain/left-sidebar/waves/sidebarWaveRowLayout";
 import {
   hasWaveTrustSummaryScore,
   WaveTrustSignals,
@@ -38,6 +44,7 @@ interface ExpandedWaveProps {
   readonly canExpand?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly isLastSubwave?: boolean | undefined;
+  readonly showSubwaveConnector?: boolean | undefined;
   readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
@@ -63,6 +70,7 @@ export const ExpandedWave = ({
   canExpand = false,
   hasUnreadSubwaves = false,
   isLastSubwave = false,
+  showSubwaveConnector = false,
   onPrefetchSubwaves,
 }: ExpandedWaveProps) => {
   const tooltipAttributes = showExpandedTooltip
@@ -141,12 +149,17 @@ export const ExpandedWave = ({
       onMouseEnter={handleRowMouseEnter}
       onMouseLeave={cancelSubwavePrefetch}
       role="group"
-      className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
+      {!isChildRow && showSubwaveConnector && (
+        <SidebarParentSubwaveConnector
+          guideLineOffsetClasses={SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES}
+        />
+      )}
       {isChildRow && (
         <SidebarSubwaveConnector
           guideLineOffsetClasses={guideLineOffsetClasses}
@@ -154,7 +167,7 @@ export const ExpandedWave = ({
         />
       )}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
