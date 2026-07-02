@@ -219,6 +219,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(screen.getByText("Connect profile")).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(
       screen.getByLabelText("Learn more about The Memes subscriptions")
     ).toHaveAttribute("href", "/about/subscriptions");

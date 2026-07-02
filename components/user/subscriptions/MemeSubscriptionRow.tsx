@@ -11,6 +11,8 @@ import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscripti
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import { formatAddress } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -41,6 +43,7 @@ export default function MemeSubscriptionRow(
 ) {
   const id = `subscription-${props.subscription.token_id}`;
   const isCompact = props.variant === "compact";
+  const locale = useBrowserLocale();
 
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -284,20 +287,34 @@ export default function MemeSubscriptionRow(
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
           <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
             <span className="tw-font-medium tw-leading-none">
-              {isSubscribedView ? "Subscribed" : "Subscribe"}
+              {t(
+                locale,
+                isSubscribedView
+                  ? "home.mintSubscriptions.subscribedLabel"
+                  : "home.mintSubscriptions.subscribeLabel"
+              )}
             </span>
             {props.infoHref && (
               <Link
                 href={props.infoHref}
-                aria-label="Learn more about The Memes subscriptions"
-                className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+                aria-label={t(
+                  locale,
+                  "home.mintSubscriptions.infoLinkAriaLabel"
+                )}
+                className="tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
               >
-                <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3.5" />
+                <FontAwesomeIcon
+                  icon={faInfoCircle}
+                  className="tw-size-3.5"
+                  aria-hidden
+                />
               </Link>
             )}
             {props.balanceLabel && (
               <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-leading-none tw-text-iron-400">
-                <span className="tw-leading-none">Balance</span>
+                <span className="tw-leading-none">
+                  {t(locale, "home.mintSubscriptions.balanceLabel")}
+                </span>
                 <span className="tw-leading-none tw-text-iron-300">
                   {props.balanceLabel}
                 </span>
@@ -311,7 +328,7 @@ export default function MemeSubscriptionRow(
                 href={props.profileSubscriptionsHref}
                 className="tw-text-sm tw-leading-none tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
               >
-                My subscriptions
+                {t(locale, "home.mintSubscriptions.profileSubscriptionsLink")}
               </Link>
             )}
           </span>
