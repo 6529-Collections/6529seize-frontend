@@ -212,6 +212,8 @@ export * from '../models/ApiMarkDropUnreadResponse';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
+export * from '../models/ApiMemesExtendedData';
+export * from '../models/ApiMemesExtendedDataPage';
 export * from '../models/ApiMemesMintStat';
 export * from '../models/ApiMemesMintStatsPage';
 export * from '../models/ApiMemesMintStatsTotals';
@@ -719,6 +721,8 @@ import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
+import { ApiMemesExtendedData                             , ApiMemesExtendedDataTokenTypeEnum                               } from '../models/ApiMemesExtendedData';
+import { ApiMemesExtendedDataPage } from '../models/ApiMemesExtendedDataPage';
 import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
 import { ApiMemesMintStatsTotals } from '../models/ApiMemesMintStatsTotals';
@@ -1059,6 +1063,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiIdentitySubscriptionTargetAction",
     "ApiIdentitySubscriptionTargetType",
     "ApiMediaUploadMimeType",
+    "ApiMemesExtendedDataTokenTypeEnum",
     "ApiNftTokenTypeEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
     "ApiNotificationCause",
@@ -1320,6 +1325,8 @@ let typeMap: {[index: string]: any} = {
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
     "ApiMediaResolveRequest": ApiMediaResolveRequest,
     "ApiMediaResolveResponse": ApiMediaResolveResponse,
+    "ApiMemesExtendedData": ApiMemesExtendedData,
+    "ApiMemesExtendedDataPage": ApiMemesExtendedDataPage,
     "ApiMemesMintStat": ApiMemesMintStat,
     "ApiMemesMintStatsPage": ApiMemesMintStatsPage,
     "ApiMemesMintStatsTotals": ApiMemesMintStatsTotals,

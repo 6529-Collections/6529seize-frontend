@@ -54,6 +54,10 @@ function readFetchHeaders(
   return Object.fromEntries(new Headers(init?.headers).entries());
 }
 
+function setStagingApiKeyForTest(value: string | undefined): void {
+  publicEnv["STAGING_API_KEY"] = value;
+}
+
 function mockFreshTheMemesLiveCountApis(): void {
   mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
     const url = readFetchUrl(input);
@@ -156,13 +160,13 @@ describe("createFirstParty6529Plan", () => {
     global.fetch = mockFetch as unknown as typeof fetch;
     publicEnv.API_ENDPOINT = "https://api.test";
     publicEnv.BASE_ENDPOINT = "https://6529.io";
-    publicEnv.STAGING_API_KEY = undefined;
+    setStagingApiKeyForTest(undefined);
   });
 
   afterEach(() => {
     publicEnv.API_ENDPOINT = originalApiEndpoint;
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
-    publicEnv.STAGING_API_KEY = originalStagingApiKey;
+    setStagingApiKeyForTest(originalStagingApiKey);
   });
 
   afterAll(() => {
@@ -330,6 +334,64 @@ describe("createFirstParty6529Plan", () => {
     ]);
   });
 
+  it("marks The Memes TDH rate pending when extended data is not recorded in TDH", async () => {
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.pathname === "/api/nfts") {
+        return jsonResponse({
+          data: [
+            {
+              id: 509,
+              name: "The Collective Synapse",
+              artist: "elnaz555",
+              artist_seize_handle: "elnaz555",
+              hodl_rate: 22.7803,
+              mint_date: "2026-06-15T09:23:23.000Z",
+              thumbnail: "https://cdn.6529.io/memes/509.png",
+              metadata: {
+                attributes: [{ trait_type: "Type - Season", value: 15 }],
+              },
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === "/api/memes_extended_data") {
+        return jsonResponse({
+          data: [
+            {
+              id: 509,
+              edition_size: 173,
+              season: 15,
+              recorded_in_tdh: false,
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/509`) {
+        return jsonResponse({ message: "Unauthorized" }, 401);
+      }
+
+      if (url.pathname === "/api/memes-mint-stats/509") {
+        return jsonResponse({
+          mint_date: "2026-06-15T09:23:23.000Z",
+          total_count: 94,
+        });
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+    const { data } = await plan!.execute();
+
+    expect(data.facts).toContainEqual({ label: "TDH rate", value: "Pending" });
+  });
+
   it("uses The Memes Manifold totalMax when public APIs only expose live mint counts", async () => {
     mockManifoldReadContract.mockResolvedValue([
       509n,
@@ -361,7 +423,7 @@ describe("createFirstParty6529Plan", () => {
 
   it("falls back to the production public API when the configured staging API fails", async () => {
     publicEnv.API_ENDPOINT = "https://api.staging.6529.io";
-    publicEnv.STAGING_API_KEY = "staging-secret";
+    setStagingApiKeyForTest("staging-secret");
     const productionFallbackAuthHeaders: Array<string | null> = [];
 
     mockFetch.mockImplementation(async (input: RequestInfo | URL, init) => {
@@ -622,7 +684,7 @@ describe("createFirstParty6529Plan", () => {
     const firstAuthPlan = createFirstParty6529Plan(url, { apiAuth: "alpha" });
     const secondAuthPlan = createFirstParty6529Plan(url, { apiAuth: "beta" });
 
-    publicEnv.STAGING_API_KEY = "staging-secret";
+    setStagingApiKeyForTest("staging-secret");
     const stagingPlan = createFirstParty6529Plan(url);
 
     expect(publicPlan?.cacheKey).toBe("6529:public:the-memes:/the-memes/509");
