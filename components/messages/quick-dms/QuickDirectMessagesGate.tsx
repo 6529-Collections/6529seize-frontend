@@ -11,30 +11,27 @@ const LazyQuickDirectMessages = dynamic(() => import("./QuickDirectMessages"), {
   ssr: false,
 });
 
-const getDesktopViewportSnapshot = (): boolean => {
-  if (
-    typeof globalThis.window === "undefined" ||
-    typeof globalThis.window.matchMedia !== "function"
-  ) {
-    return false;
-  }
+const DESKTOP_VIEWPORT_QUERY = `(min-width: ${SIDEBAR_MOBILE_BREAKPOINT}px)`;
 
-  return globalThis.window.matchMedia(
-    `(min-width: ${SIDEBAR_MOBILE_BREAKPOINT}px)`
-  ).matches;
+type BrowserWindowWithOptionalMatchMedia = {
+  matchMedia?: Window["matchMedia"];
+};
+
+const getBrowserWindow = (): BrowserWindowWithOptionalMatchMedia | undefined =>
+  (globalThis as { window?: BrowserWindowWithOptionalMatchMedia }).window;
+
+const getDesktopViewportSnapshot = (): boolean => {
+  return (
+    getBrowserWindow()?.matchMedia?.(DESKTOP_VIEWPORT_QUERY).matches ?? false
+  );
 };
 
 const subscribeDesktopViewport = (onStoreChange: () => void): (() => void) => {
-  if (
-    typeof globalThis.window === "undefined" ||
-    typeof globalThis.window.matchMedia !== "function"
-  ) {
+  const mediaQuery = getBrowserWindow()?.matchMedia?.(DESKTOP_VIEWPORT_QUERY);
+
+  if (mediaQuery === undefined) {
     return () => undefined;
   }
-
-  const mediaQuery = globalThis.window.matchMedia(
-    `(min-width: ${SIDEBAR_MOBILE_BREAKPOINT}px)`
-  );
 
   mediaQuery.addEventListener("change", onStoreChange);
   return () => mediaQuery.removeEventListener("change", onStoreChange);
