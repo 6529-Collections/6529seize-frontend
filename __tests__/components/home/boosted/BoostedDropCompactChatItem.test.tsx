@@ -101,4 +101,22 @@ describe("BoostedDropCompactChatItem", () => {
         .querySelector('[data-boosted-drop-compact-preview="true"]')
     ).not.toBeInTheDocument();
   });
+
+  it("keeps drops without parts as a compact row without preview text", () => {
+    render(
+      <BoostedDropCompactChatItem
+        drop={createDrop({
+          parts: null,
+        })}
+        onClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("Boosted drop")).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId("boosted-drop-compact-chat-item")
+        .querySelector('[data-boosted-drop-compact-preview="true"]')
+    ).not.toBeInTheDocument();
+  });
 });

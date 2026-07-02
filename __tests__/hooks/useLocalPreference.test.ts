@@ -24,12 +24,12 @@ describe("useLocalPreference", () => {
   it("responds to storage events", () => {
     const { result } = renderHook(() => useLocalPreference("pref", "def"));
     act(() => {
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: "pref",
-          newValue: JSON.stringify("other"),
-        })
-      );
+      const event = new Event("storage") as StorageEvent;
+      Object.defineProperty(event, "key", { value: "pref" });
+      Object.defineProperty(event, "newValue", {
+        value: JSON.stringify("other"),
+      });
+      window.dispatchEvent(event);
     });
     expect(result.current[0]).toBe("other");
   });

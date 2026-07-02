@@ -6,6 +6,10 @@ import { t } from "@/i18n/messages";
 
 const COMPACT_PREVIEW_MAX_LENGTH = 240;
 
+type CompactPreviewDrop = Omit<ApiDrop, "parts"> & {
+  readonly parts?: ApiDrop["parts"] | null;
+};
+
 const truncateCompactPreviewText = (value: string): string =>
   value.length > COMPACT_PREVIEW_MAX_LENGTH
     ? `${value.slice(0, COMPACT_PREVIEW_MAX_LENGTH).trimEnd()}...`
@@ -46,20 +50,25 @@ export const getBoostedDropCompactAuthorLabel = (
     author: getBoostedDropAuthorLabel(authorHandle),
   });
 
-export const getBoostedDropCompactPreviewText = (
-  drop: ApiDrop
-): string | null => {
-  const title = drop.title?.trim() ?? "";
+export const getBoostedDropCompactPreviewText = ({
+  parts,
+  title,
+}: CompactPreviewDrop): string | null => {
+  const trimmedTitle = title?.trim() ?? "";
   const content =
-    drop.parts
+    (parts ?? [])
       .map((part) => markdownToPlainText(part.content ?? ""))
       .find((partText) => partText.length > 0) ?? "";
 
   let previewText = content;
-  if (title.length > 0 && content.length > 0 && title !== content) {
-    previewText = `${title}: ${content}`;
-  } else if (title.length > 0) {
-    previewText = title;
+  if (
+    trimmedTitle.length > 0 &&
+    content.length > 0 &&
+    trimmedTitle !== content
+  ) {
+    previewText = `${trimmedTitle}: ${content}`;
+  } else if (trimmedTitle.length > 0) {
+    previewText = trimmedTitle;
   }
 
   return previewText.length > 0

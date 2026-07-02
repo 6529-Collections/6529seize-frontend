@@ -68,13 +68,18 @@ function useLocalPreference<T>(
       }
     };
     const handleLocalPreferenceChange = (event: Event) => {
-      const customEvent =
-        event as CustomEvent<LocalPreferenceChangeEventDetail>;
-      if (customEvent.detail.key !== key) {
+      const customEvent = event as CustomEvent<
+        Partial<LocalPreferenceChangeEventDetail> | undefined
+      >;
+      const detail = customEvent.detail;
+      if (detail?.key !== key) {
+        return;
+      }
+      if (!("value" in detail)) {
         return;
       }
 
-      const newValue = customEvent.detail.value;
+      const newValue = detail.value;
       if (validator && !validator(newValue)) {
         return;
       }
