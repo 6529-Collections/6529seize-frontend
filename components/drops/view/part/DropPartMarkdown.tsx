@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Children,
+  createElement,
   memo,
   useEffect,
   useLayoutEffect,
@@ -49,6 +49,7 @@ import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
 const BreakComponent = () => <br />;
 
 const EMPTY_MENTIONED_GROUPS: ApiDropGroupMention[] = [];
+const EMOJI_SHORTCODE_REGEX = /:\w+:/;
 
 const mergeClassNames = (...classes: Array<string | undefined>): string =>
   classes.filter(Boolean).join(" ");
@@ -109,29 +110,8 @@ const CodeBlockRenderer = ({
 }: MarkdownCodeProps) => {
   const codeRef = useRef<HTMLElement>(null);
 
-  const codeText = useMemo(() => {
-    return Children.toArray(children)
-      .map((child) => {
-        if (typeof child === "string" || typeof child === "number") {
-          return child;
-        }
-
-        return "";
-      })
-      .join("");
-  }, [children]);
-
-  const language = useMemo(() => {
-    const match =
-      typeof className === "string"
-        ? /language-([\w+-]+)/.exec(className)
-        : null;
-
-    return match?.[1] ?? null;
-  }, [className]);
-
   useEffect(() => {
-    if (globalThis.window === undefined) {
+    if (typeof globalThis.window === "undefined") {
       return;
     }
 
@@ -140,14 +120,20 @@ const CodeBlockRenderer = ({
       return;
     }
 
-    if (!codeText || codeText.trim() === "") {
+    if (element.textContent.trim() === "") {
       return;
     }
 
-    highlightCodeElement(element, language).catch((error) => {
-      console.error("[DropPartMarkdown] Failed to highlight code", error);
-    });
-  }, [codeText, language]);
+    const language = /language-([\w+-]+)/.exec(element.className)?.[1] ?? null;
+
+    void (async () => {
+      try {
+        await highlightCodeElement(element, language);
+      } catch (error: unknown) {
+        console.error("[DropPartMarkdown] Failed to highlight code", error);
+      }
+    })();
+  });
 
   return (
     <code
@@ -185,11 +171,7 @@ const createMarkdownComponents = ({
         className: mergeClassNames(headingClassName, className),
       };
 
-      return (
-        <TagComponent {...(mergedProps as any)}>
-          {customRenderer(children)}
-        </TagComponent>
-      );
+      return createElement(TagComponent, mergedProps, customRenderer(children));
     };
 
     HeadingRenderer.displayName = `MarkdownHeading(${
@@ -238,11 +220,11 @@ const createMarkdownComponents = ({
     h3: createHeadingRenderer("h3"),
     h4: createHeadingRenderer("h4"),
     h5: createHeadingRenderer("h5"),
-    ...(renderParagraph ? { p: renderParagraph } : {}),
+    ...(renderParagraph !== undefined ? { p: renderParagraph } : {}),
     li: ListItemRenderer,
     code: CodeRenderer,
-    ...(renderAnchor ? { a: renderAnchor } : {}),
-    ...(renderImage ? { img: renderImage } : {}),
+    ...(renderAnchor !== undefined ? { a: renderAnchor } : {}),
+    ...(renderImage !== undefined ? { img: renderImage } : {}),
     br: BreakComponent,
     blockquote: BlockQuoteRenderer,
   } satisfies Components;
@@ -293,9 +275,17 @@ function DropPartMarkdown({
 }: DropPartMarkdownProps) {
   const queryClient = useQueryClient();
   const isMobile = useIsMobileScreen();
-  const { emojiMap, findNativeEmoji } = useEmoji();
+  const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
   const seizeSettings = useSeizeSettingsOptional();
   const { variant: linkPreviewVariant } = useLinkPreviewContext();
+
+  useEffect(() => {
+    if (!partContent || !EMOJI_SHORTCODE_REGEX.test(partContent)) {
+      return;
+    }
+
+    void loadEmojiData();
+  }, [loadEmojiData, partContent]);
 
   useLayoutEffect(() => {
     primeMarketplacePreviewCacheFromNftLinks({
@@ -309,6 +299,7 @@ function DropPartMarkdown({
       case "sm":
         return isMobile ? "tw-text-xs" : "tw-text-sm";
       case "md":
+      case undefined:
       default:
         return "tw-text-md";
     }

@@ -53,6 +53,7 @@ jest.mock(
 );
 
 jest.mock("@tanstack/react-query", () => ({
+  useQuery: jest.fn(),
   useQueryClient: jest.fn(() => ({
     getQueryCache: jest.fn(() => ({ findAll: mockQueryCacheFindAll })),
     setQueryData: mockSetQueryData,
@@ -144,6 +145,7 @@ const createEmojiContextValue = (
   findNativeEmoji: (id: string) => NativeEmojiMock | null = () => null
 ) => ({
   emojiMap,
+  emojiData: {},
   loading: false,
   categories: [],
   categoryIcons: {},
@@ -158,6 +160,9 @@ const createEmojiContextValue = (
     }
     return null;
   },
+  loadCustomEmojis: jest.fn(() => Promise.resolve(emojiMap)),
+  loadNativeEmojis: jest.fn(() => Promise.resolve({})),
+  loadEmojiData: jest.fn(() => Promise.resolve()),
 });
 
 const createMockDrop = (overrides: Record<string, unknown> = {}) => ({

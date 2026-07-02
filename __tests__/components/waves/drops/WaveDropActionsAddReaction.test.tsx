@@ -17,6 +17,11 @@ const mobileWrapperDialogMock = jest.fn(
       </div>
     ) : null
 );
+const mockLoadCustomEmojis = jest.fn(() => Promise.resolve([]));
+const mockLoadNativeEmojis = jest.fn(() => Promise.resolve({}));
+const mockLoadEmojiData = jest.fn(() => Promise.resolve());
+const mockFindNativeEmoji = jest.fn();
+const mockFindCustomEmoji = jest.fn();
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
@@ -90,11 +95,15 @@ jest.mock("@emoji-mart/data", () => ({
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: jest.fn(() => ({
     emojiMap: [],
+    emojiData: {},
     categories: [],
     categoryIcons: {},
     loading: false,
-    findNativeEmoji: jest.fn(),
-    findCustomEmoji: jest.fn(),
+    findNativeEmoji: mockFindNativeEmoji,
+    findCustomEmoji: mockFindCustomEmoji,
+    loadCustomEmojis: mockLoadCustomEmojis,
+    loadNativeEmojis: mockLoadNativeEmojis,
+    loadEmojiData: mockLoadEmojiData,
   })),
 }));
 
