@@ -1,19 +1,23 @@
-import {
-  ArrowPathIcon,
-  ArrowTurnDownRightIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowPathIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import {
+  getSidebarWaveRowLayoutClasses,
+  type SidebarWaveRowLayoutVariant,
+} from "./sidebarWaveRowLayout";
 
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
+const CONNECTOR_COLOR_CLASSES =
+  "tw-border-iron-800/80 desktop-hover:group-hover/subwaves-toggle:tw-border-iron-700/80";
 
 interface SidebarSubwavesToggleProps {
   readonly isExpanded: boolean;
   readonly isLoading: boolean;
   readonly knownSubwavesCount: number | null;
+  readonly layoutVariant: SidebarWaveRowLayoutVariant;
   readonly onClick: () => void;
   readonly parentWaveName: string;
+  readonly showConnector: boolean;
   readonly unreadDropsCount: number;
 }
 
@@ -87,8 +91,10 @@ export function SidebarSubwavesToggle({
   isExpanded,
   isLoading,
   knownSubwavesCount,
+  layoutVariant,
   onClick,
   parentWaveName,
+  showConnector,
   unreadDropsCount,
 }: SidebarSubwavesToggleProps) {
   const label = getToggleLabel({
@@ -106,11 +112,22 @@ export function SidebarSubwavesToggle({
   const wrapperSpacingClasses = isExpanded
     ? "tw-min-h-[38px] tw-pb-1"
     : "tw-min-h-[42px] tw-pb-2";
+  const { rowPaddingClasses, guideLineOffsetClasses } =
+    getSidebarWaveRowLayoutClasses({
+      isChildRow: true,
+      variant: layoutVariant,
+    });
 
   return (
     <div
-      className={`tw-flex tw-h-full tw-items-stretch tw-pl-[16.5px] tw-pr-5 tw-pt-0.5 ${wrapperSpacingClasses}`}
+      className={`tw-group/subwaves-toggle tw-relative tw-flex tw-h-full tw-items-stretch ${rowPaddingClasses} tw-pt-0.5 ${wrapperSpacingClasses}`}
     >
+      {showConnector && (
+        <span
+          aria-hidden="true"
+          className={`tw-pointer-events-none tw-absolute tw-bottom-0 tw-top-0 ${guideLineOffsetClasses} tw-border-0 tw-border-l tw-border-solid ${CONNECTOR_COLOR_CLASSES} tw-transition-colors tw-duration-200`}
+        />
+      )}
       <button
         type="button"
         aria-busy={isLoading || undefined}
@@ -118,18 +135,13 @@ export function SidebarSubwavesToggle({
         aria-label={ariaLabel}
         disabled={isLoading}
         onClick={onClick}
-        className="tw-group/subwaves tw-flex tw-h-8 tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
+        className="tw-group/subwaves tw-relative tw-z-[1] tw-flex tw-h-8 tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-          {isLoading ? (
+          {isLoading && (
             <ArrowPathIcon
               aria-hidden="true"
               className="tw-size-3.5 tw-flex-shrink-0 tw-animate-spin"
-            />
-          ) : (
-            <ArrowTurnDownRightIcon
-              aria-hidden="true"
-              className="tw-size-3.5 tw-flex-shrink-0"
             />
           )}
           <span className="tw-truncate">{label}</span>
