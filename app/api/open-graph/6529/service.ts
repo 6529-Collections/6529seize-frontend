@@ -12,7 +12,6 @@ import type {
   BaseNFT,
   LabExtendedData,
   LabNFT,
-  MemesExtendedData,
   NFT,
   Rememe,
 } from "@/entities/INFT";
@@ -21,6 +20,7 @@ import type {
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type {
   LinkPreviewMedia,
@@ -66,7 +66,7 @@ type NftRecord = Partial<BaseNFT> &
     readonly owner_display?: string | null | undefined;
   };
 
-type MemesRecord = NftRecord & Partial<MemesExtendedData>;
+type MemesRecord = NftRecord & Partial<ApiMemesExtendedData>;
 type LabRecord = NftRecord & Partial<LabExtendedData>;
 
 type MintingClaimRecord = {

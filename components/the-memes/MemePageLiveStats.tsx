@@ -7,7 +7,8 @@ import ProfileAvatar, {
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
-import type { BaseNFT, MemesExtendedData, NFT } from "@/entities/INFT";
+import type { BaseNFT, NFT } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -63,7 +64,7 @@ export function MemeCollectorsStats({
   nftMeta,
   locale = DEFAULT_LOCALE,
 }: {
-  readonly nftMeta: MemesExtendedData;
+  readonly nftMeta: ApiMemesExtendedData;
   readonly locale?: SupportedLocale | undefined;
 }) {
   const percentUniqueExMuseumLabel = getPercentUniqueExMuseumLabel(
@@ -128,7 +129,7 @@ export function MemeEditionSizeStats({
   nftMeta,
   locale = DEFAULT_LOCALE,
 }: {
-  readonly nftMeta: MemesExtendedData;
+  readonly nftMeta: ApiMemesExtendedData;
   readonly locale?: SupportedLocale | undefined;
 }) {
   const editionSizeExMuseumLabel = getEditionSizeExMuseumLabel(nftMeta, locale);
@@ -234,9 +235,14 @@ function InlineStatsMetric({
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1.5">
         <span className={COLLECTOR_METRIC_VALUE_CLASS}>{value}</span>
-        {unranked && <UnrankedBadge locale={locale} />}
+        {unranked && <UnrankedBadge label={label} locale={locale} />}
         {!unranked && isRankDisplayable(rank, total) && (
-          <CollectorRankBadge rank={rank!} total={total!} locale={locale} />
+          <CollectorRankBadge
+            label={label}
+            rank={rank!}
+            total={total!}
+            locale={locale}
+          />
         )}
       </div>
     </div>
@@ -244,28 +250,40 @@ function InlineStatsMetric({
 }
 
 function CollectorRankBadge({
+  label,
   rank,
   total,
   locale,
 }: {
+  readonly label: string;
   readonly rank: number;
   readonly total: number;
   readonly locale: SupportedLocale;
 }) {
+  const rankText = t(locale, "theMemes.detail.live.rank", {
+    rank: formatInteger(locale, rank),
+    total: formatInteger(locale, total),
+  });
+
   return (
-    <span className={RANK_BADGE_CLASS}>
-      {t(locale, "theMemes.detail.live.rank", {
-        rank: formatInteger(locale, rank),
-        total: formatInteger(locale, total),
-      })}
+    <span className={RANK_BADGE_CLASS} aria-label={`${label}: ${rankText}`}>
+      {rankText}
     </span>
   );
 }
 
-function UnrankedBadge({ locale }: { readonly locale: SupportedLocale }) {
+function UnrankedBadge({
+  label,
+  locale,
+}: {
+  readonly label: string;
+  readonly locale: SupportedLocale;
+}) {
+  const unrankedText = t(locale, "theMemes.detail.live.rankUnranked");
+
   return (
-    <span className={RANK_BADGE_CLASS}>
-      {t(locale, "theMemes.detail.live.rankUnranked")}
+    <span className={RANK_BADGE_CLASS} aria-label={`${label}: ${unrankedText}`}>
+      {unrankedText}
     </span>
   );
 }
@@ -277,11 +295,11 @@ function isRankDisplayable(
   return rank !== undefined && rank > 0 && total !== undefined && total > 0;
 }
 
-function isMemeUnranked(nftMeta: MemesExtendedData) {
+function isMemeUnranked(nftMeta: ApiMemesExtendedData) {
   return nftMeta.recorded_in_tdh === false;
 }
 
-function getMemeRankTotal(nftMeta: MemesExtendedData) {
+function getMemeRankTotal(nftMeta: ApiMemesExtendedData) {
   if (isMemeUnranked(nftMeta)) {
     return undefined;
   }
@@ -290,7 +308,7 @@ function getMemeRankTotal(nftMeta: MemesExtendedData) {
 }
 
 function getPercentUniqueExMuseumLabel(
-  nftMeta: MemesExtendedData,
+  nftMeta: ApiMemesExtendedData,
   locale: SupportedLocale
 ) {
   return nftMeta.burnt > 0
@@ -299,7 +317,7 @@ function getPercentUniqueExMuseumLabel(
 }
 
 function getEditionSizeExMuseumLabel(
-  nftMeta: MemesExtendedData,
+  nftMeta: ApiMemesExtendedData,
   locale: SupportedLocale
 ) {
   return nftMeta.burnt > 0
