@@ -18,6 +18,7 @@ interface WaveDropsMessageListSectionProps {
   readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
   readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
+  readonly paginationThreshold: number;
   readonly onTopIntersection: () => void;
   readonly onReply: ({
     drop,
@@ -51,8 +52,6 @@ interface WaveDropsMessageListSectionProps {
   readonly isVotingControlsLocked?: boolean | undefined;
 }
 
-const MIN_DROPS_FOR_PAGINATION = 25;
-
 export const WaveDropsMessageListSection: React.FC<
   WaveDropsMessageListSectionProps
 > = ({
@@ -62,6 +61,7 @@ export const WaveDropsMessageListSection: React.FC<
   scrollContainerCallbackRef,
   bottomAnchorRef,
   bottomAnchorCallbackRef,
+  paginationThreshold,
   onTopIntersection,
   onReply,
   queueSerialTarget,
@@ -90,7 +90,7 @@ export const WaveDropsMessageListSection: React.FC<
 }) => {
   const hasNextPage =
     !!waveMessages?.hasNextPage &&
-    waveMessages.drops.length >= MIN_DROPS_FOR_PAGINATION;
+    waveMessages.drops.length >= paginationThreshold;
 
   const containerRef = scrollContainerCallbackRef ?? scrollContainerRef;
   const anchorRef = bottomAnchorCallbackRef ?? bottomAnchorRef;
