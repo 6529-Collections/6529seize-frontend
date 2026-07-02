@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
 
 import { DELEGATION_ABI } from "@/abis/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
@@ -13,10 +12,12 @@ import styles from "./Delegation.module.scss";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
+  DelegationFormField,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
   DelegationFormLabel,
   DelegationFormOriginalDelegatorFormGroup,
+  DelegationFormRow,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 
@@ -113,34 +114,31 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
   }
 
   return (
-    <Container>
-      <Row>
-        <Col xs={10} className="pt-3 pb-1">
+    <div className="tw-w-full tw-px-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="tw-w-10/12 tw-px-3 tw-pb-1 tw-pt-3">
           <h4>Register Delegation Manager (Sub-Delegation)</h4>
           <p className={styles["actionIntro"]}>
             Grant a manager wallet permission to maintain delegations and
             consolidations for the managed wallet.
           </p>
-        </Col>
-        <Col
-          xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
-        >
+        </div>
+        <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3 tw-pb-1 tw-pt-3">
           <DelegationCloseButton
             onHide={props.onHide}
             title="Delegation Manager"
           />
-        </Col>
-      </Row>
-      <Row className="pt-4">
-        <Col>
-          <Form>
+        </div>
+      </div>
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-w-full tw-px-3">
+          <form>
             {props.subdelegation && (
               <DelegationFormOriginalDelegatorFormGroup
                 subdelegation={props.subdelegation}
               />
             )}
-            <Form.Group as={Row} className="pb-4">
+            <DelegationFormRow>
               <DelegationFormLabel
                 title={
                   props.subdelegation ? "Manager Wallet" : "Managed Wallet"
@@ -149,13 +147,16 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
                   props.subdelegation ? `executing` : `registering`
                 } the sub-delegation`}
               />
-              <Col sm={9}>
+              <DelegationFormField>
                 <DelegationAddressDisabledInput
                   address={props.address}
                   ens={props.ens}
+                  label={
+                    props.subdelegation ? "Delegation Manager" : "Delegator"
+                  }
                 />
-              </Col>
-            </Form.Group>
+              </DelegationFormField>
+            </DelegationFormRow>
             <DelegationFormCollectionFormGroup
               collection={newDelegationCollection}
               setCollection={setNewDelegationCollection}
@@ -176,9 +177,9 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
               onSetToast={props.onSetToast}
               submitBtnLabel="Register Delegation Manager"
             />
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

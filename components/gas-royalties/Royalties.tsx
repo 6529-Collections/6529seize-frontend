@@ -152,21 +152,23 @@ export default function RoyaltiesComponent() {
         getUrl={getUrlWithParams}
         {...getSharedProps()}
       />
-      <div className="tw-pt-4">
+      <section className="tailwind-scope tw-container tw-mx-auto tw-px-0 tw-pt-4">
         <div className={`tw-pt-4 ${styles["scrollContainer"]}`}>
           {royalties.length > 0 && (
-            <table className={styles["royaltiesTable"]}>
+            <table
+              className={`${styles["royaltiesTable"]} tw-mb-4 tw-w-full tw-border-collapse tw-text-inherit`}
+            >
               <thead>
                 <tr>
-                  <th>
+                  <th className="tw-p-2 tw-text-left">
                     {collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
                       ? "Meme Lab Card"
                       : "Meme Card"}{" "}
                     (x{royalties.length})
                   </th>
-                  <th>Artist</th>
-                  <th className="tw-text-center">Volume</th>
-                  <th className="tw-text-center">
+                  <th className="tw-p-2 tw-text-left">Artist</th>
+                  <th className="tw-p-2 tw-text-center">Volume</th>
+                  <th className="tw-p-2 tw-text-center">
                     <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
                       {isPrimary ? "Primary Proceeds" : "Royalties"}
                       {isPrimary && (
@@ -191,9 +193,11 @@ export default function RoyaltiesComponent() {
                     </div>
                   </th>
                   {!isPrimary && (
-                    <th className="tw-text-center">Effective Royalty %</th>
+                    <th className="tw-p-2 tw-text-center">
+                      Effective Royalty %
+                    </th>
                   )}
-                  <th className="tw-text-center">
+                  <th className="tw-p-2 tw-text-center">
                     <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
                       Artist Split{" "}
                       <>
@@ -220,7 +224,7 @@ export default function RoyaltiesComponent() {
               <tbody>
                 {royalties.map((r) => (
                   <tr key={`token-${r.token_id}`}>
-                    <td>
+                    <td className="tw-p-2 tw-align-middle">
                       <GasRoyaltiesTokenImage
                         path={
                           collectionFocus ===
@@ -241,28 +245,28 @@ export default function RoyaltiesComponent() {
                         }
                       />
                     </td>
-                    <td>{r.artist}</td>
-                    <td className="tw-text-center">
+                    <td className="tw-p-2 tw-align-middle">{r.artist}</td>
+                    <td className="tw-p-2 tw-text-center tw-align-middle">
                       {displayDecimal(r.volume)}
                     </td>
-                    <td className="tw-text-center">
+                    <td className="tw-p-2 tw-text-center tw-align-middle">
                       {displayDecimal(r.proceeds)}
                     </td>
                     {!isPrimary && (
-                      <td className="tw-text-center">
+                      <td className="tw-p-2 tw-text-center tw-align-middle">
                         {r.proceeds > 0
                           ? `${((r.proceeds / r.volume) * 100).toFixed(2)}%`
                           : `-`}
                       </td>
                     )}
-                    <td>
+                    <td className="tw-p-2 tw-align-middle">
                       <div className="tw-flex tw-justify-center">
                         <span className="tw-flex tw-items-center tw-gap-1">
                           {displayDecimal(r.artist_take)}
                           {collectionFocus ===
                             GasRoyaltiesCollectionFocus.MEMELAB &&
                             r.artist_split > 0 && (
-                              <span className="font-smaller font-color-h">
+                              <span className="tw-text-sm tw-text-iron-400">
                                 ({displayDecimal(r.artist_split * 100)}
                                 %)
                               </span>
@@ -273,23 +277,26 @@ export default function RoyaltiesComponent() {
                   </tr>
                 ))}
                 <tr key={`royalties-total`}>
-                  <td colSpan={2} className="tw-text-right">
+                  <td
+                    colSpan={2}
+                    className="tw-p-2 tw-text-right tw-align-middle"
+                  >
                     <b>TOTAL</b>
                   </td>
-                  <td className="tw-text-center">
+                  <td className="tw-p-2 tw-text-center tw-align-middle">
                     {displayDecimal(sumVolume)}
                   </td>
-                  <td className="tw-text-center">
+                  <td className="tw-p-2 tw-text-center tw-align-middle">
                     {displayDecimal(sumProceeds)}
                   </td>
                   {!isPrimary && (
-                    <td className="tw-text-center">
+                    <td className="tw-p-2 tw-text-center tw-align-middle">
                       {sumProceeds > 0
                         ? `${((sumProceeds / sumVolume) * 100).toFixed(2)}%`
                         : `-`}
                     </td>
                   )}
-                  <td className="tw-text-center">
+                  <td className="tw-p-2 tw-text-center tw-align-middle">
                     {displayDecimal(sumArtistTake)}
                     {collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB &&
                       sumArtistTake > 0 &&
@@ -303,14 +310,16 @@ export default function RoyaltiesComponent() {
           )}
         </div>
         {!fetching && royalties.length === 0 && (
-          <h5>No royalties found for selected dates</h5>
+          <div>
+            <h5>No royalties found for selected dates</h5>
+          </div>
         )}
         {!fetching && royalties.length > 0 && (
-          <div className="font-color-h tw-pb-3 tw-pt-3">
+          <div className="tw-pb-3 tw-pt-3 tw-text-iron-400">
             All values are in ETH
           </div>
         )}
-      </div>
+      </section>
     </>
   );
 }
