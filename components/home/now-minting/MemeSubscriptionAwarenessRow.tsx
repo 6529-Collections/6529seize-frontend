@@ -14,7 +14,7 @@ import { Tooltip } from "react-tooltip";
 import { ABOUT_SUBSCRIPTIONS_HREF } from "../../user/subscriptions/subscriptionNavigation";
 
 const SUBSCRIPTION_ROW_CLASS_NAME =
-  "tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-py-3";
+  "tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-4 tw-py-3";
 
 function ReadonlySubscriptionToggle({
   checked,

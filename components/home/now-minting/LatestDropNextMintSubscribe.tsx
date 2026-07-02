@@ -167,16 +167,17 @@ export default function LatestDropNextMintSubscribe(
     }
   );
 
-  const subscribed = !!profileKey
-    ? shouldQueryUpcomingStatus
-      ? !!upcomingStatus?.subscribed
-      : !!finalStatus?.subscribed_count
-    : false;
-  const subscribedCount = profileKey
-    ? shouldQueryUpcomingStatus
-      ? upcomingStatus?.count
-      : finalStatus?.subscribed_count
-    : undefined;
+  let subscribed = false;
+  let subscribedCount: number | undefined;
+  if (profileKey) {
+    if (shouldQueryUpcomingStatus) {
+      subscribed = !!upcomingStatus?.subscribed;
+      subscribedCount = upcomingStatus?.count;
+    } else {
+      subscribed = !!finalStatus?.subscribed_count;
+      subscribedCount = finalStatus?.subscribed_count;
+    }
+  }
   const subscribersCount = useMemo(() => {
     const counts = shouldQueryUpcomingStatus
       ? upcomingCounts

@@ -13,6 +13,9 @@ import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
 import { useState } from "react";
 
+const PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME =
+  "tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-400/50 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-bg-primary-600";
+
 export default function AboutSubscriptionsProfileButton() {
   const { connectedProfile, setToast } = useAuth();
   const { seizeConnectFresh } = useSeizeConnectContext();
@@ -40,7 +43,7 @@ export default function AboutSubscriptionsProfileButton() {
       setShouldNavigateAfterConnect(false);
       console.error("Failed to open wallet connection", error);
       setToast({
-        message: "Failed to open wallet connection. Please try again.",
+        message: t(locale, "home.mintSubscriptions.connectFailed"),
         type: "error",
       });
     }
@@ -61,7 +64,7 @@ export default function AboutSubscriptionsProfileButton() {
         onClick={() => {
           void onConnect();
         }}
-        className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-400/50 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-primary-600"
+        className={`${PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
         {t(locale, "home.mintSubscriptions.connectToSubscribe")}
       </button>
@@ -71,7 +74,7 @@ export default function AboutSubscriptionsProfileButton() {
   return (
     <Link
       href={profileSubscriptionsHref}
-      className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white tw-no-underline tw-ring-1 tw-ring-inset tw-ring-primary-400/50 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-bg-primary-600 desktop-hover:hover:tw-text-white"
+      className={`${PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} tw-no-underline desktop-hover:hover:tw-text-white`}
     >
       {t(locale, "home.mintSubscriptions.profileSubscriptionsLink")}
       <ArrowRightIcon className="tw-size-4" aria-hidden="true" />

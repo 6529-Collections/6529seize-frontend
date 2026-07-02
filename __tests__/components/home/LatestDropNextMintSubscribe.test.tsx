@@ -2,20 +2,17 @@ import { renderWithAuth } from "@/__tests__/utils/testContexts";
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
 import { useQuery } from "@tanstack/react-query";
 import { screen } from "@testing-library/react";
-import type { AnchorHTMLAttributes } from "react";
 
-type LinkMockProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href: string;
-};
+jest.mock("next/link", () => {
+  const { mockNextLinkComponent } = jest.requireActual(
+    "@/__tests__/utils/nextLinkMock"
+  );
 
-jest.mock("next/link", () => ({
-  __esModule: true,
-  default: ({ href, children, ...props }: LinkMockProps) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
+  return {
+    __esModule: true,
+    default: mockNextLinkComponent,
+  };
+});
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),

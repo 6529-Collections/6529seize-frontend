@@ -6,7 +6,7 @@ import {
 
 export default function AboutSubscriptions() {
   return (
-    <Container>
+    <Container className="!tw-px-0">
       <Row>
         <Col>
           <h1>
