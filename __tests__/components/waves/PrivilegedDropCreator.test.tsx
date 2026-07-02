@@ -11,6 +11,33 @@ import {
 } from "@/contexts/wave/WaveEligibilityContext";
 
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
+type ProfileSetupVisibilityInput = {
+  readonly address?: string | null | undefined;
+  readonly connectedProfileHandle?: string | null | undefined;
+  readonly fetchingProfile?: boolean | undefined;
+  readonly hasValidWalletAuth?: boolean | undefined;
+};
+type DropPlaceholderMockProps = {
+  readonly type: "chat" | "submission" | "both";
+  readonly action?: React.ReactNode | undefined;
+};
+type MockAuthState = {
+  readonly connectedProfile?:
+    | {
+        readonly handle?: string | null | undefined;
+      }
+    | null
+    | undefined;
+  readonly activeProfileProxy?: object | null | undefined;
+  readonly fetchingProfile?: boolean | undefined;
+};
+type TestWave = Pick<
+  React.ComponentProps<typeof PrivilegedDropCreator>["wave"],
+  "id" | "chat" | "participation" | "metrics"
+>;
+type EligibilitySnapshot = ReturnType<
+  ReturnType<typeof useWaveEligibility>["getEligibility"]
+>;
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({
@@ -21,11 +48,39 @@ jest.mock("@/hooks/useDropPriviledges", () => ({
   useDropPrivileges: jest.fn(),
   ChatRestriction: { SLOW_MODE: "SLOW_MODE" },
 }));
-jest.mock("@/components/auth/Auth", () => ({ useAuth: () => ({}) }));
+const mockUseAuth = jest.fn<MockAuthState, []>(() => ({}));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => mockUseAuth(),
+}));
+const mockUseSeizeConnectContext = jest.fn(() => ({
+  address: undefined,
+  hasValidWalletAuth: false,
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => mockUseSeizeConnectContext(),
+}));
+jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
+  __esModule: true,
+  default: () => <button type="button">Create profile</button>,
+  shouldShowUserSetUpProfileCta: ({
+    address,
+    connectedProfileHandle,
+    fetchingProfile,
+    hasValidWalletAuth,
+  }: ProfileSetupVisibilityInput) =>
+    Boolean(
+      !fetchingProfile &&
+        hasValidWalletAuth !== false &&
+        !connectedProfileHandle &&
+        address
+    ),
+}));
 jest.mock("@/components/waves/DropPlaceholder", () => ({
   __esModule: true,
-  default: (props: any) => (
-    <div data-testid="placeholder" data-type={props.type} />
+  default: (props: DropPlaceholderMockProps) => (
+    <div data-testid="placeholder" data-type={props.type}>
+      {props.action}
+    </div>
   ),
 }));
 jest.mock("@/components/waves/CreateDrop", () => ({
@@ -34,7 +89,7 @@ jest.mock("@/components/waves/CreateDrop", () => ({
 }));
 
 const mockPriv = useDropPrivileges as jest.Mock;
-const wave: any = {
+const wave: TestWave = {
   id: "wave-1",
   chat: { authenticated_user_eligible: true, enabled: true },
   participation: { authenticated_user_eligible: true },
@@ -50,7 +105,9 @@ const renderPrivilegedDropCreator = (
         activeDrop={null}
         onCancelReplyQuote={() => {}}
         onDropAddedToQueue={() => {}}
-        wave={wave}
+        wave={
+          wave as React.ComponentProps<typeof PrivilegedDropCreator>["wave"]
+        }
         dropId={null}
         fixedDropMode={DropMode.CHAT}
         {...props}
@@ -63,7 +120,7 @@ const EligibilityProbe = ({
   onEligibility,
 }: {
   readonly waveId: string;
-  readonly onEligibility: (eligibility: any) => void;
+  readonly onEligibility: (eligibility: EligibilitySnapshot) => void;
 }) => {
   const { getEligibility } = useWaveEligibility();
 
@@ -78,6 +135,15 @@ describe("PrivilegedDropCreator", () => {
   beforeEach(() => {
     mockPriv.mockReset();
     mockInvalidateQueries.mockClear();
+    mockUseAuth.mockReturnValue({
+      connectedProfile: undefined,
+      activeProfileProxy: undefined,
+      fetchingProfile: false,
+    });
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: undefined,
+      hasValidWalletAuth: false,
+    });
   });
 
   it("shows both placeholder when both restricted", () => {
@@ -125,6 +191,87 @@ describe("PrivilegedDropCreator", () => {
     expect(screen.getByTestId("create")).toBeInTheDocument();
   });
 
+  it("passes needs profile state for connected wallets without a profile", () => {
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: "0xabc",
+      hasValidWalletAuth: true,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: "SUB",
+      chatRestriction: "CHAT",
+    });
+
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
+
+    expect(mockPriv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isLoggedIn: false,
+        needsProfile: true,
+      })
+    );
+    expect(
+      screen.getByRole("button", { name: "Create profile" })
+    ).toBeInTheDocument();
+  });
+
+  it("does not request profile setup while the profile is loading", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: undefined,
+      activeProfileProxy: undefined,
+      fetchingProfile: true,
+    });
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: "0xabc",
+      hasValidWalletAuth: true,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: "SUB",
+      chatRestriction: "CHAT",
+    });
+
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
+
+    expect(mockPriv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isLoggedIn: true,
+        needsProfile: false,
+      })
+    );
+    expect(screen.queryByTestId("placeholder")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("create")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Create profile" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps proxy sessions out of the profile setup path", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: undefined,
+      activeProfileProxy: { created_by: { handle: "proxy" } },
+      fetchingProfile: false,
+    });
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: "0xabc",
+      hasValidWalletAuth: true,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: "SUB",
+      chatRestriction: "CHAT",
+    });
+
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
+
+    expect(mockPriv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isProxy: true,
+        needsProfile: false,
+      })
+    );
+    expect(
+      screen.queryByRole("button", { name: "Create profile" })
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps chat composer visible during slow mode cooldown", () => {
     mockPriv.mockReturnValue({
       submissionRestriction: null,
@@ -148,7 +295,9 @@ describe("PrivilegedDropCreator", () => {
           activeDrop={null}
           onCancelReplyQuote={() => {}}
           onDropAddedToQueue={() => {}}
-          wave={wave}
+          wave={
+            wave as React.ComponentProps<typeof PrivilegedDropCreator>["wave"]
+          }
           dropId={null}
           fixedDropMode={DropMode.CHAT}
         />

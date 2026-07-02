@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesMobile from "../WavesMobile";
 
 type WavesBranchProps = {
@@ -23,15 +22,6 @@ function getConnectPrompt(
   contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
 ): ReactNode {
   switch (contentState) {
-    case "needs-profile":
-      return (
-        <>
-          <h1 className="tw-text-xl tw-font-bold">
-            You need to set up a profile to continue.
-          </h1>
-          <UserSetUpProfileCta />
-        </>
-      );
     case "not-available":
       return (
         <h1 className="tw-text-xl tw-font-bold">
@@ -41,6 +31,7 @@ function getConnectPrompt(
     case "loading":
     case "measuring":
     case "not-authenticated":
+    case "needs-profile":
     case "ready":
     default:
       return null;
@@ -84,12 +75,18 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
   const connectPrompt = getConnectPrompt(contentState);
+  const shouldRenderWavesContent =
+    contentState === "ready" ||
+    contentState === "not-authenticated" ||
+    contentState === "needs-profile" ||
+    contentState === "loading" ||
+    contentState === "measuring";
 
   let content: ReactNode = null;
 
-  if (contentState === "ready" || contentState === "not-authenticated") {
+  if (shouldRenderWavesContent) {
     content = getWavesContent({
-      children,
+      children: contentState === "loading" ? null : children,
       containerClassName,
       isApp,
     });

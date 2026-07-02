@@ -20,6 +20,19 @@ describe("DropPlaceholder", () => {
       ).toBeInTheDocument();
     });
 
+    it("renders needs profile message for chat", () => {
+      render(
+        <DropPlaceholder
+          type="chat"
+          chatRestriction={ChatRestriction.NEEDS_PROFILE}
+        />
+      );
+
+      expect(
+        screen.getByText("Create a profile to participate in chat")
+      ).toBeInTheDocument();
+    });
+
     it("renders proxy user message for chat", () => {
       render(
         <DropPlaceholder
@@ -98,6 +111,19 @@ describe("DropPlaceholder", () => {
 
       expect(
         screen.getByText("Please log in to make submissions")
+      ).toBeInTheDocument();
+    });
+
+    it("renders needs profile message for submission", () => {
+      render(
+        <DropPlaceholder
+          type="submission"
+          submissionRestriction={SubmissionRestriction.NEEDS_PROFILE}
+        />
+      );
+
+      expect(
+        screen.getByText("Create a profile to submit in this wave")
       ).toBeInTheDocument();
     });
 
@@ -225,6 +251,24 @@ describe("DropPlaceholder", () => {
 
       expect(
         screen.getByText("Connect your wallet to participate in this wave")
+      ).toBeInTheDocument();
+    });
+
+    it("renders create profile message and action for profileless users", () => {
+      render(
+        <DropPlaceholder
+          type="both"
+          chatRestriction={ChatRestriction.NEEDS_PROFILE}
+          submissionRestriction={SubmissionRestriction.NEEDS_PROFILE}
+          action={<button type="button">Create profile</button>}
+        />
+      );
+
+      expect(
+        screen.getByText("Create a profile to participate in this wave")
+      ).toHaveClass("tw-text-primary-400");
+      expect(
+        screen.getByRole("button", { name: "Create profile" })
       ).toBeInTheDocument();
     });
 
