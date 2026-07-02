@@ -46,7 +46,7 @@ export default function NextGenNavigationHeader(
       styles = {};
     }
     const viewHeader = (
-      <h5 className={`mb-0 pb-2 font-color unselectable`} style={styles}>
+      <h5 className={`tw-mb-0 tw-pb-2 tw-text-white tw-select-none`} style={styles}>
         <b>{v ?? "Featured"}</b>
       </h5>
     );
@@ -55,7 +55,7 @@ export default function NextGenNavigationHeader(
     }
     return (
       <button
-        className="btn-link decoration-none"
+        className="tw-border-0 tw-bg-transparent !tw-p-0 tw-font-[inherit] tw-text-inherit tw-cursor-pointer tw-outline-[inherit] hover:tw-bg-transparent focus:tw-bg-transparent active:tw-bg-transparent hover:tw-text-[#9a9a9a] focus:tw-text-[#9a9a9a] active:tw-text-[#9a9a9a] tw-no-underline"
         onClick={() => {
           if (props.setView) {
             props.setView(v);
@@ -87,13 +87,13 @@ export default function NextGenNavigationHeader(
     mobileLogoMaxWidth = "48vw";
   }
 
-  let headerControlsClassName = "gap-3 flex-nowrap";
+  let headerControlsClassName = "tw-gap-4 tw-flex-nowrap";
   if (isStackedHeader) {
-    let stackedJustifyClassName = "justify-content-start";
+    let stackedJustifyClassName = "tw-justify-start";
     if (isCompactHeader) {
-      stackedJustifyClassName = "justify-content-between";
+      stackedJustifyClassName = "tw-justify-between";
     }
-    headerControlsClassName = `gap-2 flex-nowrap ${stackedJustifyClassName} w-100`;
+    headerControlsClassName = `tw-gap-2 tw-flex-nowrap ${stackedJustifyClassName} tw-w-full`;
   }
 
   let headerPaddingTop = "0";
@@ -108,15 +108,15 @@ export default function NextGenNavigationHeader(
     <>
       <div
         className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["navigationHeader"]} ${
-          isStackedHeader ? `flex-column gap-2` : `justify-content-between`
+          isStackedHeader ? `tw-flex-col tw-gap-2` : `tw-justify-between`
         }`}
         style={{
           height: isStackedHeader ? "auto" : "90px",
           paddingTop: headerPaddingTop,
         }}
       >
-        <div className={`d-flex align-items-center ${headerControlsClassName}`}>
-          <span className="d-xl-none flex-shrink-1 overflow-hidden">
+        <div className={`tw-flex tw-items-center ${headerControlsClassName}`}>
+          <span className="tw-shrink tw-overflow-hidden xl:tw-hidden">
             <CollectionsDropdown
               activePage="nextgen"
               variant="brand"
@@ -141,7 +141,7 @@ export default function NextGenNavigationHeader(
             priority
             width="0"
             height="0"
-            className="cursor-pointer d-none d-xl-block"
+            className="tw-hidden tw-cursor-pointer xl:tw-block"
             style={{
               width: "250px",
               maxWidth: "85vw",
@@ -157,18 +157,18 @@ export default function NextGenNavigationHeader(
               }
             }}
           />
-          <span className="flex-shrink-0">
+          <span className="tw-shrink-0">
             <LFGButton contract={"nextgen"} />
           </span>
         </div>
         <div
-          className={`d-flex align-items-center ${
+          className={`tw-flex tw-items-center ${
             isStackedHeader
-              ? "w-100 justify-content-center pt-3 pb-3"
-              : "justify-content-end"
+              ? "tw-w-full tw-justify-center tw-pt-4 tw-pb-4"
+              : "tw-justify-end"
           }`}
         >
-          <span className="d-flex justify-content-center justify-content-md-end gap-3 gap-md-4">
+          <span className="tw-flex tw-justify-center md:tw-justify-end tw-gap-4 md:tw-gap-6">
             {printView(undefined)}
             {printView(NextgenView.COLLECTIONS)}
             {printView(NextgenView.ARTISTS)}

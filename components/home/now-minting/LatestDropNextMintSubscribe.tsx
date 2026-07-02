@@ -107,12 +107,12 @@ export default function LatestDropNextMintSubscribe(
     return (
       <div className={SUBSCRIPTION_SLOT_CLASS_NAME} aria-hidden>
         <div className="tw-py-1">
-          <div className="d-flex align-items-center justify-content-between gap-2">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
             <span className="tw-flex tw-w-full tw-leading-none">
               <span className="tw-h-6 tw-w-full tw-animate-pulse tw-rounded-md tw-bg-white/10" />
             </span>
           </div>
-          <div className="font-smaller font-color-silver d-flex align-items-center gap-2 tw-mt-2">
+          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-400">
             <span className="tw-h-5 tw-w-[180px] tw-animate-pulse tw-rounded-md tw-bg-white/5" />
           </div>
         </div>

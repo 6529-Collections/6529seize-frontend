@@ -20,7 +20,7 @@ export default function LeaderboardSort<LeaderboardSortType>(
   }>
 ) {
   return (
-    <span className="d-flex flex-column">
+    <span className="tw-flex tw-flex-col">
       <FontAwesomeIcon
         icon={faSquareCaretUp}
         onClick={() =>

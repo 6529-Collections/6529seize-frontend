@@ -321,7 +321,7 @@ export default function MemeSubscriptionRow(
           )}
         </div>
         {finalWithMetadata && (
-          <div className="font-smaller font-color-silver tw-mt-2 tw-pr-2">
+          <div className="tw-mt-2 tw-pr-2 tw-text-sm tw-text-iron-400">
             Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
             {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
             {finalWithMetadata.phaseSubscriptions.toLocaleString()} - Airdrop
@@ -330,7 +330,7 @@ export default function MemeSubscriptionRow(
           </div>
         )}
         {props.minting_today && (
-          <div className="font-smaller font-color-silver tw-mt-2 tw-flex tw-items-center tw-gap-2">
+          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-400">
             <span
               data-tooltip-id={`minting-today-${props.subscription.token_id}`}
             >
@@ -397,7 +397,7 @@ export default function MemeSubscriptionRow(
               )}
             </span>
             {finalWithMetadata && (
-              <span className="font-smaller font-color-silver">
+              <span className="tw-text-sm tw-text-iron-400">
                 Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
                 {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
                 {finalWithMetadata.phaseSubscriptions.toLocaleString()} -
