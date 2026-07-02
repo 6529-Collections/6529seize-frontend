@@ -8,9 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import UserSetUpProfileCta, {
-  shouldShowUserSetUpProfileCta,
-} from "../user/utils/set-up-profile/UserSetUpProfileCta";
+import { shouldShowUserSetUpProfileCta } from "../user/utils/set-up-profile/UserSetUpProfileCta";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
 import {
@@ -96,9 +94,10 @@ export default function PrivilegedDropCreator({
       fetchingProfile,
       hasValidWalletAuth,
     }) && !activeProfileProxy;
-  const profileAction = shouldOfferProfileSetup ? (
-    <UserSetUpProfileCta className="tw-mt-1" />
-  ) : undefined;
+  const profileSetupHref =
+    shouldOfferProfileSetup && address
+      ? `/${address.toLowerCase()}`
+      : undefined;
 
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile || isProfileLoadingForWallet,
@@ -135,7 +134,7 @@ export default function PrivilegedDropCreator({
         type="both"
         chatRestriction={blockingChatRestriction}
         submissionRestriction={submissionRestriction}
-        action={profileAction}
+        profileSetupHref={profileSetupHref}
       />
     );
   }
@@ -145,7 +144,7 @@ export default function PrivilegedDropCreator({
       <DropPlaceholder
         type="chat"
         chatRestriction={blockingChatRestriction}
-        action={profileAction}
+        profileSetupHref={profileSetupHref}
       />
     );
   }
@@ -158,7 +157,7 @@ export default function PrivilegedDropCreator({
       <DropPlaceholder
         type="submission"
         submissionRestriction={submissionRestriction}
-        action={profileAction}
+        profileSetupHref={profileSetupHref}
       />
     );
   }
