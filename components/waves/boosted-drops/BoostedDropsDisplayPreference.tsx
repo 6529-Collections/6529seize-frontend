@@ -18,11 +18,11 @@ const BOOSTED_DROPS_DISPLAY_LABEL_KEYS = {
   hidden: "waveChat.boostedDrops.display.hidden",
 } as const satisfies Record<BoostedDropsDisplayPreference, MessageKey>;
 
-export const getBoostedDropsDisplayPreferenceLabel = (
+const getBoostedDropsDisplayPreferenceLabel = (
   preference: BoostedDropsDisplayPreference
 ): string => t(DEFAULT_LOCALE, BOOSTED_DROPS_DISPLAY_LABEL_KEYS[preference]);
 
-export const getBoostedDropsDisplayPreferenceMenuLabel = (
+const getBoostedDropsDisplayPreferenceMenuLabel = (
   preference: BoostedDropsDisplayPreference
 ): string =>
   t(DEFAULT_LOCALE, "waveChat.boostedDrops.display.menuCurrent", {

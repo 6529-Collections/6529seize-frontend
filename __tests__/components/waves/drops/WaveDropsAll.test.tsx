@@ -23,10 +23,12 @@ import React from "react";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropsAll from "@/components/waves/drops/wave-drops-all";
-import { BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY } from "@/hooks/useBoostedDropsDisplayPreference";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
+const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
+  "waveChatBoostedDropsDisplayPreference";
 
 // Mock hooks and dependencies
 jest.mock("@/hooks/useVirtualizedWaveDrops");

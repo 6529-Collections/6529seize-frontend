@@ -7,7 +7,7 @@ import {
   type BoostedDropsDisplayPreference,
 } from "@/types/boosted-drops.types";
 
-export const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
+const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
   "waveChatBoostedDropsDisplayPreference";
 
 export function useBoostedDropsDisplayPreference(): [
