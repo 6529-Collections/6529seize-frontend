@@ -117,8 +117,8 @@ distribution routes.
     - `position_in_season`, `position_in_year`, `position_in_epoch`,
       `position_in_period`, `position_in_era`, `position_in_eon`
     - `calendar_path` and `mint_path`
-  - `400` for invalid ids (non-numeric, `0`, decimals, negatives, or above
-    JavaScript `MAX_SAFE_INTEGER`):
+  - `400` for invalid ids (non-numeric, `0`, decimals, negatives, unsafe
+    integers, or values above `100000`):
     - `{"error":"Invalid id. Use a positive integer up to 100000 in /api/meme-calendar/<id>."}`
   - `422` when the id parses but timeline resolution fails:
     - `{"error":"Unable to resolve calendar details for this mint id. The id may be out of range."}`
