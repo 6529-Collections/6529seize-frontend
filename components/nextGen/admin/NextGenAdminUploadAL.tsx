@@ -185,9 +185,9 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="no-padding">
+    <Container className="!tw-p-0">
       <NextGenAdminHeadingRow close={props.close} title="UPLOAD ALLOWLIST" />
-      <Row className="pt-3">
+      <Row className="tw-pt-4">
         <Col>
           <Form>
             <NextGenCollectionIdFormGroup
@@ -198,7 +198,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
                   checked={type == Type.ALLOWLIST}
@@ -221,7 +221,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               </span>
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Phase</Form.Label>
               <Form.Control
                 type="string"
@@ -230,7 +230,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 onChange={(e: any) => setPhaseName(e.target.value)}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Control
                 type="file"
                 accept={".csv"}
@@ -243,7 +243,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 }}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Allowlist Start Time</Form.Label>
               <Form.Control
                 type="integer"
@@ -252,7 +252,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 onChange={(e: any) => setAllowlistStartTime(e.target.value)}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Allowlist end Time</Form.Label>
               <Form.Control
                 type="integer"
@@ -261,7 +261,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 onChange={(e: any) => setAllowlistEndTime(e.target.value)}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Mint Price (ETH)</Form.Label>
               <Form.Control
                 type="integer"
@@ -271,9 +271,9 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               />
             </Form.Group>
             {!uploading && errors.length > 0 && printAdminErrors(errors)}
-            <div className="tw-flex tw-items-center tw-gap-4 tw-mt-6">
+            <div className="tw-mt-6 tw-flex tw-items-center tw-gap-4">
               <Button
-                className="seize-btn"
+                className="tw-rounded-none tw-border-0 tw-px-5 tw-py-1.5 tw-font-bold disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                 disabled={
                   !collectionID ||
                   !allowlistFile ||
@@ -294,7 +294,9 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                   wallet...
                 </span>
               )}
-              {uploadSuccess && <span className="tw-text-success">Uploaded</span>}
+              {uploadSuccess && (
+                <span className="tw-text-success">Uploaded</span>
+              )}
               {!uploading && uploadError && (
                 <span className="tw-text-error">{uploadError}</span>
               )}
