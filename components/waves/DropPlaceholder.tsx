@@ -113,22 +113,17 @@ export default function DropPlaceholder({
   const getColor = () => {
     if (
       type === "both" &&
-      ((chatRestriction === ChatRestriction.NOT_LOGGED_IN &&
-        submissionRestriction === SubmissionRestriction.NOT_LOGGED_IN) ||
-        (chatRestriction === ChatRestriction.NEEDS_PROFILE &&
-          submissionRestriction === SubmissionRestriction.NEEDS_PROFILE))
+      chatRestriction === ChatRestriction.NEEDS_PROFILE &&
+      submissionRestriction === SubmissionRestriction.NEEDS_PROFILE
     ) {
       return "tw-text-primary-400";
     }
-    if (
-      type === "chat" &&
-      (chatRestriction === ChatRestriction.NOT_LOGGED_IN ||
-        chatRestriction === ChatRestriction.NEEDS_PROFILE)
-    )
+    if (type === "chat" && chatRestriction === ChatRestriction.NEEDS_PROFILE)
       return "tw-text-primary-400";
     if (type === "submission") {
       switch (submissionRestriction) {
         case SubmissionRestriction.NOT_LOGGED_IN:
+          return "tw-text-iron-400";
         case SubmissionRestriction.NEEDS_PROFILE:
           return "tw-text-primary-400";
         case SubmissionRestriction.NOT_STARTED:
