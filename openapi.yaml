@@ -2097,6 +2097,8 @@ paths:
                 $ref: "#/components/schemas/ApiDmDropsUnreadCount"
         "400":
           description: Bad request
+        "401":
+          description: Unauthorized
         "403":
           description: Forbidden - profile required
   /drops/{dropId}/toggle-hide-link-preview:

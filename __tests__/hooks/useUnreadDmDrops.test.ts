@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useUnreadDmDrops } from "@/hooks/useUnreadDmDrops";
 
@@ -124,5 +124,31 @@ describe("useUnreadDmDrops", () => {
 
     expect(result.current.unreadDmDropsCount).toBe(0);
     expect(result.current.haveUnreadDmDrops).toBe(false);
+  });
+
+  it("logs non-auth query failures", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    const error = new Error("network down");
+    mockUseQuery.mockReturnValue({
+      ...defaultQueryResult,
+      data: undefined,
+      error,
+      isError: true,
+      isSuccess: false,
+      status: "error" as const,
+    });
+
+    renderHook(() => useUnreadDmDrops("alice"));
+
+    await waitFor(() => {
+      expect(consoleError).toHaveBeenCalledWith(
+        "Failed to fetch unread DM drops",
+        error
+      );
+    });
+
+    consoleError.mockRestore();
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   isUnauthorizedQueryError,
@@ -36,7 +37,7 @@ export function useUnreadDmDrops(
     handle && options.enabled !== false && hasUsableAuthJwt
   );
 
-  const { data } = useQuery<ApiDmDropsUnreadCount>({
+  const { data, error, isError } = useQuery<ApiDmDropsUnreadCount>({
     queryKey: [
       QueryKey.DM_DROPS_UNREAD,
       { identity: handle, auth: authFingerprint },
@@ -62,6 +63,14 @@ export function useUnreadDmDrops(
     },
     retryDelay: (failureCount: number) => failureCount * 1000,
   });
+
+  useEffect(() => {
+    if (!isError || !error || isUnauthorizedQueryError(error)) {
+      return;
+    }
+
+    console.error("Failed to fetch unread DM drops", error);
+  }, [error, isError]);
 
   const unreadDmDrops = isEnabled ? data : undefined;
   const unreadDmDropsCount = clampUnreadCount(unreadDmDrops?.count);

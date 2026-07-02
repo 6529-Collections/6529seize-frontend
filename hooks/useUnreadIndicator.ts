@@ -24,7 +24,7 @@ export function useUnreadIndicator({
     type === "notifications" ? handle : null
   );
 
-  const { haveUnreadDmDrops, unreadDmDrops } = useUnreadDmDrops(
+  const { haveUnreadDmDrops } = useUnreadDmDrops(
     type === "messages" ? handle : null
   );
 
@@ -46,8 +46,7 @@ export function useUnreadIndicator({
     );
   });
 
-  const hasUnreadMessages =
-    haveUnreadDmDrops || (!unreadDmDrops && hasLocalUnreadMessages);
+  const hasUnreadMessages = haveUnreadDmDrops || hasLocalUnreadMessages;
 
   return { hasUnread: hasUnreadMessages };
 }
