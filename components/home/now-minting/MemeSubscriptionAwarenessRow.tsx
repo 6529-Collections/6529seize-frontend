@@ -108,7 +108,12 @@ export default function MemeSubscriptionAwarenessRow({
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-font-semibold tw-leading-none tw-text-primary-300">
-            {t(locale, "home.mintSubscriptions.subscribedLabel")}
+            {t(
+              locale,
+              subscribed
+                ? "home.mintSubscriptions.subscribedLabel"
+                : "home.mintSubscriptions.subscribeLabel"
+            )}
           </div>
           {safeSubscribersCount !== undefined && (
             <div className="tw-mt-2 tw-text-xs tw-leading-4 tw-text-primary-300/70">
