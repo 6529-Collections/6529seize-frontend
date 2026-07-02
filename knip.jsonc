@@ -94,8 +94,6 @@
     ],
     "ignoreDependencies": [
       "bootstrap",
-      // Temporary until the final Bootstrap cleanup removes legacy test mocks.
-      "react-bootstrap",
       "pino-pretty",
       "babel-jest",
       "eslint-plugin-jsx-a11y",

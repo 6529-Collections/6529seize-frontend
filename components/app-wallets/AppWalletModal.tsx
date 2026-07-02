@@ -22,6 +22,15 @@ import { useAppWallets } from "./AppWalletsContext";
 
 const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
 
+function closeDialog(dialog: HTMLDialogElement) {
+  if (typeof dialog.close === "function" && dialog.open) {
+    dialog.close();
+    return;
+  }
+
+  dialog.removeAttribute("open");
+}
+
 function AppWalletModalShell(
   props: Readonly<{
     show: boolean;
@@ -47,11 +56,7 @@ function AppWalletModalShell(
     }
 
     if (!show) {
-      if (dialog.open) {
-        dialog.close();
-      } else {
-        dialog.removeAttribute("open");
-      }
+      closeDialog(dialog);
       previouslyFocusedElementRef.current?.focus();
       previouslyFocusedElementRef.current = null;
       return undefined;
@@ -76,11 +81,7 @@ function AppWalletModalShell(
       ?.focus();
 
     return () => {
-      if (dialog.open) {
-        dialog.close();
-      } else {
-        dialog.removeAttribute("open");
-      }
+      closeDialog(dialog);
       previouslyFocusedElementRef.current?.focus();
       previouslyFocusedElementRef.current = null;
     };
@@ -104,18 +105,26 @@ function AppWalletModalShell(
       ref={dialogRef}
       aria-modal="true"
       aria-labelledby={titleId}
-      className={clsx("tailwind-scope", styles["modalDialog"])}
+      className="tailwind-scope tw-m-0 tw-flex tw-h-[100dvh] tw-max-h-none tw-w-screen tw-max-w-none tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-4 tw-text-inherit backdrop:tw-bg-black/50"
       onCancel={(event) => event.preventDefault()}
       onMouseDown={handleDialogMouseDown}
     >
-      <div className={styles["modalPanel"]}>
+      <div className="tw-w-full tw-max-w-[500px]">
         <div className={styles["modalHeader"]}>
-          <h2 id={titleId} className={styles["modalTitle"]}>
+          <h2
+            id={titleId}
+            className="tw-m-0 tw-text-xl tw-font-medium tw-leading-[1.2]"
+          >
             {title}
           </h2>
         </div>
         <div className={styles["modalContent"]}>{children}</div>
-        <div className={clsx(styles["modalContent"], styles["modalFooter"])}>
+        <div
+          className={clsx(
+            styles["modalContent"],
+            "tw-flex tw-justify-end tw-gap-2"
+          )}
+        >
           {footer}
         </div>
       </div>
