@@ -15,13 +15,16 @@ profile image, and recent profile drops.
 - Active wallet without valid auth: the current action requests wallet auth.
 - Authenticated wallet without profile: the current action opens profile setup.
 - Profile without profile image: the profile-image step remains incomplete, but
-  it does not block Waves or messaging actions.
+  it appears after the Waves/message steps and does not block them.
+- Profile that opens Waves from the current journey action: the public Waves
+  entry step is marked complete from a route-aware client navigation.
 - Profile with recent public Wave drop: the first public message step is marked
-  complete.
+  complete and the public Waves entry step is also satisfied.
 
 The first public message check queries recent drops for the connected profile
-handle and counts drops in public Waves only. If that check fails, the page keeps
-the message step open and leaves the rest of the guide available.
+identity and counts drops in public Waves only when the returned drop author
+matches the connected profile. If that check fails, the page keeps the message
+step open and leaves the rest of the guide available.
 
 ## Progress
 
@@ -29,9 +32,9 @@ The journey shows five visible steps:
 
 1. Connect wallet.
 2. Create profile.
-3. Add profile image.
-4. Enter public Waves.
-5. Send first public message.
+3. Enter public Waves.
+4. Send first public message.
+5. Add profile image.
 
 Progress is a simple completed count over those five steps. The profile-image
 step is optional in the sense that it is not a gate, but it is still incomplete
