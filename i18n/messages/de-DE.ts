@@ -86,6 +86,7 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Datei-Upload-Bereich für den Wave-Chat",
+  "waves.loadingStatus": "Waves werden geladen",
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
