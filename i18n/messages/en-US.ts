@@ -439,6 +439,10 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
 } as const);
 
+const WAVE_LOADING_MESSAGES = objectMessages("waves", {
+  loadingStatus: "Loading waves",
+} as const);
+
 const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
   coverAlt: "{waveName} cover",
   "dropsCount.one": "{timeAgo} · {count} drop",
@@ -1257,6 +1261,7 @@ export const EN_US_MESSAGES = {
   ...WAVES_SIDEBAR_MESSAGES,
   ...QUICK_DM_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_LOADING_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,

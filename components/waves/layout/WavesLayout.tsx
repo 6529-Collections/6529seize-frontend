@@ -6,6 +6,8 @@ import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent"
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesMobile from "../WavesMobile";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 type WavesBranchProps = {
   readonly children: ReactNode;
@@ -15,9 +17,56 @@ function WavesBranchLoadingFallback() {
   return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
 }
 
-const WavesDesktop = dynamic<WavesBranchProps>(() => import("../WavesDesktop"), {
-  loading: () => <WavesBranchLoadingFallback />,
-});
+const WavesDesktop = dynamic<WavesBranchProps>(
+  () => import("../WavesDesktop"),
+  {
+    loading: () => <WavesBranchLoadingFallback />,
+  }
+);
+
+function WavesContentLoadingFallback() {
+  const locale = useBrowserLocale();
+
+  return (
+    <div
+      className="tw-flex tw-h-full tw-min-h-[min(100dvh,720px)] tw-flex-col tw-gap-4 tw-overflow-hidden tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-px-8"
+      role="status"
+      aria-live="polite"
+      aria-label={t(locale, "waves.loadingStatus")}
+    >
+      <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-6xl tw-flex-col tw-gap-4">
+        <div className="tw-space-y-3">
+          <div className="tw-h-5 tw-w-48 tw-animate-pulse tw-rounded tw-bg-iron-800" />
+          <div className="tw-h-3 tw-w-full tw-max-w-md tw-animate-pulse tw-rounded tw-bg-iron-900" />
+        </div>
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-3">
+          {["left", "middle", "right"].map((column) => (
+            <div
+              key={`waves-content-loading-${column}`}
+              className={`tw-flex tw-flex-col tw-gap-4 ${
+                column === "middle" ? "tw-hidden md:tw-flex" : ""
+              } ${column === "right" ? "tw-hidden xl:tw-flex" : ""}`}
+            >
+              {[0, 1, 2].map((item) => (
+                <div
+                  key={`waves-content-loading-${column}-${item}`}
+                  className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/75"
+                >
+                  <div className="tw-h-44 tw-animate-pulse tw-bg-iron-900" />
+                  <div className="tw-space-y-3 tw-p-4">
+                    <div className="tw-h-4 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800" />
+                    <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-900" />
+                    <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-900" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function getConnectPrompt(
   contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
@@ -94,7 +143,12 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
 
   if (shouldRenderWavesContent) {
     content = getWavesContent({
-      children: contentState === "loading" ? null : children,
+      children:
+        contentState === "loading" || contentState === "measuring" ? (
+          <WavesContentLoadingFallback />
+        ) : (
+          children
+        ),
       containerClassName,
       isApp,
     });
