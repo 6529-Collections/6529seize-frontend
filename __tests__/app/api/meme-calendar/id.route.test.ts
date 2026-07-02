@@ -14,6 +14,15 @@ import {
 } from "@/app/api/meme-calendar/meme-calendar-response";
 import { GET } from "@/app/api/meme-calendar/[id]/route";
 
+const EXPECTED_POSITION_FIELDS = {
+  position_in_season: expect.any(Number),
+  position_in_year: expect.any(Number),
+  position_in_epoch: expect.any(Number),
+  position_in_period: expect.any(Number),
+  position_in_era: expect.any(Number),
+  position_in_eon: expect.any(Number),
+};
+
 describe("/api/meme-calendar/[id]", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -60,10 +69,61 @@ describe("/api/meme-calendar/[id]", () => {
         period: expected.periodNumber,
         era: expected.eraNumber,
         eon: expected.eonNumber,
+        ...EXPECTED_POSITION_FIELDS,
         calendar_path: "/meme-calendar",
         mint_path: `/the-memes/${id}`,
       },
       { headers: MEME_CALENDAR_API_CACHE_HEADERS }
+    );
+  });
+
+  it("returns division positions for a structured timeline mint", async () => {
+    const response = await GET({} as any, {
+      params: Promise.resolve({ id: "516" }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        mint_number: 516,
+        season: 16,
+        year: 4,
+        epoch: 1,
+        period: 1,
+        era: 1,
+        eon: 1,
+        position_in_season: 1,
+        position_in_year: 78,
+        position_in_epoch: 469,
+        position_in_period: 469,
+        position_in_era: 469,
+        position_in_eon: 469,
+      })
+    );
+  });
+
+  it("counts SZN1 positions from the historical first mint", async () => {
+    const response = await GET({} as any, {
+      params: Promise.resolve({ id: "47" }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        mint_number: 47,
+        season: 1,
+        year: 0,
+        epoch: 0,
+        period: 0,
+        era: 0,
+        eon: 0,
+        position_in_season: 47,
+        position_in_year: 47,
+        position_in_epoch: 47,
+        position_in_period: 47,
+        position_in_era: 47,
+        position_in_eon: 47,
+      })
     );
   });
 
