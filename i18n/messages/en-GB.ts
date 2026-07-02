@@ -84,6 +84,7 @@ export const EN_GB_MESSAGES = {
   ...EN_GB_QR_SCANNER_MESSAGES,
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
+  "waves.loadingStatus": "Loading waves",
   "memes.quickVote.leftThisRound": "{count} left this round",
   "memes.quickVote.unrated": "{count} unrated",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",

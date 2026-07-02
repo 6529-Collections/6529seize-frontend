@@ -12,7 +12,9 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     return require("@/components/waves/WavesDesktop").default;
   }
 
-  throw new Error(`Unexpected dynamic import in WavesLayout test: ${loaderSource}`);
+  throw new Error(
+    `Unexpected dynamic import in WavesLayout test: ${loaderSource}`
+  );
 });
 
 jest.mock("../../../hooks/useAuthenticatedContent", () => ({
@@ -92,7 +94,7 @@ describe("WavesLayout", () => {
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 
-  it("keeps the Waves shell mounted without children while auth state is loading", () => {
+  it("shows a loading skeleton while keeping real content hidden during auth loading", () => {
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "loading",
     });
@@ -104,6 +106,9 @@ describe("WavesLayout", () => {
     );
 
     expect(screen.getByTestId("waves-desktop")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading waves" })
+    ).toBeInTheDocument();
     expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
