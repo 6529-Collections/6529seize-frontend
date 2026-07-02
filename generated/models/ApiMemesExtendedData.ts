@@ -475,3 +475,4 @@ export enum ApiMemesExtendedDataTokenTypeEnum {
     Erc1155 = 'ERC1155',
     Erc721 = 'ERC721'
 }
+
