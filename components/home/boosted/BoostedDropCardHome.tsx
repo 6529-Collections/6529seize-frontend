@@ -11,7 +11,6 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
-import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image from "next/image";
@@ -24,6 +23,11 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from "react";
 import BoostedDropCardHomeContent from "./BoostedDropCardHomeContent";
+import {
+  getBoostedDropAuthorLabel,
+  getBoostedDropBoostLabel,
+  getBoostedDropOpenLabel,
+} from "./boostedDropText";
 
 type BoostedDropCardHomeVariant = "home" | "chat";
 
@@ -58,23 +62,6 @@ const WAVE_LINK_CLASSES =
   "tw-group/wave tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-full tw-bg-white/5 tw-py-1 tw-pl-2.5 tw-pr-1 tw-no-underline tw-transition-all active:tw-scale-95 desktop-hover:hover:tw-bg-white/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 const OPEN_DROP_BUTTON_CLASSES =
   "tw-absolute tw-inset-0 tw-z-20 tw-m-0 tw-block tw-h-full tw-w-full tw-cursor-pointer tw-rounded-[inherit] tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
-
-const getBoostLabel = (boosts: number): string =>
-  t(
-    DEFAULT_LOCALE,
-    boosts === 1
-      ? "home.boostedDrop.boostCount.one"
-      : "home.boostedDrop.boostCount.many",
-    { count: formatInteger(DEFAULT_LOCALE, boosts) }
-  );
-
-const getAuthorLabel = (handle: string | null | undefined): string =>
-  handle?.trim() || t(DEFAULT_LOCALE, "home.boostedDrop.anonymousAuthor");
-
-const getOpenDropLabel = (authorHandle: string | null | undefined): string =>
-  t(DEFAULT_LOCALE, "home.boostedDrop.openDrop", {
-    author: getAuthorLabel(authorHandle),
-  });
 
 const BoostedDropCardChatBoostButton = memo(
   ({ drop }: { readonly drop: ApiDrop }) => {
@@ -125,10 +112,10 @@ const BoostedDropCardChatBoostButton = memo(
         aria-label={
           isBoosted
             ? t(DEFAULT_LOCALE, "home.boostedDrop.removeBoostFromDrop", {
-                author: getAuthorLabel(drop.author.handle),
+                author: getBoostedDropAuthorLabel(drop.author.handle),
               })
             : t(DEFAULT_LOCALE, "home.boostedDrop.boostDrop", {
-                author: getAuthorLabel(drop.author.handle),
+                author: getBoostedDropAuthorLabel(drop.author.handle),
               })
         }
       >
@@ -177,7 +164,7 @@ const BoostedDropCardHeader = memo(
             </span>
           </div>
           <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-black/30 tw-px-2 tw-py-1 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400">
-            {getBoostLabel(totalBoosts)}
+            {getBoostedDropBoostLabel(totalBoosts)}
           </span>
         </div>
       );
@@ -194,7 +181,7 @@ const BoostedDropCardHeader = memo(
         </div>
         <div
           className={`${PILL_CLASSES} tw-gap-0.5 sm:tw-ml-auto`}
-          aria-label={getBoostLabel(totalBoosts)}
+          aria-label={getBoostedDropBoostLabel(totalBoosts)}
         >
           {Array.from({ length: fireIconsToShow }).map((_, index) => (
             <BoostIcon
@@ -240,7 +227,7 @@ const BoostedDropCardFooter = memo(
         onClick={(event) => event.stopPropagation()}
         className={PROFILE_LINK_CLASSES}
         aria-label={t(DEFAULT_LOCALE, "home.boostedDrop.viewAuthor", {
-          author: getAuthorLabel(author.handle),
+          author: getBoostedDropAuthorLabel(author.handle),
         })}
       >
         <ProfileAvatar
@@ -249,7 +236,7 @@ const BoostedDropCardFooter = memo(
           size={ProfileBadgeSize.SMALL}
         />
         <span className="tw-break-words tw-text-sm tw-font-medium tw-text-iron-50">
-          {getAuthorLabel(author.handle)}
+          {getBoostedDropAuthorLabel(author.handle)}
         </span>
       </Link>
 
@@ -314,7 +301,7 @@ const BoostedDropCardHome = memo(
     const fireIconsToShow = Math.min(boosts, MAX_FIRE_ICONS);
     const remainingBoosts = Math.max(boosts - MAX_FIRE_ICONS, 0);
     const isChatVariant = variant === "chat";
-    const openDropLabel = getOpenDropLabel(author.handle);
+    const openDropLabel = getBoostedDropOpenLabel(author.handle);
     const waveHref = getWaveRoute({
       waveId: wave.id,
       isDirectMessage: false,
