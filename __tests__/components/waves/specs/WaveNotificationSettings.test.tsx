@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveNotificationSettings from "@/components/waves/specs/WaveNotificationSettings";
@@ -27,11 +26,6 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
       all_drops_notifications_subscribers_limit: 1000,
     },
   }),
-}));
-
-jest.mock("react-bootstrap", () => ({
-  OverlayTrigger: ({ children }: any) => children,
-  Tooltip: ({ children }: any) => <div>{children}</div>,
 }));
 
 const mockWave: ApiWave = {

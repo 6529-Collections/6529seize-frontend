@@ -20,20 +20,6 @@ jest.mock("@/components/pagination/Pagination", () => (props: any) => (
   </div>
 ));
 
-jest.mock("react-bootstrap", () => {
-  const RB: any = {
-    Container: (p: any) => <div data-testid="container" {...p} />,
-    Row: (p: any) => <div data-testid="row" {...p} />,
-    Col: (p: any) => <div data-testid="col" {...p} />,
-  };
-  const Dropdown: any = (p: any) => <div data-testid="dropdown" {...p} />;
-  Dropdown.Toggle = (p: any) => <button {...p}>{p.children}</button>;
-  Dropdown.Menu = (p: any) => <div data-testid="menu" {...p} />;
-  Dropdown.Item = (p: any) => <button {...p} />;
-  RB.Dropdown = Dropdown;
-  return RB;
-});
-
 beforeEach(() => {
   fetchUrl.mockReset();
   window.scrollTo = jest.fn();
