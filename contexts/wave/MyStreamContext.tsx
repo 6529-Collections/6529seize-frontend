@@ -113,13 +113,13 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   children,
 }) => {
   const { isCapacitor, isActive } = useCapacitor();
-  const pathname = usePathname();
+  const pathname = usePathname() as string | null;
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
   const [
     directMessagesListActivationCount,
     setDirectMessagesListActivationCount,
   ] = useState(0);
-  const isDirectMessagesRoute = pathname.startsWith("/messages");
+  const isDirectMessagesRoute = pathname?.startsWith("/messages") ?? false;
   const isDirectMessagesListEnabled =
     isDirectMessagesRoute || directMessagesListActivationCount > 0;
   const { wave: activeWaveData } = useWaveById(activeWaveId, {

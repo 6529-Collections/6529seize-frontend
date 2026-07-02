@@ -193,6 +193,24 @@ describe("MyStreamProvider resume sync", () => {
     expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
   });
 
+  it("treats a null pathname as a non-messages route", () => {
+    usePathnameMock.mockReturnValue(null);
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    act(() => {
+      window.dispatchEvent(new Event("online"));
+    });
+
+    expect(mainRefetch).toHaveBeenCalledTimes(1);
+    expect(dmRefetch).not.toHaveBeenCalled();
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+  });
+
   it("refetches DMs on browser resume for messages routes", () => {
     usePathnameMock.mockReturnValue("/messages/wave-1");
 
