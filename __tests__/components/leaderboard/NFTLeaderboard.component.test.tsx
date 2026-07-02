@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NFTLeaderboard from '@/components/leaderboard/NFTLeaderboard';
@@ -10,7 +9,6 @@ jest.mock('@/components/searchModal/SearchModal', () => ({
   SearchModalDisplay: () => null,
 }));
 
-jest.mock('react-bootstrap', () => ({ Container:(p:any)=><div>{p.children}</div>, Row:(p:any)=><div>{p.children}</div>, Col:(p:any)=><div>{p.children}</div>, Table:(p:any)=><table>{p.children}</table> }));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon:(p:any)=><svg onClick={p.onClick} /> }));
 
 jest.mock('@/helpers/Helpers', () => ({ numberWithCommas:(n:number)=>String(n), cicToType: ()=>'T' }));

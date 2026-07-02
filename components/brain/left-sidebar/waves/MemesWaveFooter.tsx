@@ -114,7 +114,7 @@ const getContainerClassName = ({
 
 const getExpandedFrameClassName = (floating: boolean): string => {
   if (floating) {
-    return `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-origin-bottom tw-scale-[var(--memes-wave-floating-footer-scale)] tw-flex-shrink-0 tw-transform-gpu tw-will-change-transform`;
+    return `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-origin-bottom tw-scale-[var(--memes-wave-floating-footer-scale)] tw-flex-shrink-0 tw-transform-gpu tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] tw-will-change-transform motion-reduce:tw-transition-none`;
   }
 
   return "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4";
