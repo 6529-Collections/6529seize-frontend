@@ -43,7 +43,6 @@ interface JourneyStep {
   readonly body: string;
   readonly icon: IconComponent;
   readonly complete: boolean;
-  readonly optional?: boolean;
 }
 
 interface ActionTile {
@@ -161,6 +160,33 @@ const isPublicWaveDropByProfile = (
   );
 };
 
+const hasPositiveNumber = (value: number | null | undefined) =>
+  typeof value === "number" && value > 0;
+
+const hasItems = (items: readonly unknown[] | null | undefined) =>
+  Boolean(items?.length);
+
+const hasEstablishedProfileActivity = (
+  profile: ApiIdentity | null
+): boolean => {
+  if (!profile) {
+    return false;
+  }
+
+  return (
+    profile.is_wave_creator ||
+    Boolean(profile.profile_wave_id) ||
+    hasPositiveNumber(profile.level) ||
+    hasPositiveNumber(profile.cic) ||
+    hasPositiveNumber(profile.rep) ||
+    hasPositiveNumber(profile.tdh) ||
+    hasPositiveNumber(profile.xtdh) ||
+    hasItems(profile.active_main_stage_submission_ids) ||
+    hasItems(profile.winner_main_stage_drop_ids) ||
+    hasItems(profile.artist_of_prevote_cards)
+  );
+};
+
 export default function Join6529PageClient() {
   const locale = useBrowserLocale();
   useSetTitle(m(locale, "join6529.metadata.title"));
@@ -178,11 +204,11 @@ export default function Join6529PageClient() {
     formattedRemainingSteps,
     formattedTotalSteps,
     hasActiveWalletAddress,
+    hasEstablishedActivity,
     hasFirstPublicMessage,
     hasProfile,
     hasProfileImage,
     progressDetailKey,
-    progressPercent,
     steps,
     totalSteps,
   } = useJoin6529Journey(locale);
@@ -197,7 +223,6 @@ export default function Join6529PageClient() {
           formattedTotalSteps={formattedTotalSteps}
           locale={locale}
           progressDetailKey={progressDetailKey}
-          progressPercent={progressPercent}
           totalSteps={totalSteps}
         />
 
@@ -214,6 +239,7 @@ export default function Join6529PageClient() {
             currentPanel={currentPanel}
             didPublicMessageCheckFail={didPublicMessageCheckFail}
             hasActiveWalletAddress={hasActiveWalletAddress}
+            hasEstablishedActivity={hasEstablishedActivity}
             hasFirstPublicMessage={hasFirstPublicMessage}
             hasProfile={hasProfile}
             hasProfileImage={hasProfileImage}
@@ -265,18 +291,20 @@ function useJoin6529Journey(locale: SupportedLocale) {
     : null;
   const hasProfile = Boolean(connectedProfile);
   const hasProfileImage = Boolean(connectedProfile?.pfp);
+  const hasEstablishedActivity =
+    hasEstablishedProfileActivity(connectedProfile);
 
   const {
     data: recentProfileDrops,
-    isError: didPublicMessageCheckFail,
-    isFetching: checkingPublicMessage,
+    isError: didRecentPublicMessageCheckFail,
+    isFetching: checkingRecentPublicMessage,
   } = useQuery({
     queryKey: [
       QueryKey.PROFILE_DROPS,
       "join-6529-first-public-message",
       profileQueryIdentity,
     ],
-    enabled: Boolean(profileQueryIdentity),
+    enabled: Boolean(profileQueryIdentity) && !hasEstablishedActivity,
     staleTime: 60_000,
     queryFn: async () => {
       if (!profileQueryIdentity) {
@@ -295,12 +323,18 @@ function useJoin6529Journey(locale: SupportedLocale) {
     },
   });
 
-  const hasFirstPublicMessage = Boolean(
+  const hasRecentPublicMessage = Boolean(
     recentProfileDrops?.some((drop) =>
       isPublicWaveDropByProfile(drop, connectedProfile)
     )
   );
+  const hasFirstPublicMessage =
+    hasEstablishedActivity || hasRecentPublicMessage;
   const hasEnteredWaves = hasFirstPublicMessage || hasEnteredWavesFromGuide;
+  const checkingPublicMessage =
+    !hasFirstPublicMessage && checkingRecentPublicMessage;
+  const didPublicMessageCheckFail =
+    !hasFirstPublicMessage && didRecentPublicMessageCheckFail;
 
   useEffect(() => {
     setHasEnteredWavesFromGuide(
@@ -371,7 +405,6 @@ function useJoin6529Journey(locale: SupportedLocale) {
         body: m(locale, "join6529.steps.pfp.body"),
         icon: PhotoIcon,
         complete: hasProfileImage,
-        optional: true,
       },
     ],
     [
@@ -414,7 +447,6 @@ function useJoin6529Journey(locale: SupportedLocale) {
   const completedSteps = steps.filter((step) => step.complete).length;
   const totalSteps = steps.length;
   const remainingSteps = totalSteps - completedSteps;
-  const progressPercent = Math.round((completedSteps / totalSteps) * 100);
   const formattedCompletedSteps = formatInteger(locale, completedSteps);
   const formattedRemainingSteps = formatInteger(locale, remainingSteps);
   const formattedTotalSteps = formatInteger(locale, totalSteps);
@@ -492,6 +524,7 @@ function useJoin6529Journey(locale: SupportedLocale) {
           kind: "link",
           label: m(locale, "join6529.action.openWaves"),
           href: WAVES_HREF,
+          onNavigate: markWavesEntered,
         },
       };
     }
@@ -589,11 +622,11 @@ function useJoin6529Journey(locale: SupportedLocale) {
     formattedRemainingSteps,
     formattedTotalSteps,
     hasActiveWalletAddress,
+    hasEstablishedActivity,
     hasFirstPublicMessage,
     hasProfile,
     hasProfileImage,
     progressDetailKey,
-    progressPercent,
     steps,
     totalSteps,
   };
@@ -606,7 +639,6 @@ function JoinHeader({
   formattedTotalSteps,
   locale,
   progressDetailKey,
-  progressPercent,
   totalSteps,
 }: {
   readonly completedSteps: number;
@@ -615,7 +647,6 @@ function JoinHeader({
   readonly formattedTotalSteps: string;
   readonly locale: SupportedLocale;
   readonly progressDetailKey: Join6529MessageKey;
-  readonly progressPercent: number;
   readonly totalSteps: number;
 }) {
   return (
@@ -656,23 +687,16 @@ function JoinHeader({
             })}
           </span>
         </div>
-        <div
+        <progress
           aria-label={m(locale, "join6529.progress.ariaLabel")}
-          aria-valuemax={totalSteps}
-          aria-valuemin={0}
-          aria-valuenow={completedSteps}
           aria-valuetext={m(locale, "join6529.progress.ariaValue", {
             completed: formattedCompletedSteps,
             total: formattedTotalSteps,
           })}
-          className="tw-mt-5 tw-h-2 tw-overflow-hidden tw-rounded-full tw-bg-white/10"
-          role="progressbar"
-        >
-          <div
-            className="tw-h-full tw-rounded-full tw-bg-emerald-400"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
+          className="tw-mt-5 tw-block tw-h-2 tw-w-full tw-appearance-none tw-overflow-hidden tw-rounded-full tw-bg-white/10 [&::-moz-progress-bar]:tw-rounded-full [&::-moz-progress-bar]:tw-bg-emerald-400 [&::-webkit-progress-bar]:tw-rounded-full [&::-webkit-progress-bar]:tw-bg-white/10 [&::-webkit-progress-value]:tw-rounded-full [&::-webkit-progress-value]:tw-bg-emerald-400"
+          max={totalSteps}
+          value={completedSteps}
+        />
       </section>
     </header>
   );
@@ -714,6 +738,7 @@ function JoinStateAside({
   currentPanel,
   didPublicMessageCheckFail,
   hasActiveWalletAddress,
+  hasEstablishedActivity,
   hasFirstPublicMessage,
   hasProfile,
   hasProfileImage,
@@ -725,6 +750,7 @@ function JoinStateAside({
   readonly currentPanel: CurrentPanelContent;
   readonly didPublicMessageCheckFail: boolean;
   readonly hasActiveWalletAddress: boolean;
+  readonly hasEstablishedActivity: boolean;
   readonly hasFirstPublicMessage: boolean;
   readonly hasProfile: boolean;
   readonly hasProfileImage: boolean;
@@ -739,6 +765,7 @@ function JoinStateAside({
         connectedProfile={connectedProfile}
         didPublicMessageCheckFail={didPublicMessageCheckFail}
         hasActiveWalletAddress={hasActiveWalletAddress}
+        hasEstablishedActivity={hasEstablishedActivity}
         hasFirstPublicMessage={hasFirstPublicMessage}
         hasProfile={hasProfile}
         hasProfileImage={hasProfileImage}
@@ -781,6 +808,7 @@ function JourneyStatePanel({
   connectedProfile,
   didPublicMessageCheckFail,
   hasActiveWalletAddress,
+  hasEstablishedActivity,
   hasFirstPublicMessage,
   hasProfile,
   hasProfileImage,
@@ -791,6 +819,7 @@ function JourneyStatePanel({
   readonly connectedProfile: ApiIdentity | null;
   readonly didPublicMessageCheckFail: boolean;
   readonly hasActiveWalletAddress: boolean;
+  readonly hasEstablishedActivity: boolean;
   readonly hasFirstPublicMessage: boolean;
   readonly hasProfile: boolean;
   readonly hasProfileImage: boolean;
@@ -834,6 +863,7 @@ function JourneyStatePanel({
           label={m(locale, "join6529.status.message")}
           value={getPublicMessageStatus({
             checkingPublicMessage,
+            hasEstablishedActivity,
             hasFirstPublicMessage,
             locale,
           })}
@@ -945,11 +975,6 @@ function JourneyStepRow({
           <h3 className="tw-text-base tw-font-semibold tw-leading-6 tw-text-white">
             {step.title}
           </h3>
-          {step.optional && (
-            <span className="tw-rounded-full tw-border tw-border-violet-300/25 tw-bg-violet-300/10 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-violet-200">
-              {m(locale, "join6529.progress.optional")}
-            </span>
-          )}
           <span
             className={cx(
               "tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide",
@@ -977,7 +1002,7 @@ function CurrentAction({ action }: { readonly action: CurrentPanelAction }) {
     </>
   );
   const className =
-    "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black tw-transition hover:tw-bg-slate-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/70 disabled:tw-cursor-not-allowed disabled:tw-opacity-70";
+    "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black tw-no-underline tw-transition hover:tw-bg-slate-200 hover:tw-no-underline focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/70 focus:tw-no-underline disabled:tw-cursor-not-allowed disabled:tw-opacity-70";
 
   if (action.kind === "link" && action.href) {
     const linkProps = {
@@ -1034,7 +1059,7 @@ function ActionTileCard({ tile }: { readonly tile: ActionTile }) {
   const Icon = tile.icon;
   return (
     <Link
-      className="tw-group tw-flex tw-min-h-[150px] tw-flex-col tw-justify-between tw-rounded-lg tw-border tw-border-white/10 tw-bg-zinc-950 tw-p-4 tw-transition hover:tw-border-sky-300/35 hover:tw-bg-sky-300/[0.06] focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-sky-300/60"
+      className="tw-group tw-flex tw-min-h-[150px] tw-flex-col tw-justify-between tw-rounded-lg tw-border tw-border-white/10 tw-bg-zinc-950 tw-p-4 tw-text-inherit tw-no-underline tw-transition hover:tw-border-sky-300/35 hover:tw-bg-sky-300/[0.06] hover:tw-text-inherit hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-sky-300/60"
       href={tile.href}
     >
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
@@ -1058,15 +1083,22 @@ function ActionTileCard({ tile }: { readonly tile: ActionTile }) {
 
 function getPublicMessageStatus({
   checkingPublicMessage,
+  hasEstablishedActivity,
   hasFirstPublicMessage,
   locale,
 }: {
   readonly checkingPublicMessage: boolean;
+  readonly hasEstablishedActivity: boolean;
   readonly hasFirstPublicMessage: boolean;
   readonly locale: SupportedLocale;
 }) {
   if (hasFirstPublicMessage) {
-    return m(locale, "join6529.status.detected");
+    return m(
+      locale,
+      hasEstablishedActivity
+        ? "join6529.progress.done"
+        : "join6529.status.detected"
+    );
   }
   if (checkingPublicMessage) {
     return m(locale, "join6529.status.checking");
