@@ -179,7 +179,7 @@
     "clsx": "2.1.1",
     "cross-env": "7.0.3",
     "csv-parser": "3.2.0",
-    "date-fns": "2.30.0",
+    "date-fns": "4.4.0",
     "emoji-mart": "5.6.0",
     "emoji-regex": "10.6.0",
     "ethereum-cryptography": "3.2.0",
