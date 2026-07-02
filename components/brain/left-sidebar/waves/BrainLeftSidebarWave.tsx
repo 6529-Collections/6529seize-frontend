@@ -303,7 +303,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               </div>
             )}
           </div>
-          {hasUnreadSubwaves && (
+          {hasUnreadSubwaves && !canExpand && (
             <span
               aria-hidden="true"
               className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"

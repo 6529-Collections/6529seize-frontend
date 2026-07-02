@@ -4,16 +4,11 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-} from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
@@ -60,6 +55,7 @@ const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
 const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
 const SUBWAVE_ROW_HEIGHT = 48 as const;
 const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
+const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 const TOOLTIP_STYLE = {
   ...SIDEBAR_TOOLTIP_STYLE,
@@ -256,23 +252,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     onParentExpand: streamWaves.loadSubwavesForParent,
     showExpandedSubwaves: !isCollapsed,
   });
-  const hasLoadedActiveParentSubwaves = useMemo(
-    () =>
-      activeParentWaveId !== null &&
-      waves.some((wave) => wave.parentWaveId === activeParentWaveId),
-    [activeParentWaveId, waves]
-  );
-  const loadActiveParentSubwaves = useEffectEvent((parentWaveId: string) => {
-    streamWaves.loadSubwavesForParent(parentWaveId);
+  useLoadActiveSidebarParentSubwaves({
+    activeParentWaveId,
+    waves,
   });
-
-  useEffect(() => {
-    if (activeParentWaveId === null || hasLoadedActiveParentSubwaves) {
-      return;
-    }
-
-    loadActiveParentSubwaves(activeParentWaveId);
-  }, [activeParentWaveId, hasLoadedActiveParentSubwaves]);
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
   const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;
@@ -353,7 +336,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const getSidebarRowHeight = useCallback(
     (row: SidebarWaveTreeRow) => {
       if (row.rowType === "subwaves-toggle") {
-        return SUBWAVE_TOGGLE_ROW_HEIGHT;
+        return row.isExpanded
+          ? SUBWAVE_TOGGLE_ROW_HEIGHT
+          : COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT;
       }
 
       return row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight;

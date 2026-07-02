@@ -439,6 +439,14 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
     "true"
   );
   expect(screen.queryByTestId("wave-child")).toBeNull();
+  const collapsedVirtualizerOptions =
+    mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
+  expect(
+    collapsedVirtualizerOptions.rowHeight(collapsedVirtualizerOptions.items[0])
+  ).toBe(62);
+  expect(
+    collapsedVirtualizerOptions.rowHeight(collapsedVirtualizerOptions.items[1])
+  ).toBe(42);
 
   fireEvent.click(
     screen.getByRole("button", {
@@ -465,6 +473,12 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
     "data-sidebar-subwave-row-state",
     "entering"
   );
+  const expandedVirtualizerOptions =
+    mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
+  const expandedToggleRow = expandedVirtualizerOptions.items.find(
+    (row: { readonly key: string }) => row.key === "parent:subwaves-toggle"
+  );
+  expect(expandedVirtualizerOptions.rowHeight(expandedToggleRow)).toBe(38);
   expect(screen.getByTestId("wave-child")).toHaveAttribute("data-pin", "false");
 });
 

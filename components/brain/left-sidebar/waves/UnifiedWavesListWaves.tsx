@@ -2,8 +2,6 @@
 
 import React, {
   useCallback,
-  useEffect,
-  useEffectEvent,
   useMemo,
   forwardRef,
   useImperativeHandle,
@@ -29,6 +27,7 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
@@ -51,6 +50,7 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
 const SUBWAVE_ROW_HEIGHT = 48 as const;
 const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
+const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
@@ -178,23 +178,10 @@ const UnifiedWavesListWaves = forwardRef<
       loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
       onParentExpand: streamWaves.loadSubwavesForParent,
     });
-    const hasLoadedActiveParentSubwaves = useMemo(
-      () =>
-        activeParentWaveId !== null &&
-        waves.some((wave) => wave.parentWaveId === activeParentWaveId),
-      [activeParentWaveId, waves]
-    );
-    const loadActiveParentSubwaves = useEffectEvent((parentWaveId: string) => {
-      streamWaves.loadSubwavesForParent(parentWaveId);
+    useLoadActiveSidebarParentSubwaves({
+      activeParentWaveId,
+      waves,
     });
-
-    useEffect(() => {
-      if (activeParentWaveId === null || hasLoadedActiveParentSubwaves) {
-        return;
-      }
-
-      loadActiveParentSubwaves(activeParentWaveId);
-    }, [activeParentWaveId, hasLoadedActiveParentSubwaves]);
 
     const { announcementWaves, highlyRatedWaves, pinnedWaves, allWaves } =
       useMemo(
@@ -326,7 +313,9 @@ const UnifiedWavesListWaves = forwardRef<
     );
     const getSidebarRowHeight = useCallback((row: SidebarWaveTreeRow) => {
       if (row.rowType === "subwaves-toggle") {
-        return SUBWAVE_TOGGLE_ROW_HEIGHT;
+        return row.isExpanded
+          ? SUBWAVE_TOGGLE_ROW_HEIGHT
+          : COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT;
       }
 
       return row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT;

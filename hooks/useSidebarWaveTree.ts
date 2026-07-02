@@ -55,7 +55,11 @@ const getUnreadSubwaveDropsCount = (
     0
   );
 
-  return Math.max(wave.unreadFollowedSubwaveDrops, loadedSubwaveUnreadCount);
+  if (wave.unreadFollowedSubwaveDrops > 0) {
+    return wave.unreadFollowedSubwaveDrops;
+  }
+
+  return loadedSubwaveUnreadCount;
 };
 
 const normalizeParentIds = (value: unknown): readonly string[] => {

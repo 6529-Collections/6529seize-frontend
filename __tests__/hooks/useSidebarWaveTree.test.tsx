@@ -226,7 +226,7 @@ describe("useSidebarWaveTree", () => {
       createMockMinimalWave({
         id: "child",
         parentWaveId: "parent",
-        unreadDropsCount: 3,
+        unreadDropsCount: 9,
       }),
     ];
     const { result } = renderHook(() =>

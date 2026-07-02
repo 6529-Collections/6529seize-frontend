@@ -103,9 +103,14 @@ export function SidebarSubwavesToggle({
     parentWaveName,
   });
   const showUnreadBadge = unreadDropsCount > 0;
+  const wrapperSpacingClasses = isExpanded
+    ? "tw-min-h-[38px] tw-pb-1"
+    : "tw-min-h-[42px] tw-pb-2";
 
   return (
-    <div className="tw-flex tw-h-full tw-min-h-[38px] tw-items-stretch tw-pb-1 tw-pl-[16.5px] tw-pr-5 tw-pt-0.5">
+    <div
+      className={`tw-flex tw-h-full tw-items-stretch tw-pl-[16.5px] tw-pr-5 tw-pt-0.5 ${wrapperSpacingClasses}`}
+    >
       <button
         type="button"
         aria-busy={isLoading || undefined}

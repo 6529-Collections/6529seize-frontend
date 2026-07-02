@@ -67,6 +67,8 @@ describe("SidebarSubwavesToggle", () => {
 
     expect(wrapper).toHaveClass("tw-pl-[16.5px]");
     expect(wrapper).toHaveClass("tw-pr-5");
+    expect(wrapper).toHaveClass("tw-min-h-[42px]");
+    expect(wrapper).toHaveClass("tw-pb-2");
     expect(wrapper).not.toHaveClass("tw-px-5");
     expect(button).toHaveClass("tw-h-8");
     expect(button).toHaveClass("tw-rounded-lg");
@@ -101,11 +103,19 @@ describe("SidebarSubwavesToggle", () => {
   it("renders the expanded state", () => {
     renderToggle({ isExpanded: true, knownSubwavesCount: 1 });
 
+    const button = screen.getByRole("button", {
+      name: "Hide Parent Wave subwaves",
+    });
+    const wrapper = button.parentElement;
+
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(wrapper).toHaveClass("tw-min-h-[38px]");
+    expect(wrapper).toHaveClass("tw-pb-1");
     expect(
       screen.getByRole("button", {
         name: "Hide Parent Wave subwaves",
       })
-    ).toHaveAttribute("aria-expanded", "true");
+    ).toBeInTheDocument();
     expect(screen.getByText("Hide subwaves")).toBeInTheDocument();
   });
 });

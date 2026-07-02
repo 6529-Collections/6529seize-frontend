@@ -137,10 +137,7 @@ describe("ExpandedWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    const unreadSubwavesDot = getWaveRow().querySelector(".tw-bg-primary-400");
-    expect(unreadSubwavesDot).not.toBeNull();
-    expect(unreadSubwavesDot).toHaveClass("tw-right-[-3px]");
-    expect(unreadSubwavesDot).toHaveClass("tw-top-[-3px]");
+    expect(getWaveRow().querySelector(".tw-bg-primary-400")).toBeNull();
     expect(getWaveRow()).toHaveClass("tw-px-5");
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
     expect(getWaveRow()).toHaveClass("tw-items-center");
@@ -262,18 +259,20 @@ describe("ExpandedWave", () => {
       isLastSubwave: false,
     });
 
-    const elbow = getWaveRow().querySelector('[class~="tw-rounded-bl-xl"]');
-    const continuation = getWaveRow().querySelector(
-      '[class~="tw-top-1/2"][class~="tw-bottom-0"]'
+    const connectors = getWaveRow().querySelectorAll(
+      "span[aria-hidden='true']"
     );
+    const trunk = connectors.item(0);
+    const elbow = connectors.item(1);
 
+    expect(connectors).toHaveLength(2);
+    expect(trunk).toHaveClass("tw-top-0");
+    expect(trunk).toHaveClass("tw-bottom-0");
+    expect(trunk).toHaveClass("tw-border-l");
+    expect(trunk).not.toHaveClass("tw-border-b");
     expect(elbow).not.toBeNull();
     expect(elbow).toHaveClass("tw-top-0");
     expect(elbow).toHaveClass("tw-rounded-bl-xl");
-    expect(continuation).not.toBeNull();
-    expect(continuation).toHaveClass("tw-bottom-0");
-    expect(continuation).toHaveClass("tw-border-l");
-    expect(continuation).not.toHaveClass("tw-border-b");
   });
 
   it("prefetches subwaves after hover intent on expandable rows", () => {
