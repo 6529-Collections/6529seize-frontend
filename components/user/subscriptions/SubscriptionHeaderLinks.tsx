@@ -33,7 +33,7 @@ export function SubscriptionBalanceLabel({
   );
 }
 
-export function SubscriptionInfoLink({
+function SubscriptionInfoLink({
   className = "",
   href,
 }: Readonly<{

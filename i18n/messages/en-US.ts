@@ -894,6 +894,8 @@ export const EN_US_MESSAGES = {
     "Learn more about The Memes subscriptions",
   "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
   "home.mintSubscriptions.connectToSubscribe": "Connect to Subscribe",
+  "home.mintSubscriptions.connectFailed":
+    "Failed to open wallet connection. Please try again.",
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
   "home.mintSubscriptions.subscribersCount": "Subscribers count {count}",

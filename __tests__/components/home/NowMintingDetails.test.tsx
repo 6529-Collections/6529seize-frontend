@@ -1,10 +1,5 @@
 import NowMintingDetails from "@/components/home/now-minting/NowMintingDetails";
 import { render, screen } from "@testing-library/react";
-import type { AnchorHTMLAttributes } from "react";
-
-type LinkMockProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href: string;
-};
 
 type LatestDropNextMintSubscribeMockProps = {
   readonly?: boolean;
@@ -23,14 +18,16 @@ const mockLatestDropNextMintSubscribe = jest.fn(
   )
 );
 
-jest.mock("next/link", () => ({
-  __esModule: true,
-  default: ({ href, children, ...props }: LinkMockProps) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
+jest.mock("next/link", () => {
+  const { mockNextLinkComponent } = jest.requireActual(
+    "@/__tests__/utils/nextLinkMock"
+  );
+
+  return {
+    __esModule: true,
+    default: mockNextLinkComponent,
+  };
+});
 
 jest.mock("@/components/home/now-minting/NowMintingHeader", () => ({
   __esModule: true,
