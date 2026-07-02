@@ -54,6 +54,10 @@ function readFetchHeaders(
   return Object.fromEntries(new Headers(init?.headers).entries());
 }
 
+function setStagingApiKeyForTest(value: string | undefined): void {
+  publicEnv["STAGING_API_KEY"] = value;
+}
+
 function mockFreshTheMemesLiveCountApis(): void {
   mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
     const url = readFetchUrl(input);
@@ -156,13 +160,13 @@ describe("createFirstParty6529Plan", () => {
     global.fetch = mockFetch as unknown as typeof fetch;
     publicEnv.API_ENDPOINT = "https://api.test";
     publicEnv.BASE_ENDPOINT = "https://6529.io";
-    publicEnv.STAGING_API_KEY = undefined;
+    setStagingApiKeyForTest(undefined);
   });
 
   afterEach(() => {
     publicEnv.API_ENDPOINT = originalApiEndpoint;
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
-    publicEnv.STAGING_API_KEY = originalStagingApiKey;
+    setStagingApiKeyForTest(originalStagingApiKey);
   });
 
   afterAll(() => {
@@ -419,7 +423,7 @@ describe("createFirstParty6529Plan", () => {
 
   it("falls back to the production public API when the configured staging API fails", async () => {
     publicEnv.API_ENDPOINT = "https://api.staging.6529.io";
-    publicEnv.STAGING_API_KEY = "staging-secret";
+    setStagingApiKeyForTest("staging-secret");
     const productionFallbackAuthHeaders: Array<string | null> = [];
 
     mockFetch.mockImplementation(async (input: RequestInfo | URL, init) => {
@@ -680,7 +684,7 @@ describe("createFirstParty6529Plan", () => {
     const firstAuthPlan = createFirstParty6529Plan(url, { apiAuth: "alpha" });
     const secondAuthPlan = createFirstParty6529Plan(url, { apiAuth: "beta" });
 
-    publicEnv.STAGING_API_KEY = "staging-secret";
+    setStagingApiKeyForTest("staging-secret");
     const stagingPlan = createFirstParty6529Plan(url);
 
     expect(publicPlan?.cacheKey).toBe("6529:public:the-memes:/the-memes/509");
