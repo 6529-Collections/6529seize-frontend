@@ -10,6 +10,7 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   MEME_CALENDAR_API_CACHE_HEADERS,
+  buildMemeCalendarMintResponse,
   getMintTimelineStatus,
 } from "@/app/api/meme-calendar/meme-calendar-response";
 import { GET } from "@/app/api/meme-calendar/[id]/route";
@@ -97,6 +98,24 @@ describe("/api/meme-calendar/[id]", () => {
         position_in_eon: 1,
       })
     );
+  });
+
+  it("does not throw when a resolved range has no scheduled mint", () => {
+    const timeline = getMintTimelineDetails(500);
+    const malformedTimeline = {
+      ...timeline,
+      ranges: {
+        ...timeline.ranges,
+        szn: {
+          start: new Date(Date.UTC(2021, 0, 1)),
+          end: new Date(Date.UTC(2021, 0, 2)),
+        },
+      },
+    };
+
+    expect(
+      buildMemeCalendarMintResponse(malformedTimeline as typeof timeline)
+    ).toBeNull();
   });
 
   it("returns division positions for a structured timeline mint", async () => {
