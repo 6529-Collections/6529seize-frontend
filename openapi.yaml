@@ -2076,6 +2076,31 @@ paths:
                 $ref: "#/components/schemas/ApiMarkDropUnreadResponse"
         "404":
           description: Drop not found
+  /dm-drops/unread:
+    get:
+      tags:
+        - Drops
+      summary: Get authenticated user's unread direct-message drop count.
+      operationId: getDmDropsUnread
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/dm-drops/dm-drops.handlers"
+          name: handleGetDmDropsUnread
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDmDropsUnreadCount"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
   /drops/{dropId}/toggle-hide-link-preview:
     post:
       tags:
@@ -14555,6 +14580,14 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+    ApiDmDropsUnreadCount:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          minimum: 0
     ApiMediaResolveRequest:
       type: object
       required:
