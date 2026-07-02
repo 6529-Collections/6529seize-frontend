@@ -11,9 +11,12 @@ import {
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 
 const noopWaveAction = () => {};
-const noopAsyncWaveAction = async () => undefined;
 
-const useDmWavesList = () => {
+interface UseDmWavesListOptions {
+  readonly enabled?: boolean | undefined;
+}
+
+const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const {
     activeProfileProxy,
@@ -28,6 +31,7 @@ const useDmWavesList = () => {
   const isPendingAuthSwitch = Boolean(
     address && (!hasValidWalletAuthorization || fetchingProfile)
   );
+  const isEnabled = options.enabled !== false;
   const viewerIdentityKey = useMemo(() => {
     if (!address || !hasValidWalletAuthorization || !hasAuthenticatedProfile) {
       return null;
@@ -46,6 +50,7 @@ const useDmWavesList = () => {
     hasValidWalletAuthorization,
   ]);
   const shouldFetchDmWaves = Boolean(
+    isEnabled &&
     address &&
     hasAuthenticatedProfile &&
     viewerIdentityKey &&
@@ -81,26 +86,20 @@ const useDmWavesList = () => {
     );
   }, [mainWaves, shouldFetchDmWaves]);
 
-  // minimal wrapper to match waves list return signature
-  const addPinnedWave = noopWaveAction;
-  const removePinnedWave = noopWaveAction;
-  const loadSubwavesForParent = noopWaveAction;
-  const prefetchSubwavesForParent = noopWaveAction;
-
   const fetchNextPageStable = useCallback(() => {
     if (!shouldFetchDmWaves) {
-      return noopAsyncWaveAction();
+      return;
     }
 
-    return fetchNextPage();
+    fetchNextPage();
   }, [fetchNextPage, shouldFetchDmWaves]);
 
   const refetchStable = useCallback(() => {
     if (!shouldFetchDmWaves) {
-      return noopAsyncWaveAction();
+      return;
     }
 
-    return refetch();
+    refetch();
   }, [refetch, shouldFetchDmWaves]);
 
   return useMemo(
@@ -114,10 +113,10 @@ const useDmWavesList = () => {
       pinnedWaves: [],
       isPinnedWavesLoading: false,
       hasPinnedWavesError: false,
-      addPinnedWave,
-      removePinnedWave,
-      loadSubwavesForParent,
-      prefetchSubwavesForParent,
+      addPinnedWave: noopWaveAction,
+      removePinnedWave: noopWaveAction,
+      loadSubwavesForParent: noopWaveAction,
+      prefetchSubwavesForParent: noopWaveAction,
       mainWaves: shouldFetchDmWaves ? mainWaves : [],
       missingPinnedIds: [],
       mainWavesRefetch: refetchStable,
