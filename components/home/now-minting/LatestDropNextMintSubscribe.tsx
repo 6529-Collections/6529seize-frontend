@@ -17,12 +17,12 @@ import { t, type MessageKey } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { commonApiFetch } from "@/services/api/common-api";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useContext, useMemo } from "react";
 import MemeSubscriptionRow from "../../user/subscriptions/MemeSubscriptionRow";
+import SubscriptionHeaderLinks, {
+  SubscriptionBalanceLabel,
+} from "../../user/subscriptions/SubscriptionHeaderLinks";
 
 const SUBSCRIPTION_SLOT_CLASS_NAME =
   "tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4";
@@ -30,8 +30,10 @@ const ABOUT_SUBSCRIPTIONS_HREF = "/about/subscriptions";
 type SubscriptionAwarenessStatusKey = Extract<
   MessageKey,
   | "home.mintSubscriptions.status.connectProfile"
+  | "home.mintSubscriptions.status.manageInProfile"
   | "home.mintSubscriptions.status.proxyActive"
 >;
+type SubscriptionStatusSource = "none" | "upcoming";
 
 function getProfileKey(
   connectedProfile: ApiIdentity | null
@@ -47,17 +49,19 @@ function getProfileSubscriptionsHref(
 ): string | undefined {
   const normalisedHandle = connectedProfile?.normalised_handle?.trim();
   if (normalisedHandle) {
-    return `/${normalisedHandle}/subscriptions`;
+    return `/${encodeURIComponent(normalisedHandle)}/subscriptions`;
   }
 
   const handle = connectedProfile?.handle?.trim();
-  return handle ? `/${handle}/subscriptions` : undefined;
+  return handle ? `/${encodeURIComponent(handle)}/subscriptions` : undefined;
 }
 
 function SubscriptionAwarenessRow({
+  balanceLabel,
   profileSubscriptionsHref,
   statusLabelKey,
 }: Readonly<{
+  balanceLabel?: string | undefined;
   profileSubscriptionsHref: string | undefined;
   statusLabelKey: SubscriptionAwarenessStatusKey;
 }>) {
@@ -68,30 +72,15 @@ function SubscriptionAwarenessRow({
     <div className={SUBSCRIPTION_SLOT_CLASS_NAME}>
       <div className="tw-py-1">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
-            <span className="tw-font-medium tw-leading-none">
-              {t(locale, "home.mintSubscriptions.subscribeLabel")}
-            </span>
-            <Link
-              href={ABOUT_SUBSCRIPTIONS_HREF}
-              aria-label={t(locale, "home.mintSubscriptions.infoLinkAriaLabel")}
-              className="tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
-            >
-              <FontAwesomeIcon
-                icon={faInfoCircle}
-                className="tw-size-3.5"
-                aria-hidden
-              />
-            </Link>
-            {profileSubscriptionsHref && (
-              <Link
-                href={profileSubscriptionsHref}
-                className="tw-text-sm tw-leading-none tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
-              >
-                {t(locale, "home.mintSubscriptions.profileSubscriptionsLink")}
-              </Link>
+          <SubscriptionHeaderLinks
+            labelKey="home.mintSubscriptions.subscribeLabel"
+            infoHref={ABOUT_SUBSCRIPTIONS_HREF}
+            profileSubscriptionsHref={profileSubscriptionsHref}
+          >
+            {balanceLabel && (
+              <SubscriptionBalanceLabel balanceLabel={balanceLabel} />
             )}
-          </span>
+          </SubscriptionHeaderLinks>
           <div className="tw-flex tw-items-center tw-gap-2">
             <span
               aria-hidden
@@ -113,6 +102,7 @@ export default function LatestDropNextMintSubscribe(
   props: Readonly<{
     tokenId?: number;
     readonly?: boolean;
+    statusSource?: SubscriptionStatusSource;
   }> = {}
 ) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -120,10 +110,9 @@ export default function LatestDropNextMintSubscribe(
   const { isIos } = useCapacitor();
   const locale = useBrowserLocale();
 
-  const tokenId = useMemo(
-    () => props.tokenId ?? getCanonicalNextMintNumber(),
-    [props.tokenId]
-  );
+  const statusSource = props.statusSource ?? "upcoming";
+  const shouldQueryUpcomingStatus = statusSource === "upcoming";
+  const tokenId = props.tokenId ?? getCanonicalNextMintNumber();
   const hasTokenId = Number.isInteger(tokenId) && tokenId > 0;
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -156,12 +145,16 @@ export default function LatestDropNextMintSubscribe(
         await commonApiFetch<ApiUpcomingMemeSubscriptionStatus>({
           endpoint: `subscriptions/consolidation/upcoming-memes/${tokenId}/${profileKey}`,
         }),
-      enabled: !hideSubscriptions && !!profileKey && hasTokenId,
+      enabled:
+        !hideSubscriptions &&
+        !!profileKey &&
+        hasTokenId &&
+        shouldQueryUpcomingStatus,
       retry: false,
     });
 
   const subscription = useMemo<NFTSubscription | null>(() => {
-    if (!profileKey || !hasTokenId || !status) {
+    if (!shouldQueryUpcomingStatus || !profileKey || !hasTokenId || !status) {
       return null;
     }
 
@@ -172,7 +165,7 @@ export default function LatestDropNextMintSubscribe(
       subscribed: status.subscribed,
       subscribed_count: status.count ?? 1,
     } as NFTSubscription;
-  }, [hasTokenId, profileKey, status, tokenId]);
+  }, [hasTokenId, profileKey, shouldQueryUpcomingStatus, status, tokenId]);
 
   const balanceLabel = useMemo(() => {
     const balance = details?.balance ?? 0;
@@ -195,6 +188,16 @@ export default function LatestDropNextMintSubscribe(
             ? "home.mintSubscriptions.status.proxyActive"
             : "home.mintSubscriptions.status.connectProfile"
         }
+      />
+    );
+  }
+
+  if (!shouldQueryUpcomingStatus) {
+    return (
+      <SubscriptionAwarenessRow
+        balanceLabel={details ? balanceLabel : undefined}
+        profileSubscriptionsHref={profileSubscriptionsHref}
+        statusLabelKey="home.mintSubscriptions.status.manageInProfile"
       />
     );
   }

@@ -11,17 +11,16 @@ import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscripti
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import { formatAddress } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useContext, useEffect, useMemo, useState } from "react";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
-import EthereumIcon from "../utils/icons/EthereumIcon";
+import SubscriptionHeaderLinks, {
+  SubscriptionBalanceLabel,
+} from "./SubscriptionHeaderLinks";
 
 export default function MemeSubscriptionRow(
   props: Readonly<{
@@ -43,7 +42,6 @@ export default function MemeSubscriptionRow(
 ) {
   const id = `subscription-${props.subscription.token_id}`;
   const isCompact = props.variant === "compact";
-  const locale = useBrowserLocale();
 
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -285,53 +283,19 @@ export default function MemeSubscriptionRow(
     return (
       <div className="tw-py-1">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
-            <span className="tw-font-medium tw-leading-none">
-              {t(
-                locale,
-                isSubscribedView
-                  ? "home.mintSubscriptions.subscribedLabel"
-                  : "home.mintSubscriptions.subscribeLabel"
-              )}
-            </span>
-            {props.infoHref && (
-              <Link
-                href={props.infoHref}
-                aria-label={t(
-                  locale,
-                  "home.mintSubscriptions.infoLinkAriaLabel"
-                )}
-                className="tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
-              >
-                <FontAwesomeIcon
-                  icon={faInfoCircle}
-                  className="tw-size-3.5"
-                  aria-hidden
-                />
-              </Link>
-            )}
+          <SubscriptionHeaderLinks
+            labelKey={
+              isSubscribedView
+                ? "home.mintSubscriptions.subscribedLabel"
+                : "home.mintSubscriptions.subscribeLabel"
+            }
+            infoHref={props.infoHref}
+            profileSubscriptionsHref={props.profileSubscriptionsHref}
+          >
             {props.balanceLabel && (
-              <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-leading-none tw-text-iron-400">
-                <span className="tw-leading-none">
-                  {t(locale, "home.mintSubscriptions.balanceLabel")}
-                </span>
-                <span className="tw-leading-none tw-text-iron-300">
-                  {props.balanceLabel}
-                </span>
-                <span className="tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-self-center tw-text-iron-400">
-                  <EthereumIcon />
-                </span>
-              </span>
+              <SubscriptionBalanceLabel balanceLabel={props.balanceLabel} />
             )}
-            {props.profileSubscriptionsHref && (
-              <Link
-                href={props.profileSubscriptionsHref}
-                className="tw-text-sm tw-leading-none tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
-              >
-                {t(locale, "home.mintSubscriptions.profileSubscriptionsLink")}
-              </Link>
-            )}
-          </span>
+          </SubscriptionHeaderLinks>
           {isSubscribedView ? (
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300">
               {subscribedCount} / {props.eligibilityCount}

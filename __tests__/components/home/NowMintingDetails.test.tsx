@@ -1,13 +1,31 @@
 import NowMintingDetails from "@/components/home/now-minting/NowMintingDetails";
 import { render, screen } from "@testing-library/react";
+import type { AnchorHTMLAttributes } from "react";
 
-const mockLatestDropNextMintSubscribe = jest.fn((props: any) => (
-  <div data-testid="subscribe-section" data-token-id={props.tokenId} />
-));
+type LinkMockProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string;
+};
+
+type LatestDropNextMintSubscribeMockProps = {
+  readonly?: boolean;
+  statusSource?: "none" | "upcoming";
+  tokenId?: number;
+};
+
+const mockLatestDropNextMintSubscribe = jest.fn(
+  (props: LatestDropNextMintSubscribeMockProps) => (
+    <div
+      data-testid="subscribe-section"
+      data-token-id={props.tokenId}
+      data-readonly={String(props.readonly)}
+      data-status-source={props.statusSource}
+    />
+  )
+);
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children, ...props }: any) => (
+  default: ({ href, children, ...props }: LinkMockProps) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -26,7 +44,8 @@ jest.mock("@/components/home/now-minting/NowMintingStatsGrid", () => ({
 
 jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
   __esModule: true,
-  default: (props: any) => mockLatestDropNextMintSubscribe(props),
+  default: (props: LatestDropNextMintSubscribeMockProps) =>
+    mockLatestDropNextMintSubscribe(props),
 }));
 
 jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
@@ -69,6 +88,14 @@ describe("NowMintingDetails", () => {
     expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
       "data-token-id",
       "667"
+    );
+    expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
+      "data-readonly",
+      "true"
+    );
+    expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
+      "data-status-source",
+      "none"
     );
   });
 
