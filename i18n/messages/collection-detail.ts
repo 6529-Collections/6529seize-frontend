@@ -352,6 +352,7 @@ export const THE_MEMES_DETAIL_ART_MESSAGES = namespaceMessages(
     ["values.boostPercent", "{sign}{value}%"],
     ["values.notAvailable", "N/A"],
     ["values.rank", "#{rank}"],
+    ["values.unranked", "Unranked"],
   ] as const
 );
 

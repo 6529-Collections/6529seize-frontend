@@ -278,3 +278,4 @@ export enum ApiNftTokenTypeEnum {
     Erc1155 = 'ERC1155',
     Erc721 = 'ERC721'
 }
+
