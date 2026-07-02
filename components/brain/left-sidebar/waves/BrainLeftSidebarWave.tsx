@@ -20,8 +20,14 @@ import {
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
-import { SidebarSubwaveConnector } from "./SidebarSubwaveConnector";
-import { getSidebarWaveRowLayoutClasses } from "./sidebarWaveRowLayout";
+import {
+  SidebarParentSubwaveConnector,
+  SidebarSubwaveConnector,
+} from "./SidebarSubwaveConnector";
+import {
+  getSidebarWaveRowLayoutClasses,
+  SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
+} from "./sidebarWaveRowLayout";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
@@ -35,6 +41,7 @@ interface BrainLeftSidebarWaveProps {
   readonly canExpand?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly isLastSubwave?: boolean | undefined;
+  readonly showSubwaveConnector?: boolean | undefined;
   readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
@@ -97,6 +104,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   canExpand = false,
   hasUnreadSubwaves = false,
   isLastSubwave = false,
+  showSubwaveConnector = false,
   onPrefetchSubwaves,
 }) => {
   const { activeWave } = useMyStream();
@@ -238,12 +246,17 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         onMouseEnter: handleRowMouseEnter,
         onMouseLeave: cancelSubwavePrefetch,
       })}
-      className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/50 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
+      {!isChildRow && showSubwaveConnector && (
+        <SidebarParentSubwaveConnector
+          guideLineOffsetClasses={SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES}
+        />
+      )}
       {isChildRow && (
         <SidebarSubwaveConnector
           guideLineOffsetClasses={guideLineOffsetClasses}
@@ -251,7 +264,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         />
       )}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
