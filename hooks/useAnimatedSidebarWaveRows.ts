@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
 
-export const SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS = 200 as const;
+export const SIDEBAR_SUBWAVE_ROW_EXIT_TRANSITION_MS = 160 as const;
+export const SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS =
+  SIDEBAR_SUBWAVE_ROW_EXIT_TRANSITION_MS + 20;
 
 type SidebarWaveRowAnimationState = "entered" | "entering" | "exiting";
 type AfterPaintDelay = {
@@ -93,7 +95,10 @@ const getAnimatedRowsForNextTree = ({
   for (const row of rows) {
     const previousRow = previousRowsByKey.get(row.key);
     const animationState =
-      row.depth === 1 && previousRow === undefined ? "entering" : "entered";
+      row.depth === 1 &&
+      (previousRow === undefined || previousRow.animationState === "exiting")
+        ? "entering"
+        : "entered";
 
     nextRows.push({
       ...row,
@@ -198,8 +203,14 @@ export function useAnimatedSidebarWaveRows(
 
   useEffect(() => {
     const effectState = { isDisposed: false };
-    let enterDelay: AfterPaintDelay | null = null;
-    let exitTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
+    const enterDelay = createAfterPaintDelay();
+    const exitTimer = keepExitingRows
+      ? globalThis.setTimeout(() => {
+          if (!effectState.isDisposed) {
+            setAnimatedRows(removeExitingRows);
+          }
+        }, SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS)
+      : null;
 
     void (async () => {
       await Promise.resolve();
@@ -216,23 +227,18 @@ export function useAnimatedSidebarWaveRows(
           rows,
         })
       );
+    })();
 
-      exitTimer = globalThis.setTimeout(() => {
-        if (!effectState.isDisposed) {
-          setAnimatedRows(removeExitingRows);
-        }
-      }, SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
-
-      enterDelay = createAfterPaintDelay();
-      void (async () => {
-        await enterDelay.done;
+    void (async () => {
+      await enterDelay.done;
+      if (!effectState.isDisposed) {
         setAnimatedRows(markEnteringRowsAsEntered);
-      })();
+      }
     })();
 
     return () => {
       effectState.isDisposed = true;
-      enterDelay?.cancel();
+      enterDelay.cancel();
       if (exitTimer !== null) {
         globalThis.clearTimeout(exitTimer);
       }

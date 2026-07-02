@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import {
-  SIDEBAR_SUBWAVE_ROW_TRANSITION_MS,
+  SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS,
   useAnimatedSidebarWaveRows,
 } from "@/hooks/useAnimatedSidebarWaveRows";
 import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
@@ -47,6 +47,19 @@ const parentOnlyRows: SidebarWaveTreeRow[] = [
   },
 ];
 
+const flushAnimatedRowsEffect = async () => {
+  await act(async () => {
+    await Promise.resolve();
+  });
+};
+
+const advanceAnimationTimers = async (time: number) => {
+  await act(async () => {
+    jest.advanceTimersByTime(time);
+    await Promise.resolve();
+  });
+};
+
 describe("useAnimatedSidebarWaveRows", () => {
   it("returns rows during the first non-empty render", () => {
     const renderSnapshots: {
@@ -86,7 +99,7 @@ describe("useAnimatedSidebarWaveRows", () => {
     ]);
   });
 
-  it("keeps exiting child rows by default until the transition timer finishes", () => {
+  it("keeps exiting child rows by default until the transition timer finishes", async () => {
     jest.useFakeTimers();
 
     try {
@@ -101,6 +114,7 @@ describe("useAnimatedSidebarWaveRows", () => {
       );
 
       rerender({ rows: parentOnlyRows });
+      await flushAnimatedRowsEffect();
 
       expect(result.current.map((row) => row.key)).toEqual([
         "parent",
@@ -111,9 +125,7 @@ describe("useAnimatedSidebarWaveRows", () => {
         animationState: "exiting",
       });
 
-      act(() => {
-        jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
-      });
+      await advanceAnimationTimers(SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
 
       expect(result.current.map((row) => row.key)).toEqual(["parent"]);
     } finally {
@@ -144,5 +156,66 @@ describe("useAnimatedSidebarWaveRows", () => {
     });
 
     expect(result.current.map((row) => row.key)).toEqual(["parent"]);
+  });
+
+  it("settles quick close and reopen cycles without stale animation state", async () => {
+    jest.useFakeTimers();
+
+    try {
+      const { result, rerender } = renderHook(
+        ({ rows }: { readonly rows: SidebarWaveTreeRow[] }) =>
+          useAnimatedSidebarWaveRows(rows),
+        {
+          initialProps: {
+            rows: parentOnlyRows,
+          },
+        }
+      );
+
+      rerender({ rows: expandedRows });
+      await flushAnimatedRowsEffect();
+      expect(result.current[1]).toMatchObject({
+        key: "parent:child",
+        animationState: "entering",
+      });
+
+      rerender({ rows: parentOnlyRows });
+      await flushAnimatedRowsEffect();
+      expect(result.current[1]).toMatchObject({
+        key: "parent:child",
+        animationState: "exiting",
+      });
+
+      rerender({ rows: expandedRows });
+      await flushAnimatedRowsEffect();
+      expect(result.current[1]).toMatchObject({
+        key: "parent:child",
+        animationState: "entering",
+      });
+
+      await advanceAnimationTimers(40);
+
+      expect(result.current.map((row) => row.key)).toEqual([
+        "parent",
+        "parent:child",
+      ]);
+      expect(result.current.map((row) => row.animationState)).toEqual([
+        "entered",
+        "entered",
+      ]);
+
+      await advanceAnimationTimers(SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
+
+      expect(result.current.map((row) => row.key)).toEqual([
+        "parent",
+        "parent:child",
+      ]);
+      expect(result.current.map((row) => row.animationState)).toEqual([
+        "entered",
+        "entered",
+      ]);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
