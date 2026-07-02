@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import FooterWrapper from "@/components/footer/FooterWrapper";
 import MobileLayout from "@/components/layout/MobileLayout";
@@ -13,10 +13,37 @@ import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
-  flushMobileLaunchTiming,
   markMobileLaunchStep,
+  scheduleMobileLaunchFlush,
 } from "@/utils/monitoring/mobileLaunchTiming";
 import type { ComponentType, ReactNode } from "react";
+
+const getTouchTabletViewportSnapshot = (): boolean => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return window.innerWidth < SIDEBAR_MOBILE_BREAKPOINT;
+};
+
+const getTouchTabletViewportServerSnapshot = (): boolean => false;
+
+const subscribeTouchTabletViewport = (
+  onStoreChange: () => void
+): (() => void) => {
+  if (typeof window === "undefined") {
+    return () => undefined;
+  }
+
+  const mediaQuery = window.matchMedia(
+    `(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`
+  );
+
+  mediaQuery.addEventListener("change", onStoreChange);
+  return () => {
+    mediaQuery.removeEventListener("change", onStoreChange);
+  };
+};
 
 export default function LayoutWrapper({
   children,
@@ -26,58 +53,20 @@ export default function LayoutWrapper({
   const { isApp, hasTouchScreen } = useDeviceInfo();
   const { refreshKey } = useGlobalRefresh();
   const isSmallScreen = useIsMobileScreen();
-  const [isTouchTabletViewport, setIsTouchTabletViewport] = useState(() => {
-    if (globalThis.window === undefined) {
-      return false;
-    }
-    return globalThis.window.innerWidth < SIDEBAR_MOBILE_BREAKPOINT;
-  });
+  const isTouchTabletViewport = useSyncExternalStore(
+    subscribeTouchTabletViewport,
+    getTouchTabletViewportSnapshot,
+    getTouchTabletViewportServerSnapshot
+  );
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (!hasTouchScreen) {
-      setIsTouchTabletViewport(false);
-      return;
-    }
-
-    const browserWindow = globalThis.window;
-    if (browserWindow === undefined) {
-      setIsTouchTabletViewport(false);
-      return;
-    }
-
-    const mediaQuery = browserWindow.matchMedia(
-      `(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`
-    );
-
-    setIsTouchTabletViewport(mediaQuery.matches);
-    const listener = (event: MediaQueryListEvent) => {
-      setIsTouchTabletViewport(event.matches);
-    };
-
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", listener);
-      return () => {
-        mediaQuery.removeEventListener?.("change", listener);
-      };
-    }
-
-    const previousOnChange = mediaQuery.onchange;
-    mediaQuery.onchange = listener;
-    return () => {
-      if (mediaQuery.onchange === listener) {
-        mediaQuery.onchange = previousOnChange ?? null;
-      }
-    };
-  }, [hasTouchScreen]);
-
   const isAccessOrRestricted =
-    pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
+    pathname.startsWith("/access") || pathname.startsWith("/restricted");
 
   useEffect(() => {
     const flushAfterPaint = () => {
       markMobileLaunchStep("first_useful_app_shell");
-      flushMobileLaunchTiming("shell_paint");
+      scheduleMobileLaunchFlush("shell_paint", 5000);
     };
 
     if (typeof globalThis.requestAnimationFrame === "function") {
