@@ -10,7 +10,10 @@ const mockUseIntersectionObserver =
     typeof useIntersectionObserver
   >;
 
-function setup({ ref = React.createRef<HTMLDivElement>() } = {}) {
+function setup({
+  ref = React.createRef<HTMLDivElement>(),
+  hasNextPage = true,
+} = {}) {
   const onTopIntersection = jest.fn();
 
   const utils = render(
@@ -18,7 +21,7 @@ function setup({ ref = React.createRef<HTMLDivElement>() } = {}) {
       ref={ref}
       onTopIntersection={onTopIntersection}
       isFetchingNextPage={false}
-      hasNextPage={true}
+      hasNextPage={hasNextPage}
     >
       <div>child</div>
     </WaveDropsReverseContainer>
@@ -47,6 +50,19 @@ describe("WaveDropsReverseContainer", () => {
     expect(firstOptions.root).toBeNull();
     expect(firstEnabled).toBe(false);
     expect(lastOptions.root).toBe(scrollDiv);
+    expect(lastEnabled).toBe(true);
+
+    lastCallback({ isIntersecting: true } as IntersectionObserverEntry);
+
+    expect(onTopIntersection).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the top intersection callback active when hasNextPage is false", () => {
+    const { onTopIntersection } = setup({ hasNextPage: false });
+
+    const [, , lastCallback, lastEnabled] =
+      mockUseIntersectionObserver.mock.calls.at(-1)!;
+
     expect(lastEnabled).toBe(true);
 
     lastCallback({ isIntersecting: true } as IntersectionObserverEntry);

@@ -24,7 +24,7 @@ import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
@@ -32,6 +32,13 @@ import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 
 const EMPTY_DROPS: Drop[] = [];
+const DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE = 50;
+const MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE = 25;
+
+const getVirtualizedDropsPageSize = (isMobileAllDropsView: boolean): number =>
+  isMobileAllDropsView
+    ? MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE
+    : DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE;
 
 interface WaveDropsAllProps {
   readonly waveId: string;
@@ -77,11 +84,16 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
-  const { isAppleMobile } = useDeviceInfo();
+  const { isAppleMobile, isMobileDevice } = useDeviceInfo();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  // Render-window reduction applies to all mobile webviews; isAppleMobile below
+  // only gates the iOS-specific newest-drop deferral behavior.
+  const [virtualizedDropsPageSize] = useState(() =>
+    getVirtualizedDropsPageSize(isMobileDevice && dropId === null)
+  );
 
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
-    useVirtualizedWaveDrops(waveId, dropId, wave);
+    useVirtualizedWaveDrops(waveId, dropId, wave, virtualizedDropsPageSize);
 
   const { setUnreadDividerSerialNo } = useUnreadDivider();
 
@@ -228,7 +240,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const canFetchMoreDrops =
     !!waveMessages &&
-    waveMessages.hasNextPage &&
+    (waveMessages.hasMoreLocal || waveMessages.hasNextPage) &&
     !waveMessages.isLoading &&
     !waveMessages.isLoadingNextPage;
 
@@ -289,6 +301,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         scrollContainerCallbackRef={scrollContainerCallbackRef}
         bottomAnchorRef={bottomAnchorRef}
         bottomAnchorCallbackRef={bottomAnchorCallbackRef}
+        paginationThreshold={virtualizedDropsPageSize}
         onTopIntersection={handleTopIntersection}
         onReply={onReply}
         queueSerialTarget={queueSerialTarget}
@@ -345,7 +358,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
       key={`unread-divider-${waveId}`}
     >
       <WaveDropsAllInner
-        key={waveId}
+        key={`${waveId}:${dropId ?? ""}`}
         waveId={waveId}
         wave={wave}
         dropId={dropId}

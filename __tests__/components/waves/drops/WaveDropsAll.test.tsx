@@ -186,6 +186,7 @@ type WaveMessagesMock = {
   isLoading?: boolean | undefined;
   isLoadingNextPage?: boolean | undefined;
   hasNextPage?: boolean | undefined;
+  hasMoreLocal?: boolean | undefined;
   drops?: ApiDrop[] | undefined;
 };
 
@@ -228,6 +229,7 @@ function setupMocks(options: MockSetupOptions = {}) {
     isLoading: false,
     isLoadingNextPage: false,
     hasNextPage: false,
+    hasMoreLocal: false,
     drops: [] as any,
   };
 
@@ -498,6 +500,110 @@ describe("WaveDropsAll", () => {
         isVotingClosed: true,
         isVotingControlsLocked: true,
       });
+    });
+  });
+
+  describe("Virtualized Drop Page Size", () => {
+    it("uses a smaller virtual page size for mobile all-drops views", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+      });
+
+      renderComponent();
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        25
+      );
+    });
+
+    it("keeps the default virtual page size for desktop all-drops views", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: false },
+      });
+
+      renderComponent();
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        50
+      );
+    });
+
+    it("keeps the default virtual page size for mobile drop-scoped views", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+      });
+
+      renderComponent({ dropId: "target-drop" });
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        "target-drop",
+        undefined,
+        50
+      );
+    });
+
+    it("keeps the virtual page size stable when device info changes in the same all-drops view", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+      });
+
+      const renderResult = renderComponent();
+      const { props } = renderResult;
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        25
+      );
+
+      require("@/hooks/useDeviceInfo").default.mockReturnValue({
+        isAppleMobile: false,
+        isMobileDevice: false,
+        hasTouchScreen: false,
+        isApp: false,
+      });
+
+      renderResult.rerender(<WaveDropsAll {...props} />);
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        25
+      );
+    });
+
+    it("recomputes the virtual page size when the drop scope changes", () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+      });
+
+      const renderResult = renderComponent();
+      const { props } = renderResult;
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        null,
+        undefined,
+        25
+      );
+
+      renderResult.rerender(<WaveDropsAll {...props} dropId="target-drop" />);
+
+      expect(useVirtualizedWaveDropsMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        "target-drop",
+        undefined,
+        50
+      );
     });
   });
 
@@ -826,6 +932,7 @@ describe("WaveDropsAll", () => {
   describe("Virtualization and Pagination", () => {
     it("passes pagination props to reverse container", async () => {
       setupMocks({
+        deviceInfo: { isMobileDevice: true },
         waveMessages: {
           drops: Array.from({ length: 30 }, (_, i) =>
             createMockDrop({ id: `drop-${i}` })
@@ -884,6 +991,66 @@ describe("WaveDropsAll", () => {
       expect(containerProps.hasNextPage).toBe(false);
     });
 
+    it("keeps hasNextPage enabled at the mobile pagination threshold", async () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+        waveMessages: {
+          drops: Array.from({ length: 25 }, (_, i) =>
+            createMockDrop({ id: `drop-${i}` })
+          ),
+          hasNextPage: true,
+        },
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId("reverse-container")).toBeInTheDocument();
+      });
+
+      expect(containerProps.hasNextPage).toBe(true);
+    });
+
+    it("keeps desktop pagination gated until the desktop page size is rendered", async () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: false },
+        waveMessages: {
+          drops: Array.from({ length: 30 }, (_, i) =>
+            createMockDrop({ id: `drop-${i}` })
+          ),
+          hasNextPage: true,
+        },
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId("reverse-container")).toBeInTheDocument();
+      });
+
+      expect(containerProps.hasNextPage).toBe(false);
+    });
+
+    it("keeps hasNextPage enabled at the desktop pagination threshold", async () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: false },
+        waveMessages: {
+          drops: Array.from({ length: 50 }, (_, i) =>
+            createMockDrop({ id: `drop-${i}` })
+          ),
+          hasNextPage: true,
+        },
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId("reverse-container")).toBeInTheDocument();
+      });
+
+      expect(containerProps.hasNextPage).toBe(true);
+    });
+
     it("calls fetchNextPage when top intersection is triggered", async () => {
       setupMocks({
         waveMessages: {
@@ -906,6 +1073,35 @@ describe("WaveDropsAll", () => {
           type: "FULL",
         },
         "target-drop"
+      );
+    });
+
+    it("calls fetchNextPage to reveal cached local drops after server pages are exhausted", async () => {
+      setupMocks({
+        deviceInfo: { isMobileDevice: true },
+        waveMessages: {
+          drops: Array.from({ length: 25 }, (_, i) =>
+            createMockDrop({ id: `drop-${i}` })
+          ),
+          hasNextPage: false,
+          hasMoreLocal: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      renderComponent({ waveId: "test-wave", dropId: null });
+
+      await act(async () => {
+        containerProps.onTopIntersection();
+      });
+
+      expect(mockFetchNextPage).toHaveBeenCalledWith(
+        {
+          waveId: "test-wave",
+          type: "FULL",
+        },
+        null
       );
     });
 
