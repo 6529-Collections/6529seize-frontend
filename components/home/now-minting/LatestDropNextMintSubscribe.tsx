@@ -22,15 +22,18 @@ import { useContext, useMemo } from "react";
 import MemeSubscriptionRow from "../../user/subscriptions/MemeSubscriptionRow";
 import SubscriptionHeaderLinks, {
   SubscriptionBalanceLabel,
+  SubscriptionInfoLink,
 } from "../../user/subscriptions/SubscriptionHeaderLinks";
+import {
+  ABOUT_SUBSCRIPTIONS_HREF,
+  getProfileSubscriptionsHref,
+} from "../../user/subscriptions/subscriptionNavigation";
 
 const SUBSCRIPTION_SLOT_CLASS_NAME =
   "tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4";
-const ABOUT_SUBSCRIPTIONS_HREF = "/about/subscriptions";
 type SubscriptionAwarenessStatusKey = Extract<
   MessageKey,
   | "home.mintSubscriptions.status.connectProfile"
-  | "home.mintSubscriptions.status.manageInProfile"
   | "home.mintSubscriptions.status.proxyActive"
 >;
 type SubscriptionStatusSource = "none" | "upcoming";
@@ -44,18 +47,6 @@ function getProfileKey(
   );
 }
 
-function getProfileSubscriptionsHref(
-  connectedProfile: ApiIdentity | null
-): string | undefined {
-  const normalisedHandle = connectedProfile?.normalised_handle?.trim();
-  if (normalisedHandle) {
-    return `/${encodeURIComponent(normalisedHandle)}/subscriptions`;
-  }
-
-  const handle = connectedProfile?.handle?.trim();
-  return handle ? `/${encodeURIComponent(handle)}/subscriptions` : undefined;
-}
-
 function SubscriptionAwarenessRow({
   balanceLabel,
   profileSubscriptionsHref,
@@ -63,10 +54,10 @@ function SubscriptionAwarenessRow({
 }: Readonly<{
   balanceLabel?: string | undefined;
   profileSubscriptionsHref: string | undefined;
-  statusLabelKey: SubscriptionAwarenessStatusKey;
+  statusLabelKey?: SubscriptionAwarenessStatusKey | undefined;
 }>) {
   const locale = useBrowserLocale();
-  const statusLabel = t(locale, statusLabelKey);
+  const statusLabel = statusLabelKey ? t(locale, statusLabelKey) : null;
 
   return (
     <div className={SUBSCRIPTION_SLOT_CLASS_NAME}>
@@ -74,23 +65,27 @@ function SubscriptionAwarenessRow({
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
           <SubscriptionHeaderLinks
             labelKey="home.mintSubscriptions.subscribeLabel"
-            infoHref={ABOUT_SUBSCRIPTIONS_HREF}
             profileSubscriptionsHref={profileSubscriptionsHref}
           >
             {balanceLabel && (
               <SubscriptionBalanceLabel balanceLabel={balanceLabel} />
             )}
           </SubscriptionHeaderLinks>
-          <div className="tw-flex tw-items-center tw-gap-2">
-            <span
-              aria-hidden
-              className="tw-inline-flex tw-h-5 tw-w-10 tw-shrink-0 tw-items-center tw-rounded-full tw-bg-iron-800 tw-p-0.5 tw-ring-1 tw-ring-inset tw-ring-iron-700"
-            >
-              <span className="tw-size-4 tw-rounded-full tw-bg-iron-500" />
-            </span>
-            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400">
-              {statusLabel}
-            </span>
+          <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2">
+            {statusLabel && (
+              <>
+                <span
+                  aria-hidden
+                  className="tw-inline-flex tw-h-5 tw-w-10 tw-shrink-0 tw-items-center tw-rounded-full tw-bg-iron-800 tw-p-0.5 tw-ring-1 tw-ring-inset tw-ring-iron-700"
+                >
+                  <span className="tw-size-4 tw-rounded-full tw-bg-iron-500" />
+                </span>
+                <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400">
+                  {statusLabel}
+                </span>
+              </>
+            )}
+            <SubscriptionInfoLink href={ABOUT_SUBSCRIPTIONS_HREF} />
           </div>
         </div>
       </div>
@@ -197,7 +192,6 @@ export default function LatestDropNextMintSubscribe(
       <SubscriptionAwarenessRow
         balanceLabel={details ? balanceLabel : undefined}
         profileSubscriptionsHref={profileSubscriptionsHref}
-        statusLabelKey="home.mintSubscriptions.status.manageInProfile"
       />
     );
   }

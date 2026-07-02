@@ -792,7 +792,6 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
   "home.mintSubscriptions.status.connectProfile": "Connect profile",
-  "home.mintSubscriptions.status.manageInProfile": "Manage in profile",
   "home.mintSubscriptions.status.proxyActive": "Proxy active",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",

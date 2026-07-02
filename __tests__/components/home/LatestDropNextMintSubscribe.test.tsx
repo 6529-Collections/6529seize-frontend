@@ -153,11 +153,14 @@ describe("LatestDropNextMintSubscribe", () => {
       screen.queryByTestId("meme-subscription-row")
     ).not.toBeInTheDocument();
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
-    expect(screen.getByText("Manage in profile")).toBeInTheDocument();
+    expect(screen.queryByText("Manage in profile")).not.toBeInTheDocument();
     expect(screen.getByText("My subscriptions")).toHaveAttribute(
       "href",
       "/test-handle/subscriptions"
     );
+    expect(
+      screen.getByLabelText("Learn more about The Memes subscriptions")
+    ).toHaveAttribute("href", "/about/subscriptions");
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
         queryKey: ["next-mint-subscription-status", expect.any(String), 516],

@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 /* eslint-disable react/display-name */
 import AboutPage from "@/app/about/[section]/page";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
+import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptionsProfileButton";
 import { AboutSection } from "@/types/enums";
 
 jest.mock("next/navigation", () => ({
@@ -204,6 +205,42 @@ describe("About contents dropdown", () => {
     expect(
       screen.getByRole("menuitem", { name: /go to page: subscriptions/i })
     ).toHaveAttribute("href", "/about/subscriptions");
+  });
+
+  it("shows connected subscriptions action before the subscriptions dropdown", () => {
+    setCookieCountry("US");
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: {
+              handle: "test-handle",
+              normalised_handle: "test-handle",
+              primary_wallet: "0x123",
+              wallets: [],
+            },
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+
+    const profileLink = screen.getByRole("link", {
+      name: /my subscriptions/i,
+    });
+    const trigger = screen.getByRole("button", {
+      name: /open about contents navigation/i,
+    });
+
+    expect(profileLink).toHaveAttribute("href", "/test-handle/subscriptions");
+    expect(
+      profileLink.compareDocumentPosition(trigger) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 
   it("uses dropdown item styling without link underlines", async () => {
