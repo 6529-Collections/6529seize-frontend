@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode} from "react";
+import type { ReactNode } from "react";
 import { useMemo } from "react";
 import Head from "next/head";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
@@ -20,15 +20,6 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
 
   const connectPrompt = useMemo(() => {
     switch (contentState) {
-      case "needs-profile":
-        return (
-          <>
-            <h1 className="tw-text-xl tw-font-bold">
-              You need to set up a profile to continue.
-            </h1>
-            <UserSetUpProfileCta />
-          </>
-        );
       case "not-available":
         return (
           <h1 className="tw-text-xl tw-font-bold">
@@ -61,11 +52,21 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
       return <ConnectWallet />;
     }
 
-    // For other states (needs-profile, not-available)
+    if (contentState === "needs-profile") {
+      return (
+        <ConnectWallet
+          title="You need to set up a profile to continue."
+          description="Create a profile to access messages."
+          action={<UserSetUpProfileCta />}
+        />
+      );
+    }
+
+    // For other blocked states.
     if (connectPrompt) {
       return (
-        <div className="tw-flex tw-items-center tw-justify-center tw-min-h-screen tw-px-6">
-          <div className="tw-flex tw-flex-col tw-items-center tw-text-center tw-gap-4">
+        <div className="tw-flex tw-min-h-screen tw-items-center tw-justify-center tw-px-6">
+          <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-text-center">
             {connectPrompt}
           </div>
         </div>

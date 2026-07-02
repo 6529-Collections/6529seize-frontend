@@ -79,9 +79,13 @@ is blocked.
 
 - Footer shows `Connect your wallet to participate in this wave`:
   both chat and submission are blocked because the current viewer is signed out.
+- Footer shows `Create a profile to participate in this wave`:
+  both chat and submission are blocked because the current viewer has an
+  authenticated wallet but no profile handle yet. Public wave content can stay
+  readable; use `Create profile` to unlock participation after setup.
 - Footer shows `You cannot participate in this wave at the moment`:
   both chat and submission are blocked for your current context, but not
-  because the current viewer is signed out.
+  because the current viewer is signed out or missing a profile.
 - Footer shows `Wave is closed`:
   chat is disabled for the current chat-type wave context.
 - Footer shows a chat restriction:
@@ -153,6 +157,9 @@ is blocked.
   thread root.
 - If a signed-out direct wave link shows only the locked preview, connect a
   wallet to continue into thread interactions.
+- If `/messages` shows a wallet/profile gate, resolve the shown prerequisite
+  first. Direct-message threads do not expose their content to profileless
+  authenticated wallets.
 - If posting or submissions stay blocked, use the exact footer copy to identify
   the current restriction and retry after resolving that state.
 - If quick vote stays hidden, confirm that you are inside a supported waves

@@ -8,7 +8,6 @@ import {
   markMobileLaunchStep,
   scheduleMobileLaunchFlush,
 } from "../../../utils/monitoring/mobileLaunchTiming";
-import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesMobile from "../WavesMobile";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -85,15 +84,6 @@ function WavesContentLoadingFallback() {
 
 function getConnectPrompt(contentState: WavesContentState): ReactNode {
   switch (contentState) {
-    case WAVES_CONTENT_STATE_NEEDS_PROFILE:
-      return (
-        <>
-          <h1 className="tw-text-xl tw-font-bold">
-            You need to set up a profile to continue.
-          </h1>
-          <UserSetUpProfileCta />
-        </>
-      );
     case WAVES_CONTENT_STATE_NOT_AVAILABLE:
       return (
         <h1 className="tw-text-xl tw-font-bold">
@@ -103,6 +93,7 @@ function getConnectPrompt(contentState: WavesContentState): ReactNode {
     case WAVES_CONTENT_STATE_LOADING:
     case WAVES_CONTENT_STATE_MEASURING:
     case WAVES_CONTENT_STATE_PUBLIC:
+    case WAVES_CONTENT_STATE_NEEDS_PROFILE:
     case WAVES_CONTENT_STATE_READY:
     default:
       return null;
@@ -158,11 +149,13 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const shouldRenderWavesContent =
     contentState === WAVES_CONTENT_STATE_READY ||
     contentState === WAVES_CONTENT_STATE_PUBLIC ||
+    contentState === WAVES_CONTENT_STATE_NEEDS_PROFILE ||
     contentState === WAVES_CONTENT_STATE_LOADING ||
     contentState === WAVES_CONTENT_STATE_MEASURING;
   const hasUsefulWavesContent =
     contentState === WAVES_CONTENT_STATE_READY ||
-    contentState === WAVES_CONTENT_STATE_PUBLIC;
+    contentState === WAVES_CONTENT_STATE_PUBLIC ||
+    contentState === WAVES_CONTENT_STATE_NEEDS_PROFILE;
   const hasVisibleLaunchContent =
     hasUsefulWavesContent || connectPrompt !== null;
 
