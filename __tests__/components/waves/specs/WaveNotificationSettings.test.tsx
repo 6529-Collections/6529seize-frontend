@@ -141,6 +141,9 @@ describe("WaveNotificationSettings", () => {
 
     await openNotificationMenu();
 
+    const menu = screen.getByRole("menu");
+    expect(menu).toHaveAttribute("aria-labelledby", trigger.id);
+
     const allMentionsButton = screen.getByLabelText(
       "Receive ALL mention notifications"
     );
@@ -149,6 +152,10 @@ describe("WaveNotificationSettings", () => {
     );
     expect(allMentionsButton).toBeInTheDocument();
     expect(allButton).toBeInTheDocument();
+    expect(allMentionsButton).toHaveAttribute("role", "menuitemcheckbox");
+    expect(allButton).toHaveAttribute("role", "menuitemcheckbox");
+    expect(allMentionsButton.parentElement).toHaveAttribute("role", "none");
+    expect(allButton.parentElement).toHaveAttribute("role", "none");
     expect(
       screen.queryByLabelText("Receive mentions-only notifications")
     ).not.toBeInTheDocument();
@@ -260,6 +267,25 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
   });
 
+  it("keeps unavailable all-message option focusable without firing an update", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+
+    renderComponent(mockWaveHighSubscribers);
+
+    await openNotificationMenu();
+
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
+    allButton.focus();
+
+    await userEvent.keyboard("{Enter}");
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    expect(allButton).toHaveFocus();
+  });
+
   it("allows disabling all-message notifications when subscribed and subscriber limit reached", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
@@ -328,6 +354,11 @@ describe("WaveNotificationSettings", () => {
     });
 
     expect(refetch).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(
+        screen.queryByLabelText("Receive ALL mention notifications")
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("disables ALL mention notifications", async () => {
@@ -634,9 +665,15 @@ describe("WaveNotificationSettings", () => {
     );
     await userEvent.click(allButton);
 
-    // Check for spinner in the button
     await waitFor(() => {
-      expect(allButton.querySelector(".spinner")).toBeInTheDocument();
+      expect(
+        screen.queryByLabelText("Receive notifications for all messages")
+      ).not.toBeInTheDocument();
+    });
+
+    const trigger = screen.getByLabelText("Open notification settings");
+    await waitFor(() => {
+      expect(trigger.querySelector(".spinner")).toBeInTheDocument();
     });
   });
 

@@ -16,6 +16,9 @@ export default function WaveNotificationSettings({
   compact = false,
 }: WaveRatingProps) {
   const settings = useWaveNotificationSettings(wave);
+  const controlsClassName = compact
+    ? "tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs"
+    : "tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs";
 
   if (!settings.following || settings.isMuted) {
     return (
@@ -29,13 +32,7 @@ export default function WaveNotificationSettings({
 
   if (settings.preferencesUnavailable) {
     return (
-      <div
-        className={
-          compact
-            ? "tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs"
-            : "tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs"
-        }
-      >
+      <div className={controlsClassName}>
         <WaveNotificationRetryButton settings={settings} compact={compact} />
         <WaveMutedNotificationButton
           waveId={wave.id}
@@ -47,13 +44,7 @@ export default function WaveNotificationSettings({
   }
 
   return (
-    <div
-      className={
-        compact
-          ? "tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs"
-          : "tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs"
-      }
-    >
+    <div className={controlsClassName}>
       <WaveNotificationPreferenceButtons
         waveId={wave.id}
         settings={settings}

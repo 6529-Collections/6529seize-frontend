@@ -49,6 +49,8 @@ export default function WaveNotificationPreferenceButtons({
   const allDropsSelectionDisabled =
     settings.disableAllDropsSelection && !settings.allDropsEnabled;
   const tooltipId = `wave-notification-actions-${waveId}`;
+  const triggerId = `${tooltipId}-trigger`;
+  const menuId = `${tooltipId}-menu`;
   const allDropsDisabledDescriptionId = `${tooltipId}-all-drops-disabled-description`;
   const triggerActive =
     settings.allGroupNotificationsEnabled || settings.allDropsEnabled;
@@ -79,6 +81,7 @@ export default function WaveNotificationPreferenceButtons({
       }
     >
       <button
+        id={triggerId}
         ref={buttonRef}
         type="button"
         disabled={settings.loading}
@@ -92,6 +95,7 @@ export default function WaveNotificationPreferenceButtons({
         aria-label="Open notification settings"
         aria-expanded={isOpen}
         aria-haspopup="menu"
+        aria-controls={isOpen ? menuId : undefined}
       >
         {triggerContent}
       </button>
@@ -102,8 +106,10 @@ export default function WaveNotificationPreferenceButtons({
         buttonRef={buttonRef}
         horizontalAlign="right"
         minWidth={260}
+        menuId={menuId}
+        menuLabelledBy={triggerId}
       >
-        <li className="tw-list-none">
+        <li role="none" className="tw-list-none">
           <button
             type="button"
             disabled={settings.loading}
@@ -114,6 +120,7 @@ export default function WaveNotificationPreferenceButtons({
             onClick={(event) => {
               event.stopPropagation();
               settings.onAllGroupNotificationsClick();
+              setIsOpen(false);
             }}
             className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
               {
@@ -137,7 +144,7 @@ export default function WaveNotificationPreferenceButtons({
             )}
           </button>
         </li>
-        <li className="tw-list-none">
+        <li role="none" className="tw-list-none">
           <button
             type="button"
             disabled={settings.loading}
@@ -157,6 +164,7 @@ export default function WaveNotificationPreferenceButtons({
                 return;
               }
               settings.onAllDropsNotificationsClick();
+              setIsOpen(false);
             }}
             className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
               {
