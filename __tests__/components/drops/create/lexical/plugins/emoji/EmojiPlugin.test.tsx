@@ -1,22 +1,24 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import EmojiPlugin, { EMOJI_MATCH_REGEX } from '@/components/drops/create/lexical/plugins/emoji/EmojiPlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEmoji } from '@/contexts/EmojiContext';
+import React from "react";
+import { render } from "@testing-library/react";
+import EmojiPlugin, {
+  EMOJI_MATCH_REGEX,
+} from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useEmoji } from "@/contexts/EmojiContext";
 
-jest.mock('@lexical/react/LexicalComposerContext', () => ({
+jest.mock("@lexical/react/LexicalComposerContext", () => ({
   useLexicalComposerContext: jest.fn(),
 }));
 
-jest.mock('@/components/drops/create/lexical/nodes/EmojiNode', () => ({
+jest.mock("@/components/drops/create/lexical/nodes/EmojiNode", () => ({
   EmojiNode: class {},
 }));
 
-jest.mock('@/contexts/EmojiContext', () => ({
+jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: jest.fn(),
 }));
 
-jest.mock('lexical', () => {
+jest.mock("lexical", () => {
   class MockTextNode {
     private text: string;
 
@@ -37,7 +39,7 @@ jest.mock('lexical', () => {
     remove() {}
 
     getKey() {
-      return 'key';
+      return "key";
     }
   }
 
@@ -62,28 +64,50 @@ beforeEach(() => {
   useEmojiMock.mockReturnValue({
     emojiMap: [
       {
-        id: 'custom',
-        name: 'custom',
-        category: 'custom',
-        emojis: [{ id: 'smile', name: 'Smile', keywords: 'happy', skins: [{ src: '' }] }],
+        id: "custom",
+        name: "custom",
+        category: "custom",
+        emojis: [
+          {
+            id: "smile",
+            name: "Smile",
+            keywords: "happy",
+            skins: [{ src: "" }],
+          },
+        ],
       },
     ],
     loading: false,
     categories: [],
     categoryIcons: {},
+    emojiData: null,
     findNativeEmoji: jest.fn(() => null),
-    findCustomEmoji: jest.fn((id: string) => (id.replaceAll(':', '') === 'smile' ? { id: 'smile', name: 'Smile', keywords: 'happy', skins: [{ src: '' }] } : null)),
+    findCustomEmoji: jest.fn((id: string) =>
+      id.replaceAll(":", "") === "smile"
+        ? {
+            id: "smile",
+            name: "Smile",
+            keywords: "happy",
+            skins: [{ src: "" }],
+          }
+        : null
+    ),
+    loadCustomEmojis: jest.fn(() => Promise.resolve([])),
+    loadNativeEmojis: jest.fn(() => Promise.resolve(null)),
+    loadEmojiData: jest.fn(() => Promise.resolve()),
   });
 });
 
-describe('EmojiPlugin', () => {
-  it('matches emoji regex correctly', () => {
-    const text = 'say :smile: and :joy:';
-    const matches = Array.from(text.matchAll(EMOJI_MATCH_REGEX)).map((match) => match[1]);
-    expect(matches).toEqual(['smile', 'joy']);
+describe("EmojiPlugin", () => {
+  it("matches emoji regex correctly", () => {
+    const text = "say :smile: and :joy:";
+    const matches = Array.from(text.matchAll(EMOJI_MATCH_REGEX)).map(
+      (match) => match[1]
+    );
+    expect(matches).toEqual(["smile", "joy"]);
   });
 
-  it('calls update when emoji text detected', () => {
+  it("calls update when emoji text detected", () => {
     let listener: (text: string) => void = () => undefined;
     const update = jest.fn((callback: () => void) => callback());
     const editor = {
@@ -99,11 +123,11 @@ describe('EmojiPlugin', () => {
 
     expect(update).toHaveBeenCalledTimes(1);
 
-    listener('hello :smile:');
+    listener("hello :smile:");
     expect(update).toHaveBeenCalledTimes(2);
   });
 
-  it('does not update when listener text has no colon', () => {
+  it("does not update when listener text has no colon", () => {
     const update = jest.fn((callback: () => void) => callback());
     const register = jest.fn(() => () => undefined);
 
@@ -117,13 +141,13 @@ describe('EmojiPlugin', () => {
     render(<EmojiPlugin />);
 
     const listener = register.mock.calls[0][0] as (text: string) => void;
-    listener('nothing');
+    listener("nothing");
 
     expect(update).toHaveBeenCalledTimes(1);
   });
 
-  it('regex captures id including surrounding colons', () => {
-    const match = ':smile:'.match(EMOJI_MATCH_REGEX);
-    expect(match?.[0]).toBe(':smile:');
+  it("regex captures id including surrounding colons", () => {
+    const match = ":smile:".match(EMOJI_MATCH_REGEX);
+    expect(match?.[0]).toBe(":smile:");
   });
 });

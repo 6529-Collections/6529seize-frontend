@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DefaultWinnerDrop from "@/components/waves/drops/winner/DefaultWinnerDrop";
+import { EmojiProvider } from "@/contexts/EmojiContext";
 import React from "react";
 
 jest.mock("next/navigation", () => ({
@@ -52,6 +53,9 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
   default: (...args: any[]) => mockUseIsTouchDevice(...args),
 }));
+
+const renderWithEmojiProvider = (ui: React.ReactElement) =>
+  render(ui, { wrapper: EmojiProvider });
 
 const HOVER_INPUT_MEDIA_QUERIES = new Set([
   "(any-hover: hover)",
@@ -108,7 +112,7 @@ describe("DefaultWinnerDrop", () => {
     const onReply = jest.fn();
     setHoverSupport(true);
 
-    render(
+    renderWithEmojiProvider(
       <DefaultWinnerDrop
         drop={drop}
         previousDrop={null}
@@ -129,7 +133,7 @@ describe("DefaultWinnerDrop", () => {
   });
 
   it("renders identity and filtered metadata when provided", () => {
-    const { container } = render(
+    const { container } = renderWithEmojiProvider(
       <DefaultWinnerDrop
         drop={{
           ...drop,
@@ -165,7 +169,7 @@ describe("DefaultWinnerDrop", () => {
   });
 
   it("renders vote details through the shared ratings row when there are raters", () => {
-    render(
+    renderWithEmojiProvider(
       <DefaultWinnerDrop
         drop={{ ...drop, raters_count: 4 }}
         previousDrop={null}
@@ -197,7 +201,7 @@ describe("DefaultWinnerDrop", () => {
       maxEmbedDepth: 4,
     };
 
-    render(
+    renderWithEmojiProvider(
       <DefaultWinnerDrop
         drop={drop}
         previousDrop={null}
@@ -225,7 +229,7 @@ describe("DefaultWinnerDrop", () => {
     setViewportWidth(1440);
     setHoverSupport(false);
 
-    const { rerender } = render(
+    const { rerender } = renderWithEmojiProvider(
       <DefaultWinnerDrop
         drop={drop}
         previousDrop={null}
@@ -290,7 +294,7 @@ describe("DefaultWinnerDrop", () => {
       />
     );
 
-    const { rerender } = render(renderDrop());
+    const { rerender } = renderWithEmojiProvider(renderDrop());
     const onLongPress = mockWaveDropContent.mock.calls.at(-1)?.[0]?.onLongPress;
 
     act(() => {
@@ -316,7 +320,7 @@ describe("DefaultWinnerDrop", () => {
     setViewportWidth(1440);
     setHoverSupport(false);
 
-    render(
+    renderWithEmojiProvider(
       <DefaultWinnerDrop
         drop={drop}
         previousDrop={null}
