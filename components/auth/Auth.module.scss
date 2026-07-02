@@ -1,11 +1,16 @@
 @use "../../styles/variables.scss";
 
 .signModalDialog {
+  width: min(32rem, calc(100vw - 2rem));
   max-width: min(32rem, calc(100vw - 2rem));
-  margin: 0.75rem auto;
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
 }
 
 .signModalSurface {
+  width: 100%;
+  margin: 0;
+  padding: 0;
   background: linear-gradient(
     180deg,
     rgba(38, 39, 43, 0.98) 0%,
@@ -16,6 +21,10 @@
   border-radius: 0.9rem !important;
   overflow: hidden;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.signModalSurface::backdrop {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .signModalHeader {

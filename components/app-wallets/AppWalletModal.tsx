@@ -1,8 +1,13 @@
 "use client";
 import styles from "./AppWallet.module.scss";
-import type { RefObject } from "react";
-import { useCallback, useRef, useState } from "react";
-import { Modal } from "react-bootstrap";
+import type {
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+  RefObject,
+} from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -16,6 +21,84 @@ import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
 
 const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
+
+function AppWalletModalShell(
+  props: Readonly<{
+    show: boolean;
+    title: string;
+    onHide: () => void;
+    children: ReactNode;
+    footer: ReactNode;
+  }>
+) {
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const { children, footer, onHide, show, title } = props;
+
+  useEffect(() => {
+    if (!show || typeof document === "undefined") {
+      return undefined;
+    }
+
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return undefined;
+    }
+
+    if (typeof dialog.showModal === "function") {
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    } else {
+      dialog.setAttribute("open", "");
+    }
+
+    return () => {
+      if (dialog.open) {
+        dialog.close();
+      } else {
+        dialog.removeAttribute("open");
+      }
+    };
+  }, [show]);
+
+  const handleDialogMouseDown = useCallback(
+    (event: ReactMouseEvent<HTMLDialogElement>) => {
+      if (event.target === event.currentTarget) {
+        onHide();
+      }
+    },
+    [onHide]
+  );
+
+  if (!show || typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(
+    <dialog
+      ref={dialogRef}
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className={clsx("tailwind-scope", styles["modalDialog"])}
+      onCancel={(event) => event.preventDefault()}
+      onMouseDown={handleDialogMouseDown}
+    >
+      <div className={styles["modalPanel"]}>
+        <div className={styles["modalHeader"]}>
+          <h2 id={titleId} className={styles["modalTitle"]}>
+            {title}
+          </h2>
+        </div>
+        <div className={styles["modalContent"]}>{children}</div>
+        <div className={clsx(styles["modalContent"], styles["modalFooter"])}>
+          {footer}
+        </div>
+      </div>
+    </dialog>,
+    document.body
+  );
+}
 
 const showAppWalletError = (
   timeoutRef: RefObject<NodeJS.Timeout | null>,
@@ -137,17 +220,41 @@ export function CreateAppWalletModal(
   ]);
 
   return (
-    <Modal
+    <AppWalletModalShell
       show={show}
       onHide={() => handleHide()}
-      backdrop
-      keyboard={false}
-      centered
+      title={`${importData ? "Import" : "Create New"} Wallet`}
+      footer={
+        <>
+          <button
+            type="button"
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#6c757d] tw-bg-[#6c757d] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#565e64] enabled:hover:tw-bg-[#5c636a] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+            onClick={() => handleHide()}
+          >
+            Cancel
+          </button>
+          {importData ? (
+            <button
+              type="button"
+              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+              disabled={!walletName || !walletPass || isAdding}
+              onClick={handleImport}
+            >
+              {isAdding ? "Importing..." : "Import"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+              disabled={!walletName || !walletPass || isAdding}
+              onClick={handleCreate}
+            >
+              {isAdding ? "Creating..." : "Create"}
+            </button>
+          )}
+        </>
+      }
     >
-      <Modal.Header className={styles["modalHeader"]}>
-        <Modal.Title>{importData ? `Import` : `Create New`} Wallet</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className={styles["modalContent"]}>
         <label className="tw-pb-1" htmlFor="walletName">
           Wallet Name
         </label>
@@ -203,36 +310,7 @@ export function CreateAppWalletModal(
             <>Provide a name and password for your new wallet</>
           )}
         </p>
-      </Modal.Body>
-      <Modal.Footer className={styles["modalContent"]}>
-        <button
-          type="button"
-          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#6c757d] tw-bg-[#6c757d] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#565e64] enabled:hover:tw-bg-[#5c636a] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-          onClick={() => handleHide()}
-        >
-          Cancel
-        </button>
-        {importData ? (
-          <button
-            type="button"
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-            disabled={!walletName || !walletPass || isAdding}
-            onClick={handleImport}
-          >
-            {isAdding ? "Importing..." : "Import"}
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-            disabled={!walletName || !walletPass || isAdding}
-            onClick={handleCreate}
-          >
-            {isAdding ? "Creating..." : "Create"}
-          </button>
-        )}
-      </Modal.Footer>
-    </Modal>
+    </AppWalletModalShell>
   );
 }
 
@@ -347,17 +425,30 @@ export function UnlockAppWalletModal(
   ]);
 
   return (
-    <Modal
+    <AppWalletModalShell
       show={show}
       onHide={() => handleHide()}
-      backdrop
-      keyboard={false}
-      centered
+      title="Unlock Wallet"
+      footer={
+        <>
+          <button
+            type="button"
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#6c757d] tw-bg-[#6c757d] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#565e64] enabled:hover:tw-bg-[#5c636a] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+            onClick={() => handleHide()}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+            disabled={!canUnlock}
+            onClick={handleUnlock}
+          >
+            {unlocking ? "Unlocking..." : "Unlock"}
+          </button>
+        </>
+      }
     >
-      <Modal.Header className={styles["modalHeader"]}>
-        <Modal.Title>Unlock Wallet</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className={styles["modalContent"]}>
         <label className="tw-flex tw-items-center tw-justify-between tw-pb-1">
           <span className="tw-select-none">Wallet Password</span>
           <FontAwesomeIcon
@@ -415,24 +506,6 @@ export function UnlockAppWalletModal(
             <>Provide wallet password to continue</>
           )}
         </p>
-      </Modal.Body>
-      <Modal.Footer className={styles["modalContent"]}>
-        <button
-          type="button"
-          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#6c757d] tw-bg-[#6c757d] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#565e64] enabled:hover:tw-bg-[#5c636a] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-          onClick={() => handleHide()}
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-          disabled={!canUnlock}
-          onClick={handleUnlock}
-        >
-          {unlocking ? "Unlocking..." : "Unlock"}
-        </button>
-      </Modal.Footer>
-    </Modal>
+    </AppWalletModalShell>
   );
 }
