@@ -4,6 +4,10 @@ import dynamic from "next/dynamic";
 import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import {
+  markMobileLaunchStep,
+  scheduleMobileLaunchFlush,
+} from "../../../utils/monitoring/mobileLaunchTiming";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesMobile from "../WavesMobile";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -12,6 +16,17 @@ import { t } from "@/i18n/messages";
 type WavesBranchProps = {
   readonly children: ReactNode;
 };
+
+type WavesContentState = ReturnType<
+  typeof useAuthenticatedContent
+>["contentState"];
+
+const WAVES_CONTENT_STATE_PUBLIC = "not-authenticated";
+const WAVES_CONTENT_STATE_READY = "ready";
+const WAVES_CONTENT_STATE_LOADING = "loading";
+const WAVES_CONTENT_STATE_MEASURING = "measuring";
+const WAVES_CONTENT_STATE_NEEDS_PROFILE = "needs-profile";
+const WAVES_CONTENT_STATE_NOT_AVAILABLE = "not-available";
 
 function WavesBranchLoadingFallback() {
   return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
@@ -68,11 +83,9 @@ function WavesContentLoadingFallback() {
   );
 }
 
-function getConnectPrompt(
-  contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
-): ReactNode {
+function getConnectPrompt(contentState: WavesContentState): ReactNode {
   switch (contentState) {
-    case "needs-profile":
+    case WAVES_CONTENT_STATE_NEEDS_PROFILE:
       return (
         <>
           <h1 className="tw-text-xl tw-font-bold">
@@ -81,19 +94,28 @@ function getConnectPrompt(
           <UserSetUpProfileCta />
         </>
       );
-    case "not-available":
+    case WAVES_CONTENT_STATE_NOT_AVAILABLE:
       return (
         <h1 className="tw-text-xl tw-font-bold">
           This content is not available.
         </h1>
       );
-    case "loading":
-    case "measuring":
-    case "not-authenticated":
-    case "ready":
+    case WAVES_CONTENT_STATE_LOADING:
+    case WAVES_CONTENT_STATE_MEASURING:
+    case WAVES_CONTENT_STATE_PUBLIC:
+    case WAVES_CONTENT_STATE_READY:
     default:
       return null;
   }
+}
+
+function isResolvedWavesContentState(contentState: WavesContentState): boolean {
+  return (
+    contentState === WAVES_CONTENT_STATE_READY ||
+    contentState === WAVES_CONTENT_STATE_PUBLIC ||
+    contentState === WAVES_CONTENT_STATE_NEEDS_PROFILE ||
+    contentState === WAVES_CONTENT_STATE_NOT_AVAILABLE
+  );
 }
 
 function getWavesContent({
@@ -134,17 +156,23 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
   const connectPrompt = getConnectPrompt(contentState);
   const shouldRenderWavesContent =
-    contentState === "ready" ||
-    contentState === "not-authenticated" ||
-    contentState === "loading" ||
-    contentState === "measuring";
+    contentState === WAVES_CONTENT_STATE_READY ||
+    contentState === WAVES_CONTENT_STATE_PUBLIC ||
+    contentState === WAVES_CONTENT_STATE_LOADING ||
+    contentState === WAVES_CONTENT_STATE_MEASURING;
+  const hasUsefulWavesContent =
+    contentState === WAVES_CONTENT_STATE_READY ||
+    contentState === WAVES_CONTENT_STATE_PUBLIC;
+  const hasVisibleLaunchContent =
+    hasUsefulWavesContent || connectPrompt !== null;
 
   let content: ReactNode = null;
 
   if (shouldRenderWavesContent) {
     content = getWavesContent({
       children:
-        contentState === "loading" || contentState === "measuring" ? (
+        contentState === WAVES_CONTENT_STATE_LOADING ||
+        contentState === WAVES_CONTENT_STATE_MEASURING ? (
           <WavesContentLoadingFallback />
         ) : (
           children
@@ -162,6 +190,27 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
         </div>
       );
   }
+
+  useEffect(() => {
+    markMobileLaunchStep("waves_layout_mounted");
+  }, []);
+
+  useEffect(() => {
+    if (!hasVisibleLaunchContent) {
+      return;
+    }
+
+    markMobileLaunchStep("waves_first_content_visible");
+    scheduleMobileLaunchFlush("waves_content_visible", 250);
+  }, [hasVisibleLaunchContent]);
+
+  useEffect(() => {
+    if (!isResolvedWavesContentState(contentState)) {
+      return;
+    }
+
+    markMobileLaunchStep("waves_content_state_resolved");
+  }, [contentState]);
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-overflow-hidden tw-bg-black">
