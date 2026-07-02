@@ -3,10 +3,11 @@
 import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
 import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { toBaseNftFromApiMemesExtendedData } from "@/components/the-memes/apiMemesExtendedDataAdapter";
 import { getTheMemesDetailHref } from "@/components/the-memes/theMemesRouteParams";
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { getNftMimeType } from "@/helpers/nft.helpers";
 import {
   formatDate,
@@ -21,7 +22,7 @@ import { MemesSort } from "@/types/enums";
 import Link from "next/link";
 
 function getVolume(
-  nft: NFTWithMemesExtendedData,
+  nft: ApiMemesExtendedData,
   volumeType: VolumeType,
   locale: SupportedLocale
 ) {
@@ -52,7 +53,7 @@ function getVolume(
 }
 
 function getNftMetricText(
-  nft: NFTWithMemesExtendedData,
+  nft: ApiMemesExtendedData,
   sort: MemesSort,
   volumeType: VolumeType,
   locale: SupportedLocale
@@ -126,14 +127,15 @@ export default function TheMemesCard({
   hasConnectedProfile,
   locale,
 }: {
-  readonly nft: NFTWithMemesExtendedData;
+  readonly nft: ApiMemesExtendedData;
   readonly sort: MemesSort;
   readonly volumeType: VolumeType;
   readonly hasConnectedProfile: boolean;
   readonly locale?: SupportedLocale;
 }) {
   const resolvedLocale = locale ?? DEFAULT_LOCALE;
-  const mediaMimeType = getNftMimeType(nft);
+  const mediaNft = toBaseNftFromApiMemesExtendedData(nft);
+  const mediaMimeType = getNftMimeType(mediaNft);
   const metricText = getNftMetricText(nft, sort, volumeType, resolvedLocale);
   const tokenId = formatInteger(resolvedLocale, nft.id);
 
@@ -148,7 +150,7 @@ export default function TheMemesCard({
     >
       <div className="tw-bg-iron-900">
         <NFTImage
-          nft={nft}
+          nft={mediaNft}
           animation={false}
           height={300}
           showThumbnail={true}

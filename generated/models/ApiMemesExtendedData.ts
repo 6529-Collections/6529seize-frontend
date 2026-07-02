@@ -13,14 +13,73 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiNft {
+/**
+* Meme Card NFT data plus extended collection metrics. Positive rank values are ranked against `ranked_collection_size` when that value is present. `collection_size` remains the total Meme Cards collection size. A rank value of `-1` represents an unranked card when `recorded_in_tdh` is `false`; `recorded_in_tdh: null` or an absent value is a legacy/transitional state.
+*/
+export class ApiMemesExtendedData {
+    /**
+    * Total Meme Cards collection size.
+    */
+    'collection_size': number;
+    'edition_size': number;
+    /**
+    * Positive rank for TDH-recorded cards, or -1 when unranked.
+    */
+    'edition_size_rank': number;
+    'museum_holdings': number;
+    /**
+    * Positive rank for TDH-recorded cards, or -1 when unranked.
+    */
+    'museum_holdings_rank': number;
+    'edition_size_cleaned': number;
+    /**
+    * Positive rank for TDH-recorded cards, or -1 when unranked.
+    */
+    'edition_size_cleaned_rank': number;
+    'hodlers': number;
+    /**
+    * Positive rank for TDH-recorded cards, or -1 when unranked.
+    */
+    'hodlers_rank': number;
+    'percent_unique': number;
+    /**
+    * Positive rank for TDH-recorded cards, or -1 when unranked.
+    */
+    'percent_unique_rank': number;
+    'percent_unique_cleaned': number;
+    /**
+    * Positive rank for TDH-recorded cards, or -1 when unranked.
+    */
+    'percent_unique_cleaned_rank': number;
+    'burnt': number;
+    'edition_size_not_burnt': number;
+    /**
+    * Positive rank for TDH-recorded cards, or -1 when unranked.
+    */
+    'edition_size_not_burnt_rank': number;
+    'percent_unique_not_burnt': number;
+    /**
+    * Positive rank for TDH-recorded cards, or -1 when unranked.
+    */
+    'percent_unique_not_burnt_rank': number;
+    'season': number;
+    'meme': number;
+    'meme_name': string;
+    /**
+    * True when this Meme Card is present in TDH NFT records, false when it is known not to be recorded yet, and null/absent during legacy or fallback states.
+    */
+    'recorded_in_tdh'?: boolean | null;
+    /**
+    * Rank denominator for TDH-recorded cards. Null for unranked, legacy, or fallback rows.
+    */
+    'ranked_collection_size'?: number | null;
     'id': number;
     'contract': string;
     'mint_price': number;
     'supply': number;
     'name': string;
     'collection': string;
-    'token_type': ApiNftTokenTypeEnum;
+    'token_type': ApiMemesExtendedDataTokenTypeEnum;
     'hodl_rate': number;
     'description': string;
     'artist': string;
@@ -55,6 +114,144 @@ export class ApiNft {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "collection_size",
+            "baseName": "collection_size",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size",
+            "baseName": "edition_size",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_rank",
+            "baseName": "edition_size_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "museum_holdings",
+            "baseName": "museum_holdings",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "museum_holdings_rank",
+            "baseName": "museum_holdings_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_cleaned",
+            "baseName": "edition_size_cleaned",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_cleaned_rank",
+            "baseName": "edition_size_cleaned_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "hodlers",
+            "baseName": "hodlers",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "hodlers_rank",
+            "baseName": "hodlers_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "percent_unique",
+            "baseName": "percent_unique",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "percent_unique_rank",
+            "baseName": "percent_unique_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "percent_unique_cleaned",
+            "baseName": "percent_unique_cleaned",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "percent_unique_cleaned_rank",
+            "baseName": "percent_unique_cleaned_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "burnt",
+            "baseName": "burnt",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_not_burnt",
+            "baseName": "edition_size_not_burnt",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_not_burnt_rank",
+            "baseName": "edition_size_not_burnt_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "percent_unique_not_burnt",
+            "baseName": "percent_unique_not_burnt",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "percent_unique_not_burnt_rank",
+            "baseName": "percent_unique_not_burnt_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "season",
+            "baseName": "season",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "meme",
+            "baseName": "meme",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "meme_name",
+            "baseName": "meme_name",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "recorded_in_tdh",
+            "baseName": "recorded_in_tdh",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "ranked_collection_size",
+            "baseName": "ranked_collection_size",
+            "type": "number",
+            "format": "int64"
+        },
         {
             "name": "id",
             "baseName": "id",
@@ -94,7 +291,7 @@ export class ApiNft {
         {
             "name": "token_type",
             "baseName": "token_type",
-            "type": "ApiNftTokenTypeEnum",
+            "type": "ApiMemesExtendedDataTokenTypeEnum",
             "format": ""
         },
         {
@@ -267,14 +464,14 @@ export class ApiNft {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiNft.attributeTypeMap;
+        return ApiMemesExtendedData.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
-export enum ApiNftTokenTypeEnum {
+export enum ApiMemesExtendedDataTokenTypeEnum {
     Erc1155 = 'ERC1155',
     Erc721 = 'ERC721'
 }
