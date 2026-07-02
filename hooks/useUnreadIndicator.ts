@@ -1,14 +1,27 @@
 "use client";
 
 import { useUnreadNotifications } from "./useUnreadNotifications";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useUnreadDmDrops } from "./useUnreadDmDrops";
 
 type UnreadIndicatorType = "notifications" | "messages";
 
+interface LocalUnreadDirectMessage {
+  readonly unreadDropsCount?: number | null | undefined;
+  readonly newDropsCount?:
+    | {
+        readonly count?: number | null | undefined;
+      }
+    | null
+    | undefined;
+}
+
 interface UseUnreadIndicatorProps {
   readonly type: UnreadIndicatorType;
   readonly handle: string | null;
+  readonly localDirectMessages?:
+    | readonly LocalUnreadDirectMessage[]
+    | null
+    | undefined;
 }
 
 interface UseUnreadIndicatorReturn {
@@ -18,6 +31,7 @@ interface UseUnreadIndicatorReturn {
 export function useUnreadIndicator({
   type,
   handle,
+  localDirectMessages,
 }: UseUnreadIndicatorProps): UseUnreadIndicatorReturn {
   // Use existing notifications hook for notifications
   const { haveUnreadNotifications } = useUnreadNotifications(
@@ -28,9 +42,6 @@ export function useUnreadIndicator({
     type === "messages" ? handle : null
   );
 
-  // Use direct messages context for messages
-  const { directMessages } = useMyStream();
-
   // Only show indicators if user is authenticated
   if (!handle) {
     return { hasUnread: false };
@@ -40,10 +51,8 @@ export function useUnreadIndicator({
     return { hasUnread: haveUnreadNotifications };
   }
 
-  const hasLocalUnreadMessages = directMessages.list.some((dm) => {
-    return (
-      (dm?.unreadDropsCount ?? 0) > 0 || (dm?.newDropsCount?.count ?? 0) > 0
-    );
+  const hasLocalUnreadMessages = (localDirectMessages ?? []).some((dm) => {
+    return (dm.unreadDropsCount ?? 0) > 0 || (dm.newDropsCount?.count ?? 0) > 0;
   });
 
   const hasUnreadMessages = haveUnreadDmDrops || hasLocalUnreadMessages;
