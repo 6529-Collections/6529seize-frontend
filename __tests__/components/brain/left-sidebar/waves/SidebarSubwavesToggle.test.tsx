@@ -74,20 +74,20 @@ describe("SidebarSubwavesToggle", () => {
     expect(wrapper).toHaveClass("tw-pb-2");
     expect(wrapper).not.toHaveClass("tw-px-5");
     expect(button).not.toHaveClass("tw-h-8");
-    expect(button).toHaveClass("tw-rounded-lg");
-    expect(button).toHaveClass("tw-border-iron-800");
-    expect(button).toHaveClass("tw-bg-iron-950");
-    expect(button).toHaveClass("tw-px-3");
+    expect(button).toHaveClass("tw-rounded-xl");
+    expect(button).toHaveClass("tw-border-white/10");
+    expect(button).toHaveClass("tw-bg-iron-900/40");
+    expect(button).toHaveClass("tw-px-2.5");
     expect(button).toHaveClass("tw-py-1");
     expect(button).toHaveClass("tw-text-xs");
     expect(button).toHaveClass("tw-font-medium");
     expect(button).toHaveClass("tw-text-iron-350");
-    expect(button).not.toHaveClass(
-      "tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+    expect(button).toHaveClass(
+      "tw-shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
     );
-    expect(button).toHaveClass("desktop-hover:hover:tw-border-iron-700");
-    expect(button).toHaveClass("desktop-hover:hover:tw-bg-iron-900");
-    expect(button).toHaveClass("desktop-hover:hover:tw-text-iron-300");
+    expect(button).toHaveClass("desktop-hover:hover:tw-border-white/15");
+    expect(button).toHaveClass("desktop-hover:hover:tw-bg-iron-800/45");
+    expect(button).toHaveClass("desktop-hover:hover:tw-text-iron-200");
     expect(button).toHaveClass("focus-visible:tw-outline-primary-400");
     expect(button).not.toHaveClass("tw-bg-primary-500/10");
     expect(unreadBadge).toHaveClass("tw-h-[18px]");

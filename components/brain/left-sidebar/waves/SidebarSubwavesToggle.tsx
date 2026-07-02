@@ -10,7 +10,7 @@ const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 const CONNECTOR_COLOR_CLASSES =
   "tw-border-iron-800/80 desktop-hover:group-hover/subwaves-toggle:tw-border-iron-700/80";
 const BUTTON_CLASSES =
-  "tw-group/subwaves tw-relative tw-z-[1] tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-1 tw-text-left tw-text-xs tw-font-medium tw-text-iron-350 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none";
+  "tw-group/subwaves tw-relative tw-z-[1] tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/40 tw-px-2.5 tw-py-1 tw-text-left tw-text-xs tw-font-medium tw-text-iron-350 tw-shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] tw-transition-all focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-iron-800/45 desktop-hover:hover:tw-text-iron-200 motion-reduce:tw-transition-none";
 const UNREAD_BADGE_CLASSES =
   "tw-flex tw-h-[18px] tw-min-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1.5 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-white";
 
