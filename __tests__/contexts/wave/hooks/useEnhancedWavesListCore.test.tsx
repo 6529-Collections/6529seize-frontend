@@ -161,7 +161,7 @@ describe("useEnhancedWavesListCore", () => {
       firstUnreadFollowedSubwaveDropSerialNo: 42,
       sidebarActivityTimestamp: 500,
       newDropsCount: expect.objectContaining({
-        latestDropTimestamp: 500,
+        latestDropTimestamp: 100,
       }),
     });
   });
