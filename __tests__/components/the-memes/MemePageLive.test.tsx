@@ -5,7 +5,8 @@ import {
 } from "@/components/the-memes/MemePageLive";
 import { MemeCollectorsStats } from "@/components/the-memes/MemePageLiveStats";
 import { MemePageReferencesSubMenu } from "@/components/the-memes/MemePageReferences";
-import type { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
+import type { NFT, Rememe } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import {
   formatDate,
   formatInteger,
@@ -142,7 +143,7 @@ function createNft(overrides: Partial<NFT> = {}): NFT {
   } as NFT;
 }
 
-function createMeta(): MemesExtendedData {
+function createMeta(): ApiMemesExtendedData {
   return {
     id: 1,
     created_at: new Date(),
@@ -167,7 +168,7 @@ function createMeta(): MemesExtendedData {
     season: 1,
     meme: 1,
     meme_name: "meme",
-  } as MemesExtendedData;
+  } as ApiMemesExtendedData;
 }
 
 function createRememe(name: string, overrides: Partial<Rememe> = {}): Rememe {
@@ -419,6 +420,53 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(
       collectorsLabel.parentElement?.parentElement?.parentElement
     ).toHaveClass("tw-flex", "tw-flex-wrap");
+  });
+
+  it("uses ranked collection size for live rank totals when provided", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft()}
+        nftMeta={{
+          ...createMeta(),
+          collection_size: 498,
+          ranked_collection_size: 497,
+          hodlers: 97,
+          hodlers_rank: 480,
+        }}
+      />
+    );
+
+    expect(screen.getByText("Rank 480/497")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Collectors: Rank 480/497")
+    ).toBeInTheDocument();
+  });
+
+  it("shows unranked rank pills and pending TDH for memes not recorded in TDH", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft({ hodl_rate: 22.65 })}
+        nftMeta={{
+          ...createMeta(),
+          recorded_in_tdh: false,
+          ranked_collection_size: 99,
+          edition_size_rank: -1,
+          edition_size_cleaned_rank: -1,
+          hodlers_rank: -1,
+        }}
+      />
+    );
+
+    expect(screen.getAllByText("Unranked")).toHaveLength(3);
+    expect(screen.getByLabelText("Edition size: Unranked")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("ex. 6529 museum: Unranked")
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Collectors: Unranked")).toBeInTheDocument();
+    expect(screen.getByText("Pending")).toBeInTheDocument();
+    expect(screen.queryByText("22.65")).not.toBeInTheDocument();
   });
 
   it("formats live panel stats with the selected locale", () => {

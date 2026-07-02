@@ -9,7 +9,7 @@ import type {
   ManifoldMintMetadata,
 } from "@/components/manifold-minting/manifold-mint-metadata";
 import { useTitle } from "@/contexts/TitleContext";
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { Time } from "@/helpers/time";
 
 const ManifoldMinting = dynamic(
@@ -23,7 +23,7 @@ export default function TheMemesMint({
   nft,
   standalone = false,
 }: {
-  readonly nft: NFTWithMemesExtendedData;
+  readonly nft: ApiMemesExtendedData;
   readonly standalone?: boolean;
 }) {
   const { setTitle } = useTitle();

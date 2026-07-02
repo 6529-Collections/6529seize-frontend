@@ -1,6 +1,6 @@
 import { mainnet } from "viem/chains";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import {
   getDimensionsFromMetadata,
   getFileMimeTypeFromMetadata,
@@ -13,7 +13,7 @@ import NowMintingStatsGrid from "./NowMintingStatsGrid";
 import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 
 interface NowMintingDetailsProps {
-  readonly nft: NFTWithMemesExtendedData;
+  readonly nft: ApiMemesExtendedData;
 }
 
 export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {

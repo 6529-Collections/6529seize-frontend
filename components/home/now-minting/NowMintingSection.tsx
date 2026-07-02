@@ -1,11 +1,11 @@
 "use client";
 
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import NowMintingArtwork from "./NowMintingArtwork";
 import NowMintingDetails from "./NowMintingDetails";
 
 interface NowMintingSectionProps {
-  readonly nft: NFTWithMemesExtendedData | undefined;
+  readonly nft: ApiMemesExtendedData | undefined;
   readonly isFetching: boolean;
 }
 
