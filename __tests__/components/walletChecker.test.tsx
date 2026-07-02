@@ -4,28 +4,6 @@ import { fetchUrl } from "@/services/6529api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
-jest.mock("react-bootstrap", () => ({
-  __esModule: true,
-  Container: (p: any) => <div>{p.children}</div>,
-  Row: (p: any) => <div>{p.children}</div>,
-  Col: (p: any) => <div>{p.children}</div>,
-  Form: Object.assign(
-    (p: any) => <form onSubmit={p.onSubmit}>{p.children}</form>,
-    {
-      Group: (p: any) => <div>{p.children}</div>,
-      Label: (p: any) => <label>{p.children}</label>,
-      Control: (p: any) => <input {...p} />,
-      Text: (p: any) => <span>{p.children}</span>,
-    }
-  ),
-  Button: (p: any) => (
-    <button onClick={p.onClick} disabled={p.disabled}>
-      {p.children}
-    </button>
-  ),
-  Table: (p: any) => <table>{p.children}</table>,
-}));
-
 jest.mock(
   "@/components/utils/input/ens-address/EnsAddressInput",
   () =>
