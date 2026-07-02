@@ -74,7 +74,6 @@ const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
   sortMutedLast: true,
 };
 
-/* eslint-disable max-lines-per-function, sonarjs/cognitive-complexity -- This hook already owns wave list enrichment; this change only adds disabled-domain no-ops around the existing behavior. */
 function useEnhancedWavesListCore(
   activeWaveId: string | null,
   wavesData: WavesDataSource,

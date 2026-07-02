@@ -132,7 +132,6 @@ const addUnreadDropCount = ({
  * @param refetchWaves - Function to refetch waves data when needed
  * @returns Object containing newDropsCounts and reset function
  */
-/* eslint-disable max-lines-per-function, sonarjs/cognitive-complexity -- This hook already centralizes websocket drop count state; this change only gates the existing work by domain. */
 function useNewDropCounter(
   activeWaveId: string | null,
   waves: SidebarWave[],
@@ -166,7 +165,6 @@ function useNewDropCounter(
   useEffect(() => {
     if (enabled && !wasEnabledRef.current) {
       lastUnknownWaveRefetchAtRef.current = null;
-      // eslint-disable-next-line react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-adjust-state-on-prop-change -- Reopening a disabled list domain must not reuse stale websocket counters.
       setNewDropsCounts({});
     }
 
@@ -274,7 +272,6 @@ function useNewDropCounter(
   // Reset active wave counts whenever activeWaveId changes
   useEffect(() => {
     if (enabled && activeWaveId) {
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-ref-to-parent, react-you-might-not-need-an-effect/no-derived-state -- Existing unread-counter behavior clears the visible active wave when focus changes.
       resetWaveNewDropsCount(activeWaveId);
     }
   }, [activeWaveId, enabled, resetWaveNewDropsCount]);
