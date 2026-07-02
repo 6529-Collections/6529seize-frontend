@@ -1,12 +1,5 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import NextGenMint, { Spinner } from '@/components/nextGen/collections/collectionParts/mint/NextGenMint';
-
-jest.mock('react-bootstrap', () => ({
-  Container: (p: any) => <div data-testid="container" {...p} />,
-  Row: (p: any) => <div {...p} />,
-  Col: (p: any) => <div {...p} />,
-}));
 
 jest.mock('@/components/nextGen/collections/collectionParts/mint/NextGenMintWidget', () => () => <div data-testid="widget" />);
 jest.mock('@/components/nextGen/collections/collectionParts/mint/NextGenMintBurnWidget', () => () => <div data-testid="burn-widget" />);
@@ -50,7 +43,6 @@ describe('NextGenMint', () => {
     expect(container.querySelector("output")).toBeInTheDocument();
   });
 });
-
 
 describe('NextGenMint additional', () => {
   it('renders mint widget when public sale live', () => {

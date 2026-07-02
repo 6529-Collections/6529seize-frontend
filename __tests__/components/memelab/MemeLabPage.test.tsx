@@ -7,34 +7,6 @@ import React from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
 
-jest.mock("react-bootstrap", () => {
-  const actual = jest.requireActual("react-bootstrap");
-  const Carousel = ({ children, onSlide, ...props }: any) => (
-    <div data-testid="carousel" {...props}>
-      <button
-        type="button"
-        data-testid="carousel-slide-0"
-        onClick={() => onSlide?.(0)}
-      />
-      <button
-        type="button"
-        data-testid="carousel-slide-1"
-        onClick={() => onSlide?.(1)}
-      />
-      {children}
-    </div>
-  );
-
-  Carousel.Item = ({ children, ...props }: any) => (
-    <div {...props}>{children}</div>
-  );
-
-  return {
-    ...actual,
-    Carousel,
-  };
-});
-
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: jest.fn(() => ({
