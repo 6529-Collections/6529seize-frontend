@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+const LOCAL_PREFERENCE_CHANGE_EVENT = "local-preference-change";
+
+interface LocalPreferenceChangeEventDetail {
+  readonly key: string;
+  readonly value: unknown;
+}
+
 /**
  * A hook for managing user preferences stored in localStorage
  *
@@ -13,7 +20,7 @@ import { useState, useEffect, useCallback } from "react";
 function useLocalPreference<T>(
   key: string,
   defaultValue: T,
-  validator?: (value: any) => boolean
+  validator?: (value: unknown) => boolean
 ): [T, (newValue: T) => void] {
   // Initialize state with a function to avoid unnecessary localStorage lookups
   const [preference, setPreference] = useState<T>(() => {
@@ -29,12 +36,12 @@ function useLocalPreference<T>(
       if (storedValue === null) return defaultValue;
 
       // Parse the stored value
-      const parsedValue = JSON.parse(storedValue);
+      const parsedValue: unknown = JSON.parse(storedValue);
 
       // If a validator is provided, check if the value is valid
       if (validator && !validator(parsedValue)) return defaultValue;
 
-      return parsedValue;
+      return parsedValue as T;
     } catch (e) {
       // If there's an error reading from localStorage, return the default
       console.warn(`Error reading ${key} from localStorage:`, e);
@@ -49,7 +56,7 @@ function useLocalPreference<T>(
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === key && event.newValue) {
         try {
-          const newValue = JSON.parse(event.newValue);
+          const newValue: unknown = JSON.parse(event.newValue);
           // Apply validator if it exists
           if (validator && !validator(newValue)) {
             return;
@@ -60,11 +67,32 @@ function useLocalPreference<T>(
         }
       }
     };
+    const handleLocalPreferenceChange = (event: Event) => {
+      const customEvent =
+        event as CustomEvent<LocalPreferenceChangeEventDetail>;
+      if (customEvent.detail.key !== key) {
+        return;
+      }
+
+      const newValue = customEvent.detail.value;
+      if (validator && !validator(newValue)) {
+        return;
+      }
+      setPreference(newValue as T);
+    };
 
     window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(
+      LOCAL_PREFERENCE_CHANGE_EVENT,
+      handleLocalPreferenceChange
+    );
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        LOCAL_PREFERENCE_CHANGE_EVENT,
+        handleLocalPreferenceChange
+      );
     };
   }, [key, validator, setPreference]);
 
@@ -87,6 +115,14 @@ function useLocalPreference<T>(
         console.warn(`Error writing ${key} to localStorage:`, e);
         setPreference(newValue);
       }
+      window.dispatchEvent(
+        new CustomEvent<LocalPreferenceChangeEventDetail>(
+          LOCAL_PREFERENCE_CHANGE_EVENT,
+          {
+            detail: { key, value: newValue },
+          }
+        )
+      );
     },
     [key, setPreference]
   );

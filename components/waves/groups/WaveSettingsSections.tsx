@@ -11,6 +11,9 @@ import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.t
 import WaveOutcomesVisibility from "@/components/waves/specs/WaveOutcomesVisibility";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
 import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
+import BoostedDropsDisplayPreference from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface WaveSettingsSectionsProps {
   readonly wave: ApiWave;
@@ -47,6 +50,17 @@ export default function WaveSettingsSections({
   return (
     <div className="tw-pb-4">
       <WaveActiveCurationSection wave={wave} />
+
+      {showChatSettings && (
+        <SettingsSection
+          title={t(
+            DEFAULT_LOCALE,
+            "waveChat.boostedDrops.display.sectionTitle"
+          )}
+        >
+          <BoostedDropsDisplayPreference />
+        </SettingsSection>
+      )}
 
       {isDisplaySettingsWave && (
         <SettingsSection title="Display">
