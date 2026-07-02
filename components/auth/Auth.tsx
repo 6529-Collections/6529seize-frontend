@@ -1891,7 +1891,9 @@ export default function Auth({
     } else {
       dialog.setAttribute("open", "");
     }
-    dialog.focus();
+    dialog
+      .querySelector<HTMLElement>("button:not([disabled]), a[href]")
+      ?.focus();
 
     return () => {
       closeDialog(dialog);
