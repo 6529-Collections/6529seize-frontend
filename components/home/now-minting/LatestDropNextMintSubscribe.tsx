@@ -10,33 +10,32 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiUpcomingMemeSubscriptionStatus } from "@/generated/models/ApiUpcomingMemeSubscriptionStatus";
-import type { NFTSubscription } from "@/generated/models/NFTSubscription";
-import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
-import { formatNumber, roundTo } from "@/i18n/format";
+import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
+import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
+import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { t, type MessageKey } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useMemo } from "react";
-import MemeSubscriptionRow from "../../user/subscriptions/MemeSubscriptionRow";
-import SubscriptionHeaderLinks, {
-  SubscriptionBalanceLabel,
-  SubscriptionInfoLink,
-} from "../../user/subscriptions/SubscriptionHeaderLinks";
-import {
-  ABOUT_SUBSCRIPTIONS_HREF,
-  getProfileSubscriptionsHref,
-} from "../../user/subscriptions/subscriptionNavigation";
+import MemeSubscriptionAwarenessRow from "./MemeSubscriptionAwarenessRow";
+import { getProfileSubscriptionsHref } from "../../user/subscriptions/subscriptionNavigation";
 
-const SUBSCRIPTION_SLOT_CLASS_NAME =
-  "tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4";
-type SubscriptionAwarenessStatusKey = Extract<
+type SubscriptionTooltipKey = Extract<
   MessageKey,
-  | "home.mintSubscriptions.status.connectProfile"
-  | "home.mintSubscriptions.status.proxyActive"
+  | "home.mintSubscriptions.tooltip.connect"
+  | "home.mintSubscriptions.tooltip.dropped"
+  | "home.mintSubscriptions.tooltip.manage"
+  | "home.mintSubscriptions.tooltip.mintDay"
+  | "home.mintSubscriptions.tooltip.profileSubscribe"
+  | "home.mintSubscriptions.tooltip.proxy"
 >;
 type SubscriptionStatusSource = "none" | "upcoming";
+
+type RedeemedSubscriptionCountsResponse = {
+  data: RedeemedSubscriptionCounts[];
+};
 
 function getProfileKey(
   connectedProfile: ApiIdentity | null
@@ -47,50 +46,40 @@ function getProfileKey(
   );
 }
 
-function SubscriptionAwarenessRow({
-  balanceLabel,
-  profileSubscriptionsHref,
-  statusLabelKey,
+function getToggleTooltipKey({
+  activeProfileProxy,
+  isMintingDay,
+  isUpcoming,
+  profileKey,
+  subscribed,
 }: Readonly<{
-  balanceLabel?: string | undefined;
-  profileSubscriptionsHref: string | undefined;
-  statusLabelKey?: SubscriptionAwarenessStatusKey | undefined;
-}>) {
-  const locale = useBrowserLocale();
-  const statusLabel = statusLabelKey ? t(locale, statusLabelKey) : null;
+  activeProfileProxy: boolean;
+  isMintingDay: boolean;
+  isUpcoming: boolean;
+  profileKey: string | undefined;
+  subscribed: boolean;
+}>): SubscriptionTooltipKey {
+  if (activeProfileProxy) {
+    return "home.mintSubscriptions.tooltip.proxy";
+  }
 
-  return (
-    <div className={SUBSCRIPTION_SLOT_CLASS_NAME}>
-      <div className="tw-py-1">
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <SubscriptionHeaderLinks
-            labelKey="home.mintSubscriptions.subscribeLabel"
-            profileSubscriptionsHref={profileSubscriptionsHref}
-          >
-            {balanceLabel && (
-              <SubscriptionBalanceLabel balanceLabel={balanceLabel} />
-            )}
-          </SubscriptionHeaderLinks>
-          <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2">
-            {statusLabel && (
-              <>
-                <span
-                  aria-hidden
-                  className="tw-inline-flex tw-h-5 tw-w-10 tw-shrink-0 tw-items-center tw-rounded-full tw-bg-iron-800 tw-p-0.5 tw-ring-1 tw-ring-inset tw-ring-iron-700"
-                >
-                  <span className="tw-size-4 tw-rounded-full tw-bg-iron-500" />
-                </span>
-                <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400">
-                  {statusLabel}
-                </span>
-              </>
-            )}
-            <SubscriptionInfoLink href={ABOUT_SUBSCRIPTIONS_HREF} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  if (!profileKey) {
+    return "home.mintSubscriptions.tooltip.connect";
+  }
+
+  if (subscribed) {
+    return "home.mintSubscriptions.tooltip.manage";
+  }
+
+  if (isUpcoming && isMintingDay) {
+    return "home.mintSubscriptions.tooltip.mintDay";
+  }
+
+  if (isUpcoming) {
+    return "home.mintSubscriptions.tooltip.profileSubscribe";
+  }
+
+  return "home.mintSubscriptions.tooltip.dropped";
 }
 
 export default function LatestDropNextMintSubscribe(
@@ -107,6 +96,7 @@ export default function LatestDropNextMintSubscribe(
 
   const statusSource = props.statusSource ?? "upcoming";
   const shouldQueryUpcomingStatus = statusSource === "upcoming";
+  const isMintingDay = shouldQueryUpcomingStatus && isMintingToday();
   const tokenId = props.tokenId ?? getCanonicalNextMintNumber();
   const hasTokenId = Number.isInteger(tokenId) && tokenId > 0;
   const hideSubscriptions = shouldHideSubscriptions({
@@ -123,119 +113,103 @@ export default function LatestDropNextMintSubscribe(
     [connectedProfile]
   );
 
-  const { data: details } = useQuery<SubscriptionDetails>({
-    queryKey: ["next-mint-subscription-details", profileKey],
+  const { data: upcomingStatus } = useQuery<ApiUpcomingMemeSubscriptionStatus>({
+    queryKey: ["mint-subscription-status", "upcoming", profileKey, tokenId],
     queryFn: async () =>
-      await commonApiFetch<SubscriptionDetails>({
-        endpoint: `subscriptions/consolidation/details/${profileKey}`,
+      await commonApiFetch<ApiUpcomingMemeSubscriptionStatus>({
+        endpoint: `subscriptions/consolidation/upcoming-memes/${tokenId}/${profileKey}`,
       }),
-    enabled: !hideSubscriptions && !!profileKey,
+    enabled:
+      !hideSubscriptions &&
+      !!profileKey &&
+      hasTokenId &&
+      shouldQueryUpcomingStatus,
     retry: false,
   });
 
-  const { data: status, refetch: refetchStatus } =
-    useQuery<ApiUpcomingMemeSubscriptionStatus>({
-      queryKey: ["next-mint-subscription-status", profileKey, tokenId],
+  const { data: finalStatus } = useQuery<NFTFinalSubscription>({
+    queryKey: ["mint-subscription-status", "final", profileKey, tokenId],
+    queryFn: async () =>
+      await commonApiFetch<NFTFinalSubscription>({
+        endpoint: `subscriptions/consolidation/final/${profileKey}/${MEMES_CONTRACT}/${tokenId}`,
+      }),
+    enabled:
+      !hideSubscriptions &&
+      !!profileKey &&
+      hasTokenId &&
+      !shouldQueryUpcomingStatus,
+    retry: false,
+  });
+
+  const { data: upcomingCounts } = useQuery<SubscriptionCounts[]>({
+    queryKey: ["mint-subscription-counts", "upcoming", tokenId],
+    queryFn: async () =>
+      await commonApiFetch<SubscriptionCounts[]>({
+        endpoint: "subscriptions/upcoming-memes-counts?card_count=1",
+      }),
+    enabled: !hideSubscriptions && hasTokenId && shouldQueryUpcomingStatus,
+    retry: false,
+  });
+
+  const { data: redeemedCounts } = useQuery<RedeemedSubscriptionCountsResponse>(
+    {
+      queryKey: ["mint-subscription-counts", "redeemed", tokenId],
       queryFn: async () =>
-        await commonApiFetch<ApiUpcomingMemeSubscriptionStatus>({
-          endpoint: `subscriptions/consolidation/upcoming-memes/${tokenId}/${profileKey}`,
+        await commonApiFetch<RedeemedSubscriptionCountsResponse>({
+          endpoint: "subscriptions/redeemed-memes-counts",
+          params: {
+            page_size: "10",
+            page: "1",
+          },
         }),
-      enabled:
-        !hideSubscriptions &&
-        !!profileKey &&
-        hasTokenId &&
-        shouldQueryUpcomingStatus,
+      enabled: !hideSubscriptions && hasTokenId && !shouldQueryUpcomingStatus,
       retry: false,
-    });
-
-  const subscription = useMemo<NFTSubscription | null>(() => {
-    if (!shouldQueryUpcomingStatus || !profileKey || !hasTokenId || !status) {
-      return null;
     }
+  );
 
-    return {
-      consolidation_key: profileKey,
-      contract: MEMES_CONTRACT,
-      token_id: tokenId,
-      subscribed: status.subscribed,
-      subscribed_count: status.count ?? 1,
-    } as NFTSubscription;
-  }, [hasTokenId, profileKey, shouldQueryUpcomingStatus, status, tokenId]);
-
-  const balanceLabel = useMemo(() => {
-    const balance = details?.balance ?? 0;
-    const safeBalance = Number.isFinite(balance) ? balance : 0;
-    return formatNumber(locale, roundTo(safeBalance, 6), {
-      maximumFractionDigits: 6,
-    });
-  }, [details?.balance, locale]);
+  const subscribed = !!profileKey
+    ? shouldQueryUpcomingStatus
+      ? !!upcomingStatus?.subscribed
+      : !!finalStatus?.subscribed_count
+    : false;
+  const subscribedCount = profileKey
+    ? shouldQueryUpcomingStatus
+      ? upcomingStatus?.count
+      : finalStatus?.subscribed_count
+    : undefined;
+  const subscribersCount = useMemo(() => {
+    const counts = shouldQueryUpcomingStatus
+      ? upcomingCounts
+      : redeemedCounts?.data;
+    return counts?.find((count) => count.token_id === tokenId)?.count;
+  }, [
+    redeemedCounts?.data,
+    shouldQueryUpcomingStatus,
+    tokenId,
+    upcomingCounts,
+  ]);
+  const tooltipLabel = t(
+    locale,
+    getToggleTooltipKey({
+      activeProfileProxy: !!activeProfileProxy,
+      isMintingDay,
+      isUpcoming: shouldQueryUpcomingStatus,
+      profileKey,
+      subscribed,
+    })
+  );
 
   if (hideSubscriptions || !hasTokenId) {
     return null;
   }
 
-  if (!profileKey) {
-    return (
-      <SubscriptionAwarenessRow
-        profileSubscriptionsHref={profileSubscriptionsHref}
-        statusLabelKey={
-          activeProfileProxy
-            ? "home.mintSubscriptions.status.proxyActive"
-            : "home.mintSubscriptions.status.connectProfile"
-        }
-      />
-    );
-  }
-
-  if (!shouldQueryUpcomingStatus) {
-    return (
-      <SubscriptionAwarenessRow
-        balanceLabel={details ? balanceLabel : undefined}
-        profileSubscriptionsHref={profileSubscriptionsHref}
-      />
-    );
-  }
-
-  if (!subscription) {
-    return (
-      <div className={SUBSCRIPTION_SLOT_CLASS_NAME} aria-hidden>
-        <div className="tw-py-1">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-            <span className="tw-flex tw-w-full tw-leading-none">
-              <span className="tw-h-6 tw-w-full tw-animate-pulse tw-rounded-md tw-bg-white/10" />
-            </span>
-          </div>
-          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-400">
-            <span className="tw-h-5 tw-w-[180px] tw-animate-pulse tw-rounded-md tw-bg-white/5" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className={SUBSCRIPTION_SLOT_CLASS_NAME}>
-      <div className="tw-rounded-xl tw-bg-transparent">
-        <MemeSubscriptionRow
-          profileKey={profileKey}
-          title="The Memes"
-          subscription={subscription}
-          eligibilityCount={
-            details?.subscription_eligibility_count ?? status?.eligibility ?? 1
-          }
-          balanceLabel={balanceLabel}
-          readonly={props.readonly ?? false}
-          infoHref={ABOUT_SUBSCRIPTIONS_HREF}
-          profileSubscriptionsHref={profileSubscriptionsHref}
-          refresh={() => {
-            refetchStatus();
-          }}
-          minting_today={isMintingToday()}
-          first
-          date={null}
-          variant="compact"
-        />
-      </div>
-    </div>
+    <MemeSubscriptionAwarenessRow
+      profileSubscriptionsHref={profileSubscriptionsHref}
+      subscribed={subscribed}
+      subscribedCount={subscribedCount}
+      subscribersCount={subscribersCount}
+      tooltipLabel={tooltipLabel}
+    />
   );
 }

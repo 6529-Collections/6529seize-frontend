@@ -88,21 +88,27 @@ Use this page for visibility rules, state switches, and route targets.
   trimmed), `Coming up` suppresses the `NEXT MINT` card.
 - On iOS outside the US, the countdown `Mint` button is hidden.
 - On iOS outside the US, The Memes subscription row is hidden.
-- Latest Drop subscription awareness links to subscription info/profile
-  subscriptions without querying the upcoming-meme status endpoint for the
-  current or already-dropped card.
+- Latest Drop subscription awareness is read-only and links to subscription
+  info/profile subscriptions without querying the upcoming-meme status endpoint
+  for the current or already-dropped card.
 - The current/latest `/the-memes/{id}` detail page uses the same awareness-only
   subscription row beside the mint countdown.
-- Awareness-only connected rows do not show a passive `Manage in profile`
-  status; the subscription info link is the right-edge question-mark control.
+- Awareness-only rows do not embed the profile subscription editor. They show a
+  blue read-only `Subscribed` strip with a disabled switch, optional user
+  subscribed count, optional subscriber total, an icon-only profile
+  subscriptions link when connected, and a right-edge question-mark info link.
+- Balance, eligibility, quantity selectors, and subscription mutation controls
+  are intentionally not shown in home/latest-card awareness rows.
 - Without a connected profile, the subscription row can still show a
-  non-actionable awareness state with a link to `/about/subscriptions`.
+  non-actionable disabled switch awareness state with a link to
+  `/about/subscriptions`.
 - With a connected profile, the subscription row can link to
-  `/{user}/subscriptions`; profile-specific subscription status and final
-  phase/position details only render when the related APIs return data.
+  `/{user}/subscriptions`; profile-specific subscription status/count only
+  render when the related read-only APIs return data.
 - On `/about/subscriptions`, connected users see a primary `My subscriptions`
-  action beside the about-section dropdown when subscriptions are available in
-  their environment.
+  action on the left side of the about-section navigation row. Disconnected
+  users see a primary `Connect to Subscribe` action that opens wallet
+  connection and then routes to their profile subscriptions once connected.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.

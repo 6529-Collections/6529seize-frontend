@@ -100,7 +100,8 @@ export function AboutContentsDropdown({
   return (
     <div
       className={clsx(
-        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
+        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
+        leadingAction ? "tw-justify-between" : "tw-justify-end",
         className
       )}
     >
