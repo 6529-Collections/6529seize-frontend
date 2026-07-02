@@ -87,7 +87,7 @@ describe("DropPlaceholder", () => {
       ).toBeInTheDocument();
     });
 
-    it("applies primary color for not logged in chat restriction", () => {
+    it("applies muted color for not logged in chat restriction", () => {
       render(
         <DropPlaceholder
           type="chat"
@@ -96,7 +96,7 @@ describe("DropPlaceholder", () => {
       );
 
       const message = screen.getByText("Please log in to participate in chat");
-      expect(message).toHaveClass("tw-text-primary-400");
+      expect(message).toHaveClass("tw-text-iron-400");
     });
   });
 
@@ -201,7 +201,7 @@ describe("DropPlaceholder", () => {
       );
 
       expect(screen.getByText("Please log in to make submissions")).toHaveClass(
-        "tw-text-primary-400"
+        "tw-text-iron-400"
       );
 
       rerender(
@@ -251,7 +251,7 @@ describe("DropPlaceholder", () => {
 
       expect(
         screen.getByText("Connect your wallet to participate in this wave")
-      ).toBeInTheDocument();
+      ).toHaveClass("tw-text-iron-400");
     });
 
     it("renders inline create profile link for profileless users", () => {
