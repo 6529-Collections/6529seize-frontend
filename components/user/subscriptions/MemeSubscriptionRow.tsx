@@ -15,6 +15,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useContext, useEffect, useMemo, useState } from "react";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
@@ -34,6 +35,8 @@ export default function MemeSubscriptionRow(
     variant?: "default" | "compact";
     balanceLabel?: string;
     subscribedView?: boolean;
+    infoHref?: string | undefined;
+    profileSubscriptionsHref?: string | undefined;
   }>
 ) {
   const id = `subscription-${props.subscription.token_id}`;
@@ -283,6 +286,15 @@ export default function MemeSubscriptionRow(
             <span className="tw-font-medium tw-leading-none">
               {isSubscribedView ? "Subscribed" : "Subscribe"}
             </span>
+            {props.infoHref && (
+              <Link
+                href={props.infoHref}
+                aria-label="Learn more about The Memes subscriptions"
+                className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+              >
+                <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3.5" />
+              </Link>
+            )}
             {props.balanceLabel && (
               <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-leading-none tw-text-iron-400">
                 <span className="tw-leading-none">Balance</span>
@@ -293,6 +305,14 @@ export default function MemeSubscriptionRow(
                   <EthereumIcon />
                 </span>
               </span>
+            )}
+            {props.profileSubscriptionsHref && (
+              <Link
+                href={props.profileSubscriptionsHref}
+                className="tw-text-sm tw-leading-none tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+              >
+                My subscriptions
+              </Link>
             )}
           </span>
           {isSubscribedView ? (

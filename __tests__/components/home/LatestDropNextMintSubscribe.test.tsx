@@ -3,6 +3,15 @@ import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDro
 import { useQuery } from "@tanstack/react-query";
 import { screen } from "@testing-library/react";
 
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ href, children, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
 }));
@@ -21,7 +30,8 @@ jest.mock(
           {props.eligibilityCount}
           minting_today:{String(props.minting_today)} readonly:
           {String(props.readonly)} balance:{props.balanceLabel} variant:
-          {props.variant ?? "default"} date:{String(props.date)}
+          {props.variant ?? "default"} date:{String(props.date)} info:
+          {props.infoHref} profile:{props.profileSubscriptionsHref}
         </div>
       );
     }
@@ -99,6 +109,20 @@ describe("LatestDropNextMintSubscribe", () => {
     );
     expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
       /date:null/
+    );
+    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
+      /info:\/about\/subscriptions/
+    );
+    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
+      /profile:\/test-handle\/subscriptions/
+    );
+  });
+
+  it("uses a provided token id for active latest-drop subscription state", () => {
+    renderWithAuth(<LatestDropNextMintSubscribe tokenId={516} />);
+
+    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
+      /token:516/
     );
   });
 
@@ -188,16 +212,20 @@ describe("LatestDropNextMintSubscribe", () => {
     );
   });
 
-  it("does not render when there is no connected profile", () => {
-    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />, {
+  it("renders awareness when there is no connected profile", () => {
+    renderWithAuth(<LatestDropNextMintSubscribe />, {
       connectedProfile: null,
     });
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByText("Subscribe")).toBeInTheDocument();
+    expect(screen.getByText("Connect profile")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Learn more about The Memes subscriptions")
+    ).toHaveAttribute("href", "/about/subscriptions");
   });
 
-  it("does not render during an active proxy session", () => {
-    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />, {
+  it("renders awareness during an active proxy session", () => {
+    renderWithAuth(<LatestDropNextMintSubscribe />, {
       activeProfileProxy: {
         id: "proxy-1",
         granted_to: {} as any,
@@ -207,10 +235,14 @@ describe("LatestDropNextMintSubscribe", () => {
       } as any,
     });
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByText("Proxy active")).toBeInTheDocument();
+    expect(screen.getByText("My subscriptions")).toHaveAttribute(
+      "href",
+      "/test-handle/subscriptions"
+    );
   });
 
-  it("does not render in latest-drop mode when the profile is not subscribed", () => {
+  it("renders when the profile is not subscribed", () => {
     useQueryMock.mockImplementation(({ queryKey }) => {
       if (queryKey[0] === "next-mint-subscription-details") {
         return {
@@ -237,10 +269,13 @@ describe("LatestDropNextMintSubscribe", () => {
       };
     });
 
-    const { container } = renderWithAuth(
-      <LatestDropNextMintSubscribe showOnlyWhenSubscribed readonly />
-    );
+    renderWithAuth(<LatestDropNextMintSubscribe tokenId={516} readonly />);
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
+      /token:516/
+    );
+    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
+      /readonly:true/
+    );
   });
 });

@@ -1,6 +1,10 @@
 import NowMintingDetails from "@/components/home/now-minting/NowMintingDetails";
 import { render, screen } from "@testing-library/react";
 
+const mockLatestDropNextMintSubscribe = jest.fn((props: any) => (
+  <div data-testid="subscribe-section" data-token-id={props.tokenId} />
+));
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children, ...props }: any) => (
@@ -22,7 +26,7 @@ jest.mock("@/components/home/now-minting/NowMintingStatsGrid", () => ({
 
 jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
   __esModule: true,
-  default: () => <div data-testid="subscribe-section" />,
+  default: (props: any) => mockLatestDropNextMintSubscribe(props),
 }));
 
 jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
@@ -42,6 +46,10 @@ const baseNft = {
 };
 
 describe("NowMintingDetails", () => {
+  beforeEach(() => {
+    mockLatestDropNextMintSubscribe.mockClear();
+  });
+
   it("omits file metadata rows when media metadata is missing", () => {
     render(
       <NowMintingDetails
@@ -58,7 +66,10 @@ describe("NowMintingDetails", () => {
     expect(screen.queryByText("Dimensions")).not.toBeInTheDocument();
     expect(screen.getByText("Collection")).toBeInTheDocument();
     expect(screen.getByText("Season")).toBeInTheDocument();
-    expect(screen.getByTestId("subscribe-section")).toBeInTheDocument();
+    expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
+      "data-token-id",
+      "667"
+    );
   });
 
   it("renders file metadata rows when image metadata is present", () => {
