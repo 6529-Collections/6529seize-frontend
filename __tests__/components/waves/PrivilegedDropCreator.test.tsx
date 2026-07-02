@@ -19,7 +19,7 @@ type ProfileSetupVisibilityInput = {
 };
 type DropPlaceholderMockProps = {
   readonly type: "chat" | "submission" | "both";
-  readonly action?: React.ReactNode | undefined;
+  readonly profileSetupHref?: string | undefined;
 };
 type MockAuthState = {
   readonly connectedProfile?:
@@ -61,7 +61,6 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
   __esModule: true,
-  default: () => <button type="button">Create profile</button>,
   shouldShowUserSetUpProfileCta: ({
     address,
     connectedProfileHandle,
@@ -70,17 +69,19 @@ jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
   }: ProfileSetupVisibilityInput) =>
     Boolean(
       !fetchingProfile &&
-        hasValidWalletAuth !== false &&
-        !connectedProfileHandle &&
-        address
+      hasValidWalletAuth !== false &&
+      !connectedProfileHandle &&
+      address
     ),
 }));
 jest.mock("@/components/waves/DropPlaceholder", () => ({
   __esModule: true,
   default: (props: DropPlaceholderMockProps) => (
-    <div data-testid="placeholder" data-type={props.type}>
-      {props.action}
-    </div>
+    <div
+      data-testid="placeholder"
+      data-type={props.type}
+      data-profile-setup-href={props.profileSetupHref ?? ""}
+    />
   ),
 }));
 jest.mock("@/components/waves/CreateDrop", () => ({
@@ -209,9 +210,10 @@ describe("PrivilegedDropCreator", () => {
         needsProfile: true,
       })
     );
-    expect(
-      screen.getByRole("button", { name: "Create profile" })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("placeholder")).toHaveAttribute(
+      "data-profile-setup-href",
+      "/0xabc"
+    );
   });
 
   it("does not request profile setup while the profile is loading", () => {
@@ -239,9 +241,6 @@ describe("PrivilegedDropCreator", () => {
     );
     expect(screen.queryByTestId("placeholder")).not.toBeInTheDocument();
     expect(screen.queryByTestId("create")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Create profile" })
-    ).not.toBeInTheDocument();
   });
 
   it("keeps proxy sessions out of the profile setup path", () => {
@@ -267,9 +266,10 @@ describe("PrivilegedDropCreator", () => {
         needsProfile: false,
       })
     );
-    expect(
-      screen.queryByRole("button", { name: "Create profile" })
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("placeholder")).toHaveAttribute(
+      "data-profile-setup-href",
+      ""
+    );
   });
 
   it("keeps chat composer visible during slow mode cooldown", () => {

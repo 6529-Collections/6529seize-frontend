@@ -2,6 +2,7 @@ import {
   ChatRestriction,
   SubmissionRestriction,
 } from "@/hooks/useDropPriviledges";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 function throwUnhandledRestriction(
@@ -15,22 +16,40 @@ interface DropPlaceholderProps {
   readonly type: "chat" | "submission" | "both";
   readonly chatRestriction?: ChatRestriction | undefined;
   readonly submissionRestriction?: SubmissionRestriction | undefined;
-  readonly action?: ReactNode | undefined;
+  readonly profileSetupHref?: string | undefined;
 }
 
 export default function DropPlaceholder({
   type,
   chatRestriction,
   submissionRestriction,
-  action,
+  profileSetupHref,
 }: DropPlaceholderProps) {
+  const getProfileSetupMessage = (suffix: string): ReactNode => {
+    if (!profileSetupHref) {
+      return `Create a profile ${suffix}`;
+    }
+
+    return (
+      <>
+        <Link
+          href={profileSetupHref}
+          className="tw-text-primary-400 tw-no-underline tw-transition tw-duration-200 hover:tw-text-primary-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+        >
+          Create a profile
+        </Link>{" "}
+        <span className="tw-text-iron-400">{suffix}</span>
+      </>
+    );
+  };
+
   const getMessage = () => {
     if (type === "chat" && chatRestriction) {
       switch (chatRestriction) {
         case ChatRestriction.NOT_LOGGED_IN:
           return "Please log in to participate in chat";
         case ChatRestriction.NEEDS_PROFILE:
-          return "Create a profile to participate in chat";
+          return getProfileSetupMessage("to participate in chat");
         case ChatRestriction.PROXY_USER:
           return "Proxy users cannot participate in chat";
         case ChatRestriction.SLOW_MODE:
@@ -50,7 +69,7 @@ export default function DropPlaceholder({
         case SubmissionRestriction.NOT_LOGGED_IN:
           return "Please log in to make submissions";
         case SubmissionRestriction.NEEDS_PROFILE:
-          return "Create a profile to submit in this wave";
+          return getProfileSetupMessage("to submit in this wave");
         case SubmissionRestriction.PROXY_USER:
           return "Proxy users cannot make submissions";
         case SubmissionRestriction.NO_PERMISSION:
@@ -82,7 +101,7 @@ export default function DropPlaceholder({
         chatRestriction === ChatRestriction.NEEDS_PROFILE &&
         submissionRestriction === SubmissionRestriction.NEEDS_PROFILE
       ) {
-        return "Create a profile to participate in this wave";
+        return getProfileSetupMessage("to participate in this wave");
       }
 
       return "You cannot participate in this wave at the moment";
@@ -94,22 +113,17 @@ export default function DropPlaceholder({
   const getColor = () => {
     if (
       type === "both" &&
-      ((chatRestriction === ChatRestriction.NOT_LOGGED_IN &&
-        submissionRestriction === SubmissionRestriction.NOT_LOGGED_IN) ||
-        (chatRestriction === ChatRestriction.NEEDS_PROFILE &&
-          submissionRestriction === SubmissionRestriction.NEEDS_PROFILE))
+      chatRestriction === ChatRestriction.NEEDS_PROFILE &&
+      submissionRestriction === SubmissionRestriction.NEEDS_PROFILE
     ) {
       return "tw-text-primary-400";
     }
-    if (
-      type === "chat" &&
-      (chatRestriction === ChatRestriction.NOT_LOGGED_IN ||
-        chatRestriction === ChatRestriction.NEEDS_PROFILE)
-    )
+    if (type === "chat" && chatRestriction === ChatRestriction.NEEDS_PROFILE)
       return "tw-text-primary-400";
     if (type === "submission") {
       switch (submissionRestriction) {
         case SubmissionRestriction.NOT_LOGGED_IN:
+          return "tw-text-iron-400";
         case SubmissionRestriction.NEEDS_PROFILE:
           return "tw-text-primary-400";
         case SubmissionRestriction.NOT_STARTED:
@@ -127,11 +141,10 @@ export default function DropPlaceholder({
 
   return (
     <div className="tw-flex tw-min-h-[48px] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-iron-800/50 tw-bg-iron-900/50 tw-px-4 tw-py-3 tw-backdrop-blur">
-      <div className="tw-flex tw-flex-col tw-items-center tw-gap-2 tw-text-center">
+      <div className="tw-flex tw-items-center tw-justify-center tw-text-center">
         <p className={`tw-mb-0 tw-text-sm tw-font-medium ${getColor()}`}>
           {getMessage()}
         </p>
-        {action}
       </div>
     </div>
   );

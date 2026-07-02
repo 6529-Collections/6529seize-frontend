@@ -87,7 +87,7 @@ describe("DropPlaceholder", () => {
       ).toBeInTheDocument();
     });
 
-    it("applies primary color for not logged in chat restriction", () => {
+    it("applies muted color for not logged in chat restriction", () => {
       render(
         <DropPlaceholder
           type="chat"
@@ -96,7 +96,7 @@ describe("DropPlaceholder", () => {
       );
 
       const message = screen.getByText("Please log in to participate in chat");
-      expect(message).toHaveClass("tw-text-primary-400");
+      expect(message).toHaveClass("tw-text-iron-400");
     });
   });
 
@@ -201,7 +201,7 @@ describe("DropPlaceholder", () => {
       );
 
       expect(screen.getByText("Please log in to make submissions")).toHaveClass(
-        "tw-text-primary-400"
+        "tw-text-iron-400"
       );
 
       rerender(
@@ -251,25 +251,36 @@ describe("DropPlaceholder", () => {
 
       expect(
         screen.getByText("Connect your wallet to participate in this wave")
-      ).toBeInTheDocument();
+      ).toHaveClass("tw-text-iron-400");
     });
 
-    it("renders create profile message and action for profileless users", () => {
+    it("renders inline create profile link for profileless users", () => {
       render(
         <DropPlaceholder
           type="both"
           chatRestriction={ChatRestriction.NEEDS_PROFILE}
           submissionRestriction={SubmissionRestriction.NEEDS_PROFILE}
-          action={<button type="button">Create profile</button>}
+          profileSetupHref="/0xabc"
         />
       );
 
       expect(
-        screen.getByText("Create a profile to participate in this wave")
+        screen.getByText(
+          (_content, element) =>
+            element?.tagName.toLowerCase() === "p" &&
+            element.textContent ===
+              "Create a profile to participate in this wave"
+        )
       ).toHaveClass("tw-text-primary-400");
+      expect(screen.getByText("to participate in this wave")).toHaveClass(
+        "tw-text-iron-400"
+      );
+      const link = screen.getByRole("link", { name: "Create a profile" });
+      expect(link).toHaveAttribute("href", "/0xabc");
+      expect(link).toHaveClass("tw-text-primary-400", "tw-no-underline");
       expect(
-        screen.getByRole("button", { name: "Create profile" })
-      ).toBeInTheDocument();
+        screen.queryByRole("button", { name: "Create profile" })
+      ).not.toBeInTheDocument();
     });
 
     it("renders generic message for both type", () => {
