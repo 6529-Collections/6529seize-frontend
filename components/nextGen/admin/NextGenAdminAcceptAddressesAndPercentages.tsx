@@ -180,12 +180,12 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (
-    <Container className="no-padding">
+    <Container className="!tw-p-0">
       <NextGenAdminHeadingRow
         title="Accept Addresses and Percentages"
         close={props.close}
       />
-      <Row className="pt-3">
+      <Row className="tw-pt-4">
         <Col>
           <Form>
             <NextGenCollectionIdFormGroup
@@ -203,7 +203,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Primary 1</Form.Label>
               <Row>
                 <Col xs={9}>
@@ -219,12 +219,14 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    {...(primary1?.percentage && { value: primary1.percentage })}
+                    {...(primary1?.percentage && {
+                      value: primary1.percentage,
+                    })}
                   />
                 </Col>
               </Row>
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Primary 2</Form.Label>
               <Row>
                 <Col xs={9}>
@@ -240,12 +242,14 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    {...(primary2?.percentage && { value: primary2.percentage })}
+                    {...(primary2?.percentage && {
+                      value: primary2.percentage,
+                    })}
                   />
                 </Col>
               </Row>
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Primary 3</Form.Label>
               <Row>
                 <Col xs={9}>
@@ -261,12 +265,14 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    {...(primary3?.percentage && { value: primary3.percentage })}
+                    {...(primary3?.percentage && {
+                      value: primary3.percentage,
+                    })}
                   />
                 </Col>
               </Row>
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Secondary 1</Form.Label>
               <Row>
                 <Col xs={9}>
@@ -282,12 +288,14 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    {...(secondary1?.percentage && { value: secondary1.percentage })}
+                    {...(secondary1?.percentage && {
+                      value: secondary1.percentage,
+                    })}
                   />
                 </Col>
               </Row>
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Secondary 2</Form.Label>
               <Row>
                 <Col xs={9}>
@@ -303,12 +311,14 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    {...(secondary2?.percentage && { value: secondary2?.percentage })}
+                    {...(secondary2?.percentage && {
+                      value: secondary2.percentage,
+                    })}
                   />
                 </Col>
               </Row>
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Secondary 3</Form.Label>
               <Row>
                 <Col xs={9}>
@@ -324,12 +334,14 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    {...(secondary3?.percentage && { value: secondary3.percentage })}
+                    {...(secondary3?.percentage && {
+                      value: secondary3.percentage,
+                    })}
                   />
                 </Col>
               </Row>
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Primary Addresses Status</Form.Label>
               <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
@@ -352,7 +364,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                 />
               </span>
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Secondary Addresses Status</Form.Label>
               <span className="tw-flex tw-items-center tw-gap-4">
                 <Form.Check
@@ -390,7 +402,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
               </div>
             )}
             <Button
-              className={`mt-3 mb-3 seize-btn`}
+              className={`tw-mb-4 tw-mt-4 tw-rounded-none tw-border-0 tw-px-5 tw-py-1.5 tw-font-bold disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
               disabled={submitting || loading}
               onClick={() => submit()}
             >

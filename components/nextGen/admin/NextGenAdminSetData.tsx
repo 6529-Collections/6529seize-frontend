@@ -131,9 +131,9 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (
-    <Container className="no-padding">
+    <Container className="!tw-p-0">
       <NextGenAdminHeadingRow title="Set Collection Data" close={props.close} />
-      <Row className="pt-3">
+      <Row className="tw-pt-4">
         <Col>
           <Form>
             <NextGenCollectionIdFormGroup
@@ -165,12 +165,13 @@ export default function NextGenAdminSetData(props: Readonly<Props>) {
             />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
-              className={`mt-3 mb-3 seize-btn`}
+              className={`tw-mb-4 tw-mt-4 tw-rounded-none tw-border-0 tw-px-5 tw-py-1.5 tw-font-bold disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
               disabled={submitting || loading}
               onClick={() => {
                 setLoading(true);
                 submit();
-              }}>
+              }}
+            >
               Submit
             </Button>
           </Form>
