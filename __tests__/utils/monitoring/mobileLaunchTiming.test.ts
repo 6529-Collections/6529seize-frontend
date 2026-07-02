@@ -58,6 +58,28 @@ async function loadMobileLaunchTiming({
   return { timing, sentry };
 }
 
+function flushLaunchTiming(
+  timing: MobileLaunchTimingModule,
+  reason: Parameters<
+    MobileLaunchTimingModule["scheduleMobileLaunchFlush"]
+  >[0] = "manual"
+): void {
+  timing.scheduleMobileLaunchFlush(reason, 0);
+  jest.advanceTimersByTime(0);
+}
+
+function mockCryptoSample(value: number): void {
+  const cryptoSample = Math.floor(value * 0x100000000);
+  jest
+    .spyOn(globalThis.crypto, "getRandomValues")
+    .mockImplementation((array) => {
+      if (array instanceof Uint32Array && array.length > 0) {
+        array[0] = cryptoSample;
+      }
+      return array;
+    });
+}
+
 describe("mobileLaunchTiming", () => {
   beforeEach(() => {
     currentNow = 0;
@@ -65,7 +87,7 @@ describe("mobileLaunchTiming", () => {
     jest.spyOn(globalThis.performance, "now").mockImplementation(() => {
       return currentNow;
     });
-    jest.spyOn(Math, "random").mockReturnValue(0.99);
+    mockCryptoSample(0.99);
     globalThis.history.pushState({}, "", "/waves/123?wallet=secret");
   });
 
@@ -75,29 +97,122 @@ describe("mobileLaunchTiming", () => {
     jest.resetModules();
   });
 
-  it("does not start outside Capacitor", async () => {
+  it("starts web launches outside Capacitor", async () => {
+    mockCryptoSample(0.01);
     const { timing, sentry } = await loadMobileLaunchTiming({ native: false });
 
     timing.startMobileLaunchTiming();
-    currentNow = 4000;
-    timing.flushMobileLaunchTiming("manual");
+    currentNow = 100;
+    flushLaunchTiming(timing, "manual");
 
-    expect(sentry.addBreadcrumb).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        category: "mobile_launch",
+        message: "start",
+      })
+    );
     expect(sentry.logger.warn).not.toHaveBeenCalled();
-    expect(sentry.logger.info).not.toHaveBeenCalled();
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        platform: "web_desktop",
+        route_family: "/waves/[wave]",
+        sample_rate: 0.05,
+      })
+    );
   });
 
   it("flushes once", async () => {
-    jest.spyOn(Math, "random").mockReturnValue(0.01);
+    mockCryptoSample(0.01);
     const { timing, sentry } = await loadMobileLaunchTiming();
 
     timing.startMobileLaunchTiming();
     currentNow = 100;
-    timing.flushMobileLaunchTiming("manual");
-    timing.flushMobileLaunchTiming("manual");
+    flushLaunchTiming(timing, "manual");
+    flushLaunchTiming(timing, "manual");
 
     expect(sentry.logger.info).toHaveBeenCalledTimes(1);
     expect(sentry.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it("adds safe launch context and flat milestone attributes", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    timing.startMobileLaunchTiming();
+    currentNow = 120;
+    timing.markMobileLaunchStep("wagmi_children_unblocked");
+    currentNow = 200;
+    timing.markMobileLaunchStep("first_useful_app_shell");
+    timing.setMobileLaunchContext({
+      app_wallet_count_bucket: "2_5",
+      app_wallets_state: "supported_with_wallets",
+      auth_state: "authenticated_profile",
+      wallet_connection_state: "connected",
+    });
+    currentNow = 400;
+    flushLaunchTiming(timing, "manual");
+
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        context: {
+          app_wallet_count_bucket: "2_5",
+          app_wallets_state: "supported_with_wallets",
+          auth_state: "authenticated_profile",
+          wallet_connection_state: "connected",
+        },
+        provider_gate_ms: 120,
+        shell_after_wagmi_ms: 80,
+        step_first_useful_app_shell_ms: 200,
+        step_wagmi_children_unblocked_ms: 120,
+      })
+    );
+  });
+
+  it("measures elapsed time from the launch timing start baseline", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    currentNow = 500;
+    timing.startMobileLaunchTiming();
+    currentNow = 650;
+    timing.markMobileLaunchStep("first_useful_app_shell");
+    currentNow = 900;
+    flushLaunchTiming(timing, "manual");
+
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        step_first_useful_app_shell_ms: 150,
+        total_ms: 400,
+      })
+    );
+  });
+
+  it("lets a waves content flush replace a scheduled shell flush", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    timing.startMobileLaunchTiming();
+    currentNow = 50;
+    timing.scheduleMobileLaunchFlush("shell_paint", 5000);
+    currentNow = 100;
+    timing.markMobileLaunchStep("waves_first_content_visible");
+    timing.scheduleMobileLaunchFlush("waves_content_visible", 250);
+    currentNow = 350;
+    jest.advanceTimersByTime(250);
+
+    expect(sentry.logger.info).toHaveBeenCalledTimes(1);
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        flush_reason: "waves_content_visible",
+        step_waves_first_content_visible_ms: 100,
+        total_ms: 350,
+      })
+    );
+
+    jest.advanceTimersByTime(5000);
+
+    expect(sentry.logger.info).toHaveBeenCalledTimes(1);
   });
 
   it("logs slow launches as warnings without sampling", async () => {
@@ -106,7 +221,7 @@ describe("mobileLaunchTiming", () => {
     timing.startMobileLaunchTiming();
     currentNow = 3000;
     timing.markMobileLaunchStep("first_useful_app_shell");
-    timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(timing, "shell_paint");
 
     expect(sentry.logger.warn).toHaveBeenCalledTimes(1);
     expect(sentry.logger.warn).toHaveBeenCalledWith(
@@ -127,7 +242,7 @@ describe("mobileLaunchTiming", () => {
     globalThis.history.pushState({}, "", "/alice?jwt=secret");
     timing.startMobileLaunchTiming();
     currentNow = 3000;
-    timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(timing, "shell_paint");
 
     expect(sentry.logger.warn).toHaveBeenCalledWith(
       "mobile_launch_timing",
@@ -138,21 +253,23 @@ describe("mobileLaunchTiming", () => {
   });
 
   it("samples normal launches at five percent", async () => {
+    globalThis.history.pushState({}, "", "/about");
     const first = await loadMobileLaunchTiming();
 
     first.timing.startMobileLaunchTiming();
     currentNow = 100;
-    first.timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(first.timing, "shell_paint");
 
     expect(first.sentry.logger.info).not.toHaveBeenCalled();
     expect(first.sentry.logger.warn).not.toHaveBeenCalled();
 
-    jest.spyOn(Math, "random").mockReturnValue(0.01);
+    mockCryptoSample(0.01);
+    globalThis.history.pushState({}, "", "/about");
     const second = await loadMobileLaunchTiming();
 
     second.timing.startMobileLaunchTiming();
     currentNow = 100;
-    second.timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(second.timing, "shell_paint");
 
     expect(second.sentry.logger.info).toHaveBeenCalledTimes(1);
     expect(second.sentry.logger.warn).not.toHaveBeenCalled();
@@ -221,7 +338,7 @@ describe("mobileLaunchTiming", () => {
     }
 
     currentNow = 3500;
-    timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(timing, "shell_paint");
 
     expect(sentry.logger.warn).toHaveBeenCalledWith(
       "mobile_launch_timing",
@@ -269,7 +386,7 @@ describe("mobileLaunchTiming", () => {
     });
 
     currentNow = 3500;
-    timing.flushMobileLaunchTiming("shell_paint");
+    flushLaunchTiming(timing, "shell_paint");
 
     expect(sentry.logger.warn).toHaveBeenCalledWith(
       "mobile_launch_timing",

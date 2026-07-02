@@ -452,8 +452,7 @@ export default function UserPageSubscriptionsTopUp() {
                   min={1}
                   placeholder="count"
                   value={memeCount}
-                  className={styles["countInput"]}
-                  style={{ width: "100px", padding: "2px 10px" }}
+                  className="tw-w-[100px] tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-0.5 tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedOption("other");

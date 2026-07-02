@@ -67,6 +67,7 @@ jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
   measureMobileLaunchAsync: jest.fn(
     async (_stepName: string, task: () => unknown) => await task()
   ),
+  setMobileLaunchContext: jest.fn(),
 }));
 
 describe("AppWalletsContext methods", () => {
