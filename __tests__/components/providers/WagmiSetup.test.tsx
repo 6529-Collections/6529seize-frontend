@@ -1236,7 +1236,11 @@ describe("WagmiSetup Security Tests", () => {
       expect(mockValidateWalletSafely).toHaveBeenCalledWith(validWallet);
       expect(mockValidateWalletSafely).toHaveBeenCalledWith(invalidWallet);
       expect(mockLogErrorSecurely).toHaveBeenCalledWith(
-        `[WagmiSetup] Skipping invalid app-wallet connector ${invalidWallet.address}`,
+        "[WagmiSetup] Skipping invalid app-wallet connector",
+        expect.any(Error)
+      );
+      expect(mockLogErrorSecurely).not.toHaveBeenCalledWith(
+        expect.stringContaining(invalidWallet.address),
         expect.any(Error)
       );
       expect(mockSetToast).not.toHaveBeenCalledWith(
