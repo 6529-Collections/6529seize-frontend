@@ -70,48 +70,6 @@
   color: variables.$lighter-grey-2;
 }
 
-.collectionDelegationsAccordion {
-  --bs-accordion-bg: #{variables.$very-dark-grey};
-  --bs-accordion-border-color: transparent;
-  --bs-accordion-btn-bg: #{variables.$almost-very-dark-grey};
-  --bs-accordion-active-bg: #{variables.$almost-very-dark-grey};
-  --bs-accordion-btn-color: #{variables.$font-color};
-  --bs-accordion-active-color: #{variables.$font-color};
-  --bs-accordion-body-padding-x: 1rem;
-  --bs-accordion-body-padding-y: 0.75rem;
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5 {
-    float: none;
-  }
-
-  button {
-    font-weight: bold;
-  }
-
-  :global(.accordion-body) {
-    background-color: variables.$very-dark-grey;
-    color: variables.$font-color;
-  }
-}
-
-.collectionDelegationsAccordionItem {
-  border-radius: 0 !important;
-  background-color: variables.$very-dark-grey;
-}
-
-.collectionDelegationsAccordionItemDisabled {
-  pointer-events: none !important;
-  background-color: color.scale(variables.$project-blue, $lightness: -10%);
-
-  button {
-    color: variables.$font-color-h !important;
-  }
-}
-
 .closeNewDelegationForm {
   background: transparent;
   border: none;
