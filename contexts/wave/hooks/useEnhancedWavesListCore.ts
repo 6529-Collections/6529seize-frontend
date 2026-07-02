@@ -279,7 +279,7 @@ function useEnhancedWavesListCore(
       return [];
     }
 
-    return waves.map(mapWave);
+    return waves.map((wave) => mapWave(wave));
   }, [isEnabled, waves, mapWave]);
 
   const fetchNextPage = useCallback(() => {
