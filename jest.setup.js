@@ -104,7 +104,7 @@ if (globalThis.window !== undefined) {
   globalThis.window.MessageChannel = TestMessageChannel;
   globalThis.window.MessagePort = globalThis.window.MessagePort ?? MessagePort;
 
-  // Mock CSS parsing for react-bootstrap and other CSS-dependent components
+  // Mock CSS parsing for CSS-dependent components
   Object.defineProperty(window, "getComputedStyle", {
     value: () => ({
       getPropertyValue: (prop) => {
