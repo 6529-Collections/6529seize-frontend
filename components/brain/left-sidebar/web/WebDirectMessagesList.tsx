@@ -5,7 +5,7 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import React, { useContext, useRef, type ReactNode } from "react";
+import React, { useContext, useEffect, useRef, type ReactNode } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
@@ -37,7 +37,10 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const shouldRenderCreateDirectMessage = !isApp;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const { directMessages, registerWave } = useMyStream();
+  const { directMessages, registerWave, requestDirectMessagesList } =
+    useMyStream();
+
+  useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
 
   useInfiniteScroll(
     directMessages.hasNextPage,
