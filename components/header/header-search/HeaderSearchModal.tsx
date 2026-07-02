@@ -864,7 +864,9 @@ export default function HeaderSearchModal({
   const [selectedCategory, setSelectedCategory] = useLocalPreference<CATEGORY>(
     "headerSearchCategoryFilter",
     CATEGORY.ALL,
-    (value) => Object.values(CATEGORY).includes(value)
+    (value): value is CATEGORY =>
+      typeof value === "string" &&
+      (Object.values(CATEGORY) as CATEGORY[]).includes(value as CATEGORY)
   );
 
   const [debouncedValue, setDebouncedValue] = useState<string>("");

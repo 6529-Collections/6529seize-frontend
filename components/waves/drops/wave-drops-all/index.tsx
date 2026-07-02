@@ -20,6 +20,7 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplayPreference";
 import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -103,7 +104,17 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     isMuted
   );
 
-  const { data: boostedDrops } = useWaveBoostedDrops({ waveId, wave });
+  const [boostedDropsDisplayPreference] = useBoostedDropsDisplayPreference();
+  const shouldRenderInsertedBoostedDrops =
+    boostedDropsDisplayPreference !== "hidden";
+  const { data: boostedDrops } = useWaveBoostedDrops({
+    waveId,
+    wave,
+    enabled: shouldRenderInsertedBoostedDrops,
+  });
+  const visibleBoostedDrops = shouldRenderInsertedBoostedDrops
+    ? boostedDrops
+    : undefined;
 
   const scrollBehavior = useScrollBehavior();
   const {
@@ -316,7 +327,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         pendingCount={pendingDropsCount}
         onRevealPending={revealPendingDrops}
         bottomPaddingClassName={bottomPaddingClassName}
-        boostedDrops={boostedDrops}
+        boostedDrops={visibleBoostedDrops}
+        boostedDropsDisplayPreference={boostedDropsDisplayPreference}
         onBoostedDropClick={queueSerialTarget}
         onScrollToUnread={queueSerialTarget}
         unreadCount={unreadCount}

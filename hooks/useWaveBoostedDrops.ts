@@ -14,6 +14,7 @@ interface UseWaveBoostedDropsProps {
   readonly wave?: ApiWave | undefined;
   readonly limit?: number;
   readonly timeWindow?: TimeWindow;
+  readonly enabled?: boolean;
 }
 
 const DEFAULT_LIMIT = 10;
@@ -25,6 +26,7 @@ export function useWaveBoostedDrops({
   wave,
   limit = DEFAULT_LIMIT,
   timeWindow = TimeWindow.DAY,
+  enabled = true,
 }: UseWaveBoostedDropsProps) {
   return useQuery<ApiDrop[]>({
     queryKey: [QueryKey.BOOSTED_DROPS, { waveId, limit, timeWindow }],
@@ -51,7 +53,7 @@ export function useWaveBoostedDrops({
       });
       return response.data;
     },
-    enabled: !!waveId,
+    enabled: enabled && !!waveId,
     staleTime: STALE_TIME,
     refetchInterval: REFETCH_INTERVAL,
     retry: 2,
