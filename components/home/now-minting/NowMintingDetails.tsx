@@ -30,7 +30,7 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
         <NowMintingHeader
           cardNumber={nft.id}
           title={nft.name}
-          artistHandle={nft.artist_seize_handle}
+          artistHandle={nft.artist_seize_handle ?? ""}
           artistName={nft.artist}
           mediaMimeType={fileMimeType}
         />
@@ -38,7 +38,7 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
         <LatestDropNextMintSubscribe showOnlyWhenSubscribed readonly />
         <NowMintingDetailsAccordion
           nftId={nft.id}
-          mintDate={nft.mint_date}
+          mintDate={nft.mint_date ?? undefined}
           fileType={getFileTypeFromMetadata(nft.metadata)}
           dimensions={getDimensionsFromMetadata(nft.metadata)}
           collection={nft.collection}

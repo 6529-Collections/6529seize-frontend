@@ -3,6 +3,7 @@
 import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
 import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { toBaseNftFromApiMemesExtendedData } from "@/components/the-memes/apiMemesExtendedDataAdapter";
 import { getTheMemesDetailHref } from "@/components/the-memes/theMemesRouteParams";
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
 import { VolumeType } from "@/entities/INFT";
@@ -133,7 +134,8 @@ export default function TheMemesCard({
   readonly locale?: SupportedLocale;
 }) {
   const resolvedLocale = locale ?? DEFAULT_LOCALE;
-  const mediaMimeType = getNftMimeType(nft);
+  const mediaNft = toBaseNftFromApiMemesExtendedData(nft);
+  const mediaMimeType = getNftMimeType(mediaNft);
   const metricText = getNftMetricText(nft, sort, volumeType, resolvedLocale);
   const tokenId = formatInteger(resolvedLocale, nft.id);
 
@@ -148,7 +150,7 @@ export default function TheMemesCard({
     >
       <div className="tw-bg-iron-900">
         <NFTImage
-          nft={nft}
+          nft={mediaNft}
           animation={false}
           height={300}
           showThumbnail={true}
