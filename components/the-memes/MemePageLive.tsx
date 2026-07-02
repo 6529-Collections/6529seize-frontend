@@ -36,7 +36,11 @@ export function MemePageLiveRightMenu(props: {
         {props.nftMeta && (
           <MemeEditionSizeStats nftMeta={props.nftMeta} locale={locale} />
         )}
-        <MemeNftLivePanel nft={props.nft} locale={locale} />
+        <MemeNftLivePanel
+          nft={props.nft}
+          recordedInTdh={props.nftMeta?.recorded_in_tdh}
+          locale={locale}
+        />
       </div>
     );
   }

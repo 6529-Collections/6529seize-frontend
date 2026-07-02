@@ -234,6 +234,7 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
     ["edition.exMuseum", "ex. 6529 museum"],
     ["edition.exBurntAndMuseum", "ex. burnt and 6529 museum"],
     ["rank", "Rank {rank}/{total}"],
+    ["rankUnranked", "Unranked"],
     ["artwork.createdBy", "Created by"],
     ["artwork.mintDate", "Mint date"],
     ["artwork.notAvailable", "not available"],
@@ -245,6 +246,7 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
     ["market.tdhRate", "TDH rate"],
     ["market.highestOffer", "Highest offer"],
     ["market.unavailable", "N/A"],
+    ["market.pending", "Pending"],
     ["market.ethUnit", "ETH"],
     ["additionalDetails", "Additional details"],
   ] as const
