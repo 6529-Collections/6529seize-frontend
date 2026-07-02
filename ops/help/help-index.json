@@ -4608,7 +4608,7 @@
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
         "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",
-        "Calendar API responses include the mint number, UTC mint date, UTC start and end timestamps, live/past/upcoming status, SZN, Year, Epoch, Period, Era, Eon, /meme-calendar, and /the-memes/{id} paths.",
+        "Calendar API responses include the mint number, UTC mint date, UTC start and end timestamps, live/past/upcoming status, SZN, Year, Epoch, Period, Era, Eon, position_in_season, position_in_year, position_in_epoch, position_in_period, position_in_era, position_in_eon, /meme-calendar, and /the-memes/{id} paths.",
         "The bot can use the calendar API for exact next/current/past drop timing and overall mint-window answers.",
         "Mint windows are schedule information only; wallet eligibility, allowlists, and actual mint success are still enforced by the mint flow."
       ],
