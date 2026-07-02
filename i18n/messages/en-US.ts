@@ -400,6 +400,17 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",
   expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
   expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
+  subwavesToggleView: "View subwaves",
+  subwavesToggleViewCountOne: "View {count} subwave",
+  subwavesToggleViewCountMany: "View {count} subwaves",
+  subwavesToggleHide: "Hide subwaves",
+  subwavesToggleLoading: "Loading subwaves",
+  subwavesToggleUnreadBadge: "{count} new",
+  subwavesToggleViewAriaLabel: "View {waveName} subwaves",
+  subwavesToggleViewCountOneAriaLabel: "View {count} subwave for {waveName}",
+  subwavesToggleViewCountManyAriaLabel: "View {count} subwaves for {waveName}",
+  subwavesToggleHideAriaLabel: "Hide {waveName} subwaves",
+  subwavesToggleLoadingAriaLabel: "Loading {waveName} subwaves",
 } as const);
 
 const QUICK_DM_MESSAGES = objectMessages("quickDm", {
@@ -774,6 +785,15 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from post by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  "home.mintSubscriptions.balanceLabel": "Balance",
+  "home.mintSubscriptions.infoLinkAriaLabel":
+    "Learn more about The Memes subscriptions",
+  "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
+  "home.mintSubscriptions.subscribeLabel": "Subscribe",
+  "home.mintSubscriptions.subscribedLabel": "Subscribed",
+  "home.mintSubscriptions.status.connectProfile": "Connect profile",
+  "home.mintSubscriptions.status.manageInProfile": "Manage in profile",
+  "home.mintSubscriptions.status.proxyActive": "Proxy active",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.title": "The Memes",

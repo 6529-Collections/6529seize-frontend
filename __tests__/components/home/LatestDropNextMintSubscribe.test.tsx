@@ -2,10 +2,28 @@ import { renderWithAuth } from "@/__tests__/utils/testContexts";
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
 import { useQuery } from "@tanstack/react-query";
 import { screen } from "@testing-library/react";
+import type { AnchorHTMLAttributes } from "react";
+
+type LinkMockProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string;
+};
+type MemeSubscriptionRowMockProps = {
+  balanceLabel?: string | undefined;
+  date: unknown;
+  eligibilityCount: number;
+  infoHref?: string | undefined;
+  minting_today?: boolean | undefined;
+  profileSubscriptionsHref?: string | undefined;
+  readonly: boolean;
+  subscription: {
+    token_id: number;
+  };
+  variant?: string | undefined;
+};
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children, ...props }: any) => (
+  default: ({ href, children, ...props }: LinkMockProps) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -23,7 +41,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 jest.mock(
   "@/components/user/subscriptions/MemeSubscriptionRow",
   () =>
-    function MockMemeSubscriptionRow(props: any) {
+    function MockMemeSubscriptionRow(props: MemeSubscriptionRowMockProps) {
       return (
         <div data-testid="meme-subscription-row">
           token:{props.subscription.token_id} eligibility:
@@ -126,6 +144,28 @@ describe("LatestDropNextMintSubscribe", () => {
     );
   });
 
+  it("renders connected awareness without upcoming status lookup when status source is none", () => {
+    renderWithAuth(
+      <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
+    );
+
+    expect(
+      screen.queryByTestId("meme-subscription-row")
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Subscribe")).toBeInTheDocument();
+    expect(screen.getByText("Manage in profile")).toBeInTheDocument();
+    expect(screen.getByText("My subscriptions")).toHaveAttribute(
+      "href",
+      "/test-handle/subscriptions"
+    );
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ["next-mint-subscription-status", expect.any(String), 516],
+        enabled: false,
+      })
+    );
+  });
+
   it("disables retries for expected subscription lookup errors", () => {
     renderWithAuth(<LatestDropNextMintSubscribe />);
 
@@ -219,6 +259,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(screen.getByText("Connect profile")).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(
       screen.getByLabelText("Learn more about The Memes subscriptions")
     ).toHaveAttribute("href", "/about/subscriptions");

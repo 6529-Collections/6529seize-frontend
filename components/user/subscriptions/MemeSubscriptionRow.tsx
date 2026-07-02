@@ -15,11 +15,12 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useContext, useEffect, useMemo, useState } from "react";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
-import EthereumIcon from "../utils/icons/EthereumIcon";
+import SubscriptionHeaderLinks, {
+  SubscriptionBalanceLabel,
+} from "./SubscriptionHeaderLinks";
 
 export default function MemeSubscriptionRow(
   props: Readonly<{
@@ -282,39 +283,19 @@ export default function MemeSubscriptionRow(
     return (
       <div className="tw-py-1">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
-            <span className="tw-font-medium tw-leading-none">
-              {isSubscribedView ? "Subscribed" : "Subscribe"}
-            </span>
-            {props.infoHref && (
-              <Link
-                href={props.infoHref}
-                aria-label="Learn more about The Memes subscriptions"
-                className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
-              >
-                <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3.5" />
-              </Link>
-            )}
+          <SubscriptionHeaderLinks
+            labelKey={
+              isSubscribedView
+                ? "home.mintSubscriptions.subscribedLabel"
+                : "home.mintSubscriptions.subscribeLabel"
+            }
+            infoHref={props.infoHref}
+            profileSubscriptionsHref={props.profileSubscriptionsHref}
+          >
             {props.balanceLabel && (
-              <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-leading-none tw-text-iron-400">
-                <span className="tw-leading-none">Balance</span>
-                <span className="tw-leading-none tw-text-iron-300">
-                  {props.balanceLabel}
-                </span>
-                <span className="tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-self-center tw-text-iron-400">
-                  <EthereumIcon />
-                </span>
-              </span>
+              <SubscriptionBalanceLabel balanceLabel={props.balanceLabel} />
             )}
-            {props.profileSubscriptionsHref && (
-              <Link
-                href={props.profileSubscriptionsHref}
-                className="tw-text-sm tw-leading-none tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
-              >
-                My subscriptions
-              </Link>
-            )}
-          </span>
+          </SubscriptionHeaderLinks>
           {isSubscribedView ? (
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300">
               {subscribedCount} / {props.eligibilityCount}

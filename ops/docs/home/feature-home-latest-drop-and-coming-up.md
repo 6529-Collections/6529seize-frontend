@@ -44,9 +44,8 @@ Use this page for visibility rules, state switches, and route targets.
    - `Latest Drop` when the current mint is not ended, or when no next winner
      is available.
    - `Next Drop` when the current mint is ended and a next winner exists.
-4. `Latest Drop` shows artwork, stats, subscription awareness or controls,
-   edition details, and countdown states: `Upcoming`, `Live`, `Mint Complete`,
-   or `Error`.
+4. `Latest Drop` shows artwork, stats, subscription awareness, edition details,
+   and countdown states: `Upcoming`, `Live`, `Mint Complete`, or `Error`.
 5. `Coming up` resolves after app settings load and `memes_wave_id` is
    available.
 6. `Coming up` then shows:
@@ -86,6 +85,9 @@ Use this page for visibility rules, state switches, and route targets.
   trimmed), `Coming up` suppresses the `NEXT MINT` card.
 - On iOS outside the US, the countdown `Mint` button is hidden.
 - On iOS outside the US, The Memes subscription row is hidden.
+- Latest Drop subscription awareness links to subscription info/profile
+  subscriptions without querying the upcoming-meme status endpoint for the
+  current or already-dropped card.
 - Without a connected profile, the subscription row can still show a
   non-actionable awareness state with a link to `/about/subscriptions`.
 - With a connected profile, the subscription row can link to

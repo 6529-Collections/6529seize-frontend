@@ -163,7 +163,7 @@ function useEnhancedWavesListCore(
       );
       const newDrops = {
         count: wsData?.count ?? 0,
-        latestDropTimestamp: sidebarActivityTimestamp,
+        latestDropTimestamp: directLatestDropTimestamp,
         firstUnreadSerialNo: wsData?.firstUnreadSerialNo ?? null,
       };
       const isWsDataCoveredByApi =
