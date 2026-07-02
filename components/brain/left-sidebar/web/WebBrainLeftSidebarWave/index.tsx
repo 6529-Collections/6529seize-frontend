@@ -23,6 +23,7 @@ interface WebBrainLeftSidebarWaveProps {
   readonly canExpand?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly isLastSubwave?: boolean | undefined;
+  readonly showSubwaveConnector?: boolean | undefined;
   readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
@@ -38,6 +39,7 @@ const WebBrainLeftSidebarWave = ({
   canExpand = false,
   hasUnreadSubwaves = false,
   isLastSubwave = false,
+  showSubwaveConnector = false,
   onPrefetchSubwaves,
 }: WebBrainLeftSidebarWaveProps) => {
   const { activeWave } = useMyStream();
@@ -122,6 +124,7 @@ const WebBrainLeftSidebarWave = ({
       canExpand={canExpand}
       hasUnreadSubwaves={hasUnreadSubwaves}
       isLastSubwave={isLastSubwave}
+      showSubwaveConnector={showSubwaveConnector}
       onPrefetchSubwaves={hasTouchScreen ? undefined : onPrefetchSubwaves}
     />
   );
