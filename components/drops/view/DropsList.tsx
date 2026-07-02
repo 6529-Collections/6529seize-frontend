@@ -13,8 +13,13 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject } from "react";
 import { memo, useCallback, useMemo, useState } from "react";
 import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
+import BoostedDropCompactChatItem from "@/components/home/boosted/BoostedDropCompactChatItem";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import UnreadDivider from "./UnreadDivider";
+import {
+  DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
+  type BoostedDropsDisplayPreference,
+} from "@/types/boosted-drops.types";
 
 // Logarithmic positions for boost cards (visual positions, 1-indexed)
 const BOOST_CARD_POSITIONS = [5, 10, 20, 40, 80, 160];
@@ -44,6 +49,9 @@ interface DropsListProps {
   readonly location?: DropLocation | undefined;
   readonly unreadDividerSerialNo?: number | null | undefined;
   readonly boostedDrops?: ApiDrop[] | undefined;
+  readonly boostedDropsDisplayPreference?:
+    | BoostedDropsDisplayPreference
+    | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
@@ -73,6 +81,7 @@ const DropsList = memo(
     location = DropLocation.WAVE,
     unreadDividerSerialNo,
     boostedDrops,
+    boostedDropsDisplayPreference = DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
     onBoostedDropClick,
     suspendLightDropHydration = false,
     winningThreshold,
@@ -141,11 +150,13 @@ const DropsList = memo(
     // Set once when boosted drops first arrive, then stays fixed
     // This makes boosted cards scroll away with new drops, but stay anchored when loading history
     const [boostAnchors, setBoostAnchors] = useState<number[] | null>(null);
+    const shouldInsertBoostCards = boostedDropsDisplayPreference !== "hidden";
 
     // Adjust state during render (React-recommended pattern for derived state)
     // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
     if (
       boostAnchors === null &&
+      shouldInsertBoostCards &&
       boostedDrops &&
       boostedDrops.length > 0 &&
       orderedDrops.length > 0
@@ -170,7 +181,12 @@ const DropsList = memo(
     // orderedDrops[0] = oldest (top), orderedDrops[last] = newest (bottom)
     const boostCardAtIndex = useMemo(() => {
       const map = new Map<number, number>();
-      if (!boostedDrops || boostedDrops.length === 0 || !onBoostedDropClick) {
+      if (
+        !shouldInsertBoostCards ||
+        !boostedDrops ||
+        boostedDrops.length === 0 ||
+        !onBoostedDropClick
+      ) {
         return map;
       }
       if (!boostAnchors) {
@@ -188,7 +204,13 @@ const DropsList = memo(
         }
       }
       return map;
-    }, [boostedDrops, onBoostedDropClick, boostAnchors, orderedDrops]);
+    }, [
+      boostedDrops,
+      onBoostedDropClick,
+      boostAnchors,
+      orderedDrops,
+      shouldInsertBoostCards,
+    ]);
 
     const renderBoostCard = useCallback(
       (index: number): React.ReactNode => {
@@ -197,21 +219,39 @@ const DropsList = memo(
         if (boostedIndex === undefined) return null;
         const boostedDrop = boostedDrops[boostedIndex];
         if (!boostedDrop) return null;
+        const onClick = () => onBoostedDropClick(boostedDrop.serial_no);
+        const isCompact = boostedDropsDisplayPreference === "compact";
         return (
           <div
-            key={`boost-card-${boostedIndex}-${boostedDrop.id}`}
-            className="tw-px-3 tw-py-3 sm:tw-px-4"
+            key={`boost-card-${boostedIndex}-${boostedDrop.id}-${boostedDropsDisplayPreference}`}
+            className={
+              isCompact
+                ? "tw-px-3 tw-py-1.5 sm:tw-px-4"
+                : "tw-px-3 tw-py-3 sm:tw-px-4"
+            }
           >
-            <BoostedDropCardHome
-              drop={boostedDrop}
-              variant="chat"
-              rank={boostedIndex + 1}
-              onClick={() => onBoostedDropClick(boostedDrop.serial_no)}
-            />
+            {isCompact ? (
+              <BoostedDropCompactChatItem
+                drop={boostedDrop}
+                onClick={onClick}
+              />
+            ) : (
+              <BoostedDropCardHome
+                drop={boostedDrop}
+                variant="chat"
+                rank={boostedIndex + 1}
+                onClick={onClick}
+              />
+            )}
           </div>
         );
       },
-      [boostCardAtIndex, boostedDrops, onBoostedDropClick]
+      [
+        boostCardAtIndex,
+        boostedDrops,
+        boostedDropsDisplayPreference,
+        onBoostedDropClick,
+      ]
     );
 
     const renderUnreadDivider = useCallback(
