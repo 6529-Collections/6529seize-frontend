@@ -141,4 +141,21 @@ describe("QuickDmListPanel", () => {
 
     expect(fetchNextPage).toHaveBeenCalledTimes(1);
   });
+
+  it("does not observe or load when there is no next page", () => {
+    const { fetchNextPage } = renderPanel({ hasNextPage: false });
+
+    expect(MockIntersectionObserver.instances).toHaveLength(0);
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it("does not observe or load while the next page is already fetching", () => {
+    const { fetchNextPage } = renderPanel({
+      hasNextPage: true,
+      isFetchingNextPage: true,
+    });
+
+    expect(MockIntersectionObserver.instances).toHaveLength(0);
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
 });
