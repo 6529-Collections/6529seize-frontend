@@ -316,10 +316,12 @@ export default function QuickDirectMessages() {
           <QuickDmListPanel
             waves={waves}
             isFetching={directMessages.isFetching}
+            isFetchingNextPage={directMessages.isFetchingNextPage}
+            hasNextPage={directMessages.hasNextPage}
             locale={locale}
             onClose={close}
             onCreateDirectMessage={createDirectMessageAction}
-            onOpenAll={openAll}
+            onFetchNextPage={directMessages.fetchNextPage}
             onOpenChat={openChat}
             onRegisterWave={registerWave}
           />
