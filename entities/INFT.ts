@@ -79,6 +79,8 @@ export interface MemesExtendedData extends ExtendedDataBase {
   season: number;
   meme: number;
   meme_name: string;
+  recorded_in_tdh?: boolean | null | undefined;
+  ranked_collection_size?: number | null | undefined;
 }
 
 export type NFTWithMemesExtendedData = NFT & MemesExtendedData;
