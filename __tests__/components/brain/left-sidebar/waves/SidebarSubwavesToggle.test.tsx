@@ -90,14 +90,19 @@ describe("SidebarSubwavesToggle", () => {
   });
 
   it("renders the loading state", () => {
-    renderToggle({ isLoading: true });
+    const { onClick } = renderToggle({ isLoading: true });
 
-    expect(
-      screen.getByRole("button", {
-        name: "Loading Parent Wave subwaves",
-      })
-    ).toHaveAttribute("aria-busy", "true");
+    const button = screen.getByRole("button", {
+      name: "Loading Parent Wave subwaves",
+    });
+
+    expect(button).toHaveAttribute("aria-busy", "true");
+    expect(button).toBeDisabled();
     expect(screen.getByText("Loading subwaves")).toBeInTheDocument();
+
+    fireEvent.click(button);
+
+    expect(onClick).not.toHaveBeenCalled();
   });
 
   it("renders the expanded state", () => {

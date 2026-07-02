@@ -116,6 +116,7 @@ export function SidebarSubwavesToggle({
         aria-busy={isLoading || undefined}
         aria-expanded={isExpanded}
         aria-label={ariaLabel}
+        disabled={isLoading}
         onClick={onClick}
         className="tw-group/subwaves tw-flex tw-h-8 tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
       >
