@@ -39,7 +39,7 @@ export default function CookiesBanner() {
       </span>
       <span className="tw-flex tw-items-center tw-justify-between tw-gap-4">
         <button
-          className="tw-border-0 tw-bg-[rgb(34,34,34)] tw-px-2.5 tw-py-[5px] tw-transition-transform tw-duration-300 tw-ease-in-out hover:tw-scale-[1.02] hover:tw-bg-[#208359] hover:tw-text-white"
+          className="tw-border-0 tw-bg-[rgb(34,34,34)] tw-px-2.5 tw-py-[5px] tw-text-white tw-transition-transform tw-duration-300 tw-ease-in-out hover:tw-scale-[1.02] hover:tw-bg-[#208359] hover:tw-text-white"
           onClick={consent}>
           Accept
         </button>
