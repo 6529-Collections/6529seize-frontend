@@ -14,7 +14,7 @@ import { Tooltip } from "react-tooltip";
 import { ABOUT_SUBSCRIPTIONS_HREF } from "../../user/subscriptions/subscriptionNavigation";
 
 const SUBSCRIPTION_ROW_CLASS_NAME =
-  "tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-4 tw-py-3";
+  "tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-4 tw-py-3";
 
 function ReadonlySubscriptionToggle({
   checked,
@@ -33,11 +33,7 @@ function ReadonlySubscriptionToggle({
         className="tw-inline-flex tw-shrink-0"
       >
         <span
-          role="switch"
-          aria-checked={checked}
-          aria-disabled="true"
-          aria-label={tooltipLabel}
-          tabIndex={0}
+          aria-hidden="true"
           className={clsx(
             "tw-inline-flex tw-h-6 tw-w-12 tw-cursor-not-allowed tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black",
             checked
@@ -55,7 +51,19 @@ function ReadonlySubscriptionToggle({
           />
         </span>
       </span>
-      <Tooltip id={tooltipId} place="top" />
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        positionStrategy="fixed"
+        offset={12}
+        style={{
+          lineHeight: 1.35,
+          maxWidth: "min(28rem, calc(100vw - 2rem))",
+          textAlign: "center",
+          whiteSpace: "normal",
+          zIndex: 10000,
+        }}
+      />
     </>
   );
 }
@@ -105,7 +113,7 @@ export default function MemeSubscriptionAwarenessRow({
 
   return (
     <div className={SUBSCRIPTION_ROW_CLASS_NAME}>
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-font-semibold tw-leading-none tw-text-primary-300">
             {t(

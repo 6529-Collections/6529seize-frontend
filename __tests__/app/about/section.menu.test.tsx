@@ -8,14 +8,13 @@ import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptio
 import { AboutSection } from "@/types/enums";
 
 jest.mock("next/navigation", () => ({
-  RedirectType: {
-    push: "push",
-  },
-  redirect: (...args: Parameters<typeof mockRedirect>) => mockRedirect(...args),
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({
+    push: (...args: Parameters<typeof mockRouterPush>) =>
+      mockRouterPush(...args),
+  }),
 }));
 
-const mockRedirect = jest.fn();
+const mockRouterPush = jest.fn();
 const mockSeizeConnectFresh = jest.fn();
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
@@ -90,7 +89,7 @@ describe("About contents dropdown", () => {
 
   beforeEach(() => {
     setCookieCountry("DE");
-    mockRedirect.mockClear();
+    mockRouterPush.mockClear();
     mockSeizeConnectFresh.mockClear();
   });
 
@@ -282,7 +281,7 @@ describe("About contents dropdown", () => {
     );
 
     expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
-    expect(mockRedirect).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
   it("routes to profile subscriptions after connecting from subscriptions action", async () => {
@@ -320,10 +319,7 @@ describe("About contents dropdown", () => {
     );
 
     await waitFor(() => {
-      expect(mockRedirect).toHaveBeenCalledWith(
-        "/test-handle/subscriptions",
-        "push"
-      );
+      expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
     });
   });
 

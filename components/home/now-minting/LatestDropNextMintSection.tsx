@@ -148,7 +148,7 @@ export default function LatestDropNextMintSection({
                 <LatestDropNextMintSubscribe />
               </div>
 
-              <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-pt-4">
+              <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4">
                 <div className="tw-col-span-2">
                   <NowMintingStatsItem
                     label="Wave"

@@ -38,6 +38,32 @@ jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
 
 const useQueryMock = useQuery as jest.Mock;
 
+function expectDecorativeSubscriptionToggle(
+  container: HTMLElement,
+  tooltipLabel: string,
+  checked: boolean
+) {
+  const trigger = Array.from(
+    container.querySelectorAll("[data-tooltip-content]")
+  ).find(
+    (element) => element.getAttribute("data-tooltip-content") === tooltipLabel
+  );
+  expect(trigger).toBeInTheDocument();
+
+  const toggle = trigger?.querySelector("[aria-hidden='true']");
+  expect(toggle).toBeInTheDocument();
+  expect(toggle).not.toHaveAttribute("role");
+  expect(toggle).not.toHaveAttribute("tabindex");
+  expect(toggle).toHaveClass(
+    checked ? "tw-bg-primary-500/40" : "tw-bg-black/35"
+  );
+  expect(
+    screen.queryByRole("switch", {
+      name: tooltipLabel,
+    })
+  ).not.toBeInTheDocument();
+}
+
 describe("LatestDropNextMintSubscribe", () => {
   beforeEach(() => {
     useQueryMock.mockImplementation(({ queryKey }) => {
@@ -95,21 +121,16 @@ describe("LatestDropNextMintSubscribe", () => {
   });
 
   it("renders the subscribe section for the connected profile", () => {
-    renderWithAuth(<LatestDropNextMintSubscribe />);
+    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />);
 
     expect(screen.getByText("Subscribed")).toBeInTheDocument();
     expect(screen.getByText("Subscribers count 12")).toBeInTheDocument();
     expect(screen.getByText("2x")).toBeInTheDocument();
-    expect(
-      screen.getByRole("switch", {
-        name: "Manage this in profile subscriptions.",
-      })
-    ).toHaveAttribute("aria-checked", "true");
-    expect(
-      screen.getByRole("switch", {
-        name: "Manage this in profile subscriptions.",
-      })
-    ).toHaveAttribute("aria-disabled", "true");
+    expectDecorativeSubscriptionToggle(
+      container,
+      "Manage this in profile subscriptions.",
+      true
+    );
     expect(screen.queryByText("Balance")).not.toBeInTheDocument();
     expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
       "href",
@@ -132,7 +153,7 @@ describe("LatestDropNextMintSubscribe", () => {
   });
 
   it("renders connected dropped awareness without upcoming status lookup when status source is none", () => {
-    renderWithAuth(
+    const { container } = renderWithAuth(
       <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
     );
 
@@ -142,16 +163,11 @@ describe("LatestDropNextMintSubscribe", () => {
       screen.queryByText("Cannot change active drops")
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Balance")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("switch", {
-        name: "This card has already dropped and can no longer be subscribed to.",
-      })
-    ).toHaveAttribute("aria-checked", "false");
-    expect(
-      screen.getByRole("switch", {
-        name: "This card has already dropped and can no longer be subscribed to.",
-      })
-    ).toHaveAttribute("aria-disabled", "true");
+    expectDecorativeSubscriptionToggle(
+      container,
+      "This card has already dropped and can no longer be subscribed to.",
+      false
+    );
     expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
       "href",
       "/test-handle/subscriptions"
@@ -196,17 +212,17 @@ describe("LatestDropNextMintSubscribe", () => {
       };
     });
 
-    renderWithAuth(
+    const { container } = renderWithAuth(
       <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
     );
 
     expect(screen.getByText("3x")).toBeInTheDocument();
     expect(screen.getByText("Subscribed")).toBeInTheDocument();
-    expect(
-      screen.getByRole("switch", {
-        name: "Manage this in profile subscriptions.",
-      })
-    ).toHaveAttribute("aria-checked", "true");
+    expectDecorativeSubscriptionToggle(
+      container,
+      "Manage this in profile subscriptions.",
+      true
+    );
   });
 
   it("disables retries for expected subscription lookup errors", () => {
@@ -232,17 +248,16 @@ describe("LatestDropNextMintSubscribe", () => {
   });
 
   it("renders awareness when there is no connected profile", () => {
-    renderWithAuth(<LatestDropNextMintSubscribe />, {
+    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />, {
       connectedProfile: null,
     });
 
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
-    expect(
-      screen.getByRole("switch", { name: "Connect to subscribe" })
-    ).toHaveAttribute("aria-checked", "false");
-    expect(
-      screen.getByRole("switch", { name: "Connect to subscribe" })
-    ).toHaveAttribute("aria-disabled", "true");
+    expectDecorativeSubscriptionToggle(
+      container,
+      "Connect to subscribe",
+      false
+    );
     expect(screen.queryByLabelText("My subscriptions")).not.toBeInTheDocument();
     expect(
       screen.getByLabelText("Learn more about The Memes subscriptions")
@@ -250,7 +265,7 @@ describe("LatestDropNextMintSubscribe", () => {
   });
 
   it("renders awareness during an active proxy session", () => {
-    renderWithAuth(<LatestDropNextMintSubscribe />, {
+    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />, {
       activeProfileProxy: {
         id: "proxy-1",
         granted_to: {} as any,
@@ -260,11 +275,11 @@ describe("LatestDropNextMintSubscribe", () => {
       } as any,
     });
 
-    expect(
-      screen.getByRole("switch", {
-        name: "Manage subscriptions from your own profile, not a proxy session.",
-      })
-    ).toHaveAttribute("aria-checked", "false");
+    expectDecorativeSubscriptionToggle(
+      container,
+      "Manage subscriptions from your own profile, not a proxy session.",
+      false
+    );
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
       "href",
@@ -301,14 +316,14 @@ describe("LatestDropNextMintSubscribe", () => {
       };
     });
 
-    renderWithAuth(<LatestDropNextMintSubscribe />);
+    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />);
 
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(screen.queryByText("1x")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("switch", {
-        name: "Go to profile subscriptions to subscribe.",
-      })
-    ).toHaveAttribute("aria-checked", "false");
+    expectDecorativeSubscriptionToggle(
+      container,
+      "Go to profile subscriptions to subscribe.",
+      false
+    );
   });
 });
