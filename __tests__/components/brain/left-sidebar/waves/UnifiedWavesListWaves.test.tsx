@@ -15,7 +15,7 @@ import {
   getVisibleHighlyRatedPreviewItems,
   type HighlyRatedWavePreviewItem,
 } from "@/components/brain/left-sidebar/waves/HighlyRatedWavesToggle";
-import { SIDEBAR_SUBWAVE_ROW_TRANSITION_MS } from "@/hooks/useAnimatedSidebarWaveRows";
+import { SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS } from "@/hooks/useAnimatedSidebarWaveRows";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useAuth } from "@/components/auth/Auth";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
@@ -120,6 +120,12 @@ const baseWaves = [
   createMockMinimalWave({ id: "f1", isFollowing: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
+
+const flushAnimatedSidebarRows = async () => {
+  await act(async () => {
+    await Promise.resolve();
+  });
+};
 
 const createPreviewItem = ({
   id,
@@ -810,7 +816,7 @@ it("respects hide options and does not render toggle when not connected", () => 
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "false");
 });
 
-it("expands regular subwaves and keeps child rows unpinned", () => {
+it("expands regular subwaves and keeps child rows unpinned", async () => {
   render(
     <UnifiedWavesListWaves
       waves={[
@@ -850,6 +856,7 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
       name: "View 1 subwave for Mock Wave",
     })
   );
+  await flushAnimatedSidebarRows();
 
   expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
   expect(
@@ -879,7 +886,7 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
   expect(screen.getByTestId("wave-child")).toHaveAttribute("data-pin", "false");
 });
 
-it("keeps child rows mounted while collapse animation runs", () => {
+it("keeps child rows mounted while collapse animation runs", async () => {
   jest.useFakeTimers();
 
   try {
@@ -906,6 +913,7 @@ it("keeps child rows mounted while collapse animation runs", () => {
         name: "View 1 subwave for Mock Wave",
       })
     );
+    await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
     expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 
@@ -914,6 +922,7 @@ it("keeps child rows mounted while collapse animation runs", () => {
         name: "Hide Mock Wave subwaves",
       })
     );
+    await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledTimes(1);
 
     expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
@@ -922,7 +931,7 @@ it("keeps child rows mounted while collapse animation runs", () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
+      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
     });
 
     expect(screen.queryByTestId("wave-child")).toBeNull();

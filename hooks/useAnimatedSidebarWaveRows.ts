@@ -3,19 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
 
-export const SIDEBAR_SUBWAVE_ROW_TRANSITION_MS = 180 as const;
+export const SIDEBAR_SUBWAVE_ROW_EXIT_TRANSITION_MS = 160 as const;
+export const SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS =
+  SIDEBAR_SUBWAVE_ROW_EXIT_TRANSITION_MS + 20;
 
 type SidebarWaveRowAnimationState = "entered" | "entering" | "exiting";
-type AfterPaintHandle =
-  | {
-      type: "animation-frames";
-      firstId: number;
-      secondId: number | null;
-    }
-  | {
-      readonly type: "timeout";
-      readonly id: ReturnType<typeof globalThis.setTimeout>;
-    };
+type AfterPaintDelay = {
+  readonly done: Promise<void>;
+  readonly cancel: () => void;
+};
 
 export interface AnimatedSidebarWaveTreeRow extends SidebarWaveTreeRow {
   readonly animationState: SidebarWaveRowAnimationState;
@@ -33,40 +29,95 @@ const getEnteredRows = (
     animationState: "entered",
   }));
 
-const requestAfterPaint = (callback: () => void) => {
-  if (typeof globalThis.requestAnimationFrame === "function") {
-    const handle: AfterPaintHandle = {
-      type: "animation-frames",
-      firstId: 0,
-      secondId: null,
-    };
-    handle.firstId = globalThis.requestAnimationFrame(() => {
-      handle.secondId = globalThis.requestAnimationFrame(callback);
-    });
-    return handle;
-  }
+const createAfterPaintDelay = (): AfterPaintDelay => {
+  let cancel = () => {
+    // No scheduled work yet.
+  };
 
-  return {
-    type: "timeout",
-    id: globalThis.setTimeout(callback, 32),
-  } satisfies AfterPaintHandle;
+  const done = new Promise<void>((resolve) => {
+    const resolveAfterPaint = () => {
+      resolve();
+    };
+
+    if (
+      typeof globalThis.requestAnimationFrame === "function" &&
+      typeof globalThis.cancelAnimationFrame === "function"
+    ) {
+      let secondId: number | null = null;
+      const firstId = globalThis.requestAnimationFrame(() => {
+        secondId = globalThis.requestAnimationFrame(resolveAfterPaint);
+      });
+
+      cancel = () => {
+        globalThis.cancelAnimationFrame(firstId);
+        if (secondId !== null) {
+          globalThis.cancelAnimationFrame(secondId);
+        }
+      };
+
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(resolveAfterPaint, 32);
+    cancel = () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  });
+
+  return { done, cancel };
 };
 
-const cancelAfterPaint = (handle: AfterPaintHandle) => {
-  if (
-    handle.type === "animation-frames" &&
-    typeof globalThis.cancelAnimationFrame === "function"
-  ) {
-    globalThis.cancelAnimationFrame(handle.firstId);
-    if (handle.secondId !== null) {
-      globalThis.cancelAnimationFrame(handle.secondId);
-    }
-    return;
+const getAnimatedRowsForNextTree = ({
+  currentRows,
+  keepExitingRows,
+  previousRows,
+  rowKeys,
+  rows,
+}: {
+  readonly currentRows: readonly AnimatedSidebarWaveTreeRow[];
+  readonly keepExitingRows: boolean;
+  readonly previousRows: readonly AnimatedSidebarWaveTreeRow[];
+  readonly rowKeys: readonly string[];
+  readonly rows: readonly SidebarWaveTreeRow[];
+}): AnimatedSidebarWaveTreeRow[] => {
+  if (previousRows.length === 0) {
+    return currentRows.length === 0 ? [...previousRows] : [...currentRows];
   }
 
-  if (handle.type === "timeout") {
-    globalThis.clearTimeout(handle.id);
+  const nextKeys = new Set(rowKeys);
+  const previousRowsByKey = new Map(previousRows.map((row) => [row.key, row]));
+  const exitingRowsByParent = keepExitingRows
+    ? groupExitingRowsByParent(previousRows, nextKeys)
+    : new Map<string, AnimatedSidebarWaveTreeRow[]>();
+  const nextToggleParentIds = getNextToggleParentIds(rows);
+  const nextRows: AnimatedSidebarWaveTreeRow[] = [];
+
+  for (const row of rows) {
+    const previousRow = previousRowsByKey.get(row.key);
+    const animationState =
+      row.depth === 1 &&
+      (previousRow === undefined || previousRow.animationState === "exiting")
+        ? "entering"
+        : "entered";
+
+    nextRows.push({
+      ...row,
+      animationState,
+    });
+
+    if (row.rowType === "subwaves-toggle" && row.parentWaveId !== null) {
+      nextRows.push(...(exitingRowsByParent.get(row.parentWaveId) ?? []));
+      exitingRowsByParent.delete(row.parentWaveId);
+      continue;
+    }
+
+    if (row.depth === 0 && !nextToggleParentIds.has(row.wave.id)) {
+      nextRows.push(...(exitingRowsByParent.get(row.wave.id) ?? []));
+      exitingRowsByParent.delete(row.wave.id);
+    }
   }
+
+  return nextRows;
 };
 
 const groupExitingRowsByParent = (
@@ -91,6 +142,36 @@ const groupExitingRowsByParent = (
   return map;
 };
 
+const getNextToggleParentIds = (rows: readonly SidebarWaveTreeRow[]) => {
+  const parentIds = new Set<string>();
+
+  for (const row of rows) {
+    if (row.rowType === "subwaves-toggle" && row.parentWaveId !== null) {
+      parentIds.add(row.parentWaveId);
+    }
+  }
+
+  return parentIds;
+};
+
+export const getParentIdsWithVisibleSubwaveRows = (
+  rows: readonly AnimatedSidebarWaveTreeRow[]
+) => {
+  const parentIds = new Set<string>();
+
+  for (const row of rows) {
+    if (
+      row.rowType === "wave" &&
+      row.depth === 1 &&
+      row.parentWaveId !== null
+    ) {
+      parentIds.add(row.parentWaveId);
+    }
+  }
+
+  return parentIds;
+};
+
 const markEnteringRowsAsEntered = (
   rows: readonly AnimatedSidebarWaveTreeRow[]
 ): AnimatedSidebarWaveTreeRow[] =>
@@ -105,6 +186,9 @@ const removeExitingRows = (
 ): AnimatedSidebarWaveTreeRow[] =>
   rows.filter((row) => row.animationState !== "exiting");
 
+const hasExitingRows = (rows: readonly AnimatedSidebarWaveTreeRow[]) =>
+  rows.some((row) => row.animationState === "exiting");
+
 export function useAnimatedSidebarWaveRows(
   rows: readonly SidebarWaveTreeRow[],
   { keepExitingRows = true }: UseAnimatedSidebarWaveRowsOptions = {}
@@ -114,61 +198,55 @@ export function useAnimatedSidebarWaveRows(
   >(() => getEnteredRows(rows));
 
   const rowKeys = useMemo(() => rows.map((row) => row.key), [rows]);
-  const rowKeySignature = rowKeys.join("\n");
   const currentRows = useMemo(() => getEnteredRows(rows), [rows]);
 
   useEffect(() => {
-    const nextKeys = new Set(rowKeys);
+    const effectState = { isDisposed: false };
+    const enterDelay = createAfterPaintDelay();
 
-    setAnimatedRows((previousRows) => {
-      if (previousRows.length === 0) {
-        return currentRows.length === 0 ? previousRows : currentRows;
+    void (async () => {
+      await Promise.resolve();
+      if (effectState.isDisposed) {
+        return;
       }
 
-      const previousRowsByKey = new Map(
-        previousRows.map((row) => [row.key, row])
+      setAnimatedRows((previousRows) =>
+        getAnimatedRowsForNextTree({
+          currentRows,
+          keepExitingRows,
+          previousRows,
+          rowKeys,
+          rows,
+        })
       );
-      const exitingRowsByParent = keepExitingRows
-        ? groupExitingRowsByParent(previousRows, nextKeys)
-        : new Map<string, AnimatedSidebarWaveTreeRow[]>();
-      const nextRows: AnimatedSidebarWaveTreeRow[] = [];
+    })();
 
-      for (const row of rows) {
-        const previousRow = previousRowsByKey.get(row.key);
-        const animationState =
-          row.depth === 1 && previousRow === undefined ? "entering" : "entered";
-
-        nextRows.push({
-          ...row,
-          animationState,
-        });
-
-        if (row.depth === 0) {
-          nextRows.push(...(exitingRowsByParent.get(row.wave.id) ?? []));
-          exitingRowsByParent.delete(row.wave.id);
-        }
+    void (async () => {
+      await enterDelay.done;
+      if (!effectState.isDisposed) {
+        setAnimatedRows(markEnteringRowsAsEntered);
       }
+    })();
 
-      for (const exitingRows of exitingRowsByParent.values()) {
-        nextRows.push(...exitingRows);
-      }
+    return () => {
+      effectState.isDisposed = true;
+      enterDelay.cancel();
+    };
+  }, [currentRows, keepExitingRows, rowKeys, rows]);
 
-      return nextRows;
-    });
-
-    const enterFrame = requestAfterPaint(() => {
-      setAnimatedRows(markEnteringRowsAsEntered);
-    });
+  useEffect(() => {
+    if (!keepExitingRows || !hasExitingRows(animatedRows)) {
+      return;
+    }
 
     const exitTimer = globalThis.setTimeout(() => {
       setAnimatedRows(removeExitingRows);
-    }, SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
+    }, SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
 
     return () => {
-      cancelAfterPaint(enterFrame);
       globalThis.clearTimeout(exitTimer);
     };
-  }, [currentRows, keepExitingRows, rowKeySignature, rowKeys, rows]);
+  }, [animatedRows, keepExitingRows]);
 
   const rowsForInitialHydration =
     animatedRows.length === 0 && currentRows.length > 0
