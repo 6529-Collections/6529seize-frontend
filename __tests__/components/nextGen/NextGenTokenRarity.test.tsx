@@ -2,20 +2,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextgenTokenRarity from '@/components/nextGen/collections/nextgenToken/NextGenTokenProperties';
 
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const Accordion: any = ({ children }: any) => <div>{children}</div>;
-  Accordion.Item = ({ children }: any) => <div>{children}</div>;
-  Accordion.Button = ({ children, ...props }: any) => <button {...props}>{children}</button>;
-  Accordion.Body = ({ children }: any) => <div>{children}</div>;
-  return {
-    Accordion,
-    Container: (p: any) => <div {...p} />,
-    Row: (p: any) => <div {...p} />,
-    Col: (p: any) => <div {...p} />,
-  };
-});
-
 jest.mock('react-toggle', () => (props: any) => <input type="checkbox" {...props} />);
 
 const baseProps = {

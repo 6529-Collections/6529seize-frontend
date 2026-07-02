@@ -38,14 +38,6 @@ jest.mock("@/helpers/AllowlistToolHelpers", () => ({
   getRandomObjectId: () => "id",
 }));
 
-jest.mock("react-bootstrap", () => {
-  return {
-    Container: (p: any) => <div data-testid="container" {...p} />,
-    Row: (p: any) => <div data-testid="row" {...p} />,
-    Col: (p: any) => <div data-testid="col" {...p} />,
-  };
-});
-
 const { commonApiFetch } = require("@/services/api/common-api");
 
 const collection = { id: 1, name: "Collection" } as any;
