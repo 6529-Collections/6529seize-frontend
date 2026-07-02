@@ -53,8 +53,6 @@ function AppWalletModalShell(
 
     if (!show) {
       closeDialog(dialog);
-      previouslyFocusedElementRef.current?.focus();
-      previouslyFocusedElementRef.current = null;
       return undefined;
     }
 

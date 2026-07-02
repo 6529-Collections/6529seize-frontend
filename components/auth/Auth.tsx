@@ -1874,8 +1874,6 @@ export default function Auth({
 
     if (!shouldShowSignModal) {
       closeDialog(dialog);
-      signModalPreviouslyFocusedElementRef.current?.focus();
-      signModalPreviouslyFocusedElementRef.current = null;
       return undefined;
     }
 
