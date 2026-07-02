@@ -24,6 +24,9 @@ This folder stores repo-local Codex skills and agent guidance.
   troubleshooting guidance.
 - [Sonar Guardrails](sonar-guardrails/SKILL.md): captures Sonar-oriented
   quality guardrails.
+- [Test Mobile Devices](test-mobile-devices/SKILL.md): guides native iOS
+  Simulator and real iPhone QA evidence for frontend changes, with Android
+  reserved for a future workflow.
 - [WCAG 2.2 AA](wcag-22-aa/SKILL.md): guides frontend accessibility audits,
   remediations, and PR review against WCAG 2.2 AA.
 - [Write Skills](write-skills/SKILL.md): helps create, improve, or review
