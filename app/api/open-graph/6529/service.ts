@@ -427,7 +427,10 @@ function readTheMemesTdhRateValue(
   }
 
   const tdhRate = readPositiveNumber(hodlRate);
-  return tdhRate !== undefined ? formatDecimal(tdhRate) : undefined;
+  if (tdhRate === undefined) {
+    return undefined;
+  }
+  return formatDecimal(tdhRate);
 }
 
 function readMetadataString(
