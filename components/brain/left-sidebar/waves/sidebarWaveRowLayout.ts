@@ -1,4 +1,4 @@
-type SidebarWaveRowLayoutVariant = "app" | "web";
+export type SidebarWaveRowLayoutVariant = "app" | "web";
 
 interface SidebarWaveRowLayoutInput {
   readonly isChildRow: boolean;
@@ -16,7 +16,7 @@ interface SidebarWaveRowLayoutClasses {
 const DEFAULT_LINK_GAP_CLASSES = "tw-space-x-3";
 const DEFAULT_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[62px]";
 const CHILD_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[48px]";
-const CHILD_GUIDE_LINE_OFFSET_CLASSES = "tw-left-9";
+export const SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES = "tw-left-9";
 
 const rowLayoutByVariant = {
   app: {
@@ -25,7 +25,7 @@ const rowLayoutByVariant = {
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
       rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
-      guideLineOffsetClasses: CHILD_GUIDE_LINE_OFFSET_CLASSES,
+      guideLineOffsetClasses: SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
     },
     default: {
       rowPaddingClasses: "tw-px-5",
@@ -41,7 +41,7 @@ const rowLayoutByVariant = {
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
       rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
-      guideLineOffsetClasses: CHILD_GUIDE_LINE_OFFSET_CLASSES,
+      guideLineOffsetClasses: SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
     },
     default: {
       rowPaddingClasses: "tw-px-5",

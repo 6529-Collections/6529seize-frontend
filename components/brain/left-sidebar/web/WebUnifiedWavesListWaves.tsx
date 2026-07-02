@@ -40,7 +40,11 @@ import {
   useSidebarWaveTree,
   type SidebarWaveTreeRow,
 } from "@/hooks/useSidebarWaveTree";
-import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
+import {
+  useAnimatedSidebarWaveRows,
+  getParentIdsWithVisibleSubwaveRows,
+  type AnimatedSidebarWaveTreeRow,
+} from "@/hooks/useAnimatedSidebarWaveRows";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import {
   groupSidebarWavesForView,
@@ -54,6 +58,7 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
 const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
 const SUBWAVE_ROW_HEIGHT = 48 as const;
+const COLLAPSING_SUBWAVE_ROW_HEIGHT = 1 as const;
 const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
 const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
@@ -309,6 +314,22 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     allRows,
     rowAnimationOptions
   );
+  const announcementParentsWithVisibleSubwaves = useMemo(
+    () => getParentIdsWithVisibleSubwaveRows(animatedAnnouncementRows),
+    [animatedAnnouncementRows]
+  );
+  const highlyRatedParentsWithVisibleSubwaves = useMemo(
+    () => getParentIdsWithVisibleSubwaveRows(animatedHighlyRatedRows),
+    [animatedHighlyRatedRows]
+  );
+  const pinnedParentsWithVisibleSubwaves = useMemo(
+    () => getParentIdsWithVisibleSubwaveRows(animatedPinnedRows),
+    [animatedPinnedRows]
+  );
+  const virtualizedParentsWithVisibleSubwaves = useMemo(
+    () => getParentIdsWithVisibleSubwaveRows(animatedAllRows),
+    [animatedAllRows]
+  );
   const hasAnnouncementRows = animatedAnnouncementRows.length > 0;
   const hasHighlyRatedRows = animatedHighlyRatedRows.length > 0;
   const hasPinnedRows = animatedPinnedRows.length > 0;
@@ -334,11 +355,15 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const rowHeight = getBaseRowHeight(isCollapsed);
   const isMessageBasePath = basePath === "/messages";
   const getSidebarRowHeight = useCallback(
-    (row: SidebarWaveTreeRow) => {
+    (row: AnimatedSidebarWaveTreeRow) => {
       if (row.rowType === "subwaves-toggle") {
         return row.isExpanded
           ? SUBWAVE_TOGGLE_ROW_HEIGHT
           : COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT;
+      }
+
+      if (row.depth === 1 && row.animationState === "exiting") {
+        return COLLAPSING_SUBWAVE_ROW_HEIGHT;
       }
 
       return row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight;
@@ -408,7 +433,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     ]
   );
 
-  const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
+  const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
     items: virtualizedRows,
     key: virtualizedKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
@@ -417,15 +442,23 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     overscan: 5,
   });
 
-  const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => {
+  const renderWaveRow = (
+    row: AnimatedSidebarWaveTreeRow,
+    showPin: boolean,
+    parentsWithVisibleSubwaves: ReadonlySet<string>
+  ) => {
+    const showConnectedSubwaves = parentsWithVisibleSubwaves.has(row.wave.id);
+
     if (row.rowType === "subwaves-toggle") {
       return (
         <SidebarSubwavesToggle
           isExpanded={row.isExpanded}
           isLoading={row.isLoadingSubwaves}
           knownSubwavesCount={row.knownSubwavesCount}
+          layoutVariant="web"
           onClick={() => toggleParent(row.wave.id)}
           parentWaveName={row.wave.name}
+          showConnector={showConnectedSubwaves}
           unreadDropsCount={row.unreadSubwaveDropsCount}
         />
       );
@@ -442,6 +475,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         canExpand={row.canExpand && !isCollapsed}
         hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
         isLastSubwave={row.isLastSubwave}
+        showSubwaveConnector={
+          row.depth === 0 && showConnectedSubwaves && !isCollapsed
+        }
         onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
       />
     );
@@ -480,7 +516,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               renderRow={(row) =>
                 renderWaveRow(
                   row,
-                  !hidePin && !isCollapsed && row.wave.isPinned
+                  !hidePin && !isCollapsed && row.wave.isPinned,
+                  announcementParentsWithVisibleSubwaves
                 )
               }
               rows={animatedAnnouncementRows}
@@ -529,7 +566,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   isRowVisible={(row) =>
                     isVisibleSectionRow({ row, sectionName: "highly rated" })
                   }
-                  renderRow={(row) => renderWaveRow(row, false)}
+                  renderRow={(row) =>
+                    renderWaveRow(
+                      row,
+                      false,
+                      highlyRatedParentsWithVisibleSubwaves
+                    )
+                  }
                   rows={animatedHighlyRatedRows}
                   transitionClassName="tw-w-full"
                 />
@@ -556,7 +599,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   isVisibleSectionRow({ row, sectionName: "pinned" })
                 }
                 renderRow={(row) =>
-                  renderWaveRow(row, !hidePin && !isCollapsed)
+                  renderWaveRow(
+                    row,
+                    !hidePin && !isCollapsed,
+                    pinnedParentsWithVisibleSubwaves
+                  )
                 }
                 rows={animatedPinnedRows}
                 transitionClassName="tw-w-full"
@@ -617,7 +664,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                       height: v.size,
                     }}
                   >
-                    {renderWaveRow(row, !hidePin && !isCollapsed)}
+                    {renderWaveRow(
+                      row,
+                      !hidePin && !isCollapsed,
+                      virtualizedParentsWithVisibleSubwaves
+                    )}
                   </SidebarWaveTreeRowTransition>
                 );
               })}
