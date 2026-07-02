@@ -12,7 +12,6 @@ import type {
   BaseNFT,
   LabExtendedData,
   LabNFT,
-  MemesExtendedData,
   NFT,
   Rememe,
 } from "@/entities/INFT";
@@ -21,6 +20,7 @@ import type {
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type {
   LinkPreviewMedia,
@@ -66,7 +66,7 @@ type NftRecord = Partial<BaseNFT> &
     readonly owner_display?: string | null | undefined;
   };
 
-type MemesRecord = NftRecord & Partial<MemesExtendedData>;
+type MemesRecord = NftRecord & Partial<ApiMemesExtendedData>;
 type LabRecord = NftRecord & Partial<LabExtendedData>;
 
 type MintingClaimRecord = {
@@ -416,6 +416,21 @@ function readNumber(value: unknown): number | undefined {
 function readPositiveNumber(value: unknown): number | undefined {
   const parsed = readNumber(value);
   return parsed !== undefined && parsed > 0 ? parsed : undefined;
+}
+
+function readTheMemesTdhRateValue(
+  hodlRate: unknown,
+  recordedInTdh: boolean | null | undefined
+): string | undefined {
+  if (recordedInTdh === false) {
+    return "Pending";
+  }
+
+  const tdhRate = readPositiveNumber(hodlRate);
+  if (tdhRate === undefined) {
+    return undefined;
+  }
+  return formatDecimal(tdhRate);
 }
 
 function readMetadataString(
@@ -848,7 +863,10 @@ async function fetchTheMemesPreview(
     guardedMintStatEditionSize ??
     fallbackEditionSize;
   const season = readMemeSeason(source, metadata);
-  const tdhRate = readPositiveNumber(source.hodl_rate);
+  const tdhRateValue = readTheMemesTdhRateValue(
+    source.hodl_rate,
+    extended?.recorded_in_tdh
+  );
   const mintDate = formatMintDate(source.mint_date);
   const artistName = firstNonEmptyString(
     explicitArtistHandle,
@@ -873,10 +891,7 @@ async function fetchTheMemesPreview(
         "Edition size",
         editionSize !== undefined ? formatInteger(editionSize) : undefined
       ),
-      createFact(
-        "TDH rate",
-        tdhRate !== undefined ? formatDecimal(tdhRate) : undefined
-      ),
+      createFact("TDH rate", tdhRateValue),
       createFact(
         "Season",
         season !== undefined ? formatInteger(season) : undefined

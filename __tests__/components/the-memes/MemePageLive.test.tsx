@@ -5,7 +5,11 @@ import {
 } from "@/components/the-memes/MemePageLive";
 import { MemeCollectorsStats } from "@/components/the-memes/MemePageLiveStats";
 import { MemePageReferencesSubMenu } from "@/components/the-memes/MemePageReferences";
-import type { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
+import type { NFT, Rememe } from "@/entities/INFT";
+import {
+  ApiMemesExtendedDataTokenTypeEnum,
+  type ApiMemesExtendedData,
+} from "@/generated/models/ApiMemesExtendedData";
 import {
   formatDate,
   formatInteger,
@@ -142,10 +146,42 @@ function createNft(overrides: Partial<NFT> = {}): NFT {
   } as NFT;
 }
 
-function createMeta(): MemesExtendedData {
+function createMeta(): ApiMemesExtendedData {
   return {
     id: 1,
+    contract: "0x1",
     created_at: new Date(),
+    mint_date: new Date(),
+    mint_price: 0,
+    supply: 1,
+    name: "Meme",
+    collection: "col",
+    token_type: ApiMemesExtendedDataTokenTypeEnum.Erc1155,
+    description: "d",
+    artist: "artist",
+    artist_seize_handle: "artist",
+    uri: "",
+    icon: "",
+    thumbnail: "",
+    scaled: "",
+    image: "image.png",
+    animation: "",
+    metadata: {},
+    market_cap: 0,
+    floor_price: 0,
+    floor_price_from: null,
+    total_volume_last_24_hours: 0,
+    total_volume_last_7_days: 0,
+    total_volume_last_1_month: 0,
+    total_volume: 0,
+    has_distribution: true,
+    highest_offer: 0,
+    highest_offer_from: null,
+    boosted_tdh: 0,
+    tdh: 0,
+    tdh__raw: 0,
+    tdh_rank: 0,
+    hodl_rate: 0,
     collection_size: 100,
     edition_size: 100,
     edition_size_rank: 1,
@@ -164,10 +200,11 @@ function createMeta(): MemesExtendedData {
     edition_size_not_burnt_rank: 1,
     percent_unique_not_burnt: 0,
     percent_unique_not_burnt_rank: 1,
+    compressed_animation: null,
     season: 1,
     meme: 1,
     meme_name: "meme",
-  } as MemesExtendedData;
+  };
 }
 
 function createRememe(name: string, overrides: Partial<Rememe> = {}): Rememe {
@@ -419,6 +456,53 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(
       collectorsLabel.parentElement?.parentElement?.parentElement
     ).toHaveClass("tw-flex", "tw-flex-wrap");
+  });
+
+  it("uses ranked collection size for live rank totals when provided", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft()}
+        nftMeta={{
+          ...createMeta(),
+          collection_size: 498,
+          ranked_collection_size: 497,
+          hodlers: 97,
+          hodlers_rank: 480,
+        }}
+      />
+    );
+
+    expect(screen.getByText("Rank 480/497")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Collectors: Rank 480/497")
+    ).toBeInTheDocument();
+  });
+
+  it("shows unranked rank pills and pending TDH for memes not recorded in TDH", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft({ hodl_rate: 22.65 })}
+        nftMeta={{
+          ...createMeta(),
+          recorded_in_tdh: false,
+          ranked_collection_size: 99,
+          edition_size_rank: -1,
+          edition_size_cleaned_rank: -1,
+          hodlers_rank: -1,
+        }}
+      />
+    );
+
+    expect(screen.getAllByText("Unranked")).toHaveLength(3);
+    expect(screen.getByLabelText("Edition size: Unranked")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("ex. 6529 museum: Unranked")
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Collectors: Unranked")).toBeInTheDocument();
+    expect(screen.getByText("Pending")).toBeInTheDocument();
+    expect(screen.queryByText("22.65")).not.toBeInTheDocument();
   });
 
   it("formats live panel stats with the selected locale", () => {
