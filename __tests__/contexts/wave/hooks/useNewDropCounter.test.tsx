@@ -100,6 +100,23 @@ describe("useNewDropCounter", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
+  it("does not process websocket updates or resets while disabled", () => {
+    const refetch = jest.fn();
+    const { result } = renderHook(
+      () => useNewDropCounter(null, waves, refetch, { enabled: false }),
+      { wrapper }
+    );
+
+    emitDropUpdate();
+    act(() => {
+      result.current.resetAllWavesNewDropsCount();
+      result.current.resetWaveNewDropsCount("wave2");
+    });
+
+    expect(result.current.newDropsCounts).toEqual({});
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
   it("updates muted wave timestamps without unread counts", () => {
     const refetch = jest.fn();
     const { result, rerender } = renderHook(
