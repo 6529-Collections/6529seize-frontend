@@ -70,8 +70,6 @@ export default function WaveHeader({
   const normalizedWaveAuthorHandle = waveAuthorHandle?.toLowerCase() ?? null;
   const canUseWaveActions =
     normalizedConnectedHandle !== null && !activeProfileProxy;
-  const showNotificationSettings =
-    canUseWaveActions && !!wave.subscribed_actions.length;
   const showOwnerOptions =
     canUseWaveActions &&
     normalizedConnectedHandle === normalizedWaveAuthorHandle;
@@ -167,11 +165,9 @@ export default function WaveHeader({
 
           {canUseWaveActions && (
             <div className="tw-mt-8 tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-1.5">
-              {showNotificationSettings && (
-                <div className="tw-shrink-0">
-                  <WaveNotificationSettings wave={wave} compact />
-                </div>
-              )}
+              <div className="tw-shrink-0">
+                <WaveNotificationSettings wave={wave} compact />
+              </div>
               <div className="tw-shrink-0">
                 <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
               </div>

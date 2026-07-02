@@ -115,6 +115,16 @@ describe("WaveHeader", () => {
     expect(screen.getByTestId("wave-header-pin")).toBeInTheDocument();
   });
 
+  it("mounts notification settings for connected users before joining", () => {
+    wrapper(baseWave, undefined, {
+      connectedProfile: { handle: "alice" },
+    });
+
+    expect(
+      screen.getByTestId("wave-notification-settings")
+    ).toBeInTheDocument();
+  });
+
   it("hides pin action for subwaves", () => {
     wrapper(
       {
