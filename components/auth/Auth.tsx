@@ -1929,6 +1929,7 @@ export default function Auth({
       {children}
       <AppToastContainer />
       {enableWalletAuthentication &&
+        shouldShowSignModal &&
         typeof document !== "undefined" &&
         createPortal(
           <dialog
