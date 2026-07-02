@@ -7,8 +7,10 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
+import { getBoostedDropsDisplayPreferenceMenuItems } from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplayPreference";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
@@ -42,6 +44,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const breakpoint = useBreakpoint();
   const showBackButton = breakpoint !== "LG";
   const isCompact = breakpoint === "S";
+  const [boostedDropsDisplayPreference, setBoostedDropsDisplayPreference] =
+    useBoostedDropsDisplayPreference();
   const headerActionsTooltipId = `my-stream-wave-header-actions-${wave.id}`;
   const galleryToggleLabel =
     viewMode === "chat" ? "Switch to gallery view" : "Switch to chat view";
@@ -114,6 +118,13 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     }
 
     const items: CompactMenuItem[] = [];
+    items.push(
+      ...getBoostedDropsDisplayPreferenceMenuItems({
+        preference: boostedDropsDisplayPreference,
+        setPreference: setBoostedDropsDisplayPreference,
+      })
+    );
+
     if (showGalleryToggle && !activeCurationId) {
       items.push({
         id: "toggle-view-mode",
