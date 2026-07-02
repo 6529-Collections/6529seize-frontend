@@ -23,6 +23,8 @@ const WAVES_CONTENT_STATE_PUBLIC = "not-authenticated";
 const WAVES_CONTENT_STATE_READY = "ready";
 const WAVES_CONTENT_STATE_LOADING = "loading";
 const WAVES_CONTENT_STATE_MEASURING = "measuring";
+const WAVES_CONTENT_STATE_NEEDS_PROFILE = "needs-profile";
+const WAVES_CONTENT_STATE_NOT_AVAILABLE = "not-available";
 
 function WavesBranchLoadingFallback() {
   return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
@@ -37,7 +39,7 @@ const WavesDesktop = dynamic<WavesBranchProps>(
 
 function getConnectPrompt(contentState: WavesContentState): ReactNode {
   switch (contentState) {
-    case "needs-profile":
+    case WAVES_CONTENT_STATE_NEEDS_PROFILE:
       return (
         <>
           <h1 className="tw-text-xl tw-font-bold">
@@ -46,7 +48,7 @@ function getConnectPrompt(contentState: WavesContentState): ReactNode {
           <UserSetUpProfileCta />
         </>
       );
-    case "not-available":
+    case WAVES_CONTENT_STATE_NOT_AVAILABLE:
       return (
         <h1 className="tw-text-xl tw-font-bold">
           This content is not available.
@@ -59,6 +61,15 @@ function getConnectPrompt(contentState: WavesContentState): ReactNode {
     default:
       return null;
   }
+}
+
+function isResolvedWavesContentState(contentState: WavesContentState): boolean {
+  return (
+    contentState === WAVES_CONTENT_STATE_READY ||
+    contentState === WAVES_CONTENT_STATE_PUBLIC ||
+    contentState === WAVES_CONTENT_STATE_NEEDS_PROFILE ||
+    contentState === WAVES_CONTENT_STATE_NOT_AVAILABLE
+  );
 }
 
 function getWavesContent({
@@ -142,12 +153,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   }, [hasVisibleLaunchContent]);
 
   useEffect(() => {
-    if (
-      contentState !== "ready" &&
-      contentState !== "not-authenticated" &&
-      contentState !== "needs-profile" &&
-      contentState !== "not-available"
-    ) {
+    if (!isResolvedWavesContentState(contentState)) {
       return;
     }
 

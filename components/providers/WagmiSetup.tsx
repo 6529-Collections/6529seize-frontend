@@ -50,6 +50,11 @@ type InjectAppWalletConnectorsInput = {
   readonly setToast: (toast: AppToastInput) => void;
 };
 
+type AppKitAdapterManagerPublicShape = Pick<
+  AppKitAdapterManager,
+  "cleanup" | "createAdapterWithCache" | "shouldRecreateAdapter"
+>;
+
 /**
  * Installs a defensive wrapper around `window.ethereum` (EIP-1193 provider).
  *
@@ -103,9 +108,9 @@ function installSafeEthereumProxy(): void {
     let hasLoggedProxyGetError = false;
     const ethereumTarget = ethereum;
     const proxy = new Proxy(ethereumTarget, {
-      get(target, prop, receiver): unknown {
+      get(target, prop): unknown {
         try {
-          const value: unknown = Reflect.get(target, prop, receiver);
+          const value: unknown = Reflect.get(target, prop, target);
           if (typeof value === "function") {
             const method = value as (
               this: unknown,
@@ -158,11 +163,30 @@ function canAssignProperty(descriptor: PropertyDescriptor): boolean {
 }
 
 function assertAppKitAdapterManager(value: unknown): AppKitAdapterManager {
-  if (!(value instanceof AppKitAdapterManager)) {
+  if (!isAppKitAdapterManager(value)) {
     throw new AppKitValidationError("Internal API failed");
   }
 
   return value;
+}
+
+function isAppKitAdapterManager(value: unknown): value is AppKitAdapterManager {
+  if (
+    value === null ||
+    (typeof value !== "object" && typeof value !== "function")
+  ) {
+    return false;
+  }
+
+  const candidate = value as Partial<
+    Record<keyof AppKitAdapterManagerPublicShape, unknown>
+  >;
+
+  return (
+    typeof candidate.cleanup === "function" &&
+    typeof candidate.createAdapterWithCache === "function" &&
+    typeof candidate.shouldRecreateAdapter === "function"
+  );
 }
 
 function initializeAdapterWhenNeeded({
@@ -232,7 +256,7 @@ function injectAppWalletConnectors({
         return [setupConnector];
       } catch (error) {
         logErrorSecurely(
-          `[WagmiSetup] Skipping invalid app-wallet connector ${wallet.address}`,
+          "[WagmiSetup] Skipping invalid app-wallet connector",
           error
         );
         return [];
