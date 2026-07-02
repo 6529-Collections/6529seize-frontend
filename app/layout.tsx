@@ -5,6 +5,7 @@ export const fetchCache = "force-no-store";
 import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.scss";
 import "@/styles/Home.module.scss";
+import "@/styles/fonts.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
