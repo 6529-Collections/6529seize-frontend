@@ -340,10 +340,6 @@ const UnifiedWavesListWaves = forwardRef<
             : COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT;
         }
 
-        if (row.depth === 1 && row.animationState === "entering") {
-          return 0;
-        }
-
         if (row.depth === 1 && row.animationState === "exiting") {
           return COLLAPSING_SUBWAVE_ROW_HEIGHT;
         }

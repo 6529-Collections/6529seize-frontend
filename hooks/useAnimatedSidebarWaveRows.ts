@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
 
-export const SIDEBAR_SUBWAVE_ROW_EXIT_TRANSITION_MS = 160 as const;
+export const SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS = 200 as const;
 
 type SidebarWaveRowAnimationState = "entered" | "entering" | "exiting";
 type AfterPaintDelay = {
@@ -194,7 +194,6 @@ export function useAnimatedSidebarWaveRows(
   >(() => getEnteredRows(rows));
 
   const rowKeys = useMemo(() => rows.map((row) => row.key), [rows]);
-  const rowKeySignature = rowKeys.join("\n");
   const currentRows = useMemo(() => getEnteredRows(rows), [rows]);
 
   useEffect(() => {
@@ -202,7 +201,8 @@ export function useAnimatedSidebarWaveRows(
     let enterDelay: AfterPaintDelay | null = null;
     let exitTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
 
-    const updateTimer = globalThis.setTimeout(() => {
+    void (async () => {
+      await Promise.resolve();
       if (effectState.isDisposed) {
         return;
       }
@@ -221,24 +221,23 @@ export function useAnimatedSidebarWaveRows(
         if (!effectState.isDisposed) {
           setAnimatedRows(removeExitingRows);
         }
-      }, SIDEBAR_SUBWAVE_ROW_EXIT_TRANSITION_MS);
+      }, SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
 
       enterDelay = createAfterPaintDelay();
       void (async () => {
         await enterDelay.done;
         setAnimatedRows(markEnteringRowsAsEntered);
       })();
-    }, 0);
+    })();
 
     return () => {
       effectState.isDisposed = true;
       enterDelay?.cancel();
-      globalThis.clearTimeout(updateTimer);
       if (exitTimer !== null) {
         globalThis.clearTimeout(exitTimer);
       }
     };
-  }, [currentRows, keepExitingRows, rowKeySignature, rowKeys, rows]);
+  }, [currentRows, keepExitingRows, rowKeys, rows]);
 
   const rowsForInitialHydration =
     animatedRows.length === 0 && currentRows.length > 0
