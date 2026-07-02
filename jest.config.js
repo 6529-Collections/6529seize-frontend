@@ -32,6 +32,7 @@ const config = {
     "^dom-helpers/css$": "<rootDir>/__mocks__/css-functions.js",
     "^@next/font/(.*)$": "<rootDir>/__mocks__/nextFontMock.js",
     "^next/font/(.*)$": "<rootDir>/__mocks__/nextFontMock.js",
+    "^react-bootstrap$": "<rootDir>/stubs/empty.js",
   },
   // Test Discovery
   testMatch: ["<rootDir>/**/*.test.ts", "<rootDir>/**/*.test.tsx"],

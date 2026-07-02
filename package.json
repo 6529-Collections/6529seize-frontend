@@ -207,7 +207,6 @@
     "p-retry": "6.2.1",
     "qrcode": "1.5.4",
     "react": "19.2.4",
-    "react-bootstrap": "2.10.10",
     "react-chartjs-2": "5.3.1",
     "react-dom": "19.2.4",
     "react-error-boundary": "6.1.1",
