@@ -88,6 +88,29 @@ jest.mock("@/components/home/now-minting/NowMintingCountdown", () => {
   return MockNowMintingCountdown;
 });
 
+type LatestDropNextMintSubscribeMockProps = {
+  readonly?: boolean;
+  statusSource?: "none" | "upcoming";
+  tokenId?: number;
+};
+
+const mockLatestDropNextMintSubscribe = jest.fn(
+  (props: LatestDropNextMintSubscribeMockProps) => (
+    <div
+      data-testid="latest-drop-subscribe"
+      data-readonly={String(props.readonly)}
+      data-status-source={props.statusSource}
+      data-token-id={props.tokenId}
+    />
+  )
+);
+
+jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
+  __esModule: true,
+  default: (props: LatestDropNextMintSubscribeMockProps) =>
+    mockLatestDropNextMintSubscribe(props),
+}));
+
 jest.mock("@/components/nft-image/NFTImage", () => {
   const MockNFTImage = () => <div data-testid="nft-image" />;
   MockNFTImage.displayName = "MockNFTImage";
@@ -148,6 +171,7 @@ beforeEach(() => {
   mockReplace.mockClear();
   mockSearchParams.get.mockClear();
   mockSearchParams.toString.mockClear();
+  mockLatestDropNextMintSubscribe.mockClear();
 });
 
 const nftMeta = {
@@ -399,12 +423,18 @@ describe("MemePage search params handling", () => {
     });
 
     const mintCountdown = screen.getByTestId("mint-countdown");
+    const subscriptionRow = screen.getByTestId("latest-drop-subscribe");
     const artViewer = screen.getByTestId("art-viewer");
-    const detailsColumn = mintCountdown.parentElement;
+    const mintingGroup = mintCountdown.parentElement;
+    const detailsColumn = mintingGroup?.parentElement;
     const artworkColumn = artViewer.parentElement?.parentElement;
     const headerGrid = artworkColumn?.parentElement;
 
     expect(screen.getAllByTestId("mint-countdown")).toHaveLength(1);
+    expect(subscriptionRow).toHaveAttribute("data-token-id", "1");
+    expect(subscriptionRow).toHaveAttribute("data-readonly", "true");
+    expect(subscriptionRow).toHaveAttribute("data-status-source", "none");
+    expect(mintingGroup).toHaveClass("tw-w-full");
     expect(headerGrid).toHaveClass("lg:tw-items-center");
     expect(headerGrid?.className).toContain(
       "lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)]"

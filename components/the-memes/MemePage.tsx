@@ -9,6 +9,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
+import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import { publicEnv } from "@/config/env";
@@ -444,12 +445,19 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         </div>
         <div className={detailsColumnClassName}>
           {isLastCard && (
-            <NowMintingCountdown
-              nftId={nft.id}
-              contract={MEMES_CONTRACT}
-              chainId={mainnet.id}
-              fullWidth
-            />
+            <div className="tw-w-full">
+              <NowMintingCountdown
+                nftId={nft.id}
+                contract={MEMES_CONTRACT}
+                chainId={mainnet.id}
+                fullWidth
+              />
+              <LatestDropNextMintSubscribe
+                tokenId={nft.id}
+                readonly
+                statusSource="none"
+              />
+            </div>
           )}
           <MemePageLiveRightMenu
             show={true}

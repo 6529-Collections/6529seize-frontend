@@ -9,6 +9,7 @@ import { t } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import type { ReactNode } from "react";
 import {
   getAboutNavItemHref,
   getAboutNavItemId,
@@ -21,12 +22,14 @@ type AboutContentsDropdownProps = {
   readonly currentSection?: AboutSection | undefined;
   readonly currentHref?: string | undefined;
   readonly className?: string | undefined;
+  readonly leadingAction?: ReactNode;
 };
 
 export function AboutContentsDropdown({
   currentSection,
   currentHref,
   className,
+  leadingAction,
 }: AboutContentsDropdownProps) {
   const locale = DEFAULT_LOCALE;
   const capacitor = useCapacitor();
@@ -97,10 +100,11 @@ export function AboutContentsDropdown({
   return (
     <div
       className={clsx(
-        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-justify-end tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
+        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
         className
       )}
     >
+      {leadingAction}
       <CompactMenu
         aria-label={t(locale, "about.contents.triggerAriaLabel", {
           page: currentLabel,
