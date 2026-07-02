@@ -2095,6 +2095,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDmDropsUnreadCount"
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden - profile required
   /drops/{dropId}/toggle-hide-link-preview:
     post:
       tags:
