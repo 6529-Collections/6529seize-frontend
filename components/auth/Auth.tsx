@@ -13,7 +13,7 @@ import {
   useState,
 } from "react";
 import type { MouseEvent } from "react";
-import { Button, Modal } from "react-bootstrap";
+import { createPortal } from "react-dom";
 import { isAddress } from "viem";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import {
@@ -183,6 +183,16 @@ const SESSION_UPGRADE_REMINDER_STORAGE_KEY =
 const AUTH_MODAL_LOCALE = DEFAULT_LOCALE;
 const AUTH_TOKEN_CHANGED_EVENT_NAME = "6529-auth-token-changed";
 const SESSION_UPGRADE_REMINDER_MS = 2 * 60 * 60 * 1000;
+
+function closeDialog(dialog: HTMLDialogElement) {
+  if (typeof dialog.close === "function" && dialog.open) {
+    dialog.close();
+    return;
+  }
+
+  dialog.removeAttribute("open");
+}
+
 const DEFAULT_AUTH_ROLLOUT_SETTINGS: AuthRolloutSettings = {
   structuredSignaturesRequired: false,
   sessionV2MigrationDeadline: null,
@@ -1777,6 +1787,8 @@ export default function Auth({
     [sessionUpgradeTimeLeftMs]
   );
   const signModalTitleId = useId();
+  const signDialogRef = useRef<HTMLDialogElement>(null);
+  const signModalPreviouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const signModalTitle = (() => {
     if (isConnectionShareUpgradePrompt) {
       return t(AUTH_MODAL_LOCALE, "auth.signModal.connectionUpdateRequired");
@@ -1850,6 +1862,46 @@ export default function Auth({
     router.push("/about/tech/wallet-authentication");
   };
 
+  useEffect(() => {
+    if (!enableWalletAuthentication || typeof document === "undefined") {
+      return undefined;
+    }
+
+    const dialog = signDialogRef.current;
+    if (!dialog) {
+      return undefined;
+    }
+
+    if (!shouldShowSignModal) {
+      closeDialog(dialog);
+      return undefined;
+    }
+
+    signModalPreviouslyFocusedElementRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    if (typeof dialog.showModal === "function") {
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    } else {
+      dialog.setAttribute("open", "");
+    }
+    dialog
+      .querySelector<HTMLElement>(
+        "[data-auth-sign-primary]:not([disabled]), button:not([disabled]), a[href]"
+      )
+      ?.focus();
+
+    return () => {
+      closeDialog(dialog);
+      signModalPreviouslyFocusedElementRef.current?.focus();
+      signModalPreviouslyFocusedElementRef.current = null;
+    };
+  }, [enableWalletAuthentication, shouldShowSignModal]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -1876,89 +1928,81 @@ export default function Auth({
     >
       {children}
       <AppToastContainer />
-      {enableWalletAuthentication && (
-        <Modal
-          show={shouldShowSignModal}
-          onHide={() => {
-            // Only allow modal dismissal when not actively validating
-            if (authLoadingState === "validating") {
-              return;
-            }
-            if (isSessionUpgradePrompt) {
-              onCancelSignRequest();
-              return;
-            }
-            setShowSignModal(false);
-          }}
-          backdrop="static"
-          keyboard={false}
-          centered
-          aria-labelledby={signModalTitleId}
-          dialogClassName={styles["signModalDialog"] ?? ""}
-          contentClassName={styles["signModalSurface"] ?? ""}
-        >
-          <Modal.Header className={styles["signModalHeader"]}>
-            <Modal.Title
-              id={signModalTitleId}
-              className={styles["signModalTitle"]}
-            >
-              {signModalTitle}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body className={styles["signModalBody"]}>
-            <p className={styles["signModalLead"]}>{signModalLead}</p>
+      {enableWalletAuthentication &&
+        shouldShowSignModal &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <dialog
+            ref={signDialogRef}
+            aria-modal="true"
+            aria-labelledby={signModalTitleId}
+            className="tailwind-scope tw-m-auto tw-max-h-[calc(100dvh-2rem)] tw-w-[min(32rem,calc(100vw-2rem))] tw-max-w-[min(32rem,calc(100vw-2rem))] tw-overflow-y-auto tw-border-none tw-bg-transparent tw-p-0 tw-text-left backdrop:tw-bg-black/50"
+            onCancel={(event) => event.preventDefault()}
+            tabIndex={-1}
+          >
+            <div className={styles["signModalSurface"]}>
+              <div className={styles["signModalHeader"]}>
+                <h2 id={signModalTitleId} className={styles["signModalTitle"]}>
+                  {signModalTitle}
+                </h2>
+              </div>
+              <div className={styles["signModalBody"]}>
+                <p className={styles["signModalLead"]}>{signModalLead}</p>
 
-            <ul className={styles["signModalList"]}>
-              <li>{signModalPrimaryListItem}</li>
-              {isDisconnectedWebSessionUpgradePrompt && (
-                <li>{signModalSharedConnectionListItem}</li>
-              )}
-              <li>{signModalSecondaryListItem}</li>
-            </ul>
-            {isSessionUpgradePrompt && (
-              <p className={styles["signModalLearnMore"]}>
-                <Link
-                  href="/about/tech/wallet-authentication"
-                  onClick={onSessionUpgradeLearnMore}
-                >
-                  {t(AUTH_MODAL_LOCALE, "auth.signModal.learnMore")}
-                </Link>
-              </p>
-            )}
-          </Modal.Body>
-          <Modal.Footer className={styles["signModalFooter"]}>
-            {!isSignRequestInProgress &&
-              (!isSessionUpgradePrompt || sessionUpgradeCanDismiss) && (
-                <Button
-                  variant="link"
-                  className={styles["signModalCancelButton"]}
-                  onClick={onCancelSignRequest}
-                >
-                  {isSessionUpgradePrompt && sessionUpgradeHasDeadline
-                    ? t(AUTH_MODAL_LOCALE, "auth.signModal.remindLater")
-                    : t(AUTH_MODAL_LOCALE, "auth.signModal.cancel")}
-                </Button>
-              )}
-            {!isConnectionShareUpgradePrompt && (
-              <Button
-                variant="link"
-                className={styles["signModalConfirmButton"]}
-                onClick={onConfirmSignRequest}
-                disabled={isSignRequestInProgress}
-              >
-                {isSigningPending ? (
-                  <span className={styles["signModalButtonContent"]}>
-                    {t(AUTH_MODAL_LOCALE, "auth.signModal.confirmInWallet")}{" "}
-                    <DotLoader />
-                  </span>
-                ) : (
-                  signModalConfirmText
+                <ul className={styles["signModalList"]}>
+                  <li>{signModalPrimaryListItem}</li>
+                  {isDisconnectedWebSessionUpgradePrompt && (
+                    <li>{signModalSharedConnectionListItem}</li>
+                  )}
+                  <li>{signModalSecondaryListItem}</li>
+                </ul>
+                {isSessionUpgradePrompt && (
+                  <p className={styles["signModalLearnMore"]}>
+                    <Link
+                      href="/about/tech/wallet-authentication"
+                      onClick={onSessionUpgradeLearnMore}
+                    >
+                      {t(AUTH_MODAL_LOCALE, "auth.signModal.learnMore")}
+                    </Link>
+                  </p>
                 )}
-              </Button>
-            )}
-          </Modal.Footer>
-        </Modal>
-      )}
+              </div>
+              <div className={styles["signModalFooter"]}>
+                {!isSignRequestInProgress &&
+                  (!isSessionUpgradePrompt || sessionUpgradeCanDismiss) && (
+                    <button
+                      type="button"
+                      className={styles["signModalCancelButton"]}
+                      onClick={onCancelSignRequest}
+                    >
+                      {isSessionUpgradePrompt && sessionUpgradeHasDeadline
+                        ? t(AUTH_MODAL_LOCALE, "auth.signModal.remindLater")
+                        : t(AUTH_MODAL_LOCALE, "auth.signModal.cancel")}
+                    </button>
+                  )}
+                {!isConnectionShareUpgradePrompt && (
+                  <button
+                    type="button"
+                    className={styles["signModalConfirmButton"]}
+                    data-auth-sign-primary
+                    onClick={onConfirmSignRequest}
+                    disabled={isSignRequestInProgress}
+                  >
+                    {isSigningPending ? (
+                      <span className={styles["signModalButtonContent"]}>
+                        {t(AUTH_MODAL_LOCALE, "auth.signModal.confirmInWallet")}{" "}
+                        <DotLoader />
+                      </span>
+                    ) : (
+                      signModalConfirmText
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          </dialog>,
+          document.body
+        )}
     </AuthContext.Provider>
   );
 }
