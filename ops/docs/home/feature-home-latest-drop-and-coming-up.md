@@ -94,18 +94,19 @@ Use this page for visibility rules, state switches, and route targets.
 - The current/latest `/the-memes/{id}` detail page uses the same awareness-only
   subscription row beside the mint countdown.
 - Awareness-only rows do not embed the profile subscription editor. They show a
-  blue read-only `Subscribed` strip with a disabled switch, optional user
-  subscribed count, optional subscriber total, an icon-only profile
-  subscriptions link when connected, and a right-edge question-mark info link.
+  blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
+  optional `xN` user subscribed count when already subscribed, an
+  `xN subscribers` total, a `Set up`/`Manage` profile-subscriptions action,
+  and a right-edge question-mark info link.
 - Balance, eligibility, quantity selectors, and subscription mutation controls
   are intentionally not shown in home/latest-card awareness rows.
-- Without a connected profile, the subscription row can still show a
-  non-actionable disabled switch awareness state with a link to
-  `/about/subscriptions`.
+- Without a connected profile, the subscription row can still show a read-only
+  off toggle awareness state, a `Set up` action that opens wallet connection,
+  and a link to `/about/subscriptions`.
 - With a connected profile, the subscription row can link to
   `/{user}/subscriptions`; profile-specific subscription status/count only
   render when the related read-only APIs return data.
-- On `/about/subscriptions`, connected users see a primary `My subscriptions`
+- On `/about/subscriptions`, connected users see a primary `Manage Subscriptions`
   action on the left side of the about-section navigation row. Disconnected
   users see a primary `Connect to Subscribe` action that opens wallet
   connection and then routes to their profile subscriptions once connected.

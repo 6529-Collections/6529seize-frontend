@@ -21,7 +21,7 @@
       "facts": [
         "The home page is the main 6529.io entry point.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
-        "The home mint panel can surface The Memes subscription awareness or controls, with links to subscription info and the connected profile subscriptions tab when available.",
+        "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",

@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   getCanonicalNextMintNumber,
@@ -8,19 +8,21 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptions/useProfileSubscriptionsNavigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiUpcomingMemeSubscriptionStatus } from "@/generated/models/ApiUpcomingMemeSubscriptionStatus";
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
 import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
+import { formatNumber } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import MemeSubscriptionAwarenessRow from "./MemeSubscriptionAwarenessRow";
-import { getProfileSubscriptionsHref } from "../../user/subscriptions/subscriptionNavigation";
 
 type SubscriptionTooltipKey = Extract<
   MessageKey,
@@ -82,6 +84,51 @@ function getToggleTooltipKey({
   return "home.mintSubscriptions.tooltip.dropped";
 }
 
+function getToggleTooltipLabel({
+  activeProfileProxy,
+  isMintingDay,
+  isUpcoming,
+  locale,
+  profileKey,
+  subscribed,
+  subscribedCount,
+}: Readonly<{
+  activeProfileProxy: boolean;
+  isMintingDay: boolean;
+  isUpcoming: boolean;
+  locale: SupportedLocale;
+  profileKey: string | undefined;
+  subscribed: boolean;
+  subscribedCount: number | undefined;
+}>) {
+  const key = getToggleTooltipKey({
+    activeProfileProxy,
+    isMintingDay,
+    isUpcoming,
+    profileKey,
+    subscribed,
+  });
+
+  if (
+    key === "home.mintSubscriptions.tooltip.manage" &&
+    typeof subscribedCount === "number" &&
+    Number.isFinite(subscribedCount) &&
+    subscribedCount > 0
+  ) {
+    return t(locale, key, {
+      count: formatNumber(locale, subscribedCount, {
+        maximumFractionDigits: 0,
+      }),
+    });
+  }
+
+  if (key === "home.mintSubscriptions.tooltip.manage") {
+    return t(locale, "home.mintSubscriptions.tooltip.manageFallback");
+  }
+
+  return t(locale, key);
+}
+
 export default function LatestDropNextMintSubscribe(
   props: Readonly<{
     tokenId?: number;
@@ -89,10 +136,12 @@ export default function LatestDropNextMintSubscribe(
     statusSource?: SubscriptionStatusSource;
   }> = {}
 ) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const { country } = useCookieConsent();
   const { isIos } = useCapacitor();
   const locale = useBrowserLocale();
+  const { openProfileSubscriptions, profileSubscriptionsHref } =
+    useProfileSubscriptionsNavigation();
 
   const statusSource = props.statusSource ?? "upcoming";
   const shouldQueryUpcomingStatus = statusSource === "upcoming";
@@ -107,10 +156,6 @@ export default function LatestDropNextMintSubscribe(
   const profileKey = useMemo(
     () => (activeProfileProxy ? undefined : getProfileKey(connectedProfile)),
     [activeProfileProxy, connectedProfile]
-  );
-  const profileSubscriptionsHref = useMemo(
-    () => getProfileSubscriptionsHref(connectedProfile),
-    [connectedProfile]
   );
 
   const { data: upcomingStatus } = useQuery<ApiUpcomingMemeSubscriptionStatus>({
@@ -153,7 +198,7 @@ export default function LatestDropNextMintSubscribe(
 
   const { data: redeemedCounts } = useQuery<RedeemedSubscriptionCountsResponse>(
     {
-      queryKey: ["mint-subscription-counts", "redeemed", tokenId],
+      queryKey: ["mint-subscription-counts", "redeemed", profileKey, tokenId],
       queryFn: async () =>
         await commonApiFetch<RedeemedSubscriptionCountsResponse>({
           endpoint: "subscriptions/redeemed-memes-counts",
@@ -189,16 +234,15 @@ export default function LatestDropNextMintSubscribe(
     tokenId,
     upcomingCounts,
   ]);
-  const tooltipLabel = t(
+  const tooltipLabel = getToggleTooltipLabel({
+    activeProfileProxy: !!activeProfileProxy,
+    isMintingDay,
+    isUpcoming: shouldQueryUpcomingStatus,
     locale,
-    getToggleTooltipKey({
-      activeProfileProxy: !!activeProfileProxy,
-      isMintingDay,
-      isUpcoming: shouldQueryUpcomingStatus,
-      profileKey,
-      subscribed,
-    })
-  );
+    profileKey,
+    subscribed,
+    subscribedCount,
+  });
 
   if (hideSubscriptions || !hasTokenId) {
     return null;
@@ -206,6 +250,7 @@ export default function LatestDropNextMintSubscribe(
 
   return (
     <MemeSubscriptionAwarenessRow
+      onProfileSubscriptionsAction={openProfileSubscriptions}
       profileSubscriptionsHref={profileSubscriptionsHref}
       subscribed={subscribed}
       subscribedCount={subscribedCount}

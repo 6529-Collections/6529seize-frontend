@@ -790,21 +790,28 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.infoLinkAriaLabel":
     "Learn more about The Memes subscriptions",
   "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
+  "home.mintSubscriptions.manageSubscriptionsLink": "Manage Subscriptions",
   "home.mintSubscriptions.connectToSubscribe": "Connect to Subscribe",
   "home.mintSubscriptions.connectFailed":
     "Failed to open wallet connection. Please try again.",
+  "home.mintSubscriptions.awarenessLabel": "Subscription Minting",
+  "home.mintSubscriptions.action.manage": "Manage",
+  "home.mintSubscriptions.action.setUp": "Set up",
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
-  "home.mintSubscriptions.subscribersCount": "Subscribers count {count}",
-  "home.mintSubscriptions.tooltip.connect": "Connect to subscribe",
+  "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
+  "home.mintSubscriptions.tooltip.connect":
+    "Connect to set up subscription minting.",
   "home.mintSubscriptions.tooltip.dropped":
-    "This card has already dropped and can no longer be subscribed to.",
+    "Subscription minting is closed for this drop.",
   "home.mintSubscriptions.tooltip.manage":
-    "Manage this in profile subscriptions.",
+    "You are subscribed for x{count} for this drop.",
+  "home.mintSubscriptions.tooltip.manageFallback":
+    "You are subscribed for this drop.",
   "home.mintSubscriptions.tooltip.mintDay":
-    "Subscriptions cannot be changed on mint day.",
+    "Subscription minting cannot be changed on mint day.",
   "home.mintSubscriptions.tooltip.profileSubscribe":
-    "Go to profile subscriptions to subscribe.",
+    "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":

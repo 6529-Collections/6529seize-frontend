@@ -1,5 +1,11 @@
 import { AuthContext } from "@/components/auth/Auth";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React, { useMemo } from "react";
 /* eslint-disable react/display-name */
 import AboutPage from "@/app/about/[section]/page";
@@ -91,6 +97,7 @@ describe("About contents dropdown", () => {
     setCookieCountry("DE");
     mockRouterPush.mockClear();
     mockSeizeConnectFresh.mockClear();
+    jest.useRealTimers();
   });
 
   it("hides subscriptions row when iOS users are not in the US", async () => {
@@ -243,7 +250,7 @@ describe("About contents dropdown", () => {
     );
 
     const profileLink = screen.getByRole("link", {
-      name: /my subscriptions/i,
+      name: /manage subscriptions/i,
     });
     const trigger = screen.getByRole("button", {
       name: /open about contents navigation/i,
@@ -321,6 +328,47 @@ describe("About contents dropdown", () => {
     await waitFor(() => {
       expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
     });
+  });
+
+  it("does not keep a stale subscriptions redirect after an abandoned connection", () => {
+    jest.useFakeTimers();
+    setCookieCountry("US");
+    const renderButton = (connectedProfile: unknown) => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(renderButton(null));
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /connect to subscribe/i,
+      })
+    );
+    act(() => {
+      jest.advanceTimersByTime(120_000);
+    });
+
+    rerender(
+      renderButton({
+        handle: "test-handle",
+        normalised_handle: "test-handle",
+        primary_wallet: "0x123",
+        wallets: [],
+      })
+    );
+
+    expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
   it("uses dropdown item styling without link underlines", async () => {
