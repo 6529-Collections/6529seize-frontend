@@ -7,19 +7,6 @@ import type { AnchorHTMLAttributes } from "react";
 type LinkMockProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string;
 };
-type MemeSubscriptionRowMockProps = {
-  balanceLabel?: string | undefined;
-  date: unknown;
-  eligibilityCount: number;
-  infoHref?: string | undefined;
-  minting_today?: boolean | undefined;
-  profileSubscriptionsHref?: string | undefined;
-  readonly: boolean;
-  subscription: {
-    token_id: number;
-  };
-  variant?: string | undefined;
-};
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -37,23 +24,6 @@ jest.mock("@tanstack/react-query", () => ({
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country: "US" }),
 }));
-
-jest.mock(
-  "@/components/user/subscriptions/MemeSubscriptionRow",
-  () =>
-    function MockMemeSubscriptionRow(props: MemeSubscriptionRowMockProps) {
-      return (
-        <div data-testid="meme-subscription-row">
-          token:{props.subscription.token_id} eligibility:
-          {props.eligibilityCount}
-          minting_today:{String(props.minting_today)} readonly:
-          {String(props.readonly)} balance:{props.balanceLabel} variant:
-          {props.variant ?? "default"} date:{String(props.date)} info:
-          {props.infoHref} profile:{props.profileSubscriptionsHref}
-        </div>
-      );
-    }
-);
 
 jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   __esModule: true,
@@ -74,22 +44,45 @@ const useQueryMock = useQuery as jest.Mock;
 describe("LatestDropNextMintSubscribe", () => {
   beforeEach(() => {
     useQueryMock.mockImplementation(({ queryKey }) => {
-      if (queryKey[0] === "next-mint-subscription-details") {
+      if (
+        queryKey[0] === "mint-subscription-status" &&
+        queryKey[1] === "upcoming"
+      ) {
         return {
           data: {
-            subscription_eligibility_count: 3,
+            subscribed: true,
+            eligibility: 3,
+            count: 2,
           },
         };
       }
 
-      if (queryKey[0] === "next-mint-subscription-status") {
+      if (
+        queryKey[0] === "mint-subscription-status" &&
+        queryKey[1] === "final"
+      ) {
+        return {
+          data: undefined,
+        };
+      }
+
+      if (
+        queryKey[0] === "mint-subscription-counts" &&
+        queryKey[1] === "upcoming"
+      ) {
+        return {
+          data: [{ token_id: 478, count: 12 }],
+        };
+      }
+
+      if (
+        queryKey[0] === "mint-subscription-counts" &&
+        queryKey[1] === "redeemed"
+      ) {
         return {
           data: {
-            subscribed: true,
-            eligibility: 2,
-            count: 2,
+            data: [{ token_id: 516, count: 9 }],
           },
-          refetch: jest.fn(),
         };
       }
 
@@ -107,59 +100,60 @@ describe("LatestDropNextMintSubscribe", () => {
   it("renders the subscribe section for the connected profile", () => {
     renderWithAuth(<LatestDropNextMintSubscribe />);
 
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /token:478/
+    expect(screen.getByText("Subscribed")).toBeInTheDocument();
+    expect(screen.getByText("Subscribers count 12")).toBeInTheDocument();
+    expect(screen.getByText("2x")).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", {
+        name: "Manage this in profile subscriptions.",
+      })
+    ).toHaveAttribute("aria-checked", "true");
+    expect(
+      screen.getByRole("switch", {
+        name: "Manage this in profile subscriptions.",
+      })
+    ).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByText("Balance")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
+      "href",
+      "/test-handle/subscriptions"
     );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /eligibility:3/
-    );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /minting_today:false/
-    );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /readonly:false/
-    );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /balance:0/
-    );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /variant:compact/
-    );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /date:null/
-    );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /info:\/about\/subscriptions/
-    );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /profile:\/test-handle\/subscriptions/
-    );
+    expect(
+      screen.getByLabelText("Learn more about The Memes subscriptions")
+    ).toHaveAttribute("href", "/about/subscriptions");
   });
 
-  it("uses a provided token id for active latest-drop subscription state", () => {
+  it("uses a provided token id for upcoming subscription state", () => {
     renderWithAuth(<LatestDropNextMintSubscribe tokenId={516} />);
 
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /token:516/
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ["mint-subscription-status", "upcoming", "test-key", 516],
+        enabled: true,
+      })
     );
   });
 
-  it("renders connected awareness without upcoming status lookup when status source is none", () => {
+  it("renders connected dropped awareness without upcoming status lookup when status source is none", () => {
     renderWithAuth(
       <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
     );
 
+    expect(screen.getByText("Subscribed")).toBeInTheDocument();
+    expect(screen.getByText("Subscribers count 9")).toBeInTheDocument();
     expect(
-      screen.queryByTestId("meme-subscription-row")
+      screen.queryByText("Cannot change active drops")
     ).not.toBeInTheDocument();
-    expect(screen.getByText("Subscribe")).toBeInTheDocument();
-    expect(screen.queryByText("Manage in profile")).not.toBeInTheDocument();
-    expect(screen.getByText("Cannot change active drops")).toBeInTheDocument();
+    expect(screen.queryByText("Balance")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("switch", { name: "Cannot change active drops" })
+      screen.getByRole("switch", {
+        name: "This card has already dropped and can no longer be subscribed to.",
+      })
     ).toHaveAttribute("aria-checked", "false");
     expect(
-      screen.getByRole("switch", { name: "Cannot change active drops" })
+      screen.getByRole("switch", {
+        name: "This card has already dropped and can no longer be subscribed to.",
+      })
     ).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
       "href",
@@ -170,10 +164,51 @@ describe("LatestDropNextMintSubscribe", () => {
     ).toHaveAttribute("href", "/about/subscriptions");
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ["next-mint-subscription-status", expect.any(String), 516],
+        queryKey: ["mint-subscription-status", "upcoming", "test-key", 516],
         enabled: false,
       })
     );
+  });
+
+  it("shows finalized subscription count for dropped cards when available", () => {
+    useQueryMock.mockImplementation(({ queryKey }) => {
+      if (
+        queryKey[0] === "mint-subscription-status" &&
+        queryKey[1] === "final"
+      ) {
+        return {
+          data: {
+            subscribed_count: 3,
+          },
+        };
+      }
+
+      if (
+        queryKey[0] === "mint-subscription-counts" &&
+        queryKey[1] === "redeemed"
+      ) {
+        return {
+          data: {
+            data: [{ token_id: 516, count: 9 }],
+          },
+        };
+      }
+
+      return {
+        data: null,
+      };
+    });
+
+    renderWithAuth(
+      <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
+    );
+
+    expect(screen.getByText("3x")).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", {
+        name: "Manage this in profile subscriptions.",
+      })
+    ).toHaveAttribute("aria-checked", "true");
   });
 
   it("disables retries for expected subscription lookup errors", () => {
@@ -181,84 +216,20 @@ describe("LatestDropNextMintSubscribe", () => {
 
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ["next-mint-subscription-details", expect.any(String)],
-        retry: false,
-      })
-    );
-    expect(useQueryMock).toHaveBeenCalledWith(
-      expect.objectContaining({
         queryKey: [
-          "next-mint-subscription-status",
+          "mint-subscription-status",
+          "upcoming",
           expect.any(String),
           expect.any(Number),
         ],
         retry: false,
       })
     );
-  });
-
-  it("falls back to status eligibility when details are unavailable", () => {
-    useQueryMock.mockImplementation(({ queryKey }) => {
-      if (queryKey[0] === "next-mint-subscription-details") {
-        return { data: undefined };
-      }
-
-      if (queryKey[0] === "next-mint-subscription-status") {
-        return {
-          data: {
-            subscribed: true,
-            eligibility: 2,
-            count: 1,
-          },
-          refetch: jest.fn(),
-        };
-      }
-
-      return {
-        data: null,
-        refetch: jest.fn(),
-      };
-    });
-
-    renderWithAuth(<LatestDropNextMintSubscribe />);
-
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      "eligibility:2"
-    );
-  });
-
-  it("falls back to zero balance for non-finite details", () => {
-    useQueryMock.mockImplementation(({ queryKey }) => {
-      if (queryKey[0] === "next-mint-subscription-details") {
-        return {
-          data: {
-            balance: Number.NaN,
-            subscription_eligibility_count: 3,
-          },
-        };
-      }
-
-      if (queryKey[0] === "next-mint-subscription-status") {
-        return {
-          data: {
-            subscribed: true,
-            eligibility: 2,
-            count: 1,
-          },
-          refetch: jest.fn(),
-        };
-      }
-
-      return {
-        data: null,
-        refetch: jest.fn(),
-      };
-    });
-
-    renderWithAuth(<LatestDropNextMintSubscribe />);
-
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      "balance:0"
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ["mint-subscription-counts", "upcoming", expect.any(Number)],
+        retry: false,
+      })
     );
   });
 
@@ -267,16 +238,12 @@ describe("LatestDropNextMintSubscribe", () => {
       connectedProfile: null,
     });
 
-    expect(screen.getByText("Subscribe")).toBeInTheDocument();
-    expect(screen.queryByText("Connect profile")).not.toBeInTheDocument();
+    expect(screen.getByText("Subscribed")).toBeInTheDocument();
     expect(
-      screen.queryByText("Connect wallet to subscribe")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("switch", { name: "Connect wallet to subscribe" })
+      screen.getByRole("switch", { name: "Connect to subscribe" })
     ).toHaveAttribute("aria-checked", "false");
     expect(
-      screen.getByRole("switch", { name: "Connect wallet to subscribe" })
+      screen.getByRole("switch", { name: "Connect to subscribe" })
     ).toHaveAttribute("aria-disabled", "true");
     expect(screen.queryByLabelText("My subscriptions")).not.toBeInTheDocument();
     expect(
@@ -295,47 +262,53 @@ describe("LatestDropNextMintSubscribe", () => {
       } as any,
     });
 
-    expect(screen.getByText("Proxy active")).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", {
+        name: "Manage subscriptions from your own profile, not a proxy session.",
+      })
+    ).toHaveAttribute("aria-checked", "false");
     expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
       "href",
       "/test-handle/subscriptions"
     );
   });
 
-  it("renders when the profile is not subscribed", () => {
+  it("renders upcoming state when the profile is not subscribed", () => {
     useQueryMock.mockImplementation(({ queryKey }) => {
-      if (queryKey[0] === "next-mint-subscription-details") {
-        return {
-          data: {
-            subscription_eligibility_count: 3,
-          },
-        };
-      }
-
-      if (queryKey[0] === "next-mint-subscription-status") {
+      if (
+        queryKey[0] === "mint-subscription-status" &&
+        queryKey[1] === "upcoming"
+      ) {
         return {
           data: {
             subscribed: false,
             eligibility: 2,
             count: 1,
           },
-          refetch: jest.fn(),
+        };
+      }
+
+      if (
+        queryKey[0] === "mint-subscription-counts" &&
+        queryKey[1] === "upcoming"
+      ) {
+        return {
+          data: [{ token_id: 478, count: 12 }],
         };
       }
 
       return {
         data: null,
-        refetch: jest.fn(),
       };
     });
 
-    renderWithAuth(<LatestDropNextMintSubscribe tokenId={516} readonly />);
+    renderWithAuth(<LatestDropNextMintSubscribe />);
 
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /token:516/
-    );
-    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /readonly:true/
-    );
+    expect(screen.queryByText("1x")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", {
+        name: "Go to profile subscriptions to subscribe.",
+      })
+    ).toHaveAttribute("aria-checked", "false");
   });
 });

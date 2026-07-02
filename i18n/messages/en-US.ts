@@ -786,12 +786,21 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.infoLinkAriaLabel":
     "Learn more about The Memes subscriptions",
   "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
+  "home.mintSubscriptions.connectToSubscribe": "Connect to Subscribe",
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
-  "home.mintSubscriptions.disabled.activeDrop": "Cannot change active drops",
-  "home.mintSubscriptions.disabled.connectWallet":
-    "Connect wallet to subscribe",
-  "home.mintSubscriptions.status.proxyActive": "Proxy active",
+  "home.mintSubscriptions.subscribersCount": "Subscribers count {count}",
+  "home.mintSubscriptions.tooltip.connect": "Connect to subscribe",
+  "home.mintSubscriptions.tooltip.dropped":
+    "This card has already dropped and can no longer be subscribed to.",
+  "home.mintSubscriptions.tooltip.manage":
+    "Manage this in profile subscriptions.",
+  "home.mintSubscriptions.tooltip.mintDay":
+    "Subscriptions cannot be changed on mint day.",
+  "home.mintSubscriptions.tooltip.profileSubscribe":
+    "Go to profile subscriptions to subscribe.",
+  "home.mintSubscriptions.tooltip.proxy":
+    "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":
     "Choose how inserted boosted-drop cards appear in wave chat on this device.",
   "waveChat.boostedDrops.display.expanded": "Expanded",

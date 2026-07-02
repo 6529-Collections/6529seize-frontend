@@ -63,7 +63,7 @@ export default function AboutSubscriptionsProfileButton() {
         }}
         className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-400/50 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-primary-600"
       >
-        {t(locale, "home.mintSubscriptions.disabled.connectWallet")}
+        {t(locale, "home.mintSubscriptions.connectToSubscribe")}
       </button>
     );
   }

@@ -277,7 +277,7 @@ describe("About contents dropdown", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /connect wallet to subscribe/i,
+        name: /connect to subscribe/i,
       })
     );
 
@@ -307,7 +307,7 @@ describe("About contents dropdown", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /connect wallet to subscribe/i,
+        name: /connect to subscribe/i,
       })
     );
     rerender(
