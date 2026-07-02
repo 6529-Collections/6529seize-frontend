@@ -14,12 +14,17 @@ import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiFetch } from "@/services/api/common-api";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useContext, useMemo } from "react";
+import Toggle from "react-toggle";
 import MemeSubscriptionRow from "../../user/subscriptions/MemeSubscriptionRow";
 
 const SUBSCRIPTION_SLOT_CLASS_NAME =
   "tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4";
+const ABOUT_SUBSCRIPTIONS_HREF = "/about/subscriptions";
 
 function getProfileKey(
   connectedProfile: ApiIdentity | null
@@ -30,9 +35,70 @@ function getProfileKey(
   );
 }
 
+function getProfileSubscriptionsHref(
+  connectedProfile: ApiIdentity | null
+): string | undefined {
+  const normalisedHandle = connectedProfile?.normalised_handle?.trim();
+  if (normalisedHandle) {
+    return `/${normalisedHandle}/subscriptions`;
+  }
+
+  const handle = connectedProfile?.handle?.trim();
+  return handle ? `/${handle}/subscriptions` : undefined;
+}
+
+function SubscriptionAwarenessRow({
+  profileSubscriptionsHref,
+  statusLabel,
+  tokenId,
+}: Readonly<{
+  profileSubscriptionsHref: string | undefined;
+  statusLabel: string;
+  tokenId: number;
+}>) {
+  return (
+    <div className={SUBSCRIPTION_SLOT_CLASS_NAME}>
+      <div className="tw-py-1">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
+            <span className="tw-font-medium tw-leading-none">Subscribe</span>
+            <Link
+              href={ABOUT_SUBSCRIPTIONS_HREF}
+              aria-label="Learn more about The Memes subscriptions"
+              className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+            >
+              <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3.5" />
+            </Link>
+            {profileSubscriptionsHref && (
+              <Link
+                href={profileSubscriptionsHref}
+                className="tw-text-sm tw-leading-none tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+              >
+                My subscriptions
+              </Link>
+            )}
+          </span>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <Toggle
+              id={`subscription-awareness-${tokenId}`}
+              checked={false}
+              disabled
+              icons={false}
+              aria-label={statusLabel}
+            />
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400">
+              {statusLabel}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LatestDropNextMintSubscribe(
   props: Readonly<{
-    showOnlyWhenSubscribed?: boolean;
+    tokenId?: number;
     readonly?: boolean;
   }> = {}
 ) {
@@ -40,7 +106,10 @@ export default function LatestDropNextMintSubscribe(
   const { country } = useCookieConsent();
   const { isIos } = useCapacitor();
 
-  const tokenId = useMemo(() => getCanonicalNextMintNumber(), []);
+  const tokenId = useMemo(
+    () => props.tokenId ?? getCanonicalNextMintNumber(),
+    [props.tokenId]
+  );
   const hasTokenId = Number.isInteger(tokenId) && tokenId > 0;
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -50,6 +119,10 @@ export default function LatestDropNextMintSubscribe(
   const profileKey = useMemo(
     () => (activeProfileProxy ? undefined : getProfileKey(connectedProfile)),
     [activeProfileProxy, connectedProfile]
+  );
+  const profileSubscriptionsHref = useMemo(
+    () => getProfileSubscriptionsHref(connectedProfile),
+    [connectedProfile]
   );
 
   const { data: details } = useQuery<SubscriptionDetails>({
@@ -95,15 +168,21 @@ export default function LatestDropNextMintSubscribe(
     }).format(Math.round(safeBalance * 1_000_000) / 1_000_000);
   }, [details?.balance]);
 
-  if (hideSubscriptions || !profileKey) {
+  if (hideSubscriptions || !hasTokenId) {
     return null;
   }
 
-  if (!subscription) {
-    if (props.showOnlyWhenSubscribed || !hasTokenId) {
-      return null;
-    }
+  if (!profileKey) {
+    return (
+      <SubscriptionAwarenessRow
+        profileSubscriptionsHref={profileSubscriptionsHref}
+        statusLabel={activeProfileProxy ? "Proxy active" : "Connect profile"}
+        tokenId={tokenId}
+      />
+    );
+  }
 
+  if (!subscription) {
     return (
       <div className={SUBSCRIPTION_SLOT_CLASS_NAME} aria-hidden>
         <div className="tw-py-1">
@@ -120,10 +199,6 @@ export default function LatestDropNextMintSubscribe(
     );
   }
 
-  if (props.showOnlyWhenSubscribed && !subscription.subscribed) {
-    return null;
-  }
-
   return (
     <div className={SUBSCRIPTION_SLOT_CLASS_NAME}>
       <div className="tw-rounded-xl tw-bg-transparent">
@@ -136,6 +211,8 @@ export default function LatestDropNextMintSubscribe(
           }
           balanceLabel={balanceLabel}
           readonly={props.readonly ?? false}
+          infoHref={ABOUT_SUBSCRIPTIONS_HREF}
+          profileSubscriptionsHref={profileSubscriptionsHref}
           refresh={() => {
             refetchStatus();
           }}
