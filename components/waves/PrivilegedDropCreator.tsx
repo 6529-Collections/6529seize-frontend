@@ -7,6 +7,8 @@ import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { shouldShowUserSetUpProfileCta } from "../user/utils/set-up-profile/UserSetUpProfileCta";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
 import {
@@ -69,7 +71,8 @@ export default function PrivilegedDropCreator({
   forceStandardDropComposer = false,
 }: PrivilegedDropCreatorProps) {
   const queryClient = useQueryClient();
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
+  const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const { updateEligibility } = useWaveEligibility();
   const refreshWaveAfterSlowModeExpires = useCallback(() => {
     queryClient
@@ -79,8 +82,26 @@ export default function PrivilegedDropCreator({
       .catch(() => undefined);
   }, [queryClient, wave.id]);
 
+  const hasProfile = Boolean(connectedProfile?.handle);
+  const hasWalletAuth = Boolean(address && hasValidWalletAuth !== false);
+  const isProfileLoadingForWallet = Boolean(
+    hasWalletAuth && fetchingProfile && !hasProfile && !activeProfileProxy
+  );
+  const shouldOfferProfileSetup =
+    shouldShowUserSetUpProfileCta({
+      address,
+      connectedProfileHandle: connectedProfile?.handle,
+      fetchingProfile,
+      hasValidWalletAuth,
+    }) && !activeProfileProxy;
+  const profileSetupHref =
+    shouldOfferProfileSetup && address
+      ? `/${address.toLowerCase()}`
+      : undefined;
+
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
-    isLoggedIn: !!connectedProfile?.handle,
+    isLoggedIn: hasProfile || isProfileLoadingForWallet,
+    needsProfile: shouldOfferProfileSetup,
     isProxy: !!activeProfileProxy,
     canChat: wave.chat.authenticated_user_eligible,
     canDrop: wave.participation.authenticated_user_eligible,
@@ -103,19 +124,28 @@ export default function PrivilegedDropCreator({
     });
   }, [chatRestriction, updateEligibility, wave.id]);
 
+  if (isProfileLoadingForWallet) {
+    return null;
+  }
+
   if (submissionRestriction !== null && blockingChatRestriction !== null) {
     return (
       <DropPlaceholder
         type="both"
         chatRestriction={blockingChatRestriction}
         submissionRestriction={submissionRestriction}
+        profileSetupHref={profileSetupHref}
       />
     );
   }
 
   if (fixedDropMode === DropMode.CHAT && blockingChatRestriction !== null) {
     return (
-      <DropPlaceholder type="chat" chatRestriction={blockingChatRestriction} />
+      <DropPlaceholder
+        type="chat"
+        chatRestriction={blockingChatRestriction}
+        profileSetupHref={profileSetupHref}
+      />
     );
   }
 
@@ -127,6 +157,7 @@ export default function PrivilegedDropCreator({
       <DropPlaceholder
         type="submission"
         submissionRestriction={submissionRestriction}
+        profileSetupHref={profileSetupHref}
       />
     );
   }

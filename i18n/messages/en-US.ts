@@ -400,6 +400,17 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",
   expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
   expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
+  subwavesToggleView: "View subwaves",
+  subwavesToggleViewCountOne: "View {count} subwave",
+  subwavesToggleViewCountMany: "View {count} subwaves",
+  subwavesToggleHide: "Hide subwaves",
+  subwavesToggleLoading: "Loading subwaves",
+  subwavesToggleUnreadBadge: "{count} new",
+  subwavesToggleViewAriaLabel: "View {waveName} subwaves",
+  subwavesToggleViewCountOneAriaLabel: "View {count} subwave for {waveName}",
+  subwavesToggleViewCountManyAriaLabel: "View {count} subwaves for {waveName}",
+  subwavesToggleHideAriaLabel: "Hide {waveName} subwaves",
+  subwavesToggleLoadingAriaLabel: "Loading {waveName} subwaves",
 } as const);
 
 const QUICK_DM_MESSAGES = objectMessages("quickDm", {

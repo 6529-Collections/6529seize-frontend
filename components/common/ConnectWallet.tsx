@@ -1,12 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { type ReactNode } from "react";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 
-const ConnectWallet: React.FC = () => {
+interface ConnectWalletProps {
+  readonly title?: string | undefined;
+  readonly description?: string | undefined;
+  readonly action?: ReactNode | undefined;
+}
+
+const ConnectWallet: React.FC<ConnectWalletProps> = ({
+  title = "This content is only available to connected wallets.",
+  description = "Connect your wallet to continue.",
+  action,
+}) => {
   return (
-    <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-py-16 md:tw-h-[100dvh]">
+    <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-py-16 md:tw-h-[100dvh] md:tw-flex-row">
       <Image
         unoptimized
         priority
@@ -15,16 +25,12 @@ const ConnectWallet: React.FC = () => {
         alt="Brain"
         width={304}
         height={450}
-        className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+        className="tw-h-auto tw-max-w-[30vw] tw-rounded-md tw-shadow-lg md:tw-max-w-[200px]"
       />
-      <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
-        <h1 className="tw-text-xl tw-font-bold">
-          This content is only available to connected wallets.
-        </h1>
-        <p className="tw-text-base tw-text-gray-400">
-          Connect your wallet to continue.
-        </p>
-        <HeaderUserConnect />
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-text-center md:tw-items-start md:tw-text-left">
+        <h1 className="tw-text-xl tw-font-bold">{title}</h1>
+        <p className="tw-text-base tw-text-gray-400">{description}</p>
+        {action ?? <HeaderUserConnect />}
       </div>
     </div>
   );

@@ -39,7 +39,9 @@ export function SidebarWaveTreeRowTransition({
     <div
       data-sidebar-subwave-row-state={row.animationState}
       className={`tw-transition-all tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${
-        row.depth === 1 ? "tw-overflow-hidden" : ""
+        row.depth === 1 && row.animationState !== "entered"
+          ? "tw-overflow-hidden"
+          : ""
       } ${className ?? ""}`}
       style={{
         ...style,
