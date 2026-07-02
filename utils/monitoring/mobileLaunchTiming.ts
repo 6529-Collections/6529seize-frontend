@@ -115,6 +115,7 @@ type BuildLaunchAttributesInput = {
 };
 
 let launchState: LaunchState | null = null;
+let fallbackLaunchIdCounter = 0;
 
 export function startMobileLaunchTiming(): void {
   if (launchState !== null) {
@@ -280,7 +281,7 @@ function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
   const warn = slow || reason === "timeout" || reason === "error";
   const routeFamily = sanitizeRouteFamily(getCurrentPathname());
   const sampleRate = getSampleRate(routeFamily, state.platform);
-  const shouldLog = warn || Math.random() < sampleRate;
+  const shouldLog = warn || shouldSampleLaunch(sampleRate);
 
   if (!shouldLog) {
     return;
@@ -333,7 +334,31 @@ function createLaunchId(): string {
   try {
     return globalThis.crypto.randomUUID();
   } catch {
-    return `launch-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    // Fall through to the deterministic fallback below.
+  }
+
+  fallbackLaunchIdCounter += 1;
+  return `launch-${Date.now()}-${fallbackLaunchIdCounter}`;
+}
+
+function shouldSampleLaunch(sampleRate: number): boolean {
+  if (sampleRate >= 1) {
+    return true;
+  }
+  if (sampleRate <= 0) {
+    return false;
+  }
+
+  return getCryptoRandomUnit() < sampleRate;
+}
+
+function getCryptoRandomUnit(): number {
+  try {
+    const values = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(values);
+    return (values[0] ?? 0) / 0x100000000;
+  } catch {
+    return 1;
   }
 }
 

@@ -68,6 +68,18 @@ function flushLaunchTiming(
   jest.advanceTimersByTime(0);
 }
 
+function mockCryptoSample(value: number): void {
+  const cryptoSample = Math.floor(value * 0x100000000);
+  jest
+    .spyOn(globalThis.crypto, "getRandomValues")
+    .mockImplementation((array) => {
+      if (array instanceof Uint32Array && array.length > 0) {
+        array[0] = cryptoSample;
+      }
+      return array;
+    });
+}
+
 describe("mobileLaunchTiming", () => {
   beforeEach(() => {
     currentNow = 0;
@@ -75,7 +87,7 @@ describe("mobileLaunchTiming", () => {
     jest.spyOn(globalThis.performance, "now").mockImplementation(() => {
       return currentNow;
     });
-    jest.spyOn(Math, "random").mockReturnValue(0.99);
+    mockCryptoSample(0.99);
     globalThis.history.pushState({}, "", "/waves/123?wallet=secret");
   });
 
@@ -86,7 +98,7 @@ describe("mobileLaunchTiming", () => {
   });
 
   it("starts web launches outside Capacitor", async () => {
-    jest.spyOn(Math, "random").mockReturnValue(0.01);
+    mockCryptoSample(0.01);
     const { timing, sentry } = await loadMobileLaunchTiming({ native: false });
 
     timing.startMobileLaunchTiming();
@@ -111,7 +123,7 @@ describe("mobileLaunchTiming", () => {
   });
 
   it("flushes once", async () => {
-    jest.spyOn(Math, "random").mockReturnValue(0.01);
+    mockCryptoSample(0.01);
     const { timing, sentry } = await loadMobileLaunchTiming();
 
     timing.startMobileLaunchTiming();
@@ -251,7 +263,7 @@ describe("mobileLaunchTiming", () => {
     expect(first.sentry.logger.info).not.toHaveBeenCalled();
     expect(first.sentry.logger.warn).not.toHaveBeenCalled();
 
-    jest.spyOn(Math, "random").mockReturnValue(0.01);
+    mockCryptoSample(0.01);
     globalThis.history.pushState({}, "", "/about");
     const second = await loadMobileLaunchTiming();
 
