@@ -33,6 +33,7 @@ function AppWalletModalShell(
 ) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const { children, footer, onHide, show, title } = props;
 
   useEffect(() => {
@@ -51,8 +52,15 @@ function AppWalletModalShell(
       } else {
         dialog.removeAttribute("open");
       }
+      previouslyFocusedElementRef.current?.focus();
+      previouslyFocusedElementRef.current = null;
       return undefined;
     }
+
+    previouslyFocusedElementRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
 
     if (typeof dialog.showModal === "function") {
       if (!dialog.open) {
@@ -61,6 +69,11 @@ function AppWalletModalShell(
     } else {
       dialog.setAttribute("open", "");
     }
+    dialog
+      .querySelector<HTMLElement>(
+        "[autofocus], input:not([disabled]), button:not([disabled])"
+      )
+      ?.focus();
 
     return () => {
       if (dialog.open) {
@@ -68,6 +81,8 @@ function AppWalletModalShell(
       } else {
         dialog.removeAttribute("open");
       }
+      previouslyFocusedElementRef.current?.focus();
+      previouslyFocusedElementRef.current = null;
     };
   }, [show]);
 

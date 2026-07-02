@@ -9,7 +9,6 @@
 
 .signModalSurface {
   width: 100%;
-  margin: 0;
   padding: 0;
   background: linear-gradient(
     180deg,
@@ -19,7 +18,7 @@
   color: variables.$font-color !important;
   border: 1px solid rgba(147, 147, 159, 0.35) !important;
   border-radius: 0.9rem !important;
-  overflow: hidden;
+  overflow-y: auto;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
 }
 

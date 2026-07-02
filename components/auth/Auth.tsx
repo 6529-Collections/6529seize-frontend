@@ -1779,6 +1779,7 @@ export default function Auth({
   );
   const signModalTitleId = useId();
   const signDialogRef = useRef<HTMLDialogElement>(null);
+  const signModalPreviouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const signModalTitle = (() => {
     if (isConnectionShareUpgradePrompt) {
       return t(AUTH_MODAL_LOCALE, "auth.signModal.connectionUpdateRequired");
@@ -1868,8 +1869,15 @@ export default function Auth({
       } else {
         dialog.removeAttribute("open");
       }
+      signModalPreviouslyFocusedElementRef.current?.focus();
+      signModalPreviouslyFocusedElementRef.current = null;
       return undefined;
     }
+
+    signModalPreviouslyFocusedElementRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
 
     if (typeof dialog.showModal === "function") {
       if (!dialog.open) {
@@ -1878,6 +1886,7 @@ export default function Auth({
     } else {
       dialog.setAttribute("open", "");
     }
+    dialog.focus();
 
     return () => {
       if (dialog.open) {
@@ -1885,6 +1894,8 @@ export default function Auth({
       } else {
         dialog.removeAttribute("open");
       }
+      signModalPreviouslyFocusedElementRef.current?.focus();
+      signModalPreviouslyFocusedElementRef.current = null;
     };
   }, [enableWalletAuthentication, shouldShowSignModal]);
 
@@ -1927,6 +1938,7 @@ export default function Auth({
               styles["signModalSurface"]
             )}
             onCancel={(event) => event.preventDefault()}
+            tabIndex={-1}
           >
             <div className={styles["signModalHeader"]}>
               <h2 id={signModalTitleId} className={styles["signModalTitle"]}>
