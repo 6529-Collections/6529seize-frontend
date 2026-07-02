@@ -151,6 +151,88 @@ describe("fetchLinkPreview", () => {
     expect(getFetchSignal(0).aborted).toBe(false);
   });
 
+  it("normalizes Manifold original images in batch responses", async () => {
+    const preview: LinkPreviewResponse = {
+      requestUrl: "https://manifold.xyz/@serhiikovbasyuk",
+      title: "Serhii Kovbasyuk | Manifold",
+      image: {
+        url: "https://assets.manifold.xyz/original/8e55d2cffbeebf1ef17e8013ae10658068efc83344b3b2b28aab060df502efe3.jpg",
+        secureUrl:
+          "https://assets.manifold.xyz/original/8e55d2cffbeebf1ef17e8013ae10658068efc83344b3b2b28aab060df502efe3.jpg",
+      },
+      images: [
+        {
+          url: "https://assets.manifold.xyz/original/8e55d2cffbeebf1ef17e8013ae10658068efc83344b3b2b28aab060df502efe3.jpg",
+          secureUrl:
+            "https://assets.manifold.xyz/original/8e55d2cffbeebf1ef17e8013ae10658068efc83344b3b2b28aab060df502efe3.jpg",
+        },
+      ],
+    };
+    fetchMock.mockResolvedValueOnce(
+      createResponse({
+        results: {
+          "https://manifold.xyz/@serhiikovbasyuk": preview,
+        },
+        errors: {},
+      })
+    );
+
+    const { fetchLinkPreview } = await loadApi();
+    const request = fetchLinkPreview("https://manifold.xyz/@serhiikovbasyuk");
+
+    jest.runOnlyPendingTimers();
+
+    await expect(request).resolves.toEqual(
+      expect.objectContaining({
+        image: {
+          url: "https://assets.manifold.xyz/optimized/8e55d2cffbeebf1ef17e8013ae10658068efc83344b3b2b28aab060df502efe3/w_800.jpg",
+          secureUrl:
+            "https://assets.manifold.xyz/optimized/8e55d2cffbeebf1ef17e8013ae10658068efc83344b3b2b28aab060df502efe3/w_800.jpg",
+        },
+        images: [
+          {
+            url: "https://assets.manifold.xyz/optimized/8e55d2cffbeebf1ef17e8013ae10658068efc83344b3b2b28aab060df502efe3/w_800.jpg",
+            secureUrl:
+              "https://assets.manifold.xyz/optimized/8e55d2cffbeebf1ef17e8013ae10658068efc83344b3b2b28aab060df502efe3/w_800.jpg",
+          },
+        ],
+      })
+    );
+  });
+
+  it("preserves null image arrays while normalizing batch response images", async () => {
+    const preview: LinkPreviewResponse = {
+      requestUrl: "https://manifold.xyz/@artist/id/123",
+      title: "Manifold listing",
+      image: {
+        url: "https://assets.manifold.xyz/original/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184.JPEG",
+      },
+      images: null,
+    };
+    fetchMock.mockResolvedValueOnce(
+      createResponse({
+        results: {
+          "https://manifold.xyz/@artist/id/123": preview,
+        },
+        errors: {},
+      })
+    );
+
+    const { fetchLinkPreview } = await loadApi();
+    const request = fetchLinkPreview("https://manifold.xyz/@artist/id/123");
+
+    jest.runOnlyPendingTimers();
+
+    await expect(request).resolves.toEqual(
+      expect.objectContaining({
+        image: {
+          url: "https://assets.manifold.xyz/optimized/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184/w_800.jpg",
+        },
+        images: null,
+      })
+    );
+  });
+
   it("splits same-tick calls into POST chunks of 5 urls", async () => {
     const urls = [
       "https://one.example/article",
@@ -450,6 +532,32 @@ describe("fetchLinkPreview", () => {
     );
     expect(getFetchSignal(1).aborted).toBe(false);
     expect(getFetchSignal(2).aborted).toBe(false);
+  });
+
+  it("normalizes Manifold original images in single GET fallback responses", async () => {
+    const preview: LinkPreviewResponse = {
+      requestUrl: "https://manifold.xyz/@artist/id/123",
+      title: "Manifold listing",
+      image: {
+        url: "https://assets.manifold.xyz/original/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184.png",
+      },
+    };
+    fetchMock
+      .mockRejectedValueOnce(new Error("batch unavailable"))
+      .mockResolvedValueOnce(createResponse(preview));
+
+    const { fetchLinkPreview } = await loadApi();
+    const request = fetchLinkPreview("https://manifold.xyz/@artist/id/123");
+
+    jest.runOnlyPendingTimers();
+
+    await expect(request).resolves.toEqual(
+      expect.objectContaining({
+        image: {
+          url: "https://assets.manifold.xyz/optimized/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184/w_800.png",
+        },
+      })
+    );
   });
 
   it("aborts timed-out single GET fallback requests", async () => {

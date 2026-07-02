@@ -5,7 +5,7 @@ import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { EULAConsentProvider } from "@/components/eula/EULAConsentContext";
 import { IpfsProvider } from "@/components/ipfs/IPFSContext";
-import QuickDirectMessages from "@/components/messages/quick-dms/QuickDirectMessages";
+import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirectMessagesGate";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import NewVersionToast from "@/components/utils/NewVersionToast";
@@ -87,7 +87,7 @@ export default function Providers({
                                     {enableMyStream ? (
                                       <MyStreamProvider>
                                         {sharedProviders}
-                                        <QuickDirectMessages />
+                                        <QuickDirectMessagesGate />
                                       </MyStreamProvider>
                                     ) : (
                                       sharedProviders

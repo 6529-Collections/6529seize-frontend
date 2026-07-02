@@ -22,6 +22,7 @@ interface WaveDropsContentProps {
   readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
   readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
+  readonly paginationThreshold: number;
   readonly onTopIntersection: () => void;
   readonly onReply: ({
     drop,
@@ -61,6 +62,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   scrollContainerCallbackRef,
   bottomAnchorRef,
   bottomAnchorCallbackRef,
+  paginationThreshold,
   onTopIntersection,
   onReply,
   queueSerialTarget,
@@ -121,6 +123,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         scrollContainerCallbackRef={scrollContainerCallbackRef}
         bottomAnchorRef={bottomAnchorRef}
         bottomAnchorCallbackRef={bottomAnchorCallbackRef}
+        paginationThreshold={paginationThreshold}
         onTopIntersection={onTopIntersection}
         onReply={onReply}
         queueSerialTarget={queueSerialTarget}
