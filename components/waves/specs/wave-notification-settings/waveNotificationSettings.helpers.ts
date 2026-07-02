@@ -33,12 +33,12 @@ export function getAllDropsTooltip({
   readonly subscribersLimit: number;
 }) {
   if (disableAllDropsSelection && !subscribedToAllDrops) {
-    return `'All' notifications unavailable for waves with ${subscribersLimit.toLocaleString()}+ followers.`;
+    return `All-message notifications are unavailable for waves with ${subscribersLimit.toLocaleString()}+ followers.`;
   }
 
   if (subscribedToAllDrops) {
-    return "Click to disable notifications for all drops";
+    return "Click to disable notifications for all messages";
   }
 
-  return "Click to enable notifications for all drops";
+  return "Click to enable notifications for all messages";
 }
