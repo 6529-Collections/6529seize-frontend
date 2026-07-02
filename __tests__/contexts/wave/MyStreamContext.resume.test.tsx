@@ -40,6 +40,10 @@ jest.mock("@/hooks/useWaveById", () => ({
   })),
 }));
 
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(() => "/waves"),
+}));
+
 jest.mock("@/contexts/wave/hooks/useActiveWaveManager", () => ({
   useActiveWaveManager: jest.fn(() => ({
     activeWaveId: "wave-1",
@@ -85,8 +89,12 @@ jest.mock("@/contexts/wave/hooks/useEnhancedWavesListCore", () => ({
     fetchNextPage: wavesData.fetchNextPage,
     addPinnedWave: wavesData.addPinnedWave,
     removePinnedWave: wavesData.removePinnedWave,
+    loadSubwavesForParent: wavesData.loadSubwavesForParent,
+    prefetchSubwavesForParent: wavesData.prefetchSubwavesForParent,
+    loadingSubwaveParentIds: [],
     refetchAllWaves: wavesData.refetchAllWaves,
     resetAllWavesNewDropsCount: jest.fn(),
+    markWaveRead: jest.fn(),
     restoreWaveUnreadCount: jest.fn(),
   })),
 }));
@@ -94,6 +102,7 @@ jest.mock("@/contexts/wave/hooks/useEnhancedWavesListCore", () => ({
 const useWavesListMock = require("@/hooks/useWavesList").default as jest.Mock;
 const useDmWavesListMock = require("@/hooks/useDmWavesList")
   .default as jest.Mock;
+const usePathnameMock = require("next/navigation").usePathname as jest.Mock;
 
 const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
   Object.defineProperty(document, "visibilityState", {
@@ -112,6 +121,9 @@ const createListData = (refetchAllWaves: jest.Mock) => ({
   refetchAllWaves,
   addPinnedWave: jest.fn(),
   removePinnedWave: jest.fn(),
+  loadSubwavesForParent: jest.fn(),
+  prefetchSubwavesForParent: jest.fn(),
+  loadingSubwaveParentIds: [],
 });
 
 const CaptureMyStream = ({
@@ -130,6 +142,7 @@ describe("MyStreamProvider resume sync", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setDocumentVisibilityState("visible");
+    usePathnameMock.mockReturnValue("/waves");
     useWavesListMock.mockReturnValue(createListData(mainRefetch));
     useDmWavesListMock.mockReturnValue(createListData(dmRefetch));
   });
@@ -164,7 +177,43 @@ describe("MyStreamProvider resume sync", () => {
     });
   });
 
-  it("refetches both Waves and DMs when the browser comes online", () => {
+  it("does not refetch DMs when the browser comes online and no DM list is active", () => {
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    act(() => {
+      window.dispatchEvent(new Event("online"));
+    });
+
+    expect(mainRefetch).toHaveBeenCalledTimes(1);
+    expect(dmRefetch).not.toHaveBeenCalled();
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+  });
+
+  it("treats a null pathname as a non-messages route", () => {
+    usePathnameMock.mockReturnValue(null);
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    act(() => {
+      window.dispatchEvent(new Event("online"));
+    });
+
+    expect(mainRefetch).toHaveBeenCalledTimes(1);
+    expect(dmRefetch).not.toHaveBeenCalled();
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+  });
+
+  it("refetches DMs on browser resume for messages routes", () => {
+    usePathnameMock.mockReturnValue("/messages/wave-1");
+
     render(
       <MyStreamProvider>
         <div />
@@ -177,6 +226,44 @@ describe("MyStreamProvider resume sync", () => {
 
     expect(mainRefetch).toHaveBeenCalledTimes(1);
     expect(dmRefetch).toHaveBeenCalledTimes(1);
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+  });
+
+  it("refetches DMs while a DM surface activation is mounted", () => {
+    let context: ReturnType<typeof useMyStream> | null = null;
+
+    render(
+      <MyStreamProvider>
+        <CaptureMyStream
+          onContext={(nextContext) => {
+            context = nextContext;
+          }}
+        />
+      </MyStreamProvider>
+    );
+
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+    expect(context).not.toBeNull();
+
+    let releaseDirectMessagesList: (() => void) | null = null;
+    act(() => {
+      releaseDirectMessagesList = context!.requestDirectMessagesList();
+    });
+
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+
+    act(() => {
+      window.dispatchEvent(new Event("online"));
+    });
+
+    expect(mainRefetch).toHaveBeenCalledTimes(1);
+    expect(dmRefetch).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      releaseDirectMessagesList?.();
+    });
+
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
   });
 
   it("does not refetch on online while the document is hidden", () => {

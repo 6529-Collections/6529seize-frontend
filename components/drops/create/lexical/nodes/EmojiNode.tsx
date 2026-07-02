@@ -3,10 +3,10 @@ import type {
   Spread,
   LexicalEditor,
   EditorConfig,
-  NodeKey} from "lexical";
-import {
-  DecoratorNode
+  NodeKey,
 } from "lexical";
+import { DecoratorNode } from "lexical";
+import Image from "next/image";
 import { createElement, type JSX } from "react";
 import { useEmoji } from "@/contexts/EmojiContext";
 
@@ -41,8 +41,7 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
   }
 
   override createDOM(_config: EditorConfig): HTMLElement {
-    const span = document.createElement("span");
-    return span;
+    return document.createElement("span");
   }
 
   override updateDOM(
@@ -86,5 +85,21 @@ const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
     return <span>{`:${emojiId}:`}</span>;
   }
 
-  return <img src={emoji.skins[0]?.src} alt={emojiId} className="emoji-node" />;
+  const emojiSrc = emoji.skins[0]?.src;
+  if (!emojiSrc) {
+    return <span>{`:${emojiId}:`}</span>;
+  }
+
+  const emojiLabel = emojiId.replaceAll("_", " ");
+
+  return (
+    <Image
+      src={emojiSrc}
+      alt={emojiLabel}
+      width={20}
+      height={20}
+      unoptimized
+      className="emoji-node"
+    />
+  );
 };

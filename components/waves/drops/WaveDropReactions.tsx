@@ -23,7 +23,7 @@ import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -214,6 +214,7 @@ function ReactionTooltipContent({
 }
 
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
+  const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
   const [detailedReactionsState, setDetailedReactionsState] =
     useState<DetailedReactionsState | null>(null);
@@ -230,7 +231,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
       ? detailedReactionsState.reactions
       : null;
   const detailsLoading = detailsLoadingDropId === drop.id;
-  const dropReactions = drop.reactions ?? [];
+  const dropReactions = drop.reactions;
 
   const reactionsWithDetails = useMemo(() => {
     if (!detailedReactions) {
@@ -260,6 +261,13 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
       };
     });
   }, [detailedReactions, dropReactions]);
+
+  useQuery({
+    queryKey: ["emoji-data", "wave-reactions"],
+    queryFn: () => loadEmojiData().then(() => null),
+    enabled: reactionsWithDetails.length > 0,
+    staleTime: Infinity,
+  });
 
   const loadReactionDetails = useCallback(() => {
     if (detailedReactions) {
@@ -308,6 +316,8 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
         <WaveDropReaction
           key={`${reaction.reaction}-${getReactionCount(reaction)}`}
           drop={drop}
+          emojiMap={emojiMap}
+          findNativeEmoji={findNativeEmoji}
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
           onLoadDetails={loadReactionDetails}
@@ -328,6 +338,8 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
 
 function WaveDropReaction({
   drop,
+  emojiMap,
+  findNativeEmoji,
   reaction,
   onOpenDetailDialog,
   onLoadDetails,
@@ -335,6 +347,8 @@ function WaveDropReaction({
   isTouchDevice,
 }: {
   readonly drop: ApiDrop;
+  readonly emojiMap: ReturnType<typeof useEmoji>["emojiMap"];
+  readonly findNativeEmoji: ReturnType<typeof useEmoji>["findNativeEmoji"];
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
   readonly onLoadDetails: () => Promise<void> | null;
@@ -342,7 +356,6 @@ function WaveDropReaction({
   readonly isTouchDevice: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
-  const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
@@ -395,7 +408,7 @@ function WaveDropReaction({
     [touchHandlers]
   );
 
-  const [total, setTotal] = useState(getReactionCount(reaction));
+  const [total, setTotal] = useState(() => getReactionCount(reaction));
   const [selected, setSelected] = useState(
     reaction.reaction === drop.context_profile_context?.reaction
   );
@@ -429,13 +442,9 @@ function WaveDropReaction({
       return;
     }
 
-    if (reaction.profiles === prevProfilesRef.current) {
-      const timeoutId = setTimeout(() => {
-        setTotal((current) => (current === nextTotal ? current : nextTotal));
-      }, 0);
-      return () => clearTimeout(timeoutId);
+    if (reaction.profiles !== prevProfilesRef.current) {
+      prevProfilesRef.current = reaction.profiles;
     }
-    prevProfilesRef.current = reaction.profiles;
 
     const timeoutId = setTimeout(() => {
       setTotal((current) => (current === nextTotal ? current : nextTotal));
@@ -460,17 +469,12 @@ function WaveDropReaction({
     return () => clearTimeout(timeout);
   }, [animate]);
 
-  // derive emoji ID
   const emojiId = useMemo(
     () => reaction.reaction.replaceAll(":", ""),
     [reaction.reaction]
   );
-  const tooltipId = useMemo(
-    () => buildTooltipId("reaction", drop.id, emojiId),
-    [drop.id, emojiId]
-  );
+  const tooltipId = buildTooltipId("reaction", drop.id, emojiId);
 
-  // small + tooltip emoji nodes
   const waveId = drop.wave.id;
 
   const { emojiNode, emojiNodeTooltip } = useMemo(() => {
@@ -485,7 +489,7 @@ function WaveDropReaction({
           <div className="tw-relative tw-size-4">
             <Image
               src={customSrc}
-              alt={emojiId}
+              alt={emojiId.replaceAll("_", " ")}
               fill
               sizes="16px"
               unoptimized
@@ -497,7 +501,7 @@ function WaveDropReaction({
           <div className="tw-relative tw-size-8">
             <Image
               src={customSrc}
-              alt={emojiId}
+              alt={emojiId.replaceAll("_", " ")}
               fill
               sizes="32px"
               unoptimized
