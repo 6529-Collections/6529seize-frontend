@@ -1,0 +1,53 @@
+# Join 6529 Journey
+
+## Summary
+
+`/join-6529` is a state-aware onboarding and acquisition route. It gives users
+a short journey through the minimum useful setup path instead of a static block
+of instructions.
+
+## User State
+
+The page reads the active wallet, wallet authentication, connected profile,
+profile image, and recent profile drops.
+
+- No active wallet: the current action connects a wallet.
+- Active wallet without valid auth: the current action requests wallet auth.
+- Authenticated wallet without profile: the current action opens profile setup.
+- Profile without profile image: the profile-image step remains incomplete, but
+  it does not block Waves or messaging actions.
+- Profile with recent public Wave drop: the first public message step is marked
+  complete.
+
+The first public message check queries recent drops for the connected profile
+handle and counts drops in public Waves only. If that check fails, the page keeps
+the message step open and leaves the rest of the guide available.
+
+## Progress
+
+The journey shows five visible steps:
+
+1. Connect wallet.
+2. Create profile.
+3. Add profile image.
+4. Enter public Waves.
+5. Send first public message.
+
+Progress is a simple completed count over those five steps. The profile-image
+step is optional in the sense that it is not a gate, but it is still incomplete
+until the user uploads an image.
+
+## Related Actions
+
+The "Things to do next" area links users to:
+
+- Public Waves at `/waves`.
+- Create Wave on web at `/waves?create=wave`.
+- Profile subscriptions when a profile is available, otherwise
+  `/open-data/meme-subscriptions`.
+- Delegation Center at `/delegation/delegation-center`.
+
+## Notes
+
+The route is intentionally not wired into the main side navigation yet. It can
+be visited directly while the navigation placement is decided separately.

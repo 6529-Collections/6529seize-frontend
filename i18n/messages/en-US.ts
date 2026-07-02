@@ -641,7 +641,110 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
   ["safety.viewDetails", "View safety details"],
 ] as const);
 
+const JOIN_6529_MESSAGES = objectMessages("join6529", {
+  "metadata.title": "Join 6529",
+  "metadata.description":
+    "A state-aware guide for connecting a wallet, creating a profile, and joining public Waves on 6529.io.",
+  eyebrow: "Acquisition journey",
+  title: "Join 6529",
+  subtitle:
+    "Start where you are. Connect, create a profile, enter Waves, and get to your first public contribution.",
+  "progress.ariaLabel": "Join 6529 journey progress",
+  "progress.value": "{completed}/{total} complete",
+  "progress.detail": "{remaining} open",
+  "progress.done": "Complete",
+  "progress.current": "Current",
+  "progress.pending": "Pending",
+  "progress.optional": "Optional",
+  "steps.ariaLabel": "Join 6529 setup steps",
+  "steps.wallet.title": "Connect wallet",
+  "steps.wallet.body":
+    "Use a wallet so 6529 can recognize your account and prepare profile setup.",
+  "steps.profile.title": "Create profile",
+  "steps.profile.body":
+    "Create a profile to join the most interesting crypto conversations on 6529.",
+  "steps.pfp.title": "Add profile image",
+  "steps.pfp.body":
+    "A profile image helps people recognize you, but it does not block the next steps.",
+  "steps.waves.title": "Enter public Waves",
+  "steps.waves.body":
+    "Open Waves and find a public conversation worth following.",
+  "steps.message.title": "Send first public message",
+  "steps.message.body":
+    "Post in a public Wave so the rest of 6529 can meet you.",
+  "current.label": "Next step",
+  "current.wallet.title": "Connect your wallet",
+  "current.wallet.body":
+    "This starts the journey without forcing profile setup before you are ready.",
+  "current.auth.title": "Sign in with your wallet",
+  "current.auth.body":
+    "Sign once so the app can safely load your 6529 profile state.",
+  "current.profile.loadingTitle": "Checking your profile",
+  "current.profile.loadingBody":
+    "We are looking for an existing 6529 profile attached to this wallet.",
+  "current.profile.title": "Create your 6529 profile",
+  "current.profile.body":
+    "A profile gives you a handle, identity, and the ability to participate in Waves.",
+  "current.waves.title": "Find a public Wave",
+  "current.waves.body":
+    "Waves are where the daily conversation happens. Open the public feed and pick one thread to enter.",
+  "current.message.title": "Send your first public message",
+  "current.message.body":
+    "Reply, ask a question, or say gm in a public Wave. This page will mark the step complete once a recent public drop is detected.",
+  "current.pfp.title": "Add your profile image when ready",
+  "current.pfp.body":
+    "This step stays incomplete until you upload an image, but everything else is already available.",
+  "current.complete.title": "You are in",
+  "current.complete.body":
+    "You have the basics covered. Keep exploring Waves or create one when you have something to gather people around.",
+  "action.connect": "Connect wallet",
+  "action.connecting": "Opening wallet",
+  "action.sign": "Sign in",
+  "action.signing": "Waiting for signature",
+  "action.createProfile": "Create profile",
+  "action.openProfile": "Open profile",
+  "action.openWaves": "Open Waves",
+  "action.createWave": "Create Wave",
+  "action.learnMore": "Learn more",
+  "status.heading": "Your state",
+  "status.wallet": "Wallet",
+  "status.profile": "Profile",
+  "status.pfp": "Profile image",
+  "status.message": "Public message",
+  "status.connected": "Connected",
+  "status.notConnected": "Not connected",
+  "status.ready": "Ready",
+  "status.missing": "Missing",
+  "status.detected": "Detected",
+  "status.notDetected": "Not detected",
+  "status.checking": "Checking",
+  "status.checkFailed":
+    "Could not check recent public messages. The step stays open for now.",
+  "things.heading": "Things to do next",
+  "things.subheading":
+    "Short jumps into the parts of 6529 people usually need after profile setup.",
+  "things.explore.title": "Participate in Waves",
+  "things.explore.body":
+    "Read public conversations, reply, and follow the rooms that fit your interests.",
+  "things.help.title": "Ask help6529",
+  "things.help.body":
+    "Mention @help6529 in a public Wave when you need a quick answer.",
+  "things.subscriptions.title": "Learn subscriptions",
+  "things.subscriptions.body":
+    "See how profile and Meme subscriptions keep important updates close.",
+  "things.memes.title": "Submit a Meme",
+  "things.memes.body":
+    "Learn how Meme submissions move through Waves and voting.",
+  "things.delegation.title": "Learn delegation",
+  "things.delegation.body":
+    "Delegate wallet permissions without moving assets.",
+  "things.createWave.title": "Create a Wave",
+  "things.createWave.body":
+    "Start a public conversation or a more structured Wave for submissions.",
+} as const);
+
 export const EN_US_MESSAGES = {
+  ...JOIN_6529_MESSAGES,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
