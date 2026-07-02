@@ -61,7 +61,7 @@ function useLocalPreference<T>(
           if (validator && !validator(newValue)) {
             return;
           }
-          setPreference(newValue);
+          setPreference(newValue as T);
         } catch (e) {
           console.warn(`Error processing storage event:`, e);
         }

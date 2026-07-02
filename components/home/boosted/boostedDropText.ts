@@ -1,6 +1,15 @@
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+
+const COMPACT_PREVIEW_MAX_LENGTH = 240;
+
+const truncateCompactPreviewText = (value: string): string =>
+  value.length > COMPACT_PREVIEW_MAX_LENGTH
+    ? `${value.slice(0, COMPACT_PREVIEW_MAX_LENGTH).trimEnd()}...`
+    : value;
 
 export const getBoostedDropBoostLabel = (boosts: number): string =>
   t(
@@ -36,3 +45,24 @@ export const getBoostedDropCompactAuthorLabel = (
   t(DEFAULT_LOCALE, "home.boostedDrop.compactAuthor", {
     author: getBoostedDropAuthorLabel(authorHandle),
   });
+
+export const getBoostedDropCompactPreviewText = (
+  drop: ApiDrop
+): string | null => {
+  const title = drop.title?.trim() ?? "";
+  const content =
+    drop.parts
+      .map((part) => markdownToPlainText(part.content ?? ""))
+      .find((partText) => partText.length > 0) ?? "";
+
+  let previewText = content;
+  if (title.length > 0 && content.length > 0 && title !== content) {
+    previewText = `${title}: ${content}`;
+  } else if (title.length > 0) {
+    previewText = title;
+  }
+
+  return previewText.length > 0
+    ? truncateCompactPreviewText(previewText)
+    : null;
+};
