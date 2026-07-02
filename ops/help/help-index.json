@@ -1547,7 +1547,7 @@
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
       "canonical_path": "/waves?create=wave",
-      "related_paths": ["/waves"],
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "chat"],
       "source_refs": [
         "ops/docs/waves/create/feature-overview-step.md",
@@ -1574,7 +1574,7 @@
         "Leaderboards, winners, and voting state are part of rank-wave participation."
       ],
       "canonical_path": "/waves?create=wave",
-      "related_paths": ["/waves", "/waves?create=wave", "/waves/create"],
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "rank", "voting"],
       "source_refs": [
         "ops/docs/waves/create/feature-voting-step.md",
@@ -1600,7 +1600,7 @@
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
       "canonical_path": "/waves?create=wave",
-      "related_paths": ["/waves", "/waves?create=wave", "/waves/create"],
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "approve", "voting"],
       "source_refs": [
         "ops/docs/waves/create/feature-voting-step.md",

@@ -66,6 +66,7 @@ interface CurrentPanelContent {
   readonly title: string;
   readonly body: string;
   readonly action?: CurrentPanelAction;
+  readonly error?: string | null;
 }
 
 const CREATE_WAVE_HREF = "/waves?create=wave";
@@ -97,23 +98,6 @@ const getProfileHref = (
 ): string => {
   const routeIdentity = getProfileRouteIdentity(profile, address);
   return routeIdentity ? `/${routeIdentity}` : "/";
-};
-
-const getProfileLabel = (
-  profile: ApiIdentity | null,
-  address: string | undefined,
-  locale: SupportedLocale
-): string => {
-  if (profile?.handle) {
-    return `@${profile.handle}`;
-  }
-  if (profile?.display) {
-    return profile.display;
-  }
-  if (address) {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  }
-  return m(locale, "join6529.status.missing");
 };
 
 const normalizeIdentityValue = (value: string | null | undefined) =>
@@ -160,9 +144,6 @@ const isPublicWaveDropByProfile = (
   );
 };
 
-const hasPositiveNumber = (value: number | null | undefined) =>
-  typeof value === "number" && value > 0;
-
 const hasItems = (items: readonly unknown[] | null | undefined) =>
   Boolean(items?.length);
 
@@ -176,11 +157,6 @@ const hasEstablishedProfileActivity = (
   return (
     profile.is_wave_creator ||
     Boolean(profile.profile_wave_id) ||
-    hasPositiveNumber(profile.level) ||
-    hasPositiveNumber(profile.cic) ||
-    hasPositiveNumber(profile.rep) ||
-    hasPositiveNumber(profile.tdh) ||
-    hasPositiveNumber(profile.xtdh) ||
     hasItems(profile.active_main_stage_submission_ids) ||
     hasItems(profile.winner_main_stage_drop_ids) ||
     hasItems(profile.artist_of_prevote_cards)
@@ -193,21 +169,12 @@ export default function Join6529PageClient() {
 
   const {
     actionTiles,
-    address,
-    checkingPublicMessage,
     completedSteps,
-    connectedProfile,
     currentPanel,
     currentStepId,
-    didPublicMessageCheckFail,
     formattedCompletedSteps,
     formattedRemainingSteps,
     formattedTotalSteps,
-    hasActiveWalletAddress,
-    hasEstablishedActivity,
-    hasFirstPublicMessage,
-    hasProfile,
-    hasProfileImage,
     progressDetailKey,
     steps,
     totalSteps,
@@ -232,19 +199,7 @@ export default function Join6529PageClient() {
             locale={locale}
             steps={steps}
           />
-          <JoinStateAside
-            address={address}
-            checkingPublicMessage={checkingPublicMessage}
-            connectedProfile={connectedProfile}
-            currentPanel={currentPanel}
-            didPublicMessageCheckFail={didPublicMessageCheckFail}
-            hasActiveWalletAddress={hasActiveWalletAddress}
-            hasEstablishedActivity={hasEstablishedActivity}
-            hasFirstPublicMessage={hasFirstPublicMessage}
-            hasProfile={hasProfile}
-            hasProfileImage={hasProfileImage}
-            locale={locale}
-          />
+          <JoinStateAside currentPanel={currentPanel} locale={locale} />
         </div>
 
         <ActionTilesSection actionTiles={actionTiles} locale={locale} />
@@ -263,6 +218,10 @@ function useJoin6529Journey(locale: SupportedLocale) {
   } = useSeizeConnectContext();
   const [walletActionPending, setWalletActionPending] = useState(false);
   const [authActionPending, setAuthActionPending] = useState(false);
+  const [walletActionError, setWalletActionError] = useState<string | null>(
+    null
+  );
+  const [authActionError, setAuthActionError] = useState<string | null>(null);
   const [hasEnteredWavesFromGuide, setHasEnteredWavesFromGuide] =
     useState(false);
 
@@ -294,11 +253,7 @@ function useJoin6529Journey(locale: SupportedLocale) {
   const hasEstablishedActivity =
     hasEstablishedProfileActivity(connectedProfile);
 
-  const {
-    data: recentProfileDrops,
-    isError: didRecentPublicMessageCheckFail,
-    isFetching: checkingRecentPublicMessage,
-  } = useQuery({
+  const { data: recentProfileDrops } = useQuery({
     queryKey: [
       QueryKey.PROFILE_DROPS,
       "join-6529-first-public-message",
@@ -331,10 +286,6 @@ function useJoin6529Journey(locale: SupportedLocale) {
   const hasFirstPublicMessage =
     hasEstablishedActivity || hasRecentPublicMessage;
   const hasEnteredWaves = hasFirstPublicMessage || hasEnteredWavesFromGuide;
-  const checkingPublicMessage =
-    !hasFirstPublicMessage && checkingRecentPublicMessage;
-  const didPublicMessageCheckFail =
-    !hasFirstPublicMessage && didRecentPublicMessageCheckFail;
 
   useEffect(() => {
     setHasEnteredWavesFromGuide(
@@ -346,21 +297,30 @@ function useJoin6529Journey(locale: SupportedLocale) {
 
   const handleConnectWallet = useCallback(async () => {
     setWalletActionPending(true);
+    setWalletActionError(null);
     try {
       await seizeConnectFresh();
+    } catch {
+      setWalletActionError(m(locale, "join6529.current.wallet.error"));
     } finally {
       setWalletActionPending(false);
     }
-  }, [seizeConnectFresh]);
+  }, [locale, seizeConnectFresh]);
 
   const handleRequestAuth = useCallback(async () => {
     setAuthActionPending(true);
+    setAuthActionError(null);
     try {
-      await requestAuth();
+      const { success } = await requestAuth();
+      if (!success) {
+        setAuthActionError(m(locale, "join6529.current.auth.error"));
+      }
+    } catch {
+      setAuthActionError(m(locale, "join6529.current.auth.error"));
     } finally {
       setAuthActionPending(false);
     }
-  }, [requestAuth]);
+  }, [locale, requestAuth]);
 
   const markWavesEntered = useCallback(() => {
     if (wavesEntryStorageKey) {
@@ -460,6 +420,7 @@ function useJoin6529Journey(locale: SupportedLocale) {
       return {
         title: m(locale, "join6529.current.wallet.title"),
         body: m(locale, "join6529.current.wallet.body"),
+        error: walletActionError,
         action: {
           kind: "button",
           label: m(locale, "join6529.action.connect"),
@@ -474,6 +435,7 @@ function useJoin6529Journey(locale: SupportedLocale) {
       return {
         title: m(locale, "join6529.current.auth.title"),
         body: m(locale, "join6529.current.auth.body"),
+        error: authActionError,
         action: {
           kind: "button",
           label: m(locale, "join6529.action.sign"),
@@ -546,12 +508,13 @@ function useJoin6529Journey(locale: SupportedLocale) {
       body: m(locale, "join6529.current.complete.body"),
       action: {
         kind: "link",
-        label: m(locale, "join6529.action.createWave"),
-        href: CREATE_WAVE_HREF,
+        label: m(locale, "join6529.action.exploreWaves"),
+        href: WAVES_HREF,
       },
     };
   }, [
     authActionPending,
+    authActionError,
     fetchingProfile,
     handleConnectWallet,
     handleRequestAuth,
@@ -564,6 +527,7 @@ function useJoin6529Journey(locale: SupportedLocale) {
     locale,
     markWavesEntered,
     profileHref,
+    walletActionError,
     walletActionPending,
   ]);
 
@@ -611,21 +575,12 @@ function useJoin6529Journey(locale: SupportedLocale) {
 
   return {
     actionTiles,
-    address,
-    checkingPublicMessage,
     completedSteps,
-    connectedProfile,
     currentPanel,
     currentStepId,
-    didPublicMessageCheckFail,
     formattedCompletedSteps,
     formattedRemainingSteps,
     formattedTotalSteps,
-    hasActiveWalletAddress,
-    hasEstablishedActivity,
-    hasFirstPublicMessage,
-    hasProfile,
-    hasProfileImage,
     progressDetailKey,
     steps,
     totalSteps,
@@ -651,49 +606,42 @@ function JoinHeader({
 }) {
   return (
     <header className="tw-grid tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-items-end">
-      <div className="tw-space-y-4">
-        <p className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-emerald-300">
-          {m(locale, "join6529.eyebrow")}
+      <div className="tw-space-y-3">
+        <h1 className="tw-text-4xl tw-font-semibold tw-leading-tight tw-text-white sm:tw-text-5xl">
+          {m(locale, "join6529.title")}
+        </h1>
+        <p className="tw-max-w-3xl tw-text-base tw-leading-7 tw-text-slate-300 sm:tw-text-lg">
+          {m(locale, "join6529.subtitle")}
         </p>
-        <div className="tw-space-y-3">
-          <h1 className="tw-text-4xl tw-font-semibold tw-leading-tight tw-text-white sm:tw-text-5xl">
-            {m(locale, "join6529.title")}
-          </h1>
-          <p className="tw-max-w-3xl tw-text-base tw-leading-7 tw-text-slate-300 sm:tw-text-lg">
-            {m(locale, "join6529.subtitle")}
-          </p>
-        </div>
       </div>
 
       <section
         className="tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/[0.04] tw-p-5 tw-shadow-2xl tw-shadow-black/20"
         aria-label={m(locale, "join6529.progress.ariaLabel")}
       >
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-          <div>
-            <p className="tw-text-sm tw-font-medium tw-text-slate-400">
-              {m(locale, "join6529.progress.ariaLabel")}
-            </p>
-            <p className="tw-mt-1 tw-text-3xl tw-font-semibold tw-text-white">
-              {m(locale, "join6529.progress.value", {
-                completed: formattedCompletedSteps,
-                total: formattedTotalSteps,
-              })}
-            </p>
-          </div>
-          <span className="tw-rounded-full tw-border tw-border-sky-300/25 tw-bg-sky-300/10 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-text-sky-200">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+          <p className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-slate-400">
+            {m(locale, "join6529.progress.ariaLabel")}
+          </p>
+          <span className="tw-shrink-0 tw-rounded-full tw-border tw-border-sky-300/25 tw-bg-sky-300/10 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-text-sky-200">
             {m(locale, progressDetailKey, {
               remaining: formattedRemainingSteps,
             })}
           </span>
         </div>
+        <p className="tw-mt-5 tw-whitespace-nowrap tw-text-4xl tw-font-semibold tw-leading-none tw-text-white">
+          {m(locale, "join6529.progress.value", {
+            completed: formattedCompletedSteps,
+            total: formattedTotalSteps,
+          })}
+        </p>
         <progress
           aria-label={m(locale, "join6529.progress.ariaLabel")}
           aria-valuetext={m(locale, "join6529.progress.ariaValue", {
             completed: formattedCompletedSteps,
             total: formattedTotalSteps,
           })}
-          className="tw-mt-5 tw-block tw-h-2 tw-w-full tw-appearance-none tw-overflow-hidden tw-rounded-full tw-bg-white/10 [&::-moz-progress-bar]:tw-rounded-full [&::-moz-progress-bar]:tw-bg-emerald-400 [&::-webkit-progress-bar]:tw-rounded-full [&::-webkit-progress-bar]:tw-bg-white/10 [&::-webkit-progress-value]:tw-rounded-full [&::-webkit-progress-value]:tw-bg-emerald-400"
+          className="tw-mt-5 tw-block tw-h-2 tw-w-full tw-appearance-none tw-overflow-hidden tw-rounded-full tw-bg-white/10 [&::-moz-progress-bar]:tw-rounded-full [&::-moz-progress-bar]:tw-bg-sky-300 [&::-webkit-progress-bar]:tw-rounded-full [&::-webkit-progress-bar]:tw-bg-white/10 [&::-webkit-progress-value]:tw-rounded-full [&::-webkit-progress-value]:tw-bg-sky-300"
           max={totalSteps}
           value={completedSteps}
         />
@@ -732,45 +680,15 @@ function JourneyStepsList({
 }
 
 function JoinStateAside({
-  address,
-  checkingPublicMessage,
-  connectedProfile,
   currentPanel,
-  didPublicMessageCheckFail,
-  hasActiveWalletAddress,
-  hasEstablishedActivity,
-  hasFirstPublicMessage,
-  hasProfile,
-  hasProfileImage,
   locale,
 }: {
-  readonly address: string | undefined;
-  readonly checkingPublicMessage: boolean;
-  readonly connectedProfile: ApiIdentity | null;
   readonly currentPanel: CurrentPanelContent;
-  readonly didPublicMessageCheckFail: boolean;
-  readonly hasActiveWalletAddress: boolean;
-  readonly hasEstablishedActivity: boolean;
-  readonly hasFirstPublicMessage: boolean;
-  readonly hasProfile: boolean;
-  readonly hasProfileImage: boolean;
   readonly locale: SupportedLocale;
 }) {
   return (
     <aside className="tw-flex tw-flex-col tw-gap-4">
       <CurrentStepPanel currentPanel={currentPanel} locale={locale} />
-      <JourneyStatePanel
-        address={address}
-        checkingPublicMessage={checkingPublicMessage}
-        connectedProfile={connectedProfile}
-        didPublicMessageCheckFail={didPublicMessageCheckFail}
-        hasActiveWalletAddress={hasActiveWalletAddress}
-        hasEstablishedActivity={hasEstablishedActivity}
-        hasFirstPublicMessage={hasFirstPublicMessage}
-        hasProfile={hasProfile}
-        hasProfileImage={hasProfileImage}
-        locale={locale}
-      />
     </aside>
   );
 }
@@ -783,14 +701,14 @@ function CurrentStepPanel({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <section className="tw-rounded-lg tw-border tw-border-emerald-300/20 tw-bg-emerald-300/[0.07] tw-p-5">
-      <p className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-emerald-200">
+    <section className="tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/[0.04] tw-p-5">
+      <p className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-sky-200">
         {m(locale, "join6529.current.label")}
       </p>
       <h2 className="tw-mt-3 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-white">
         {currentPanel.title}
       </h2>
-      <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-emerald-50/80">
+      <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-slate-300">
         {currentPanel.body}
       </p>
       {currentPanel.action && (
@@ -798,84 +716,13 @@ function CurrentStepPanel({
           <CurrentAction action={currentPanel.action} />
         </div>
       )}
-    </section>
-  );
-}
-
-function JourneyStatePanel({
-  address,
-  checkingPublicMessage,
-  connectedProfile,
-  didPublicMessageCheckFail,
-  hasActiveWalletAddress,
-  hasEstablishedActivity,
-  hasFirstPublicMessage,
-  hasProfile,
-  hasProfileImage,
-  locale,
-}: {
-  readonly address: string | undefined;
-  readonly checkingPublicMessage: boolean;
-  readonly connectedProfile: ApiIdentity | null;
-  readonly didPublicMessageCheckFail: boolean;
-  readonly hasActiveWalletAddress: boolean;
-  readonly hasEstablishedActivity: boolean;
-  readonly hasFirstPublicMessage: boolean;
-  readonly hasProfile: boolean;
-  readonly hasProfileImage: boolean;
-  readonly locale: SupportedLocale;
-}) {
-  return (
-    <section className="tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/[0.03] tw-p-5">
-      <h2 className="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-slate-300">
-        {m(locale, "join6529.status.heading")}
-      </h2>
-      <div className="tw-mt-4 tw-divide-y tw-divide-white/10">
-        <StateRow
-          label={m(locale, "join6529.status.wallet")}
-          value={
-            hasActiveWalletAddress
-              ? getProfileLabel(null, address, locale)
-              : m(locale, "join6529.status.notConnected")
-          }
-          good={hasActiveWalletAddress}
-        />
-        <StateRow
-          label={m(locale, "join6529.status.profile")}
-          value={
-            hasProfile
-              ? getProfileLabel(connectedProfile, address, locale)
-              : m(locale, "join6529.status.missing")
-          }
-          good={hasProfile}
-        />
-        <StateRow
-          label={m(locale, "join6529.status.pfp")}
-          value={
-            hasProfileImage
-              ? m(locale, "join6529.status.ready")
-              : m(locale, "join6529.status.missing")
-          }
-          good={hasProfileImage}
-        />
-        <StateRow
-          ariaLive
-          label={m(locale, "join6529.status.message")}
-          value={getPublicMessageStatus({
-            checkingPublicMessage,
-            hasEstablishedActivity,
-            hasFirstPublicMessage,
-            locale,
-          })}
-          good={hasFirstPublicMessage}
-        />
-      </div>
-      {didPublicMessageCheckFail && (
+      {currentPanel.error && (
         <p
           aria-live="polite"
-          className="tw-mt-4 tw-text-xs tw-leading-5 tw-text-amber-200"
+          className="tw-mt-4 tw-text-sm tw-leading-6 tw-text-amber-200"
+          role="status"
         >
-          {m(locale, "join6529.status.checkFailed")}
+          {currentPanel.error}
         </p>
       )}
     </section>
@@ -943,9 +790,8 @@ function JourneyStepRow({
     <li
       aria-current={status === "current" ? "step" : undefined}
       className={cx(
-        "tw-grid tw-grid-cols-[44px_minmax(0,1fr)] tw-gap-4 tw-rounded-lg tw-border tw-p-4 tw-transition",
-        status === "complete" &&
-          "tw-border-emerald-300/25 tw-bg-emerald-300/[0.06]",
+        "tw-grid tw-grid-cols-[44px_minmax(0,1fr)] tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-p-4 tw-transition",
+        status === "complete" && "tw-border-white/10 tw-bg-white/[0.035]",
         status === "current" && "tw-border-sky-300/30 tw-bg-sky-300/[0.07]",
         status === "pending" && "tw-border-white/10 tw-bg-white/[0.03]"
       )}
@@ -954,7 +800,7 @@ function JourneyStepRow({
         className={cx(
           "tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border",
           status === "complete" &&
-            "tw-border-emerald-300/30 tw-bg-emerald-300/10 tw-text-emerald-200",
+            "tw-border-sky-300/25 tw-bg-sky-300/[0.08] tw-text-sky-200",
           status === "current" &&
             "tw-border-sky-300/30 tw-bg-sky-300/10 tw-text-sky-200",
           status === "pending" &&
@@ -978,8 +824,7 @@ function JourneyStepRow({
           <span
             className={cx(
               "tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide",
-              status === "complete" &&
-                "tw-bg-emerald-300/10 tw-text-emerald-200",
+              status === "complete" && "tw-bg-sky-300/10 tw-text-sky-200",
               status === "current" && "tw-bg-sky-300/10 tw-text-sky-200",
               status === "pending" && "tw-bg-white/10 tw-text-slate-300"
             )}
@@ -1028,33 +873,6 @@ function CurrentAction({ action }: { readonly action: CurrentPanelAction }) {
   );
 }
 
-function StateRow({
-  ariaLive = false,
-  good,
-  label,
-  value,
-}: {
-  readonly ariaLive?: boolean;
-  readonly good: boolean;
-  readonly label: string;
-  readonly value: string;
-}) {
-  return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-py-3 first:tw-pt-0 last:tw-pb-0">
-      <span className="tw-text-sm tw-text-slate-400">{label}</span>
-      <span
-        aria-live={ariaLive ? "polite" : undefined}
-        className={cx(
-          "tw-min-w-0 tw-truncate tw-text-right tw-text-sm tw-font-semibold",
-          good ? "tw-text-emerald-200" : "tw-text-slate-200"
-        )}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
 function ActionTileCard({ tile }: { readonly tile: ActionTile }) {
   const Icon = tile.icon;
   return (
@@ -1079,29 +897,4 @@ function ActionTileCard({ tile }: { readonly tile: ActionTile }) {
       </div>
     </Link>
   );
-}
-
-function getPublicMessageStatus({
-  checkingPublicMessage,
-  hasEstablishedActivity,
-  hasFirstPublicMessage,
-  locale,
-}: {
-  readonly checkingPublicMessage: boolean;
-  readonly hasEstablishedActivity: boolean;
-  readonly hasFirstPublicMessage: boolean;
-  readonly locale: SupportedLocale;
-}) {
-  if (hasFirstPublicMessage) {
-    return m(
-      locale,
-      hasEstablishedActivity
-        ? "join6529.progress.done"
-        : "join6529.status.detected"
-    );
-  }
-  if (checkingPublicMessage) {
-    return m(locale, "join6529.status.checking");
-  }
-  return m(locale, "join6529.status.notDetected");
 }

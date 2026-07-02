@@ -20,10 +20,12 @@ profile image, and recent profile drops.
   entry step is marked complete from a route-aware client navigation.
 - Profile with recent public Wave drop: the first public message step is marked
   complete and the public Waves entry step is also satisfied.
-- Established profiles with existing 6529 activity, such as wave creator state,
-  REP/CIC/TDH/xTDH, level, or submission/winner history, are treated as having
-  already entered Waves and sent a first public message so old users are not
-  shown beginner-only pending steps.
+- Established profiles with Wave participation signals, such as wave creator
+  state, profile Wave state, or submission/winner history, are treated as
+  having already entered Waves and sent a first public message so old users are
+  not shown beginner-only pending steps.
+- Profiles that complete all five steps are directed back to public Waves at
+  `/waves` so the complete state keeps the journey focused on exploration.
 
 The first public message check queries recent drops for the connected profile
 identity and counts drops in public Waves only when the returned drop author
