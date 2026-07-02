@@ -9,7 +9,8 @@ import {
   type AdditionalDetailsMediaRow,
 } from "@/components/the-memes/MemePageAdditionalDetails";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
-import type { IAttribute, MemesExtendedData, NFT } from "@/entities/INFT";
+import type { IAttribute, NFT } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import {
   getAnimationDimensionsFromMetadata,
   getAnimationFileTypeFromMetadata,
@@ -67,7 +68,7 @@ type MemeMetadata = MediaMetadata & {
 export function MemePageArt(props: {
   show: boolean;
   nft: NFT | undefined;
-  nftMeta: MemesExtendedData | undefined;
+  nftMeta: ApiMemesExtendedData | undefined;
   locale?: SupportedLocale;
 }) {
   if (!props.show || !props.nft || !props.nftMeta) {

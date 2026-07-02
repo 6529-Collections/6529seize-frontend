@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { MemesExtendedData, NFT } from "@/entities/INFT";
+import type { NFT } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -24,7 +25,7 @@ const MemePageArt = dynamic(() =>
 export function MemePageLiveRightMenu(props: {
   show: boolean;
   nft: NFT | undefined;
-  nftMeta?: MemesExtendedData | undefined;
+  nftMeta?: ApiMemesExtendedData | undefined;
   locale?: SupportedLocale;
 }) {
   if (props.show && props.nft) {
@@ -51,7 +52,7 @@ export function MemePageLiveRightMenu(props: {
 export function MemePageLiveSubMenu(props: {
   show: boolean;
   nft: NFT | undefined;
-  nftMeta?: MemesExtendedData | undefined;
+  nftMeta?: ApiMemesExtendedData | undefined;
   nftBalance?: number;
   defaultAdditionalDetailsOpen?: boolean;
   locale?: SupportedLocale;
@@ -107,7 +108,7 @@ function MemePageAdditionalDetailsAccordion({
   locale,
 }: {
   readonly nft: NFT;
-  readonly nftMeta: MemesExtendedData;
+  readonly nftMeta: ApiMemesExtendedData;
   readonly defaultOpen: boolean;
   readonly locale: SupportedLocale;
 }) {

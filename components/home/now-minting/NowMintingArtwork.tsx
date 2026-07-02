@@ -4,11 +4,11 @@ import InteractiveMediaLoadGate from "@/components/drops/media/InteractiveMediaL
 import { useEffect, useMemo, useState } from "react";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getMediaType } from "@/components/nft-image/utils/media-type";
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface NowMintingArtworkProps {
-  readonly nft: NFTWithMemesExtendedData;
+  readonly nft: ApiMemesExtendedData;
 }
 
 export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {

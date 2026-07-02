@@ -57,7 +57,8 @@ jest.mock("@/components/drops/media/MediaTypeBadge", () => ({
 import NFTImage from "@/components/nft-image/NFTImage";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
-import { VolumeType, type NFTWithMemesExtendedData } from "@/entities/INFT";
+import { VolumeType } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { MemesSort } from "@/types/enums";
@@ -66,7 +67,7 @@ import { render, screen } from "@testing-library/react";
 const mockNFTImage = jest.mocked(NFTImage);
 const mockNFTImageBalance = jest.mocked(NFTImageBalance);
 
-const nft: NFTWithMemesExtendedData = {
+const nft: ApiMemesExtendedData = {
   id: 6529,
   contract: "0xmemes",
   created_at: new Date("2024-01-01T00:00:00.000Z"),

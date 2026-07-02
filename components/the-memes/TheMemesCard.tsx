@@ -5,8 +5,8 @@ import CollectionCardMetricLine from "@/components/collection-page/CollectionCar
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getTheMemesDetailHref } from "@/components/the-memes/theMemesRouteParams";
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { getNftMimeType } from "@/helpers/nft.helpers";
 import {
   formatDate,
@@ -21,7 +21,7 @@ import { MemesSort } from "@/types/enums";
 import Link from "next/link";
 
 function getVolume(
-  nft: NFTWithMemesExtendedData,
+  nft: ApiMemesExtendedData,
   volumeType: VolumeType,
   locale: SupportedLocale
 ) {
@@ -52,7 +52,7 @@ function getVolume(
 }
 
 function getNftMetricText(
-  nft: NFTWithMemesExtendedData,
+  nft: ApiMemesExtendedData,
   sort: MemesSort,
   volumeType: VolumeType,
   locale: SupportedLocale
@@ -126,7 +126,7 @@ export default function TheMemesCard({
   hasConnectedProfile,
   locale,
 }: {
-  readonly nft: NFTWithMemesExtendedData;
+  readonly nft: ApiMemesExtendedData;
   readonly sort: MemesSort;
   readonly volumeType: VolumeType;
   readonly hasConnectedProfile: boolean;
