@@ -136,7 +136,7 @@ describe("LatestDropNextMintSubscribe", () => {
       <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
     );
 
-    expect(screen.getByText("Subscribed")).toBeInTheDocument();
+    expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(screen.getByText("Subscribers count 9")).toBeInTheDocument();
     expect(
       screen.queryByText("Cannot change active drops")
@@ -201,6 +201,7 @@ describe("LatestDropNextMintSubscribe", () => {
     );
 
     expect(screen.getByText("3x")).toBeInTheDocument();
+    expect(screen.getByText("Subscribed")).toBeInTheDocument();
     expect(
       screen.getByRole("switch", {
         name: "Manage this in profile subscriptions.",
@@ -235,7 +236,7 @@ describe("LatestDropNextMintSubscribe", () => {
       connectedProfile: null,
     });
 
-    expect(screen.getByText("Subscribed")).toBeInTheDocument();
+    expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(
       screen.getByRole("switch", { name: "Connect to subscribe" })
     ).toHaveAttribute("aria-checked", "false");
@@ -264,6 +265,7 @@ describe("LatestDropNextMintSubscribe", () => {
         name: "Manage subscriptions from your own profile, not a proxy session.",
       })
     ).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
       "href",
       "/test-handle/subscriptions"
@@ -301,6 +303,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
     renderWithAuth(<LatestDropNextMintSubscribe />);
 
+    expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(screen.queryByText("1x")).not.toBeInTheDocument();
     expect(
       screen.getByRole("switch", {
