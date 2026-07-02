@@ -95,12 +95,6 @@ const scrollRef = {
 } as React.RefObject<HTMLDivElement>;
 const sentinel = document.createElement("div");
 
-const flushAnimatedSidebarRows = async () => {
-  await act(async () => {
-    await Promise.resolve();
-  });
-};
-
 const baseWaves = [
   createMockMinimalWave({ id: "a1" }),
   createMockMinimalWave({
@@ -112,6 +106,12 @@ const baseWaves = [
   createMockMinimalWave({ id: "f1", isFollowing: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
+
+const flushAnimatedSidebarRows = async () => {
+  await act(async () => {
+    await Promise.resolve();
+  });
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -623,7 +623,7 @@ it("keeps child rows mounted while collapse animation runs", async () => {
   }
 });
 
-it("keeps highly rated child rows mounted while the section exit animation runs", async () => {
+it("drops highly rated child rows when their parent leaves the section", async () => {
   jest.useFakeTimers();
 
   try {
@@ -673,17 +673,6 @@ it("keeps highly rated child rows mounted while the section exit animation runs"
     await flushAnimatedSidebarRows();
 
     expect(screen.queryByTestId("wave-highly-rated-parent")).toBeNull();
-    expect(
-      screen.getByLabelText("Worth checking out waves")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("wave-highly-rated-child").parentElement
-    ).toHaveAttribute("data-sidebar-subwave-row-state", "exiting");
-
-    act(() => {
-      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
-    });
-
     expect(screen.queryByTestId("wave-highly-rated-child")).toBeNull();
     expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
   } finally {

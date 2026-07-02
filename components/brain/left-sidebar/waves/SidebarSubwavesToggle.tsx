@@ -9,6 +9,10 @@ import {
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 const CONNECTOR_COLOR_CLASSES =
   "tw-border-iron-800/80 desktop-hover:group-hover/subwaves-toggle:tw-border-iron-700/80";
+const BUTTON_CLASSES =
+  "tw-group/subwaves tw-relative tw-z-[1] tw-flex tw-h-8 tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none";
+const UNREAD_BADGE_CLASSES =
+  "tw-flex tw-h-[18px] tw-min-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1.5 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-white";
 
 interface SidebarSubwavesToggleProps {
   readonly isExpanded: boolean;
@@ -135,7 +139,7 @@ export function SidebarSubwavesToggle({
         aria-label={ariaLabel}
         disabled={isLoading}
         onClick={onClick}
-        className="tw-group/subwaves tw-relative tw-z-[1] tw-flex tw-h-8 tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
+        className={BUTTON_CLASSES}
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
           {isLoading && (
@@ -148,7 +152,7 @@ export function SidebarSubwavesToggle({
         </span>
         <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
           {showUnreadBadge && (
-            <span className="tw-flex tw-h-[18px] tw-min-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1.5 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-white">
+            <span className={UNREAD_BADGE_CLASSES}>
               {t(SIDEBAR_LOCALE, "waves.sidebar.subwavesToggleUnreadBadge", {
                 count: unreadDropsCount > 99 ? "99+" : unreadDropsCount,
               })}

@@ -117,10 +117,6 @@ const getAnimatedRowsForNextTree = ({
     }
   }
 
-  for (const exitingRows of exitingRowsByParent.values()) {
-    nextRows.push(...exitingRows);
-  }
-
   return nextRows;
 };
 
@@ -190,6 +186,9 @@ const removeExitingRows = (
 ): AnimatedSidebarWaveTreeRow[] =>
   rows.filter((row) => row.animationState !== "exiting");
 
+const hasExitingRows = (rows: readonly AnimatedSidebarWaveTreeRow[]) =>
+  rows.some((row) => row.animationState === "exiting");
+
 export function useAnimatedSidebarWaveRows(
   rows: readonly SidebarWaveTreeRow[],
   { keepExitingRows = true }: UseAnimatedSidebarWaveRowsOptions = {}
@@ -204,13 +203,6 @@ export function useAnimatedSidebarWaveRows(
   useEffect(() => {
     const effectState = { isDisposed: false };
     const enterDelay = createAfterPaintDelay();
-    const exitTimer = keepExitingRows
-      ? globalThis.setTimeout(() => {
-          if (!effectState.isDisposed) {
-            setAnimatedRows(removeExitingRows);
-          }
-        }, SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS)
-      : null;
 
     void (async () => {
       await Promise.resolve();
@@ -239,11 +231,22 @@ export function useAnimatedSidebarWaveRows(
     return () => {
       effectState.isDisposed = true;
       enterDelay.cancel();
-      if (exitTimer !== null) {
-        globalThis.clearTimeout(exitTimer);
-      }
     };
   }, [currentRows, keepExitingRows, rowKeys, rows]);
+
+  useEffect(() => {
+    if (!keepExitingRows || !hasExitingRows(animatedRows)) {
+      return;
+    }
+
+    const exitTimer = globalThis.setTimeout(() => {
+      setAnimatedRows(removeExitingRows);
+    }, SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
+
+    return () => {
+      globalThis.clearTimeout(exitTimer);
+    };
+  }, [animatedRows, keepExitingRows]);
 
   const rowsForInitialHydration =
     animatedRows.length === 0 && currentRows.length > 0

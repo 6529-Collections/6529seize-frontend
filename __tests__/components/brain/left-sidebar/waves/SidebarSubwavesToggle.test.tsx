@@ -79,7 +79,11 @@ describe("SidebarSubwavesToggle", () => {
     expect(button).toHaveClass("tw-bg-iron-950");
     expect(button).toHaveClass("tw-px-3");
     expect(button).toHaveClass("tw-text-xs");
+    expect(button).toHaveClass("tw-font-medium");
     expect(button).toHaveClass("tw-text-iron-400");
+    expect(button).not.toHaveClass(
+      "tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+    );
     expect(button).toHaveClass("desktop-hover:hover:tw-border-iron-700");
     expect(button).toHaveClass("desktop-hover:hover:tw-bg-iron-900");
     expect(button).toHaveClass("desktop-hover:hover:tw-text-iron-300");
@@ -90,6 +94,9 @@ describe("SidebarSubwavesToggle", () => {
     expect(unreadBadge).toHaveClass("tw-rounded-full");
     expect(unreadBadge).toHaveClass("tw-bg-indigo-600");
     expect(unreadBadge).toHaveClass("tw-text-[10px]");
+    expect(unreadBadge).not.toHaveClass(
+      "tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+    );
   });
 
   it("renders the loading state", () => {

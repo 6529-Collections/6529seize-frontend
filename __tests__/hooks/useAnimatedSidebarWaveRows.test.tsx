@@ -158,6 +158,23 @@ describe("useAnimatedSidebarWaveRows", () => {
     expect(result.current.map((row) => row.key)).toEqual(["parent"]);
   });
 
+  it("drops child rows when their parent leaves the tree", async () => {
+    const { result, rerender } = renderHook(
+      ({ rows }: { readonly rows: SidebarWaveTreeRow[] }) =>
+        useAnimatedSidebarWaveRows(rows),
+      {
+        initialProps: {
+          rows: expandedRows,
+        },
+      }
+    );
+
+    rerender({ rows: [] });
+    await flushAnimatedRowsEffect();
+
+    expect(result.current).toEqual([]);
+  });
+
   it("settles quick close and reopen cycles without stale animation state", async () => {
     jest.useFakeTimers();
 
