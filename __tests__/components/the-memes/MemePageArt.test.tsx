@@ -169,6 +169,20 @@ describe("MemePageArt", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows an unranked TDH rank for memes not recorded in TDH", () => {
+    render(
+      <MemePageArt
+        show={true}
+        nft={{ ...nft, tdh_rank: -1 } as any}
+        nftMeta={{ ...nftMeta, recorded_in_tdh: false } as any}
+      />
+    );
+
+    expect(screen.getByText("Meme Rank")).toBeInTheDocument();
+    expect(screen.getByText("Unranked")).toBeInTheDocument();
+    expect(screen.queryByText("#-1")).not.toBeInTheDocument();
+  });
+
   it("renders text display_type attributes in Properties", () => {
     const nftWithTextAttribute = {
       ...nft,

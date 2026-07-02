@@ -1,10 +1,10 @@
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import type { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 import { useNowMinting } from "@/hooks/useNowMinting";
 
 type NowMintingStatus = {
-  readonly nft: NFTWithMemesExtendedData | undefined;
+  readonly nft: ApiMemesExtendedData | undefined;
   readonly isFetching: boolean;
   readonly status: ManifoldClaimStatus | null;
   readonly isDropComplete: boolean;
