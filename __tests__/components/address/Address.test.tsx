@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Address from '@/components/address/Address';
@@ -15,13 +14,6 @@ jest.mock('@/helpers/Helpers', () => ({
 jest.mock('@/components/address/WalletAddress', () => ({
   WalletAddress: (props: any) => <div data-testid="wallet" {...props}>{props.display}</div>
 }));
-
-jest.mock('react-bootstrap', () => {
-  const Dropdown: any = ({ children }:any) => <div>{children}</div>;
-  Dropdown.Toggle = (p:any) => <button {...p}>{p.children}</button>;
-  Dropdown.Menu = (p:any) => <div>{p.children}</div>;
-  return { Dropdown };
-});
 
 const baseTags = {
   memesCardsSets:0,

@@ -6,21 +6,6 @@ import {
 import { Status } from "@/components/nextGen/nextgen_entities";
 import { render, screen, waitFor } from "@testing-library/react";
 
-jest.mock("react-bootstrap", () => {
-  const Form = (p: any) => <form {...p}>{p.children}</form>;
-  Form.Group = (p: any) => <div data-testid="form-group" {...p} />;
-  Form.Label = (p: any) => <label {...p} />;
-  Form.Select = (p: any) => <select {...p} />;
-  return {
-    Container: (p: any) => <div data-testid="container" {...p} />,
-    Row: (p: any) => <div data-testid="row" {...p} />,
-    Col: (p: any) => <div data-testid="col" {...p} />,
-    Form,
-    Button: (p: any) => <button {...p}>{p.children}</button>,
-    Table: (p: any) => <table {...p}>{p.children}</table>,
-  };
-});
-
 jest.mock(
   "@/components/nextGen/collections/collectionParts/mint/NextGenMintShared",
   () => ({

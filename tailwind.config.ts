@@ -190,6 +190,14 @@ const tailwindConfig: Config = {
             transform: "translateX(0)",
           },
         },
+        "boosted-preview-marquee": {
+          "0%, 12%": {
+            transform: "translate3d(0, 0, 0)",
+          },
+          "88%, 100%": {
+            transform: "translate3d(-50%, 0, 0)",
+          },
+        },
       },
       animation: {
         "loading-bar": "loading-bar 1.5s infinite",
@@ -208,6 +216,8 @@ const tailwindConfig: Config = {
         "spin-y": "spin-y 4s linear infinite",
         "poll-result-fill": "poll-result-fill 0.7s ease-out forwards",
         "poll-result-stats-in": "poll-result-stats-in 0.5s ease-out forwards",
+        "boosted-preview-marquee":
+          "boosted-preview-marquee 14s linear infinite",
       },
       backgroundSize: {
         "gradient-pos": "200% 200%",

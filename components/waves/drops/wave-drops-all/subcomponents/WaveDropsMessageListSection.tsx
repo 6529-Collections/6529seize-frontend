@@ -4,6 +4,7 @@ import { WaveDropsScrollControls } from "@/components/waves/drops/WaveDropsScrol
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+import type { BoostedDropsDisplayPreference } from "@/types/boosted-drops.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject, Ref } from "react";
 
@@ -41,6 +42,9 @@ interface WaveDropsMessageListSectionProps {
   readonly unreadDividerSerialNo?: number | null | undefined;
   readonly unreadCount?: number | undefined;
   readonly boostedDrops?: ApiDrop[] | undefined;
+  readonly boostedDropsDisplayPreference?:
+    | BoostedDropsDisplayPreference
+    | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
   readonly onDismissUnread: () => void;
@@ -78,6 +82,7 @@ export const WaveDropsMessageListSection: React.FC<
   unreadDividerSerialNo,
   unreadCount,
   boostedDrops,
+  boostedDropsDisplayPreference,
   onBoostedDropClick,
   onScrollToUnread,
   onDismissUnread,
@@ -120,6 +125,7 @@ export const WaveDropsMessageListSection: React.FC<
           onDropContentClick={onDropContentClick}
           unreadDividerSerialNo={unreadDividerSerialNo}
           boostedDrops={boostedDrops}
+          boostedDropsDisplayPreference={boostedDropsDisplayPreference}
           onBoostedDropClick={onBoostedDropClick}
           autoCollapseSerials={autoCollapseSerials}
           suspendLightDropHydration={suspendLightDropHydration}

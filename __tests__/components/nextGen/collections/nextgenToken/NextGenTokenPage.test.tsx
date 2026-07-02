@@ -45,18 +45,6 @@ import NextGenTokenPage from "@/components/nextGen/collections/nextgenToken/Next
 import { NextgenCollectionView } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
-jest.mock("react-bootstrap", () => {
-  return {
-    Container: ({ children, fluid, ...props }: any) => (
-      <div data-testid="container" data-fluid={fluid?.toString()} {...props}>
-        {children}
-      </div>
-    ),
-    Row: (p: any) => <div data-testid="row" {...p} />,
-    Col: (p: any) => <div data-testid="col" {...p} />,
-  };
-});
-
 jest.mock(
   "@/components/nextGen/collections/nextgenToken/NextGenTokenProvenance",
   () => () => <div data-testid="provenance" />

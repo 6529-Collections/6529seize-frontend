@@ -40,8 +40,8 @@ export default function MetricsPageClient() {
   const series = seriesQuery.data;
 
   return (
-    <div className="tailwind-scope tw-min-h-screen tw-bg-black">
-      <div className="tw-mx-auto tw-max-w-6xl tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-px-8">
+    <div className="tailwind-scope tw-min-h-[100dvh] tw-w-full tw-overflow-x-hidden tw-bg-black [touch-action:pan-y]">
+      <div className="tw-mx-auto tw-w-full tw-max-w-6xl tw-px-4 tw-pb-16 tw-pt-8 sm:tw-px-6 lg:tw-px-8">
         <AboutContentsDropdown currentHref="/network/health" />
         <header className="tw-mb-8">
           <h1 className="tw-text-2xl tw-font-bold tw-text-white">Health</h1>

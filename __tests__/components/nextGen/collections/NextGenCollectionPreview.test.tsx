@@ -2,15 +2,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import NextGenCollectionPreview from '@/components/nextGen/collections/NextGenCollectionPreview';
 import { formatNameForUrl } from '@/components/nextGen/nextgen_helpers';
 
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  return {
-    Container: (p: any) => <div {...p} />,
-    Row: (p: any) => <div {...p} />,
-    Col: (p: any) => <div {...p} />,
-  };
-});
-
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => <img data-testid="img" {...props} />,

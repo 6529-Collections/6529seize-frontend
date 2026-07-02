@@ -6,20 +6,6 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock("react-bootstrap", () => {
-  const RB: any = {
-    Container: (p: any) => <div {...p} />,
-    Row: (p: any) => <div {...p} />,
-    Col: (p: any) => <div {...p} />,
-  };
-  const Accordion: any = (p: any) => <div {...p} />;
-  Accordion.Item = (p: any) => <div {...p} />;
-  Accordion.Button = (p: any) => <button {...p} />;
-  Accordion.Body = (p: any) => <div {...p} />;
-  RB.Accordion = Accordion;
-  return RB;
-});
-
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: (p: any) => <svg data-testid="fa" {...p} />,
 }));
