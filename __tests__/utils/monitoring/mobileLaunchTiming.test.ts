@@ -147,6 +147,25 @@ describe("mobileLaunchTiming", () => {
     );
   });
 
+  it("measures elapsed time from the launch timing start baseline", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    currentNow = 500;
+    timing.startMobileLaunchTiming();
+    currentNow = 650;
+    timing.markMobileLaunchStep("first_useful_app_shell");
+    currentNow = 900;
+    timing.flushMobileLaunchTiming("manual");
+
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        step_first_useful_app_shell_ms: 150,
+        total_ms: 400,
+      })
+    );
+  });
+
   it("lets a waves content flush replace a scheduled shell flush", async () => {
     const { timing, sentry } = await loadMobileLaunchTiming();
 

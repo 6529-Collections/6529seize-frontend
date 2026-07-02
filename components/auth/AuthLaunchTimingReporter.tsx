@@ -73,6 +73,32 @@ function getMobileLaunchAuthState({
   return "anonymous";
 }
 
+function isMobileLaunchAuthReady({
+  authState,
+  walletConnectionState,
+}: {
+  readonly authState: MobileLaunchAuthState;
+  readonly walletConnectionState:
+    | "initializing"
+    | "disconnected"
+    | "connecting"
+    | "connected"
+    | "error";
+}): boolean {
+  if (authState === "initializing") {
+    return false;
+  }
+
+  if (authState === "anonymous") {
+    return (
+      walletConnectionState === "disconnected" ||
+      walletConnectionState === "error"
+    );
+  }
+
+  return true;
+}
+
 export default function AuthLaunchTimingReporter({
   enableWalletAuthentication,
 }: {
@@ -102,7 +128,12 @@ export default function AuthLaunchTimingReporter({
       wallet_connection_state: connectionState,
     });
 
-    if (authState !== "initializing") {
+    if (
+      isMobileLaunchAuthReady({
+        authState,
+        walletConnectionState: connectionState,
+      })
+    ) {
       markMobileLaunchStep("auth_ready");
     }
   }, [

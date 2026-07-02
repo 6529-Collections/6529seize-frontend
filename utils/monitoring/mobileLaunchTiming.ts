@@ -318,7 +318,7 @@ function nowMs(): number {
 }
 
 function getLaunchStartedAtMs(): number {
-  return 0;
+  return nowMs();
 }
 
 function elapsedSinceStart(state: LaunchState): number {
@@ -331,7 +331,7 @@ function roundMs(value: number): number {
 
 function createLaunchId(): string {
   try {
-    return crypto.randomUUID();
+    return globalThis.crypto.randomUUID();
   } catch {
     return `launch-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }

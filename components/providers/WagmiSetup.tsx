@@ -136,6 +136,14 @@ function canAssignProperty(descriptor: PropertyDescriptor): boolean {
   return descriptor.writable !== false;
 }
 
+function assertAppKitAdapterManager(value: unknown): AppKitAdapterManager {
+  if (!(value instanceof AppKitAdapterManager)) {
+    throw new AppKitValidationError("Internal API failed");
+  }
+
+  return value;
+}
+
 export default function WagmiSetup({
   children,
 }: {
@@ -179,7 +187,7 @@ export default function WagmiSetup({
 
       const config: AppKitInitializationConfig = {
         wallets,
-        adapterManager,
+        adapterManager: assertAppKitAdapterManager(adapterManager),
         isCapacitor,
         chains,
       };

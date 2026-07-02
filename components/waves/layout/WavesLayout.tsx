@@ -15,6 +15,15 @@ type WavesBranchProps = {
   readonly children: ReactNode;
 };
 
+type WavesContentState = ReturnType<
+  typeof useAuthenticatedContent
+>["contentState"];
+
+const WAVES_CONTENT_STATE_PUBLIC = "not-authenticated";
+const WAVES_CONTENT_STATE_READY = "ready";
+const WAVES_CONTENT_STATE_LOADING = "loading";
+const WAVES_CONTENT_STATE_MEASURING = "measuring";
+
 function WavesBranchLoadingFallback() {
   return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
 }
@@ -26,9 +35,7 @@ const WavesDesktop = dynamic<WavesBranchProps>(
   }
 );
 
-function getConnectPrompt(
-  contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
-): ReactNode {
+function getConnectPrompt(contentState: WavesContentState): ReactNode {
   switch (contentState) {
     case "needs-profile":
       return (
@@ -45,10 +52,10 @@ function getConnectPrompt(
           This content is not available.
         </h1>
       );
-    case "loading":
-    case "measuring":
-    case "not-authenticated":
-    case "ready":
+    case WAVES_CONTENT_STATE_LOADING:
+    case WAVES_CONTENT_STATE_MEASURING:
+    case WAVES_CONTENT_STATE_PUBLIC:
+    case WAVES_CONTENT_STATE_READY:
     default:
       return null;
   }
@@ -92,18 +99,21 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
   const connectPrompt = getConnectPrompt(contentState);
   const shouldRenderWavesContent =
-    contentState === "ready" ||
-    contentState === "not-authenticated" ||
-    contentState === "loading" ||
-    contentState === "measuring";
+    contentState === WAVES_CONTENT_STATE_READY ||
+    contentState === WAVES_CONTENT_STATE_PUBLIC ||
+    contentState === WAVES_CONTENT_STATE_LOADING ||
+    contentState === WAVES_CONTENT_STATE_MEASURING;
+  const hasUsefulWavesContent =
+    contentState === WAVES_CONTENT_STATE_READY ||
+    contentState === WAVES_CONTENT_STATE_PUBLIC;
   const hasVisibleLaunchContent =
-    shouldRenderWavesContent || connectPrompt !== null;
+    hasUsefulWavesContent || connectPrompt !== null;
 
   let content: ReactNode = null;
 
   if (shouldRenderWavesContent) {
     content = getWavesContent({
-      children: contentState === "loading" ? null : children,
+      children: contentState === WAVES_CONTENT_STATE_LOADING ? null : children,
       containerClassName,
       isApp,
     });
