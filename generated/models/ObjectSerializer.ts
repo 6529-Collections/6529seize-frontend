@@ -112,6 +112,7 @@ export * from '../models/ApiDecentralizedMediaProtocol';
 export * from '../models/ApiDecentralizedMediaResolution';
 export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
 export * from '../models/ApiDistributionAirdropsUploadResponse';
+export * from '../models/ApiDmDropsUnreadCount';
 export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropAndWave';
@@ -618,6 +619,7 @@ import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaPr
 import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentralizedMediaResolution';
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
+import { ApiDmDropsUnreadCount } from '../models/ApiDmDropsUnreadCount';
 import { ApiDrop                                 } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropAndWave } from '../models/ApiDropAndWave';
@@ -1230,6 +1232,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDecentralizedMediaResolution": ApiDecentralizedMediaResolution,
     "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
     "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
+    "ApiDmDropsUnreadCount": ApiDmDropsUnreadCount,
     "ApiDrop": ApiDrop,
     "ApiDropAndDropVote": ApiDropAndDropVote,
     "ApiDropAndWave": ApiDropAndWave,
