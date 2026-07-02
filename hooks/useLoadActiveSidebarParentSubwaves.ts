@@ -37,7 +37,12 @@ export function useLoadActiveSidebarParentSubwaves({
       return;
     }
 
-    requestedParentIdsRef.current.add(activeParentWaveId);
+    const requestedParentIds = requestedParentIdsRef.current;
+    requestedParentIds.add(activeParentWaveId);
     loadActiveParentSubwaves(activeParentWaveId);
+
+    return () => {
+      requestedParentIds.delete(activeParentWaveId);
+    };
   }, [activeParentWaveId, hasLoadedActiveParentSubwaves]);
 }
