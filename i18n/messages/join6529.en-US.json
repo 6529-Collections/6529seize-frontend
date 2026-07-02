@@ -12,7 +12,6 @@
   "join6529.progress.done": "Complete",
   "join6529.progress.current": "Current",
   "join6529.progress.pending": "Pending",
-  "join6529.progress.optional": "Optional",
   "join6529.steps.ariaLabel": "Join 6529 setup steps",
   "join6529.steps.wallet.title": "Connect wallet",
   "join6529.steps.wallet.body": "Use a wallet so 6529 can recognize your account and prepare profile setup.",

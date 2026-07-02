@@ -20,6 +20,10 @@ profile image, and recent profile drops.
   entry step is marked complete from a route-aware client navigation.
 - Profile with recent public Wave drop: the first public message step is marked
   complete and the public Waves entry step is also satisfied.
+- Established profiles with existing 6529 activity, such as wave creator state,
+  REP/CIC/TDH/xTDH, level, or submission/winner history, are treated as having
+  already entered Waves and sent a first public message so old users are not
+  shown beginner-only pending steps.
 
 The first public message check queries recent drops for the connected profile
 identity and counts drops in public Waves only when the returned drop author
@@ -37,8 +41,7 @@ The journey shows five visible steps:
 5. Add profile image.
 
 Progress is a simple completed count over those five steps. The profile-image
-step is optional in the sense that it is not a gate, but it is still incomplete
-until the user uploads an image.
+step is not a gate, but it is still incomplete until the user uploads an image.
 
 ## Related Actions
 

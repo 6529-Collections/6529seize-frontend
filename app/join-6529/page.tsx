@@ -9,10 +9,10 @@ import Join6529PageClient from "./page.client";
 
 const resolveRequestLocale = async (): Promise<SupportedLocale> => {
   const headersList = await headers();
-  const [preferredLocale] = (headersList.get("accept-language") ?? "")
+  const preferredLocale = (headersList.get("accept-language") ?? "")
     .split(",")
     .map((value) => value.split(";")[0]?.trim())
-    .filter(Boolean);
+    .find(Boolean);
   return normalizeLocale(preferredLocale);
 };
 
