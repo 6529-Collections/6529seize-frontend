@@ -18,11 +18,13 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { useContext, useMemo } from "react";
+import { useContext, useId, useMemo } from "react";
+import { Tooltip } from "react-tooltip";
 import MemeSubscriptionRow from "../../user/subscriptions/MemeSubscriptionRow";
 import SubscriptionHeaderLinks, {
   SubscriptionBalanceLabel,
   SubscriptionInfoLink,
+  SubscriptionProfileLink,
 } from "../../user/subscriptions/SubscriptionHeaderLinks";
 import {
   ABOUT_SUBSCRIPTIONS_HREF,
@@ -33,7 +35,8 @@ const SUBSCRIPTION_SLOT_CLASS_NAME =
   "tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4";
 type SubscriptionAwarenessStatusKey = Extract<
   MessageKey,
-  | "home.mintSubscriptions.status.connectProfile"
+  | "home.mintSubscriptions.disabled.activeDrop"
+  | "home.mintSubscriptions.disabled.connectWallet"
   | "home.mintSubscriptions.status.proxyActive"
 >;
 type SubscriptionStatusSource = "none" | "upcoming";
@@ -47,43 +50,71 @@ function getProfileKey(
   );
 }
 
+function DisabledSubscriptionToggle({
+  tooltipLabel,
+}: Readonly<{
+  tooltipLabel: string;
+}>) {
+  const tooltipId = `subscription-disabled-${useId().replaceAll(":", "")}`;
+
+  return (
+    <>
+      <span
+        data-tooltip-id={tooltipId}
+        data-tooltip-content={tooltipLabel}
+        className="tw-inline-flex tw-shrink-0"
+      >
+        <span
+          role="switch"
+          aria-checked="false"
+          aria-disabled="true"
+          aria-label={tooltipLabel}
+          tabIndex={0}
+          className="tw-inline-flex tw-h-6 tw-w-12 tw-cursor-not-allowed tw-items-center tw-rounded-full tw-bg-iron-800 tw-p-0.5 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+        >
+          <span className="tw-size-5 tw-rounded-full tw-bg-iron-500" />
+        </span>
+      </span>
+      <Tooltip id={tooltipId} place="top" />
+    </>
+  );
+}
+
 function SubscriptionAwarenessRow({
   balanceLabel,
+  showStatusLabel = false,
   profileSubscriptionsHref,
   statusLabelKey,
 }: Readonly<{
   balanceLabel?: string | undefined;
+  showStatusLabel?: boolean;
   profileSubscriptionsHref: string | undefined;
   statusLabelKey?: SubscriptionAwarenessStatusKey | undefined;
 }>) {
   const locale = useBrowserLocale();
-  const statusLabel = statusLabelKey ? t(locale, statusLabelKey) : null;
+  const statusLabel = t(
+    locale,
+    statusLabelKey ?? "home.mintSubscriptions.disabled.connectWallet"
+  );
 
   return (
     <div className={SUBSCRIPTION_SLOT_CLASS_NAME}>
       <div className="tw-py-1">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <SubscriptionHeaderLinks
-            labelKey="home.mintSubscriptions.subscribeLabel"
-            profileSubscriptionsHref={profileSubscriptionsHref}
-          >
+          <SubscriptionHeaderLinks labelKey="home.mintSubscriptions.subscribeLabel">
             {balanceLabel && (
               <SubscriptionBalanceLabel balanceLabel={balanceLabel} />
             )}
           </SubscriptionHeaderLinks>
           <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2">
-            {statusLabel && (
-              <>
-                <span
-                  aria-hidden
-                  className="tw-inline-flex tw-h-5 tw-w-10 tw-shrink-0 tw-items-center tw-rounded-full tw-bg-iron-800 tw-p-0.5 tw-ring-1 tw-ring-inset tw-ring-iron-700"
-                >
-                  <span className="tw-size-4 tw-rounded-full tw-bg-iron-500" />
-                </span>
-                <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400">
-                  {statusLabel}
-                </span>
-              </>
+            <DisabledSubscriptionToggle tooltipLabel={statusLabel} />
+            {showStatusLabel && (
+              <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400">
+                {statusLabel}
+              </span>
+            )}
+            {profileSubscriptionsHref && (
+              <SubscriptionProfileLink href={profileSubscriptionsHref} />
             )}
             <SubscriptionInfoLink href={ABOUT_SUBSCRIPTIONS_HREF} />
           </div>
@@ -181,8 +212,9 @@ export default function LatestDropNextMintSubscribe(
         statusLabelKey={
           activeProfileProxy
             ? "home.mintSubscriptions.status.proxyActive"
-            : "home.mintSubscriptions.status.connectProfile"
+            : "home.mintSubscriptions.disabled.connectWallet"
         }
+        showStatusLabel={!!activeProfileProxy}
       />
     );
   }
@@ -192,6 +224,8 @@ export default function LatestDropNextMintSubscribe(
       <SubscriptionAwarenessRow
         balanceLabel={details ? balanceLabel : undefined}
         profileSubscriptionsHref={profileSubscriptionsHref}
+        statusLabelKey="home.mintSubscriptions.disabled.activeDrop"
+        showStatusLabel
       />
     );
   }

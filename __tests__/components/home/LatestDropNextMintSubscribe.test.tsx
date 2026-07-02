@@ -154,7 +154,14 @@ describe("LatestDropNextMintSubscribe", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
     expect(screen.queryByText("Manage in profile")).not.toBeInTheDocument();
-    expect(screen.getByText("My subscriptions")).toHaveAttribute(
+    expect(screen.getByText("Cannot change active drops")).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", { name: "Cannot change active drops" })
+    ).toHaveAttribute("aria-checked", "false");
+    expect(
+      screen.getByRole("switch", { name: "Cannot change active drops" })
+    ).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
       "href",
       "/test-handle/subscriptions"
     );
@@ -261,8 +268,17 @@ describe("LatestDropNextMintSubscribe", () => {
     });
 
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
-    expect(screen.getByText("Connect profile")).toBeInTheDocument();
-    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(screen.queryByText("Connect profile")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Connect wallet to subscribe")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", { name: "Connect wallet to subscribe" })
+    ).toHaveAttribute("aria-checked", "false");
+    expect(
+      screen.getByRole("switch", { name: "Connect wallet to subscribe" })
+    ).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByLabelText("My subscriptions")).not.toBeInTheDocument();
     expect(
       screen.getByLabelText("Learn more about The Memes subscriptions")
     ).toHaveAttribute("href", "/about/subscriptions");
@@ -280,7 +296,7 @@ describe("LatestDropNextMintSubscribe", () => {
     });
 
     expect(screen.getByText("Proxy active")).toBeInTheDocument();
-    expect(screen.getByText("My subscriptions")).toHaveAttribute(
+    expect(screen.getByLabelText("My subscriptions")).toHaveAttribute(
       "href",
       "/test-handle/subscriptions"
     );

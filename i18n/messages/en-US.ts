@@ -787,7 +787,9 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
-  "home.mintSubscriptions.status.connectProfile": "Connect profile",
+  "home.mintSubscriptions.disabled.activeDrop": "Cannot change active drops",
+  "home.mintSubscriptions.disabled.connectWallet":
+    "Connect wallet to subscribe",
   "home.mintSubscriptions.status.proxyActive": "Proxy active",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",

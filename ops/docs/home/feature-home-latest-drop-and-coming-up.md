@@ -94,15 +94,18 @@ Use this page for visibility rules, state switches, and route targets.
 - The current/latest `/the-memes/{id}` detail page uses the same awareness-only
   subscription row beside the mint countdown.
 - Awareness-only connected rows do not show a passive `Manage in profile`
-  status; the subscription info link is the right-edge question-mark control.
+  status; they show a read-only disabled switch, an icon-only profile
+  subscriptions link when connected, and a right-edge question-mark info link.
 - Without a connected profile, the subscription row can still show a
-  non-actionable awareness state with a link to `/about/subscriptions`.
+  non-actionable disabled switch awareness state with a link to
+  `/about/subscriptions`.
 - With a connected profile, the subscription row can link to
   `/{user}/subscriptions`; profile-specific subscription status and final
   phase/position details only render when the related APIs return data.
 - On `/about/subscriptions`, connected users see a primary `My subscriptions`
-  action beside the about-section dropdown when subscriptions are available in
-  their environment.
+  action beside the about-section dropdown. Disconnected users see a primary
+  connect-wallet action that opens wallet connection and then routes to their
+  profile subscriptions once connected.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.

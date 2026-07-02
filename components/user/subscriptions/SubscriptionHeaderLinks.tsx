@@ -3,7 +3,10 @@
 import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  QuestionMarkCircleIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -49,6 +52,26 @@ export function SubscriptionInfoLink({
       className={`tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-iron-200 ${className}`}
     >
       <QuestionMarkCircleIcon className="tw-size-5" aria-hidden="true" />
+    </Link>
+  );
+}
+
+export function SubscriptionProfileLink({
+  className = "",
+  href,
+}: Readonly<{
+  className?: string;
+  href: string;
+}>) {
+  const locale = useBrowserLocale();
+
+  return (
+    <Link
+      href={href}
+      aria-label={t(locale, "home.mintSubscriptions.profileSubscriptionsLink")}
+      className={`tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-400 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-iron-200 ${className}`}
+    >
+      <ArrowTopRightOnSquareIcon className="tw-size-5" aria-hidden="true" />
     </Link>
   );
 }
