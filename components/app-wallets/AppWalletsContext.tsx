@@ -16,7 +16,11 @@ import {
 } from "./app-wallet-helpers";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
-import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
+import {
+  measureMobileLaunchAsync,
+  setMobileLaunchContext,
+  type MobileLaunchAppWalletCountBucket,
+} from "@/utils/monitoring/mobileLaunchTiming";
 
 export const APP_WALLET_MNEMONIC_UNAVAILABLE = "N/A";
 
@@ -57,6 +61,21 @@ const WALLET_KEY_PREFIX = "app-wallet_";
 
 const isSameAddress = (a: string, b: string): boolean =>
   a.toLowerCase() === b.toLowerCase();
+
+const getAppWalletCountBucket = (
+  count: number
+): MobileLaunchAppWalletCountBucket => {
+  if (count <= 0) {
+    return "0";
+  }
+  if (count === 1) {
+    return "1";
+  }
+  if (count <= 5) {
+    return "2_5";
+  }
+  return "6_plus";
+};
 
 const isV2Wallet = (wallet: AppWallet): boolean =>
   wallet.encryption_version === 2 &&
@@ -128,7 +147,8 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [appWalletsSupported]);
 
   useEffect(() => {
-    let cancelled = false;
+    const cancellation = { cancelled: false };
+    const isCancelled = () => cancellation.cancelled;
 
     const initialize = async () => {
       let supported = false;
@@ -144,13 +164,17 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
-      if (cancelled) {
+      if (isCancelled()) {
         return;
       }
 
       setAppWalletsSupported(supported);
 
       if (!supported) {
+        setMobileLaunchContext({
+          app_wallet_count_bucket: "0",
+          app_wallets_state: "unsupported",
+        });
         setAppWallets([]);
         setFetchingAppWallets(false);
         return;
@@ -162,18 +186,23 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
         getAllWallets
       );
 
-      if (cancelled) {
+      if (isCancelled()) {
         return;
       }
 
+      setMobileLaunchContext({
+        app_wallet_count_bucket: getAppWalletCountBucket(wallets.length),
+        app_wallets_state:
+          wallets.length > 0 ? "supported_with_wallets" : "supported_empty",
+      });
       setAppWallets(wallets);
       setFetchingAppWallets(false);
     };
 
-    initialize();
+    void initialize();
 
     return () => {
-      cancelled = true;
+      cancellation.cancelled = true;
     };
   }, [isCapacitor]);
 
@@ -260,7 +289,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
         const valueResult = await SecureStoragePlugin.get({ key });
         const wallet = JSON.parse(valueResult.value) as AppWallet;
 
-        if (!wallet || !isSameAddress(wallet.address, address)) {
+        if (!isSameAddress(wallet.address, address)) {
           return false;
         }
 
