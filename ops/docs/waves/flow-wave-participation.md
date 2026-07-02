@@ -72,7 +72,8 @@ same context.
   placeholders (`Select a Wave` or `Select a Conversation`).
 - When posting is blocked, thread content stays readable and the composer area
   shows blocked states (for example
-  `Connect your wallet to participate in this wave`, `Wave is closed`, or
+  `Connect your wallet to participate in this wave`,
+  `Create a profile to participate in this wave`, `Wave is closed`, or
   `You cannot participate in this wave at the moment`).
 
 ## Edge Cases
@@ -100,7 +101,10 @@ same context.
 ## Limitations / Notes
 
 - Full participation requires an authenticated wallet plus a profile handle.
-- Direct-message threads do not use the signed-out public preview flow.
+  Authenticated wallets without a profile can read public wave content when it
+  is otherwise public, but participation stays blocked.
+- Direct-message threads do not use the signed-out public preview flow and stay
+  gated until wallet/profile prerequisites are resolved.
 - Shared links can preserve overlay/jump query state, but those bootstrap rules
   still depend on the current route context.
 

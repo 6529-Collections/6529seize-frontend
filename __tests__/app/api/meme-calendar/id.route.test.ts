@@ -10,6 +10,7 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   MEME_CALENDAR_API_CACHE_HEADERS,
+  buildMemeCalendarMintResponse,
   getMintTimelineStatus,
 } from "@/app/api/meme-calendar/meme-calendar-response";
 import { GET } from "@/app/api/meme-calendar/[id]/route";
@@ -60,10 +61,110 @@ describe("/api/meme-calendar/[id]", () => {
         period: expected.periodNumber,
         era: expected.eraNumber,
         eon: expected.eonNumber,
+        position_in_season: 24,
+        position_in_year: 62,
+        position_in_epoch: 453,
+        position_in_period: 453,
+        position_in_era: 453,
+        position_in_eon: 453,
         calendar_path: "/meme-calendar",
         mint_path: `/the-memes/${id}`,
       },
       { headers: MEME_CALENDAR_API_CACHE_HEADERS }
+    );
+  });
+
+  it("counts structured ranges from their first scheduled mint", async () => {
+    const response = await GET({} as any, {
+      params: Promise.resolve({ id: "48" }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        mint_number: 48,
+        mint_date: "2023-01-02",
+        season: 2,
+        year: 1,
+        epoch: 1,
+        period: 1,
+        era: 1,
+        eon: 1,
+        position_in_season: 1,
+        position_in_year: 1,
+        position_in_epoch: 1,
+        position_in_period: 1,
+        position_in_era: 1,
+        position_in_eon: 1,
+      })
+    );
+  });
+
+  it("does not throw when a resolved range has no scheduled mint", () => {
+    const timeline = getMintTimelineDetails(500);
+    const malformedTimeline = {
+      ...timeline,
+      ranges: {
+        ...timeline.ranges,
+        szn: {
+          start: new Date(Date.UTC(2021, 0, 1)),
+          end: new Date(Date.UTC(2021, 0, 2)),
+        },
+      },
+    };
+
+    expect(
+      buildMemeCalendarMintResponse(malformedTimeline as typeof timeline)
+    ).toBeNull();
+  });
+
+  it("returns division positions for a structured timeline mint", async () => {
+    const response = await GET({} as any, {
+      params: Promise.resolve({ id: "516" }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        mint_number: 516,
+        season: 16,
+        year: 4,
+        epoch: 1,
+        period: 1,
+        era: 1,
+        eon: 1,
+        position_in_season: 1,
+        position_in_year: 78,
+        position_in_epoch: 469,
+        position_in_period: 469,
+        position_in_era: 469,
+        position_in_eon: 469,
+      })
+    );
+  });
+
+  it("counts SZN1 positions from the historical first mint", async () => {
+    const response = await GET({} as any, {
+      params: Promise.resolve({ id: "47" }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        mint_number: 47,
+        season: 1,
+        year: 0,
+        epoch: 0,
+        period: 0,
+        era: 0,
+        eon: 0,
+        position_in_season: 47,
+        position_in_year: 47,
+        position_in_epoch: 47,
+        position_in_period: 47,
+        position_in_era: 47,
+        position_in_eon: 47,
+      })
     );
   });
 
