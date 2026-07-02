@@ -15,8 +15,8 @@ interface SidebarWaveRowLayoutClasses {
 
 const DEFAULT_LINK_GAP_CLASSES = "tw-space-x-3";
 const DEFAULT_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[62px]";
-const CHILD_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[54px]";
-const CHILD_GUIDE_LINE_OFFSET_CLASSES = "tw-left-[35.5px]";
+const CHILD_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[48px]";
+const CHILD_GUIDE_LINE_OFFSET_CLASSES = "tw-left-9";
 
 const rowLayoutByVariant = {
   app: {

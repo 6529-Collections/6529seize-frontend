@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef } from "react";
-import type { MouseEvent, RefObject } from "react";
+import type { RefObject } from "react";
 import Link from "next/link";
 import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
-import { SidebarWaveExpandControl } from "@/components/brain/left-sidebar/waves/SidebarWaveExpandControl";
+import { SidebarSubwaveConnector } from "@/components/brain/left-sidebar/waves/SidebarSubwaveConnector";
 import { getSidebarWaveRowLayoutClasses } from "@/components/brain/left-sidebar/waves/sidebarWaveRowLayout";
 import {
   hasWaveTrustSummaryScore,
@@ -36,11 +36,8 @@ interface ExpandedWaveProps {
   readonly waveId: string;
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
-  readonly isExpanded?: boolean | undefined;
-  readonly isLoadingSubwaves?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly isLastSubwave?: boolean | undefined;
-  readonly onToggleExpand?: ((waveId: string) => void) | undefined;
   readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
@@ -64,11 +61,8 @@ export const ExpandedWave = ({
   waveId,
   depth = 0,
   canExpand = false,
-  isExpanded = false,
-  isLoadingSubwaves = false,
   hasUnreadSubwaves = false,
   isLastSubwave = false,
-  onToggleExpand,
   onPrefetchSubwaves,
 }: ExpandedWaveProps) => {
   const tooltipAttributes = showExpandedTooltip
@@ -85,11 +79,13 @@ export const ExpandedWave = ({
       ? latestDropTimestamp
       : null;
   const isChildRow = depth === 1;
-  const shouldShowExpandControl = canExpand && depth === 0;
   const shouldShowPinButton = showPin && depth === 0;
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowDropTime = presentLatestDropTimestamp !== null;
-  const rowVerticalPaddingClasses = isChildRow ? "tw-py-1.5" : "tw-py-2";
+  const rowVerticalPaddingClasses = isChildRow ? "tw-py-1" : "tw-py-2";
+  const contentGapClasses = isChildRow ? "tw-gap-y-0.5" : "tw-gap-y-1";
+  const titleTextClasses = isChildRow ? "tw-text-[13px]" : "tw-text-sm";
+  const timestampTextClasses = isChildRow ? "tw-text-[11px]" : "tw-text-xs";
   const {
     rowPaddingClasses,
     rowGapClasses,
@@ -104,7 +100,7 @@ export const ExpandedWave = ({
     typeof globalThis.setTimeout
   > | null>(null);
   const shouldPrefetchSubwaves = Boolean(
-    shouldShowExpandControl && onPrefetchSubwaves
+    canExpand && depth === 0 && onPrefetchSubwaves
   );
 
   const cancelSubwavePrefetch = useCallback(() => {
@@ -140,12 +136,6 @@ export const ExpandedWave = ({
 
   useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
-  const handleToggleExpand = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onToggleExpand?.(waveId);
-  };
-
   return (
     <div
       onMouseEnter={handleRowMouseEnter}
@@ -158,11 +148,9 @@ export const ExpandedWave = ({
       }`}
     >
       {isChildRow && (
-        <span
-          aria-hidden="true"
-          className={`tw-absolute -tw-top-1 ${guideLineOffsetClasses} tw-w-px tw-bg-iron-700/60 ${
-            isLastSubwave ? "tw-bottom-4" : "-tw-bottom-1"
-          }`}
+        <SidebarSubwaveConnector
+          guideLineOffsetClasses={guideLineOffsetClasses}
+          isLastSubwave={isLastSubwave}
         />
       )}
       <div
@@ -193,7 +181,9 @@ export const ExpandedWave = ({
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-1">
+            <div
+              className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${contentGapClasses}`}
+            >
               <div className="-tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
                 <Link
                   href={href}
@@ -207,28 +197,17 @@ export const ExpandedWave = ({
                 >
                   <div
                     ref={nameRef}
-                    className="tw-relative tw-z-[6] tw-truncate tw-text-sm tw-leading-tight"
+                    className={`tw-relative tw-z-[6] tw-truncate ${titleTextClasses} tw-leading-tight`}
                     {...tooltipAttributes}
                   >
                     {formattedWaveName}
                   </div>
                 </Link>
-                {shouldShowExpandControl && (
-                  <span className="tw-relative tw-z-10 tw-inline-flex">
-                    <SidebarWaveExpandControl
-                      formattedWaveName={formattedWaveName}
-                      isExpanded={isExpanded}
-                      isLoading={isLoadingSubwaves}
-                      onBlur={cancelSubwavePrefetch}
-                      onClick={handleToggleExpand}
-                      onFocus={scheduleSubwavePrefetch}
-                      shouldShowButton={shouldShowExpandControl}
-                    />
-                  </span>
-                )}
               </div>
               {shouldShowDropTime && (
-                <div className="tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap tw-text-xs tw-leading-tight tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400">
+                <div
+                  className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-leading-tight tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400`}
+                >
                   <BrainLeftSidebarWaveDropTime
                     time={presentLatestDropTimestamp}
                   />

@@ -2,9 +2,10 @@
 
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { compareSubwavesByLatestActivity } from "@/helpers/waves/subwave-activity.helpers";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type SidebarWaveDepth = 0 | 1;
+export type SidebarWaveTreeRowType = "wave" | "subwaves-toggle";
 
 const SIDEBAR_WAVE_TREE_EXPANSION_STORAGE_KEY =
   "sidebar-wave-tree-expansion-v1";
@@ -21,6 +22,7 @@ const EMPTY_EXPANSION_STATE: SidebarWaveTreeExpansionState = {
 
 export interface SidebarWaveTreeRow {
   readonly key: string;
+  readonly rowType: SidebarWaveTreeRowType;
   readonly wave: MinimalWave;
   readonly depth: SidebarWaveDepth;
   readonly parentWaveId: string | null;
@@ -28,12 +30,33 @@ export interface SidebarWaveTreeRow {
   readonly isLoadingSubwaves: boolean;
   readonly canExpand: boolean;
   readonly hasUnreadSubwaves: boolean;
+  readonly knownSubwavesCount: number | null;
+  readonly unreadSubwaveDropsCount: number;
   readonly isFirstSubwave: boolean;
   readonly isLastSubwave: boolean;
 }
 
 const hasUnreadDrops = (wave: MinimalWave) =>
   !wave.isMuted && (wave.unreadDropsCount > 0 || wave.newDropsCount.count > 0);
+
+const getUnreadDropsCount = (wave: MinimalWave) =>
+  wave.isMuted ? 0 : Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
+
+const getUnreadSubwaveDropsCount = (
+  wave: MinimalWave,
+  subwaves: readonly MinimalWave[]
+) => {
+  if (wave.isMuted) {
+    return 0;
+  }
+
+  const loadedSubwaveUnreadCount = subwaves.reduce(
+    (total, subwave) => total + getUnreadDropsCount(subwave),
+    0
+  );
+
+  return Math.max(wave.unreadFollowedSubwaveDrops, loadedSubwaveUnreadCount);
+};
 
 const normalizeParentIds = (value: unknown): readonly string[] => {
   if (!Array.isArray(value)) {
@@ -148,9 +171,14 @@ const buildSidebarWaveRows = ({
       loadingParentWaveIds.has(wave.id) &&
       getIsExpanded(wave.id);
     const hasUnreadSubwaves = canExpand && getHasUnreadSubwaves(wave);
+    const knownSubwavesCount = subwaves.length > 0 ? subwaves.length : null;
+    const unreadSubwaveDropsCount = canExpand
+      ? getUnreadSubwaveDropsCount(wave, subwaves)
+      : 0;
 
     rows.push({
       key: wave.id,
+      rowType: "wave",
       wave,
       depth: 0,
       parentWaveId: null,
@@ -158,9 +186,29 @@ const buildSidebarWaveRows = ({
       isLoadingSubwaves,
       canExpand,
       hasUnreadSubwaves,
+      knownSubwavesCount,
+      unreadSubwaveDropsCount,
       isFirstSubwave: false,
       isLastSubwave: false,
     });
+
+    if (showExpandedSubwaves && canExpand) {
+      rows.push({
+        key: `${wave.id}:subwaves-toggle`,
+        rowType: "subwaves-toggle",
+        wave,
+        depth: 1,
+        parentWaveId: wave.id,
+        isExpanded,
+        isLoadingSubwaves,
+        canExpand: true,
+        hasUnreadSubwaves,
+        knownSubwavesCount,
+        unreadSubwaveDropsCount,
+        isFirstSubwave: false,
+        isLastSubwave: false,
+      });
+    }
 
     if (!isExpanded) {
       continue;
@@ -169,6 +217,7 @@ const buildSidebarWaveRows = ({
     subwaves.forEach((subwave, index) => {
       rows.push({
         key: `${wave.id}:${subwave.id}`,
+        rowType: "wave",
         wave: subwave,
         depth: 1,
         parentWaveId: wave.id,
@@ -176,6 +225,8 @@ const buildSidebarWaveRows = ({
         isLoadingSubwaves: false,
         canExpand: false,
         hasUnreadSubwaves: false,
+        knownSubwavesCount: null,
+        unreadSubwaveDropsCount: 0,
         isFirstSubwave: index === 0,
         isLastSubwave: index === subwaves.length - 1,
       });
@@ -205,22 +256,9 @@ export function useSidebarWaveTree({
   const [initialExpansionState] =
     useState<SidebarWaveTreeExpansionState>(readExpansionState);
   const [expansionState, setExpansionState] = useState(initialExpansionState);
-  const requestedParentIdsRef = useRef<Set<string>>(new Set());
-
   const requestParentExpand = useCallback(
-    (
-      parentWaveId: string,
-      options: { readonly force?: boolean | undefined } = {}
-    ) => {
-      if (
-        onParentExpand === undefined ||
-        (!options.force && requestedParentIdsRef.current.has(parentWaveId))
-      ) {
-        return;
-      }
-
-      requestedParentIdsRef.current.add(parentWaveId);
-      onParentExpand(parentWaveId);
+    (parentWaveId: string) => {
+      onParentExpand?.(parentWaveId);
     },
     [onParentExpand]
   );
@@ -246,20 +284,6 @@ export function useSidebarWaveTree({
 
   const resolvedActiveParentWaveId =
     activeParentWaveId ?? activeParentWaveIdFromWaves;
-
-  useEffect(() => {
-    if (resolvedActiveParentWaveId === null) {
-      return;
-    }
-
-    requestParentExpand(resolvedActiveParentWaveId);
-  }, [requestParentExpand, resolvedActiveParentWaveId]);
-
-  useEffect(() => {
-    initialExpansionState.expandedParentIds.forEach((parentWaveId) => {
-      requestParentExpand(parentWaveId);
-    });
-  }, [initialExpansionState.expandedParentIds, requestParentExpand]);
 
   const expandedParentIds = useMemo(
     () => new Set(expansionState.expandedParentIds),
@@ -303,7 +327,7 @@ export function useSidebarWaveTree({
     (waveId: string) => {
       const isExpanded = getIsVisiblyExpanded(waveId);
       if (!isExpanded) {
-        requestParentExpand(waveId, { force: true });
+        requestParentExpand(waveId);
       }
 
       setExpansionState((previousState) => {
