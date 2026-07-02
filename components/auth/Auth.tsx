@@ -1892,7 +1892,9 @@ export default function Auth({
       dialog.setAttribute("open", "");
     }
     dialog
-      .querySelector<HTMLElement>("button:not([disabled]), a[href]")
+      .querySelector<HTMLElement>(
+        "[data-auth-sign-primary]:not([disabled]), button:not([disabled]), a[href]"
+      )
       ?.focus();
 
     return () => {
@@ -1983,6 +1985,7 @@ export default function Auth({
                   <button
                     type="button"
                     className={styles["signModalConfirmButton"]}
+                    data-auth-sign-primary
                     onClick={onConfirmSignRequest}
                     disabled={isSignRequestInProgress}
                   >
