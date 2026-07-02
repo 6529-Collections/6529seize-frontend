@@ -85,15 +85,15 @@ export default function NextGenAdminUpdateImagesAttributes(
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (
-    <Container className="no-padding">
+    <Container className="!tw-p-0">
       <NextGenAdminHeadingRow
         close={props.close}
         title="Update Images and Attributes"
       />
-      <Row className="pt-3">
+      <Row className="tw-pt-4">
         <Col>
           <Form>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Token IDs {tokenIds.length > 0 && `x${tokenIds.length}`}
               </Form.Label>
@@ -111,7 +111,7 @@ export default function NextGenAdminUpdateImagesAttributes(
                 }}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Images {images.length > 0 && `x${images.length}`}
               </Form.Label>
@@ -129,7 +129,7 @@ export default function NextGenAdminUpdateImagesAttributes(
                 }}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Attributes {attributes.length > 0 && `x${attributes.length}`}
               </Form.Label>
@@ -149,12 +149,13 @@ export default function NextGenAdminUpdateImagesAttributes(
             </Form.Group>
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
-              className={`mt-3 mb-3 seize-btn`}
+              className={`tw-mb-4 tw-mt-4 tw-rounded-none tw-border-0 tw-px-5 tw-py-1.5 tw-font-bold disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
               disabled={submitting || loading}
               onClick={() => {
                 setLoading(true);
                 submit();
-              }}>
+              }}
+            >
               Submit
             </Button>
           </Form>
