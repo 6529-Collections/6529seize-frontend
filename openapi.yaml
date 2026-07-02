@@ -2058,7 +2058,7 @@ paths:
         - Drops
       summary: Mark a drop and all subsequent drops in the wave as unread
       description: >-
-        Sets the user"s latest_read_timestamp to just before this drop"s
+        Sets the user's latest_read_timestamp to just before this drop's
         created_at, making this drop and all newer drops unread.
       operationId: markDropUnread
       parameters:
@@ -2080,7 +2080,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get authenticated user"s unread direct-message drop count.
+      summary: Get authenticated user's unread direct-message drop count.
       operationId: getDmDropsUnread
       x-6529-router:
         enabled: true
@@ -14719,9 +14719,9 @@ components:
         Meme Card NFT data plus extended collection metrics. Positive rank
         values are ranked against `ranked_collection_size` when that value is
         present. `collection_size` remains the total Meme Cards collection size.
-        A rank value of `-1` represents an unranked card when
-        `recorded_in_tdh` is `false`; `recorded_in_tdh: null` or an absent
-        value is a legacy/transitional state.
+        A rank value of `-1` represents an unranked card when `recorded_in_tdh`
+        is `false`; `recorded_in_tdh: null` or an absent value is a
+        legacy/transitional state.
       required:
         - collection_size
         - edition_size
@@ -14830,8 +14830,8 @@ components:
           format: int64
           nullable: true
           description: >-
-            Rank denominator for TDH-recorded cards. Null for unranked,
-            legacy, or fallback rows.
+            Rank denominator for TDH-recorded cards. Null for unranked, legacy,
+            or fallback rows.
     ApiMemesExtendedDataPage:
       type: object
       required:
@@ -15187,7 +15187,7 @@ components:
           type: string
           enum:
             - ERC1155
-            - EEC721
+            - ERC721
         hodl_rate:
           type: number
           format: float

@@ -208,6 +208,7 @@ function InlineStatsMetric({
   const tooltipId = infoTitle
     ? buildTooltipId("meme-collector-stat", label, infoTitle)
     : undefined;
+  const displayableRank = getDisplayableRank(rank, total);
 
   return (
     <div className="tw-min-w-[8.5rem]">
@@ -236,11 +237,11 @@ function InlineStatsMetric({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1.5">
         <span className={COLLECTOR_METRIC_VALUE_CLASS}>{value}</span>
         {unranked && <UnrankedBadge label={label} locale={locale} />}
-        {!unranked && isRankDisplayable(rank, total) && (
+        {!unranked && displayableRank && (
           <CollectorRankBadge
             label={label}
-            rank={rank!}
-            total={total!}
+            rank={displayableRank.rank}
+            total={displayableRank.total}
             locale={locale}
           />
         )}
@@ -288,11 +289,15 @@ function UnrankedBadge({
   );
 }
 
-function isRankDisplayable(
+function getDisplayableRank(
   rank: number | undefined,
   total: number | undefined
-) {
-  return rank !== undefined && rank > 0 && total !== undefined && total > 0;
+): { readonly rank: number; readonly total: number } | undefined {
+  if (rank === undefined || rank <= 0 || total === undefined || total <= 0) {
+    return undefined;
+  }
+
+  return { rank, total };
 }
 
 function isMemeUnranked(nftMeta: ApiMemesExtendedData) {
