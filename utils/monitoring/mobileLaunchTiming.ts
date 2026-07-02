@@ -8,13 +8,44 @@ import {
 
 const SLOW_LAUNCH_MS = 3000;
 const NORMAL_SAMPLE_RATE = 0.05;
+const FOCUSED_ROUTE_SAMPLE_RATE = 1;
 const TIMEOUT_FLUSH_MS = 15000;
 const MAX_API_CALLS = 10;
 const SLOWEST_API_CALLS = 5;
 
-type FlushReason = "shell_paint" | "timeout" | "pagehide" | "error" | "manual";
+type FlushReason =
+  | "shell_paint"
+  | "waves_content_visible"
+  | "timeout"
+  | "pagehide"
+  | "error"
+  | "manual";
 
 type ApiStatus = number | "aborted" | "network_error" | "unknown";
+
+export type MobileLaunchAuthState =
+  | "anonymous"
+  | "authenticated_profile"
+  | "authenticated_proxy_profile"
+  | "authorized_wallet_no_profile"
+  | "connected_wallet_needs_auth"
+  | "initializing"
+  | "stored_auth_disconnected"
+  | "wallet_auth_disabled";
+
+export type MobileLaunchWalletConnectionState =
+  | "initializing"
+  | "disconnected"
+  | "connecting"
+  | "connected"
+  | "error";
+
+export type MobileLaunchAppWalletsState =
+  | "supported_empty"
+  | "supported_with_wallets"
+  | "unsupported";
+
+export type MobileLaunchAppWalletCountBucket = "0" | "1" | "2_5" | "6_plus";
 
 type StepTiming = {
   readonly offset_ms: number;
@@ -44,6 +75,13 @@ type DeviceInfoAttrs = {
   readonly web_view_version?: string;
 };
 
+export type MobileLaunchContext = {
+  readonly app_wallet_count_bucket?: MobileLaunchAppWalletCountBucket;
+  readonly app_wallets_state?: MobileLaunchAppWalletsState;
+  readonly auth_state?: MobileLaunchAuthState;
+  readonly wallet_connection_state?: MobileLaunchWalletConnectionState;
+};
+
 type LaunchState = {
   readonly launchId: string;
   readonly startedAtMs: number;
@@ -51,8 +89,10 @@ type LaunchState = {
   readonly appVersion: string;
   readonly steps: Record<string, StepTiming>;
   readonly apiCalls: CapturedApiTiming[];
+  context: MobileLaunchContext;
   apiTotalCount: number;
   deviceInfo?: DeviceInfoAttrs;
+  scheduledFlushId?: ReturnType<typeof setTimeout>;
   timeoutId?: ReturnType<typeof setTimeout>;
   flushed: boolean;
 };
@@ -65,6 +105,15 @@ type ApiRequestTimingInput = {
   readonly durationMs: number;
 };
 
+type BuildLaunchAttributesInput = {
+  readonly state: LaunchState;
+  readonly totalMs: number;
+  readonly slow: boolean;
+  readonly reason: FlushReason;
+  readonly routeFamily: string;
+  readonly sampleRate: number;
+};
+
 let launchState: LaunchState | null = null;
 
 export function startMobileLaunchTiming(): void {
@@ -72,15 +121,16 @@ export function startMobileLaunchTiming(): void {
     return;
   }
 
-  if (globalThis.window === undefined || !Capacitor.isNativePlatform()) {
+  if (typeof window === "undefined") {
     return;
   }
 
-  const startedAtMs = nowMs();
+  const isNative = isNativeCapacitorPlatform();
+  const startedAtMs = getLaunchStartedAtMs();
   launchState = {
     launchId: createLaunchId(),
     startedAtMs,
-    platform: Capacitor.getPlatform(),
+    platform: getLaunchPlatform(isNative),
     appVersion: publicEnv.VERSION ?? "unknown",
     steps: {
       start: {
@@ -88,13 +138,16 @@ export function startMobileLaunchTiming(): void {
       },
     },
     apiCalls: [],
+    context: {},
     apiTotalCount: 0,
     flushed: false,
   };
 
   addStepBreadcrumb("start", 0);
   registerFlushHandlers();
-  void captureDeviceInfo().catch(() => undefined);
+  if (isNative) {
+    void captureDeviceInfo().catch(() => undefined);
+  }
 }
 
 export function markMobileLaunchStep(stepName: string): void {
@@ -167,6 +220,45 @@ export function recordMobileLaunchApiRequest(
   }
 }
 
+export function setMobileLaunchContext(context: MobileLaunchContext): void {
+  const state = getActiveState();
+  if (!state) {
+    return;
+  }
+
+  state.context = {
+    ...state.context,
+    ...context,
+  };
+}
+
+export function scheduleMobileLaunchFlush(
+  reason: FlushReason = "manual",
+  delayMs = 0
+): void {
+  const state = getActiveState();
+  if (!state) {
+    return;
+  }
+
+  if (state.scheduledFlushId !== undefined) {
+    clearTimeout(state.scheduledFlushId);
+  }
+
+  state.scheduledFlushId = setTimeout(
+    () => {
+      const activeState = getActiveState();
+      if (!activeState) {
+        return;
+      }
+
+      delete activeState.scheduledFlushId;
+      flushMobileLaunchTiming(reason);
+    },
+    Math.max(0, delayMs)
+  );
+}
+
 export function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
   const state = getActiveState();
   if (!state) {
@@ -174,6 +266,10 @@ export function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
   }
 
   state.flushed = true;
+  if (state.scheduledFlushId !== undefined) {
+    clearTimeout(state.scheduledFlushId);
+    delete state.scheduledFlushId;
+  }
   if (state.timeoutId !== undefined) {
     clearTimeout(state.timeoutId);
     delete state.timeoutId;
@@ -182,13 +278,22 @@ export function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
   const totalMs = roundMs(elapsedSinceStart(state));
   const slow = totalMs >= SLOW_LAUNCH_MS;
   const warn = slow || reason === "timeout" || reason === "error";
-  const shouldLog = warn || Math.random() < NORMAL_SAMPLE_RATE;
+  const routeFamily = sanitizeRouteFamily(getCurrentPathname());
+  const sampleRate = getSampleRate(routeFamily, state.platform);
+  const shouldLog = warn || Math.random() < sampleRate;
 
   if (!shouldLog) {
     return;
   }
 
-  const attrs = buildLaunchAttributes(state, totalMs, slow, reason);
+  const attrs = buildLaunchAttributes({
+    state,
+    totalMs,
+    slow,
+    reason,
+    routeFamily,
+    sampleRate,
+  });
   if (warn) {
     Sentry.logger.warn("mobile_launch_timing", attrs);
     return;
@@ -205,10 +310,15 @@ function getActiveState(): LaunchState | null {
 }
 
 function nowMs(): number {
-  if (globalThis.performance?.now) {
-    return globalThis.performance.now();
+  if (typeof performance === "undefined") {
+    return Date.now();
   }
-  return Date.now();
+
+  return performance.now();
+}
+
+function getLaunchStartedAtMs(): number {
+  return 0;
 }
 
 function elapsedSinceStart(state: LaunchState): number {
@@ -220,19 +330,72 @@ function roundMs(value: number): number {
 }
 
 function createLaunchId(): string {
-  if (globalThis.crypto?.randomUUID) {
-    return globalThis.crypto.randomUUID();
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `launch-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
-  return `launch-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function isNativeCapacitorPlatform(): boolean {
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
+
+function getLaunchPlatform(isNative: boolean): string {
+  if (isNative) {
+    const platform = sanitizeShortValue(getNativePlatform());
+    return platform ? `capacitor_${platform}` : "capacitor_unknown";
+  }
+
+  return isLikelyMobileWeb() ? "web_mobile" : "web_desktop";
+}
+
+function getNativePlatform(): string | undefined {
+  try {
+    return Capacitor.getPlatform();
+  } catch {
+    return undefined;
+  }
+}
+
+function isLikelyMobileWeb(): boolean {
+  const navigatorWithUserAgentData = globalThis.navigator as
+    | (Navigator & { readonly userAgentData?: { readonly mobile?: boolean } })
+    | undefined;
+
+  if (navigatorWithUserAgentData?.userAgentData?.mobile === true) {
+    return true;
+  }
+
+  if (
+    typeof window === "undefined" ||
+    typeof window.matchMedia !== "function"
+  ) {
+    return false;
+  }
+
+  return window.matchMedia("(pointer: coarse) and (max-width: 900px)").matches;
+}
+
+function getCurrentPathname(): string {
+  if (typeof window === "undefined") {
+    return "/";
+  }
+
+  return window.location.pathname || "/";
 }
 
 function registerFlushHandlers(): void {
   const state = launchState;
-  const browserWindow = globalThis.window;
-  if (!state || browserWindow === undefined) {
+  if (!state || typeof window === "undefined") {
     return;
   }
 
+  const browserWindow = window;
   state.timeoutId = setTimeout(() => {
     flushMobileLaunchTiming("timeout");
   }, TIMEOUT_FLUSH_MS);
@@ -328,24 +491,127 @@ function addStepBreadcrumb(stepName: string, offsetMs: number): void {
   });
 }
 
-function buildLaunchAttributes(
-  state: LaunchState,
-  totalMs: number,
-  slow: boolean,
-  reason: FlushReason
-): Record<string, unknown> {
+function buildLaunchAttributes({
+  state,
+  totalMs,
+  slow,
+  reason,
+  routeFamily,
+  sampleRate,
+}: BuildLaunchAttributesInput): Record<string, unknown> {
+  const context =
+    Object.keys(state.context).length > 0 ? { context: state.context } : {};
+
   return {
     launch_id: state.launchId,
     total_ms: totalMs,
     platform: state.platform,
     app_version: state.appVersion,
-    route_family: sanitizeRouteFamily(globalThis.location?.pathname ?? "/"),
+    route_family: routeFamily,
+    sample_rate: sampleRate,
     slow,
     flush_reason: reason,
+    ...buildMilestoneAttributes(state),
+    ...context,
     steps: state.steps,
     api: buildApiSummary(state),
     ...(state.deviceInfo ? { device: state.deviceInfo } : {}),
   };
+}
+
+function getSampleRate(routeFamily: string, platform: string): number {
+  if (isFocusedLaunchRoute(routeFamily) && platform !== "web_desktop") {
+    return FOCUSED_ROUTE_SAMPLE_RATE;
+  }
+
+  return NORMAL_SAMPLE_RATE;
+}
+
+function isFocusedLaunchRoute(routeFamily: string): boolean {
+  return (
+    routeFamily === "/waves" ||
+    routeFamily === "/waves/[wave]" ||
+    routeFamily === "/waves/create" ||
+    routeFamily === "/messages" ||
+    routeFamily === "/messages/[wave]" ||
+    routeFamily === "/messages/create"
+  );
+}
+
+function buildMilestoneAttributes(
+  state: LaunchState
+): Record<string, number | string> {
+  const attrs: Record<string, number | string> = {};
+  addStepOffsetAttr(attrs, state, "root_layout_reporter_mounted");
+  addStepOffsetAttr(attrs, state, "wagmi_capacitor_detected");
+  addStepOffsetAttr(attrs, state, "wagmi_init_start");
+  addStepOffsetAttr(attrs, state, "wagmi_adapter_created");
+  addStepOffsetAttr(attrs, state, "wagmi_ready");
+  addStepOffsetAttr(attrs, state, "wagmi_children_unblocked");
+  addStepOffsetAttr(attrs, state, "auth_provider_mounted");
+  addStepOffsetAttr(attrs, state, "auth_ready");
+  addStepOffsetAttr(attrs, state, "first_useful_app_shell");
+  addStepOffsetAttr(attrs, state, "waves_layout_mounted");
+  addStepOffsetAttr(attrs, state, "waves_first_content_visible");
+  addStepOffsetAttr(attrs, state, "waves_content_state_resolved");
+  addStepDurationAttr(attrs, state, "wagmi_appkit_init");
+  addStepDurationAttr(attrs, state, "wagmi_adapter_ready");
+  addStepDurationAttr(attrs, state, "auth_immediate_validation");
+  addStepDurationAttr(attrs, state, "app_wallets_secure_storage_support_check");
+  addStepDurationAttr(attrs, state, "app_wallets_load");
+
+  const wagmiUnblockedMs = getStepOffsetMs(state, "wagmi_children_unblocked");
+  const shellMs = getStepOffsetMs(state, "first_useful_app_shell");
+  const wavesContentMs = getStepOffsetMs(state, "waves_first_content_visible");
+
+  if (wagmiUnblockedMs !== undefined) {
+    attrs["provider_gate_ms"] = wagmiUnblockedMs;
+  }
+
+  if (shellMs !== undefined && wagmiUnblockedMs !== undefined) {
+    attrs["shell_after_wagmi_ms"] = roundMs(shellMs - wagmiUnblockedMs);
+  }
+
+  if (wavesContentMs !== undefined && wagmiUnblockedMs !== undefined) {
+    attrs["waves_after_wagmi_ms"] = roundMs(wavesContentMs - wagmiUnblockedMs);
+  }
+
+  return attrs;
+}
+
+function addStepOffsetAttr(
+  attrs: Record<string, number | string>,
+  state: LaunchState,
+  stepName: string
+): void {
+  const offsetMs = getStepOffsetMs(state, stepName);
+  if (offsetMs === undefined) {
+    return;
+  }
+
+  attrs[`step_${stepName}_ms`] = offsetMs;
+}
+
+function addStepDurationAttr(
+  attrs: Record<string, number | string>,
+  state: LaunchState,
+  stepName: string
+): void {
+  const durationMs = state.steps[stepName]?.duration_ms;
+  const status = state.steps[stepName]?.status;
+  if (durationMs !== undefined) {
+    attrs[`duration_${stepName}_ms`] = durationMs;
+  }
+  if (status !== undefined) {
+    attrs[`status_${stepName}`] = status;
+  }
+}
+
+function getStepOffsetMs(
+  state: LaunchState,
+  stepName: string
+): number | undefined {
+  return state.steps[stepName]?.offset_ms;
 }
 
 function buildApiSummary(state: LaunchState): Record<string, unknown> {

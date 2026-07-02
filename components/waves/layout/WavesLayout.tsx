@@ -4,6 +4,10 @@ import dynamic from "next/dynamic";
 import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import {
+  markMobileLaunchStep,
+  scheduleMobileLaunchFlush,
+} from "../../../utils/monitoring/mobileLaunchTiming";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesMobile from "../WavesMobile";
 
@@ -15,9 +19,12 @@ function WavesBranchLoadingFallback() {
   return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
 }
 
-const WavesDesktop = dynamic<WavesBranchProps>(() => import("../WavesDesktop"), {
-  loading: () => <WavesBranchLoadingFallback />,
-});
+const WavesDesktop = dynamic<WavesBranchProps>(
+  () => import("../WavesDesktop"),
+  {
+    loading: () => <WavesBranchLoadingFallback />,
+  }
+);
 
 function getConnectPrompt(
   contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
@@ -89,6 +96,8 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     contentState === "not-authenticated" ||
     contentState === "loading" ||
     contentState === "measuring";
+  const hasVisibleLaunchContent =
+    shouldRenderWavesContent || connectPrompt !== null;
 
   let content: ReactNode = null;
 
@@ -108,6 +117,32 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
         </div>
       );
   }
+
+  useEffect(() => {
+    markMobileLaunchStep("waves_layout_mounted");
+  }, []);
+
+  useEffect(() => {
+    if (!hasVisibleLaunchContent) {
+      return;
+    }
+
+    markMobileLaunchStep("waves_first_content_visible");
+    scheduleMobileLaunchFlush("waves_content_visible", 250);
+  }, [hasVisibleLaunchContent]);
+
+  useEffect(() => {
+    if (
+      contentState !== "ready" &&
+      contentState !== "not-authenticated" &&
+      contentState !== "needs-profile" &&
+      contentState !== "not-available"
+    ) {
+      return;
+    }
+
+    markMobileLaunchStep("waves_content_state_resolved");
+  }, [contentState]);
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-overflow-hidden tw-bg-black">

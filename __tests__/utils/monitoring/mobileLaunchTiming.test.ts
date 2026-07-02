@@ -75,16 +75,29 @@ describe("mobileLaunchTiming", () => {
     jest.resetModules();
   });
 
-  it("does not start outside Capacitor", async () => {
+  it("starts web launches outside Capacitor", async () => {
+    jest.spyOn(Math, "random").mockReturnValue(0.01);
     const { timing, sentry } = await loadMobileLaunchTiming({ native: false });
 
     timing.startMobileLaunchTiming();
-    currentNow = 4000;
+    currentNow = 100;
     timing.flushMobileLaunchTiming("manual");
 
-    expect(sentry.addBreadcrumb).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        category: "mobile_launch",
+        message: "start",
+      })
+    );
     expect(sentry.logger.warn).not.toHaveBeenCalled();
-    expect(sentry.logger.info).not.toHaveBeenCalled();
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        platform: "web_desktop",
+        route_family: "/waves/[wave]",
+        sample_rate: 0.05,
+      })
+    );
   });
 
   it("flushes once", async () => {
@@ -98,6 +111,67 @@ describe("mobileLaunchTiming", () => {
 
     expect(sentry.logger.info).toHaveBeenCalledTimes(1);
     expect(sentry.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it("adds safe launch context and flat milestone attributes", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    timing.startMobileLaunchTiming();
+    currentNow = 120;
+    timing.markMobileLaunchStep("wagmi_children_unblocked");
+    currentNow = 200;
+    timing.markMobileLaunchStep("first_useful_app_shell");
+    timing.setMobileLaunchContext({
+      app_wallet_count_bucket: "2_5",
+      app_wallets_state: "supported_with_wallets",
+      auth_state: "authenticated_profile",
+      wallet_connection_state: "connected",
+    });
+    currentNow = 400;
+    timing.flushMobileLaunchTiming("manual");
+
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        context: {
+          app_wallet_count_bucket: "2_5",
+          app_wallets_state: "supported_with_wallets",
+          auth_state: "authenticated_profile",
+          wallet_connection_state: "connected",
+        },
+        provider_gate_ms: 120,
+        shell_after_wagmi_ms: 80,
+        step_first_useful_app_shell_ms: 200,
+        step_wagmi_children_unblocked_ms: 120,
+      })
+    );
+  });
+
+  it("lets a waves content flush replace a scheduled shell flush", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    timing.startMobileLaunchTiming();
+    currentNow = 50;
+    timing.scheduleMobileLaunchFlush("shell_paint", 5000);
+    currentNow = 100;
+    timing.markMobileLaunchStep("waves_first_content_visible");
+    timing.scheduleMobileLaunchFlush("waves_content_visible", 250);
+    currentNow = 350;
+    jest.advanceTimersByTime(250);
+
+    expect(sentry.logger.info).toHaveBeenCalledTimes(1);
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        flush_reason: "waves_content_visible",
+        step_waves_first_content_visible_ms: 100,
+        total_ms: 350,
+      })
+    );
+
+    jest.advanceTimersByTime(5000);
+
+    expect(sentry.logger.info).toHaveBeenCalledTimes(1);
   });
 
   it("logs slow launches as warnings without sampling", async () => {
@@ -138,6 +212,7 @@ describe("mobileLaunchTiming", () => {
   });
 
   it("samples normal launches at five percent", async () => {
+    globalThis.history.pushState({}, "", "/about");
     const first = await loadMobileLaunchTiming();
 
     first.timing.startMobileLaunchTiming();
@@ -148,6 +223,7 @@ describe("mobileLaunchTiming", () => {
     expect(first.sentry.logger.warn).not.toHaveBeenCalled();
 
     jest.spyOn(Math, "random").mockReturnValue(0.01);
+    globalThis.history.pushState({}, "", "/about");
     const second = await loadMobileLaunchTiming();
 
     second.timing.startMobileLaunchTiming();

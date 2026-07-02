@@ -46,18 +46,19 @@ import type { Chain } from "viem";
  * This runs once per page load and only touches `window.ethereum`.
  */
 function installSafeEthereumProxy(): void {
-  if (globalThis.window === undefined) return;
+  if (typeof window === "undefined") return;
 
   const w = globalThis as unknown as {
-    ethereum?: unknown | undefined;
+    ethereum?: unknown;
     __6529_safeEthereumProxyInstalled?: boolean | undefined;
   };
 
-  if (w.__6529_safeEthereumProxyInstalled) return;
+  if (w.__6529_safeEthereumProxyInstalled === true) return;
 
   const ethereum = w.ethereum;
   if (
-    !ethereum ||
+    ethereum === undefined ||
+    ethereum === null ||
     (typeof ethereum !== "object" && typeof ethereum !== "function")
   ) {
     w.__6529_safeEthereumProxyInstalled = true;
@@ -79,12 +80,17 @@ function installSafeEthereumProxy(): void {
 
   try {
     let hasLoggedProxyGetError = false;
-    const proxy = new Proxy(ethereum, {
-      get(target, prop) {
+    const ethereumTarget = ethereum;
+    const proxy = new Proxy(ethereumTarget, {
+      get(target, prop, receiver): unknown {
         try {
-          const value = Reflect.get(target, prop);
+          const value: unknown = Reflect.get(target, prop, receiver);
           if (typeof value === "function") {
-            return value.bind(target);
+            const method = value as (
+              this: unknown,
+              ...args: unknown[]
+            ) => unknown;
+            return method.bind(target);
           }
           return value;
         } catch (error) {
@@ -144,10 +150,10 @@ export default function WagmiSetup({
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(
     null
   );
-  const [isMounted, setIsMounted] = useState(false);
 
   // Track processed wallets by address for efficient comparison
   const processedWallets = useRef<Set<string>>(new Set());
+  const isInitializingRef = useRef(false);
 
   // Memoize platform detection to avoid repeated calls
   const isCapacitor = useMemo(() => {
@@ -163,22 +169,9 @@ export default function WagmiSetup({
     [appWalletPasswordModal.requestPassword]
   );
 
-  // Handle client-side mounting for App Router
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Prevent concurrent initialization attempts
-  const [isInitializing, setIsInitializing] = useState(false);
-
   // Create adapter with essential configuration only
   const initializeAppKitWithWallets = useCallback(
     (wallets: AppWallet[]) => {
-      // Basic validation - let util handle detailed validation
-      if (!adapterManager) {
-        throw new AppKitValidationError("Internal API failed");
-      }
-
       const chains: Chain[] = [mainnet];
       if (enableTestnet) {
         chains.push(sepolia);
@@ -186,7 +179,7 @@ export default function WagmiSetup({
 
       const config: AppKitInitializationConfig = {
         wallets,
-        adapterManager: adapterManager as AppKitAdapterManager,
+        adapterManager,
         isCapacitor,
         chains,
       };
@@ -199,19 +192,22 @@ export default function WagmiSetup({
   // Initialize AppKit with fail-fast approach
   const setupAppKitAdapter = useCallback(
     async (wallets: AppWallet[]) => {
-      if (isInitializing) {
+      if (isInitializingRef.current) {
         throw new AppKitValidationError("Internal API failed");
       }
 
-      setIsInitializing(true);
+      isInitializingRef.current = true;
 
       try {
+        markMobileLaunchStep("wagmi_init_start");
         const result = await measureMobileLaunchAsync("wagmi_appkit_init", () =>
           initializeAppKitWithWallets(wallets)
         );
+        markMobileLaunchStep("wagmi_adapter_created");
         await measureMobileLaunchAsync("wagmi_adapter_ready", async () => {
           await (result.ready ?? Promise.resolve());
         });
+        markMobileLaunchStep("wagmi_ready");
         setCurrentAdapter(result.adapter);
       } catch (error) {
         logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
@@ -222,29 +218,32 @@ export default function WagmiSetup({
         });
         throw error; // FAIL-FAST: Re-throw to prevent app from continuing in broken state
       } finally {
-        setIsInitializing(false);
+        isInitializingRef.current = false;
       }
     },
-    [isInitializing, initializeAppKitWithWallets, setToast]
+    [initializeAppKitWithWallets, setToast]
   );
 
+  /* eslint-disable react-you-might-not-need-an-effect/no-event-handler -- These effects synchronize imperative AppKit/Wagmi systems and launch telemetry with React state. */
   // Initialize adapter eagerly on mount with empty wallets
   useEffect(() => {
-    if (isMounted && !currentAdapter && !isInitializing) {
-      installSafeEthereumProxy();
-      // Prevent unhandled promise rejections during eager initialization.
-      // Fail-fast behavior is preserved by leaving `currentAdapter` unset.
-      setupAppKitAdapter([]).catch(() => undefined);
+    if (currentAdapter !== null || isInitializingRef.current) {
+      return;
     }
-  }, [isMounted, currentAdapter, isInitializing]); // setupAppKitAdapter intentionally excluded to prevent loops
+
+    installSafeEthereumProxy();
+    // Prevent unhandled promise rejections during eager initialization.
+    // Fail-fast behavior is preserved by leaving `currentAdapter` unset.
+    void setupAppKitAdapter([]).catch(() => undefined);
+  }, [currentAdapter, setupAppKitAdapter]);
 
   useEffect(() => {
-    if (!isMounted || !currentAdapter) {
+    if (currentAdapter === null) {
       return;
     }
 
     markMobileLaunchStep("wagmi_children_unblocked");
-  }, [isMounted, currentAdapter]);
+  }, [currentAdapter]);
 
   // Inject wallet connectors dynamically using hooks (simplified approach)
   useEffect(() => {
@@ -262,31 +261,29 @@ export default function WagmiSetup({
 
     try {
       // Create connectors for current wallets
-      const connectors = appWallets
-        .flatMap((wallet) => {
-          try {
-            validateWalletSafely(wallet);
-            const connector = createAppWalletConnector(
-              Array.from(currentAdapter.wagmiConfig.chains),
-              { appWallet: wallet },
-              () =>
-                appWalletPasswordModal.requestPassword(
-                  wallet.address,
-                  wallet.address_hashed
-                )
-            );
-            const setupConnector =
-              currentAdapter.wagmiConfig._internal.connectors.setup(connector);
-            return setupConnector ? [setupConnector] : [];
-          } catch (error) {
-            logErrorSecurely(
-              `[WagmiSetup] Skipping invalid app-wallet connector ${wallet.address}`,
-              error
-            );
-            return [];
-          }
-        })
-        .filter((connector) => connector !== null);
+      const connectors = appWallets.flatMap((wallet) => {
+        try {
+          validateWalletSafely(wallet);
+          const connector = createAppWalletConnector(
+            Array.from(currentAdapter.wagmiConfig.chains),
+            { appWallet: wallet },
+            () =>
+              appWalletPasswordModal.requestPassword(
+                wallet.address,
+                wallet.address_hashed
+              )
+          );
+          const setupConnector =
+            currentAdapter.wagmiConfig._internal.connectors.setup(connector);
+          return [setupConnector];
+        } catch (error) {
+          logErrorSecurely(
+            `[WagmiSetup] Skipping invalid app-wallet connector ${wallet.address}`,
+            error
+          );
+          return [];
+        }
+      });
 
       // Get existing non-app-wallet connectors
       const existingConnectors = currentAdapter.wagmiConfig.connectors.filter(
@@ -311,9 +308,10 @@ export default function WagmiSetup({
       // Don't throw here - let the component continue but notify the user
     }
   }, [currentAdapter, appWallets, appWalletPasswordModal, setToast]);
+  /* eslint-enable react-you-might-not-need-an-effect/no-event-handler */
 
   // Show loading state until fully initialized
-  if (!isMounted || !currentAdapter) {
+  if (currentAdapter === null) {
     return null;
   }
 
