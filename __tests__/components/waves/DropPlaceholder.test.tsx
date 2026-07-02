@@ -20,6 +20,19 @@ describe("DropPlaceholder", () => {
       ).toBeInTheDocument();
     });
 
+    it("renders needs profile message for chat", () => {
+      render(
+        <DropPlaceholder
+          type="chat"
+          chatRestriction={ChatRestriction.NEEDS_PROFILE}
+        />
+      );
+
+      expect(
+        screen.getByText("Create a profile to participate in chat")
+      ).toBeInTheDocument();
+    });
+
     it("renders proxy user message for chat", () => {
       render(
         <DropPlaceholder
@@ -74,7 +87,7 @@ describe("DropPlaceholder", () => {
       ).toBeInTheDocument();
     });
 
-    it("applies primary color for not logged in chat restriction", () => {
+    it("applies muted color for not logged in chat restriction", () => {
       render(
         <DropPlaceholder
           type="chat"
@@ -83,7 +96,7 @@ describe("DropPlaceholder", () => {
       );
 
       const message = screen.getByText("Please log in to participate in chat");
-      expect(message).toHaveClass("tw-text-primary-400");
+      expect(message).toHaveClass("tw-text-iron-400");
     });
   });
 
@@ -98,6 +111,19 @@ describe("DropPlaceholder", () => {
 
       expect(
         screen.getByText("Please log in to make submissions")
+      ).toBeInTheDocument();
+    });
+
+    it("renders needs profile message for submission", () => {
+      render(
+        <DropPlaceholder
+          type="submission"
+          submissionRestriction={SubmissionRestriction.NEEDS_PROFILE}
+        />
+      );
+
+      expect(
+        screen.getByText("Create a profile to submit in this wave")
       ).toBeInTheDocument();
     });
 
@@ -175,7 +201,7 @@ describe("DropPlaceholder", () => {
       );
 
       expect(screen.getByText("Please log in to make submissions")).toHaveClass(
-        "tw-text-primary-400"
+        "tw-text-iron-400"
       );
 
       rerender(
@@ -225,7 +251,36 @@ describe("DropPlaceholder", () => {
 
       expect(
         screen.getByText("Connect your wallet to participate in this wave")
-      ).toBeInTheDocument();
+      ).toHaveClass("tw-text-iron-400");
+    });
+
+    it("renders inline create profile link for profileless users", () => {
+      render(
+        <DropPlaceholder
+          type="both"
+          chatRestriction={ChatRestriction.NEEDS_PROFILE}
+          submissionRestriction={SubmissionRestriction.NEEDS_PROFILE}
+          profileSetupHref="/0xabc"
+        />
+      );
+
+      expect(
+        screen.getByText(
+          (_content, element) =>
+            element?.tagName.toLowerCase() === "p" &&
+            element.textContent ===
+              "Create a profile to participate in this wave"
+        )
+      ).toHaveClass("tw-text-primary-400");
+      expect(screen.getByText("to participate in this wave")).toHaveClass(
+        "tw-text-iron-400"
+      );
+      const link = screen.getByRole("link", { name: "Create a profile" });
+      expect(link).toHaveAttribute("href", "/0xabc");
+      expect(link).toHaveClass("tw-text-primary-400", "tw-no-underline");
+      expect(
+        screen.queryByRole("button", { name: "Create profile" })
+      ).not.toBeInTheDocument();
     });
 
     it("renders generic message for both type", () => {
