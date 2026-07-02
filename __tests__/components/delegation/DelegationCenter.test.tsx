@@ -16,11 +16,6 @@ jest.mock("next/image", () => ({
   __esModule: true,
   default: (p: any) => <img {...p} alt="test" />,
 }));
-jest.mock("react-bootstrap", () => ({
-  Container: (p: any) => <div>{p.children}</div>,
-  Row: (p: any) => <div>{p.children}</div>,
-  Col: (p: any) => <div>{p.children}</div>,
-}));
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <svg />,
 }));

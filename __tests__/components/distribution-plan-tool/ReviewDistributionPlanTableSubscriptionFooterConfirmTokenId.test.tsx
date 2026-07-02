@@ -2,23 +2,6 @@ import { ConfirmTokenIdModal } from "@/components/distribution-plan-tool/review-
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-jest.mock("react-bootstrap", () => ({
-  __esModule: true,
-  Modal: Object.assign(
-    ({ show, children }: any) => (show ? <div>{children}</div> : null),
-    {
-      Header: ({ children }: any) => <div>{children}</div>,
-      Title: ({ children }: any) => <div>{children}</div>,
-      Body: ({ children }: any) => <div>{children}</div>,
-      Footer: ({ children }: any) => <div>{children}</div>,
-    }
-  ),
-  Button: (p: any) => <button {...p}>{p.children}</button>,
-  Col: (p: any) => <div>{p.children}</div>,
-  Container: (p: any) => <div>{p.children}</div>,
-  Row: (p: any) => <div>{p.children}</div>,
-}));
-
 describe("ConfirmTokenIdModal", () => {
   const mockOnConfirm = jest.fn();
   const mockPlan = { id: "1", name: "Meme 123 drop" } as any;

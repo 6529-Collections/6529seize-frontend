@@ -3,17 +3,6 @@ import { fetchAllPages } from "@/services/6529api";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-jest.mock("react-bootstrap", () => ({
-  Container: (props: any) => <div {...props} />,
-  Row: (props: any) => <div {...props} />,
-  Col: (props: any) => <div {...props} />,
-  Form: {
-    Select: (props: any) => <select {...props} />,
-    Control: (props: any) => <input {...props} />,
-  },
-  Button: (props: any) => <button {...props} />,
-}));
-
 describe("DelegationMappingTool drag and drop", () => {
   it("toggles active class on drag events and shows file name on drop", () => {
     const { getByText } = render(<DelegationMappingTool />);

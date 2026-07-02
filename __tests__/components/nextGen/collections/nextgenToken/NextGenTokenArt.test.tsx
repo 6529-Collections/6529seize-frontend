@@ -1,21 +1,6 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextGenTokenArt from '@/components/nextGen/collections/nextgenToken/NextGenTokenArt';
-
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const RB: any = {
-    Container: (p:any)=> <div {...p} />,
-    Row: (p:any)=> <div {...p} />,
-    Col: (p:any)=> <div {...p} />,
-  };
-  const Dropdown: any = (p:any)=> <div {...p}/>;
-  Dropdown.Toggle = (p:any)=> <button {...p}/>;
-  Dropdown.Menu = (p:any)=> <div {...p}/>;
-  RB.Dropdown = Dropdown;
-  return RB;
-});
 
 jest.mock('@/components/nextGen/collections/nextgenToken/NextGenTokenImage', () => ({
   NextGenTokenImage: ({ onClick }: any) => (
@@ -92,4 +77,3 @@ describe('NextGenTokenArt', () => {
     window.open = undefined as any;
   });
 });
-

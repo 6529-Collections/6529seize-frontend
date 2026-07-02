@@ -15,13 +15,6 @@ jest.mock("@/components/pagination/Pagination", () => ({
   ),
 }));
 
-jest.mock("react-bootstrap", () => ({
-  Container: (p: any) => <div>{p.children}</div>,
-  Row: (p: any) => <div>{p.children}</div>,
-  Col: (p: any) => <div>{p.children}</div>,
-  Table: (p: any) => <table>{p.children}</table>,
-}));
-
 jest.mock("@/components/nothingHereYet/NothingHereYetSummer", () => () => (
   <div>NoResults</div>
 ));

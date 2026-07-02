@@ -1,11 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import NextgenTokenAbout from '@/components/nextGen/collections/nextgenToken/NextGenTokenAbout';
 
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  return { Container:(p:any)=><div {...p}/>, Row:(p:any)=><div {...p}/>, Col:(p:any)=><div {...p}/> };
-});
 jest.mock('next/image', () => (props: any) => <img {...props} />);
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid={p.icon?.iconName || 'icon'} /> }));
 jest.mock('@/helpers/Helpers', () => ({
@@ -37,4 +32,3 @@ describe('NextGenTokenAbout', () => {
     expect(screen.getByText('5')).toBeInTheDocument();
   });
 });
-
