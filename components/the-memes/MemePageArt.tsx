@@ -78,6 +78,13 @@ export function MemePageArt(props: {
   const { nft, nftMeta } = props;
   const locale = props.locale ?? DEFAULT_LOCALE;
   const unavailableValue = t(locale, "theMemes.detail.art.values.notAvailable");
+  const unrankedValue = t(locale, "theMemes.detail.art.values.unranked");
+  const tdhRank = getTdhRankValue(nft.tdh_rank, {
+    locale,
+    unavailableValue,
+    unrankedValue,
+    unranked: nftMeta.recorded_in_tdh === false,
+  });
   const downloadLabels = {
     cancelDownload: t(locale, "theMemes.detail.art.download.cancelDownload"),
     complete: t(locale, "theMemes.detail.art.download.complete"),
@@ -225,11 +232,7 @@ export function MemePageArt(props: {
     {
       key: "meme-rank",
       label: t(locale, "theMemes.detail.art.fields.memeRank"),
-      value: nft.tdh_rank
-        ? t(locale, "theMemes.detail.art.values.rank", {
-            rank: formatInteger(locale, nft.tdh_rank),
-          })
-        : unavailableValue,
+      value: tdhRank,
     },
   ];
 
@@ -332,6 +335,28 @@ function getAttributeValue(
     attributes.find((attribute) => attribute.trait_type === traitType)?.value ??
     fallback
   );
+}
+
+function getTdhRankValue(
+  rank: number | undefined,
+  options: {
+    readonly locale: SupportedLocale;
+    readonly unavailableValue: string;
+    readonly unrankedValue: string;
+    readonly unranked: boolean;
+  }
+) {
+  if (options.unranked) {
+    return options.unrankedValue;
+  }
+
+  if (rank === undefined || rank <= 0) {
+    return options.unavailableValue;
+  }
+
+  return t(options.locale, "theMemes.detail.art.values.rank", {
+    rank: formatInteger(options.locale, rank),
+  });
 }
 
 function formatBoostValue(locale: SupportedLocale, value: string | number) {

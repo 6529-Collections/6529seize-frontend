@@ -227,6 +227,18 @@ describe("Playwright read-only mutation guard", () => {
         baseURL: "https://staging.6529.io",
         method: "POST",
         readonly: true,
+        url: "https://region1.google-analytics.com/g/collect?v=2",
+      })
+    ).toMatchObject({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method: "POST",
+        readonly: true,
         url: "https://www.googletagmanager.com/td?cid=redacted",
       })
     ).toMatchObject({

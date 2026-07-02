@@ -1,11 +1,11 @@
 "use client";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import { useEmoji } from "@/contexts/EmojiContext";
+import LazyEmojiPicker, {
+  type EmojiPickerSelection,
+} from "@/components/waves/LazyEmojiPicker";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
@@ -33,13 +33,9 @@ const WaveDropActionsAddReaction: React.FC<{
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null);
-  const { emojiMap, categories, categoryIcons } = useEmoji();
   const desktopIconSizeClass = size === "compact" ? "tw-size-4" : "tw-size-5";
 
-  const handleEmojiSelect = (emoji: {
-    native?: string | undefined;
-    id?: string | undefined;
-  }) => {
+  const handleEmojiSelect = (emoji: EmojiPickerSelection) => {
     const emojiText = `:${emoji.id ?? ""}:`;
     setShowPicker(false);
     void react(emojiText);
@@ -178,14 +174,7 @@ const WaveDropActionsAddReaction: React.FC<{
               ref={pickerContainerRef}
               className="tw-rounded-lg tw-bg-iron-800 tw-p-px tw-shadow-lg"
             >
-              <Picker
-                theme="dark"
-                data={data}
-                onEmojiSelect={handleEmojiSelect}
-                custom={emojiMap}
-                categories={categories}
-                categoryIcons={categoryIcons}
-              />
+              <LazyEmojiPicker onEmojiSelect={handleEmojiSelect} />
             </div>
           </div>,
           document.body
@@ -202,14 +191,7 @@ const WaveDropActionsAddReaction: React.FC<{
             className="tw-flex tw-size-full tw-items-center tw-justify-center"
             onTouchMove={(e) => e.stopPropagation()}
           >
-            <Picker
-              theme="dark"
-              data={data}
-              onEmojiSelect={handleEmojiSelect}
-              custom={emojiMap}
-              categories={categories}
-              categoryIcons={categoryIcons}
-            />
+            <LazyEmojiPicker onEmojiSelect={handleEmojiSelect} />
           </div>
         </MobileWrapperDialog>
       )}

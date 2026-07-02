@@ -227,7 +227,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
     } else if (!isValidConsolidation()) {
       return (
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="font-larger font-bolder tw-w-full tw-px-3">
+          <div className="tw-w-full tw-px-3 tw-text-lg tw-font-bold">
             You must have a consolidation to assign a Primary Address
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
       </div>
       {!connectedProfile && (
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="font-larger font-bolder tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3">
+          <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-text-lg tw-font-bold">
             Connect Wallet to continue
           </div>
         </div>

@@ -1728,6 +1728,45 @@
       ]
     },
     {
+      "id": "waves.boosted-drops-display",
+      "kind": "ui_affordance",
+      "title": "Boosted drops display preference",
+      "aliases": [
+        "boosted drops",
+        "hide boosted drops",
+        "compact boosted drops",
+        "boosted drop cards",
+        "wave chat boost cards"
+      ],
+      "keywords": [
+        "waves",
+        "chat",
+        "boosted",
+        "drops",
+        "display",
+        "compact",
+        "expanded",
+        "hidden",
+        "settings",
+        "mobile"
+      ],
+      "facts": [
+        "Wave chat can insert boosted-drop promo cards between normal chronological drops.",
+        "The Boosted drops display preference is local to the current device/browser and can be set to Expanded, Compact, or Hidden.",
+        "Expanded shows the full inserted boosted-drop card, Compact shows a slim row, and Hidden removes only inserted boosted-drop cards.",
+        "Hidden does not hide normal chronological drops that happen to have boosts.",
+        "On desktop the control is in the wave right sidebar Settings under Your display; on compact/mobile it is available from the wave header overflow menu."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "chat", "settings", "boosted-drops"],
+      "source_refs": [
+        "components/waves/boosted-drops/BoostedDropsDisplayPreference.tsx",
+        "components/drops/view/DropsList.tsx",
+        "components/brain/my-stream/tabs/MyStreamWaveTabsDefault.tsx"
+      ]
+    },
+    {
       "id": "waves.leaderboard",
       "kind": "route",
       "title": "Wave leaderboard",

@@ -240,10 +240,10 @@ describe("BoostedDropCardHome", () => {
     expect(screen.queryByText("#2")).not.toBeInTheDocument();
     expect(screen.queryByText("1m")).not.toBeInTheDocument();
     expect(screen.queryByText("Spec Wave")).not.toBeInTheDocument();
-    expect(screen.getByText("Boosted post")).toBeInTheDocument();
+    expect(screen.getByText("Boosted drop")).toBeInTheDocument();
     expect(screen.getByText("7 boosts")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Boost post by alice" })
+      screen.getByRole("button", { name: "Boost drop by alice" })
     ).toBeInTheDocument();
   });
 
@@ -271,7 +271,7 @@ describe("BoostedDropCardHome", () => {
 
     const pill = getBoostPill();
 
-    expect(screen.queryByText("Boosted post")).not.toBeInTheDocument();
+    expect(screen.queryByText("Boosted drop")).not.toBeInTheDocument();
     expect(screen.queryByText("7 boosts")).not.toBeInTheDocument();
     expect(pill).toBeInTheDocument();
   });
@@ -616,7 +616,7 @@ describe("BoostedDropCardHome", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Boost post by alice" })
+      screen.getByRole("button", { name: "Boost drop by alice" })
     );
 
     expect(mockToggleBoost).toHaveBeenCalledTimes(1);
@@ -636,7 +636,7 @@ describe("BoostedDropCardHome", () => {
     );
 
     const openButton = screen.getByRole("button", {
-      name: "Open boosted post from alice",
+      name: "Open boosted drop from alice",
     });
 
     fireEvent.click(openButton);

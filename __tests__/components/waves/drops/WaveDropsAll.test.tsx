@@ -27,6 +27,9 @@ import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
+const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
+  "waveChatBoostedDropsDisplayPreference";
+
 // Mock hooks and dependencies
 jest.mock("@/hooks/useVirtualizedWaveDrops");
 jest.mock("@/hooks/useScrollBehavior");
@@ -378,6 +381,7 @@ describe("WaveDropsAll", () => {
   beforeEach(() => {
     // Mock setTimeout for tests that need it
     jest.useFakeTimers();
+    localStorage.clear();
     mockScrollContainerRef.current = document.createElement("div");
     setupMocks();
   });
@@ -495,10 +499,45 @@ describe("WaveDropsAll", () => {
         dropViewDropId: "target-drop",
         onReply: props.onReply,
         onQuoteClick: expect.any(Function),
+        boostedDropsDisplayPreference: "compact",
         winningThreshold: 11,
         winningThresholdMinDurationMs: 120_000,
         isVotingClosed: true,
         isVotingControlsLocked: true,
+      });
+    });
+
+    it("disables inserted boosted drops when the local preference is hidden", () => {
+      localStorage.setItem(
+        BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY,
+        JSON.stringify("hidden")
+      );
+      const mockDrops = [createMockDrop()];
+      const boostedDrops = [
+        createMockDrop({ id: "boosted-drop", serial_no: 99 }),
+      ];
+      const useWaveBoostedDropsMock =
+        require("@/hooks/useWaveBoostedDrops").useWaveBoostedDrops;
+
+      setupMocks({
+        waveMessages: { drops: mockDrops as any },
+      });
+      useWaveBoostedDropsMock.mockReturnValue({
+        data: boostedDrops,
+      });
+
+      renderComponent({ waveId: "test-wave" });
+
+      expect(useWaveBoostedDropsMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          waveId: "test-wave",
+          enabled: false,
+        })
+      );
+      expect(dropsProps).toMatchObject({
+        drops: mockDrops,
+        boostedDrops: undefined,
+        boostedDropsDisplayPreference: "hidden",
       });
     });
   });

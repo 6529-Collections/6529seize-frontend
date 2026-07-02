@@ -7,6 +7,7 @@ let lightProps: any[] = [];
 let wrapperProps: any[] = [];
 let highlightProps: any[] = [];
 let boostedCardProps: any[] = [];
+let compactBoostedCardProps: any[] = [];
 
 jest.mock("@/components/waves/drops/Drop", () => {
   const MockedDrop = (props: any) => {
@@ -64,6 +65,22 @@ jest.mock("@/components/home/boosted/BoostedDropCardHome", () => ({
   },
 }));
 
+jest.mock("@/components/home/boosted/BoostedDropCompactChatItem", () => ({
+  __esModule: true,
+  default: (props: any) => {
+    compactBoostedCardProps.push(props);
+    return (
+      <button
+        data-testid="compact-boosted-card"
+        onClick={props.onClick}
+        type="button"
+      >
+        compact-boosted-{props.drop.serial_no}
+      </button>
+    );
+  },
+}));
+
 describe("DropsList", () => {
   beforeEach(() => {
     dropProps = [];
@@ -71,6 +88,7 @@ describe("DropsList", () => {
     wrapperProps = [];
     highlightProps = [];
     boostedCardProps = [];
+    compactBoostedCardProps = [];
   });
 
   it("renders full and light drops correctly", () => {
@@ -226,7 +244,7 @@ describe("DropsList", () => {
     expect(screen.queryByTestId("unread-divider")).not.toBeInTheDocument();
   });
 
-  it("renders boosted cards inline with the chat variant", () => {
+  it("renders compact boosted cards inline by default", () => {
     const drops: any = Array.from({ length: 6 }, (_, index) => ({
       stableKey: `drop-${index + 1}`,
       serial_no: index + 1,
@@ -262,7 +280,63 @@ describe("DropsList", () => {
       />
     );
 
+    expect(screen.getByTestId("compact-boosted-card")).toBeInTheDocument();
+    expect(screen.queryByTestId("boosted-card")).not.toBeInTheDocument();
+    expect(compactBoostedCardProps).toHaveLength(1);
+    expect(compactBoostedCardProps[0]).toMatchObject({
+      drop: boostedDrop,
+    });
+
+    const boostedCard = screen.getByTestId("compact-boosted-card");
+
+    expect(boostedCard.parentElement).toHaveClass(
+      "tw-px-3",
+      "tw-py-1.5",
+      "sm:tw-px-4"
+    );
+  });
+
+  it("renders expanded boosted cards with the existing chat card", () => {
+    const drops: any = Array.from({ length: 6 }, (_, index) => ({
+      stableKey: `drop-${index + 1}`,
+      serial_no: index + 1,
+      type: DropSize.FULL,
+      wave: { id: "w" },
+    }));
+    const boostedDrop = {
+      id: "boost-expanded",
+      serial_no: 999,
+      author: { handle: "boosted" },
+      wave: { id: "w", name: "Wave" },
+      parts: [],
+      boosts: 3,
+    };
+
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={drops}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        parentContainerRef={undefined}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={jest.fn()}
+        dropViewDropId={null}
+        boostedDrops={[boostedDrop] as any}
+        boostedDropsDisplayPreference="expanded"
+        onBoostedDropClick={jest.fn()}
+      />
+    );
+
     expect(screen.getByTestId("boosted-card")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("compact-boosted-card")
+    ).not.toBeInTheDocument();
     expect(boostedCardProps).toHaveLength(1);
     expect(boostedCardProps[0]).toMatchObject({
       drop: boostedDrop,
@@ -279,7 +353,54 @@ describe("DropsList", () => {
     );
   });
 
-  it("clicking an inline boosted card calls onBoostedDropClick with the drop serial", () => {
+  it("hides inserted boosted cards without hiding chronological drops", () => {
+    const drops: any = Array.from({ length: 6 }, (_, index) => ({
+      stableKey: `drop-${index + 1}`,
+      serial_no: index + 1,
+      type: DropSize.FULL,
+      wave: { id: "w" },
+    }));
+
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={drops}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        parentContainerRef={undefined}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={jest.fn()}
+        dropViewDropId={null}
+        boostedDrops={
+          [
+            {
+              id: "boost-hidden",
+              serial_no: 321,
+              author: { handle: "boosted" },
+              wave: { id: "w", name: "Wave" },
+              parts: [],
+              boosts: 2,
+            },
+          ] as any
+        }
+        boostedDropsDisplayPreference="hidden"
+        onBoostedDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("boosted-card")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("compact-boosted-card")
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByTestId("wrapper")).toHaveLength(6);
+  });
+
+  it("clicking a compact inline boosted card calls onBoostedDropClick with the drop serial", () => {
     const drops: any = Array.from({ length: 6 }, (_, index) => ({
       stableKey: `drop-${index + 1}`,
       serial_no: index + 1,
@@ -319,7 +440,7 @@ describe("DropsList", () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId("boosted-card"));
+    fireEvent.click(screen.getByTestId("compact-boosted-card"));
 
     expect(onBoostedDropClick).toHaveBeenCalledWith(321);
   });

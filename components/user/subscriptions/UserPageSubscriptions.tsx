@@ -275,7 +275,7 @@ export default function UserPageSubscriptions(
                 <span>
                   <Link
                     href="/about/subscriptions"
-                    className="font-smaller font-color-silver decoration-hover-underline">
+                    className="decoration-hover-underline tw-text-sm tw-text-iron-400">
                     Learn More
                   </Link>
                 </span>

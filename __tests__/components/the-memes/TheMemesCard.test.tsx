@@ -58,7 +58,10 @@ import NFTImage from "@/components/nft-image/NFTImage";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
 import { VolumeType } from "@/entities/INFT";
-import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
+import {
+  ApiMemesExtendedDataTokenTypeEnum,
+  type ApiMemesExtendedData,
+} from "@/generated/models/ApiMemesExtendedData";
 import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { MemesSort } from "@/types/enums";
@@ -76,7 +79,7 @@ const nft: ApiMemesExtendedData = {
   supply: 1000,
   name: "Test Meme",
   collection: "The Memes",
-  token_type: "ERC1155",
+  token_type: ApiMemesExtendedDataTokenTypeEnum.Erc1155,
   description: "Test description",
   artist: "Artist",
   artist_seize_handle: "artist",
@@ -91,11 +94,13 @@ const nft: ApiMemesExtendedData = {
   },
   market_cap: 10,
   floor_price: 0.5,
+  floor_price_from: null,
   total_volume_last_24_hours: 1,
   total_volume_last_7_days: 2,
   total_volume_last_1_month: 3,
   total_volume: 4,
   highest_offer: 0.4,
+  highest_offer_from: null,
   boosted_tdh: 1234,
   tdh: 1000,
   tdh__raw: 1000,
@@ -119,6 +124,8 @@ const nft: ApiMemesExtendedData = {
   edition_size_not_burnt_rank: 1,
   percent_unique_not_burnt: 0.5,
   percent_unique_not_burnt_rank: 1,
+  compressed_animation: null,
+  has_distribution: true,
   season: 1,
   meme: 1,
   meme_name: "Test Meme",

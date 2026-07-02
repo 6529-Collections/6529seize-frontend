@@ -1,13 +1,6 @@
 import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
 import { render, screen, waitFor } from "@testing-library/react";
 
-// Mock react-bootstrap
-jest.mock("react-bootstrap", () => ({
-  Container: (props: any) => <div {...props} />,
-  Row: (props: any) => <div {...props} />,
-  Col: (props: any) => <div {...props} />,
-}));
-
 // Mock Next.js Image component
 jest.mock("next/image", () => ({
   __esModule: true,

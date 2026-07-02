@@ -6,7 +6,10 @@ import {
 import { MemeCollectorsStats } from "@/components/the-memes/MemePageLiveStats";
 import { MemePageReferencesSubMenu } from "@/components/the-memes/MemePageReferences";
 import type { NFT, Rememe } from "@/entities/INFT";
-import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
+import {
+  ApiMemesExtendedDataTokenTypeEnum,
+  type ApiMemesExtendedData,
+} from "@/generated/models/ApiMemesExtendedData";
 import {
   formatDate,
   formatInteger,
@@ -146,7 +149,39 @@ function createNft(overrides: Partial<NFT> = {}): NFT {
 function createMeta(): ApiMemesExtendedData {
   return {
     id: 1,
+    contract: "0x1",
     created_at: new Date(),
+    mint_date: new Date(),
+    mint_price: 0,
+    supply: 1,
+    name: "Meme",
+    collection: "col",
+    token_type: ApiMemesExtendedDataTokenTypeEnum.Erc1155,
+    description: "d",
+    artist: "artist",
+    artist_seize_handle: "artist",
+    uri: "",
+    icon: "",
+    thumbnail: "",
+    scaled: "",
+    image: "image.png",
+    animation: "",
+    metadata: {},
+    market_cap: 0,
+    floor_price: 0,
+    floor_price_from: null,
+    total_volume_last_24_hours: 0,
+    total_volume_last_7_days: 0,
+    total_volume_last_1_month: 0,
+    total_volume: 0,
+    has_distribution: true,
+    highest_offer: 0,
+    highest_offer_from: null,
+    boosted_tdh: 0,
+    tdh: 0,
+    tdh__raw: 0,
+    tdh_rank: 0,
+    hodl_rate: 0,
     collection_size: 100,
     edition_size: 100,
     edition_size_rank: 1,
@@ -165,10 +200,11 @@ function createMeta(): ApiMemesExtendedData {
     edition_size_not_burnt_rank: 1,
     percent_unique_not_burnt: 0,
     percent_unique_not_burnt_rank: 1,
+    compressed_animation: null,
     season: 1,
     meme: 1,
     meme_name: "meme",
-  } as ApiMemesExtendedData;
+  };
 }
 
 function createRememe(name: string, overrides: Partial<Rememe> = {}): Rememe {

@@ -418,6 +418,21 @@ function readPositiveNumber(value: unknown): number | undefined {
   return parsed !== undefined && parsed > 0 ? parsed : undefined;
 }
 
+function readTheMemesTdhRateValue(
+  hodlRate: unknown,
+  recordedInTdh: boolean | null | undefined
+): string | undefined {
+  if (recordedInTdh === false) {
+    return "Pending";
+  }
+
+  const tdhRate = readPositiveNumber(hodlRate);
+  if (tdhRate === undefined) {
+    return undefined;
+  }
+  return formatDecimal(tdhRate);
+}
+
 function readMetadataString(
   metadata: Record<string, unknown> | null,
   key: string
@@ -848,7 +863,10 @@ async function fetchTheMemesPreview(
     guardedMintStatEditionSize ??
     fallbackEditionSize;
   const season = readMemeSeason(source, metadata);
-  const tdhRate = readPositiveNumber(source.hodl_rate);
+  const tdhRateValue = readTheMemesTdhRateValue(
+    source.hodl_rate,
+    extended?.recorded_in_tdh
+  );
   const mintDate = formatMintDate(source.mint_date);
   const artistName = firstNonEmptyString(
     explicitArtistHandle,
@@ -873,10 +891,7 @@ async function fetchTheMemesPreview(
         "Edition size",
         editionSize !== undefined ? formatInteger(editionSize) : undefined
       ),
-      createFact(
-        "TDH rate",
-        tdhRate !== undefined ? formatDecimal(tdhRate) : undefined
-      ),
+      createFact("TDH rate", tdhRateValue),
       createFact(
         "Season",
         season !== undefined ? formatInteger(season) : undefined

@@ -144,12 +144,12 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (
-    <Container className="no-padding">
+    <Container className="!tw-p-0">
       <NextGenAdminHeadingRow
         close={props.close}
         title="Set Collection Minting Costs"
       />
-      <Row className="pt-3">
+      <Row className="tw-pt-4">
         <Col>
           <Form>
             <NextGenCollectionIdFormGroup
@@ -159,7 +159,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 setCollectionID(id);
               }}
             />
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Starting Minting Price</Form.Label>
               <Form.Control
                 type="integer"
@@ -168,7 +168,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 onChange={(e: any) => setCollectionStartCost(e.target.value)}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Ending Minting Price</Form.Label>
               <Form.Control
                 type="integer"
@@ -177,7 +177,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 onChange={(e: any) => setCollectionEndCost(e.target.value)}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Rate (Applies only for sales models 2 and 3)
               </Form.Label>
@@ -188,7 +188,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 onChange={(e: any) => setRate(e.target.value)}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>
                 Time Period (Applies only for sales models 2 and 3)
               </Form.Label>
@@ -199,7 +199,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 onChange={(e: any) => setTimePeriod(e.target.value)}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Sales Model</Form.Label>
               <Form.Control
                 type="integer"
@@ -208,7 +208,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 onChange={(e: any) => setSalesOption(e.target.value)}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Delegation Address</Form.Label>
               <Form.Control
                 type="integer"
@@ -219,9 +219,10 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
             </Form.Group>
             {!loading && errors.length > 0 && printAdminErrors(errors)}
             <Button
-              className={`mt-3 mb-3 seize-btn`}
+              className={`tw-mb-4 tw-mt-4 tw-rounded-none tw-border-0 tw-px-5 tw-py-1.5 tw-font-bold disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
               disabled={submitting || loading}
-              onClick={() => submit()}>
+              onClick={() => submit()}
+            >
               Submit
             </Button>
           </Form>

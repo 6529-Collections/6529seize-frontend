@@ -1,17 +1,10 @@
 import { render, fireEvent, screen } from '@testing-library/react';
-import React from 'react';
 import {
   DelegationFormLabel,
   DelegationFormOptionsFormGroup,
   DelegationFormDelegateAddressFormGroup,
 } from '@/components/delegation/DelegationFormParts';
 
-jest.mock('react-bootstrap', () => ({
-  __esModule: true,
-  Form: { Control: (p:any)=> <input {...p}/>, Select: (p:any)=> <select {...p}/> , Label: (p:any)=> <label {...p}/> , Group:(p:any)=> <div {...p}/> },
-  Row: (p:any)=> <div {...p}/> ,
-  Col: (p:any)=> <div {...p}/> ,
-}));
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children, id }: any) => (
     <div data-testid="react-tooltip" data-tooltip-id={id}>

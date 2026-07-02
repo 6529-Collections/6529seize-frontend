@@ -6,6 +6,7 @@ import { useUnreadDivider } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+import type { BoostedDropsDisplayPreference } from "@/types/boosted-drops.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject, Ref } from "react";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
@@ -44,6 +45,9 @@ interface WaveDropsContentProps {
   readonly onRevealPending: () => void;
   readonly bottomPaddingClassName?: string | undefined;
   readonly boostedDrops?: ApiDrop[] | undefined;
+  readonly boostedDropsDisplayPreference?:
+    | BoostedDropsDisplayPreference
+    | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
   readonly unreadCount?: number | undefined;
@@ -78,6 +82,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onRevealPending,
   bottomPaddingClassName,
   boostedDrops,
+  boostedDropsDisplayPreference,
   onBoostedDropClick,
   onScrollToUnread,
   unreadCount,
@@ -140,6 +145,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         unreadDividerSerialNo={unreadDividerSerialNo}
         unreadCount={unreadCount}
         boostedDrops={boostedDrops}
+        boostedDropsDisplayPreference={boostedDropsDisplayPreference}
         onBoostedDropClick={onBoostedDropClick}
         onScrollToUnread={onScrollToUnread}
         onDismissUnread={handleDismissUnread}

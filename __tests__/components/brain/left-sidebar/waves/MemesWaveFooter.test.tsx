@@ -305,6 +305,8 @@ describe("MemesWaveFooter", () => {
     expect(floatingFrame).toHaveClass(
       "tw-scale-[var(--memes-wave-floating-footer-scale)]"
     );
+    expect(floatingFrame).toHaveClass("tw-transition-transform");
+    expect(floatingFrame).toHaveClass("motion-reduce:tw-transition-none");
   });
 
   it("tracks the measured mobile dock top while the dock compacts", async () => {
