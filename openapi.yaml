@@ -2058,7 +2058,7 @@ paths:
         - Drops
       summary: Mark a drop and all subsequent drops in the wave as unread
       description: >-
-        Sets the user"s latest_read_timestamp to just before this drop"s
+        Sets the user's latest_read_timestamp to just before this drop's
         created_at, making this drop and all newer drops unread.
       operationId: markDropUnread
       parameters:
@@ -3475,6 +3475,89 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
+  /memes_extended_data:
+    get:
+      tags:
+        - Memes
+      summary: Get paginated Memes extended data
+      description: >-
+        Returns Meme Card metadata joined with the card's NFT market and TDH
+        fields. `collection_size` is the total Meme Cards collection size.
+        `ranked_collection_size`, when present, is the denominator for
+        rank fields on rows included in TDH ranking. Rows not yet included in
+        TDH calculations can return `recorded_in_tdh: false`, `-1` rank values,
+        and `ranked_collection_size: null`. During migration or transient TDH
+        lookup fallback, `recorded_in_tdh` and `ranked_collection_size` can be
+        `null` or absent, and clients should treat that as legacy/transitional
+        state.
+      operationId: getMemesExtendedData
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 101
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 101
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: id
+          in: query
+          description: Comma-separated Meme Card IDs
+          required: false
+          schema:
+            type: string
+        - name: season
+          in: query
+          description: Comma-separated Meme seasons
+          required: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Default is age
+          required: false
+          schema:
+            type: string
+            enum:
+              - age
+              - edition_size
+              - meme
+              - hodlers
+              - tdh
+              - percent_unique
+              - percent_unique_cleaned
+              - floor_price
+              - market_cap
+              - total_volume_last_24_hours
+              - total_volume_last_7_days
+              - total_volume_last_1_month
+              - total_volume
+              - highest_offer
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemesExtendedDataPage"
   /minting-claims/{contract}/{card_id}/{merkle_root}/proofs/{address}:
     get:
       tags:
@@ -12683,6 +12766,14 @@ components:
           type: boolean
         message:
           type: string
+    ApiDmDropsUnreadCount:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          minimum: 0
     ApiDrop:
       type: object
       required:
@@ -14580,14 +14671,6 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
-    ApiDmDropsUnreadCount:
-      type: object
-      required:
-        - count
-      properties:
-        count:
-          type: integer
-          minimum: 0
     ApiMediaResolveRequest:
       type: object
       required:
@@ -14630,6 +14713,136 @@ components:
         - model/gltf-binary
         - video/quicktime
         - image/webp
+    ApiMemesExtendedData:
+      type: object
+      description: >-
+        Meme Card NFT data plus extended collection metrics. Positive rank
+        values are ranked against `ranked_collection_size` when that value is
+        present. `collection_size` remains the total Meme Cards collection size.
+        A rank value of `-1` represents an unranked card when `recorded_in_tdh`
+        is `false`; `recorded_in_tdh: null` or an absent value is a
+        legacy/transitional state.
+      required:
+        - collection_size
+        - edition_size
+        - edition_size_rank
+        - museum_holdings
+        - museum_holdings_rank
+        - edition_size_cleaned
+        - edition_size_cleaned_rank
+        - hodlers
+        - hodlers_rank
+        - percent_unique
+        - percent_unique_rank
+        - percent_unique_cleaned
+        - percent_unique_cleaned_rank
+        - burnt
+        - edition_size_not_burnt
+        - edition_size_not_burnt_rank
+        - percent_unique_not_burnt
+        - percent_unique_not_burnt_rank
+        - season
+        - meme
+        - meme_name
+      allOf:
+        - $ref: "#/components/schemas/ApiNft"
+      properties:
+        collection_size:
+          type: integer
+          format: int64
+          description: Total Meme Cards collection size.
+        edition_size:
+          type: integer
+          format: int64
+        edition_size_rank:
+          type: integer
+          format: int64
+          description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        museum_holdings:
+          type: integer
+          format: int64
+        museum_holdings_rank:
+          type: integer
+          format: int64
+          description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        edition_size_cleaned:
+          type: integer
+          format: int64
+        edition_size_cleaned_rank:
+          type: integer
+          format: int64
+          description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        hodlers:
+          type: integer
+          format: int64
+        hodlers_rank:
+          type: integer
+          format: int64
+          description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        percent_unique:
+          type: number
+          format: double
+        percent_unique_rank:
+          type: integer
+          format: int64
+          description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        percent_unique_cleaned:
+          type: number
+          format: double
+        percent_unique_cleaned_rank:
+          type: integer
+          format: int64
+          description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        burnt:
+          type: integer
+          format: int64
+        edition_size_not_burnt:
+          type: integer
+          format: int64
+        edition_size_not_burnt_rank:
+          type: integer
+          format: int64
+          description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        percent_unique_not_burnt:
+          type: number
+          format: double
+        percent_unique_not_burnt_rank:
+          type: integer
+          format: int64
+          description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        season:
+          type: integer
+          format: int64
+        meme:
+          type: integer
+          format: int64
+        meme_name:
+          type: string
+        recorded_in_tdh:
+          type: boolean
+          nullable: true
+          description: >-
+            True when this Meme Card is present in TDH NFT records, false when
+            it is known not to be recorded yet, and null/absent during legacy or
+            fallback states.
+        ranked_collection_size:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Rank denominator for TDH-recorded cards. Null for unranked, legacy,
+            or fallback rows.
+    ApiMemesExtendedDataPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemesExtendedData"
     ApiMemesMintStat:
       type: object
       required:
@@ -14974,7 +15187,7 @@ components:
           type: string
           enum:
             - ERC1155
-            - EEC721
+            - ERC721
         hodl_rate:
           type: number
           format: float

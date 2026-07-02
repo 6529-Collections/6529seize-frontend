@@ -15,9 +15,10 @@ import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
-import type { MemesExtendedData, NFT, NftRank, NftTDH } from "@/entities/INFT";
+import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
@@ -217,7 +218,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
   const [nft, setNft] = useState<NFT>();
   const [nftNotFound, setNftNotFound] = useState(false);
-  const [nftMeta, setNftMeta] = useState<MemesExtendedData>();
+  const [nftMeta, setNftMeta] = useState<ApiMemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
