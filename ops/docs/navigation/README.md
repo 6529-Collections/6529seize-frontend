@@ -49,8 +49,8 @@ and mobile app layouts.
   current routes, authenticated connection handoff, and 6529 app targets.
 - [Internal Link Navigation](feature-internal-link-navigation.md): internal
   route links, hash anchors, and drop-content link behavior.
-- [Join 6529 Journey](feature-join-6529-journey.md): state-aware setup and
-  acquisition guide at `/join-6529`.
+- [Join 6529 Onboarding Hub](feature-join-6529-journey.md): compact entry
+  guide for Waves, NFTs, subscriptions, and creating at `/join-6529`.
 
 ### Mobile-Specific Behavior
 

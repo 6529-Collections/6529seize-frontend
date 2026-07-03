@@ -65,25 +65,27 @@
         "started",
         "wallet",
         "profile",
-        "pfp",
         "waves",
-        "first",
-        "message"
+        "nfts",
+        "subscriptions",
+        "create"
       ],
       "facts": [
         "The Join 6529 guide lives at /join-6529.",
-        "It adapts to the user's current state across wallet connection, wallet auth, profile setup, profile image, public Waves, and first public message.",
-        "The profile-image step remains incomplete until an image is uploaded, but it does not block public Waves or messaging steps.",
+        "It is a compact onboarding hub with entry paths for Waves, NFT browsing, The Memes subscriptions, and creating or contributing.",
+        "The page explains that users can browse first and only need wallet, profile, ETH, or eligibility when a specific product action requires them.",
+        "NFT and mint guidance is careful: minting depends on active drops, phases, supply, wallet confirmation, gas, and eligibility; the guide does not promise guaranteed mints.",
         "Create Wave links from the guide use the web create URL /waves?create=wave."
       ],
       "canonical_path": "/join-6529",
       "related_paths": [
         "/waves",
         "/waves?create=wave",
-        "/open-data/meme-subscriptions",
-        "/delegation/delegation-center"
+        "/the-memes",
+        "/the-memes/mint",
+        "/about/subscriptions"
       ],
-      "tags": ["navigation", "getting-started", "waves"],
+      "tags": ["navigation", "getting-started", "waves", "subscriptions"],
       "source_refs": ["ops/docs/navigation/feature-join-6529-journey.md"]
     },
     {
