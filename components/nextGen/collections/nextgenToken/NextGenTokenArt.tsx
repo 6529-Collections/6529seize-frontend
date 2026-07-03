@@ -436,7 +436,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                     className={
                       showLightbox || showBlackbox
                         ? styles["lightBoxContent"]
-                        : "tw-pt-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
+                        : "tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pt-4"
                     }
                     ref={tokenImageRef}
                   >
@@ -462,14 +462,14 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           <div
             className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["modeRow"]}`}
           >
-            <div className="tw-pb-1 tw-pt-2 -tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-1 tw-pt-2">
               {printModeIcons()}
             </div>
           </div>
         </div>
       </div>
       {mode === Mode.LIVE && (
-        <div className="tw-text-[#9a9a9a] tw-text-sm tw-pt-2 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2 tw-text-sm tw-text-[#9a9a9a]">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             * Live view generates the image dynamically from scratch in your
             browser. Pebbles have a computationally expensive script and the

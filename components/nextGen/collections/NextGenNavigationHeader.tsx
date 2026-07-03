@@ -46,7 +46,10 @@ export default function NextGenNavigationHeader(
       styles = {};
     }
     const viewHeader = (
-      <h5 className={`tw-mb-0 tw-pb-2 tw-text-white tw-select-none`} style={styles}>
+      <h5
+        className={`tw-mb-0 tw-select-none tw-pb-2 tw-text-white`}
+        style={styles}
+      >
         <b>{v ?? "Featured"}</b>
       </h5>
     );
@@ -55,7 +58,7 @@ export default function NextGenNavigationHeader(
     }
     return (
       <button
-        className="tw-border-0 tw-bg-transparent !tw-p-0 tw-font-[inherit] tw-text-inherit tw-cursor-pointer tw-outline-[inherit] hover:tw-bg-transparent focus:tw-bg-transparent active:tw-bg-transparent hover:tw-text-[#9a9a9a] focus:tw-text-[#9a9a9a] active:tw-text-[#9a9a9a] tw-no-underline"
+        className="tw-cursor-pointer tw-border-0 tw-bg-transparent !tw-p-0 tw-font-[inherit] tw-text-inherit tw-no-underline tw-outline-[inherit] hover:tw-bg-transparent hover:tw-text-[#9a9a9a] focus:tw-bg-transparent focus:tw-text-[#9a9a9a] active:tw-bg-transparent active:tw-text-[#9a9a9a]"
         onClick={() => {
           if (props.setView) {
             props.setView(v);
@@ -164,11 +167,11 @@ export default function NextGenNavigationHeader(
         <div
           className={`tw-flex tw-items-center ${
             isStackedHeader
-              ? "tw-w-full tw-justify-center tw-pt-4 tw-pb-4"
+              ? "tw-w-full tw-justify-center tw-pb-4 tw-pt-4"
               : "tw-justify-end"
           }`}
         >
-          <span className="tw-flex tw-justify-center md:tw-justify-end tw-gap-4 md:tw-gap-6">
+          <span className="tw-flex tw-justify-center tw-gap-4 md:tw-justify-end md:tw-gap-6">
             {printView(undefined)}
             {printView(NextgenView.COLLECTIONS)}
             {printView(NextgenView.ARTISTS)}

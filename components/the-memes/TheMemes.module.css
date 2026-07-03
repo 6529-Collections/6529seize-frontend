@@ -118,7 +118,10 @@
   overflow: hidden;
   border-radius: 8px;
   background: rgba(19, 19, 22, 0.9);
-  box-shadow: inset 0 0 0 1px rgba(55, 55, 62, 0.6), 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset 0 0 0 1px rgba(55, 55, 62, 0.6),
+    0 10px 15px -3px rgba(0, 0, 0, 0.2),
+    0 4px 6px -4px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(8px);
 }
 
@@ -134,7 +137,9 @@
   color: rgb(154, 154, 154);
   padding: 0 0.5rem;
   text-align: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    monospace;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -164,7 +169,10 @@
   background: transparent;
   color: #efeff1;
   padding: 0;
-  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
 }
 .artSlideButton:hover:not(:disabled) {
   background-color: #37373e;

@@ -46,7 +46,8 @@ export default function AboutHTML(props: Readonly<Props>) {
           className={styles["htmlContainer"]}
           dangerouslySetInnerHTML={{
             __html: html,
-          }}></Col>
+          }}
+        ></Col>
       </Row>
     </Container>
   );

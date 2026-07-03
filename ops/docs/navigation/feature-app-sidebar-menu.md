@@ -3,22 +3,19 @@
 ## Overview
 
 In app layout, the top-left menu/avatar button opens a left drawer for
-direct profile/discovery jumps, grouped secondary routes, and account actions.
-Primary section switching stays in bottom navigation.
+primary navigation concepts, grouped secondary routes, and account actions.
 Connected account surfaces in this drawer can show unread notification
 indicators (dot/count badges) to help account switching.
-When the connected wallet can access Drop Forge, the drawer adds a standalone
-`Drop Forge` row after `About`.
+When the connected wallet can access Drop Forge, the drawer lists it inside
+`About` under `Developer & Open Data`.
 
 ## Location in the Site
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Direct rows: connected `Profile` and `Discovery`.
+- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
 - Drawer header: connected profile avatar shortcut to
   `/{normalized-handle}` with `/{walletAddress}` fallback.
-- Collapsible groups: `Network`, `Tools`, `About`.
-- Optional permission-gated row: `Drop Forge` after `About`.
 - Footer actions: `Scan QR Code` (Capacitor + scanner support), then either
   `Connect` (disconnected) or connected actions (`Push Notifications`,
   `Disconnect Wallet`, optional `Switch to {nextChain}`,
@@ -41,35 +38,39 @@ When the connected wallet can access Drop Forge, the drawer adds a standalone
      level, stats, and unread count badge when present)
    - disconnected: `6529` logo linking to `/`
 4. Drawer body shows direct rows plus grouped sections:
-   - connected `Profile` row
-   - `Discovery`
-   - `Network`, `Tools`, `About`
-   - optional `Drop Forge` row after `About`
-5. Tap the connected profile avatar or `Profile` row to open your own profile
-   route (`/{normalized-handle}` with `/{walletAddress}` fallback), tap
-   `Discovery` for `/discover`, use `Drop Forge` when present, or expand
-   grouped sections for nested routes.
+   - `NFTs`
+   - `Waves`
+   - `DMs`
+   - `Join 6529`
+   - `About`
+5. Tap the connected profile avatar to open your own profile route
+   (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `DMs` for
+   `/messages`, use `Drop Forge` inside `About` when present, or expand grouped
+   sections for nested routes.
 6. Drawer closes and route navigation runs.
 7. Use footer actions for QR scan, connect/session actions, push settings, and
    optional chain switching.
 
 ## Common Scenarios
 
-- Open network routes:
-  `/network`, `/network/activity`, `/network/groups`, `/nft-activity`,
-  `/meme-calendar`, `/network/tdh`, `/xtdh`, `/network/health`,
+- Open `NFTs`:
+  `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
+  `/nft-activity`, `/meme-calendar`.
+- Open `Waves`:
+  `/waves` and `Discover Waves` at `/discover`.
+- Open `About > Network & People` and `About > Network Data`:
+  `/network`, `/network/activity`, `/network/groups`, `/network/tdh`, `/xtdh`,
+  `/network/wave-score`, `/rep/categories`, `/network/health`,
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`.
-- Open `Discovery`:
-  use the direct row to route into `/discover`.
 - Open `Drop Forge`:
-  use the standalone row after `About` when the current wallet can access the
+  use `About > Developer & Open Data` when the current wallet can access the
   landing route.
-- Open tools routes:
+- Open About tool routes:
   `/delegation/delegation-center`, `/delegation/wallet-architecture`,
   `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`,
   `/delegation/wallet-checker`, `/tools/subscriptions-report`,
-  `/meme-accounting?focus=the-memes`, `/meme-gas?focus=the-memes`,
-  `/tools/api`, `/emma`, `/tools/block-finder`, `/open-data`.
+  `/meme-accounting`, `/meme-gas`, `/tools/api`, `/emma`,
+  `/tools/block-finder`, `/open-data`.
 - Open about routes:
   `/about/the-memes`, `/about/subscriptions`, `/about/meme-lab`,
   `/about/6529-gradient`, `/about/gdrc1`, `/about/nft-delegation`,
@@ -77,8 +78,8 @@ When the connected wallet can access Drop Forge, the drawer adds a standalone
   `/capital/fund`, `/about/faq`, `/about/apply`, `/about/contact-us`,
   `/about/data-decentralization`, `/about/ens`, `/about/license`.
 - Open connected profile shortcut:
-  tap either the drawer-header avatar or the direct `Profile` row; both
-  resolve `/{normalized-handle}` first, then `/{walletAddress}` fallback.
+  tap the drawer-header avatar; it resolves `/{normalized-handle}` first, then
+  `/{walletAddress}` fallback.
 - Use `Scan QR Code` for `https://6529.io/*` links and `mobile6529://` deep
   links (`navigate/*` and `share-connection` scopes).
 - Open `Push Notifications`, review per-device toggles, then save changes.
@@ -93,16 +94,16 @@ When the connected wallet can access Drop Forge, the drawer adds a standalone
   profile routes with valid in-app history.
 - Connected profile shortcut is avatar-only; handle/wallet text and level badge
   do not navigate.
-- `Profile` row is unavailable when disconnected.
-- Discovery stays available even while disconnected.
-- `Drop Forge` row appears only when the connected wallet can access the
-  landing route.
+- Profile access stays in account/header surfaces, not the product menu rows.
+- `Discover Waves` stays available inside `Waves` even while disconnected.
+- `Drop Forge` appears inside `About > Developer & Open Data` only when the
+  connected wallet can access the landing route.
 - Profile avatar shortcut is unavailable when disconnected because the header
   shows the `6529` home link instead.
-- `Network`, `Tools`, and `About` are collapsible; section headers inside them
-  are labels, not links.
-- `App Wallets` is prepended inside `Tools` only when app-wallet support is
-  available.
+- `NFTs`, `Waves`, and `About` are collapsible; section headers inside them are
+  labels, not links.
+- `App Wallets` appears inside `About > NFT & Reporting Tools` only when
+  app-wallet support is available.
 - `Scan QR Code` appears only when running in Capacitor with scanner support.
 - `Push Notifications` appears only when connected and opens an in-app modal.
 - Network switch controls appear only when the wallet is connected and more
@@ -115,8 +116,8 @@ When the connected wallet can access Drop Forge, the drawer adds a standalone
 
 - If drawer state looks stuck, close with backdrop/icon/swipe and reopen.
 - If route change does not apply, reopen the drawer and select the route again.
-- If `Profile` is missing, connect wallet first or use the header avatar once a
-  connected profile is available.
+- If profile access is missing, connect wallet first or use the header avatar
+  once a connected profile is available.
 - If `Drop Forge` is missing, verify the connected wallet can access the
   landing route and wait for permission checks to finish.
 - If QR scan fails or shows `Invalid QR code`, rescan, update app build if
@@ -132,9 +133,8 @@ When the connected wallet can access Drop Forge, the drawer adds a standalone
 ## Limitations / Notes
 
 - App-sidebar behavior is app-layout only.
-- Primary section switching stays in
-  [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md), even though
-  `Discovery` and `Profile` are also accessible here.
+- Bottom navigation and this drawer expose the same primary product concepts;
+  profile/account actions stay in account surfaces.
 - Search stays in the header search control, not in this drawer.
 - Session/proxy details are owned by
   [Wallet and Account Controls](feature-wallet-account-controls.md).

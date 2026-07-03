@@ -31,7 +31,7 @@ export default function DownloadUrlWidget(props: Readonly<Props>) {
 
   return (
     <button
-      className="tw-flex tw-w-fit tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-text-white tw-transition-colors hover:tw-text-iron-350 hover:[&_svg]:tw-text-iron-350 [&_svg]:tw-w-5 [&_svg]:tw-text-white [&_svg]:tw-transition-colors"
+      className="tw-flex tw-w-fit tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-text-white tw-transition-colors hover:tw-text-iron-350 [&_svg]:tw-w-5 [&_svg]:tw-text-white [&_svg]:tw-transition-colors hover:[&_svg]:tw-text-iron-350"
       onClick={() => {
         startDownload();
       }}
