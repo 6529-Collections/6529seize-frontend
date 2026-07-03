@@ -1,6 +1,7 @@
 "use client";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
+import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 
@@ -18,7 +19,7 @@ export default function DefinitionsClient() {
   useSetTitle("Definitions | Network");
 
   return (
-    <main className="tailwind-scope [min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-min-h-screen tw-w-full tw-px-3 tw-pb-12 tw-pt-12 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
+    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
       <AboutContentsDropdown currentHref="/network/definitions" />
       <h1>Definitions</h1>
 
