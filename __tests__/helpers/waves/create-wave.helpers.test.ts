@@ -224,7 +224,8 @@ describe("create-wave.helpers", () => {
         { name: "m", type: ApiWaveMetadataType.String },
       ]);
       expect(res.voting.credit_scope).toBe(ApiWaveCreditScope.Wave);
-      expect(res.voting.period.max).toBe(2 + 3 + 5);
+      expect(res.participation.period.max).toBeNull();
+      expect(res.voting.period.max).toBeNull();
       expect(res.voting.forbid_negative_votes).toBe(false);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
       expect(res.wave.max_votes_per_identity_to_drop).toBeNull();

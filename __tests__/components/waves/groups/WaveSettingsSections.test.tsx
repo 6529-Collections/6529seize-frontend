@@ -328,8 +328,10 @@ describe("WaveSettingsSections", () => {
       });
     });
     expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
-    expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+      });
     });
   });
 
@@ -466,12 +468,13 @@ describe("WaveSettingsSections", () => {
 
   it("keeps custom rules editor open when authentication fails", async () => {
     const user = userEvent.setup();
-    const { requestAuth, setToast } = renderSettings({
+    const { requestAuth, setToast, queryClient } = renderSettings({
       wave: makeWave({
         canAdmin: true,
         waveType: ApiWaveType.Rank,
       }),
     });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
     requestAuth.mockResolvedValueOnce({ success: false });
 
     await user.click(
@@ -497,18 +500,24 @@ describe("WaveSettingsSections", () => {
         "Couldn't authenticate. Reconnect your wallet and try again."
       )
     ).toHaveAttribute("role", "alert");
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+      });
+    });
     expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
   });
 
   it("keeps custom rules editor open when metadata save fails", async () => {
     createWaveMetadataMock.mockRejectedValueOnce(new Error("metadata failed"));
     const user = userEvent.setup();
-    const { setToast } = renderSettings({
+    const { setToast, queryClient } = renderSettings({
       wave: makeWave({
         canAdmin: true,
         waveType: ApiWaveType.Rank,
       }),
     });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
 
     await user.click(
       await screen.findByRole("button", { name: "Edit custom rules" })
@@ -530,6 +539,11 @@ describe("WaveSettingsSections", () => {
     expect(
       screen.getByText("Couldn't save these custom rules. Please try again.")
     ).toHaveAttribute("role", "alert");
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+      });
+    });
     expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
   });
 

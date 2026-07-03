@@ -1535,7 +1535,7 @@
       ],
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
-        "Rank wave setup includes Dates, Drops, Rules, Voting, Outcomes, Groups, and Description.",
+        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation."
       ],
@@ -1564,7 +1564,7 @@
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Dates, Drops, Rules, Voting, Outcomes, Groups, and Description.",
+        "Approve wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
         "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],

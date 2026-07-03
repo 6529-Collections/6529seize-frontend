@@ -187,9 +187,6 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
             deleteWaveMetadata({ waveId: wave.id, metadataId })
           )
         );
-        await queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE_METADATA, { wave_id: wave.id }],
-        });
         closeEditor();
       } catch (error) {
         setSaveError("Couldn't save these custom rules. Please try again.");
@@ -200,6 +197,11 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
           details: getToastErrorDetails(error, getErrorMessage(error)),
         });
       } finally {
+        await queryClient
+          .invalidateQueries({
+            queryKey: [QueryKey.WAVE_METADATA, { wave_id: wave.id }],
+          })
+          .catch(() => undefined);
         setIsSaving(false);
       }
     })();

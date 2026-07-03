@@ -84,7 +84,8 @@ submission step.
 
 ## Settings
 
-Wave admins can edit display-only custom rules later from wave settings.
+Wave admins can edit display-only custom rules and acceptance-required rules
+later from wave settings.
 Display-only custom rules are saved as wave metadata. For `Rank` and `Approve`,
 rules that require acceptance are stored as participation terms and continue to
 use the existing submit acceptance flow.

@@ -404,6 +404,10 @@ export const getCreateWaveEndDate = ({
 }: {
   readonly config: CreateWaveConfig;
 }): number | null => {
+  if (config.overview.type === ApiWaveType.Chat) {
+    return null;
+  }
+
   if (config.overview.type === ApiWaveType.Approve) {
     return config.dates.endDate;
   }
