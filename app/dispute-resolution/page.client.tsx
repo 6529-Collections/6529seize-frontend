@@ -1,7 +1,7 @@
 "use client";
 
 import { useSetTitle } from "@/contexts/TitleContext";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { AboutSection } from "@/types/enums";
 import Link from "next/link";
 import {
@@ -16,7 +16,7 @@ export default function DisputeResolutionPage() {
   return (
     <main className={`${styles["main"]} tailwind-scope`}>
       <Container>
-        <Row className="tw-pt-4 tw-pb-4">
+        <Row className="tw-pb-4 tw-pt-4">
           <Col>
             <h1>Dispute Resolution</h1>
           </Col>

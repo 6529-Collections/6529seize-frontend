@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
@@ -63,12 +63,12 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   function printCollectionSelection() {
     return (
       <div className="tw-w-full tw-p-0">
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4 tw-pb-2">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-4">
           <div className="tw-w-full tw-px-3">
             <h4>Manage by Collection</h4>
           </div>
         </div>
-        <div className="tw-flex tw-flex-wrap -tw-mx-3">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
           {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
             <div
               key={c.contract}
@@ -119,7 +119,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
 
   return (
     <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pb-2">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
         <div className="tw-w-full tw-px-3">
           <h1>Delegation Center</h1>
           <p className={styles["delegationCenterIntro"]}>
@@ -128,15 +128,11 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div className="tw-w-full tw-px-3">
-          <div
-            className={`${styles["delegationCenterSection"]} tw-py-4`}
-          >
-            <div className="tw-flex tw-flex-wrap -tw-mx-3">
-              <div
-                className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
-              >
+          <div className={`${styles["delegationCenterSection"]} tw-py-4`}>
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4">
                 <span className="tw-flex tw-flex-col">
                   <h3 className="tw-pb-4">Delegations</h3>
                   <span className="tw-flex tw-items-center tw-gap-3">
@@ -158,9 +154,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   </span>
                 </span>
               </div>
-              <div
-                className="tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-2 md:tw-w-1/4"
-              >
+              <div className="tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-2 md:tw-w-1/4">
                 <button
                   className={`${styles["addNewDelegationBtn"]}`}
                   onClick={() =>
@@ -178,15 +172,11 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
           </div>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <div className="tw-w-full tw-px-3">
-          <div
-            className={`${styles["delegationCenterSection"]} tw-py-4`}
-          >
-            <div className="tw-flex tw-flex-wrap -tw-mx-3">
-              <div
-                className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
-              >
+          <div className={`${styles["delegationCenterSection"]} tw-py-4`}>
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4">
                 <span className="tw-flex tw-flex-col">
                   <h3 className="tw-pb-4">Consolidations</h3>
                   <span className="tw-flex tw-items-center tw-gap-3">
@@ -208,9 +198,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   </span>
                 </span>
               </div>
-              <div
-                className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-py-2 md:tw-w-1/4"
-              >
+              <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-py-2 md:tw-w-1/4">
                 <button
                   className={`${styles["addNewDelegationBtn"]}`}
                   onClick={() =>
@@ -228,15 +216,11 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
           </div>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <div className="tw-w-full tw-px-3">
-          <div
-            className={`${styles["delegationCenterSection"]} tw-py-4`}
-          >
-            <div className="tw-flex tw-flex-wrap -tw-mx-3">
-              <div
-                className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4"
-              >
+          <div className={`${styles["delegationCenterSection"]} tw-py-4`}>
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4">
                 <span className="tw-flex tw-flex-col">
                   <h3 className="tw-pb-4">Delegation Management</h3>
                   <span className="tw-flex tw-items-center tw-gap-3">
@@ -258,9 +242,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   </span>
                 </span>
               </div>
-              <div
-                className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-py-2 md:tw-w-1/4"
-              >
+              <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-py-2 md:tw-w-1/4">
                 <button
                   className={`${styles["addNewDelegationBtn"]}`}
                   onClick={() =>
@@ -278,7 +260,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
           </div>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
         <div className="tw-w-full tw-px-3">
           <p className={styles["delegationCenterIntro"]}>
             Manage existing records by collection scope, including locks that

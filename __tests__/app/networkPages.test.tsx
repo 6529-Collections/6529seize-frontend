@@ -97,7 +97,7 @@ describe("network pages render", () => {
     expect(screen.getByText(/Unique Memes/i)).toBeInTheDocument();
   });
 
-  it("renders Wave Score page in Network", async () => {
+  it("renders Wave Score page under About network data", async () => {
     const page = await NetworkWaveScorePage({});
     renderWithAuth(page);
     expect(
@@ -106,7 +106,9 @@ describe("network pages render", () => {
         name: /Wave score transparency/i,
       })
     ).toBeInTheDocument();
-    expect(screen.getByText("Network menu / Wave Score")).toBeInTheDocument();
+    expect(
+      screen.getByText("About / Network Data / Wave Score")
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "Calculate a wave" })
     ).toBeInTheDocument();

@@ -1,0 +1,53 @@
+.slideshowContainer {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  width: 100vw;
+  height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.95);
+}
+
+.slideButtons {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top));
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.slideButton {
+  z-index: 1100;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  color: white;
+}
+
+.slideButton:hover {
+  color: rgb(215, 215, 215);
+}
+
+.slide {
+  position: relative;
+  display: flex;
+  width: 100vw;
+  height: 100dvh;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide img,
+.slide video {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 85vw;
+  max-height: 85vh;
+  border-radius: 2px;
+  object-fit: contain;
+}

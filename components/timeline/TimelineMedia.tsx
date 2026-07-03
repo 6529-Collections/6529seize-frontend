@@ -1,4 +1,4 @@
-import styles from "./Timeline.module.scss";
+import styles from "./Timeline.module.css";
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";

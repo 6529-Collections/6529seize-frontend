@@ -8,7 +8,6 @@ import type {
 import CreateWaveDropsMetadata from "./metadata/CreateWaveDropsMetadata";
 import CreateWaveDropsSubmissionMode from "./submission-mode/CreateWaveDropsSubmissionMode";
 import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
-import CreateWaveTermsOfService from "./terms/CreateWaveTermsOfService";
 
 export default function CreateWaveDrops({
   waveType,
@@ -62,14 +61,6 @@ export default function CreateWaveDrops({
   };
 
   const isNotChatType = waveType !== ApiWaveType.Chat;
-
-  const onTermsChange = (terms: string | null) => {
-    setDrops({
-      ...drops,
-      terms,
-      signatureRequired: !!terms,
-    });
-  };
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-8">
@@ -129,16 +120,6 @@ export default function CreateWaveDrops({
           <p className="tw-text-sm tw-font-medium tw-text-iron-400">
             Optional. Unlimited if left blank.
           </p>
-        </div>
-      )}
-      {/* Terms of Service section */}
-      {isNotChatType && (
-        <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
-          <CreateWaveTermsOfService
-            waveType={waveType}
-            terms={drops.terms}
-            setTerms={onTermsChange}
-          />
         </div>
       )}
     </div>

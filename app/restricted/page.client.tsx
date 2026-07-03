@@ -3,7 +3,7 @@
 import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { useEffect, useState } from "react";
 import { LoginImage } from "../access/page.client";
 
@@ -38,7 +38,12 @@ export default function RestrictedPage() {
     <main className={styles["login"]}>
       {image && <LoginImage image={image} alt="access" />}
       <div className={styles["loginPrompt"]}>
-        <input disabled type="text" className="tw-text-center" value={message} />
+        <input
+          disabled
+          type="text"
+          className="tw-text-center"
+          value={message}
+        />
       </div>
     </main>
   );

@@ -11,7 +11,7 @@ import {
   getCookieConsentByName,
   useCookieConsent,
 } from "../cookies/CookieConsentContext";
-import styles from "./About.module.scss";
+import styles from "./About.module.css";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -42,7 +42,9 @@ export default function AboutCookiePolicy() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles["lastUpdateText"]} tw-text-right tw-pt-3 tw-pb-3`}>
+        <Col
+          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+        >
           Last Updated: June 04, 2024
         </Col>
       </Row>
@@ -54,7 +56,7 @@ export default function AboutCookiePolicy() {
                 <h3 className="tw-mb-0">Cookie List</h3>
               </Col>
             </Row>
-            <Row className="tw-pt-2 tw-pb-2">
+            <Row className="tw-pb-2 tw-pt-2">
               <Col>
                 <p>
                   A cookie is a small piece of data (text file) that a website -
@@ -69,7 +71,7 @@ export default function AboutCookiePolicy() {
           </Container>
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <Container className="!tw-px-0">
             <Row className="tw-pb-3">
@@ -155,7 +157,7 @@ export default function AboutCookiePolicy() {
           </Container>
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <Container className="!tw-px-0">
             <Row className="tw-pb-3">

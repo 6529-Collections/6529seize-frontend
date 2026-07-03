@@ -21,7 +21,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import type { TouchEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import styles from "./TheMemes.module.scss";
+import styles from "./TheMemes.module.css";
 
 type InlineMediaVariant = "image" | "html";
 

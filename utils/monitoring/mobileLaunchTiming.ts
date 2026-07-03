@@ -246,6 +246,7 @@ export function scheduleMobileLaunchFlush(
     clearTimeout(state.scheduledFlushId);
   }
 
+  const scheduledTotalMs = roundMs(elapsedSinceStart(state));
   state.scheduledFlushId = setTimeout(
     () => {
       const activeState = getActiveState();
@@ -254,13 +255,16 @@ export function scheduleMobileLaunchFlush(
       }
 
       delete activeState.scheduledFlushId;
-      flushMobileLaunchTiming(reason);
+      flushMobileLaunchTiming(reason, scheduledTotalMs);
     },
     Math.max(0, delayMs)
   );
 }
 
-function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
+function flushMobileLaunchTiming(
+  reason: FlushReason = "manual",
+  scheduledTotalMs?: number
+): void {
   const state = getActiveState();
   if (!state) {
     return;
@@ -276,7 +280,7 @@ function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
     delete state.timeoutId;
   }
 
-  const totalMs = roundMs(elapsedSinceStart(state));
+  const totalMs = scheduledTotalMs ?? roundMs(elapsedSinceStart(state));
   const slow = totalMs >= SLOW_LAUNCH_MS;
   const warn = slow || reason === "timeout" || reason === "error";
   const routeFamily = sanitizeRouteFamily(getCurrentPathname());
@@ -530,6 +534,7 @@ function buildLaunchAttributes({
   return {
     launch_id: state.launchId,
     total_ms: totalMs,
+    total_launch_bucket: bucketMs(totalMs),
     platform: state.platform,
     app_version: state.appVersion,
     route_family: routeFamily,
@@ -591,14 +596,19 @@ function buildMilestoneAttributes(
 
   if (wagmiUnblockedMs !== undefined) {
     attrs["provider_gate_ms"] = wagmiUnblockedMs;
+    attrs["provider_gate_bucket"] = bucketMs(wagmiUnblockedMs);
   }
 
   if (shellMs !== undefined && wagmiUnblockedMs !== undefined) {
-    attrs["shell_after_wagmi_ms"] = roundMs(shellMs - wagmiUnblockedMs);
+    const shellAfterWagmiMs = roundMs(shellMs - wagmiUnblockedMs);
+    attrs["shell_after_wagmi_ms"] = shellAfterWagmiMs;
+    attrs["shell_after_wagmi_bucket"] = bucketMs(shellAfterWagmiMs);
   }
 
   if (wavesContentMs !== undefined && wagmiUnblockedMs !== undefined) {
-    attrs["waves_after_wagmi_ms"] = roundMs(wavesContentMs - wagmiUnblockedMs);
+    const wavesAfterWagmiMs = roundMs(wavesContentMs - wagmiUnblockedMs);
+    attrs["waves_after_wagmi_ms"] = wavesAfterWagmiMs;
+    attrs["waves_after_wagmi_bucket"] = bucketMs(wavesAfterWagmiMs);
   }
 
   return attrs;
@@ -626,6 +636,7 @@ function addStepDurationAttr(
   const status = state.steps[stepName]?.status;
   if (durationMs !== undefined) {
     attrs[`duration_${stepName}_ms`] = durationMs;
+    attrs[`duration_${stepName}_bucket`] = bucketMs(durationMs);
   }
   if (status !== undefined) {
     attrs[`status_${stepName}`] = status;
@@ -637,6 +648,25 @@ function getStepOffsetMs(
   stepName: string
 ): number | undefined {
   return state.steps[stepName]?.offset_ms;
+}
+
+function bucketMs(value: number): string {
+  if (value < 500) {
+    return "0_500";
+  }
+  if (value < 1500) {
+    return "500_1500";
+  }
+  if (value < 3000) {
+    return "1500_3000";
+  }
+  if (value < 5000) {
+    return "3000_5000";
+  }
+  if (value < 10000) {
+    return "5000_10000";
+  }
+  return "10000_plus";
 }
 
 function buildApiSummary(state: LaunchState): Record<string, unknown> {

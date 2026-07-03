@@ -14,11 +14,11 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Groups` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
-  `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
-  `Outcomes` -> `Description`
+- `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
+- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+  `Voting` -> `Outcomes` -> `Description`
+- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+  `Voting` -> `Outcomes` -> `Description`
 
 ## Entry Points
 
@@ -86,6 +86,7 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Dates and Timeline](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
+- [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
 - [Groups List Filters](../../groups/feature-groups-list-filters.md)

@@ -12,7 +12,7 @@ import {
   type RememesSearchParams,
 } from "@/components/rememes/rememesRouteParams";
 import { t } from "@/i18n/messages";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 

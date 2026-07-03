@@ -1,5 +1,5 @@
 import ErrorComponent from "@/components/error/Error";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { Suspense } from "react";
 
 type ErrorPageProps = {

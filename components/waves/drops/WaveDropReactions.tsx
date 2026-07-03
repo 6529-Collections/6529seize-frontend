@@ -53,7 +53,7 @@ import {
   recordReactionRequestSucceeded,
   recordReactionRollbackApplied,
 } from "@/utils/monitoring/dropReactionMonitoring";
-import styles from "./WaveDropReactions.module.scss";
+import styles from "./WaveDropReactions.module.css";
 import { fetchDropReactionDetailsV2 } from "@/services/api/wave-drops-v2-api";
 
 const WaveDropReactionsDetailDialog = dynamic(

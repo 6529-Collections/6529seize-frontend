@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import BrainMobileAbout from '@/components/brain/mobile/BrainMobileAbout';
 import { useQuery } from '@tanstack/react-query';
 import { useLayout } from '@/components/brain/my-stream/layout/LayoutContext';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 jest.mock('@/components/waves/header/WaveHeader', () => ({
   __esModule: true,
@@ -19,6 +20,11 @@ jest.mock('@/components/brain/right-sidebar/BrainRightSidebarContent', () => ({
 jest.mock('@/components/brain/right-sidebar/BrainRightSidebarFollowers', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="followers" onClick={props.closeFollowers}>followers-{props.wave.id}</div>
+}));
+
+jest.mock('@/components/waves/specs/WaveRules', () => ({
+  __esModule: true,
+  default: (props: any) => <div data-testid="rules">rules-{props.wave.id}</div>
 }));
 
 jest.mock('@tanstack/react-query');
@@ -40,6 +46,14 @@ test('renders header and content when wave data available', () => {
   expect(screen.getByTestId('header')).toBeInTheDocument();
   expect(screen.getByTestId('content')).toHaveTextContent('content-1');
   expect(screen.queryByTestId('followers')).toBeNull();
+});
+
+test('renders rules for chat waves in content view', () => {
+  mockUseQuery.mockReturnValue({
+    data: { id: '1', wave: { type: ApiWaveType.Chat } },
+  });
+  render(<BrainMobileAbout activeWaveId="1" />);
+  expect(screen.getByTestId('rules')).toHaveTextContent('rules-1');
 });
 
 test('toggles to followers view and back', async () => {

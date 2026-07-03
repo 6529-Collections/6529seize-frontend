@@ -1,4 +1,4 @@
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 
 import DistributionComponent from "@/components/distribution/Distribution";
 import {

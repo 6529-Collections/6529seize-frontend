@@ -34,17 +34,44 @@
         "expand"
       ],
       "facts": [
-        "The app sidebar is the main navigation surface for sections such as Waves, Network, Groups, Delegation, and other app areas.",
+        "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
+        "Home remains available through the 6529 logo link to /.",
+        "Discovery lives under Waves as Discover Waves, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
-        "On mobile, primary navigation is also available through mobile app navigation surfaces."
+        "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/network", "/delegation/delegation-center"],
+      "related_paths": [
+        "/the-memes",
+        "/waves",
+        "/messages",
+        "/join",
+        "/about",
+        "/discover",
+        "/network",
+        "/delegation/delegation-center"
+      ],
       "tags": ["navigation", "ui"],
       "source_refs": [
         "ops/docs/navigation/feature-sidebar-navigation.md",
         "ops/docs/navigation/feature-app-sidebar-menu.md"
       ]
+    },
+    {
+      "id": "join.6529",
+      "kind": "route",
+      "title": "Join 6529",
+      "aliases": ["join", "join 6529", "join page", "get started"],
+      "keywords": ["join", "6529", "navigation", "getting-started"],
+      "facts": [
+        "The Join 6529 page lives at /join.",
+        "Join 6529 is a primary navigation item.",
+        "The current page is a minimal placeholder; detailed join and onboarding content is not yet published there."
+      ],
+      "canonical_path": "/join",
+      "related_paths": ["/", "/about", "/waves"],
+      "tags": ["join", "navigation", "getting-started"],
+      "source_refs": ["app/join/page.tsx"]
     },
     {
       "id": "about.index",
@@ -76,7 +103,8 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links that keep their canonical /network paths.",
+        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links.",
+        "The primary About navigation menu also owns Network, Delegation, Tools, Open Data, technical, reference, and legal destinations.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, delegation, resource, community, or technical page."
       ],
       "canonical_path": "/about",
@@ -86,7 +114,7 @@
         "/about/tech",
         "/about/terms-of-service",
         "/network/tdh",
-        "/network/xtdh",
+        "/xtdh",
         "/network/health",
         "/network/definitions",
         "/network/levels",
@@ -559,7 +587,8 @@
         "Connection sharing can show a QR code for 6529 Mobile or a deep link for 6529 Desktop.",
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
         "If the Share menu says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
-        "The same Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection."
+        "The desktop Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection.",
+        "In the native app, supported non-wave pages use the header Share page button for current-page sharing."
       ],
       "canonical_path": "/",
       "suppress_source_links": true,
@@ -1470,13 +1499,15 @@
         "groups",
         "dates",
         "drops",
+        "rules",
         "voting",
         "outcomes",
         "description"
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
-        "Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "The docs for wave creation live under ops/docs/waves/create and the app route is /waves/create."
       ],
       "canonical_path": "/waves/create",
@@ -1485,7 +1516,8 @@
       "source_refs": [
         "ops/docs/waves/create/README.md",
         "ops/docs/waves/create/feature-overview-step.md",
-        "ops/docs/waves/create/feature-groups-step.md"
+        "ops/docs/waves/create/feature-groups-step.md",
+        "ops/docs/waves/create/feature-rules-step.md"
       ]
     },
     {
@@ -1499,11 +1531,12 @@
         "conversation",
         "overview",
         "groups",
+        "rules",
         "description"
       ],
       "facts": [
         "Chat waves are conversation-focused waves.",
-        "Chat wave creation uses Overview, Groups, and Description steps.",
+        "Chat wave creation uses Overview, Groups, Rules, and Description steps.",
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
       "canonical_path": "/waves/create",
@@ -1526,17 +1559,20 @@
         "leaderboard",
         "winners",
         "outcomes",
-        "drops"
+        "drops",
+        "rules"
       ],
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
-        "Rank wave setup includes Dates, Drops, Voting, Outcomes, Groups, and Description.",
+        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
+        "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "rank", "voting"],
       "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
         "ops/docs/waves/create/feature-voting-step.md",
         "ops/docs/waves/leaderboard/README.md"
       ]
@@ -1552,19 +1588,64 @@
         "wave",
         "voting",
         "outcomes",
-        "drops"
+        "drops",
+        "rules"
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Dates, Drops, Voting, Outcomes, Groups, and Description.",
+        "Approve wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
+        "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "approve", "voting"],
       "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
         "ops/docs/waves/create/feature-voting-step.md",
         "ops/docs/waves/create/feature-outcomes-step.md"
+      ]
+    },
+    {
+      "id": "waves.rules",
+      "kind": "workflow",
+      "title": "Wave rules",
+      "aliases": [
+        "wave rules",
+        "rules tab",
+        "rules step",
+        "creator rules",
+        "custom rules",
+        "participation terms",
+        "wave terms"
+      ],
+      "keywords": [
+        "wave",
+        "rules",
+        "chat",
+        "rank",
+        "approve",
+        "terms",
+        "signature",
+        "metadata",
+        "sidebar",
+        "mobile"
+      ],
+      "facts": [
+        "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
+        "Automatic rules are generated from wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
+        "Creators can add display-only custom rules that are saved as wave metadata.",
+        "Creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
+        "Wave admins can edit display-only custom rules and acceptance-required rules later from wave settings.",
+        "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
+      ],
+      "canonical_path": "/waves/create",
+      "related_paths": ["/waves", "/waves/create"],
+      "tags": ["waves", "rules", "chat", "rank", "approve"],
+      "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/flow-wave-participation.md",
+        "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md"
       ]
     },
     {
@@ -2953,6 +3034,7 @@
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
+        "Native app page sharing appears next to Search on supported non-wave, non-message, and non-notification routes.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
       ],
       "canonical_path": "/waves",
@@ -2972,12 +3054,12 @@
       ],
       "keywords": ["mobile", "bottom", "navigation", "phone", "app", "tabs"],
       "facts": [
-        "Mobile layouts use bottom navigation for common app destinations.",
-        "The mobile navigation surface is separate from the desktop sidebar.",
+        "Mobile layouts use bottom navigation for the primary concepts NFTs, Waves, DMs, Join 6529, and About.",
+        "Notifications and Profile are account utilities, not bottom-navigation product tabs.",
         "Mobile keyboard and viewport behavior can affect how navigation and composer controls fit on screen."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves", "/notifications"],
+      "related_paths": ["/the-memes", "/waves", "/messages", "/join", "/about"],
       "tags": ["navigation", "mobile"],
       "source_refs": [
         "ops/docs/navigation/feature-mobile-bottom-navigation.md",
@@ -3029,16 +3111,19 @@
       "kind": "ui_affordance",
       "title": "Share modal",
       "aliases": ["share", "share modal", "copy link", "share page"],
-      "keywords": ["share", "copy", "link", "modal", "url"],
+      "keywords": ["share", "copy", "link", "modal", "url", "native"],
       "facts": [
-        "Shared app surfaces can open a share modal for copying or sharing links.",
+        "Desktop web surfaces can open a share modal for copying or sharing links.",
+        "Native app pages outside home, Waves, Messages, and Notifications use a direct Share page header button instead of the desktop share modal.",
         "Wave-specific link sharing also exists in the wave header.",
-        "Use the share modal when users ask how to copy a route or send someone a page."
+        "Use share controls when users ask how to copy a route or send someone a page."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["navigation", "share"],
       "source_refs": [
+        "components/header/share/HeaderPageShareButton.tsx",
+        "ops/docs/navigation/feature-app-header-context.md",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/docs/waves/header/feature-wave-link-share-copy.md"
       ]
@@ -3722,11 +3807,12 @@
       "keywords": ["waves", "discover", "search", "sections", "cards"],
       "facts": [
         "Wave discovery docs cover discover cards, discover sections, and search behavior.",
-        "Discovery is for finding waves, while the Waves panel is for active navigation and participation.",
+        "Discover Waves lives under the Waves primary navigation concept and routes to /discover.",
+        "Wave discovery is for finding waves, while the Waves panel is for active navigation and participation.",
         "Search and section availability depend on the route state and access rules."
       ],
-      "canonical_path": "/waves",
-      "related_paths": ["/waves/create"],
+      "canonical_path": "/discover",
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "discovery"],
       "source_refs": [
         "ops/docs/waves/discovery/README.md",

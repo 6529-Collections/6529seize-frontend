@@ -1,6 +1,8 @@
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
+import type { HeaderSearchModalItemType } from "@/components/header/header-search/HeaderSearchModalItem";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
@@ -21,6 +23,20 @@ const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
+const mockUseMyStreamOptional = jest.fn();
+type HeaderSearchModalItemProps = {
+  readonly isSelected: boolean;
+  readonly searchValue: string;
+  readonly content: HeaderSearchModalItemType;
+  readonly onHover: (state: boolean) => void;
+  readonly onClose: () => void;
+  readonly onWaveSelect?: ((wave: ApiWave) => void) | undefined;
+};
+const mockHeaderSearchModalItem = jest.fn(
+  (props: HeaderSearchModalItemProps) => (
+    <div data-testid="item">{JSON.stringify(props)}</div>
+  )
+);
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 const originalHtmlScrollIntoView = HTMLElement.prototype.scrollIntoView;
 
@@ -105,35 +121,81 @@ jest.mock("@/hooks/useSidebarSections", () => {
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => useDropForgePermissionsMock(),
 }));
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => mockUseMyStreamOptional(),
+}));
 jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
-  const MockHeaderSearchModalItem = (props: any) => (
-    <div data-testid="item">{JSON.stringify(props)}</div>
-  );
+  const MockHeaderSearchModalItem = (props: HeaderSearchModalItemProps) =>
+    mockHeaderSearchModalItem(props);
   MockHeaderSearchModalItem.displayName = "MockHeaderSearchModalItem";
-  return MockHeaderSearchModalItem;
+  return {
+    __esModule: true,
+    default: MockHeaderSearchModalItem,
+    getHeaderSearchWavePath: ({ wave }: { readonly wave: ApiWave }) =>
+      `/waves/${wave.id}`,
+    getNftCollectionMap: () => ({}),
+    isHeaderSearchWaveDirectMessage: (wave: ApiWave) =>
+      Boolean(wave.chat?.scope?.group?.is_direct_message),
+  };
 });
 
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
+const publicWaveScope = { group: null };
+const createWaveResult = (overrides: Record<string, unknown> = {}): ApiWave =>
+  ({
+    id: "wave1",
+    name: "Wave 1",
+    serial_no: 1,
+    chat: {
+      scope: publicWaveScope,
+    },
+    wave: {
+      admin_group: publicWaveScope,
+    },
+    ...overrides,
+  }) as ApiWave;
 
 const defaultSidebarSections: SidebarSection[] = [
   {
-    key: "network",
-    name: "Network",
+    key: "nfts",
+    name: "NFTs",
     icon: () => null,
     items: [
-      { name: "xTDH", href: "/xtdh" },
-      { name: "Wave Score", href: "/network/wave-score" },
+      { name: "The Memes", href: "/the-memes" },
+      { name: "NFT Activity", href: "/nft-activity" },
     ],
     subsections: [],
   },
   {
-    key: "tools",
-    name: "Tools",
+    key: "waves",
+    name: "Waves",
     icon: () => null,
     items: [
-      { name: "Delegation Center", href: "/delegation/delegation-center" },
+      { name: "Waves", href: "/waves" },
+      { name: "Discover Waves", href: "/discover" },
     ],
     subsections: [],
+  },
+  {
+    key: "about",
+    name: "About",
+    icon: () => null,
+    items: [{ name: "About", href: "/about" }],
+    subsections: [
+      {
+        name: "Network Data",
+        items: [
+          { name: "xTDH", href: "/xtdh" },
+          { name: "Wave Score", href: "/network/wave-score" },
+        ],
+      },
+      {
+        name: "Delegation",
+        items: [
+          { name: "Delegation Center", href: "/delegation/delegation-center" },
+        ],
+      },
+    ],
   },
 ];
 
@@ -258,6 +320,7 @@ function setup(options: SetupOptions = {}) {
 describe("HeaderSearchModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseMyStreamOptional.mockReturnValue(null);
   });
 
   it("associates the search input with an accessible label", () => {
@@ -283,6 +346,48 @@ describe("HeaderSearchModal", () => {
       screen.getByRole("heading", { name: "Profiles" })
     ).toBeInTheDocument();
     expect(screen.getByTestId("item")).toBeInTheDocument();
+  });
+
+  it("opens the selected wave result instead of toggling it off", () => {
+    const activeWaveSet = jest.fn();
+    const wave = createWaveResult();
+    mockUseMyStreamOptional.mockReturnValue({
+      activeWave: {
+        id: wave.id,
+        set: activeWaveSet,
+      },
+    });
+
+    setup({
+      selectedCategory: "WAVES",
+      wavesReturn: {
+        waves: [wave],
+        isFetching: false,
+        error: null,
+        refetch: jest.fn(() => Promise.resolve()),
+      },
+      queryImpl: ({ queryKey, profilesRefetch, nftsRefetch }) => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch:
+          queryKey[0] === QueryKey.PROFILE_SEARCH
+            ? profilesRefetch
+            : nftsRefetch,
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "wave" } });
+    const waveItemCall = mockHeaderSearchModalItem.mock.calls.find(
+      ([props]) => props.content === wave
+    );
+
+    expect(waveItemCall).toBeDefined();
+    waveItemCall?.[0].onWaveSelect(wave);
+    expect(activeWaveSet).toHaveBeenCalledWith(wave.id, {
+      isDirectMessage: false,
+    });
   });
 
   it("clears search input when the clear button is pressed", () => {
@@ -357,7 +462,7 @@ describe("HeaderSearchModal", () => {
         (content) =>
           content.includes('"title":"Wave Score"') &&
           content.includes('"/network/wave-score"') &&
-          content.includes('"breadcrumbs":["Network"]')
+          content.includes('"breadcrumbs":["About","Network Data"]')
       )
     ).toBe(true);
   });
@@ -385,6 +490,9 @@ describe("HeaderSearchModal", () => {
 
     expect(networkNerdItems).toHaveLength(1);
     expect(networkNerdItems[0]).toContain('"title":"Network Nerd"');
+    expect(networkNerdItems[0]).toContain(
+      '"breadcrumbs":["About","Network Data"]'
+    );
     expect(networkNerdItems[0]).not.toContain(
       '"title":"Network Nerd Cards Collected"'
     );
@@ -398,8 +506,8 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
+          key: "nfts",
+          name: "NFTs",
           icon: () => null,
           items: [{ name: "Memes Calendar", href: "/meme-calendar" }],
           subsections: [],
@@ -431,8 +539,8 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
+          key: "nfts",
+          name: "NFTs",
           icon: () => null,
           items: [{ name: "Meme Calendar", href: "/meme-calendar" }],
           subsections: [],
@@ -464,8 +572,8 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
+          key: "nfts",
+          name: "NFTs",
           icon: () => null,
           items: [{ name: "Memes Calendar", href: "/meme-calendar" }],
           subsections: [],
@@ -497,13 +605,13 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
+          key: "about",
+          name: "About",
           icon: () => null,
           items: [],
           subsections: [
             {
-              name: "Metrics",
+              name: "Network Data",
               items: [{ name: "Health", href: "/network/health" }],
             },
           ],
@@ -518,7 +626,7 @@ describe("HeaderSearchModal", () => {
     });
 
     const input = screen.getByRole("textbox", { name: "Search" });
-    fireEvent.change(input, { target: { value: "metrics health" } });
+    fireEvent.change(input, { target: { value: "network data health" } });
 
     const items = await screen.findAllByTestId("item");
     expect(
@@ -535,23 +643,16 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
-          icon: () => null,
-          items: [],
-          subsections: [
-            {
-              name: "Metrics",
-              items: [{ name: "Health", href: "/network/health" }],
-            },
-          ],
-        },
-        {
           key: "about",
           name: "About",
           icon: () => null,
           items: [{ name: "Network Health", href: "/about/network-health" }],
-          subsections: [],
+          subsections: [
+            {
+              name: "Network Data",
+              items: [{ name: "Health", href: "/network/health" }],
+            },
+          ],
         },
       ],
       queryImpl: () => ({
@@ -574,23 +675,16 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
-          icon: () => null,
-          items: [],
-          subsections: [
-            {
-              name: "Metrics",
-              items: [{ name: "Health", href: "/network/health" }],
-            },
-          ],
-        },
-        {
           key: "about",
           name: "About",
           icon: () => null,
           items: [{ name: "Network Health", href: "/about/network-health" }],
-          subsections: [],
+          subsections: [
+            {
+              name: "Network Data",
+              items: [{ name: "Health", href: "/network/health" }],
+            },
+          ],
         },
       ],
       queryImpl: () => ({
@@ -652,13 +746,13 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "tools",
-          name: "Tools",
+          key: "about",
+          name: "About",
           icon: () => null,
           items: [],
           subsections: [
             {
-              name: "NFT Delegation",
+              name: "Delegation",
               items: [
                 {
                   name: "Delegation FAQ",
@@ -666,14 +760,6 @@ describe("HeaderSearchModal", () => {
                 },
               ],
             },
-          ],
-        },
-        {
-          key: "about",
-          name: "About",
-          icon: () => null,
-          items: [],
-          subsections: [
             {
               name: "Support",
               items: [{ name: "FAQ", href: "/about/faq" }],

@@ -254,6 +254,42 @@ const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
   eyebrow: "Yes, again!",
 } as const);
 
+const NAVIGATION_MESSAGES = objectMessages("navigation", {
+  "primary.nfts": "NFTs",
+  "primary.waves": "Waves",
+  "primary.dms": "DMs",
+  "primary.join6529": "Join 6529",
+  "primary.about": "About",
+  "primary.home": "Home",
+  "account.notifications": "Notifications",
+  "section.main": "Main",
+  "section.utility": "Utility",
+  "section.account": "Account",
+  "waves.discover": "Discover Waves",
+  "network.nerd": "Network Nerd",
+  "subsection.networkPeople": "Network & People",
+  "subsection.networkData": "Network Data",
+  "subsection.nftReportingTools": "NFT & Reporting Tools",
+  "subsection.developerOpenData": "Developer & Open Data",
+} as const);
+
+const JOIN_PAGE_MESSAGES = objectMessages("join", {
+  "metadata.title": "Join 6529",
+  "metadata.description": "Join 6529",
+  eyebrow: "6529",
+  heading: "Join 6529",
+  placeholder: "Join 6529 details are coming soon.",
+} as const);
+
+const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
+  "back.wave": "Back to wave",
+  "back.previous": "Back to previous page",
+  "back.about": "Back to About",
+  breadcrumb: "About / Network Data / Wave Score",
+  description:
+    "This Network page explains the score shown on waves across discovery, the sidebar, home, and wave pages. Find it in About under Network Data whenever you want the formula or a live wave calculation.",
+} as const);
+
 const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
   leftThisRound: "{count} left this round",
   unrated: "{count} unrated",
@@ -454,6 +490,14 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
 
+const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
+  dialogTitle: "GIF search",
+  "status.checking": "Checking GIF search...",
+  "status.ready": "GIF search is ready.",
+  "unavailable.title": "GIF search is temporarily unavailable.",
+  "unavailable.hint": "You can upload a GIF file instead.",
+} as const);
+
 const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
   coverAlt: "{waveName} cover",
   "dropsCount.one": "{timeAgo} · {count} drop",
@@ -645,6 +689,10 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
   ["safety.viewDetails", "View safety details"],
 ] as const);
 
+const COMMON_MESSAGES = objectMessages("common", {
+  close: "Close",
+} as const);
+
 export const EN_US_MESSAGES = {
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
@@ -706,7 +754,7 @@ export const EN_US_MESSAGES = {
   "acceptConnection.toast.persistFailed": "Failed to store connected profile",
   "acceptConnection.toast.acceptFailed":
     "Couldn't accept this connection. Please try again.",
-  "navigation.primary.ariaLabel": "Primary",
+  "navigation.primary.ariaLabel": "Primary navigation",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":
@@ -757,6 +805,12 @@ export const EN_US_MESSAGES = {
   "headerShare.copy.ariaLabel": "Copy URL",
   "headerShare.copy.default": "Copy URL",
   "headerShare.copy.copied": "Copied!",
+  "headerPageShare.trigger.ariaLabel": "Share page",
+  "headerPageShare.trigger.title": "Share page",
+  "headerWaveLinkAction.share": "Share wave",
+  "headerWaveLinkAction.copy": "Copy wave link",
+  "headerWaveLinkAction.feedback.shared": "Link shared",
+  "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
   "tools.api.authentication.title": "Authentication",
   "tools.api.authentication.basedOnSignatures":
@@ -1282,6 +1336,7 @@ export const EN_US_MESSAGES = {
   ...QUICK_DM_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
+  ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
@@ -1298,7 +1353,11 @@ export const EN_US_MESSAGES = {
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
+  ...COMMON_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
+  ...NAVIGATION_MESSAGES,
+  ...JOIN_PAGE_MESSAGES,
+  ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,

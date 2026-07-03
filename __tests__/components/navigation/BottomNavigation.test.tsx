@@ -10,7 +10,6 @@ import { useWaveData } from "@/hooks/useWaveData";
 import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
-  getNotificationsRoute,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
 } from "@/helpers/navigation.helpers";
 
@@ -168,25 +167,20 @@ describe("BottomNavigation", () => {
 
     const rendered = container.querySelectorAll('[data-testid="nav-item"]');
     const navItemCalls = (NavItem as jest.Mock).mock.calls;
+    const navList = container.querySelector("ul");
 
     expect(rendered).toHaveLength(navItemCalls.length);
-    expect(navItemCalls).toHaveLength(7);
+    expect(navList).toHaveClass("tw-m-0", "tw-list-none");
+    expect(navItemCalls).toHaveLength(5);
 
     const passedItems = navItemCalls.map((call) => call[0].item);
     expect(passedItems.map((item: { name: string }) => item.name)).toEqual([
-      "Discovery",
+      "NFTs",
       "Waves",
-      "Messages",
-      "Home",
-      "Network",
-      "Collections",
-      "Notifications",
+      "DMs",
+      "Join 6529",
+      "About",
     ]);
-
-    const notificationsItem = passedItems.find(
-      (item: { name: string }) => item.name === "Notifications"
-    );
-    expect(notificationsItem?.href).toBe(getNotificationsRoute(false));
     expect(navItemCalls.every((call) => call[0].variant === "floating")).toBe(
       true
     );
@@ -236,6 +230,7 @@ describe("BottomNavigation", () => {
   });
 
   it("keeps one active pill mounted while moving it between active items", () => {
+    (usePathname as jest.Mock).mockReturnValue("/the-memes");
     const { getByTestId, rerender } = render(<BottomNavigation />);
     const activePill = getByTestId("mobile-dock-active-pill");
     const initialStyle = activePill.getAttribute("style");
@@ -243,7 +238,7 @@ describe("BottomNavigation", () => {
     expectActivePillLayoutCalc({ style: initialStyle });
     expect(activePill).toHaveClass("tw-transition-[left,width,height,opacity]");
 
-    (usePathname as jest.Mock).mockReturnValue("/notifications");
+    (usePathname as jest.Mock).mockReturnValue("/waves");
     rerender(<BottomNavigation />);
 
     const movedActivePill = getByTestId("mobile-dock-active-pill");
@@ -281,7 +276,7 @@ describe("BottomNavigation", () => {
 
     await waitFor(() => {
       expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+        (NavItem as jest.Mock).mock.calls.slice(-5).every(([props]) => {
           return props.variant === "floating" && props.compact === true;
         })
       ).toBe(true);
@@ -312,7 +307,7 @@ describe("BottomNavigation", () => {
 
     await waitFor(() => {
       expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+        (NavItem as jest.Mock).mock.calls.slice(-5).every(([props]) => {
           return props.variant === "floating" && props.compact === true;
         })
       ).toBe(true);
@@ -336,7 +331,7 @@ describe("BottomNavigation", () => {
 
     await waitFor(() => {
       expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+        (NavItem as jest.Mock).mock.calls.slice(-5).every(([props]) => {
           return props.variant === "floating" && props.compact === true;
         })
       ).toBe(true);
@@ -362,7 +357,7 @@ describe("BottomNavigation", () => {
     await flushAnimationFrame();
 
     expect(
-      (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+      (NavItem as jest.Mock).mock.calls.slice(-5).every(([props]) => {
         return props.variant === "floating" && props.compact === false;
       })
     ).toBe(true);
@@ -386,22 +381,21 @@ describe("BottomNavigation", () => {
 
     await waitFor(() => {
       expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+        (NavItem as jest.Mock).mock.calls.slice(-5).every(([props]) => {
           return props.variant === "floating" && props.compact === true;
         })
       ).toBe(true);
     });
 
-    (usePathname as jest.Mock).mockReturnValue("/discover");
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("view=network")
+      new URLSearchParams("view=messages")
     );
 
     rerender(<BottomNavigation />);
 
     await waitFor(() => {
       expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+        (NavItem as jest.Mock).mock.calls.slice(-5).every(([props]) => {
           return props.variant === "floating" && props.compact === false;
         })
       ).toBe(true);
@@ -432,7 +426,7 @@ describe("BottomNavigation", () => {
 
     await waitFor(() => {
       expect(
-        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+        (NavItem as jest.Mock).mock.calls.slice(-5).every(([props]) => {
           return props.variant === "floating" && props.compact === true;
         })
       ).toBe(true);

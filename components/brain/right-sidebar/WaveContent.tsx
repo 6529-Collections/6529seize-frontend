@@ -12,6 +12,7 @@ import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
 import WaveRepDetails from "./WaveRepDetails";
 import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
+import WaveRules from "@/components/waves/specs/WaveRules";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -41,6 +42,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   const isCompetitionWave = isRankWave || isApproveWave;
   const options: TabOption[] = [
     { key: SidebarTab.ABOUT, label: "About" },
+    { key: SidebarTab.RULES, label: "Rules" },
     { key: SidebarTab.REP, label: "REP" },
     { key: SidebarTab.SETTINGS, label: "Settings" },
     ...(isCompetitionWave
@@ -71,6 +73,11 @@ export const WaveContent: React.FC<WaveContentProps> = ({
       </div>
     ),
     [SidebarTab.REP]: <WaveRepDetails wave={wave} />,
+    [SidebarTab.RULES]: (
+      <div className="tw-px-0">
+        <WaveRules wave={wave} useRing={false} />
+      </div>
+    ),
     [SidebarTab.SETTINGS]: <BrainRightSidebarSettings wave={wave} />,
     ...(isCompetitionWave
       ? {

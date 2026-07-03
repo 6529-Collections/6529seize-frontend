@@ -23,7 +23,7 @@ import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
 import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import NextGenTokenArt from "./NextGenTokenArt";
 import NextgenTokenRarity, {
@@ -81,9 +81,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
 
   function printDetails() {
     return (
-      <div className="tw-pt-6 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-flex tw-gap-6 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-6 tw-px-3">
             {printViewButton(
               props.view,
               NextgenCollectionView.ABOUT,
@@ -106,7 +106,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             )}
           </div>
         </div>
-        <div className="tw-pt-6 tw-pb-6 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-6 tw-pt-6">
           {props.view === NextgenCollectionView.ABOUT && (
             <>
               <div
@@ -141,7 +141,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             </>
           )}
           {props.view === NextgenCollectionView.PROVENANCE && (
-            <div className="tw-pt-6 tw-pb-6 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-6 tw-pt-6">
               <NextGenTokenProvenance
                 token_id={props.token.id}
                 collection={props.collection}
@@ -149,12 +149,12 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             </div>
           )}
           {props.view === NextgenCollectionView.DISPLAY_CENTER && (
-            <div className="tw-pt-6 tw-pb-6 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-6 tw-pt-6">
               <NextGenTokenRenderCenter token={props.token} />
             </div>
           )}
           {props.view === NextgenCollectionView.RARITY && (
-            <div className="tw-pt-6 tw-pb-6 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-6 tw-pt-6">
               <NextgenTokenRarity
                 collection={props.collection}
                 token={props.token}
@@ -266,16 +266,18 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     return (
       <>
         <div
-          className={`tw-w-full tw-max-w-none ${styles["tokenContainer"]} tw-pt-6 tw-pb-6`}
+          className={`tw-w-full tw-max-w-none ${styles["tokenContainer"]} tw-pb-6 tw-pt-6`}
         >
           <div className="-tw-mx-3 tw-flex tw-flex-wrap">
             <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-                <div className="tw-pb-2 -tw-mx-3 tw-flex tw-flex-wrap">
-                  <div className="tw-flex tw-items-center tw-justify-between tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+                <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
+                  <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-between tw-px-3">
                     <span className="tw-flex tw-flex-col">
                       <span className="tw-flex tw-gap-4">
-                        <h1 className="tw-mb-0 tw-text-white">{props.token.name}</h1>
+                        <h1 className="tw-mb-0 tw-text-white">
+                          {props.token.name}
+                        </h1>
                         {(props.token.burnt ||
                           isNullAddress(props.token.owner)) && (
                           <>
