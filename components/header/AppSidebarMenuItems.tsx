@@ -65,7 +65,7 @@ function AppSidebarChildMenuItem({
   let childElement: React.ReactNode = null;
 
   if (child.section === true) {
-    if (Boolean(child.label)) {
+    if (child.label.length > 0) {
       childElement = (
         <span className="tw-block tw-px-4 tw-py-2 tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500">
           {child.label}
