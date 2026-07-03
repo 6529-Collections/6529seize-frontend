@@ -1,4 +1,5 @@
-/* eslint-disable max-lines -- Existing search modal exceeds the tight limit; this change only updates navigation IA metadata. */
+/* Existing search modal exceeds tight max-lines; this change only updates navigation IA metadata. */
+/* eslint max-lines: "off" */
 "use client";
 
 import {

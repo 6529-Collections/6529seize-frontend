@@ -1,4 +1,5 @@
-/* eslint-disable max-lines -- Existing transparency page exceeds the tight limit; this change only updates navigation copy. */
+/* Existing transparency page exceeds tight max-lines; this change only updates navigation copy. */
+/* eslint max-lines: "off" */
 "use client";
 
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
