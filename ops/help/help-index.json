@@ -51,6 +51,7 @@
         "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
+        "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
       ],
@@ -61,6 +62,7 @@
         "/messages",
         "/join",
         "/about",
+        "/drop-forge",
         "/discover",
         "/network",
         "/delegation/delegation-center"

@@ -17,8 +17,8 @@ On web layouts, route switching is sidebar-first.
   are direct rows.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary link inside the expanded Waves panel and is searchable.
-- When the connected wallet can access Drop Forge, the sidebar lists it inside
-  `About` under `Developer & Open Data`.
+- When the connected wallet can access Drop Forge, the sidebar adds `Drop
+  Forge` as a standalone row after `About`.
 - `DMs` keeps a main-nav unread dot; connected users get a lower
   `Notifications` row with its own unread dot.
 - Connected account avatar in the sidebar account area can show an unread dot
@@ -28,7 +28,8 @@ On web layouts, route switching is sidebar-first.
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
-- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, `About`.
+- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, `About`, and the
+  gated `Drop Forge` row when available.
 - Utility rows: desktop `Search`, connected-only `Notifications`,
   connected-only `Profile`, and disconnected-only `Share`.
 - Bottom account area: connect action, loading placeholders, and the connected
@@ -41,7 +42,7 @@ On web layouts, route switching is sidebar-first.
 - Select direct rows or expand groups for nested routes.
 - Open `Waves` directly from the primary sidebar row.
 - Open `Discover Waves` from the expanded Waves panel header or search.
-- Open `Drop Forge` from `About > Developer & Open Data` when the current
+- Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
 - Open `Search` from the desktop sidebar row.
 - Open connected `Notifications` from the lower row above `Profile`.
@@ -76,7 +77,7 @@ On web layouts, route switching is sidebar-first.
   `/xtdh`, `/network/wave-score`, `/rep/categories`,
   `/network/health`, `/network/definitions`, `/network/levels`,
   `/network/health/network-tdh`.
-- Open `Drop Forge` from `About > Developer & Open Data` when the current
+- Open `Drop Forge` from its standalone row after `About` when the current
   wallet has landing access.
 - Open `About` tool routes:
   delegation pages, `/meme-accounting`, `/meme-gas`,
@@ -113,7 +114,7 @@ On web layouts, route switching is sidebar-first.
 - Flyouts reposition on sidebar scroll and window resize.
 - `Notifications` row appears only when wallet connection is active.
 - `Profile` row appears only when wallet connection is active.
-- `Drop Forge` appears inside `About > Developer & Open Data` only when the
+- `Drop Forge` appears as a standalone row after `About` only when the
   connected wallet can access the `/drop-forge` landing route.
 - Connected user row opens the account menu on a single activate; a quick
   second activate cycles to the next connected account when at least two are
