@@ -16,8 +16,12 @@ export default function AboutSubscriptionsProfileButton() {
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
   const locale = useBrowserLocale();
-  const { isConnecting, openProfileSubscriptions, profileSubscriptionsHref } =
-    useProfileSubscriptionsNavigation();
+  const {
+    canNavigateToProfileSubscriptionsDirectly,
+    isConnecting,
+    openProfileSubscriptions,
+    profileSubscriptionsHref,
+  } = useProfileSubscriptionsNavigation();
   const hideSubscriptions =
     cookieConsent === undefined
       ? false
@@ -30,17 +34,39 @@ export default function AboutSubscriptionsProfileButton() {
     return null;
   }
 
+  const handleOpenProfileSubscriptions = () => {
+    openProfileSubscriptions().catch((error: unknown) => {
+      console.error("Failed to open profile subscriptions", error);
+    });
+  };
+  const manageSubscriptionsLabel = t(
+    locale,
+    "home.mintSubscriptions.manageSubscriptionsLink"
+  );
+
   if (!profileSubscriptionsHref) {
     return (
       <button
         type="button"
         disabled={isConnecting}
-        onClick={() => {
-          void openProfileSubscriptions();
-        }}
+        onClick={handleOpenProfileSubscriptions}
         className={`${PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
         {t(locale, "home.mintSubscriptions.connectToSubscribe")}
+      </button>
+    );
+  }
+
+  if (!canNavigateToProfileSubscriptionsDirectly) {
+    return (
+      <button
+        type="button"
+        disabled={isConnecting}
+        onClick={handleOpenProfileSubscriptions}
+        className={`${PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
+      >
+        {manageSubscriptionsLabel}
+        <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
       </button>
     );
   }
@@ -50,7 +76,7 @@ export default function AboutSubscriptionsProfileButton() {
       href={profileSubscriptionsHref}
       className={`${PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} tw-no-underline desktop-hover:hover:tw-text-white`}
     >
-      {t(locale, "home.mintSubscriptions.manageSubscriptionsLink")}
+      {manageSubscriptionsLabel}
       <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
     </Link>
   );

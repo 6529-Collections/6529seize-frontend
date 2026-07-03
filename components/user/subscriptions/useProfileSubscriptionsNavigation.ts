@@ -11,7 +11,8 @@ import { getProfileSubscriptionsHref } from "./subscriptionNavigation";
 const PROFILE_SUBSCRIPTIONS_CONNECT_TIMEOUT_MS = 120_000;
 
 export function useProfileSubscriptionsNavigation() {
-  const { connectedProfile, setToast } = useAuth();
+  const { connectedProfile, isAuthenticated, requestAuth, setToast } =
+    useAuth();
   const { seizeConnectFresh } = useSeizeConnectContext();
   const locale = useBrowserLocale();
   const router = useRouter();
@@ -19,11 +20,16 @@ export function useProfileSubscriptionsNavigation() {
   const [shouldNavigateAfterConnect, setShouldNavigateAfterConnect] =
     useState(false);
   const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const authRequestInFlightRef = useRef(false);
   const isConnectingRef = useRef(false);
+  const shouldNavigateAfterConnectRef = useRef(false);
 
   const profileSubscriptionsHref = useMemo(
     () => getProfileSubscriptionsHref(connectedProfile),
     [connectedProfile]
+  );
+  const canNavigateToProfileSubscriptionsDirectly = !!(
+    profileSubscriptionsHref && isAuthenticated
   );
 
   const clearConnectTimeout = useCallback(() => {
@@ -33,47 +39,115 @@ export function useProfileSubscriptionsNavigation() {
     }
   }, []);
 
-  useEffect(() => clearConnectTimeout, [clearConnectTimeout]);
+  const clearPendingNavigation = useCallback(() => {
+    clearConnectTimeout();
+    shouldNavigateAfterConnectRef.current = false;
+    setShouldNavigateAfterConnect(false);
+  }, [clearConnectTimeout]);
+
+  const beginPendingNavigation = useCallback(() => {
+    clearConnectTimeout();
+    shouldNavigateAfterConnectRef.current = true;
+    setShouldNavigateAfterConnect(true);
+    connectTimeoutRef.current = setTimeout(() => {
+      clearPendingNavigation();
+    }, PROFILE_SUBSCRIPTIONS_CONNECT_TIMEOUT_MS);
+  }, [clearConnectTimeout, clearPendingNavigation]);
+
+  useEffect(() => clearPendingNavigation, [clearPendingNavigation]);
+
+  const authenticateAndNavigate = useCallback(
+    async (href: string): Promise<void> => {
+      if (authRequestInFlightRef.current) {
+        return;
+      }
+
+      authRequestInFlightRef.current = true;
+      setIsConnecting(true);
+
+      try {
+        if (!isAuthenticated) {
+          const { success } = await requestAuth();
+          if (!success) {
+            clearPendingNavigation();
+            return;
+          }
+        }
+
+        clearPendingNavigation();
+        router.push(href);
+      } catch (error) {
+        clearPendingNavigation();
+        console.error(
+          "Failed to authenticate for profile subscriptions",
+          error
+        );
+        setToast({
+          message: t(locale, "home.mintSubscriptions.connectFailed"),
+          type: "error",
+        });
+      } finally {
+        authRequestInFlightRef.current = false;
+        setIsConnecting(false);
+      }
+    },
+    [
+      clearPendingNavigation,
+      isAuthenticated,
+      locale,
+      requestAuth,
+      router,
+      setToast,
+    ]
+  );
+
+  const navigateAfterAuthenticatedConnect = useCallback(
+    (href: string): void => {
+      clearPendingNavigation();
+      router.push(href);
+    },
+    [clearPendingNavigation, router]
+  );
 
   useEffect(() => {
-    if (!shouldNavigateAfterConnect || !profileSubscriptionsHref) {
+    if (
+      !shouldNavigateAfterConnect ||
+      !profileSubscriptionsHref ||
+      !isAuthenticated
+    ) {
       return;
     }
 
-    clearConnectTimeout();
-    setShouldNavigateAfterConnect(false);
-    router.push(profileSubscriptionsHref);
+    navigateAfterAuthenticatedConnect(profileSubscriptionsHref);
   }, [
-    clearConnectTimeout,
+    isAuthenticated,
+    navigateAfterAuthenticatedConnect,
     profileSubscriptionsHref,
-    router,
     shouldNavigateAfterConnect,
   ]);
 
   const openProfileSubscriptions = useCallback(async (): Promise<void> => {
     if (profileSubscriptionsHref) {
-      router.push(profileSubscriptionsHref);
+      await authenticateAndNavigate(profileSubscriptionsHref);
       return;
     }
 
-    if (isConnectingRef.current) {
+    if (
+      isConnectingRef.current ||
+      authRequestInFlightRef.current ||
+      shouldNavigateAfterConnectRef.current
+    ) {
       return;
     }
 
     isConnectingRef.current = true;
     setIsConnecting(true);
-    clearConnectTimeout();
-    setShouldNavigateAfterConnect(true);
-    connectTimeoutRef.current = setTimeout(() => {
-      connectTimeoutRef.current = null;
-      setShouldNavigateAfterConnect(false);
-    }, PROFILE_SUBSCRIPTIONS_CONNECT_TIMEOUT_MS);
+    beginPendingNavigation();
 
     try {
       await seizeConnectFresh();
     } catch (error) {
-      clearConnectTimeout();
-      setShouldNavigateAfterConnect(false);
+      clearPendingNavigation();
       console.error("Failed to open wallet connection", error);
       setToast({
         message: t(locale, "home.mintSubscriptions.connectFailed"),
@@ -81,18 +155,22 @@ export function useProfileSubscriptionsNavigation() {
       });
     } finally {
       isConnectingRef.current = false;
-      setIsConnecting(false);
+      if (!authRequestInFlightRef.current) {
+        setIsConnecting(false);
+      }
     }
   }, [
-    clearConnectTimeout,
+    authenticateAndNavigate,
+    beginPendingNavigation,
+    clearPendingNavigation,
     locale,
     profileSubscriptionsHref,
-    router,
     seizeConnectFresh,
     setToast,
   ]);
 
   return {
+    canNavigateToProfileSubscriptionsDirectly,
     isConnecting,
     openProfileSubscriptions,
     profileSubscriptionsHref,

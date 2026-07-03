@@ -140,8 +140,12 @@ export default function LatestDropNextMintSubscribe(
   const { country } = useCookieConsent();
   const { isIos } = useCapacitor();
   const locale = useBrowserLocale();
-  const { isConnecting, openProfileSubscriptions, profileSubscriptionsHref } =
-    useProfileSubscriptionsNavigation();
+  const {
+    canNavigateToProfileSubscriptionsDirectly,
+    isConnecting,
+    openProfileSubscriptions,
+    profileSubscriptionsHref,
+  } = useProfileSubscriptionsNavigation();
 
   const statusSource = props.statusSource ?? "upcoming";
   const shouldQueryUpcomingStatus = statusSource === "upcoming";
@@ -256,7 +260,11 @@ export default function LatestDropNextMintSubscribe(
     <MemeSubscriptionAwarenessRow
       onProfileSubscriptionsAction={openProfileSubscriptions}
       profileSubscriptionsActionPending={isConnecting}
-      profileSubscriptionsHref={profileSubscriptionsHref}
+      profileSubscriptionsHref={
+        canNavigateToProfileSubscriptionsDirectly
+          ? profileSubscriptionsHref
+          : undefined
+      }
       subscribed={subscribed}
       subscribedCount={subscribedCount}
       subscribersCount={subscribersCount}

@@ -101,6 +101,10 @@ describe("About contents dropdown", () => {
     jest.useRealTimers();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("hides subscriptions row when iOS users are not in the US", async () => {
     await renderAboutSection(AboutSection.MEMES);
 
@@ -240,6 +244,7 @@ describe("About contents dropdown", () => {
               primary_wallet: "0x123",
               wallets: [],
             },
+            isAuthenticated: true,
           } as any
         }
       >
@@ -338,11 +343,15 @@ describe("About contents dropdown", () => {
   it("routes to profile subscriptions after connecting from subscriptions action", async () => {
     setCookieCountry("US");
     const setToast = jest.fn();
-    const renderButton = (connectedProfile: unknown) => (
+    const renderButton = (
+      connectedProfile: unknown,
+      isAuthenticated = false
+    ) => (
       <AuthContext.Provider
         value={
           {
             connectedProfile,
+            isAuthenticated,
             setToast,
           } as any
         }
@@ -361,17 +370,74 @@ describe("About contents dropdown", () => {
       })
     );
     rerender(
-      renderButton({
-        handle: "test-handle",
-        normalised_handle: "test-handle",
-        primary_wallet: "0x123",
-        wallets: [],
-      })
+      renderButton(
+        {
+          handle: "test-handle",
+          normalised_handle: "test-handle",
+          primary_wallet: "0x123",
+          wallets: [],
+        },
+        false
+      )
+    );
+
+    expect(mockRouterPush).not.toHaveBeenCalled();
+
+    rerender(
+      renderButton(
+        {
+          handle: "test-handle",
+          normalised_handle: "test-handle",
+          primary_wallet: "0x123",
+          wallets: [],
+        },
+        true
+      )
     );
 
     await waitFor(() => {
       expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
     });
+  });
+
+  it("waits for successful auth before routing to profile subscriptions", async () => {
+    setCookieCountry("US");
+    const requestAuth = jest.fn(async () => ({ success: false }));
+    const connectedProfile = {
+      handle: "test-handle",
+      normalised_handle: "test-handle",
+      primary_wallet: "0x123",
+      wallets: [],
+    };
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile,
+            isAuthenticated: false,
+            requestAuth,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /manage subscriptions/i,
+      })
+    );
+
+    await waitFor(() => {
+      expect(requestAuth).toHaveBeenCalledTimes(1);
+    });
+    expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
   it("does not keep a stale subscriptions redirect after an abandoned connection", () => {

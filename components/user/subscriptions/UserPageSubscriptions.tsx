@@ -15,10 +15,9 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import type {
-  AirdropAddressResult,
-} from "./UserPageSubscriptionsAirdropAddress";
+import type { AirdropAddressResult } from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
@@ -29,6 +28,14 @@ import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 
 const HISTORY_PAGE_SIZE = 10;
 
+function getSubscriptionProfileKey(
+  profile: ApiIdentity | null | undefined
+): string | undefined {
+  return (
+    profile?.consolidation_key ?? profile?.wallets?.map((w) => w.wallet).join("-")
+  );
+}
+
 export default function UserPageSubscriptions(
   props: Readonly<{
     profile: ApiIdentity;
@@ -36,9 +43,13 @@ export default function UserPageSubscriptions(
 ) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const [profileKey, setProfileKey] = useState<string>();
-
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const profileKey = activeProfileProxy
+    ? undefined
+    : getSubscriptionProfileKey(props.profile);
+  const connectedProfileKey = activeProfileProxy
+    ? undefined
+    : getSubscriptionProfileKey(connectedProfile);
+  const isConnectedAccount = !!profileKey && connectedProfileKey === profileKey;
 
   const [details, setDetails] = useState<SubscriptionDetails>();
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
@@ -85,43 +96,13 @@ export default function UserPageSubscriptions(
   const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
     useState<boolean>(true);
 
-  const [isConnectedAccount, setIsConnectedAccount] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (activeProfileProxy) {
-      setIsConnectedAccount(false);
-      setProfileKey(undefined);
-      return;
-    }
-
-    const connectedKey =
-      connectedProfile?.consolidation_key ??
-      connectedProfile?.wallets?.map((w) => w.wallet).join("-");
-    const pKey =
-      props.profile.consolidation_key ??
-      props.profile.wallets?.map((w) => w.wallet).join("-");
-
-    setIsConnectedAccount(connectedKey === pKey);
-    setProfileKey(pKey);
-  }, [connectedProfile, activeProfileProxy, props.profile]);
-
-  useEffect(() => {
-    setIsFetching(
-      fetchingDetails ||
-        fetchingAirdropAddress ||
-        fetchingTopUpHistory ||
-        fetchingMemeSubscriptions ||
-        fetchingSubscriptionLogs ||
-        fetchingRedeemedHistory
-    );
-  }, [
-    fetchingDetails,
-    fetchingAirdropAddress,
-    fetchingTopUpHistory,
-    fetchingMemeSubscriptions,
-    fetchingSubscriptionLogs,
-    fetchingRedeemedHistory,
-  ]);
+  const isFetching =
+    fetchingDetails ||
+    fetchingAirdropAddress ||
+    fetchingTopUpHistory ||
+    fetchingMemeSubscriptions ||
+    fetchingSubscriptionLogs ||
+    fetchingRedeemedHistory;
 
   function fetchDetails() {
     if (!profileKey) {
@@ -270,15 +251,15 @@ export default function UserPageSubscriptions(
         <div>
           <div>
             <div>
-              <div className="tw-flex tw-items-center tw-gap-2">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
                 <h4 className="tw-mb-0 tw-font-semibold">Subscribe</h4>
-                <span>
-                  <Link
-                    href="/about/subscriptions"
-                    className="decoration-hover-underline tw-text-sm tw-text-iron-400">
-                    Learn More
-                  </Link>
-                </span>
+                <Link
+                  href="/about/subscriptions"
+                  className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-border-primary-400/50 desktop-hover:hover:tw-bg-primary-500/10 desktop-hover:hover:tw-text-primary-200"
+                >
+                  Learn More
+                  <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
+                </Link>
               </div>
             </div>
             <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />

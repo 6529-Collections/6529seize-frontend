@@ -60,13 +60,13 @@ function expectReadonlySubscriptionToggle(
   tooltipLabel: string,
   checked: boolean
 ) {
-  const trigger = screen.getByRole("switch", { name: tooltipLabel });
+  const trigger = screen.getByRole("img", { name: tooltipLabel });
   expect(trigger).toBeInTheDocument();
   expect(container).toContainElement(trigger);
-  expect(trigger).toHaveAttribute("aria-checked", String(checked));
-  expect(trigger).toHaveAttribute("aria-disabled", "true");
-  expect(trigger).toHaveAttribute("tabindex", "0");
-  expect(trigger).toHaveAttribute("data-tooltip-content", tooltipLabel);
+  expect(trigger).not.toHaveAttribute("aria-checked");
+  expect(trigger).not.toHaveAttribute("aria-disabled");
+  expect(trigger).not.toHaveAttribute("tabindex");
+  expect(screen.queryByRole("switch", { name: tooltipLabel })).toBeNull();
 
   const toggle = trigger?.querySelector("[aria-hidden='true']");
   expect(toggle).toBeInTheDocument();
@@ -308,13 +308,14 @@ describe("LatestDropNextMintSubscribe", () => {
     });
 
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Set up" })).toBeInTheDocument();
+    const setupButton = screen.getByRole("button", { name: "Set up" });
+    expect(setupButton).toBeInTheDocument();
     expectReadonlySubscriptionToggle(
       container,
       "Connect to set up subscription minting.",
       false
     );
-    fireEvent.click(screen.getByRole("button", { name: "Set up" }));
+    fireEvent.click(setupButton);
     expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
     expect(
       screen.getByLabelText("Learn more about The Memes subscriptions")

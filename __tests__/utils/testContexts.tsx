@@ -26,6 +26,7 @@ export const createMockAuthContext = (
   overrides: Partial<AuthContextType> = {}
 ): AuthContextType => ({
   connectedProfile: defaultConnectedProfile,
+  isAuthenticated: true,
   fetchingProfile: false,
   connectionStatus: "CONNECTED" as any,
   receivedProfileProxies: [],
