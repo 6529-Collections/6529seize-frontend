@@ -73,13 +73,10 @@ export default function AboutIndex() {
                             aria-label={t(locale, "about.index.cardAriaLabel", {
                               page: label,
                             })}
-                            className="tw-group tw-flex tw-h-full tw-min-h-24 tw-flex-col tw-tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-4 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/50 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+                            className="tw-group tw-flex tw-h-full tw-min-h-20 tw-items-center tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-4 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/50 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
                           >
                             <span className="tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 group-hover:tw-text-white">
                               {label}
-                            </span>
-                            <span className="tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400 group-hover:tw-text-iron-200">
-                              {t(locale, item.descriptionKey)}
                             </span>
                           </Link>
                         );

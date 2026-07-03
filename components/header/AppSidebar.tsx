@@ -20,6 +20,11 @@ import {
   getAboutNavItemLabel,
   getVisibleAboutNavGroups,
 } from "@/components/about/about.routes";
+import {
+  getToolsNavItemLabel,
+  getToolsNavItemMenuHref,
+  getVisibleToolsNavGroups,
+} from "@/components/tools/tools.routes";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -67,33 +72,7 @@ const MENU: SidebarMenu = [
   {
     label: "Tools",
     icon: WrenchIcon,
-    children: [
-      { label: "NFT Delegation", section: true },
-      { label: "Delegation Center", path: "/delegation/delegation-center" },
-      { label: "Wallet Architecture", path: "/delegation/wallet-architecture" },
-      { label: "Delegation FAQ", path: "/delegation/delegation-faq" },
-      {
-        label: "Consolidation Use Cases",
-        path: "/delegation/consolidation-use-cases",
-      },
-      { label: "Wallet Checker", path: "/delegation/wallet-checker" },
-      { label: "The Memes Tools", section: true },
-      { label: "Memes Subscriptions", path: "/tools/subscriptions-report" },
-      { label: "Meme Accounting", path: "/meme-accounting?focus=the-memes" },
-      { label: "Meme Gas", path: "/meme-gas?focus=the-memes" },
-      {
-        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.otherTools"),
-        section: true,
-        dividerBefore: true,
-      },
-      {
-        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.api"),
-        path: "/tools/api",
-      },
-      { label: "EMMA", path: "/emma" },
-      { label: "Block Finder", path: "/tools/block-finder" },
-      { label: "Open Data", path: "/open-data" },
-    ],
+    children: [],
   },
   {
     label: "About",
@@ -124,20 +103,15 @@ export default function AppSidebar({
             country: cookieConsent.country,
           });
     const aboutChildren = getAboutSidebarChildren(hideSubscriptions);
+    const toolsChildren = getToolsSidebarChildren({
+      appWalletsSupported,
+      hideSubscriptions,
+    });
     const updatedMenu = MENU.map((item) => {
-      if (item.label === "Tools" && item.children) {
-        const updatedChildren = [...item.children];
-
-        if (appWalletsSupported) {
-          updatedChildren.unshift({
-            label: "App Wallets",
-            path: "/tools/app-wallets",
-          });
-        }
-
+      if (item.label === "Tools") {
         return {
           ...item,
-          children: updatedChildren,
+          children: toolsChildren,
         };
       }
 
@@ -169,12 +143,7 @@ export default function AppSidebar({
     }
 
     return updatedMenu;
-  }, [
-    appWalletsSupported,
-    capacitor.isIos,
-    cookieConsent?.country,
-    showDropForge,
-  ]);
+  }, [appWalletsSupported, capacitor.isIos, cookieConsent, showDropForge]);
 
   // Close on right-to-left swipe
   useEffect(() => {
@@ -265,6 +234,32 @@ function getAboutSidebarChildren(
         ...group.items.map((item) => ({
           label: getAboutNavItemLabel(item, locale),
           path: getAboutNavItemHref(item),
+        })),
+      ]
+    ),
+  ];
+}
+
+function getToolsSidebarChildren({
+  appWalletsSupported,
+  hideSubscriptions,
+}: {
+  readonly appWalletsSupported: boolean;
+  readonly hideSubscriptions: boolean;
+}): SidebarMenuChildren {
+  const locale = DEFAULT_LOCALE;
+
+  return [
+    { label: t(locale, "tools.contents.pages.tools"), path: "/tools" },
+    ...getVisibleToolsNavGroups({
+      appWalletsSupported,
+      hideSubscriptions,
+    }).flatMap(
+      (group): SidebarMenuChildren => [
+        { label: t(locale, group.labelKey), section: true },
+        ...group.items.map((item) => ({
+          label: getToolsNavItemLabel(item, locale),
+          path: getToolsNavItemMenuHref(item),
         })),
       ]
     ),

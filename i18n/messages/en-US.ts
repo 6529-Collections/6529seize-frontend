@@ -14,6 +14,7 @@ import {
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
+import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
@@ -1311,6 +1312,7 @@ export const EN_US_MESSAGES = {
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
+  ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,

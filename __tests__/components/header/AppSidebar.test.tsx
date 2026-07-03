@@ -121,10 +121,16 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         (child) => child.label === "Wave Score"
       );
       expect(waveScoreIndex).toBe(xtdhIndex + 1);
-      expect(getMenuChildren("Tools")[0]).toEqual({
-        label: "App Wallets",
-        path: "/tools/app-wallets",
-      });
+      expect(getMenuChildren("Tools")).toEqual(
+        expect.arrayContaining([
+          { label: "Tools", path: "/tools" },
+          { label: "Builder Tools", section: true },
+          { label: "App Wallets", path: "/tools/app-wallets" },
+          { label: "API", path: "/tools/api" },
+          { label: "EMMA", path: "/emma" },
+          { label: "Block Finder", path: "/tools/block-finder" },
+        ])
+      );
       const aboutChildren = getMenuChildren("About");
       expect(aboutChildren).toEqual([
         { label: "About", path: "/about" },
@@ -133,8 +139,9 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "Subscriptions", path: "/about/subscriptions" },
         { label: "Meme Lab", path: "/about/meme-lab" },
         { label: "Gradient", path: "/about/6529-gradient" },
-        { label: "Delegation", section: true },
+        { label: "Digital Rights", section: true },
         { label: "GDRC", path: "/about/gdrc1" },
+        { label: "Delegation", section: true },
         { label: "NFT Delegation", path: "/about/nft-delegation" },
         { label: "Primary Address", path: "/about/primary-address" },
         { label: "Network", section: true },
@@ -175,7 +182,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         appWalletsSupported: false,
       });
       render(<AppSidebar open={true} onClose={() => {}} />);
-      expect(getMenuChildren("Tools")[0].label).not.toBe("App Wallets");
+      expect(getMenuChildren("Tools")).toEqual(
+        expect.not.arrayContaining([
+          expect.objectContaining({ label: "App Wallets" }),
+        ])
+      );
     });
 
     it("renders nothing when closed", () => {

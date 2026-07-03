@@ -83,6 +83,7 @@ describe("useSidebarSections", () => {
       aboutSection?.subsections.map((subsection) => subsection.name)
     ).toEqual([
       "Collections",
+      "Digital Rights",
       "Delegation",
       "Network",
       "Resources",
@@ -92,7 +93,14 @@ describe("useSidebarSections", () => {
     expect(
       aboutSection?.subsections[0]?.items.map((item) => item.name)
     ).toEqual(["The Memes", "Subscriptions", "Meme Lab", "Gradient"]);
+    expect(aboutSection?.subsections[1]?.items).toEqual([
+      { name: "GDRC", href: "/about/gdrc1" },
+    ]);
     expect(aboutSection?.subsections[2]?.items).toEqual([
+      { name: "NFT Delegation", href: "/about/nft-delegation" },
+      { name: "Primary Address", href: "/about/primary-address" },
+    ]);
+    expect(aboutSection?.subsections[3]?.items).toEqual([
       { name: "TDH", href: "/network/tdh", activatesSection: false },
       { name: "xTDH", href: "/network/xtdh", activatesSection: false },
       { name: "Health", href: "/network/health", activatesSection: false },
@@ -116,5 +124,44 @@ describe("useSidebarSections", () => {
         (subsection) => subsection.name === "Support"
       )
     ).toBe(false);
+  });
+
+  it("includes the Tools index and shared Tools categories", () => {
+    const { result } = renderHook(() => useSidebarSections(false, false, "US"));
+
+    const toolsSection = result.current.find(
+      (section) => section.key === "tools"
+    );
+
+    expect(toolsSection?.items).toEqual([{ name: "Tools", href: "/tools" }]);
+    expect(
+      toolsSection?.subsections.map((subsection) => subsection.name)
+    ).toEqual([
+      "NFT Delegation",
+      "The Memes Tools",
+      "Builder Tools",
+      "Open Data",
+    ]);
+    expect(toolsSection?.subsections[0]?.items).toEqual([
+      { name: "Delegation Center", href: "/delegation/delegation-center" },
+      { name: "Wallet Architecture", href: "/delegation/wallet-architecture" },
+      { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
+      {
+        name: "Consolidation Use Cases",
+        href: "/delegation/consolidation-use-cases",
+      },
+      { name: "Wallet Checker", href: "/delegation/wallet-checker" },
+    ]);
+    expect(toolsSection?.subsections[2]?.items).toEqual([
+      { name: "API", href: "/tools/api" },
+      { name: "EMMA", href: "/emma" },
+      { name: "Block Finder", href: "/tools/block-finder" },
+    ]);
+    expect(
+      toolsSection?.subsections[3]?.items.some(
+        (item) =>
+          item.name === "6529bot Usage" && item.href === "/open-data/6529bot"
+      )
+    ).toBe(true);
   });
 });

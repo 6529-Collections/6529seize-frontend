@@ -6,6 +6,23 @@ import {
 } from "../testHelpers";
 
 test.describe("About Pages @smoke @medium @large", () => {
+  test("should load the about index page", async ({ page }) => {
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await expect(page).toHaveTitle("About");
+    await expectNoHorizontalOverflow(page);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "About 6529" })
+    ).toBeVisible();
+    await expect(page.getByText("Digital Rights")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Open page: GDRC" })
+    ).toHaveAttribute("href", "/about/gdrc1");
+    await expect(
+      page.getByText(/Global Delegation Rights Contract/i)
+    ).toHaveCount(0);
+  });
+
   test("should load the about/the-memes page", async ({ page }) => {
     await page.goto("/about/the-memes", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
@@ -45,5 +62,20 @@ test.describe("About Pages @smoke @medium @large", () => {
       "It is better to think about subscriptions as"
     );
     await expect(subscriptionContent).toBeVisible();
+
+    await page
+      .getByRole("button", { name: /Open About contents navigation/i })
+      .click();
+    const contentsMenu = page.getByRole("menu");
+    await expect(
+      contentsMenu.getByText("About", { exact: true })
+    ).toBeVisible();
+    await expect(
+      contentsMenu.getByText("Digital Rights", { exact: true })
+    ).toBeVisible();
+    await expect(
+      contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
   });
 });

@@ -7,6 +7,11 @@ import {
   getVisibleAboutNavGroups,
   isAboutSectionNavItem,
 } from "@/components/about/about.routes";
+import {
+  getToolsNavItemHref,
+  getToolsNavItemLabel,
+  getVisibleToolsNavGroups,
+} from "@/components/tools/tools.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -66,73 +71,25 @@ function getToolsSection(
   appWalletsSupported: boolean,
   hideSubscriptions: boolean
 ): SidebarSection {
+  const visibleToolsGroups = getVisibleToolsNavGroups({
+    appWalletsSupported,
+    hideSubscriptions,
+  });
+
   return {
     key: "tools",
     name: "Tools",
     icon: WrenchIcon,
-    items: [],
-    subsections: [
-      {
-        name: "NFT Delegation",
-        items: [
-          { name: "Delegation Center", href: "/delegation/delegation-center" },
-          {
-            name: "Wallet Architecture",
-            href: "/delegation/wallet-architecture",
-          },
-          { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
-          {
-            name: "Consolidation Use Cases",
-            href: "/delegation/consolidation-use-cases",
-          },
-          { name: "Wallet Checker", href: "/delegation/wallet-checker" },
-        ],
-      },
-      {
-        name: "The Memes Tools",
-        items: [
-          ...(hideSubscriptions
-            ? []
-            : [
-                {
-                  name: "Subscriptions Report",
-                  href: "/tools/subscriptions-report",
-                },
-              ]),
-          { name: "Memes Accounting", href: "/meme-accounting" },
-          { name: "Memes Gas", href: "/meme-gas" },
-        ],
-      },
-      {
-        name: "Other Tools",
-        items: [
-          ...(appWalletsSupported
-            ? [{ name: "App Wallets", href: "/tools/app-wallets" }]
-            : []),
-          { name: "API", href: "/tools/api" },
-          { name: "EMMA", href: "/emma" },
-          { name: "Block Finder", href: "/tools/block-finder" },
-        ],
-      },
-      {
-        name: "Open Data",
-        items: [
-          { name: "Open Data", href: "/open-data" },
-          { name: "Network Metrics", href: "/open-data/network-metrics" },
-          ...(hideSubscriptions
-            ? []
-            : [
-                {
-                  name: "Meme Subscriptions",
-                  href: "/open-data/meme-subscriptions",
-                },
-              ]),
-          { name: "Rememes", href: "/open-data/rememes" },
-          { name: "Team", href: "/open-data/team" },
-          { name: "Royalties", href: "/open-data/royalties" },
-        ],
-      },
+    items: [
+      { name: t(DEFAULT_LOCALE, "tools.contents.pages.tools"), href: "/tools" },
     ],
+    subsections: visibleToolsGroups.map((group) => ({
+      name: t(DEFAULT_LOCALE, group.labelKey),
+      items: group.items.map((item) => ({
+        name: getToolsNavItemLabel(item, DEFAULT_LOCALE),
+        href: getToolsNavItemHref(item),
+      })),
+    })),
   };
 }
 

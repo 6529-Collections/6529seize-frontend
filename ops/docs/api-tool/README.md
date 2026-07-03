@@ -1,9 +1,11 @@
 # API Tool
 
-API Tool docs cover user-facing utility routes under `/tools/*`.
+API Tool docs cover the Tools index and user-facing utility routes under
+`/tools/*`.
 
 ## Overview
 
+- `/tools`: landing page for grouped tool navigation.
 - `/tools/api`: static guide for API authentication and multipart media-drop
   requests.
 - `/tools/block-finder`: estimate the closest block for a timestamp, or find
@@ -18,17 +20,20 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 
 ## Read Order
 
-1. Start with `API Authentication and Media Drop Flow` for API auth, multipart
+1. Start with `Tools Index` for the grouped `/tools` landing page and shared
+   sidebar categories.
+2. Read `API Authentication and Media Drop Flow` for API auth, multipart
    upload, and drop creation examples.
-2. Read `Block Finder` for timestamp lookup, include-sequence windows, and
+3. Read `Block Finder` for timestamp lookup, include-sequence windows, and
    result detail actions.
-3. Read `Memes Subscriptions Report` for aggregate subscription reporting.
-4. Read `App Wallets Management` for native app-wallet setup, recovery, and
+4. Read `Memes Subscriptions Report` for aggregate subscription reporting.
+5. Read `App Wallets Management` for native app-wallet setup, recovery, and
    unsupported-state behavior.
-5. Read `6529bot Admin` for the private bot operator route and auth boundary.
+6. Read `6529bot Admin` for the private bot operator route and auth boundary.
 
 ## Route Coverage
 
+- `/tools`
 - `/tools/api`
 - `/tools/block-finder`
 - `/tools/subscriptions-report`
@@ -40,33 +45,40 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 ## Navigation and Visibility
 
 - Web sidebar paths:
-  - `Tools -> Other Tools -> API`
-  - `Tools -> Other Tools -> Block Finder`
+  - `Tools -> Tools`
+  - `Tools -> Builder Tools -> API`
+  - `Tools -> Builder Tools -> Block Finder`
   - `Tools -> The Memes Tools -> Subscriptions Report`
-  - `Tools -> Other Tools -> App Wallets` (only when app-wallet support is
+  - `Tools -> Builder Tools -> App Wallets` (only when app-wallet support is
     enabled)
 - Native app sidebar paths:
-  - `Tools -> API`
-  - `Tools -> Block Finder`
-  - `Tools -> The Memes Tools -> Memes Subscriptions`
-  - `Tools -> App Wallets` (only when app-wallet support is enabled)
+  - `Tools -> Tools`
+  - `Tools -> Builder Tools -> API`
+  - `Tools -> Builder Tools -> Block Finder`
+  - `Tools -> The Memes Tools -> Subscriptions Report`
+  - `Tools -> Builder Tools -> App Wallets` (only when app-wallet support is
+    enabled)
 - When app-wallet support is unavailable, direct `/tools/app-wallets*` routes
   still load but show an unsupported message panel instead of wallet controls.
 - `6529bot Admin` is direct-route only. It is not listed in sidebar menus and
   fails closed unless deployment config, 6529 wallet auth, and the server-side
   operator allowlist all pass.
+- The public `/tools` landing page does not list private operator or local-only
+  routes.
 - On iOS outside the US, `Subscriptions Report` is hidden in web sidebar and
   search.
-- On native app, the Tools drawer still lists `Memes Subscriptions`.
+- On native app, the Tools drawer uses the same `Subscriptions Report` label
+  when visible.
 - Direct route access still works when a menu row is hidden.
 
 ## Features
 
-1. [API Authentication and Media Drop Flow](feature-api-authentication-and-media-drop-flow.md)
-2. [Block Finder](feature-block-finder.md)
-3. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
-4. [App Wallets Management](feature-app-wallets.md)
-5. [6529bot Admin](feature-6529bot-admin.md)
+1. [Tools Index](feature-tools-index.md)
+2. [API Authentication and Media Drop Flow](feature-api-authentication-and-media-drop-flow.md)
+3. [Block Finder](feature-block-finder.md)
+4. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
+5. [App Wallets Management](feature-app-wallets.md)
+6. [6529bot Admin](feature-6529bot-admin.md)
 
 ## Flows
 

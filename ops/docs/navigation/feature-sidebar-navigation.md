@@ -75,7 +75,7 @@ On web layouts, route switching is sidebar-first.
   `/open-data/team`, `/open-data/royalties`.
 - Use collapsed-rail flyouts for grouped destinations:
   `Network` keeps `Metrics`, `Tools` keeps labels such as `NFT Delegation`,
-  `The Memes Tools`, `Other Tools`, and `Open Data`, and `About` keeps its
+  `The Memes Tools`, `Builder Tools`, and `Open Data`, and `About` keeps its
   subsection labels instead of flattening every route into one list.
 - Open `About` and `6529 Capital` routes from grouped links.
 - Open connected `Notifications` from the lower row above `Profile`.

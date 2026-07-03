@@ -11,13 +11,13 @@ Open Data docs cover dataset download routes under `/open-data/*`.
   `/open-data/royalties`.
 - Entry paths:
   - Web sidebar (desktop and mobile web): `Tools -> Open Data -> Open Data`
-  - Native app menu: `Tools -> Open Data`
+  - Native app menu: `Tools -> Open Data -> Open Data`
   - Direct URL: `/open-data`
   - About-page links from `/about/minting` and `/about/data-decentralization`
 - Web sidebar also includes direct links to each dataset route under
   `Tools -> Open Data`.
-- Native app menu links only to `/open-data`; dataset routes are reached from
-  hub cards or direct URLs.
+- Native app menu also includes direct links to dataset routes under
+  `Tools -> Open Data`.
 - Visibility rule: on native iOS, the `Meme Subscriptions` hub card is shown
   only when cookie-country is `US`.
 - On native iOS, `Meme Subscriptions` can be temporarily hidden while
