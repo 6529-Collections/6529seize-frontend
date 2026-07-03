@@ -197,7 +197,6 @@ const containsOnlyNativeEmojis = (str: string): boolean => {
 };
 
 const CustomEmojiImage = ({ alt, bigEmoji, src }: CustomEmojiImageProps) => (
-  // eslint-disable-next-line @next/next/no-img-element -- Emoji markdown tokens have dynamic inline dimensions.
   <img
     src={src}
     alt={alt}

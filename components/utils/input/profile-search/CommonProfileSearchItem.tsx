@@ -51,7 +51,6 @@ export default function CommonProfileSearchItem({
                 <div className="tw-h-full tw-w-full tw-max-w-full">
                   <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-center">
                     {/* Keep img here because this lightweight search dropdown behaves like a typeahead. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={getScaledImageUri(
                         profile.pfp,

@@ -126,7 +126,6 @@ export enum AllowlistOperationCode {
 
 export interface AllowlistOperationBase {
   readonly code: AllowlistOperationCode;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly params: Record<string, any>;
 }
 
