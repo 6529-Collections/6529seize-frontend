@@ -85,11 +85,16 @@ const getHiddenStyle = (hidden: boolean) =>
     ? "tw-opacity-0 tw-translate-y-[calc(100%+1.5rem)]"
     : "tw-opacity-100 tw-translate-y-0";
 
+type BrowserGlobal = typeof globalThis & {
+  readonly window?: Window;
+  readonly document?: Document;
+};
+
 const getBrowserWindow = (): Window | undefined =>
-  typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+  (globalThis as BrowserGlobal).window;
 
 const getBrowserDocument = (): Document | undefined =>
-  typeof globalThis.document === "undefined" ? undefined : globalThis.document;
+  (globalThis as BrowserGlobal).document;
 
 const getWindowScrollPosition = ({
   browserWindow,
@@ -180,7 +185,11 @@ const useCompactDock = ({
     compactState.resetKey === resetKey ? compactState.compact : false;
   const setCompact = useCallback(
     (nextCompact: boolean) => {
-      setCompactState({ resetKey, compact: nextCompact });
+      setCompactState((current) =>
+        current.resetKey === resetKey && current.compact === nextCompact
+          ? current
+          : { resetKey, compact: nextCompact }
+      );
     },
     [resetKey]
   );

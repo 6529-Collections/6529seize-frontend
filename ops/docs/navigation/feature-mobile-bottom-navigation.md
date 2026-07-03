@@ -31,7 +31,7 @@ bottom product-tab set.
 2. Tap a tab:
    - `NFTs` -> `/the-memes`
    - `Waves` -> `/waves`, or cached non-DM thread (`/waves/{waveId}`)
-   - `DMs` -> `/messages`, or cached DM thread (`/messages/{waveId}`)
+   - `DMs` -> `/messages`, or cached DM thread (`/messages/{id}`)
    - `Join 6529` -> `/join`
    - `About` -> `/about`
 3. Active-tab highlight updates from route path plus `wave`/`view` query state.
@@ -58,8 +58,8 @@ bottom product-tab set.
   even when path is not `/messages`.
 - `Join 6529` is active on `/join`.
 - `About` is active on `/about`, `/about/*`, network/reference routes,
-  delegation routes, tools routes, `/open-data`, `/xtdh`, and
-  `/rep/categories`.
+  delegation routes, tools routes, `/open-data`, `/drop-forge`,
+  `/drop-forge/*`, `/xtdh`, and `/rep/categories`.
 - `DMs` unread dots show only when a connected profile has unread items.
 - On non-stream routes (for example `/network`, `/the-memes`),
   layout reserves bottom space so content is not hidden behind the bar.

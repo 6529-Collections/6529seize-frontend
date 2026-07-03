@@ -30,14 +30,21 @@ interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
 }
 
+type BrowserGlobal = typeof globalThis & {
+  readonly window?: Window;
+};
+
 const getBrowserWindow = (): Window | undefined =>
-  typeof globalThis.window === "undefined" ? undefined : globalThis.window;
+  (globalThis as BrowserGlobal).window;
+
+const getSafePathname = (pathname: string | null): string => pathname ?? "";
 
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
 >(({ isCollapsed = false }, ref) => {
   const pathname = usePathname();
+  const safePathname = getSafePathname(pathname);
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
@@ -262,7 +269,7 @@ const WebSidebarNav = React.forwardRef<
           <WebSidebarNavItem
             href="/messages"
             icon={ChatBubbleIcon}
-            active={pathname.startsWith("/messages")}
+            active={safePathname.startsWith("/messages")}
             collapsed={isCollapsed}
             label={t(DEFAULT_LOCALE, "navigation.primary.dms")}
             hasIndicator={hasUnreadMessages}
@@ -273,7 +280,9 @@ const WebSidebarNav = React.forwardRef<
           <WebSidebarNavItem
             href="/join"
             icon={UserPlusIcon}
-            active={pathname === "/join" || pathname.startsWith("/join/")}
+            active={
+              safePathname === "/join" || safePathname.startsWith("/join/")
+            }
             collapsed={isCollapsed}
             label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
           />
