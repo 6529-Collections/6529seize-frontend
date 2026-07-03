@@ -89,7 +89,6 @@ jest.mock("@/components/home/now-minting/NowMintingCountdown", () => {
 });
 
 type LatestDropNextMintSubscribeMockProps = {
-  readonly?: boolean;
   statusSource?: "none" | "upcoming";
   tokenId?: number;
 };
@@ -98,7 +97,6 @@ const mockLatestDropNextMintSubscribe = jest.fn(
   (props: LatestDropNextMintSubscribeMockProps) => (
     <div
       data-testid="latest-drop-subscribe"
-      data-readonly={String(props.readonly)}
       data-status-source={props.statusSource}
       data-token-id={props.tokenId}
     />
@@ -432,7 +430,6 @@ describe("MemePage search params handling", () => {
 
     expect(screen.getAllByTestId("mint-countdown")).toHaveLength(1);
     expect(subscriptionRow).toHaveAttribute("data-token-id", "1");
-    expect(subscriptionRow).toHaveAttribute("data-readonly", "true");
     expect(subscriptionRow).toHaveAttribute("data-status-source", "none");
     expect(mintingGroup).toHaveClass("tw-w-full");
     expect(headerGrid).toHaveClass("lg:tw-items-center");

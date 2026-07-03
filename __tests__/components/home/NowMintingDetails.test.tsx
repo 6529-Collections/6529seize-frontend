@@ -2,7 +2,6 @@ import NowMintingDetails from "@/components/home/now-minting/NowMintingDetails";
 import { render, screen } from "@testing-library/react";
 
 type LatestDropNextMintSubscribeMockProps = {
-  readonly?: boolean;
   statusSource?: "none" | "upcoming";
   tokenId?: number;
 };
@@ -12,7 +11,6 @@ const mockLatestDropNextMintSubscribe = jest.fn(
     <div
       data-testid="subscribe-section"
       data-token-id={props.tokenId}
-      data-readonly={String(props.readonly)}
       data-status-source={props.statusSource}
     />
   )
@@ -85,10 +83,6 @@ describe("NowMintingDetails", () => {
     expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
       "data-token-id",
       "667"
-    );
-    expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
-      "data-readonly",
-      "true"
     );
     expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
       "data-status-source",

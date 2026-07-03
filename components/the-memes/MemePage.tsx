@@ -455,7 +455,6 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               />
               <LatestDropNextMintSubscribe
                 tokenId={nft.id}
-                readonly
                 statusSource="none"
               />
             </div>

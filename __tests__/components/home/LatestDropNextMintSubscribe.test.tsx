@@ -204,7 +204,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
   it("renders connected dropped awareness without upcoming status lookup when status source is none", () => {
     const { container } = renderWithAuth(
-      <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
+      <LatestDropNextMintSubscribe tokenId={516} statusSource="none" />
     );
 
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
@@ -268,7 +268,7 @@ describe("LatestDropNextMintSubscribe", () => {
     });
 
     const { container } = renderWithAuth(
-      <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
+      <LatestDropNextMintSubscribe tokenId={516} statusSource="none" />
     );
 
     expect(screen.getByText("x3")).toBeInTheDocument();
