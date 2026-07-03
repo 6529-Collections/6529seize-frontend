@@ -4,13 +4,14 @@ import {
   Bars3Icon,
   ChatBubbleLeftIcon,
   EllipsisHorizontalIcon,
-  PaperAirplaneIcon,
   Squares2X2Icon,
-  ShareIcon,
   LinkIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { faShare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
@@ -26,6 +27,7 @@ import {
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useWave } from "@/hooks/useWave";
 import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
@@ -36,6 +38,7 @@ import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
+import HeaderPageShareButton from "./share/HeaderPageShareButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
 import PrimaryButton from "../utils/button/PrimaryButton";
@@ -45,7 +48,6 @@ import WavePicture from "@/components/waves/WavePicture";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import useCreateModalState from "@/hooks/useCreateModalState";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
@@ -65,6 +67,12 @@ interface HeaderConnectedAccount {
 interface HeaderTimeoutRef {
   current: ReturnType<typeof setTimeout> | null;
 }
+
+type HeaderMoreMenuItem = CompactMenuItem & {
+  readonly renderAsDirectButton?: boolean | undefined;
+  readonly directIcon?: ReactNode | undefined;
+  readonly directActionActive?: boolean | undefined;
+};
 
 const sliceString = (str: string, length: number): string => {
   if (str.length <= length) return str;
@@ -110,6 +118,34 @@ const getDropForgeTitle = (pathSegments: string[]): string | null => {
   }
 
   return null;
+};
+
+const shouldShowHeaderPageShareAction = ({
+  activeView,
+  isCapacitor,
+  pathname,
+}: {
+  readonly activeView: string | null;
+  readonly isCapacitor: boolean;
+  readonly pathname: string;
+}): boolean => {
+  if (!isCapacitor) {
+    return false;
+  }
+
+  if (
+    pathname === "/" ||
+    pathname === "/waves" ||
+    pathname.startsWith("/waves/") ||
+    pathname === "/messages" ||
+    pathname.startsWith("/messages/") ||
+    pathname === "/notifications" ||
+    pathname.startsWith("/notifications/")
+  ) {
+    return false;
+  }
+
+  return activeView !== "waves" && activeView !== "messages";
 };
 
 const getHeaderTitle = ({
@@ -257,13 +293,55 @@ const HeaderDropActionButton = ({
   );
 };
 
+function getDirectActionLabel(
+  item: HeaderMoreMenuItem | null
+): string | undefined {
+  if (!item || item.kind === "section") {
+    return undefined;
+  }
+
+  if (item.ariaLabel) {
+    return item.ariaLabel;
+  }
+
+  return typeof item.label === "string" ? item.label : undefined;
+}
+
 const HeaderMoreMenu = ({
   items,
 }: {
-  readonly items: readonly CompactMenuItem[];
+  readonly items: readonly HeaderMoreMenuItem[];
 }) => {
   if (items.length === 0) {
     return null;
+  }
+
+  const onlyItem = items.length === 1 ? (items[0] ?? null) : null;
+  const directActionLabel = getDirectActionLabel(onlyItem);
+  if (
+    onlyItem &&
+    onlyItem.kind !== "section" &&
+    onlyItem.renderAsDirectButton &&
+    directActionLabel
+  ) {
+    return (
+      <button
+        type="button"
+        aria-label={directActionLabel}
+        title={directActionLabel}
+        onClick={onlyItem.onSelect}
+        disabled={onlyItem.disabled}
+        aria-busy={onlyItem.directActionActive ? "true" : undefined}
+        className={clsx(
+          "tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+          onlyItem.directActionActive
+            ? "tw-scale-95 tw-bg-iron-800 tw-text-iron-50 tw-ring-1 tw-ring-primary-400"
+            : "tw-bg-black tw-text-iron-300 hover:tw-text-iron-50"
+        )}
+      >
+        {onlyItem.directIcon ?? onlyItem.icon}
+      </button>
+    );
   }
 
   return (
@@ -367,9 +445,9 @@ export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
   const { waveDropAction } = useHeaderContext();
+  const { isCapacitor } = useCapacitor();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
-  const { openDirectMessage } = useCreateModalState();
   const {
     address,
     hasValidWalletAuth: isAuthenticated,
@@ -446,25 +524,34 @@ export default function AppHeader() {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
     feedbackState: waveLinkActionFeedbackState,
+    isSharing: isWaveLinkSharing,
     onClick: handleWaveLinkActionClick,
   } = useWaveShareCopyAction({
     waveId: waveId ?? "",
     waveName: activeWave?.name ?? "",
     isDirectMessage: activeWave ? isDm : false,
+    showShareFeedback: !isCapacitor,
   });
-  const waveLinkActionIconColor =
-    waveLinkActionFeedbackState === "idle"
-      ? "tw-text-iron-300"
-      : "tw-text-emerald-300";
-  const renderWaveLinkActionIcon = () => {
-    const iconClassName = `tw-h-4 tw-w-4 ${waveLinkActionIconColor}`;
+  const renderWaveLinkActionIcon = ({
+    direct = false,
+  }: {
+    readonly direct?: boolean | undefined;
+  } = {}) => {
+    let waveLinkActionIconColor = "tw-text-emerald-300";
+    if (direct && isWaveLinkSharing) {
+      waveLinkActionIconColor = "tw-text-iron-50";
+    } else if (waveLinkActionFeedbackState === "idle") {
+      waveLinkActionIconColor = "tw-text-iron-300";
+    }
+    const iconSizeClassName = direct ? "tw-h-6 tw-w-6" : "tw-h-4 tw-w-4";
+    const iconClassName = `${iconSizeClassName} ${waveLinkActionIconColor}`;
 
     if (waveLinkActionFeedbackState !== "idle") {
       return <CheckIcon className={iconClassName} />;
     }
 
     if (waveLinkActionMode === "share") {
-      return <ShareIcon className={iconClassName} />;
+      return <FontAwesomeIcon icon={faShare} className={iconClassName} />;
     }
 
     return <LinkIcon className={iconClassName} />;
@@ -483,9 +570,11 @@ export default function AppHeader() {
     activeWaveId: waveParam,
     searchParams,
   });
-  const isMessagesContext = activeView === "messages";
-  const isOnMessagesRoute = pathname === "/messages" && !waveParam;
-  const showCreateDmAction = isOnMessagesRoute || isMessagesContext;
+  const showPageShareAction = shouldShowHeaderPageShareAction({
+    activeView,
+    isCapacitor,
+    pathname,
+  });
 
   const isProfilePage = typeof params["user"] === "string";
 
@@ -562,7 +651,7 @@ export default function AppHeader() {
   });
   const galleryToggleLabel =
     viewMode === "chat" ? "Switch to gallery view" : "Switch to chat view";
-  const appHeaderMoreMenuItems: CompactMenuItem[] = [];
+  const appHeaderMoreMenuItems: HeaderMoreMenuItem[] = [];
 
   if (showGalleryToggle) {
     appHeaderMoreMenuItems.push({
@@ -578,21 +667,16 @@ export default function AppHeader() {
     });
   }
 
-  if (showCreateDmAction) {
-    appHeaderMoreMenuItems.push({
-      id: "create-dm",
-      label: "Create DM",
-      icon: <PaperAirplaneIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />,
-      onSelect: openDirectMessage,
-    });
-  }
-
   if (showWaveLinkAction) {
     appHeaderMoreMenuItems.push({
       id: "wave-link",
       label: waveLinkActionLabel,
+      ariaLabel: waveLinkActionLabel,
       icon: renderWaveLinkActionIcon(),
+      directIcon: renderWaveLinkActionIcon({ direct: true }),
       onSelect: handleWaveLinkActionClick,
+      renderAsDirectButton: true,
+      directActionActive: isWaveLinkSharing,
     });
   }
 
@@ -633,6 +717,11 @@ export default function AppHeader() {
           <div className="tw-flex-shrink-0">
             <HeaderActionButtons />
           </div>
+          {showPageShareAction && (
+            <div className="tw-flex-shrink-0">
+              <HeaderPageShareButton isCapacitor={isCapacitor} />
+            </div>
+          )}
           <div className="tw-flex-shrink-0">
             <HeaderSearchButton
               wave={

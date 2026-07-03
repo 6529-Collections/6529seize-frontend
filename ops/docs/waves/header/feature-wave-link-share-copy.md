@@ -32,7 +32,10 @@ Users can:
 ## Entry Points
 
 1. Open a non-DM wave thread.
-2. Use the wave-link action button near other thread header controls.
+2. Use the wave-link action button near other thread header controls. In the
+   native app header, the action appears directly when it is the only overflow
+   action; when other wave actions are available, it appears inside the
+   overflow menu.
 
 ## User Journey
 
@@ -52,6 +55,8 @@ Users can:
 - Share-cancel (`AbortError`) does not trigger copy fallback.
 - If share is unsupported, the action starts in copy mode.
 - This control does not change tabs, route, or sidebar open/closed state.
+- The native app's global `Share page` header button is hidden on wave routes,
+  so wave routes keep using this wave-specific share/copy action.
 
 ## Failure and Recovery
 
