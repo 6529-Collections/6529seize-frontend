@@ -454,6 +454,14 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
 
+const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
+  dialogTitle: "GIF search",
+  "status.checking": "Checking GIF search...",
+  "status.ready": "GIF search is ready.",
+  "unavailable.title": "GIF search is temporarily unavailable.",
+  "unavailable.hint": "You can upload a GIF file instead.",
+} as const);
+
 const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
   coverAlt: "{waveName} cover",
   "dropsCount.one": "{timeAgo} · {count} drop",
@@ -644,6 +652,10 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
   ["safety.size", "Size {size}"],
   ["safety.viewDetails", "View safety details"],
 ] as const);
+
+const COMMON_MESSAGES = objectMessages("common", {
+  close: "Close",
+} as const);
 
 export const EN_US_MESSAGES = {
   "auth.sessionUpgrade.action": "Upgrade Authentication",
@@ -1288,6 +1300,7 @@ export const EN_US_MESSAGES = {
   ...QUICK_DM_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
+  ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
@@ -1304,6 +1317,7 @@ export const EN_US_MESSAGES = {
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
+  ...COMMON_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,

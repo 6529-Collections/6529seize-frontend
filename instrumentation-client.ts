@@ -20,7 +20,6 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
-  shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
@@ -37,6 +36,7 @@ import {
   tagSampledLowValueNetworkError,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
+import { shouldFilterGifPickerTenorError } from "@/utils/sentry-gif-picker-tenor-filter";
 import * as Sentry from "@sentry/nextjs";
 
 try {
@@ -167,7 +167,7 @@ function shouldFilterEvent(
     return true;
   }
 
-  if (shouldFilterGifPickerTenorCategoriesError(event)) {
+  if (shouldFilterGifPickerTenorError(event)) {
     return true;
   }
 
