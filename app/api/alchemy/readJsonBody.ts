@@ -1,6 +1,6 @@
 import type { NextRequest, NextResponse } from "next/server";
 
-export type JsonBodyReadResult<T> =
+type JsonBodyReadResult<T> =
   | { ok: true; body: T }
   | { ok: false; response: NextResponse };
 
