@@ -1,5 +1,11 @@
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
@@ -286,7 +292,7 @@ describe("WaveDrop", () => {
     );
   });
 
-  it("keeps touch sheet entry for touch-only detection on a wide viewport without hover", () => {
+  it("keeps touch sheet entry for touch-only detection on a wide viewport without hover", async () => {
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(true);
@@ -324,7 +330,7 @@ describe("WaveDrop", () => {
       });
     });
 
-    expect(mobileMenuProps.isOpen).toBe(true);
+    await waitFor(() => expect(mobileMenuProps?.isOpen).toBe(true));
   });
 
   it("keeps touch entry in compact touch layouts even when hover is available", () => {
@@ -360,7 +366,7 @@ describe("WaveDrop", () => {
     );
   });
 
-  it("clears an open touch sheet when the layout switches to desktop hover mode", () => {
+  it("clears an open touch sheet when the layout switches to desktop hover mode", async () => {
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(false);
@@ -390,13 +396,13 @@ describe("WaveDrop", () => {
       });
     });
 
-    expect(mobileMenuProps.isOpen).toBe(true);
+    await waitFor(() => expect(mobileMenuProps?.isOpen).toBe(true));
 
     act(() => {
       setViewportWidth(1440);
     });
 
-    expect(mobileMenuProps.isOpen).toBe(false);
+    await waitFor(() => expect(mobileMenuProps?.isOpen).toBe(false));
 
     act(() => {
       setViewportWidth(800);
@@ -685,7 +691,7 @@ describe("WaveDrop", () => {
     act(() => {
       jest.advanceTimersByTime(600);
     });
-    expect(mobileMenuProps.isOpen).toBe(false);
+    expect(mobileMenuProps).toBeUndefined();
 
     fireEvent.touchEnd(dropRoot);
     fireEvent.click(content);

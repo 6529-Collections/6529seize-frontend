@@ -28,7 +28,7 @@ export default function NowMintingDetailsAccordion({
   ];
 
   return (
-    <details className="tw-group tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
+    <details className="tw-group">
       <summary className="tw-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-50">
         <span>Edition Details</span>
         <ChevronRightIcon className="tw-size-4 tw-transition-transform group-open:tw-rotate-90" />

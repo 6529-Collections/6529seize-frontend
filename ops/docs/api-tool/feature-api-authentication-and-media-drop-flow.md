@@ -12,8 +12,8 @@
 ## Location in the Site
 
 - Route: `/tools/api`
-- Web sidebar path: `Tools -> Other Tools -> API`
-- Native app sidebar path: `Tools -> API`
+- Web sidebar path: `Tools -> Builder Tools -> API`
+- Native app sidebar path: `Tools -> Builder Tools -> API`
 - Footer link: `API`
 
 ## Entry Points

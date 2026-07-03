@@ -39,6 +39,7 @@ describe("About index page", () => {
       screen.getByRole("heading", { name: "About 6529" })
     ).toBeInTheDocument();
     expect(screen.getByText("Collections")).toBeInTheDocument();
+    expect(screen.getByText("Digital Rights")).toBeInTheDocument();
     expect(screen.getByText("Delegation")).toBeInTheDocument();
     expect(screen.getByText("Network")).toBeInTheDocument();
     expect(screen.getByText("Resources")).toBeInTheDocument();
@@ -47,6 +48,13 @@ describe("About index page", () => {
     expect(
       screen.getByRole("link", { name: /open page: the memes/i })
     ).toHaveAttribute("href", "/about/the-memes");
+    expect(screen.getByText("GDRC")).toBeInTheDocument();
+    expect(
+      screen.queryByText(/global delegation rights contract/i)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/the core collection, mint context/i)
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /mission/i })).toBeNull();
     expect(
       screen.getByRole("link", { name: /open page: tdh/i })
