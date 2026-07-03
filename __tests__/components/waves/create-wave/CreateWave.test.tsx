@@ -237,6 +237,7 @@ describe("CreateWave", () => {
         maxWinners: null,
       },
       display: {
+        customRules: null,
         outcomesVisible: true,
         approve: {
           approvalsTabLabel: "",
@@ -833,6 +834,46 @@ describe("CreateWave", () => {
           body: {
             data_key: "wave_display.outcomes.visible",
             data_value: "false",
+          },
+        });
+      });
+    });
+
+    it("saves display-only custom rules metadata for chat waves", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "CHAT",
+          },
+          display: {
+            ...mockWaveConfig.config.display,
+            customRules: "  Keep submissions original.  ",
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result, variables);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
+          waveId: "new-wave-id",
+          body: {
+            data_key: "wave_display.rules.custom",
+            data_value: "Keep submissions original.",
           },
         });
       });

@@ -16,11 +16,11 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Groups` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
-  `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
-  `Outcomes` -> `Description`
+- `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
+- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+  `Voting` -> `Outcomes` -> `Description`
+- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+  `Voting` -> `Outcomes` -> `Description`
 
 ## What You Can Set
 
@@ -80,5 +80,6 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
+- [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Docs Home](../../README.md)

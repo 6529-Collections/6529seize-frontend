@@ -56,12 +56,15 @@ same context.
      `Outcome`, and wave-specific tabs).
 5. Read and navigate drops with unread markers, serial jumps, and search jump
    actions.
-6. Use drop actions (reply, react, vote, open drop, copy link, boost,
+6. Open `Rules` from the desktop right sidebar or the mobile `About`
+   information path to review automatic wave rules and any creator-added
+   custom rules.
+7. Use drop actions (reply, react, vote, open drop, copy link, boost,
    admin-only pinned-drop updates, and other available actions) based on wave
    and drop eligibility. In memes-wave contexts, quick vote can also appear
    from dedicated footer triggers when unrated memes remain.
-7. Submit new content when participation is allowed.
-8. Share links so others can reopen the same wave or target drop.
+8. Submit new content when participation is allowed.
+9. Share links so others can reopen the same wave or target drop.
 
 ## Common Scenarios
 
@@ -70,6 +73,9 @@ same context.
   CTA.
 - If no wave is selected on desktop list routes, the UI shows selection
   placeholders (`Select a Wave` or `Select a Conversation`).
+- `Rank` and `Approve` rules show two layers: automatic rules generated from
+  wave settings and optional creator rules. Creator rules that require
+  acceptance are enforced by the existing submit terms/signature modal.
 - When posting is blocked, thread content stays readable and the composer area
   shows blocked states (for example
   `Connect your wallet to participate in this wave`, `Wave is closed`, or
@@ -111,6 +117,7 @@ same context.
 - [Wave Chat Index](chat/README.md)
 - [Wave Drop Actions Index](drop-actions/README.md)
 - [Wave Creation Index](create/README.md)
+- [Wave Creation Rules Step](create/feature-rules-step.md)
 - [Public Wave Preview](feature-public-wave-preview.md)
 - [Wave Winners Tab](leaderboard/feature-winners-tab.md)
 - [Wave Outcome Lists](feature-outcome-lists.md)

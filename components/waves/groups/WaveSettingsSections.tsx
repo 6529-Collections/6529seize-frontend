@@ -5,6 +5,8 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import WaveApprovalThresholds from "@/components/waves/specs/WaveApprovalThresholds";
 import WaveApproveTabLabels from "@/components/waves/specs/WaveApproveTabLabels";
+import WaveBindingRules from "@/components/waves/specs/WaveBindingRules";
+import WaveCustomRules from "@/components/waves/specs/WaveCustomRules";
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveGroup from "@/components/waves/specs/groups/group/WaveGroup";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
@@ -47,6 +49,11 @@ export default function WaveSettingsSections({
   return (
     <div className="tw-pb-4">
       <WaveActiveCurationSection wave={wave} />
+
+      <SettingsSection title="Rules">
+        <WaveCustomRules wave={wave} />
+        <WaveBindingRules wave={wave} />
+      </SettingsSection>
 
       {isDisplaySettingsWave && (
         <SettingsSection title="Display">

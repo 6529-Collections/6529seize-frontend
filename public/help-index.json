@@ -1469,13 +1469,15 @@
         "groups",
         "dates",
         "drops",
+        "rules",
         "voting",
         "outcomes",
         "description"
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
-        "Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "The docs for wave creation live under ops/docs/waves/create and the app route is /waves/create."
       ],
       "canonical_path": "/waves/create",
@@ -1484,7 +1486,8 @@
       "source_refs": [
         "ops/docs/waves/create/README.md",
         "ops/docs/waves/create/feature-overview-step.md",
-        "ops/docs/waves/create/feature-groups-step.md"
+        "ops/docs/waves/create/feature-groups-step.md",
+        "ops/docs/waves/create/feature-rules-step.md"
       ]
     },
     {
@@ -1498,11 +1501,12 @@
         "conversation",
         "overview",
         "groups",
+        "rules",
         "description"
       ],
       "facts": [
         "Chat waves are conversation-focused waves.",
-        "Chat wave creation uses Overview, Groups, and Description steps.",
+        "Chat wave creation uses Overview, Groups, Rules, and Description steps.",
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
       "canonical_path": "/waves/create",
@@ -1525,17 +1529,20 @@
         "leaderboard",
         "winners",
         "outcomes",
-        "drops"
+        "drops",
+        "rules"
       ],
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
-        "Rank wave setup includes Dates, Drops, Voting, Outcomes, Groups, and Description.",
+        "Rank wave setup includes Dates, Drops, Rules, Voting, Outcomes, Groups, and Description.",
+        "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "rank", "voting"],
       "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
         "ops/docs/waves/create/feature-voting-step.md",
         "ops/docs/waves/leaderboard/README.md"
       ]
@@ -1551,19 +1558,64 @@
         "wave",
         "voting",
         "outcomes",
-        "drops"
+        "drops",
+        "rules"
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Dates, Drops, Voting, Outcomes, Groups, and Description.",
+        "Approve wave setup includes Dates, Drops, Rules, Voting, Outcomes, Groups, and Description.",
+        "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "approve", "voting"],
       "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
         "ops/docs/waves/create/feature-voting-step.md",
         "ops/docs/waves/create/feature-outcomes-step.md"
+      ]
+    },
+    {
+      "id": "waves.rules",
+      "kind": "workflow",
+      "title": "Wave rules",
+      "aliases": [
+        "wave rules",
+        "rules tab",
+        "rules step",
+        "creator rules",
+        "custom rules",
+        "participation terms",
+        "wave terms"
+      ],
+      "keywords": [
+        "wave",
+        "rules",
+        "chat",
+        "rank",
+        "approve",
+        "terms",
+        "signature",
+        "metadata",
+        "sidebar",
+        "mobile"
+      ],
+      "facts": [
+        "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
+        "Automatic rules are generated from wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
+        "Creators can add display-only custom rules that are saved as wave metadata.",
+        "Creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
+        "Wave admins can edit display-only custom rules and acceptance-required rules later from wave settings.",
+        "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
+      ],
+      "canonical_path": "/waves/create",
+      "related_paths": ["/waves", "/waves/create"],
+      "tags": ["waves", "rules", "chat", "rank", "approve"],
+      "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/flow-wave-participation.md",
+        "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md"
       ]
     },
     {

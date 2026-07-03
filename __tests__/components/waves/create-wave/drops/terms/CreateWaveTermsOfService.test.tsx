@@ -18,10 +18,10 @@ describe('CreateWaveTermsOfService', () => {
     expect(setTerms).toHaveBeenCalledWith('xyz');
   });
 
-  it('does not render for Chat waves', () => {
-    const { container } = render(
+  it('renders for Chat waves', () => {
+    render(
       <CreateWaveTermsOfService waveType={ApiWaveType.Chat} terms={null} setTerms={() => {}} />
     );
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByRole('checkbox')).toBeInTheDocument();
   });
 });

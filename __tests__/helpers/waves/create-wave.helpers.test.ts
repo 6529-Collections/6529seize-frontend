@@ -87,7 +87,25 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.GROUPS,
           waveType: ApiWaveType.Chat,
         })
+      ).toBe(CreateWaveStep.RULES);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.RULES,
+          waveType: ApiWaveType.Chat,
+        })
       ).toBe(CreateWaveStep.DESCRIPTION);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.DROPS,
+          waveType: ApiWaveType.Approve,
+        })
+      ).toBe(CreateWaveStep.RULES);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.RULES,
+          waveType: ApiWaveType.Approve,
+        })
+      ).toBe(CreateWaveStep.VOTING);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.VOTING,
@@ -110,7 +128,19 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.DESCRIPTION,
           waveType: ApiWaveType.Chat,
         })
+      ).toBe(CreateWaveStep.RULES);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.RULES,
+          waveType: ApiWaveType.Chat,
+        })
       ).toBe(CreateWaveStep.GROUPS);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.VOTING,
+          waveType: ApiWaveType.Approve,
+        })
+      ).toBe(CreateWaveStep.RULES);
       expect(
         getCreateWavePreviousStep({
           step: CreateWaveStep.OUTCOMES,

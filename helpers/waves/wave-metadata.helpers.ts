@@ -7,6 +7,7 @@ import type {
 } from "@/types/waves.types";
 
 export const APPROVE_WAVE_TAB_LABEL_MAX_LENGTH = 24;
+export const WAVE_CUSTOM_RULES_MAX_LENGTH = 2000;
 
 export const DEFAULT_APPROVE_WAVE_TAB_LABELS = {
   approvals: "Proposals",
@@ -24,6 +25,7 @@ const RESERVED_APPROVE_WAVE_TAB_LABELS = [
 export const WAVE_DISPLAY_METADATA_KEYS = {
   approvalsTabLabel: "wave_display.approve.tabs.approvals_label",
   approvedTabLabel: "wave_display.approve.tabs.approved_label",
+  customRules: "wave_display.rules.custom",
   outcomesVisible: "wave_display.outcomes.visible",
 } as const;
 
@@ -69,7 +71,16 @@ interface WaveOutcomeVisibilityMetadataUpdate {
   readonly deleteIds: number[];
 }
 
+interface WaveCustomRulesMetadataUpdate {
+  readonly create: ApiCreateWaveMetadataRequest[];
+  readonly deleteIds: number[];
+}
+
 export const normalizeWaveTabLabel = (
+  value: string | null | undefined
+): string => value?.trim() ?? "";
+
+export const normalizeWaveCustomRules = (
   value: string | null | undefined
 ): string => value?.trim() ?? "";
 
@@ -160,6 +171,20 @@ const getMetadataRequest = ({
   };
 };
 
+const getCustomRulesMetadataRequest = (
+  customRules: string | null | undefined
+): ApiCreateWaveMetadataRequest | null => {
+  const normalizedRules = normalizeWaveCustomRules(customRules);
+  if (!normalizedRules) {
+    return null;
+  }
+
+  return {
+    data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+    data_value: normalizedRules.slice(0, WAVE_CUSTOM_RULES_MAX_LENGTH),
+  };
+};
+
 export const getCreateWaveDisplayMetadataRequests = ({
   display,
   waveType,
@@ -167,16 +192,20 @@ export const getCreateWaveDisplayMetadataRequests = ({
   readonly display: CreateWaveDisplayConfig | null | undefined;
   readonly waveType: ApiWaveType;
 }): ApiCreateWaveMetadataRequest[] => {
-  if (!display || waveType === ApiWaveType.Chat) {
+  if (!display) {
     return [];
   }
 
-  const outcomeVisibilityRequest = getOutcomeVisibilityMetadataRequest(
-    display.outcomesVisible
+  const outcomeVisibilityRequest =
+    waveType === ApiWaveType.Chat
+      ? null
+      : getOutcomeVisibilityMetadataRequest(display.outcomesVisible);
+  const customRulesRequest = getCustomRulesMetadataRequest(
+    display.customRules
   );
-  const requests: ApiCreateWaveMetadataRequest[] = outcomeVisibilityRequest
-    ? [outcomeVisibilityRequest]
-    : [];
+  const requests = [outcomeVisibilityRequest, customRulesRequest].filter(
+    (request): request is ApiCreateWaveMetadataRequest => request !== null
+  );
 
   if (waveType !== ApiWaveType.Approve) {
     return requests;
@@ -393,4 +422,54 @@ export const getWaveOutcomeVisibilityMetadataUpdate = ({
   }
 
   return { create: [request], deleteIds: [] };
+};
+
+export const getWaveCustomRulesFromMetadata = (
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): string | null => {
+  const rules = normalizeWaveCustomRules(
+    getLatestMetadataValue({
+      metadata,
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.customRules,
+    })
+  );
+
+  return rules || null;
+};
+
+export const getWaveCustomRulesMetadataDraft = (
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): string => getWaveCustomRulesFromMetadata(metadata) ?? "";
+
+export const getWaveCustomRulesMetadataUpdate = ({
+  metadata,
+  customRules,
+}: {
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly customRules: string | null | undefined;
+}): WaveCustomRulesMetadataUpdate => {
+  const rows = getApproveWaveDisplayMetadataRows({
+    metadata,
+    dataKey: WAVE_DISPLAY_METADATA_KEYS.customRules,
+  });
+  const latestValue = normalizeWaveCustomRules(
+    getLatestMetadataValue({
+      metadata,
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.customRules,
+    })
+  );
+  const request = getCustomRulesMetadataRequest(customRules);
+
+  if (request === null) {
+    return {
+      create: [],
+      deleteIds: rows.map((row) => row.id),
+    };
+  }
+
+  if (latestValue === request.data_value) {
+    return { create: [], deleteIds: [] };
+  }
+
+  return { create: [request], deleteIds: rows.map((row) => row.id) };
 };
