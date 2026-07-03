@@ -117,6 +117,15 @@ type BrowserIdleScheduler = {
   readonly cancelIdleCallback?: (handle: number) => void;
 };
 
+type WaveMuteState = {
+  readonly metrics?: {
+    readonly muted?: boolean;
+  } | null;
+};
+
+const getWaveMuted = (wave: WaveMuteState | null | undefined): boolean =>
+  wave?.metrics?.muted ?? false;
+
 const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
   let idleHandle: number | null = null;
   const timeoutHandle = window.setTimeout(() => {
@@ -267,7 +276,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [wavesHookData.waves, dmWavesHookData.waves]);
 
   const activeWaveDataId = activeWaveData?.id ?? null;
-  const activeWaveMuted = activeWaveData?.metrics.muted ?? false;
+  const activeWaveMuted = getWaveMuted(activeWaveData);
   const isWaveMuted = useCallback(
     (waveId: string): boolean => {
       const wave = wavesRef.current.find((w) => w.id === waveId);
