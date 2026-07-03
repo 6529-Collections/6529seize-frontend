@@ -38,13 +38,15 @@
 }
 
 .rowContainer {
+  --header-gutter-half: 0.75rem;
+
   padding-right: max(
-    calc(env(safe-area-inset-left) - calc(var(--bs-gutter-x) * 0.5)),
-    calc(var(--bs-gutter-x) * 0.5)
+    calc(env(safe-area-inset-left) - var(--header-gutter-half)),
+    var(--header-gutter-half)
   );
   padding-left: max(
-    calc(env(safe-area-inset-right) - calc(var(--bs-gutter-x) * 0.5)),
-    calc(var(--bs-gutter-x) * 0.5)
+    calc(env(safe-area-inset-right) - var(--header-gutter-half)),
+    var(--header-gutter-half)
   );
 }
 
