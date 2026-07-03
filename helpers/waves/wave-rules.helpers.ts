@@ -30,7 +30,7 @@ import {
 import { formatSlowModeInterval } from "@/helpers/waves/slow-mode.helpers";
 import type { CreateWaveConfig } from "@/types/waves.types";
 
-export interface WaveRuleRow {
+interface WaveRuleRow {
   readonly id: string;
   readonly label: string;
   readonly value: string;
