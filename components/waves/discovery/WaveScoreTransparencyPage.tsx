@@ -15,6 +15,8 @@ import {
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
 import { parseSeizeWaveLink } from "@/helpers/SeizeLinkParser";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchWaveById, searchWavesByName } from "@/services/api/waves-v2-api";
 import type { SidebarWave } from "@/types/waves.types";
 import {
@@ -325,12 +327,12 @@ function sanitizeReturnTo(value: string | null | undefined): string | null {
 
 function getBackLinkLabel(href: string): string {
   if (href.startsWith("/waves/") || href.startsWith("/messages/")) {
-    return "Back to wave";
+    return t(DEFAULT_LOCALE, "waveScore.navigation.back.wave");
   }
   if (href !== DEFAULT_BACK_HREF) {
-    return "Back to previous page";
+    return t(DEFAULT_LOCALE, "waveScore.navigation.back.previous");
   }
-  return "Back to About";
+  return t(DEFAULT_LOCALE, "waveScore.navigation.back.about");
 }
 
 function scrollElementIntoNearestView(element: HTMLElement | null): void {
@@ -1783,16 +1785,13 @@ export function WaveScoreTransparencyPage({
               {backLinkLabel}
             </Link>
             <p className="tw-mt-5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-              About / Network Data / Wave Score
+              {t(DEFAULT_LOCALE, "waveScore.navigation.breadcrumb")}
             </p>
             <h1 className="tw-mt-5 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white md:tw-text-4xl">
               Wave score transparency
             </h1>
             <p className="tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-              This Network page explains the score shown on waves across
-              discovery, the sidebar, home, and wave pages. Find it in About
-              under Network Data whenever you want the formula or a live wave
-              calculation.
+              {t(DEFAULT_LOCALE, "waveScore.navigation.description")}
             </p>
           </div>
 

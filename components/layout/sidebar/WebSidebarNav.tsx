@@ -10,6 +10,8 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
@@ -262,7 +264,7 @@ const WebSidebarNav = React.forwardRef<
             icon={ChatBubbleIcon}
             active={pathname.startsWith("/messages")}
             collapsed={isCollapsed}
-            label="DMs"
+            label={t(DEFAULT_LOCALE, "navigation.primary.dms")}
             hasIndicator={hasUnreadMessages}
           />
         </li>
@@ -273,7 +275,7 @@ const WebSidebarNav = React.forwardRef<
             icon={UserPlusIcon}
             active={pathname === "/join" || pathname.startsWith("/join/")}
             collapsed={isCollapsed}
-            label="Join 6529"
+            label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
           />
         </li>
 

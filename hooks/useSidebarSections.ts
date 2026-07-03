@@ -29,11 +29,18 @@ function mapAboutNavGroupToSubsection(
 function getWavesSection(): SidebarSection {
   return {
     key: "waves",
-    name: "Waves",
+    name: t(DEFAULT_LOCALE, "navigation.primary.waves"),
     icon: WavesIcon,
     items: [
-      { name: "Waves", href: "/waves", activePathPrefixes: ["/waves/"] },
-      { name: "Discover Waves", href: "/discover" },
+      {
+        name: t(DEFAULT_LOCALE, "navigation.primary.waves"),
+        href: "/waves",
+        activePathPrefixes: ["/waves/"],
+      },
+      {
+        name: t(DEFAULT_LOCALE, "navigation.waves.discover"),
+        href: "/discover",
+      },
     ],
     subsections: [],
   };
@@ -42,7 +49,7 @@ function getWavesSection(): SidebarSection {
 function getNftsSection(): SidebarSection {
   return {
     key: "nfts",
-    name: "NFTs",
+    name: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
     icon: CollectionsMenuIcon,
     items: [
       {
@@ -83,7 +90,7 @@ function getAboutMovedSubsections(
 ): SidebarSubsection[] {
   return [
     {
-      name: "Network & People",
+      name: t(DEFAULT_LOCALE, "navigation.subsection.networkPeople"),
       items: [
         { name: "Identities", href: "/network" },
         { name: "Activity", href: "/network/activity" },
@@ -91,7 +98,7 @@ function getAboutMovedSubsections(
       ],
     },
     {
-      name: "Network Data",
+      name: t(DEFAULT_LOCALE, "navigation.subsection.networkData"),
       items: [
         {
           name: "TDH",
@@ -112,7 +119,7 @@ function getAboutMovedSubsections(
       ],
     },
     {
-      name: "NFT & Reporting Tools",
+      name: t(DEFAULT_LOCALE, "navigation.subsection.nftReportingTools"),
       items: [
         ...(hideSubscriptions
           ? []
@@ -136,7 +143,7 @@ function getAboutMovedSubsections(
       ],
     },
     {
-      name: "Developer & Open Data",
+      name: t(DEFAULT_LOCALE, "navigation.subsection.developerOpenData"),
       items: [
         { name: "API", href: "/tools/api" },
         { name: "EMMA", href: "/emma" },
@@ -178,9 +185,15 @@ function getAboutSection(
 
   return {
     key: "about",
-    name: "About",
+    name: t(DEFAULT_LOCALE, "navigation.primary.about"),
     icon: DocumentTextIcon,
-    items: [{ name: "About", href: "/about", activePathPrefixes: ["/about/"] }],
+    items: [
+      {
+        name: t(DEFAULT_LOCALE, "navigation.primary.about"),
+        href: "/about",
+        activePathPrefixes: ["/about/"],
+      },
+    ],
     subsections: [
       ...(collectionsGroup
         ? [mapAboutNavGroupToSubsection(collectionsGroup)]

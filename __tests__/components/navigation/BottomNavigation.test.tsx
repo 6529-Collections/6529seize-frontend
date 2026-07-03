@@ -385,9 +385,8 @@ describe("BottomNavigation", () => {
       ).toBe(true);
     });
 
-    (usePathname as jest.Mock).mockReturnValue("/discover");
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("view=network")
+      new URLSearchParams("view=messages")
     );
 
     rerender(<BottomNavigation />);

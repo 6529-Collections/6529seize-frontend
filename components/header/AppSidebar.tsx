@@ -13,6 +13,8 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { appendDropForgeToAbout } from "@/components/navigation/sidebarSectionUtils";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
@@ -79,12 +81,12 @@ export default function AppSidebar({
       sectionMap.get("nfts"),
       sectionMap.get("waves"),
       {
-        label: "DMs",
+        label: t(DEFAULT_LOCALE, "navigation.primary.dms"),
         path: "/messages",
         icon: ChatBubbleIcon,
       },
       {
-        label: "Join 6529",
+        label: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
         path: "/join",
         icon: UserPlusIcon,
       },
@@ -161,7 +163,7 @@ export default function AppSidebar({
             <DialogPanel className="tw-pointer-events-auto tw-flex tw-size-full tw-max-w-[22.75rem] tw-flex-col tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)] tw-pt-[env(safe-area-inset-top,0px)] tw-shadow-xl">
               <AppSidebarHeader onClose={handleClose} />
               <nav
-                aria-label="Primary navigation"
+                aria-label={t(DEFAULT_LOCALE, "navigation.primary.ariaLabel")}
                 className="tw-flex-1 tw-overflow-y-auto tw-py-6 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
               >
                 <div className="tw-flex tw-h-full tw-flex-col">

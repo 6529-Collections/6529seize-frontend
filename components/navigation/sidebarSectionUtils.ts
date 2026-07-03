@@ -3,8 +3,13 @@ import {
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import type { SidebarSection } from "@/components/navigation/navTypes";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
-const DEVELOPER_SECTION_NAME = "Developer & Open Data";
+const DEVELOPER_SECTION_NAME = t(
+  DEFAULT_LOCALE,
+  "navigation.subsection.developerOpenData"
+);
 
 export function appendDropForgeToAbout(
   section: SidebarSection

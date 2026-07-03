@@ -49,6 +49,8 @@ import {
   type SidebarPageEntry,
   useSidebarSections,
 } from "@/hooks/useSidebarSections";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { useWaves } from "@/hooks/useWaves";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -96,43 +98,67 @@ const isFilterableCategory = (
   category: CATEGORY
 ): category is FilterableCategory => category !== CATEGORY.ALL;
 
+const HEADER_SEARCH_LABELS = {
+  about: t(DEFAULT_LOCALE, "navigation.primary.about"),
+  account: t(DEFAULT_LOCALE, "navigation.section.account"),
+  developerOpenData: t(
+    DEFAULT_LOCALE,
+    "navigation.subsection.developerOpenData"
+  ),
+  dms: t(DEFAULT_LOCALE, "navigation.primary.dms"),
+  home: t(DEFAULT_LOCALE, "navigation.primary.home"),
+  join6529: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
+  main: t(DEFAULT_LOCALE, "navigation.section.main"),
+  networkData: t(DEFAULT_LOCALE, "navigation.subsection.networkData"),
+  networkNerd: t(DEFAULT_LOCALE, "navigation.network.nerd"),
+  nfts: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
+  notifications: t(DEFAULT_LOCALE, "navigation.account.notifications"),
+  utility: t(DEFAULT_LOCALE, "navigation.section.utility"),
+  waves: t(DEFAULT_LOCALE, "navigation.primary.waves"),
+} as const;
+
 const CATEGORY_LABELS: Record<FilterableCategory, string> = {
   [CATEGORY.PAGES]: "Pages",
   [CATEGORY.PROFILES]: "Profiles",
-  [CATEGORY.NFTS]: "NFTs",
-  [CATEGORY.WAVES]: "Waves",
+  [CATEGORY.NFTS]: HEADER_SEARCH_LABELS.nfts,
+  [CATEGORY.WAVES]: HEADER_SEARCH_LABELS.waves,
 };
 
 const CATEGORY_PREVIEW_LIMIT = 3;
 
 const DIRECT_NAVIGATION_PAGES: SidebarPageEntry[] = [
   {
-    name: "DMs",
+    name: HEADER_SEARCH_LABELS.dms,
     href: "/messages",
-    section: "Main",
+    section: HEADER_SEARCH_LABELS.main,
     icon: ChatBubbleIcon,
   },
   {
-    name: "Join 6529",
+    name: HEADER_SEARCH_LABELS.join6529,
     href: "/join",
-    section: "Main",
+    section: HEADER_SEARCH_LABELS.main,
     icon: UserPlusIcon,
   },
 ];
 
 const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
-  { name: "Home", href: "/", section: "Utility", icon: HomeIcon },
   {
-    name: "Notifications",
+    name: HEADER_SEARCH_LABELS.home,
+    href: "/",
+    section: HEADER_SEARCH_LABELS.utility,
+    icon: HomeIcon,
+  },
+  {
+    name: HEADER_SEARCH_LABELS.notifications,
     href: "/notifications",
-    section: "Account",
+    section: HEADER_SEARCH_LABELS.account,
     icon: BellIcon,
   },
   {
-    name: "Network Nerd",
+    name: HEADER_SEARCH_LABELS.networkNerd,
     href: "/network/nerd",
-    section: "About",
-    subsection: "Network Data",
+    section: HEADER_SEARCH_LABELS.about,
+    subsection: HEADER_SEARCH_LABELS.networkData,
     icon: UsersIcon,
   },
 ];
@@ -955,8 +981,8 @@ export default function HeaderSearchModal({
       {
         name: DROP_FORGE_TITLE,
         href: DROP_FORGE_PATH,
-        section: "About",
-        subsection: "Developer & Open Data",
+        section: HEADER_SEARCH_LABELS.about,
+        subsection: HEADER_SEARCH_LABELS.developerOpenData,
         icon: DropForgeIcon,
       },
     ];
@@ -965,7 +991,7 @@ export default function HeaderSearchModal({
       pages.push({
         name: DROP_FORGE_SECTIONS.CRAFT.title,
         href: DROP_FORGE_SECTIONS.CRAFT.path,
-        section: "About",
+        section: HEADER_SEARCH_LABELS.about,
         subsection: DROP_FORGE_TITLE,
         icon: DropForgeCraftIcon,
       });
@@ -975,7 +1001,7 @@ export default function HeaderSearchModal({
       pages.push({
         name: DROP_FORGE_SECTIONS.LAUNCH.title,
         href: DROP_FORGE_SECTIONS.LAUNCH.path,
-        section: "About",
+        section: HEADER_SEARCH_LABELS.about,
         subsection: DROP_FORGE_TITLE,
         icon: DropForgeLaunchIcon,
       });

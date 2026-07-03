@@ -1,6 +1,14 @@
 import { isNavItemActive } from "@/components/navigation/isNavItemActive";
 import type { NavItem } from "@/components/navigation/navTypes";
 
+const bottomNavItems: NavItem[] = [
+  { kind: "route", name: "NFTs", href: "/the-memes", icon: "" },
+  { kind: "view", name: "Waves", viewKey: "waves", icon: "" },
+  { kind: "view", name: "DMs", viewKey: "messages", icon: "" },
+  { kind: "route", name: "Join 6529", href: "/join", icon: "" },
+  { kind: "route", name: "About", href: "/about", icon: "" },
+];
+
 describe("isNavItemActive", () => {
   it("returns true for About item when on network routes with no active view", () => {
     const item: NavItem = {
@@ -102,5 +110,28 @@ describe("isNavItemActive", () => {
         true
       )
     ).toBe(true);
+  });
+
+  it("keeps representative bottom-nav routes mutually exclusive", () => {
+    const cases = [
+      { pathname: "/the-memes", activeItemName: "NFTs" },
+      { pathname: "/nft-activity", activeItemName: "NFTs" },
+      { pathname: "/discover", activeItemName: "Waves" },
+      { pathname: "/messages", activeItemName: "DMs" },
+      { pathname: "/join", activeItemName: "Join 6529" },
+      { pathname: "/network", activeItemName: "About" },
+      { pathname: "/tools/app-wallets", activeItemName: "About" },
+      { pathname: "/meme-accounting", activeItemName: "About" },
+    ];
+
+    cases.forEach(({ pathname, activeItemName }) => {
+      const activeItems = bottomNavItems
+        .filter((item) =>
+          isNavItemActive(item, pathname, new URLSearchParams(), null, false)
+        )
+        .map((item) => item.name);
+
+      expect(activeItems).toEqual([activeItemName]);
+    });
   });
 });

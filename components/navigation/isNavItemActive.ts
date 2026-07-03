@@ -149,6 +149,8 @@ const isLegacyNavGroupActive = (
   itemName: string,
   pathname: string
 ): boolean => {
+  // Keep retired labels active-compatible for old app shells and tests that may
+  // still pass pre-cleanup nav configs during rollout.
   if (itemName === "Network") {
     return isLegacyNetworkRouteActive(pathname);
   }

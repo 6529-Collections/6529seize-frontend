@@ -32,17 +32,19 @@ import type { NavItem as NavItemData } from "./navTypes";
 import { getActiveViewFromUrl } from "./ViewContext";
 import { DocumentTextIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 
+const BOTTOM_NAVIGATION_LOCALE = DEFAULT_LOCALE;
+
 const items: NavItemData[] = [
   {
     kind: "route",
-    name: "NFTs",
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.nfts"),
     href: "/the-memes",
     icon: "nfts",
     iconComponent: CollectionsMenuIcon,
   },
   {
     kind: "view",
-    name: "Waves",
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.waves"),
     viewKey: "waves",
     icon: "waves",
     iconComponent: WavesIcon,
@@ -50,21 +52,21 @@ const items: NavItemData[] = [
   },
   {
     kind: "view",
-    name: "DMs",
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.dms"),
     viewKey: "messages",
     icon: "messages",
     iconComponent: ChatBubbleIcon,
   },
   {
     kind: "route",
-    name: "Join 6529",
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.join6529"),
     href: "/join",
     icon: "join",
     iconComponent: UserPlusIcon,
   },
   {
     kind: "route",
-    name: "About",
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.about"),
     href: "/about",
     icon: "about",
     iconComponent: DocumentTextIcon,
@@ -77,7 +79,6 @@ interface BottomNavigationProps {
 
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
-const BOTTOM_NAVIGATION_LOCALE = DEFAULT_LOCALE;
 
 const getHiddenStyle = (hidden: boolean) =>
   hidden
