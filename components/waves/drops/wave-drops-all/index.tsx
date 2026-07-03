@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
+import { useFirstVisibleDropsPainted } from "./hooks/useFirstVisibleDropsPainted";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
@@ -98,23 +99,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const { setUnreadDividerSerialNo } = useUnreadDivider();
 
-  const typingMessage = useWaveIsTyping(
-    waveId,
-    connectedProfile?.handle ?? null,
-    isMuted
-  );
-
   const [boostedDropsDisplayPreference] = useBoostedDropsDisplayPreference();
   const shouldRenderInsertedBoostedDrops =
     boostedDropsDisplayPreference !== "hidden";
-  const { data: boostedDrops } = useWaveBoostedDrops({
-    waveId,
-    wave,
-    enabled: shouldRenderInsertedBoostedDrops,
-  });
-  const visibleBoostedDrops = shouldRenderInsertedBoostedDrops
-    ? boostedDrops
-    : undefined;
 
   const scrollBehavior = useScrollBehavior();
   const {
@@ -181,6 +168,26 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       ),
     };
   }, [renderedWaveMessages, wave]);
+  const hasVisibleDrops =
+    (renderedWaveMessagesWithFullWave?.drops.length ?? 0) > 0;
+  const firstVisibleDropsPainted = useFirstVisibleDropsPainted(hasVisibleDrops);
+
+  const typingMessage = useWaveIsTyping(
+    waveId,
+    connectedProfile?.handle ?? null,
+    isMuted,
+    { enabled: firstVisibleDropsPainted }
+  );
+
+  const { data: boostedDrops } = useWaveBoostedDrops({
+    waveId,
+    wave,
+    enabled: shouldRenderInsertedBoostedDrops && firstVisibleDropsPainted,
+  });
+  const visibleBoostedDrops =
+    shouldRenderInsertedBoostedDrops && firstVisibleDropsPainted
+      ? boostedDrops
+      : undefined;
 
   const {
     serialTarget,
