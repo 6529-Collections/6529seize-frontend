@@ -7,6 +7,7 @@ import {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
+  shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
@@ -15,8 +16,10 @@ import {
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
+  shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
   type SentryClientEvent,
   type SentryStackFrame,
@@ -32,6 +35,10 @@ describe("sentry-client-filters", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const objectCapturedPromiseRejectionWithoutStackMessage =
+    "Object captured as promise rejection with keys: code, message";
+  const coinbaseMetricsNetworkMessage =
+    "Network request failed. Please check your connection and try again. (/metrics)";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
@@ -84,6 +91,10 @@ describe("sentry-client-filters", () => {
   ].join(" ");
   const observedWasmModuleCspUnsafeEvalMessage =
     "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
+  const injectedProviderProxyStartsWithMessage =
+    "t?.startsWith is not a function";
+  const walletConnectStaleSessionTopicMessage =
+    "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
@@ -361,6 +372,34 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createInjectedProviderProxyStartsWithEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/notifications",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: injectedProviderProxyStartsWithMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///js/injected/proxy-injected-providers.js",
+                abs_path: "app:///js/injected/proxy-injected-providers.js",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
+
   const createSentryRouteParameterizationEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -412,6 +451,62 @@ describe("sentry-client-filters", () => {
     ],
     ...overrides,
   });
+
+  const createObservedSentryRouteParameterizationEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    createSentryRouteParameterizationEvent({
+      transaction: "/:user",
+      request: {
+        url: "https://6529.io/york",
+        headers: {
+          "User-Agent": metaMaskMobileWebViewUserAgent,
+        },
+      },
+      contexts: {},
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+        url: "/york",
+        transaction: "/:user",
+      },
+      breadcrumbs: [
+        {
+          category: "navigation",
+          data: {
+            from: "/the-memes/516",
+            to: "/york",
+          },
+        },
+      ],
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: true,
+                },
+                {
+                  filename:
+                    "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    });
 
   const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -468,6 +563,84 @@ describe("sentry-client-filters", () => {
       },
       ...overrides,
     }) as TestSentryClientEvent;
+
+  const createThirdPartyTelemetryNetworkErrorEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/notifications",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: coinbaseMetricsNetworkMessage,
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+        },
+      ],
+    },
+    tags: {
+      errorType: "network",
+      handled: "yes",
+      transaction: "/notifications",
+      url: "/notifications",
+    },
+    breadcrumbs: [
+      {
+        category: "console",
+        level: "error",
+        message: "TypeError: Load failed",
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "info",
+        message: "GET: /notifications [200]",
+        data: {
+          url: "/notifications",
+          "url.is_first_party": true,
+          "url.is_first_party_api": false,
+        },
+      },
+    ],
+    ...overrides,
+  });
+
+  const createWalletConnectStaleSessionTopicEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: walletConnectStaleSessionTopicMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///_next/static/chunks/10s7s3u16zx-f.js",
+                abs_path: "app:///_next/static/chunks/10s7s3u16zx-f.js",
+                function: "isValidSessionTopic",
+                in_app: true,
+              },
+              {
+                filename: "app:///_next/static/chunks/10s7s3u16zx-f.js",
+                abs_path: "app:///_next/static/chunks/10s7s3u16zx-f.js",
+                function: "onRelayMessage",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
 
   const createLowValueNetworkEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -1117,6 +1290,14 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters Coinbase metrics network error events without app frames", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createThirdPartyTelemetryNetworkErrorEvent()
+    );
+
+    expect(result).toBe(true);
+  });
+
   it("does not filter first-party spans", () => {
     const result = shouldFilterThirdPartyTelemetrySpan(
       buildSpan({
@@ -1125,6 +1306,58 @@ describe("sentry-client-filters", () => {
             "https://api.6529.io/api/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
           "http.response.status_code": 0,
           "url.same_origin": false,
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Coinbase metrics network errors with app-owned frames", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createThirdPartyTelemetryNetworkErrorEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value: coinbaseMetricsNetworkMessage,
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+              stacktrace: {
+                frames: [
+                  {
+                    filename: "services/api/common-api.ts",
+                    abs_path: "services/api/common-api.ts",
+                    in_app: true,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter first-party network error targets as telemetry", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createThirdPartyTelemetryNetworkErrorEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/metrics)",
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+            },
+          ],
         },
       })
     );
@@ -2532,6 +2765,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters Sentry route parameterization errors with the Sentry parameterization frame outside route bounds", () => {
+    // Arrange
+    const event = createObservedSentryRouteParameterizationEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters MetaMaskMobile WebView route parameterization errors on the memes mint route", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
@@ -2646,6 +2890,50 @@ describe("sentry-client-filters", () => {
                   filename:
                     "https://6529.io/_next/static/chunks/app/the-memes/mint/page-1234567890abcdef.js",
                   function: "submitMint",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Sentry parameterization errors when an app-owned frame is present", () => {
+    // Arrange
+    const event = createObservedSentryRouteParameterizationEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: true,
+                },
+                {
+                  filename:
+                    "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./utils/routeParams.ts",
+                  function: "serializeRouteParams",
+                  in_app: true,
                 },
               ],
             },
@@ -3167,6 +3455,41 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter Coinbase WalletLink websocket 1006 errors with app-owned source frames", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                  function: "webSocket.onclose",
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx",
+                  function: "connectWebSocket",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter app-owned websocket 1006 errors with AppKit Coinbase breadcrumbs", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
@@ -3457,6 +3780,90 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters WalletConnect stale session-topic errors from bundled wallet frames", () => {
+    // Arrange
+    const event = createWalletConnectStaleSessionTopicEvent();
+
+    // Act
+    const result = shouldFilterWalletConnectStaleSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter WalletConnect stale session-topic errors with app-owned source frames", () => {
+    // Arrange
+    const event = createWalletConnectStaleSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: walletConnectStaleSessionTopicMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///_next/static/chunks/10s7s3u16zx-f.js",
+                  function: "isValidSessionTopic",
+                  in_app: true,
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/auth/walletConnectSession.ts",
+                  function: "restoreWalletConnectSession",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterWalletConnectStaleSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter other WalletConnect missing-key errors", () => {
+    // Arrange
+    const event = createWalletConnectStaleSessionTopicEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value:
+              "No matching key. pairing topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///_next/static/chunks/10s7s3u16zx-f.js",
+                  function: "isValidSessionTopic",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterWalletConnectStaleSessionTopic(event);
 
     // Assert
     expect(result).toBe(false);
@@ -3849,6 +4256,36 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters disconnected wallet-provider object rejections without serialized stacks", () => {
+    // Arrange
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionWithoutStackMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4900,
+          message: "The provider is disconnected from all chains.",
+        },
+      },
+    };
+
+    // Act
+    const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters RabbyMobile 4001 user-rejected object rejections without app frames", () => {
     // Arrange
     const event = createRabbyMobileUserRejectedRequestEvent();
@@ -3894,6 +4331,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters injected provider proxy startsWith errors", () => {
+    // Arrange
+    const event = createInjectedProviderProxyStartsWithEvent();
+
+    // Act
+    const result = shouldFilterInjectedProviderProxyStartsWithError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter disconnected wallet-provider object rejections with app frames", () => {
     // Arrange
     const event = {
@@ -3918,6 +4366,81 @@ describe("sentry-client-filters", () => {
           code: 4900,
           message: "The provider is disconnected from all chains.",
           stack: disconnectedProviderStack,
+        },
+      },
+    };
+
+    // Act
+    const result = shouldFilterDisconnectedWalletProviderRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter injected provider proxy errors with app frames", () => {
+    // Arrange
+    const event = createInjectedProviderProxyStartsWithEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: injectedProviderProxyStartsWithMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///js/injected/proxy-injected-providers.js",
+                  abs_path: "app:///js/injected/proxy-injected-providers.js",
+                  in_app: true,
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/providers/WagmiSetup.tsx",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./components/providers/WagmiSetup.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedProviderProxyStartsWithError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter no-stack disconnected wallet-provider rejections with app frames", () => {
+    // Arrange
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionWithoutStackMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "components/providers/WagmiSetup.tsx",
+                  abs_path: "components/providers/WagmiSetup.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4900,
+          message: "The provider is disconnected from all chains.",
         },
       },
     };
