@@ -64,6 +64,10 @@ interface LeaderboardParamsInput extends LeaderboardQueryKeyInput {
   readonly pageSize: number;
 }
 
+interface FetchLeaderboardPageInput extends LeaderboardParamsInput {
+  readonly signal?: AbortSignal | undefined;
+}
+
 const normalizePriceFilter = (value?: number): number | undefined =>
   typeof value === "number" && Number.isFinite(value) && value >= 0
     ? value
@@ -167,7 +171,8 @@ const fetchLeaderboardPage = ({
   sort,
   sortDirection,
   priceFilters,
-}: LeaderboardParamsInput) =>
+  signal,
+}: FetchLeaderboardPageInput) =>
   fetchWaveLeaderboardV2({
     waveId,
     params: buildLeaderboardParams({
@@ -178,6 +183,7 @@ const fetchLeaderboardPage = ({
       sortDirection,
       priceFilters,
     }),
+    signal,
   });
 
 const getNextLeaderboardPageParam = ({
@@ -286,7 +292,13 @@ export function useWaveDropsLeaderboard({
     refetch,
   } = useInfiniteQuery({
     queryKey,
-    queryFn: ({ pageParam }: { pageParam: number | null }) =>
+    queryFn: ({
+      pageParam,
+      signal,
+    }: {
+      readonly pageParam: number | null;
+      readonly signal?: AbortSignal | undefined;
+    }) =>
       fetchLeaderboardPage({
         waveId,
         pageParam,
@@ -294,6 +306,7 @@ export function useWaveDropsLeaderboard({
         sort,
         sortDirection,
         priceFilters: canonicalPriceFilters,
+        signal,
       }),
     initialPageParam: null,
     getNextPageParam: (lastPage: ApiDropsLeaderboardPage) =>

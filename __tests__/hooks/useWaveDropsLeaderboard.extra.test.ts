@@ -109,6 +109,21 @@ describe("useWaveDropsLeaderboard extra", () => {
     );
   });
 
+  it("forwards the query cancellation signal to the leaderboard request", async () => {
+    renderHook(() => useWaveDropsLeaderboard({ waveId: "2" }));
+
+    const call = getMainQueryOptions();
+    const signal = new AbortController().signal;
+    await call.queryFn({ pageParam: null, signal });
+
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/waves/2/leaderboard",
+        signal,
+      })
+    );
+  });
+
   it("does not prefetch or start a polling query on mount", () => {
     renderHook(() => useWaveDropsLeaderboard({ waveId: "2" }));
 
