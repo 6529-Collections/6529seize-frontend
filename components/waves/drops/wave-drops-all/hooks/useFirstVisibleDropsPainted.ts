@@ -12,28 +12,28 @@ export function useFirstVisibleDropsPainted(hasVisibleDrops: boolean): boolean {
       return;
     }
 
-    const requestFrame =
-      typeof window.requestAnimationFrame === "function"
-        ? window.requestAnimationFrame.bind(window)
-        : (callback: FrameRequestCallback) =>
-            window.setTimeout(() => {
-              callback(performance.now());
-            }, 16);
-    const cancelFrame =
-      typeof window.cancelAnimationFrame === "function"
-        ? window.cancelAnimationFrame.bind(window)
-        : window.clearTimeout.bind(window);
-    let timeoutId: number | null = null;
-    const animationFrameId = requestFrame(() => {
-      timeoutId = window.setTimeout(() => {
+    let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
+    const markPainted = () => {
+      timeoutId = globalThis.setTimeout(() => {
         setPainted(true);
       }, 0);
-    });
+    };
+
+    let cancelFrame: () => void;
+    if (typeof globalThis.requestAnimationFrame === "function") {
+      const animationFrameId = globalThis.requestAnimationFrame(markPainted);
+      cancelFrame = () => globalThis.cancelAnimationFrame(animationFrameId);
+    } else {
+      const fallbackTimeoutId = globalThis.setTimeout(() => {
+        markPainted();
+      }, 16);
+      cancelFrame = () => globalThis.clearTimeout(fallbackTimeoutId);
+    }
 
     return () => {
-      cancelFrame(animationFrameId);
+      cancelFrame();
       if (timeoutId !== null) {
-        window.clearTimeout(timeoutId);
+        globalThis.clearTimeout(timeoutId);
       }
     };
   }, [hasVisibleDrops, painted]);

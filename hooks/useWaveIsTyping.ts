@@ -36,7 +36,8 @@ function buildTypingString(entries: TypingEntry[]): string {
   if (entries.length === 0) return "";
 
   // Highest-level first.
-  const sorted = entries.sort((a, b) => b.profile.level - a.profile.level);
+  const sorted = [...entries];
+  sorted.sort((a, b) => b.profile.level - a.profile.level);
 
   const names = sorted.map((e) => e.profile.handle);
   const firstName = names[0] ?? "";
