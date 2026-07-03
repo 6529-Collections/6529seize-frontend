@@ -17,8 +17,8 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `Join 6529`,
-  `About`) plus connected utility rows such as `Notifications`.
+- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `About`) plus
+  connected utility rows such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
 - App bottom navigation tabs (`Discovery`, `Waves`, `Messages`, `Home`,
   `Network`, `Collections`, `Notifications`).
@@ -48,8 +48,9 @@ context-aware `Back`).
 
 ## Common Scenarios
 
-- Desktop web metrics jump: open `About` -> `Network Data`, then move between
-  `Health`, `Definitions`, `Levels`, and `Network Stats`.
+- Desktop web metrics jump: open `About` -> `Network & Reputation`, then move
+  between `Network Health`, `Network Definitions`, `Levels`,
+  `Network TDH Stats`, `xTDH Overview`, and `xTDH Allocations Dashboard`.
 - Collapsed desktop rail: open a flyout submenu and pick a nested route without
   expanding the rail.
 - Wave discovery jump: on web/sidebar, open `Waves` -> `Discover Waves`; in
@@ -81,7 +82,9 @@ context-aware `Back`).
   shortcut; handle/wallet text and level badge are informational.
 - Web sidebar and search-page catalogs can vary by runtime constraints:
   iOS non-US hides subscription-related entries, and `App Wallets` appears only
-  when app-wallet support is enabled.
+  when app-wallet support is enabled. `About` keeps network/reference routes in
+  `Network & Reputation`, wallet/delegation routes in `Delegation & Wallets`,
+  and open-data/tool routes in `Data & Developer Tools`.
 - Sidebar `Share` is web-only: disconnected desktop web shows a standalone row,
   connected desktop web moves it into the user menu, and Capacitor/native plus
   mobile-device web hide it.

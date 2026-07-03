@@ -183,14 +183,15 @@ const defaultSidebarSections: SidebarSection[] = [
     items: [{ name: "About", href: "/about" }],
     subsections: [
       {
-        name: "Network Data",
+        name: "Network & Reputation",
         items: [
-          { name: "xTDH", href: "/xtdh" },
+          { name: "xTDH Allocations Dashboard", href: "/xtdh" },
           { name: "Wave Score", href: "/network/wave-score" },
+          { name: "Network Nerd", href: "/network/nerd" },
         ],
       },
       {
-        name: "Delegation",
+        name: "Delegation & Wallets",
         items: [
           { name: "Delegation Center", href: "/delegation/delegation-center" },
         ],
@@ -462,7 +463,7 @@ describe("HeaderSearchModal", () => {
         (content) =>
           content.includes('"title":"Wave Score"') &&
           content.includes('"/network/wave-score"') &&
-          content.includes('"breadcrumbs":["About","Network Data"]')
+          content.includes('"breadcrumbs":["About","Network & Reputation"]')
       )
     ).toBe(true);
   });
@@ -491,7 +492,7 @@ describe("HeaderSearchModal", () => {
     expect(networkNerdItems).toHaveLength(1);
     expect(networkNerdItems[0]).toContain('"title":"Network Nerd"');
     expect(networkNerdItems[0]).toContain(
-      '"breadcrumbs":["About","Network Data"]'
+      '"breadcrumbs":["About","Network & Reputation"]'
     );
     expect(networkNerdItems[0]).not.toContain(
       '"title":"Network Nerd Cards Collected"'
@@ -611,8 +612,8 @@ describe("HeaderSearchModal", () => {
           items: [],
           subsections: [
             {
-              name: "Network Data",
-              items: [{ name: "Health", href: "/network/health" }],
+              name: "Network & Reputation",
+              items: [{ name: "Network Health", href: "/network/health" }],
             },
           ],
         },
@@ -626,13 +627,13 @@ describe("HeaderSearchModal", () => {
     });
 
     const input = screen.getByRole("textbox", { name: "Search" });
-    fireEvent.change(input, { target: { value: "network data health" } });
+    fireEvent.change(input, { target: { value: "network reputation health" } });
 
     const items = await screen.findAllByTestId("item");
     expect(
       items.some(
         (item) =>
-          (item.textContent ?? "").includes('"title":"Health"') &&
+          (item.textContent ?? "").includes('"title":"Network Health"') &&
           (item.textContent ?? "").includes('"/network/health"')
       )
     ).toBe(true);
@@ -649,8 +650,8 @@ describe("HeaderSearchModal", () => {
           items: [{ name: "Network Health", href: "/about/network-health" }],
           subsections: [
             {
-              name: "Network Data",
-              items: [{ name: "Health", href: "/network/health" }],
+              name: "Network & Reputation",
+              items: [{ name: "Network Health", href: "/network/health" }],
             },
           ],
         },
@@ -681,8 +682,8 @@ describe("HeaderSearchModal", () => {
           items: [{ name: "Network Health", href: "/about/network-health" }],
           subsections: [
             {
-              name: "Network Data",
-              items: [{ name: "Health", href: "/network/health" }],
+              name: "Network & Reputation",
+              items: [{ name: "Network Health", href: "/network/health" }],
             },
           ],
         },

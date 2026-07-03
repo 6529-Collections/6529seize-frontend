@@ -267,10 +267,10 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "section.account": "Account",
   "waves.discover": "Discover Waves",
   "network.nerd": "Network Nerd",
-  "subsection.networkPeople": "Network & People",
-  "subsection.networkData": "Network Data",
-  "subsection.nftReportingTools": "NFT & Reporting Tools",
-  "subsection.developerOpenData": "Developer & Open Data",
+  "subsection.networkPeople": "Network & Reputation",
+  "subsection.networkData": "Network & Reputation",
+  "subsection.nftReportingTools": "Collections & Minting",
+  "subsection.developerOpenData": "Data & Developer Tools",
 } as const);
 
 const JOIN_PAGE_MESSAGES = objectMessages("join", {
@@ -285,9 +285,9 @@ const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
   "back.wave": "Back to wave",
   "back.previous": "Back to previous page",
   "back.about": "Back to About",
-  breadcrumb: "About / Network Data / Wave Score",
+  breadcrumb: "About / Network & Reputation / Wave Score",
   description:
-    "This Network page explains the score shown on waves across discovery, the sidebar, home, and wave pages. Find it in About under Network Data whenever you want the formula or a live wave calculation.",
+    "This Network page explains the score shown on waves across discovery, the sidebar, home, and wave pages. Find it in About under Network & Reputation whenever you want the formula or a live wave calculation.",
 } as const);
 
 const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {

@@ -5,7 +5,6 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
@@ -33,11 +32,14 @@ function mapSectionToMenuItem(section: SidebarSection): SidebarMenu[number] {
     })),
     ...(section.subsections?.flatMap(
       (subsection): SidebarMenuChildren => [
-        { label: subsection.name, section: true },
-        ...subsection.items.map((item) => ({
-          label: item.name,
-          path: item.href,
-        })),
+        {
+          label: subsection.name,
+          section: true,
+          children: subsection.items.map((item) => ({
+            label: item.name,
+            path: item.href,
+          })),
+        },
       ]
     ) ?? []),
   ];
@@ -84,11 +86,6 @@ export default function AppSidebar({
         label: t(DEFAULT_LOCALE, "navigation.primary.dms"),
         path: "/messages",
         icon: ChatBubbleIcon,
-      },
-      {
-        label: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
-        path: "/join",
-        icon: UserPlusIcon,
       },
       sectionMap.get("about"),
     ].flatMap((item): SidebarMenu => {

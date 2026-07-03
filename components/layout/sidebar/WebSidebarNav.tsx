@@ -12,7 +12,6 @@ import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
   useCallback,
@@ -273,18 +272,6 @@ const WebSidebarNav = React.forwardRef<
             collapsed={isCollapsed}
             label={t(DEFAULT_LOCALE, "navigation.primary.dms")}
             hasIndicator={hasUnreadMessages}
-          />
-        </li>
-
-        <li>
-          <WebSidebarNavItem
-            href="/join"
-            icon={UserPlusIcon}
-            active={
-              safePathname === "/join" || safePathname.startsWith("/join/")
-            }
-            collapsed={isCollapsed}
-            label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
           />
         </li>
 

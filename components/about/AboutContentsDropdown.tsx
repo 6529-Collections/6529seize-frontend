@@ -1,12 +1,13 @@
 "use client";
 
+import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { AboutSection } from "@/types/enums";
+import type { AboutSection } from "@/types/enums";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import {
@@ -31,6 +32,7 @@ export function AboutContentsDropdown({
   const locale = DEFAULT_LOCALE;
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
+  const { appWalletsSupported } = useAppWallets();
   const hideSubscriptions =
     cookieConsent === undefined
       ? false
@@ -38,7 +40,10 @@ export function AboutContentsDropdown({
           capacitorIsIos: capacitor.isIos,
           country: cookieConsent.country,
         });
-  const groups = getVisibleAboutNavGroups(hideSubscriptions);
+  const groups = getVisibleAboutNavGroups({
+    hideSubscriptions,
+    appWalletsSupported,
+  });
   const normalizedCurrentHref = normalizeAboutHref(currentHref);
   const currentItem = groups
     .flatMap((group) => group.items)

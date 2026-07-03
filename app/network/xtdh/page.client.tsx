@@ -5,12 +5,12 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 
 export default function XTDHMainPage() {
-  useSetTitle("xTDH | Network");
+  useSetTitle("xTDH Overview | Network");
 
   return (
     <main className="tailwind-scope [min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-min-h-screen tw-w-full tw-px-3 tw-pb-12 tw-pt-12 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
       <AboutContentsDropdown currentHref="/network/xtdh" />
-      <h1>xTDH</h1>
+      <h1>xTDH Overview</h1>
       <p className="tw-mt-2">
         xTDH is an extension of <Link href="/network/tdh">TDH</Link> which helps
         to include other NFT holders to 6529 ecosystem and offer them all the
