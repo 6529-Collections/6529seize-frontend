@@ -1,5 +1,6 @@
 "use client";
 
+import { NETWORK_CONTENT_SECTION_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -292,7 +293,7 @@ export default function CommunityStats() {
   }
 
   return (
-    <section className="[min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
+    <section className={NETWORK_CONTENT_SECTION_CLASSES}>
       <div className="tw-pt-4 md:tw-w-2/3">
         <h1 className="tw-mb-0">Network Stats</h1>
       </div>
