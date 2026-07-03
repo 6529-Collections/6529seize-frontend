@@ -7,15 +7,19 @@ import {
 } from "@headlessui/react";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 import type { SidebarSection } from "@/components/navigation/navTypes";
-import { appendDropForgeToAbout } from "@/components/navigation/sidebarSectionUtils";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
+import DropForgeIcon from "../common/icons/DropForgeIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
@@ -70,14 +74,14 @@ export default function AppSidebar({
   const handleClose = useCallback(() => onClose(), [onClose]);
 
   const menu = useMemo(() => {
-    const navigationSections = showDropForge
-      ? sections.map((section) =>
-          section.key === "about" ? appendDropForgeToAbout(section) : section
-        )
-      : sections;
     const sectionMap = new Map(
-      navigationSections.map((section) => [section.key, section])
+      sections.map((section) => [section.key, section])
     );
+    const dropForgeItem: SidebarMenu[number] = {
+      label: DROP_FORGE_TITLE,
+      path: DROP_FORGE_PATH,
+      icon: DropForgeIcon,
+    };
 
     return [
       sectionMap.get("nfts"),
@@ -88,6 +92,7 @@ export default function AppSidebar({
         icon: ChatBubbleIcon,
       },
       sectionMap.get("about"),
+      ...(showDropForge ? [dropForgeItem] : []),
     ].flatMap((item): SidebarMenu => {
       if (item === undefined) {
         return [];

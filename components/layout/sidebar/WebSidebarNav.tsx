@@ -3,9 +3,13 @@
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
+import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
 import type { SidebarSection } from "@/components/navigation/navTypes";
-import { appendDropForgeToAbout } from "@/components/navigation/sidebarSectionUtils";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
@@ -71,16 +75,7 @@ const WebSidebarNav = React.forwardRef<
     capacitor.isIos,
     country
   );
-  const navigationSections = useMemo(
-    () =>
-      showDropForge
-        ? sections.map((section) =>
-            section.key === "about" ? appendDropForgeToAbout(section) : section
-          )
-        : sections,
-    [sections, showDropForge]
-  );
-  const sectionMap = useSectionMap(navigationSections);
+  const sectionMap = useSectionMap(sections);
   const nftsSection = sectionMap.get("nfts");
   const wavesSection = sectionMap.get("waves");
   const aboutSection = sectionMap.get("about");
@@ -95,7 +90,7 @@ const WebSidebarNav = React.forwardRef<
 
   const activeSectionKey = useMemo(() => {
     if (!pathname) return null;
-    for (const section of navigationSections) {
+    for (const section of sections) {
       const inItems = section.items.some((item) =>
         isSidebarNavItemActive(item, pathname)
       );
@@ -106,7 +101,7 @@ const WebSidebarNav = React.forwardRef<
       if (inItems || inSubsections) return section.key;
     }
     return null;
-  }, [pathname, navigationSections]);
+  }, [pathname, sections]);
 
   const expandedKeys = useMemo(() => {
     const keys = new Set(manualExpandedKeys);
@@ -206,7 +201,7 @@ const WebSidebarNav = React.forwardRef<
   const renderCollapsedSubmenu = useCallback(
     (sectionKey: string) => {
       if (isCollapsed && openSubmenuKey === sectionKey && submenuAnchor) {
-        const openSection = navigationSections.find(
+        const openSection = sections.find(
           (section) => section.key === sectionKey
         );
         if (!openSection) {
@@ -232,7 +227,7 @@ const WebSidebarNav = React.forwardRef<
     [
       isCollapsed,
       openSubmenuKey,
-      navigationSections,
+      sections,
       pathname,
       closeSubmenu,
       submenuAnchor,
@@ -303,6 +298,21 @@ const WebSidebarNav = React.forwardRef<
         </li>
 
         {aboutSection && renderExpandableSection(aboutSection)}
+
+        {showDropForge && (
+          <li>
+            <WebSidebarNavItem
+              href={DROP_FORGE_PATH}
+              icon={DropForgeIcon}
+              active={
+                safePathname === DROP_FORGE_PATH ||
+                safePathname.startsWith(`${DROP_FORGE_PATH}/`)
+              }
+              collapsed={isCollapsed}
+              label={DROP_FORGE_TITLE}
+            />
+          </li>
+        )}
       </ul>
     </nav>
   );

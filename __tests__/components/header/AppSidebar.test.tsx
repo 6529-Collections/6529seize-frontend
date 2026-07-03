@@ -6,6 +6,7 @@ import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissio
 
 let headerProps: any = null;
 let connectProps: any = null;
+let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
 
 type AppSidebarMenuItemsProps = Parameters<typeof AppSidebarMenuItems>[0];
 type SidebarMenu = AppSidebarMenuItemsProps["menu"];
@@ -32,7 +33,7 @@ jest.mock("@/components/header/AppUserConnect", () => (props: any) => {
 
 jest.mock("@/components/app-wallets/AppWalletsContext");
 jest.mock("@/hooks/useDropForgePermissions", () => ({
-  useDropForgePermissions: () => ({ ...DEFAULT_DROP_FORGE_PERMISSIONS }),
+  useDropForgePermissions: () => mockDropForgePermissions,
 }));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
@@ -106,6 +107,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
     beforeEach(() => {
       headerProps = menuProps = connectProps = null;
+      mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
       setCookieCountry("US");
     });
 
@@ -221,6 +223,37 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       expect(onClose).toHaveBeenCalled();
       connectProps.onNavigate();
       expect(onClose).toHaveBeenCalledTimes(2);
+    });
+
+    it("adds Drop Forge as a gated top-level row after About", () => {
+      mockDropForgePermissions = {
+        ...DEFAULT_DROP_FORGE_PERMISSIONS,
+        canAccessLanding: true,
+      };
+      (useAppWallets as jest.Mock).mockReturnValue({
+        appWalletsSupported: true,
+      });
+
+      render(<AppSidebar open={true} onClose={() => {}} />);
+
+      expect(getMenu().map((item) => item.label)).toEqual([
+        "NFTs",
+        "Waves",
+        "DMs",
+        "About",
+        "Drop Forge",
+      ]);
+      expect(getMenuItem("Drop Forge")).toEqual(
+        expect.objectContaining({
+          label: "Drop Forge",
+          path: "/drop-forge",
+        })
+      );
+      expect(getMenuChildren("About")).toEqual(
+        expect.not.arrayContaining([
+          expect.objectContaining({ label: "Drop Forge" }),
+        ])
+      );
     });
 
     it("omits App Wallets when unsupported", () => {

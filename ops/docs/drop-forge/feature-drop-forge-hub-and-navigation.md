@@ -12,14 +12,15 @@ two section cards:
 ## Location in the Site
 
 - Route: `/drop-forge`
-- App sidebar row: `Drop Forge` (only when the connected wallet can access it)
+- Web and app sidebar row: `Drop Forge` after `About` (only when the connected
+  wallet can access it)
 - Header search page results: `Drop Forge`, and optionally `Craft Claims` and
   `Launch Claims`
 
 ## Entry Points
 
 - Open `/drop-forge` directly.
-- Select `Drop Forge` from the app sidebar.
+- Select `Drop Forge` from the web or app sidebar.
 - Open the route from header search page results.
 
 ## User Journey

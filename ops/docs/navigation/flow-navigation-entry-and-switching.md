@@ -18,7 +18,8 @@ context-aware `Back`).
 ## Entry Points
 
 - Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `About`) plus
-  connected utility rows such as `Notifications`.
+  gated `Drop Forge` when available and connected utility rows
+  such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
 - App bottom navigation tabs (`Discovery`, `Waves`, `Messages`, `Home`,
   `Network`, `Collections`, `Notifications`).
@@ -58,6 +59,8 @@ context-aware `Back`).
   bottom bar, tap `Discovery`.
 - Desktop web notifications jump: use the lower connected-only `Notifications`
   row near the account area.
+- Drop Forge jump: use the standalone `Drop Forge` row after `About` when the
+  connected wallet has landing access.
 - Small-screen web: open overlay menu, pick a route, and continue after
   auto-close on navigation.
 - Desktop web share: while disconnected use the standalone lower `Share` row;
@@ -86,7 +89,8 @@ context-aware `Back`).
   iOS non-US hides subscription-related entries, and `App Wallets` appears only
   when app-wallet support is enabled. `About` keeps network/reference routes in
   `Network & Reputation`, wallet/delegation routes in `Delegation & Wallets`,
-  and open-data/tool routes in `Data & Developer Tools`.
+  and open-data/tool routes in `Data & Developer Tools`. `Drop Forge` appears
+  only when the connected wallet can access `/drop-forge`.
 - Sidebar `Share` is web-only: disconnected desktop web shows a standalone row,
   connected desktop web moves it into the user menu, and Capacitor/native plus
   mobile-device web hide it.

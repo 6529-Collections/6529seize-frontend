@@ -6,14 +6,16 @@ In app layout, the top-left menu/avatar button opens a left drawer for
 primary navigation concepts, grouped secondary routes, and account actions.
 Connected account surfaces in this drawer can show unread notification
 indicators (dot/count badges) to help account switching.
-When the connected wallet can access Drop Forge, the drawer lists it inside
-`About` under `Data & Developer Tools`.
+When the connected wallet can access Drop Forge, the drawer lists it as a
+standalone row after `About`.
 
 ## Location in the Site
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
 - Primary rows/groups: `NFTs`, `Waves`, `DMs`, and `About`.
+- Gated primary row: `Drop Forge`, after `About`, only when the connected
+  wallet can access it.
 - Drawer header: connected profile avatar shortcut to
   `/{normalized-handle}` with `/{walletAddress}` fallback.
 - Footer actions: `Scan QR Code` (Capacitor + scanner support), then either
@@ -44,9 +46,9 @@ When the connected wallet can access Drop Forge, the drawer lists it inside
    - `About`
 5. Tap the connected profile avatar to open your own profile route
    (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `DMs` for
-   `/messages`, use `Drop Forge` inside `About` when present, or expand grouped
-   sections for nested routes. About opens to group headings first, then each
-   group expands to its links.
+   `/messages`, use the standalone `Drop Forge` row when present, or expand
+   grouped sections for nested routes. About opens to group headings first,
+   then each group expands to its links.
 6. Drawer closes and route navigation runs.
 7. Use footer actions for QR scan, connect/session actions, push settings, and
    optional chain switching.
@@ -66,7 +68,7 @@ When the connected wallet can access Drop Forge, the drawer lists it inside
   `/network/nerd`, `/network/prenodes`, and
   `/network/tdh/historic-boosts`.
 - Open `Drop Forge`:
-  use `About > Data & Developer Tools` when the current wallet can access the
+  use the standalone row after `About` when the current wallet can access the
   landing route.
 - Open About tool routes:
   `/delegation/delegation-center`, `/delegation/wallet-architecture`,
@@ -99,7 +101,7 @@ When the connected wallet can access Drop Forge, the drawer lists it inside
   do not navigate.
 - Profile access stays in account/header surfaces, not the product menu rows.
 - `Discover Waves` stays available inside `Waves` even while disconnected.
-- `Drop Forge` appears inside `About > Data & Developer Tools` only when the
+- `Drop Forge` appears as a standalone row after `About` only when the
   connected wallet can access the landing route.
 - Profile avatar shortcut is unavailable when disconnected because the header
   shows the `6529` home link instead.
