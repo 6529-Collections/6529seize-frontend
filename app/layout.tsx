@@ -5,13 +5,13 @@ export const fetchCache = "force-no-store";
 import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.scss";
 import "@/styles/Home.module.scss";
-import "@/styles/seize-bootstrap.scss";
+import "@/styles/fonts.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import "@/styles/swiper.scss";
+import "@/styles/swiper.css";
 //keep this last so that we can override the styles of the above css files
-import "@/styles/animations.scss";
+import "@/styles/animations.css";
 import "@/styles/globals.scss";
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
