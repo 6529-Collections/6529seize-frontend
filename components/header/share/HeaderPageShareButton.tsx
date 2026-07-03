@@ -5,8 +5,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { isShareCancelError } from "@/utils/error";
 import { Share } from "@capacitor/share";
-import { ShareIcon as OutlineShareIcon } from "@heroicons/react/24/outline";
-import { ShareIcon as SolidShareIcon } from "@heroicons/react/24/solid";
+import { faShare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import { useState } from "react";
 
@@ -92,15 +92,11 @@ export default function HeaderPageShareButton({
       className={clsx(
         "tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
         isSharing
-          ? "tw-bg-black tw-text-iron-50"
+          ? "tw-scale-95 tw-bg-iron-800 tw-text-iron-50 tw-ring-1 tw-ring-primary-400"
           : "tw-bg-black tw-text-iron-300 hover:tw-text-iron-50 active:tw-bg-iron-800"
       )}
     >
-      {isSharing ? (
-        <SolidShareIcon className="tw-h-6 tw-w-6" />
-      ) : (
-        <OutlineShareIcon className="tw-h-6 tw-w-6" />
-      )}
+      <FontAwesomeIcon icon={faShare} className="tw-h-6 tw-w-6" />
     </button>
   );
 }

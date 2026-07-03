@@ -3034,7 +3034,7 @@
       "keywords": ["share", "copy", "link", "modal", "url", "native"],
       "facts": [
         "Desktop web surfaces can open a share modal for copying or sharing links.",
-        "Native app pages outside Waves, Messages, and Notifications use a direct Share page header button instead of the desktop share modal.",
+        "Native app pages outside home, Waves, Messages, and Notifications use a direct Share page header button instead of the desktop share modal.",
         "Wave-specific link sharing also exists in the wave header.",
         "Use share controls when users ask how to copy a route or send someone a page."
       ],

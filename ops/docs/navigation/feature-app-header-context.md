@@ -63,7 +63,7 @@ In the app layout, the header adapts to route and thread state. It controls:
      (including `?view=messages`).
    - On `/`, network-health heart shortcut appears.
    - In the native app, `Share page` appears immediately before `Search` on
-     pages outside `/waves*`, `/messages*`, and `/notifications*`.
+     pages outside `/`, `/waves*`, `/messages*`, and `/notifications*`.
    - `Search` is always available.
 7. More actions:
    - Wave-specific actions can appear in the overflow menu.
@@ -91,7 +91,7 @@ In the app layout, the header adapts to route and thread state. It controls:
 - Profile routes show `Back` only when in-app history can resolve a target.
 - Menu/avatar unread dot appears only when a non-active connected account has
   unread notifications.
-- Native page share is hidden on `/waves*`, `/messages*`, and
+- Native page share is hidden on `/`, `/waves*`, `/messages*`, and
   `/notifications*`, and also while the native app is showing waves/messages
   context from query-state navigation.
 - Rememes formatting applies only when both `contract` and `tokenId` are
@@ -106,8 +106,8 @@ In the app layout, the header adapts to route and thread state. It controls:
   or `/messages`.
 - If create action is missing, verify you are in waves/messages list context
   and not inside an active thread.
-- If page share is missing in the native app, verify the route is not under
-  `/waves`, `/messages`, or `/notifications`.
+- If page share is missing in the native app, verify the route is not `/` or
+  under `/waves`, `/messages`, or `/notifications`.
 - If menu does not open, retry from the same top-left control.
 - If the menu/avatar unread dot looks stale, open account controls and switch
   to the target account, then revisit `/notifications`.

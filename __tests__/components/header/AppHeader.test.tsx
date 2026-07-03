@@ -647,6 +647,7 @@ describe("AppHeader", () => {
   });
 
   it.each([
+    "/",
     "/waves",
     "/waves/w1",
     "/messages",
