@@ -1,23 +1,26 @@
-@use "sass:color";
-@use "variables.scss";
-@use "fonts.scss";
 @import "react-toggle/style.css";
 @import "react-tooltip/dist/react-tooltip.css";
 @import "highlight.js/styles/vs2015.css";
-
+@font-face {
+  font-family: "Square One";
+  font-display: swap;
+  src: url("../assets/square-one-2/SquareOne-p7jra.woff2") format("woff2"), url("../assets/square-one-2/SquareOne-p7jra.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat";
+  font-display: swap;
+  src: url("../assets/montserrat/Montserrat-VariableFont_wght.woff2") format("woff2"), url("../assets/montserrat/Montserrat-VariableFont_wght.ttf") format("truetype");
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 @layer components {
   .layout-root {
     min-height: 100dvh;
-
     --layout-max: 82.75rem;
     --sidebar-width: 0px;
     --collapsed-width: 0px;
     --expanded-width: 0px;
-
     --scrollbar-compensation: calc(100vw - 100%);
     --layout-margin: max(
       ((100vw - var(--layout-max)) - var(--scrollbar-compensation)) / 2,
@@ -25,17 +28,14 @@
     );
     --left-rail: calc(var(--layout-margin) + var(--sidebar-width));
   }
-
-  .layout-root:not([data-mobile="true"]) {
+  .layout-root:not([data-mobile=true]) {
     max-width: var(--layout-max);
     margin-inline: auto;
   }
-
-  .layout-root[data-mobile="true"] {
+  .layout-root[data-mobile=true] {
     --layout-margin: 0px;
     --left-rail: 0px;
   }
-
   .layout-main {
     width: 100%;
     will-change: transform;
@@ -43,90 +43,67 @@
     transition-duration: 300ms;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
-
-  .layout-main[data-mobile="false"][data-narrow="false"] {
+  .layout-main[data-mobile=false][data-narrow=false] {
     padding-left: var(--sidebar-width);
   }
-
-  .layout-main[data-mobile="false"][data-narrow="true"] {
+  .layout-main[data-mobile=false][data-narrow=true] {
     padding-left: var(--collapsed-width);
   }
-
-  .layout-main[data-offcanvas="true"][data-mobile="true"][data-right-open="false"] {
+  .layout-main[data-offcanvas=true][data-mobile=true][data-right-open=false] {
     transform: translateX(var(--sidebar-width));
   }
-
-  .layout-main[data-offcanvas="true"][data-mobile="false"][data-narrow="true"][data-right-open="false"] {
+  .layout-main[data-offcanvas=true][data-mobile=false][data-narrow=true][data-right-open=false] {
     transform: translateX(calc(var(--expanded-width) - var(--collapsed-width)));
   }
-
-  .layout-main[data-offcanvas="true"][data-mobile="true"],
-  .layout-main[data-offcanvas="true"][data-mobile="false"][data-narrow="true"] {
+  .layout-main[data-offcanvas=true][data-mobile=true],
+  .layout-main[data-offcanvas=true][data-mobile=false][data-narrow=true] {
     opacity: 0.4;
     pointer-events: none;
   }
 }
-
 @layer base {
   *,
   *::before,
   *::after {
     box-sizing: border-box;
   }
-
   * {
     -webkit-tap-highlight-color: transparent;
   }
-
   /* Android keyboard height adjustments */
   :root {
     --android-keyboard-height: 0px;
     --pull-to-refresh-fixed-overlay-offset: 0px;
     --pull-to-refresh-fixed-overlay-transition-duration: 0ms;
   }
-
-  [data-pull-to-refresh-transform-root="true"]
-    [data-pull-to-refresh-fixed-overlay="true"] {
+  [data-pull-to-refresh-transform-root=true] [data-pull-to-refresh-fixed-overlay=true] {
     translate: 0 calc(var(--pull-to-refresh-fixed-overlay-offset, 0px) * -1);
     transition-property: translate;
-    transition-duration: var(
-      --pull-to-refresh-fixed-overlay-transition-duration,
-      0ms
-    );
+    transition-duration: var(--pull-to-refresh-fixed-overlay-transition-duration, 0ms);
     transition-timing-function: ease-out;
   }
-
-  :root[data-pull-to-refresh-active="true"]
-    [data-pull-to-refresh-transform-root="true"]
-    [data-pull-to-refresh-fixed-overlay="true"] {
+  :root[data-pull-to-refresh-active=true] [data-pull-to-refresh-transform-root=true] [data-pull-to-refresh-fixed-overlay=true] {
     will-change: translate;
   }
-
   @media (prefers-reduced-motion: reduce) {
-    [data-pull-to-refresh-transform-root="true"]
-      [data-pull-to-refresh-fixed-overlay="true"] {
+    [data-pull-to-refresh-transform-root=true] [data-pull-to-refresh-fixed-overlay=true] {
       transition-duration: 0ms;
     }
   }
-
   #sticky-social-icons-container {
     overflow: clip !important;
   }
-
   @supports not (overflow: clip) {
     #sticky-social-icons-container {
       overflow: hidden !important;
     }
   }
 }
-
-// add the code bellow
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
     -ms-overflow-style: none;
@@ -134,12 +111,9 @@
     scrollbar-width: none;
     /* Firefox */
   }
-
   /* Prevent text selection on touch devices only */
-  .touch-select-none {
-    // Use any-* queries so hybrid devices (touchscreen + trackpad/mouse) don't
-    // get treated as touch-only when the primary pointer is coarse.
-    @media (any-hover: none) and (any-pointer: coarse) {
+  @media (any-hover: none) and (any-pointer: coarse) {
+    .touch-select-none {
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -149,13 +123,11 @@
       touch-action: manipulation;
       -khtml-user-select: none;
       -o-user-select: none;
-
       /* Additional Android-specific properties */
       -webkit-user-drag: none;
       -webkit-user-modify: read-only;
     }
   }
-
   /* Prevent native selection/callouts when JS has selected touch-sheet mode. */
   .touch-action-sheet-select-none {
     user-select: none;
@@ -167,76 +139,71 @@
     -khtml-user-select: none;
     -o-user-select: none;
   }
-
   /* Android keyboard adjustments */
   .android-keyboard-adjust {
     padding-bottom: var(--android-keyboard-height);
     transition: padding-bottom 0.3s ease-out;
   }
-
   .android-keyboard-transform {
     transform: translateY(calc(-1 * var(--android-keyboard-height)));
     transition: transform 0.3s ease-out;
   }
-
   /* Custom selection mode for drops area */
   .drops-custom-selection {
     /* Default cursor for the container */
     cursor: default;
-
     /* Text cursor only on actual text content elements */
-    p,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    li,
-    code,
-    span.tw-align-middle,
-    span.emoji-text-node,
-    span:not(.emoji-node):not(.emoji-node-big) {
-      cursor: text;
-    }
-
+  }
+  .drops-custom-selection p,
+  .drops-custom-selection h1,
+  .drops-custom-selection h2,
+  .drops-custom-selection h3,
+  .drops-custom-selection h4,
+  .drops-custom-selection h5,
+  .drops-custom-selection h6,
+  .drops-custom-selection li,
+  .drops-custom-selection code,
+  .drops-custom-selection span.tw-align-middle,
+  .drops-custom-selection span.emoji-text-node,
+  .drops-custom-selection span:not(.emoji-node):not(.emoji-node-big) {
+    cursor: text;
+  }
+  .drops-custom-selection {
     /* Override text cursor for excluded elements */
-    [data-text-selection-exclude="true"] {
-      p,
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      li,
-      code,
-      span.tw-align-middle,
-      span.emoji-text-node,
-      span:not(.emoji-node):not(.emoji-node-big) {
-        cursor: pointer !important;
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-      }
-    }
-
+  }
+  .drops-custom-selection [data-text-selection-exclude=true] p,
+  .drops-custom-selection [data-text-selection-exclude=true] h1,
+  .drops-custom-selection [data-text-selection-exclude=true] h2,
+  .drops-custom-selection [data-text-selection-exclude=true] h3,
+  .drops-custom-selection [data-text-selection-exclude=true] h4,
+  .drops-custom-selection [data-text-selection-exclude=true] h5,
+  .drops-custom-selection [data-text-selection-exclude=true] h6,
+  .drops-custom-selection [data-text-selection-exclude=true] li,
+  .drops-custom-selection [data-text-selection-exclude=true] code,
+  .drops-custom-selection [data-text-selection-exclude=true] span.tw-align-middle,
+  .drops-custom-selection [data-text-selection-exclude=true] span.emoji-text-node,
+  .drops-custom-selection [data-text-selection-exclude=true] span:not(.emoji-node):not(.emoji-node-big) {
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+  }
+  .drops-custom-selection {
     /* Ensure links and buttons remain clickable and allow selection in them */
-    a,
-    button,
-    input,
-    textarea,
-    select {
-      cursor: pointer !important;
-      user-select: auto;
-      -webkit-user-select: auto;
-      -moz-user-select: auto;
-      -ms-user-select: auto;
-    }
+  }
+  .drops-custom-selection a,
+  .drops-custom-selection button,
+  .drops-custom-selection input,
+  .drops-custom-selection textarea,
+  .drops-custom-selection select {
+    cursor: pointer !important;
+    user-select: auto;
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
   }
 }
-
 #seize-web3-network-switch {
   display: none;
 }
@@ -246,43 +213,37 @@
     scrollbar-gutter: stable both-edges;
   }
 }
-
 body {
   background-color: #000000 !important;
-  color: variables.$font-color !important;
-  font-size: variables.$font-size !important;
-  font-family: variables.$main-font !important;
+  color: white !important;
+  font-size: 16px !important;
+  font-family: "Montserrat", sans-serif !important;
   overflow: auto;
-
-  &.capacitor-native footer {
-    padding-bottom: 100px !important;
-  }
+}
+body.capacitor-native footer {
+  padding-bottom: 100px !important;
 }
 
-.mobile-wrapper-dialog {
-  input,
-  textarea,
-  select {
-    font-size: 16px;
-    touch-action: manipulation;
-  }
+.mobile-wrapper-dialog input,
+.mobile-wrapper-dialog textarea,
+.mobile-wrapper-dialog select {
+  font-size: 16px;
+  touch-action: manipulation;
 }
 
-body.capacitor-native {
-  input,
-  textarea,
-  select,
-  [contenteditable="true"] {
-    font-size: max(1rem, 16px) !important;
-    touch-action: manipulation;
-  }
+body.capacitor-native input,
+body.capacitor-native textarea,
+body.capacitor-native select,
+body.capacitor-native [contenteditable=true] {
+  font-size: max(1rem, 16px) !important;
+  touch-action: manipulation;
 }
 
 textarea,
 select,
 input,
 button {
-  color: variables.$font-color;
+  color: white;
 }
 
 textarea:not(.tailwind-scope textarea),
@@ -291,7 +252,7 @@ input:not(.tailwind-scope input),
 button:not(.tailwind-scope button),
 video:not(.tailwind-scope video),
 svg:not(.tailwind-scope svg) {
-  font-size: variables.$font-size;
+  font-size: 16px;
   outline: 0 !important;
   box-shadow: none !important;
 }
@@ -303,18 +264,14 @@ code {
 a {
   outline: 0 !important;
   text-decoration: underline;
-  color: variables.$font-color;
+  color: white;
 }
 
 @media (hover: hover) {
   a:hover {
-    color: color.scale(
-      variables.$font-color,
-      $lightness: -(variables.$darken-percentage)
-    );
+    color: rgb(178.5, 178.5, 178.5);
   }
 }
-
 @media only screen and (max-width: 1200px) {
   body,
   button:not(.tailwind-scope button),
@@ -324,10 +281,9 @@ a {
   button:not(.tailwind-scope button),
   video,
   select {
-    font-size: variables.$font-smaller !important;
+    font-size: 14px !important;
   }
 }
-
 @media only screen and (max-width: 800px) {
   body,
   button:not(.tailwind-scope button),
@@ -337,16 +293,12 @@ a {
   button:not(.tailwind-scope button),
   video,
   select {
-    font-size: variables.$font-smallest !important;
+    font-size: 12px !important;
   }
 }
-
-* {
-  &:before,
-  &:after {
-    position: absolute;
-    content: "";
-  }
+*:before, *:after {
+  position: absolute;
+  content: "";
 }
 
 b:not(.tailwind-scope b) {
@@ -356,59 +308,54 @@ b:not(.tailwind-scope b) {
 h1 {
   font-size: 20px;
   font-weight: 700;
-  color: variables.$font-color;
+  color: white;
 }
 
 h2:not(.tailwind-scope h2) {
   font-size: 18px;
   font-weight: 700;
-  color: variables.$font-color;
+  color: white;
 }
 
 h3:not(.tailwind-scope h3) {
   font-size: 18px;
   font-weight: 700;
-  color: variables.$font-color;
+  color: white;
 }
 
 h4:not(.tailwind-scope h4) {
   font-size: 18px;
   font-weight: 700;
-  color: variables.$font-color;
+  color: white;
 }
 
 h5:not(.tailwind-scope h5) {
   font-size: 18px;
   font-weight: 700;
-  color: variables.$font-color;
+  color: white;
 }
 
 @media only screen and (max-width: 800px) {
   h1 {
     font-size: 18px;
   }
-
   h2:not(.tailwind-scope h2) {
     font-size: 16px;
     font-weight: bold;
   }
-
   h3:not(.tailwind-scope h3) {
     font-size: 16px;
     font-weight: bold;
   }
-
   h4:not(.tailwind-scope h4) {
     font-size: 16px;
     font-weight: bold;
   }
-
   h5:not(.tailwind-scope h5) {
     font-size: 16px;
     font-weight: bold;
   }
 }
-
 .text-right {
   text-align: right;
 }
@@ -419,14 +366,12 @@ h5:not(.tailwind-scope h5) {
 
 #walletconnect-wrapper {
   color: black !important;
-
-  a {
-    color: black !important;
-  }
-
-  input {
-    color: black !important;
-  }
+}
+#walletconnect-wrapper a {
+  color: black !important;
+}
+#walletconnect-wrapper input {
+  color: black !important;
 }
 
 .-cbwsdk-try-extension-cta {
@@ -435,33 +380,29 @@ h5:not(.tailwind-scope h5) {
 }
 
 #footer {
-  font-size: variables.$font-smaller;
-  background-color: variables.$bg-color-1;
+  font-size: 14px;
+  background-color: black;
   padding: 2rem;
   line-height: 18px;
-
-  img {
-    height: 18px;
-    vertical-align: bottom;
+}
+#footer img {
+  height: 18px;
+  vertical-align: bottom;
+}
+@media only screen and (max-width: 800px) {
+  #footer img {
+    height: 14px;
+    vertical-align: middle;
   }
-
-  @media only screen and (max-width: 800px) {
-    img {
-      height: 14px;
-      vertical-align: middle;
-    }
-  }
-
-  a {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  a:hover {
-    opacity: 0.75;
-  }
+}
+#footer a {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+#footer a:hover {
+  opacity: 0.75;
 }
 
 .twitter-share-button {
@@ -471,22 +412,21 @@ h5:not(.tailwind-scope h5) {
   padding: 1px 12px 1px 6px !important;
   border-radius: 9999px;
   font-size: smaller !important;
-
-  &:hover {
-    background-color: #0c7abf !important;
-  }
+}
+.twitter-share-button:hover {
+  background-color: #0c7abf !important;
 }
 
 .font-color {
-  color: variables.$font-color;
+  color: white;
 }
 
 .font-color-h {
-  color: variables.$font-color-h;
+  color: rgb(154, 154, 154);
 }
 
 .font-color-silver {
-  color: variables.$silver;
+  color: rgb(147, 147, 159);
 }
 
 .font-color-blue {
@@ -501,10 +441,8 @@ h5:not(.tailwind-scope h5) {
   color: #dc3545;
 }
 
-.font-color-hover {
-  &:hover {
-    color: variables.$font-color;
-  }
+.font-color-hover:hover {
+  color: white;
 }
 
 .indented {
@@ -537,7 +475,7 @@ h5:not(.tailwind-scope h5) {
 }
 
 .icon-black {
-  background-color: variables.$very-dark-grey;
+  background-color: rgb(34, 34, 34);
   color: white;
   display: block;
   height: 30px;
@@ -548,7 +486,7 @@ h5:not(.tailwind-scope h5) {
 
 .icon-white {
   background-color: white;
-  color: variables.$very-dark-grey;
+  color: rgb(34, 34, 34);
   display: block;
   height: 30px;
   width: 30px;
@@ -566,20 +504,16 @@ h5:not(.tailwind-scope h5) {
 
 .decoration-hover-underline {
   text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
+}
+.decoration-hover-underline:hover {
+  text-decoration: underline;
 }
 
-.scale-hover {
-  img {
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.02);
-    }
-  }
+.scale-hover img {
+  transition: transform 0.3s ease;
+}
+.scale-hover img:hover {
+  transform: scale(1.02);
 }
 
 .seize-btn {
@@ -597,41 +531,34 @@ h5:not(.tailwind-scope h5) {
   background-color: transparent !important;
   border: transparent !important;
   text-decoration: underline;
-  color: variables.$font-color !important;
-
-  &:hover {
-    color: variables.$font-color-h !important;
-  }
+  color: white !important;
+}
+.seize-btn-link:hover {
+  color: rgb(154, 154, 154) !important;
 }
 
 .btn-white {
   background-color: white !important;
   color: black !important;
-
-  &:hover {
-    background-color: variables.$off-white !important;
-  }
+}
+.btn-white:hover {
+  background-color: rgb(215, 215, 215) !important;
 }
 
 .btn-black {
   background-color: black !important;
   color: white !important;
-
-  &:hover {
-    background-color: variables.$dark-grey !important;
-  }
+}
+.btn-black:hover {
+  background-color: rgb(51, 51, 51) !important;
 }
 
 .btn-green {
-  background-color: variables.$project-green;
+  background-color: #208359;
   color: white !important;
-
-  &:hover {
-    background-color: color.adjust(
-      $color: variables.$project-green,
-      $lightness: 5%
-    );
-  }
+}
+.btn-green:hover {
+  background-color: rgb(37.0061349693, 151.4938650307, 102.9233128834);
 }
 
 .btn-block {
@@ -644,9 +571,7 @@ h5:not(.tailwind-scope h5) {
 
 .edit-profile {
   opacity: 0;
-  transition:
-    visibility 0s,
-    opacity 0.3s ease-out;
+  transition: visibility 0s, opacity 0.3s ease-out;
 }
 
 .edit-profile:hover {
@@ -659,10 +584,9 @@ h5:not(.tailwind-scope h5) {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-
-  &:focus {
-    outline: none !important;
-  }
+}
+.unselectable:focus {
+  outline: none !important;
 }
 
 .btn-link {
@@ -673,16 +597,12 @@ h5:not(.tailwind-scope h5) {
   font: inherit;
   cursor: pointer;
   outline: inherit;
-
-  &:hover,
-  &:focus,
-  &:active {
-    background-color: inherit !important;
-  }
-
-  &:hover {
-    color: variables.$font-color-h !important;
-  }
+}
+.btn-link:hover, .btn-link:focus, .btn-link:active {
+  background-color: inherit !important;
+}
+.btn-link:hover {
+  color: rgb(154, 154, 154) !important;
 }
 
 .scrollbar-width {
@@ -706,40 +626,10 @@ h5:not(.tailwind-scope h5) {
   /* For momentum scroll on iOS */
 }
 
-// Scroll shadow for content overflow indication
 .scroll-shadow {
-  background:
-    /* Shadow at the top */
-    linear-gradient(
-        to bottom,
-        rgba(14, 16, 21, 0.8) 0%,
-        rgba(14, 16, 21, 0) 10px
-      )
-      0 0,
-    /* Shadow at the bottom */
-    linear-gradient(to top, rgba(14, 16, 21, 0.8) 0%, rgba(14, 16, 21, 0) 10px)
-      0 100%,
-    /* Preventing the shadows from overlapping the content */
-    radial-gradient(
-        farthest-side at 50% 0,
-        rgba(0, 0, 0, 0.2),
-        rgba(0, 0, 0, 0)
-      )
-      0 0,
-    radial-gradient(
-        farthest-side at 50% 100%,
-        rgba(0, 0, 0, 0.2),
-        rgba(0, 0, 0, 0)
-      )
-      0 100%;
-
+  background: linear-gradient(to bottom, rgba(14, 16, 21, 0.8) 0%, rgba(14, 16, 21, 0) 10px) 0 0, linear-gradient(to top, rgba(14, 16, 21, 0.8) 0%, rgba(14, 16, 21, 0) 10px) 0 100%, radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) 0 0, radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) 0 100%;
   background-repeat: no-repeat;
-  background-size:
-    100% 10px,
-    100% 10px,
-    100% 10px,
-    100% 10px;
-
+  background-size: 100% 10px, 100% 10px, 100% 10px, 100% 10px;
   /* Make sure the shadows remain fixed during scrolling */
   background-attachment: local, local, scroll, scroll;
 }
@@ -750,11 +640,10 @@ h5:not(.tailwind-scope h5) {
   scrollbar-width: none;
   /* Firefox */
   overflow-x: auto;
-
-  &::-webkit-scrollbar {
-    display: none;
-    /* Safari and Chrome */
-  }
+}
+.table-scroll-container::-webkit-scrollbar {
+  display: none;
+  /* Safari and Chrome */
 }
 
 .react-toggle--checked .react-toggle-thumb,
@@ -779,13 +668,11 @@ h5:not(.tailwind-scope h5) {
     color: #ffffff;
   }
 }
-
 @media (any-hover: none) and (any-pointer: coarse) {
   .touch-visible {
     display: block !important;
   }
 }
-
 pre code {
   word-break: break-word;
 }
@@ -803,7 +690,6 @@ pre code {
     opacity: 0.3 !important;
   }
 }
-
 .float-left {
   float: left;
 }
@@ -817,12 +703,11 @@ pre code {
   border: 1px solid transparent;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
   transition: transform 0.3s ease;
-
-  &:hover {
-    transform: scale(1.01);
-    border: 1px solid variables.$dark-grey;
-    cursor: pointer;
-  }
+}
+.seize-card:hover {
+  transform: scale(1.01);
+  border: 1px solid rgb(51, 51, 51);
+  cursor: pointer;
 }
 
 .emoji-node {

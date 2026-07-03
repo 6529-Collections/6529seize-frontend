@@ -1,0 +1,33 @@
+.swiper {
+  --swiper-navigation-size: 24px;
+  position: relative;
+}
+.swiper .swiper-slide-active {
+  scale: 1.05;
+}
+.swiper .swiper-pagination {
+  position: static;
+  text-align: center;
+}
+.swiper .swiper-pagination .swiper-pagination-bullet-active {
+  background: rgb(215, 215, 215);
+}
+.swiper.swiper-horizontal .swiper-button-prev, .swiper.swiper-horizontal .swiper-button-next {
+  color: rgb(215, 215, 215);
+  top: auto;
+  margin-top: 0;
+  bottom: 2px;
+}
+.swiper.swiper-horizontal .swiper-button-prev::before, .swiper.swiper-horizontal .swiper-button-prev::after, .swiper.swiper-horizontal .swiper-button-next::before, .swiper.swiper-horizontal .swiper-button-next::after {
+  display: none;
+}
+.swiper .swiper-button-prev {
+  left: calc(50% - 120px);
+}
+.swiper .swiper-button-next {
+  right: calc(50% - 120px);
+}
+
+.submission-carousel-swiper .swiper-slide-active {
+  scale: 1;
+}

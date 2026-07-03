@@ -8,10 +8,10 @@ import "@/styles/Home.module.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import "@/styles/swiper.scss";
+import "@/styles/swiper.css";
 //keep this last so that we can override the styles of the above css files
-import "@/styles/animations.scss";
-import "@/styles/globals.scss";
+import "@/styles/animations.css";
+import "@/styles/globals.css";
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
