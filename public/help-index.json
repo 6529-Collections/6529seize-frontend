@@ -65,27 +65,25 @@
         "started",
         "wallet",
         "profile",
+        "pfp",
         "waves",
-        "nfts",
-        "subscriptions",
-        "create"
+        "first",
+        "message"
       ],
       "facts": [
         "The Join 6529 guide lives at /join-6529.",
-        "It is a compact onboarding hub with entry paths for Waves, NFT browsing, The Memes subscriptions, and creating or contributing.",
-        "The page explains that users can browse first and only need wallet, profile, ETH, or eligibility when a specific product action requires them.",
-        "NFT and mint guidance is careful: minting depends on active drops, phases, supply, wallet confirmation, gas, and eligibility; the guide does not promise guaranteed mints.",
+        "It adapts to the user's current state across wallet connection, wallet auth, profile setup, profile image, public Waves, and first public message.",
+        "The profile-image step remains incomplete until an image is uploaded, but it does not block public Waves or messaging steps.",
         "Create Wave links from the guide use the web create URL /waves?create=wave."
       ],
       "canonical_path": "/join-6529",
       "related_paths": [
         "/waves",
         "/waves?create=wave",
-        "/the-memes",
-        "/the-memes/mint",
-        "/about/subscriptions"
+        "/open-data/meme-subscriptions",
+        "/delegation/delegation-center"
       ],
-      "tags": ["navigation", "getting-started", "waves", "subscriptions"],
+      "tags": ["navigation", "getting-started", "waves"],
       "source_refs": ["ops/docs/navigation/feature-join-6529-journey.md"]
     },
     {
@@ -1490,7 +1488,7 @@
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],
       "canonical_path": "/waves?create=wave",
-      "related_paths": ["/waves", "/waves/create"],
+      "related_paths": ["/waves"],
       "tags": ["waves", "create", "ui"],
       "source_refs": ["ops/docs/waves/create/feature-modal-entry-points.md"]
     },
