@@ -245,8 +245,6 @@
 }
 .newDelegationSubmitBtn {
   background-color: #208359;
-  padding-left: 15px;
-  padding-right: 25px;
   border: none;
   padding: 12px 20px;
   cursor: pointer;
@@ -266,8 +264,6 @@
 
 .newDelegationCancelBtn {
   background-color: white;
-  padding-left: 15px;
-  padding-right: 25px;
   color: black !important;
   margin-right: 15px;
   margin-top: 15px;
@@ -289,8 +285,6 @@
 
 .lockUseCaseBtn {
   background-color: rgb(218, 218, 218);
-  padding-left: 15px;
-  padding-right: 25px;
   border: none;
   padding: 12px 20px;
   cursor: pointer;

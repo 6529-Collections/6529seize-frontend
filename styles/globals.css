@@ -685,11 +685,6 @@ pre code {
   opacity: 0.75;
 }
 
-@-moz-document url-prefix() {
-  .firefox-svg {
-    opacity: 0.3 !important;
-  }
-}
 .float-left {
   float: left;
 }
