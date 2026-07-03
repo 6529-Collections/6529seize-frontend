@@ -1,5 +1,5 @@
 "use client";
-import styles from "./AppWallet.module.scss";
+import styles from "./AppWallet.module.css";
 import type { ReactNode, RefObject } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";

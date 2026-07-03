@@ -1,16 +1,13 @@
-@use "sass:color";
-@use "../../styles/variables.scss";
-
 .mainContainer {
   font-size: larger;
   z-index: 600;
   position: relative;
-  min-height: variables.$header-height;
-  background-color: variables.$bg-color-1;
+  min-height: 100px;
+  background-color: black;
 }
 
 .capacitorMainContainer {
-  height: calc(variables.$header-height-capacitor + env(safe-area-inset-top));
+  height: calc(70px + env(safe-area-inset-top));
   z-index: 600;
   background-color: #000000;
   position: fixed;
@@ -23,31 +20,24 @@
 }
 
 .capacitorPlaceholder {
-  height: calc(variables.$header-height-capacitor + env(safe-area-inset-top));
+  height: calc(70px + env(safe-area-inset-top));
   opacity: 0;
 }
 
 .headerRow {
-  min-height: variables.$header-height;
+  min-height: 100px;
   z-index: 10;
 }
 
 .capacitorHeaderRow {
-  min-height: variables.$header-height-capacitor;
+  min-height: 70px;
   z-index: 10;
 }
 
 .rowContainer {
   --header-gutter-half: 0.75rem;
-
-  padding-right: max(
-    calc(env(safe-area-inset-left) - var(--header-gutter-half)),
-    var(--header-gutter-half)
-  );
-  padding-left: max(
-    calc(env(safe-area-inset-right) - var(--header-gutter-half)),
-    var(--header-gutter-half)
-  );
+  padding-right: max(env(safe-area-inset-left) - var(--header-gutter-half), var(--header-gutter-half));
+  padding-left: max(env(safe-area-inset-right) - var(--header-gutter-half), var(--header-gutter-half));
 }
 
 .logoIcon {
@@ -55,16 +45,15 @@
   max-width: min(40vw, 250px);
   position: relative;
   transition: box-shadow 0.1s ease, transform 0.1s ease;
-
-  &:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 10px 5px rgba(215, 215, 215, 0.3);
-  }
+}
+.logoIcon:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px 5px rgba(215, 215, 215, 0.3);
 }
 
 .headerRight {
   font-weight: bold;
-  font-size: variables.$font-size;
+  font-size: 16px;
 }
 
 .burgerMenuBtn {
@@ -79,46 +68,43 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: variables.$bg-color-1;
+  background-color: black;
   z-index: 1001;
   padding-top: 20px;
   padding-bottom: 20px;
   overflow-y: auto;
-
-  a {
-    text-decoration: none;
-    h3,
-    h4 {
-      float: none;
-      color: white !important;
-    }
-  }
-
-  .burgerMenuCaretOpen::after {
-    display: inline-block;
-    margin-left: 0.255em;
-    vertical-align: 0.255em;
-    content: "";
-    position: relative;
-    top: 2px;
-    border-top: 0.3em solid;
-    border-right: 0.3em solid transparent;
-    border-bottom: 0;
-    border-left: 0.3em solid transparent;
-  }
-
-  .burgerMenuCaretClose::after {
-    display: inline-block;
-    margin-left: 0.255em;
-    vertical-align: 0.255em;
-    content: "";
-    position: relative;
-    top: 2px;
-    border-top: 0;
-    border-right: 0.3em solid transparent;
-    border-bottom: 0.3em solid;
-    border-left: 0.3em solid transparent;
-  }
+}
+.burgerMenu a {
+  text-decoration: none;
+}
+.burgerMenu a h3,
+.burgerMenu a h4 {
+  float: none;
+  color: white !important;
+}
+.burgerMenu .burgerMenuCaretOpen::after {
+  display: inline-block;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  content: "";
+  position: relative;
+  top: 2px;
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+.burgerMenu .burgerMenuCaretClose::after {
+  display: inline-block;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  content: "";
+  position: relative;
+  top: 2px;
+  border-top: 0;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0.3em solid;
+  border-left: 0.3em solid transparent;
 }
 
 .burgerMenuHeader {
@@ -145,11 +131,12 @@
   align-items: center;
   margin-right: 16px;
   white-space: nowrap;
-  a span {
-    text-decoration: none !important;
-  }
-
-  @media only screen and (max-width: 1400px) {
+}
+.mainNavLink a span {
+  text-decoration: none !important;
+}
+@media only screen and (max-width: 1400px) {
+  .mainNavLink {
     font-size: 16px;
   }
 }
@@ -164,10 +151,8 @@
   padding-right: 22px;
 }
 
-.fontBlack {
-  a:first-of-type {
-    color: black;
-  }
+.fontBlack a:first-of-type {
+  color: black;
 }
 
 @media (min-width: 1200px) {
@@ -178,35 +163,31 @@
     display: block !important;
   }
 }
-
 .headerPlaceholder {
   z-index: 10;
   position: relative;
-  min-height: variables.$header-height;
-  background-color: variables.$bg-color-1;
+  min-height: 100px;
+  background-color: black;
 }
 
 .headerPlaceholderCapacitor {
   z-index: 10;
   position: relative;
-  min-height: variables.$header-height-capacitor;
-  background-color: variables.$bg-color-1;
+  min-height: 70px;
+  background-color: black;
 }
 
 .userDropdown {
   background-color: white;
   border-left: 0.5px solid black;
   display: inline-block;
-
-  ::after {
-    display: none !important;
-  }
+}
+.userDropdown ::after {
+  display: none !important;
 }
 
-.consolidationDropDown {
-  ::after {
-    display: none;
-  }
+.consolidationDropDown ::after {
+  display: none;
 }
 
 .consolidationDropdownBtn {
@@ -216,19 +197,16 @@
   color: black !important;
   text-align: center;
   margin-left: 2px;
-
-  svg {
-    height: 20px;
-    width: 20px;
-  }
-
-  &:hover {
-    background-color: variables.$off-white;
-  }
-
-  &::after {
-    display: none !important;
-  }
+}
+.consolidationDropdownBtn svg {
+  height: 20px;
+  width: 20px;
+}
+.consolidationDropdownBtn:hover {
+  background-color: rgb(215, 215, 215);
+}
+.consolidationDropdownBtn::after {
+  display: none !important;
 }
 
 .userProfileBtn {
@@ -238,15 +216,13 @@
   color: black !important;
   text-align: center;
   margin-left: 2px;
-
-  svg {
-    height: 20px;
-    width: 20px;
-  }
-
-  &:hover {
-    background-color: variables.$off-white;
-  }
+}
+.userProfileBtn svg {
+  height: 20px;
+  width: 20px;
+}
+.userProfileBtn:hover {
+  background-color: rgb(215, 215, 215);
 }
 
 .userBtn {
@@ -265,10 +241,9 @@
 
 .consolidationBtnActive {
   background-color: #ffff00;
-
-  &:hover {
-    background-color: color.scale(#ffff00, $lightness: -5%);
-  }
+}
+.consolidationBtnActive:hover {
+  background-color: rgb(242.25, 242.25, 0);
 }
 
 .userBtnIcon {
@@ -283,24 +258,22 @@
   border-left: 7px solid transparent;
 }
 
-.viewModeDropdown {
-  button {
-    width: 100%;
-    height: 100%;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    font-size: inherit !important;
-    text-align: left;
-    padding: 6px 12px 6px 20px;
-  }
-  button::before {
-    left: 6px;
-    top: calc((100% - 10px) / 2);
-  }
+.viewModeDropdown button {
+  width: 100%;
+  height: 100%;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  font-size: inherit !important;
+  text-align: left;
+  padding: 6px 12px 6px 20px;
+}
+.viewModeDropdown button::before {
+  left: 6px;
+  top: calc((100% - 10px) / 2);
 }
 
 .viewModeIcon {
-  height: variables.$font-size;
+  height: 16px;
   padding-right: 8px;
 }
 
@@ -313,7 +286,7 @@
 }
 
 .dropdownItemHeader {
-  color: variables.$font-color-h !important;
+  color: rgb(154, 154, 154) !important;
 }
 
 .new {
@@ -331,7 +304,7 @@
   z-index: 600;
   position: relative;
   min-height: 70px;
-  background-color: variables.$bg-color-1;
+  background-color: black;
 }
 
 .headerRowSmall {
@@ -343,11 +316,10 @@
   max-width: min(10vw, 40px);
   position: relative;
   transition: box-shadow 0.1s ease, transform 0.1s ease;
-
-  &:hover {
-    transform: scale(1.02); /* Optional: Adds a slight zoom effect */
-    box-shadow: 0 0 20px 10px rgba(255, 215, 215, 0.3);
-  }
+}
+.logoIconSmall:hover {
+  transform: scale(1.02); /* Optional: Adds a slight zoom effect */
+  box-shadow: 0 0 20px 10px rgba(255, 215, 215, 0.3);
 }
 
 .submenuContainer {
@@ -359,17 +331,16 @@
   padding-left: 16px;
   padding-right: 16px;
   font-weight: normal;
-  color: variables.$font-color;
+  color: white;
   cursor: pointer;
-
-  &:hover {
-    background-color: #222 !important;
-  }
+}
+.submenuContainer:hover {
+  background-color: #222 !important;
 }
 
 .nestedMenu {
   position: absolute;
-  border-top: 3px solid variables.$font-color;
+  border-top: 3px solid white;
   left: 100%;
   top: 0;
   display: none;
@@ -385,5 +356,5 @@
 }
 
 .burgerMenuSubheader {
-  color: variables.$font-color-h !important;
+  color: rgb(154, 154, 154) !important;
 }

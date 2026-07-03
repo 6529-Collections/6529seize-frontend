@@ -1,6 +1,3 @@
-@use "sass:color";
-@use "../../../styles/variables.scss";
-
 .navigationHeader {
   display: flex;
   align-items: center;
@@ -9,7 +6,7 @@
 .navigationHeaderHr {
   margin: 0;
   border-top-width: 2px;
-  color: variables.$lighter-grey;
+  color: rgb(68, 68, 68);
 }
 
 .nextgenBannerWrapper {
@@ -31,11 +28,10 @@
   border: 1px solid transparent;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
   transition: transform 0.3s ease;
-
-  &:hover {
-    transform: scale(1.02);
-    border: 1px solid variables.$dark-grey;
-  }
+}
+.collectionPreview:hover {
+  transform: scale(1.02);
+  border: 1px solid rgb(51, 51, 51);
 }
 
 .collectionPreviewTitle {
@@ -47,16 +43,12 @@
 .mintBtn {
   border-radius: 0;
   border: none;
-  background-color: variables.$project-green !important;
+  background-color: #208359 !important;
   padding: 10px 50px;
   width: 100%;
-
-  &:hover {
-    background-color: color.adjust(
-      $color: variables.$project-green,
-      $lightness: 10%
-    ) !important;
-  }
+}
+.mintBtn:hover {
+  background-color: rgb(42.0122699387, 171.9877300613, 116.8466257669) !important;
 }
 
 .globeIcon {
@@ -64,30 +56,28 @@
   cursor: pointer;
 }
 
-.viewAllTokens {
-  :hover {
-    color: variables.$font-color-h;
-  }
-  svg {
-    height: 22px;
-  }
+.viewAllTokens :hover {
+  color: rgb(154, 154, 154);
+}
+.viewAllTokens svg {
+  height: 22px;
 }
 
 .infoIcon {
   height: 18px;
   margin-left: 6px;
   cursor: help;
-  &:focus {
-    outline: none !important;
-  }
+}
+.infoIcon:focus {
+  outline: none !important;
 }
 
 .backIcon {
   height: 18px;
   cursor: pointer;
-  &:focus {
-    outline: none !important;
-  }
+}
+.backIcon:focus {
+  outline: none !important;
 }
 
 @media only screen and (max-width: 800px) {
@@ -95,15 +85,13 @@
     height: 15px;
   }
 }
-
 .formInput {
-  color: variables.$dark-grey !important;
+  color: rgb(51, 51, 51) !important;
   border-radius: 0 !important;
-  border-color: variables.$lightest-grey;
-
-  &:focus {
-    border-color: variables.$project-blue !important;
-  }
+  border-color: rgb(154, 154, 154);
+}
+.formInput:focus {
+  border-color: #267c93 !important;
 }
 
 .overview {
@@ -122,10 +110,9 @@
 .copyData {
   text-decoration: underline;
   cursor: pointer;
-
-  &:hover {
-    color: variables.$lightest-grey;
-  }
+}
+.copyData:hover {
+  color: rgb(154, 154, 154);
 }
 
 .previewBanner {
@@ -143,25 +130,24 @@
 }
 
 .collectionHeaderCol {
-  background-color: variables.$very-dark-grey;
+  background-color: rgb(34, 34, 34);
 }
 
 .mintSelect {
-  color: variables.$dark-grey !important;
+  color: rgb(51, 51, 51) !important;
 }
 
 .mintingForRadio {
   margin-bottom: 0;
   min-height: unset;
-  input {
-    border-color: transparent !important;
-    background-color: white !important;
-    cursor: pointer;
-  }
-
-  input:checked {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2.3' fill='%23000'/%3e%3c/svg%3e") !important;
-  }
+}
+.mintingForRadio input {
+  border-color: transparent !important;
+  background-color: white !important;
+  cursor: pointer;
+}
+.mintingForRadio input:checked {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2.3' fill='%23000'/%3e%3c/svg%3e") !important;
 }
 
 .loader {
@@ -170,19 +156,17 @@
   margin-left: 5px;
 }
 
-.marketplace {
-  &:hover {
-    opacity: 0.75;
-  }
+.marketplace:hover {
+  opacity: 0.75;
 }
 
 .trafficLight {
-  height: variables.$font-size;
-  width: variables.$font-size;
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
   display: inline-block;
   animation: flashing 1s infinite;
-  background-color: variables.$lightest-grey;
+  background-color: rgb(154, 154, 154);
 }
 
 .trafficLightGreen {
@@ -221,8 +205,8 @@
 }
 
 .phaseTimeTagComplete {
-  border: 1px solid variables.$font-color-h;
-  color: variables.$font-color-h;
+  border: 1px solid rgb(154, 154, 154);
+  color: rgb(154, 154, 154);
 }
 
 .phaseTimeTagActive {
@@ -231,8 +215,8 @@
 }
 
 .phaseTimeTagUpcoming {
-  border: 1px solid variables.$project-orange;
-  color: variables.$project-orange;
+  border: 1px solid #ffa500;
+  color: #ffa500;
 }
 
 .artistSignature {
@@ -242,7 +226,7 @@
 }
 
 .tokenContainer {
-  background-color: variables.$nextgen-grey;
+  background-color: rgb(40, 40, 40);
 }
 
 .mintDetails {
@@ -261,20 +245,20 @@
   background-color: transparent;
   border: none;
   padding-right: 10px;
-  a {
-    line-height: 30px;
-  }
-  button {
-    font-size: larger !important;
-    font-weight: bolder !important;
-    padding: 0;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    @media only screen and (max-width: 800px) {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
+}
+.filterDropdown a {
+  line-height: 30px;
+}
+.filterDropdown button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+@media only screen and (max-width: 800px) {
+  .filterDropdown button::after {
+    margin-top: 0.5rem;
   }
 }
 
@@ -286,12 +270,12 @@
 .copyIcon {
   height: 18px;
   cursor: pointer;
-  &:hover {
-    color: variables.$lightest-grey;
-  }
-  &:focus {
-    outline: none !important;
-  }
+}
+.copyIcon:hover {
+  color: rgb(154, 154, 154);
+}
+.copyIcon:focus {
+  outline: none !important;
 }
 
 .nextgenCarousel {
@@ -299,27 +283,24 @@
   position: relative;
   scroll-behavior: smooth;
   width: calc(100% - 60px);
-
-  &::-webkit-scrollbar {
-    height: 8px;
-    cursor: pointer;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: variables.$nextgen-grey;
-    border-radius: 10px;
-    border: 1px solid variables.$off-white;
-  }
-
-  &::-webkit-scrollbar-track {
-    width: 50%;
-    background: variables.$off-white;
-    border-radius: 10px;
-  }
-
-  // Firefox
-  @supports (scrollbar-color: auto) {
-    scrollbar-color: darkgrey variables.$off-white;
+}
+.nextgenCarousel::-webkit-scrollbar {
+  height: 8px;
+  cursor: pointer;
+}
+.nextgenCarousel::-webkit-scrollbar-thumb {
+  background-color: rgb(40, 40, 40);
+  border-radius: 10px;
+  border: 1px solid rgb(215, 215, 215);
+}
+.nextgenCarousel::-webkit-scrollbar-track {
+  width: 50%;
+  background: rgb(215, 215, 215);
+  border-radius: 10px;
+}
+@supports (scrollbar-color: auto) {
+  .nextgenCarousel {
+    scrollbar-color: darkgrey rgb(215, 215, 215);
     scrollbar-width: thin;
   }
 }
@@ -329,70 +310,60 @@
   cursor: pointer;
   padding-left: 15px;
   padding-right: 15px;
-  svg {
-    height: 30px;
-  }
+}
+.nextgenCarouselLeft svg,
+.nextgenCarouselRight svg {
+  height: 30px;
 }
 
 .slideshowContainer {
-  background-color: variables.$nextgen-grey;
+  background-color: rgb(40, 40, 40);
 }
 
 .countdownContainer {
-  background-color: variables.$very-dark-grey;
+  background-color: rgb(34, 34, 34);
   padding: 15px 20px;
   width: 100%;
   color: white;
-  box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
-    1px 3px 6px 0px rgba(0, 0, 0, 0.15),
-    -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
-    -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
-    6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
+  box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02), 1px 3px 6px 0px rgba(0, 0, 0, 0.15), -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02), -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset, 6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 0.5rem;
 }
 
-.logsTable {
-  tr td {
-    white-space: nowrap;
-  }
-  tr td:first-child {
-    width: 1%;
-  }
-
-  tr {
-    line-height: 40px;
-  }
-
-  tbody tr:nth-child(odd) {
-    background-color: variables.$almost-very-dark-grey;
-  }
-
-  & > :not(caption) > * > * {
-    padding: 0.5rem !important;
-  }
+.logsTable tr td {
+  white-space: nowrap;
+}
+.logsTable tr td:first-child {
+  width: 1%;
+}
+.logsTable tr {
+  line-height: 40px;
+}
+.logsTable tbody tr:nth-child(odd) {
+  background-color: rgb(30, 30, 30);
+}
+.logsTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
 }
 
 .collectionProvenanceAccordion {
   border-radius: 0 !important;
-  button {
-    background-color: variables.$almost-very-dark-grey !important;
-  }
+}
+.collectionProvenanceAccordion button {
+  background-color: rgb(30, 30, 30) !important;
 }
 
 .collectionProvenanceAccordionOdd {
   border-radius: 0 !important;
-  button {
-    background-color: variables.$very-dark-grey !important;
-  }
+}
+.collectionProvenanceAccordionOdd button {
+  background-color: rgb(34, 34, 34) !important;
 }
 
-.collectionProvenanceAccordionButtonHideCaret {
-  &::after {
-    display: none !important;
-  }
+.collectionProvenanceAccordionButtonHideCaret::after {
+  display: none !important;
 }
 
 .collectionProvenanceAccordionButton {
@@ -404,12 +375,12 @@
 
 .collectionProvenanceAccordionBody {
   color: white;
-  background-color: variables.$almost-very-dark-grey !important;
+  background-color: rgb(30, 30, 30) !important;
 }
 
 .collectionProvenanceAccordionBodyOdd {
   color: white;
-  background-color: variables.$very-dark-grey !important;
+  background-color: rgb(34, 34, 34) !important;
 }
 
 .logsScrollContainer {
@@ -426,52 +397,45 @@
   min-height: 450px;
 }
 
-.traitsAccordion {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5 {
-    float: none;
-  }
-
-  button {
-    padding-left: 0;
-    padding-right: 0;
-    font-weight: bold;
-    background-color: variables.$very-dark-grey !important;
-  }
+.traitsAccordion h1,
+.traitsAccordion h2,
+.traitsAccordion h3,
+.traitsAccordion h4,
+.traitsAccordion h5 {
+  float: none;
+}
+.traitsAccordion button {
+  padding-left: 0;
+  padding-right: 0;
+  font-weight: bold;
+  background-color: rgb(34, 34, 34) !important;
 }
 
 .traitsAccordionItem {
-  background-color: variables.$very-dark-grey !important;
+  background-color: rgb(34, 34, 34) !important;
 }
 
 .traitsAccordionBody {
   padding: 0px;
-  color: variables.$font-color;
-  background-color: variables.$very-dark-grey !important;
+  color: white;
+  background-color: rgb(34, 34, 34) !important;
 }
 
 .listed {
   font-weight: bold;
 }
 
-.rarityDropdown {
-  button {
-    padding: 6px 20px;
-    background-color: transparent !important;
-    border: none !important;
-
-    &:hover {
-      color: variables.$font-color-h;
-    }
-
-    @media only screen and (max-width: 800px) {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
+.rarityDropdown button {
+  padding: 6px 20px;
+  background-color: transparent !important;
+  border: none !important;
+}
+.rarityDropdown button:hover {
+  color: rgb(154, 154, 154);
+}
+@media only screen and (max-width: 800px) {
+  .rarityDropdown button::after {
+    margin-top: 0.5rem;
   }
 }
 
@@ -480,10 +444,9 @@
   cursor: default;
   padding: 20px;
   transition: transform 0.3s ease;
-
-  &:hover {
-    transform: scale(1.015);
-  }
+}
+.phaseBox:hover {
+  transform: scale(1.015);
 }
 
 .exploreBtn {
@@ -493,11 +456,10 @@
   font-weight: bold;
   padding-left: 20px;
   padding-right: 20px;
-
-  &:hover {
-    background-color: white;
-    color: black;
-  }
+}
+.exploreBtn:hover {
+  background-color: white;
+  color: black;
 }
 
 .collectorSetPill {
@@ -511,11 +473,10 @@
   padding-top: 10px;
   padding-bottom: 10px;
   cursor: pointer;
-
-  &:hover {
-    background-color: variables.$off-white;
-    color: black;
-  }
+}
+.collectorSetPill:hover {
+  background-color: rgb(215, 215, 215);
+  color: black;
 }
 
 .collectorSetPillSelected {
@@ -526,11 +487,9 @@
 
 .collectorSetAccordionBody {
   color: white;
-  background-color: variables.$nextgen-grey;
+  background-color: rgb(40, 40, 40);
 }
 
-.collectorSetAccordionButtonUltimate {
-  &::after {
-    display: none;
-  }
+.collectorSetAccordionButtonUltimate::after {
+  display: none;
 }

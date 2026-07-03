@@ -1,13 +1,10 @@
-@use "sass:color";
-@use "../../styles/variables.scss" as variables;
-
 .main {
   min-height: 100vh;
 }
 
 .mainContainer {
-  background-color: variables.$bg-color-2;
-  min-height: calc(100vh - variables.$header-height);
+  background-color: rgb(34, 34, 34);
+  min-height: calc(100vh - 100px);
   padding-bottom: 20px;
 }
 
@@ -37,28 +34,25 @@
 }
 
 .sort {
-  color: variables.$font-color;
+  color: white;
   cursor: pointer;
   margin-right: 15px;
   text-decoration: none;
-
-  &:hover {
-    color: white !important;
-  }
+}
+.sort:hover {
+  color: white !important;
 }
 
-.sortDirection {
-  &:hover {
-    color: variables.$off-white;
-  }
+.sortDirection:hover {
+  color: rgb(215, 215, 215);
 }
 
 .disabled {
-  color: variables.$lightest-grey;
+  color: rgb(154, 154, 154);
   text-decoration: none;
-  &:hover {
-    color: white;
-  }
+}
+.disabled:hover {
+  color: white;
 }
 
 .artHeader {
@@ -79,7 +73,7 @@
 .artFormatLabel {
   flex: 1;
   text-align: center;
-  color: variables.$font-color;
+  color: white;
 }
 
 .artControls {
@@ -124,10 +118,7 @@
   overflow: hidden;
   border-radius: 8px;
   background: rgba(19, 19, 22, 0.9);
-  box-shadow:
-    inset 0 0 0 1px rgba(55, 55, 62, 0.6),
-    0 10px 15px -3px rgba(0, 0, 0, 0.2),
-    0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(55, 55, 62, 0.6), 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(8px);
 }
 
@@ -137,15 +128,13 @@
   height: 1.625rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid variables.$almost-very-dark-grey;
+  border: 1px solid rgb(30, 30, 30);
   border-radius: 4px;
   background: transparent;
-  color: variables.$lightest-grey;
+  color: rgb(154, 154, 154);
   padding: 0 0.5rem;
   text-align: center;
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -175,20 +164,15 @@
   background: transparent;
   color: #efeff1;
   padding: 0;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    opacity 0.2s ease;
-
-  &:hover:not(:disabled) {
-    background-color: #37373e;
-    color: #efeff1;
-  }
-
-  &:disabled {
-    cursor: default;
-    opacity: 0.35;
-  }
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+.artSlideButton:hover:not(:disabled) {
+  background-color: #37373e;
+  color: #efeff1;
+}
+.artSlideButton:disabled {
+  cursor: default;
+  opacity: 0.35;
 }
 
 .artSlideIcon {
@@ -197,15 +181,12 @@
 }
 
 .memePageTab {
-  color: color.scale(
-    variables.$font-color,
-    $lightness: -(variables.$darken-percentage)
-  );
+  color: rgb(178.5, 178.5, 178.5);
   margin-right: 15px;
   cursor: pointer;
-  &:hover {
-    color: white;
-  }
+}
+.memePageTab:hover {
+  color: white;
 }
 
 .memePageTabActive {
@@ -217,7 +198,6 @@
     font-size: 8px;
   }
 }
-
 .memesCarousel {
   position: relative;
   z-index: 2;
@@ -242,13 +222,11 @@
 }
 
 .rankSubheading {
-  color: variables.$font-color !important;
+  color: white !important;
 }
 
-.hodlersTable {
-  td {
-    width: 50%;
-  }
+.hodlersTable td {
+  width: 50%;
 }
 
 .overviewColumn {
@@ -267,46 +245,40 @@
   background-color: transparent;
   border: none;
   width: 100%;
-  a {
-    line-height: 30px;
-  }
-  button {
-    font-size: larger !important;
-    font-weight: bolder !important;
-    cursor: copy;
-    padding: 0;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    &::after {
-      margin-top: 0.8rem;
-    }
-  }
-  div {
-    width: 80%;
-  }
+}
+.activityFilterDropdown a {
+  line-height: 30px;
+}
+.activityFilterDropdown button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  cursor: copy;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.activityFilterDropdown button::after {
+  margin-top: 0.8rem;
+}
+.activityFilterDropdown div {
+  width: 80%;
 }
 
 @media only screen and (max-width: 800px) {
-  .activityFilterDropdown {
-    button {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
+  .activityFilterDropdown button::after {
+    margin-top: 0.5rem;
   }
 }
-
 .tabFocus {
   float: left;
   white-space: nowrap;
   cursor: pointer;
   margin-right: 20px;
-  color: variables.$lightest-grey;
+  color: rgb(154, 154, 154);
   text-decoration: none;
-
-  &:hover {
-    color: white;
-  }
+}
+.tabFocus:hover {
+  color: white;
 }
 
 .tabFocusActive {
@@ -322,39 +294,31 @@
   background-color: transparent;
   border: none;
   display: inline-block;
-
-  a {
-    line-height: 30px;
-  }
-  button {
-    color: variables.$lightest-grey !important;
-    font-size: inherit;
-    padding: 0;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    &::after {
-      margin-top: 0.8rem;
-    }
-  }
-  div {
-    width: 60%;
-  }
+}
+.volumeDropdown a {
+  line-height: 30px;
+}
+.volumeDropdown button {
+  color: rgb(154, 154, 154) !important;
+  font-size: inherit;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.volumeDropdown button::after {
+  margin-top: 0.8rem;
+}
+.volumeDropdown div {
+  width: 60%;
 }
 
 @media only screen and (max-width: 800px) {
-  .volumeDropdown {
-    button {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
+  .volumeDropdown button::after {
+    margin-top: 0.5rem;
   }
 }
-
-.volumeDropdownEnabled {
-  button {
-    color: white !important;
-  }
+.volumeDropdownEnabled button {
+  color: white !important;
 }
 
 .leaderboardNavigationLeft {
@@ -373,7 +337,6 @@
     padding-bottom: 10px;
   }
 }
-
 .nftImageWrapper {
   display: flex;
   min-width: 0;
@@ -386,42 +349,38 @@
   background-color: transparent;
   border: none;
   padding-right: 25px;
-  a {
-    line-height: 30px;
-  }
-  button {
-    font-size: larger !important;
-    font-weight: bolder !important;
-    cursor: copy;
-    padding: 0;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    &::after {
-      margin-top: 0.8rem;
-    }
-  }
-  div {
-    width: 60%;
-  }
+}
+.seasonDropdown a {
+  line-height: 30px;
+}
+.seasonDropdown button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  cursor: copy;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.seasonDropdown button::after {
+  margin-top: 0.8rem;
+}
+.seasonDropdown div {
+  width: 60%;
 }
 
 @media only screen and (max-width: 800px) {
-  .seasonDropdown {
-    button {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
+  .seasonDropdown button::after {
+    margin-top: 0.5rem;
   }
 }
-
 .viewAllLink {
   font-size: 15px !important;
-  font-family: variables.$main-font;
+  font-family: "Montserrat", sans-serif;
   font-weight: lighter;
   margin-left: 15px;
-
-  @media only screen and (max-width: 800px) {
+}
+@media only screen and (max-width: 800px) {
+  .viewAllLink {
     font-size: 12px !important;
   }
 }
@@ -429,16 +388,17 @@
 .buttonIcon {
   width: 30px;
   cursor: pointer;
-
-  &:hover {
-    opacity: 0.75;
-  }
-
-  @media only screen and (max-width: 1200px) {
+}
+.buttonIcon:hover {
+  opacity: 0.75;
+}
+@media only screen and (max-width: 1200px) {
+  .buttonIcon {
     width: 26px;
   }
-
-  @media only screen and (max-width: 800px) {
+}
+@media only screen and (max-width: 800px) {
+  .buttonIcon {
     width: 22px;
   }
 }
@@ -449,30 +409,28 @@
   background-color: transparent;
   border: none;
   padding-right: 25px;
-  a,
-  > button {
-    line-height: 30px;
-  }
-  > button {
-    font-size: larger !important;
-    font-weight: bolder !important;
-    cursor: copy;
-    padding: 0;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    &::after {
-      margin-top: 0.8rem;
-    }
-  }
-  div {
-    max-height: 65vh;
-    overflow-y: auto;
-  }
-  @media only screen and (max-width: 800px) {
-    button {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
+}
+.rememesSortDropdown a,
+.rememesSortDropdown > button {
+  line-height: 30px;
+}
+.rememesSortDropdown > button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  cursor: copy;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.rememesSortDropdown > button::after {
+  margin-top: 0.8rem;
+}
+.rememesSortDropdown div {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+@media only screen and (max-width: 800px) {
+  .rememesSortDropdown button::after {
+    margin-top: 0.5rem;
   }
 }

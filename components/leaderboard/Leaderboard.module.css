@@ -1,6 +1,3 @@
-@use "sass:color";
-@use "../../styles/variables.scss" as variables;
-
 .scrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
@@ -56,7 +53,7 @@
 }
 
 .networkStatLabel {
-  color: variables.$lightest-grey;
+  color: rgb(154, 154, 154);
   font-size: 0.85rem;
   font-weight: 700;
   line-height: 1;
@@ -76,24 +73,20 @@
     align-items: flex-start;
     flex-direction: column;
   }
-
   .networkStats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     margin-left: 0;
     width: 100%;
   }
-
   .networkStat {
     min-width: 0;
   }
 }
-
 @media only screen and (max-width: 700px) {
   .networkStats {
     grid-template-columns: 1fr;
   }
 }
-
 .networkToolbar {
   background-color: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.075);
@@ -128,7 +121,7 @@
 }
 
 .networkViewTabs {
-  color: variables.$lightest-grey;
+  color: rgb(154, 154, 154);
   font-size: 1.35rem;
   font-weight: 800;
   line-height: 1;
@@ -194,13 +187,13 @@
   line-height: 1;
   font-size: larger;
   font-weight: bold;
-  color: variables.$lightest-grey;
+  color: rgb(154, 154, 154);
 }
 
 .tdhViewSegmentedControl {
   align-items: center;
-  background-color: variables.$almost-very-dark-grey;
-  border: 1px solid variables.$dark-grey;
+  background-color: rgb(30, 30, 30);
+  border: 1px solid rgb(51, 51, 51);
   border-radius: 9999px;
   display: inline-flex;
   line-height: 1;
@@ -213,15 +206,14 @@
   background: transparent;
   border: 0;
   border-radius: 9999px;
-  color: variables.$lightest-grey;
+  color: rgb(154, 154, 154);
   font-size: 0.8em;
   font-weight: bold;
   line-height: 1;
   padding: 6px 10px;
-
-  &:hover {
-    color: white;
-  }
+}
+.tdhViewSegment:hover {
+  color: white;
 }
 
 .focusToggle {
@@ -235,20 +227,16 @@
   display: none;
 }
 
-@media only screen and (max-width: 760px),
-  (pointer: coarse) and (max-width: 900px) {
+@media only screen and (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
   .networkHeader {
     gap: 1rem;
   }
-
   .networkToolbar {
     min-height: 0;
   }
-
   .scrollContainer {
     overflow-x: visible;
   }
-
   .networkToolbarTop {
     align-items: stretch;
     flex-direction: column;
@@ -256,49 +244,41 @@
     min-height: 0;
     padding: 0.875rem 1rem;
   }
-
   .networkToolbarSearchRow {
     justify-content: stretch;
     padding: 0.75rem 1rem;
   }
-
   .networkViewTabs {
     font-size: 1rem;
     line-height: 1.1;
     width: 100%;
   }
-
   .networkFilters {
     align-items: stretch;
     flex-direction: column;
     gap: 0.5rem;
     width: 100%;
   }
-
   .networkFilters .contentDropdown,
   .networkFilters .contentDropdown button {
     max-width: 100%;
     width: 100%;
   }
-
   .networkFilters .contentDropdown button {
     justify-content: flex-start;
     min-height: 32px;
     text-align: left;
     white-space: normal;
   }
-
   .focusToggle {
     display: grid;
     gap: 0.5rem;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
   }
-
   .focusToggle > span {
     display: none;
   }
-
   .focusToggle .focus {
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 9999px;
@@ -307,33 +287,28 @@
     text-align: center;
     white-space: normal;
   }
-
   .focusToggle .focus:not(.disabled) {
-    background-color: variables.$font-color;
-    color: variables.$very-dark-grey;
+    background-color: white;
+    color: rgb(34, 34, 34);
   }
-
   .focusToggle .focus.disabled {
     border-color: rgba(255, 255, 255, 0.08);
   }
-
   .leaderboardTableShell {
     -webkit-overflow-scrolling: touch;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     padding-bottom: 0.5rem;
   }
-
   .leaderboardTableFrameWithCue {
     padding-top: 2rem;
   }
-
   .scrollCue {
     align-items: center;
-    background-color: variables.$almost-very-dark-grey;
+    background-color: rgb(30, 30, 30);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 9999px;
-    color: variables.$font-color;
+    color: white;
     display: inline-flex;
     height: 1.55rem;
     justify-content: center;
@@ -342,33 +317,27 @@
     top: 0.1rem;
     width: 2rem;
     z-index: 1;
-
-    svg {
-      height: 1rem;
-      width: 1rem;
-    }
   }
-
+  .scrollCue svg {
+    height: 1rem;
+    width: 1rem;
+  }
   .scrollCueLeft {
     left: 0;
   }
-
   .scrollCueRight {
     right: 0;
   }
-
   .cardsCollectedTable {
     min-width: 64rem;
     table-layout: auto;
     width: max-content;
   }
-
   .interactionsTable {
     min-width: 78rem;
     table-layout: auto;
     width: max-content;
   }
-
   .cardsCollectedTable th:first-child,
   .cardsCollectedTable td:first-child,
   .interactionsTable th:first-child,
@@ -376,7 +345,6 @@
     min-width: 4rem;
     width: auto;
   }
-
   .cardsCollectedTable th:nth-child(2),
   .cardsCollectedTable td:nth-child(2),
   .interactionsTable th:nth-child(2),
@@ -385,7 +353,6 @@
     min-width: 16rem;
     width: auto;
   }
-
   .cardsCollectedTable th:not(:first-child):not(:nth-child(2)),
   .cardsCollectedTable td:not(:first-child):not(:nth-child(2)),
   .interactionsTable th:not(:first-child):not(:nth-child(2)),
@@ -393,21 +360,19 @@
     min-width: 7rem;
   }
 }
-
 .tdhViewSegmentActive {
-  background-color: variables.$font-color;
-  color: variables.$very-dark-grey;
-
-  &:hover {
-    color: variables.$very-dark-grey;
-  }
+  background-color: white;
+  color: rgb(34, 34, 34);
+}
+.tdhViewSegmentActive:hover {
+  color: rgb(34, 34, 34);
 }
 
 .pageHeader {
   white-space: nowrap;
-  h1 {
-    margin-bottom: 0px !important;
-  }
+}
+.pageHeader h1 {
+  margin-bottom: 0px !important;
 }
 
 .hodler {
@@ -416,9 +381,9 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.2rem;
-  span {
-    overflow-wrap: break-word;
-  }
+}
+.hodler span {
+  overflow-wrap: break-word;
 }
 
 .memeLabRank {
@@ -428,9 +393,9 @@
 
 .memeLabHodler {
   width: 80%;
-  span {
-    overflow-wrap: break-word;
-  }
+}
+.memeLabHodler span {
+  overflow-wrap: break-word;
 }
 
 .memeLabBalance {
@@ -459,7 +424,7 @@
 
 .viewAllLink {
   font-size: 15px !important;
-  font-family: variables.$main-font;
+  font-family: "Montserrat", sans-serif;
   font-weight: lighter;
 }
 
@@ -475,20 +440,17 @@
     line-height: 11px;
   }
 }
-
 @media only screen and (max-width: 800px) {
   .viewAllLink {
     font-size: 12px !important;
   }
-
   .tdhBoost {
     font-size: 9px;
     line-height: 9px;
   }
 }
-
 .boolean {
-  height: variables.$font-size;
+  height: 16px;
 }
 
 .caret {
@@ -498,62 +460,52 @@
 
 @media only screen and (max-width: 1200px) {
   .boolean {
-    height: variables.$font-smaller !important;
+    height: 14px !important;
   }
-
   .caret {
     height: 12px;
   }
 }
-
 @media only screen and (max-width: 800px) {
   .boolean {
-    height: variables.$font-smallest !important;
+    height: 12px !important;
   }
 }
-
 .disabled {
-  color: variables.$lightest-grey;
-  &:hover {
-    color: white;
-  }
+  color: rgb(154, 154, 154);
+}
+.disabled:hover {
+  color: white;
 }
 
-.memeLabLeaderboardTable {
-  tr td {
-    white-space: nowrap;
-    align-items: center;
-    vertical-align: middle;
-    span {
-      float: left;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      a {
-        line-height: 40px;
-      }
-    }
-  }
-
-  th {
-    white-space: nowrap;
-    line-height: 28px;
-  }
-
-  th span {
-    white-space: nowrap;
-  }
-
-  td {
-    line-height: 40px;
-  }
-
-  thead tr {
-    background-color: transparent !important;
-  }
-
-  tr:nth-child(even) {
-    background-color: variables.$almost-very-dark-grey;
-  }
+.memeLabLeaderboardTable tr td {
+  white-space: nowrap;
+  align-items: center;
+  vertical-align: middle;
+}
+.memeLabLeaderboardTable tr td span {
+  float: left;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+.memeLabLeaderboardTable tr td span a {
+  line-height: 40px;
+}
+.memeLabLeaderboardTable th {
+  white-space: nowrap;
+  line-height: 28px;
+}
+.memeLabLeaderboardTable th span {
+  white-space: nowrap;
+}
+.memeLabLeaderboardTable td {
+  line-height: 40px;
+}
+.memeLabLeaderboardTable thead tr {
+  background-color: transparent !important;
+}
+.memeLabLeaderboardTable tr:nth-child(even) {
+  background-color: rgb(30, 30, 30);
 }
 
 .leaderboardTableFrame,
@@ -566,7 +518,7 @@
 }
 
 .leaderboardEmpty {
-  color: variables.$font-color;
+  color: white;
   padding: 1rem 0;
 }
 
@@ -574,12 +526,11 @@
   display: inline-flex;
   flex-shrink: 0;
   line-height: 1;
-
-  span {
-    float: none !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-  }
+}
+.collectorLevel span {
+  float: none !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 @media only screen and (max-width: 1600px) {
@@ -587,29 +538,22 @@
     white-space: break-spaces !important;
   }
 }
-
 @media only screen and (max-width: 1290px) {
   .hodler {
     min-width: 220px;
   }
 }
-
-.nftLeaderboardTable {
-  tr td {
-    white-space: nowrap;
-  }
-
-  tr td:first-child {
-    width: 1%;
-  }
-
-  td {
-    line-height: 40px;
-  }
-
-  tr:nth-child(even) {
-    background-color: variables.$almost-very-dark-grey;
-  }
+.nftLeaderboardTable tr td {
+  white-space: nowrap;
+}
+.nftLeaderboardTable tr td:first-child {
+  width: 1%;
+}
+.nftLeaderboardTable td {
+  line-height: 40px;
+}
+.nftLeaderboardTable tr:nth-child(even) {
+  background-color: rgb(30, 30, 30);
 }
 
 .nftLeaderboardTable > :not(caption) > * > * {
@@ -630,12 +574,11 @@
   padding-left: 10px;
   padding-right: 10px;
   cursor: pointer;
-  width: calc(100% / 3);
+  width: 33.3333333333%;
   text-align: center;
-
-  &:first-of-type {
-    border: 2px solid white;
-  }
+}
+.focusSwitchLabel:first-of-type {
+  border: 2px solid white;
 }
 
 .focusSwitchLabelExtraPadding {
@@ -644,8 +587,8 @@
 }
 
 .focusSwitchLabelActive {
-  background-color: variables.$font-color;
-  color: variables.$bg-color-2;
+  background-color: white;
+  color: rgb(34, 34, 34);
 }
 
 .focusSwitch {
@@ -654,17 +597,17 @@
   float: left;
   height: 48px;
   line-height: 48px;
-  input {
-    cursor: pointer;
-    line-height: 48px;
-    margin-top: 15px;
-    background-color: variables.$project-yellow;
-    border-color: variables.$very-dark-grey !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%231e1e1e'/%3e%3c/svg%3e") !important;
-  }
-  input:checked {
-    background-color: variables.$project-orange !important;
-  }
+}
+.focusSwitch input {
+  cursor: pointer;
+  line-height: 48px;
+  margin-top: 15px;
+  background-color: #ffff00;
+  border-color: rgb(34, 34, 34) !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%231e1e1e'/%3e%3c/svg%3e") !important;
+}
+.focusSwitch input:checked {
+  background-color: #ffa500 !important;
 }
 
 @media only screen and (max-width: 1200px) {
@@ -672,13 +615,11 @@
     margin-left: 10px;
   }
 }
-
 @media only screen and (max-width: 800px) {
   .focusSwitch {
     margin-left: 20px;
   }
 }
-
 .contentDropdown {
   display: inline-block;
   line-height: 48px;
@@ -686,35 +627,35 @@
   text-align: center;
   background-color: transparent;
   border: none;
-  a,
-  .contentDropdownItem {
-    line-height: 30px;
-  }
-  button {
-    align-items: center;
-    display: inline-flex;
-    font-size: larger !important;
-    font-weight: bolder !important;
-    gap: 0.35rem;
-    padding: 0;
-    background-color: transparent !important;
-    border: 0;
-    border-color: transparent !important;
-    color: variables.$font-color;
-    &::after {
-      display: none;
-    }
-  }
-  div {
-    width: 60%;
-  }
+}
+.contentDropdown a,
+.contentDropdown .contentDropdownItem {
+  line-height: 30px;
+}
+.contentDropdown button {
+  align-items: center;
+  display: inline-flex;
+  font-size: larger !important;
+  font-weight: bolder !important;
+  gap: 0.35rem;
+  padding: 0;
+  background-color: transparent !important;
+  border: 0;
+  border-color: transparent !important;
+  color: white;
+}
+.contentDropdown button::after {
+  display: none;
+}
+.contentDropdown div {
+  width: 60%;
 }
 
 .contentDropdownMenu {
-  background-color: variables.$very-dark-grey;
-  border: 1px solid variables.$dark-grey;
+  background-color: rgb(34, 34, 34);
+  border: 1px solid rgb(51, 51, 51);
   border-radius: 0.375rem;
-  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 35%);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
   left: 50%;
@@ -728,51 +669,49 @@
 }
 
 .contentDropdownItem {
-  color: variables.$font-color;
-  font-size: variables.$font-size !important;
+  color: white;
+  font-size: 16px !important;
   font-weight: normal !important;
   justify-content: flex-start;
   padding: 0.25rem 1rem !important;
   text-align: left;
   white-space: nowrap;
   width: 100%;
-
-  &:hover,
-  &:focus {
-    background-color: variables.$dark-grey !important;
-    color: white;
-  }
+}
+.contentDropdownItem:hover, .contentDropdownItem:focus {
+  background-color: rgb(51, 51, 51) !important;
+  color: white;
 }
 
 .focus {
   background: transparent;
   border: 0;
-  color: variables.$font-color;
+  color: white;
   cursor: pointer;
   font: inherit;
   padding: 0;
 }
 
 .disabled {
-  color: variables.$lightest-grey;
+  color: rgb(154, 154, 154);
   text-decoration: none;
-  &:hover {
-    color: white;
-  }
+}
+.disabled:hover {
+  color: white;
 }
 
 .museumToggle {
   display: inline-block;
   line-height: 48px;
   margin-right: 25px;
-  input {
-    margin-top: 15px;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e") !important;
-    border-color: black !important;
-  }
-  input:checked {
-    background-color: variables.$project-yellow !important;
-  }
+}
+.museumToggle input {
+  margin-top: 15px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23000'/%3e%3c/svg%3e") !important;
+  border-color: black !important;
+}
+.museumToggle input:checked {
+  background-color: #ffff00 !important;
 }
 
 .loader {
@@ -796,7 +735,6 @@
     transform: rotate(360deg);
   }
 }
-
 @media (min-width: 1300px) {
   .dMdNone {
     display: none !important;
@@ -805,24 +743,18 @@
     display: flex !important;
   }
 }
-
 .interactionsHeader {
   text-align: center;
-  border-bottom: 1px solid variables.$font-color !important;
+  border-bottom: 1px solid white !important;
 }
 
 .statsContainer {
-  background-color: variables.$very-dark-grey;
+  background-color: rgb(34, 34, 34);
   border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 15px 20px;
   min-width: 360px;
   color: white;
-  box-shadow:
-    0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
-    1px 3px 6px 0px rgba(0, 0, 0, 0.15),
-    -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
-    -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
-    6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
+  box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02), 1px 3px 6px 0px rgba(0, 0, 0, 0.15), -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02), -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset, 6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -832,17 +764,15 @@
 .tdBottomPlace {
   font-size: 14px;
   height: 40px;
-  border-bottom: 1px solid variables.$lightest-grey;
-  &.me {
-    background-color: variables.$project-yellow;
-    color: black;
-    border-bottom: 1px solid variables.$lightest-grey;
-  }
+  border-bottom: 1px solid rgb(154, 154, 154);
+}
+.tdBottomPlace.me {
+  background-color: #ffff00;
+  color: black;
+  border-bottom: 1px solid rgb(154, 154, 154);
 }
 
-.highlightedRow {
-  td {
-    background-color: variables.$project-yellow;
-    color: black;
-  }
+.highlightedRow td {
+  background-color: #ffff00;
+  color: black;
 }

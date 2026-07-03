@@ -2,7 +2,7 @@
 
 import LatestActivity from "@/components/latest-activity/LatestActivity";
 import { useSetTitle } from "@/contexts/TitleContext";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 
 export default function NFTActivityPage() {
   useSetTitle("NFT Activity | Network");

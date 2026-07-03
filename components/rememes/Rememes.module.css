@@ -1,20 +1,15 @@
-@use "sass:color";
-@use "../../styles/variables.scss" as variables;
-
 .marketplace {
   margin-left: 5px;
-
-  &:hover {
-    opacity: 0.75;
-  }
+}
+.marketplace:hover {
+  opacity: 0.75;
 }
 
 .marketplaceRememe {
   margin-right: 15px;
-
-  &:hover {
-    opacity: 0.75;
-  }
+}
+.marketplaceRememe:hover {
+  opacity: 0.75;
 }
 
 .memeRefDropdown {
@@ -23,47 +18,45 @@
   background-color: transparent;
   border: none;
   padding-right: 25px;
-  a {
-    line-height: 30px;
-  }
-  button {
-    font-size: larger !important;
-    font-weight: bolder !important;
-    cursor: copy;
-    padding: 0;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    &::after {
-      margin-top: 0.8rem;
-    }
-  }
-  div {
-    max-height: 65vh;
-    overflow-y: auto;
-  }
-
-  @media only screen and (max-width: 800px) {
-    button {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
+}
+.memeRefDropdown a {
+  line-height: 30px;
+}
+.memeRefDropdown button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  cursor: copy;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.memeRefDropdown button::after {
+  margin-top: 0.8rem;
+}
+.memeRefDropdown div {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+@media only screen and (max-width: 800px) {
+  .memeRefDropdown button::after {
+    margin-top: 0.5rem;
   }
 }
 
 .buttonIcon {
   width: 30px;
   cursor: pointer;
-
-  &:hover {
-    opacity: 0.75;
-  }
-
-  @media only screen and (max-width: 1200px) {
+}
+.buttonIcon:hover {
+  opacity: 0.75;
+}
+@media only screen and (max-width: 1200px) {
+  .buttonIcon {
     width: 26px;
   }
-
-  @media only screen and (max-width: 800px) {
+}
+@media only screen and (max-width: 800px) {
+  .buttonIcon {
     width: 22px;
   }
 }
@@ -71,29 +64,26 @@
 .globeIcon {
   margin-right: 8px;
   width: 30px;
-
-  @media only screen and (max-width: 800px) {
+}
+@media only screen and (max-width: 800px) {
+  .globeIcon {
     width: 20px;
   }
 }
 
 .linkIcon {
-  height: variables.$font-size;
+  height: 16px;
   margin-left: 8px;
 }
 
 .userLink {
   text-decoration: none;
-
-  img {
-    margin-right: 8px;
-  }
-
-  &:hover {
-    img {
-      opacity: 0.75;
-    }
-  }
+}
+.userLink img {
+  margin-right: 8px;
+}
+.userLink:hover img {
+  opacity: 0.75;
 }
 
 .tabFocus {
@@ -102,14 +92,13 @@
   cursor: pointer;
   margin-right: 20px;
   color: #9a9a9a;
-
-  &:hover {
-    color: variables.$font-color;
-  }
+}
+.tabFocus:hover {
+  color: white;
 }
 
 .tabActive {
-  color: variables.$font-color;
+  color: white;
 }
 
 .metadataTable > :not(caption) > * > * {
@@ -134,46 +123,42 @@
   width: 100%;
   padding: 0.375rem 0.75rem;
   line-height: 1.5;
-  color: variables.$dark-grey !important;
-  border: 1px solid variables.$lightest-grey;
+  color: rgb(51, 51, 51) !important;
+  border: 1px solid rgb(154, 154, 154);
   border-radius: 0 !important;
-
-  &:focus {
-    border-color: variables.$project-blue !important;
-  }
+}
+.formInput:focus {
+  border-color: #267c93 !important;
 }
 
 .addMemeReferencesDropdown {
   line-height: 48px;
   background-color: transparent;
   border: none;
-  a,
-  > button {
-    line-height: 30px;
-  }
-  svg {
-    color: variables.$off-white;
-    width: 30px;
-    height: 30px;
-
-    &:hover {
-      color: white;
-    }
-  }
-  > button {
-    border: none !important;
-    background-color: transparent !important;
-    padding: 0 !important;
-
-    &::after {
-      border: none !important;
-    }
-  }
-
-  div {
-    max-height: 50vh;
-    overflow-y: auto;
-  }
+}
+.addMemeReferencesDropdown a,
+.addMemeReferencesDropdown > button {
+  line-height: 30px;
+}
+.addMemeReferencesDropdown svg {
+  color: rgb(215, 215, 215);
+  width: 30px;
+  height: 30px;
+}
+.addMemeReferencesDropdown svg:hover {
+  color: white;
+}
+.addMemeReferencesDropdown > button {
+  border: none !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+.addMemeReferencesDropdown > button::after {
+  border: none !important;
+}
+.addMemeReferencesDropdown div {
+  max-height: 50vh;
+  overflow-y: auto;
 }
 
 .addMemeReferenceWrapper {
@@ -183,8 +168,8 @@
 }
 
 .addMemeReferenceDisplay {
-  color: variables.$bg-color-1;
-  background-color: variables.$off-white;
+  color: black;
+  background-color: rgb(215, 215, 215);
   padding: 5px 10px;
   margin-right: 10px;
   border-top-right-radius: 5px;
@@ -194,27 +179,26 @@
 .addMemeReferenceDisplayBtn {
   border: none;
   border-radius: 0;
-  color: variables.$bg-color-1;
-  border-color: variables.$bg-color-1 !important;
+  color: black;
+  border-color: black !important;
   width: 30px;
-  background-color: variables.$off-white;
+  background-color: rgb(215, 215, 215);
   padding: 5px 10px;
-  border-right: 1px solid variables.$bg-color-1;
+  border-right: 1px solid black;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
   cursor: pointer;
   outline: 0 !important;
-
-  &:hover {
-    background-color: white;
-    color: black !important;
-  }
+}
+.addMemeReferenceDisplayBtn:hover {
+  background-color: white;
+  color: black !important;
 }
 
 .addMemeReferenceDisplayBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale(white, $lightness: -20%);
-  color: variables.$lighter-grey-2;
+  background-color: #cccccc;
+  color: rgb(100, 100, 100);
 }
 
 .verifiedIcon {
@@ -236,25 +220,22 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-
-  a {
-    text-decoration: none;
-  }
-
-  &:hover {
-    background-color: variables.$almost-very-dark-grey;
-    border: 1px solid variables.$off-white;
-  }
+}
+.replica a {
+  text-decoration: none;
+}
+.replica:hover {
+  background-color: rgb(30, 30, 30);
+  border: 1px solid rgb(215, 215, 215);
 }
 
 .addRememeTokenList {
   position: relative;
   max-height: 40vh;
   overflow-y: scroll;
-
-  li {
-    word-wrap: break-word;
-  }
+}
+.addRememeTokenList li {
+  word-wrap: break-word;
 }
 
 .connectWalletButton {
@@ -294,15 +275,16 @@
 .addRememeChecklist {
   padding: 0 !important;
   margin: 0 !important;
-  li {
-    list-style-type: none;
-  }
+}
+.addRememeChecklist li {
+  list-style-type: none;
 }
 
 .rememesFiltersRow {
   justify-content: flex-end;
-
-  @media only screen and (max-width: 1200px) {
+}
+@media only screen and (max-width: 1200px) {
+  .rememesFiltersRow {
     justify-content: center;
   }
 }

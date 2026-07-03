@@ -1,4 +1,4 @@
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import {

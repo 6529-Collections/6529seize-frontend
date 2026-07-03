@@ -1,17 +1,11 @@
-@use "../../styles/variables.scss";
-
 .signModalDialog {
-  max-width: min(32rem, calc(100vw - 2rem));
+  max-width: min(32rem, 100vw - 2rem);
   margin: 0.75rem auto;
 }
 
 .signModalSurface {
-  background: linear-gradient(
-    180deg,
-    rgba(38, 39, 43, 0.98) 0%,
-    rgba(19, 19, 22, 0.98) 100%
-  ) !important;
-  color: variables.$font-color !important;
+  background: linear-gradient(180deg, rgba(38, 39, 43, 0.98) 0%, rgba(19, 19, 22, 0.98) 100%) !important;
+  color: white !important;
   border: 1px solid rgba(147, 147, 159, 0.35) !important;
   border-radius: 0.9rem !important;
   overflow: hidden;
@@ -96,11 +90,7 @@
   font-size: 0.98rem !important;
   line-height: 1 !important;
   text-decoration: none !important;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .signModalCancelButton {
@@ -147,25 +137,21 @@
     max-width: calc(100vw - 1rem);
     margin: 0.5rem auto;
   }
-
   .signModalHeader,
   .signModalBody,
   .signModalFooter {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
-
   .signModalFooter {
     justify-content: space-between !important;
   }
-
   .signModalCancelButton,
   .signModalConfirmButton {
     flex: 1;
     min-width: 0;
     font-size: 0.95rem !important;
   }
-
   .signModalLead {
     font-size: 0.95rem;
   }
