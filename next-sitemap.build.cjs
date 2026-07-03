@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 require("tsx/cjs");
 
 const sitemapConfig = require("./next-sitemap.config.ts");

@@ -258,7 +258,6 @@ export function useDeferredNewestDrops({
     };
 
     if (session !== nextSession) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- This commits the derived session before the next paint so deferred-drop capture stays in sync with the current render inputs.
       setSession(nextSession);
     }
   }, [isAppleMobile, latestSerialNo, session, shouldPinToBottom, waveId]);

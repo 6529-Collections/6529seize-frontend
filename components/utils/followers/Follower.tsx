@@ -125,6 +125,7 @@ export default function Follower({
               <UserFollowBtn
                 handle={followerHandle}
                 size={UserFollowBtnSize.SMALL}
+                showMuteButton={false}
               />
             ) : (
               <div className="tw-h-8 tw-w-[7.25rem]" />

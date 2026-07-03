@@ -147,7 +147,6 @@ function RepContributorRow({
           <div className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
             {contributor.pfpUrl ? (
               // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={getScaledImageUri(
                   contributor.pfpUrl,

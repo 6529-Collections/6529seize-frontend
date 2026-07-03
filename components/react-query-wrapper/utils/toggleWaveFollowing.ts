@@ -3,7 +3,6 @@ import type { QueryClient } from "@tanstack/react-query";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "./query-utils";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
-// eslint-disable-next-line import/no-cycle -- QueryKey is canonical in ReactQueryWrapper until the enum is split out.
 import { QueryKey } from "../ReactQueryWrapper";
 
 type SidebarWaveQueryKey =
