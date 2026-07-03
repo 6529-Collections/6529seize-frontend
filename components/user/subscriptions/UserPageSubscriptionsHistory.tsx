@@ -13,7 +13,7 @@ import type { Page } from "@/helpers/Types";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
-import styles from "./UserPageSubscriptions.module.scss";
+import styles from "./UserPageSubscriptions.module.css";
 
 function className(...classNames: readonly (string | undefined)[]): string {
   return classNames

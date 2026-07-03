@@ -78,7 +78,7 @@ export default function WaveDropReply({
           )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-0 tw-flex tw-min-w-0 tw-items-center xl:tw-pr-24">
+          <p className="tw-mb-0 tw-mt-0 tw-flex tw-min-w-0 tw-items-center xl:tw-pr-24">
             <Link
               href={`/${drop.author.handle}`}
               className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"

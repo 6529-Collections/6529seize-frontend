@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";

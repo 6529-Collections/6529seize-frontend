@@ -24,7 +24,7 @@ jest.mock("@headlessui/react", () => ({
   },
 }));
 
-jest.mock("@/components/the-memes/TheMemes.module.scss", () => ({
+jest.mock("@/components/the-memes/TheMemes.module.css", () => ({
   sort: "sort",
   disabled: "disabled",
   volumeDropdown: "volumeDropdown",

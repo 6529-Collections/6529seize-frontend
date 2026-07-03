@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {

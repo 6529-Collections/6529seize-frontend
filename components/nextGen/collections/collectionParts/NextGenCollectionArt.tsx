@@ -26,7 +26,7 @@ import {
   NextGenTokenListedType,
   formatNameForUrl,
 } from "@/components/nextGen/nextgen_helpers";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
 import NextGenTokenList from "../NextGenTokenList";
 

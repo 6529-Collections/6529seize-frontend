@@ -16,7 +16,7 @@ import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Lightbulb from "./Lightbulb";
-import styles from "./NextGenToken.module.scss";
+import styles from "./NextGenToken.module.css";
 import {
   NextGenTokenDownloadDropdownItem,
   Resolution,

@@ -27,7 +27,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DistributionLink } from "../NextGen";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 
 interface Props {
   collection: NextGenCollection;

@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { formatNameForUrl } from "../nextgen_helpers";
 import { NextGenMintCounts } from "./collectionParts/NextGenCollectionHeader";
-import styles from "./NextGen.module.scss";
+import styles from "./NextGen.module.css";
 
 interface Props {
   collection: NextGenCollection;

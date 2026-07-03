@@ -12,7 +12,7 @@ import { formatAddress } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Rememe } from "@/entities/INFT";
 import type { Metadata } from "next";

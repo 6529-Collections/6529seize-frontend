@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./NextGenAdmin.module.scss";
+import styles from "./NextGenAdmin.module.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Col, Container, Row } from "./NextGenAdminShared";
 import {

@@ -20,7 +20,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import {
   getNextGenIconUrl,
   getNextGenImageUrl,
