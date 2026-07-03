@@ -101,8 +101,7 @@ export default function DateCountdown(props: Readonly<Props>) {
       ) : (
         <div
           className={`${styles["skeletonText"]} ${styles["skeletonTitle"]}`}
-          aria-hidden="true"
-        >
+          aria-hidden="true">
           &nbsp;
         </div>
       )}
@@ -121,8 +120,7 @@ export default function DateCountdown(props: Readonly<Props>) {
         ) : (
           <div
             className={`${styles["skeletonText"]} ${styles["skeletonCountdown"]}`}
-            aria-hidden="true"
-          >
+            aria-hidden="true">
             &nbsp;
           </div>
         )}

@@ -24,9 +24,9 @@ export function shouldShowUserSetUpProfileCta({
 }: UserSetUpProfileCtaVisibilityInput): boolean {
   return Boolean(
     !fetchingProfile &&
-    hasValidWalletAuth !== false &&
-    !connectedProfileHandle &&
-    address
+      hasValidWalletAuth !== false &&
+      !connectedProfileHandle &&
+      address
   );
 }
 

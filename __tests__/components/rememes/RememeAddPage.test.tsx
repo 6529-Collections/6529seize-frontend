@@ -295,9 +295,7 @@ describe("RememeAddPage", () => {
     expect(signedMessage).toEqual(expect.stringContaining("Wallet: 0x123"));
     expect(signedMessage).toEqual(expect.stringContaining("Payload Hash:"));
     expect(signedMessage).toEqual(
-      expect.stringContaining(
-        "Purpose: Sign this message to add a 6529 ReMeme."
-      )
+      expect.stringContaining("Purpose: Sign this message to add a 6529 ReMeme.")
     );
   });
 

@@ -52,7 +52,8 @@ export function NextGenTokenImage(
       const handleOrWallet =
         props.token.normalised_handle ?? formatAddress(props.token.owner);
       const profileHref = `/${props.token.normalised_handle ?? props.token.owner}`;
-      const initial = handleOrWallet.trim().charAt(0) || "?";
+      const initial =
+        handleOrWallet.trim().charAt(0) || "?";
       const ownerInfo = (
         <div className="tailwind-scope tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2.5">
           <ProfileAvatar
@@ -222,8 +223,7 @@ export function NextGenTokenImage(
       if (value && date) {
         saleDisplay = (
           <span className="tw-flex tw-items-center">
-            <span className="tw-text-sm tw-text-[#9a9a9a]">{display}</span>
-            &nbsp;
+            <span className="tw-text-[#9a9a9a] tw-text-sm">{display}</span>&nbsp;
             <span className="tw-flex tw-gap-2">
               <span>
                 {Number.parseFloat(value.toFixed(5)).toLocaleString()}{" "}
@@ -287,7 +287,7 @@ export function NextGenTokenImage(
         </span>
         {!props.hide_info && (
           <span
-            className={`tw-flex tw-items-center tw-pt-1 ${
+            className={`tw-pt-1 tw-flex tw-items-center ${
               props.rarity_type ||
               props.show_listing ||
               props.show_max_sale ||

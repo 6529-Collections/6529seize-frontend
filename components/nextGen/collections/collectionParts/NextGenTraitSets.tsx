@@ -205,14 +205,16 @@ export default function NextGenTraitSets(
       );
     }
     return (
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">{content}</div>
+      <div className="tw-pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+        {content}
+      </div>
     );
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-12 tw-pt-2 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+    <div className="tw-pb-12 tw-pt-2 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       {!props.preview && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-6">
+        <div className="tw-pb-6 -tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionHeader
               collection={props.collection}
@@ -223,15 +225,15 @@ export default function NextGenTraitSets(
       )}
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-between tw-gap-4 tw-px-3">
-          <h1 className="tw-min-w-fit tw-whitespace-nowrap">Trait Sets</h1>
+          <h1 className="tw-whitespace-nowrap tw-min-w-fit">Trait Sets</h1>
           {props.preview && (
             <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/trait-sets`}
-              className={`tw-flex tw-items-center tw-gap-2 tw-no-underline ${styles["viewAllTokens"]}`}
+              className={`tw-no-underline tw-flex tw-items-center tw-gap-2 ${styles["viewAllTokens"]}`}
             >
-              <h5 className="tw-mb-0 tw-flex tw-items-center tw-gap-2 tw-text-white">
+              <h5 className="tw-text-white tw-mb-0 tw-flex tw-items-center tw-gap-2">
                 View All
                 <FontAwesomeIcon
                   icon={faArrowCircleRight}
@@ -249,7 +251,7 @@ export default function NextGenTraitSets(
           )}
         </div>
       </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+      <div className="tw-pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
             <div className="-tw-mx-3 tw-flex tw-flex-wrap">
@@ -260,7 +262,7 @@ export default function NextGenTraitSets(
         </div>
       </div>
       {selectedTrait !== ULTIMATE && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
+        <div className="tw-pt-6 -tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-between tw-px-3">
             <span>
               {traitsLoaded ? (
@@ -283,9 +285,9 @@ export default function NextGenTraitSets(
         </div>
       )}
       {selectedTrait === ULTIMATE && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
+        <div className="tw-pt-6 -tw-mx-3 tw-flex tw-flex-wrap">
           <div
-            className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-text-lg tw-font-bold"
+            className="tw-text-lg tw-font-bold tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
             style={{ maxWidth: "100%" }}
           >
             <u>{ULTIMATE} Set</u>
@@ -297,7 +299,7 @@ export default function NextGenTraitSets(
         </div>
       )}
       {selectedTrait !== ULTIMATE && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div className="tw-pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
           <div
             className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
             style={{
@@ -328,7 +330,7 @@ export default function NextGenTraitSets(
         totalResults > 0 &&
         totalResults / PAGE_SIZE > 1 &&
         setsLoaded && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4 tw-pt-2 tw-text-center">
+          <div className="tw-pb-4 tw-pt-2 -tw-mx-3 tw-flex tw-flex-wrap tw-text-center">
             <Pagination
               page={page}
               pageSize={PAGE_SIZE}
@@ -348,15 +350,15 @@ export default function NextGenTraitSets(
         />
       ) : (
         setsLoaded && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+          <div className="tw-pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
             <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
                 )}/trait-sets`}
-                className={`tw-flex tw-items-center tw-justify-center tw-gap-2 tw-no-underline ${styles["viewAllTokens"]}`}
+                className={`tw-no-underline tw-flex tw-items-center tw-justify-center tw-gap-2 ${styles["viewAllTokens"]}`}
               >
-                <h5 className="tw-mb-0 tw-flex tw-items-center tw-gap-2 tw-text-white">
+                <h5 className="tw-text-white tw-mb-0 tw-flex tw-items-center tw-gap-2">
                   View All Trait Sets
                   <FontAwesomeIcon
                     icon={faArrowCircleRight}
@@ -424,7 +426,7 @@ function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
 
   return (
     <Link
-      className="tw-flex tw-gap-2 tw-no-underline hover:tw-underline"
+      className="tw-no-underline hover:tw-underline tw-flex tw-gap-2"
       onClick={(e) => e.stopPropagation()}
       href={`/${props.set.handle ?? props.set.owner}`}
     >
@@ -557,7 +559,7 @@ function TraitSetAccordion(
                 </div>
               </div>
             ))}
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
+          <div className="tw-pt-6 -tw-mx-3 tw-flex tw-flex-wrap">
             <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               {missingValues.length > 0 ? (
                 <>

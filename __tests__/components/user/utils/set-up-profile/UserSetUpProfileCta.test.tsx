@@ -83,11 +83,7 @@ function renderWithProfile(
 ) {
   return render(
     <AuthContext.Provider
-      value={{
-        ...defaultAuthContext,
-        connectedProfile: profile,
-        ...authContext,
-      }}
+      value={{ ...defaultAuthContext, connectedProfile: profile, ...authContext }}
     >
       <UserSetUpProfileCta />
     </AuthContext.Provider>

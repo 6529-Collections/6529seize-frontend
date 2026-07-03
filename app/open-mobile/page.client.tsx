@@ -59,8 +59,8 @@ export default function OpenMobilePage() {
 
   return (
     <ClientOnly>
-      <div className="tailwind-scope tw-flex tw-h-screen tw-flex-col tw-items-center tw-justify-center tw-gap-10 tw-p-4 tw-text-center">
-        <p className="tw-animate-pulse tw-text-2xl tw-font-bold">
+      <div className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen tw-text-center tw-p-4 tw-gap-10">
+        <p className="tw-text-2xl tw-font-bold tw-animate-pulse">
           Opening 6529 Mobile...
         </p>
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1">

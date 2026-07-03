@@ -20,11 +20,15 @@ jest.mock(
   })
 );
 
-jest.mock("@/components/pagination/Pagination", () => (props: any) => (
-  <div data-testid="pagination">
-    <button onClick={() => props.setPage(props.page + 1)}>next</button>
-  </div>
-));
+jest.mock(
+  "@/components/pagination/Pagination",
+  () => (props: any) =>
+    (
+      <div data-testid="pagination">
+        <button onClick={() => props.setPage(props.page + 1)}>next</button>
+      </div>
+    )
+);
 
 jest.mock("@/components/dotLoader/DotLoader", () => () => (
   <div data-testid="loader" />

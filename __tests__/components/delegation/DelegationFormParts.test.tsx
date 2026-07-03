@@ -1,84 +1,74 @@
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent } from '@testing-library/react';
 import {
   DelegationExpiryCalendar,
   DelegationTokenSelection,
   DelegationCloseButton,
-} from "@/components/delegation/DelegationFormParts";
+} from '@/components/delegation/DelegationFormParts';
 
-jest.mock("@fortawesome/react-fontawesome", () => ({
-  FontAwesomeIcon: (p: any) => (
-    <svg data-testid="icon" onClick={p.onClick} {...p} />
-  ),
-}));
+jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid="icon" onClick={p.onClick} {...p}/> }));
 
-jest.mock("react-tooltip", () => ({
+jest.mock('react-tooltip', () => ({
   Tooltip: ({ children, id }: any) => (
-    <div data-testid={`tooltip-${id}`}>{children}</div>
+    <div data-testid={`tooltip-${id}`}>
+      {children}
+    </div>
   ),
 }));
-jest.mock("wagmi", () => ({ useEnsName: () => ({ data: null }) }));
+jest.mock('wagmi', () => ({ useEnsName: () => ({ data: null }) }));
 
-describe("Delegation form helpers", () => {
-  it("DelegationExpiryCalendar sets date correctly", () => {
+describe('Delegation form helpers', () => {
+  it('DelegationExpiryCalendar sets date correctly', () => {
     const setDate = jest.fn();
-    const { container } = render(
-      <DelegationExpiryCalendar setDelegationDate={setDate} />
-    );
-    const input = container.querySelector("input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "2024-01-02" } });
-    expect(setDate).toHaveBeenCalledWith(new Date("2024-01-02"));
-    fireEvent.change(input, { target: { value: "" } });
+    const { container } = render(<DelegationExpiryCalendar setDelegationDate={setDate} />);
+    const input = container.querySelector('input') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '2024-01-02' } });
+    expect(setDate).toHaveBeenCalledWith(new Date('2024-01-02'));
+    fireEvent.change(input, { target: { value: '' } });
     expect(setDate).toHaveBeenLastCalledWith(undefined);
   });
 
-  it("DelegationTokenSelection handles numeric input", () => {
+  it('DelegationTokenSelection handles numeric input', () => {
     const setToken = jest.fn();
-    const { container } = render(
-      <DelegationTokenSelection setDelegationToken={setToken} />
-    );
-    const input = container.querySelector("input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "5" } });
+    const { container } = render(<DelegationTokenSelection setDelegationToken={setToken} />);
+    const input = container.querySelector('input') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '5' } });
     expect(setToken).toHaveBeenCalledWith(5);
-    fireEvent.change(input, { target: { value: "abc" } });
+    fireEvent.change(input, { target: { value: 'abc' } });
     expect(isNaN(setToken.mock.calls[1][0])).toBe(true);
   });
 
-  it("DelegationCloseButton triggers onHide", () => {
+  it('DelegationCloseButton triggers onHide', () => {
     const onHide = jest.fn();
-    const { getByLabelText } = render(
-      <DelegationCloseButton title="Test" onHide={onHide} />
-    );
-    fireEvent.click(getByLabelText("Cancel Test"));
+    const { getByLabelText } = render(<DelegationCloseButton title="Test" onHide={onHide} />);
+    fireEvent.click(getByLabelText('Cancel Test'));
     expect(onHide).toHaveBeenCalled();
   });
 
-  it("DelegationFormOptionsFormGroup selects option", () => {
+  it('DelegationFormOptionsFormGroup selects option', () => {
     const setSelected = jest.fn();
-    const mod = require("@/components/delegation/DelegationFormParts");
+    const mod = require('@/components/delegation/DelegationFormParts');
     const { DelegationFormOptionsFormGroup } = mod;
     const { container } = render(
       <DelegationFormOptionsFormGroup
         title="T"
         tooltip="tip"
-        options={["a", "b"]}
+        options={[ 'a', 'b' ]}
         selected=""
         setSelected={setSelected}
       />
     );
-    const select = container.querySelector("select") as HTMLSelectElement;
-    fireEvent.change(select, { target: { value: "b" } });
-    expect(setSelected).toHaveBeenCalledWith("b");
+    const select = container.querySelector('select') as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: 'b' } });
+    expect(setSelected).toHaveBeenCalledWith('b');
   });
 
-  it("DelegationFormLabel renders tooltip", () => {
-    const mod = require("@/components/delegation/DelegationFormParts");
+  it('DelegationFormLabel renders tooltip', () => {
+    const mod = require('@/components/delegation/DelegationFormParts');
     const { DelegationFormLabel } = mod;
     const { getByText, getByTestId } = render(
       <DelegationFormLabel title="Label" tooltip="info" />
     );
-    expect(getByText("Label")).toBeInTheDocument();
-    expect(
-      getByTestId("tooltip-delegation-form-label-label")
-    ).toBeInTheDocument();
+    expect(getByText('Label')).toBeInTheDocument();
+    expect(getByTestId('tooltip-delegation-form-label-label')).toBeInTheDocument();
   });
 });

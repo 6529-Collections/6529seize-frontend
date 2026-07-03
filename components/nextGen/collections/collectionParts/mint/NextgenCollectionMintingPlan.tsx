@@ -120,8 +120,8 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     return (
       <div key={getRandomObjectId()} className="tw-flex tw-flex-col tw-py-2">
         <div className={styles["phaseBox"]}>
-          <span className="tw-flex tw-items-center tw-justify-center tw-pb-4">
-            <h4 className="tw-mb-0 tw-text-white">{phaseName}</h4>
+          <span className="tw-pb-4 tw-flex tw-items-center tw-justify-center">
+            <h4 className="tw-text-white tw-mb-0">{phaseName}</h4>
           </span>
           <table className="tw-w-full">
             <tbody>
@@ -160,7 +160,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
         <h3 className="tw-mb-0">Distribution Plan</h3>
       </div>
       <hr />
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-6 tw-pt-3 sm:tw-grid-cols-2 md:tw-grid-cols-3">
+      <div className="tw-pt-3 tw-grid tw-grid-cols-1 tw-gap-x-6 sm:tw-grid-cols-2 md:tw-grid-cols-3">
         <div className="tw-col-span-full">
           <h2>Phases</h2>
         </div>

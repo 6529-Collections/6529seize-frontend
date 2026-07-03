@@ -210,7 +210,7 @@ export default function NextGenZoomableImage(
       >
         {loading && (
           <span
-            className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4"
+            className="tw-flex tw-flex-col tw-gap-4 tw-items-center tw-justify-center"
             style={{
               position: "absolute",
               top: "0",

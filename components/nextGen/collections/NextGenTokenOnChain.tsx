@@ -108,18 +108,18 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     return (
       <>
         <div
-          className={`tw-w-full tw-max-w-none ${styles["tokenContainer"]} tw-pb-6 tw-pt-6`}
+          className={`tw-w-full tw-max-w-none ${styles["tokenContainer"]} tw-pt-6 tw-pb-6`}
         >
           <div className="-tw-mx-3 tw-flex tw-flex-wrap">
             <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
                 <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                  <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-between tw-px-3">
+                  <div className="tw-flex tw-items-center tw-justify-between tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                     <h2 className="tw-mb-0">{tokenName}</h2>
                   </div>
                 </div>
-                <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
-                  <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-center">
+                <div className="tw-pt-6 -tw-mx-3 tw-flex tw-flex-wrap">
+                  <div className="tw-text-center tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                     <Image
                       unoptimized
                       priority
@@ -141,19 +141,19 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
             </div>
           </div>
         </div>
-        <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        <div className="tw-pt-4 tw-pb-4 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
           <div className="-tw-mx-3 tw-flex tw-flex-wrap">
             <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <h4>About</h4>
             </div>
           </div>
           <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-            <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-gap-12 tw-px-3">
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
+            <div className="tw-flex tw-items-center tw-gap-12 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+              <span className="tw-pt-1 tw-pb-1 tw-flex tw-flex-col">
                 <span className="tw-text-[#9a9a9a]">Token ID</span>
                 <span>#{props.token_id}</span>
               </span>
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
+              <span className="tw-pt-1 tw-pb-1 tw-flex tw-flex-col">
                 <span className="tw-text-[#9a9a9a]">Collection</span>
                 <Link
                   href={`/nextgen/collection/${formatNameForUrl(
@@ -163,13 +163,13 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   {props.collection.name}
                 </Link>
               </span>
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
+              <span className="tw-pt-1 tw-pb-1 tw-flex tw-flex-col">
                 <span className="tw-text-[#9a9a9a]">Artist</span>
                 <Link href={`/${props.collection.artist_address}`}>
                   {props.collection.artist}
                 </Link>
               </span>
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
+              <span className="tw-pt-1 tw-pb-1 tw-flex tw-flex-col">
                 <span className="tw-text-[#9a9a9a]">Owner</span>
                 <span className="tw-flex">
                   <Address
@@ -181,7 +181,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   )}
                 </span>
               </span>
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
+              <span className="tw-pt-1 tw-pb-1 tw-flex tw-flex-col">
                 <span className="tw-text-[#9a9a9a]">Metadata</span>
                 <span className="tw-flex tw-items-center tw-gap-1">
                   <span>
@@ -200,7 +200,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 </span>
               </span>
               {(!capacitor.isIos || country === "US") && (
-                <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
+                <span className="tw-pt-1 tw-pb-1 tw-flex tw-flex-col">
                   <span className="tw-text-[#9a9a9a]">Marketplaces</span>
                   <span className="tw-flex tw-gap-6">
                     <>
@@ -235,7 +235,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
               )}
             </div>
           </div>
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+          <div className="tw-pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
             <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
               <b>
                 Token Indexing, check back later <DotLoader />
@@ -249,9 +249,9 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
 
   if (fetchingMetadata || tokenNotFound || !tokenImage) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-12 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="tw-pt-12 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-center">
+          <div className="tw-text-center tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h4 className="tw-mb-0">
               {tokenNotFound ? (
                 <>Token Not Found</>

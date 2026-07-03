@@ -37,7 +37,9 @@ describe("EnsAddressInput", () => {
   it("renders input with placeholder", () => {
     render(<EnsAddressInput onAddressChange={mockOnAddressChange} />);
 
-    expect(screen.getByPlaceholderText("0x... or ENS")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("0x... or ENS")
+    ).toBeInTheDocument();
   });
 
   it("renders with custom placeholder", () => {
@@ -140,7 +142,9 @@ describe("EnsAddressInput", () => {
   });
 
   it("disables input when disabled prop is true", () => {
-    render(<EnsAddressInput onAddressChange={mockOnAddressChange} disabled />);
+    render(
+      <EnsAddressInput onAddressChange={mockOnAddressChange} disabled />
+    );
 
     expect(screen.getByPlaceholderText("0x... or ENS")).toBeDisabled();
   });

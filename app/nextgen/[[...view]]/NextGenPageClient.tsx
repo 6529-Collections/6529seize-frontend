@@ -69,9 +69,9 @@ export default function NextGenPageClient({
           )}
           {view && (
             <div className={`tw-w-full tw-max-w-none ${styles["main"]}`}>
-              <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-items-center">
+              <div className="tw-flex tw-items-center -tw-mx-3 tw-flex-wrap">
                 <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                  <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+                  <div className="tw-pb-6 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
                     <div className="-tw-mx-3 tw-flex tw-flex-wrap">
                       <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                         {view === NextgenView.COLLECTIONS && (

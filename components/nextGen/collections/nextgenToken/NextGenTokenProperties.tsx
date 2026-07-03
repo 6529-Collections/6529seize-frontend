@@ -295,7 +295,7 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
   return (
     <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
+        <div className="tw-pb-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3 className="tw-mb-0">Rarity</h3>
         </div>
       </div>
@@ -311,7 +311,7 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-lg tw-font-bold">
+        <div className="tw-text-lg tw-font-bold tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           {props.token.name}
         </div>
       </div>
@@ -408,7 +408,7 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
   return (
     <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
+        <div className="tw-pb-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h3 className="tw-mb-0">Traits</h3>
         </div>
       </div>
@@ -417,7 +417,7 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
           className="-tw-mx-3 tw-flex tw-flex-wrap"
           key={`trait-${t.trait.replaceAll(" ", "-")}`}
         >
-          <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3 tw-pb-4">
+          <div className="tw-pb-4 tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3">
             <span className="tw-text-[#9a9a9a]">{t.trait}:</span>
             <span>
               <Link

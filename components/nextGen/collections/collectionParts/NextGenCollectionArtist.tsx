@@ -35,10 +35,10 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
   }, []);
 
   return (
-    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+    <div className="!tw-p-0 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div
-          className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-items-center tw-justify-center tw-px-3 tw-pt-6 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/4 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+          className="tw-pt-6 tw-flex tw-items-center tw-justify-center tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/4 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
           style={{ maxWidth: "100%" }}
         >
           {profile?.pfp && (
@@ -59,26 +59,24 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
           )}
         </div>
         <div
-          className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-pt-6 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-3/4 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+          className="tw-pt-6 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-3/4 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
           style={{ maxWidth: "100%" }}
         >
-          <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+          <div className="!tw-p-0 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
             <div className="-tw-mx-3 tw-flex tw-flex-wrap">
               <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                <h3 className="tw-mb-0 tw-text-white">
-                  {props.collection.artist}
-                </h3>
+                <h3 className="tw-mb-0 tw-text-white">{props.collection.artist}</h3>
               </div>
             </div>
             {profile?.handle && (
-              <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+              <div className="tw-pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
                 <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                   <Link href={`/${profile?.handle}`}>@{profile?.handle}</Link>
                 </div>
               </div>
             )}
             {props.link_collections && (
-              <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
+              <div className="tw-pt-6 -tw-mx-3 tw-flex tw-flex-wrap">
                 <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                   Collection{props.link_collections.length > 1 ? "s" : ""}:{" "}
                   {props.link_collections.map((c, index) => (
@@ -95,7 +93,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                 </div>
               </div>
             )}
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
+            <div className="tw-pt-6 -tw-mx-3 tw-flex tw-flex-wrap">
               <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
                 {bio}
               </div>
