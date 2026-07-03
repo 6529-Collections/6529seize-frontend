@@ -169,7 +169,7 @@ export default function HeaderSearchModalItem({
           />
         );
       }
-      const isDm = wave.wave.admin_group.group?.is_direct_message;
+      const isDm = isHeaderSearchWaveDirectMessage(wave);
       if (isDm) {
         return getMediaIcon(ChatBubbleIcon);
       }

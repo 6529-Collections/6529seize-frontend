@@ -3,6 +3,7 @@ import HeaderSearchModalItem, {
   type HeaderSearchModalItemType,
 } from "@/components/header/header-search/HeaderSearchModalItem";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -68,26 +69,27 @@ beforeEach(() => {
 
 const publicWaveScope = { group: null };
 
-const createWaveResult = (overrides: Record<string, unknown> = {}) => ({
-  id: "wave1",
-  name: "Wave 1",
-  picture: "pic.png",
-  serial_no: 2,
-  chat: {
-    scope: publicWaveScope,
-  },
-  wave: {
-    admin_group: publicWaveScope,
-  },
-  ...overrides,
-});
+const createWaveResult = (overrides: Record<string, unknown> = {}): ApiWave =>
+  ({
+    id: "wave1",
+    name: "Wave 1",
+    picture: "pic.png",
+    serial_no: 2,
+    chat: {
+      scope: publicWaveScope,
+    },
+    wave: {
+      admin_group: publicWaveScope,
+    },
+    ...overrides,
+  }) as ApiWave;
 
 const renderComponent = (
   content: HeaderSearchModalItemType,
   searchValue: string,
   isSelected: boolean,
   options: {
-    readonly onWaveSelect?: ((wave: any) => void) | undefined;
+    readonly onWaveSelect?: ((wave: ApiWave) => void) | undefined;
   } = {}
 ) => {
   const onClose = jest.fn();
@@ -164,7 +166,7 @@ describe("HeaderSearchModalItem", () => {
     mockUseSearchParams.mockReturnValue({
       get: jest.fn((key: string) => (key === "wave" ? "other" : null)),
     });
-    const wave: any = createWaveResult();
+    const wave = createWaveResult();
     renderComponent(wave, "wave", false);
     const link = screen.getByTestId("link");
     expect(link).toHaveAttribute("href", "/waves/wave1");
@@ -178,7 +180,7 @@ describe("HeaderSearchModalItem", () => {
     mockUsePathname.mockReturnValue("/waves/parent-wave");
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
     const onWaveSelect = jest.fn();
-    const wave: any = createWaveResult({
+    const wave = createWaveResult({
       id: "subwave-1",
       name: "Subwave 1",
       picture: null,
@@ -200,7 +202,7 @@ describe("HeaderSearchModalItem", () => {
     mockUsePathname.mockReturnValue("/waves/parent-wave");
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
     const onWaveSelect = jest.fn();
-    const wave: any = createWaveResult({
+    const wave = createWaveResult({
       id: "subwave-1",
       name: "Subwave 1",
       picture: null,
@@ -216,7 +218,7 @@ describe("HeaderSearchModalItem", () => {
   });
 
   it("handles wave direct-message detection defensively", () => {
-    expect(isHeaderSearchWaveDirectMessage({} as any)).toBe(false);
+    expect(isHeaderSearchWaveDirectMessage({} as ApiWave)).toBe(false);
   });
 
   it("renders page item and shows breadcrumbs", () => {
