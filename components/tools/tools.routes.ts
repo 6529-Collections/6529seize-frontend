@@ -116,7 +116,7 @@ const TOOLS_CONTENTS_NAV_GROUPS: readonly ToolsContentsNavGroup[] = [
     labelKey: "tools.contents.groups.openData",
     items: [
       {
-        id: "open-data",
+        id: "open-data-hub",
         href: "/open-data",
         labelKey: "tools.contents.pages.openData",
       },

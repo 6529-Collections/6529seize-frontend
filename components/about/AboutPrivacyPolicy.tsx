@@ -16,11 +16,13 @@ export default function AboutPrivacyPolicy() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles["lastUpdateText"]} tw-text-right tw-pt-3 tw-pb-3`}>
+        <Col
+          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+        >
           Last Updated: February 23, 2023
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <>
             <p>

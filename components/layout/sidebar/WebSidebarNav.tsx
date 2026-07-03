@@ -3,19 +3,16 @@
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
-import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
-import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
-import HomeIcon from "@/components/common/icons/HomeIcon";
-import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import {
-  DROP_FORGE_PATH,
-  DROP_FORGE_TITLE,
-} from "@/components/drop-forge/drop-forge.constants";
+import type { SidebarSection } from "@/components/navigation/navTypes";
+import { appendDropForgeToAbout } from "@/components/navigation/sidebarSectionUtils";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
   useCallback,
@@ -33,11 +30,21 @@ interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
 }
 
+type BrowserGlobal = typeof globalThis & {
+  readonly window?: Window;
+};
+
+const getBrowserWindow = (): Window | undefined =>
+  (globalThis as BrowserGlobal).window;
+
+const getSafePathname = (pathname: string | null): string => pathname ?? "";
+
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
 >(({ isCollapsed = false }, ref) => {
   const pathname = usePathname();
+  const safePathname = getSafePathname(pathname);
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
@@ -48,7 +55,8 @@ const WebSidebarNav = React.forwardRef<
     handle: connectedProfile?.handle ?? null,
   });
 
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [manualExpandedKeys, setManualExpandedKeys] = useState<string[]>([]);
+  const [manualCollapsedKeys, setManualCollapsedKeys] = useState<string[]>([]);
   const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
   const [submenuAnchor, setSubmenuAnchor] = useState<{
     left: number;
@@ -64,9 +72,20 @@ const WebSidebarNav = React.forwardRef<
     capacitor.isIos,
     country
   );
-  const sectionMap = useSectionMap(sections);
-  const networkSection = sectionMap.get("network");
-  const collectionsSection = sectionMap.get("collections");
+  const navigationSections = useMemo(
+    () =>
+      showDropForge
+        ? sections.map((section) =>
+            section.key === "about" ? appendDropForgeToAbout(section) : section
+          )
+        : sections,
+    [sections, showDropForge]
+  );
+  const sectionMap = useSectionMap(navigationSections);
+  const nftsSection = sectionMap.get("nfts");
+  const wavesSection = sectionMap.get("waves");
+  const toolsSection = sectionMap.get("tools");
+  const aboutSection = sectionMap.get("about");
 
   const closeSubmenu = useCallback(() => {
     setOpenSubmenuKey(null);
@@ -78,7 +97,7 @@ const WebSidebarNav = React.forwardRef<
 
   const activeSectionKey = useMemo(() => {
     if (!pathname) return null;
-    for (const section of sections) {
+    for (const section of navigationSections) {
       const inItems = section.items.some((item) =>
         isSidebarNavItemActive(item, pathname)
       );
@@ -89,22 +108,15 @@ const WebSidebarNav = React.forwardRef<
       if (inItems || inSubsections) return section.key;
     }
     return null;
-  }, [pathname, sections]);
+  }, [pathname, navigationSections]);
 
-  useEffect(() => {
-    if (activeSectionKey) {
-      setExpandedKeys([activeSectionKey]);
-    } else {
-      setExpandedKeys([]);
+  const expandedKeys = useMemo(() => {
+    const keys = new Set(manualExpandedKeys);
+    if (activeSectionKey && !manualCollapsedKeys.includes(activeSectionKey)) {
+      keys.add(activeSectionKey);
     }
-    closeSubmenu();
-  }, [activeSectionKey, closeSubmenu]);
-
-  useEffect(() => {
-    if (!isCollapsed) {
-      closeSubmenu();
-    }
-  }, [isCollapsed, closeSubmenu]);
+    return Array.from(keys);
+  }, [activeSectionKey, manualCollapsedKeys, manualExpandedKeys]);
 
   const handleSectionToggle = useCallback(
     (sectionKey: string, event?: React.MouseEvent) => {
@@ -131,46 +143,62 @@ const WebSidebarNav = React.forwardRef<
         return;
       }
 
-      setExpandedKeys((prev) =>
-        prev.includes(sectionKey)
-          ? prev.filter((key) => key !== sectionKey)
-          : [...prev, sectionKey]
+      const isExpanded = expandedKeys.includes(sectionKey);
+      if (isExpanded) {
+        setManualExpandedKeys((prev) =>
+          prev.filter((key) => key !== sectionKey)
+        );
+        setManualCollapsedKeys((prev) =>
+          prev.includes(sectionKey) ? prev : [...prev, sectionKey]
+        );
+        return;
+      }
+
+      setManualCollapsedKeys((prev) =>
+        prev.filter((key) => key !== sectionKey)
+      );
+      setManualExpandedKeys((prev) =>
+        prev.includes(sectionKey) ? prev : [...prev, sectionKey]
       );
     },
-    [isCollapsed, openSubmenuKey]
+    [expandedKeys, isCollapsed, openSubmenuKey]
   );
 
   useEffect(() => {
     if (isCollapsed && submenuTrigger) {
       const updateAnchor = () => {
         const rect = submenuTrigger.getBoundingClientRect();
-        setSubmenuAnchor({
+        const nextAnchor = {
           left: rect.right + 12,
           top: rect.top,
           height: rect.height,
-        });
+        };
+        setSubmenuAnchor((previous) =>
+          previous?.left === nextAnchor.left &&
+          previous.top === nextAnchor.top &&
+          previous.height === nextAnchor.height
+            ? previous
+            : nextAnchor
+        );
       };
 
-      const browserWindow = globalThis.window ?? undefined;
+      const browserWindow = getBrowserWindow();
+      if (browserWindow === undefined) {
+        return undefined;
+      }
+
       const scrollContainer = submenuTrigger.closest(
         "[data-sidebar-scroll='true']"
-      ) as HTMLElement | null;
-      const canObserve = typeof ResizeObserver === "function";
-      const resizeObserver = canObserve
-        ? new ResizeObserver(updateAnchor)
-        : null;
+      );
 
-      updateAnchor();
-      browserWindow?.addEventListener("resize", updateAnchor);
+      browserWindow.addEventListener("resize", updateAnchor);
       scrollContainer?.addEventListener("scroll", updateAnchor, {
         passive: true,
       });
-      resizeObserver?.observe(submenuTrigger);
 
       return () => {
-        browserWindow?.removeEventListener("resize", updateAnchor);
+        browserWindow.removeEventListener("resize", updateAnchor);
         scrollContainer?.removeEventListener("scroll", updateAnchor);
-        resizeObserver?.disconnect();
       };
     }
 
@@ -180,7 +208,7 @@ const WebSidebarNav = React.forwardRef<
   const renderCollapsedSubmenu = useCallback(
     (sectionKey: string) => {
       if (isCollapsed && openSubmenuKey === sectionKey && submenuAnchor) {
-        const openSection = sections.find(
+        const openSection = navigationSections.find(
           (section) => section.key === sectionKey
         );
         if (!openSection) {
@@ -206,12 +234,26 @@ const WebSidebarNav = React.forwardRef<
     [
       isCollapsed,
       openSubmenuKey,
-      sections,
+      navigationSections,
       pathname,
       closeSubmenu,
       submenuAnchor,
       submenuTrigger,
     ]
+  );
+
+  const renderExpandableSection = (section: SidebarSection) => (
+    <li className={isCollapsed ? "tw-relative" : undefined} key={section.key}>
+      <WebSidebarExpandable
+        section={section}
+        expanded={expandedKeys.includes(section.key)}
+        onToggle={(event) => handleSectionToggle(section.key, event)}
+        collapsed={isCollapsed}
+        pathname={pathname}
+        data-section={section.key}
+      />
+      {renderCollapsedSubmenu(section.key)}
+    </li>
   );
 
   return (
@@ -220,109 +262,36 @@ const WebSidebarNav = React.forwardRef<
       aria-label="Desktop navigation"
     >
       <ul className="tw-m-0 tw-list-none tw-p-0">
-        <li>
-          <WebSidebarNavItem
-            href="/"
-            icon={HomeIcon}
-            active={pathname === "/"}
-            collapsed={isCollapsed}
-            label="Home"
-          />
-        </li>
+        {nftsSection && renderExpandableSection(nftsSection)}
 
-        <li>
-          <WebSidebarNavItem
-            href="/waves"
-            icon={WavesIcon}
-            active={pathname?.startsWith("/waves") || false}
-            collapsed={isCollapsed}
-            label="Waves"
-          />
-        </li>
+        {wavesSection && renderExpandableSection(wavesSection)}
 
         <li>
           <WebSidebarNavItem
             href="/messages"
             icon={ChatBubbleIcon}
-            active={pathname?.startsWith("/messages") || false}
+            active={safePathname.startsWith("/messages")}
             collapsed={isCollapsed}
-            label="Messages"
+            label={t(DEFAULT_LOCALE, "navigation.primary.dms")}
             hasIndicator={hasUnreadMessages}
           />
         </li>
 
         <li>
           <WebSidebarNavItem
-            href="/discover"
-            icon={DiscoverIcon}
-            active={pathname.startsWith("/discover")}
+            href="/join"
+            icon={UserPlusIcon}
+            active={
+              safePathname === "/join" || safePathname.startsWith("/join/")
+            }
             collapsed={isCollapsed}
-            label="Discovery"
+            label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
           />
         </li>
 
-        {networkSection && (
-          <li className={isCollapsed ? "tw-relative" : undefined}>
-            <WebSidebarExpandable
-              section={networkSection}
-              expanded={expandedKeys.includes("network")}
-              onToggle={(event) => handleSectionToggle("network", event)}
-              collapsed={isCollapsed}
-              pathname={pathname}
-              data-section="network"
-            />
-            {renderCollapsedSubmenu("network")}
-          </li>
-        )}
+        {toolsSection && renderExpandableSection(toolsSection)}
 
-        {collectionsSection && (
-          <li className={isCollapsed ? "tw-relative" : undefined}>
-            <WebSidebarExpandable
-              section={collectionsSection}
-              expanded={expandedKeys.includes("collections")}
-              onToggle={(event) => handleSectionToggle("collections", event)}
-              collapsed={isCollapsed}
-              pathname={pathname}
-              data-section="collections"
-            />
-            {renderCollapsedSubmenu("collections")}
-          </li>
-        )}
-
-        {sections
-          .filter(
-            (section) =>
-              section.key !== "network" && section.key !== "collections"
-          )
-          .map((section) => (
-            <React.Fragment key={section.key}>
-              <li className={isCollapsed ? "tw-relative" : undefined}>
-                <WebSidebarExpandable
-                  section={section}
-                  expanded={expandedKeys.includes(section.key)}
-                  onToggle={(event) => handleSectionToggle(section.key, event)}
-                  collapsed={isCollapsed}
-                  pathname={pathname}
-                  data-section={section.key}
-                />
-                {renderCollapsedSubmenu(section.key)}
-              </li>
-              {section.key === "about" && showDropForge && (
-                <li>
-                  <WebSidebarNavItem
-                    href={DROP_FORGE_PATH}
-                    icon={DropForgeIcon}
-                    active={
-                      pathname === DROP_FORGE_PATH ||
-                      pathname?.startsWith(`${DROP_FORGE_PATH}/`)
-                    }
-                    collapsed={isCollapsed}
-                    label={DROP_FORGE_TITLE}
-                  />
-                </li>
-              )}
-            </React.Fragment>
-          ))}
+        {aboutSection && renderExpandableSection(aboutSection)}
       </ul>
     </nav>
   );

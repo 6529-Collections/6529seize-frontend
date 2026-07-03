@@ -248,8 +248,8 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         name: /connected wallets|profile to continue|messages/i,
       })
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "Messages" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Messages" })).toHaveAttribute(
+    await expect(page.getByRole("link", { name: "DMs" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "DMs" })).toHaveAttribute(
       "aria-current",
       "page"
     );

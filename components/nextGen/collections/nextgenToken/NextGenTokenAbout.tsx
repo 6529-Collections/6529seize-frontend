@@ -68,32 +68,32 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
   }, [props.token.owner, connectedProfile?.wallets]);
 
   return (
-    <div className="!tw-p-0 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
           <h3 className="tw-mb-0">About</h3>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Collection Token ID:</span>
           <span>{props.token.normalised_id}</span>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Contract Token ID:</span>
           <span>{props.token.id}</span>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Minted:</span>
           <span>{printMintDate(props.token.mint_date)}</span>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Mint Price:</span>
           <span>
             {props.token.mint_price ? (
@@ -110,9 +110,9 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-2 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Collector:</span>
-          <span className="tw-flex tw-gap-1 tw-items-center">
+          <span className="tw-flex tw-items-center tw-gap-1">
             {(props.token.burnt || isNullAddress(props.token.owner)) && (
               <>
                 <FontAwesomeIcon
@@ -135,7 +135,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             {profile?.level ? (
               <Link
                 href={`/${profile?.handle ?? props.token.owner}`}
-                className="tw-flex tw-gap-2 tw-no-underline hover:tw-underline tw-items-center"
+                className="tw-flex tw-items-center tw-gap-2 tw-no-underline hover:tw-underline"
               >
                 <UserCICAndLevel level={profile.level} />
                 <span className="decoration-underline">
@@ -158,16 +158,16 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-2 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Collector TDH:</span>
-          <span className="tw-flex tw-gap-1 tw-items-center">
+          <span className="tw-flex tw-items-center tw-gap-1">
             {numberWithCommas(Math.round((profile?.tdh ?? 0) * 100) / 100)}
           </span>
         </div>
       </div>
       {(!capacitor.isIos || country === "US") && (
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-pb-4 tw-flex tw-flex-col tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-flex-col tw-px-3 tw-pb-4">
             <span className="tw-text-[#9a9a9a]">Listed:</span>
             <span className="tw-flex tw-flex-col tw-items-start tw-gap-2 tw-pt-1">
               <span>
@@ -175,7 +175,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-flex tw-gap-2 tw-items-center tw-no-underline"
+                  className="tw-flex tw-items-center tw-gap-2 tw-no-underline"
                   data-tooltip-id={`opensea-${props.token.id}`}
                 >
                   <Image
@@ -187,7 +187,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     height={24}
                   />
                   {props.token.opensea_price > 0 ? (
-                    <span className="tw-flex tw-gap-2 tw-items-center">
+                    <span className="tw-flex tw-items-center tw-gap-2">
                       <span className="tw-flex tw-items-center">
                         <span>{props.token.opensea_price}</span>
                         <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
@@ -245,7 +245,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   href={getBlurLink(props.token.id)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-flex tw-gap-2 tw-items-center tw-no-underline"
+                  className="tw-flex tw-items-center tw-gap-2 tw-no-underline"
                   data-tooltip-id={`blur-${props.token.id}`}
                 >
                   <Image
@@ -257,7 +257,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     height={24}
                   />
                   {props.token.blur_price > 0 ? (
-                    <span className="tw-flex tw-gap-2 tw-items-center">
+                    <span className="tw-flex tw-items-center tw-gap-2">
                       <span className="tw-flex tw-items-center">
                         <span>{props.token.blur_price}</span>
                         <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
@@ -295,7 +295,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   href={getMagicEdenLink(props.token.id)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-flex tw-gap-2 tw-items-center tw-no-underline"
+                  className="tw-flex tw-items-center tw-gap-2 tw-no-underline"
                   data-tooltip-id={`magic-eden-${props.token.id}`}
                 >
                   <Image
@@ -307,7 +307,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     height={24}
                   />
                   {props.token.me_price > 0 ? (
-                    <span className="tw-flex tw-gap-2 tw-items-center">
+                    <span className="tw-flex tw-items-center tw-gap-2">
                       <span className="tw-flex tw-items-center">
                         <span>{props.token.me_price}</span>
                         <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
@@ -365,7 +365,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </div>
       )}
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Collection:</span>
           <span>
             <Link
@@ -379,7 +379,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Artist:</span>
           <span>
             <Link href={`/${props.collection.artist_address}`}>
@@ -389,7 +389,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">TDH Rate:</span>
           <span>
             {numberWithCommas(Math.round(props.token.hodl_rate * 100) / 100)}
@@ -400,7 +400,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-pb-4 tw-flex tw-gap-1 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
           <span className="tw-text-[#9a9a9a]">Image Licence:</span>
           <span>{props.collection.licence}</span>
         </div>
@@ -419,12 +419,12 @@ export function TraitScore(
   return (
     <span className="tw-flex tw-flex-col">
       <span className="tw-flex tw-gap-2">
-        <span className="tw-whitespace-nowrap tw-min-w-fit tw-flex tw-items-center">
+        <span className="tw-flex tw-min-w-fit tw-items-center tw-whitespace-nowrap">
           <span className="tw-text-sm tw-text-[#9a9a9a]">Score</span>&nbsp;
           {displayScore(props.score)}
         </span>
         <span className="tw-text-[#9a9a9a]">|</span>
-        <span className="tw-whitespace-nowrap tw-min-w-fit tw-flex tw-items-center">
+        <span className="tw-flex tw-min-w-fit tw-items-center tw-whitespace-nowrap">
           <span className="tw-text-sm tw-text-[#9a9a9a]">Rank</span>&nbsp;#
           {props.rank.toLocaleString()}
         </span>

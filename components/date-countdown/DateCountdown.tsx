@@ -101,9 +101,7 @@ export default function DateCountdown(props: Readonly<Props>) {
       {isReady ? (
         <div>{title}</div>
       ) : (
-        <div
-          className={`${SKELETON_TEXT_CLASS} tw-w-1/2`}
-          aria-hidden="true">
+        <div className={`${SKELETON_TEXT_CLASS} tw-w-1/2`} aria-hidden="true">
           &nbsp;
         </div>
       )}
@@ -120,9 +118,7 @@ export default function DateCountdown(props: Readonly<Props>) {
             {plural(timeLeft.seconds, "second")}
           </>
         ) : (
-          <div
-            className={`${SKELETON_TEXT_CLASS} tw-w-4/5`}
-            aria-hidden="true">
+          <div className={`${SKELETON_TEXT_CLASS} tw-w-4/5`} aria-hidden="true">
             &nbsp;
           </div>
         )}

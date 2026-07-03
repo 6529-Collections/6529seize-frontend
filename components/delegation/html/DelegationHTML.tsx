@@ -89,9 +89,9 @@ export default function DelegationHTML(props: Readonly<Props>) {
     );
   } else {
     return (
-      <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-pt-2">
+      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-2 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
         {isFaqChildArticle && article && (
-          <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pb-2">
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
             <div className="tw-w-full tw-px-3">
               <nav aria-label="Breadcrumb" className={styles["breadcrumbNav"]}>
                 <Link href="/delegation/delegation-center">
@@ -106,7 +106,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
           </div>
         )}
         {pageTitle && (
-          <div className="tw-flex tw-flex-wrap -tw-mx-3">
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
             <div className="tw-w-full tw-px-3">
               <h1>
                 {titleLighter && `${titleLighter} `}
@@ -116,7 +116,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
           </div>
         )}
         {isFaqChildArticle && article && (
-          <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
             <div className="tw-w-full tw-px-3">
               <p className={styles["articleSummary"]}>{article.summary}</p>
               <Link
@@ -128,7 +128,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
             </div>
           </div>
         )}
-        <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-3">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3">
           <div
             className={`${styles["htmlContainer"]} tw-w-full tw-px-3`}
             aria-busy={loading}
@@ -146,7 +146,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
         </div>
         {isFaqChildArticle &&
           (articleNavigation.previous || articleNavigation.next) && (
-            <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
               <div className="tw-w-full tw-px-3">
                 <nav
                   aria-label="Delegation FAQ article navigation"
