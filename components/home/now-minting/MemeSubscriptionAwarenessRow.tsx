@@ -25,40 +25,36 @@ function ReadonlySubscriptionToggle({
   tooltipLabel: string;
 }>) {
   return (
-    <CustomTooltip
-      content={tooltipLabel}
-      placement="top"
-      delayShow={150}
-      offset={12}
-    >
-      <span
-        role="switch"
-        aria-checked={checked}
-        aria-disabled="true"
-        aria-label={tooltipLabel}
-        tabIndex={0}
-        className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full"
+    <>
+      <CustomTooltip
+        content={tooltipLabel}
+        placement="top"
+        delayShow={150}
+        offset={12}
       >
-        <span
-          aria-hidden="true"
-          className={clsx(
-            "tw-pointer-events-none tw-inline-flex tw-h-6 tw-w-12 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors",
-            checked
-              ? "tw-bg-primary-500 tw-shadow-[0_0_14px_rgba(74,119,255,0.45)] tw-ring-primary-300"
-              : "tw-bg-black/35 tw-opacity-80 tw-ring-primary-400/25"
-          )}
-        >
+        <span className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full">
           <span
+            aria-hidden="true"
             className={clsx(
-              "tw-size-5 tw-rounded-full tw-shadow-sm tw-transition-transform",
+              "tw-pointer-events-none tw-inline-flex tw-h-6 tw-w-12 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors",
               checked
-                ? "tw-translate-x-6 tw-bg-white"
-                : "tw-translate-x-0 tw-bg-iron-500"
+                ? "tw-bg-primary-500 tw-shadow-[0_0_14px_rgba(74,119,255,0.45)] tw-ring-primary-300"
+                : "tw-bg-black/35 tw-opacity-80 tw-ring-primary-400/25"
             )}
-          />
+          >
+            <span
+              className={clsx(
+                "tw-size-5 tw-rounded-full tw-shadow-sm tw-transition-transform",
+                checked
+                  ? "tw-translate-x-6 tw-bg-white"
+                  : "tw-translate-x-0 tw-bg-iron-500"
+              )}
+            />
+          </span>
         </span>
-      </span>
-    </CustomTooltip>
+      </CustomTooltip>
+      <span className="tw-sr-only">{tooltipLabel}</span>
+    </>
   );
 }
 

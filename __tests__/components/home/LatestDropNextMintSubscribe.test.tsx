@@ -60,15 +60,22 @@ function expectReadonlySubscriptionToggle(
   tooltipLabel: string,
   checked: boolean
 ) {
-  const trigger = screen.getByRole("switch", { name: tooltipLabel });
-  expect(trigger).toBeInTheDocument();
-  expect(container).toContainElement(trigger);
-  expect(trigger).toHaveAttribute("aria-checked", String(checked));
-  expect(trigger).toHaveAttribute("aria-disabled", "true");
-  expect(trigger).toHaveAttribute("tabindex", "0");
+  const statusText = screen.getByText(tooltipLabel, {
+    selector: ".tw-sr-only",
+  });
+  expect(statusText).toBeInTheDocument();
+  expect(container).toContainElement(statusText);
+  expect(screen.queryByRole("switch", { name: tooltipLabel })).toBeNull();
   expect(screen.queryByRole("img", { name: tooltipLabel })).toBeNull();
 
-  const toggle = trigger?.querySelector("[aria-hidden='true']");
+  const trigger = container.querySelector(".tw-cursor-default");
+  expect(trigger).not.toBeNull();
+  const triggerElement = trigger as HTMLElement;
+  expect(triggerElement).not.toHaveAttribute("aria-checked");
+  expect(triggerElement).not.toHaveAttribute("aria-disabled");
+  expect(triggerElement).not.toHaveAttribute("tabindex");
+
+  const toggle = triggerElement.querySelector("[aria-hidden='true']");
   expect(toggle).toBeInTheDocument();
   expect(toggle).toHaveClass(checked ? "tw-bg-primary-500" : "tw-bg-black/35");
 }
