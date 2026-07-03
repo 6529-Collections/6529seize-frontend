@@ -4,11 +4,8 @@ import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import {
-  DROP_FORGE_PATH,
-  DROP_FORGE_TITLE,
-} from "@/components/drop-forge/drop-forge.constants";
 import type { SidebarSection } from "@/components/navigation/navTypes";
+import { appendDropForgeToAbout } from "@/components/navigation/sidebarSectionUtils";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
@@ -29,32 +26,6 @@ import { isSidebarNavItemActive } from "./nav/sidebarActive";
 
 interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
-}
-
-function appendDropForgeToAbout(section: SidebarSection): SidebarSection {
-  const dropForgeItem = { name: DROP_FORGE_TITLE, href: DROP_FORGE_PATH };
-  const subsections = section.subsections ?? [];
-  const developerSectionName = "Developer & Open Data";
-  const hasDeveloperSection = subsections.some(
-    (subsection) => subsection.name === developerSectionName
-  );
-
-  return {
-    ...section,
-    subsections: hasDeveloperSection
-      ? subsections.map((subsection) =>
-          subsection.name === developerSectionName
-            ? { ...subsection, items: [...subsection.items, dropForgeItem] }
-            : subsection
-        )
-      : [
-          ...subsections,
-          {
-            name: developerSectionName,
-            items: [dropForgeItem],
-          },
-        ],
-  };
 }
 
 const getBrowserWindow = (): Window | undefined =>

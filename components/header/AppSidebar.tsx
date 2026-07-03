@@ -7,15 +7,12 @@ import {
 } from "@headlessui/react";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
-import {
-  DROP_FORGE_PATH,
-  DROP_FORGE_TITLE,
-} from "@/components/drop-forge/drop-forge.constants";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 import type { SidebarSection } from "@/components/navigation/navTypes";
+import { appendDropForgeToAbout } from "@/components/navigation/sidebarSectionUtils";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
@@ -25,32 +22,6 @@ import AppUserConnect from "./AppUserConnect";
 type SidebarMenu = Parameters<typeof AppSidebarMenuItems>[0]["menu"];
 
 type SidebarMenuChildren = NonNullable<SidebarMenu[number]["children"]>;
-
-function appendDropForgeToAbout(section: SidebarSection): SidebarSection {
-  const dropForgeItem = { name: DROP_FORGE_TITLE, href: DROP_FORGE_PATH };
-  const subsections = section.subsections ?? [];
-  const developerSectionName = "Developer & Open Data";
-  const hasDeveloperSection = subsections.some(
-    (subsection) => subsection.name === developerSectionName
-  );
-
-  return {
-    ...section,
-    subsections: hasDeveloperSection
-      ? subsections.map((subsection) =>
-          subsection.name === developerSectionName
-            ? { ...subsection, items: [...subsection.items, dropForgeItem] }
-            : subsection
-        )
-      : [
-          ...subsections,
-          {
-            name: developerSectionName,
-            items: [dropForgeItem],
-          },
-        ],
-  };
-}
 
 function mapSectionToMenuItem(section: SidebarSection): SidebarMenu[number] {
   const children: SidebarMenuChildren = [
