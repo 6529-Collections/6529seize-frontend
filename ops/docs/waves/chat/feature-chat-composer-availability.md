@@ -4,14 +4,16 @@
 
 Composer availability is evaluated only after thread access checks pass.
 
-Before a thread loads, routing can stop at:
+Before a direct-message thread loads, routing can stop at:
 
 - Connect wallet
 - Set up profile
 - `This content is not available`
 
-If the thread loads, the footer checks chat availability. Submission
-availability is exposed through the Chat tab `Submit drop` action.
+Standard wave threads can still load read-only public content while wallet or
+profile setup is incomplete. If the thread loads, the footer checks chat
+availability. Submission availability is exposed through the Chat tab
+`Submit drop` action.
 
 ## Location in the Site
 
@@ -25,6 +27,10 @@ availability is exposed through the Chat tab `Submit drop` action.
 - Logged-out blocked panel: if chat is blocked because the viewer is not
   authenticated, footer shows
   `Connect your wallet to participate in this wave`.
+- Profile setup blocked panel: if the wallet is authenticated but does not have
+  a profile handle yet, footer shows
+  `Create a profile to participate in this wave` with a `Create profile`
+  action.
 - Generic blocked panel: if chat is blocked for any other reason, footer
   shows `You cannot participate in this wave at the moment`.
 - Closed-chat panel: if composer rendering reaches a chat-type wave with chat
@@ -60,10 +66,10 @@ availability is exposed through the Chat tab `Submit drop` action.
 
 - This page covers availability only, not input formatting or submission
   syntax.
-- Blocked panels are informational only; there is no inline permission
-  escalation action.
-- When both chat and submission are blocked, messaging is generic, not
-  reason-specific.
+- Most blocked panels are informational only; the profile setup blocked panel
+  links to profile creation.
+- When both chat and submission are blocked for non-auth reasons, messaging is
+  generic, not reason-specific.
 
 ## Related Pages
 

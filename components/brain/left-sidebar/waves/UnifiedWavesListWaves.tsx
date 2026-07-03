@@ -10,6 +10,7 @@ import React, {
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
+import { SidebarSubwavesToggle } from "./SidebarSubwavesToggle";
 import { SidebarCategoryLabel } from "./SidebarCategoryLabel";
 import {
   buildHighlyRatedWavePreviewItems,
@@ -26,13 +27,18 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   useSidebarWaveTree,
   type SidebarWaveTreeRow,
 } from "@/hooks/useSidebarWaveTree";
-import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
+import {
+  useAnimatedSidebarWaveRows,
+  getParentIdsWithVisibleSubwaveRows,
+  type AnimatedSidebarWaveTreeRow,
+} from "@/hooks/useAnimatedSidebarWaveRows";
 import {
   groupSidebarWavesForView,
   isValidSidebarWave,
@@ -46,7 +52,10 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 // Virtualization constants
 const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
-const SUBWAVE_ROW_HEIGHT = 54 as const;
+const SUBWAVE_ROW_HEIGHT = 48 as const;
+const COLLAPSING_SUBWAVE_ROW_HEIGHT = 1 as const;
+const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
+const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
@@ -174,6 +183,10 @@ const UnifiedWavesListWaves = forwardRef<
       loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
       onParentExpand: streamWaves.loadSubwavesForParent,
     });
+    useLoadActiveSidebarParentSubwaves({
+      activeParentWaveId,
+      waves,
+    });
 
     const { announcementWaves, highlyRatedWaves, pinnedWaves, allWaves } =
       useMemo(
@@ -207,6 +220,22 @@ const UnifiedWavesListWaves = forwardRef<
     const animatedHighlyRatedRows = useAnimatedSidebarWaveRows(highlyRatedRows);
     const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
     const animatedAllRows = useAnimatedSidebarWaveRows(allRows);
+    const announcementParentsWithVisibleSubwaves = useMemo(
+      () => getParentIdsWithVisibleSubwaveRows(animatedAnnouncementRows),
+      [animatedAnnouncementRows]
+    );
+    const highlyRatedParentsWithVisibleSubwaves = useMemo(
+      () => getParentIdsWithVisibleSubwaveRows(animatedHighlyRatedRows),
+      [animatedHighlyRatedRows]
+    );
+    const pinnedParentsWithVisibleSubwaves = useMemo(
+      () => getParentIdsWithVisibleSubwaveRows(animatedPinnedRows),
+      [animatedPinnedRows]
+    );
+    const virtualizedParentsWithVisibleSubwaves = useMemo(
+      () => getParentIdsWithVisibleSubwaveRows(animatedAllRows),
+      [animatedAllRows]
+    );
     const virtualizedRows = animatedAllRows;
     let virtualizedAriaLabel = t(
       SIDEBAR_LOCALE,
@@ -304,12 +333,23 @@ const UnifiedWavesListWaves = forwardRef<
       ]
     );
     const getSidebarRowHeight = useCallback(
-      (row: SidebarWaveTreeRow) =>
-        row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
+      (row: AnimatedSidebarWaveTreeRow) => {
+        if (row.rowType === "subwaves-toggle") {
+          return row.isExpanded
+            ? SUBWAVE_TOGGLE_ROW_HEIGHT
+            : COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT;
+        }
+
+        if (row.depth === 1 && row.animationState === "exiting") {
+          return COLLAPSING_SUBWAVE_ROW_HEIGHT;
+        }
+
+        return row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT;
+      },
       []
     );
 
-    const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
+    const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
       items: virtualizedRows,
       key: virtualizedKey,
       scrollContainerRef,
@@ -318,22 +358,43 @@ const UnifiedWavesListWaves = forwardRef<
       overscan: VIRTUALIZATION_OVERSCAN,
     });
 
-    const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => (
-      <BrainLeftSidebarWave
-        wave={row.wave}
-        onHover={onHover}
-        showPin={showPin && row.depth === 0}
-        isDirectMessage={isDirectMessage}
-        depth={row.depth}
-        canExpand={row.canExpand}
-        isExpanded={row.isExpanded}
-        isLoadingSubwaves={row.isLoadingSubwaves}
-        hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
-        isLastSubwave={row.isLastSubwave}
-        onToggleExpand={toggleParent}
-        onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
-      />
-    );
+    const renderWaveRow = (
+      row: AnimatedSidebarWaveTreeRow,
+      showPin: boolean,
+      parentsWithVisibleSubwaves: ReadonlySet<string>
+    ) => {
+      const showConnectedSubwaves = parentsWithVisibleSubwaves.has(row.wave.id);
+
+      if (row.rowType === "subwaves-toggle") {
+        return (
+          <SidebarSubwavesToggle
+            isExpanded={row.isExpanded}
+            isLoading={row.isLoadingSubwaves}
+            knownSubwavesCount={row.knownSubwavesCount}
+            layoutVariant="app"
+            onClick={() => toggleParent(row.wave.id)}
+            parentWaveName={row.wave.name}
+            showConnector={showConnectedSubwaves}
+            unreadDropsCount={row.unreadSubwaveDropsCount}
+          />
+        );
+      }
+
+      return (
+        <BrainLeftSidebarWave
+          wave={row.wave}
+          onHover={onHover}
+          showPin={showPin && row.depth === 0}
+          isDirectMessage={isDirectMessage}
+          depth={row.depth}
+          canExpand={row.canExpand}
+          hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+          isLastSubwave={row.isLastSubwave}
+          showSubwaveConnector={row.depth === 0 && showConnectedSubwaves}
+          onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
+        />
+      );
+    };
 
     useImperativeHandle(ref, () => ({
       containerRef: virtual.containerRef,
@@ -365,7 +426,11 @@ const UnifiedWavesListWaves = forwardRef<
               })
             }
             renderRow={(row) =>
-              renderWaveRow(row, !hidePin && row.wave.isPinned)
+              renderWaveRow(
+                row,
+                !hidePin && row.wave.isPinned,
+                announcementParentsWithVisibleSubwaves
+              )
             }
             rows={animatedAnnouncementRows}
           />
@@ -410,7 +475,13 @@ const UnifiedWavesListWaves = forwardRef<
                     sectionName: "highly rated",
                   })
                 }
-                renderRow={(row) => renderWaveRow(row, false)}
+                renderRow={(row) =>
+                  renderWaveRow(
+                    row,
+                    false,
+                    highlyRatedParentsWithVisibleSubwaves
+                  )
+                }
                 rows={animatedHighlyRatedRows}
               />
             )}
@@ -440,7 +511,9 @@ const UnifiedWavesListWaves = forwardRef<
                   sectionName: "pinned",
                 })
               }
-              renderRow={(row) => renderWaveRow(row, !hidePin)}
+              renderRow={(row) =>
+                renderWaveRow(row, !hidePin, pinnedParentsWithVisibleSubwaves)
+              }
               rows={animatedPinnedRows}
             />
           </>
@@ -504,7 +577,11 @@ const UnifiedWavesListWaves = forwardRef<
                     height: v.size,
                   }}
                 >
-                  {renderWaveRow(row, !hidePin)}
+                  {renderWaveRow(
+                    row,
+                    !hidePin,
+                    virtualizedParentsWithVisibleSubwaves
+                  )}
                 </SidebarWaveTreeRowTransition>
               );
             })}

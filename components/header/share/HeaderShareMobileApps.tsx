@@ -30,7 +30,7 @@ export function ShareMobileApp({
       target={target}
       rel="noopener noreferrer"
       onClick={handleClick}
-      className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8"
+      className="tw-flex tw-flex-col tw-items-center tw-gap-8 tw-no-underline"
     >
       <Image
         unoptimized

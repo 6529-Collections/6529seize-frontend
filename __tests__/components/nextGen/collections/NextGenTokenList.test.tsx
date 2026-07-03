@@ -20,15 +20,11 @@ jest.mock(
   })
 );
 
-jest.mock(
-  "@/components/pagination/Pagination",
-  () => (props: any) =>
-    (
-      <div data-testid="pagination">
-        <button onClick={() => props.setPage(props.page + 1)}>next</button>
-      </div>
-    )
-);
+jest.mock("@/components/pagination/Pagination", () => (props: any) => (
+  <div data-testid="pagination">
+    <button onClick={() => props.setPage(props.page + 1)}>next</button>
+  </div>
+));
 
 jest.mock("@/components/dotLoader/DotLoader", () => () => (
   <div data-testid="loader" />
@@ -37,14 +33,6 @@ jest.mock("@/components/dotLoader/DotLoader", () => () => (
 jest.mock("@/helpers/AllowlistToolHelpers", () => ({
   getRandomObjectId: () => "id",
 }));
-
-jest.mock("react-bootstrap", () => {
-  return {
-    Container: (p: any) => <div data-testid="container" {...p} />,
-    Row: (p: any) => <div data-testid="row" {...p} />,
-    Col: (p: any) => <div data-testid="col" {...p} />,
-  };
-});
 
 const { commonApiFetch } = require("@/services/api/common-api");
 

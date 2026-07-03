@@ -64,7 +64,7 @@ export default function UserPageStatsBoostBreakdown({
         </th>
         <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
           {hasBoostValue(breakdown?.available) ? (
-            <span className="d-flex align-items-center justify-content-center gap-2">
+            <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
               {formatBoostValue(locale, breakdown.available)}
               <BoostBreakdownInfo
                 info={breakdown.available_info}
@@ -77,7 +77,7 @@ export default function UserPageStatsBoostBreakdown({
         </td>
         <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
           {hasBoostValue(breakdown?.acquired) ? (
-            <span className="d-flex align-items-center justify-content-center gap-2">
+            <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
               {formatBoostValue(locale, breakdown.acquired)}
               <BoostBreakdownInfo
                 info={breakdown.acquired_info}
@@ -184,7 +184,7 @@ export default function UserPageStatsBoostBreakdown({
           </th>
           <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
             {hasBoostValue(breakdown.available) ? (
-              <span className="d-flex align-items-center justify-content-center gap-2">
+              <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
                 {formatBoostValue(locale, breakdown.available)}
                 <BoostBreakdownInfo
                   info={breakdown.available_info}
@@ -197,7 +197,7 @@ export default function UserPageStatsBoostBreakdown({
           </td>
           <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
             {hasBoostValue(breakdown.acquired) ? (
-              <span className="d-flex align-items-center justify-content-center gap-2">
+              <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
                 {formatBoostValue(locale, breakdown.acquired)}
                 <BoostBreakdownInfo
                   info={breakdown.acquired_info}
@@ -300,7 +300,7 @@ export default function UserPageStatsBoostBreakdown({
                       </th>
                       <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
                         {tdh?.boost ? (
-                          <span className="d-flex align-items-center justify-content-center gap-2">
+                          <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
                             {formatBoostValue(
                               locale,
                               (tdh.boost_breakdown.memes_card_sets?.available ??
@@ -323,7 +323,7 @@ export default function UserPageStatsBoostBreakdown({
                       </td>
                       <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
                         {tdh?.boost ? (
-                          <span className="d-flex align-items-center justify-content-center gap-2">
+                          <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
                             {formatBoostValue(
                               locale,
                               roundTo(tdh.boost - 1, 2)
@@ -397,11 +397,11 @@ function BoostBreakdownInfo({
       >
         {info.length > 1 ? (
           <ul
-            className="mb-0"
+            className="tw-mb-0"
             style={{ paddingLeft: "1rem", textAlign: "left" }}
           >
             {info.map((i) => (
-              <li key={getRandomObjectId()} className="text-left">
+              <li key={getRandomObjectId()} className="tw-text-left">
                 {i}
               </li>
             ))}

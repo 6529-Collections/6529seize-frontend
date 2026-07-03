@@ -400,6 +400,17 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",
   expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
   expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
+  subwavesToggleView: "View subwaves",
+  subwavesToggleViewCountOne: "View {count} subwave",
+  subwavesToggleViewCountMany: "View {count} subwaves",
+  subwavesToggleHide: "Hide subwaves",
+  subwavesToggleLoading: "Loading subwaves",
+  subwavesToggleUnreadBadge: "{count} new",
+  subwavesToggleViewAriaLabel: "View {waveName} subwaves",
+  subwavesToggleViewCountOneAriaLabel: "View {count} subwave for {waveName}",
+  subwavesToggleViewCountManyAriaLabel: "View {count} subwaves for {waveName}",
+  subwavesToggleHideAriaLabel: "Hide {waveName} subwaves",
+  subwavesToggleLoadingAriaLabel: "Loading {waveName} subwaves",
 } as const);
 
 const QUICK_DM_MESSAGES = objectMessages("quickDm", {
@@ -437,6 +448,10 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+} as const);
+
+const WAVE_LOADING_MESSAGES = objectMessages("waves", {
+  loadingStatus: "Loading waves",
 } as const);
 
 const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
@@ -758,18 +773,27 @@ export const EN_US_MESSAGES = {
   "tools.api.authentication.nodeExample":
     "Here's a full example in Node.js using ethers and node-fetch:",
   "home.boostedDrop.anonymousAuthor": "Anonymous",
-  "home.boostedDrop.badge": "Boosted post",
+  "home.boostedDrop.badge": "Boosted drop",
   "home.boostedDrop.boost": "Boost",
-  "home.boostedDrop.boostDrop": "Boost post by {author}",
+  "home.boostedDrop.boostDrop": "Boost drop by {author}",
   "home.boostedDrop.boosted": "Boosted",
   "home.boostedDrop.boostCount.one": "{count} boost",
   "home.boostedDrop.boostCount.many": "{count} boosts",
+  "home.boostedDrop.compactAuthor": "by {author}",
   "home.boostedDrop.internalLinkSource": "{source} link",
   "home.boostedDrop.internalLinks.networkWaveScoreTitle": "Network: Wave Score",
-  "home.boostedDrop.openDrop": "Open boosted post from {author}",
+  "home.boostedDrop.openDrop": "Open boosted drop from {author}",
   "home.boostedDrop.removeBoost": "Remove boost",
-  "home.boostedDrop.removeBoostFromDrop": "Remove boost from post by {author}",
+  "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  "waveChat.boostedDrops.display.description":
+    "Choose how inserted boosted-drop cards appear in wave chat on this device.",
+  "waveChat.boostedDrops.display.expanded": "Expanded",
+  "waveChat.boostedDrops.display.hidden": "Hidden",
+  "waveChat.boostedDrops.display.compact": "Compact",
+  "waveChat.boostedDrops.display.label": "Boosted drops",
+  "waveChat.boostedDrops.display.menuCurrent": "Boosted drops: {mode}",
+  "waveChat.boostedDrops.display.sectionTitle": "Your display",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.title": "The Memes",
@@ -1257,6 +1281,7 @@ export const EN_US_MESSAGES = {
   ...WAVES_SIDEBAR_MESSAGES,
   ...QUICK_DM_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_LOADING_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,

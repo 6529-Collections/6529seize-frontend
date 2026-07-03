@@ -4,10 +4,10 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import React, { useCallback, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
@@ -25,17 +25,26 @@ import {
   SidebarCategoryLabel,
 } from "../waves/SidebarCategoryLabel";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
+import { SidebarSubwavesToggle } from "../waves/SidebarSubwavesToggle";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
 import { SidebarWaveTreeRowTransition } from "../waves/SidebarWaveTreeRowTransition";
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
+import {
+  PROFILE_FEED_TOOLTIP_ID,
+  WebProfileFeedShortcut,
+} from "./WebProfileFeedShortcut";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import {
   useSidebarWaveTree,
   type SidebarWaveTreeRow,
 } from "@/hooks/useSidebarWaveTree";
-import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
+import {
+  useAnimatedSidebarWaveRows,
+  getParentIdsWithVisibleSubwaveRows,
+  type AnimatedSidebarWaveTreeRow,
+} from "@/hooks/useAnimatedSidebarWaveRows";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import {
   groupSidebarWavesForView,
@@ -48,35 +57,15 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
 const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
-const SUBWAVE_ROW_HEIGHT = 54 as const;
-const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
-const PROFILE_FEED_LABEL = "Profile Waves Feed";
+const SUBWAVE_ROW_HEIGHT = 48 as const;
+const COLLAPSING_SUBWAVE_ROW_HEIGHT = 1 as const;
+const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
+const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 const TOOLTIP_STYLE = {
   ...SIDEBAR_TOOLTIP_STYLE,
   zIndex: 10000,
 } as const satisfies React.CSSProperties;
-
-function MasonryGridIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className="tw-size-4 tw-flex-shrink-0"
-    >
-      <rect width="7" height="9" x="3" y="3" rx="1" />
-      <rect width="7" height="5" x="14" y="3" rx="1" />
-      <rect width="7" height="9" x="14" y="12" rx="1" />
-      <rect width="7" height="5" x="3" y="16" rx="1" />
-    </svg>
-  );
-}
 
 function SidebarCategoryHeader({
   label,
@@ -163,42 +152,6 @@ interface WebUnifiedWavesListWavesProps {
   readonly sentinelRef: React.RefObject<HTMLDivElement | null>;
 }
 
-function ProfileFeedAvatar({ isActive }: { readonly isActive: boolean }) {
-  return (
-    <div
-      className={`tw-relative tw-size-8 tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-200 desktop-hover:group-hover:tw-brightness-110 ${
-        isActive
-          ? "tw-border-primary-300/75 tw-opacity-100"
-          : "tw-border-iron-700/80 tw-opacity-90 desktop-hover:group-hover:tw-border-iron-500/80 desktop-hover:group-hover:tw-opacity-100"
-      }`}
-    >
-      <div
-        className={`tw-h-full tw-w-full tw-rounded-full ${
-          isActive ? "tw-bg-primary-500/90" : "tw-bg-iron-900"
-        }`}
-      />
-      <div
-        className={`tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center ${
-          isActive ? "tw-text-primary-50" : "tw-text-iron-400"
-        }`}
-      >
-        <MasonryGridIcon />
-      </div>
-    </div>
-  );
-}
-
-function isModifiedClick(event: React.MouseEvent<HTMLAnchorElement>) {
-  return (
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey ||
-    event.button === 1 ||
-    event.button === 2
-  );
-}
-
 function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
   return (
     <div
@@ -270,78 +223,6 @@ const isVisibleSectionRow = ({
   return false;
 };
 
-function WebProfileFeedShortcut({
-  basePath,
-  isCollapsed,
-}: {
-  readonly basePath: string;
-  readonly isCollapsed: boolean;
-}) {
-  const { activeWave } = useMyStream();
-  const isActive = activeWave.id === null;
-
-  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (event.defaultPrevented || isModifiedClick(event)) {
-      return;
-    }
-
-    event.preventDefault();
-    activeWave.set(null, { isDirectMessage: false });
-  };
-
-  if (isCollapsed) {
-    return (
-      <div
-        className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-            : "desktop-hover:hover:tw-bg-iron-800/70"
-        }`}
-      >
-        <Link
-          href={basePath}
-          prefetch={false}
-          onClick={handleClick}
-          aria-label={PROFILE_FEED_LABEL}
-          aria-current={isActive ? "page" : undefined}
-          className="tw-flex tw-items-center tw-justify-center tw-no-underline"
-          data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
-          data-tooltip-content={PROFILE_FEED_LABEL}
-        >
-          <ProfileFeedAvatar isActive={isActive} />
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={`tw-group tw-mt-2 tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
-        isActive
-          ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-          : "desktop-hover:hover:tw-bg-iron-800/80"
-      }`}
-    >
-      <Link
-        href={basePath}
-        prefetch={false}
-        onClick={handleClick}
-        aria-current={isActive ? "page" : undefined}
-        className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-        }`}
-      >
-        <ProfileFeedAvatar isActive={isActive} />
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-truncate tw-text-sm">{PROFILE_FEED_LABEL}</div>
-        </div>
-      </Link>
-    </div>
-  );
-}
-
 const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   waves,
   onHover,
@@ -375,6 +256,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
     onParentExpand: streamWaves.loadSubwavesForParent,
     showExpandedSubwaves: !isCollapsed,
+  });
+  useLoadActiveSidebarParentSubwaves({
+    activeParentWaveId,
+    waves,
   });
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
@@ -429,6 +314,22 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     allRows,
     rowAnimationOptions
   );
+  const announcementParentsWithVisibleSubwaves = useMemo(
+    () => getParentIdsWithVisibleSubwaveRows(animatedAnnouncementRows),
+    [animatedAnnouncementRows]
+  );
+  const highlyRatedParentsWithVisibleSubwaves = useMemo(
+    () => getParentIdsWithVisibleSubwaveRows(animatedHighlyRatedRows),
+    [animatedHighlyRatedRows]
+  );
+  const pinnedParentsWithVisibleSubwaves = useMemo(
+    () => getParentIdsWithVisibleSubwaveRows(animatedPinnedRows),
+    [animatedPinnedRows]
+  );
+  const virtualizedParentsWithVisibleSubwaves = useMemo(
+    () => getParentIdsWithVisibleSubwaveRows(animatedAllRows),
+    [animatedAllRows]
+  );
   const hasAnnouncementRows = animatedAnnouncementRows.length > 0;
   const hasHighlyRatedRows = animatedHighlyRatedRows.length > 0;
   const hasPinnedRows = animatedPinnedRows.length > 0;
@@ -454,8 +355,19 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const rowHeight = getBaseRowHeight(isCollapsed);
   const isMessageBasePath = basePath === "/messages";
   const getSidebarRowHeight = useCallback(
-    (row: SidebarWaveTreeRow) =>
-      row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight,
+    (row: AnimatedSidebarWaveTreeRow) => {
+      if (row.rowType === "subwaves-toggle") {
+        return row.isExpanded
+          ? SUBWAVE_TOGGLE_ROW_HEIGHT
+          : COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT;
+      }
+
+      if (row.depth === 1 && row.animationState === "exiting") {
+        return COLLAPSING_SUBWAVE_ROW_HEIGHT;
+      }
+
+      return row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight;
+    },
     [rowHeight]
   );
   const handleHighlyRatedPreviewHover = useCallback(
@@ -521,7 +433,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     ]
   );
 
-  const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
+  const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
     items: virtualizedRows,
     key: virtualizedKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
@@ -530,23 +442,46 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     overscan: 5,
   });
 
-  const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => (
-    <WebBrainLeftSidebarWave
-      wave={row.wave}
-      onHover={onHover}
-      showPin={showPin && row.depth === 0}
-      basePath={basePath}
-      collapsed={isCollapsed}
-      depth={row.depth}
-      canExpand={row.canExpand && !isCollapsed}
-      isExpanded={row.isExpanded}
-      isLoadingSubwaves={row.isLoadingSubwaves}
-      hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
-      isLastSubwave={row.isLastSubwave}
-      onToggleExpand={toggleParent}
-      onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
-    />
-  );
+  const renderWaveRow = (
+    row: AnimatedSidebarWaveTreeRow,
+    showPin: boolean,
+    parentsWithVisibleSubwaves: ReadonlySet<string>
+  ) => {
+    const showConnectedSubwaves = parentsWithVisibleSubwaves.has(row.wave.id);
+
+    if (row.rowType === "subwaves-toggle") {
+      return (
+        <SidebarSubwavesToggle
+          isExpanded={row.isExpanded}
+          isLoading={row.isLoadingSubwaves}
+          knownSubwavesCount={row.knownSubwavesCount}
+          layoutVariant="web"
+          onClick={() => toggleParent(row.wave.id)}
+          parentWaveName={row.wave.name}
+          showConnector={showConnectedSubwaves}
+          unreadDropsCount={row.unreadSubwaveDropsCount}
+        />
+      );
+    }
+
+    return (
+      <WebBrainLeftSidebarWave
+        wave={row.wave}
+        onHover={onHover}
+        showPin={showPin && row.depth === 0}
+        basePath={basePath}
+        collapsed={isCollapsed}
+        depth={row.depth}
+        canExpand={row.canExpand && !isCollapsed}
+        hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+        isLastSubwave={row.isLastSubwave}
+        showSubwaveConnector={
+          row.depth === 0 && showConnectedSubwaves && !isCollapsed
+        }
+        onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
+      />
+    );
+  };
 
   return (
     <>
@@ -581,7 +516,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               renderRow={(row) =>
                 renderWaveRow(
                   row,
-                  !hidePin && !isCollapsed && row.wave.isPinned
+                  !hidePin && !isCollapsed && row.wave.isPinned,
+                  announcementParentsWithVisibleSubwaves
                 )
               }
               rows={animatedAnnouncementRows}
@@ -630,7 +566,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   isRowVisible={(row) =>
                     isVisibleSectionRow({ row, sectionName: "highly rated" })
                   }
-                  renderRow={(row) => renderWaveRow(row, false)}
+                  renderRow={(row) =>
+                    renderWaveRow(
+                      row,
+                      false,
+                      highlyRatedParentsWithVisibleSubwaves
+                    )
+                  }
                   rows={animatedHighlyRatedRows}
                   transitionClassName="tw-w-full"
                 />
@@ -657,7 +599,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   isVisibleSectionRow({ row, sectionName: "pinned" })
                 }
                 renderRow={(row) =>
-                  renderWaveRow(row, !hidePin && !isCollapsed)
+                  renderWaveRow(
+                    row,
+                    !hidePin && !isCollapsed,
+                    pinnedParentsWithVisibleSubwaves
+                  )
                 }
                 rows={animatedPinnedRows}
                 transitionClassName="tw-w-full"
@@ -718,7 +664,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                       height: v.size,
                     }}
                   >
-                    {renderWaveRow(row, !hidePin && !isCollapsed)}
+                    {renderWaveRow(
+                      row,
+                      !hidePin && !isCollapsed,
+                      virtualizedParentsWithVisibleSubwaves
+                    )}
                   </SidebarWaveTreeRowTransition>
                 );
               })}

@@ -117,7 +117,7 @@ export default function NextGenTokenDownload(
 
   function printResolution(quality: Resolution) {
     return (
-      <span className="no-wrap tw-flex tw-items-center tw-gap-4">
+      <span className="tw-flex tw-min-w-fit tw-items-center tw-gap-4 tw-whitespace-nowrap">
         <FontAwesomeIcon
           data-tooltip-id={`external-link-${props.token.id}-${quality}`}
           style={{ cursor: "pointer", height: "20px", width: "20px" }}
@@ -161,7 +161,7 @@ export default function NextGenTokenDownload(
           className="tw-relative tw-w-1/3 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
           style={{ maxWidth: "100%" }}
         >
-          <span className="no-wrap">
+          <span className="tw-min-w-fit tw-whitespace-nowrap">
             <span>{props.resolution}</span>
             {imageExists &&
               imageSize > 0 &&

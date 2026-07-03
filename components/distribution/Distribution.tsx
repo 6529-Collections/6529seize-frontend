@@ -405,7 +405,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                       {fetching ? (
                         <DotLoader />
                       ) : (
-                        <span className="font-larger">
+                        <span className="tw-text-lg">
                           {t(locale, "distribution.table.walletCount", {
                             count: formatInteger(locale, totalResults),
                           })}
@@ -432,7 +432,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                 <tbody>
                   {distributions.map((d) => (
                     <tr key={`${d.wallet}`}>
-                      <th className="font-smaller" scope="row">
+                      <th className="tw-text-sm" scope="row">
                         {d.wallet}
                       </th>
                       <td>

@@ -52,8 +52,7 @@ export function NextGenTokenImage(
       const handleOrWallet =
         props.token.normalised_handle ?? formatAddress(props.token.owner);
       const profileHref = `/${props.token.normalised_handle ?? props.token.owner}`;
-      const initial =
-        handleOrWallet.trim().charAt(0) || "?";
+      const initial = handleOrWallet.trim().charAt(0) || "?";
       const ownerInfo = (
         <div className="tailwind-scope tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2.5">
           <ProfileAvatar
@@ -170,11 +169,11 @@ export function NextGenTokenImage(
     let listingDisplay;
     if (props.show_listing) {
       listingDisplay = (
-        <span className="d-flex align-items-center gap-2">
-          <span className="d-flex align-items-center">
+        <span className="tw-flex tw-items-center tw-gap-2">
+          <span className="tw-flex tw-items-center">
             {props.token.price > 0 ? (
               <>
-                <span className="font-smaller font-color-h">Listed for</span>
+                <span className="tw-text-sm tw-text-[#9a9a9a]">Listed for</span>
                 &nbsp;
                 {props.token.price} {ETHEREUM_ICON_TEXT}
               </>
@@ -191,7 +190,7 @@ export function NextGenTokenImage(
                 style={{ height: "20px", width: "auto" }}
                 src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
                 alt={"pepe"}
-                className="cursor-pointer"
+                className="tw-cursor-pointer"
               />
             )}
           {props.token.me_price == props.token.price &&
@@ -203,7 +202,7 @@ export function NextGenTokenImage(
                 style={{ height: "20px", width: "auto" }}
                 src={`/${getRoyaltyImage(props.token.me_royalty / 100)}`}
                 alt={"pepe"}
-                className="cursor-pointer"
+                className="tw-cursor-pointer"
               />
             )}
         </span>
@@ -222,9 +221,10 @@ export function NextGenTokenImage(
 
       if (value && date) {
         saleDisplay = (
-          <span className="d-flex align-items-center">
-            <span className="font-color-h font-smaller">{display}</span>&nbsp;
-            <span className="d-flex gap-2">
+          <span className="tw-flex tw-items-center">
+            <span className="tw-text-sm tw-text-[#9a9a9a]">{display}</span>
+            &nbsp;
+            <span className="tw-flex tw-gap-2">
               <span>
                 {Number.parseFloat(value.toFixed(5)).toLocaleString()}{" "}
                 {ETHEREUM_ICON_TEXT}
@@ -238,7 +238,7 @@ export function NextGenTokenImage(
       }
     }
     return (
-      <span className="d-flex flex-column align-items-end gap-1">
+      <span className="tw-flex tw-flex-col tw-items-end tw-gap-1">
         {rarityDisplay}
         {saleDisplay}
         {listingDisplay}
@@ -260,7 +260,7 @@ export function NextGenTokenImage(
     return (
       <>
         <span
-          className="d-flex flex-column align-items-center justify-content-center"
+          className="tw-flex tw-flex-col tw-items-center tw-justify-center"
           style={{
             overflow: "hidden",
             height: height,
@@ -287,20 +287,20 @@ export function NextGenTokenImage(
         </span>
         {!props.hide_info && (
           <span
-            className={`pt-1 d-flex align-items-center ${
+            className={`tw-flex tw-items-center tw-pt-1 ${
               props.rarity_type ||
               props.show_listing ||
               props.show_max_sale ||
               props.show_last_sale ||
               props.show_owner_info
-                ? "justify-content-between"
-                : "justify-content-center"
+                ? "tw-justify-between"
+                : "tw-justify-center"
             }`}
           >
             <span className={props.info_class ?? ""}>
               #{props.token.normalised_id}
             </span>
-            <span className="d-flex align-items-center gap-2">
+            <span className="tw-flex tw-items-center tw-gap-2">
               {getExtraInfo()}
               {getOwnerInfo()}
             </span>
@@ -338,7 +338,7 @@ export function NextGenTokenImage(
     return (
       <Link
         href={`/nextgen/token/${props.token.id}`}
-        className="decoration-none scale-hover unselectable"
+        className="tw-select-none tw-no-underline [&_img]:tw-transition-transform [&_img]:tw-duration-300 hover:[&_img]:tw-scale-[1.02]"
       >
         {getContent()}
       </Link>

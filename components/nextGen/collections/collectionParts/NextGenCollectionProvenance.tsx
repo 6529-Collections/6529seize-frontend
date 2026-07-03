@@ -65,7 +65,7 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
       className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
       ref={scrollTarget}
     >
-      <div className="tw-[padding-top:0.5rem] -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           {logs.map((log, index) => (
             <NextGenCollectionProvenanceRow
@@ -231,7 +231,7 @@ export function NextGenCollectionProvenanceRow(
       if (log.log.startsWith("Script at index")) {
         return (
           <span className="tw-flex tw-flex-col">
-            <span className="font-smaller font-color-h tw-[padding-bottom:0.5rem]">
+            <span className="tw-pb-2 tw-text-sm tw-text-[#9a9a9a]">
               * The script of each collection is split into manageable chunks
               due to Ethereum&apos;s transaction size limits. Each chunk of the
               script is updated individually in a separate transaction.
@@ -262,7 +262,7 @@ export function NextGenCollectionProvenanceRow(
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <span className="tw-flex tw-items-center tw-justify-between">
             <span className="tw-flex tw-items-center tw-gap-6">
-              <span className="no-wrap">
+              <span className="tw-min-w-fit tw-whitespace-nowrap">
                 {getDateDisplay(new Date(log.block_timestamp * 1000))}
               </span>
               <span className="tw-flex tw-items-center">

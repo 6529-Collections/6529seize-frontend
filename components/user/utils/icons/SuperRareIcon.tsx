@@ -1,10 +1,11 @@
 export default function SuperRareIcon() {
   return (
     <svg
-      className="tw-w-full tw-h-full d-flex align-items-center tw-align-top"
+      className="tw-flex tw-h-full tw-w-full tw-items-center tw-align-top"
       viewBox="0 0 90 90"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg">
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         fill="white"
         transform="scale(1.11) translate(0, 2.78)"

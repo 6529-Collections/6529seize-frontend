@@ -17,8 +17,9 @@ export default function ShowMoreButton({
 }>) {
   return (
     <button
-      className="btn-link decoration-none"
-      onClick={() => setExpanded(!expanded)}>
+      className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit tw-no-underline hover:tw-text-[#9a9a9a]"
+      onClick={() => setExpanded(!expanded)}
+    >
       {expanded ? (
         <>
           {showLessLabel}{" "}

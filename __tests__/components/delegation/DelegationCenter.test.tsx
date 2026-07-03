@@ -16,11 +16,6 @@ jest.mock("next/image", () => ({
   __esModule: true,
   default: (p: any) => <img {...p} alt="test" />,
 }));
-jest.mock("react-bootstrap", () => ({
-  Container: (p: any) => <div>{p.children}</div>,
-  Row: (p: any) => <div>{p.children}</div>,
-  Col: (p: any) => <div>{p.children}</div>,
-}));
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <svg />,
 }));
@@ -33,7 +28,9 @@ describe("DelegationCenterComponent", () => {
   it("triggers wallet connect when not connected", () => {
     const setSection = jest.fn();
     render(<DelegationCenterComponent setSection={setSection} />);
-    fireEvent.click(screen.getByRole("button", { name: "Register Delegation" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Register Delegation" })
+    );
     expect(seizeCtx.seizeConnect).toHaveBeenCalled();
     expect(setSection).not.toHaveBeenCalled();
   });
@@ -42,7 +39,9 @@ describe("DelegationCenterComponent", () => {
     seizeCtx.isConnected = true;
     const setSection = jest.fn();
     render(<DelegationCenterComponent setSection={setSection} />);
-    fireEvent.click(screen.getByRole("button", { name: "Register Delegation" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Register Delegation" })
+    );
     await waitFor(() =>
       expect(setSection).toHaveBeenCalledWith(
         DelegationCenterSection.REGISTER_DELEGATION

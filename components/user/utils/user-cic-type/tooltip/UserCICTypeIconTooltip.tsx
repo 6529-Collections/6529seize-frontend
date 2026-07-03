@@ -87,7 +87,7 @@ export default function UserCICTypeIconTooltip({
         </span>
       </div>
       {cicType === CICType.INACCURATE && (
-        <div className="mt-2">
+        <div className="tw-mt-2">
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-medium tw-text-iron-400">
             This profile is at risk of losing its handle if its NIC does not
             turn positive. The detailed process will go live after the

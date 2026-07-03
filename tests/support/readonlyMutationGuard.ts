@@ -55,6 +55,7 @@ const IGNORED_EXTERNAL_MUTATION_HOSTS = [
 ];
 const GOOGLE_COLLECT_HOSTS = new Set([
   "analytics.google.com",
+  "region1.google-analytics.com",
   "www.google-analytics.com",
   "www.google.com",
 ]);

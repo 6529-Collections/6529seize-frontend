@@ -452,8 +452,7 @@ export default function UserPageSubscriptionsTopUp() {
                   min={1}
                   placeholder="count"
                   value={memeCount}
-                  className={styles["countInput"]}
-                  style={{ width: "100px", padding: "2px 10px" }}
+                  className="tw-w-[100px] tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-0.5 tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedOption("other");
@@ -507,7 +506,7 @@ export default function UserPageSubscriptionsTopUp() {
         <div className="tw-pb-2">
           <div className="tw-flex tw-items-end tw-gap-2 tw-whitespace-nowrap">
             <h4 className="tw-mb-0 tw-font-semibold">Top Up</h4>
-            <span className="font-color-h font-smaller tw-flex tw-items-center tw-gap-1">
+            <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-text-[#9a9a9a]">
               Sending to{" "}
               <>
                 <span data-tooltip-id="subscription-address">

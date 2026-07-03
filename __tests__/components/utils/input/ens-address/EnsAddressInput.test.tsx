@@ -4,14 +4,6 @@ import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInpu
 const mockHandleInputChange = jest.fn();
 const mockSetInputValue = jest.fn();
 
-jest.mock("react-bootstrap", () => ({
-  Form: {
-    Control: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-      <input data-testid="form-control" {...props} />
-    ),
-  },
-}));
-
 jest.mock("@/hooks/useEnsResolution", () => ({
   useEnsResolution: jest.fn(() => ({
     inputValue: "",
@@ -45,9 +37,7 @@ describe("EnsAddressInput", () => {
   it("renders input with placeholder", () => {
     render(<EnsAddressInput onAddressChange={mockOnAddressChange} />);
 
-    expect(
-      screen.getByPlaceholderText("0x... or ENS")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("0x... or ENS")).toBeInTheDocument();
   });
 
   it("renders with custom placeholder", () => {
@@ -150,9 +140,7 @@ describe("EnsAddressInput", () => {
   });
 
   it("disables input when disabled prop is true", () => {
-    render(
-      <EnsAddressInput onAddressChange={mockOnAddressChange} disabled />
-    );
+    render(<EnsAddressInput onAddressChange={mockOnAddressChange} disabled />);
 
     expect(screen.getByPlaceholderText("0x... or ENS")).toBeDisabled();
   });

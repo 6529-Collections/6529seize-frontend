@@ -16,9 +16,7 @@ import {
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import Link from "next/link";
-import type {
-  AirdropAddressResult,
-} from "./UserPageSubscriptionsAirdropAddress";
+import type { AirdropAddressResult } from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
@@ -275,13 +273,14 @@ export default function UserPageSubscriptions(
                 <span>
                   <Link
                     href="/about/subscriptions"
-                    className="font-smaller font-color-silver decoration-hover-underline">
+                    className="decoration-hover-underline tw-text-sm tw-text-iron-400"
+                  >
                     Learn More
                   </Link>
                 </span>
               </div>
             </div>
-            <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />
+            <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
             <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2">
               <div className="tw-pb-4">
                 <UserPageSubscriptionsBalance

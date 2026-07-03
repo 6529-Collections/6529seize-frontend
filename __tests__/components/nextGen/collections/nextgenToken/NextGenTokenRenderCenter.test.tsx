@@ -2,21 +2,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NextGenTokenRenderCenter from "@/components/nextGen/collections/nextgenToken/NextGenTokenRenderCenter";
 
-jest.mock("react-bootstrap", () => {
-  const React = require("react");
-  const RB: any = {
-    Container: (p: any) => <div {...p} />,
-    Row: (p: any) => <div {...p} />,
-    Col: (p: any) => <div {...p} />,
-  };
-  const Dropdown: any = (p: any) => <div {...p} />;
-  Dropdown.Toggle = (p: any) => <button {...p}>{p.children}</button>;
-  Dropdown.Menu = (p: any) => <div {...p} />;
-  Dropdown.Item = (p: any) => <button {...p}>{p.children}</button>;
-  RB.Dropdown = Dropdown;
-  return RB;
-});
-
 jest.mock(
   "@/components/nextGen/collections/nextgenToken/NextGenTokenDownload",
   () => ({

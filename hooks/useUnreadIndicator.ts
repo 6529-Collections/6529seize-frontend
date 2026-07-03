@@ -1,14 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useUnreadNotifications } from "./useUnreadNotifications";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useUnreadDmDrops } from "./useUnreadDmDrops";
 
 type UnreadIndicatorType = "notifications" | "messages";
+
+interface LocalUnreadDirectMessage {
+  readonly unreadDropsCount?: number | null | undefined;
+  readonly newDropsCount?:
+    | {
+        readonly count?: number | null | undefined;
+      }
+    | null
+    | undefined;
+}
 
 interface UseUnreadIndicatorProps {
   readonly type: UnreadIndicatorType;
   readonly handle: string | null;
+  readonly localDirectMessages?:
+    | readonly LocalUnreadDirectMessage[]
+    | null
+    | undefined;
 }
 
 interface UseUnreadIndicatorReturn {
@@ -18,34 +31,31 @@ interface UseUnreadIndicatorReturn {
 export function useUnreadIndicator({
   type,
   handle,
+  localDirectMessages,
 }: UseUnreadIndicatorProps): UseUnreadIndicatorReturn {
-  const [hasUnread, setHasUnread] = useState(false);
-
   // Use existing notifications hook for notifications
   const { haveUnreadNotifications } = useUnreadNotifications(
     type === "notifications" ? handle : null
   );
 
-  // Use direct messages context for messages
-  const { directMessages } = useMyStream();
+  const { haveUnreadDmDrops } = useUnreadDmDrops(
+    type === "messages" ? handle : null
+  );
 
-  useEffect(() => {
-    // Only show indicators if user is authenticated
-    if (!handle) {
-      setHasUnread(false);
-      return;
-    }
+  // Only show indicators if user is authenticated
+  if (!handle) {
+    return { hasUnread: false };
+  }
 
-    if (type === "notifications") {
-      setHasUnread(haveUnreadNotifications);
-    } else if (type === "messages") {
-      const hasUnreadMessages = directMessages.list.some((dm) => {
-        return (dm?.unreadDropsCount ?? 0) > 0 || (dm?.newDropsCount?.count ?? 0) > 0;
-      });
+  if (type === "notifications") {
+    return { hasUnread: haveUnreadNotifications };
+  }
 
-      setHasUnread(hasUnreadMessages);
-    }
-  }, [type, handle, haveUnreadNotifications, directMessages.list]);
+  const hasLocalUnreadMessages = (localDirectMessages ?? []).some((dm) => {
+    return (dm.unreadDropsCount ?? 0) > 0 || (dm.newDropsCount?.count ?? 0) > 0;
+  });
 
-  return { hasUnread };
+  const hasUnreadMessages = haveUnreadDmDrops || hasLocalUnreadMessages;
+
+  return { hasUnread: hasUnreadMessages };
 }

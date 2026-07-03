@@ -14,14 +14,6 @@ jest.mock("@/components/header/user/HeaderUserConnect", () => () => (
   <div data-testid="header-connect" />
 ));
 
-jest.mock("react-bootstrap", () => {
-  return {
-    Container: (p: any) => <div data-testid="container" {...p} />,
-    Row: (p: any) => <div data-testid="row" {...p} />,
-    Col: (p: any) => <div data-testid="col" {...p} />,
-  };
-});
-
 jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   __esModule: true,
   default: () => <div data-testid="user-cic" />,

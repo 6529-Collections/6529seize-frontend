@@ -138,7 +138,7 @@ export default function Address(props: Readonly<Props>) {
           </button>
           &nbsp;&nbsp;
           <Link
-            className="decoration-none decoration-hover-underline"
+            className="decoration-hover-underline tw-no-underline"
             href={getProfileLink()}
           >
             <span

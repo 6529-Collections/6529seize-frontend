@@ -13,13 +13,13 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
   return (
     <Link
       href={`/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
-      className="decoration-none"
+      className="tw-no-underline"
     >
       <div
         className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["collectionPreview"]}`}
       >
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="pb-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-6">
             <Image
               unoptimized
               priority
@@ -48,7 +48,7 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
             >
               <div className="-tw-mx-3 tw-flex tw-flex-wrap">
                 <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                  <h3 className="mb-0">{props.collection.name}</h3>
+                  <h3 className="tw-mb-0">{props.collection.name}</h3>
                 </div>
               </div>
               <div className="-tw-mx-3 tw-flex tw-flex-wrap">
@@ -57,7 +57,7 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
                 </div>
               </div>
               <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                <div className="font-color-h d-flex tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+                <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-[#9a9a9a]">
                   <NextGenMintCounts collection={props.collection} />
                 </div>
               </div>

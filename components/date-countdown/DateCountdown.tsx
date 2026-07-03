@@ -94,20 +94,21 @@ export default function DateCountdown(props: Readonly<Props>) {
     `${n.toLocaleString()} ${word}${n === 1 ? "" : "s"}`;
 
   return (
-    <div className="d-flex flex-column">
+    <div className="tw-flex tw-flex-col">
       {/* Title */}
       {isReady ? (
         <div>{title}</div>
       ) : (
         <div
           className={`${styles["skeletonText"]} ${styles["skeletonTitle"]}`}
-          aria-hidden="true">
+          aria-hidden="true"
+        >
           &nbsp;
         </div>
       )}
 
       {/* Countdown */}
-      <div className="pt-2 font-larger font-bolder" aria-live="polite">
+      <div className="tw-pt-2 tw-text-lg tw-font-bold" aria-live="polite">
         {isReady && timeLeft ? (
           <>
             {timeLeft.days > 0 && <>{plural(timeLeft.days, "day")}, </>}
@@ -120,7 +121,8 @@ export default function DateCountdown(props: Readonly<Props>) {
         ) : (
           <div
             className={`${styles["skeletonText"]} ${styles["skeletonCountdown"]}`}
-            aria-hidden="true">
+            aria-hidden="true"
+          >
             &nbsp;
           </div>
         )}

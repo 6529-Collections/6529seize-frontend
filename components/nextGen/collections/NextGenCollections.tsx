@@ -56,7 +56,7 @@ export default function NextGenCollections() {
 
   return (
     <div className="tw-mx-auto tw-w-full tw-px-3 tw-py-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="tw-[padding-bottom:1rem] -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-justify-between tw-px-3">
           <h1>Collections</h1>
           <label className="tw-flex tw-items-center tw-gap-2 tw-text-lg tw-font-bold">
@@ -86,7 +86,7 @@ export default function NextGenCollections() {
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-6">
         {collections.map((collection) => (
           <div
-            className="tw-[padding-bottom:1rem] tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto min-[992px]:tw-w-1/3 min-[992px]:tw-shrink-0 min-[992px]:tw-grow-0 min-[992px]:tw-basis-auto"
+            className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-pb-4 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto min-[992px]:tw-w-1/3 min-[992px]:tw-shrink-0 min-[992px]:tw-grow-0 min-[992px]:tw-basis-auto"
             key={`collection-preview-${collection.id}`}
             style={{ maxWidth: "100%" }}
           >

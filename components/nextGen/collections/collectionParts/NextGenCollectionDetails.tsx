@@ -37,25 +37,25 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
   }
 
   return (
-    <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+          <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
             <div className="-tw-mx-3 tw-flex tw-flex-wrap">
               <div
-                className="pt-2 pb-2 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+                className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-pb-2 tw-pt-2 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
                 style={{ maxWidth: "100%" }}
               >
                 {props.collection.artist_signature && (
                   <>
                     <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                      <div className="font-color-h tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-[#9a9a9a]">
                         Artist Signature
                       </div>
                     </div>
-                    <div className="pb-2 -tw-mx-3 tw-flex tw-flex-wrap">
+                    <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
                       <div
-                        className="pt-2 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                        className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-pt-2"
                         style={{ maxWidth: "100%" }}
                       >
                         <div className={styles["artistSignature"]}>
@@ -67,22 +67,22 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                 )}
                 <div className="-tw-mx-3 tw-flex tw-flex-wrap">
                   <div
-                    className="pt-2 pb-2 d-flex flex-column tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                    className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-px-3 tw-pb-2 tw-pt-2"
                     style={{ maxWidth: "100%" }}
                   >
-                    <span className="font-color-h">Allowlist</span>
+                    <span className="tw-text-[#9a9a9a]">Allowlist</span>
                     <DistributionLink collection={props.collection} />
                   </div>
                   <div
-                    className="pt-2 pb-2 d-flex gap-5 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                    className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-gap-12 tw-px-3 tw-pb-2 tw-pt-2"
                     style={{ maxWidth: "100%" }}
                   >
-                    <span className="d-flex flex-column">
-                      <span className="font-color-h">License</span>
+                    <span className="tw-flex tw-flex-col">
+                      <span className="tw-text-[#9a9a9a]">License</span>
                       <span>{props.collection.licence}</span>
                     </span>
-                    <span className="d-flex flex-column">
-                      <span className="font-color-h">Library</span>
+                    <span className="tw-flex tw-flex-col">
+                      <span className="tw-text-[#9a9a9a]">Library</span>
                       <span>
                         {props.collection.library
                           ? props.collection.library
@@ -91,13 +91,13 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                     </span>
                   </div>
                   <div
-                    className="pt-2 pb-2 d-flex flex-column tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
+                    className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-px-3 tw-pb-2 tw-pt-2"
                     style={{ maxWidth: "100%" }}
                   >
-                    <span className="font-color-h">Contract</span>
+                    <span className="tw-text-[#9a9a9a]">Contract</span>
                     <span>
                       <Link
-                        className="font-color text-decoration-none"
+                        className="tw-text-white tw-no-underline"
                         href={getEtherscanLink()}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -122,10 +122,10 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                 </div>
               </div>
               <div
-                className="pt-2 pb-2 d-flex flex-column tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-2/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+                className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-px-3 tw-pb-2 tw-pt-2 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-2/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
                 style={{ maxWidth: "100%" }}
               >
-                <span className="font-color-h">Collection Overview</span>
+                <span className="tw-text-[#9a9a9a]">Collection Overview</span>
                 <span>{props.collection.description}</span>
               </div>
             </div>
@@ -138,13 +138,13 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
 
 function NextGenCollectionDetailsAbout() {
   return (
-    <div className="no-padding pt-4 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 tw-pt-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>About Pebbles</h4>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             Pebbles aims to explore the order that can emerge from a small set
@@ -153,12 +153,12 @@ function NextGenCollectionDetailsAbout() {
           </p>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>History of Technical Innovation</h4>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             ZeBlocks prides itself on technical innovation in its generative
@@ -175,12 +175,12 @@ function NextGenCollectionDetailsAbout() {
           </ul>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>Pebbles: Matched To The Human Eye</h4>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             Pebble is one of the highest-resolution generative collections ever
@@ -251,12 +251,12 @@ function NextGenCollectionDetailsAbout() {
           </ul>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>NextGen x Pebbles</h4>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <p>
             NextGen will take the following approach to support Pebbles’s
@@ -287,12 +287,12 @@ function NextGenCollectionDetailsAbout() {
           </ul>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h4>Key Collection Parameters</h4>
         </div>
       </div>
-      <div className="pb-3 -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <table className="tw-w-full tw-border-collapse">
             <tbody>

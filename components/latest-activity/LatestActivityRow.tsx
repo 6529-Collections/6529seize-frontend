@@ -221,7 +221,9 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     return (
       <span
         className={
-          isTailwind ? "tw-flex tw-items-center tw-whitespace-nowrap" : "d-flex"
+          isTailwind
+            ? "tw-flex tw-items-center tw-whitespace-nowrap"
+            : "tw-flex"
         }
       >
         {(areEqualAddresses(MANIFOLD, props.tr.from_address) ||
@@ -388,7 +390,9 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     return (
       <span
         className={
-          isTailwind ? "tw-flex tw-items-center tw-whitespace-nowrap" : "d-flex"
+          isTailwind
+            ? "tw-flex tw-items-center tw-whitespace-nowrap"
+            : "tw-flex"
         }
       >
         {getDescription()}
@@ -404,7 +408,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         className={
           isTailwind
             ? "tw-flex tw-items-center tw-gap-3 tw-pl-4"
-            : "d-flex align-items-center gap-3"
+            : "tw-flex tw-items-center tw-gap-4"
         }
       >
         {printRoyalties(
@@ -512,7 +516,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         className={
           isTailwind
             ? `tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`
-            : "align-middle text-center"
+            : "tw-text-center tw-align-middle"
         }
       >
         {getDateDisplay(new Date(props.tr.transaction_date))}
@@ -521,7 +525,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         className={
           isTailwind
             ? `tw-w-14 tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-text-center tw-align-middle`
-            : "align-middle text-center"
+            : "tw-text-center tw-align-middle"
         }
       >
         <FontAwesomeIcon className={getIconClass()} icon={getIcon()} />
@@ -530,7 +534,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         className={
           isTailwind
             ? `tw-flex tw-items-center tw-justify-between tw-gap-2 tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`
-            : "d-flex align-items-center justify-content-between gap-2"
+            : "tw-flex tw-items-center tw-justify-between tw-gap-2"
         }
       >
         {areEqualAddresses(props.tr.contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID])

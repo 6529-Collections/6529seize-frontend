@@ -36,13 +36,14 @@ export default function CodeExample({ code }: CodeExampleProps) {
           backgroundColor: "rgb(26, 26, 26)",
           border: "1px solid rgb(44, 44, 44)",
           overflow: "auto",
-        }}>
+        }}
+      >
         <code ref={codeRef} className="language-javascript">
           {code}
         </code>
       </pre>
       <button
-        className="btn btn-sm position-absolute"
+        className="tw-absolute tw-rounded tw-px-2 tw-py-1"
         style={{
           top: "8px",
           right: "8px",
@@ -52,7 +53,8 @@ export default function CodeExample({ code }: CodeExampleProps) {
           fontSize: "0.75rem",
         }}
         onClick={copyToClipboard}
-        data-tooltip-id="copy-code-tooltip">
+        data-tooltip-id="copy-code-tooltip"
+      >
         {copied ? "Copied!" : "Copy"}
       </button>
       <Tooltip
@@ -62,7 +64,8 @@ export default function CodeExample({ code }: CodeExampleProps) {
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
-        }}>
+        }}
+      >
         <span className="tw-text-xs">{copied ? "Copied!" : "Copy code"}</span>
       </Tooltip>
     </div>

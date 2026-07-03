@@ -75,14 +75,14 @@ function TraitAccordion(
               className="tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-text-center"
               style={{ maxWidth: "100%" }}
             >
-              <span className="font-color-h">Rank:</span> #
+              <span className="tw-text-[#9a9a9a]">Rank:</span> #
               {props.rank.toLocaleString()}
             </div>
             <div
               className="tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-text-center"
               style={{ maxWidth: "100%" }}
             >
-              <span className="font-color-h">Score:</span>{" "}
+              <span className="tw-text-[#9a9a9a]">Score:</span>{" "}
               {displayScore(props.score)}
             </div>
           </div>
@@ -131,7 +131,7 @@ function TraitAccordion(
                       )}-${t.value.replaceAll(" ", "-")}`}
                     >
                       <td className="tw-w-5/12 tw-px-3 tw-py-2">
-                        <span className="font-color-h">{t.trait}:</span>{" "}
+                        <span className="tw-text-[#9a9a9a]">{t.trait}:</span>{" "}
                         <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
@@ -295,8 +295,8 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
   return (
     <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-[padding-bottom:1rem] tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h3 className="tw-[margin-bottom:0]">Rarity</h3>
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
+          <h3 className="tw-mb-0">Rarity</h3>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
@@ -311,7 +311,7 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-4">
-        <div className="font-larger font-bolder tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-lg tw-font-bold">
           {props.token.name}
         </div>
       </div>
@@ -408,8 +408,8 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
   return (
     <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-[padding-bottom:1rem] tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h3 className="tw-[margin-bottom:0]">Traits</h3>
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
+          <h3 className="tw-mb-0">Traits</h3>
         </div>
       </div>
       {props.traits.map((t) => (
@@ -417,8 +417,8 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
           className="-tw-mx-3 tw-flex tw-flex-wrap"
           key={`trait-${t.trait.replaceAll(" ", "-")}`}
         >
-          <div className="tw-[padding-bottom:1rem] tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3">
-            <span className="font-color-h">{t.trait}:</span>
+          <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3 tw-pb-4">
+            <span className="tw-text-[#9a9a9a]">{t.trait}:</span>
             <span>
               <Link
                 href={`/nextgen/collection/${formatNameForUrl(
@@ -428,7 +428,7 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
                 {t.value}
               </Link>
             </span>
-            <span className="font-color-h">
+            <span className="tw-text-[#9a9a9a]">
               {t.value_count.toLocaleString()}/{t.token_count.toLocaleString()}
             </span>
           </div>
@@ -457,7 +457,7 @@ export function NextgenRarityToggle(
       />
       <label
         htmlFor={label}
-        className={props.disabled ? "font-color-h" : "font-color"}
+        className={props.disabled ? "tw-text-[#9a9a9a]" : "tw-text-white"}
       >
         <b>{props.title}</b>
       </label>

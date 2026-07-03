@@ -2,7 +2,7 @@
 
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { useEffect, useEffectEvent } from "react";
-import { Form } from "react-bootstrap";
+import clsx from "clsx";
 
 interface EnsAddressInputProps {
   readonly id?: string | undefined;
@@ -18,6 +18,9 @@ interface EnsAddressInputProps {
   readonly onLoadingChange?: (isLoading: boolean) => void;
   readonly onError?: (hasError: boolean) => void;
 }
+
+const inputClassName =
+  "tw-block tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-bg-clip-padding tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-950 tw-transition-[border-color,box-shadow] placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-bg-white focus:tw-text-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/30 disabled:tw-bg-iron-100 disabled:tw-opacity-100";
 
 export default function EnsAddressInput({
   id,
@@ -80,13 +83,13 @@ export default function EnsAddressInput({
   }, [inputValue, ensAddressQuery.isError]);
 
   return (
-    <Form.Control
+    <input
       id={id}
       disabled={disabled}
       autoFocus={autoFocus}
       placeholder={placeholder}
       aria-describedby={ariaDescribedBy}
-      className={className}
+      className={clsx(inputClassName, className)}
       type="text"
       value={inputValue}
       onChange={(e) => handleInputChange(e.target.value)}

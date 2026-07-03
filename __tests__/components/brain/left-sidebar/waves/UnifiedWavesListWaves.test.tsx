@@ -15,7 +15,7 @@ import {
   getVisibleHighlyRatedPreviewItems,
   type HighlyRatedWavePreviewItem,
 } from "@/components/brain/left-sidebar/waves/HighlyRatedWavesToggle";
-import { SIDEBAR_SUBWAVE_ROW_TRANSITION_MS } from "@/hooks/useAnimatedSidebarWaveRows";
+import { SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS } from "@/hooks/useAnimatedSidebarWaveRows";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useAuth } from "@/components/auth/Auth";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
@@ -38,18 +38,8 @@ jest.mock(
       data-pin={String(props.showPin)}
       data-depth={String(props.depth)}
       data-can-expand={String(props.canExpand)}
-      data-expanded={String(props.isExpanded)}
-      data-loading-subwaves={String(props.isLoadingSubwaves)}
       data-unread-subwaves={String(props.hasUnreadSubwaves)}
-    >
-      {props.canExpand && (
-        <button
-          type="button"
-          data-testid={`toggle-${props.wave.id}`}
-          onClick={() => props.onToggleExpand?.(props.wave.id)}
-        />
-      )}
-    </div>
+    ></div>
   )
 );
 jest.mock(
@@ -131,6 +121,12 @@ const baseWaves = [
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
 
+const flushAnimatedSidebarRows = async () => {
+  await act(async () => {
+    await Promise.resolve();
+  });
+};
+
 const createPreviewItem = ({
   id,
   isActive = false,
@@ -155,7 +151,7 @@ beforeEach(() => {
     activeProfileProxy: null,
   });
   mockUseMyStream.mockReturnValue({
-    activeWave: { id: null, set: jest.fn() },
+    activeWave: { id: null, parentWaveId: null, set: jest.fn() },
     waves: {
       loadSubwavesForParent,
       prefetchSubwavesForParent,
@@ -171,8 +167,9 @@ beforeEach(() => {
     virtualItems: [
       { index: 0, start: 0, size: 62 },
       { index: 1, start: 62, size: 40 },
+      { index: 2, start: 102, size: 1 },
     ],
-    totalHeight: 102,
+    totalHeight: 103,
   });
 });
 
@@ -819,7 +816,7 @@ it("respects hide options and does not render toggle when not connected", () => 
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "false");
 });
 
-it("expands regular subwaves and keeps child rows unpinned", () => {
+it("expands regular subwaves and keeps child rows unpinned", async () => {
   render(
     <UnifiedWavesListWaves
       waves={[
@@ -845,14 +842,28 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
     "true"
   );
   expect(screen.queryByTestId("wave-child")).toBeNull();
+  const collapsedVirtualizerOptions =
+    mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
+  expect(
+    collapsedVirtualizerOptions.rowHeight(collapsedVirtualizerOptions.items[0])
+  ).toBe(62);
+  expect(
+    collapsedVirtualizerOptions.rowHeight(collapsedVirtualizerOptions.items[1])
+  ).toBe(42);
 
-  fireEvent.click(screen.getByTestId("toggle-parent"));
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "View 1 subwave for Mock Wave",
+    })
+  );
+  await flushAnimatedSidebarRows();
 
   expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
-  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
-    "data-expanded",
-    "true"
-  );
+  expect(
+    screen.getByRole("button", {
+      name: "Hide Mock Wave subwaves",
+    })
+  ).toHaveAttribute("aria-expanded", "true");
   expect(screen.getByTestId("wave-parent")).toHaveAttribute(
     "data-unread-subwaves",
     "false"
@@ -866,10 +877,16 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
     "data-sidebar-subwave-row-state",
     "entering"
   );
+  const expandedVirtualizerOptions =
+    mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
+  const expandedToggleRow = expandedVirtualizerOptions.items.find(
+    (row: { readonly key: string }) => row.key === "parent:subwaves-toggle"
+  );
+  expect(expandedVirtualizerOptions.rowHeight(expandedToggleRow)).toBe(38);
   expect(screen.getByTestId("wave-child")).toHaveAttribute("data-pin", "false");
 });
 
-it("keeps child rows mounted while collapse animation runs", () => {
+it("keeps child rows mounted while collapse animation runs", async () => {
   jest.useFakeTimers();
 
   try {
@@ -891,11 +908,21 @@ it("keeps child rows mounted while collapse animation runs", () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId("toggle-parent"));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "View 1 subwave for Mock Wave",
+      })
+    );
+    await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
     expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId("toggle-parent"));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Hide Mock Wave subwaves",
+      })
+    );
+    await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledTimes(1);
 
     expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
@@ -904,7 +931,7 @@ it("keeps child rows mounted while collapse animation runs", () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
+      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS);
     });
 
     expect(screen.queryByTestId("wave-child")).toBeNull();
@@ -941,10 +968,11 @@ it("auto-expands the parent for the active subwave", () => {
     />
   );
 
-  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
-    "data-expanded",
-    "true"
-  );
+  expect(
+    screen.getByRole("button", {
+      name: "Hide Mock Wave subwaves",
+    })
+  ).toHaveAttribute("aria-expanded", "true");
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 });
 
@@ -971,14 +999,16 @@ it("loads a direct active subwave parent before showing it expanded", async () =
     />
   );
 
-  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
-    "data-expanded",
-    "false"
-  );
-  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
-    "data-loading-subwaves",
-    "true"
-  );
+  expect(
+    screen.getByRole("button", {
+      name: "Loading Mock Wave subwaves",
+    })
+  ).toHaveAttribute("aria-busy", "true");
+  expect(
+    screen.getByRole("button", {
+      name: "Loading Mock Wave subwaves",
+    })
+  ).toHaveAttribute("aria-expanded", "false");
   expect(screen.queryByTestId("wave-child")).toBeNull();
 
   await waitFor(() => {

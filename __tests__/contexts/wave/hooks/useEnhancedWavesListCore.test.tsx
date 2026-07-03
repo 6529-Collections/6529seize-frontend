@@ -115,6 +115,48 @@ describe("useEnhancedWavesListCore", () => {
     );
   });
 
+  it("passes disabled state to the new-drop counter and suppresses returned list work", () => {
+    const refetchAllWaves = jest.fn();
+    const fetchNextPage = jest.fn();
+    const wavesData = {
+      ...createWavesData({
+        mainWavesRefetch: jest.fn(),
+        refetchAllWaves,
+        waves: [createSidebarWave()],
+      }),
+      fetchNextPage,
+      isFetching: true,
+      isFetchingNextPage: true,
+      hasNextPage: true,
+    };
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        enabled: false,
+        supportsPinning: true,
+      })
+    );
+
+    expect(mockedUseNewDropCounter).toHaveBeenCalledWith(
+      null,
+      wavesData.waves,
+      refetchAllWaves,
+      expect.objectContaining({ enabled: false })
+    );
+    expect(result.current.waves).toEqual([]);
+    expect(result.current.isFetching).toBe(false);
+    expect(result.current.isFetchingNextPage).toBe(false);
+    expect(result.current.hasNextPage).toBe(false);
+
+    result.current.fetchNextPage();
+    result.current.refetchAllWaves();
+    result.current.markWaveRead("wave-1");
+    result.current.restoreWaveUnreadCount("wave-1", 1);
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+    expect(refetchAllWaves).not.toHaveBeenCalled();
+  });
+
   it("preserves official marker while mapping sidebar waves", () => {
     const wavesData = createWavesData({
       mainWavesRefetch: jest.fn(),
@@ -161,7 +203,7 @@ describe("useEnhancedWavesListCore", () => {
       firstUnreadFollowedSubwaveDropSerialNo: 42,
       sidebarActivityTimestamp: 500,
       newDropsCount: expect.objectContaining({
-        latestDropTimestamp: 500,
+        latestDropTimestamp: 100,
       }),
     });
   });

@@ -6,15 +6,6 @@ jest.mock("next/link", () => ({
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
 }));
 
-jest.mock("react-bootstrap", () => {
-  return {
-    Container: (p: any) => <div>{p.children}</div>,
-    Row: (p: any) => <div>{p.children}</div>,
-    Col: (p: any) => <div>{p.children}</div>,
-    Table: (p: any) => <table>{p.children}</table>,
-  };
-});
-
 jest.mock("@/components/nft-image/NFTImage", () => ({
   __esModule: true,
   default: () => <div data-testid="image" />,

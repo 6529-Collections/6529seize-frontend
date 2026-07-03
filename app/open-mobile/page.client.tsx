@@ -59,8 +59,8 @@ export default function OpenMobilePage() {
 
   return (
     <ClientOnly>
-      <div className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen tw-text-center tw-p-4 tw-gap-10">
-        <p className="tw-text-2xl tw-font-bold tw-animate-pulse">
+      <div className="tailwind-scope tw-flex tw-h-screen tw-flex-col tw-items-center tw-justify-center tw-gap-10 tw-p-4 tw-text-center">
+        <p className="tw-animate-pulse tw-text-2xl tw-font-bold">
           Opening 6529 Mobile...
         </p>
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1">
@@ -69,7 +69,10 @@ export default function OpenMobilePage() {
             {printShareMobileApps()}
           </div>
         </div>
-        <button onClick={handleBack} className="tw-mt-10 btn-link">
+        <button
+          onClick={handleBack}
+          className="tw-mt-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit hover:tw-text-[#9a9a9a]"
+        >
           Back to 6529.io
         </button>
       </div>

@@ -198,7 +198,7 @@ export default function NextGenZoomableImage(
     }
     return (
       <span
-        className="d-flex align-items-center justify-content-center"
+        className="tw-flex tw-items-center tw-justify-center"
         style={{
           height: height,
           width: "auto",
@@ -210,7 +210,7 @@ export default function NextGenZoomableImage(
       >
         {loading && (
           <span
-            className="d-flex flex-column gap-3 align-items-center justify-content-center"
+            className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4"
             style={{
               position: "absolute",
               top: "0",
@@ -221,10 +221,10 @@ export default function NextGenZoomableImage(
               backgroundColor: "rgb(0, 0, 0)",
             }}
           >
-            <span className="d-flex flex-wrap text-center">
+            <span className="tw-flex tw-flex-wrap tw-text-center">
               {isMobileDevice ? "8K" : "16K"} Pebbles are very large
             </span>
-            <span className="d-flex flex-wrap text-center">
+            <span className="tw-flex tw-flex-wrap tw-text-center">
               Chill while we download you into the Pebbles multiverse
             </span>
             <span className="color-white">
@@ -283,7 +283,7 @@ export default function NextGenZoomableImage(
 
   if (props.maintain_aspect_ratio) {
     return (
-      <span className="d-flex flex-column align-items-center">
+      <span className="tw-flex tw-flex-col tw-items-center">
         {getContent()}
       </span>
     );
