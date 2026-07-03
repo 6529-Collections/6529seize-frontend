@@ -24,6 +24,7 @@ import {
   useWaveDropMobileMenu,
   WaveDropMobileMenuProvider,
 } from "../WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "../useWaveDropMobileMenuController";
 import WaveDropReactions from "../WaveDropReactions";
 import type {
   DropIdentityMode,
@@ -232,29 +233,16 @@ function EndedParticipationDropInner({
   );
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
-  useEffect(() => {
-    if (!showInteractions || !effectiveIsSlideUp) {
-      return;
-    }
-
-    mobileMenu?.open({
-      drop,
-      longPressTriggered,
-      showReplyAndQuote,
-      onOpenChange: setIsSlideUp,
-      onReply: handleOnReply,
-      onAddReaction: handleOnAddReaction,
-    });
-  }, [
+  useWaveDropMobileMenuController({
     drop,
-    effectiveIsSlideUp,
-    handleOnAddReaction,
-    handleOnReply,
+    enabled: showInteractions,
+    isOpen: effectiveIsSlideUp,
     longPressTriggered,
-    mobileMenu,
-    showInteractions,
     showReplyAndQuote,
-  ]);
+    onOpenChange: setIsSlideUp,
+    onReply: handleOnReply,
+    onAddReaction: handleOnAddReaction,
+  });
 
   return (
     <div

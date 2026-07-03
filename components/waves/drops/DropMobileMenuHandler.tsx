@@ -8,6 +8,7 @@ import {
   useWaveDropMobileMenu,
   WaveDropMobileMenuProvider,
 } from "./WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "./useWaveDropMobileMenuController";
 
 interface DropMobileMenuHandlerProps {
   readonly drop: ExtendedDrop;
@@ -127,28 +128,16 @@ function DropMobileMenuHandlerInner({
 
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
-  useEffect(() => {
-    if (!effectiveIsSlideUp) {
-      return;
-    }
-
-    mobileMenu?.open({
-      drop,
-      longPressTriggered,
-      showReplyAndQuote,
-      onOpenChange: setIsSlideUp,
-      onReply: handleOnReply,
-      onAddReaction: handleOnAddReaction,
-    });
-  }, [
+  useWaveDropMobileMenuController({
     drop,
-    effectiveIsSlideUp,
-    handleOnAddReaction,
-    handleOnReply,
+    enabled: true,
+    isOpen: effectiveIsSlideUp,
     longPressTriggered,
-    mobileMenu,
     showReplyAndQuote,
-  ]);
+    onOpenChange: setIsSlideUp,
+    onReply: handleOnReply,
+    onAddReaction: handleOnAddReaction,
+  });
 
   const rootClassName = canUseTouchActionSheet
     ? "touch-action-sheet-select-none"

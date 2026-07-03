@@ -17,6 +17,7 @@ import {
   useWaveDropMobileMenu,
   WaveDropMobileMenuProvider,
 } from "../WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "../useWaveDropMobileMenuController";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
 import ParticipationDropContainer from "./ParticipationDropContainer";
@@ -185,31 +186,17 @@ function OngoingParticipationDropInner({
 
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
-  useEffect(() => {
-    if (!showInteractions || !effectiveIsSlideUp) {
-      return;
-    }
-
-    mobileMenu?.open({
-      drop,
-      longPressTriggered,
-      showReplyAndQuote,
-      onOpenChange: setIsSlideUp,
-      onReply: handleOnReply,
-      onAddReaction: handleOnAddReaction,
-      showVoting: !isVotingActionLocked,
-    });
-  }, [
+  useWaveDropMobileMenuController({
     drop,
-    effectiveIsSlideUp,
-    handleOnAddReaction,
-    handleOnReply,
-    isVotingActionLocked,
+    enabled: showInteractions,
+    isOpen: effectiveIsSlideUp,
     longPressTriggered,
-    mobileMenu,
-    showInteractions,
     showReplyAndQuote,
-  ]);
+    onOpenChange: setIsSlideUp,
+    onReply: handleOnReply,
+    onAddReaction: handleOnAddReaction,
+    showVoting: !isVotingActionLocked,
+  });
 
   return (
     <ParticipationDropContainer
@@ -321,11 +308,18 @@ function OngoingParticipationDropInner({
       </div>
 
       {showInteractions &&
-        isVoteModalOpen &&
         (isMobileScreen ? (
-          <MobileVotingModal drop={drop} isOpen onClose={closeVoteModal} />
+          <MobileVotingModal
+            drop={drop}
+            isOpen={isVoteModalOpen}
+            onClose={closeVoteModal}
+          />
         ) : (
-          <VotingModal drop={drop} isOpen onClose={closeVoteModal} />
+          <VotingModal
+            drop={drop}
+            isOpen={isVoteModalOpen}
+            onClose={closeVoteModal}
+          />
         ))}
     </ParticipationDropContainer>
   );

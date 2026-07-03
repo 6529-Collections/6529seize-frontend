@@ -28,6 +28,7 @@ import {
   useWaveDropMobileMenu,
   WaveDropMobileMenuProvider,
 } from "../WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "../useWaveDropMobileMenuController";
 import WaveDropRatings from "../WaveDropRatings";
 import WaveDropReactions from "../WaveDropReactions";
 import WaveDropReply from "../WaveDropReply";
@@ -176,29 +177,16 @@ const DefaultWinnerDropInner = ({
     );
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
-  useEffect(() => {
-    if (!showInteractions || !effectiveIsSlideUp) {
-      return;
-    }
-
-    mobileMenu?.open({
-      drop,
-      longPressTriggered,
-      showReplyAndQuote,
-      onOpenChange: setIsSlideUp,
-      onReply: handleOnReply,
-      onAddReaction: handleOnAddReaction,
-    });
-  }, [
+  useWaveDropMobileMenuController({
     drop,
-    effectiveIsSlideUp,
-    handleOnAddReaction,
-    handleOnReply,
+    enabled: showInteractions,
+    isOpen: effectiveIsSlideUp,
     longPressTriggered,
-    mobileMenu,
-    showInteractions,
     showReplyAndQuote,
-  ]);
+    onOpenChange: setIsSlideUp,
+    onReply: handleOnReply,
+    onAddReaction: handleOnAddReaction,
+  });
 
   return (
     <div

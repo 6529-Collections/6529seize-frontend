@@ -67,9 +67,10 @@ describe("WaveDropMobileMenuProvider", () => {
   });
 
   it("uses one shared menu host for different drops", async () => {
+    const onDropAOpenChange = jest.fn();
     render(
       <WaveDropMobileMenuProvider>
-        <OpenMenuButton dropId="drop-a" />
+        <OpenMenuButton dropId="drop-a" onOpenChange={onDropAOpenChange} />
         <OpenMenuButton dropId="drop-b" />
       </WaveDropMobileMenuProvider>
     );
@@ -87,6 +88,7 @@ describe("WaveDropMobileMenuProvider", () => {
       "drop-b"
     );
     expect(screen.getAllByTestId("shared-menu")).toHaveLength(1);
+    expect(onDropAOpenChange).toHaveBeenCalledWith(false);
   });
 
   it("notifies the active opener when the shared menu closes", async () => {

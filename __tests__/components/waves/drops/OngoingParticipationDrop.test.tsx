@@ -382,7 +382,10 @@ describe("OngoingParticipationDrop", () => {
       />
     );
 
-    expect(screen.queryByTestId("voting-modal")).not.toBeInTheDocument();
+    expect(screen.getByTestId("voting-modal")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
     expect(screen.queryByTestId("vote-button")).toBeNull();
   });
 

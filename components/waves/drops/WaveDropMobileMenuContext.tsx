@@ -5,7 +5,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -13,7 +12,7 @@ import {
 } from "react";
 import type { WaveDropMobileMenuProps } from "./WaveDropMobileMenu";
 
-type WaveDropMobileMenuRequest = Omit<
+export type WaveDropMobileMenuRequest = Omit<
   WaveDropMobileMenuProps,
   "isOpen" | "setOpen"
 > & {
@@ -58,19 +57,24 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
   >(null);
   const activeMenuRef = useRef<typeof activeMenu>(null);
 
-  useEffect(() => {
-    activeMenuRef.current = activeMenu;
-  }, [activeMenu]);
-
   const open = useCallback((request: WaveDropMobileMenuRequest) => {
-    setActiveMenu({ ...request, isOpen: true });
+    const current = activeMenuRef.current;
+    if (current?.isOpen && current.drop.id !== request.drop.id) {
+      current.onOpenChange?.(false);
+    }
+
+    const nextActiveMenu = { ...request, isOpen: true };
+    activeMenuRef.current = nextActiveMenu;
+    setActiveMenu(nextActiveMenu);
   }, []);
 
   const setOpen = useCallback((isOpen: boolean) => {
-    activeMenuRef.current?.onOpenChange?.(isOpen);
-    setActiveMenu((current) => {
-      return current ? { ...current, isOpen } : current;
-    });
+    const current = activeMenuRef.current;
+    current?.onOpenChange?.(isOpen);
+
+    const nextActiveMenu = current ? { ...current, isOpen } : current;
+    activeMenuRef.current = nextActiveMenu;
+    setActiveMenu(nextActiveMenu);
   }, []);
 
   const close = useCallback(() => {

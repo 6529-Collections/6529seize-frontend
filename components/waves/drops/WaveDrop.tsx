@@ -43,6 +43,7 @@ import {
   useWaveDropMobileMenu,
   WaveDropMobileMenuProvider,
 } from "./WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "./useWaveDropMobileMenuController";
 import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
@@ -1308,33 +1309,18 @@ const WaveDropInner = ({
   // Derive effective menu state - menu can't be open while editing
   const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
 
-  useEffect(() => {
-    if (!showInteractions || !effectiveIsSlideUp) {
-      return;
-    }
-
-    mobileMenu?.open({
-      drop,
-      longPressTriggered,
-      showReplyAndQuote,
-      onOpenChange: setIsSlideUp,
-      onReply: handleOnReply,
-      onAddReaction: handleOnAddReaction,
-      onEdit: handleOnEdit,
-      onBoostAnimation: handleMobileBoostAnimation,
-    });
-  }, [
+  useWaveDropMobileMenuController({
     drop,
-    effectiveIsSlideUp,
-    handleMobileBoostAnimation,
-    handleOnAddReaction,
-    handleOnEdit,
-    handleOnReply,
+    enabled: showInteractions,
+    isOpen: effectiveIsSlideUp,
     longPressTriggered,
-    mobileMenu,
-    showInteractions,
     showReplyAndQuote,
-  ]);
+    onOpenChange: setIsSlideUp,
+    onReply: handleOnReply,
+    onAddReaction: handleOnAddReaction,
+    onEdit: handleOnEdit,
+    onBoostAnimation: handleMobileBoostAnimation,
+  });
 
   const dropClasses = getDropClasses(
     isActiveDrop,
