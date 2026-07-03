@@ -5,6 +5,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 describe("CreateWaveDisplaySettings", () => {
   const baseDisplay = {
+    customRules: null,
     outcomesVisible: true,
     approve: {
       approvalsTabLabel: "",

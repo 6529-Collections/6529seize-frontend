@@ -11,6 +11,7 @@ import CreateWaveGroups from "./groups/CreateWaveGroups";
 import type { useWaveConfig } from "./hooks/useWaveConfig";
 import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
+import CreateWaveRules from "./CreateWaveRules";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 
 type WaveConfigController = ReturnType<typeof useWaveConfig>;
@@ -105,6 +106,15 @@ export default function CreateWaveStepContent({
           waveType={config.overview.type}
           drops={config.drops}
           errors={errors}
+          setDrops={setDrops}
+        />
+      );
+    case CreateWaveStep.RULES:
+      return (
+        <CreateWaveRules
+          config={config}
+          groupsCache={groupsCache}
+          setDisplay={setDisplay}
           setDrops={setDrops}
         />
       );
