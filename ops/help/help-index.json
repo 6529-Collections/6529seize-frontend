@@ -1490,7 +1490,7 @@
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],
       "canonical_path": "/waves?create=wave",
-      "related_paths": ["/waves"],
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "create", "ui"],
       "source_refs": ["ops/docs/waves/create/feature-modal-entry-points.md"]
     },
