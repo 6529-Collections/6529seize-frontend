@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./DelegationHTML.module.scss";
+import styles from "./DelegationHTML.module.css";
 import Image from "next/image";
 import Link from "next/link";
 import {

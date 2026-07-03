@@ -21,7 +21,7 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { getRememeSortLabel } from "../rememes/rememesI18n";
 import { getRememeDetailHref } from "../rememes/rememesRouteParams";
-import styles from "./TheMemes.module.scss";
+import styles from "./TheMemes.module.css";
 
 const REMEMES_PAGE_SIZE = 20;
 const REMEME_SORTING = [RememeSort.RANDOM, RememeSort.CREATED_ASC] as const;

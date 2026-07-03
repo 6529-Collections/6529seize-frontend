@@ -3,7 +3,7 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import styles from "@/components/nextGen/collections/NextGen.module.css";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_MINTER,

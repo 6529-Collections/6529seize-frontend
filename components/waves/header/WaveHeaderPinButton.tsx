@@ -27,7 +27,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   const { waves } = useMyStream();
   const { isAnnouncementsWave, isLoaded: isSettingsLoaded } =
     useSeizeSettings();
-  const { pinnedIds, isOperationInProgress, canPinWave } =
+  const { pinnedIds, isOperationInProgress, canPinWave, pinWave, unpinWave } =
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
 
@@ -55,9 +55,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     return "tw-border-0 tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700";
   }, [isPinned]);
 
-  const ariaLabel = useMemo(() => {
-    return isPinned ? PIN_ACTIONS.UNPIN : PIN_ACTIONS.PIN;
-  }, [isPinned]);
+  const ariaLabel = isPinned ? PIN_ACTIONS.UNPIN : PIN_ACTIONS.PIN;
 
   // Don't render if user is not authenticated or using proxy
   if (!connectedProfile?.handle || activeProfileProxy) {
@@ -84,34 +82,36 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
       return;
     }
 
-    try {
-      if (isPinned) {
-        waves.removePinnedWave(waveId);
-        return;
-      }
+    void (async () => {
+      try {
+        if (isPinned) {
+          await unpinWave(waveId);
+          return;
+        }
 
-      if (!canPinWave(waveId)) {
+        if (!canPinWave(waveId)) {
+          setToast({
+            type: "error",
+            title: `Maximum ${MAX_PINNED_WAVES} pinned waves reached.`,
+            description: "Unpin another wave first.",
+          });
+          return;
+        }
+
+        await pinWave(waveId);
+      } catch (error: unknown) {
+        console.error("Error updating wave pin status:", error);
+
         setToast({
           type: "error",
-          title: `Maximum ${MAX_PINNED_WAVES} pinned waves reached.`,
-          description: "Unpin another wave first.",
+          title: isPinned
+            ? "Couldn't unpin this wave."
+            : "Couldn't pin this wave.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error),
         });
-        return;
       }
-
-      waves.addPinnedWave(waveId);
-    } catch (error) {
-      console.error("Error updating wave pin status:", error);
-
-      setToast({
-        type: "error",
-        title: isPinned
-          ? "Couldn't unpin this wave."
-          : "Couldn't pin this wave.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    }
+    })();
   };
 
   return (

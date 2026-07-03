@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { Fragment } from "react";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import styles from "./CommunityDownloads.module.scss";
+import styles from "./CommunityDownloads.module.css";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export function formatDate(dateString: string): string {

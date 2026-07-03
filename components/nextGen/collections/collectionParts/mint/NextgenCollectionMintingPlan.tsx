@@ -17,7 +17,7 @@ import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "@/components/searchModal/SearchModal";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import styles from "@/components/nextGen/collections/NextGen.module.css";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import { getJsonData } from "./NextGenMintWidget";
 

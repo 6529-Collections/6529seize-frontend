@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 import DelegationCenterComponent from "./DelegationCenter";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";

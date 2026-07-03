@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./Clap.module.scss";
+import styles from "./Clap.module.css";
 import mojs from "@mojs/core";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";

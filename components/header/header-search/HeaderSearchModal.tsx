@@ -31,14 +31,10 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
-import {
-  getActiveWaveIdFromUrl,
-  getWaveHomeRoute,
-  getWaveRoute,
-} from "@/helpers/navigation.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -53,7 +49,9 @@ import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { useWaves } from "@/hooks/useWaves";
 import { commonApiFetch } from "@/services/api/common-api";
 import HeaderSearchModalItem, {
+  getHeaderSearchWavePath,
   getNftCollectionMap,
+  isHeaderSearchWaveDirectMessage,
 } from "./HeaderSearchModalItem";
 import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
 import type {
@@ -235,7 +233,7 @@ function HeaderSearchSiteResults({
 }: HeaderSearchSiteResultsProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const myStream = useMyStreamOptional();
   const { isApp } = useDeviceInfo();
   const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
   const activeElementRef = useRef<HTMLDivElement>(null);
@@ -319,6 +317,23 @@ function HeaderSearchSiteResults({
     onClose();
   };
 
+  const goToWave = (wave: ApiWave) => {
+    const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
+
+    if (myStream) {
+      myStream.activeWave.set(wave.id, { isDirectMessage });
+    } else {
+      router.push(
+        getHeaderSearchWavePath({
+          wave,
+          isApp,
+        })
+      );
+    }
+
+    onClose();
+  };
+
   useKeyPressEvent("ArrowDown", () =>
     setSelectedItemIndex((index) =>
       index + 1 < flattenedItems.length ? index + 1 : index
@@ -356,19 +371,7 @@ function HeaderSearchSiteResults({
     }
 
     if (isWaveResult(item)) {
-      const currentWaveId =
-        getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
-      const isDirectMessage = item.chat.scope.group?.is_direct_message ?? false;
-      const target =
-        currentWaveId === item.id
-          ? getWaveHomeRoute({ isDirectMessage, isApp })
-          : getWaveRoute({
-              waveId: item.id,
-              isDirectMessage,
-              isApp,
-            });
-      router.push(target);
-      onClose();
+      goToWave(item);
     }
   });
 
@@ -393,6 +396,7 @@ function HeaderSearchSiteResults({
         isSelected={index === selectedItemIndex}
         onHover={(state) => onHover(index, state)}
         onClose={onClose}
+        onWaveSelect={goToWave}
       />
     </div>
   );

@@ -7,7 +7,7 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <svg />,
 }));
 
-jest.mock("@/components/app-wallets/AppWallet.module.scss", () => ({
+jest.mock("@/components/app-wallets/AppWallet.module.css", () => ({
   newWalletInput: "input",
   modalHeader: "header",
   modalContent: "content",

@@ -6,7 +6,7 @@ import { useEnsName, useReadContract } from "wagmi";
 import type { NextGenCollection } from "@/entities/INextgen";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
-import styles from "./NextGen.module.scss";
+import styles from "./NextGen.module.css";
 
 import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

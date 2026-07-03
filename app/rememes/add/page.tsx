@@ -4,7 +4,7 @@ import {
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import RememeAddPage from "@/components/rememes/RememeAddPage";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 
 export default function ReMemesAddPage() {

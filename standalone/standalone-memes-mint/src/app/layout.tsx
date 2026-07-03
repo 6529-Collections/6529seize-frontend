@@ -1,8 +1,8 @@
-import "@/components/drops/create/lexical/lexical.styles.scss";
-import "@/styles/Home.module.scss";
-import "@/styles/seize-bootstrap.scss";
-import "@/styles/animations.scss";
-import "@/styles/globals.scss";
+import "@/components/drops/create/lexical/lexical.styles.css";
+import "@/styles/Home.module.css";
+import "@/styles/fonts.css";
+import "@/styles/animations.css";
+import "@/styles/globals.css";
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import Providers from "@/components/providers/Providers";

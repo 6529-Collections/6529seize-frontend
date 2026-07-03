@@ -21,7 +21,7 @@ import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 
 const FORM_ROW_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-2 tw-pb-4 sm:tw-grid-cols-12 sm:tw-gap-4";

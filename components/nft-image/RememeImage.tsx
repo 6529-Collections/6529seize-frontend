@@ -1,4 +1,4 @@
-import styles from "@/components/nft-image/NFTImage.module.scss";
+import styles from "@/components/nft-image/NFTImage.module.css";
 import type { Rememe } from "@/entities/INFT";
 import Image from "next/image";
 import { parseIpfsUrl, parseIpfsUrlToGateway } from "@/helpers/Helpers";

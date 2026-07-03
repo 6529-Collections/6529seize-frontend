@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchange } from "@fortawesome/free-solid-svg-icons";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useSingleWaveDropVoteState } from "./useSingleWaveDropVoteState";
-import styles from "./VoteButton.module.scss";
+import styles from "./VoteButton.module.css";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;

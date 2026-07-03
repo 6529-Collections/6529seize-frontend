@@ -559,7 +559,8 @@
         "Connection sharing can show a QR code for 6529 Mobile or a deep link for 6529 Desktop.",
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
         "If the Share menu says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
-        "The same Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection."
+        "The desktop Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection.",
+        "In the native app, supported non-wave pages use the header Share page button for current-page sharing."
       ],
       "canonical_path": "/",
       "suppress_source_links": true,
@@ -3005,6 +3006,7 @@
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
+        "Native app page sharing appears next to Search on supported non-wave, non-message, and non-notification routes.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
       ],
       "canonical_path": "/waves",
@@ -3081,16 +3083,19 @@
       "kind": "ui_affordance",
       "title": "Share modal",
       "aliases": ["share", "share modal", "copy link", "share page"],
-      "keywords": ["share", "copy", "link", "modal", "url"],
+      "keywords": ["share", "copy", "link", "modal", "url", "native"],
       "facts": [
-        "Shared app surfaces can open a share modal for copying or sharing links.",
+        "Desktop web surfaces can open a share modal for copying or sharing links.",
+        "Native app pages outside home, Waves, Messages, and Notifications use a direct Share page header button instead of the desktop share modal.",
         "Wave-specific link sharing also exists in the wave header.",
-        "Use the share modal when users ask how to copy a route or send someone a page."
+        "Use share controls when users ask how to copy a route or send someone a page."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["navigation", "share"],
       "source_refs": [
+        "components/header/share/HeaderPageShareButton.tsx",
+        "ops/docs/navigation/feature-app-header-context.md",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/docs/waves/header/feature-wave-link-share-copy.md"
       ]

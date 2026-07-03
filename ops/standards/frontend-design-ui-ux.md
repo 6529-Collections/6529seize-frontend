@@ -56,7 +56,7 @@ generic admin patterns or decorative filler.
   collection card may have different density, but each new piece should look
   native to its neighboring route.
 - Do not treat legacy styling as the future design system. Older Bootstrap,
-  WordPress/Fusion, global Sass, and pre-migration module styles can be useful
+  WordPress/Fusion, global CSS, and pre-migration module styles can be useful
   evidence for layout constraints or product behavior, but modern Tailwind
   surfaces are the stronger visual reference for new or migrated UI.
 
@@ -67,15 +67,12 @@ Before designing or reviewing touched UI, inspect the closest relevant source:
 - `tailwind.config.ts` for the `tw-` prefix, `iron-*` palette, primary/error/
   success colors, breakpoints, container queries, hover/touch variants, and
   motion tokens.
-- `styles/globals.scss` for global layout classes, `tailwind-scope`, app-level
+- `styles/globals.css` for global layout classes, `tailwind-scope`, app-level
   resets, and places where legacy global rules intentionally avoid Tailwind
   scoped UI.
-- `styles/variables.scss` and `styles/seize-bootstrap.scss` for legacy Sass and
-  Bootstrap compatibility. Treat these as compatibility sources unless the
-  touched surface is still intentionally Bootstrap-based.
-- Nearby `*.module.scss`, route components, and shared components for local
+- Nearby `*.module.css`, route components, and shared components for local
   spacing, borders, typography, state styling, and responsive behavior. First
-  classify the surface as modern Tailwind, legacy Bootstrap/Sass, or mixed.
+  classify the surface as modern Tailwind, legacy CSS, or mixed.
 - Existing user-facing docs under `ops/docs/` only as behavior references; verify
   UI details against code and browser evidence.
 

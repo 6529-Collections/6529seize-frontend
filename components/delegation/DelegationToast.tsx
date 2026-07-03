@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 
 interface DelegationToastState {
   title: string;
