@@ -1,5 +1,7 @@
-import type { HeaderSearchModalItemType } from "@/components/header/header-search/HeaderSearchModalItem";
-import HeaderSearchModalItem from "@/components/header/header-search/HeaderSearchModalItem";
+import HeaderSearchModalItem, {
+  isHeaderSearchWaveDirectMessage,
+  type HeaderSearchModalItemType,
+} from "@/components/header/header-search/HeaderSearchModalItem";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -85,7 +87,6 @@ const renderComponent = (
   searchValue: string,
   isSelected: boolean,
   options: {
-    readonly activeWaveId?: string | null | undefined;
     readonly onWaveSelect?: ((wave: any) => void) | undefined;
   } = {}
 ) => {
@@ -105,7 +106,6 @@ const renderComponent = (
         isSelected={isSelected}
         onHover={onHover}
         onClose={onClose}
-        activeWaveId={options.activeWaveId}
         onWaveSelect={options.onWaveSelect}
       />
     </QueryClientProvider>
@@ -185,7 +185,6 @@ describe("HeaderSearchModalItem", () => {
     });
 
     const { onClose } = renderComponent(wave, "subwave", false, {
-      activeWaveId: "parent-wave",
       onWaveSelect,
     });
 
@@ -208,13 +207,16 @@ describe("HeaderSearchModalItem", () => {
     });
 
     const { onClose } = renderComponent(wave, "subwave", false, {
-      activeWaveId: "parent-wave",
       onWaveSelect,
     });
 
     fireEvent.click(screen.getByTestId("link"), { metaKey: true });
     expect(onWaveSelect).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("handles wave direct-message detection defensively", () => {
+    expect(isHeaderSearchWaveDirectMessage({} as any)).toBe(false);
   });
 
   it("renders page item and shows breadcrumbs", () => {

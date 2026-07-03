@@ -35,9 +35,6 @@ import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
-import {
-  getActiveWaveIdFromUrl,
-} from "@/helpers/navigation.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -236,7 +233,6 @@ function HeaderSearchSiteResults({
 }: HeaderSearchSiteResultsProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const myStream = useMyStreamOptional();
   const { isApp } = useDeviceInfo();
   const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
@@ -321,22 +317,15 @@ function HeaderSearchSiteResults({
     onClose();
   };
 
-  const currentWaveId =
-    myStream?.activeWave.id ??
-    getActiveWaveIdFromUrl({ pathname, searchParams }) ??
-    undefined;
-
   const goToWave = (wave: ApiWave) => {
     const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
-    const nextWaveId = currentWaveId === wave.id ? null : wave.id;
 
     if (myStream) {
-      myStream.activeWave.set(nextWaveId, { isDirectMessage });
+      myStream.activeWave.set(wave.id, { isDirectMessage });
     } else {
       router.push(
         getHeaderSearchWavePath({
           wave,
-          currentWaveId,
           isApp,
         })
       );
@@ -407,7 +396,6 @@ function HeaderSearchSiteResults({
         isSelected={index === selectedItemIndex}
         onHover={(state) => onHover(index, state)}
         onClose={onClose}
-        activeWaveId={currentWaveId}
         onWaveSelect={goToWave}
       />
     </div>

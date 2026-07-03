@@ -21,6 +21,10 @@ const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
+const mockUseMyStreamOptional = jest.fn();
+const mockHeaderSearchModalItem = jest.fn((props: any) => (
+  <div data-testid="item">{JSON.stringify(props)}</div>
+));
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 const originalHtmlScrollIntoView = HTMLElement.prototype.scrollIntoView;
 
@@ -105,15 +109,38 @@ jest.mock("@/hooks/useSidebarSections", () => {
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => useDropForgePermissionsMock(),
 }));
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => mockUseMyStreamOptional(),
+}));
 jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
-  const MockHeaderSearchModalItem = (props: any) => (
-    <div data-testid="item">{JSON.stringify(props)}</div>
-  );
+  const MockHeaderSearchModalItem = (props: any) =>
+    mockHeaderSearchModalItem(props);
   MockHeaderSearchModalItem.displayName = "MockHeaderSearchModalItem";
-  return MockHeaderSearchModalItem;
+  return {
+    __esModule: true,
+    default: MockHeaderSearchModalItem,
+    getHeaderSearchWavePath: ({ wave }: { readonly wave: any }) =>
+      `/waves/${wave.id}`,
+    getNftCollectionMap: () => ({}),
+    isHeaderSearchWaveDirectMessage: (wave: any) =>
+      Boolean(wave.chat?.scope?.group?.is_direct_message),
+  };
 });
 
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
+const publicWaveScope = { group: null };
+const createWaveResult = (overrides: Record<string, unknown> = {}) => ({
+  id: "wave1",
+  name: "Wave 1",
+  serial_no: 1,
+  chat: {
+    scope: publicWaveScope,
+  },
+  wave: {
+    admin_group: publicWaveScope,
+  },
+  ...overrides,
+});
 
 const defaultSidebarSections: SidebarSection[] = [
   {
@@ -258,6 +285,7 @@ function setup(options: SetupOptions = {}) {
 describe("HeaderSearchModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseMyStreamOptional.mockReturnValue(null);
   });
 
   it("associates the search input with an accessible label", () => {
@@ -283,6 +311,48 @@ describe("HeaderSearchModal", () => {
       screen.getByRole("heading", { name: "Profiles" })
     ).toBeInTheDocument();
     expect(screen.getByTestId("item")).toBeInTheDocument();
+  });
+
+  it("opens the selected wave result instead of toggling it off", () => {
+    const activeWaveSet = jest.fn();
+    const wave = createWaveResult();
+    mockUseMyStreamOptional.mockReturnValue({
+      activeWave: {
+        id: wave.id,
+        set: activeWaveSet,
+      },
+    });
+
+    setup({
+      selectedCategory: "WAVES",
+      wavesReturn: {
+        waves: [wave],
+        isFetching: false,
+        error: null,
+        refetch: jest.fn(() => Promise.resolve()),
+      },
+      queryImpl: ({ queryKey, profilesRefetch, nftsRefetch }) => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch:
+          queryKey[0] === QueryKey.PROFILE_SEARCH
+            ? profilesRefetch
+            : nftsRefetch,
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "wave" } });
+    const waveItemCall = mockHeaderSearchModalItem.mock.calls.find(
+      ([props]) => props.content === wave
+    );
+
+    expect(waveItemCall).toBeDefined();
+    waveItemCall?.[0].onWaveSelect(wave);
+    expect(activeWaveSet).toHaveBeenCalledWith(wave.id, {
+      isDirectMessage: false,
+    });
   });
 
   it("clears search input when the clear button is pressed", () => {

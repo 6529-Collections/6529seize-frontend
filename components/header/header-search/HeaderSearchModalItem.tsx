@@ -2,7 +2,7 @@
 
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { type ComponentType, useEffect, useRef } from "react";
 import { useHoverDirty } from "react-use";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
@@ -20,11 +20,7 @@ import {
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
-import {
-  getActiveWaveIdFromUrl,
-  getWaveHomeRoute,
-  getWaveRoute,
-} from "@/helpers/navigation.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
 import HeaderSearchModalPfp from "./HeaderSearchModalPfp";
@@ -53,26 +49,30 @@ export type HeaderSearchModalItemType =
   | ApiWave
   | PageSearchResult;
 
+type HeaderSearchWaveDirectMessageCandidate = {
+  readonly chat?: {
+    readonly scope?: {
+      readonly group?: {
+        readonly is_direct_message?: boolean | null | undefined;
+      } | null;
+    } | null;
+  } | null;
+};
+
 export const isHeaderSearchWaveDirectMessage = (wave: ApiWave): boolean =>
-  Boolean(wave.chat.scope.group?.is_direct_message);
+  Boolean(
+    (wave as HeaderSearchWaveDirectMessageCandidate).chat?.scope?.group
+      ?.is_direct_message
+  );
 
 export const getHeaderSearchWavePath = ({
   wave,
-  currentWaveId,
   isApp,
 }: {
   readonly wave: ApiWave;
-  readonly currentWaveId: string | null | undefined;
   readonly isApp: boolean;
 }): string => {
   const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
-
-  if (currentWaveId === wave.id) {
-    return getWaveHomeRoute({
-      isDirectMessage,
-      isApp,
-    });
-  }
 
   return getWaveRoute({
     waveId: wave.id,
@@ -108,7 +108,6 @@ export default function HeaderSearchModalItem({
   isSelected,
   onHover,
   onClose,
-  activeWaveId,
   onWaveSelect,
 }: {
   readonly isSelected: boolean;
@@ -116,11 +115,9 @@ export default function HeaderSearchModalItem({
   readonly content: HeaderSearchModalItemType;
   readonly onHover: (state: boolean) => void;
   readonly onClose: () => void;
-  readonly activeWaveId?: string | null | undefined;
   readonly onWaveSelect?: (wave: ApiWave) => void;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const ref = useRef<HTMLDivElement>(null);
   const isHovering = useHoverDirty(ref as React.RefObject<HTMLDivElement>);
   const { isApp } = useDeviceInfo();
@@ -133,7 +130,7 @@ export default function HeaderSearchModalItem({
   const isPage = () => (content as PageSearchResult).type === "PAGE";
   const isProfile = () => Object.hasOwn(content, "handle");
   const isNft = () => Object.hasOwn(content, "contract");
-  const isWave = () => !isProfile() && !isNft() && !isPage();
+  const isWave = () => Object.hasOwn(content, "serial_no");
   const getWave = () => content as ApiWave;
 
   const getProfile = () => content as CommunityMemberMinimal;
@@ -161,7 +158,7 @@ export default function HeaderSearchModalItem({
       const page = getPage();
       const Icon = page.icon ?? DocumentTextIcon;
       return getMediaIcon(Icon);
-    } else {
+    } else if (isWave()) {
       const wave = getWave();
       if (wave.picture) {
         return (
@@ -178,6 +175,8 @@ export default function HeaderSearchModalItem({
       }
       return getMediaIcon(WavesIcon);
     }
+
+    return getMediaIcon(DocumentTextIcon);
   };
 
   useEffect(() => {
@@ -201,18 +200,15 @@ export default function HeaderSearchModalItem({
       return `${collectionMap[key]?.path}/${nft.id}`;
     } else if (isPage()) {
       return getPage().href;
-    } else {
+    } else if (isWave()) {
       const wave = getWave();
-      const currentWaveId =
-        activeWaveId ??
-        getActiveWaveIdFromUrl({ pathname, searchParams }) ??
-        undefined;
       return getHeaderSearchWavePath({
         wave,
-        currentWaveId,
         isApp,
       });
     }
+
+    return "#";
   };
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -244,9 +240,11 @@ export default function HeaderSearchModalItem({
       return getNft().name;
     } else if (isPage()) {
       return getPage().title;
-    } else {
+    } else if (isWave()) {
       return getWave().name;
     }
+
+    return "-";
   };
 
   const getSecondaryText = () => {
@@ -264,11 +262,13 @@ export default function HeaderSearchModalItem({
         return page.breadcrumbs.join(" • ");
       }
       return page.href;
-    } else {
+    } else if (isWave()) {
       const wave = getWave();
       const author = wave.author?.handle ?? wave.author?.primary_address;
       return author ? `by ${author}` : `Wave #${wave.serial_no}`;
     }
+
+    return null;
   };
 
   const getSecondaryTextClassName = () => {
