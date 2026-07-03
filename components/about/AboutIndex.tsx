@@ -1,12 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
 
+import GroupedLinkIndex, {
+  type GroupedLinkIndexGroup,
+} from "@/components/common/GroupedLinkIndex";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -29,6 +31,19 @@ export default function AboutIndex() {
     country,
   });
   const groups = getVisibleAboutNavGroups(hideSubscriptions);
+  const indexGroups: GroupedLinkIndexGroup[] = groups.map((group) => ({
+    id: group.id,
+    title: t(locale, group.labelKey),
+    items: group.items.map((item) => {
+      const label = t(locale, item.labelKey);
+
+      return {
+        id: getAboutNavItemId(item),
+        label,
+        href: getAboutNavItemHref(item),
+      };
+    }),
+  }));
 
   useSetTitle(t(locale, "about.index.metadata.title"));
 
@@ -36,57 +51,16 @@ export default function AboutIndex() {
     <Container className="tw-pt-2">
       <Row>
         <Col>
-          <section className="tw-w-full tw-pb-10 tw-text-iron-100">
-            <header className="tw-mb-8 tw-max-w-3xl">
-              <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                {t(locale, "about.index.eyebrow")}
-              </p>
-              <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
-                {t(locale, "about.index.title")}
-              </h1>
-              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
-                {t(locale, "about.index.lead")}
-              </p>
-            </header>
-
-            <div className="tw-grid tw-gap-7">
-              {groups.map((group) => {
-                const groupTitle = t(locale, group.labelKey);
-                const headingId = `about-index-${group.id}`;
-
-                return (
-                  <section key={group.id} aria-labelledby={headingId}>
-                    <h2
-                      id={headingId}
-                      className="tw-mb-3 tw-text-sm tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-400"
-                    >
-                      {groupTitle}
-                    </h2>
-                    <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-                      {group.items.map((item) => {
-                        const label = t(locale, item.labelKey);
-
-                        return (
-                          <Link
-                            key={getAboutNavItemId(item)}
-                            href={getAboutNavItemHref(item)}
-                            aria-label={t(locale, "about.index.cardAriaLabel", {
-                              page: label,
-                            })}
-                            className="tw-group tw-flex tw-h-full tw-min-h-20 tw-items-center tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-4 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/50 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
-                          >
-                            <span className="tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 group-hover:tw-text-white">
-                              {label}
-                            </span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </section>
-                );
-              })}
-            </div>
-          </section>
+          <GroupedLinkIndex
+            eyebrow={t(locale, "about.index.eyebrow")}
+            title={t(locale, "about.index.title")}
+            lead={t(locale, "about.index.lead")}
+            groups={indexGroups}
+            headingIdPrefix="about-index"
+            getCardAriaLabel={(page) =>
+              t(locale, "about.index.cardAriaLabel", { page })
+            }
+          />
         </Col>
       </Row>
     </Container>

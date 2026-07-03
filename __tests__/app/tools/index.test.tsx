@@ -2,13 +2,15 @@
  * @jest-environment jsdom
  */
 
-import ToolsIndexPage from "@/app/tools/page";
+import ToolsIndexPage, { metadata } from "@/app/tools/page";
+import { getVisibleToolsNavGroups } from "@/components/tools/tools.routes";
 import { render, screen } from "@testing-library/react";
 
 const mockSetTitle = jest.fn();
 
 let country = "US";
 let appWalletsSupported = true;
+let isIos = true;
 
 jest.mock("@/contexts/TitleContext", () => ({
   useSetTitle: () => mockSetTitle,
@@ -16,7 +18,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isIos: true }),
+  default: () => ({ isIos }),
 }));
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
@@ -31,6 +33,7 @@ describe("Tools index page", () => {
   beforeEach(() => {
     country = "US";
     appWalletsSupported = true;
+    isIos = true;
     mockSetTitle.mockClear();
   });
 
@@ -63,14 +66,49 @@ describe("Tools index page", () => {
     ).toHaveAttribute("href", "/open-data/6529bot");
   });
 
+  it("exposes metadata", () => {
+    expect(metadata.title).toEqual("Tools");
+    expect(metadata.description).toEqual(
+      "6529 tools, reports, APIs, delegation utilities, and open data. | 6529.io"
+    );
+  });
+
+  it("keeps local-only tools out of the public Tools route list", () => {
+    const publicToolHrefs = getVisibleToolsNavGroups({
+      appWalletsSupported: true,
+      hideSubscriptions: false,
+    }).flatMap((group) => group.items.map((item) => item.href));
+
+    expect(publicToolHrefs).not.toContain("/tools/agent-login");
+  });
+
   it("hides subscription-only links for restricted iOS users", () => {
     country = "DE";
+    isIos = true;
 
     render(<ToolsIndexPage />);
 
-    expect(screen.queryByText("Subscriptions Report")).toBeNull();
-    expect(screen.queryByText("Meme Subscriptions")).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: /open tool: subscriptions report/i })
+    ).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: /open tool: meme subscriptions/i })
+    ).toBeNull();
     expect(screen.getByText("Meme Accounting")).toBeInTheDocument();
+  });
+
+  it("keeps subscription links visible for non-iOS users in restricted countries", () => {
+    country = "DE";
+    isIos = false;
+
+    render(<ToolsIndexPage />);
+
+    expect(
+      screen.getByRole("link", { name: /open tool: subscriptions report/i })
+    ).toHaveAttribute("href", "/tools/subscriptions-report");
+    expect(
+      screen.getByRole("link", { name: /open tool: meme subscriptions/i })
+    ).toHaveAttribute("href", "/open-data/meme-subscriptions");
   });
 
   it("hides app-wallet links when app wallets are unavailable", () => {

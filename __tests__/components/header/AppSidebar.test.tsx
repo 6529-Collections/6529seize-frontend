@@ -126,18 +126,38 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "Waves", path: "/waves" },
         { label: "Discover Waves", path: "/discover" },
       ]);
-      expect(getMenuChildren("Tools")).toEqual(
-        expect.arrayContaining([
-          { label: "Tools", path: "/tools" },
-          { label: "Builder Tools", section: true },
-          { label: "App Wallets", path: "/tools/app-wallets" },
-          { label: "API", path: "/tools/api" },
-          { label: "EMMA", path: "/emma" },
-          { label: "Block Finder", path: "/tools/block-finder" },
-          { label: "Open Data", section: true },
-          { label: "Open Data", path: "/open-data" },
-        ])
-      );
+      expect(getMenuChildren("Tools")).toEqual([
+        { label: "Tools", path: "/tools" },
+        { label: "NFT Delegation", section: true },
+        { label: "Delegation Center", path: "/delegation/delegation-center" },
+        {
+          label: "Wallet Architecture",
+          path: "/delegation/wallet-architecture",
+        },
+        { label: "Delegation FAQ", path: "/delegation/delegation-faq" },
+        {
+          label: "Consolidation Use Cases",
+          path: "/delegation/consolidation-use-cases",
+        },
+        { label: "Wallet Checker", path: "/delegation/wallet-checker" },
+        { label: "The Memes Tools", section: true },
+        { label: "Subscriptions Report", path: "/tools/subscriptions-report" },
+        { label: "Meme Accounting", path: "/meme-accounting" },
+        { label: "Meme Gas", path: "/meme-gas" },
+        { label: "Builder Tools", section: true },
+        { label: "App Wallets", path: "/tools/app-wallets" },
+        { label: "API", path: "/tools/api" },
+        { label: "EMMA", path: "/emma" },
+        { label: "Block Finder", path: "/tools/block-finder" },
+        { label: "Open Data", section: true },
+        { label: "Open Data", path: "/open-data" },
+        { label: "Network Metrics", path: "/open-data/network-metrics" },
+        { label: "Meme Subscriptions", path: "/open-data/meme-subscriptions" },
+        { label: "6529bot Usage", path: "/open-data/6529bot" },
+        { label: "Rememes", path: "/open-data/rememes" },
+        { label: "Team", path: "/open-data/team" },
+        { label: "Royalties", path: "/open-data/royalties" },
+      ]);
 
       const aboutChildren = getMenuChildren("About");
       expect(aboutChildren).toEqual(

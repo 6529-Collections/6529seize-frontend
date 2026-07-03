@@ -14,7 +14,9 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "About 6529" })
     ).toBeVisible();
-    await expect(page.getByText("Digital Rights")).toBeVisible();
+    await expect(
+      page.locator("main").getByText("Digital Rights")
+    ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Open page: GDRC" })
     ).toHaveAttribute("href", "/about/gdrc1");

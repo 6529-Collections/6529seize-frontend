@@ -59,10 +59,15 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     await expect(page.getByText("NFT Delegation")).toBeVisible();
     await expect(page.getByText("The Memes Tools")).toBeVisible();
     await expect(page.getByText("Builder Tools")).toBeVisible();
-    await expect(page.getByText("Open Data")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Open Data" })
+    ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Open tool: API" })
     ).toHaveAttribute("href", "/tools/api");
+    await expect(
+      page.getByRole("link", { name: "Open tool: 6529bot Usage" })
+    ).toHaveAttribute("href", "/open-data/6529bot");
     await expect(
       page.getByRole("link", { name: "Open tool: GDRC" })
     ).toHaveCount(0);
