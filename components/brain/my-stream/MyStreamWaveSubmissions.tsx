@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -16,8 +16,6 @@ import { DropLocation } from "@/components/waves/drops/drop.types";
 import { WaveLeaderboardLoading } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoading";
 import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-
-const CURATION_FILTER_PARAM = "curation_id";
 
 interface MyStreamWaveSubmissionsProps {
   readonly wave: ApiWave;
@@ -50,30 +48,15 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   } = useWaveDropsLeaderboard({
     waveId: wave.id,
     sort: WaveDropsLeaderboardSort.RANK,
-    curatedByGroupId: undefined,
   });
   const handleReply = useCallback(() => undefined, []);
   const handleRetry = useCallback(() => {
     void refetch();
   }, [refetch]);
 
-  useEffect(() => {
-    const params = new URLSearchParams(searchParamsString || "");
-    if (!params.has(CURATION_FILTER_PARAM)) {
-      return;
-    }
-
-    params.delete(CURATION_FILTER_PARAM);
-
-    const nextQuery = params.toString();
-    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
-    router.replace(nextUrl, { scroll: false });
-  }, [pathname, router, searchParamsString]);
-
   const openDropById = useCallback(
     (dropId: string) => {
       const params = new URLSearchParams(searchParamsString || "");
-      params.delete(CURATION_FILTER_PARAM);
       params.set("drop", dropId);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
@@ -93,7 +76,7 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
         return;
       }
 
-      fetchNextPage();
+      void fetchNextPage();
     },
     [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]
   );

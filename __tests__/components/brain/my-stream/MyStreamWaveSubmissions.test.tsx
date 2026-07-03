@@ -8,7 +8,6 @@ import {
 
 let searchParamsString = "";
 const push = jest.fn();
-const replace = jest.fn();
 let mockApprovalWaveStatus = {
   winningThreshold: undefined as number | undefined,
   winningThresholdMinDurationMs: undefined as number | undefined,
@@ -24,14 +23,10 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ leaderboardViewStyle: {} }),
 }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push, replace }),
+  useRouter: () => ({ push }),
   usePathname: () => "/waves",
   useSearchParams: () => {
-    const params = new URLSearchParams(searchParamsString);
-
     return {
-      get: (key: string) => params.get(key),
-      has: (key: string) => params.has(key),
       toString: () => searchParamsString,
     };
   },
@@ -94,38 +89,17 @@ describe("MyStreamWaveSubmissions", () => {
     });
   });
 
-  it("does not forward curation_id to the submissions query", () => {
-    searchParamsString = "curation_id=group-1";
-
+  it("requests rank submissions", () => {
     render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
 
     expect(useWaveDropsLeaderboardMock).toHaveBeenCalledWith({
       waveId: "1",
       sort: WaveDropsLeaderboardSort.RANK,
-      curatedByGroupId: undefined,
     });
   });
 
-  it("removes curation_id from the URL and preserves other params", () => {
-    searchParamsString = "wave=wave-1&curation_id=group-1&drop=drop-1";
-
-    render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
-
-    expect(replace).toHaveBeenCalledWith("/waves?wave=wave-1&drop=drop-1", {
-      scroll: false,
-    });
-  });
-
-  it("does not replace the URL when curation_id is absent", () => {
+  it("preserves existing params when opening a drop", () => {
     searchParamsString = "wave=wave-1";
-
-    render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
-
-    expect(replace).not.toHaveBeenCalled();
-  });
-
-  it("does not preserve curation_id when opening a drop", () => {
-    searchParamsString = "wave=wave-1&curation_id=group-1";
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [{ id: "drop-1" }],
       fetchNextPage: jest.fn(),

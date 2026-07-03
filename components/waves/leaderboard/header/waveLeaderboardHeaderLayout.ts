@@ -7,9 +7,6 @@ interface ResolveWaveLeaderboardHeaderLayoutInput {
   readonly viewModesWidth: number;
   readonly sortTabsWidth: number;
   readonly sortDropdownWidth: number;
-  readonly hasCurationControl: boolean;
-  readonly curationTabsWidth?: number | undefined;
-  readonly curationDropdownWidth?: number | undefined;
   readonly hasActions: boolean;
   readonly allowActionWrap?: boolean | undefined;
   readonly actionsFullWidth?: number | undefined;
@@ -21,7 +18,6 @@ interface ResolveWaveLeaderboardHeaderLayoutInput {
 
 interface WaveLeaderboardHeaderLayout {
   readonly sortMode: "tabs" | "dropdown";
-  readonly curationMode: "tabs" | "dropdown";
   readonly enableControlsScroll: boolean;
   readonly actionMode: WaveLeaderboardHeaderActionMode;
   readonly wrapActions: boolean;
@@ -53,35 +49,17 @@ const normalizeWrapEarlyThreshold = (value: number | undefined): number => {
 const getDropdownControlsWidth = ({
   viewModesWidth,
   sortDropdownWidth,
-  hasCurationControl,
-  curationDropdownWidth,
   gapWidth,
 }: {
   readonly viewModesWidth: number;
   readonly sortDropdownWidth: number;
-  readonly hasCurationControl: boolean;
-  readonly curationDropdownWidth: number;
   readonly gapWidth: number;
 }): number | null => {
   if (!isValidWidth(viewModesWidth) || !isValidWidth(sortDropdownWidth)) {
     return null;
   }
 
-  if (!hasCurationControl) {
-    return viewModesWidth + gapWidth + sortDropdownWidth;
-  }
-
-  if (!isValidWidth(curationDropdownWidth)) {
-    return null;
-  }
-
-  return (
-    viewModesWidth +
-    gapWidth +
-    sortDropdownWidth +
-    gapWidth +
-    curationDropdownWidth
-  );
+  return viewModesWidth + gapWidth + sortDropdownWidth;
 };
 
 const fits = (
@@ -96,9 +74,6 @@ export function resolveWaveLeaderboardHeaderLayout({
   viewModesWidth,
   sortTabsWidth,
   sortDropdownWidth,
-  hasCurationControl,
-  curationTabsWidth = 0,
-  curationDropdownWidth = 0,
   hasActions,
   allowActionWrap = true,
   actionsFullWidth = 0,
@@ -117,9 +92,6 @@ export function resolveWaveLeaderboardHeaderLayout({
     viewModesWidth,
     sortTabsWidth,
     sortDropdownWidth,
-    hasCurationControl,
-    curationTabsWidth,
-    curationDropdownWidth,
     gapWidth: safeControlsGapWidth,
   });
 
@@ -134,8 +106,6 @@ export function resolveWaveLeaderboardHeaderLayout({
   const minimumControlsWidth = getDropdownControlsWidth({
     viewModesWidth,
     sortDropdownWidth,
-    hasCurationControl,
-    curationDropdownWidth,
     gapWidth: safeControlsGapWidth,
   });
 
@@ -184,9 +154,6 @@ export function resolveWaveLeaderboardHeaderLayout({
     viewModesWidth,
     sortTabsWidth,
     sortDropdownWidth,
-    hasCurationControl,
-    curationTabsWidth,
-    curationDropdownWidth,
     gapWidth: safeControlsGapWidth,
   });
 

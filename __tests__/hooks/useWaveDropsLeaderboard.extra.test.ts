@@ -116,11 +116,10 @@ describe("useWaveDropsLeaderboard extra", () => {
     expect(useQuery).not.toHaveBeenCalled();
   });
 
-  it("includes curation and price params in query key and request params", async () => {
+  it("includes price params in query key and request params", async () => {
     renderHook(() =>
       useWaveDropsLeaderboard({
         waveId: "2",
-        curatedByGroupId: "curation-group-1",
         minPrice: 0.5,
         maxPrice: 2.75,
         priceCurrency: " ETH ",
@@ -129,7 +128,7 @@ describe("useWaveDropsLeaderboard extra", () => {
     );
 
     const call = getMainQueryOptions();
-    expect(call.queryKey[1].curation_id).toBe("curation-group-1");
+    expect(call.queryKey[1]).not.toHaveProperty("curation_id");
     expect(call.queryKey[1].min_price).toBe("0.5");
     expect(call.queryKey[1].max_price).toBe("2.75");
     expect(call.queryKey[1].price_currency).toBe("ETH");
@@ -141,10 +140,16 @@ describe("useWaveDropsLeaderboard extra", () => {
         endpoint: "v2/waves/2/leaderboard",
         params: expect.objectContaining({
           sort: WaveDropsLeaderboardSort.PRICE,
-          curation_id: "curation-group-1",
           min_price: "0.5",
           max_price: "2.75",
           price_currency: "ETH",
+        }),
+      })
+    );
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.not.objectContaining({
+          curation_id: expect.any(String),
         }),
       })
     );

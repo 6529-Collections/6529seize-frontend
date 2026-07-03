@@ -14,11 +14,20 @@ interface WaveLeaderboardGalleryProps {
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
 }
+
+const SORT_ANIMATION_KEYS: Record<WaveDropsLeaderboardSort, number> = {
+  RANK: 1,
+  PRICE: 2,
+  REALTIME_VOTE: 3,
+  RATING_PREDICTION: 4,
+  TREND: 5,
+  MY_REALTIME_VOTE: 6,
+  CREATED_AT: 7,
+};
 
 export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   wave,
@@ -26,7 +35,6 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   isVotingClosed = false,
   isVotingControlsLocked = false,
   onDropClick,
-  curatedByGroupId,
   minPrice,
   maxPrice,
   priceCurrency,
@@ -41,29 +49,24 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort,
-      curatedByGroupId,
       minPrice,
       maxPrice,
       priceCurrency,
     });
 
-  // Track when sort changes to signal animation
-  const [animationKey, setAnimationKey] = React.useState(0);
-  const [previousSort, setPreviousSort] = React.useState(sort);
-
-  React.useEffect(() => {
-    if (previousSort !== sort) {
-      setPreviousSort(sort);
-      setAnimationKey((prev) => prev + 1);
-    }
-  }, [sort, previousSort]);
+  const [initialSort] = React.useState(sort);
+  const animationKey = sort === initialSort ? 0 : SORT_ANIMATION_KEYS[sort];
 
   // Always use art-focused mode in grid view
 
   // Filter drops to only include those with media
   const dropsWithMedia = useMemo(() => {
-    return drops.filter((drop) => (drop.parts[0]?.media.length ?? 0) > 0) || [];
+    return drops.filter((drop) => (drop.parts[0]?.media.length ?? 0) > 0);
   }, [drops]);
+
+  const handleLoadMore = React.useCallback(() => {
+    void fetchNextPage();
+  }, [fetchNextPage]);
 
   if (isFetching && dropsWithMedia.length === 0) {
     return (
@@ -101,7 +104,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
         {hasNextPage && (
           <div className="tw-col-span-full tw-mb-2 tw-mt-4 tw-flex tw-justify-center">
             <button
-              onClick={() => fetchNextPage()}
+              onClick={handleLoadMore}
               disabled={isFetchingNextPage}
               className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
             >
