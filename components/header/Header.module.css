@@ -36,15 +36,23 @@
 
 .rowContainer {
   --header-gutter-half: 0.75rem;
-  padding-right: max(env(safe-area-inset-left) - var(--header-gutter-half), var(--header-gutter-half));
-  padding-left: max(env(safe-area-inset-right) - var(--header-gutter-half), var(--header-gutter-half));
+  padding-right: max(
+    calc(env(safe-area-inset-left) - var(--header-gutter-half)),
+    var(--header-gutter-half)
+  );
+  padding-left: max(
+    calc(env(safe-area-inset-right) - var(--header-gutter-half)),
+    var(--header-gutter-half)
+  );
 }
 
 .logoIcon {
   height: auto;
   max-width: min(40vw, 250px);
   position: relative;
-  transition: box-shadow 0.1s ease, transform 0.1s ease;
+  transition:
+    box-shadow 0.1s ease,
+    transform 0.1s ease;
 }
 .logoIcon:hover {
   transform: scale(1.02);
@@ -314,7 +322,9 @@
   height: auto;
   max-width: min(10vw, 40px);
   position: relative;
-  transition: box-shadow 0.1s ease, transform 0.1s ease;
+  transition:
+    box-shadow 0.1s ease,
+    transform 0.1s ease;
 }
 .logoIconSmall:hover {
   transform: scale(1.02); /* Optional: Adds a slight zoom effect */

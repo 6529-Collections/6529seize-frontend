@@ -65,9 +65,28 @@ const mockAuthContext = {
 const mockUseWaveNotificationSubscription =
   require("@/hooks/useWaveNotificationSubscription").useWaveNotificationSubscription;
 
+const mockMatchMedia = () => {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+  globalThis.matchMedia = window.matchMedia;
+};
+
 describe("WaveNotificationSettings", () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    mockMatchMedia();
     mockUseWaveNotificationSubscription.mockReturnValue({
       data: { subscribed: false, enabled_group_notifications: [] },
       refetch: jest.fn(),
@@ -82,36 +101,67 @@ describe("WaveNotificationSettings", () => {
     );
   };
 
-  it("does not render when not following wave", () => {
-    const waveNotFollowing = { ...mockWave, subscribed_actions: [] };
-    const { container } = renderComponent(waveNotFollowing);
+  const openNotificationMenu = async () => {
+    const trigger = screen.getByLabelText("Open notification settings");
+    await userEvent.click(trigger);
+    return trigger;
+  };
 
-    expect(container.firstChild).toBeNull();
+  it("renders mute without notification menu when not following wave", () => {
+    const waveNotFollowing = { ...mockWave, subscribed_actions: [] };
+    renderComponent(waveNotFollowing);
+
+    expect(screen.getByLabelText("Mute wave")).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Open notification settings")
+    ).not.toBeInTheDocument();
   });
 
-  it("renders notification buttons when following wave", () => {
+  it("renders a speaker notification menu and mute button when following wave", async () => {
     renderComponent();
 
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
-    );
-    const allButton = screen.getByLabelText("Receive all drop notifications");
-    expect(allMentionsButton).toBeInTheDocument();
-    expect(allButton).toBeInTheDocument();
-    expect(allMentionsButton.parentElement).toHaveClass(
+    const trigger = screen.getByLabelText("Open notification settings");
+    const muteButton = screen.getByLabelText("Mute wave");
+
+    expect(trigger).toBeInTheDocument();
+    expect(muteButton).toBeInTheDocument();
+    expect(trigger.parentElement?.parentElement).toHaveClass(
       "tw-grid",
       "tw-grid-cols-2",
       "tw-gap-x-1.5"
     );
-    expect(allButton.parentElement).toBe(allMentionsButton.parentElement);
-    expect(allMentionsButton).toHaveClass("tw-w-full", "tw-border");
-    expect(allButton).toHaveClass("tw-w-full", "tw-border");
+    expect(muteButton.parentElement?.parentElement).toBe(
+      trigger.parentElement?.parentElement
+    );
+    expect(trigger).toHaveClass("tw-w-full", "tw-border");
+    expect(muteButton).toHaveClass("tw-w-full", "tw-border");
+    expect(
+      screen.queryByLabelText("Receive ALL mention notifications")
+    ).not.toBeInTheDocument();
+
+    await openNotificationMenu();
+
+    const menu = screen.getByRole("menu");
+    expect(menu).toHaveAttribute("aria-labelledby", trigger.id);
+
+    const allMentionsButton = screen.getByLabelText(
+      "Receive ALL mention notifications"
+    );
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
+    expect(allMentionsButton).toBeInTheDocument();
+    expect(allButton).toBeInTheDocument();
+    expect(allMentionsButton).toHaveAttribute("role", "menuitemcheckbox");
+    expect(allButton).toHaveAttribute("role", "menuitemcheckbox");
+    expect(allMentionsButton.parentElement).toHaveAttribute("role", "none");
+    expect(allButton.parentElement).toHaveAttribute("role", "none");
     expect(
       screen.queryByLabelText("Receive mentions-only notifications")
     ).not.toBeInTheDocument();
   });
 
-  it("shows ALL mention button as active when enabled", () => {
+  it("shows ALL mention menu item as active when enabled", async () => {
     mockUseWaveNotificationSubscription.mockReturnValue({
       data: {
         subscribed: false,
@@ -122,17 +172,21 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
-    );
-    expect(allMentionsButton).toHaveClass(
+    expect(screen.getByLabelText("Open notification settings")).toHaveClass(
       "tw-bg-primary-400/10",
       "tw-border-primary-400/30",
       "tw-text-primary-400"
     );
+
+    await openNotificationMenu();
+
+    const allMentionsButton = screen.getByLabelText(
+      "Receive ALL mention notifications"
+    );
+    expect(allMentionsButton).toHaveClass("tw-text-primary-400");
   });
 
-  it("shows all drop button as active when all drop notifications enabled", () => {
+  it("shows all-message menu item as active when all-message notifications enabled", async () => {
     mockUseWaveNotificationSubscription.mockReturnValue({
       data: { subscribed: true, enabled_group_notifications: [] },
       refetch: jest.fn(),
@@ -140,15 +194,21 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
-    const allButton = screen.getByLabelText("Receive all drop notifications");
-    expect(allButton).toHaveClass(
+    expect(screen.getByLabelText("Open notification settings")).toHaveClass(
       "tw-bg-primary-400/10",
       "tw-border-primary-400/30",
       "tw-text-primary-400"
     );
+
+    await openNotificationMenu();
+
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
+    expect(allButton).toHaveClass("tw-text-primary-400");
   });
 
-  it("can show ALL mention and all drop buttons active together", () => {
+  it("can show ALL mention and all-message menu items active together", async () => {
     mockUseWaveNotificationSubscription.mockReturnValue({
       data: {
         subscribed: true,
@@ -159,39 +219,74 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
+    expect(screen.getByLabelText("Open notification settings")).toHaveClass(
+      "tw-bg-primary-400/10",
+      "tw-border-primary-400/30",
+      "tw-text-primary-400"
+    );
+
+    await openNotificationMenu();
+
     expect(
       screen.getByLabelText("Receive ALL mention notifications")
-    ).toHaveClass(
-      "tw-bg-primary-400/10",
-      "tw-border-primary-400/30",
-      "tw-text-primary-400"
-    );
-    expect(screen.getByLabelText("Receive all drop notifications")).toHaveClass(
-      "tw-bg-primary-400/10",
-      "tw-border-primary-400/30",
-      "tw-text-primary-400"
-    );
+    ).toHaveClass("tw-text-primary-400");
+    expect(
+      screen.getByLabelText("Receive notifications for all messages")
+    ).toHaveClass("tw-text-primary-400");
   });
 
-  it("marks only all drop notifications unavailable when subscriber limit reached", () => {
+  it("shows all-message option as unavailable when subscriber limit is reached", async () => {
     renderComponent(mockWaveHighSubscribers);
+
+    expect(screen.getByLabelText("Open notification settings")).toBeEnabled();
+    const muteButton = screen.getByLabelText("Mute wave");
+    expect(muteButton).not.toBeDisabled();
+    expect(muteButton).toHaveAttribute(
+      "data-tooltip-content",
+      "Click to mute this wave"
+    );
+    expect(muteButton.parentElement?.parentElement).toHaveClass(
+      "tw-grid",
+      "tw-grid-cols-2"
+    );
+
+    await openNotificationMenu();
 
     const allMentionsButton = screen.getByLabelText(
       "Receive ALL mention notifications"
     );
-    const allButton = screen.getByLabelText("Receive all drop notifications");
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
     expect(allMentionsButton).not.toBeDisabled();
     expect(allButton).not.toBeDisabled();
     expect(allButton).toHaveAttribute("aria-disabled", "true");
     expect(allButton).toHaveAccessibleDescription(
-      "'All' notifications unavailable for waves with 1,000+ followers."
+      "All-message notifications are unavailable for waves with 1,000+ followers."
     );
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
-    expect(allButton).not.toHaveAttribute("style");
-    expect(allButton.parentElement).toHaveClass("tw-grid");
   });
 
-  it("allows disabling all drop notifications when subscribed and subscriber limit reached", async () => {
+  it("keeps unavailable all-message option focusable without firing an update", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+
+    renderComponent(mockWaveHighSubscribers);
+
+    await openNotificationMenu();
+
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
+    allButton.focus();
+
+    await userEvent.keyboard("{Enter}");
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    expect(allButton).toHaveFocus();
+  });
+
+  it("allows disabling all-message notifications when subscribed and subscriber limit reached", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
 
@@ -203,16 +298,15 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent(mockWaveHighSubscribers);
 
-    const allButton = screen.getByLabelText("Receive all drop notifications");
-    expect(allButton).toBeEnabled();
-    expect(allButton).toHaveClass(
-      "tw-bg-primary-400/10",
-      "tw-border-primary-400/30",
-      "tw-text-primary-400"
+    await openNotificationMenu();
+
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
     );
+    expect(allButton).toBeEnabled();
+    expect(allButton).toHaveClass("tw-text-primary-400");
     expect(allButton).not.toHaveClass("tw-cursor-not-allowed");
-    expect(allButton).not.toHaveAttribute("style");
-    expect(allButton.parentElement?.tagName).toBe("DIV");
+    expect(allButton.parentElement?.tagName).toBe("LI");
 
     await userEvent.click(allButton);
 
@@ -242,6 +336,8 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
+    await openNotificationMenu();
+
     const allMentionsButton = screen.getByLabelText(
       "Receive ALL mention notifications"
     );
@@ -258,6 +354,11 @@ describe("WaveNotificationSettings", () => {
     });
 
     expect(refetch).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(
+        screen.queryByLabelText("Receive ALL mention notifications")
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("disables ALL mention notifications", async () => {
@@ -275,6 +376,8 @@ describe("WaveNotificationSettings", () => {
     commonApiPost.mockResolvedValue({});
 
     renderComponent();
+
+    await openNotificationMenu();
 
     const allMentionsButton = screen.getByLabelText(
       "Receive ALL mention notifications"
@@ -294,7 +397,7 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("enables all drop notifications while preserving ALL mention preference", async () => {
+  it("enables all-message notifications while preserving ALL mention preference", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
 
@@ -310,7 +413,11 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
-    const allButton = screen.getByLabelText("Receive all drop notifications");
+    await openNotificationMenu();
+
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
     await userEvent.click(allButton);
 
     await waitFor(() => {
@@ -326,7 +433,7 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("disables all drop notifications while preserving ALL mention preference", async () => {
+  it("disables all-message notifications while preserving ALL mention preference", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
 
@@ -342,7 +449,11 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
-    const allButton = screen.getByLabelText("Receive all drop notifications");
+    await openNotificationMenu();
+
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
     await userEvent.click(allButton);
 
     await waitFor(() => {
@@ -358,15 +469,59 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("does not call API when clicking disabled all drop notifications", async () => {
+  it("mutes the wave from the bell-slash button when all-message notifications are unavailable", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
+    commonApiPost.mockResolvedValue({});
 
     renderComponent(mockWaveHighSubscribers);
 
-    const allButton = screen.getByLabelText("Receive all drop notifications");
-    await userEvent.click(allButton);
+    const muteButton = screen.getByLabelText("Mute wave");
+    await userEvent.click(muteButton);
 
-    expect(commonApiPost).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(commonApiPost).toHaveBeenCalledWith({
+        endpoint: "waves/wave-456/mute",
+        body: {},
+      });
+    });
+  });
+
+  it("mutes the wave from the bell-slash button before joining", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    commonApiPost.mockResolvedValue({});
+
+    renderComponent({ ...mockWave, subscribed_actions: [] });
+
+    const muteButton = screen.getByLabelText("Mute wave");
+    await userEvent.click(muteButton);
+
+    await waitFor(() => {
+      expect(commonApiPost).toHaveBeenCalledWith({
+        endpoint: "waves/wave-123/mute",
+        body: {},
+      });
+    });
+  });
+
+  it("mutes the wave from the bell-slash button when all-message notifications are available", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    commonApiPost.mockResolvedValue({});
+
+    renderComponent();
+
+    expect(
+      screen.getByLabelText("Open notification settings")
+    ).toBeInTheDocument();
+
+    const muteButton = screen.getByLabelText("Mute wave");
+    await userEvent.click(muteButton);
+
+    await waitFor(() => {
+      expect(commonApiPost).toHaveBeenCalledWith({
+        endpoint: "waves/wave-123/mute",
+        body: {},
+      });
+    });
   });
 
   it("does not update notification preferences before preferences load", async () => {
@@ -380,16 +535,18 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
-    );
-    const allButton = screen.getByLabelText("Receive all drop notifications");
-    expect(allMentionsButton).toBeDisabled();
-    expect(allButton).toBeDisabled();
+    const trigger = screen.getByLabelText("Open notification settings");
+    expect(trigger).toBeDisabled();
+    expect(screen.getByLabelText("Mute wave")).not.toBeDisabled();
 
-    await userEvent.click(allMentionsButton);
-    await userEvent.click(allButton);
+    await userEvent.click(trigger);
 
+    expect(
+      screen.queryByLabelText("Receive ALL mention notifications")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Receive notifications for all messages")
+    ).not.toBeInTheDocument();
     expect(commonApiPost).not.toHaveBeenCalled();
   });
 
@@ -409,11 +566,15 @@ describe("WaveNotificationSettings", () => {
 
     const retryButton = screen.getByLabelText("Retry notification settings");
     expect(retryButton).toBeEnabled();
+    expect(screen.getByLabelText("Mute wave")).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Open notification settings")
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText("Receive ALL mention notifications")
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByLabelText("Receive all drop notifications")
+      screen.queryByLabelText("Receive notifications for all messages")
     ).not.toBeInTheDocument();
 
     await userEvent.click(retryButton);
@@ -422,7 +583,7 @@ describe("WaveNotificationSettings", () => {
     expect(commonApiPost).not.toHaveBeenCalled();
   });
 
-  it("handles API error when enabling all drop notifications", async () => {
+  it("handles API error when enabling all-message notifications", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
 
     mockUseWaveNotificationSubscription.mockReturnValue({
@@ -434,7 +595,11 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
-    const allButton = screen.getByLabelText("Receive all drop notifications");
+    await openNotificationMenu();
+
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
     await userEvent.click(allButton);
 
     await waitFor(() => {
@@ -461,6 +626,8 @@ describe("WaveNotificationSettings", () => {
     commonApiPost.mockRejectedValue("Unable to update subscription");
 
     renderComponent();
+
+    await openNotificationMenu();
 
     const allMentionsButton = screen.getByLabelText(
       "Receive ALL mention notifications"
@@ -491,21 +658,30 @@ describe("WaveNotificationSettings", () => {
 
     renderComponent();
 
-    const allButton = screen.getByLabelText("Receive all drop notifications");
+    await openNotificationMenu();
+
+    const allButton = screen.getByLabelText(
+      "Receive notifications for all messages"
+    );
     await userEvent.click(allButton);
 
-    // Check for spinner in the button
     await waitFor(() => {
-      expect(allButton.querySelector(".spinner")).toBeInTheDocument();
+      expect(
+        screen.queryByLabelText("Receive notifications for all messages")
+      ).not.toBeInTheDocument();
+    });
+
+    const trigger = screen.getByLabelText("Open notification settings");
+    await waitFor(() => {
+      expect(trigger.querySelector(".spinner")).toBeInTheDocument();
     });
   });
 
-  it("keeps all button focusable when wave has high subscriber count", () => {
+  it("keeps mute button focusable when wave has high subscriber count", () => {
     renderComponent(mockWaveHighSubscribers);
 
-    const allButton = screen.getByLabelText("Receive all drop notifications");
-    expect(allButton).not.toBeDisabled();
-    expect(allButton).toHaveAttribute("aria-disabled", "true");
+    const muteButton = screen.getByLabelText("Mute wave");
+    expect(muteButton).not.toBeDisabled();
   });
 
   it("renders muted button when wave is muted", () => {
@@ -513,6 +689,11 @@ describe("WaveNotificationSettings", () => {
 
     const mutedButton = screen.getByLabelText("Unmute wave");
     expect(mutedButton).toBeInTheDocument();
+    expect(mutedButton).toHaveClass(
+      "tw-bg-error/10",
+      "tw-border-error/40",
+      "tw-text-error"
+    );
     expect(screen.getByText("Muted")).toBeInTheDocument();
   });
 
@@ -520,10 +701,13 @@ describe("WaveNotificationSettings", () => {
     renderComponent(mockWaveMuted);
 
     expect(
+      screen.queryByLabelText("Open notification settings")
+    ).not.toBeInTheDocument();
+    expect(
       screen.queryByLabelText("Receive ALL mention notifications")
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByLabelText("Receive all drop notifications")
+      screen.queryByLabelText("Receive notifications for all messages")
     ).not.toBeInTheDocument();
   });
 
