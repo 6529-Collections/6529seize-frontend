@@ -1,10 +1,9 @@
-export const fetchCache = "force-no-store";
-
 // Side effect: Overrides globalThis.fetch on server-side to automatically
 // add auth headers (x-6529-internal-*) for rate limiter/WAF bypass
 import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.css";
 import "@/styles/Home.module.css";
+import "@/styles/fonts.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -22,6 +21,8 @@ import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import type { Viewport } from "next";
+
+export const fetchCache = "force-no-store";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {
