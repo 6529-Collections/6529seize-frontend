@@ -26,7 +26,7 @@ export default function SwiperAutoplayButton({
   }, [manuallyPaused, isInViewport, swiper.autoplay]);
 
   return (
-    <div className="text-center">
+    <div className="tw-text-center">
       <FontAwesomeIcon
         style={{ height: "24px", cursor: "pointer" }}
         onClick={() => {

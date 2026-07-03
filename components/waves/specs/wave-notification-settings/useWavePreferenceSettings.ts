@@ -109,8 +109,8 @@ export function useWavePreferenceSettings(wave: ApiWave) {
         enabled_group_notifications: enabledGroupNotifications,
       },
       errorMessage: subscribedToAllDrops
-        ? "Unable to disable all drop notifications"
-        : "Unable to enable all drop notifications",
+        ? "Unable to disable all-message notifications"
+        : "Unable to enable all-message notifications",
     });
   }, [
     disableAllDropsSelection,

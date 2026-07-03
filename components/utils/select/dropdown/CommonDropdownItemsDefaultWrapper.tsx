@@ -33,6 +33,8 @@ export default function CommonDropdownItemsDefaultWrapper({
   horizontalAlign = "auto",
   minWidth = DEFAULT_MENU_MIN_WIDTH,
   portalClassName = "tw-z-[999]",
+  menuId,
+  menuLabelledBy,
   children,
 }: {
   readonly isOpen: boolean;
@@ -43,6 +45,8 @@ export default function CommonDropdownItemsDefaultWrapper({
   readonly horizontalAlign?: DropdownHorizontalAlign | undefined;
   readonly minWidth?: number | undefined;
   readonly portalClassName?: string | undefined;
+  readonly menuId?: string | undefined;
+  readonly menuLabelledBy?: string | undefined;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -169,8 +173,10 @@ export default function CommonDropdownItemsDefaultWrapper({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
+            id={menuId}
             ref={listRef}
             role="menu"
+            aria-labelledby={menuLabelledBy}
             tabIndex={-1}
             className="tw-w-full tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
             initial={{ opacity: 0, y: -10 }}
@@ -179,7 +185,10 @@ export default function CommonDropdownItemsDefaultWrapper({
             transition={{ duration: 0.2 }}
           >
             <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden [scrollbar-color:#3f3f46_#18181b] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb:hover]:tw-bg-iron-600 [&::-webkit-scrollbar-thumb]:tw-rounded-full [&::-webkit-scrollbar-thumb]:tw-bg-iron-700 [&::-webkit-scrollbar-track]:tw-bg-iron-900 [&::-webkit-scrollbar]:tw-w-2">
-              <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2">
+              <ul
+                role="none"
+                className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2"
+              >
                 {children}
               </ul>
             </div>

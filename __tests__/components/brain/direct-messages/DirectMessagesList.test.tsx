@@ -56,6 +56,7 @@ jest.mock(
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     directMessages: mockDMs,
+    requestDirectMessagesList: mockRequestDirectMessagesList,
     registerWave: jest.fn(),
   }),
 }));
@@ -84,6 +85,10 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 let mockAuth = false;
 let mockIsApp = false;
+const mockReleaseDirectMessagesList = jest.fn();
+const mockRequestDirectMessagesList = jest.fn(
+  () => mockReleaseDirectMessagesList
+);
 const mockDMs = {
   list: [{ id: "1", name: "dm" }],
   hasNextPage: false,
@@ -104,6 +109,9 @@ describe("DirectMessagesList", () => {
     jest.clearAllMocks();
     mockAuth = false;
     mockIsApp = false;
+    mockRequestDirectMessagesList.mockReturnValue(
+      mockReleaseDirectMessagesList
+    );
   });
 
   it("shows connect wallet placeholder when not authenticated", () => {
@@ -124,5 +132,16 @@ describe("DirectMessagesList", () => {
     expect(getByTestId("waves-list")).toHaveTextContent("1");
     expect(screen.getByTestId("create-dm-btn")).toBeInTheDocument();
     expect((useDeviceInfo as jest.Mock).mock.calls.length).toBeGreaterThan(0);
+  });
+
+  it("activates the full DM list while mounted", () => {
+    mockAuth = true;
+    const { unmount } = renderWithAuth({ handle: "alice" });
+
+    expect(mockRequestDirectMessagesList).toHaveBeenCalledTimes(1);
+
+    unmount();
+
+    expect(mockReleaseDirectMessagesList).toHaveBeenCalledTimes(1);
   });
 });

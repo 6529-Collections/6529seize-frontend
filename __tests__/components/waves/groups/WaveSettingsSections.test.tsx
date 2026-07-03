@@ -14,7 +14,7 @@ import {
   fetchWaveMetadata,
 } from "@/services/api/waves-v2-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -193,6 +193,14 @@ const expectApprovalQueriesInvalidated = (
   );
 };
 
+const getDisplaySection = (): HTMLElement => {
+  const section = screen.getByText("Display").closest("section");
+  if (!section) {
+    throw new Error("Display section not found");
+  }
+  return section;
+};
+
 describe("WaveSettingsSections", () => {
   beforeEach(() => {
     commonApiPostMock.mockResolvedValue(makeWave());
@@ -284,7 +292,11 @@ describe("WaveSettingsSections", () => {
       }),
     });
 
-    expect(await screen.findByText("Hidden")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        within(getDisplaySection()).getByText("Hidden")
+      ).toBeInTheDocument();
+    });
     expect(
       screen.queryByRole("button", { name: "Edit outcome visibility" })
     ).not.toBeInTheDocument();
@@ -569,10 +581,11 @@ describe("WaveSettingsSections", () => {
       }),
     });
 
-    expect(await screen.findByText("Hidden")).toBeInTheDocument();
-    await user.click(
-      screen.getByRole("button", { name: "Edit outcome visibility" })
-    );
+    const editOutcomeButton = await screen.findByRole("button", {
+      name: "Edit outcome visibility",
+    });
+    expect(within(getDisplaySection()).getByText("Hidden")).toBeInTheDocument();
+    await user.click(editOutcomeButton);
     await user.click(screen.getByLabelText("Show outcomes"));
     await user.click(screen.getByRole("button", { name: "Save" }));
 

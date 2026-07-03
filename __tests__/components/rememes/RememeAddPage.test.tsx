@@ -2,14 +2,6 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import RememeAddPage from "@/components/rememes/RememeAddPage";
 
-// Mock react-bootstrap
-jest.mock("react-bootstrap", () => ({
-  Container: (props: any) => <div {...props} />,
-  Row: (props: any) => <div {...props} />,
-  Col: (props: any) => <div {...props} />,
-  Button: (props: any) => <button {...props} />,
-}));
-
 // Mock Next.js Image component
 jest.mock("next/image", () => ({
   __esModule: true,

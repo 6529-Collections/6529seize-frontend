@@ -1,4 +1,4 @@
-// Mock CSS parsing functions used by react-bootstrap
+// Mock CSS parsing functions used by dom-helpers/css
 function cssMock(element, property, value) {
   // Handle different call signatures
   if (arguments.length === 0) {

@@ -26,6 +26,18 @@ const getChildTransitionStyle = (
   };
 };
 
+const getTransitionDurationClass = (row: AnimatedSidebarWaveTreeRow) => {
+  if (row.animationState === "entering") {
+    return "tw-duration-[260ms]";
+  }
+
+  if (row.animationState === "exiting") {
+    return "tw-duration-[160ms]";
+  }
+
+  return "tw-duration-200";
+};
+
 export function SidebarWaveTreeRowTransition({
   row,
   rowHeight,
@@ -34,12 +46,15 @@ export function SidebarWaveTreeRowTransition({
   children,
 }: SidebarWaveTreeRowTransitionProps) {
   const childStyle = getChildTransitionStyle(row, rowHeight);
+  const transitionDurationClass = getTransitionDurationClass(row);
 
   return (
     <div
       data-sidebar-subwave-row-state={row.animationState}
-      className={`tw-transition-all tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${
-        row.depth === 1 ? "tw-overflow-hidden" : ""
+      className={`tw-transition-[top,height,max-height,opacity,transform] ${transitionDurationClass} tw-ease-out motion-reduce:tw-transition-none ${
+        row.depth === 1 && row.animationState !== "entered"
+          ? "tw-overflow-hidden"
+          : ""
       } ${className ?? ""}`}
       style={{
         ...style,

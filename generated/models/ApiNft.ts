@@ -276,6 +276,6 @@ export class ApiNft {
 
 export enum ApiNftTokenTypeEnum {
     Erc1155 = 'ERC1155',
-    Eec721 = 'EEC721'
+    Erc721 = 'ERC721'
 }
 

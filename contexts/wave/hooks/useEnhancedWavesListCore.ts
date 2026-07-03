@@ -62,6 +62,7 @@ interface WavesDataSource {
 
 interface UseEnhancedWavesListCoreOptions {
   supportsPinning: boolean;
+  enabled?: boolean | undefined;
   otherListWaveIds?: ReadonlySet<string> | undefined;
   unknownWaveRefetchCooldownMs?: number | undefined;
   preserveBackendWaveOrder?: boolean | undefined;
@@ -78,16 +79,26 @@ function useEnhancedWavesListCore(
   wavesData: WavesDataSource,
   options: UseEnhancedWavesListCoreOptions = DEFAULT_OPTIONS
 ) {
+  const isEnabled = options.enabled !== false;
+  const {
+    addPinnedWave: addPinnedWaveFromData,
+    fetchNextPage: fetchNextPageFromData,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    loadSubwavesForParent: loadSubwavesForParentFromData,
+    loadingSubwaveParentIds,
+    prefetchSubwavesForParent: prefetchSubwavesForParentFromData,
+    refetchAllWaves: refetchAllWavesFromData,
+    removePinnedWave: removePinnedWaveFromData,
+    waves,
+  } = wavesData;
   const { newDropsCounts, resetAllWavesNewDropsCount, resetWaveNewDropsCount } =
-    useNewDropCounter(
-      activeWaveId,
-      wavesData.waves,
-      wavesData.refetchAllWaves,
-      {
-        otherListWaveIds: options.otherListWaveIds,
-        unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
-      }
-    );
+    useNewDropCounter(activeWaveId, waves, refetchAllWavesFromData, {
+      enabled: isEnabled,
+      otherListWaveIds: options.otherListWaveIds,
+      unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
+    });
 
   const [clearedUnreadWaveIds, setClearedUnreadWaveIds] = useState<Set<string>>(
     new Set()
@@ -97,21 +108,32 @@ function useEnhancedWavesListCore(
     Record<string, number>
   >({});
 
-  const resetWaveUnreadCount = useCallback((waveId: string) => {
-    setClearedUnreadWaveIds((prev) => {
-      const next = new Set(prev);
-      next.add(waveId);
-      return next;
-    });
-    setForcedUnreadCounts((prev) => {
-      if (!(waveId in prev)) return prev;
-      const { [waveId]: _, ...rest } = prev;
-      return rest;
-    });
-  }, []);
+  const resetWaveUnreadCount = useCallback(
+    (waveId: string) => {
+      if (!isEnabled) {
+        return;
+      }
+
+      setClearedUnreadWaveIds((prev) => {
+        const next = new Set(prev);
+        next.add(waveId);
+        return next;
+      });
+      setForcedUnreadCounts((prev) => {
+        if (!(waveId in prev)) return prev;
+        const { [waveId]: _, ...rest } = prev;
+        return rest;
+      });
+    },
+    [isEnabled]
+  );
 
   const restoreWaveUnreadCount = useCallback(
     (waveId: string, count?: number) => {
+      if (!isEnabled) {
+        return;
+      }
+
       setClearedUnreadWaveIds((prev) => {
         if (!prev.has(waveId)) return prev;
         const next = new Set(prev);
@@ -125,7 +147,7 @@ function useEnhancedWavesListCore(
         }));
       }
     },
-    []
+    [isEnabled]
   );
 
   const markWaveRead = useCallback(
@@ -137,7 +159,7 @@ function useEnhancedWavesListCore(
   );
 
   useEffect(() => {
-    if (!activeWaveId) return;
+    if (!isEnabled || !activeWaveId) return;
     setForcedUnreadCounts((prev) => {
       if (!(activeWaveId in prev)) return prev;
       const { [activeWaveId]: _, ...rest } = prev;
@@ -147,12 +169,13 @@ function useEnhancedWavesListCore(
       resetWaveUnreadCount(activeWaveId);
     }, UNREAD_CLEAR_DELAY_MS);
     return () => clearTimeout(timeout);
-  }, [activeWaveId, resetWaveUnreadCount]);
+  }, [activeWaveId, isEnabled, resetWaveUnreadCount]);
 
   const mapWave = useCallback(
     (wave: EnhancedSidebarWave): MinimalWave => {
       const wsData = newDropsCounts[wave.id];
-      const hasNewWsDrops = (wsData?.count ?? 0) > 0;
+      const wsDropCount = wsData?.count ?? 0;
+      const hasNewWsDrops = wsDropCount > 0;
       const directLatestDropTimestamp = getNewestTimestamp(
         wsData?.latestDropTimestamp,
         wave.latestDropTimestamp ?? null
@@ -162,8 +185,8 @@ function useEnhancedWavesListCore(
         wave.latestFollowedSubwaveDropTimestamp ?? null
       );
       const newDrops = {
-        count: wsData?.count ?? 0,
-        latestDropTimestamp: sidebarActivityTimestamp,
+        count: wsDropCount,
+        latestDropTimestamp: directLatestDropTimestamp,
         firstUnreadSerialNo: wsData?.firstUnreadSerialNo ?? null,
       };
       const isWsDataCoveredByApi =
@@ -192,15 +215,15 @@ function useEnhancedWavesListCore(
       if (isCleared) {
         unreadDropsCount = 0;
       } else if (forcedCount !== undefined) {
-        unreadDropsCount = forcedCount + (wsData?.count ?? 0);
+        unreadDropsCount = forcedCount + wsDropCount;
       } else if (wasCleared && hasNewWsDrops) {
-        unreadDropsCount = wsData?.count ?? 0;
+        unreadDropsCount = wsDropCount;
       } else if (hasNewWsDrops && isWsDataCoveredByApi) {
         // The API can already include the same websocket drop after a refetch.
         // Use the larger count instead of adding both sources and double-counting.
-        unreadDropsCount = Math.max(wave.unreadDropsCount, wsData?.count ?? 0);
+        unreadDropsCount = Math.max(wave.unreadDropsCount, wsDropCount);
       } else if (hasNewWsDrops) {
-        unreadDropsCount = wave.unreadDropsCount + (wsData?.count ?? 0);
+        unreadDropsCount = wave.unreadDropsCount + wsDropCount;
       } else {
         unreadDropsCount = wave.unreadDropsCount;
       }
@@ -214,10 +237,10 @@ function useEnhancedWavesListCore(
         contributors: wave.contributors,
         newDropsCount: newDrops,
         isPinned: options.supportsPinning
-          ? (wave.isPinned ?? wave.pinned ?? false)
+          ? wave.isPinned === true || wave.pinned === true
           : false,
-        isFollowing: wave.subscribed ?? false,
-        isOfficial: wave.isOfficial ?? false,
+        isFollowing: wave.subscribed,
+        isOfficial: wave.isOfficial === true,
         isMuted: wave.muted,
         parentWaveId: wave.parentWaveId,
         hasSubwaves: wave.hasSubwaves,
@@ -238,7 +261,7 @@ function useEnhancedWavesListCore(
         // reserved for parent rows surfaced only because a child subwave is followed.
         isFollowedSubwaveContainer:
           wave.parentWaveId === null &&
-          !(wave.subscribed ?? false) &&
+          !wave.subscribed &&
           wave.followedSubwavesCount > 0,
       };
     },
@@ -250,9 +273,50 @@ function useEnhancedWavesListCore(
     ]
   );
 
-  const minimal = useMemo(
-    () => wavesData.waves.map(mapWave),
-    [wavesData.waves, mapWave]
+  const minimal = useMemo(() => {
+    if (!isEnabled) {
+      return [];
+    }
+
+    return waves.map((wave) => mapWave(wave));
+  }, [isEnabled, waves, mapWave]);
+
+  const fetchNextPage = useCallback(() => {
+    if (!isEnabled) {
+      return;
+    }
+
+    fetchNextPageFromData();
+  }, [fetchNextPageFromData, isEnabled]);
+
+  const refetchAllWaves = useCallback(() => {
+    if (!isEnabled) {
+      return;
+    }
+
+    refetchAllWavesFromData();
+  }, [isEnabled, refetchAllWavesFromData]);
+
+  const loadSubwavesForParent = useCallback(
+    (parentWaveId: string) => {
+      if (!isEnabled) {
+        return;
+      }
+
+      loadSubwavesForParentFromData(parentWaveId);
+    },
+    [isEnabled, loadSubwavesForParentFromData]
+  );
+
+  const prefetchSubwavesForParent = useCallback(
+    (parentWaveId: string) => {
+      if (!isEnabled) {
+        return;
+      }
+
+      prefetchSubwavesForParentFromData(parentWaveId);
+    },
+    [isEnabled, prefetchSubwavesForParentFromData]
   );
 
   const sorted = useMemo(
@@ -274,39 +338,40 @@ function useEnhancedWavesListCore(
   return useMemo(
     () => ({
       waves: sorted,
-      isFetching: wavesData.isFetching,
-      isFetchingNextPage: wavesData.isFetchingNextPage,
-      hasNextPage: wavesData.hasNextPage,
-      fetchNextPage: wavesData.fetchNextPage,
-      addPinnedWave: options.supportsPinning
-        ? wavesData.addPinnedWave
-        : () => {},
-      removePinnedWave: options.supportsPinning
-        ? wavesData.removePinnedWave
-        : () => {},
-      refetchAllWaves: wavesData.refetchAllWaves,
-      loadSubwavesForParent: wavesData.loadSubwavesForParent,
-      prefetchSubwavesForParent: wavesData.prefetchSubwavesForParent,
-      loadingSubwaveParentIds: wavesData.loadingSubwaveParentIds ?? [],
+      isFetching: isEnabled ? isFetching : false,
+      isFetchingNextPage: isEnabled ? isFetchingNextPage : false,
+      hasNextPage: isEnabled ? hasNextPage : false,
+      fetchNextPage,
+      addPinnedWave:
+        isEnabled && options.supportsPinning ? addPinnedWaveFromData : () => {},
+      removePinnedWave:
+        isEnabled && options.supportsPinning
+          ? removePinnedWaveFromData
+          : () => {},
+      refetchAllWaves,
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: isEnabled ? (loadingSubwaveParentIds ?? []) : [],
       resetAllWavesNewDropsCount,
       markWaveRead,
       restoreWaveUnreadCount,
     }),
     [
       sorted,
-      wavesData.isFetching,
-      wavesData.isFetchingNextPage,
-      wavesData.hasNextPage,
-      wavesData.fetchNextPage,
-      wavesData.addPinnedWave,
-      wavesData.removePinnedWave,
-      wavesData.refetchAllWaves,
-      wavesData.loadSubwavesForParent,
-      wavesData.prefetchSubwavesForParent,
-      wavesData.loadingSubwaveParentIds,
+      isFetching,
+      isFetchingNextPage,
+      hasNextPage,
+      fetchNextPage,
+      addPinnedWaveFromData,
+      removePinnedWaveFromData,
+      refetchAllWaves,
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds,
       resetAllWavesNewDropsCount,
       markWaveRead,
       restoreWaveUnreadCount,
+      isEnabled,
       options.supportsPinning,
     ]
   );

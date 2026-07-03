@@ -111,6 +111,45 @@ describe("useDmWavesList", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
+  it("respects enabled=false without enabling the full DM query", () => {
+    const fetchNextPage = jest.fn();
+    const refetch = jest.fn();
+    useWavesV2Mock.mockReturnValue({
+      waves: [
+        { id: "older", latestDropTimestamp: 100 },
+        { id: "newer", latestDropTimestamp: 200 },
+      ],
+      isFetching: true,
+      isFetchingNextPage: true,
+      hasNextPage: true,
+      fetchNextPage,
+      status: "success",
+      refetch,
+    });
+
+    const { result } = renderHook(() => useDmWavesList({ enabled: false }));
+
+    expect(useWavesV2Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        directMessage: true,
+        viewerIdentityKey: "0xabc:primary",
+        enabled: false,
+      })
+    );
+    expect(result.current.waves).toEqual([]);
+    expect(result.current.mainWaves).toEqual([]);
+    expect(result.current.isFetching).toBe(false);
+    expect(result.current.isFetchingNextPage).toBe(false);
+    expect(result.current.hasNextPage).toBe(false);
+
+    result.current.fetchNextPage();
+    result.current.mainWavesRefetch();
+    result.current.refetchAllWaves();
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
   it("re-enables the DM query after profile loading settles", () => {
     let fetchingProfile = true;
     useAuthMock.mockImplementation(() => ({

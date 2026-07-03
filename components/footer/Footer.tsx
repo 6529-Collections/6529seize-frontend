@@ -45,10 +45,10 @@ export default function Footer() {
 
   return (
     <footer
-      className="tailwind-scope d-flex flex-column align-items-center justify-content-center gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800"
+      className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800"
       id="footer"
     >
-      <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
+      <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
         {printLinkWithImage(
           "https://x.com/punk6529",
           "/twitter.png",
@@ -68,7 +68,7 @@ export default function Footer() {
           "6529-Collections"
         )}
       </span>
-      <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
+      <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
         {printLink(
           `/about/${AboutSection.TERMS_OF_SERVICE}`,
           "Terms of Service"

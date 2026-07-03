@@ -42,7 +42,7 @@ export default function CodeExample({ code }: CodeExampleProps) {
         </code>
       </pre>
       <button
-        className="btn btn-sm position-absolute"
+        className="tw-absolute tw-rounded tw-px-2 tw-py-1"
         style={{
           top: "8px",
           right: "8px",

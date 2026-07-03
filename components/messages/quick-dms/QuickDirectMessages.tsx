@@ -76,7 +76,8 @@ export default function QuickDirectMessages() {
   const { connectedProfile, showWaves } = useAuth();
   const isDesktop = useIsQuickDmDesktop();
   const locale = useBrowserLocale();
-  const { directMessages, registerWave } = useMyStream();
+  const { directMessages, registerWave, requestDirectMessagesList } =
+    useMyStream();
   const shouldLiftLauncher = useWaveDropsScrollControlsVisible();
   const [state, setState] = useState<QuickDmState>(() => readStoredState());
   const [isCreateDirectMessageOpen, setIsCreateDirectMessageOpen] =
@@ -111,6 +112,8 @@ export default function QuickDirectMessages() {
       ),
     [state.view, state.waveId, waves]
   );
+
+  useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
 
   const setAndStoreState = useCallback((nextState: QuickDmState) => {
     setState(nextState);
@@ -313,10 +316,12 @@ export default function QuickDirectMessages() {
           <QuickDmListPanel
             waves={waves}
             isFetching={directMessages.isFetching}
+            isFetchingNextPage={directMessages.isFetchingNextPage}
+            hasNextPage={directMessages.hasNextPage}
             locale={locale}
             onClose={close}
             onCreateDirectMessage={createDirectMessageAction}
-            onOpenAll={openAll}
+            onFetchNextPage={directMessages.fetchNextPage}
             onOpenChat={openChat}
             onRegisterWave={registerWave}
           />
