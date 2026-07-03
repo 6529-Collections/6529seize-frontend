@@ -1,8 +1,9 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import AppHeader from "@/components/header/AppHeader";
 
 const mockShare = jest.fn();
+const mockNativeShare = jest.fn();
 const mockWriteText = jest.fn();
 const mockCopyToClipboard = jest.fn();
 let mockWaveDropAction: any = null;
@@ -43,6 +44,15 @@ jest.mock("@/components/utils/Spinner", () => ({
 jest.mock("@/components/header/HeaderActionButtons", () => ({
   __esModule: true,
   default: () => <div data-testid="actions" />,
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+jest.mock("@capacitor/share", () => ({
+  Share: {
+    share: (...args: unknown[]) => mockNativeShare(...args),
+  },
 }));
 jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
   __esModule: true,
@@ -103,6 +113,7 @@ const { useMyStreamOptional } = require("@/contexts/wave/MyStreamContext");
 const { useWaveById } = require("@/hooks/useWaveById");
 const { useWave } = require("@/hooks/useWave");
 const { useWaveViewMode } = require("@/hooks/useWaveViewMode");
+const useCapacitor = require("@/hooks/useCapacitor").default;
 
 function setup(opts: any) {
   const wave = opts.wave
@@ -174,13 +185,18 @@ describe("AppHeader", () => {
 
   beforeEach(() => {
     mockShare.mockReset();
+    mockNativeShare.mockReset();
     mockWriteText.mockReset();
     mockCopyToClipboard.mockReset();
     mockShare.mockResolvedValue(undefined);
+    mockNativeShare.mockResolvedValue(undefined);
     mockWriteText.mockResolvedValue(undefined);
     mockWaveDropAction = null;
+    useCapacitor.mockReturnValue({ isCapacitor: true });
     setNavigatorShare(mockShare);
     setNavigatorClipboard();
+    window.history.pushState({}, "", "/");
+    document.title = "6529";
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -272,15 +288,19 @@ describe("AppHeader", () => {
     setup({
       wave,
       asPath: "/waves/w1",
-      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+      waveInfo: {
+        isRankWave: true,
+        isApproveWave: false,
+        isMemesWave: false,
+        isDm: false,
+      },
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "More header actions" })
-    );
+    expect(
+      screen.queryByRole("button", { name: "More header actions" })
+    ).not.toBeInTheDocument();
 
-    const shareItem = screen.getByRole("menuitem", { name: "Share wave" });
-    fireEvent.click(shareItem);
+    fireEvent.click(screen.getByRole("button", { name: "Share wave" }));
 
     expect(mockShare).toHaveBeenCalledWith({
       title: "WaveOne",
@@ -332,15 +352,19 @@ describe("AppHeader", () => {
     setup({
       wave,
       asPath: "/waves/w1",
-      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+      waveInfo: {
+        isRankWave: true,
+        isApproveWave: false,
+        isMemesWave: false,
+        isDm: false,
+      },
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "More header actions" })
-    );
-
     expect(
-      screen.getByRole("menuitem", { name: "Copy wave link" })
+      screen.queryByRole("button", { name: "More header actions" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Copy wave link" })
     ).toBeInTheDocument();
   });
 
@@ -383,13 +407,15 @@ describe("AppHeader", () => {
       activeWaveId: "w2",
       wave,
       asPath: "/waves/w2",
-      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+      waveInfo: {
+        isRankWave: true,
+        isApproveWave: false,
+        isMemesWave: false,
+        isDm: false,
+      },
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "More header actions" })
-    );
-    fireEvent.click(screen.getByRole("menuitem", { name: "Copy wave link" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy wave link" }));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
       "http://localhost/waves/w2"
@@ -421,6 +447,62 @@ describe("AppHeader", () => {
       screen.queryByRole("button", { name: "Show wave description" })
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
+  });
+
+  it("shares the exact current app URL from non-wave app pages", async () => {
+    window.history.pushState(
+      {},
+      "",
+      "/the-memes/123?foo=bar&view=exact#details"
+    );
+    document.title = "The Memes #123";
+
+    setup({ address: "0x1", asPath: "/the-memes/123" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Share page" }));
+
+    await waitFor(() =>
+      expect(mockNativeShare).toHaveBeenCalledWith({
+        title: "The Memes #123",
+        url: "https://test.6529.io/the-memes/123?foo=bar&view=exact#details",
+      })
+    );
+  });
+
+  it.each([
+    "/waves",
+    "/waves/w1",
+    "/messages",
+    "/messages/w1",
+    "/notifications",
+    "/notifications/settings",
+  ])("hides page share on excluded app route %s", (asPath) => {
+    setup({ asPath });
+
+    expect(
+      screen.queryByRole("button", { name: "Share page" })
+    ).not.toBeInTheDocument();
+  });
+
+  it.each(["waves", "messages"])(
+    "hides page share while app is showing %s query context",
+    (view) => {
+      setup({ asPath: "/", query: { view } });
+
+      expect(
+        screen.queryByRole("button", { name: "Share page" })
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it("hides page share outside Capacitor", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+
+    setup({ asPath: "/the-memes/123" });
+
+    expect(
+      screen.queryByRole("button", { name: "Share page" })
+    ).not.toBeInTheDocument();
   });
 
   it("links 1:1 DM active wave title to the other participant profile", () => {

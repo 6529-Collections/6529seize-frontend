@@ -6,11 +6,12 @@ import {
   EllipsisHorizontalIcon,
   PaperAirplaneIcon,
   Squares2X2Icon,
-  ShareIcon,
   LinkIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { faShare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
@@ -36,6 +37,7 @@ import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
+import HeaderPageShareButton from "./share/HeaderPageShareButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
 import PrimaryButton from "../utils/button/PrimaryButton";
@@ -266,6 +268,26 @@ const HeaderMoreMenu = ({
     return null;
   }
 
+  const onlyItem = items.length === 1 ? items[0] : null;
+  if (onlyItem && onlyItem.kind !== "section" && onlyItem.id === "wave-link") {
+    const ariaLabel =
+      onlyItem.ariaLabel ??
+      (typeof onlyItem.label === "string" ? onlyItem.label : "Share wave");
+
+    return (
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        title={ariaLabel}
+        onClick={onlyItem.onSelect}
+        disabled={onlyItem.disabled}
+        className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+      >
+        {onlyItem.icon}
+      </button>
+    );
+  }
+
   return (
     <CompactMenu
       aria-label="More header actions"
@@ -464,7 +486,7 @@ export default function AppHeader() {
     }
 
     if (waveLinkActionMode === "share") {
-      return <ShareIcon className={iconClassName} />;
+      return <FontAwesomeIcon icon={faShare} className={iconClassName} />;
     }
 
     return <LinkIcon className={iconClassName} />;
@@ -473,6 +495,8 @@ export default function AppHeader() {
   const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
   const isMessagesRoute =
     pathname === "/messages" || pathname.startsWith("/messages/");
+  const isNotificationsRoute =
+    pathname === "/notifications" || pathname.startsWith("/notifications/");
   const isHomeRoute = pathname === "/";
 
   const isCreateRoute =
@@ -484,8 +508,15 @@ export default function AppHeader() {
     searchParams,
   });
   const isMessagesContext = activeView === "messages";
+  const isWavesContext = activeView === "waves";
   const isOnMessagesRoute = pathname === "/messages" && !waveParam;
   const showCreateDmAction = isOnMessagesRoute || isMessagesContext;
+  const showPageShareAction =
+    !isWavesRoute &&
+    !isMessagesRoute &&
+    !isNotificationsRoute &&
+    !isWavesContext &&
+    !isMessagesContext;
 
   const isProfilePage = typeof params["user"] === "string";
 
@@ -633,6 +664,11 @@ export default function AppHeader() {
           <div className="tw-flex-shrink-0">
             <HeaderActionButtons />
           </div>
+          {showPageShareAction && (
+            <div className="tw-flex-shrink-0">
+              <HeaderPageShareButton />
+            </div>
+          )}
           <div className="tw-flex-shrink-0">
             <HeaderSearchButton
               wave={
