@@ -585,6 +585,9 @@ export const getCreateWaveValidationErrors = ({
         })
       );
       break;
+    case CreateWaveStep.RULES:
+      // No validation for rules step
+      break;
     case CreateWaveStep.VOTING:
       errors.push(
         ...getVotingValidationErrors({

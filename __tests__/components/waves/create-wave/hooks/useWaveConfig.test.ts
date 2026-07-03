@@ -93,6 +93,7 @@ describe("useWaveConfig", () => {
         maxWinners: null,
       });
       expect(result.current.config.display).toEqual({
+        customRules: null,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",

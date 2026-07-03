@@ -14,8 +14,8 @@ You must save at least one outcome before `Next` can move to `Description`.
 
 ## Step Path
 
-- `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
-- `Approve`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
+- `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
 
 ## Outcome Types
 
@@ -82,6 +82,7 @@ You must save at least one outcome before `Next` can move to `Description`.
 
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
+- [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Voting Configuration](feature-voting-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Outcome Lists](../feature-outcome-lists.md)

@@ -228,10 +228,13 @@ describe("WaveSettingsSections", () => {
     });
 
     expect(screen.getByText("Approval tabs")).toBeInTheDocument();
+    expect(screen.getByText("Rules")).toBeInTheDocument();
     expect(screen.getByText("Display")).toBeInTheDocument();
     expect(screen.getByText("Approval rule")).toBeInTheDocument();
     expect(screen.getByText("Chat")).toBeInTheDocument();
     expect(screen.getByText("Access")).toBeInTheDocument();
+    expect(screen.getByText("Custom rules")).toBeInTheDocument();
+    expect(screen.getByText("Acceptance rules")).toBeInTheDocument();
     expect(screen.getByText("Approvals tab")).toBeInTheDocument();
     expect(screen.getByText("Approved tab")).toBeInTheDocument();
     expect(screen.getByText("Outcomes")).toBeInTheDocument();
@@ -246,11 +249,30 @@ describe("WaveSettingsSections", () => {
     renderSettings({ wave: makeWave({ waveType: ApiWaveType.Rank }) });
 
     expect(screen.getByText("Display")).toBeInTheDocument();
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByText("Custom rules")).toBeInTheDocument();
+    expect(screen.getByText("Acceptance rules")).toBeInTheDocument();
     expect(screen.getByText("Outcomes")).toBeInTheDocument();
     expect(screen.queryByText("Approval tabs")).not.toBeInTheDocument();
     expect(screen.queryByText("Approvals tab")).not.toBeInTheDocument();
     expect(screen.queryByText("Approval rule")).not.toBeInTheDocument();
     expect(screen.queryByText("Approve after")).not.toBeInTheDocument();
+    expect(fetchWaveMetadataMock).toHaveBeenCalledWith({ waveId: "wave-1" });
+  });
+
+  it("shows rules settings for chat waves without display or approval settings", () => {
+    renderSettings({ wave: makeWave({ waveType: ApiWaveType.Chat }) });
+
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByText("Custom rules")).toBeInTheDocument();
+    expect(screen.queryByText("Acceptance rules")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Edit acceptance rules" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Display")).not.toBeInTheDocument();
+    expect(screen.queryByText("Outcomes")).not.toBeInTheDocument();
+    expect(screen.queryByText("Approval tabs")).not.toBeInTheDocument();
+    expect(screen.queryByText("Approval rule")).not.toBeInTheDocument();
     expect(fetchWaveMetadataMock).toHaveBeenCalledWith({ waveId: "wave-1" });
   });
 
@@ -306,9 +328,250 @@ describe("WaveSettingsSections", () => {
       });
     });
     expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+      });
+    });
+  });
+
+  it("saves custom rules metadata", async () => {
+    const user = userEvent.setup();
+    const { queryClient } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit custom rules" })
+    );
+    await user.type(
+      screen.getByLabelText("Display-only rules"),
+      "Keep submissions original."
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: "Keep submissions original.",
+        },
+      });
+    });
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
     });
+  });
+
+  it("deletes custom rules metadata when cleared", async () => {
+    const user = userEvent.setup();
+    waveMetadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+        data_value: "Old custom rule",
+      },
+    ];
+
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    expect(await screen.findByText("Added")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Edit custom rules" }));
+    await user.clear(screen.getByLabelText("Display-only rules"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        metadataId: 1,
+      });
+    });
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
+  });
+
+  it("creates replacement custom rules before deleting old metadata", async () => {
+    const user = userEvent.setup();
+    let resolveCreate: (() => void) | undefined;
+    const createPromise = new Promise((resolve) => {
+      resolveCreate = () =>
+        resolve({
+          id: 3,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: "New custom rule",
+        });
+    });
+    createWaveMetadataMock.mockReturnValueOnce(createPromise);
+    waveMetadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+        data_value: "Old custom rule",
+      },
+      {
+        id: 2,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+        data_value: "Older custom rule",
+      },
+    ];
+
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    expect(await screen.findByText("Added")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Edit custom rules" }));
+    await user.clear(screen.getByLabelText("Display-only rules"));
+    await user.type(
+      screen.getByLabelText("Display-only rules"),
+      "New custom rule"
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: "New custom rule",
+        },
+      });
+    });
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+
+    resolveCreate?.();
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledTimes(2);
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 1,
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 2,
+    });
+  });
+
+  it("keeps custom rules editor open when authentication fails", async () => {
+    const user = userEvent.setup();
+    const { requestAuth, setToast, queryClient } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+    requestAuth.mockResolvedValueOnce({ success: false });
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit custom rules" })
+    );
+    await user.type(
+      screen.getByLabelText("Display-only rules"),
+      "Keep submissions original."
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        message:
+          "Couldn't authenticate. Reconnect your wallet and try again.",
+      });
+    });
+    expect(
+      screen.getByText(
+        "Couldn't authenticate. Reconnect your wallet and try again."
+      )
+    ).toHaveAttribute("role", "alert");
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+      });
+    });
+    expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
+  });
+
+  it("keeps custom rules editor open when metadata save fails", async () => {
+    createWaveMetadataMock.mockRejectedValueOnce(new Error("metadata failed"));
+    const user = userEvent.setup();
+    const { setToast, queryClient } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit custom rules" })
+    );
+    await user.type(
+      screen.getByLabelText("Display-only rules"),
+      "Keep submissions original."
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        title: "Couldn't save these custom rules.",
+        description: "Please try again.",
+        details: "metadata failed.",
+      });
+    });
+    expect(
+      screen.getByText("Couldn't save these custom rules. Please try again.")
+    ).toHaveAttribute("role", "alert");
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+      });
+    });
+    expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
+  });
+
+  it("saves acceptance rules through participation terms", async () => {
+    const user = userEvent.setup();
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Edit acceptance rules" })
+    );
+    await user.type(
+      screen.getByLabelText("Rules that require acceptance"),
+      "Must be original."
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+    expect(commonApiPostMock.mock.calls[0][0].body.participation).toMatchObject(
+      {
+        terms: "Must be original.",
+        signature_required: true,
+      }
+    );
   });
 
   it("deletes outcome visibility metadata when reset to shown", async () => {
@@ -403,6 +666,12 @@ describe("WaveSettingsSections", () => {
       await screen.findByRole("button", { name: "Edit approvals tab label" })
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("button", { name: "Edit custom rules" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Edit acceptance rules" })
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("button", { name: "Edit approved tab label" })
     ).toBeInTheDocument();
     expect(
@@ -436,6 +705,12 @@ describe("WaveSettingsSections", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Edit hold time" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Edit custom rules" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Edit acceptance rules" })
     ).not.toBeInTheDocument();
     await waitFor(() => {
       expect(
