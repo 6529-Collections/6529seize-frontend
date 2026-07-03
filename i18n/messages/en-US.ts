@@ -800,6 +800,7 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
   "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
+  "home.mintSubscriptions.subscribersLoading": "Loading subscriber count",
   "home.mintSubscriptions.tooltip.connect":
     "Connect to set up subscription minting.",
   "home.mintSubscriptions.tooltip.dropped":

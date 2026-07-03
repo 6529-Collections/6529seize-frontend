@@ -140,7 +140,7 @@ export default function LatestDropNextMintSubscribe(
   const { country } = useCookieConsent();
   const { isIos } = useCapacitor();
   const locale = useBrowserLocale();
-  const { openProfileSubscriptions, profileSubscriptionsHref } =
+  const { isConnecting, openProfileSubscriptions, profileSubscriptionsHref } =
     useProfileSubscriptionsNavigation();
 
   const statusSource = props.statusSource ?? "upcoming";
@@ -186,7 +186,9 @@ export default function LatestDropNextMintSubscribe(
     retry: false,
   });
 
-  const { data: upcomingCounts } = useQuery<SubscriptionCounts[]>({
+  const { data: upcomingCounts, isLoading: upcomingCountsLoading } = useQuery<
+    SubscriptionCounts[]
+  >({
     queryKey: ["mint-subscription-counts", "upcoming", tokenId],
     queryFn: async () =>
       await commonApiFetch<SubscriptionCounts[]>({
@@ -196,8 +198,8 @@ export default function LatestDropNextMintSubscribe(
     retry: false,
   });
 
-  const { data: redeemedCounts } = useQuery<RedeemedSubscriptionCountsResponse>(
-    {
+  const { data: redeemedCounts, isLoading: redeemedCountsLoading } =
+    useQuery<RedeemedSubscriptionCountsResponse>({
       queryKey: ["mint-subscription-counts", "redeemed", profileKey, tokenId],
       queryFn: async () =>
         await commonApiFetch<RedeemedSubscriptionCountsResponse>({
@@ -209,8 +211,7 @@ export default function LatestDropNextMintSubscribe(
         }),
       enabled: !hideSubscriptions && hasTokenId && !shouldQueryUpcomingStatus,
       retry: false,
-    }
-  );
+    });
 
   let subscribed = false;
   let subscribedCount: number | undefined;
@@ -234,6 +235,9 @@ export default function LatestDropNextMintSubscribe(
     tokenId,
     upcomingCounts,
   ]);
+  const subscribersCountLoading = shouldQueryUpcomingStatus
+    ? !!upcomingCountsLoading
+    : !!redeemedCountsLoading;
   const tooltipLabel = getToggleTooltipLabel({
     activeProfileProxy: !!activeProfileProxy,
     isMintingDay,
@@ -251,10 +255,12 @@ export default function LatestDropNextMintSubscribe(
   return (
     <MemeSubscriptionAwarenessRow
       onProfileSubscriptionsAction={openProfileSubscriptions}
+      profileSubscriptionsActionPending={isConnecting}
       profileSubscriptionsHref={profileSubscriptionsHref}
       subscribed={subscribed}
       subscribedCount={subscribedCount}
       subscribersCount={subscribersCount}
+      subscribersCountLoading={subscribersCountLoading}
       tooltipLabel={tooltipLabel}
     />
   );

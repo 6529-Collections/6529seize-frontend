@@ -55,30 +55,22 @@ jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
 const useQueryMock = useQuery as jest.Mock;
 const isMintingTodayMock = isMintingToday as jest.Mock;
 
-function expectDecorativeSubscriptionToggle(
+function expectReadonlySubscriptionToggle(
   container: HTMLElement,
   tooltipLabel: string,
   checked: boolean
 ) {
-  const trigger = Array.from(
-    container.querySelectorAll("[data-tooltip-content]")
-  ).find(
-    (element) => element.getAttribute("data-tooltip-content") === tooltipLabel
-  );
+  const trigger = screen.getByRole("switch", { name: tooltipLabel });
   expect(trigger).toBeInTheDocument();
+  expect(container).toContainElement(trigger);
+  expect(trigger).toHaveAttribute("aria-checked", String(checked));
+  expect(trigger).toHaveAttribute("aria-disabled", "true");
+  expect(trigger).toHaveAttribute("tabindex", "0");
+  expect(trigger).toHaveAttribute("data-tooltip-content", tooltipLabel);
 
   const toggle = trigger?.querySelector("[aria-hidden='true']");
   expect(toggle).toBeInTheDocument();
-  expect(toggle).not.toHaveAttribute("role");
-  expect(toggle).not.toHaveAttribute("tabindex");
-  expect(toggle).toHaveClass(
-    checked ? "tw-bg-primary-500/40" : "tw-bg-black/35"
-  );
-  expect(
-    screen.queryByRole("switch", {
-      name: tooltipLabel,
-    })
-  ).not.toBeInTheDocument();
+  expect(toggle).toHaveClass(checked ? "tw-bg-primary-500" : "tw-bg-black/35");
 }
 
 describe("LatestDropNextMintSubscribe", () => {
@@ -144,7 +136,7 @@ describe("LatestDropNextMintSubscribe", () => {
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
     expect(screen.getByText("x12 subscribers")).toBeInTheDocument();
     expect(screen.getByText("x2")).toBeInTheDocument();
-    expectDecorativeSubscriptionToggle(
+    expectReadonlySubscriptionToggle(
       container,
       "You are subscribed for x2 for this drop.",
       true
@@ -170,6 +162,46 @@ describe("LatestDropNextMintSubscribe", () => {
     );
   });
 
+  it("keeps the info link stable while subscriber count loads", () => {
+    useQueryMock.mockImplementation(({ queryKey }) => {
+      if (
+        queryKey[0] === "mint-subscription-status" &&
+        queryKey[1] === "upcoming"
+      ) {
+        return {
+          data: {
+            subscribed: true,
+            eligibility: 3,
+            count: 1,
+          },
+        };
+      }
+
+      if (
+        queryKey[0] === "mint-subscription-counts" &&
+        queryKey[1] === "upcoming"
+      ) {
+        return {
+          data: undefined,
+          isLoading: true,
+        };
+      }
+
+      return {
+        data: null,
+      };
+    });
+
+    renderWithAuth(<LatestDropNextMintSubscribe />);
+
+    expect(
+      screen.getByRole("status", { name: "Loading subscriber count" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Learn more about The Memes subscriptions")
+    ).toHaveAttribute("href", "/about/subscriptions");
+  });
+
   it("renders connected dropped awareness without upcoming status lookup when status source is none", () => {
     const { container } = renderWithAuth(
       <LatestDropNextMintSubscribe tokenId={516} readonly statusSource="none" />
@@ -181,7 +213,7 @@ describe("LatestDropNextMintSubscribe", () => {
       screen.queryByText("Cannot change active drops")
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Balance")).not.toBeInTheDocument();
-    expectDecorativeSubscriptionToggle(
+    expectReadonlySubscriptionToggle(
       container,
       "Subscription minting is closed for this drop.",
       false
@@ -241,7 +273,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
     expect(screen.getByText("x3")).toBeInTheDocument();
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
-    expectDecorativeSubscriptionToggle(
+    expectReadonlySubscriptionToggle(
       container,
       "You are subscribed for x3 for this drop.",
       true
@@ -277,7 +309,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Set up" })).toBeInTheDocument();
-    expectDecorativeSubscriptionToggle(
+    expectReadonlySubscriptionToggle(
       container,
       "Connect to set up subscription minting.",
       false
@@ -300,7 +332,7 @@ describe("LatestDropNextMintSubscribe", () => {
       } as any,
     });
 
-    expectDecorativeSubscriptionToggle(
+    expectReadonlySubscriptionToggle(
       container,
       "Manage subscriptions from your own profile, not a proxy session.",
       false
@@ -345,7 +377,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
     expect(screen.queryByText("x1")).not.toBeInTheDocument();
-    expectDecorativeSubscriptionToggle(
+    expectReadonlySubscriptionToggle(
       container,
       "You are not subscribed for this drop.",
       false
@@ -388,7 +420,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
     const { container } = renderWithAuth(<LatestDropNextMintSubscribe />);
 
-    expectDecorativeSubscriptionToggle(
+    expectReadonlySubscriptionToggle(
       container,
       "Subscription minting cannot be changed on mint day.",
       false

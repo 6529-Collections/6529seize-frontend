@@ -97,6 +97,7 @@ describe("About contents dropdown", () => {
     setCookieCountry("DE");
     mockRouterPush.mockClear();
     mockSeizeConnectFresh.mockClear();
+    mockSeizeConnectFresh.mockResolvedValue(undefined);
     jest.useRealTimers();
   });
 
@@ -289,6 +290,49 @@ describe("About contents dropdown", () => {
 
     expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
     expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it("disables disconnected subscriptions action during wallet connection", async () => {
+    setCookieCountry("US");
+    let resolveConnect!: () => void;
+    mockSeizeConnectFresh.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveConnect = resolve;
+        })
+    );
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: null,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+
+    const connectButton = screen.getByRole("button", {
+      name: /connect to subscribe/i,
+    });
+
+    fireEvent.click(connectButton);
+    expect(connectButton).toBeDisabled();
+    fireEvent.click(connectButton);
+    expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveConnect();
+    });
+
+    await waitFor(() => {
+      expect(connectButton).not.toBeDisabled();
+    });
   });
 
   it("routes to profile subscriptions after connecting from subscriptions action", async () => {

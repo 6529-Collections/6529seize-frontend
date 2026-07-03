@@ -15,9 +15,11 @@ export function useProfileSubscriptionsNavigation() {
   const { seizeConnectFresh } = useSeizeConnectContext();
   const locale = useBrowserLocale();
   const router = useRouter();
+  const [isConnecting, setIsConnecting] = useState(false);
   const [shouldNavigateAfterConnect, setShouldNavigateAfterConnect] =
     useState(false);
   const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isConnectingRef = useRef(false);
 
   const profileSubscriptionsHref = useMemo(
     () => getProfileSubscriptionsHref(connectedProfile),
@@ -54,6 +56,12 @@ export function useProfileSubscriptionsNavigation() {
       return;
     }
 
+    if (isConnectingRef.current) {
+      return;
+    }
+
+    isConnectingRef.current = true;
+    setIsConnecting(true);
     clearConnectTimeout();
     setShouldNavigateAfterConnect(true);
     connectTimeoutRef.current = setTimeout(() => {
@@ -71,6 +79,9 @@ export function useProfileSubscriptionsNavigation() {
         message: t(locale, "home.mintSubscriptions.connectFailed"),
         type: "error",
       });
+    } finally {
+      isConnectingRef.current = false;
+      setIsConnecting(false);
     }
   }, [
     clearConnectTimeout,
@@ -82,6 +93,7 @@ export function useProfileSubscriptionsNavigation() {
   ]);
 
   return {
+    isConnecting,
     openProfileSubscriptions,
     profileSubscriptionsHref,
   };
