@@ -84,8 +84,9 @@ On web layouts, route switching is sidebar-first.
   `/open-data/royalties`.
 - Use collapsed-rail flyouts for grouped destinations:
   `NFTs` keeps collection and NFT activity links, `Waves` keeps `Discover
-  Waves`, and `About` keeps subsection labels instead of flattening every route
-  into one list.
+  Waves`, `Tools` keeps labels such as `NFT Delegation`, `The Memes Tools`,
+  `Builder Tools`, and `Open Data`, and `About` keeps subsection labels instead
+  of flattening every route into one list.
 - Open `About` and `6529 Capital` routes from grouped links.
 - Open connected `Notifications` from the lower row above `Profile`.
 - Open `Share` to generate QR/deep links for the current route:

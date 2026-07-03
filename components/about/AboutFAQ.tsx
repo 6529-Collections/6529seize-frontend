@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -8,6 +10,8 @@ import {
 import styles from "./About.module.css";
 
 export default function AboutFAQ() {
+  const locale = DEFAULT_LOCALE;
+
   return (
     <Container>
       <Row>
@@ -84,7 +88,7 @@ export default function AboutFAQ() {
                 <Image
                   unoptimized
                   src="/faq-waves-view.jpg"
-                  alt="Waves view in 6529"
+                  alt={t(locale, "about.faq.images.wavesAlt")}
                   width={2626}
                   height={1284}
                   className={styles["faqImage"]}

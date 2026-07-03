@@ -487,7 +487,6 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   useEffect(() => {
     const abortController = new AbortController();
     const initialUrlNfts = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     fetchNfts(initialUrlNfts, [], abortController.signal);
     return () => abortController.abort();
   }, [fetchNfts]);
@@ -521,7 +520,6 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     fetchTransactions();
 
     return () => abortController.abort();

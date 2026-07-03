@@ -21,7 +21,7 @@ This step covers:
 
 ## Entry Points
 
-- Open `Tools -> EMMA`, sign in, open a plan, then select `Create Snapshots`.
+- Open `About -> Data & Developer Tools -> EMMA`, sign in, open a plan, then select `Create Snapshots`.
 - Open an existing plan in `/emma/plans/{planId}` and stay on the snapshots
   step.
 - Reopen a plan already in progress to continue monitoring snapshot jobs.

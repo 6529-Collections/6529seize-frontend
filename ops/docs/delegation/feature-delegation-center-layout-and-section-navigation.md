@@ -15,7 +15,7 @@ state.
 
 ## Entry Points
 
-- Sidebar: `Tools -> NFT Delegation`
+- Sidebar: `About -> Delegation & Wallets`
   - `/delegation/delegation-center`
   - `/delegation/wallet-architecture`
   - `/delegation/delegation-faq`

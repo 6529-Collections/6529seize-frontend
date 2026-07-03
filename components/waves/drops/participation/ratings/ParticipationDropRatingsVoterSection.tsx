@@ -38,7 +38,6 @@ export default function ParticipationDropRatingsVoterSection({
                 >
                   <Link href={`/${raterLabel}`}>
                     {/* Voter avatars can come from arbitrary remote hosts, so this stays unoptimized. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={getScaledImageUri(
                         rater.profile.pfp,

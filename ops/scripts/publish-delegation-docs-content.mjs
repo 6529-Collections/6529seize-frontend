@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable security/detect-non-literal-fs-filename -- all filesystem paths are constrained to this repo before use */
 
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";

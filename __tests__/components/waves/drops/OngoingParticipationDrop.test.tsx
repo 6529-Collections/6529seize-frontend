@@ -322,16 +322,20 @@ describe("OngoingParticipationDrop", () => {
     expect(mobileMenuProps).toBeUndefined();
   });
 
-  it("hides voting in the mobile menu when voting is closed", () => {
+  it("hides voting in the mobile menu when voting is closed", async () => {
+    const user = userEvent.setup();
     renderComp({ mobile: true, isVotingClosed: true });
+    await user.click(screen.getByTestId("content"));
 
     expect(
       (mobileMenuProps as { readonly showVoting?: boolean }).showVoting
     ).toBe(false);
   });
 
-  it("locks vote actions without marking ratings closed", () => {
+  it("locks vote actions without marking ratings closed", async () => {
+    const user = userEvent.setup();
     renderComp({ mobile: true, isVotingControlsLocked: true });
+    await user.click(screen.getByTestId("content"));
 
     expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
     expect(footerProps.isVotingClosed).toBe(false);
