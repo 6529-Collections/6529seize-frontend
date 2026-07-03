@@ -158,8 +158,13 @@ const noisyThirdPartyTelemetryTargets = new Set([
   "cca-lite.coinbase.com/metrics",
   "region1.google-analytics.com/g/collect",
 ]);
+const noisyThirdPartyTelemetryNetworkPaths = new Set(["/metrics"]);
 const objectCapturedPromiseRejectionMessage =
   "Object captured as promise rejection with keys: code, message, stack";
+const objectCapturedPromiseRejectionMessages = new Set([
+  objectCapturedPromiseRejectionMessage,
+  "Object captured as promise rejection with keys: code, message",
+]);
 const providerDisconnectedCode = 4900;
 const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
@@ -242,6 +247,9 @@ const sentryRouteParameterizationMechanismType =
   "auto.browser.browserapierrors.setTimeout";
 const sentryRouteParameterizationMessage =
   "JSON.stringify cannot serialize cyclic structures.";
+const sentryRouteParameterizationPathToken =
+  "client/routing/parameterization.ts";
+const sentryPackagePathTokens = ["@sentry/nextjs", "@sentry+nextjs"];
 const metaMaskMobileContextTokens = ["metamaskmobile", "metamask mobile"];
 const mobileSafariWebViewContextTokens = [
   "mobile safari ui/wkwebview",
@@ -259,6 +267,16 @@ const routeParameterizationTagKeys = [
   "os",
   "os.name",
 ];
+const injectedProviderProxyPath =
+  "app:///js/injected/proxy-injected-providers.js";
+const injectedProviderProxyStartsWithMessage =
+  "t?.startsWith is not a function";
+const walletConnectStaleSessionTopicPattern =
+  /^No matching key\. session topic doesn't exist: [a-f0-9]+$/i;
+const walletConnectStaleSessionFunctions = new Set([
+  "isValidSessionTopic",
+  "onRelayMessage",
+]);
 const URL_IN_PARENS_PATTERN = /\(([^)]+)\)/g;
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
@@ -315,6 +333,10 @@ function getEventMessage(event: SentryClientEvent): string {
   }
 
   return typeof event.message === "string" ? event.message : "";
+}
+
+function isObjectCapturedPromiseRejectionMessage(value: string): boolean {
+  return objectCapturedPromiseRejectionMessages.has(value);
 }
 
 function getFramePaths(frame: SentryStackFrame): string[] {
@@ -1140,6 +1162,22 @@ function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
   );
 }
 
+function isInjectedProviderProxyFrame(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some((path) =>
+    path.includes(injectedProviderProxyPath)
+  );
+}
+
+function hasOnlyInjectedProviderProxyFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.length > 0 &&
+    frames.every(isInjectedProviderProxyFrame)
+  );
+}
+
 function isInjectedWasmCspFramePath(path: string): boolean {
   const normalizedPath = path.trim();
   return (
@@ -1298,6 +1336,24 @@ function hasNativeJsonStringifyFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
+}
+
+function isSentryRouteParameterizationPath(path: string): boolean {
+  return (
+    path.includes(sentryRouteParameterizationPathToken) &&
+    sentryPackagePathTokens.some((token) => path.includes(token))
+  );
+}
+
+function hasSentryRouteParameterizationFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) =>
+      getFramePaths(frame).some(isSentryRouteParameterizationPath)
+    )
+  );
 }
 
 function isGifPickerTenorManagerPath(path: string | undefined): boolean {
@@ -1698,6 +1754,38 @@ function hasThirdPartyWalletLinkWebSocket1006Evidence(
   );
 }
 
+function isWalletConnectStaleSessionTopicMessage(value: string): boolean {
+  return walletConnectStaleSessionTopicPattern.test(normalizeErrorPrefix(value));
+}
+
+function hasWalletConnectStaleSessionFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) => {
+      const functionName = frame.function?.trim();
+      return (
+        typeof functionName === "string" &&
+        walletConnectStaleSessionFunctions.has(functionName)
+      );
+    })
+  );
+}
+
+function hasAppOwnedWalletConnectStaleSessionEvidence(
+  event: SentryClientEvent,
+  value: SentryExceptionValue | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = value?.stacktrace?.frames;
+  return (
+    hasAppOwnedSourceFrame(frames) ||
+    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+  );
+}
+
 function matchesWalletCollisionPattern(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return walletCollisionPatterns.some((pattern) =>
@@ -2036,6 +2124,36 @@ export function getThirdPartyTelemetrySpanTargetKey(
   return `${url.hostname.toLowerCase()}${url.pathname}`;
 }
 
+function isNoisyThirdPartyTelemetryNetworkTarget(value: string): boolean {
+  const absoluteUrl = parseAbsoluteRequestUrl(value);
+  if (absoluteUrl) {
+    return noisyThirdPartyTelemetryTargets.has(
+      `${absoluteUrl.hostname.toLowerCase()}${absoluteUrl.pathname}`
+    );
+  }
+
+  const pathname = getRequestPathname(value);
+  return (
+    pathname !== null && noisyThirdPartyTelemetryNetworkPaths.has(pathname)
+  );
+}
+
+function hasThirdPartyTelemetryNetworkMessageTarget(
+  event: SentryClientEvent
+): boolean {
+  return getMessageTargetCandidates(event).some((candidate) =>
+    isNoisyThirdPartyTelemetryNetworkTarget(candidate.url)
+  );
+}
+
+function hasAppOwnedNetworkErrorEvidence(event: SentryClientEvent): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  return (
+    hasLikelyAppOwnedFrame(frames) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+  );
+}
+
 export function shouldFilterThirdPartyTelemetrySpan(
   span: SentryTransactionSpan
 ): boolean {
@@ -2309,7 +2427,7 @@ export function shouldFilterDisconnectedWalletProviderRejection(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  if (getEventMessage(event) !== objectCapturedPromiseRejectionMessage) {
+  if (!isObjectCapturedPromiseRejectionMessage(getEventMessage(event))) {
     return false;
   }
 
@@ -2327,11 +2445,18 @@ export function shouldFilterDisconnectedWalletProviderRejection(
   const message = getStringValue(serialized["message"])?.trim();
   const stack = getStringValue(serialized["stack"]);
 
-  return (
-    code === providerDisconnectedCode &&
-    message === providerDisconnectedMessage &&
-    isThirdPartyWalletExtensionStack(stack)
-  );
+  if (
+    code !== providerDisconnectedCode ||
+    message !== providerDisconnectedMessage
+  ) {
+    return false;
+  }
+
+  if (!stack) {
+    return !hasAppOwnedStackEvidence(event, stack, hint);
+  }
+
+  return isThirdPartyWalletExtensionStack(stack);
 }
 
 export function shouldFilterRabbyMobileUserRejectedRequest(
@@ -2451,6 +2576,21 @@ export function shouldFilterGifPickerTenorCategoriesError(
   );
 }
 
+export function shouldFilterThirdPartyTelemetryNetworkError(
+  event: SentryClientEvent
+): boolean {
+  const message = getEventMessage(event);
+  if (!isNetworkErrorMessage(message)) {
+    return false;
+  }
+
+  if (!hasThirdPartyTelemetryNetworkMessageTarget(event)) {
+    return false;
+  }
+
+  return !hasAppOwnedNetworkErrorEvidence(event);
+}
+
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -2471,6 +2611,15 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     return false;
   }
 
+  const hasAppOwnedEvidence = hasAppOwnedWalletLinkWebSocket1006Evidence(
+    event,
+    value,
+    hint
+  );
+  if (hasAppOwnedEvidence) {
+    return false;
+  }
+
   const hasExplicitCoinbaseWalletLinkStack =
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
@@ -2480,11 +2629,6 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     return true;
   }
 
-  const hasAppOwnedEvidence = hasAppOwnedWalletLinkWebSocket1006Evidence(
-    event,
-    value,
-    hint
-  );
   if (
     hasWalletLinkWebSocketUnhandledRejectionSignature(value, event, hint) &&
     !hasAppOwnedEvidence
@@ -2515,6 +2659,37 @@ export function shouldFilterTalismanExtensionOnboardingError(
   return hasInjectedOrThirdPartyWalletExtensionSignature(frames, hint);
 }
 
+export function shouldFilterWalletConnectStaleSessionTopic(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const messageCandidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+  const hasTargetMessage = messageCandidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      isWalletConnectStaleSessionTopicMessage(candidate)
+  );
+
+  if (!hasTargetMessage) {
+    return false;
+  }
+
+  if (!hasBrowserUnhandledRejectionMechanism(value)) {
+    return false;
+  }
+
+  if (!hasWalletConnectStaleSessionFrame(value?.stacktrace?.frames)) {
+    return false;
+  }
+
+  return !hasAppOwnedWalletConnectStaleSessionEvidence(event, value, hint);
+}
+
 export function shouldFilterSentryRouteParameterizationError(
   event: SentryClientEvent
 ): boolean {
@@ -2542,9 +2717,28 @@ export function shouldFilterSentryRouteParameterizationError(
   }
 
   return (
-    hasRouteParameterizationRouteEvidence(event) &&
+    (hasRouteParameterizationRouteEvidence(event) ||
+      hasSentryRouteParameterizationFrame(frames)) &&
     hasMetaMaskMobileWebViewContext(event)
   );
+}
+
+export function shouldFilterInjectedProviderProxyStartsWithError(
+  event: SentryClientEvent
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== injectedProviderProxyStartsWithMessage
+  ) {
+    return false;
+  }
+
+  if (!hasBrowserUnhandledRejectionMechanism(value)) {
+    return false;
+  }
+
+  return hasOnlyInjectedProviderProxyFrames(value.stacktrace?.frames);
 }
 
 export function shouldFilterInjectedWalletCollision(
