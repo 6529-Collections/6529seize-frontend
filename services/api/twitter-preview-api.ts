@@ -16,6 +16,7 @@ const TWITTER_PREVIEW_CACHE_TTL_MS = 10 * 60 * 1000;
 const TWITTER_PREVIEW_CACHE_MAX_ITEMS = 200;
 const TWITTER_PREVIEW_BATCH_MAX_URLS = 5;
 const TWITTER_PREVIEW_BATCH_MAX_ACTIVE_CHUNKS = 2;
+const TWITTER_PREVIEW_GET_FALLBACK_MAX_REQUESTS = 1;
 const TWITTER_PREVIEW_METADATA_ERROR_MESSAGE =
   "Failed to fetch Twitter/X preview metadata.";
 const TWITTER_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE = `${TWITTER_PREVIEW_METADATA_ERROR_MESSAGE} Request timed out.`;
@@ -259,8 +260,13 @@ const resolveBatchChunk = async (
     batchResponse = await fetchTwitterPreviewBatch(
       requests.map((request) => request.url)
     );
-  } catch {
-    await resolveViaSingleRequests(requests);
+  } catch (error: unknown) {
+    if (requests.length <= TWITTER_PREVIEW_GET_FALLBACK_MAX_REQUESTS) {
+      await resolveViaSingleRequests(requests);
+      return;
+    }
+
+    rejectBatchRequests(requests, error);
     return;
   }
 
