@@ -155,9 +155,6 @@ const TOOLS_CONTENTS_NAV_GROUPS = [
   },
 ] as const satisfies readonly ToolsContentsNavGroup[];
 
-export type ToolsNavItemId =
-  (typeof TOOLS_CONTENTS_NAV_GROUPS)[number]["items"][number]["id"];
-
 function isToolsNavItemVisible(
   item: ToolsContentsNavItem,
   options: ToolsVisibilityOptions
@@ -182,12 +179,6 @@ export function getVisibleToolsNavGroups(options: ToolsVisibilityOptions) {
 
 export function getToolsNavItemHref(item: ToolsContentsNavItem): string {
   return item.href;
-}
-
-export function getToolsNavItemId(item: {
-  readonly id: ToolsNavItemId;
-}): ToolsNavItemId {
-  return item.id;
 }
 
 export function getToolsNavItemLabel(

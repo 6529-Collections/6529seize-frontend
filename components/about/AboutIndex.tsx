@@ -54,12 +54,12 @@ export default function AboutIndex() {
           <GroupedLinkIndex
             eyebrow={t(locale, "about.index.eyebrow")}
             title={t(locale, "about.index.title")}
-            lead={t(locale, "about.index.lead")}
             groups={indexGroups}
             headingIdPrefix="about-index"
             getCardAriaLabel={(page) =>
               t(locale, "about.index.cardAriaLabel", { page })
             }
+            showArrows
           />
         </Col>
       </Row>

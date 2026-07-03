@@ -31,7 +31,7 @@ export default function GroupedLinkIndex({
 }: {
   readonly eyebrow: string;
   readonly title: string;
-  readonly lead: string;
+  readonly lead?: string | undefined;
   readonly groups: readonly GroupedLinkIndexGroup[];
   readonly headingIdPrefix: string;
   readonly getCardAriaLabel: (label: string) => string;
@@ -46,9 +46,11 @@ export default function GroupedLinkIndex({
         <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
           {title}
         </h1>
-        <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
-          {lead}
-        </p>
+        {lead ? (
+          <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
+            {lead}
+          </p>
+        ) : null}
       </header>
 
       <div className="tw-grid tw-gap-7">

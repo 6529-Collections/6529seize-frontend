@@ -15,7 +15,7 @@
   "about.contents.groups.community": "Community",
   "about.contents.groups.legal": "Legal",
   "about.contents.pages.theMemes": "The Memes",
-  "about.contents.pages.subscriptions": "Subscriptions",
+  "about.contents.pages.subscriptions": "Subscription Minting",
   "about.contents.pages.memeLab": "Meme Lab",
   "about.contents.pages.gradient": "Gradient",
   "about.contents.pages.gdrc": "GDRC",
@@ -44,6 +44,5 @@
   "about.index.metadata.description": "About 6529",
   "about.index.eyebrow": "About",
   "about.index.title": "About 6529",
-  "about.index.lead": "Find the right About page for collections, delegation, technical notes, policies, and ways to connect.",
   "about.index.cardAriaLabel": "Open page: {page}"
 }

@@ -42,16 +42,16 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
         labelKey: "about.contents.pages.theMemes",
       },
       {
-        section: AboutSection.SUBSCRIPTIONS,
-        labelKey: "about.contents.pages.subscriptions",
-      },
-      {
         section: AboutSection.MEME_LAB,
         labelKey: "about.contents.pages.memeLab",
       },
       {
         section: AboutSection.GRADIENTS,
         labelKey: "about.contents.pages.gradient",
+      },
+      {
+        section: AboutSection.SUBSCRIPTIONS,
+        labelKey: "about.contents.pages.subscriptions",
       },
     ],
   },

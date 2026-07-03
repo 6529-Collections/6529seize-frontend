@@ -119,7 +119,7 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into Collections, Digital Rights, Delegation, Network, Resources, Community, and Legal label-only link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links.",
+        "It groups About pages into Collections, Digital Rights, Delegation, Network, Resources, Community, and Legal link cards with right-arrow affordances, including TDH, xTDH, Health, Definitions, Levels, Network Stats, and Subscription Minting links.",
         "The GDRC page is listed under Digital Rights, separate from Delegation.",
         "The primary About navigation menu also owns Network, Delegation, reporting tools, Open Data, technical, reference, and legal destinations.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, digital-rights, delegation, resource, community, or technical page."
@@ -5217,7 +5217,7 @@
       ],
       "facts": [
         "The Tools index page lives at /tools.",
-        "It groups label-only tool cards into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
+        "It groups tool cards with right-arrow affordances into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
         "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
         "Private operator routes and local-only tools are not listed on the public Tools index."
