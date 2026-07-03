@@ -32,8 +32,11 @@ function ReadonlySubscriptionToggle({
       offset={12}
     >
       <span
-        role="img"
+        role="switch"
+        aria-checked={checked}
+        aria-disabled="true"
         aria-label={tooltipLabel}
+        tabIndex={0}
         className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full"
       >
         <span
