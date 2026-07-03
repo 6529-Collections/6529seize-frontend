@@ -294,6 +294,20 @@ const HeaderDropActionButton = ({
   );
 };
 
+function getDirectActionLabel(
+  item: HeaderMoreMenuItem | null
+): string | undefined {
+  if (!item || item.kind === "section") {
+    return undefined;
+  }
+
+  if (item.ariaLabel) {
+    return item.ariaLabel;
+  }
+
+  return typeof item.label === "string" ? item.label : undefined;
+}
+
 const HeaderMoreMenu = ({
   items,
 }: {
@@ -303,12 +317,8 @@ const HeaderMoreMenu = ({
     return null;
   }
 
-  const onlyItem = items.length === 1 ? items[0] : null;
-  const directActionLabel =
-    onlyItem && onlyItem.kind !== "section"
-      ? (onlyItem.ariaLabel ??
-        (typeof onlyItem.label === "string" ? onlyItem.label : undefined))
-      : undefined;
+  const onlyItem = items.length === 1 ? (items[0] ?? null) : null;
+  const directActionLabel = getDirectActionLabel(onlyItem);
   if (
     onlyItem &&
     onlyItem.kind !== "section" &&
@@ -528,12 +538,12 @@ export default function AppHeader() {
   }: {
     readonly direct?: boolean | undefined;
   } = {}) => {
-    const waveLinkActionIconColor =
-      direct && isWaveLinkSharing
-        ? "tw-text-iron-50"
-        : waveLinkActionFeedbackState === "idle"
-          ? "tw-text-iron-300"
-          : "tw-text-emerald-300";
+    let waveLinkActionIconColor = "tw-text-emerald-300";
+    if (direct && isWaveLinkSharing) {
+      waveLinkActionIconColor = "tw-text-iron-50";
+    } else if (waveLinkActionFeedbackState === "idle") {
+      waveLinkActionIconColor = "tw-text-iron-300";
+    }
     const iconSizeClassName = direct ? "tw-h-6 tw-w-6" : "tw-h-4 tw-w-4";
     const iconClassName = `${iconSizeClassName} ${waveLinkActionIconColor}`;
 

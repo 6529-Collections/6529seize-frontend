@@ -11,18 +11,20 @@ import clsx from "clsx";
 import { useState } from "react";
 
 function getCurrentPublicUrl(): string {
+  const currentWindow = globalThis.window;
   const route =
-    typeof window === "undefined"
+    typeof currentWindow === "undefined"
       ? "/"
-      : `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      : `${currentWindow.location.pathname}${currentWindow.location.search}${currentWindow.location.hash}`;
   const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
   const normalizedRoute = route.startsWith("/") ? route : "/" + route;
   return `${normalizedBase}${normalizedRoute}`;
 }
 
 function getShareTitle(): string {
-  if (typeof document !== "undefined" && document.title.trim()) {
-    return document.title;
+  const currentDocument = globalThis.document;
+  if (typeof currentDocument !== "undefined" && currentDocument.title.trim()) {
+    return currentDocument.title;
   }
 
   return "6529";
