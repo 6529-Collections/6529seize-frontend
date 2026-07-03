@@ -333,6 +333,12 @@ describe("LatestDropNextMintSubscribe", () => {
       "Connect to set up subscription minting.",
       false
     );
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ["mint-subscription-counts", "by-token", 478],
+        enabled: true,
+      })
+    );
     fireEvent.click(setupButton);
     expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
     expect(
