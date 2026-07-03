@@ -9,6 +9,7 @@ import { t } from "@/i18n/messages";
 import type { AboutSection } from "@/types/enums";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import type { ReactNode } from "react";
 import {
   getAboutNavItemHref,
   getAboutNavItemId,
@@ -21,12 +22,14 @@ type AboutContentsDropdownProps = {
   readonly currentSection?: AboutSection | undefined;
   readonly currentHref?: string | undefined;
   readonly className?: string | undefined;
+  readonly leadingAction?: ReactNode;
 };
 
 export function AboutContentsDropdown({
   currentSection,
   currentHref,
   className,
+  leadingAction,
 }: AboutContentsDropdownProps) {
   const locale = DEFAULT_LOCALE;
   const capacitor = useCapacitor();
@@ -97,16 +100,18 @@ export function AboutContentsDropdown({
   return (
     <div
       className={clsx(
-        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-justify-end tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
+        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
+        leadingAction ? "tw-justify-between" : "tw-justify-end",
         className
       )}
     >
+      {leadingAction}
       <CompactMenu
         aria-label={t(locale, "about.contents.triggerAriaLabel", {
           page: currentLabel,
         })}
         unstyledTrigger
-        triggerClassName="tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-3 tw-py-2 tw-text-left tw-shadow-sm tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+        triggerClassName="tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-3 tw-py-2 tw-text-left tw-shadow-sm tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
         trigger={<AboutContentsDropdownTrigger currentLabel={currentLabel} />}
         items={items}
         activeItemId={activeItemId}

@@ -25,6 +25,7 @@ import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import React, {
@@ -53,8 +54,12 @@ import {
   recordReactionRollbackApplied,
 } from "@/utils/monitoring/dropReactionMonitoring";
 import styles from "./WaveDropReactions.module.css";
-import WaveDropReactionsDetailDialog from "./WaveDropReactionsDetailDialog";
 import { fetchDropReactionDetailsV2 } from "@/services/api/wave-drops-v2-api";
+
+const WaveDropReactionsDetailDialog = dynamic(
+  () => import("./WaveDropReactionsDetailDialog"),
+  { ssr: false, loading: () => null }
+);
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
@@ -325,13 +330,15 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           isTouchDevice={isTouchDevice}
         />
       ))}
-      <WaveDropReactionsDetailDialog
-        isOpen={dialogReaction !== null}
-        onClose={handleCloseDialog}
-        reactions={reactionsWithDetails}
-        initialReaction={dialogReaction ?? undefined}
-        isLoading={detailsLoading}
-      />
+      {dialogReaction !== null && (
+        <WaveDropReactionsDetailDialog
+          isOpen
+          onClose={handleCloseDialog}
+          reactions={reactionsWithDetails}
+          initialReaction={dialogReaction}
+          isLoading={detailsLoading}
+        />
+      )}
     </>
   );
 };

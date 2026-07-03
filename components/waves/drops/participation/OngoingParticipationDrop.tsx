@@ -13,7 +13,11 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import WaveDropActions from "../WaveDropActions";
-import WaveDropMobileMenu from "../WaveDropMobileMenu";
+import {
+  useWaveDropMobileMenu,
+  withWaveDropMobileMenuProvider,
+} from "../WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "../useWaveDropMobileMenuController";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
 import ParticipationDropContainer from "./ParticipationDropContainer";
@@ -63,7 +67,7 @@ interface OngoingParticipationDropProps {
   readonly maxEmbedDepth?: number | undefined;
 }
 
-export default function OngoingParticipationDrop({
+function OngoingParticipationDropInner({
   drop,
   showWaveInfo,
   activeDrop,
@@ -95,6 +99,7 @@ export default function OngoingParticipationDrop({
   const isMobileScreen = useIsMobileScreen();
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
+  const mobileMenu = useWaveDropMobileMenu();
   const identityProfile = getParticipationIdentityProfile({
     wave: drop.wave,
     metadata: drop.metadata,
@@ -134,16 +139,19 @@ export default function OngoingParticipationDrop({
 
     setIsSlideUp(false);
     setLongPressTriggered(false);
-  }, [canUseTouchActionSheet]);
+    mobileMenu?.close();
+  }, [canUseTouchActionSheet, mobileMenu]);
 
   const handleOnReply = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
-  }, [onReply, drop, activePartIndex]);
+  }, [onReply, drop, activePartIndex, mobileMenu]);
 
   const handleOnAddReaction = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
-  }, []);
+  }, [mobileMenu]);
 
   const handleVoteButtonClick = useCallback(() => {
     openVoteModal();
@@ -153,6 +161,22 @@ export default function OngoingParticipationDrop({
     canShowVote && showInteractions && !isVotingActionLocked ? (
       <VotingModalButton drop={drop} onClick={handleVoteButtonClick} />
     ) : null;
+
+  const identityHeader =
+    identityMode === "minimal" ? (
+      <DropMinimalIdentityRow
+        drop={drop}
+        timestampLayout={timestampLayout}
+      />
+    ) : (
+      <ParticipationDropHeader
+        drop={drop}
+        showWaveInfo={showWaveInfo}
+        winningThreshold={winningThreshold}
+        timestampLayout={timestampLayout}
+      />
+    );
+
   const content = (
     <ParticipationDropContent
       drop={drop}
@@ -176,14 +200,41 @@ export default function OngoingParticipationDrop({
   );
   const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
 
+  const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
+  const useRankStyles =
+    typeof winningThreshold !== "number" || winningThreshold <= 0;
+  const votingModal = isMobileScreen ? (
+    <MobileVotingModal
+      drop={drop}
+      isOpen={isVoteModalOpen}
+      onClose={closeVoteModal}
+    />
+  ) : (
+    <VotingModal
+      drop={drop}
+      isOpen={isVoteModalOpen}
+      onClose={closeVoteModal}
+    />
+  );
+
+  useWaveDropMobileMenuController({
+    drop,
+    enabled: showInteractions,
+    isOpen: effectiveIsSlideUp,
+    longPressTriggered,
+    showReplyAndQuote,
+    onOpenChange: setIsSlideUp,
+    onReply: handleOnReply,
+    onAddReaction: handleOnAddReaction,
+    showVoting: !isVotingActionLocked,
+  });
+
   return (
     <ParticipationDropContainer
       drop={drop}
       isActiveDrop={isActiveDrop}
       location={location}
-      useRankStyles={
-        !(typeof winningThreshold === "number" && winningThreshold > 0)
-      }
+      useRankStyles={useRankStyles}
       floatingActions={
         canUseDesktopHoverActions && showInteractions && showReplyAndQuote ? (
           <WaveDropActions
@@ -206,19 +257,7 @@ export default function OngoingParticipationDrop({
               <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
                 <WaveDropAuthorPfp drop={drop} />
                 <div className="tw-min-w-0 tw-flex-1">
-                  {identityMode === "minimal" ? (
-                    <DropMinimalIdentityRow
-                      drop={drop}
-                      timestampLayout={timestampLayout}
-                    />
-                  ) : (
-                    <ParticipationDropHeader
-                      drop={drop}
-                      showWaveInfo={showWaveInfo}
-                      winningThreshold={winningThreshold}
-                      timestampLayout={timestampLayout}
-                    />
-                  )}
+                  {identityHeader}
                 </div>
               </div>
             )}
@@ -228,20 +267,7 @@ export default function OngoingParticipationDrop({
           <>
             {showIdentity && <WaveDropAuthorPfp drop={drop} />}
             <div className="tw-flex tw-w-full tw-flex-col">
-              {showIdentity &&
-                (identityMode === "minimal" ? (
-                  <DropMinimalIdentityRow
-                    drop={drop}
-                    timestampLayout={timestampLayout}
-                  />
-                ) : (
-                  <ParticipationDropHeader
-                    drop={drop}
-                    showWaveInfo={showWaveInfo}
-                    winningThreshold={winningThreshold}
-                    timestampLayout={timestampLayout}
-                  />
-                ))}
+              {showIdentity && identityHeader}
               {content}
             </div>
           </>
@@ -285,33 +311,9 @@ export default function OngoingParticipationDrop({
         )}
       </div>
 
-      {showInteractions &&
-        (isMobileScreen ? (
-          <MobileVotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
-        ) : (
-          <VotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
-        ))}
-
-      {showInteractions && (
-        <WaveDropMobileMenu
-          drop={drop}
-          isOpen={isSlideUp && canUseTouchActionSheet}
-          longPressTriggered={longPressTriggered}
-          showReplyAndQuote={showReplyAndQuote}
-          setOpen={setIsSlideUp}
-          onReply={handleOnReply}
-          onAddReaction={handleOnAddReaction}
-          showVoting={!isVotingActionLocked}
-        />
-      )}
+      {showInteractions && votingModal}
     </ParticipationDropContainer>
   );
 }
+
+export default withWaveDropMobileMenuProvider(OngoingParticipationDropInner);

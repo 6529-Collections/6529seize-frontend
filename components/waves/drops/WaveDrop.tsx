@@ -39,7 +39,11 @@ import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
 import WaveDropMetadata from "./WaveDropMetadata";
-import WaveDropMobileMenu from "./WaveDropMobileMenu";
+import {
+  useWaveDropMobileMenu,
+  withWaveDropMobileMenuProvider,
+} from "./WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "./useWaveDropMobileMenuController";
 import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
@@ -71,9 +75,11 @@ const getPointerId = (event: React.PointerEvent<HTMLDivElement>): number =>
 const isPrimaryPointerButton = (
   event: React.PointerEvent<HTMLDivElement>
 ): boolean => {
-  const maybeButton = (event as React.PointerEvent<HTMLDivElement> & {
-    readonly button?: number | undefined;
-  }).button;
+  const maybeButton = (
+    event as React.PointerEvent<HTMLDivElement> & {
+      readonly button?: number | undefined;
+    }
+  ).button;
 
   return (
     maybeButton === undefined ||
@@ -790,7 +796,7 @@ interface WaveDropProps {
   readonly maxEmbedDepth?: number | undefined;
 }
 
-const WaveDrop = ({
+const WaveDropInner = ({
   drop,
   previousDrop,
   nextDrop,
@@ -860,6 +866,7 @@ const WaveDrop = ({
 
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
+  const mobileMenu = useWaveDropMobileMenu();
   const allowLongPress = showInteractions && canUseTouchActionSheet;
   const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
@@ -1120,17 +1127,19 @@ const WaveDrop = ({
     if (editingDropId) {
       dispatch(setEditingDropId(null));
     }
+    mobileMenu?.close();
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]!.part_id });
-  }, [onReply, drop, activePartIndex, editingDropId, dispatch]);
+  }, [onReply, drop, activePartIndex, editingDropId, dispatch, mobileMenu]);
 
   const handleOnAddReaction = useCallback(() => {
     // Cancel any active edit mode first
     if (editingDropId) {
       dispatch(setEditingDropId(null));
     }
+    mobileMenu?.close();
     setIsSlideUp(false);
-  }, [editingDropId, dispatch]);
+  }, [editingDropId, dispatch, mobileMenu]);
 
   const handleOpenTouchActions = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -1154,9 +1163,10 @@ const WaveDrop = ({
   });
 
   const handleOnEdit = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false); // Close mobile menu when entering edit mode
     dispatch(setEditingDropId(drop.id));
-  }, [dispatch, drop.id]);
+  }, [dispatch, drop.id, mobileMenu]);
 
   const handleEditSave = useCallback(
     (
@@ -1279,8 +1289,14 @@ const WaveDrop = ({
     resetTimestampSwipe();
     setIsSlideUp(false);
     setLongPressTriggered(false);
+    mobileMenu?.close();
     clearSuppression();
-  }, [canUseTouchActionSheet, clearSuppression, resetTimestampSwipe]);
+  }, [
+    canUseTouchActionSheet,
+    clearSuppression,
+    mobileMenu,
+    resetTimestampSwipe,
+  ]);
 
   useEffect(() => {
     if (showGroupedTimestamp) {
@@ -1292,6 +1308,19 @@ const WaveDrop = ({
 
   // Derive effective menu state - menu can't be open while editing
   const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
+
+  useWaveDropMobileMenuController({
+    drop,
+    enabled: showInteractions,
+    isOpen: effectiveIsSlideUp,
+    longPressTriggered,
+    showReplyAndQuote,
+    onOpenChange: setIsSlideUp,
+    onReply: handleOnReply,
+    onAddReaction: handleOnAddReaction,
+    onEdit: handleOnEdit,
+    onBoostAnimation: handleMobileBoostAnimation,
+  });
 
   const dropClasses = getDropClasses(
     isActiveDrop,
@@ -1413,19 +1442,6 @@ const WaveDrop = ({
           {reactionsRow}
           {footerRow}
         </div>
-        {showInteractions && (
-          <WaveDropMobileMenu
-            drop={drop}
-            isOpen={effectiveIsSlideUp}
-            longPressTriggered={longPressTriggered}
-            showReplyAndQuote={showReplyAndQuote}
-            setOpen={setIsSlideUp}
-            onReply={handleOnReply}
-            onAddReaction={handleOnAddReaction}
-            onEdit={handleOnEdit}
-            onBoostAnimation={handleMobileBoostAnimation}
-          />
-        )}
         <DropBoostAnimation
           animation={boostAnimation}
           onComplete={handleBoostAnimationComplete}
@@ -1434,5 +1450,7 @@ const WaveDrop = ({
     </div>
   );
 };
+
+const WaveDrop = withWaveDropMobileMenuProvider(WaveDropInner);
 
 export default memo(WaveDrop);

@@ -842,6 +842,37 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  "home.mintSubscriptions.balanceLabel": "Balance",
+  "home.mintSubscriptions.infoLinkAriaLabel":
+    "Learn more about The Memes subscriptions",
+  "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
+  "home.mintSubscriptions.manageSubscriptionsLink": "Manage",
+  "home.mintSubscriptions.connectToSubscribe": "Connect to Subscribe",
+  "home.mintSubscriptions.connectFailed":
+    "Failed to open wallet connection. Please try again.",
+  "home.mintSubscriptions.awarenessLabel": "Subscription Minting",
+  "home.mintSubscriptions.action.manage": "Manage",
+  "home.mintSubscriptions.action.setUp": "Set up",
+  "home.mintSubscriptions.subscribeLabel": "Subscribe",
+  "home.mintSubscriptions.subscribedLabel": "Subscribed",
+  "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
+  "home.mintSubscriptions.subscribersLoading": "Loading subscriber count",
+  "home.mintSubscriptions.tooltip.connect":
+    "Connect to set up subscription minting.",
+  "home.mintSubscriptions.tooltip.dropped":
+    "Subscription minting is closed for this drop.",
+  "home.mintSubscriptions.tooltip.manage.one":
+    "You are subscribed for x{count} copy of this drop.",
+  "home.mintSubscriptions.tooltip.manage.many":
+    "You are subscribed for x{count} copies of this drop.",
+  "home.mintSubscriptions.tooltip.manageFallback":
+    "You are subscribed for this drop.",
+  "home.mintSubscriptions.tooltip.mintDay":
+    "Subscription minting cannot be changed on mint day.",
+  "home.mintSubscriptions.tooltip.profileSubscribe":
+    "You are not subscribed for this drop.",
+  "home.mintSubscriptions.tooltip.proxy":
+    "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":
     "Choose how inserted boosted-drop cards appear in wave chat on this device.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
