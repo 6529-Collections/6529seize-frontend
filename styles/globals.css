@@ -220,6 +220,7 @@ body {
   font-family: "Montserrat", sans-serif !important;
   overflow: auto;
 }
+
 body.capacitor-native footer {
   padding-bottom: 100px !important;
 }
@@ -244,6 +245,11 @@ select,
 input,
 button {
   color: white;
+  font-family: inherit;
+}
+
+optgroup {
+  font-family: inherit;
 }
 
 textarea:not(.tailwind-scope textarea),
