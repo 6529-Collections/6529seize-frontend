@@ -161,6 +161,22 @@ function OngoingParticipationDropInner({
     canShowVote && showInteractions && !isVotingActionLocked ? (
       <VotingModalButton drop={drop} onClick={handleVoteButtonClick} />
     ) : null;
+
+  const identityHeader =
+    identityMode === "minimal" ? (
+      <DropMinimalIdentityRow
+        drop={drop}
+        timestampLayout={timestampLayout}
+      />
+    ) : (
+      <ParticipationDropHeader
+        drop={drop}
+        showWaveInfo={showWaveInfo}
+        winningThreshold={winningThreshold}
+        timestampLayout={timestampLayout}
+      />
+    );
+
   const content = (
     <ParticipationDropContent
       drop={drop}
@@ -185,6 +201,21 @@ function OngoingParticipationDropInner({
   const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
 
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
+  const useRankStyles =
+    typeof winningThreshold !== "number" || winningThreshold <= 0;
+  const votingModal = isMobileScreen ? (
+    <MobileVotingModal
+      drop={drop}
+      isOpen={isVoteModalOpen}
+      onClose={closeVoteModal}
+    />
+  ) : (
+    <VotingModal
+      drop={drop}
+      isOpen={isVoteModalOpen}
+      onClose={closeVoteModal}
+    />
+  );
 
   useWaveDropMobileMenuController({
     drop,
@@ -203,9 +234,7 @@ function OngoingParticipationDropInner({
       drop={drop}
       isActiveDrop={isActiveDrop}
       location={location}
-      useRankStyles={
-        !(typeof winningThreshold === "number" && winningThreshold > 0)
-      }
+      useRankStyles={useRankStyles}
       floatingActions={
         canUseDesktopHoverActions && showInteractions && showReplyAndQuote ? (
           <WaveDropActions
@@ -228,19 +257,7 @@ function OngoingParticipationDropInner({
               <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
                 <WaveDropAuthorPfp drop={drop} />
                 <div className="tw-min-w-0 tw-flex-1">
-                  {identityMode === "minimal" ? (
-                    <DropMinimalIdentityRow
-                      drop={drop}
-                      timestampLayout={timestampLayout}
-                    />
-                  ) : (
-                    <ParticipationDropHeader
-                      drop={drop}
-                      showWaveInfo={showWaveInfo}
-                      winningThreshold={winningThreshold}
-                      timestampLayout={timestampLayout}
-                    />
-                  )}
+                  {identityHeader}
                 </div>
               </div>
             )}
@@ -250,20 +267,7 @@ function OngoingParticipationDropInner({
           <>
             {showIdentity && <WaveDropAuthorPfp drop={drop} />}
             <div className="tw-flex tw-w-full tw-flex-col">
-              {showIdentity &&
-                (identityMode === "minimal" ? (
-                  <DropMinimalIdentityRow
-                    drop={drop}
-                    timestampLayout={timestampLayout}
-                  />
-                ) : (
-                  <ParticipationDropHeader
-                    drop={drop}
-                    showWaveInfo={showWaveInfo}
-                    winningThreshold={winningThreshold}
-                    timestampLayout={timestampLayout}
-                  />
-                ))}
+              {showIdentity && identityHeader}
               {content}
             </div>
           </>
@@ -307,20 +311,7 @@ function OngoingParticipationDropInner({
         )}
       </div>
 
-      {showInteractions &&
-        (isMobileScreen ? (
-          <MobileVotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
-        ) : (
-          <VotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
-        ))}
+      {showInteractions && votingModal}
     </ParticipationDropContainer>
   );
 }

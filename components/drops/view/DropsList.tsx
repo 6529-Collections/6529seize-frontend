@@ -84,6 +84,7 @@ const DropsList = memo(
     boostedDrops,
     boostedDropsDisplayPreference = DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
     onBoostedDropClick,
+    autoCollapseSerials,
     suspendLightDropHydration = false,
     winningThreshold,
     winningThresholdMinDurationMs,
@@ -325,7 +326,10 @@ const DropsList = memo(
               dropSerialNo={drop.serial_no}
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
               type={drop.type}
-              suspendLightDropHydration={suspendLightDropHydration}
+              suspendLightDropHydration={
+                suspendLightDropHydration ||
+                (autoCollapseSerials?.has(drop.serial_no) ?? false)
+              }
             >
               {dropContent}
             </VirtualScrollWrapper>
@@ -336,6 +340,7 @@ const DropsList = memo(
       });
     }, [
       orderedDrops,
+      autoCollapseSerials,
       getItemData,
       location,
       renderBoostCard,
