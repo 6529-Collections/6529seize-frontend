@@ -190,7 +190,12 @@ export function useProfileSubscriptionsNavigation() {
       return;
     }
 
-    void authenticateAndNavigate(profileSubscriptionsHref);
+    authenticateAndNavigate(profileSubscriptionsHref).catch((error) => {
+      console.error(
+        "Failed to resume profile subscriptions navigation",
+        error
+      );
+    });
   }, [
     authenticateAndNavigate,
     profileSubscriptionsHref,
