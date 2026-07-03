@@ -52,6 +52,7 @@ import {
 } from "../waves/sidebarWaveListUtils";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import Link from "next/link";
 
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
@@ -170,6 +171,20 @@ function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
   );
 }
 
+function DiscoverWavesLink() {
+  const label = t(SIDEBAR_LOCALE, "navigation.waves.discover");
+
+  return (
+    <Link
+      href="/discover"
+      className="desktop-hover:hover:tw-text-primary-200 tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black motion-reduce:tw-transition-none"
+      aria-label={label}
+    >
+      {label}
+    </Link>
+  );
+}
+
 function WebWavesListHeader({
   headerPaddingClassName,
   isCollapsed,
@@ -198,9 +213,10 @@ function WebWavesListHeader({
       label="Waves"
       paddingClassName={headerPaddingClassName}
       rightContent={
-        showCreateWaveButton ? (
-          <CreateWaveButton onClick={onCreateWave} />
-        ) : undefined
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <DiscoverWavesLink />
+          {showCreateWaveButton && <CreateWaveButton onClick={onCreateWave} />}
+        </div>
       }
     />
   );
