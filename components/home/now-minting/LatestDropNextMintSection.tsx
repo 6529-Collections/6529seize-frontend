@@ -145,7 +145,7 @@ export default function LatestDropNextMintSection({
                   />
                 </div>
 
-                <LatestDropNextMintSubscribe />
+                <LatestDropNextMintSubscribe tokenId={nextMintCardNumber} />
               </div>
 
               <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4">

@@ -190,17 +190,16 @@ export default function LatestDropNextMintSubscribe(
     retry: false,
   });
 
-  const { data: upcomingCounts, isLoading: upcomingCountsLoading } = useQuery<
-    SubscriptionCounts[]
-  >({
-    queryKey: ["mint-subscription-counts", "upcoming", tokenId],
-    queryFn: async () =>
-      await commonApiFetch<SubscriptionCounts[]>({
-        endpoint: `subscriptions/upcoming-memes-counts?token_id=${tokenId}`,
-      }),
-    enabled: !hideSubscriptions && hasTokenId,
-    retry: false,
-  });
+  const { data: tokenCount, isLoading: tokenCountLoading } =
+    useQuery<SubscriptionCounts>({
+      queryKey: ["mint-subscription-counts", "by-token", tokenId],
+      queryFn: async () =>
+        await commonApiFetch<SubscriptionCounts>({
+          endpoint: `subscriptions/memes/${tokenId}/count`,
+        }),
+      enabled: !hideSubscriptions && hasTokenId,
+      retry: false,
+    });
 
   let subscribed = false;
   let subscribedCount: number | undefined;
@@ -214,9 +213,9 @@ export default function LatestDropNextMintSubscribe(
     }
   }
   const subscribersCount = useMemo(() => {
-    return upcomingCounts?.find((count) => count.token_id === tokenId)?.count;
-  }, [tokenId, upcomingCounts]);
-  const subscribersCountLoading = !!upcomingCountsLoading;
+    return tokenCount?.token_id === tokenId ? tokenCount.count : undefined;
+  }, [tokenId, tokenCount]);
+  const subscribersCountLoading = !!tokenCountLoading;
   const tooltipLabel = getToggleTooltipLabel({
     activeProfileProxy: !!activeProfileProxy,
     isMintingDay,

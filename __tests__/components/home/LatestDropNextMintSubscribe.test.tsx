@@ -116,15 +116,13 @@ describe("LatestDropNextMintSubscribe", () => {
 
       if (
         queryKey[0] === "mint-subscription-counts" &&
-        queryKey[1] === "upcoming"
+        queryKey[1] === "by-token"
       ) {
         return {
-          data: [
-            {
-              token_id: queryKey[2],
-              count: queryKey[2] === 516 ? 13 : 12,
-            },
-          ],
+          data: {
+            token_id: queryKey[2],
+            count: queryKey[2] === 516 ? 13 : 12,
+          },
         };
       }
 
@@ -188,7 +186,7 @@ describe("LatestDropNextMintSubscribe", () => {
 
       if (
         queryKey[0] === "mint-subscription-counts" &&
-        queryKey[1] === "upcoming"
+        queryKey[1] === "by-token"
       ) {
         return {
           data: undefined,
@@ -242,14 +240,14 @@ describe("LatestDropNextMintSubscribe", () => {
     );
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ["mint-subscription-counts", "upcoming", 516],
+        queryKey: ["mint-subscription-counts", "by-token", 516],
       })
     );
     const countsQuery = useQueryMock.mock.calls.find(([options]) => {
       const queryKey = options.queryKey;
       return (
         queryKey[0] === "mint-subscription-counts" &&
-        queryKey[1] === "upcoming" &&
+        queryKey[1] === "by-token" &&
         queryKey[2] === 516
       );
     })?.[0] as
@@ -257,14 +255,14 @@ describe("LatestDropNextMintSubscribe", () => {
       | undefined;
     expect(countsQuery).toBeDefined();
 
-    commonApiFetchMock.mockResolvedValueOnce([{ token_id: 516, count: 13 }]);
+    commonApiFetchMock.mockResolvedValueOnce({ token_id: 516, count: 13 });
 
     await expect(
       countsQuery?.queryFn({ signal: new AbortController().signal })
-    ).resolves.toEqual([{ token_id: 516, count: 13 }]);
+    ).resolves.toEqual({ token_id: 516, count: 13 });
     expect(commonApiFetchMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        endpoint: "subscriptions/upcoming-memes-counts?token_id=516",
+        endpoint: "subscriptions/memes/516/count",
       })
     );
   });
@@ -316,7 +314,7 @@ describe("LatestDropNextMintSubscribe", () => {
     );
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ["mint-subscription-counts", "upcoming", expect.any(Number)],
+        queryKey: ["mint-subscription-counts", "by-token", expect.any(Number)],
         retry: false,
       })
     );
@@ -382,10 +380,10 @@ describe("LatestDropNextMintSubscribe", () => {
 
       if (
         queryKey[0] === "mint-subscription-counts" &&
-        queryKey[1] === "upcoming"
+        queryKey[1] === "by-token"
       ) {
         return {
-          data: [{ token_id: 478, count: 12 }],
+          data: { token_id: 478, count: 12 },
         };
       }
 
@@ -427,10 +425,10 @@ describe("LatestDropNextMintSubscribe", () => {
 
       if (
         queryKey[0] === "mint-subscription-counts" &&
-        queryKey[1] === "upcoming"
+        queryKey[1] === "by-token"
       ) {
         return {
-          data: [{ token_id: 478, count: 12 }],
+          data: { token_id: 478, count: 12 },
         };
       }
 

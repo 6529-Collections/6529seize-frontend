@@ -106,7 +106,7 @@ Use this page for visibility rules, state switches, and route targets.
 - With a connected profile, the subscription row can link to
   `/{user}/subscriptions`; profile-specific subscription status/count only
   render when the related read-only APIs return data.
-- On `/about/subscriptions`, connected users see a primary `Manage Subscriptions`
+- On `/about/subscriptions`, connected users see a primary `Manage`
   action on the left side of the about-section navigation row. Disconnected
   users see a primary `Connect to Subscribe` action that opens wallet
   connection and then routes to their profile subscriptions once connected.

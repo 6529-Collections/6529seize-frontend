@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { ABOUT_SUBSCRIPTIONS_HREF } from "../../user/subscriptions/subscriptionNavigation";
 
 const SUBSCRIPTION_ROW_CLASS_NAME =
-  "tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-4 tw-py-3";
+  "tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-3 tw-py-3 md:tw-px-4";
 
 function ReadonlySubscriptionToggle({
   checked,
@@ -37,7 +37,7 @@ function ReadonlySubscriptionToggle({
           <span
             aria-hidden="true"
             className={clsx(
-              "tw-pointer-events-none tw-inline-flex tw-h-6 tw-w-12 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors",
+              "tw-pointer-events-none tw-inline-flex tw-h-5 tw-w-10 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors md:tw-h-6 md:tw-w-12",
               checked
                 ? "tw-bg-primary-500 tw-shadow-[0_0_14px_rgba(74,119,255,0.45)] tw-ring-primary-300"
                 : "tw-bg-black/35 tw-opacity-80 tw-ring-primary-400/25"
@@ -45,9 +45,9 @@ function ReadonlySubscriptionToggle({
           >
             <span
               className={clsx(
-                "tw-size-5 tw-rounded-full tw-shadow-sm tw-transition-transform",
+                "tw-size-4 tw-rounded-full tw-shadow-sm tw-transition-transform md:tw-size-5",
                 checked
-                  ? "tw-translate-x-6 tw-bg-white"
+                  ? "tw-translate-x-5 tw-bg-white md:tw-translate-x-6"
                   : "tw-translate-x-0 tw-bg-iron-500"
               )}
             />
@@ -73,7 +73,7 @@ function SubscriptionAction({
   onClick?: (() => void | Promise<void>) | undefined;
 }>) {
   const className =
-    "tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-200 disabled:tw-cursor-wait disabled:tw-opacity-60";
+    "tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-xs tw-font-semibold tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-200 disabled:tw-cursor-wait disabled:tw-opacity-60 md:tw-text-sm";
   const handleClick = () => {
     Promise.resolve(onClick?.()).catch((error: unknown) => {
       console.error("Failed to open profile subscriptions", error);
@@ -203,7 +203,7 @@ export default function MemeSubscriptionAwarenessRow({
     <div className={SUBSCRIPTION_ROW_CLASS_NAME}>
       <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-4 tw-gap-y-3">
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <div className="tw-font-semibold tw-leading-none tw-text-primary-300">
+          <div className="tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 md:tw-text-base">
             {t(locale, "home.mintSubscriptions.awarenessLabel")}
           </div>
           <ReadonlySubscriptionToggle
@@ -211,7 +211,7 @@ export default function MemeSubscriptionAwarenessRow({
             tooltipLabel={tooltipLabel}
           />
           {safeSubscribedCount !== undefined && (
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-none tw-text-primary-300/75">
+            <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-leading-none tw-text-primary-300/75 md:tw-text-sm">
               x
               {formatNumber(locale, safeSubscribedCount, {
                 maximumFractionDigits: 0,
@@ -230,7 +230,7 @@ export default function MemeSubscriptionAwarenessRow({
           <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
         </SubscriptionAction>
 
-        <div className="tw-flex tw-min-h-7 tw-min-w-0 tw-items-center tw-text-sm tw-leading-4 tw-text-primary-300/70">
+        <div className="tw-flex tw-min-h-7 tw-min-w-0 tw-items-center tw-text-xs tw-leading-4 tw-text-primary-300/70 md:tw-text-sm">
           <SubscribersCountText
             loading={subscribersCountLoading}
             safeSubscribersCount={safeSubscribersCount}

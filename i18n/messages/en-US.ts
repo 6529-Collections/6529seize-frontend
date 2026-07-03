@@ -790,7 +790,7 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.infoLinkAriaLabel":
     "Learn more about The Memes subscriptions",
   "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
-  "home.mintSubscriptions.manageSubscriptionsLink": "Manage Subscriptions",
+  "home.mintSubscriptions.manageSubscriptionsLink": "Manage",
   "home.mintSubscriptions.connectToSubscribe": "Connect to Subscribe",
   "home.mintSubscriptions.connectFailed":
     "Failed to open wallet connection. Please try again.",

@@ -258,7 +258,7 @@ describe("About contents dropdown", () => {
     );
 
     const profileLink = screen.getByRole("link", {
-      name: /manage subscriptions/i,
+      name: /manage/i,
     });
     const trigger = screen.getByRole("button", {
       name: /open about contents navigation/i,
@@ -468,7 +468,7 @@ describe("About contents dropdown", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /manage subscriptions/i,
+        name: /manage/i,
       })
     );
 
