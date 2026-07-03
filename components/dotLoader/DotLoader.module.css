@@ -1,18 +1,16 @@
-@use "../../styles/variables.scss";
-
 .loader {
   display: inline-flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .dot {
+  margin: 0 3px;
   width: 5px;
   height: 5px;
-  background-color: white;
-  border-radius: 50%;
-  margin: 0 3px;
   animation: blink 0.9s infinite ease-in-out;
+  border-radius: 50%;
+  background-color: white;
 }
 
 .dot:nth-child(1) {
@@ -32,16 +30,17 @@
   100% {
     opacity: 0;
   }
+
   50% {
     opacity: 1;
   }
 }
 
 .spinner {
-  cursor: pointer;
-  height: 24px;
   width: 24px;
+  height: 24px;
   animation: circle 0.5s steps(8) infinite;
+  cursor: pointer;
 }
 
 @keyframes circle {

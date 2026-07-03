@@ -4,7 +4,7 @@ import { formatInteger, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { Fragment, type ReactNode } from "react";
-import styles from "./UserPageStats.module.scss";
+import styles from "./UserPageStats.module.css";
 import {
   UserPageStatsTableHead,
   UserPageStatsTableHr,

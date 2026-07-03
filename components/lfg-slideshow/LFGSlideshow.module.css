@@ -1,16 +1,14 @@
-@use "../../styles/variables.scss" as variables;
-
 .slideshowContainer {
   position: fixed;
   inset: 0;
+  z-index: 999;
+  display: flex;
   width: 100vw;
   height: 100dvh;
-  background-color: rgba(0, 0, 0, 0.95);
-  display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
   overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.95);
 }
 
 .slideButtons {
@@ -23,24 +21,24 @@
 }
 
 .slideButton {
-  color: white;
-  cursor: pointer;
   z-index: 1100;
-  height: 28px;
   width: 28px;
+  height: 28px;
+  cursor: pointer;
+  color: white;
+}
 
-  &:hover {
-    color: variables.$off-white;
-  }
+.slideButton:hover {
+  color: rgb(215, 215, 215);
 }
 
 .slide {
+  position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100vw;
   height: 100dvh;
-  position: relative;
+  align-items: center;
+  justify-content: center;
 }
 
 .slide img,
@@ -50,6 +48,6 @@
   height: auto;
   max-width: 85vw;
   max-height: 85vh;
-  object-fit: contain;
   border-radius: 2px;
+  object-fit: contain;
 }
