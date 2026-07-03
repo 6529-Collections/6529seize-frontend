@@ -20,9 +20,7 @@ export default function CookiesBanner() {
   return (
     <div
       className={`tw-fixed tw-bottom-0 tw-z-[999] tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-bg-[rgb(195,225,252)] tw-px-5 tw-py-[5px] tw-text-[rgb(34,34,34)] ${
-        isApp
-          ? "tw-bottom-20 tw-mb-[max(5px,env(safe-area-inset-bottom))]"
-          : ""
+        isApp ? "tw-bottom-20 tw-mb-[max(5px,env(safe-area-inset-bottom))]" : ""
       } ${isApp && isAppleMobile ? "tw-mb-0" : ""} ${
         isApp ? `tw-flex-col` : ""
       }`}
@@ -40,17 +38,20 @@ export default function CookiesBanner() {
       <span className="tw-flex tw-items-center tw-justify-between tw-gap-4">
         <button
           className="tw-border-0 tw-bg-[rgb(34,34,34)] tw-px-2.5 tw-py-[5px] tw-text-white tw-transition-transform tw-duration-300 tw-ease-in-out hover:tw-scale-[1.02] hover:tw-bg-[#208359] hover:tw-text-white"
-          onClick={consent}>
+          onClick={consent}
+        >
           Accept
         </button>
         <button
           className="tw-border-0 tw-bg-transparent tw-text-[rgb(34,34,34)] tw-no-underline hover:tw-text-[rgb(100,100,100)]"
-          onClick={reject}>
+          onClick={reject}
+        >
           <span className="tw-text-sm">Reject Non-Essential</span>
         </button>
         <Link
           className="tw-border-0 tw-bg-transparent tw-text-[rgb(34,34,34)] tw-no-underline hover:tw-text-[rgb(100,100,100)]"
-          href="/about/cookie-policy">
+          href="/about/cookie-policy"
+        >
           <span className="tw-text-sm">Learn more</span>
         </Link>
       </span>

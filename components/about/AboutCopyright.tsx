@@ -14,11 +14,13 @@ export default function AboutCopyright() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles["lastUpdateText"]} tw-text-right tw-pt-3 tw-pb-3`}>
+        <Col
+          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+        >
           Last Updated: April 23, 2024
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <p className="tw-text-lg tw-font-bold">Introduction</p>
           <p>
@@ -30,7 +32,7 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <p className="tw-text-lg tw-font-bold">
             Copyright Infringement Notification
@@ -88,7 +90,7 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <p className="tw-text-lg tw-font-bold">Counter-Notification</p>
           <p>
@@ -141,7 +143,7 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <p className="tw-text-lg tw-font-bold">Repeat Infringer Policy</p>
           <p>
@@ -156,7 +158,7 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <p className="tw-text-lg tw-font-bold">Modifications to the Policy</p>
           <p>
@@ -167,7 +169,7 @@ export default function AboutCopyright() {
           </p>
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <p className="tw-text-lg tw-font-bold">Contact Information</p>
           <p>

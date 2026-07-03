@@ -11,9 +11,14 @@ import { isNavItemActive } from "@/components/navigation/isNavItemActive";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useWave } from "@/hooks/useWave";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import LogoIcon from "@/components/common/icons/LogoIcon";
 
 const mockUseLinkStatus = jest.fn(() => ({ pending: false }));
+
+const TestIcon = ({
+  className,
+}: {
+  readonly className?: string | undefined;
+}) => <span aria-hidden="true" className={className} />;
 
 jest.mock("next/link", () => {
   const MockLink = ({
@@ -262,7 +267,7 @@ describe("NavItem notifications", () => {
     mockUseLinkStatus.mockReturnValue({ pending: true });
     const item = {
       kind: "view",
-      name: "Messages",
+      name: "DMs",
       viewKey: "messages",
       icon: "messages",
     } as any;
@@ -279,7 +284,7 @@ describe("NavItem notifications", () => {
       name: "Home",
       href: "/",
       icon: "/6529.svg",
-      iconComponent: LogoIcon,
+      iconComponent: TestIcon,
     } as any;
 
     const { container } = render(<NavItem item={item} />);
@@ -294,7 +299,7 @@ describe("NavItem notifications", () => {
       name: "Home",
       href: "/",
       icon: "/6529.svg",
-      iconComponent: LogoIcon,
+      iconComponent: TestIcon,
     } as any;
 
     const { container } = render(<NavItem item={item} />);
@@ -311,7 +316,7 @@ describe("NavItem notifications", () => {
       name: "Home",
       href: "/",
       icon: "/6529.svg",
-      iconComponent: LogoIcon,
+      iconComponent: TestIcon,
     } as any;
 
     const { container } = render(<NavItem item={item} variant="fixed" />);

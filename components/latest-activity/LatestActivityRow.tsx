@@ -516,7 +516,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         className={
           isTailwind
             ? `tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`
-            : "tw-align-middle tw-text-center"
+            : "tw-text-center tw-align-middle"
         }
       >
         {getDateDisplay(new Date(props.tr.transaction_date))}
@@ -525,7 +525,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         className={
           isTailwind
             ? `tw-w-14 tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-text-center tw-align-middle`
-            : "tw-align-middle tw-text-center"
+            : "tw-text-center tw-align-middle"
         }
       >
         <FontAwesomeIcon className={getIconClass()} icon={getIcon()} />

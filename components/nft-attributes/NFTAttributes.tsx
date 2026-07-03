@@ -17,7 +17,8 @@ export default function NFTAttributes(
               <br />
               <span
                 className="tw-whitespace-nowrap tw-text-[15px] tw-font-bold"
-                title={a.value}>
+                title={a.value}
+              >
                 {a.value}
               </span>
             </div>

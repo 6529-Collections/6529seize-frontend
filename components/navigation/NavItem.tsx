@@ -156,9 +156,11 @@ const NavItemLinkContent = ({
       {item.name === "Notifications" && haveUnreadNotifications && (
         <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
       )}
-      {item.name === "Messages" && hasUnreadMessages && (
-        <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
-      )}
+      {item.kind === "view" &&
+        item.viewKey === "messages" &&
+        hasUnreadMessages && (
+          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
+        )}
     </div>
   );
 };
@@ -182,7 +184,8 @@ const NavItemContent = ({
 
   const { name } = item;
   const { icon } = item;
-  const { address, seizeConnect, hasValidWalletAuth } = useSeizeConnectContext();
+  const { address, seizeConnect, hasValidWalletAuth } =
+    useSeizeConnectContext();
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
@@ -203,7 +206,9 @@ const NavItemContent = ({
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle:
-      item.name === "Messages" ? (connectedProfile?.handle ?? null) : null,
+      item.kind === "view" && item.viewKey === "messages"
+        ? (connectedProfile?.handle ?? null)
+        : null,
   });
 
   const { removeAllDeliveredNotifications } = useNotificationsContext();

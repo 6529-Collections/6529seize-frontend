@@ -93,7 +93,8 @@ export default function Pagination(props: Readonly<Props>) {
               props.page > 1 ? ICON_ENABLED_CLASS : ICON_DISABLED_CLASS
             }`}
             aria-label="Previous page"
-            disabled={props.page <= 1}>
+            disabled={props.page <= 1}
+          >
             <FontAwesomeIcon icon={faCaretLeft} />
           </button>
           <input
@@ -111,7 +112,8 @@ export default function Pagination(props: Readonly<Props>) {
             onClick={goToLast}
             className={GO_TO_LAST_CLASS}
             aria-label="Go to last page"
-            disabled={isLastPage()}>
+            disabled={isLastPage()}
+          >
             {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
           </button>
           <button
@@ -121,7 +123,8 @@ export default function Pagination(props: Readonly<Props>) {
               isLastPage() ? ICON_DISABLED_CLASS : ICON_ENABLED_CLASS
             }`}
             aria-label="Next page"
-            disabled={isLastPage()}>
+            disabled={isLastPage()}
+          >
             <FontAwesomeIcon icon={faCaretRight} />
           </button>
         </span>

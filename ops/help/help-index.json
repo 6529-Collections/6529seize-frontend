@@ -34,17 +34,44 @@
         "expand"
       ],
       "facts": [
-        "The app sidebar is the main navigation surface for sections such as Waves, Network, Groups, Delegation, and other app areas.",
+        "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
+        "Home remains available through the 6529 logo link to /.",
+        "Discovery lives under Waves as Discover Waves, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
-        "On mobile, primary navigation is also available through mobile app navigation surfaces."
+        "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/network", "/delegation/delegation-center"],
+      "related_paths": [
+        "/the-memes",
+        "/waves",
+        "/messages",
+        "/join",
+        "/about",
+        "/discover",
+        "/network",
+        "/delegation/delegation-center"
+      ],
       "tags": ["navigation", "ui"],
       "source_refs": [
         "ops/docs/navigation/feature-sidebar-navigation.md",
         "ops/docs/navigation/feature-app-sidebar-menu.md"
       ]
+    },
+    {
+      "id": "join.6529",
+      "kind": "route",
+      "title": "Join 6529",
+      "aliases": ["join", "join 6529", "join page", "get started"],
+      "keywords": ["join", "6529", "navigation", "getting-started"],
+      "facts": [
+        "The Join 6529 page lives at /join.",
+        "Join 6529 is a primary navigation item.",
+        "The current page is a minimal placeholder; detailed join and onboarding content is not yet published there."
+      ],
+      "canonical_path": "/join",
+      "related_paths": ["/", "/about", "/waves"],
+      "tags": ["join", "navigation", "getting-started"],
+      "source_refs": ["app/join/page.tsx"]
     },
     {
       "id": "about.index",
@@ -76,7 +103,8 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links that keep their canonical /network paths.",
+        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links.",
+        "The primary About navigation menu also owns Network, Delegation, Tools, Open Data, technical, reference, and legal destinations.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, delegation, resource, community, or technical page."
       ],
       "canonical_path": "/about",
@@ -86,7 +114,7 @@
         "/about/tech",
         "/about/terms-of-service",
         "/network/tdh",
-        "/network/xtdh",
+        "/xtdh",
         "/network/health",
         "/network/definitions",
         "/network/levels",
@@ -3026,12 +3054,12 @@
       ],
       "keywords": ["mobile", "bottom", "navigation", "phone", "app", "tabs"],
       "facts": [
-        "Mobile layouts use bottom navigation for common app destinations.",
-        "The mobile navigation surface is separate from the desktop sidebar.",
+        "Mobile layouts use bottom navigation for the primary concepts NFTs, Waves, DMs, Join 6529, and About.",
+        "Notifications and Profile are account utilities, not bottom-navigation product tabs.",
         "Mobile keyboard and viewport behavior can affect how navigation and composer controls fit on screen."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves", "/notifications"],
+      "related_paths": ["/the-memes", "/waves", "/messages", "/join", "/about"],
       "tags": ["navigation", "mobile"],
       "source_refs": [
         "ops/docs/navigation/feature-mobile-bottom-navigation.md",
@@ -3779,11 +3807,12 @@
       "keywords": ["waves", "discover", "search", "sections", "cards"],
       "facts": [
         "Wave discovery docs cover discover cards, discover sections, and search behavior.",
-        "Discovery is for finding waves, while the Waves panel is for active navigation and participation.",
+        "Discover Waves lives under the Waves primary navigation concept and routes to /discover.",
+        "Wave discovery is for finding waves, while the Waves panel is for active navigation and participation.",
         "Search and section availability depend on the route state and access rules."
       ],
-      "canonical_path": "/waves",
-      "related_paths": ["/waves/create"],
+      "canonical_path": "/discover",
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "discovery"],
       "source_refs": [
         "ops/docs/waves/discovery/README.md",

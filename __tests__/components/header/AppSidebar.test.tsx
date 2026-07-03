@@ -92,77 +92,60 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       setCookieCountry("US");
     });
 
-    it("includes App Wallets when supported and handles close", () => {
+    it("renders the menu IA with App Wallets under About when supported and handles close", () => {
       const onClose = jest.fn();
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: true,
       });
       render(<AppSidebar open={true} onClose={onClose} />);
-      const networkChildren = getMenuChildren("Network");
+      expect(getMenu().map((item) => item.label)).toEqual([
+        "NFTs",
+        "Waves",
+        "DMs",
+        "Join 6529",
+        "About",
+      ]);
       expect(getMenu()).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: "Profile", path: "/profile" }),
-          expect.objectContaining({ label: "Discovery", path: "/discover" }),
+          expect.objectContaining({ label: "DMs", path: "/messages" }),
+          expect.objectContaining({ label: "Join 6529", path: "/join" }),
         ])
       );
-      expect(networkChildren).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ label: "xTDH", path: "/xtdh" }),
-          expect.objectContaining({
-            label: "Wave Score",
-            path: "/network/wave-score",
-          }),
-        ])
-      );
-      const xtdhIndex = networkChildren.findIndex(
-        (child) => child.label === "xTDH"
-      );
-      const waveScoreIndex = networkChildren.findIndex(
-        (child) => child.label === "Wave Score"
-      );
-      expect(waveScoreIndex).toBe(xtdhIndex + 1);
-      expect(getMenuChildren("Tools")[0]).toEqual({
-        label: "App Wallets",
-        path: "/tools/app-wallets",
-      });
+      expect(getMenuChildren("NFTs")).toEqual([
+        { label: "The Memes", path: "/the-memes" },
+        { label: "6529 Gradient", path: "/6529-gradient" },
+        { label: "NextGen", path: "/nextgen" },
+        { label: "Meme Lab", path: "/meme-lab" },
+        { label: "ReMemes", path: "/rememes" },
+        { label: "NFT Activity", path: "/nft-activity" },
+        { label: "Memes Calendar", path: "/meme-calendar" },
+      ]);
+      expect(getMenuChildren("Waves")).toEqual([
+        { label: "Waves", path: "/waves" },
+        { label: "Discover Waves", path: "/discover" },
+      ]);
       const aboutChildren = getMenuChildren("About");
-      expect(aboutChildren).toEqual([
+      expect(aboutChildren).toEqual(
+        expect.arrayContaining([
+          { label: "Network & People", section: true },
+          { label: "Identities", path: "/network" },
+          { label: "Network Data", section: true },
+          { label: "xTDH", path: "/xtdh" },
+          { label: "Wave Score", path: "/network/wave-score" },
+          { label: "Delegation", section: true },
+          { label: "Delegation Center", path: "/delegation/delegation-center" },
+          { label: "NFT & Reporting Tools", section: true },
+          { label: "App Wallets", path: "/tools/app-wallets" },
+          { label: "Developer & Open Data", section: true },
+          { label: "Open Data", path: "/open-data" },
+        ])
+      );
+      expect(aboutChildren.slice(0, 5)).toEqual([
         { label: "About", path: "/about" },
         { label: "Collections", section: true },
         { label: "The Memes", path: "/about/the-memes" },
         { label: "Subscriptions", path: "/about/subscriptions" },
         { label: "Meme Lab", path: "/about/meme-lab" },
-        { label: "Gradient", path: "/about/6529-gradient" },
-        { label: "Delegation", section: true },
-        { label: "GDRC", path: "/about/gdrc1" },
-        { label: "NFT Delegation", path: "/about/nft-delegation" },
-        { label: "Primary Address", path: "/about/primary-address" },
-        { label: "Network", section: true },
-        { label: "TDH", path: "/network/tdh" },
-        { label: "xTDH", path: "/network/xtdh" },
-        { label: "Health", path: "/network/health" },
-        { label: "Definitions", path: "/network/definitions" },
-        { label: "Levels", path: "/network/levels" },
-        { label: "Network Stats", path: "/network/health/network-tdh" },
-        { label: "Resources", section: true },
-        { label: "FAQ", path: "/about/faq" },
-        { label: "ENS", path: "/about/ens" },
-        { label: "Minting", path: "/about/minting" },
-        { label: "Nakamoto Threshold", path: "/about/nakamoto-threshold" },
-        { label: "License", path: "/about/license" },
-        { label: "Community", section: true },
-        { label: "Apply", path: "/about/apply" },
-        { label: "Contact Us", path: "/about/contact-us" },
-        { label: "Tech", path: "/about/tech" },
-        {
-          label: "Data Decentralization",
-          path: "/about/data-decentralization",
-        },
-        { label: "Legal", section: true },
-        { label: "Terms of Service", path: "/about/terms-of-service" },
-        { label: "Privacy Policy", path: "/about/privacy-policy" },
-        { label: "Cookie Policy", path: "/about/cookie-policy" },
-        { label: "Copyright", path: "/about/copyright" },
       ]);
       headerProps.onClose();
       expect(onClose).toHaveBeenCalled();
@@ -175,7 +158,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         appWalletsSupported: false,
       });
       render(<AppSidebar open={true} onClose={() => {}} />);
-      expect(getMenuChildren("Tools")[0].label).not.toBe("App Wallets");
+      expect(getMenuChildren("About")).toEqual(
+        expect.not.arrayContaining([
+          expect.objectContaining({ label: "App Wallets" }),
+        ])
+      );
     });
 
     it("renders nothing when closed", () => {

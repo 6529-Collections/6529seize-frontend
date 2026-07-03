@@ -46,7 +46,8 @@ export default function ScrollToButton(props: Readonly<Props>) {
       smooth={true}
       offset={props.offset}
       style={{ display: showButton ? "flex" : "none" }}
-      duration={250}>
+      duration={250}
+    >
       <FontAwesomeIcon icon={faChevronUp} className={SCROLL_ICON_CLASS} />
     </Link>
   );

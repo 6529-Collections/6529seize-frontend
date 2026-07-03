@@ -4,7 +4,11 @@
 }
 
 .signModalSurface {
-  background: linear-gradient(180deg, rgba(38, 39, 43, 0.98) 0%, rgba(19, 19, 22, 0.98) 100%) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(38, 39, 43, 0.98) 0%,
+    rgba(19, 19, 22, 0.98) 100%
+  ) !important;
   color: white !important;
   border: 1px solid rgba(147, 147, 159, 0.35) !important;
   border-radius: 0.9rem !important;
@@ -90,7 +94,11 @@
   font-size: 0.98rem !important;
   line-height: 1 !important;
   text-decoration: none !important;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .signModalCancelButton {
