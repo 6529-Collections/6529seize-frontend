@@ -3068,12 +3068,20 @@
       ],
       "keywords": ["mobile", "bottom", "navigation", "phone", "app", "tabs"],
       "facts": [
-        "Mobile layouts use bottom navigation for the primary concepts NFTs, Waves, DMs, Join 6529, and About.",
-        "Notifications and Profile are account utilities, not bottom-navigation product tabs.",
+        "Mobile layouts use bottom navigation for Discovery, Waves, Messages, Home, Network, Collections, and Notifications.",
+        "The mobile bottom navigation surface is separate from the desktop and app sidebar IA.",
         "Mobile keyboard and viewport behavior can affect how navigation and composer controls fit on screen."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/the-memes", "/waves", "/messages", "/join", "/about"],
+      "related_paths": [
+        "/discover",
+        "/waves",
+        "/messages",
+        "/",
+        "/network",
+        "/the-memes",
+        "/notifications"
+      ],
       "tags": ["navigation", "mobile"],
       "source_refs": [
         "ops/docs/navigation/feature-mobile-bottom-navigation.md",
