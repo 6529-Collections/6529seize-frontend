@@ -118,7 +118,6 @@ export default function CreateWaveRules({
       {supportsAcceptanceRules && (
         <section className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
           <CreateWaveTermsOfService
-            waveType={config.overview.type}
             terms={config.drops.terms}
             setTerms={setBindingRules}
             title="Rules that require acceptance"

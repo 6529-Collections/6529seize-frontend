@@ -318,11 +318,10 @@ const getDecisionRows = (
   }
 
   const subsequentDecisions = decisionsStrategy.subsequent_decisions ?? [];
-  const cadenceLabel = !subsequentDecisions.length
-    ? "Single decision"
-    : decisionsStrategy.is_rolling
-      ? `Rolling sequence: ${formatDurationList(subsequentDecisions)}`
-      : `${subsequentDecisions.length + 1} scheduled decisions`;
+  const cadenceLabel = getDecisionCadenceLabel({
+    subsequentDecisions,
+    isRolling: decisionsStrategy.is_rolling,
+  });
 
   return [
     {
@@ -336,6 +335,38 @@ const getDecisionRows = (
       value: cadenceLabel,
     },
   ];
+};
+
+const getDecisionCadenceLabel = ({
+  subsequentDecisions,
+  isRolling,
+}: {
+  readonly subsequentDecisions: readonly number[];
+  readonly isRolling: boolean;
+}): string => {
+  if (subsequentDecisions.length === 0) {
+    return "Single decision";
+  }
+
+  if (isRolling) {
+    return `Rolling sequence: ${formatDurationList(subsequentDecisions)}`;
+  }
+
+  return `${subsequentDecisions.length + 1} scheduled decisions`;
+};
+
+const getApprovalThresholdLabel = ({
+  approvalThreshold,
+  creditLabel,
+}: {
+  readonly approvalThreshold: string | null;
+  readonly creditLabel: string;
+}): string => {
+  if (approvalThreshold === null) {
+    return "Not set";
+  }
+
+  return `${approvalThreshold} ${creditLabel}`;
 };
 
 const getOutcomeCountLabel = (count: number): string => {
@@ -592,10 +623,10 @@ const getCreateRules = ({
         {
           id: "approval-threshold",
           label: "Approval threshold",
-          value:
-            approvalThreshold !== null
-              ? `${approvalThreshold} ${creditLabel}`
-              : "Not set",
+          value: getApprovalThresholdLabel({
+            approvalThreshold,
+            creditLabel,
+          }),
         },
         {
           id: "approval-hold",
@@ -870,10 +901,10 @@ const getWaveRules = ({
         {
           id: "approval-threshold",
           label: "Approval threshold",
-          value:
-            approvalThreshold !== null
-              ? `${approvalThreshold} ${creditLabel}`
-              : "Not set",
+          value: getApprovalThresholdLabel({
+            approvalThreshold,
+            creditLabel,
+          }),
         },
         {
           id: "approval-hold",

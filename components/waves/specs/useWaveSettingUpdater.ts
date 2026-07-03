@@ -73,13 +73,13 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
       }
 
       const body = convertWaveToUpdateWave(wave);
-      void updateWave(
+      updateWave(
         {
           ...body,
           chat: getChatUpdate(body.chat),
         },
         closeEditor
-      );
+      ).catch(() => undefined);
     },
     [mutating, updateWave, wave]
   );
@@ -95,14 +95,14 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
       }
 
       const body = convertWaveToUpdateWave(wave);
-      void updateWave(
+      updateWave(
         {
           ...body,
           wave: getWaveConfigUpdate(body.wave),
         },
         closeEditor,
         onSuccess
-      );
+      ).catch(() => undefined);
     },
     [mutating, updateWave, wave]
   );
@@ -119,13 +119,13 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
       }
 
       const body = convertWaveToUpdateWave(wave);
-      void updateWave(
+      updateWave(
         {
           ...body,
           participation: getParticipationUpdate(body.participation),
         },
         closeEditor
-      );
+      ).catch(() => undefined);
     },
     [mutating, updateWave, wave]
   );

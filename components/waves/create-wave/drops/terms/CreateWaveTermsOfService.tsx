@@ -1,6 +1,5 @@
 "use client";
 
-import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useState } from "react";
 
 export default function CreateWaveTermsOfService({
@@ -12,7 +11,6 @@ export default function CreateWaveTermsOfService({
   placeholder = "Enter the terms of service that participants will need to agree to and sign...",
   helperText = "Participants will need to sign these terms with their wallet",
 }: {
-  readonly waveType: ApiWaveType;
   readonly terms: string | null;
   readonly setTerms: (terms: string | null) => void;
   readonly title?: string | undefined;
