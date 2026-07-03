@@ -19,7 +19,6 @@ export default function WaveWinnersDropHeaderAuthorPfp({
           <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
             <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
               {/* Winner avatars can come from arbitrary remote hosts, so this stays unoptimized. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={winner.drop.author.pfp}
                 alt="Profile picture"
