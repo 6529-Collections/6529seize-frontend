@@ -141,6 +141,8 @@ describe("useSidebarSections", () => {
     const toolsSection = result.current.find(
       (section) => section.key === "tools"
     );
+    const findToolsSubsection = (name: string) =>
+      toolsSection?.subsections.find((subsection) => subsection.name === name);
 
     expect(toolsSection?.items).toEqual([{ name: "Tools", href: "/tools" }]);
     expect(
@@ -151,7 +153,7 @@ describe("useSidebarSections", () => {
       "Builder Tools",
       "Open Data",
     ]);
-    expect(toolsSection?.subsections[0]?.items).toEqual([
+    expect(findToolsSubsection("NFT Delegation")?.items).toEqual([
       { name: "Delegation Center", href: "/delegation/delegation-center" },
       { name: "Wallet Architecture", href: "/delegation/wallet-architecture" },
       { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
@@ -161,13 +163,13 @@ describe("useSidebarSections", () => {
       },
       { name: "Wallet Checker", href: "/delegation/wallet-checker" },
     ]);
-    expect(toolsSection?.subsections[2]?.items).toEqual([
+    expect(findToolsSubsection("Builder Tools")?.items).toEqual([
       { name: "API", href: "/tools/api" },
       { name: "EMMA", href: "/emma" },
       { name: "Block Finder", href: "/tools/block-finder" },
     ]);
     expect(
-      toolsSection?.subsections[3]?.items.some(
+      findToolsSubsection("Open Data")?.items.some(
         (item) =>
           item.name === "6529bot Usage" && item.href === "/open-data/6529bot"
       )

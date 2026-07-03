@@ -2,6 +2,7 @@
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import GroupedLinkIndex, {
+  type GroupedLinkIndexIcon,
   type GroupedLinkIndexGroup,
 } from "@/components/common/GroupedLinkIndex";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -10,7 +11,11 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getToolsNavItemId, getVisibleToolsNavGroups } from "./tools.routes";
+import {
+  getToolsNavItemId,
+  getVisibleToolsNavGroups,
+  type ToolsNavItemId,
+} from "./tools.routes";
 import {
   BookOpenIcon,
   ChartBarIcon,
@@ -28,11 +33,8 @@ import {
   WalletIcon,
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
-import type { ComponentType } from "react";
 
-type ToolIcon = ComponentType<{ className?: string | undefined }>;
-
-const TOOL_INDEX_ICONS: Record<string, ToolIcon> = {
+const TOOL_INDEX_ICONS = {
   "delegation-center": ShieldCheckIcon,
   "wallet-architecture": BookOpenIcon,
   "delegation-faq": QuestionMarkCircleIcon,
@@ -52,7 +54,7 @@ const TOOL_INDEX_ICONS: Record<string, ToolIcon> = {
   rememes: CubeTransparentIcon,
   team: ShieldCheckIcon,
   royalties: ChartBarIcon,
-};
+} satisfies Record<ToolsNavItemId, GroupedLinkIndexIcon>;
 
 export default function ToolsIndex() {
   const locale = DEFAULT_LOCALE;
@@ -70,12 +72,16 @@ export default function ToolsIndex() {
   const indexGroups: GroupedLinkIndexGroup[] = groups.map((group) => ({
     id: group.id,
     title: t(locale, group.labelKey),
-    items: group.items.map((item) => ({
-      id: getToolsNavItemId(item),
-      label: t(locale, item.labelKey),
-      href: item.href,
-      Icon: TOOL_INDEX_ICONS[getToolsNavItemId(item)] ?? WrenchScrewdriverIcon,
-    })),
+    items: group.items.map((item) => {
+      const itemId = getToolsNavItemId(item);
+
+      return {
+        id: itemId,
+        label: t(locale, item.labelKey),
+        href: item.href,
+        Icon: TOOL_INDEX_ICONS[itemId],
+      };
+    }),
   }));
 
   useSetTitle(t(locale, "tools.index.metadata.title"));

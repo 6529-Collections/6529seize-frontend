@@ -1,7 +1,7 @@
 # API Tool
 
-API Tool docs cover the Tools index and user-facing utility routes under
-`/tools/*`.
+API Tool docs cover the Tools index, user-facing `/tools/*` utility routes,
+and the private `/tools/6529bot/admin` operator page.
 
 ## Overview
 

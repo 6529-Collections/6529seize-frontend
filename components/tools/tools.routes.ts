@@ -28,7 +28,7 @@ type ToolsVisibilityOptions = {
   readonly hideSubscriptions: boolean;
 };
 
-const TOOLS_CONTENTS_NAV_GROUPS: readonly ToolsContentsNavGroup[] = [
+const TOOLS_CONTENTS_NAV_GROUPS = [
   {
     id: "nft-delegation",
     labelKey: "tools.contents.groups.nftDelegation",
@@ -153,7 +153,10 @@ const TOOLS_CONTENTS_NAV_GROUPS: readonly ToolsContentsNavGroup[] = [
       },
     ],
   },
-] as const;
+] as const satisfies readonly ToolsContentsNavGroup[];
+
+export type ToolsNavItemId =
+  (typeof TOOLS_CONTENTS_NAV_GROUPS)[number]["items"][number]["id"];
 
 function isToolsNavItemVisible(
   item: ToolsContentsNavItem,
@@ -170,9 +173,7 @@ function isToolsNavItemVisible(
   return true;
 }
 
-export function getVisibleToolsNavGroups(
-  options: ToolsVisibilityOptions
-): ToolsContentsNavGroup[] {
+export function getVisibleToolsNavGroups(options: ToolsVisibilityOptions) {
   return TOOLS_CONTENTS_NAV_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter((item) => isToolsNavItemVisible(item, options)),
@@ -183,7 +184,9 @@ export function getToolsNavItemHref(item: ToolsContentsNavItem): string {
   return item.href;
 }
 
-export function getToolsNavItemId(item: ToolsContentsNavItem): string {
+export function getToolsNavItemId(item: {
+  readonly id: ToolsNavItemId;
+}): ToolsNavItemId {
   return item.id;
 }
 

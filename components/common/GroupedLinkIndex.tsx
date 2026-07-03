@@ -3,7 +3,9 @@ import clsx from "clsx";
 import Link from "next/link";
 import type { ComponentType } from "react";
 
-type GroupedLinkIndexIcon = ComponentType<{ className?: string | undefined }>;
+export type GroupedLinkIndexIcon = ComponentType<{
+  className?: string | undefined;
+}>;
 
 export type GroupedLinkIndexItem = {
   readonly id: string;
