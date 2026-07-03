@@ -16,7 +16,6 @@ import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
   useCallback,
@@ -79,7 +78,6 @@ const WebSidebarNav = React.forwardRef<
   const sectionMap = useSectionMap(sections);
   const nftsSection = sectionMap.get("nfts");
   const wavesSection = sectionMap.get("waves");
-  const toolsSection = sectionMap.get("tools");
   const aboutSection = sectionMap.get("about");
 
   const closeSubmenu = useCallback(() => {
@@ -298,20 +296,6 @@ const WebSidebarNav = React.forwardRef<
             hasIndicator={hasUnreadMessages}
           />
         </li>
-
-        <li>
-          <WebSidebarNavItem
-            href="/join"
-            icon={UserPlusIcon}
-            active={
-              safePathname === "/join" || safePathname.startsWith("/join/")
-            }
-            collapsed={isCollapsed}
-            label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
-          />
-        </li>
-
-        {toolsSection && renderExpandableSection(toolsSection)}
 
         {aboutSection && renderExpandableSection(aboutSection)}
 

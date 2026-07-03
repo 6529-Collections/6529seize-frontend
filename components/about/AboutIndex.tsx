@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  AboutCol as Col,
-  AboutContainer as Container,
-  AboutRow as Row,
-} from "./AboutLayout";
-
+import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import GroupedLinkIndex, {
   type GroupedLinkIndexGroup,
 } from "@/components/common/GroupedLinkIndex";
@@ -15,7 +10,11 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-
+import {
+  AboutCol as Col,
+  AboutContainer as Container,
+  AboutRow as Row,
+} from "./AboutLayout";
 import {
   getAboutNavItemHref,
   getAboutNavItemId,
@@ -26,11 +25,15 @@ export default function AboutIndex() {
   const locale = DEFAULT_LOCALE;
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
+  const { appWalletsSupported } = useAppWallets();
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: capacitor.isIos,
     country,
   });
-  const groups = getVisibleAboutNavGroups(hideSubscriptions);
+  const groups = getVisibleAboutNavGroups({
+    hideSubscriptions,
+    appWalletsSupported,
+  });
   const indexGroups: GroupedLinkIndexGroup[] = groups.map((group) => ({
     id: group.id,
     title: t(locale, group.labelKey),
@@ -40,6 +43,7 @@ export default function AboutIndex() {
       return {
         id: getAboutNavItemId(item),
         label,
+        description: t(locale, item.descriptionKey),
         href: getAboutNavItemHref(item),
       };
     }),

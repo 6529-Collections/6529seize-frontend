@@ -12,11 +12,10 @@ On web layouts, route switching is sidebar-first.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
   nested route grouping shown in the expanded rail.
 - The 6529 logo links to `/`; there is no labeled `Home` product row.
-- Primary menu concepts are `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
-- `NFTs` and `About` are expandable groups; `Waves`, `DMs`, and `Join 6529`
-  are direct rows.
+- Primary menu concepts are `NFTs`, `Waves`, `DMs`, and `About`.
+- `NFTs` and `About` are expandable groups; `Waves` and `DMs` are direct rows.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
-  remains a secondary link inside the expanded Waves panel and is searchable.
+  remains a secondary Waves experience link and searchable destination.
 - When the connected wallet can access Drop Forge, the sidebar adds `Drop
   Forge` as a standalone row after `About`.
 - `DMs` keeps a main-nav unread dot; connected users get a lower
@@ -28,8 +27,9 @@ On web layouts, route switching is sidebar-first.
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
-- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, `About`, and the
-  gated `Drop Forge` row when available.
+- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `About`.
+- Gated primary row: `Drop Forge`, after `About`, only when the connected
+  wallet can access it.
 - Utility rows: desktop `Search`, connected-only `Notifications`,
   connected-only `Profile`, and disconnected-only `Share`.
 - Bottom account area: connect action, loading placeholders, and the connected
@@ -59,8 +59,8 @@ On web layouts, route switching is sidebar-first.
 4. Open `NFTs` or `About` for nested routes; use the `Waves` row for direct
    `/waves` navigation.
 5. In collapsed mode, group rows open anchored flyout submenus that preserve
-   subsection labels such as `Network Data`, `Developer & Open Data`, or
-   `Resources`.
+   subsection labels such as `Network & Reputation`, `Delegation & Wallets`, or
+   `Data & Developer Tools`.
 6. Select a destination and watch active state update.
 7. In overlay mode, sidebar closes after route change.
 
@@ -72,25 +72,28 @@ On web layouts, route switching is sidebar-first.
 - Open `Waves` routes:
   use the primary `Waves` row for `/waves`; use `Discover Waves` in the Waves
   panel header or search for `/discover`.
-- Open `About > Network & People` and `About > Network Data` routes:
+- Open `About > Network & Reputation` routes:
   `/network`, `/network/activity`, `/network/groups`, `/network/tdh`,
-  `/xtdh`, `/network/wave-score`, `/rep/categories`,
-  `/network/health`, `/network/definitions`, `/network/levels`,
-  `/network/health/network-tdh`.
+  `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
+  `/network/wave-score`, `/rep/categories`, `/network/health`,
+  `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,
+  `/network/nerd`, `/network/prenodes`, and
+  `/network/tdh/historic-boosts`.
 - Open `Drop Forge` from its standalone row after `About` when the current
   wallet has landing access.
 - Open `About` tool routes:
-  delegation pages, `/meme-accounting`, `/meme-gas`,
-  optional `/tools/subscriptions-report`, optional `/tools/app-wallets`,
-  `/tools/api`, `/emma`, `/tools/block-finder`,
+  delegation pages under `Delegation & Wallets`, `/meme-accounting`,
+  `/meme-gas`, optional `/tools/subscriptions-report`, optional
+  `/tools/app-wallets`, `/tools/api`, `/emma`, `/tools/block-finder`,
   `/open-data`, `/open-data/6529bot`, `/open-data/network-metrics`,
-  optional `/open-data/meme-subscriptions`, `/open-data/rememes`,
-  `/open-data/team`, `/open-data/royalties`.
+  optional `/open-data/meme-subscriptions`, `/open-data/rememes`
+  (`ReMemes Data`), `/open-data/team` (`Team Data`), and
+  `/open-data/royalties`.
 - Use collapsed-rail flyouts for grouped destinations:
-  `NFTs` keeps collection and NFT activity links, `Tools` keeps labels such as
-  `NFT Delegation`, `The Memes Tools`, `Builder Tools`, and `Open Data`, and
-  `About` keeps subsection labels instead of flattening every route into one
-  list. `Waves` remains a direct row in collapsed mode.
+  `NFTs` keeps collection and NFT activity links, and `About` keeps subsection
+  labels such as `Network & Reputation`, `Delegation & Wallets`, and
+  `Data & Developer Tools` instead of flattening every route into one list.
+  `Waves` remains a direct row in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
 - Open connected `Notifications` from the lower row above `Profile`.
 - Open `Share` to generate QR/deep links for the current route:
@@ -123,9 +126,10 @@ On web layouts, route switching is sidebar-first.
   mobile-device web.
 - Connected desktop-web `Share` moves into the user menu and stays hidden until
   device detection resolves.
-- `App Wallets` appears only when app-wallet support is enabled.
+- `App Wallets` appears inside `About > Delegation & Wallets` only when
+  app-wallet support is enabled.
 - On iOS, subscription-related rows show only when country resolves to `US`:
-  `Subscriptions Report`, `Open Data > Meme Subscriptions`,
+  `Subscriptions Report`, `Open Data > Meme Subscriptions Data`,
   and `About > Subscriptions`.
 
 ## Failure and Recovery

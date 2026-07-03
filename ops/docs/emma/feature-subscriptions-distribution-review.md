@@ -15,7 +15,7 @@ The Memes token distribution outputs.
 
 ## Entry Points
 
-1. Open `Tools -> EMMA`.
+1. Open `About -> Data & Developer Tools -> EMMA`.
 2. Open a plan from `/emma/plans`.
 3. Move to `Review` from the plan sidebar, or reopen a plan already on this
    step.

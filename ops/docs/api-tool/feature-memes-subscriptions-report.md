@@ -13,14 +13,14 @@ subscription counts.
 
 - Route: `/tools/subscriptions-report`
 - Web sidebar/search path (when visible):
-  `Tools -> The Memes Tools -> Subscriptions Report`
+  `About -> Data & Developer Tools -> Subscriptions Report`
 - Native app drawer path:
-  `Tools -> The Memes Tools -> Subscriptions Report`
+  `About -> Data & Developer Tools -> Subscriptions Report`
 - Related open-data route: `/open-data/meme-subscriptions`
 
 ## Entry Points
 
-- Open from `Tools -> The Memes Tools` (when visible in current nav).
+- Open from `About -> Data & Developer Tools` (when visible in current nav).
 - Open `/tools/subscriptions-report` directly (route always loads).
 - Use header actions:
   - `My Subscriptions` -> `/{your-handle}/subscriptions` (when shown)

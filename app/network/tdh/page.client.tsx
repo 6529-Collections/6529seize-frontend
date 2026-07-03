@@ -206,7 +206,7 @@ export default function TDHMainPage() {
       {/* Cross-links */}
       <div className="tw-mt-10 tw-grid tw-gap-6 md:tw-grid-cols-2">
         <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">
-          <h3>Network Stats</h3>
+          <h3>Network TDH Stats</h3>
           <p className="tw-mt-1">
             Aggregate community activity, holdings, trading, and time-based
             metrics across the network.
@@ -215,7 +215,7 @@ export default function TDHMainPage() {
             href="/network/health/network-tdh"
             className={BUTTON_LINK_CLASSES}
           >
-            View Network Stats
+            View Network TDH Stats
           </Link>
         </div>
         <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">

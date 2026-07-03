@@ -139,6 +139,9 @@ jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
   };
 });
 
+const actualSidebarHooks = jest.requireActual(
+  "@/hooks/useSidebarSections"
+) as typeof import("@/hooks/useSidebarSections");
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
 const publicWaveScope = { group: null };
 const createWaveResult = (overrides: Record<string, unknown> = {}): ApiWave =>
@@ -183,14 +186,15 @@ const defaultSidebarSections: SidebarSection[] = [
     items: [{ name: "About", href: "/about" }],
     subsections: [
       {
-        name: "Network Data",
+        name: "Network & Reputation",
         items: [
-          { name: "xTDH", href: "/xtdh" },
+          { name: "xTDH Allocations Dashboard", href: "/xtdh" },
           { name: "Wave Score", href: "/network/wave-score" },
+          { name: "Network Nerd", href: "/network/nerd" },
         ],
       },
       {
-        name: "Delegation",
+        name: "Delegation & Wallets",
         items: [
           { name: "Delegation Center", href: "/delegation/delegation-center" },
         ],
@@ -232,6 +236,7 @@ interface SetupOptions {
   nftsRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   wavesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   sidebarSections?: SidebarSection[] | undefined;
+  useActualSidebarSections?: boolean | undefined;
   dropForgePermissions?: typeof DEFAULT_DROP_FORGE_PERMISSIONS | undefined;
 }
 
@@ -244,6 +249,7 @@ function setup(options: SetupOptions = {}) {
     nftsRefetch = jest.fn(() => Promise.resolve()),
     wavesRefetch = jest.fn(() => Promise.resolve()),
     sidebarSections = defaultSidebarSections,
+    useActualSidebarSections = false,
     dropForgePermissions,
   } = options;
   const push = jest.fn();
@@ -260,7 +266,18 @@ function setup(options: SetupOptions = {}) {
   useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });
   useCookieConsentMock.mockReturnValue({ country: "US" });
   capacitorMock.mockReturnValue({ isIos: false });
-  useSidebarSectionsMock.mockReturnValue(sidebarSections);
+  if (useActualSidebarSections) {
+    useSidebarSectionsMock.mockImplementation(
+      (appWalletsSupported: boolean, isIos: boolean, country: string | null) =>
+        actualSidebarHooks.useSidebarSections(
+          appWalletsSupported,
+          isIos,
+          country
+        )
+    );
+  } else {
+    useSidebarSectionsMock.mockReturnValue(sidebarSections);
+  }
   useDropForgePermissionsMock.mockReturnValue(
     dropForgePermissions ?? { ...DEFAULT_DROP_FORGE_PERMISSIONS }
   );
@@ -462,7 +479,7 @@ describe("HeaderSearchModal", () => {
         (content) =>
           content.includes('"title":"Wave Score"') &&
           content.includes('"/network/wave-score"') &&
-          content.includes('"breadcrumbs":["About","Network Data"]')
+          content.includes('"breadcrumbs":["About","Network & Reputation"]')
       )
     ).toBe(true);
   });
@@ -470,6 +487,7 @@ describe("HeaderSearchModal", () => {
   it("shows one Network Nerd page result for cards and interactions aliases", async () => {
     setup({
       selectedCategory: "PAGES",
+      useActualSidebarSections: true,
       queryImpl: () => ({
         isFetching: false,
         data: [],
@@ -491,7 +509,7 @@ describe("HeaderSearchModal", () => {
     expect(networkNerdItems).toHaveLength(1);
     expect(networkNerdItems[0]).toContain('"title":"Network Nerd"');
     expect(networkNerdItems[0]).toContain(
-      '"breadcrumbs":["About","Network Data"]'
+      '"breadcrumbs":["About","Network & Reputation"]'
     );
     expect(networkNerdItems[0]).not.toContain(
       '"title":"Network Nerd Cards Collected"'
@@ -611,8 +629,8 @@ describe("HeaderSearchModal", () => {
           items: [],
           subsections: [
             {
-              name: "Network Data",
-              items: [{ name: "Health", href: "/network/health" }],
+              name: "Network & Reputation",
+              items: [{ name: "Network Health", href: "/network/health" }],
             },
           ],
         },
@@ -626,13 +644,13 @@ describe("HeaderSearchModal", () => {
     });
 
     const input = screen.getByRole("textbox", { name: "Search" });
-    fireEvent.change(input, { target: { value: "network data health" } });
+    fireEvent.change(input, { target: { value: "network reputation health" } });
 
     const items = await screen.findAllByTestId("item");
     expect(
       items.some(
         (item) =>
-          (item.textContent ?? "").includes('"title":"Health"') &&
+          (item.textContent ?? "").includes('"title":"Network Health"') &&
           (item.textContent ?? "").includes('"/network/health"')
       )
     ).toBe(true);
@@ -649,8 +667,8 @@ describe("HeaderSearchModal", () => {
           items: [{ name: "Network Health", href: "/about/network-health" }],
           subsections: [
             {
-              name: "Network Data",
-              items: [{ name: "Health", href: "/network/health" }],
+              name: "Network & Reputation",
+              items: [{ name: "Network Health", href: "/network/health" }],
             },
           ],
         },
@@ -681,8 +699,8 @@ describe("HeaderSearchModal", () => {
           items: [{ name: "Network Health", href: "/about/network-health" }],
           subsections: [
             {
-              name: "Network Data",
-              items: [{ name: "Health", href: "/network/health" }],
+              name: "Network & Reputation",
+              items: [{ name: "Network Health", href: "/network/health" }],
             },
           ],
         },

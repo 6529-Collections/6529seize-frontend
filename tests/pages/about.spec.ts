@@ -15,7 +15,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       page.getByRole("heading", { level: 1, name: "About 6529" })
     ).toBeVisible();
     await expect(
-      page.locator("main").getByText("Digital Rights")
+      page.locator("main").getByText("Delegation & Wallets")
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Open page: GDRC" })
@@ -28,7 +28,7 @@ test.describe("About Pages @smoke @medium @large", () => {
   test("should load the about/the-memes page", async ({ page }) => {
     await page.goto("/about/the-memes", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    await expect(page).toHaveTitle(/^The Memes( \| About)?$/);
+    await expect(page).toHaveTitle("About The Memes | About");
     await expectNoHorizontalOverflow(page);
     const text = page.getByText("large edition, CCO (public domain) NFTs");
     await expect(text).toBeVisible();
@@ -73,7 +73,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       contentsMenu.getByText("About", { exact: true })
     ).toBeVisible();
     await expect(
-      contentsMenu.getByText("Digital Rights", { exact: true })
+      contentsMenu.getByText("Delegation & Wallets", { exact: true })
     ).toBeVisible();
     await expect(
       contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })

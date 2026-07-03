@@ -12,13 +12,13 @@ Each table row shows a `Date` and `Link`.
 
 - Route: `/open-data/royalties`
 - Hub route: `/open-data`
-- Desktop sidebar: `Tools -> Open Data -> Royalties`
-- Mobile sidebar: `Tools -> Open Data -> Royalties`
+- Desktop sidebar: `About -> Data & Developer Tools -> Royalties`
+- Mobile sidebar: `About -> Data & Developer Tools -> Royalties`
 
 ## Entry Points
 
 - Open the `Royalties` card on `/open-data`.
-- Open `Tools -> Open Data -> Royalties` in the sidebar.
+- Open `About -> Data & Developer Tools -> Royalties` in the sidebar.
 - Open `/open-data/royalties` directly.
 
 ## Data Source and Table

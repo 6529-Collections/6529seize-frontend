@@ -57,7 +57,8 @@ Profile access stays in the app drawer/account surfaces.
 - `Discovery` is active only on `/discover`.
 - `Waves` and `Messages` can be active from `?view=waves` or `?view=messages`
   even when path is not `/waves` or `/messages`.
-- `Network` is active on `/network`, `/network/*`, `/nft-activity`, and `/xtdh`.
+- `Network` is active on `/network`, `/network/*`, `/nft-activity`, and
+  `/xtdh` (`xTDH Allocations Dashboard`).
 - `Collections` is active on `/the-memes`, `/6529-gradient`, `/nextgen`,
   `/meme-lab`, and `/rememes`.
 - `Home` is active only on `/` when no `wave`/`view` override is active.

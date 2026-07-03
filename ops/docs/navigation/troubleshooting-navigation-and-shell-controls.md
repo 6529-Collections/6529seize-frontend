@@ -63,7 +63,7 @@ handoff does not behave as expected.
 - `App Wallets` row is missing:
   it appears only when app-wallet support is available.
 - Subscription rows are missing on iOS web:
-  `Subscriptions Report`, `Open Data > Meme Subscriptions`, and
+  `Subscriptions Report`, `Open Data > Meme Subscriptions Data`, and
   `About > Subscriptions` are shown only for `US` country context.
 - Search shortcut does nothing:
   use `⌘K` where search triggers are mounted; `Ctrl+K` works only from the

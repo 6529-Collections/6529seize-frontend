@@ -45,8 +45,8 @@ March 19, 2026.
 - Download datasets and exports: [Open Data](open-data/README.md)
 - Check app shell navigation and mobile handoff:
   [Navigation](navigation/README.md)
-- Use the `/tools` landing page and utility routes under `/tools/*`, including
-  private 6529bot operator tools: [API Tool](api-tool/README.md)
+- Use direct utility routes under `/tools/*`, including the secondary `/tools`
+  index and private 6529bot operator tools: [API Tool](api-tool/README.md)
 - Debug shared cross-route behavior: [Shared](shared/README.md)
 
 ## Area Index

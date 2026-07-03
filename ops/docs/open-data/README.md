@@ -10,14 +10,14 @@ Open Data docs cover dataset download routes under `/open-data/*`.
   `/open-data/6529bot`, `/open-data/rememes`, `/open-data/team`, and
   `/open-data/royalties`.
 - Entry paths:
-  - Web sidebar (desktop and mobile web): `Tools -> Open Data -> Open Data`
-  - Native app menu: `Tools -> Open Data -> Open Data`
+  - Web sidebar (desktop and mobile web): `About -> Data & Developer Tools -> Open Data`
+  - Native app menu: `About -> Data & Developer Tools -> Open Data`
   - Direct URL: `/open-data`
   - About-page links from `/about/minting` and `/about/data-decentralization`
 - Web sidebar also includes direct links to each dataset route under
-  `Tools -> Open Data`.
+  `About -> Data & Developer Tools`.
 - Native app menu also includes direct links to dataset routes under
-  `Tools -> Open Data`.
+  `About -> Data & Developer Tools`.
 - Visibility rule: on native iOS, the `Meme Subscriptions` hub card is shown
   only when cookie-country is `US`.
 - On native iOS, `Meme Subscriptions` can be temporarily hidden while

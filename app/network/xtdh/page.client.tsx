@@ -6,12 +6,12 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 
 export default function XTDHMainPage() {
-  useSetTitle("xTDH | Network");
+  useSetTitle("xTDH Overview | Network");
 
   return (
     <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
       <AboutContentsDropdown currentHref="/network/xtdh" />
-      <h1>xTDH</h1>
+      <h1>xTDH Overview</h1>
       <p className="tw-mt-2">
         xTDH is an extension of <Link href="/network/tdh">TDH</Link> which helps
         to include other NFT holders to 6529 ecosystem and offer them all the

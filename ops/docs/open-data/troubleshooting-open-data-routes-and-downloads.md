@@ -26,7 +26,7 @@ or a download link does not open.
 - What to do:
   1. Open `/open-data/meme-subscriptions` directly.
   2. Wait for country-check to finish, then reopen `/open-data`.
-  3. Open `Tools -> Open Data -> Meme Subscriptions` from the sidebar.
+  3. Open `About -> Data & Developer Tools -> Meme Subscriptions Data` from the sidebar.
 
 ## `Failed to load community downloads. Please try again.`
 

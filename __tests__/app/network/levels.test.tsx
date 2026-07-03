@@ -15,6 +15,10 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useOptionalCookieConsent: () => ({ country: "US" }),
 }));
 
+jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
+  useAppWallets: () => ({ appWalletsSupported: false }),
+}));
+
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({

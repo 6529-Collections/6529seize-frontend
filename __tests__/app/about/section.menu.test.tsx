@@ -35,6 +35,10 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: () => ({ isIos: true }),
 }));
 
+jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
+  useAppWallets: () => ({ appWalletsSupported: false }),
+}));
+
 let country = "DE";
 let optionalCookieConsentCountry: string | undefined = "DE";
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
@@ -143,11 +147,11 @@ describe("About contents dropdown", () => {
 
     openContentsMenu();
 
-    expect(screen.getByText("Collections")).toBeInTheDocument();
-    expect(screen.getByText("Delegation")).toBeInTheDocument();
-    expect(screen.getByText("Network")).toBeInTheDocument();
-    expect(screen.getByText("Resources")).toBeInTheDocument();
-    expect(screen.getByText("Community")).toBeInTheDocument();
+    expect(screen.getByText("About 6529")).toBeInTheDocument();
+    expect(screen.getByText("Collections & Minting")).toBeInTheDocument();
+    expect(screen.getByText("Network & Reputation")).toBeInTheDocument();
+    expect(screen.getByText("Delegation & Wallets")).toBeInTheDocument();
+    expect(screen.getByText("Data & Developer Tools")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(screen.queryByText("Mission")).toBeNull();
   });
@@ -182,29 +186,47 @@ describe("About contents dropdown", () => {
     ).toHaveAttribute("href", "/about/cookie-policy");
   });
 
-  it("links to TDH and xTDH resource pages without moving their paths", async () => {
+  it("links to network resource pages without moving their paths", async () => {
     setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: /go to page: tdh/i })
+      screen.getByRole("menuitem", { name: "Go to page: TDH" })
     ).toHaveAttribute("href", "/network/tdh");
     expect(
-      screen.getByRole("menuitem", { name: /go to page: xtdh/i })
+      screen.getByRole("menuitem", { name: /go to page: xtdh overview/i })
     ).toHaveAttribute("href", "/network/xtdh");
     expect(
-      screen.getByRole("menuitem", { name: /go to page: health/i })
+      screen.getByRole("menuitem", {
+        name: /go to page: xtdh allocations dashboard/i,
+      })
+    ).toHaveAttribute("href", "/xtdh");
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: network health/i })
     ).toHaveAttribute("href", "/network/health");
     expect(
-      screen.getByRole("menuitem", { name: /go to page: definitions/i })
+      screen.getByRole("menuitem", {
+        name: /go to page: network definitions/i,
+      })
     ).toHaveAttribute("href", "/network/definitions");
     expect(
       screen.getByRole("menuitem", { name: /go to page: levels/i })
     ).toHaveAttribute("href", "/network/levels");
     expect(
-      screen.getByRole("menuitem", { name: /go to page: network stats/i })
+      screen.getByRole("menuitem", { name: /go to page: network tdh stats/i })
     ).toHaveAttribute("href", "/network/health/network-tdh");
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: network nerd/i })
+    ).toHaveAttribute("href", "/network/nerd");
+    expect(
+      screen.getByRole("menuitem", { name: /go to page: prenodes/i })
+    ).toHaveAttribute("href", "/network/prenodes");
+    expect(
+      screen.getByRole("menuitem", {
+        name: /go to page: tdh historic boosts/i,
+      })
+    ).toHaveAttribute("href", "/network/tdh/historic-boosts");
   });
 
   it("marks a network resource as current when rendered on that route", () => {
@@ -216,12 +238,14 @@ describe("About contents dropdown", () => {
     const trigger = screen.getByRole("button", {
       name: /open about contents navigation/i,
     });
-    expect(trigger).toHaveTextContent("Network Stats");
+    expect(trigger).toHaveTextContent("Network TDH Stats");
 
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: /network stats, current page/i })
+      screen.getByRole("menuitem", {
+        name: /network tdh stats, current page/i,
+      })
     ).toHaveAttribute("data-active", "true");
   });
 
@@ -232,7 +256,7 @@ describe("About contents dropdown", () => {
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: /go to page: subscriptions/i })
+      screen.getByRole("menuitem", { name: "Go to page: Subscriptions" })
     ).toHaveAttribute("href", "/about/subscriptions");
   });
 

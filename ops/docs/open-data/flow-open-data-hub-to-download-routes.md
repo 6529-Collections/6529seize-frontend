@@ -20,11 +20,11 @@ download link.
 
 ## Entry Points
 
-- Web sidebar (desktop and mobile web): `Tools -> Open Data -> Open Data`
+- Web sidebar (desktop and mobile web): `About -> Data & Developer Tools -> Open Data`
 - Web sidebar (desktop and mobile web): direct links to each dataset route under
-  `Tools -> Open Data`
-- Native app menu: `Tools -> Open Data -> Open Data`
-- Native app menu: direct links to each dataset route under `Tools -> Open Data`
+  `About -> Data & Developer Tools`
+- Native app menu: `About -> Data & Developer Tools -> Open Data`
+- Native app menu: direct links to each dataset route under `About -> Data & Developer Tools`
 - Direct URL: `/open-data` or any dataset route
 - About-page links from `/about/minting` and `/about/data-decentralization`
 
@@ -78,7 +78,7 @@ download link.
   - `/open-data/royalties`
 - Web sidebar includes direct links to all dataset routes.
 - Native app menu includes direct links to dataset routes under
-  `Tools -> Open Data`; hub cards and direct URLs also work.
+  `About -> Data & Developer Tools`; hub cards and direct URLs also work.
 - `Meme Subscriptions` can be hidden on the hub for native iOS app users outside
   the US, but the direct route still works.
 

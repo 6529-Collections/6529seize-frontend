@@ -10,6 +10,7 @@ export type GroupedLinkIndexIcon = ComponentType<{
 export type GroupedLinkIndexItem = {
   readonly id: string;
   readonly label: string;
+  readonly description?: string | undefined;
   readonly href: string;
   readonly Icon?: GroupedLinkIndexIcon | undefined;
 };
@@ -68,6 +69,7 @@ export default function GroupedLinkIndex({
                   const showAccessory =
                     item.Icon !== undefined || showArrows === true;
                   const Icon = item.Icon;
+                  const hasDescription = item.description !== undefined;
 
                   return (
                     <Link
@@ -75,8 +77,11 @@ export default function GroupedLinkIndex({
                       href={item.href}
                       aria-label={getCardAriaLabel(item.label)}
                       className={clsx(
-                        "tw-group tw-flex tw-h-full tw-min-h-20 tw-items-center tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-4 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-[#24386F] hover:tw-bg-[#050B1E] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black",
-                        showAccessory && "tw-gap-4"
+                        "tw-group tw-flex tw-h-full tw-min-h-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-4 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-[#24386F] hover:tw-bg-[#050B1E] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black",
+                        showAccessory && "tw-gap-4",
+                        hasDescription
+                          ? "tw-flex-col tw-items-start"
+                          : "tw-items-center"
                       )}
                     >
                       {Icon !== undefined && (
@@ -95,6 +100,11 @@ export default function GroupedLinkIndex({
                       >
                         {item.label}
                       </span>
+                      {hasDescription && (
+                        <span className="tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400 group-hover:tw-text-iron-200">
+                          {item.description}
+                        </span>
+                      )}
                       {showArrows && (
                         <ArrowRightIcon
                           aria-hidden="true"

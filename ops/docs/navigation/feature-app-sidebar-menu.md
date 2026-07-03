@@ -13,8 +13,9 @@ standalone row after `About`.
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, `About`, and the
-  gated `Drop Forge` row when available.
+- Primary rows/groups: `NFTs`, `Waves`, `DMs`, and `About`.
+- Gated primary row: `Drop Forge`, after `About`, only when the connected
+  wallet can access it.
 - Drawer header: connected profile avatar shortcut to
   `/{normalized-handle}` with `/{walletAddress}` fallback.
 - Footer actions: `Scan QR Code` (Capacitor + scanner support), then either
@@ -42,12 +43,12 @@ standalone row after `About`.
    - `NFTs`
    - `Waves`
    - `DMs`
-   - `Join 6529`
    - `About`
 5. Tap the connected profile avatar to open your own profile route
    (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `DMs` for
    `/messages`, use the standalone `Drop Forge` row when present, or expand
-   grouped sections for nested routes.
+   grouped sections for nested routes. About opens to group headings first,
+   then each group expands to its links.
 6. Drawer closes and route navigation runs.
 7. Use footer actions for QR scan, connect/session actions, push settings, and
    optional chain switching.
@@ -59,10 +60,13 @@ standalone row after `About`.
   `/nft-activity`, `/meme-calendar`.
 - Open `Waves`:
   `/waves` and `Discover Waves` at `/discover`.
-- Open `About > Network & People` and `About > Network Data`:
-  `/network`, `/network/activity`, `/network/groups`, `/network/tdh`, `/xtdh`,
+- Open `About > Network & Reputation`:
+  `/network`, `/network/activity`, `/network/groups`, `/network/tdh`,
+  `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
   `/network/wave-score`, `/rep/categories`, `/network/health`,
-  `/network/definitions`, `/network/levels`, `/network/health/network-tdh`.
+  `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,
+  `/network/nerd`, `/network/prenodes`, and
+  `/network/tdh/historic-boosts`.
 - Open `Drop Forge`:
   use the standalone row after `About` when the current wallet can access the
   landing route.
@@ -71,12 +75,12 @@ standalone row after `About`.
   `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`,
   `/delegation/wallet-checker`, `/tools/subscriptions-report`,
   `/meme-accounting`, `/meme-gas`, `/tools/api`, `/emma`,
-  `/tools/block-finder`, `/open-data`.
+  `/tools/block-finder`, `/open-data`, `/open-data/rememes` (`ReMemes Data`),
+  and `/open-data/team` (`Team Data`).
 - Open about routes:
   `/about/the-memes`, `/about/subscriptions`, `/about/meme-lab`,
-  `/about/6529-gradient`, `/about/gdrc1`, `/about/nft-delegation`,
-  `/about/primary-address`, `/capital`, `/capital/company-portfolio`,
-  `/capital/fund`, `/about/faq`, `/about/apply`, `/about/contact-us`,
+  `/about/gradients`, `/about/gdrc1`, `/about/nft-delegation`,
+  `/about/primary-address`, `/about/faq`, `/about/apply`, `/about/contact-us`,
   `/about/data-decentralization`, `/about/ens`, `/about/license`.
 - Open connected profile shortcut:
   tap the drawer-header avatar; it resolves `/{normalized-handle}` first, then
@@ -101,9 +105,9 @@ standalone row after `About`.
   connected wallet can access the landing route.
 - Profile avatar shortcut is unavailable when disconnected because the header
   shows the `6529` home link instead.
-- `NFTs`, `Waves`, and `About` are collapsible; section headers inside them are
-  labels, not links.
-- `App Wallets` appears inside `About > NFT & Reporting Tools` only when
+- `NFTs`, `Waves`, and `About` are collapsible; About group headers are nested
+  disclosure controls, not links.
+- `App Wallets` appears inside `About > Delegation & Wallets` only when
   app-wallet support is available.
 - `Scan QR Code` appears only when running in Capacitor with scanner support.
 - `Push Notifications` appears only when connected and opens an in-app modal.
