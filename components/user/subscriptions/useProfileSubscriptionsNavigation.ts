@@ -8,12 +8,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getProfileSubscriptionsHref } from "./subscriptionNavigation";
 
-const PROFILE_SUBSCRIPTIONS_CONNECT_TIMEOUT_MS = 120_000;
+const PROFILE_SUBSCRIPTIONS_CONNECT_TIMEOUT_MS = 5 * 60_000;
 const PROFILE_SUBSCRIPTIONS_PENDING_NAVIGATION_KEY =
   "6529:profile-subscriptions-pending-navigation";
 
 function getPendingNavigationExpiresAt(): number | undefined {
-  if (typeof globalThis.sessionStorage === "undefined") {
+  if (globalThis.sessionStorage === undefined) {
     return undefined;
   }
 
@@ -37,7 +37,7 @@ function getPendingNavigationExpiresAt(): number | undefined {
 }
 
 function clearStoredPendingNavigation(): void {
-  if (typeof globalThis.sessionStorage === "undefined") {
+  if (globalThis.sessionStorage === undefined) {
     return;
   }
 
@@ -67,7 +67,7 @@ function hasPendingNavigation(): boolean {
 }
 
 function storePendingNavigation(): void {
-  if (typeof globalThis.sessionStorage === "undefined") {
+  if (globalThis.sessionStorage === undefined) {
     return;
   }
 

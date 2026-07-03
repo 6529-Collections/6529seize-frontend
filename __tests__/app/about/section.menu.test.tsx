@@ -515,7 +515,7 @@ describe("About contents dropdown", () => {
       })
     );
     act(() => {
-      jest.advanceTimersByTime(120_000);
+      jest.advanceTimersByTime(5 * 60_000);
     });
 
     rerender(

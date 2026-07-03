@@ -214,7 +214,7 @@ export default function MemeSubscriptionAwarenessRow({
             tooltipLabel={tooltipLabel}
           />
           {safeSubscribedCount !== undefined && (
-            <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-leading-none tw-text-primary-300/75">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-none tw-text-primary-300/75">
               x
               {formatNumber(locale, safeSubscribedCount, {
                 maximumFractionDigits: 0,
@@ -233,7 +233,7 @@ export default function MemeSubscriptionAwarenessRow({
           <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
         </SubscriptionAction>
 
-        <div className="tw-flex tw-min-h-7 tw-min-w-0 tw-items-center tw-text-xs tw-leading-4 tw-text-primary-300/70">
+        <div className="tw-flex tw-min-h-7 tw-min-w-0 tw-items-center tw-text-sm tw-leading-4 tw-text-primary-300/70">
           <SubscribersCountText
             loading={subscribersCountLoading}
             safeSubscribersCount={safeSubscribersCount}
