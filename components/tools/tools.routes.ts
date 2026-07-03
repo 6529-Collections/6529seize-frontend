@@ -9,7 +9,7 @@ type ToolsContentsGroupId =
 
 type ToolsNavItemVisibility = "app-wallets" | "subscriptions";
 
-export type ToolsContentsNavItem = {
+type ToolsContentsNavItem = {
   readonly id: string;
   readonly href: string;
   readonly labelKey: MessageKey;
@@ -17,13 +17,13 @@ export type ToolsContentsNavItem = {
   readonly visibility?: ToolsNavItemVisibility | undefined;
 };
 
-export type ToolsContentsNavGroup = {
+type ToolsContentsNavGroup = {
   readonly id: ToolsContentsGroupId;
   readonly labelKey: MessageKey;
   readonly items: readonly ToolsContentsNavItem[];
 };
 
-export type ToolsVisibilityOptions = {
+type ToolsVisibilityOptions = {
   readonly appWalletsSupported: boolean;
   readonly hideSubscriptions: boolean;
 };
@@ -181,10 +181,6 @@ export function getVisibleToolsNavGroups(
 
 export function getToolsNavItemHref(item: ToolsContentsNavItem): string {
   return item.href;
-}
-
-export function getToolsNavItemMenuHref(item: ToolsContentsNavItem): string {
-  return item.menuHref ?? item.href;
 }
 
 export function getToolsNavItemId(item: ToolsContentsNavItem): string {
