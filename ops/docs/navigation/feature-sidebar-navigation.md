@@ -13,8 +13,10 @@ On web layouts, route switching is sidebar-first.
   nested route grouping shown in the expanded rail.
 - The 6529 logo links to `/`; there is no labeled `Home` product row.
 - Primary menu concepts are `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
-- `NFTs`, `Waves`, and `About` are expandable groups; `DMs` and `Join 6529`
+- `NFTs` and `About` are expandable groups; `Waves`, `DMs`, and `Join 6529`
   are direct rows.
+- The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
+  remains a secondary link inside the expanded Waves panel and is searchable.
 - When the connected wallet can access Drop Forge, the sidebar lists it inside
   `About` under `Developer & Open Data`.
 - `DMs` keeps a main-nav unread dot; connected users get a lower
@@ -37,7 +39,8 @@ On web layouts, route switching is sidebar-first.
 - Desktop and narrow desktop web: use sidebar chevron toggle.
 - Touch small-screen web: use header menu button.
 - Select direct rows or expand groups for nested routes.
-- Open `Discover Waves` from the `Waves` group.
+- Open `Waves` directly from the primary sidebar row.
+- Open `Discover Waves` from the expanded Waves panel header or search.
 - Open `Drop Forge` from `About > Developer & Open Data` when the current
   wallet can access `/drop-forge`.
 - Open `Search` from the desktop sidebar row.
@@ -52,7 +55,8 @@ On web layouts, route switching is sidebar-first.
 2. Switch primary sections with direct rows.
 3. Use lower utility rows for connected `Notifications`, connected `Profile`,
    or disconnected `Share`.
-4. Open `NFTs`, `Waves`, or `About` for nested routes.
+4. Open `NFTs` or `About` for nested routes; use the `Waves` row for direct
+   `/waves` navigation.
 5. In collapsed mode, group rows open anchored flyout submenus that preserve
    subsection labels such as `Network Data`, `Developer & Open Data`, or
    `Resources`.
@@ -65,7 +69,8 @@ On web layouts, route switching is sidebar-first.
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
   `/nft-activity`, `/meme-calendar`.
 - Open `Waves` routes:
-  `/waves` and `Discover Waves` at `/discover`.
+  use the primary `Waves` row for `/waves`; use `Discover Waves` in the Waves
+  panel header or search for `/discover`.
 - Open `About > Network & People` and `About > Network Data` routes:
   `/network`, `/network/activity`, `/network/groups`, `/network/tdh`,
   `/xtdh`, `/network/wave-score`, `/rep/categories`,
@@ -81,10 +86,10 @@ On web layouts, route switching is sidebar-first.
   optional `/open-data/meme-subscriptions`, `/open-data/rememes`,
   `/open-data/team`, `/open-data/royalties`.
 - Use collapsed-rail flyouts for grouped destinations:
-  `NFTs` keeps collection and NFT activity links, `Waves` keeps `Discover
-  Waves`, `Tools` keeps labels such as `NFT Delegation`, `The Memes Tools`,
-  `Builder Tools`, and `Open Data`, and `About` keeps subsection labels instead
-  of flattening every route into one list.
+  `NFTs` keeps collection and NFT activity links, `Tools` keeps labels such as
+  `NFT Delegation`, `The Memes Tools`, `Builder Tools`, and `Open Data`, and
+  `About` keeps subsection labels instead of flattening every route into one
+  list. `Waves` remains a direct row in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
 - Open connected `Notifications` from the lower row above `Profile`.
 - Open `Share` to generate QR/deep links for the current route:
@@ -96,10 +101,11 @@ On web layouts, route switching is sidebar-first.
 
 - `DMs` unread dots stay in the main nav; `Notifications` unread dots stay
   on the lower connected-only row.
-- `Discover Waves` is a secondary Waves link and routes to `/discover`.
+- `Discover Waves` is a secondary Waves panel/search link and routes to
+  `/discover`.
 - Connected user avatar unread dot reflects unread notifications on other
   connected accounts (not the active one).
-- Active grouped route auto-expands its section on route load/change.
+- Active grouped routes auto-expand their section on route load/change.
 - In collapsed mode, selecting the same group toggles flyout open/closed.
 - Collapsed flyouts keep subsection headers as labels; only the nested rows
   inside each subsection navigate.
