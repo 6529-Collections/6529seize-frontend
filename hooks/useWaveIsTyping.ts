@@ -9,9 +9,16 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 /*  Types                                                             */
 /* ------------------------------------------------------------------ */
 
+type TypingProfile = ApiProfileMin & { readonly handle: string };
+
 interface TypingEntry {
-  profile: ApiProfileMin;
+  profile: TypingProfile;
   lastTypingAt: number; // our local receive time (ms)
+}
+
+interface TypingMessageState {
+  readonly scopeKey: string;
+  readonly message: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -28,23 +35,66 @@ const CLEANUP_INTERVAL_MS = 1_000; // prune/check once per second
 function buildTypingString(entries: TypingEntry[]): string {
   if (entries.length === 0) return "";
 
-  // Highest‑level first (undefined → 0)
-  const sorted = entries.sort(
-    (a, b) => (b.profile.level ?? 0) - (a.profile.level ?? 0)
-  );
+  // Highest-level first.
+  const sorted = entries.sort((a, b) => b.profile.level - a.profile.level);
 
   const names = sorted.map((e) => e.profile.handle);
+  const firstName = names[0] ?? "";
+  const secondName = names[1] ?? "";
 
   if (names.length === 1) {
-    return `${names[0]} is typing`;
+    return `${firstName} is typing`;
   }
   if (names.length === 2) {
-    return `${names[0]}, ${names[1]} are typing`;
+    return `${firstName}, ${secondName} are typing`;
   }
-  return `${names[0]}, ${names[1]} and ${
+  return `${firstName}, ${secondName} and ${
     names.length - 2
   } more people are typing`;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isTypingProfile = (value: unknown): value is TypingProfile =>
+  isRecord(value) && typeof value["handle"] === "string";
+
+type ValidWsTypingMessage = WsTypingMessage & {
+  readonly data: WsTypingMessage["data"] & {
+    readonly profile: TypingProfile;
+  };
+};
+
+const isWsTypingMessage = (value: unknown): value is ValidWsTypingMessage => {
+  if (!isRecord(value) || value["type"] !== WsMessageType.USER_IS_TYPING) {
+    return false;
+  }
+
+  const data = value["data"];
+  if (!isRecord(data)) {
+    return false;
+  }
+
+  return (
+    typeof data["wave_id"] === "string" && isTypingProfile(data["profile"])
+  );
+};
+
+const isWsDropUpdateMessage = (
+  value: unknown
+): value is WsDropUpdateMessage => {
+  if (!isRecord(value) || value["type"] !== WsMessageType.DROP_UPDATE) {
+    return false;
+  }
+
+  const data = value["data"];
+  if (!isRecord(data)) {
+    return false;
+  }
+
+  const author = data["author"];
+  return isRecord(author) && typeof author["handle"] === "string";
+};
 
 /* ------------------------------------------------------------------ */
 /*  Hook                                                              */
@@ -60,38 +110,44 @@ function buildTypingString(entries: TypingEntry[]): string {
 export function useWaveIsTyping(
   waveId: string,
   myHandle: string | null,
-  disabled: boolean = false
+  disabled: boolean = false,
+  options?: { readonly enabled?: boolean | undefined }
 ): string {
-  const { socket } = useWaveWebSocket(disabled ? "" : waveId);
+  const enabled = options?.enabled ?? true;
+  const shouldSubscribe = enabled && !disabled;
+  const { socket } = useWaveWebSocket(shouldSubscribe ? waveId : "");
+  const scopeKey = `${waveId}:${shouldSubscribe ? "subscribed" : "paused"}`;
 
-  const [typingMessage, setTypingMessage] = useState("");
+  const [typingMessageState, setTypingMessageState] =
+    useState<TypingMessageState>({
+      scopeKey,
+      message: "",
+    });
 
   const typersRef = useRef<Map<string, TypingEntry>>(new Map());
 
   useEffect(() => {
     typersRef.current.clear();
-    setTypingMessage("");
-  }, [waveId, disabled]);
+  }, [scopeKey]);
 
   /* ----- 2. Handle incoming USER_IS_TYPING packets ----------------- */
   useEffect(() => {
-    if (!socket) return;
+    if (!shouldSubscribe || !socket) return;
 
     const onMessage = (event: MessageEvent) => {
-      let msg: WsTypingMessage | WsDropUpdateMessage;
+      let msg: unknown;
       try {
-        msg = JSON.parse(event.data);
+        msg = JSON.parse(String(event.data)) as unknown;
       } catch {
         return;
       }
-      if (msg.type === WsMessageType.DROP_UPDATE) {
-        typersRef.current.delete(msg.data?.author.handle ?? "");
+      if (isWsDropUpdateMessage(msg)) {
+        typersRef.current.delete(msg.data.author.handle);
       }
-      if (msg.type !== WsMessageType.USER_IS_TYPING) return;
+      if (!isWsTypingMessage(msg)) return;
       const data = msg.data;
-      if (!data || data.wave_id !== waveId) return;
-      if (data.profile?.handle === myHandle) return; // ignore myself
-      if (!data.profile?.handle) return;
+      if (data.wave_id !== waveId) return;
+      if (data.profile.handle === myHandle) return; // ignore myself
       // Use local clock for freshness (avoids clock‑skew issues)
       typersRef.current.set(data.profile.handle, {
         profile: data.profile,
@@ -102,14 +158,16 @@ export function useWaveIsTyping(
     const currentSocket = socket;
     currentSocket.addEventListener("message", onMessage);
     return () => {
-      if (currentSocket) {
-        currentSocket.removeEventListener("message", onMessage);
-      }
+      currentSocket.removeEventListener("message", onMessage);
     };
-  }, [socket, waveId, myHandle]);
+  }, [socket, waveId, myHandle, shouldSubscribe]);
 
   /* ----- 3. Periodic cleanup + state update ------------------------ */
   useEffect(() => {
+    if (!shouldSubscribe) {
+      return;
+    }
+
     const intervalId = setInterval(() => {
       const now = Date.now();
       // Prune stale typers
@@ -125,11 +183,17 @@ export function useWaveIsTyping(
       );
 
       // Only trigger re‑render if text actually changed
-      setTypingMessage((prev) => (prev === newMessage ? prev : newMessage));
+      setTypingMessageState((prev) =>
+        prev.scopeKey === scopeKey && prev.message === newMessage
+          ? prev
+          : { scopeKey, message: newMessage }
+      );
     }, CLEANUP_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, []); // stable for entire lifespan
+  }, [scopeKey, shouldSubscribe]);
 
-  return typingMessage;
+  return shouldSubscribe && typingMessageState.scopeKey === scopeKey
+    ? typingMessageState.message
+    : "";
 }
