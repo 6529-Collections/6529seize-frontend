@@ -2,7 +2,7 @@
 
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
-import styles from "@/components/nft-image/NFTImage.module.scss";
+import styles from "@/components/nft-image/NFTImage.module.css";
 import NFTModel from "@/components/nft-image/NFTModel";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 

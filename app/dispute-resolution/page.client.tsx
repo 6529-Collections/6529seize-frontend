@@ -1,7 +1,7 @@
 "use client";
 
 import { useSetTitle } from "@/contexts/TitleContext";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { AboutSection } from "@/types/enums";
 import Link from "next/link";
 import {

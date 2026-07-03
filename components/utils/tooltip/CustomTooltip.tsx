@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { CUSTOM_TOOLTIP_CLOSE_ALL_EVENT } from "@/helpers/tooltip.helpers";
-import styles from "./CustomTooltip.module.scss";
+import styles from "./CustomTooltip.module.css";
 import {
   calculateTooltipLayout,
   getTooltipWindow,
@@ -457,22 +457,13 @@ export default function CustomTooltip({
           >
             <div className={styles["tooltipContent"]}>{content}</div>
             {showArrow && (
-              <>
-                <div
-                  className={joinTooltipClassNames(
-                    styles["tooltipArrowBridge"],
-                    styles["tooltipArrowBridge--" + actualPlacement]
-                  )}
-                  style={arrowStyle}
-                />
-                <div
-                  className={joinTooltipClassNames(
-                    styles["tooltipArrow"],
-                    styles["tooltipArrow--" + actualPlacement]
-                  )}
-                  style={arrowStyle}
-                />
-              </>
+              <div
+                className={joinTooltipClassNames(
+                  styles["tooltipArrow"],
+                  styles["tooltipArrow--" + actualPlacement]
+                )}
+                style={arrowStyle}
+              />
             )}
           </div>,
           document.body

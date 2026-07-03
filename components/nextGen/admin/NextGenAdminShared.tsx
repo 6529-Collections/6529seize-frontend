@@ -5,7 +5,7 @@ import type {
   ComponentPropsWithoutRef,
   ReactNode,
 } from "react";
-import styles from "./NextGenAdmin.module.scss";
+import styles from "./NextGenAdmin.module.css";
 
 const adminPrimaryButtonClassName =
   "tw-bg-[#267c93] tw-text-white hover:tw-bg-[#20697d]";

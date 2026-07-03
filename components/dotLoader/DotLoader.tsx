@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import styles from "./DotLoader.module.scss";
+import styles from "./DotLoader.module.css";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 export default function DotLoader() {

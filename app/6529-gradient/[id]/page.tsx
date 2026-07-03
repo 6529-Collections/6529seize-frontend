@@ -10,7 +10,7 @@ import {
   buildNftPageJsonLd,
   fetchNftForStructuredData,
 } from "@/lib/structured-data/nft";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 import { cache } from "react";
 

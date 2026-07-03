@@ -6,7 +6,7 @@ import {
   getDelegationRouteMetadata,
 } from "@/components/delegation/delegation-page-metadata";
 import { useSetTitle } from "@/contexts/TitleContext";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { DelegationCenterSection } from "@/types/enums";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

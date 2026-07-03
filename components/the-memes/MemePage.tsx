@@ -48,7 +48,7 @@ import {
   MEME_FOCUS,
   MEME_TABS,
 } from "./MemeShared";
-import styles from "./TheMemes.module.scss";
+import styles from "./TheMemes.module.css";
 import UpcomingMemePage from "./UpcomingMemePage";
 
 const MemePageActivity = dynamic(() =>

@@ -36,7 +36,7 @@ import {
 } from "../nextGen/collections/nextgenToken/NextGenTokenImage";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
-import styles from "./LatestActivity.module.scss";
+import styles from "./LatestActivity.module.css";
 
 function calculateRoyaltiesPercentage(value: number, royalties: number) {
   return Math.round((royalties / value) * 10000) / 10000;

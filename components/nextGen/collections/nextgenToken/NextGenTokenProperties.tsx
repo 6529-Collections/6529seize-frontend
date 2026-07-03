@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./NextGenToken.module.scss";
+import styles from "./NextGenToken.module.css";
 
 import type {
   NextGenCollection,

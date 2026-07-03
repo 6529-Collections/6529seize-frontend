@@ -11,7 +11,7 @@ import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
 import { DistributionLink } from "../NextGen";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
 import NextGenTraitSets from "./NextGenTraitSets";
 

@@ -10,7 +10,7 @@ import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import { useEffect, useState } from "react";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionArtist from "./NextGenCollectionArtist";

@@ -1,5 +1,5 @@
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import SlideshowHeader from "./hooks/SlideshowHeader";
 import TokenSlideshow from "./hooks/TokenSlideshow";
 

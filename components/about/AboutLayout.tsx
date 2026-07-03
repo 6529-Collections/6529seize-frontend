@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import type { HTMLAttributes, TableHTMLAttributes } from "react";
 
-import styles from "./AboutLayout.module.scss";
+import styles from "./AboutLayout.module.css";
 
 type AboutContainerProps = HTMLAttributes<HTMLDivElement> & {
   readonly fluid?: boolean;
