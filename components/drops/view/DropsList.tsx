@@ -3,6 +3,7 @@
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import LightDrop from "@/components/waves/drops/LightDrop";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
+import { WaveDropMobileMenuProvider } from "@/components/waves/drops/WaveDropMobileMenuContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type {
   Drop as DropType,
@@ -265,7 +266,7 @@ const DropsList = memo(
       [unreadDividerSerialNo]
     );
 
-    return useMemo(() => {
+    const renderedDrops = useMemo(() => {
       return orderedDrops.flatMap((drop, i) => {
         const previousDrop = orderedDrops[i - 1] ?? null;
         const nextDrop = orderedDrops[i + 1] ?? null;
@@ -341,6 +342,10 @@ const DropsList = memo(
       renderUnreadDivider,
       suspendLightDropHydration,
     ]);
+
+    return (
+      <WaveDropMobileMenuProvider>{renderedDrops}</WaveDropMobileMenuProvider>
+    );
   }
 );
 

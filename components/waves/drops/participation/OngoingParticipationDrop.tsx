@@ -13,7 +13,10 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import WaveDropActions from "../WaveDropActions";
-import WaveDropMobileMenu from "../WaveDropMobileMenu";
+import {
+  useWaveDropMobileMenu,
+  WaveDropMobileMenuProvider,
+} from "../WaveDropMobileMenuContext";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
 import ParticipationDropContainer from "./ParticipationDropContainer";
@@ -63,7 +66,7 @@ interface OngoingParticipationDropProps {
   readonly maxEmbedDepth?: number | undefined;
 }
 
-export default function OngoingParticipationDrop({
+function OngoingParticipationDropInner({
   drop,
   showWaveInfo,
   activeDrop,
@@ -95,6 +98,7 @@ export default function OngoingParticipationDrop({
   const isMobileScreen = useIsMobileScreen();
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
+  const mobileMenu = useWaveDropMobileMenu();
   const identityProfile = getParticipationIdentityProfile({
     wave: drop.wave,
     metadata: drop.metadata,
@@ -134,16 +138,19 @@ export default function OngoingParticipationDrop({
 
     setIsSlideUp(false);
     setLongPressTriggered(false);
-  }, [canUseTouchActionSheet]);
+    mobileMenu?.close();
+  }, [canUseTouchActionSheet, mobileMenu]);
 
   const handleOnReply = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
-  }, [onReply, drop, activePartIndex]);
+  }, [onReply, drop, activePartIndex, mobileMenu]);
 
   const handleOnAddReaction = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
-  }, []);
+  }, [mobileMenu]);
 
   const handleVoteButtonClick = useCallback(() => {
     openVoteModal();
@@ -175,6 +182,34 @@ export default function OngoingParticipationDrop({
     />
   );
   const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
+
+  const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
+
+  useEffect(() => {
+    if (!showInteractions || !effectiveIsSlideUp) {
+      return;
+    }
+
+    mobileMenu?.open({
+      drop,
+      longPressTriggered,
+      showReplyAndQuote,
+      onOpenChange: setIsSlideUp,
+      onReply: handleOnReply,
+      onAddReaction: handleOnAddReaction,
+      showVoting: !isVotingActionLocked,
+    });
+  }, [
+    drop,
+    effectiveIsSlideUp,
+    handleOnAddReaction,
+    handleOnReply,
+    isVotingActionLocked,
+    longPressTriggered,
+    mobileMenu,
+    showInteractions,
+    showReplyAndQuote,
+  ]);
 
   return (
     <ParticipationDropContainer
@@ -286,32 +321,22 @@ export default function OngoingParticipationDrop({
       </div>
 
       {showInteractions &&
+        isVoteModalOpen &&
         (isMobileScreen ? (
-          <MobileVotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
+          <MobileVotingModal drop={drop} isOpen onClose={closeVoteModal} />
         ) : (
-          <VotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
+          <VotingModal drop={drop} isOpen onClose={closeVoteModal} />
         ))}
-
-      {showInteractions && (
-        <WaveDropMobileMenu
-          drop={drop}
-          isOpen={isSlideUp && canUseTouchActionSheet}
-          longPressTriggered={longPressTriggered}
-          showReplyAndQuote={showReplyAndQuote}
-          setOpen={setIsSlideUp}
-          onReply={handleOnReply}
-          onAddReaction={handleOnAddReaction}
-          showVoting={!isVotingActionLocked}
-        />
-      )}
     </ParticipationDropContainer>
+  );
+}
+
+export default function OngoingParticipationDrop(
+  props: OngoingParticipationDropProps
+) {
+  return (
+    <WaveDropMobileMenuProvider>
+      <OngoingParticipationDropInner {...props} />
+    </WaveDropMobileMenuProvider>
   );
 }

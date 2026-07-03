@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
+import {
+  useWaveDropMobileMenu,
+  WaveDropMobileMenuProvider,
+} from "./WaveDropMobileMenuContext";
 
 interface DropMobileMenuHandlerProps {
   readonly drop: ExtendedDrop;
@@ -16,7 +19,7 @@ interface DropMobileMenuHandlerProps {
 const LONG_PRESS_DURATION = 500; // milliseconds
 const MOVE_THRESHOLD = 10; // pixels
 
-export default function DropMobileMenuHandler({
+function DropMobileMenuHandlerInner({
   drop,
   children,
   showReplyAndQuote,
@@ -26,6 +29,7 @@ export default function DropMobileMenuHandler({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const { canUseTouchActionSheet } = useDropActionInteractionMode();
+  const mobileMenu = useWaveDropMobileMenu();
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
@@ -86,13 +90,15 @@ export default function DropMobileMenuHandler({
   };
 
   const handleOnReply = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
     onReply();
-  }, [onReply]);
+  }, [mobileMenu, onReply]);
 
   const handleOnAddReaction = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
-  }, []);
+  }, [mobileMenu]);
 
   useEffect(() => {
     return () => {
@@ -115,8 +121,34 @@ export default function DropMobileMenuHandler({
 
     setIsSlideUp(false);
     setLongPressTriggered(false);
+    mobileMenu?.close();
     clearSuppression();
-  }, [canUseTouchActionSheet, clearSuppression]);
+  }, [canUseTouchActionSheet, clearSuppression, mobileMenu]);
+
+  const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
+
+  useEffect(() => {
+    if (!effectiveIsSlideUp) {
+      return;
+    }
+
+    mobileMenu?.open({
+      drop,
+      longPressTriggered,
+      showReplyAndQuote,
+      onOpenChange: setIsSlideUp,
+      onReply: handleOnReply,
+      onAddReaction: handleOnAddReaction,
+    });
+  }, [
+    drop,
+    effectiveIsSlideUp,
+    handleOnAddReaction,
+    handleOnReply,
+    longPressTriggered,
+    mobileMenu,
+    showReplyAndQuote,
+  ]);
 
   const rootClassName = canUseTouchActionSheet
     ? "touch-action-sheet-select-none"
@@ -131,16 +163,17 @@ export default function DropMobileMenuHandler({
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
     >
-      {children} {/* Mobile menu */}
-      <WaveDropMobileMenu
-        drop={drop}
-        isOpen={isSlideUp && canUseTouchActionSheet}
-        longPressTriggered={longPressTriggered}
-        showReplyAndQuote={showReplyAndQuote}
-        setOpen={setIsSlideUp}
-        onReply={handleOnReply}
-        onAddReaction={handleOnAddReaction}
-      />
+      {children}
     </div>
+  );
+}
+
+export default function DropMobileMenuHandler(
+  props: DropMobileMenuHandlerProps
+) {
+  return (
+    <WaveDropMobileMenuProvider>
+      <DropMobileMenuHandlerInner {...props} />
+    </WaveDropMobileMenuProvider>
   );
 }

@@ -24,7 +24,10 @@ import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
 import WaveDropHeader from "../WaveDropHeader";
 import WaveDropMetadata from "../WaveDropMetadata";
-import WaveDropMobileMenu from "../WaveDropMobileMenu";
+import {
+  useWaveDropMobileMenu,
+  WaveDropMobileMenuProvider,
+} from "../WaveDropMobileMenuContext";
 import WaveDropRatings from "../WaveDropRatings";
 import WaveDropReactions from "../WaveDropReactions";
 import WaveDropReply from "../WaveDropReply";
@@ -74,7 +77,7 @@ interface DefautWinnerDropProps {
   readonly maxEmbedDepth?: number | undefined;
 }
 
-const DefaultWinnerDrop = ({
+const DefaultWinnerDropInner = ({
   drop,
   showWaveInfo,
   activeDrop,
@@ -107,6 +110,7 @@ const DefaultWinnerDrop = ({
   const isStorm = drop.parts.length > 1;
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
+  const mobileMenu = useWaveDropMobileMenu();
 
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
@@ -138,16 +142,19 @@ const DefaultWinnerDrop = ({
 
     setIsSlideUp(false);
     setLongPressTriggered(false);
-  }, [canUseTouchActionSheet]);
+    mobileMenu?.close();
+  }, [canUseTouchActionSheet, mobileMenu]);
 
   const handleOnReply = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
-  }, [onReply, drop, activePartIndex]);
+  }, [onReply, drop, activePartIndex, mobileMenu]);
 
   const handleOnAddReaction = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
-  }, []);
+  }, [mobileMenu]);
   const identityHeader =
     identityMode === "minimal" ? (
       <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
@@ -167,6 +174,31 @@ const DefaultWinnerDrop = ({
         timestampLayout={timestampLayout}
       />
     );
+  const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
+
+  useEffect(() => {
+    if (!showInteractions || !effectiveIsSlideUp) {
+      return;
+    }
+
+    mobileMenu?.open({
+      drop,
+      longPressTriggered,
+      showReplyAndQuote,
+      onOpenChange: setIsSlideUp,
+      onReply: handleOnReply,
+      onAddReaction: handleOnAddReaction,
+    });
+  }, [
+    drop,
+    effectiveIsSlideUp,
+    handleOnAddReaction,
+    handleOnReply,
+    longPressTriggered,
+    mobileMenu,
+    showInteractions,
+    showReplyAndQuote,
+  ]);
 
   return (
     <div
@@ -306,19 +338,16 @@ const DefaultWinnerDrop = ({
           </div>
         )}
       </div>
-      {showInteractions && (
-        <WaveDropMobileMenu
-          drop={drop}
-          isOpen={isSlideUp && canUseTouchActionSheet}
-          longPressTriggered={longPressTriggered}
-          showReplyAndQuote={showReplyAndQuote}
-          setOpen={setIsSlideUp}
-          onReply={handleOnReply}
-          onAddReaction={handleOnAddReaction}
-        />
-      )}
     </div>
   );
 };
+
+const MemoizedDefaultWinnerDropInner = memo(DefaultWinnerDropInner);
+
+const DefaultWinnerDrop = (props: DefautWinnerDropProps) => (
+  <WaveDropMobileMenuProvider>
+    <MemoizedDefaultWinnerDropInner {...props} />
+  </WaveDropMobileMenuProvider>
+);
 
 export default memo(DefaultWinnerDrop);
