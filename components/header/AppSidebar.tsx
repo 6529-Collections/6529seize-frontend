@@ -90,6 +90,7 @@ export default function AppSidebar({
         path: "/join",
         icon: UserPlusIcon,
       },
+      sectionMap.get("tools"),
       sectionMap.get("about"),
     ].flatMap((item): SidebarMenu => {
       if (item === undefined) {

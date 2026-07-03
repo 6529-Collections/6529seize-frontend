@@ -9,14 +9,28 @@
       "kind": "route",
       "title": "6529.io home",
       "aliases": ["home", "homepage", "landing page", "6529 home"],
-      "keywords": ["home", "latest", "mint", "coming", "discover", "mission"],
+      "keywords": [
+        "home",
+        "latest",
+        "mint",
+        "coming",
+        "discover",
+        "mission",
+        "subscriptions"
+      ],
       "facts": [
         "The home page is the main 6529.io entry point.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",
-      "related_paths": ["/the-memes", "/waves"],
+      "related_paths": [
+        "/the-memes",
+        "/waves",
+        "/about/subscriptions",
+        "/{user}/subscriptions"
+      ],
       "tags": ["home", "navigation"],
       "source_refs": ["ops/docs/home/README.md"]
     },
@@ -90,6 +104,8 @@
         "contents",
         "navigation",
         "collections",
+        "digital rights",
+        "gdrc",
         "delegation",
         "resources",
         "community",
@@ -103,13 +119,15 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links.",
-        "The primary About navigation menu also owns Network, Delegation, Tools, Open Data, technical, reference, and legal destinations.",
-        "Use the About index when users want to browse all About pages or find the right policy, collection, delegation, resource, community, or technical page."
+        "It groups About pages into Collections, Digital Rights, Delegation, Network, Resources, Community, and Legal label-only link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links.",
+        "The GDRC page is listed under Digital Rights, separate from Delegation.",
+        "The primary About navigation menu also owns Network, Delegation, reporting tools, Open Data, technical, reference, and legal destinations.",
+        "Use the About index when users want to browse all About pages or find the right policy, collection, digital-rights, delegation, resource, community, or technical page."
       ],
       "canonical_path": "/about",
       "related_paths": [
         "/about/the-memes",
+        "/about/gdrc1",
         "/about/faq",
         "/about/tech",
         "/about/terms-of-service",
@@ -383,13 +401,19 @@
       "keywords": ["gdrc1", "gdrc", "charter", "digital", "rights", "about"],
       "facts": [
         "The GDRC1 page lives at /about/gdrc1.",
+        "GDRC stands for Global Digital Rights Charter.",
+        "GDRC is separate from NFT Delegation and is not the Global Delegation Rights Contract.",
         "The page states that 6529 supports the Global Digital Rights Charter 1.",
-        "The page links to digitalrightscharter.org and displays the full text of GDRC1."
+        "The page links to digitalrightscharter.org and displays the full text of GDRC1.",
+        "The About index lists GDRC under Digital Rights, not Delegation."
       ],
       "canonical_path": "/about/gdrc1",
       "related_paths": ["/about/faq"],
       "tags": ["about", "rights", "gdrc1"],
-      "source_refs": ["components/about/AboutGDRC1.tsx"]
+      "source_refs": [
+        "components/about/AboutGDRC1.tsx",
+        "components/about/about.routes.ts"
+      ]
     },
     {
       "id": "about.nft-delegation",
@@ -1635,8 +1659,8 @@
         "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
         "Automatic rules are generated from wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators can add display-only custom rules that are saved as wave metadata.",
-        "Creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
-        "Wave admins can edit display-only custom rules and acceptance-required rules later from wave settings.",
+        "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
+        "Wave admins can edit display-only custom rules later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
         "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
       ],
       "canonical_path": "/waves/create",
@@ -5166,6 +5190,53 @@
       "source_refs": [
         "app/open-data/royalties/page.tsx",
         "ops/docs/open-data/feature-royalties-uploads.md"
+      ]
+    },
+    {
+      "id": "tools.index",
+      "kind": "route",
+      "title": "Tools index",
+      "aliases": [
+        "tools",
+        "tools page",
+        "tools index",
+        "tools landing page",
+        "6529 tools",
+        "tool categories"
+      ],
+      "keywords": [
+        "tools",
+        "navigation",
+        "delegation",
+        "memes",
+        "api",
+        "emma",
+        "block finder",
+        "open data",
+        "app wallets"
+      ],
+      "facts": [
+        "The Tools index page lives at /tools.",
+        "It groups label-only tool cards into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
+        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
+        "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
+        "Private operator routes and local-only tools are not listed on the public Tools index."
+      ],
+      "canonical_path": "/tools",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/tools/subscriptions-report",
+        "/tools/api",
+        "/tools/block-finder",
+        "/emma",
+        "/open-data"
+      ],
+      "tags": ["tools", "navigation"],
+      "source_refs": [
+        "app/tools/page.tsx",
+        "components/tools/ToolsIndex.tsx",
+        "components/tools/tools.routes.ts",
+        "ops/docs/api-tool/feature-tools-index.md"
       ]
     },
     {
