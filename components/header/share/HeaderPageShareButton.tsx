@@ -13,7 +13,7 @@ import { useState } from "react";
 function getCurrentPublicUrl(): string {
   const currentWindow = globalThis.window;
   const route =
-    typeof currentWindow === "undefined"
+    currentWindow === undefined
       ? "/"
       : `${currentWindow.location.pathname}${currentWindow.location.search}${currentWindow.location.hash}`;
   const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
@@ -22,9 +22,9 @@ function getCurrentPublicUrl(): string {
 }
 
 function getShareTitle(): string {
-  const currentDocument = globalThis.document;
-  if (typeof currentDocument !== "undefined" && currentDocument.title.trim()) {
-    return currentDocument.title;
+  const title = globalThis.document?.title;
+  if (title?.trim()) {
+    return title;
   }
 
   return "6529";
