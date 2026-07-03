@@ -51,6 +51,21 @@ export function UserPageXtdhGrantListItem({
     null
   );
 
+  function handleGrantMutationSuccess(message: string): void {
+    setToast({
+      type: "success",
+      message,
+    });
+    queryClient
+      .invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] })
+      .catch(() => undefined);
+    const identity = grant.grantor.handle ?? grant.grantor.primary_address;
+    if (identity) {
+      invalidateIdentityTdhStats({ identity });
+    }
+    setActiveModal(null);
+  }
+
   const stopGrant = useMutation({
     mutationFn: async () => {
       await commonApiPost({
@@ -61,18 +76,7 @@ export function UserPageXtdhGrantListItem({
       });
     },
     onSuccess: () => {
-      setToast({
-        type: "success",
-        message: "Grant stopped.",
-      });
-      queryClient
-        .invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] })
-        .catch(() => undefined);
-      const identity = grant.grantor.handle ?? grant.grantor.primary_address;
-      if (identity) {
-        invalidateIdentityTdhStats({ identity });
-      }
-      setActiveModal(null);
+      handleGrantMutationSuccess("Grant stopped.");
     },
     onError: () => {
       setToast({
@@ -92,18 +96,7 @@ export function UserPageXtdhGrantListItem({
       });
     },
     onSuccess: () => {
-      setToast({
-        type: "success",
-        message: "Grant revoked.",
-      });
-      queryClient
-        .invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] })
-        .catch(() => undefined);
-      const identity = grant.grantor.handle ?? grant.grantor.primary_address;
-      if (identity) {
-        invalidateIdentityTdhStats({ identity });
-      }
-      setActiveModal(null);
+      handleGrantMutationSuccess("Grant revoked.");
     },
     onError: () => {
       setToast({

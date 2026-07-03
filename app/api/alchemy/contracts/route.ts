@@ -5,6 +5,7 @@ import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { normaliseAddress } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
+import { readJsonBody } from "../readJsonBody";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 const MAX_CONTRACTS_PER_REQUEST = 50;
@@ -129,60 +130,6 @@ function contractErrorEntry(
     error,
     status,
   };
-}
-
-async function readJsonBody(
-  request: NextRequest
-): Promise<
-  { ok: true; body: unknown } | { ok: false; response: NextResponse }
-> {
-  const contentLengthHeader = request.headers.get("content-length");
-  if (contentLengthHeader) {
-    const contentLength = Number(contentLengthHeader);
-    if (
-      !Number.isFinite(contentLength) ||
-      contentLength < 0 ||
-      contentLength > MAX_BODY_BYTES
-    ) {
-      return {
-        ok: false,
-        response: jsonError("Request body is too large", 413),
-      };
-    }
-  }
-
-  const reader = request.body?.getReader();
-  if (!reader) {
-    return { ok: false, response: jsonError("Invalid JSON payload") };
-  }
-
-  const decoder = new TextDecoder();
-  let totalBytes = 0;
-  let rawBody = "";
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    totalBytes += value.byteLength;
-    if (totalBytes > MAX_BODY_BYTES) {
-      return {
-        ok: false,
-        response: jsonError("Request body is too large", 413),
-      };
-    }
-    rawBody += decoder.decode(value, { stream: true });
-  }
-
-  rawBody += decoder.decode();
-
-  try {
-    const parsedBody: unknown = JSON.parse(rawBody);
-    return { ok: true, body: parsedBody };
-  } catch {
-    return { ok: false, response: jsonError("Invalid JSON payload") };
-  }
 }
 
 function parseRequestBody(body: unknown): ParseResult {
@@ -326,7 +273,11 @@ async function fetchContractMetadataEntry({
 }
 
 export async function POST(request: NextRequest) {
-  const bodyResult = await readJsonBody(request);
+  const bodyResult = await readJsonBody<unknown>({
+    request,
+    maxBodyBytes: MAX_BODY_BYTES,
+    jsonError,
+  });
   if (!bodyResult.ok) {
     return bodyResult.response;
   }
