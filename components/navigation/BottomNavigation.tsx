@@ -5,6 +5,7 @@ import React, {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -13,6 +14,7 @@ import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
+  getNotificationsRoute,
   usesReverseMobileBottomNavigationScroll,
 } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -23,28 +25,31 @@ import { t } from "@/i18n/messages";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
+import DiscoverIcon from "../common/icons/DiscoverIcon";
+import LogoIcon from "../common/icons/LogoIcon";
 import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
+import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
 import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import type { NavItem as NavItemData } from "./navTypes";
 import { getActiveViewFromUrl } from "./ViewContext";
-import { DocumentTextIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 
 const BOTTOM_NAVIGATION_LOCALE = DEFAULT_LOCALE;
 
 const items: NavItemData[] = [
   {
     kind: "route",
-    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.nfts"),
-    href: "/the-memes",
-    icon: "nfts",
-    iconComponent: CollectionsMenuIcon,
+    name: "Discovery",
+    href: "/discover",
+    icon: "discover",
+    iconComponent: DiscoverIcon,
   },
   {
     kind: "view",
-    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.waves"),
+    name: "Waves",
     viewKey: "waves",
     icon: "waves",
     iconComponent: WavesIcon,
@@ -52,24 +57,39 @@ const items: NavItemData[] = [
   },
   {
     kind: "view",
-    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.dms"),
+    name: "Messages",
     viewKey: "messages",
     icon: "messages",
     iconComponent: ChatBubbleIcon,
   },
   {
     kind: "route",
-    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.join6529"),
-    href: "/join",
-    icon: "join",
-    iconComponent: UserPlusIcon,
+    name: "Home",
+    href: "/",
+    icon: "home",
+    iconComponent: LogoIcon,
+    iconSizeClass: "tw-size-9",
   },
   {
     kind: "route",
-    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.about"),
-    href: "/about",
-    icon: "about",
-    iconComponent: DocumentTextIcon,
+    name: "Network",
+    href: "/network",
+    icon: "network",
+    iconComponent: UsersIcon,
+  },
+  {
+    kind: "route",
+    name: "Collections",
+    href: "/the-memes",
+    icon: "collections",
+    iconComponent: CollectionsMenuIcon,
+  },
+  {
+    kind: "route",
+    name: "Notifications",
+    href: "/notifications",
+    icon: "notifications",
+    iconComponent: BellIcon,
   },
 ];
 
@@ -423,7 +443,18 @@ const BottomNavigationResolvedContent: React.FC<
     };
   }, [hidden, registerRef]);
 
-  const navItems = items;
+  const navItems = useMemo(
+    () =>
+      items.map((item) =>
+        item.name === "Notifications"
+          ? {
+              ...item,
+              href: getNotificationsRoute(isApp),
+            }
+          : item
+      ),
+    [isApp]
+  );
   const profileHref = getProfileHref({
     address,
     handle: connectedProfile?.handle,
