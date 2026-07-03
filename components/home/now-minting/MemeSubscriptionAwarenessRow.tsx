@@ -76,7 +76,7 @@ function SubscriptionAction({
   onClick?: (() => void | Promise<void>) | undefined;
 }>) {
   const className =
-    "tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-200 disabled:tw-cursor-wait disabled:tw-opacity-60";
+    "tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-200 disabled:tw-cursor-wait disabled:tw-opacity-60";
   const handleClick = () => {
     Promise.resolve(onClick?.()).catch((error: unknown) => {
       console.error("Failed to open profile subscriptions", error);

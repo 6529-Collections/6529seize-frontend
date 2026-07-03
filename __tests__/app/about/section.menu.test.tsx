@@ -98,10 +98,12 @@ describe("About contents dropdown", () => {
     mockRouterPush.mockClear();
     mockSeizeConnectFresh.mockClear();
     mockSeizeConnectFresh.mockResolvedValue(undefined);
+    globalThis.sessionStorage?.clear();
     jest.useRealTimers();
   });
 
   afterEach(() => {
+    globalThis.sessionStorage?.clear();
     jest.useRealTimers();
   });
 
@@ -394,6 +396,53 @@ describe("About contents dropdown", () => {
         true
       )
     );
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
+    });
+  });
+
+  it("preserves subscriptions redirect through connect/auth remounts", async () => {
+    setCookieCountry("US");
+    const setToast = jest.fn();
+    const connectedProfile = {
+      handle: "test-handle",
+      normalised_handle: "test-handle",
+      primary_wallet: "0x123",
+      wallets: [],
+    };
+    const renderButton = (
+      connectedProfileValue: unknown,
+      isAuthenticated = false
+    ) => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: connectedProfileValue,
+            isAuthenticated,
+            setToast,
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+    const firstRender = render(renderButton(null));
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /connect to subscribe/i,
+      })
+    );
+    firstRender.unmount();
+
+    const { rerender } = render(renderButton(connectedProfile, false));
+    expect(mockRouterPush).not.toHaveBeenCalled();
+
+    rerender(renderButton(connectedProfile, true));
 
     await waitFor(() => {
       expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
