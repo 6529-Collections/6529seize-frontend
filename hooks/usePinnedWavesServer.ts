@@ -105,12 +105,13 @@ async function fetchPinnedWavesPages(): Promise<SidebarWave[]> {
 function usePinnedWavesQuery(
   queryClient: QueryClient,
   queryKey: PinnedWavesQueryKey,
-  isAuthenticated: boolean
+  enabled: boolean,
+  shouldClearCache: boolean
 ) {
   const query = useQuery<SidebarWave[], Error>({
     queryKey,
     queryFn: fetchPinnedWavesPages,
-    enabled: isAuthenticated,
+    enabled,
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
     refetchInterval: PINNED_WAVES_REFETCH_INTERVAL,
@@ -118,10 +119,10 @@ function usePinnedWavesQuery(
   });
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (shouldClearCache) {
       queryClient.setQueryData(queryKey, []);
     }
-  }, [isAuthenticated, queryClient, queryKey]);
+  }, [queryClient, queryKey, shouldClearCache]);
 
   return query;
 }
@@ -379,7 +380,13 @@ function usePinnedWaveMutations(
   return { pinMutation, unpinMutation };
 }
 
-export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
+interface UsePinnedWavesServerOptions {
+  readonly enabled?: boolean | undefined;
+}
+
+export function usePinnedWavesServer(
+  options: UsePinnedWavesServerOptions = {}
+): UsePinnedWavesServerReturn {
   const {
     connectedProfile,
     activeProfileProxy,
@@ -399,6 +406,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const isPendingAuthSwitch = Boolean(
     address && (!hasValidWalletAuthorization || fetchingProfile)
   );
+  const isEnabled = options.enabled !== false;
   const viewerIdentityKey = useMemo(() => {
     if (!address || !hasValidWalletAuthorization || isPendingAuthSwitch) {
       return null;
@@ -419,7 +427,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const pinnedWavesQueryKey = usePinnedWavesQueryKey(viewerIdentityKey);
   const { waves: officialWaves } = useOfficialWaves({
     viewerIdentityKey,
-    enabled: !isPendingAuthSwitch,
+    enabled: isEnabled && !isPendingAuthSwitch,
   });
   const officialWaveIds = useMemo(
     () => new Set(officialWaves.map((wave) => wave.id)),
@@ -428,7 +436,8 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const { data, isLoading, isError, error, refetch } = usePinnedWavesQuery(
     queryClient,
     pinnedWavesQueryKey,
-    hasAuthenticatedProfile && !isPendingAuthSwitch
+    isEnabled && hasAuthenticatedProfile && !isPendingAuthSwitch,
+    !hasAuthenticatedProfile || isPendingAuthSwitch
   );
   const pinnedWaves = data ?? [];
   const { pinnedIds, canPinWave } = usePinnedWavesBudget(
@@ -483,9 +492,11 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   return {
     pinnedWaves,
     pinnedIds,
-    isLoading,
-    isError,
-    error: error ?? pinMutation.error ?? unpinMutation.error,
+    isLoading: isEnabled ? isLoading : false,
+    isError: isEnabled ? isError : false,
+    error: isEnabled
+      ? (error ?? pinMutation.error ?? unpinMutation.error)
+      : null,
     pinWave,
     unpinWave,
     refetch,

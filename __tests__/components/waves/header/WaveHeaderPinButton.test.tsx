@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveHeaderPinButton from "@/components/waves/header/WaveHeaderPinButton";
 import { AuthContext } from "@/components/auth/Auth";
@@ -8,6 +8,8 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 // Create mocks that we can access
 const mockAddPinnedWave = jest.fn();
 const mockRemovePinnedWave = jest.fn();
+const mockPinWave = jest.fn();
+const mockUnpinWave = jest.fn();
 let mockWavesList: any[] = [];
 
 // Mock the MyStreamContext
@@ -79,12 +81,16 @@ describe("WaveHeaderPinButton", () => {
       isAnnouncementsWave: () => false,
       isLoaded: true,
     });
+    mockPinWave.mockResolvedValue(undefined);
+    mockUnpinWave.mockResolvedValue(undefined);
 
     // Set default mock return values
     mockUsePinnedWavesServer.mockReturnValue({
       pinnedIds: [],
       isOperationInProgress: mockIsOperationInProgress,
       canPinWave: mockCanPinWave,
+      pinWave: mockPinWave,
+      unpinWave: mockUnpinWave,
     });
     mockIsOperationInProgress.mockReturnValue(false);
     mockCanPinWave.mockReturnValue(true);
@@ -137,6 +143,8 @@ describe("WaveHeaderPinButton", () => {
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
       renderComponent();
       expect(screen.getByRole("button")).toHaveAttribute(
@@ -157,6 +165,8 @@ describe("WaveHeaderPinButton", () => {
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
       const { container } = renderComponent();
       expect(container.firstChild).toBeNull();
@@ -195,8 +205,8 @@ describe("WaveHeaderPinButton", () => {
       const button = screen.getByRole("button");
       await user.click(button);
 
-      expect(mockAddPinnedWave).toHaveBeenCalledWith("wave-123");
-      expect(mockRemovePinnedWave).not.toHaveBeenCalled();
+      await waitFor(() => expect(mockPinWave).toHaveBeenCalledWith("wave-123"));
+      expect(mockUnpinWave).not.toHaveBeenCalled();
     });
 
     it("prevents event propagation when clicked", async () => {
@@ -217,7 +227,7 @@ describe("WaveHeaderPinButton", () => {
 
       await user.click(button);
 
-      expect(mockAddPinnedWave).toHaveBeenCalled();
+      await waitFor(() => expect(mockPinWave).toHaveBeenCalled());
     });
   });
 
@@ -228,6 +238,8 @@ describe("WaveHeaderPinButton", () => {
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
     });
 
@@ -241,8 +253,10 @@ describe("WaveHeaderPinButton", () => {
 
       await user.click(button);
 
-      expect(mockRemovePinnedWave).toHaveBeenCalledWith("wave-123");
-      expect(mockAddPinnedWave).not.toHaveBeenCalled();
+      await waitFor(() =>
+        expect(mockUnpinWave).toHaveBeenCalledWith("wave-123")
+      );
+      expect(mockPinWave).not.toHaveBeenCalled();
     });
 
     it("unpins a pinned announcement wave when clicked", async () => {
@@ -256,7 +270,9 @@ describe("WaveHeaderPinButton", () => {
       const button = screen.getByRole("button");
       await user.click(button);
 
-      expect(mockRemovePinnedWave).toHaveBeenCalledWith("wave-123");
+      await waitFor(() =>
+        expect(mockUnpinWave).toHaveBeenCalledWith("wave-123")
+      );
     });
   });
 
@@ -267,6 +283,8 @@ describe("WaveHeaderPinButton", () => {
         pinnedIds: ["wave-1", "wave-2", "wave-3"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
       mockCanPinWave.mockReturnValue(false);
     });
@@ -283,7 +301,7 @@ describe("WaveHeaderPinButton", () => {
         title: "Maximum 3 pinned waves reached.",
         description: "Unpin another wave first.",
       });
-      expect(mockAddPinnedWave).not.toHaveBeenCalled();
+      expect(mockPinWave).not.toHaveBeenCalled();
     });
 
     it("keeps the header control hidden during settings load at max capacity", () => {
@@ -297,7 +315,7 @@ describe("WaveHeaderPinButton", () => {
       expect(container.firstChild).toBeNull();
       expect(screen.queryByRole("button")).not.toBeInTheDocument();
       expect(mockAuth.setToast).not.toHaveBeenCalled();
-      expect(mockAddPinnedWave).not.toHaveBeenCalled();
+      expect(mockPinWave).not.toHaveBeenCalled();
     });
   });
 
@@ -309,6 +327,8 @@ describe("WaveHeaderPinButton", () => {
         pinnedIds: [],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
     });
 
@@ -327,8 +347,8 @@ describe("WaveHeaderPinButton", () => {
       const button = screen.getByRole("button");
       await user.click(button);
 
-      expect(mockAddPinnedWave).not.toHaveBeenCalled();
-      expect(mockRemovePinnedWave).not.toHaveBeenCalled();
+      expect(mockPinWave).not.toHaveBeenCalled();
+      expect(mockUnpinWave).not.toHaveBeenCalled();
     });
   });
 
@@ -336,35 +356,35 @@ describe("WaveHeaderPinButton", () => {
     it("handles errors when pinning fails", async () => {
       const user = userEvent.setup();
       const mockError = new Error("Network error");
-      mockAddPinnedWave.mockImplementation(() => {
-        throw mockError;
-      });
+      mockPinWave.mockRejectedValue(mockError);
 
       renderComponent();
 
       const button = screen.getByRole("button");
       await user.click(button);
 
-      expect(mockAuth.setToast).toHaveBeenCalledWith({
-        type: "error",
-        title: "Couldn't pin this wave.",
-        description: "Please try again.",
-        details: "Network error. Please check your connection and try again.",
-      });
+      await waitFor(() =>
+        expect(mockAuth.setToast).toHaveBeenCalledWith({
+          type: "error",
+          title: "Couldn't pin this wave.",
+          description: "Please try again.",
+          details: "Network error. Please check your connection and try again.",
+        })
+      );
     });
 
     it("handles errors when unpinning fails", async () => {
       const user = userEvent.setup();
       const mockError = new Error("Server error");
-      mockRemovePinnedWave.mockImplementation(() => {
-        throw mockError;
-      });
+      mockUnpinWave.mockRejectedValue(mockError);
 
       // Mock as pinned wave
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
 
       renderComponent();
@@ -372,31 +392,33 @@ describe("WaveHeaderPinButton", () => {
       const button = screen.getByRole("button");
       await user.click(button);
 
-      expect(mockAuth.setToast).toHaveBeenCalledWith({
-        type: "error",
-        title: "Couldn't unpin this wave.",
-        description: "Please try again.",
-        details: "Server error.",
-      });
+      await waitFor(() =>
+        expect(mockAuth.setToast).toHaveBeenCalledWith({
+          type: "error",
+          title: "Couldn't unpin this wave.",
+          description: "Please try again.",
+          details: "Server error.",
+        })
+      );
     });
 
     it("handles non-Error objects in catch block", async () => {
       const user = userEvent.setup();
-      mockAddPinnedWave.mockImplementation(() => {
-        throw new Error("String error");
-      });
+      mockPinWave.mockRejectedValue(new Error("String error"));
 
       renderComponent();
 
       const button = screen.getByRole("button");
       await user.click(button);
 
-      expect(mockAuth.setToast).toHaveBeenCalledWith({
-        type: "error",
-        title: "Couldn't pin this wave.",
-        description: "Please try again.",
-        details: "String error.",
-      });
+      await waitFor(() =>
+        expect(mockAuth.setToast).toHaveBeenCalledWith({
+          type: "error",
+          title: "Couldn't pin this wave.",
+          description: "Please try again.",
+          details: "String error.",
+        })
+      );
     });
   });
 
@@ -415,6 +437,8 @@ describe("WaveHeaderPinButton", () => {
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
 
       renderComponent();
@@ -430,6 +454,8 @@ describe("WaveHeaderPinButton", () => {
         pinnedIds: ["wave-1", "wave-2", "wave-3"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
       mockCanPinWave.mockReturnValue(false);
 
@@ -457,6 +483,8 @@ describe("WaveHeaderPinButton", () => {
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
+        pinWave: mockPinWave,
+        unpinWave: mockUnpinWave,
       });
 
       renderComponent();

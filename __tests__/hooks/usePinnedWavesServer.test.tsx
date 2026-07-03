@@ -188,6 +188,25 @@ test("disables pinned and official wave reads while wallet auth is invalid", () 
   });
 });
 
+test("disables pinned and official wave reads without clearing cache when deferred", () => {
+  renderHook(() => usePinnedWavesServer({ enabled: false }), { wrapper });
+
+  expect(useQueryMock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      enabled: false,
+      queryKey: expect.arrayContaining([
+        expect.anything(),
+        expect.objectContaining({ viewer_identity: "0xabc:primary" }),
+      ]),
+    })
+  );
+  expect(useOfficialWavesMock).toHaveBeenCalledWith({
+    viewerIdentityKey: "0xabc:primary",
+    enabled: false,
+  });
+  expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
+});
+
 test("fetches pinned waves across multiple API pages", async () => {
   fetchWavesV2PageMock
     .mockResolvedValueOnce(
