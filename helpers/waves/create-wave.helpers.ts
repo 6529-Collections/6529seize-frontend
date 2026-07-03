@@ -422,6 +422,8 @@ export const getCreateNewWaveBody = ({
   readonly parentWaveId?: string | null | undefined;
 }): ApiCreateNewWave => {
   const endDate = getCreateWaveEndDate({ config });
+  const supportsParticipationTerms =
+    config.overview.type !== ApiWaveType.Chat;
 
   return {
     name: config.overview.name,
@@ -469,12 +471,14 @@ export const getCreateNewWaveBody = ({
           type: metadata.type,
         }))
         .filter((metadata) => !!metadata.name),
-      signature_required: config.drops.signatureRequired,
+      signature_required: supportsParticipationTerms
+        ? config.drops.signatureRequired
+        : false,
       period: {
         min: config.dates.submissionStartDate,
         max: endDate,
       },
-      terms: config.drops.terms,
+      terms: supportsParticipationTerms ? config.drops.terms : null,
       ...(config.drops.submissionStrategy
         ? {
             submission_strategy: config.drops.submissionStrategy,

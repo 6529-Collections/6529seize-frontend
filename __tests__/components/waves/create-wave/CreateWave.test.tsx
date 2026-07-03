@@ -13,6 +13,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import CreateWave from "@/components/waves/create-wave/CreateWave";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CreateWaveStep } from "@/types/waves.types";
 
 jest.mock("@/components/waves/create-wave/CreateWaveFlow", () => {
@@ -376,6 +377,51 @@ describe("CreateWave", () => {
     renderCreateWave();
 
     expect(screen.getByTestId("create-wave-groups")).toBeInTheDocument();
+  });
+
+  it("hides acceptance rules on the chat rules step", () => {
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.RULES,
+      config: {
+        ...mockWaveConfig.config,
+        overview: {
+          ...mockWaveConfig.config.overview,
+          type: ApiWaveType.Chat,
+        },
+      },
+    });
+
+    renderCreateWave();
+
+    expect(
+      screen.getByLabelText("Display-only creator rules")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Rules that require acceptance")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Require acceptance")).not.toBeInTheDocument();
+  });
+
+  it("shows acceptance rules on the rank rules step", () => {
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.RULES,
+      config: {
+        ...mockWaveConfig.config,
+        overview: {
+          ...mockWaveConfig.config.overview,
+          type: ApiWaveType.Rank,
+        },
+      },
+    });
+
+    renderCreateWave();
+
+    expect(
+      screen.getByText("Rules that require acceptance")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Require acceptance")).toBeInTheDocument();
   });
 
   it("shows actions component when no outcome type is selected", () => {

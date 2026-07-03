@@ -1605,8 +1605,8 @@
         "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
         "Automatic rules are generated from wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators can add display-only custom rules that are saved as wave metadata.",
-        "Creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
-        "Wave admins can edit display-only custom rules and acceptance-required rules later from wave settings.",
+        "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
+        "Wave admins can edit display-only custom rules later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
         "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
       ],
       "canonical_path": "/waves/create",

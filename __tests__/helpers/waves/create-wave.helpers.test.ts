@@ -252,6 +252,21 @@ describe("create-wave.helpers", () => {
       ).toHaveProperty("parent_wave_id", "parent-wave");
     });
 
+    it("ignores participation terms for chat waves", () => {
+      const config = createBaseConfig(ApiWaveType.Chat);
+      config.drops.terms = "Should not apply to chat.";
+      config.drops.signatureRequired = true;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.terms).toBeNull();
+      expect(res.participation.signature_required).toBe(false);
+    });
+
     it("maps allowed negative votes to the inverse backend flag", () => {
       const config = createBaseConfig(ApiWaveType.Rank);
       config.voting.allowNegativeVotes = true;

@@ -621,9 +621,11 @@ const getCreateRules = ({
   return {
     automatic,
     custom: {
-      binding: normalizeWaveCustomRules(config.drops.terms) || null,
+      binding: isChatWave
+        ? null
+        : normalizeWaveCustomRules(config.drops.terms) || null,
       display: normalizeWaveCustomRules(config.display.customRules) || null,
-      signatureRequired: config.drops.signatureRequired,
+      signatureRequired: isChatWave ? false : config.drops.signatureRequired,
     },
   };
 };
@@ -896,9 +898,13 @@ const getWaveRules = ({
   return {
     automatic,
     custom: {
-      binding: normalizeWaveCustomRules(wave.participation.terms) || null,
+      binding: isChatWave
+        ? null
+        : normalizeWaveCustomRules(wave.participation.terms) || null,
       display: getWaveCustomRulesFromMetadata(metadata),
-      signatureRequired: wave.participation.signature_required,
+      signatureRequired: isChatWave
+        ? false
+        : wave.participation.signature_required,
     },
   };
 };

@@ -257,7 +257,10 @@ describe("WaveSettingsSections", () => {
 
     expect(screen.getByText("Rules")).toBeInTheDocument();
     expect(screen.getByText("Custom rules")).toBeInTheDocument();
-    expect(screen.getByText("Acceptance rules")).toBeInTheDocument();
+    expect(screen.queryByText("Acceptance rules")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Edit acceptance rules" })
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("Display")).not.toBeInTheDocument();
     expect(screen.queryByText("Outcomes")).not.toBeInTheDocument();
     expect(screen.queryByText("Approval tabs")).not.toBeInTheDocument();
@@ -292,7 +295,7 @@ describe("WaveSettingsSections", () => {
     const { queryClient } = renderSettings({
       wave: makeWave({
         canAdmin: true,
-        waveType: ApiWaveType.Chat,
+        waveType: ApiWaveType.Rank,
       }),
     });
     const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");

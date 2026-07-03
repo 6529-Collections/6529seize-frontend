@@ -56,9 +56,11 @@ The automatic rules preview summarizes configured wave behavior, including:
 Use display-only creator rules for wave-specific guidance that participants
 should see but do not need to sign.
 
-Use rules that require acceptance when participants must explicitly accept and
-sign those rules before submitting. These rules use the existing participation
-terms and wallet-signature flow.
+For `Rank` and `Approve` waves, use rules that require acceptance when
+participants must explicitly accept and sign those rules before submitting.
+These rules use the existing participation terms and wallet-signature flow.
+`Chat` waves do not show acceptance-required rules because they do not have a
+submission step.
 
 ## User Journey
 
@@ -66,8 +68,8 @@ terms and wallet-signature flow.
 2. Open `Rules`.
 3. Review the automatic rules preview.
 4. Optionally enter display-only creator rules.
-5. Optionally enable `Require acceptance` and enter rules participants must
-   accept before submitting.
+5. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
+   rules participants must accept before submitting.
 6. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
    `Rank` and `Approve`.
 
@@ -77,24 +79,26 @@ terms and wallet-signature flow.
 - Mobile participants see the rules panel from the wave `About` information
   path.
 - Display-only custom rules appear in the rules panel.
-- Rules that require acceptance appear in the rules panel and are enforced by
-  the existing submit terms/signature modal.
+- For `Rank` and `Approve`, rules that require acceptance appear in the rules
+  panel and are enforced by the existing submit terms/signature modal.
 
 ## Settings
 
-Wave admins can edit both custom-rule layers later from wave settings.
-Display-only custom rules are saved as wave metadata. Rules that require
-acceptance are stored as participation terms and continue to use the existing
-submit acceptance flow.
+Wave admins can edit display-only custom rules later from wave settings.
+Display-only custom rules are saved as wave metadata. For `Rank` and `Approve`,
+rules that require acceptance are stored as participation terms and continue to
+use the existing submit acceptance flow.
 
 ## Edge Cases
 
 - `Chat` automatic rules focus on wave type, access, and chat settings.
-- Leaving both custom-rule fields blank is valid.
+- `Chat` custom rules are display-only.
+- Leaving custom-rule fields blank is valid.
 - Display-only creator rules are capped at `2,000` characters.
-- Turning off `Require acceptance` clears the acceptance-required rules text.
-- Acceptance-required rules require a wallet signature only when rules text is
-  present.
+- For `Rank` and `Approve`, turning off `Require acceptance` clears the
+  acceptance-required rules text.
+- For `Rank` and `Approve`, acceptance-required rules require a wallet
+  signature only when rules text is present.
 
 ## Related Pages
 

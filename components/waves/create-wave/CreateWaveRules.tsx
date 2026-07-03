@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   WAVE_CUSTOM_RULES_MAX_LENGTH,
   normalizeWaveCustomRules,
@@ -35,6 +36,7 @@ export default function CreateWaveRules({
 
   const customRules = config.display.customRules ?? "";
   const normalizedCustomRules = normalizeWaveCustomRules(customRules);
+  const supportsAcceptanceRules = config.overview.type !== ApiWaveType.Chat;
 
   const setDisplayRules = (value: string) => {
     setDisplay({
@@ -104,18 +106,22 @@ export default function CreateWaveRules({
         </div>
       </section>
 
-      <section className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
-        <CreateWaveTermsOfService
-          waveType={config.overview.type}
-          terms={config.drops.terms}
-          setTerms={setBindingRules}
-          title="Rules that require acceptance"
-          toggleLabel="Require acceptance"
-          description="Use this only for custom creator rules that participants must accept and sign before submitting."
-          placeholder="Enter rules participants must accept before submitting..."
-          helperText="Participants will sign these rules with their wallet"
-        />
-      </section>
+      {supportsAcceptanceRules && (
+        <section className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
+          <CreateWaveTermsOfService
+            waveType={config.overview.type}
+            terms={config.drops.terms}
+            setTerms={setBindingRules}
+            title="Rules that require acceptance"
+            toggleLabel="Require acceptance"
+            description={
+              "Use this only for custom creator rules that participants must accept and sign before submitting."
+            }
+            placeholder="Enter rules participants must accept before submitting..."
+            helperText="Participants will sign these rules with their wallet"
+          />
+        </section>
+      )}
     </div>
   );
 }

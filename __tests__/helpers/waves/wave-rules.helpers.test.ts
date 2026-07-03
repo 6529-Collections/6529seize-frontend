@@ -126,7 +126,11 @@ describe("wave-rules.helpers", () => {
     expect(labels).not.toEqual(
       expect.arrayContaining(["Who can drop", "Who can vote"])
     );
-    expect(rules.custom.display).toBe("Keep chat respectful.");
+    expect(rules.custom).toEqual({
+      binding: null,
+      display: "Keep chat respectful.",
+      signatureRequired: false,
+    });
   });
 
   it("builds custom rules from wave metadata", () => {
@@ -208,8 +212,8 @@ describe("wave-rules.helpers", () => {
         required_media: [],
         required_metadata: [],
         no_of_applications_allowed_per_participant: null,
-        signature_required: false,
-        terms: null,
+        signature_required: true,
+        terms: "Legacy chat terms.",
         submission_strategy: null,
       },
       voting: {
@@ -250,5 +254,7 @@ describe("wave-rules.helpers", () => {
         expect.objectContaining({ label: "Outcomes visibility" }),
       ])
     );
+    expect(rules.custom.binding).toBeNull();
+    expect(rules.custom.signatureRequired).toBe(false);
   });
 });

@@ -76,6 +76,8 @@ same context.
 - `Rank` and `Approve` rules show two layers: automatic rules generated from
   wave settings and optional creator rules. Creator rules that require
   acceptance are enforced by the existing submit terms/signature modal.
+- `Chat` rules show automatic chat/access rules and optional display-only
+  creator rules.
 - When posting is blocked, thread content stays readable and the composer area
   shows blocked states (for example
   `Connect your wallet to participate in this wave`, `Wave is closed`, or

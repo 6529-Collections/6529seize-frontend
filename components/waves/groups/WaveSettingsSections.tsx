@@ -44,6 +44,7 @@ export default function WaveSettingsSections({
   const isDisplaySettingsWave =
     wave.wave.type === ApiWaveType.Rank ||
     wave.wave.type === ApiWaveType.Approve;
+  const supportsAcceptanceRules = wave.wave.type !== ApiWaveType.Chat;
   const showChatSettings = wave.chat.enabled;
 
   return (
@@ -52,7 +53,7 @@ export default function WaveSettingsSections({
 
       <SettingsSection title="Rules">
         <WaveCustomRules wave={wave} />
-        <WaveBindingRules wave={wave} />
+        {supportsAcceptanceRules && <WaveBindingRules wave={wave} />}
       </SettingsSection>
 
       {isDisplaySettingsWave && (
