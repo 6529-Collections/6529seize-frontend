@@ -27,6 +27,7 @@ import { useGrantItemViewModel } from "./useGrantItemViewModel";
 export function UserPageXtdhGrantListItem({
   grant,
   isSelf,
+  contractOverviewState,
 }: Readonly<UserPageXtdhGrantListItemProps>) {
   const {
     chain,
@@ -40,7 +41,7 @@ export function UserPageXtdhGrantListItem({
     variant,
     validFrom,
     validTo,
-  } = useGrantItemViewModel(grant);
+  } = useGrantItemViewModel(grant, contractOverviewState);
 
   const queryClient = useQueryClient();
   const { invalidateIdentityTdhStats } = useContext(ReactQueryWrapperContext);
@@ -64,7 +65,7 @@ export function UserPageXtdhGrantListItem({
         type: "success",
         message: "Grant stopped.",
       });
-      queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
+      void queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
       const identity = grant.grantor.handle ?? grant.grantor.primary_address;
       if (identity) {
         invalidateIdentityTdhStats({ identity });
@@ -93,7 +94,7 @@ export function UserPageXtdhGrantListItem({
         type: "success",
         message: "Grant revoked.",
       });
-      queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
+      void queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
       const identity = grant.grantor.handle ?? grant.grantor.primary_address;
       if (identity) {
         invalidateIdentityTdhStats({ identity });
@@ -109,7 +110,7 @@ export function UserPageXtdhGrantListItem({
   });
 
   const tokenState = useMemo<TokenPanelState>(
-    () => mapTokenCountToState(grant.target_tokens_count ?? null),
+    () => mapTokenCountToState(grant.target_tokens_count),
     [grant.target_tokens_count]
   );
 
