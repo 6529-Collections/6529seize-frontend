@@ -26,7 +26,7 @@ import {
   normalizeToastText,
 } from "@/helpers/toast.helpers";
 
-import styles from "./AppToast.module.scss";
+import styles from "./AppToast.module.css";
 
 export type AppToastAction = {
   readonly label: string;

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import TimelineMedia, { MediaType } from "@/components/timeline/TimelineMedia";
 import { t } from "@/i18n/messages";
 
-jest.mock("@/components/timeline/Timeline.module.scss", () => ({
+jest.mock("@/components/timeline/Timeline.module.css", () => ({
   timelineMediaImage: "media",
 }));
 

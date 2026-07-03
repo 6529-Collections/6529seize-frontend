@@ -1,7 +1,7 @@
 import { DROP_FORGE_TITLE } from "@/components/drop-forge/drop-forge.constants";
 import DropForgeLaunchClaimPageClient from "@/components/drop-forge/launch/DropForgeLaunchClaimPageClient";
 import { getAppMetadata } from "@/components/providers/metadata";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 
 interface Props {

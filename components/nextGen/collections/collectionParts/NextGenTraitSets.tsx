@@ -28,7 +28,7 @@ import {
   formatNameForUrl,
   normalizeNextgenTokenID,
 } from "@/components/nextGen/nextgen_helpers";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import {
   getNextGenIconUrl,
   getNextGenImageUrl,

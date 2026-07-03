@@ -2,7 +2,7 @@
 
 import SubscriptionsReportComponent from "@/components/subscriptions-report/SubscriptionsReport";
 import { useSetTitle } from "@/contexts/TitleContext";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 
 export default function SubscriptionsReport() {
   useSetTitle("Subscriptions Report | Tools");

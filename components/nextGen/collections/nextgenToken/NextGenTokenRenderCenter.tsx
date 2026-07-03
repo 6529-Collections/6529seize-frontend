@@ -6,7 +6,7 @@ import type { NextGenToken } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
 import { mainnet } from "wagmi/chains";
-import styles from "./NextGenToken.module.scss";
+import styles from "./NextGenToken.module.css";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 
 export default function NextgenTokenRenderCenter(

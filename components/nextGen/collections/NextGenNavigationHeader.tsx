@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./NextGen.module.scss";
+import styles from "./NextGen.module.css";
 
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";

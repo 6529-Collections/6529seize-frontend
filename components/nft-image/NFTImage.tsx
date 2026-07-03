@@ -1,5 +1,5 @@
 import type { BaseNFT, NFTLite } from "@/entities/INFT";
-import styles from "@/components/nft-image/NFTImage.module.scss";
+import styles from "@/components/nft-image/NFTImage.module.css";
 import NFTHTMLRenderer from "@/components/nft-image/renderers/NFTHTMLRenderer";
 import NFTImageRenderer from "@/components/nft-image/renderers/NFTImageRenderer";
 import NFTModelRenderer from "@/components/nft-image/renderers/NFTModelRenderer";

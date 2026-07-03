@@ -3,7 +3,7 @@ import Timeline from "@/components/timeline/Timeline";
 import { MediaType } from "@/components/timeline/TimelineMedia";
 import { t } from "@/i18n/messages";
 
-jest.mock("@/components/timeline/Timeline.module.scss", () => ({
+jest.mock("@/components/timeline/Timeline.module.css", () => ({
   timeline: "timeline",
   timelineContainer: "container",
   content: "content",

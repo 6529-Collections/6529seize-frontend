@@ -54,7 +54,7 @@ describe("useWaveShareCopyAction", () => {
   };
 
   const renderUseWaveShareCopyAction = (
-    overrides: Partial<typeof defaultParams> = {}
+    overrides: Partial<Parameters<typeof useWaveShareCopyAction>[0]> = {}
   ) => {
     const params = { ...defaultParams, ...overrides };
     return renderHook(useWaveShareCopyAction, {
@@ -100,6 +100,42 @@ describe("useWaveShareCopyAction", () => {
     await waitFor(() => expect(result.current.label).toBe("Link shared"));
   });
 
+  it("can keep Capacitor share presentation active without success feedback", async () => {
+    mockCapacitorIsNativePlatform.mockReturnValue(true);
+    let resolveShare: (value: unknown) => void = () => undefined;
+    mockCapacitorShare.mockReturnValue(
+      new Promise((resolve) => {
+        resolveShare = resolve;
+      })
+    );
+
+    const { result } = renderUseWaveShareCopyAction({
+      showShareFeedback: false,
+    });
+
+    act(() => {
+      result.current.onClick();
+    });
+
+    await waitFor(() => expect(result.current.isSharing).toBe(true));
+
+    act(() => {
+      result.current.onClick();
+    });
+
+    expect(mockCapacitorShare).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveShare({});
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(result.current.isSharing).toBe(false));
+    expect(result.current.label).toBe("Share wave");
+    expect(result.current.mode).toBe("share");
+    expect(mockCopyToClipboard).not.toHaveBeenCalled();
+  });
+
   it("falls back to copy after non-abort Capacitor share failure", async () => {
     mockCapacitorIsNativePlatform.mockReturnValue(true);
     mockCapacitorShare.mockRejectedValue(new Error("Share failed"));
@@ -117,6 +153,23 @@ describe("useWaveShareCopyAction", () => {
       )
     );
     await waitFor(() => expect(result.current.mode).toBe("copy"));
+  });
+
+  it("does not fallback to copy when Capacitor share is dismissed", async () => {
+    mockCapacitorIsNativePlatform.mockReturnValue(true);
+    mockCapacitorShare.mockRejectedValue(new Error("Share cancelled"));
+
+    const { result } = renderUseWaveShareCopyAction();
+
+    act(() => {
+      result.current.onClick();
+    });
+
+    await waitFor(() => expect(mockCapacitorShare).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(result.current.isSharing).toBe(false));
+    expect(mockCopyToClipboard).not.toHaveBeenCalled();
+    expect(result.current.mode).toBe("share");
+    expect(result.current.label).toBe("Share wave");
   });
 
   it("does not fallback to copy when Capacitor share is cancelled", async () => {

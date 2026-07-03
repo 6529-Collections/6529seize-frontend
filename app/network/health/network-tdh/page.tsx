@@ -1,7 +1,7 @@
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import CommunityStatsComponent from "@/components/communityStats/CommunityStats";
 import { getAppMetadata } from "@/components/providers/metadata";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 
 export default function CommunityStatsPage() {
   return (

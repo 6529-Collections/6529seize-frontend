@@ -6,7 +6,7 @@ jest.mock("@/helpers/Helpers", () => ({
     `${address.slice(0, 6)}...${address.slice(-4)}`,
 }));
 
-jest.mock("@/components/searchModal/SearchModal.module.scss", () => ({
+jest.mock("@/components/searchModal/SearchModal.module.css", () => ({
   shakeWalletInput: "shakeWalletInput",
   modalInput: "modal-input",
   modalButton: "modal-button",

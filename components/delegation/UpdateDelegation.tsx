@@ -3,7 +3,7 @@
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { useState } from "react";
 import { useEnsName } from "wagmi";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 
 import { DELEGATION_ABI } from "@/abis/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
