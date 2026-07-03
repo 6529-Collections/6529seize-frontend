@@ -21,6 +21,7 @@ import {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
+  shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
@@ -29,8 +30,10 @@ import {
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
+  shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
@@ -136,7 +139,15 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterInjectedProviderProxyStartsWithError(event)) {
+    return true;
+  }
+
   if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterWalletConnectStaleSessionTopic(event, hint)) {
     return true;
   }
 
@@ -165,6 +176,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterRabbyMobileRainbowKitNotFoundError(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterThirdPartyTelemetryNetworkError(event)) {
     return true;
   }
 
@@ -438,6 +453,11 @@ Sentry.init({
         : undefined;
     if (error instanceof Error) {
       handleNetworkError(event, error, value);
+    }
+    // Raw browser failures can become wrapped network messages only after
+    // normalization, so telemetry targets get one post-normalization pass.
+    if (shouldFilterThirdPartyTelemetryNetworkError(event)) {
+      return null;
     }
 
     const networkErrorSamplingEvent = networkErrorSamplingMessageSnapshot
