@@ -65,4 +65,15 @@ describe("WebSidebarNav", () => {
       "page"
     );
   });
+
+  it("keeps Waves active when users are on Discover Waves", () => {
+    mockUsePathname.mockReturnValue("/discover");
+
+    render(<WebSidebarNav isCollapsed={false} />);
+
+    const wavesLink = screen.getByRole("link", { name: "Waves" });
+    expect(wavesLink).toHaveAttribute("href", "/waves");
+    expect(wavesLink).toHaveAttribute("aria-current", "location");
+    expect(screen.queryByRole("link", { name: "Discover Waves" })).toBeNull();
+  });
 });

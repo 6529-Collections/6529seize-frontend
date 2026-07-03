@@ -263,12 +263,18 @@ const WebSidebarNav = React.forwardRef<
       return null;
     }
 
+    const isPrimaryItemActive = isSidebarNavItemActive(primaryItem, pathname);
+    const hasActiveSectionItem = section.items.some((item) =>
+      isSidebarNavItemActive(item, pathname)
+    );
+
     return (
       <li key={section.key}>
         <WebSidebarNavItem
           href={primaryItem.href}
           icon={section.icon}
-          active={isSidebarNavItemActive(primaryItem, pathname)}
+          active={hasActiveSectionItem}
+          ariaCurrent={isPrimaryItemActive ? "page" : "location"}
           collapsed={isCollapsed}
           label={section.name}
           data-section={section.key}
