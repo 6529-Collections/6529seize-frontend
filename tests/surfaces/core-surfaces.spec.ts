@@ -97,7 +97,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await forceExpandedDesktopSidebar(page);
     await gotoReady(page, "/");
 
-    const nav = page.getByRole("navigation", { name: "Primary navigation" });
+    const nav = page.getByRole("navigation", { name: "Desktop navigation" });
     await nav.getByRole("button", { name: "About" }).click();
     await nav.getByRole("button", { name: "Network Data" }).click();
     await nav.getByRole("link", { name: "TDH", exact: true }).click();
