@@ -33,9 +33,13 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
     onClose();
   };
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <MobileWrapperDialog
-      isOpen={isOpen}
+      isOpen
       onClose={handleClose}
       title="Vote for this artwork"
       headerActions={
