@@ -15,9 +15,11 @@ and mobile app layouts.
 
 ## Route Coverage
 
-- Primary section switching: `NFTs` (`/the-memes`), `Waves` (`/waves`),
-  `DMs` (`/messages`), `Join 6529` (`/join`), and `About` (`/about`).
-  Home remains available through the 6529 logo link to `/`.
+- Web/sidebar primary section switching: `NFTs` (`/the-memes`), `Waves`
+  (`/waves`), `DMs` (`/messages`), `Join 6529` (`/join`), and `About`
+  (`/about`). Home remains available through the 6529 logo link to `/`.
+- App bottom section switching: `/discover`, `/waves`, `/messages`, `/`,
+  `/network`, `/the-memes`, and `/notifications`.
 - Secondary jumps: `Discover Waves` (`/discover`), `/network/*`,
   `/nft-activity`, `/meme-calendar`, collection routes, tools routes, and
   about routes.
@@ -29,8 +31,9 @@ and mobile app layouts.
 - [Web Sidebar Navigation](feature-sidebar-navigation.md): web route switching
   from the desktop rail and overlay sidebar modes on narrow web layouts.
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): app primary
-  tabs for `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
-- [App Sidebar Menu](feature-app-sidebar-menu.md): app drawer with the same
+  tabs for `Discovery`, `Waves`, `Messages`, `Home`, `Network`,
+  `Collections`, and `Notifications`.
+- [App Sidebar Menu](feature-app-sidebar-menu.md): app drawer with sidebar
   primary concepts, a connected profile-avatar shortcut, grouped secondary
   links under `NFTs`, `Waves`, and `About`, and footer account actions.
 

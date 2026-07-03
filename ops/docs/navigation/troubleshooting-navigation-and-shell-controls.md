@@ -44,9 +44,10 @@ handoff does not behave as expected.
 - `Notifications` row is missing on web:
   it appears only when connected and sits above `Profile` near the sidebar
   account area, not in the main navigation list.
-- `Discover Waves` is missing or `/discover` looks empty:
-  `Discover Waves` lives under the `Waves` navigation group. If the page body
-  is blank, refresh `/discover` or compare against `/` and `/waves`.
+- `Discovery` or `Discover Waves` is missing, or `/discover` looks empty:
+  web/sidebar exposes `Discover Waves` under the `Waves` navigation group, and
+  the app bottom bar exposes `Discovery`. If the page body is blank, refresh
+  `/discover` or compare against `/` and `/waves`.
 - `Profile` shortcut is missing:
   connect wallet first; profile access is an account utility and is hidden
   while disconnected.
@@ -81,7 +82,7 @@ handoff does not behave as expected.
 - App bottom navigation is hidden:
   dismiss keyboard, close single-drop view (`?drop=...`), and finish inline
   drop edit mode.
-- `Waves` or `DMs` tab highlight looks wrong:
+- `Waves` or `Messages` tab highlight looks wrong:
   verify both route and query state (`wave` and `view`).
 - Pull-to-refresh does not trigger:
   use app-shell context, scroll to top, and start the gesture from the header
