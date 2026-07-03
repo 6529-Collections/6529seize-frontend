@@ -143,6 +143,8 @@ describe("mobileLaunchTiming", () => {
     timing.markMobileLaunchStep("wagmi_children_unblocked");
     currentNow = 200;
     timing.markMobileLaunchStep("first_useful_app_shell");
+    currentNow = 360;
+    timing.markMobileLaunchStep("waves_first_content_visible");
     timing.setMobileLaunchContext({
       app_wallet_count_bucket: "2_5",
       app_wallets_state: "supported_with_wallets",
@@ -162,9 +164,41 @@ describe("mobileLaunchTiming", () => {
           wallet_connection_state: "connected",
         },
         provider_gate_ms: 120,
+        provider_gate_bucket: "0_500",
         shell_after_wagmi_ms: 80,
+        shell_after_wagmi_bucket: "0_500",
         step_first_useful_app_shell_ms: 200,
         step_wagmi_children_unblocked_ms: 120,
+        total_launch_bucket: "0_500",
+        waves_after_wagmi_ms: 240,
+        waves_after_wagmi_bucket: "0_500",
+      })
+    );
+  });
+
+  it("adds bucket attributes for measured launch step durations", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    timing.startMobileLaunchTiming();
+    currentNow = 100;
+    const result = await timing.measureMobileLaunchAsync(
+      "wagmi_appkit_init",
+      () => {
+        currentNow = 1700;
+        return "ready";
+      }
+    );
+    currentNow = 3500;
+    flushLaunchTiming(timing, "manual");
+
+    expect(result).toBe("ready");
+    expect(sentry.logger.warn).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        duration_wagmi_appkit_init_ms: 1600,
+        duration_wagmi_appkit_init_bucket: "1500_3000",
+        total_ms: 3500,
+        total_launch_bucket: "3000_5000",
       })
     );
   });
