@@ -6,7 +6,7 @@ import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import {
   useWaveDropMobileMenu,
-  WaveDropMobileMenuProvider,
+  withWaveDropMobileMenuProvider,
 } from "./WaveDropMobileMenuContext";
 import { useWaveDropMobileMenuController } from "./useWaveDropMobileMenuController";
 
@@ -157,12 +157,4 @@ function DropMobileMenuHandlerInner({
   );
 }
 
-export default function DropMobileMenuHandler(
-  props: DropMobileMenuHandlerProps
-) {
-  return (
-    <WaveDropMobileMenuProvider>
-      <DropMobileMenuHandlerInner {...props} />
-    </WaveDropMobileMenuProvider>
-  );
-}
+export default withWaveDropMobileMenuProvider(DropMobileMenuHandlerInner);

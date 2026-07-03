@@ -15,7 +15,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import WaveDropActions from "../WaveDropActions";
 import {
   useWaveDropMobileMenu,
-  WaveDropMobileMenuProvider,
+  withWaveDropMobileMenuProvider,
 } from "../WaveDropMobileMenuContext";
 import { useWaveDropMobileMenuController } from "../useWaveDropMobileMenuController";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
@@ -325,12 +325,4 @@ function OngoingParticipationDropInner({
   );
 }
 
-export default function OngoingParticipationDrop(
-  props: OngoingParticipationDropProps
-) {
-  return (
-    <WaveDropMobileMenuProvider>
-      <OngoingParticipationDropInner {...props} />
-    </WaveDropMobileMenuProvider>
-  );
-}
+export default withWaveDropMobileMenuProvider(OngoingParticipationDropInner);

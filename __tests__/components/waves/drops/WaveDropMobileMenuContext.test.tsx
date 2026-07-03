@@ -4,6 +4,7 @@ import {
   useWaveDropMobileMenu,
   WaveDropMobileMenuProvider,
 } from "@/components/waves/drops/WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "@/components/waves/drops/useWaveDropMobileMenuController";
 
 const menuRender = jest.fn();
 
@@ -61,6 +62,27 @@ function OpenMenuButton({
   );
 }
 
+function ControlledMenuOwner({
+  dropId,
+  onOpenChange,
+}: {
+  readonly dropId: string;
+  readonly onOpenChange?: ((open: boolean) => void) | undefined;
+}) {
+  useWaveDropMobileMenuController({
+    drop: createDrop(dropId),
+    enabled: true,
+    isOpen: true,
+    longPressTriggered: false,
+    showReplyAndQuote: true,
+    onOpenChange,
+    onReply: jest.fn(),
+    onAddReaction: jest.fn(),
+  });
+
+  return null;
+}
+
 describe("WaveDropMobileMenuProvider", () => {
   beforeEach(() => {
     menuRender.mockClear();
@@ -103,6 +125,42 @@ describe("WaveDropMobileMenuProvider", () => {
     await screen.findByTestId("shared-menu");
     fireEvent.click(screen.getByTestId("close-menu"));
 
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("clears the shared menu when its opener unmounts", async () => {
+    const onOpenChange = jest.fn();
+
+    function TestHarness() {
+      const [showOwner, setShowOwner] = React.useState(true);
+
+      return (
+        <WaveDropMobileMenuProvider>
+          {showOwner && (
+            <ControlledMenuOwner
+              dropId="drop-a"
+              onOpenChange={onOpenChange}
+            />
+          )}
+          <button
+            type="button"
+            data-testid="unmount-owner"
+            onClick={() => setShowOwner(false)}
+          />
+        </WaveDropMobileMenuProvider>
+      );
+    }
+
+    render(<TestHarness />);
+
+    expect(await screen.findByTestId("shared-menu")).toHaveAttribute(
+      "data-drop-id",
+      "drop-a"
+    );
+
+    fireEvent.click(screen.getByTestId("unmount-owner"));
+
+    expect(screen.queryByTestId("shared-menu")).not.toBeInTheDocument();
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 });

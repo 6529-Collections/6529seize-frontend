@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import {
+  type ComponentType,
   createContext,
   useCallback,
   useContext,
@@ -22,6 +23,7 @@ export type WaveDropMobileMenuRequest = Omit<
 interface WaveDropMobileMenuContextValue {
   readonly open: (request: WaveDropMobileMenuRequest) => void;
   readonly close: () => void;
+  readonly clearDrop: (dropId: string) => void;
 }
 
 const WaveDropMobileMenuContext =
@@ -47,6 +49,22 @@ export const WaveDropMobileMenuProvider: React.FC<{
   return (
     <WaveDropMobileMenuProviderRoot>{children}</WaveDropMobileMenuProviderRoot>
   );
+};
+
+export const withWaveDropMobileMenuProvider = <P extends object>(
+  Component: ComponentType<P>
+) => {
+  const WithWaveDropMobileMenuProvider = (props: P) => (
+    <WaveDropMobileMenuProvider>
+      <Component {...props} />
+    </WaveDropMobileMenuProvider>
+  );
+
+  WithWaveDropMobileMenuProvider.displayName = `WithWaveDropMobileMenuProvider(${
+    Component.displayName || Component.name || "Component"
+  })`;
+
+  return WithWaveDropMobileMenuProvider;
 };
 
 const WaveDropMobileMenuProviderRoot: React.FC<{
@@ -81,9 +99,20 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
     setOpen(false);
   }, [setOpen]);
 
+  const clearDrop = useCallback((dropId: string) => {
+    const current = activeMenuRef.current;
+    if (current?.drop.id !== dropId) {
+      return;
+    }
+
+    current.onOpenChange?.(false);
+    activeMenuRef.current = null;
+    setActiveMenu(null);
+  }, []);
+
   const value = useMemo<WaveDropMobileMenuContextValue>(
-    () => ({ open, close }),
-    [close, open]
+    () => ({ open, close, clearDrop }),
+    [clearDrop, close, open]
   );
 
   return (

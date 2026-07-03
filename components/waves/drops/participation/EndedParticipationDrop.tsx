@@ -22,7 +22,7 @@ import WaveDropContent from "../WaveDropContent";
 import WaveDropMetadata from "../WaveDropMetadata";
 import {
   useWaveDropMobileMenu,
-  WaveDropMobileMenuProvider,
+  withWaveDropMobileMenuProvider,
 } from "../WaveDropMobileMenuContext";
 import { useWaveDropMobileMenuController } from "../useWaveDropMobileMenuController";
 import WaveDropReactions from "../WaveDropReactions";
@@ -361,12 +361,4 @@ function EndedParticipationDropInner({
   );
 }
 
-export default function EndedParticipationDrop(
-  props: EndedParticipationDropProps
-) {
-  return (
-    <WaveDropMobileMenuProvider>
-      <EndedParticipationDropInner {...props} />
-    </WaveDropMobileMenuProvider>
-  );
-}
+export default withWaveDropMobileMenuProvider(EndedParticipationDropInner);

@@ -41,7 +41,7 @@ import WaveDropHeader from "./WaveDropHeader";
 import WaveDropMetadata from "./WaveDropMetadata";
 import {
   useWaveDropMobileMenu,
-  WaveDropMobileMenuProvider,
+  withWaveDropMobileMenuProvider,
 } from "./WaveDropMobileMenuContext";
 import { useWaveDropMobileMenuController } from "./useWaveDropMobileMenuController";
 import WaveDropRatings from "./WaveDropRatings";
@@ -1451,12 +1451,6 @@ const WaveDropInner = ({
   );
 };
 
-const MemoizedWaveDropInner = memo(WaveDropInner);
-
-const WaveDrop = (props: WaveDropProps) => (
-  <WaveDropMobileMenuProvider>
-    <MemoizedWaveDropInner {...props} />
-  </WaveDropMobileMenuProvider>
-);
+const WaveDrop = withWaveDropMobileMenuProvider(WaveDropInner);
 
 export default memo(WaveDrop);

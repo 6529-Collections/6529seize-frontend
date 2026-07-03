@@ -46,6 +46,7 @@ export const useWaveDropMobileMenuController = ({
       showCopyOption,
       showVoting,
     });
+
   }, [
     drop,
     enabled,
@@ -62,6 +63,12 @@ export const useWaveDropMobileMenuController = ({
     showReplyAndQuote,
     showVoting,
   ]);
+
+  useEffect(() => {
+    return () => {
+      mobileMenu?.clearDrop(drop.id);
+    };
+  }, [drop.id, mobileMenu]);
 
   return useCallback(() => {
     mobileMenu?.close();
