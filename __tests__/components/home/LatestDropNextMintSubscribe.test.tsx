@@ -71,6 +71,7 @@ function expectReadonlySubscriptionToggle(
   const statusText = screen.getByTestId("readonly-subscription-toggle-status");
   expect(statusText).toBeInTheDocument();
   expect(statusText).toHaveTextContent(tooltipLabel);
+  expect(statusText).toHaveAttribute("role", "status");
   expect(container).toContainElement(statusText);
   expect(screen.queryByRole("switch", { name: tooltipLabel })).toBeNull();
   expect(screen.queryByRole("img", { name: tooltipLabel })).toBeNull();

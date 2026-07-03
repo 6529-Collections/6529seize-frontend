@@ -577,6 +577,58 @@ describe("About contents dropdown", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
+  it("does not resume a remounted subscriptions redirect after the timeout expires", () => {
+    jest.useFakeTimers();
+    setCookieCountry("US");
+    const requestAuth = jest.fn(async () => ({ success: true }));
+    const renderButton = (connectedProfile: unknown) => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile,
+            requestAuth,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+    const firstRender = render(renderButton(null));
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /connect to subscribe/i,
+      })
+    );
+    firstRender.unmount();
+
+    const remounted = render(renderButton(null));
+    act(() => {
+      jest.advanceTimersByTime(5 * 60_000);
+    });
+    expect(
+      globalThis.sessionStorage.getItem(
+        PROFILE_SUBSCRIPTIONS_PENDING_NAVIGATION_KEY
+      )
+    ).toBeNull();
+
+    remounted.rerender(
+      renderButton({
+        handle: "test-handle",
+        normalised_handle: "test-handle",
+        primary_wallet: "0x123",
+        wallets: [],
+      })
+    );
+
+    expect(requestAuth).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
   it("uses dropdown item styling without link underlines", async () => {
     setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);

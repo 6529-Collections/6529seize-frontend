@@ -61,6 +61,7 @@ function ReadonlySubscriptionToggle({
       </CustomTooltip>
       <span
         data-testid="readonly-subscription-toggle-status"
+        role="status"
         className="tw-sr-only"
       >
         {tooltipLabel}
