@@ -20,7 +20,11 @@ import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
 import WaveDropMetadata from "../WaveDropMetadata";
-import WaveDropMobileMenu from "../WaveDropMobileMenu";
+import {
+  useWaveDropMobileMenu,
+  withWaveDropMobileMenuProvider,
+} from "../WaveDropMobileMenuContext";
+import { useWaveDropMobileMenuController } from "../useWaveDropMobileMenuController";
 import WaveDropReactions from "../WaveDropReactions";
 import type {
   DropIdentityMode,
@@ -61,7 +65,7 @@ interface EndedParticipationDropProps {
   readonly maxEmbedDepth?: number | undefined;
 }
 
-export default function EndedParticipationDrop({
+function EndedParticipationDropInner({
   drop,
   showWaveInfo,
   activeDrop,
@@ -106,6 +110,7 @@ export default function EndedParticipationDrop({
   const [isSlideUp, setIsSlideUp] = useState(false);
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
+  const mobileMenu = useWaveDropMobileMenu();
   const showIdentity = identityMode !== "hidden";
   const isStackedTimestamp = timestampLayout === "stacked";
   const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
@@ -129,16 +134,19 @@ export default function EndedParticipationDrop({
 
     setIsSlideUp(false);
     setLongPressTriggered(false);
-  }, [canUseTouchActionSheet]);
+    mobileMenu?.close();
+  }, [canUseTouchActionSheet, mobileMenu]);
 
   const handleOnReply = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
-  }, [onReply, drop, activePartIndex]);
+  }, [onReply, drop, activePartIndex, mobileMenu]);
 
   const handleOnAddReaction = useCallback(() => {
+    mobileMenu?.close();
     setIsSlideUp(false);
-  }, []);
+  }, [mobileMenu]);
 
   const getDropLocationBackground = () => {
     return "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800";
@@ -223,6 +231,18 @@ export default function EndedParticipationDrop({
       maxEmbedDepth={maxEmbedDepth}
     />
   );
+  const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
+
+  useWaveDropMobileMenuController({
+    drop,
+    enabled: showInteractions,
+    isOpen: effectiveIsSlideUp,
+    longPressTriggered,
+    showReplyAndQuote,
+    onOpenChange: setIsSlideUp,
+    onReply: handleOnReply,
+    onAddReaction: handleOnAddReaction,
+  });
 
   return (
     <div
@@ -335,20 +355,10 @@ export default function EndedParticipationDrop({
               {footer}
             </div>
           )}
-
-          {showInteractions && (
-            <WaveDropMobileMenu
-              drop={drop}
-              isOpen={isSlideUp && canUseTouchActionSheet}
-              longPressTriggered={longPressTriggered}
-              showReplyAndQuote={showReplyAndQuote}
-              setOpen={setIsSlideUp}
-              onReply={handleOnReply}
-              onAddReaction={handleOnAddReaction}
-            />
-          )}
         </div>
       </div>
     </div>
   );
 }
+
+export default withWaveDropMobileMenuProvider(EndedParticipationDropInner);

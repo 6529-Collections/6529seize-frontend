@@ -9,14 +9,28 @@
       "kind": "route",
       "title": "6529.io home",
       "aliases": ["home", "homepage", "landing page", "6529 home"],
-      "keywords": ["home", "latest", "mint", "coming", "discover", "mission"],
+      "keywords": [
+        "home",
+        "latest",
+        "mint",
+        "coming",
+        "discover",
+        "mission",
+        "subscriptions"
+      ],
       "facts": [
         "The home page is the main 6529.io entry point.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",
-      "related_paths": ["/the-memes", "/waves"],
+      "related_paths": [
+        "/the-memes",
+        "/waves",
+        "/about/subscriptions",
+        "/{user}/subscriptions"
+      ],
       "tags": ["home", "navigation"],
       "source_refs": ["ops/docs/home/README.md"]
     },

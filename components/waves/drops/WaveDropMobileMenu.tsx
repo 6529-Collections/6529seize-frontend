@@ -25,7 +25,7 @@ import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
 import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
 
-interface WaveDropMobileMenuProps {
+export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
   readonly isOpen: boolean;
   readonly showReplyAndQuote: boolean;
