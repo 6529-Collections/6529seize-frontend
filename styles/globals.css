@@ -249,6 +249,10 @@ button {
   font-family: inherit;
 }
 
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 optgroup {
   font-family: inherit;
 }

@@ -66,6 +66,16 @@ type WavePictureContributors = React.ComponentProps<
   typeof WavePicture
 >["contributors"];
 
+const getWaveIsDirectMessage = (wave: ApiWave): boolean =>
+  wave.chat.scope.group !== null
+    ? wave.chat.scope.group.is_direct_message === true
+    : false;
+
+const getLowercaseHandle = (
+  handle: string | null | undefined
+): string | null =>
+  handle !== null && handle !== undefined ? handle.toLowerCase() : null;
+
 interface MyStreamWaveHeaderIdentityProps {
   readonly descriptionPreviewRef: React.RefObject<HTMLSpanElement | null>;
   readonly directMessageProfileHref: string | null;
@@ -133,7 +143,7 @@ function MyStreamWaveHeaderIdentity({
             contributors={wavePictureContributors}
           />
         </div>
-        <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight lg:tw-text-xl">
+        <h1 className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight lg:tw-text-xl">
           {wave.name}
         </h1>
       </Link>
@@ -163,7 +173,7 @@ function MyStreamWaveHeaderIdentity({
               }`}
             >
               {isCompact ? (
-                <h1 className="tw-mb-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
+                <h1 className="tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
                   <span className="tw-min-w-0 tw-truncate">{wave.name}</span>
                   <ChevronDownIcon
                     aria-hidden="true"
@@ -172,7 +182,7 @@ function MyStreamWaveHeaderIdentity({
                 </h1>
               ) : (
                 <>
-                  <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+                  <h1 className="tw-m-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
                     {wave.name}
                   </h1>
                   <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
@@ -199,7 +209,7 @@ function MyStreamWaveHeaderIdentity({
           </>
         ) : (
           <>
-            <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+            <h1 className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
               {wave.name}
             </h1>
             {scoreActions}
@@ -239,9 +249,9 @@ export default function MyStreamWaveTabsHeader({
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
-  const isDirectMessage = wave.chat?.scope?.group?.is_direct_message ?? false;
-  const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
-  const waveAuthorHandle = wave.author?.handle?.toLowerCase() ?? null;
+  const isDirectMessage = getWaveIsDirectMessage(wave);
+  const connectedHandle = getLowercaseHandle(connectedProfile?.handle);
+  const waveAuthorHandle = getLowercaseHandle(wave.author.handle);
   const showWaveRepAction =
     connectedHandle !== null &&
     !activeProfileProxy &&
@@ -254,7 +264,7 @@ export default function MyStreamWaveTabsHeader({
     connectedProfile,
     activeProfileProxyCreatedBy: activeProfileProxy?.created_by,
   });
-  const wavePictureContributors = (wave.contributors_overview ?? []).map((c) => ({
+  const wavePictureContributors = wave.contributors_overview.map((c) => ({
     pfp: c.contributor_pfp,
     identity: c.contributor_identity,
   }));
