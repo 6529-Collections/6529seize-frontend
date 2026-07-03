@@ -1,6 +1,5 @@
 "use client";
 
-import { NETWORK_CONTENT_SECTION_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -293,7 +292,7 @@ export default function CommunityStats() {
   }
 
   return (
-    <section className={NETWORK_CONTENT_SECTION_CLASSES}>
+    <section className="tw-w-full">
       <div className="tw-pt-4 md:tw-w-2/3">
         <h1 className="tw-mb-0">Network Stats</h1>
       </div>
