@@ -1,14 +1,13 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import useCapacitor from "@/hooks/useCapacitor";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { Share } from "@capacitor/share";
 import { faShare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-const HEADER_PAGE_SHARE_LOCALE = DEFAULT_LOCALE;
+import clsx from "clsx";
+import { useState } from "react";
 
 function getCurrentPublicUrl(): string {
   const route =
@@ -42,16 +41,21 @@ function getErrorName(error: unknown): string {
 }
 
 async function copyFallback(url: string): Promise<void> {
-  const writeText = navigator?.clipboard?.writeText;
+  const writeText = globalThis.navigator?.clipboard?.writeText;
   if (typeof writeText !== "function") {
     return;
   }
 
-  await writeText.call(navigator.clipboard, url);
+  await writeText.call(globalThis.navigator.clipboard, url);
 }
 
-export default function HeaderPageShareButton() {
-  const { isCapacitor } = useCapacitor();
+export default function HeaderPageShareButton({
+  isCapacitor,
+}: {
+  readonly isCapacitor: boolean;
+}) {
+  const locale = useBrowserLocale();
+  const [isSharing, setIsSharing] = useState(false);
 
   if (!isCapacitor) {
     return null;
@@ -60,6 +64,7 @@ export default function HeaderPageShareButton() {
   const shareCurrentPage = async () => {
     const url = getCurrentPublicUrl();
 
+    setIsSharing(true);
     try {
       await Share.share({
         title: getShareTitle(),
@@ -75,21 +80,26 @@ export default function HeaderPageShareButton() {
       } catch (copyError: unknown) {
         console.error("Failed to share or copy current page URL", copyError);
       }
+    } finally {
+      setIsSharing(false);
     }
   };
 
   return (
     <button
       type="button"
-      aria-label={t(
-        HEADER_PAGE_SHARE_LOCALE,
-        "headerPageShare.trigger.ariaLabel"
-      )}
-      title={t(HEADER_PAGE_SHARE_LOCALE, "headerPageShare.trigger.title")}
+      aria-label={t(locale, "headerPageShare.trigger.ariaLabel")}
+      title={t(locale, "headerPageShare.trigger.title")}
       onClick={() => {
         void shareCurrentPage();
       }}
-      className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800"
+      aria-busy={isSharing ? "true" : undefined}
+      className={clsx(
+        "tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
+        isSharing
+          ? "tw-scale-95 tw-bg-iron-800 tw-text-iron-50 tw-ring-1 tw-ring-primary-400"
+          : "tw-bg-black tw-text-iron-300 hover:tw-text-iron-50 active:tw-bg-iron-800"
+      )}
     >
       <FontAwesomeIcon icon={faShare} className="tw-h-6 tw-w-6" />
     </button>

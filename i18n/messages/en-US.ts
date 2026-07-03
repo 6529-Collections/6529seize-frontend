@@ -759,6 +759,10 @@ export const EN_US_MESSAGES = {
   "headerShare.copy.copied": "Copied!",
   "headerPageShare.trigger.ariaLabel": "Share page",
   "headerPageShare.trigger.title": "Share page",
+  "headerWaveLinkAction.share": "Share wave",
+  "headerWaveLinkAction.copy": "Copy wave link",
+  "headerWaveLinkAction.feedback.shared": "Link shared",
+  "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
   "tools.api.authentication.title": "Authentication",
   "tools.api.authentication.basedOnSignatures":
