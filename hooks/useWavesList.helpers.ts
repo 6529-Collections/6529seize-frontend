@@ -11,7 +11,7 @@ export type SidebarWaveWithDiscoverySection = SidebarWave & {
 
 export const SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED: SidebarDiscoverySection =
   "highly-rated";
-export const SIDEBAR_DISCOVERY_SECTION_ALL: SidebarDiscoverySection = "all";
+const SIDEBAR_DISCOVERY_SECTION_ALL: SidebarDiscoverySection = "all";
 
 const HIGHLY_RATED_WAVE_LIMIT = 10;
 
