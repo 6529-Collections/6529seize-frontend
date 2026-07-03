@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import EndedParticipationDrop from "@/components/waves/drops/participation/EndedParticipationDrop";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
@@ -132,7 +132,7 @@ describe("EndedParticipationDrop", () => {
     ParticipationIdentityProfileCardMock.mockClear();
   });
 
-  it("opens mobile menu on long press", () => {
+  it("opens mobile menu on long press", async () => {
     const { rerender } = render(
       <EndedParticipationDrop
         drop={drop}
@@ -145,8 +145,8 @@ describe("EndedParticipationDrop", () => {
         onQuoteClick={jest.fn()}
       />
     );
-    // Initially menu should be closed
-    expect(WaveDropMobileMenuMock.mock.calls[0][0]?.isOpen).toBe(false);
+    // Initially no hidden menu should be mounted.
+    expect(WaveDropMobileMenuMock).not.toHaveBeenCalled();
 
     // Trigger onLongPress prop from WaveDropContent
     const onLongPress = WaveDropContentMock.mock.calls[0][0]?.onLongPress;
@@ -168,8 +168,10 @@ describe("EndedParticipationDrop", () => {
       />
     );
 
-    // After long press, menu should be open
-    expect(WaveDropMobileMenuMock.mock.calls[1][0]?.isOpen).toBe(true);
+    // After long press, menu should be open.
+    await waitFor(() =>
+      expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(true)
+    );
   });
 
   it("renders desktop actions outside the clipped card", () => {
@@ -243,7 +245,7 @@ describe("EndedParticipationDrop", () => {
     expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(true);
   });
 
-  it("clears an open touch sheet when the mode switches to desktop hover", () => {
+  it("clears an open touch sheet when the mode switches to desktop hover", async () => {
     mockUseIsMobileDevice.mockReturnValue(false);
     mockUseHasTouchInput.mockReturnValue(true);
     mockUseIsTouchDevice.mockReturnValue(true);
@@ -269,12 +271,16 @@ describe("EndedParticipationDrop", () => {
       onLongPress();
     });
 
-    expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(true);
+    await waitFor(() =>
+      expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(true)
+    );
 
     setHoverSupport(true);
     rerender(renderDrop());
 
-    expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(false);
+    await waitFor(() =>
+      expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(false)
+    );
 
     setHoverSupport(false);
     rerender(renderDrop());
