@@ -65,7 +65,9 @@ export function UserPageXtdhGrantListItem({
         type: "success",
         message: "Grant stopped.",
       });
-      void queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
+      queryClient
+        .invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] })
+        .catch(() => undefined);
       const identity = grant.grantor.handle ?? grant.grantor.primary_address;
       if (identity) {
         invalidateIdentityTdhStats({ identity });
@@ -94,7 +96,9 @@ export function UserPageXtdhGrantListItem({
         type: "success",
         message: "Grant revoked.",
       });
-      void queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
+      queryClient
+        .invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] })
+        .catch(() => undefined);
       const identity = grant.grantor.handle ?? grant.grantor.primary_address;
       if (identity) {
         invalidateIdentityTdhStats({ identity });

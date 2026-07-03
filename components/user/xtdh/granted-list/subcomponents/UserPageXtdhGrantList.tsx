@@ -108,14 +108,14 @@ export function UserPageXtdhGrantList({
       {grants.map((grant) => {
         const request = getGrantContractRequest(grant);
         const state =
-          request !== null
-            ? contractOverviewStates.get(
+          request === null
+            ? undefined
+            : contractOverviewStates.get(
                 getContractOverviewLookupKey(
                   request.address,
                   request.chain ?? "ethereum"
                 )
-              )
-            : undefined;
+              );
 
         return (
           <UserPageXtdhGrantListItem

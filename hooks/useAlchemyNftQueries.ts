@@ -208,7 +208,7 @@ async function fetchContractOverviewsFromApi({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body,
-      ...(signal !== undefined ? { signal: signal } : {}),
+      ...(signal === undefined ? {} : { signal: signal }),
     }
   );
 
