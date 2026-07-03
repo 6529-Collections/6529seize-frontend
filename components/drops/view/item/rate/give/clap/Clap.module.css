@@ -38,7 +38,7 @@
   100% {
     transform: scale(1);
     box-shadow:
-      0 0 50px rgb(31.2, 139.2, 76.8),
+      0 0 50px rgb(31, 139, 77),
       inset 0 0 10px rgb(39, 174, 96);
     opacity: 0;
   }
@@ -54,7 +54,7 @@
   100% {
     transform: scale(1);
     box-shadow:
-      0 0 50px rgb(153.6, 45.6, 34.4),
+      0 0 50px rgb(154, 46, 34),
       inset 0 0 10px rgb(192, 57, 43);
     opacity: 0;
   }

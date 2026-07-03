@@ -23,12 +23,12 @@
 }
 
 .checkBtn:hover {
-  background-color: rgb(43.2378378378, 141.0918918919, 167.2621621622);
+  background-color: rgb(43, 141, 167);
 }
 
 .checkBtn:active,
 .checkBtn:disabled {
-  background-color: rgb(36.1, 117.8, 139.65) !important;
+  background-color: rgb(36, 118, 140) !important;
 }
 
 .clearBtn {

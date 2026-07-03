@@ -14,7 +14,7 @@
   cursor: pointer;
 }
 .connectBtn:hover {
-  background-color: rgb(216.75, 216.75, 216.75);
+  background-color: rgb(217, 217, 217);
 }
 
 .connectRequired {
@@ -35,7 +35,7 @@
   padding: 12px 18px;
 }
 .connectRequiredButton:hover {
-  background-color: rgb(43.2378378378, 141.0918918919, 167.2621621622);
+  background-color: rgb(43, 141, 167);
 }
 .connectRequiredButton:focus-visible {
   outline: 2px solid #267c93;
@@ -53,7 +53,7 @@
   cursor: pointer;
 }
 .viewManageBtn:hover {
-  background-color: rgb(229.5, 229.5, 229.5);
+  background-color: rgb(230, 230, 230);
 }
 
 .viewManageBtnDisabled {
@@ -94,12 +94,12 @@
   cursor: pointer;
 }
 .useCaseWalletUpdate:hover {
-  background-color: rgb(43.2378378378, 141.0918918919, 167.2621621622);
+  background-color: rgb(43, 141, 167);
 }
 
 .useCaseWalletUpdateDisabled {
   pointer-events: none !important;
-  background-color: rgb(34.2, 111.6, 132.3);
+  background-color: rgb(34, 112, 132);
   color: rgb(154, 154, 154);
 }
 
@@ -111,12 +111,12 @@
   cursor: pointer;
 }
 .useCaseWalletRevoke:hover {
-  background-color: rgb(219.2278761062, 32.2721238938, 57.8672566372);
+  background-color: rgb(219, 32, 58);
 }
 
 .useCaseWalletRevokeDisabled {
   pointer-events: none !important;
-  background-color: rgb(177.3, 26.1, 46.8);
+  background-color: rgb(177, 26, 47);
   color: rgb(154, 154, 154);
 }
 
@@ -140,12 +140,12 @@
   white-space: normal;
 }
 .addNewDelegationBtn:hover {
-  background-color: rgb(43.2378378378, 141.0918918919, 167.2621621622);
+  background-color: rgb(43, 141, 167);
 }
 
 .addNewDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: rgb(34.2, 111.6, 132.3);
+  background-color: rgb(34, 112, 132);
   color: rgb(154, 154, 154);
 }
 
@@ -162,12 +162,12 @@
   cursor: pointer;
 }
 .revokeDelegationBtn:hover {
-  background-color: rgb(187.15, 27.55, 49.4);
+  background-color: rgb(187, 28, 49);
 }
 
 .revokeDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: rgb(177.3, 26.1, 46.8);
+  background-color: rgb(177, 26, 47);
   color: rgb(154, 154, 154);
 }
 
@@ -178,19 +178,19 @@
   justify-content: center;
   margin-right: 15px;
   margin-top: 15px;
-  background-color: rgb(193.5, 101.7, 11.7);
+  background-color: rgb(194, 102, 12);
   color: white;
   width: fit-content;
   padding: 12px 16px;
   cursor: pointer;
 }
 .lockDelegationBtn:hover {
-  background-color: rgb(182.75, 96.05, 11.05);
+  background-color: rgb(183, 96, 11);
 }
 
 .lockDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: rgb(172, 90.4, 10.4);
+  background-color: rgb(172, 90, 10);
   color: rgb(154, 154, 154);
 }
 
@@ -255,12 +255,12 @@
   color: white;
 }
 .newDelegationSubmitBtn:hover {
-  background-color: rgb(30.4, 124.45, 84.55);
+  background-color: rgb(30, 124, 85);
 }
 
 .newDelegationSubmitBtnDisabled {
   pointer-events: none !important;
-  background-color: rgb(28.8, 117.9, 80.1);
+  background-color: rgb(29, 118, 80);
   color: rgb(154, 154, 154);
 }
 
@@ -276,19 +276,19 @@
   cursor: pointer;
 }
 .newDelegationCancelBtn:hover {
-  background-color: rgb(216.75, 216.75, 216.75);
+  background-color: rgb(217, 217, 217);
 }
 
 .newDelegationError {
-  color: rgb(226.410619469, 60.789380531, 83.4637168142);
+  color: rgb(226, 61, 83);
 }
 
 .newDelegationSuccess {
-  color: rgb(44.0147239264, 180.1852760736, 122.4159509202);
+  color: rgb(44, 180, 122);
 }
 
 .lockUseCaseBtn {
-  background-color: rgb(217.75, 217.75, 217.75);
+  background-color: rgb(218, 218, 218);
   padding-left: 15px;
   padding-right: 25px;
   border: none;
@@ -468,15 +468,15 @@
 }
 
 .delegationActiveLabel {
-  color: rgb(42.0122699387, 171.9877300613, 116.8466257669);
+  color: rgb(42, 172, 117);
 }
 
 .delegationExpiredLabel {
-  color: rgb(225.1017699115, 51.8982300885, 75.610619469);
+  color: rgb(225, 52, 76);
 }
 
 .consolidationActiveLabel {
-  color: rgb(77.8054054054, 181.4702702703, 209.1945945946);
+  color: rgb(78, 181, 209);
 }
 
 .consolidationNotAcceptedLabel {

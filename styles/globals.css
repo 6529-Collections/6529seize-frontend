@@ -269,7 +269,7 @@ a {
 
 @media (hover: hover) {
   a:hover {
-    color: rgb(178.5, 178.5, 178.5);
+    color: rgb(179, 179, 179);
   }
 }
 @media only screen and (max-width: 1200px) {
@@ -558,7 +558,7 @@ h5:not(.tailwind-scope h5) {
   color: white !important;
 }
 .btn-green:hover {
-  background-color: rgb(37.0061349693, 151.4938650307, 102.9233128834);
+  background-color: rgb(37, 151, 103);
 }
 
 .btn-block {

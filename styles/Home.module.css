@@ -100,7 +100,7 @@
   text-decoration: underline;
 }
 .instructionsLink:hover {
-  color: rgb(178.5, 178.5, 178.5);
+  color: rgb(179, 179, 179);
 }
 
 .nextGenQuestion {
@@ -120,8 +120,8 @@
   border-bottom: 3px solid white;
 }
 .viewAllLink span:hover {
-  color: rgb(178.5, 178.5, 178.5);
-  border-bottom: 3px solid rgb(178.5, 178.5, 178.5);
+  color: rgb(179, 179, 179);
+  border-bottom: 3px solid rgb(179, 179, 179);
 }
 @media only screen and (max-width: 800px) {
   .viewAllLink span {
