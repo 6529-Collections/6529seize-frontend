@@ -53,6 +53,34 @@ export type HeaderSearchModalItemType =
   | ApiWave
   | PageSearchResult;
 
+export const isHeaderSearchWaveDirectMessage = (wave: ApiWave): boolean =>
+  Boolean(wave.chat.scope.group?.is_direct_message);
+
+export const getHeaderSearchWavePath = ({
+  wave,
+  currentWaveId,
+  isApp,
+}: {
+  readonly wave: ApiWave;
+  readonly currentWaveId: string | null | undefined;
+  readonly isApp: boolean;
+}): string => {
+  const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
+
+  if (currentWaveId === wave.id) {
+    return getWaveHomeRoute({
+      isDirectMessage,
+      isApp,
+    });
+  }
+
+  return getWaveRoute({
+    waveId: wave.id,
+    isDirectMessage,
+    isApp,
+  });
+};
+
 export const getNftCollectionMap = () => {
   return {
     [MEMES_CONTRACT.toLowerCase()]: {
@@ -80,12 +108,16 @@ export default function HeaderSearchModalItem({
   isSelected,
   onHover,
   onClose,
+  activeWaveId,
+  onWaveSelect,
 }: {
   readonly isSelected: boolean;
   readonly searchValue: string;
   readonly content: HeaderSearchModalItemType;
   readonly onHover: (state: boolean) => void;
   readonly onClose: () => void;
+  readonly activeWaveId?: string | null | undefined;
+  readonly onWaveSelect?: (wave: ApiWave) => void;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -172,23 +204,37 @@ export default function HeaderSearchModalItem({
     } else {
       const wave = getWave();
       const currentWaveId =
-        getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
-      const isDirectMessage =
-        wave.chat?.scope?.group?.is_direct_message ?? false;
-
-      if (currentWaveId === wave.id) {
-        return getWaveHomeRoute({
-          isDirectMessage,
-          isApp,
-        });
-      }
-
-      return getWaveRoute({
-        waveId: wave.id,
-        isDirectMessage,
+        activeWaveId ??
+        getActiveWaveIdFromUrl({ pathname, searchParams }) ??
+        undefined;
+      return getHeaderSearchWavePath({
+        wave,
+        currentWaveId,
         isApp,
       });
     }
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isWave() || !onWaveSelect || event.defaultPrevented) {
+      onClose();
+      return;
+    }
+
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button === 1 ||
+      event.button === 2
+    ) {
+      onClose();
+      return;
+    }
+
+    event.preventDefault();
+    onWaveSelect(getWave());
   };
 
   const getPrimaryText = () => {
@@ -251,7 +297,7 @@ export default function HeaderSearchModalItem({
     >
       <Link
         href={getPath()}
-        onClick={onClose}
+        onClick={handleClick}
         className="tw-group tw-flex tw-w-full tw-min-w-0 tw-select-none tw-items-center tw-gap-3 tw-text-left tw-text-sm tw-font-medium tw-no-underline"
       >
         {getMedia()}

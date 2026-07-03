@@ -64,10 +64,30 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const publicWaveScope = { group: null };
+
+const createWaveResult = (overrides: Record<string, unknown> = {}) => ({
+  id: "wave1",
+  name: "Wave 1",
+  picture: "pic.png",
+  serial_no: 2,
+  chat: {
+    scope: publicWaveScope,
+  },
+  wave: {
+    admin_group: publicWaveScope,
+  },
+  ...overrides,
+});
+
 const renderComponent = (
   content: HeaderSearchModalItemType,
   searchValue: string,
-  isSelected: boolean
+  isSelected: boolean,
+  options: {
+    readonly activeWaveId?: string | null | undefined;
+    readonly onWaveSelect?: ((wave: any) => void) | undefined;
+  } = {}
 ) => {
   const onClose = jest.fn();
   const onHover = jest.fn();
@@ -85,6 +105,8 @@ const renderComponent = (
         isSelected={isSelected}
         onHover={onHover}
         onClose={onClose}
+        activeWaveId={options.activeWaveId}
+        onWaveSelect={options.onWaveSelect}
       />
     </QueryClientProvider>
   );
@@ -142,18 +164,57 @@ describe("HeaderSearchModalItem", () => {
     mockUseSearchParams.mockReturnValue({
       get: jest.fn((key: string) => (key === "wave" ? "other" : null)),
     });
-    const wave: any = {
-      id: "wave1",
-      name: "Wave 1",
-      picture: "pic.png",
-      serial_no: 2,
-    };
+    const wave: any = createWaveResult();
     renderComponent(wave, "wave", false);
     const link = screen.getByTestId("link");
     expect(link).toHaveAttribute("href", "/waves/wave1");
     expect(link.textContent).toContain("Wave 1");
     expect(link.textContent).toContain("Wave #2");
     expect(screen.getByTestId("media").textContent).toContain("pic.png");
+  });
+
+  it("selects wave results through the active wave handler", () => {
+    useHoverDirty.mockReturnValue(false);
+    mockUsePathname.mockReturnValue("/waves/parent-wave");
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    const onWaveSelect = jest.fn();
+    const wave: any = createWaveResult({
+      id: "subwave-1",
+      name: "Subwave 1",
+      picture: null,
+    });
+
+    const { onClose } = renderComponent(wave, "subwave", false, {
+      activeWaveId: "parent-wave",
+      onWaveSelect,
+    });
+
+    const link = screen.getByTestId("link");
+    expect(link).toHaveAttribute("href", "/waves/subwave-1");
+    fireEvent.click(link);
+    expect(onWaveSelect).toHaveBeenCalledWith(wave);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("keeps modified wave result clicks as regular links", () => {
+    useHoverDirty.mockReturnValue(false);
+    mockUsePathname.mockReturnValue("/waves/parent-wave");
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    const onWaveSelect = jest.fn();
+    const wave: any = createWaveResult({
+      id: "subwave-1",
+      name: "Subwave 1",
+      picture: null,
+    });
+
+    const { onClose } = renderComponent(wave, "subwave", false, {
+      activeWaveId: "parent-wave",
+      onWaveSelect,
+    });
+
+    fireEvent.click(screen.getByTestId("link"), { metaKey: true });
+    expect(onWaveSelect).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("renders page item and shows breadcrumbs", () => {
