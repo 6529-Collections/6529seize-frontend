@@ -263,15 +263,30 @@ describe("fetchTwitterPreview", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("falls back to single GET requests when the POST batch fails", async () => {
-    const firstUrl = "https://x.com/first/status/3001";
-    const secondUrl = "https://x.com/second/status/3002";
-    const firstPreview = createPreview(firstUrl, "3001", "First post");
-    const secondPreview = createPreview(secondUrl, "3002", "Second post");
+  it("falls back to a single GET request when a one-url POST batch fails", async () => {
+    const url = "https://x.com/first/status/3001";
+    const preview = createPreview(url, "3001", "First post");
     fetchMock
       .mockRejectedValueOnce(new Error("batch unavailable"))
-      .mockResolvedValueOnce(createResponse(firstPreview))
-      .mockResolvedValueOnce(createResponse(secondPreview));
+      .mockResolvedValueOnce(createResponse(preview));
+
+    const { fetchTwitterPreview } = await loadApi();
+    const request = fetchTwitterPreview(url);
+
+    jest.runOnlyPendingTimers();
+
+    await expect(request).resolves.toEqual(preview);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/twitter/preview");
+    expect(fetchMock.mock.calls[1]?.[0]).toBe(
+      "/api/twitter/preview?url=https%3A%2F%2Fx.com%2Ffirst%2Fstatus%2F3001"
+    );
+  });
+
+  it("does not fan out GET requests when a multi-url POST batch fails", async () => {
+    const firstUrl = "https://x.com/first/status/3001";
+    const secondUrl = "https://x.com/second/status/3002";
+    fetchMock.mockRejectedValueOnce(new Error("batch unavailable"));
 
     const { fetchTwitterPreview } = await loadApi();
     const first = fetchTwitterPreview(firstUrl);
@@ -279,17 +294,9 @@ describe("fetchTwitterPreview", () => {
 
     jest.runOnlyPendingTimers();
 
-    await expect(Promise.all([first, second])).resolves.toEqual([
-      firstPreview,
-      secondPreview,
-    ]);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    await expect(first).rejects.toThrow("batch unavailable");
+    await expect(second).rejects.toThrow("batch unavailable");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/twitter/preview");
-    expect(fetchMock.mock.calls[1]?.[0]).toBe(
-      "/api/twitter/preview?url=https%3A%2F%2Fx.com%2Ffirst%2Fstatus%2F3001"
-    );
-    expect(fetchMock.mock.calls[2]?.[0]).toBe(
-      "/api/twitter/preview?url=https%3A%2F%2Fx.com%2Fsecond%2Fstatus%2F3002"
-    );
   });
 });
