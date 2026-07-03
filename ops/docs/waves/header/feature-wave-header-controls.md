@@ -8,7 +8,8 @@ leaving the thread.
 Users can:
 
 - Follow or unfollow (`Join` / `Joined`)
-- Use notification controls after following
+- Use the speaker notification menu after following
+- Mute or unmute waves from the bell-slash control
 - Open wave description from the info button
 - Open and close followers from the `Joined` count
 - Pin or unpin the wave
@@ -43,8 +44,10 @@ Users can:
 
 1. Open `About` in an active wave.
 2. Select `Join` to follow (or `Joined` to unfollow).
-3. If followed, set notification mode (`@` mentions-only or all drops when enabled).
-4. If the wave is muted, use `Muted` to unmute from the same top row.
+3. If followed, open the speaker button to choose `@ALL` mention notifications
+   or `Notify for all messages`.
+4. Use the bell-slash button to mute the wave before or after joining, or
+   unmute it when the wave is already muted.
 5. Use the info button to open the wave description panel.
 6. Close description with outside click, `Escape`, or the info button.
 7. Select `Joined` count to toggle between about content and followers.
@@ -71,9 +74,13 @@ Users can:
 
 - Signed-out users and proxy sessions do not get follow, notification, pin,
   edit, or owner controls.
-- Notification controls render only when the wave is followed.
-- `All` notifications can be disabled for high-follower waves.
-- When muted, notification mode buttons are replaced by a `Muted` control.
+- The speaker notification menu renders only when the wave is followed; the
+  bell-slash mute control can render before joining.
+- All-message notifications can be unavailable for high-follower waves unless
+  already enabled; the unavailable all-message row stays disabled in the speaker
+  menu.
+- When muted, the speaker notification menu is replaced by a bell-slash `Muted`
+  control that unmutes the wave.
 - Direct-message waves never show rename or picture-edit pencils, even when the
   connected user would otherwise pass `canEditWave`.
 - Pin attempts beyond 20 are blocked and show an error toast.

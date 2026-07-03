@@ -2,12 +2,12 @@
 
 import WavePicture from "@/components/waves/WavePicture";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import { getMessagesBaseRoute } from "@/helpers/navigation.helpers";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { InboxIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import type React from "react";
+import { useRef } from "react";
 import { QuickDmLoadingRows, QuickDmPanelHeader } from "./QuickDmPanelPieces";
 import {
   getFormattedWaveName,
@@ -111,32 +111,46 @@ const QuickDmConversationRow = ({
 
 export const QuickDmListPanel = ({
   isFetching,
+  isFetchingNextPage,
+  hasNextPage,
   locale,
   onClose,
   onCreateDirectMessage,
-  onOpenAll,
+  onFetchNextPage,
   onOpenChat,
   onRegisterWave,
   waves,
 }: {
   readonly isFetching: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly hasNextPage: boolean;
   readonly locale: SupportedLocale;
   readonly onClose: () => void;
   readonly onCreateDirectMessage?: (() => void) | undefined;
-  readonly onOpenAll: () => void;
+  readonly onFetchNextPage: () => void;
   readonly onOpenChat: (waveId: string) => void;
   readonly onRegisterWave: (waveId: string) => void;
   readonly waves: MinimalWave[];
 }) => {
-  const recentWaves = waves.slice(0, 5);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   let content: React.ReactNode;
+
+  useInfiniteScroll(
+    hasNextPage,
+    isFetchingNextPage,
+    onFetchNextPage,
+    scrollContainerRef,
+    sentinelRef,
+    "80px"
+  );
 
   if (isFetching && waves.length === 0) {
     content = <QuickDmLoadingRows locale={locale} />;
-  } else if (recentWaves.length > 0) {
+  } else if (waves.length > 0) {
     content = (
       <div className="tw-flex tw-flex-col tw-gap-1">
-        {recentWaves.map((wave) => (
+        {waves.map((wave) => (
           <QuickDmConversationRow
             key={wave.id}
             locale={locale}
@@ -145,6 +159,25 @@ export const QuickDmListPanel = ({
             onHover={onRegisterWave}
           />
         ))}
+        {(hasNextPage || isFetchingNextPage) && (
+          <div
+            ref={sentinelRef}
+            className="tw-flex tw-h-8 tw-items-center tw-justify-center"
+            aria-hidden={!isFetchingNextPage}
+          >
+            {isFetchingNextPage && (
+              <>
+                <span className="tw-sr-only" role="status" aria-live="polite">
+                  {t(locale, "quickDm.loadingStatus")}
+                </span>
+                <span
+                  className="tw-h-1.5 tw-w-14 tw-rounded-full tw-bg-white/10"
+                  aria-hidden="true"
+                />
+              </>
+            )}
+          </div>
+        )}
       </div>
     );
   } else {
@@ -152,22 +185,18 @@ export const QuickDmListPanel = ({
   }
 
   return (
-    <div className="tw-flex tw-max-h-[420px] tw-w-[340px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+    <div className="tw-flex tw-max-h-[min(640px,calc(100dvh-8rem))] tw-w-[340px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
       <QuickDmPanelHeader
         locale={locale}
         title={t(locale, "quickDm.listTitle")}
         onClose={onClose}
         onCreateDirectMessage={onCreateDirectMessage}
       />
-      <div className="tw-min-h-0 tw-overflow-y-auto tw-p-2">{content}</div>
-      <div className="tw-border-t tw-border-white/10 tw-p-2">
-        <Link
-          href={getMessagesBaseRoute(false)}
-          onClick={onOpenAll}
-          className="hover:tw-text-primary-200 tw-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-        >
-          {t(locale, "quickDm.showAll")}
-        </Link>
+      <div
+        ref={scrollContainerRef}
+        className="tw-min-h-0 tw-overflow-y-auto tw-p-2"
+      >
+        {content}
       </div>
     </div>
   );
