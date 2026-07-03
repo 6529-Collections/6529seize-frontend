@@ -65,7 +65,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   }, [drops]);
 
   const handleLoadMore = React.useCallback(() => {
-    void fetchNextPage();
+    fetchNextPage().catch(() => undefined);
   }, [fetchNextPage]);
 
   if (isFetching && dropsWithMedia.length === 0) {

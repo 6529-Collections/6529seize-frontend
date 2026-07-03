@@ -58,7 +58,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
       return;
     }
 
-    void fetchNextPage();
+    fetchNextPage().catch(() => undefined);
   }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
   const intersectionElementRef = useIntersectionObserver(handleIntersection);
 

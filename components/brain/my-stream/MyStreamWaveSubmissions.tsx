@@ -76,7 +76,7 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
         return;
       }
 
-      void fetchNextPage();
+      fetchNextPage().catch(() => undefined);
     },
     [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]
   );
