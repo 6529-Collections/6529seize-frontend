@@ -117,6 +117,20 @@ function setCachedContract(entry: ContractResponseEntry): void {
   });
 }
 
+function contractErrorEntry(
+  contract: ContractRequest,
+  error = "Failed to fetch contract metadata",
+  status = 502
+): ContractResponseEntry {
+  return {
+    address: contract.address,
+    chain: contract.chain,
+    metadata: null,
+    error,
+    status,
+  };
+}
+
 async function readJsonBody(
   request: NextRequest
 ): Promise<
@@ -291,6 +305,26 @@ async function fetchContractMetadata({
   return entry;
 }
 
+async function fetchContractMetadataEntry({
+  apiKey,
+  contract,
+  signal,
+}: {
+  readonly apiKey: string;
+  readonly contract: ContractRequest;
+  readonly signal: AbortSignal;
+}): Promise<ContractResponseEntry> {
+  try {
+    return await fetchContractMetadata({
+      ...contract,
+      apiKey,
+      signal,
+    });
+  } catch {
+    return contractErrorEntry(contract);
+  }
+}
+
 export async function POST(request: NextRequest) {
   const bodyResult = await readJsonBody(request);
   if (!bodyResult.ok) {
@@ -306,9 +340,9 @@ export async function POST(request: NextRequest) {
     const apiKey = getAlchemyApiKey();
     const contracts = await Promise.all(
       parseResult.contracts.map((contract) =>
-        fetchContractMetadata({
-          ...contract,
+        fetchContractMetadataEntry({
           apiKey,
+          contract,
           signal: request.signal,
         })
       )
@@ -322,7 +356,7 @@ export async function POST(request: NextRequest) {
         : "Failed to fetch contract metadata";
     return NextResponse.json(
       { error: message },
-      { status: 400, headers: NO_STORE_HEADERS }
+      { status: 500, headers: NO_STORE_HEADERS }
     );
   }
 }

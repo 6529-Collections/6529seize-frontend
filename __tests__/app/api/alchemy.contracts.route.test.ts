@@ -17,6 +17,8 @@ import { POST } from "@/app/api/alchemy/contracts/route";
 
 const CONTRACT_ONE = "0x0000000000000000000000000000000000000001";
 const CONTRACT_TWO = "0x0000000000000000000000000000000000000002";
+const CONTRACT_THREE = "0x0000000000000000000000000000000000000003";
+const CONTRACT_FOUR = "0x0000000000000000000000000000000000000004";
 
 type MockBodyReadResult =
   | { readonly done: false; readonly value: Uint8Array }
@@ -146,5 +148,52 @@ describe("app/api/alchemy/contracts route", () => {
     expect(response.status).toBe(400);
     expect(response.body).toEqual({ error: "Invalid contract address" });
     expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("keeps successful entries when one contract fetch throws", async () => {
+    mockFetch
+      .mockResolvedValueOnce(
+        jsonResponse({
+          contractMetadata: {
+            name: "Collection Three",
+            tokenType: "ERC721",
+          },
+        })
+      )
+      .mockRejectedValueOnce(new Error("network unavailable"));
+
+    const response = (await POST(
+      requestFor({
+        contracts: [
+          { address: CONTRACT_THREE, chain: "ethereum" },
+          { address: CONTRACT_FOUR, chain: "ethereum" },
+        ],
+      })
+    )) as RouteResponse;
+
+    expect(response.status).toBe(200);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(response.body).toEqual({
+      contracts: [
+        {
+          address: CONTRACT_THREE,
+          chain: "ethereum",
+          metadata: {
+            contractMetadata: {
+              name: "Collection Three",
+              tokenType: "ERC721",
+            },
+            _checksum: CONTRACT_THREE,
+          },
+        },
+        {
+          address: CONTRACT_FOUR,
+          chain: "ethereum",
+          metadata: null,
+          error: "Failed to fetch contract metadata",
+          status: 502,
+        },
+      ],
+    });
   });
 });

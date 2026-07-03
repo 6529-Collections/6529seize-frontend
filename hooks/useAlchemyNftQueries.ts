@@ -120,7 +120,7 @@ type ContractMetadataBatchResponse = {
     | undefined;
 };
 
-export type ContractOverviewBatchResult = {
+type ContractOverviewBatchResult = {
   readonly contractsByKey: ReadonlyMap<string, ContractOverview | null>;
   readonly errorsByKey: ReadonlyMap<string, string>;
 };
@@ -308,6 +308,15 @@ export function getContractOverviewLookupKey(
   return getContractCacheKey(address, chain);
 }
 
+function getContractOverviewBatchRequestKey(
+  contract: ContractOverviewBatchRequest
+): string {
+  return getContractOverviewLookupKey(
+    contract.address,
+    contract.chain ?? "ethereum"
+  );
+}
+
 function getTokenCacheKey(params: TokenMetadataParams): string {
   if (params.tokens) {
     const sortedTokens = [...params.tokens].sort((a, b) => {
@@ -485,19 +494,18 @@ export function useContractOverviewsQuery({
       deduped.push({ address: checksum, chain });
     }
 
-    return deduped;
+    return deduped.sort((left, right) =>
+      getContractOverviewBatchRequestKey(left).localeCompare(
+        getContractOverviewBatchRequestKey(right)
+      )
+    );
   }, [contracts]);
+  const contractLookupKey = useMemo(
+    () => normalizedContracts.map(getContractOverviewBatchRequestKey).join("|"),
+    [normalizedContracts]
+  );
   const query = useQuery({
-    queryKey: [
-      QueryKey.NFT_CONTRACT_OVERVIEW,
-      "batch",
-      normalizedContracts.map((contract) =>
-        getContractOverviewLookupKey(
-          contract.address,
-          contract.chain ?? "ethereum"
-        )
-      ),
-    ],
+    queryKey: [QueryKey.NFT_CONTRACT_OVERVIEW, "batch", contractLookupKey],
     enabled: enabled && normalizedContracts.length > 0,
     staleTime: CONTRACT_TTL,
     gcTime: CONTRACT_TTL,
