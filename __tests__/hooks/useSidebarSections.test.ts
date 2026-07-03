@@ -2,12 +2,13 @@ import { renderHook } from "@testing-library/react";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 
 describe("useSidebarSections", () => {
-  it("returns the menu IA groups with NFT and Waves secondary links", () => {
+  it("returns the menu IA groups with NFT, Waves, Tools, and About links", () => {
     const { result } = renderHook(() => useSidebarSections(false, false, "US"));
 
     expect(result.current.map((section) => section.key)).toEqual([
       "nfts",
       "waves",
+      "tools",
       "about",
     ]);
 
@@ -58,6 +59,8 @@ describe("useSidebarSections", () => {
     const aboutSection = result.current.find(
       (section) => section.key === "about"
     );
+    const findAboutSubsection = (name: string) =>
+      aboutSection?.subsections.find((subsection) => subsection.name === name);
 
     expect(aboutSection?.items).toEqual([
       { name: "About", href: "/about", activePathPrefixes: ["/about/"] },
@@ -68,6 +71,7 @@ describe("useSidebarSections", () => {
       "Collections",
       "Network & People",
       "Network Data",
+      "Digital Rights",
       "Delegation",
       "NFT & Reporting Tools",
       "Developer & Open Data",
@@ -75,15 +79,18 @@ describe("useSidebarSections", () => {
       "Community",
       "Legal",
     ]);
-    expect(
-      aboutSection?.subsections[0]?.items.map((item) => item.name)
-    ).toEqual(["The Memes", "Subscriptions", "Meme Lab", "Gradient"]);
-    expect(aboutSection?.subsections[1]?.items).toEqual([
+    expect(findAboutSubsection("Collections")?.items).toEqual([
+      { name: "The Memes", href: "/about/the-memes" },
+      { name: "Subscriptions", href: "/about/subscriptions" },
+      { name: "Meme Lab", href: "/about/meme-lab" },
+      { name: "Gradient", href: "/about/6529-gradient" },
+    ]);
+    expect(findAboutSubsection("Network & People")?.items).toEqual([
       { name: "Identities", href: "/network" },
       { name: "Activity", href: "/network/activity" },
       { name: "Groups", href: "/network/groups" },
     ]);
-    expect(aboutSection?.subsections[2]?.items).toEqual([
+    expect(findAboutSubsection("Network Data")?.items).toEqual([
       {
         name: "TDH",
         href: "/network/tdh",
@@ -101,8 +108,10 @@ describe("useSidebarSections", () => {
       { name: "Levels", href: "/network/levels" },
       { name: "Network Stats", href: "/network/health/network-tdh" },
     ]);
-    expect(aboutSection?.subsections[3]?.items).toEqual([
+    expect(findAboutSubsection("Digital Rights")?.items).toEqual([
       { name: "GDRC", href: "/about/gdrc1" },
+    ]);
+    expect(findAboutSubsection("Delegation")?.items).toEqual([
       { name: "NFT Delegation", href: "/about/nft-delegation" },
       { name: "Primary Address", href: "/about/primary-address" },
       { name: "Delegation Center", href: "/delegation/delegation-center" },
@@ -117,46 +126,81 @@ describe("useSidebarSections", () => {
       },
       { name: "Wallet Checker", href: "/delegation/wallet-checker" },
     ]);
-    expect(aboutSection?.subsections[4]?.items).toEqual([
-      { name: "Subscriptions Report", href: "/tools/subscriptions-report" },
-      { name: "Memes Accounting", href: "/meme-accounting" },
-      { name: "Memes Gas", href: "/meme-gas" },
+    expect(findAboutSubsection("Developer & Open Data")?.items).toEqual(
+      expect.arrayContaining([
+        { name: "Open Data", href: "/open-data" },
+        { name: "6529bot Data", href: "/open-data/6529bot" },
+        { name: "Network Metrics", href: "/open-data/network-metrics" },
+      ])
+    );
+  });
+
+  it("includes the Tools index and shared Tools categories", () => {
+    const { result } = renderHook(() => useSidebarSections(false, false, "US"));
+
+    const toolsSection = result.current.find(
+      (section) => section.key === "tools"
+    );
+    const findToolsSubsection = (name: string) =>
+      toolsSection?.subsections.find((subsection) => subsection.name === name);
+
+    expect(toolsSection?.items).toEqual([{ name: "Tools", href: "/tools" }]);
+    expect(
+      toolsSection?.subsections.map((subsection) => subsection.name)
+    ).toEqual([
+      "NFT Delegation",
+      "The Memes Tools",
+      "Builder Tools",
+      "Open Data",
     ]);
-    expect(aboutSection?.subsections[5]?.items).toEqual([
+    expect(findToolsSubsection("NFT Delegation")?.items).toEqual([
+      { name: "Delegation Center", href: "/delegation/delegation-center" },
+      { name: "Wallet Architecture", href: "/delegation/wallet-architecture" },
+      { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
+      {
+        name: "Consolidation Use Cases",
+        href: "/delegation/consolidation-use-cases",
+      },
+      { name: "Wallet Checker", href: "/delegation/wallet-checker" },
+    ]);
+    expect(findToolsSubsection("Builder Tools")?.items).toEqual([
       { name: "API", href: "/tools/api" },
       { name: "EMMA", href: "/emma" },
       { name: "Block Finder", href: "/tools/block-finder" },
-      { name: "Open Data", href: "/open-data" },
-      { name: "6529bot Data", href: "/open-data/6529bot" },
-      { name: "Network Metrics", href: "/open-data/network-metrics" },
-      { name: "Meme Subscriptions", href: "/open-data/meme-subscriptions" },
-      { name: "Rememes", href: "/open-data/rememes" },
-      { name: "Team", href: "/open-data/team" },
-      { name: "Royalties", href: "/open-data/royalties" },
     ]);
     expect(
-      aboutSection?.subsections.some(
-        (subsection) => subsection.name === "Tools"
+      findToolsSubsection("Open Data")?.items.some(
+        (item) =>
+          item.name === "6529bot Usage" && item.href === "/open-data/6529bot"
       )
-    ).toBe(false);
-    expect(
-      result.current.some((section) =>
-        ["network", "collections", "tools"].includes(section.key)
-      )
-    ).toBe(false);
+    ).toBe(true);
   });
 
-  it("includes App Wallets inside About tools when supported", () => {
+  it("includes App Wallets in Tools and About tool groups when supported", () => {
     const { result } = renderHook(() => useSidebarSections(true, false, "US"));
 
+    const toolsSection = result.current.find(
+      (section) => section.key === "tools"
+    );
     const aboutSection = result.current.find(
       (section) => section.key === "about"
     );
-    const nftTools = aboutSection?.subsections.find(
+    const toolsBuilder = toolsSection?.subsections.find(
+      (subsection) => subsection.name === "Builder Tools"
+    );
+    const aboutNftTools = aboutSection?.subsections.find(
       (subsection) => subsection.name === "NFT & Reporting Tools"
     );
 
-    expect(nftTools?.items).toEqual(
+    expect(toolsBuilder?.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "App Wallets",
+          href: "/tools/app-wallets",
+        }),
+      ])
+    );
+    expect(aboutNftTools?.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           name: "App Wallets",

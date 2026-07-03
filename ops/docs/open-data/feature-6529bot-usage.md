@@ -14,7 +14,7 @@ side. Browser clients receive rendered aggregate data only.
 
 - Route: `/open-data/6529bot`
 - Hub route: `/open-data`
-- Web sidebar path: `Tools -> Open Data -> Open Data -> 6529bot Usage`
+- Sidebar path: `Tools -> Open Data -> 6529bot Usage`
 
 ## Data Source
 

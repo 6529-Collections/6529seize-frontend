@@ -84,6 +84,7 @@ const WebSidebarNav = React.forwardRef<
   const sectionMap = useSectionMap(navigationSections);
   const nftsSection = sectionMap.get("nfts");
   const wavesSection = sectionMap.get("waves");
+  const toolsSection = sectionMap.get("tools");
   const aboutSection = sectionMap.get("about");
 
   const closeSubmenu = useCallback(() => {
@@ -287,6 +288,8 @@ const WebSidebarNav = React.forwardRef<
             label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
           />
         </li>
+
+        {toolsSection && renderExpandableSection(toolsSection)}
 
         {aboutSection && renderExpandableSection(aboutSection)}
       </ul>

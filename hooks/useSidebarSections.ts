@@ -7,9 +7,14 @@ import {
   getAboutNavItemLabel,
   getVisibleAboutNavGroups,
 } from "@/components/about/about.routes";
+import {
+  getToolsNavItemHref,
+  getToolsNavItemLabel,
+  getVisibleToolsNavGroups,
+} from "@/components/tools/tools.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { DocumentTextIcon, WrenchIcon } from "@heroicons/react/24/outline";
 import { useMemo, type ComponentType } from "react";
 
 type SidebarSubsection = NonNullable<SidebarSection["subsections"]>[number];
@@ -81,6 +86,32 @@ function getNftsSection(): SidebarSection {
       { name: "Memes Calendar", href: "/meme-calendar" },
     ],
     subsections: [],
+  };
+}
+
+function getToolsSection(
+  appWalletsSupported: boolean,
+  hideSubscriptions: boolean
+): SidebarSection {
+  const visibleToolsGroups = getVisibleToolsNavGroups({
+    appWalletsSupported,
+    hideSubscriptions,
+  });
+
+  return {
+    key: "tools",
+    name: t(DEFAULT_LOCALE, "navigation.primary.tools"),
+    icon: WrenchIcon,
+    items: [
+      { name: t(DEFAULT_LOCALE, "tools.contents.pages.tools"), href: "/tools" },
+    ],
+    subsections: visibleToolsGroups.map((group) => ({
+      name: t(DEFAULT_LOCALE, group.labelKey),
+      items: group.items.map((item) => ({
+        name: getToolsNavItemLabel(item, DEFAULT_LOCALE),
+        href: getToolsNavItemHref(item),
+      })),
+    })),
   };
 }
 
@@ -174,6 +205,7 @@ function getAboutSection(
   const aboutGroups = getVisibleAboutNavGroups(hideSubscriptions);
   const aboutGroupById = new Map(aboutGroups.map((group) => [group.id, group]));
   const collectionsGroup = aboutGroupById.get("collections");
+  const digitalRightsGroup = aboutGroupById.get("digital-rights");
   const delegationGroup = aboutGroupById.get("delegation");
   const resourcesGroup = aboutGroupById.get("resources");
   const communityGroup = aboutGroupById.get("community");
@@ -199,6 +231,9 @@ function getAboutSection(
         ? [mapAboutNavGroupToSubsection(collectionsGroup)]
         : []),
       ...movedSubsections.slice(0, 2),
+      ...(digitalRightsGroup
+        ? [mapAboutNavGroupToSubsection(digitalRightsGroup)]
+        : []),
       ...(delegationGroup
         ? [
             {
@@ -241,6 +276,7 @@ function buildSidebarSections(
   return [
     getNftsSection(),
     getWavesSection(),
+    getToolsSection(appWalletsSupported, hideSubscriptions),
     getAboutSection(appWalletsSupported, hideSubscriptions),
   ];
 }

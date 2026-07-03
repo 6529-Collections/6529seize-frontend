@@ -6,7 +6,7 @@ import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibi
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { AboutSection } from "@/types/enums";
+import type { AboutSection } from "@/types/enums";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import type { ReactNode } from "react";
@@ -118,7 +118,7 @@ export function AboutContentsDropdown({
         anchor={{ to: "bottom end", gap: 8, padding: 16 }}
         menuWidthClassName="tw-w-72 tw-max-w-[calc(100vw-2rem)] sm:tw-w-80"
         header={<AboutContentsDropdownHeader />}
-        headerClassName="tw-mb-1 tw-px-3 tw-pb-3 tw-pt-2"
+        headerClassName="tw-mb-1 tw-flex tw-min-h-14 tw-items-center tw-px-3 tw-py-2"
         itemsWrapperClassName="tw-pr-2"
         menuClassName="tw-[scrollbar-gutter:stable] tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-2 tw-pr-3 tw-shadow-2xl tw-backdrop-blur tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-max-h-96"
         itemClassName="!tw-no-underline hover:!tw-no-underline focus:!tw-no-underline tw-px-3 tw-py-2.5"
@@ -161,7 +161,7 @@ function AboutContentsDropdownHeader() {
   const locale = DEFAULT_LOCALE;
 
   return (
-    <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-50">
+    <div className="tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
       {t(locale, "about.contents.menuHeading")}
     </div>
   );
