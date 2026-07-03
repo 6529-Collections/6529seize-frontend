@@ -220,7 +220,6 @@
     "rehype-external-links": "3.0.0",
     "rehype-sanitize": "6.0.0",
     "remark-gfm": "4.0.1",
-    "sass": "1.98.0",
     "sharp": "0.34.5",
     "swiper": "12.1.2",
     "three": "0.163.0",

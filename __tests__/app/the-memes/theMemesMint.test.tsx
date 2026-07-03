@@ -24,7 +24,7 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock("@/styles/Home.module.scss", () => ({ main: "main-class" }));
+jest.mock("@/styles/Home.module.css", () => ({ main: "main-class" }));
 
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({

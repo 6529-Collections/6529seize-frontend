@@ -168,8 +168,10 @@ describe("BottomNavigation", () => {
 
     const rendered = container.querySelectorAll('[data-testid="nav-item"]');
     const navItemCalls = (NavItem as jest.Mock).mock.calls;
+    const navList = container.querySelector("ul");
 
     expect(rendered).toHaveLength(navItemCalls.length);
+    expect(navList).toHaveClass("tw-m-0", "tw-list-none");
     expect(navItemCalls).toHaveLength(7);
 
     const passedItems = navItemCalls.map((call) => call[0].item);

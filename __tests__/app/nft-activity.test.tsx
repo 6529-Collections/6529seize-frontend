@@ -33,12 +33,6 @@ jest.mock("@/components/latest-activity/LatestActivity", () => {
   };
 });
 
-// Mock styles
-jest.mock("@/styles/Modules.module.scss", () => ({
-  main: "main-class",
-  leaderboardContainer: "leaderboard-container-class",
-}));
-
 // Mock MyStreamContext if needed
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({}),

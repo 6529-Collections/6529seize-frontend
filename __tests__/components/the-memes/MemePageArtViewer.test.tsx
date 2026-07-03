@@ -151,7 +151,7 @@ afterEach(() => {
 describe("MemePageArtViewer", () => {
   it("sizes carousel renderer wrappers without depending on Bootstrap Col", () => {
     const styles = readFileSync(
-      join(process.cwd(), "components/the-memes/TheMemes.module.scss"),
+      join(process.cwd(), "components/the-memes/TheMemes.module.css"),
       "utf8"
     );
 
