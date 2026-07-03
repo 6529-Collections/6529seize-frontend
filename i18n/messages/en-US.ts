@@ -1254,6 +1254,17 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
+  "profile.mute.action.mute": "Mute notifications",
+  "profile.mute.action.unmute": "Unmute notifications",
+  "profile.mute.action.muteAriaLabel": "Mute notifications from this profile",
+  "profile.mute.action.unmuteAriaLabel":
+    "Unmute notifications from this profile",
+  "profile.mute.error.mute": "Couldn't mute this profile.",
+  "profile.mute.error.unmute": "Couldn't unmute this profile.",
+  "profile.mute.error.description": "Please try again.",
+  "profile.mute.status.muted": "Notifications from this profile are muted.",
+  "profile.mute.status.unmuted":
+    "Notifications from this profile are not muted.",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
   "drop.media.processingGeneric": "Processing media",
