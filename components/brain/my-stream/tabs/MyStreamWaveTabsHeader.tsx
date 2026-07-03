@@ -66,6 +66,36 @@ type WavePictureContributors = React.ComponentProps<
   typeof WavePicture
 >["contributors"];
 
+type RuntimeSafeWave = Omit<
+  ApiWave,
+  "author" | "chat" | "contributors_overview"
+> & {
+  readonly author?: { readonly handle?: string | null } | null;
+  readonly chat?: {
+    readonly scope?: {
+      readonly group?: { readonly is_direct_message?: boolean | null } | null;
+    } | null;
+  } | null;
+  readonly contributors_overview?: ApiWave["contributors_overview"] | null;
+};
+
+const getWaveIsDirectMessage = (wave: ApiWave): boolean =>
+  (wave as RuntimeSafeWave).chat?.scope?.group?.is_direct_message === true;
+
+const getLowercaseHandle = (
+  handle: string | null | undefined
+): string | null =>
+  handle === null || handle === undefined ? null : handle.toLowerCase();
+
+const getWaveAuthorHandle = (wave: ApiWave): string | null =>
+  getLowercaseHandle((wave as RuntimeSafeWave).author?.handle);
+
+const getWavePictureContributors = (wave: ApiWave): WavePictureContributors =>
+  ((wave as RuntimeSafeWave).contributors_overview ?? []).map((c) => ({
+    pfp: c.contributor_pfp,
+    identity: c.contributor_identity,
+  }));
+
 interface MyStreamWaveHeaderIdentityProps {
   readonly descriptionPreviewRef: React.RefObject<HTMLSpanElement | null>;
   readonly directMessageProfileHref: string | null;
@@ -133,7 +163,7 @@ function MyStreamWaveHeaderIdentity({
             contributors={wavePictureContributors}
           />
         </div>
-        <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight lg:tw-text-xl">
+        <h1 className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight lg:tw-text-xl">
           {wave.name}
         </h1>
       </Link>
@@ -163,7 +193,7 @@ function MyStreamWaveHeaderIdentity({
               }`}
             >
               {isCompact ? (
-                <h1 className="tw-mb-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
+                <h1 className="tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
                   <span className="tw-min-w-0 tw-truncate">{wave.name}</span>
                   <ChevronDownIcon
                     aria-hidden="true"
@@ -172,7 +202,7 @@ function MyStreamWaveHeaderIdentity({
                 </h1>
               ) : (
                 <>
-                  <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+                  <h1 className="tw-m-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
                     {wave.name}
                   </h1>
                   <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
@@ -199,7 +229,7 @@ function MyStreamWaveHeaderIdentity({
           </>
         ) : (
           <>
-            <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+            <h1 className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
               {wave.name}
             </h1>
             {scoreActions}
@@ -239,9 +269,9 @@ export default function MyStreamWaveTabsHeader({
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
-  const isDirectMessage = wave.chat?.scope?.group?.is_direct_message ?? false;
-  const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
-  const waveAuthorHandle = wave.author?.handle?.toLowerCase() ?? null;
+  const isDirectMessage = getWaveIsDirectMessage(wave);
+  const connectedHandle = getLowercaseHandle(connectedProfile?.handle);
+  const waveAuthorHandle = getWaveAuthorHandle(wave);
   const showWaveRepAction =
     connectedHandle !== null &&
     !activeProfileProxy &&
@@ -254,10 +284,7 @@ export default function MyStreamWaveTabsHeader({
     connectedProfile,
     activeProfileProxyCreatedBy: activeProfileProxy?.created_by,
   });
-  const wavePictureContributors = (wave.contributors_overview ?? []).map((c) => ({
-    pfp: c.contributor_pfp,
-    identity: c.contributor_identity,
-  }));
+  const wavePictureContributors = getWavePictureContributors(wave);
   const showShareAction = !isDirectMessage;
   const previewText = getWaveDescriptionPreviewText(wave);
   const showDescriptionPreview = showShareAction && !!previewText;
