@@ -66,15 +66,35 @@ type WavePictureContributors = React.ComponentProps<
   typeof WavePicture
 >["contributors"];
 
+type RuntimeSafeWave = Omit<
+  ApiWave,
+  "author" | "chat" | "contributors_overview"
+> & {
+  readonly author?: { readonly handle?: string | null } | null;
+  readonly chat?: {
+    readonly scope?: {
+      readonly group?: { readonly is_direct_message?: boolean | null } | null;
+    } | null;
+  } | null;
+  readonly contributors_overview?: ApiWave["contributors_overview"] | null;
+};
+
 const getWaveIsDirectMessage = (wave: ApiWave): boolean =>
-  wave.chat.scope.group !== null
-    ? wave.chat.scope.group.is_direct_message === true
-    : false;
+  (wave as RuntimeSafeWave).chat?.scope?.group?.is_direct_message === true;
 
 const getLowercaseHandle = (
   handle: string | null | undefined
 ): string | null =>
-  handle !== null && handle !== undefined ? handle.toLowerCase() : null;
+  handle === null || handle === undefined ? null : handle.toLowerCase();
+
+const getWaveAuthorHandle = (wave: ApiWave): string | null =>
+  getLowercaseHandle((wave as RuntimeSafeWave).author?.handle);
+
+const getWavePictureContributors = (wave: ApiWave): WavePictureContributors =>
+  ((wave as RuntimeSafeWave).contributors_overview ?? []).map((c) => ({
+    pfp: c.contributor_pfp,
+    identity: c.contributor_identity,
+  }));
 
 interface MyStreamWaveHeaderIdentityProps {
   readonly descriptionPreviewRef: React.RefObject<HTMLSpanElement | null>;
@@ -251,7 +271,7 @@ export default function MyStreamWaveTabsHeader({
   const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = getWaveIsDirectMessage(wave);
   const connectedHandle = getLowercaseHandle(connectedProfile?.handle);
-  const waveAuthorHandle = getLowercaseHandle(wave.author.handle);
+  const waveAuthorHandle = getWaveAuthorHandle(wave);
   const showWaveRepAction =
     connectedHandle !== null &&
     !activeProfileProxy &&
@@ -264,10 +284,7 @@ export default function MyStreamWaveTabsHeader({
     connectedProfile,
     activeProfileProxyCreatedBy: activeProfileProxy?.created_by,
   });
-  const wavePictureContributors = wave.contributors_overview.map((c) => ({
-    pfp: c.contributor_pfp,
-    identity: c.contributor_identity,
-  }));
+  const wavePictureContributors = getWavePictureContributors(wave);
   const showShareAction = !isDirectMessage;
   const previewText = getWaveDescriptionPreviewText(wave);
   const showDescriptionPreview = showShareAction && !!previewText;

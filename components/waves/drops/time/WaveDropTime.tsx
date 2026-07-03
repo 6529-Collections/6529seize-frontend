@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useSyncExternalStore } from "react";
 import { Time } from "@/helpers/time";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 
@@ -63,32 +63,27 @@ const getCompactRevealTimestamp = (date: Date): string => {
   }).format(date);
 };
 
+const subscribeToViewportResize = (onStoreChange: () => void): (() => void) => {
+  globalThis.window.addEventListener("resize", onStoreChange);
+  return () => globalThis.window.removeEventListener("resize", onStoreChange);
+};
+
+const getIsMobileSnapshot = (): boolean => globalThis.window.innerWidth <= 640;
+
+const getIsMobileServerSnapshot = (): boolean => false;
+
 const WaveDropTime: React.FC<WaveDropTimeProps> = ({
   timestamp,
   size = "xs",
   variant = "default",
 }) => {
   // Hooks must be called at the top level
-  const [isMobile, setIsMobile] = useState(
-    () => typeof window !== "undefined" && window.innerWidth <= 640
+  const isMobile = useSyncExternalStore(
+    subscribeToViewportResize,
+    getIsMobileSnapshot,
+    getIsMobileServerSnapshot
   );
   const compact = useCompactMode();
-
-  // Check mobile on mount and window resize
-  useEffect(() => {
-    function checkMobile() {
-      const screenSize = window.innerWidth;
-      if (screenSize <= 640) {
-        // Tailwind's sm breakpoint
-        setIsMobile(true);
-      } else {
-        setIsMobile(false);
-      }
-    }
-
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Don't render if no timestamp
   const date = getValidTimestampDate(timestamp);

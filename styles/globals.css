@@ -249,7 +249,7 @@ button {
   font-family: inherit;
 }
 
-button:not(:disabled) {
+button:not(:disabled):not([class*="tw-cursor-"]) {
   cursor: pointer;
 }
 

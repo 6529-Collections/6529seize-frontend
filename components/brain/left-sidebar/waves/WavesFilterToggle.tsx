@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -28,8 +28,27 @@ const checkConnectedIdentity = (
  */
 const WavesFilterToggle = (): React.JSX.Element | null => {
   // Hooks must be called unconditionally at the top level
-  const followingHookResult = useShowFollowingWaves();
-  const authResult = useAuth();
+  const followingHookResult = useShowFollowingWaves() as
+    | ReturnType<typeof useShowFollowingWaves>
+    | null
+    | undefined;
+  const authResult = useAuth() as ReturnType<typeof useAuth> | null | undefined;
+
+  if (
+    followingHookResult === null ||
+    followingHookResult === undefined ||
+    authResult === null ||
+    authResult === undefined
+  ) {
+    console.warn(
+      "[WavesFilterToggle] required hook state was unavailable - component will not render",
+      {
+        component: "WavesFilterToggle",
+        error: "hook_state_unavailable",
+      }
+    );
+    return null;
+  }
 
   // Extract data before any early returns
   const [following, setFollowing] = followingHookResult;
@@ -37,9 +56,10 @@ const WavesFilterToggle = (): React.JSX.Element | null => {
 
   // Check authentication state using pure helper function - hook must be called before any returns
   const connectedHandle = connectedProfile?.handle;
-  const isConnectedIdentity = useMemo(() => {
-    return checkConnectedIdentity(connectedHandle, activeProfileProxy);
-  }, [connectedHandle, activeProfileProxy]);
+  const isConnectedIdentity = checkConnectedIdentity(
+    connectedHandle,
+    activeProfileProxy
+  );
 
   // Early return for non-authenticated users
   if (!isConnectedIdentity) {
