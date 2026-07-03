@@ -158,6 +158,8 @@ const noisyThirdPartyTelemetryTargets = new Set([
   "cca-lite.coinbase.com/metrics",
   "region1.google-analytics.com/g/collect",
 ]);
+// Coinbase wallet telemetry can arrive as a wrapped network error with only a
+// bare path target; keep this exact so first-party API paths still survive.
 const noisyThirdPartyTelemetryNetworkPaths = new Set(["/metrics"]);
 const objectCapturedPromiseRejectionMessage =
   "Object captured as promise rejection with keys: code, message, stack";

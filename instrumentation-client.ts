@@ -454,6 +454,8 @@ Sentry.init({
     if (error instanceof Error) {
       handleNetworkError(event, error, value);
     }
+    // Raw browser failures can become wrapped network messages only after
+    // normalization, so telemetry targets get one post-normalization pass.
     if (shouldFilterThirdPartyTelemetryNetworkError(event)) {
       return null;
     }
