@@ -7,7 +7,7 @@ import NextgenCollectionsComponent from "@/components/nextGen/collections/NextGe
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
 import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
 import { useEffect, useState } from "react";

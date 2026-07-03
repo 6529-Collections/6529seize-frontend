@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { NextGenCollectionHead } from "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader";

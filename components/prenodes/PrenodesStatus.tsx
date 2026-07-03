@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "./Prenodes.module.scss";
 import { useEffect, useState } from "react";
 import Pagination from "../pagination/Pagination";
 import { Time } from "@/helpers/time";
@@ -30,6 +29,16 @@ interface Prenode {
 }
 
 const PAGE_SIZE = 20;
+const PRENODE_CARD_CLASS =
+  "tw-border tw-border-solid tw-border-transparent tw-p-5 tw-shadow-[0_0_10px_rgba(0,0,0,0.5)] tw-transition-transform tw-duration-300 tw-ease-in-out hover:tw-scale-[1.01] hover:tw-cursor-pointer hover:tw-border-[rgb(51,51,51)] [&_table]:tw-mb-0 [&_tr_td]:tw-pb-2.5";
+const STATUS_CLASSNAMES = {
+  error: "tw-text-[red]",
+  success: "tw-text-[green]",
+  unknown: "tw-text-[rgb(100,100,100)]",
+  warning: "tw-text-[orange]",
+} as const;
+type StatusClassName =
+  (typeof STATUS_CLASSNAMES)[keyof typeof STATUS_CLASSNAMES];
 
 function getSyncStatusLabel(name: string, isSynced: boolean, known: boolean) {
   if (!known) {
@@ -127,21 +136,25 @@ export default function PrenodesStatus() {
     const createdAt: Time = Time.fromString(prenode.created_at.toString());
     const updatedAt: Time = Time.fromString(prenode.updated_at.toString());
 
-    let updatedAtStatus = styles["error"];
+    let updatedAtStatus: StatusClassName = STATUS_CLASSNAMES.error;
     let updatedAtIcon = faXmarkCircle;
-    let tdhStatus = styles["unknown"];
+    let tdhStatus: StatusClassName = STATUS_CLASSNAMES.unknown;
     let tdhIcon = faMinusCircle;
-    let blockStatus = styles["unknown"];
+    let blockStatus: StatusClassName = STATUS_CLASSNAMES.unknown;
     let blockIcon = faMinusCircle;
     if (prenode.ping_status === "green") {
-      updatedAtStatus = styles["success"];
+      updatedAtStatus = STATUS_CLASSNAMES.success;
       updatedAtIcon = faCheckCircle;
       tdhIcon = prenode.tdh_sync ? faCheckCircle : faXmarkCircle;
-      tdhStatus = prenode.tdh_sync ? styles["success"] : styles["error"];
+      tdhStatus = prenode.tdh_sync
+        ? STATUS_CLASSNAMES.success
+        : STATUS_CLASSNAMES.error;
       blockIcon = prenode.block_sync ? faCheckCircle : faXmarkCircle;
-      blockStatus = prenode.block_sync ? styles["success"] : styles["error"];
+      blockStatus = prenode.block_sync
+        ? STATUS_CLASSNAMES.success
+        : STATUS_CLASSNAMES.error;
     } else if (prenode.ping_status === "orange") {
-      updatedAtStatus = styles["warning"];
+      updatedAtStatus = STATUS_CLASSNAMES.warning;
       updatedAtIcon = faWarning;
     }
 
@@ -153,7 +166,7 @@ export default function PrenodesStatus() {
           rel="noopener noreferrer"
           className="tw-no-underline"
         >
-          <div className={styles["prenode"]}>
+          <div className={PRENODE_CARD_CLASS}>
             <h5>{prenodeHost}</h5>
             <div className="tw-font-extralight">
               <i>{prenode.ip}</i>
@@ -193,7 +206,7 @@ export default function PrenodesStatus() {
                     <td>
                       {printStatusIcon(
                         updatedAtIcon,
-                        updatedAtStatus!,
+                        updatedAtStatus,
                         getPingStatusLabel(prenode.ping_status)
                       )}
                     </td>
@@ -205,7 +218,7 @@ export default function PrenodesStatus() {
                     <td>
                       {printStatusIcon(
                         tdhIcon,
-                        tdhStatus!,
+                        tdhStatus,
                         getSyncStatusLabel(
                           "TDH status",
                           prenode.tdh_sync,
@@ -221,7 +234,7 @@ export default function PrenodesStatus() {
                     <td>
                       {printStatusIcon(
                         blockIcon,
-                        blockStatus!,
+                        blockStatus,
                         getSyncStatusLabel(
                           "TDH block status",
                           prenode.block_sync,

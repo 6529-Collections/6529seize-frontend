@@ -3,7 +3,7 @@
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type DragEvent, useRef, useState } from "react";
-import styles from "./MappingTool.module.scss";
+import styles from "./MappingTool.module.css";
 
 interface MappingToolUploadProps {
   readonly fileName?: string | undefined;

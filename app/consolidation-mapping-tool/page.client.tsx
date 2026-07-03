@@ -2,7 +2,7 @@
 
 import ConsolidationMappingTool from "@/components/mapping-tools/ConsolidationMappingTool";
 import { useSetTitle } from "@/contexts/TitleContext";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { useEffect, useState } from "react";
 
 export default function ConsolidationMappingToolPage() {

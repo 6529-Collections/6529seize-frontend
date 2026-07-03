@@ -22,7 +22,7 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
-import styles from "./NextGenAdmin.module.scss";
+import styles from "./NextGenAdmin.module.css";
 import {
   Button,
   Col,

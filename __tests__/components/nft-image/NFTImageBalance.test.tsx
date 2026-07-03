@@ -9,7 +9,7 @@ jest.mock("@/hooks/useNftBalance");
 jest.mock("@/components/auth/Auth");
 
 // Mock the SCSS module
-jest.mock("@/components/nft-image/NFTImage.module.scss", () => ({
+jest.mock("@/components/nft-image/NFTImage.module.css", () => ({
   balance: "balance",
   balanceBigger: "balanceBigger",
   balanceInline: "balanceInline",

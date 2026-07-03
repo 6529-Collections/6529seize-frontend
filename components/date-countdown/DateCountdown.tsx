@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import styles from "./DateCountdown.module.scss";
 
 interface Props {
   title?: string | undefined;
@@ -14,6 +13,9 @@ interface TimeLeft {
   minutes: number;
   seconds: number;
 }
+
+const SKELETON_TEXT_CLASS =
+  "tw-animate-[shimmer_1.5s_infinite] tw-rounded tw-bg-[linear-gradient(90deg,#444_25%,#555_50%,#444_75%)] tw-bg-[length:200%_100%]";
 
 export default function DateCountdown(props: Readonly<Props>) {
   const { title, date } = props;
@@ -100,7 +102,7 @@ export default function DateCountdown(props: Readonly<Props>) {
         <div>{title}</div>
       ) : (
         <div
-          className={`${styles["skeletonText"]} ${styles["skeletonTitle"]}`}
+          className={`${SKELETON_TEXT_CLASS} tw-w-1/2`}
           aria-hidden="true">
           &nbsp;
         </div>
@@ -119,7 +121,7 @@ export default function DateCountdown(props: Readonly<Props>) {
           </>
         ) : (
           <div
-            className={`${styles["skeletonText"]} ${styles["skeletonCountdown"]}`}
+            className={`${SKELETON_TEXT_CLASS} tw-w-4/5`}
             aria-hidden="true">
             &nbsp;
           </div>

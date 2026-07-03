@@ -4,7 +4,7 @@ import { faArrowCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import styles from "@/components/nextGen/collections/NextGen.module.css";
 
 interface SlideshowHeaderProps {
   readonly collectionName: string;

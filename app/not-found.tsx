@@ -1,5 +1,5 @@
 import NotFound from "@/components/not-found/NotFound";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { Suspense } from "react";
 
 export default function NotFoundPage() {

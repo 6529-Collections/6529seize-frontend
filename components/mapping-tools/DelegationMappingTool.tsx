@@ -14,7 +14,7 @@ import {
   MappingToolSubmitButton,
   MappingToolUpload,
 } from "./MappingToolControls";
-import styles from "./MappingTool.module.scss";
+import styles from "./MappingTool.module.css";
 
 const csvParser = require("csv-parser");
 
