@@ -5,7 +5,7 @@ import { TitleProvider } from "@/contexts/TitleContext";
 
 // Mock the SCSS module
 jest.mock(
-  "@/components/community-downloads/CommunityDownloads.module.scss",
+  "@/components/community-downloads/CommunityDownloads.module.css",
   () => ({
     downloadLink: "downloadLink",
   })
@@ -67,12 +67,7 @@ describe("CommunityDownloads", () => {
     (useCookieConsent as jest.Mock).mockReturnValue({ country: "US" });
 
     renderComponent();
-    [
-      "Network Metrics",
-      "Rememes",
-      "Team",
-      "Royalties",
-    ].forEach((text) => {
+    ["Network Metrics", "Rememes", "Team", "Royalties"].forEach((text) => {
       expect(screen.getByText(text)).toBeInTheDocument();
     });
   });

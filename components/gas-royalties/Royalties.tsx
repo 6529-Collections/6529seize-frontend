@@ -15,7 +15,7 @@ import {
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "./GasRoyalties";
-import styles from "./GasRoyalties.module.scss";
+import styles from "./GasRoyalties.module.css";
 
 const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 

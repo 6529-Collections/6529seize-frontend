@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "@/components/nft-image/NFTImage.module.scss";
+import styles from "@/components/nft-image/NFTImage.module.css";
 
 export type NFTImageBalanceBadgeState =
   | "seized"

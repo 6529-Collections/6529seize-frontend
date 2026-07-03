@@ -7,7 +7,7 @@ import TheMemesMint from "@/components/the-memes/TheMemesMint";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 
 export default async function TheMemesMintPage() {

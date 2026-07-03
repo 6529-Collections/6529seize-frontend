@@ -1,7 +1,7 @@
 import Royalties from "@/components/gas-royalties/Royalties";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
 import type { Metadata } from "next";
 

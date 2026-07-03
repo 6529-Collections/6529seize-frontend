@@ -308,7 +308,7 @@ const getDockClassName = (compact: boolean) =>
 const floatingNavInnerClassName = "tw-relative tw-h-full";
 
 const getFloatingNavListClassName = (compact: boolean) =>
-  `tw-flex tw-h-full tw-items-center ${
+  `tw-m-0 tw-flex tw-h-full tw-list-none tw-items-center ${
     compact ? "tw-gap-0 tw-px-2.5" : "tw-gap-0.5 tw-px-4"
   }`;
 

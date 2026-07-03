@@ -1,4 +1,4 @@
-import styles from "./AppWallet.module.scss";
+import styles from "./AppWallet.module.css";
 import Image from "next/image";
 
 export default function AppWalletAvatar(

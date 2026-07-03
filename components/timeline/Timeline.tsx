@@ -1,5 +1,5 @@
 import type { BaseNFT, NFTHistory } from "@/entities/INFT";
-import styles from "./Timeline.module.scss";
+import styles from "./Timeline.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { numberWithCommasFromString } from "@/helpers/Helpers";
 import TimelineMediaComponent, { MediaType } from "./TimelineMedia";

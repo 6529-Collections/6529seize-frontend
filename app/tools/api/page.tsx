@@ -2,7 +2,7 @@ import CodeExample from "@/components/code-example/CodeExample";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 import {
   AboutCol as Col,
@@ -245,7 +245,7 @@ run().catch((err) => {
 });`;
   return (
     <main className={`${styles["main"]} tailwind-scope`}>
-      <Container className="tw-pt-4 tw-pb-4">
+      <Container className="tw-pb-4 tw-pt-4">
         <Row>
           <Col>
             <h1>6529.io API</h1>
@@ -279,7 +279,7 @@ run().catch((err) => {
             </p>
 
             <div
-              className="tw-p-4 tw-rounded tw-mb-4 tw-font-medium"
+              className="tw-mb-4 tw-rounded tw-p-4 tw-font-medium"
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",

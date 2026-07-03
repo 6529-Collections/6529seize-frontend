@@ -26,7 +26,7 @@ import {
   SUB_DELEGATION_USE_CASE,
   SUPPORTED_COLLECTIONS,
 } from "../delegation-constants";
-import styles from "./WalletChecker.module.scss";
+import styles from "./WalletChecker.module.css";
 
 const TABLE_CLASS =
   "tw-w-full tw-min-w-[720px] tw-border-separate tw-border-spacing-y-1";

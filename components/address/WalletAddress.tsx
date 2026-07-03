@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./Address.module.scss";
+import styles from "./Address.module.css";
 import { containsEmojis, formatAddress } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {

@@ -1,11 +1,11 @@
 "use client";
 
 import ErrorComponent from "@/components/error/Error";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { extractErrorDetails } from "@/utils/error-extractor";
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
-import {publicEnv} from "@/config/env";
+import { publicEnv } from "@/config/env";
 
 type ErrorProps = {
   readonly error: Error & { digest?: string | undefined };

@@ -14,7 +14,7 @@ import {
   MappingToolSubmitButton,
   MappingToolUpload,
 } from "./MappingToolControls";
-import styles from "./MappingTool.module.scss";
+import styles from "./MappingTool.module.css";
 
 const csvParser = require("csv-parser");
 
@@ -131,12 +131,12 @@ export default function DelegationMappingTool() {
   return (
     <div className={styles["toolArea"]} id="mapping-tool-form">
       <MappingToolUpload fileName={file?.name} onFileSelected={setFile} />
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
         <label className="tw-w-full tw-px-3" htmlFor="delegation-collection">
           Select Collection
         </label>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <div className="tw-w-full tw-px-3">
           <select
             id="delegation-collection"
@@ -162,12 +162,12 @@ export default function DelegationMappingTool() {
           </select>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
         <label className="tw-w-full tw-px-3" htmlFor="delegation-use-case">
           Select Use Case
         </label>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <div className="tw-w-full tw-px-3">
           <select
             id="delegation-use-case"
@@ -194,7 +194,7 @@ export default function DelegationMappingTool() {
           </select>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-4">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
         <div className="tw-w-full tw-px-3 tw-text-sm tw-text-iron-400">
           Note: If the selected collection or use case delegation is not found,
           the tool will automatically switch to using delegations for

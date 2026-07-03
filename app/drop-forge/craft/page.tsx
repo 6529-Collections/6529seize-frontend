@@ -4,7 +4,7 @@ import {
 } from "@/components/drop-forge/drop-forge.constants";
 import DropForgeClaimsListPageClient from "@/components/drop-forge/DropForgeClaimsListPageClient";
 import { getAppMetadata } from "@/components/providers/metadata";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 
 const CRAFT = DROP_FORGE_SECTIONS.CRAFT;

@@ -2,7 +2,7 @@
 
 import TheMemesMint from "@/components/the-memes/TheMemesMint";
 import { useNowMinting } from "@/hooks/useNowMinting";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 
 const MINT_STATUS_CARD_CLASS =
   "tw-flex tw-aspect-square tw-w-full tw-max-w-[20rem] tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-2xl tw-border tw-border-iron-700/35 tw-bg-[#1a1a1a] tw-px-5 tw-py-6 tw-text-center tw-shadow-[0_0_0_1px_rgba(255,255,255,0.03)]";

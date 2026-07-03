@@ -2,6 +2,9 @@
 
 import { publicEnv } from "@/config/env";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { isShareCancelError } from "@/utils/error";
 import { Capacitor } from "@capacitor/core";
 import { Share } from "@capacitor/share";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -21,25 +24,16 @@ interface UseWaveShareCopyActionParams {
   readonly waveName: string;
   readonly isDirectMessage: boolean;
   readonly feedbackTimeoutMs?: number | undefined;
+  readonly showShareFeedback?: boolean | undefined;
+  readonly copyOnShareFailure?: boolean | undefined;
 }
 
 interface UseWaveShareCopyActionResult {
   readonly mode: WaveLinkActionMode;
   readonly label: string;
   readonly feedbackState: WaveLinkActionFeedback;
+  readonly isSharing: boolean;
   readonly onClick: () => void;
-}
-
-function getErrorName(error: unknown): string {
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "name" in error &&
-    typeof error.name === "string"
-  ) {
-    return error.name;
-  }
-  return "";
 }
 
 function canUseNativeShare(url: string): boolean {
@@ -70,9 +64,13 @@ export function useWaveShareCopyAction({
   waveName,
   isDirectMessage,
   feedbackTimeoutMs = DEFAULT_FEEDBACK_TIMEOUT_MS,
+  showShareFeedback = true,
+  copyOnShareFailure = true,
 }: UseWaveShareCopyActionParams): UseWaveShareCopyActionResult {
+  const locale = useBrowserLocale();
   const feedbackTimeoutRef = useRef<number | null>(null);
   const [, copyToClipboard] = useCopyToClipboard();
+  const [isSharing, setIsSharing] = useState(false);
   const isNativeApp = useMemo(() => Capacitor.isNativePlatform(), []);
   const relativeRoute = useMemo(
     () =>
@@ -148,6 +146,11 @@ export function useWaveShareCopyAction({
       return;
     }
 
+    if (isSharing) {
+      return;
+    }
+
+    setIsSharing(true);
     void (async () => {
       try {
         if (isNativeApp) {
@@ -158,14 +161,22 @@ export function useWaveShareCopyAction({
           handleCopy();
           return;
         }
-        setTemporaryFeedback("shared");
+        if (showShareFeedback) {
+          setTemporaryFeedback("shared");
+        }
       } catch (error: unknown) {
-        if (getErrorName(error) === "AbortError") {
+        if (isShareCancelError(error)) {
+          return;
+        }
+
+        if (!copyOnShareFailure) {
           return;
         }
 
         setShareFailedUrl(canonicalWaveUrl);
         handleCopy();
+      } finally {
+        setIsSharing(false);
       }
     })();
   }, [
@@ -174,24 +185,28 @@ export function useWaveShareCopyAction({
     canonicalWaveUrl,
     handleCopy,
     isNativeApp,
+    isSharing,
+    showShareFeedback,
+    copyOnShareFailure,
     setTemporaryFeedback,
   ]);
 
   let label: string;
   if (feedbackState === "shared") {
-    label = "Link shared";
+    label = t(locale, "headerWaveLinkAction.feedback.shared");
   } else if (feedbackState === "copied") {
-    label = "Link copied";
+    label = t(locale, "headerWaveLinkAction.feedback.copied");
   } else if (mode === "share") {
-    label = "Share wave";
+    label = t(locale, "headerWaveLinkAction.share");
   } else {
-    label = "Copy wave link";
+    label = t(locale, "headerWaveLinkAction.copy");
   }
 
   return {
     mode,
     label,
     feedbackState,
+    isSharing,
     onClick,
   };
 }

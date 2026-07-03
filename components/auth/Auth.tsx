@@ -75,7 +75,7 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
-import styles from "./Auth.module.scss";
+import styles from "./Auth.module.css";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 
 // Custom error classes for authentication failures

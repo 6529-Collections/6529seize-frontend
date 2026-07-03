@@ -1,0 +1,290 @@
+.marketplace {
+  margin-left: 5px;
+}
+.marketplace:hover {
+  opacity: 0.75;
+}
+
+.marketplaceRememe {
+  margin-right: 15px;
+}
+.marketplaceRememe:hover {
+  opacity: 0.75;
+}
+
+.memeRefDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 25px;
+}
+.memeRefDropdown a {
+  line-height: 30px;
+}
+.memeRefDropdown button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  cursor: copy;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.memeRefDropdown button::after {
+  margin-top: 0.8rem;
+}
+.memeRefDropdown div {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+@media only screen and (max-width: 800px) {
+  .memeRefDropdown button::after {
+    margin-top: 0.5rem;
+  }
+}
+
+.buttonIcon {
+  width: 30px;
+  cursor: pointer;
+}
+.buttonIcon:hover {
+  opacity: 0.75;
+}
+@media only screen and (max-width: 1200px) {
+  .buttonIcon {
+    width: 26px;
+  }
+}
+@media only screen and (max-width: 800px) {
+  .buttonIcon {
+    width: 22px;
+  }
+}
+
+.globeIcon {
+  margin-right: 8px;
+  width: 30px;
+}
+@media only screen and (max-width: 800px) {
+  .globeIcon {
+    width: 20px;
+  }
+}
+
+.linkIcon {
+  height: 16px;
+  margin-left: 8px;
+}
+
+.userLink {
+  text-decoration: none;
+}
+.userLink img {
+  margin-right: 8px;
+}
+.userLink:hover img {
+  opacity: 0.75;
+}
+
+.tabFocus {
+  float: left;
+  white-space: nowrap;
+  cursor: pointer;
+  margin-right: 20px;
+  color: #9a9a9a;
+}
+.tabFocus:hover {
+  color: white;
+}
+
+.tabActive {
+  color: white;
+}
+
+.metadataTable > :not(caption) > * > * {
+  padding: 0.5rem;
+}
+
+.metadataTableNoBreak {
+  white-space: nowrap;
+}
+
+.metadataTableBreak {
+  word-break: break-all;
+}
+
+.addRememeContainer {
+  border: 1px solid white;
+  padding: 30px;
+}
+
+.formInput {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  line-height: 1.5;
+  color: rgb(51, 51, 51) !important;
+  border: 1px solid rgb(154, 154, 154);
+  border-radius: 0 !important;
+}
+.formInput:focus {
+  border-color: #267c93 !important;
+}
+
+.addMemeReferencesDropdown {
+  line-height: 48px;
+  background-color: transparent;
+  border: none;
+}
+.addMemeReferencesDropdown a,
+.addMemeReferencesDropdown > button {
+  line-height: 30px;
+}
+.addMemeReferencesDropdown svg {
+  color: rgb(215, 215, 215);
+  width: 30px;
+  height: 30px;
+}
+.addMemeReferencesDropdown svg:hover {
+  color: white;
+}
+.addMemeReferencesDropdown > button {
+  border: none !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+.addMemeReferencesDropdown > button::after {
+  border: none !important;
+}
+.addMemeReferencesDropdown div {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.addMemeReferenceWrapper {
+  white-space: nowrap;
+  float: none;
+  line-height: 250%;
+}
+
+.addMemeReferenceDisplay {
+  color: black;
+  background-color: rgb(215, 215, 215);
+  padding: 5px 10px;
+  margin-right: 10px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.addMemeReferenceDisplayBtn {
+  border: none;
+  border-radius: 0;
+  color: black;
+  border-color: black !important;
+  width: 30px;
+  background-color: rgb(215, 215, 215);
+  padding: 5px 10px;
+  border-right: 1px solid black;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  cursor: pointer;
+  outline: 0 !important;
+}
+.addMemeReferenceDisplayBtn:hover {
+  background-color: white;
+  color: black !important;
+}
+
+.addMemeReferenceDisplayBtnDisabled {
+  pointer-events: none !important;
+  background-color: #cccccc;
+  color: rgb(51, 51, 51);
+}
+
+.verifiedIcon {
+  color: #00ba00;
+  width: 30px;
+  height: 30px;
+}
+
+.unverifiedIcon {
+  color: #fb3535;
+  width: 30px;
+  height: 30px;
+}
+
+.replica {
+  border: 1px solid white;
+  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.replica a {
+  text-decoration: none;
+}
+.replica:hover {
+  background-color: rgb(30, 30, 30);
+  border: 1px solid rgb(215, 215, 215);
+}
+
+.addRememeTokenList {
+  position: relative;
+  max-height: 40vh;
+  overflow-y: scroll;
+}
+.addRememeTokenList li {
+  word-wrap: break-word;
+}
+
+.connectWalletButton {
+  background-color: white !important;
+  color: black !important;
+  font-size: larger !important;
+  font-weight: bolder !important;
+  border: none !important;
+  padding: 6px 20px;
+  margin-left: 20px;
+}
+
+.validateButton {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.loaderSlot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  line-height: 0;
+}
+
+.loader {
+  width: 12px !important;
+  height: 12px !important;
+  border-width: 1.5px !important;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+
+.addRememeChecklist {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.addRememeChecklist li {
+  list-style-type: none;
+}
+
+.rememesFiltersRow {
+  justify-content: flex-end;
+}
+@media only screen and (max-width: 1200px) {
+  .rememesFiltersRow {
+    justify-content: center;
+  }
+}
