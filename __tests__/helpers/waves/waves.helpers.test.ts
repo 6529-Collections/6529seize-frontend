@@ -6,6 +6,7 @@ import {
 } from "@/helpers/waves/waves.helpers";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CreateWaveStepStatus } from "@/types/waves.types";
 
 jest.mock("@/services/api/common-api", () => ({
@@ -242,6 +243,20 @@ describe("waves.helpers", () => {
 
       expect(result.voting).toMatchObject({
         credit_scope: ApiWaveCreditScope.Drop,
+      });
+    });
+
+    it("clears participation terms for chat wave updates", () => {
+      const wave = makeWave();
+      wave.wave.type = ApiWaveType.Chat;
+      wave.participation.terms = "Legacy chat terms.";
+      wave.participation.signature_required = true;
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.participation).toMatchObject({
+        terms: null,
+        signature_required: false,
       });
     });
 

@@ -1,0 +1,148 @@
+.main {
+  min-height: 100vh;
+}
+
+.latestDropImage {
+  background-color: rgb(51, 51, 51);
+  padding: 0;
+  position: relative;
+}
+.latestDropImage img {
+  max-width: 100%;
+  max-height: 650px;
+}
+.latestDropImage iframe {
+  width: 100%;
+  height: 650px;
+}
+.latestDropImage video {
+  width: 100%;
+  height: 650px;
+}
+
+.marketplace {
+  margin-right: 15px;
+}
+
+.marketplace:hover {
+  opacity: 0.75;
+}
+
+.hideWidget {
+  border: 1px solid white;
+  background-color: transparent;
+}
+
+.tdhFormula {
+  line-height: 75px;
+  color: lightblue;
+  font-size: larger;
+  font-weight: bold;
+  padding-left: 20px;
+}
+
+.login {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: rgb(34, 34, 34);
+}
+.login .loginImage {
+  max-width: 100%;
+  max-height: 100vh;
+}
+
+.loginPrompt {
+  position: absolute;
+  width: 100%;
+  height: 100px;
+  z-index: 10;
+  bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loginPrompt input {
+  padding-left: 10px;
+  border: none;
+  height: 40px;
+  background-color: rgb(30, 30, 30);
+  width: 80%;
+  max-width: 400px;
+}
+
+.nftImagePadding {
+  padding-bottom: 35px;
+}
+
+.memeLabHeader h1 {
+  float: right;
+}
+
+.htmlContainer h2,
+.htmlContainer h3,
+.htmlContainer h4,
+.htmlContainer h5 {
+  font-family: "Montserrat", sans-serif !important;
+  float: none;
+}
+.htmlContainer ul li {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.instructionsLink {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.instructionsLink:hover {
+  color: rgb(179, 179, 179);
+}
+
+.nextGenQuestion {
+  height: calc(100vh - 100px - 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewAllLink {
+  text-decoration: none;
+}
+.viewAllLink span {
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 700;
+  border-bottom: 3px solid white;
+}
+.viewAllLink span:hover {
+  color: rgb(179, 179, 179);
+  border-bottom: 3px solid rgb(179, 179, 179);
+}
+@media only screen and (max-width: 800px) {
+  .viewAllLink span {
+    font-size: 12px !important;
+  }
+}
+
+.communityMetricsTable tr td {
+  max-width: fit-content;
+  padding: 0.5rem !important;
+}
+
+.shadowBox {
+  background-color: rgb(34, 34, 34);
+  padding: 15px 20px !important;
+  color: white;
+  width: 100%;
+  position: relative;
+  box-shadow:
+    0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
+    1px 3px 6px 0px rgba(0, 0, 0, 0.15),
+    -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
+    -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
+    6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
+  border-radius: 0.5rem;
+}

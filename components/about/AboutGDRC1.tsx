@@ -7,7 +7,7 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
-import styles from "./About.module.scss";
+import styles from "./About.module.css";
 import { fetchAboutSectionFile } from "./about.helpers";
 
 export default function AboutGDRC1() {

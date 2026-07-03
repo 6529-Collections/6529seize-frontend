@@ -10,6 +10,7 @@ import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
+  customRules: null,
   outcomesVisible: true,
   approve: {
     approvalsTabLabel: "",

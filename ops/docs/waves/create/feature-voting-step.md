@@ -20,12 +20,12 @@ approve-wave threshold behavior.
 
 ## Step Path
 
-- `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
-- `Approve`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
+- `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
 
 ## Navigation Behavior
 
-- Enter `Voting` from `Drops`.
+- Enter `Voting` from `Rules`.
 - `Back` from `Outcomes` returns to `Voting`.
 - `Next` stays enabled; validation runs when clicked.
 - On large screens, the step rail can reopen completed steps only.
@@ -101,6 +101,7 @@ approve-wave threshold behavior.
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Dates and Timeline](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
+- [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Outcomes Step](feature-outcomes-step.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)
 - [Wave Drop Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)

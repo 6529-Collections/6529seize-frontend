@@ -1,6 +1,9 @@
-import type { HeaderSearchModalItemType } from "@/components/header/header-search/HeaderSearchModalItem";
-import HeaderSearchModalItem from "@/components/header/header-search/HeaderSearchModalItem";
+import HeaderSearchModalItem, {
+  isHeaderSearchWaveDirectMessage,
+  type HeaderSearchModalItemType,
+} from "@/components/header/header-search/HeaderSearchModalItem";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -64,10 +67,30 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const publicWaveScope = { group: null };
+
+const createWaveResult = (overrides: Record<string, unknown> = {}): ApiWave =>
+  ({
+    id: "wave1",
+    name: "Wave 1",
+    picture: "pic.png",
+    serial_no: 2,
+    chat: {
+      scope: publicWaveScope,
+    },
+    wave: {
+      admin_group: publicWaveScope,
+    },
+    ...overrides,
+  }) as ApiWave;
+
 const renderComponent = (
   content: HeaderSearchModalItemType,
   searchValue: string,
-  isSelected: boolean
+  isSelected: boolean,
+  options: {
+    readonly onWaveSelect?: ((wave: ApiWave) => void) | undefined;
+  } = {}
 ) => {
   const onClose = jest.fn();
   const onHover = jest.fn();
@@ -85,6 +108,7 @@ const renderComponent = (
         isSelected={isSelected}
         onHover={onHover}
         onClose={onClose}
+        onWaveSelect={options.onWaveSelect}
       />
     </QueryClientProvider>
   );
@@ -142,18 +166,59 @@ describe("HeaderSearchModalItem", () => {
     mockUseSearchParams.mockReturnValue({
       get: jest.fn((key: string) => (key === "wave" ? "other" : null)),
     });
-    const wave: any = {
-      id: "wave1",
-      name: "Wave 1",
-      picture: "pic.png",
-      serial_no: 2,
-    };
+    const wave = createWaveResult();
     renderComponent(wave, "wave", false);
     const link = screen.getByTestId("link");
     expect(link).toHaveAttribute("href", "/waves/wave1");
     expect(link.textContent).toContain("Wave 1");
     expect(link.textContent).toContain("Wave #2");
     expect(screen.getByTestId("media").textContent).toContain("pic.png");
+  });
+
+  it("selects wave results through the active wave handler", () => {
+    useHoverDirty.mockReturnValue(false);
+    mockUsePathname.mockReturnValue("/waves/parent-wave");
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    const onWaveSelect = jest.fn();
+    const wave = createWaveResult({
+      id: "subwave-1",
+      name: "Subwave 1",
+      picture: null,
+    });
+
+    const { onClose } = renderComponent(wave, "subwave", false, {
+      onWaveSelect,
+    });
+
+    const link = screen.getByTestId("link");
+    expect(link).toHaveAttribute("href", "/waves/subwave-1");
+    fireEvent.click(link);
+    expect(onWaveSelect).toHaveBeenCalledWith(wave);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("keeps modified wave result clicks as regular links", () => {
+    useHoverDirty.mockReturnValue(false);
+    mockUsePathname.mockReturnValue("/waves/parent-wave");
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    const onWaveSelect = jest.fn();
+    const wave = createWaveResult({
+      id: "subwave-1",
+      name: "Subwave 1",
+      picture: null,
+    });
+
+    const { onClose } = renderComponent(wave, "subwave", false, {
+      onWaveSelect,
+    });
+
+    fireEvent.click(screen.getByTestId("link"), { metaKey: true });
+    expect(onWaveSelect).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("handles wave direct-message detection defensively", () => {
+    expect(isHeaderSearchWaveDirectMessage({} as ApiWave)).toBe(false);
   });
 
   it("renders page item and shows breadcrumbs", () => {

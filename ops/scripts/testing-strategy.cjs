@@ -222,7 +222,7 @@ const SOURCE_CODE_EXTENSIONS = new Set([
   ".mjs",
   ".cjs",
 ]);
-const STYLE_EXTENSIONS = new Set([".css", ".scss"]);
+const STYLE_EXTENSIONS = new Set([".css"]);
 const SECRET_SCAN_EXTENSIONS = new Set([
   ...SOURCE_CODE_EXTENSIONS,
   ...STYLE_EXTENSIONS,

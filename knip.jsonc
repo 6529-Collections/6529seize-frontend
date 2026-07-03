@@ -93,7 +93,6 @@
       "coderabbit"
     ],
     "ignoreDependencies": [
-      "bootstrap",
       "pino-pretty",
       "babel-jest",
       "eslint-plugin-jsx-a11y",

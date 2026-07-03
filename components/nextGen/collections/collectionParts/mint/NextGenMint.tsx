@@ -7,7 +7,7 @@ import {
   MINTING_USE_CASE,
 } from "@/components/delegation/delegation-constants";
 import DotLoader from "@/components/dotLoader/DotLoader";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import styles from "@/components/nextGen/collections/NextGen.module.css";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,

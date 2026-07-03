@@ -1,13 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import CreateWaveTermsOfService from '@/components/waves/create-wave/drops/terms/CreateWaveTermsOfService';
-import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 describe('CreateWaveTermsOfService', () => {
   it('renders toggle and textarea when enabled', () => {
     const setTerms = jest.fn();
     render(
       <CreateWaveTermsOfService
-        waveType={ApiWaveType.Rank}
         terms="abc"
         setTerms={setTerms}
       />
@@ -18,10 +16,10 @@ describe('CreateWaveTermsOfService', () => {
     expect(setTerms).toHaveBeenCalledWith('xyz');
   });
 
-  it('does not render for Chat waves', () => {
-    const { container } = render(
-      <CreateWaveTermsOfService waveType={ApiWaveType.Chat} terms={null} setTerms={() => {}} />
+  it('renders when disabled', () => {
+    render(
+      <CreateWaveTermsOfService terms={null} setTerms={() => {}} />
     );
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByRole('checkbox')).toBeInTheDocument();
   });
 });

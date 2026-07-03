@@ -1,7 +1,7 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import ReviewbotAdminDashboard from "@/components/reviewbot-admin/ReviewbotAdminDashboard";
 import { getReviewbotAdminDashboard } from "@/services/reviewbot-admin-api";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 import { connection } from "next/server";
 

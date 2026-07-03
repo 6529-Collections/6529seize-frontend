@@ -10,7 +10,7 @@ import {
   NextGenPhases,
 } from "./collectionParts/NextGenCollectionHeader";
 import NextGenCollectionSlideshow from "./collectionParts/NextGenCollectionSlideshow";
-import styles from "./NextGen.module.scss";
+import styles from "./NextGen.module.css";
 
 interface Props {
   collection: NextGenCollection;

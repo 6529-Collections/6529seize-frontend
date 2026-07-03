@@ -8,7 +8,6 @@ requirements:
 - one required media type
 - optional required metadata keys
 - optional simultaneous-submission limit
-- optional participation terms
 
 ## Location in the Site
 
@@ -25,7 +24,7 @@ requirements:
 
 - Follow the `Rank` or `Approve` path:
   `Overview -> Groups -> Dates -> Drops`.
-- Use `Back` from `Voting` to return in one step.
+- Use `Back` from `Rules` to return in one step.
 - On large screens, use the step rail after you move past `Drops`.
 
 ## User Journey
@@ -40,8 +39,7 @@ requirements:
    - set metadata name
    - remove rows you do not need
 3. Optionally set `Maximum number of simultaneous submissions per participant`.
-4. Optionally enable `Participation Terms` and enter terms text.
-5. Click `Next` to continue to `Voting`.
+4. Click `Next` to continue to `Rules`.
 
 ## Common Scenarios
 
@@ -51,7 +49,7 @@ requirements:
   added`).
 - Add metadata rules for fields every participant must provide.
 - Leave submission-limit blank for unlimited simultaneous submissions.
-- Add participation terms when submissions should require signed terms.
+- Add creator rules and acceptance requirements in the next `Rules` step.
 
 ## Edge Cases
 
@@ -64,21 +62,18 @@ requirements:
 - Submission-limit input keeps only positive integers:
   - `0`, negative, or invalid input clears the value.
   - decimal input is reduced to its integer part (example: `2.5` becomes `2`).
-- Turning off `Enable Terms` clears saved terms text.
-- Terms-signature requirement is enabled only when terms text is non-empty.
 
 ## Failure and Recovery
 
 - If `Next` does not advance, resolve duplicate metadata names, then retry.
 - If submission-limit input keeps clearing, enter a positive whole number or
   leave it blank.
-- If terms were enabled by mistake, disable `Enable Terms` to clear them.
 
 ## Limitations / Notes
 
 - `Chat` waves skip `Drops`.
 - Required metadata is optional.
-- Participation terms are optional.
+- Custom creator rules are configured in `Rules`, not `Drops`.
 
 ## Related Pages
 
@@ -88,6 +83,7 @@ requirements:
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Dates and Timeline](feature-dates-step.md)
+- [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Voting Configuration](feature-voting-step.md)
 - [Wave Drop Composer Metadata Submissions](../composer/feature-metadata-submissions.md)
 - [Docs Home](../../README.md)

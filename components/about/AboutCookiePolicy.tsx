@@ -11,7 +11,7 @@ import {
   getCookieConsentByName,
   useCookieConsent,
 } from "../cookies/CookieConsentContext";
-import styles from "./About.module.scss";
+import styles from "./About.module.css";
 import {
   AboutCol as Col,
   AboutContainer as Container,

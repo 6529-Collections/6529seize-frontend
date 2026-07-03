@@ -8,7 +8,7 @@ import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUB_DELEGATION_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,

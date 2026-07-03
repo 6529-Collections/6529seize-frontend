@@ -38,4 +38,16 @@ describe("CreateWavesMainSteps", () => {
 
     expect(screen.queryByText("Approval")).not.toBeInTheDocument();
   });
+
+  it("renders rules in the chat wave step list", () => {
+    render(
+      <CreateWavesMainSteps
+        waveType={ApiWaveType.Chat}
+        activeStep={CreateWaveStep.RULES}
+        onStep={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("Rules")).toBeInTheDocument();
+  });
 });

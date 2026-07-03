@@ -5,7 +5,7 @@ import {
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import type { Metadata } from "next";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata(

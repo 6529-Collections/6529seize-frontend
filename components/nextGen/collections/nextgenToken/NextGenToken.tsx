@@ -23,7 +23,7 @@ import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
 import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import NextGenTokenArt from "./NextGenTokenArt";
 import NextgenTokenRarity, {

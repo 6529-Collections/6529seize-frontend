@@ -16,7 +16,7 @@ jest.mock("@headlessui/react", () => ({
   },
 }));
 
-jest.mock("@/components/the-memes/TheMemes.module.scss", () => ({}));
+jest.mock("@/components/the-memes/TheMemes.module.css", () => ({}));
 
 describe("printVolumeTypeDropdown", () => {
   it("renders all volume type items", () => {

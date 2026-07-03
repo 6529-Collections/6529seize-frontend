@@ -10,6 +10,7 @@ import BrainRightSidebarContent from "../right-sidebar/BrainRightSidebarContent"
 import BrainRightSidebarFollowers from "../right-sidebar/BrainRightSidebarFollowers";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import WaveRules from "@/components/waves/specs/WaveRules";
 
 interface BrainMobileAboutProps {
   readonly activeWaveId: string | null;
@@ -59,6 +60,11 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
             useRounded={false}
           />
           {mode === Mode.CONTENT && <BrainRightSidebarContent wave={wave} />}
+          {mode === Mode.CONTENT && (
+            <div className="tw-py-4">
+              <WaveRules wave={wave} useRing={false} />
+            </div>
+          )}
           {mode === Mode.FOLLOWERS && (
             <BrainRightSidebarFollowers
               wave={wave}

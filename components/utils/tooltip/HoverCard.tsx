@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { CUSTOM_TOOLTIP_CLOSE_ALL_EVENT } from "@/helpers/tooltip.helpers";
-import styles from "./CustomTooltip.module.scss";
+import styles from "./CustomTooltip.module.css";
 import {
   calculateTooltipLayout,
   getTooltipWindow,
