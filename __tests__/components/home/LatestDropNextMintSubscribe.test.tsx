@@ -1,6 +1,7 @@
 import { renderWithAuth } from "@/__tests__/utils/testContexts";
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
 import { isMintingToday } from "@/components/meme-calendar/meme-calendar.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, screen } from "@testing-library/react";
 
@@ -34,6 +35,10 @@ jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
 }));
 
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
+}));
+
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country: "US" }),
 }));
@@ -54,6 +59,9 @@ jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
 
 const useQueryMock = useQuery as jest.Mock;
 const isMintingTodayMock = isMintingToday as jest.Mock;
+const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
+  typeof commonApiFetch
+>;
 
 function expectReadonlySubscriptionToggle(
   container: HTMLElement,
@@ -120,9 +128,7 @@ describe("LatestDropNextMintSubscribe", () => {
         queryKey[1] === "redeemed"
       ) {
         return {
-          data: {
-            data: [{ token_id: 516, count: 9 }],
-          },
+          data: { token_id: 516, count: 9 },
         };
       }
 
@@ -240,7 +246,60 @@ describe("LatestDropNextMintSubscribe", () => {
     );
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ["mint-subscription-counts", "redeemed", "test-key", 516],
+        queryKey: ["mint-subscription-counts", "redeemed", 516],
+      })
+    );
+  });
+
+  it("fetches additional redeemed count pages until the token is found", async () => {
+    renderWithAuth(
+      <LatestDropNextMintSubscribe tokenId={516} statusSource="none" />
+    );
+    const redeemedCountsQuery = useQueryMock.mock.calls.find(([options]) => {
+      const queryKey = options.queryKey;
+      return (
+        queryKey[0] === "mint-subscription-counts" && queryKey[1] === "redeemed"
+      );
+    })?.[0] as
+      | { queryFn: (context: { signal: AbortSignal }) => Promise<unknown> }
+      | undefined;
+    expect(redeemedCountsQuery).toBeDefined();
+
+    commonApiFetchMock
+      .mockResolvedValueOnce({
+        data: [{ token_id: 515, count: 4 }],
+        count: 2,
+        page: 1,
+        next: "/api/subscriptions/redeemed-memes-counts?page=2",
+      })
+      .mockResolvedValueOnce({
+        data: [{ token_id: 516, count: 9 }],
+        count: 2,
+        page: 2,
+        next: null,
+      });
+
+    await expect(
+      redeemedCountsQuery?.queryFn({ signal: new AbortController().signal })
+    ).resolves.toEqual({ token_id: 516, count: 9 });
+    expect(commonApiFetchMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        endpoint: "subscriptions/redeemed-memes-counts",
+        params: {
+          page_size: "50",
+          page: "1",
+        },
+      })
+    );
+    expect(commonApiFetchMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        endpoint: "subscriptions/redeemed-memes-counts",
+        params: {
+          page_size: "50",
+          page: "2",
+        },
       })
     );
   });
@@ -263,9 +322,7 @@ describe("LatestDropNextMintSubscribe", () => {
         queryKey[1] === "redeemed"
       ) {
         return {
-          data: {
-            data: [{ token_id: 516, count: 9 }],
-          },
+          data: { token_id: 516, count: 9 },
         };
       }
 

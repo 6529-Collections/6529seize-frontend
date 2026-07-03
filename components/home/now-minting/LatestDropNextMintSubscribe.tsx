@@ -13,6 +13,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiUpcomingMemeSubscriptionStatus } from "@/generated/models/ApiUpcomingMemeSubscriptionStatus";
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
+import type { RedeemedSubscriptionCountsPage } from "@/generated/models/RedeemedSubscriptionCountsPage";
 import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -35,9 +36,7 @@ type SubscriptionTooltipKey = Extract<
 >;
 type SubscriptionStatusSource = "none" | "upcoming";
 
-type RedeemedSubscriptionCountsResponse = {
-  data: RedeemedSubscriptionCounts[];
-};
+const REDEEMED_COUNTS_PAGE_SIZE = 50;
 
 function getProfileKey(
   connectedProfile: ApiIdentity | null
@@ -129,6 +128,37 @@ function getToggleTooltipLabel({
   return t(locale, key);
 }
 
+async function fetchRedeemedSubscriptionCountForToken(
+  tokenId: number,
+  signal: AbortSignal
+): Promise<RedeemedSubscriptionCounts | undefined> {
+  let page = 1;
+
+  while (true) {
+    const response = await commonApiFetch<RedeemedSubscriptionCountsPage>({
+      endpoint: "subscriptions/redeemed-memes-counts",
+      params: {
+        page_size: REDEEMED_COUNTS_PAGE_SIZE.toString(),
+        page: page.toString(),
+      },
+      signal,
+    });
+    const matchingCount = response.data.find(
+      (count) => count.token_id === tokenId
+    );
+
+    if (matchingCount) {
+      return matchingCount;
+    }
+
+    if (!response.next || response.data.length === 0) {
+      return undefined;
+    }
+
+    page += 1;
+  }
+}
+
 export default function LatestDropNextMintSubscribe(
   props: Readonly<{
     tokenId?: number;
@@ -201,20 +231,15 @@ export default function LatestDropNextMintSubscribe(
     retry: false,
   });
 
-  const { data: redeemedCounts, isLoading: redeemedCountsLoading } =
-    useQuery<RedeemedSubscriptionCountsResponse>({
-      queryKey: ["mint-subscription-counts", "redeemed", profileKey, tokenId],
-      queryFn: async () =>
-        await commonApiFetch<RedeemedSubscriptionCountsResponse>({
-          endpoint: "subscriptions/redeemed-memes-counts",
-          params: {
-            page_size: "10",
-            page: "1",
-          },
-        }),
-      enabled: !hideSubscriptions && hasTokenId && !shouldQueryUpcomingStatus,
-      retry: false,
-    });
+  const { data: redeemedCount, isLoading: redeemedCountsLoading } = useQuery<
+    RedeemedSubscriptionCounts | undefined
+  >({
+    queryKey: ["mint-subscription-counts", "redeemed", tokenId],
+    queryFn: async ({ signal }) =>
+      await fetchRedeemedSubscriptionCountForToken(tokenId, signal),
+    enabled: !hideSubscriptions && hasTokenId && !shouldQueryUpcomingStatus,
+    retry: false,
+  });
 
   let subscribed = false;
   let subscribedCount: number | undefined;
@@ -228,12 +253,13 @@ export default function LatestDropNextMintSubscribe(
     }
   }
   const subscribersCount = useMemo(() => {
-    const counts = shouldQueryUpcomingStatus
-      ? upcomingCounts
-      : redeemedCounts?.data;
-    return counts?.find((count) => count.token_id === tokenId)?.count;
+    if (!shouldQueryUpcomingStatus) {
+      return redeemedCount?.count;
+    }
+
+    return upcomingCounts?.find((count) => count.token_id === tokenId)?.count;
   }, [
-    redeemedCounts?.data,
+    redeemedCount?.count,
     shouldQueryUpcomingStatus,
     tokenId,
     upcomingCounts,
