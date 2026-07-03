@@ -7,18 +7,26 @@
   100% {
     transform: scale(1);
     opacity: 0;
-    box-shadow: 0 0 50px var(--theme-secondary, rgba(255, 255, 255, 0.3)), inset 0 0 10px var(--theme-primary, rgba(255, 255, 255, 0.9));
+    box-shadow:
+      0 0 50px var(--theme-secondary, rgba(255, 255, 255, 0.3)),
+      inset 0 0 10px var(--theme-primary, rgba(255, 255, 255, 0.9));
   }
 }
 @keyframes glow {
   0% {
-    box-shadow: 0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)), 0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+    box-shadow:
+      0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+      0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
   50% {
-    box-shadow: 0 0 20px var(--theme-primary, rgba(255, 255, 255, 0.2)), 0 0 30px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+    box-shadow:
+      0 0 20px var(--theme-primary, rgba(255, 255, 255, 0.2)),
+      0 0 30px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
   100% {
-    box-shadow: 0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)), 0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+    box-shadow:
+      0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+      0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
 }
 @keyframes funSpin {
@@ -86,7 +94,8 @@
     opacity: 1;
   }
 }
-.voteButton, .voteButtonMini {
+.voteButton,
+.voteButtonMini {
   position: relative;
   font-size: 14px;
   border-radius: 8px;
@@ -100,15 +109,18 @@
   cursor: pointer;
   transition: all 0.3s ease-out;
 }
-.voteButton:not(:disabled):hover, .voteButtonMini:not(:disabled):hover {
+.voteButton:not(:disabled):hover,
+.voteButtonMini:not(:disabled):hover {
   background: #d4d4d4;
   border-color: #d4d4d4;
 }
-.voteButton:disabled, .voteButtonMini:disabled {
+.voteButton:disabled,
+.voteButtonMini:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
-.voteButton:focus-visible, .voteButtonMini:focus-visible {
+.voteButton:focus-visible,
+.voteButtonMini:focus-visible {
   outline: 2px solid rgba(64, 106, 254, 0.75);
   outline-offset: 2px;
 }
@@ -151,7 +163,8 @@
 .voteSubmitFull > div {
   width: 100%;
 }
-.voteSubmitFull .voteButton, .voteSubmitFull .voteButtonMini {
+.voteSubmitFull .voteButton,
+.voteSubmitFull .voteButtonMini {
   width: 100%;
   height: auto;
   min-height: 40px;
@@ -161,34 +174,35 @@
   color: #4c4c55;
   box-shadow: none;
 }
-.voteSubmitFull .voteButton:not(:disabled):hover, .voteSubmitFull .voteButtonMini:not(:disabled):hover {
+.voteSubmitFull .voteButton:not(:disabled):hover,
+.voteSubmitFull .voteButtonMini:not(:disabled):hover {
   background: rgba(255, 255, 255, 0.03);
   border-color: #37373e;
   color: #60606c;
 }
 .voteSubmitFull .voteButtonPositive {
-  background: #10b981;
-  border-color: #10b981;
+  background: #047857;
+  border-color: #047857;
   color: #fff;
   font-weight: 700;
   box-shadow: none;
 }
 .voteSubmitFull .voteButtonPositive:not(:disabled):hover {
-  background: #059669;
-  border-color: #059669;
+  background: #065f46;
+  border-color: #065f46;
   box-shadow: none;
   color: #fff;
 }
 .voteSubmitFull .voteButtonNegative {
-  background: #f43f5e;
-  border-color: #f43f5e;
+  background: #be123c;
+  border-color: #be123c;
   color: #fff;
   font-weight: 700;
   box-shadow: none;
 }
 .voteSubmitFull .voteButtonNegative:not(:disabled):hover {
-  background: #e11d48;
-  border-color: #e11d48;
+  background: #9f1239;
+  border-color: #9f1239;
   box-shadow: none;
   color: #fff;
 }
@@ -235,7 +249,9 @@
   border-radius: 50%;
   border-top-color: #0a0a0a;
   border-right-color: #0a0a0a;
-  animation: spinnerEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards, funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
+  animation:
+    spinnerEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+    funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
 }
 .spinner.exit {
   animation: spinnerExit 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;

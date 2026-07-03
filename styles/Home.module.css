@@ -42,18 +42,16 @@
 }
 
 .login {
+  display: flex;
   height: 100vh;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   background-color: rgb(34, 34, 34);
 }
 .login .loginImage {
   max-width: 100%;
   max-height: 100vh;
-}
-.login {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .loginPrompt {
@@ -140,6 +138,11 @@
   color: white;
   width: 100%;
   position: relative;
-  box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02), 1px 3px 6px 0px rgba(0, 0, 0, 0.15), -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02), -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset, 6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
+  box-shadow:
+    0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
+    1px 3px 6px 0px rgba(0, 0, 0, 0.15),
+    -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
+    -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
+    6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
   border-radius: 0.5rem;
 }

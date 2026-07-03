@@ -166,9 +166,7 @@
   .drops-custom-selection span:not(.emoji-node):not(.emoji-node-big) {
     cursor: text;
   }
-  .drops-custom-selection {
-    /* Override text cursor for excluded elements */
-  }
+  /* Override text cursor for excluded elements */
   .drops-custom-selection [data-text-selection-exclude="true"] p,
   .drops-custom-selection [data-text-selection-exclude="true"] h1,
   .drops-custom-selection [data-text-selection-exclude="true"] h2,
@@ -193,9 +191,7 @@
     -moz-user-select: none !important;
     -ms-user-select: none !important;
   }
-  .drops-custom-selection {
-    /* Ensure links and buttons remain clickable and allow selection in them */
-  }
+  /* Ensure links and buttons remain clickable and allow selection in them */
   .drops-custom-selection a,
   .drops-custom-selection button,
   .drops-custom-selection input,
@@ -282,9 +278,7 @@ a {
   textarea:not(.tailwind-scope textarea),
   select,
   input:not(.tailwind-scope input),
-  button:not(.tailwind-scope button),
-  video,
-  select {
+  video {
     font-size: 14px !important;
   }
 }
@@ -294,9 +288,7 @@ a {
   textarea:not(.tailwind-scope textarea),
   select,
   input:not(.tailwind-scope input),
-  button:not(.tailwind-scope button),
-  video,
-  select {
+  video {
     font-size: 12px !important;
   }
 }
@@ -707,11 +699,13 @@ h5:not(.tailwind-scope h5) {
   }
 }
 pre code {
-  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .word-break {
-  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .react-toggle--disabled {

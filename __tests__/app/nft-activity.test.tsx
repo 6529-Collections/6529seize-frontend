@@ -86,7 +86,7 @@ describe("NFTActivityPage", () => {
     const { container } = renderComponent();
 
     const section = container.querySelector("main > section");
-    expect(section).toHaveClass("leaderboard-container-class");
+    expect(section).toHaveClass("leaderboardContainer");
     expect(section).toHaveClass("tailwind-scope");
   });
 
@@ -106,6 +106,6 @@ describe("NFTActivityPage", () => {
     const { container } = renderComponent();
 
     const mainElement = container.querySelector("main");
-    expect(mainElement).toHaveClass("main-class");
+    expect(mainElement).toHaveClass("main");
   });
 });

@@ -112,8 +112,8 @@
 }
 
 .closeButton:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
+  background: #1f2937;
+  color: #ffffff;
 }
 
 .closeButton svg {
@@ -139,24 +139,24 @@
 }
 
 .successIcon {
-  background: rgba(60, 203, 127, 0.14);
-  color: #7ddda9;
+  background: #123524;
+  color: #a7f3d0;
 }
 
 .errorIcon {
-  background: rgba(249, 112, 102, 0.14);
-  color: #ff9a92;
+  background: #3b1717;
+  color: #fecaca;
 }
 
 .warningIcon {
-  background: rgba(246, 200, 95, 0.14);
-  color: #ffd986;
+  background: #3b2d0f;
+  color: #fde68a;
 }
 
 .infoIcon,
 .defaultIcon {
-  background: rgba(132, 173, 255, 0.14);
-  color: #a9c4ff;
+  background: #172554;
+  color: #bfdbfe;
 }
 
 .newVersionWrapper {
