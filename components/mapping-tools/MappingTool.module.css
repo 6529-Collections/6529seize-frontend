@@ -40,7 +40,7 @@
 .submitBtnDisabled {
   pointer-events: none !important;
   background-color: rgb(29, 118, 80);
-  color: rgb(154, 154, 154);
+  color: rgb(255, 255, 255);
 }
 
 .loader {

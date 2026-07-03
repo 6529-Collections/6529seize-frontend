@@ -198,7 +198,7 @@
 .addMemeReferenceDisplayBtnDisabled {
   pointer-events: none !important;
   background-color: #cccccc;
-  color: rgb(100, 100, 100);
+  color: rgb(51, 51, 51);
 }
 
 .verifiedIcon {

@@ -59,7 +59,7 @@
 .viewManageBtnDisabled {
   pointer-events: none !important;
   background-color: #cccccc;
-  color: rgb(100, 100, 100);
+  color: rgb(51, 51, 51);
 }
 
 .closeNewDelegationForm {
@@ -100,7 +100,7 @@
 .useCaseWalletUpdateDisabled {
   pointer-events: none !important;
   background-color: rgb(34, 112, 132);
-  color: rgb(154, 154, 154);
+  color: rgb(255, 255, 255);
 }
 
 .useCaseWalletRevoke {
@@ -117,7 +117,7 @@
 .useCaseWalletRevokeDisabled {
   pointer-events: none !important;
   background-color: rgb(177, 26, 47);
-  color: rgb(154, 154, 154);
+  color: rgb(255, 255, 255);
 }
 
 .addNewDelegationBtn {
@@ -146,7 +146,7 @@
 .addNewDelegationBtnDisabled {
   pointer-events: none !important;
   background-color: rgb(34, 112, 132);
-  color: rgb(154, 154, 154);
+  color: rgb(255, 255, 255);
 }
 
 .revokeDelegationBtn {
@@ -168,7 +168,7 @@
 .revokeDelegationBtnDisabled {
   pointer-events: none !important;
   background-color: rgb(177, 26, 47);
-  color: rgb(154, 154, 154);
+  color: rgb(255, 255, 255);
 }
 
 .lockDelegationBtn {
@@ -178,20 +178,20 @@
   justify-content: center;
   margin-right: 15px;
   margin-top: 15px;
-  background-color: rgb(194, 102, 12);
+  background-color: rgb(148, 78, 9);
   color: white;
   width: fit-content;
   padding: 12px 16px;
   cursor: pointer;
 }
 .lockDelegationBtn:hover {
-  background-color: rgb(183, 96, 11);
+  background-color: rgb(135, 71, 8);
 }
 
 .lockDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: rgb(172, 90, 10);
-  color: rgb(154, 154, 154);
+  background-color: rgb(130, 68, 8);
+  color: rgb(255, 255, 255);
 }
 
 .formInput {
@@ -259,7 +259,7 @@
 .newDelegationSubmitBtnDisabled {
   pointer-events: none !important;
   background-color: rgb(29, 118, 80);
-  color: rgb(154, 154, 154);
+  color: rgb(255, 255, 255);
 }
 
 .newDelegationCancelBtn {
