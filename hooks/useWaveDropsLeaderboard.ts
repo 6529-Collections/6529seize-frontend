@@ -241,7 +241,7 @@ const useRemoveDropsQueryOnUnmount = ({
   useEffect(() => {
     return () => {
       queryClient.removeQueries({
-        queryKey: [QueryKey.DROPS, { waveId }],
+        queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
       });
     };
   }, [waveId, queryClient]);
