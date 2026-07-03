@@ -254,6 +254,33 @@ const WebSidebarNav = React.forwardRef<
     </li>
   );
 
+  const renderDirectSectionLink = (section: SidebarSection) => {
+    const primaryItem = section.items[0];
+
+    if (primaryItem === undefined) {
+      return null;
+    }
+
+    const isPrimaryItemActive = isSidebarNavItemActive(primaryItem, pathname);
+    const hasActiveSectionItem = section.items.some((item) =>
+      isSidebarNavItemActive(item, pathname)
+    );
+
+    return (
+      <li key={section.key}>
+        <WebSidebarNavItem
+          href={primaryItem.href}
+          icon={section.icon}
+          active={hasActiveSectionItem}
+          ariaCurrent={isPrimaryItemActive ? "page" : "location"}
+          collapsed={isCollapsed}
+          label={section.name}
+          data-section={section.key}
+        />
+      </li>
+    );
+  };
+
   return (
     <nav
       className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
@@ -262,7 +289,7 @@ const WebSidebarNav = React.forwardRef<
       <ul className="tw-m-0 tw-list-none tw-p-0">
         {nftsSection && renderExpandableSection(nftsSection)}
 
-        {wavesSection && renderExpandableSection(wavesSection)}
+        {wavesSection && renderDirectSectionLink(wavesSection)}
 
         <li>
           <WebSidebarNavItem

@@ -53,8 +53,9 @@ context-aware `Back`).
   `Network TDH Stats`, `xTDH Overview`, and `xTDH Allocations Dashboard`.
 - Collapsed desktop rail: open a flyout submenu and pick a nested route without
   expanding the rail.
-- Wave discovery jump: on web/sidebar, open `Waves` -> `Discover Waves`; in
-  the app bottom bar, tap `Discovery`.
+- Wave discovery jump: on web/sidebar, open `/waves` with the `Waves` row, then
+  use the `Discover Waves` link in the Waves panel header or search; in the app
+  bottom bar, tap `Discovery`.
 - Desktop web notifications jump: use the lower connected-only `Notifications`
   row near the account area.
 - Small-screen web: open overlay menu, pick a route, and continue after
@@ -74,8 +75,9 @@ context-aware `Back`).
 
 - App top-left control switches between menu/avatar and `Back`; when `Back` is
   shown, sidebar drawer entry is not available.
-- `Discover Waves` lives under `Waves` on web/sidebar, while the app bottom
-  bar keeps a dedicated `Discovery` tab for `/discover`.
+- `Waves` is one-click from the web sidebar. `Discover Waves` is secondary in
+  the Waves experience and searchable, while the app bottom bar keeps a
+  dedicated `Discovery` tab for `/discover`.
 - The app-drawer profile avatar is connected-only and resolves handle-first
   profile routing with wallet fallback.
 - In the app drawer header, only the connected profile avatar is a profile

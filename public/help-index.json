@@ -50,7 +50,7 @@
       "facts": [
         "The primary navigation concepts are NFTs, Waves, DMs, and About.",
         "Home remains available through the 6529 logo link to /.",
-        "Discovery lives under Waves as Discover Waves, while Network, Delegation, Tools, Open Data, and reference material live under About.",
+        "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
       ],
@@ -1502,7 +1502,7 @@
         "Waves are the main social threads for conversations, drops, reactions, voting, and wave-specific activity.",
         "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
         "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
-        "The Waves panel includes wave lists, pinned waves, highly rated waves, and create controls."
+        "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves/create", "/messages"],
@@ -3882,7 +3882,7 @@
       "keywords": ["waves", "discover", "search", "sections", "cards"],
       "facts": [
         "Wave discovery docs cover discover cards, discover sections, and search behavior.",
-        "Discover Waves lives under the Waves primary navigation concept and routes to /discover.",
+        "Discover Waves is a secondary Waves experience link and searchable destination that routes to /discover.",
         "Wave discovery is for finding waves, while the Waves panel is for active navigation and participation.",
         "Search and section availability depend on the route state and access rules."
       ],
