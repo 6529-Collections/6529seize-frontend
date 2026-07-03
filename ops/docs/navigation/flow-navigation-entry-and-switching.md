@@ -8,7 +8,8 @@ context-aware `Back`).
 
 ## Location in the Site
 
-- Desktop web: fixed left sidebar with direct rows and expandable groups.
+- Desktop web: fixed left sidebar with the 6529 logo home link, direct rows,
+  and expandable groups.
 - Narrow desktop web: collapsed icon rail with flyout submenus.
 - Small-screen web: header menu opens the same sidebar as an overlay.
 - App layout: bottom tabs for primary sections plus header menu/avatar drawer
@@ -16,12 +17,10 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar rows (`Home`, `Waves`, `Messages`, `Discovery`,
-  connected `Notifications`) and section groups (`Network`, `Collections`,
-  `Tools`, `About`).
+- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `Join 6529`,
+  `About`) plus connected utility rows such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
-- App bottom navigation tabs (`Discovery`, `Waves`, `Messages`, `Home`,
-  `Network`, `Collections`, `Notifications`).
+- App bottom navigation tabs (`NFTs`, `Waves`, `DMs`, `Join 6529`, `About`).
 - App header menu/avatar button for drawer routes and account actions (when
   `Back` is not active).
 - Search entry points: sidebar `Search`, app header search button, `⌘K` on
@@ -39,32 +38,31 @@ context-aware `Back`).
 3. Open secondary destinations:
    - web: use lower connected `Notifications`/`Profile`, disconnected
      `Share`, expand sidebar groups, or open search
-   - app: open sidebar drawer for connected `Profile`, `Discovery`, grouped
-     routes, and account actions, or use the connected profile avatar shortcut
-     in the drawer header
+   - app: open sidebar drawer for grouped routes and account actions, or use
+     the connected profile avatar shortcut in the drawer header
 4. Confirm route change via active states and unread indicators.
 5. In app wave/message threads:
-   - tap `Waves` or `Messages` once to return to section root
+   - tap `Waves` or `DMs` once to return to section root
    - tap again from root to reopen last visited thread (when cached)
 
 ## Common Scenarios
 
-- Desktop web metrics jump: open `Network` -> `Metrics`, then move between
+- Desktop web metrics jump: open `About` -> `Network Data`, then move between
   `Health`, `Definitions`, `Levels`, and `Network Stats`.
 - Collapsed desktop rail: open a flyout submenu and pick a nested route without
   expanding the rail.
-- Discovery jump: use the dedicated web/app navigation destination to open
-  `/discover`, then enter a wave from its card grid.
+- Wave discovery jump: open `Waves` -> `Discover Waves` to open `/discover`,
+  then enter a wave from its card grid.
 - Desktop web notifications jump: use the lower connected-only `Notifications`
   row near the account area.
 - Small-screen web: open overlay menu, pick a route, and continue after
   auto-close on navigation.
 - Desktop web share: while disconnected use the standalone lower `Share` row;
   while connected open the user menu and choose `Share`.
-- App secondary route jump: open app drawer and choose grouped `Tools` or
-  `About` routes.
+- App secondary route jump: open app drawer and choose grouped `About` routes
+  for network/reference/tool destinations.
 - App profile jump from the drawer: open app drawer and tap the connected
-  `Profile` row or connected profile avatar to route into your own profile.
+  profile avatar to route into your own profile.
 - Site-wide search jump: type at least 3 characters, then open a
   page/profile/NFT/wave result.
 - In-wave search jump: switch to `In this Wave`, type at least 2 characters,
@@ -74,9 +72,9 @@ context-aware `Back`).
 
 - App top-left control switches between menu/avatar and `Back`; when `Back` is
   shown, sidebar drawer entry is not available.
-- Bottom-nav `Discovery` is always visible and routes to `/discover`.
-- App-drawer `Profile` is connected-only and resolves handle-first profile
-  routing with wallet fallback.
+- `Discover Waves` lives under `Waves` and routes to `/discover`.
+- The app-drawer profile avatar is connected-only and resolves handle-first
+  profile routing with wallet fallback.
 - In the app drawer header, only the connected profile avatar is a profile
   shortcut; handle/wallet text and level badge are informational.
 - Web sidebar and search-page catalogs can vary by runtime constraints:
@@ -85,7 +83,7 @@ context-aware `Back`).
 - Sidebar `Share` is web-only: disconnected desktop web shows a standalone row,
   connected desktop web moves it into the user menu, and Capacitor/native plus
   mobile-device web hide it.
-- `Messages` and `Notifications` unread dots require a connected profile with
+- `DMs` and `Notifications` unread dots require a connected profile with
   unread state.
 - Bottom navigation is not rendered during single-drop open or inline mobile
   edit mode, and is hidden/non-interactive while the mobile keyboard is open.
@@ -100,7 +98,7 @@ context-aware `Back`).
 - If a route row is missing, verify auth/country/device/feature-gate constraints.
 - If search is still loading, wait for debounce/fetch; if no results, refine
   query; if error appears, use `Try Again`.
-- If `Waves`/`Messages` keeps reopening an outdated thread, open the active
+- If `Waves`/`DMs` keeps reopening an outdated thread, open the active
   thread and tap that tab once to clear cached last-visited target.
 - If app `Back` is unavailable in current context, use sidebar or bottom
   navigation to return to a section root route.

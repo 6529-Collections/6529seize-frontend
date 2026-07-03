@@ -5,7 +5,6 @@ import React, {
   Suspense,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -14,7 +13,6 @@ import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR,
-  getNotificationsRoute,
   usesReverseMobileBottomNavigationScroll,
 } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -25,29 +23,28 @@ import { t } from "@/i18n/messages";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
-import DiscoverIcon from "../common/icons/DiscoverIcon";
-import LogoIcon from "../common/icons/LogoIcon";
 import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
-import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
 import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import type { NavItem as NavItemData } from "./navTypes";
 import { getActiveViewFromUrl } from "./ViewContext";
+import { DocumentTextIcon, UserPlusIcon } from "@heroicons/react/24/outline";
+
+const BOTTOM_NAVIGATION_LOCALE = DEFAULT_LOCALE;
 
 const items: NavItemData[] = [
   {
     kind: "route",
-    name: "Discovery",
-    href: "/discover",
-    icon: "discover",
-    iconComponent: DiscoverIcon,
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.nfts"),
+    href: "/the-memes",
+    icon: "nfts",
+    iconComponent: CollectionsMenuIcon,
   },
   {
     kind: "view",
-    name: "Waves",
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.waves"),
     viewKey: "waves",
     icon: "waves",
     iconComponent: WavesIcon,
@@ -55,39 +52,24 @@ const items: NavItemData[] = [
   },
   {
     kind: "view",
-    name: "Messages",
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.dms"),
     viewKey: "messages",
     icon: "messages",
     iconComponent: ChatBubbleIcon,
   },
   {
     kind: "route",
-    name: "Home",
-    href: "/",
-    icon: "home",
-    iconComponent: LogoIcon,
-    iconSizeClass: "tw-size-9",
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.join6529"),
+    href: "/join",
+    icon: "join",
+    iconComponent: UserPlusIcon,
   },
   {
     kind: "route",
-    name: "Network",
-    href: "/network",
-    icon: "network",
-    iconComponent: UsersIcon,
-  },
-  {
-    kind: "route",
-    name: "Collections",
-    href: "/the-memes",
-    icon: "collections",
-    iconComponent: CollectionsMenuIcon,
-  },
-  {
-    kind: "route",
-    name: "Notifications",
-    href: "/notifications",
-    icon: "notifications",
-    iconComponent: BellIcon,
+    name: t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.about"),
+    href: "/about",
+    icon: "about",
+    iconComponent: DocumentTextIcon,
   },
 ];
 
@@ -97,22 +79,34 @@ interface BottomNavigationProps {
 
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
-const BOTTOM_NAVIGATION_LOCALE = DEFAULT_LOCALE;
 
 const getHiddenStyle = (hidden: boolean) =>
   hidden
     ? "tw-opacity-0 tw-translate-y-[calc(100%+1.5rem)]"
     : "tw-opacity-100 tw-translate-y-0";
 
-const getWindowScrollPosition = () => {
-  const browserWindow = globalThis.window;
-  const documentElement = globalThis.document?.documentElement;
-  const body = globalThis.document?.body;
+type BrowserGlobal = typeof globalThis & {
+  readonly window?: Window;
+  readonly document?: Document;
+};
 
+const getBrowserWindow = (): Window | undefined =>
+  (globalThis as BrowserGlobal).window;
+
+const getBrowserDocument = (): Document | undefined =>
+  (globalThis as BrowserGlobal).document;
+
+const getWindowScrollPosition = ({
+  browserWindow,
+  browserDocument,
+}: {
+  readonly browserWindow: Window;
+  readonly browserDocument: Document;
+}) => {
   return Math.max(
-    browserWindow?.scrollY ?? 0,
-    documentElement?.scrollTop ?? 0,
-    body?.scrollTop ?? 0
+    browserWindow.scrollY,
+    browserDocument.documentElement.scrollTop,
+    browserDocument.body.scrollTop
   );
 };
 
@@ -124,12 +118,20 @@ const isTrackedScrollElement = (
   target.matches(MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR) &&
   target.scrollHeight > target.clientHeight;
 
-const getScrollPosition = (target: EventTarget | null | undefined) => {
+const getScrollPosition = ({
+  browserDocument,
+  browserWindow,
+  target,
+}: {
+  readonly browserDocument: Document;
+  readonly browserWindow: Window;
+  readonly target: EventTarget | null | undefined;
+}) => {
   if (isTrackedScrollElement(target)) {
     return target.scrollTop;
   }
 
-  return getWindowScrollPosition();
+  return getWindowScrollPosition({ browserDocument, browserWindow });
 };
 
 const getTrackedScrollTarget = ({
@@ -139,17 +141,21 @@ const getTrackedScrollTarget = ({
   readonly browserWindow: Window;
   readonly target: EventTarget | null | undefined;
 }): EventTarget | null => {
-  const browserDocument = globalThis.document;
+  const browserDocument = getBrowserDocument();
 
   if (isTrackedScrollElement(target)) {
     return target;
   }
 
+  if (browserDocument === undefined) {
+    return target === browserWindow ? browserWindow : null;
+  }
+
   if (
     target === browserWindow ||
     target === browserDocument ||
-    target === browserDocument?.documentElement ||
-    target === browserDocument?.body
+    target === browserDocument.documentElement ||
+    target === browserDocument.body
   ) {
     return browserWindow;
   }
@@ -166,15 +172,29 @@ const useCompactDock = ({
   readonly resetKey: string;
   readonly reverseScrollDirection: boolean;
 }) => {
-  const [compact, setCompact] = useState(false);
+  const [compactState, setCompactState] = useState({
+    resetKey,
+    compact: false,
+  });
   const previousScrollPositionsRef = useRef<WeakMap<EventTarget, number>>(
     new WeakMap()
   );
   const frameRef = useRef<number | null>(null);
   const pendingScrollTargetsRef = useRef<Set<EventTarget>>(new Set());
+  const compact =
+    compactState.resetKey === resetKey ? compactState.compact : false;
+  const setCompact = useCallback(
+    (nextCompact: boolean) => {
+      setCompactState((current) =>
+        current.resetKey === resetKey && current.compact === nextCompact
+          ? current
+          : { resetKey, compact: nextCompact }
+      );
+    },
+    [resetKey]
+  );
 
   useEffect(() => {
-    setCompact(false);
     previousScrollPositionsRef.current = new WeakMap();
     pendingScrollTargetsRef.current.clear();
     if (frameRef.current !== null) {
@@ -185,21 +205,24 @@ const useCompactDock = ({
 
   useEffect(() => {
     if (hidden) {
-      setCompact(false);
-      return;
+      return undefined;
     }
 
-    const browserWindow = globalThis.window;
-    const browserDocument = globalThis.document;
-    if (browserWindow === undefined) {
-      return;
+    const browserWindow = getBrowserWindow();
+    const browserDocument = getBrowserDocument();
+    if (browserWindow === undefined || browserDocument === undefined) {
+      return undefined;
     }
 
     previousScrollPositionsRef.current = new WeakMap();
     pendingScrollTargetsRef.current = new Set();
 
     const syncCompactState = (target: EventTarget) => {
-      const currentScrollPosition = getScrollPosition(target);
+      const currentScrollPosition = getScrollPosition({
+        browserDocument,
+        browserWindow,
+        target,
+      });
       const previousScrollPosition =
         previousScrollPositionsRef.current.get(target) ?? currentScrollPosition;
       const delta = currentScrollPosition - previousScrollPosition;
@@ -247,15 +270,18 @@ const useCompactDock = ({
     };
 
     browserWindow.addEventListener("scroll", handleScroll, { passive: true });
-    browserDocument?.addEventListener("scroll", handleScroll, {
+    browserDocument.addEventListener("scroll", handleScroll, {
       capture: true,
       passive: true,
     });
-    syncCompactState(browserWindow);
+    previousScrollPositionsRef.current.set(
+      browserWindow,
+      getWindowScrollPosition({ browserDocument, browserWindow })
+    );
 
     return () => {
       browserWindow.removeEventListener("scroll", handleScroll);
-      browserDocument?.removeEventListener("scroll", handleScroll, {
+      browserDocument.removeEventListener("scroll", handleScroll, {
         capture: true,
       });
       if (frameRef.current !== null) {
@@ -264,7 +290,7 @@ const useCompactDock = ({
       }
       pendingScrollTargetsRef.current.clear();
     };
-  }, [hidden, reverseScrollDirection]);
+  }, [hidden, reverseScrollDirection, setCompact]);
 
   return hidden ? false : compact;
 };
@@ -397,18 +423,7 @@ const BottomNavigationResolvedContent: React.FC<
     };
   }, [hidden, registerRef]);
 
-  const navItems = useMemo(
-    () =>
-      items.map((item) =>
-        item.name === "Notifications"
-          ? {
-              ...item,
-              href: getNotificationsRoute(isApp),
-            }
-          : item
-      ),
-    [isApp]
-  );
+  const navItems = items;
   const profileHref = getProfileHref({
     address,
     handle: connectedProfile?.handle,

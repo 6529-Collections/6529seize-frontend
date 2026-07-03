@@ -245,7 +245,7 @@ run().catch((err) => {
 });`;
   return (
     <main className={`${styles["main"]} tailwind-scope`}>
-      <Container className="tw-pt-4 tw-pb-4">
+      <Container className="tw-pb-4 tw-pt-4">
         <Row>
           <Col>
             <h1>6529.io API</h1>
@@ -279,7 +279,7 @@ run().catch((err) => {
             </p>
 
             <div
-              className="tw-p-4 tw-rounded tw-mb-4 tw-font-medium"
+              className="tw-mb-4 tw-rounded tw-p-4 tw-font-medium"
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
