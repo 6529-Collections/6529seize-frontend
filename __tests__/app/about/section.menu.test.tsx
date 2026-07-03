@@ -485,6 +485,52 @@ describe("About contents dropdown", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
+  it("does not route to a stale profile if the connected profile changes during auth", async () => {
+    setCookieCountry("US");
+    let resolveAuth!: (value: { success: boolean }) => void;
+    const requestAuth = jest.fn(
+      () =>
+        new Promise<{ success: boolean }>((resolve) => {
+          resolveAuth = resolve;
+        })
+    );
+    const renderButton = (handle: string) => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: {
+              handle,
+              normalised_handle: handle,
+              primary_wallet: "0x123",
+              wallets: [],
+            },
+            isAuthenticated: false,
+            requestAuth,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(renderButton("test-handle"));
+
+    fireEvent.click(screen.getByRole("button", { name: /manage/i }));
+    await waitFor(() => {
+      expect(requestAuth).toHaveBeenCalledTimes(1);
+    });
+
+    rerender(renderButton("other-handle"));
+    await act(async () => {
+      resolveAuth({ success: true });
+    });
+
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
   it("does not keep a stale subscriptions redirect after an abandoned connection", () => {
     jest.useFakeTimers();
     setCookieCountry("US");

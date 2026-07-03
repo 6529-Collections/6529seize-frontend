@@ -192,6 +192,8 @@ export default function LatestDropNextMintSubscribe(
 
   const { data: tokenCount, isLoading: tokenCountLoading } =
     useQuery<SubscriptionCounts>({
+      // Public aggregate count for the Meme token; intentionally not scoped by
+      // profileKey so logged-out and connected users see the same subscriber total.
       queryKey: ["mint-subscription-counts", "by-token", tokenId],
       queryFn: async () =>
         await commonApiFetch<SubscriptionCounts>({

@@ -97,9 +97,14 @@ export function useProfileSubscriptionsNavigation() {
     () => getProfileSubscriptionsHref(connectedProfile),
     [connectedProfile]
   );
+  const profileSubscriptionsHrefRef = useRef(profileSubscriptionsHref);
   const canNavigateToProfileSubscriptionsDirectly = !!(
     profileSubscriptionsHref && isAuthenticated
   );
+
+  useEffect(() => {
+    profileSubscriptionsHrefRef.current = profileSubscriptionsHref;
+  }, [profileSubscriptionsHref]);
 
   const clearConnectTimeout = useCallback(() => {
     if (connectTimeoutRef.current) {
@@ -156,6 +161,11 @@ export function useProfileSubscriptionsNavigation() {
             clearPendingNavigation();
             return;
           }
+        }
+
+        if (profileSubscriptionsHrefRef.current !== href) {
+          clearPendingNavigation();
+          return;
         }
 
         clearPendingNavigation();

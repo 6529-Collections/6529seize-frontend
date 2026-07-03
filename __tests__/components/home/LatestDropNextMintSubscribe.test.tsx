@@ -298,6 +298,45 @@ describe("LatestDropNextMintSubscribe", () => {
     );
   });
 
+  it("uses the subscribed fallback tooltip when subscription count is unavailable", () => {
+    useQueryMock.mockImplementation(({ queryKey }) => {
+      if (
+        queryKey[0] === "mint-subscription-status" &&
+        queryKey[1] === "upcoming"
+      ) {
+        return {
+          data: {
+            subscribed: true,
+            eligibility: 2,
+            count: 0,
+          },
+        };
+      }
+
+      if (
+        queryKey[0] === "mint-subscription-counts" &&
+        queryKey[1] === "by-token"
+      ) {
+        return {
+          data: { token_id: 478, count: 12 },
+        };
+      }
+
+      return {
+        data: null,
+      };
+    });
+
+    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />);
+
+    expect(screen.queryByText("x0")).not.toBeInTheDocument();
+    expectReadonlySubscriptionToggle(
+      container,
+      "You are subscribed for this drop.",
+      true
+    );
+  });
+
   it("disables retries for expected subscription lookup errors", () => {
     renderWithAuth(<LatestDropNextMintSubscribe />);
 
