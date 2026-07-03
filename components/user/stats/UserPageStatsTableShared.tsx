@@ -1,6 +1,6 @@
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import styles from "./UserPageStats.module.scss";
+import styles from "./UserPageStats.module.css";
 
 function getTableColumnLabels(locale: SupportedLocale) {
   return {

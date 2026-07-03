@@ -7,7 +7,7 @@ import { numberWithCommas } from "@/helpers/Helpers";
 import clsx from "clsx";
 import { useState } from "react";
 import type { Collector, Content } from "./Leaderboard";
-import styles from "./Leaderboard.module.scss";
+import styles from "./Leaderboard.module.css";
 import type { LeaderboardMetrics } from "./leaderboard_helpers";
 import {
   formatPercentageFromCounts,

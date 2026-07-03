@@ -10,7 +10,7 @@ import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown"
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { AboutSection } from "@/types/enums";
 
 const WALLET_AUTH_LOCALE = DEFAULT_LOCALE;

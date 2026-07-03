@@ -1,0 +1,112 @@
+.nftAnimation {
+  position: relative;
+  padding: 0;
+}
+
+.nftAnimation model-viewer {
+  background-color: black;
+}
+
+.nftAnimation iframe,
+.nftAnimation model-viewer {
+  width: 100%;
+}
+
+.nftAnimation video {
+  max-width: 100%;
+}
+
+.nftAnimation svg {
+  width: 100%;
+}
+
+.heightFull {
+  max-height: 90vh !important;
+}
+
+.heightFull iframe,
+.heightFull video,
+.heightFull model-viewer {
+  height: 90vh !important;
+  max-width: 90vw;
+}
+
+.height650 {
+  max-width: 100%;
+  max-height: 650px !important;
+}
+
+.height650 iframe,
+.height650 video,
+.height650 model-viewer {
+  height: 650px;
+}
+
+.height300 {
+  height: 300px !important;
+  max-width: 100%;
+}
+
+.height300 iframe,
+.height300 video,
+.height300 model-viewer {
+  height: 300px;
+}
+
+@media only screen and (max-width: 1200px) {
+  .height300 {
+    height: 250px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .height300 {
+    height: 200px;
+  }
+}
+
+.imageWrapper {
+  position: relative;
+  padding: 0;
+}
+
+.balance {
+  position: absolute;
+  bottom: -40px;
+  margin-right: 10px;
+  padding: 2px 5px;
+  background-color: transparent;
+  box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+  color: rgb(154, 154, 154) !important;
+  font-family: "Montserrat", sans-serif;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.balanceBigger {
+  bottom: -45px;
+  padding: 6px 25px;
+}
+
+.balanceInline {
+  color: rgb(154, 154, 154) !important;
+  font-family: "Montserrat", sans-serif;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.transparentBG {
+  background-color: transparent !important;
+}
+
+@media only screen and (max-width: 1200px) {
+  .balance {
+    font-size: 14px !important;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  .balance {
+    font-size: 12px !important;
+  }
+}

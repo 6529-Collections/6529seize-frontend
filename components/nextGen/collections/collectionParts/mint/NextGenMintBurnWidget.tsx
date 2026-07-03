@@ -2,7 +2,7 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import styles from "@/components/nextGen/collections/NextGen.module.css";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -11,10 +11,9 @@ import {
 import type {
   CollectionWithMerkle,
   ProofResponse,
-  TokensPerAddress} from "@/components/nextGen/nextgen_entities";
-import {
-  Status
+  TokensPerAddress,
 } from "@/components/nextGen/nextgen_entities";
+import { Status } from "@/components/nextGen/nextgen_entities";
 import {
   getStatusFromDates,
   useMintSharedState,
@@ -270,7 +269,8 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
         onChange={() => {
           setErrors([]);
           setIsMinting(false);
-        }}>
+        }}
+      >
         <div>
           <div>
             <u>Burn Details</u>
@@ -337,7 +337,8 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
             disabled={!tokensOwnedForBurnAddressLoaded}
             className={`${styles["mintSelect"]} tw-form-select tw-block tw-w-full tw-rounded-none`}
             value={tokenId}
-            onChange={(e) => setTokenId(e.currentTarget.value)}>
+            onChange={(e) => setTokenId(e.currentTarget.value)}
+          >
             <option value="" disabled>
               Select Token to burn -{" "}
               {tokensOwnedForBurnAddressLoaded
@@ -357,7 +358,8 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
             type="button"
             className={styles["mintBtn"]}
             disabled={disableMint()}
-            onClick={handleMintClick}>
+            onClick={handleMintClick}
+          >
             {getButtonText()}
             {isMinting && <Spinner />}
           </button>

@@ -3,7 +3,7 @@
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type DragEvent, useRef, useState } from "react";
-import styles from "./MappingTool.module.scss";
+import styles from "./MappingTool.module.css";
 
 interface MappingToolUploadProps {
   readonly fileName?: string | undefined;
@@ -40,12 +40,12 @@ export function MappingToolUpload({
 
   return (
     <>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div className="tw-w-full tw-px-3">
           Upload File <span className="tw-text-iron-400">(.csv)</span>
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-2">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <div className="tw-w-full tw-px-3">
           <button
             type="button"
@@ -101,7 +101,7 @@ export function MappingToolSubmitButton({
   onSubmit,
 }: MappingToolSubmitButtonProps) {
   return (
-    <div className="tw-flex tw-flex-wrap -tw-mx-3 tw-pt-3">
+    <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3">
       <div className="tw-w-full tw-px-3">
         <button
           type="button"

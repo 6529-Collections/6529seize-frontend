@@ -1,0 +1,208 @@
+.modalInput {
+  border: 1px solid rgb(34, 34, 34);
+  border-radius: 0;
+  color: rgb(34, 34, 34) !important;
+}
+
+.modalInput:focus {
+  border-color: black;
+}
+
+.removeWalletBtn {
+  display: inline-flex;
+  width: 15px;
+  cursor: pointer;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  vertical-align: middle;
+}
+
+.shakeWalletInput {
+  animation: shake 0.2s;
+  animation-iteration-count: infinite;
+}
+
+.shakeWalletInput input {
+  border-color: #c51d34 !important;
+}
+
+.shakeWalletInput button {
+  background-color: #c51d34 !important;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+
+  10% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+  }
+
+  20% {
+    transform: translate(-3px, 0) rotate(1deg);
+  }
+
+  30% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+
+  40% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+
+  50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+  }
+
+  60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+  }
+
+  70% {
+    transform: translate(3px, 1px) rotate(-1deg);
+  }
+
+  80% {
+    transform: translate(-1px, -1px) rotate(1deg);
+  }
+
+  90% {
+    transform: translate(1px, 2px) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+  }
+}
+
+.modalButton {
+  border: none !important;
+  border-radius: 0;
+  background-color: rgb(34, 34, 34);
+}
+
+.modalButton:hover,
+.modalButton:active {
+  background-color: black !important;
+}
+
+.modalButtonClear {
+  border-color: rgb(51, 51, 51);
+  border-radius: 0;
+  background-color: transparent;
+  color: rgb(51, 51, 51) !important;
+}
+
+.modalButtonClear:hover {
+  border-color: black !important;
+  background-color: transparent !important;
+  color: black !important;
+}
+
+.modalButtonClear:active,
+.modalButtonClear:disabled {
+  border-color: rgb(154, 154, 154) !important;
+  background-color: rgb(154, 154, 154) !important;
+}
+
+.modalButtonDone {
+  float: right;
+  border-color: rgb(34, 34, 34);
+  border-radius: 0;
+  background-color: rgb(34, 34, 34);
+  color: white;
+}
+
+.modalButtonDone:hover {
+  border-color: rgb(51, 51, 51);
+  background-color: rgb(51, 51, 51);
+}
+
+.noSearchWalletsText {
+  color: rgb(154, 154, 154);
+}
+
+.searchBtn {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  border-radius: 20px;
+  background-color: white !important;
+  padding: 10px;
+  color: black;
+  text-align: center;
+}
+
+.searchBtn:hover {
+  background-color: rgb(215, 215, 215) !important;
+}
+
+.searchBtn:disabled {
+  cursor: not-allowed;
+  background-color: rgb(154, 154, 154) !important;
+}
+
+.searchBtnActive {
+  background-color: rgb(42, 172, 117) !important;
+}
+
+.searchBtnActive:hover,
+.searchBtnActive:active,
+.searchBtnActive:focus {
+  background-color: #208359 !important;
+}
+
+.searchWalletDisplay {
+  margin-right: 10px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  background-color: #333;
+  padding: 5px 10px;
+}
+
+.searchWalletDisplayBtn {
+  width: 30px;
+  cursor: pointer;
+  border-right: 1px solid #999 !important;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  outline: 0 !important;
+  background-color: #333 !important;
+  padding: 3px 5px !important;
+  text-decoration: none !important;
+}
+
+.searchWalletDisplayBtn:hover {
+  background-color: rgb(68, 68, 68) !important;
+}
+
+.searchWalletDisplayBtn:disabled {
+  cursor: not-allowed;
+  background-color: rgb(154, 154, 154) !important;
+}
+
+.clearSearchBtnIcon {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  cursor: pointer;
+  appearance: none;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.clearSearchBtnIcon:hover {
+  color: rgb(154, 154, 154);
+}
+
+.clearSearchBtnIcon:focus {
+  outline: none !important;
+}

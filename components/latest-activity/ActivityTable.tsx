@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./LatestActivity.module.scss";
+import styles from "./LatestActivity.module.css";
 import LatestActivityRow from "./LatestActivityRow";
 import { areEqualAddresses, isNextgenContract } from "@/helpers/Helpers";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";

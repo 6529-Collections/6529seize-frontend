@@ -1,0 +1,61 @@
+.clap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #131316;
+}
+
+.clap::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  content: "";
+}
+
+.clapPositive:hover::after {
+  animation: shockwave-positive 1s ease-in infinite;
+}
+
+.clapNegative:hover::after {
+  animation: shockwave-negative 1s ease-in infinite;
+}
+
+.clapCount {
+  top: -22.5px;
+}
+
+@keyframes shockwave-positive {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 2px rgb(39, 174, 96);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 50px rgb(31, 139, 77),
+      inset 0 0 10px rgb(39, 174, 96);
+    opacity: 0;
+  }
+}
+
+@keyframes shockwave-negative {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 2px rgb(192, 57, 43);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 50px rgb(154, 46, 34),
+      inset 0 0 10px rgb(192, 57, 43);
+    opacity: 0;
+  }
+}

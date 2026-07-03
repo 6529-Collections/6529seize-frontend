@@ -16,7 +16,7 @@ jest.mock("@/components/the-memes/TheMemesMint", () => ({
   ),
 }));
 
-jest.mock("@/styles/Home.module.scss", () => ({ main: "main-class" }));
+jest.mock("@/styles/Home.module.css", () => ({ main: "main-class" }));
 
 describe("StandaloneTheMemesMintPageClient", () => {
   beforeEach(() => {

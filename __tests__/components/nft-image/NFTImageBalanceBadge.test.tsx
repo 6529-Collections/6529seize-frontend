@@ -1,7 +1,7 @@
 import NFTImageBalanceBadge from "@/components/nft-image/NFTImageBalanceBadge";
 import { render, screen } from "@testing-library/react";
 
-jest.mock("@/components/nft-image/NFTImage.module.scss", () => ({
+jest.mock("@/components/nft-image/NFTImage.module.css", () => ({
   balance: "balance",
   balanceBigger: "balanceBigger",
   balanceInline: "balanceInline",

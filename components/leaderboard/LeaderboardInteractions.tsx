@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useState } from "react";
-import styles from "./Leaderboard.module.scss";
+import styles from "./Leaderboard.module.css";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { SortDirection } from "@/entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";

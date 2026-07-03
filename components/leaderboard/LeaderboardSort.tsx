@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SortDirection } from "@/entities/ISort";
-import styles from "./Leaderboard.module.scss";
+import styles from "./Leaderboard.module.css";
 import {
   faSquareCaretDown,
   faSquareCaretUp,

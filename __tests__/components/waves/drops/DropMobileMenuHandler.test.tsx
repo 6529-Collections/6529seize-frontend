@@ -1,4 +1,10 @@
-import { render, fireEvent, act, createEvent } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  act,
+  createEvent,
+  screen,
+} from "@testing-library/react";
 import React from "react";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -131,7 +137,7 @@ test("keeps selection suppression for compact hybrid touch layouts with hover", 
   );
 });
 
-test("opens menu on long press", () => {
+test("opens menu on long press", async () => {
   jest.useFakeTimers();
   const { getByTestId } = render(
     <DropMobileMenuHandler
@@ -149,7 +155,7 @@ test("opens menu on long press", () => {
   act(() => {
     jest.advanceTimersByTime(600);
   });
-  const menu = getByTestId("menu");
+  const menu = await screen.findByTestId("menu");
   expect(menu.dataset.open).toBe("true");
   fireEvent.click(getByTestId("child"));
 });
@@ -206,7 +212,7 @@ test("lets short touch taps click child controls", () => {
   expect(onChildClick).toHaveBeenCalledTimes(1);
 });
 
-test("suppresses the child click after an extended long press opens the menu", () => {
+test("suppresses the child click after an extended long press opens the menu", async () => {
   jest.useFakeTimers();
   const onChildClick = jest.fn();
   const { getByTestId } = render(
@@ -230,11 +236,11 @@ test("suppresses the child click after an extended long press opens the menu", (
   fireEvent.touchEnd(child);
   fireEvent.click(child);
 
-  expect(getByTestId("menu").dataset.open).toBe("true");
+  expect((await screen.findByTestId("menu")).dataset.open).toBe("true");
   expect(onChildClick).not.toHaveBeenCalled();
 });
 
-test("clears an open touch sheet when the layout switches to desktop hover mode", () => {
+test("clears an open touch sheet when the layout switches to desktop hover mode", async () => {
   jest.useFakeTimers();
   const { getByTestId } = render(
     <DropMobileMenuHandler
@@ -254,7 +260,7 @@ test("clears an open touch sheet when the layout switches to desktop hover mode"
     jest.advanceTimersByTime(600);
   });
 
-  expect(getByTestId("menu").dataset.open).toBe("true");
+  expect((await screen.findByTestId("menu")).dataset.open).toBe("true");
 
   setHoverSupport(true);
   act(() => {
@@ -293,8 +299,7 @@ test("does not open menu on desktop-width touch devices with hover", () => {
     jest.advanceTimersByTime(600);
   });
 
-  expect(getByTestId("menu").dataset.open).toBe("false");
-  expect(getByTestId("menu").dataset.longPressTriggered).toBe("false");
+  expect(screen.queryByTestId("menu")).not.toBeInTheDocument();
   expect(getHandlerRoot(getByTestId("child"))).not.toHaveClass(
     TOUCH_ACTION_SHEET_SELECT_NONE_CLASS
   );

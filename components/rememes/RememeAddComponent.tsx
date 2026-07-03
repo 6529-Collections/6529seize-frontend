@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
 import type { Nft, NftContract } from "./alchemy-sdk-types";
-import styles from "./Rememes.module.scss";
+import styles from "./Rememes.module.css";
 
 export interface ProcessedRememe {
   valid: boolean;

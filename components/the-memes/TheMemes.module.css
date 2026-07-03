@@ -1,0 +1,444 @@
+.main {
+  min-height: 100vh;
+}
+
+.mainContainer {
+  background-color: rgb(34, 34, 34);
+  min-height: calc(100vh - 100px);
+  padding-bottom: 20px;
+}
+
+.tab {
+  padding: 0;
+}
+
+.hodlersTableLive {
+  margin-bottom: 0;
+}
+
+.hodlersTableLive > :not(caption) > * > * {
+  padding: 0.1rem 0.1rem;
+}
+
+.marketplace {
+  margin-right: 15px;
+}
+
+.marketplace:hover {
+  opacity: 0.75;
+}
+
+.theArtImage {
+  max-width: 100%;
+  max-height: 800px;
+}
+
+.sort {
+  color: white;
+  cursor: pointer;
+  margin-right: 15px;
+  text-decoration: none;
+}
+.sort:hover {
+  color: white !important;
+}
+
+.sortDirection:hover {
+  color: rgb(215, 215, 215);
+}
+
+.disabled {
+  color: rgb(154, 154, 154);
+  text-decoration: none;
+}
+.disabled:hover {
+  color: white;
+}
+
+.artHeader {
+  position: relative;
+  padding: 1rem 0;
+  z-index: 1;
+}
+
+.artHeaderContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 1rem;
+  position: relative;
+}
+
+.artFormatLabel {
+  flex: 1;
+  text-align: center;
+  color: white;
+}
+
+.artControls {
+  position: relative;
+  padding: 0.5rem 0 0;
+  z-index: 1;
+}
+
+.artControlsContent {
+  position: relative;
+  display: flex;
+  min-height: 2.5rem;
+  column-gap: 1rem;
+  align-items: center;
+  padding: 0;
+}
+
+.artControlsBalance {
+  display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  align-items: center;
+}
+
+.artControlsCenter {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.375rem;
+  height: 2.25rem;
+  padding: 0;
+  background-color: transparent;
+}
+
+.artControlsCenterWithBalance {
+  margin-left: auto;
+}
+
+.artControlsCenterGrouped {
+  gap: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(19, 19, 22, 0.9);
+  box-shadow:
+    inset 0 0 0 1px rgba(55, 55, 62, 0.6),
+    0 10px 15px -3px rgba(0, 0, 0, 0.2),
+    0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+.artControlsFormatLabel {
+  display: inline-flex;
+  min-width: 3.25rem;
+  height: 1.625rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(30, 30, 30);
+  border-radius: 4px;
+  background: transparent;
+  color: rgb(154, 154, 154);
+  padding: 0 0.5rem;
+  text-align: center;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.artControlsCenterGrouped .artControlsFormatLabel {
+  width: 2.25rem;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 0;
+  color: #efeff1;
+  padding: 0;
+}
+
+.artSlideButton {
+  display: flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #efeff1;
+  padding: 0;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+.artSlideButton:hover:not(:disabled) {
+  background-color: #37373e;
+  color: #efeff1;
+}
+.artSlideButton:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.artSlideIcon {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.memePageTab {
+  color: rgb(179, 179, 179);
+  margin-right: 15px;
+  cursor: pointer;
+}
+.memePageTab:hover {
+  color: white;
+}
+
+.memePageTabActive {
+  color: white;
+}
+
+@media only screen and (max-width: 450px) {
+  .arweaveLink {
+    font-size: 8px;
+  }
+}
+.memesCarousel {
+  position: relative;
+  z-index: 2;
+  height: clamp(360px, 58vw, 650px);
+  overflow: hidden;
+}
+
+.memesCarousel [data-carousel-slide] > * {
+  height: 100%;
+  max-height: 100% !important;
+}
+
+.memesCarousel [data-carousel-slide] iframe,
+.memesCarousel [data-carousel-slide] video,
+.memesCarousel [data-carousel-slide] model-viewer {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+.memesCarousel [data-carousel-slide] img {
+  max-height: 100% !important;
+}
+
+.rankSubheading {
+  color: white !important;
+}
+
+.hodlersTable td {
+  width: 50%;
+}
+
+.overviewColumn {
+  font-size: larger;
+  font-weight: bold;
+}
+
+.overviewColumnNote {
+  font-size: smaller;
+  font-weight: lighter;
+}
+
+.activityFilterDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+}
+.activityFilterDropdown a {
+  line-height: 30px;
+}
+.activityFilterDropdown button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  cursor: copy;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.activityFilterDropdown button::after {
+  margin-top: 0.8rem;
+}
+.activityFilterDropdown div {
+  width: 80%;
+}
+
+@media only screen and (max-width: 800px) {
+  .activityFilterDropdown button::after {
+    margin-top: 0.5rem;
+  }
+}
+.tabFocus {
+  float: left;
+  white-space: nowrap;
+  cursor: pointer;
+  margin-right: 20px;
+  color: rgb(154, 154, 154);
+  text-decoration: none;
+}
+.tabFocus:hover {
+  color: white;
+}
+
+.tabFocusActive {
+  color: white !important;
+}
+
+.nftImagePadding {
+  padding-bottom: 35px;
+}
+
+.volumeDropdown {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  display: inline-block;
+}
+.volumeDropdown a {
+  line-height: 30px;
+}
+.volumeDropdown button {
+  color: rgb(154, 154, 154) !important;
+  font-size: inherit;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.volumeDropdown button::after {
+  margin-top: 0.8rem;
+}
+.volumeDropdown div {
+  width: 60%;
+}
+
+@media only screen and (max-width: 800px) {
+  .volumeDropdown button::after {
+    margin-top: 0.5rem;
+  }
+}
+.volumeDropdownEnabled button {
+  color: white !important;
+}
+
+.leaderboardNavigationLeft {
+  text-align: left;
+}
+
+.leaderboardNavigationRight {
+  text-align: right;
+}
+
+@media only screen and (max-width: 767px) {
+  .leaderboardNavigationLeft,
+  .leaderboardNavigationRight {
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+.nftImageWrapper {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.seasonDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 25px;
+}
+.seasonDropdown a {
+  line-height: 30px;
+}
+.seasonDropdown button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  cursor: copy;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.seasonDropdown button::after {
+  margin-top: 0.8rem;
+}
+.seasonDropdown div {
+  width: 60%;
+}
+
+@media only screen and (max-width: 800px) {
+  .seasonDropdown button::after {
+    margin-top: 0.5rem;
+  }
+}
+.viewAllLink {
+  font-size: 15px !important;
+  font-family: "Montserrat", sans-serif;
+  font-weight: lighter;
+  margin-left: 15px;
+}
+@media only screen and (max-width: 800px) {
+  .viewAllLink {
+    font-size: 12px !important;
+  }
+}
+
+.buttonIcon {
+  width: 30px;
+  cursor: pointer;
+}
+.buttonIcon:hover {
+  opacity: 0.75;
+}
+@media only screen and (max-width: 1200px) {
+  .buttonIcon {
+    width: 26px;
+  }
+}
+@media only screen and (max-width: 800px) {
+  .buttonIcon {
+    width: 22px;
+  }
+}
+
+.rememesSortDropdown {
+  line-height: 48px;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  padding-right: 25px;
+}
+.rememesSortDropdown a,
+.rememesSortDropdown > button {
+  line-height: 30px;
+}
+.rememesSortDropdown > button {
+  font-size: larger !important;
+  font-weight: bolder !important;
+  cursor: copy;
+  padding: 0;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.rememesSortDropdown > button::after {
+  margin-top: 0.8rem;
+}
+.rememesSortDropdown div {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+@media only screen and (max-width: 800px) {
+  .rememesSortDropdown button::after {
+    margin-top: 0.5rem;
+  }
+}

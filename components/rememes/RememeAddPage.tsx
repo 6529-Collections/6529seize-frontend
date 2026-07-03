@@ -28,7 +28,7 @@ import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import type { ProcessedRememe } from "./RememeAddComponent";
 import RememeAddComponent from "./RememeAddComponent";
-import styles from "./Rememes.module.scss";
+import styles from "./Rememes.module.css";
 
 interface CheckList {
   status: boolean;

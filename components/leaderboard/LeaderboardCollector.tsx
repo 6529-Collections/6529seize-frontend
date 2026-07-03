@@ -4,7 +4,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import Image from "next/image";
-import styles from "./Leaderboard.module.scss";
+import styles from "./Leaderboard.module.css";
 
 export function LeaderboardCollector(
   props: Readonly<{

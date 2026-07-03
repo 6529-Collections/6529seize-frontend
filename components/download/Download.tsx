@@ -2,7 +2,6 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "@/hooks/useDownloader";
-import styles from "./Download.module.scss";
 import {
   faDownload,
   faXmarkCircle,
@@ -238,7 +237,7 @@ export default function Download(props: Readonly<Props>) {
   }, []);
 
   return (
-    <div className={`${styles["download"]} ${props.className ?? ""}`}>
+    <div className={`tw-inline-block ${props.className ?? ""}`}>
       <DownloadContent
         alwaysShowText={props.alwaysShowText}
         isCompleted={isCompleted}

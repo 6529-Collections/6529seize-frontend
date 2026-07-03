@@ -8,7 +8,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import styles from "./Pagination.module.scss";
 
 interface Props {
   page: number;
@@ -23,6 +22,15 @@ export interface Paginated<T> {
   next: any;
   data: T[];
 }
+
+const ICON_BUTTON_CLASS =
+  "tw-inline-flex tw-w-[14px] tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit tw-[font:inherit] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-[#528bff] disabled:tw-cursor-default";
+const ICON_ENABLED_CLASS = "tw-cursor-pointer";
+const ICON_DISABLED_CLASS = "tw-cursor-default tw-opacity-60";
+const GO_TO_LAST_CLASS =
+  "tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit tw-[font:inherit] hover:tw-text-[rgb(179,179,179)] hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-[#528bff] disabled:tw-cursor-default disabled:tw-text-inherit disabled:tw-no-underline";
+const PAGE_INPUT_CLASS =
+  "tw-w-[35px] tw-border-0 tw-border-b tw-border-solid tw-border-white tw-bg-transparent tw-text-center";
 
 export default function Pagination(props: Readonly<Props>) {
   const [inputPage, setInputPage] = useState<string>(props.page.toString());
@@ -81,17 +89,18 @@ export default function Pagination(props: Readonly<Props>) {
           <button
             type="button"
             onClick={pagePrevious}
-            className={`${styles["iconButton"]} ${
-              props.page > 1 ? styles["iconEnabled"] : styles["iconDisabled"]
+            className={`${ICON_BUTTON_CLASS} ${
+              props.page > 1 ? ICON_ENABLED_CLASS : ICON_DISABLED_CLASS
             }`}
             aria-label="Previous page"
-            disabled={props.page <= 1}>
+            disabled={props.page <= 1}
+          >
             <FontAwesomeIcon icon={faCaretLeft} />
           </button>
           <input
             id="page-number"
             type="text"
-            className={styles["pageInput"]}
+            className={PAGE_INPUT_CLASS}
             onKeyDown={enterValue}
             onChange={setValue}
             value={inputPage}
@@ -101,19 +110,21 @@ export default function Pagination(props: Readonly<Props>) {
           <button
             type="button"
             onClick={goToLast}
-            className={styles["goToLast"]}
+            className={GO_TO_LAST_CLASS}
             aria-label="Go to last page"
-            disabled={isLastPage()}>
+            disabled={isLastPage()}
+          >
             {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
           </button>
           <button
             type="button"
             onClick={pageNext}
-            className={`${styles["iconButton"]} ${
-              isLastPage() ? styles["iconDisabled"] : styles["iconEnabled"]
+            className={`${ICON_BUTTON_CLASS} ${
+              isLastPage() ? ICON_DISABLED_CLASS : ICON_ENABLED_CLASS
             }`}
             aria-label="Next page"
-            disabled={isLastPage()}>
+            disabled={isLastPage()}
+          >
             <FontAwesomeIcon icon={faCaretRight} />
           </button>
         </span>

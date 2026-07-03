@@ -1757,7 +1757,9 @@ function hasThirdPartyWalletLinkWebSocket1006Evidence(
 }
 
 function isWalletConnectStaleSessionTopicMessage(value: string): boolean {
-  return walletConnectStaleSessionTopicPattern.test(normalizeErrorPrefix(value));
+  return walletConnectStaleSessionTopicPattern.test(
+    normalizeErrorPrefix(value)
+  );
 }
 
 function hasWalletConnectStaleSessionFrame(
