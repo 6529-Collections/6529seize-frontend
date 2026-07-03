@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint promise/prefer-await-to-callbacks: "off" -- Browser paint scheduling APIs are callback-based. */
+
 import { useEffect, useState } from "react";
 
 export function useFirstVisibleDropsPainted(hasVisibleDrops: boolean): boolean {
@@ -13,10 +15,8 @@ export function useFirstVisibleDropsPainted(hasVisibleDrops: boolean): boolean {
     const requestFrame =
       typeof window.requestAnimationFrame === "function"
         ? window.requestAnimationFrame.bind(window)
-        : // eslint-disable-next-line promise/prefer-await-to-callbacks -- Browser frame scheduling is callback-based.
-          (callback: FrameRequestCallback) =>
+        : (callback: FrameRequestCallback) =>
             window.setTimeout(() => {
-              // eslint-disable-next-line promise/prefer-await-to-callbacks -- Browser frame scheduling is callback-based.
               callback(performance.now());
             }, 16);
     const cancelFrame =

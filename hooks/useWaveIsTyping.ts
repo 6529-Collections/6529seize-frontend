@@ -57,7 +57,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
 const isTypingProfile = (value: unknown): value is TypingProfile =>
-  isRecord(value) && typeof value["handle"] === "string";
+  isRecord(value) &&
+  typeof value["handle"] === "string" &&
+  typeof value["level"] === "number";
 
 type ValidWsTypingMessage = WsTypingMessage & {
   readonly data: WsTypingMessage["data"] & {
@@ -142,7 +144,10 @@ export function useWaveIsTyping(
         return;
       }
       if (isWsDropUpdateMessage(msg)) {
-        typersRef.current.delete(msg.data.author.handle);
+        const authorHandle = msg.data.author.handle;
+        if (authorHandle) {
+          typersRef.current.delete(authorHandle);
+        }
       }
       if (!isWsTypingMessage(msg)) return;
       const data = msg.data;
