@@ -50,6 +50,7 @@
 // Tooltip content - dark theme optimized
 .tooltipContent {
   position: relative;
+  z-index: 1;
   background: #131316;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
@@ -98,6 +99,7 @@
 // Arrow styles - proper triangular arrows using CSS borders
 .tooltipArrow {
   position: absolute;
+  z-index: 2;
   width: 0;
   height: 0;
   pointer-events: none;
@@ -187,6 +189,37 @@
   }
 }
 
+.tooltipArrowBridge {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  background: #131316;
+
+  &--top {
+    bottom: -1px;
+    width: 14px;
+    height: 2px;
+  }
+
+  &--bottom {
+    top: -1px;
+    width: 14px;
+    height: 2px;
+  }
+
+  &--left {
+    right: -1px;
+    width: 2px;
+    height: 14px;
+  }
+
+  &--right {
+    left: -1px;
+    width: 2px;
+    height: 14px;
+  }
+}
+
 // Responsive adjustments - maintaining Montserrat readability
 @media (max-width: 768px) {
   .tooltipContent {
@@ -254,6 +287,18 @@
       }
     }
   }
+
+  .tooltipArrowBridge {
+    &--top,
+    &--bottom {
+      width: 12px;
+    }
+
+    &--left,
+    &--right {
+      height: 12px;
+    }
+  }
 }
 
 // High contrast mode
@@ -293,5 +338,9 @@
         border-right-color: #000;
       }
     }
+  }
+
+  .tooltipArrowBridge {
+    background: #000;
   }
 }

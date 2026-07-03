@@ -1,6 +1,6 @@
 "use client";
 
-import type { RefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
 import React, {
   useCallback,
   useEffect,
@@ -410,6 +410,17 @@ export default function CustomTooltip({
     };
   }, [closeTooltipImmediately]);
 
+  const arrowStyle: CSSProperties =
+    actualPlacement === "top" || actualPlacement === "bottom"
+      ? {
+          left: `${arrowPosition.x}px`,
+          transform: "translateX(-50%)",
+        }
+      : {
+          top: `${arrowPosition.y}px`,
+          transform: "translateY(-50%)",
+        };
+
   return (
     <>
       <span
@@ -445,21 +456,17 @@ export default function CustomTooltip({
             <div className={styles["tooltipContent"]}>{content}</div>
             <div
               className={joinTooltipClassNames(
+                styles["tooltipArrowBridge"],
+                styles["tooltipArrowBridge--" + actualPlacement]
+              )}
+              style={arrowStyle}
+            />
+            <div
+              className={joinTooltipClassNames(
                 styles["tooltipArrow"],
                 styles["tooltipArrow--" + actualPlacement]
               )}
-              style={{
-                ...((actualPlacement === "top" ||
-                  actualPlacement === "bottom") && {
-                  left: `${arrowPosition.x}px`,
-                  transform: "translateX(-50%)",
-                }),
-                ...((actualPlacement === "left" ||
-                  actualPlacement === "right") && {
-                  top: `${arrowPosition.y}px`,
-                  transform: "translateY(-50%)",
-                }),
-              }}
+              style={arrowStyle}
             />
           </div>,
           document.body

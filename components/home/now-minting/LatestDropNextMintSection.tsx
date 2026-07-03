@@ -103,7 +103,7 @@ export default function LatestDropNextMintSection({
           <div className="tw-p-5 md:tw-p-6 lg:tw-col-span-6 xl:tw-col-span-4">
             <div className="tw-flex tw-flex-col tw-gap-5">
               <div className="tw-flex tw-flex-col">
-                <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                   <div className="tw-flex tw-items-center tw-gap-2">
                     <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
                     <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-emerald-400">
@@ -128,7 +128,7 @@ export default function LatestDropNextMintSection({
                   </p>
                 )}
 
-                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                   {media?.mime_type && (
                     <MediaTypeBadge
                       mimeType={media.mime_type}

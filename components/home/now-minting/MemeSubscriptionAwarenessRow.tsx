@@ -34,7 +34,7 @@ function ReadonlySubscriptionToggle({
       <span
         role="img"
         aria-label={tooltipLabel}
-        className="tw-inline-flex tw-shrink-0 tw-cursor-help tw-rounded-full"
+        className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full"
       >
         <span
           aria-hidden="true"
