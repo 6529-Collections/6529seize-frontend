@@ -30,6 +30,7 @@ interface CustomTooltipProps {
   readonly disabled?: boolean | undefined;
   readonly offset?: number | undefined;
   readonly hoverTransitionDelay?: number | undefined;
+  readonly showArrow?: boolean | undefined;
 }
 
 const ARIA_DESCRIBED_BY_ATTRIBUTE = "aria-describedby";
@@ -81,6 +82,7 @@ export default function CustomTooltip({
   disabled = false,
   offset = 8,
   hoverTransitionDelay = 150,
+  showArrow = true,
 }: CustomTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState<TooltipCoordinates>({ x: 0, y: 0 });
@@ -454,20 +456,24 @@ export default function CustomTooltip({
             }}
           >
             <div className={styles["tooltipContent"]}>{content}</div>
-            <div
-              className={joinTooltipClassNames(
-                styles["tooltipArrowBridge"],
-                styles["tooltipArrowBridge--" + actualPlacement]
-              )}
-              style={arrowStyle}
-            />
-            <div
-              className={joinTooltipClassNames(
-                styles["tooltipArrow"],
-                styles["tooltipArrow--" + actualPlacement]
-              )}
-              style={arrowStyle}
-            />
+            {showArrow && (
+              <>
+                <div
+                  className={joinTooltipClassNames(
+                    styles["tooltipArrowBridge"],
+                    styles["tooltipArrowBridge--" + actualPlacement]
+                  )}
+                  style={arrowStyle}
+                />
+                <div
+                  className={joinTooltipClassNames(
+                    styles["tooltipArrow"],
+                    styles["tooltipArrow--" + actualPlacement]
+                  )}
+                  style={arrowStyle}
+                />
+              </>
+            )}
           </div>,
           document.body
         )}

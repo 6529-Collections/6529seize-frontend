@@ -344,6 +344,7 @@ describe("About contents dropdown", () => {
 
   it("routes to profile subscriptions after connecting from subscriptions action", async () => {
     setCookieCountry("US");
+    const requestAuth = jest.fn(async () => ({ success: true }));
     const setToast = jest.fn();
     const renderButton = (
       connectedProfile: unknown,
@@ -354,6 +355,7 @@ describe("About contents dropdown", () => {
           {
             connectedProfile,
             isAuthenticated,
+            requestAuth,
             setToast,
           } as any
         }
@@ -383,27 +385,15 @@ describe("About contents dropdown", () => {
       )
     );
 
-    expect(mockRouterPush).not.toHaveBeenCalled();
-
-    rerender(
-      renderButton(
-        {
-          handle: "test-handle",
-          normalised_handle: "test-handle",
-          primary_wallet: "0x123",
-          wallets: [],
-        },
-        true
-      )
-    );
-
     await waitFor(() => {
+      expect(requestAuth).toHaveBeenCalledTimes(1);
       expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
     });
   });
 
   it("preserves subscriptions redirect through connect/auth remounts", async () => {
     setCookieCountry("US");
+    const requestAuth = jest.fn(async () => ({ success: true }));
     const setToast = jest.fn();
     const connectedProfile = {
       handle: "test-handle",
@@ -420,6 +410,7 @@ describe("About contents dropdown", () => {
           {
             connectedProfile: connectedProfileValue,
             isAuthenticated,
+            requestAuth,
             setToast,
           } as any
         }
@@ -439,12 +430,10 @@ describe("About contents dropdown", () => {
     );
     firstRender.unmount();
 
-    const { rerender } = render(renderButton(connectedProfile, false));
-    expect(mockRouterPush).not.toHaveBeenCalled();
-
-    rerender(renderButton(connectedProfile, true));
+    render(renderButton(connectedProfile, false));
 
     await waitFor(() => {
+      expect(requestAuth).toHaveBeenCalledTimes(1);
       expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
     });
   });

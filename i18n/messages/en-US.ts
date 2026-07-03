@@ -805,8 +805,10 @@ export const EN_US_MESSAGES = {
     "Connect to set up subscription minting.",
   "home.mintSubscriptions.tooltip.dropped":
     "Subscription minting is closed for this drop.",
-  "home.mintSubscriptions.tooltip.manage":
-    "You are subscribed for x{count} for this drop.",
+  "home.mintSubscriptions.tooltip.manage.one":
+    "You are subscribed for x{count} copy of this drop.",
+  "home.mintSubscriptions.tooltip.manage.many":
+    "You are subscribed for x{count} copies of this drop.",
   "home.mintSubscriptions.tooltip.manageFallback":
     "You are subscribed for this drop.",
   "home.mintSubscriptions.tooltip.mintDay":

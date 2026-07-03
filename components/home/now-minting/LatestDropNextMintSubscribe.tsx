@@ -12,8 +12,6 @@ import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptio
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiUpcomingMemeSubscriptionStatus } from "@/generated/models/ApiUpcomingMemeSubscriptionStatus";
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
-import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
-import type { RedeemedSubscriptionCountsPage } from "@/generated/models/RedeemedSubscriptionCountsPage";
 import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -25,18 +23,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import MemeSubscriptionAwarenessRow from "./MemeSubscriptionAwarenessRow";
 
-type SubscriptionTooltipKey = Extract<
-  MessageKey,
-  | "home.mintSubscriptions.tooltip.connect"
-  | "home.mintSubscriptions.tooltip.dropped"
-  | "home.mintSubscriptions.tooltip.manage"
-  | "home.mintSubscriptions.tooltip.mintDay"
-  | "home.mintSubscriptions.tooltip.profileSubscribe"
-  | "home.mintSubscriptions.tooltip.proxy"
->;
+type SubscriptionTooltipKey =
+  | Extract<
+      MessageKey,
+      | "home.mintSubscriptions.tooltip.connect"
+      | "home.mintSubscriptions.tooltip.dropped"
+      | "home.mintSubscriptions.tooltip.mintDay"
+      | "home.mintSubscriptions.tooltip.profileSubscribe"
+      | "home.mintSubscriptions.tooltip.proxy"
+    >
+  | "manage";
 type SubscriptionStatusSource = "none" | "upcoming";
-
-const REDEEMED_COUNTS_PAGE_SIZE = 50;
 
 function getProfileKey(
   connectedProfile: ApiIdentity | null
@@ -69,7 +66,7 @@ function getToggleTooltipKey({
   }
 
   if (subscribed) {
-    return "home.mintSubscriptions.tooltip.manage";
+    return "manage";
   }
 
   if (isUpcoming && isMintingDay) {
@@ -109,54 +106,28 @@ function getToggleTooltipLabel({
   });
 
   if (
-    key === "home.mintSubscriptions.tooltip.manage" &&
+    key === "manage" &&
     typeof subscribedCount === "number" &&
     Number.isFinite(subscribedCount) &&
     subscribedCount > 0
   ) {
-    return t(locale, key, {
+    const manageTooltipKey: MessageKey =
+      subscribedCount === 1
+        ? "home.mintSubscriptions.tooltip.manage.one"
+        : "home.mintSubscriptions.tooltip.manage.many";
+
+    return t(locale, manageTooltipKey, {
       count: formatNumber(locale, subscribedCount, {
         maximumFractionDigits: 0,
       }),
     });
   }
 
-  if (key === "home.mintSubscriptions.tooltip.manage") {
+  if (key === "manage") {
     return t(locale, "home.mintSubscriptions.tooltip.manageFallback");
   }
 
   return t(locale, key);
-}
-
-async function fetchRedeemedSubscriptionCountForToken(
-  tokenId: number,
-  signal: AbortSignal
-): Promise<RedeemedSubscriptionCounts | undefined> {
-  let page = 1;
-
-  while (true) {
-    const response = await commonApiFetch<RedeemedSubscriptionCountsPage>({
-      endpoint: "subscriptions/redeemed-memes-counts",
-      params: {
-        page_size: REDEEMED_COUNTS_PAGE_SIZE.toString(),
-        page: page.toString(),
-      },
-      signal,
-    });
-    const matchingCount = response.data.find(
-      (count) => count.token_id === tokenId
-    );
-
-    if (matchingCount) {
-      return matchingCount;
-    }
-
-    if (!response.next || response.data.length === 0) {
-      return undefined;
-    }
-
-    page += 1;
-  }
 }
 
 export default function LatestDropNextMintSubscribe(
@@ -225,19 +196,9 @@ export default function LatestDropNextMintSubscribe(
     queryKey: ["mint-subscription-counts", "upcoming", tokenId],
     queryFn: async () =>
       await commonApiFetch<SubscriptionCounts[]>({
-        endpoint: "subscriptions/upcoming-memes-counts?card_count=1",
+        endpoint: `subscriptions/upcoming-memes-counts?token_id=${tokenId}`,
       }),
-    enabled: !hideSubscriptions && hasTokenId && shouldQueryUpcomingStatus,
-    retry: false,
-  });
-
-  const { data: redeemedCount, isLoading: redeemedCountsLoading } = useQuery<
-    RedeemedSubscriptionCounts | undefined
-  >({
-    queryKey: ["mint-subscription-counts", "redeemed", tokenId],
-    queryFn: async ({ signal }) =>
-      await fetchRedeemedSubscriptionCountForToken(tokenId, signal),
-    enabled: !hideSubscriptions && hasTokenId && !shouldQueryUpcomingStatus,
+    enabled: !hideSubscriptions && hasTokenId,
     retry: false,
   });
 
@@ -253,20 +214,9 @@ export default function LatestDropNextMintSubscribe(
     }
   }
   const subscribersCount = useMemo(() => {
-    if (!shouldQueryUpcomingStatus) {
-      return redeemedCount?.count;
-    }
-
     return upcomingCounts?.find((count) => count.token_id === tokenId)?.count;
-  }, [
-    redeemedCount?.count,
-    shouldQueryUpcomingStatus,
-    tokenId,
-    upcomingCounts,
-  ]);
-  const subscribersCountLoading = shouldQueryUpcomingStatus
-    ? !!upcomingCountsLoading
-    : !!redeemedCountsLoading;
+  }, [tokenId, upcomingCounts]);
+  const subscribersCountLoading = !!upcomingCountsLoading;
   const tooltipLabel = getToggleTooltipLabel({
     activeProfileProxy: !!activeProfileProxy,
     isMintingDay,

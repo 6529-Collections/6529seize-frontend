@@ -185,27 +185,14 @@ export function useProfileSubscriptionsNavigation() {
     ]
   );
 
-  const navigateAfterAuthenticatedConnect = useCallback(
-    (href: string): void => {
-      clearPendingNavigation();
-      router.push(href);
-    },
-    [clearPendingNavigation, router]
-  );
-
   useEffect(() => {
-    if (
-      !shouldNavigateAfterConnect ||
-      !profileSubscriptionsHref ||
-      !isAuthenticated
-    ) {
+    if (!shouldNavigateAfterConnect || !profileSubscriptionsHref) {
       return;
     }
 
-    navigateAfterAuthenticatedConnect(profileSubscriptionsHref);
+    void authenticateAndNavigate(profileSubscriptionsHref);
   }, [
-    isAuthenticated,
-    navigateAfterAuthenticatedConnect,
+    authenticateAndNavigate,
     profileSubscriptionsHref,
     shouldNavigateAfterConnect,
   ]);

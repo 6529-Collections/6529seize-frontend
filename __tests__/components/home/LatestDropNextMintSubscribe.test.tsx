@@ -100,7 +100,7 @@ describe("LatestDropNextMintSubscribe", () => {
           data: {
             subscribed: true,
             eligibility: 3,
-            count: 2,
+            count: 1,
           },
         };
       }
@@ -119,16 +119,12 @@ describe("LatestDropNextMintSubscribe", () => {
         queryKey[1] === "upcoming"
       ) {
         return {
-          data: [{ token_id: 478, count: 12 }],
-        };
-      }
-
-      if (
-        queryKey[0] === "mint-subscription-counts" &&
-        queryKey[1] === "redeemed"
-      ) {
-        return {
-          data: { token_id: 516, count: 9 },
+          data: [
+            {
+              token_id: queryKey[2],
+              count: queryKey[2] === 516 ? 13 : 12,
+            },
+          ],
         };
       }
 
@@ -148,10 +144,10 @@ describe("LatestDropNextMintSubscribe", () => {
 
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
     expect(screen.getByText("x12 subscribers")).toBeInTheDocument();
-    expect(screen.getByText("x2")).toBeInTheDocument();
+    expect(screen.getByText("x1")).toBeInTheDocument();
     expectReadonlySubscriptionToggle(
       container,
-      "You are subscribed for x2 for this drop.",
+      "You are subscribed for x1 copy of this drop.",
       true
     );
     expect(screen.queryByText("Balance")).not.toBeInTheDocument();
@@ -215,13 +211,13 @@ describe("LatestDropNextMintSubscribe", () => {
     ).toHaveAttribute("href", "/about/subscriptions");
   });
 
-  it("renders connected dropped awareness without upcoming status lookup when status source is none", () => {
+  it("renders connected dropped awareness without upcoming status lookup when status source is none", async () => {
     const { container } = renderWithAuth(
       <LatestDropNextMintSubscribe tokenId={516} statusSource="none" />
     );
 
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
-    expect(screen.getByText("x9 subscribers")).toBeInTheDocument();
+    expect(screen.getByText("x13 subscribers")).toBeInTheDocument();
     expect(
       screen.queryByText("Cannot change active drops")
     ).not.toBeInTheDocument();
@@ -246,60 +242,29 @@ describe("LatestDropNextMintSubscribe", () => {
     );
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ["mint-subscription-counts", "redeemed", 516],
+        queryKey: ["mint-subscription-counts", "upcoming", 516],
       })
     );
-  });
-
-  it("fetches additional redeemed count pages until the token is found", async () => {
-    renderWithAuth(
-      <LatestDropNextMintSubscribe tokenId={516} statusSource="none" />
-    );
-    const redeemedCountsQuery = useQueryMock.mock.calls.find(([options]) => {
+    const countsQuery = useQueryMock.mock.calls.find(([options]) => {
       const queryKey = options.queryKey;
       return (
-        queryKey[0] === "mint-subscription-counts" && queryKey[1] === "redeemed"
+        queryKey[0] === "mint-subscription-counts" &&
+        queryKey[1] === "upcoming" &&
+        queryKey[2] === 516
       );
     })?.[0] as
       | { queryFn: (context: { signal: AbortSignal }) => Promise<unknown> }
       | undefined;
-    expect(redeemedCountsQuery).toBeDefined();
+    expect(countsQuery).toBeDefined();
 
-    commonApiFetchMock
-      .mockResolvedValueOnce({
-        data: [{ token_id: 515, count: 4 }],
-        count: 2,
-        page: 1,
-        next: "/api/subscriptions/redeemed-memes-counts?page=2",
-      })
-      .mockResolvedValueOnce({
-        data: [{ token_id: 516, count: 9 }],
-        count: 2,
-        page: 2,
-        next: null,
-      });
+    commonApiFetchMock.mockResolvedValueOnce([{ token_id: 516, count: 13 }]);
 
     await expect(
-      redeemedCountsQuery?.queryFn({ signal: new AbortController().signal })
-    ).resolves.toEqual({ token_id: 516, count: 9 });
-    expect(commonApiFetchMock).toHaveBeenNthCalledWith(
-      1,
+      countsQuery?.queryFn({ signal: new AbortController().signal })
+    ).resolves.toEqual([{ token_id: 516, count: 13 }]);
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        endpoint: "subscriptions/redeemed-memes-counts",
-        params: {
-          page_size: "50",
-          page: "1",
-        },
-      })
-    );
-    expect(commonApiFetchMock).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        endpoint: "subscriptions/redeemed-memes-counts",
-        params: {
-          page_size: "50",
-          page: "2",
-        },
+        endpoint: "subscriptions/upcoming-memes-counts?token_id=516",
       })
     );
   });
@@ -317,15 +282,6 @@ describe("LatestDropNextMintSubscribe", () => {
         };
       }
 
-      if (
-        queryKey[0] === "mint-subscription-counts" &&
-        queryKey[1] === "redeemed"
-      ) {
-        return {
-          data: { token_id: 516, count: 9 },
-        };
-      }
-
       return {
         data: null,
       };
@@ -339,7 +295,7 @@ describe("LatestDropNextMintSubscribe", () => {
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
     expectReadonlySubscriptionToggle(
       container,
-      "You are subscribed for x3 for this drop.",
+      "You are subscribed for x3 copies of this drop.",
       true
     );
   });

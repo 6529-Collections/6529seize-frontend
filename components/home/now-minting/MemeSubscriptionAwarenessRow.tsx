@@ -31,6 +31,7 @@ function ReadonlySubscriptionToggle({
         placement="top"
         delayShow={150}
         offset={12}
+        showArrow={false}
       >
         <span className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full">
           <span
