@@ -24,19 +24,20 @@ const defaultConnectedProfile = {
 
 export const createMockAuthContext = (
   overrides: Partial<AuthContextType> = {}
-): AuthContextType => ({
-  connectedProfile: defaultConnectedProfile,
-  isAuthenticated: true,
-  fetchingProfile: false,
-  connectionStatus: "CONNECTED" as any,
-  receivedProfileProxies: [],
-  activeProfileProxy: null,
-  showWaves: false,
-  requestAuth: jest.fn(async () => ({ success: false })),
-  setToast: jest.fn(),
-  setActiveProfileProxy: jest.fn(async () => {}),
-  ...overrides,
-} as unknown as AuthContextType);
+): AuthContextType =>
+  ({
+    connectedProfile: defaultConnectedProfile,
+    isAuthenticated: true,
+    fetchingProfile: false,
+    connectionStatus: "CONNECTED" as any,
+    receivedProfileProxies: [],
+    activeProfileProxy: null,
+    showWaves: false,
+    requestAuth: jest.fn(async () => ({ success: false })),
+    setToast: jest.fn(),
+    setActiveProfileProxy: jest.fn(async () => {}),
+    ...overrides,
+  }) as unknown as AuthContextType;
 
 export const renderWithAuth = (
   component: React.ReactElement,

@@ -32,7 +32,8 @@ function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
 ): string | undefined {
   return (
-    profile?.consolidation_key ?? profile?.wallets?.map((w) => w.wallet).join("-")
+    profile?.consolidation_key ??
+    profile?.wallets?.map((w) => w.wallet).join("-")
   );
 }
 
@@ -255,14 +256,14 @@ export default function UserPageSubscriptions(
                 <h4 className="tw-mb-0 tw-font-semibold">Subscribe</h4>
                 <Link
                   href="/about/subscriptions"
-                  className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-border-primary-400/50 desktop-hover:hover:tw-bg-primary-500/10 desktop-hover:hover:tw-text-primary-200"
+                  className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-border-primary-400/50 desktop-hover:hover:tw-bg-primary-500/10"
                 >
                   Learn More
                   <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
                 </Link>
               </div>
             </div>
-            <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />
+            <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
             <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2">
               <div className="tw-pb-4">
                 <UserPageSubscriptionsBalance
