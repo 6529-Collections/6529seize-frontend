@@ -27,6 +27,7 @@ import {
   WAVE_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
+import { formatSlowModeInterval } from "@/helpers/waves/slow-mode.helpers";
 import type { CreateWaveConfig } from "@/types/waves.types";
 
 export interface WaveRuleRow {
@@ -855,7 +856,7 @@ const getWaveRules = ({
         {
           id: "chat-slow-mode",
           label: "Slow mode",
-          value: formatDuration(wave.chat.slow_mode_cooldown_ms) ?? "Off",
+          value: formatSlowModeInterval(wave.chat.slow_mode_cooldown_ms),
         },
       ],
     });

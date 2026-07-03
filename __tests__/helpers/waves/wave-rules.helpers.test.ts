@@ -257,4 +257,52 @@ describe("wave-rules.helpers", () => {
     expect(rules.custom.binding).toBeNull();
     expect(rules.custom.signatureRequired).toBe(false);
   });
+
+  it("formats chat slow mode rules with seconds when configured below one minute", () => {
+    const wave = {
+      wave: {
+        type: ApiWaveType.Chat,
+        admin_group: { group: null },
+        admin_drop_deletion_enabled: false,
+        max_votes_per_identity_to_drop: null,
+        time_lock_ms: null,
+        decisions_strategy: null,
+      },
+      visibility: { scope: { group: null } },
+      participation: {
+        scope: { group: null },
+        period: null,
+        required_media: [],
+        required_metadata: [],
+        no_of_applications_allowed_per_participant: null,
+        signature_required: false,
+        terms: null,
+        submission_strategy: null,
+      },
+      voting: {
+        scope: { group: null },
+        period: null,
+        credit_type: ApiWaveCreditType.TdhPlusXtdh,
+        credit_scope: ApiWaveCreditScope.Wave,
+        credit_category: null,
+        creditor: null,
+        credit_nfts: null,
+        forbid_negative_votes: false,
+      },
+      chat: {
+        enabled: true,
+        scope: { group: null },
+        links_disabled: false,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    } as any;
+
+    const rules = buildWaveRules({ wave, metadata: [] });
+
+    expect(rules.automatic.flatMap((section) => section.rows)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Slow mode", value: "30s" }),
+      ])
+    );
+  });
 });

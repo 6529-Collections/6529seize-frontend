@@ -50,7 +50,7 @@ export default function CreateWaveRules({
     const normalizedTerms = normalizeWaveCustomRules(terms);
     setDrops({
       ...config.drops,
-      terms: normalizedTerms || null,
+      terms,
       signatureRequired: Boolean(normalizedTerms),
     });
   };

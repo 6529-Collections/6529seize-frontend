@@ -8,6 +8,7 @@ import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType"
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
 import type {
   CreateWaveConfig,
   CreateWaveDatesConfig,
@@ -424,6 +425,11 @@ export const getCreateNewWaveBody = ({
   const endDate = getCreateWaveEndDate({ config });
   const supportsParticipationTerms =
     config.overview.type !== ApiWaveType.Chat;
+  const participationTerms = supportsParticipationTerms
+    ? normalizeWaveCustomRules(config.drops.terms)
+    : null;
+  const signatureRequired =
+    config.drops.signatureRequired && Boolean(participationTerms);
 
   return {
     name: config.overview.name,
@@ -471,14 +477,12 @@ export const getCreateNewWaveBody = ({
           type: metadata.type,
         }))
         .filter((metadata) => !!metadata.name),
-      signature_required: supportsParticipationTerms
-        ? config.drops.signatureRequired
-        : false,
+      signature_required: signatureRequired,
       period: {
         min: config.dates.submissionStartDate,
         max: endDate,
       },
-      terms: supportsParticipationTerms ? config.drops.terms : null,
+      terms: signatureRequired ? participationTerms : null,
       ...(config.drops.submissionStrategy
         ? {
             submission_strategy: config.drops.submissionStrategy,

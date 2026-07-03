@@ -267,6 +267,36 @@ describe("create-wave.helpers", () => {
       expect(res.participation.signature_required).toBe(false);
     });
 
+    it("normalizes participation terms for rank waves at the API boundary", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.drops.terms = "  First rule.\n\nSecond rule.  ";
+      config.drops.signatureRequired = true;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.terms).toBe("First rule.\n\nSecond rule.");
+      expect(res.participation.signature_required).toBe(true);
+    });
+
+    it("clears whitespace-only participation terms for rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.drops.terms = "   \n  ";
+      config.drops.signatureRequired = true;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.terms).toBeNull();
+      expect(res.participation.signature_required).toBe(false);
+    });
+
     it("maps allowed negative votes to the inverse backend flag", () => {
       const config = createBaseConfig(ApiWaveType.Rank);
       config.voting.allowNegativeVotes = true;
