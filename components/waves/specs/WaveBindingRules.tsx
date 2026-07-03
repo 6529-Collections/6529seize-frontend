@@ -28,6 +28,8 @@ function WaveBindingRulesEditor({
   onDraftChange,
   onSubmit,
 }: WaveBindingRulesEditorProps) {
+  const helperId = "wave-binding-rules-helper";
+
   return (
     <form
       className="tw-flex tw-flex-col tw-gap-3"
@@ -44,6 +46,7 @@ function WaveBindingRulesEditor({
       </label>
       <textarea
         id="wave-binding-rules"
+        aria-describedby={helperId}
         autoFocus
         disabled={mutating}
         rows={5}
@@ -52,7 +55,10 @@ function WaveBindingRulesEditor({
         className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
         placeholder="Add rules participants must accept before submitting..."
       />
-      <p className="tw-mb-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500">
+      <p
+        id={helperId}
+        className="tw-mb-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500"
+      >
         Participants sign these rules with their wallet before submitting. Clear
         the field to remove the acceptance requirement.
       </p>

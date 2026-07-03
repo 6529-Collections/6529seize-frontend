@@ -30,6 +30,7 @@ interface WaveCustomRulesProps {
 interface WaveCustomRulesEditorProps {
   readonly closeEditor: () => void;
   readonly draft: string;
+  readonly errorMessage: string | null;
   readonly isSaving: boolean;
   readonly submitDisabled: boolean;
   readonly onDraftChange: (draft: string) => void;
@@ -42,12 +43,16 @@ const getErrorMessage = (error: unknown): string =>
 function WaveCustomRulesEditor({
   closeEditor,
   draft,
+  errorMessage,
   isSaving,
   submitDisabled,
   onDraftChange,
   onSubmit,
 }: WaveCustomRulesEditorProps) {
   const normalizedDraft = normalizeWaveCustomRules(draft);
+  const counterId = "wave-custom-rules-counter";
+  const errorId = "wave-custom-rules-error";
+  const describedBy = errorMessage ? `${counterId} ${errorId}` : counterId;
 
   return (
     <form
@@ -65,6 +70,8 @@ function WaveCustomRulesEditor({
       </label>
       <textarea
         id="wave-custom-rules"
+        aria-describedby={describedBy}
+        aria-invalid={errorMessage ? true : undefined}
         autoFocus
         disabled={isSaving}
         maxLength={WAVE_CUSTOM_RULES_MAX_LENGTH}
@@ -74,9 +81,22 @@ function WaveCustomRulesEditor({
         className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
         placeholder="Add optional display-only creator rules..."
       />
-      <div className="tw-flex tw-justify-end tw-text-xs tw-font-medium tw-text-iron-500">
+      <div
+        id={counterId}
+        aria-live="polite"
+        className="tw-flex tw-justify-end tw-text-xs tw-font-medium tw-text-iron-500"
+      >
         {normalizedDraft.length}/{WAVE_CUSTOM_RULES_MAX_LENGTH}
       </div>
+      {errorMessage && (
+        <p
+          id={errorId}
+          role="alert"
+          className="tw-mb-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-error"
+        >
+          {errorMessage}
+        </p>
+      )}
       <WaveSettingEditorActions
         disabled={isSaving}
         onCancel={closeEditor}
@@ -99,6 +119,7 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
     [metadata]
   );
   const [draft, setDraft] = useState("");
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const canEdit =
     !metadataQuery.isLoading &&
@@ -107,6 +128,7 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
 
   const resetEditor = useCallback(() => {
     setDraft(getWaveCustomRulesMetadataDraft(metadata));
+    setSaveError(null);
   }, [metadata]);
 
   const getUpdate = useCallback(
@@ -141,25 +163,28 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
 
     void (async () => {
       setIsSaving(true);
+      setSaveError(null);
       try {
         const { success } = await requestAuth();
         if (!success) {
+          const message =
+            "Couldn't authenticate. Reconnect your wallet and try again.";
+          setSaveError(message);
           setToast({
             type: "error",
-            message:
-              "Couldn't authenticate. Reconnect your wallet and try again.",
+            message,
           });
           return;
         }
 
         await Promise.all(
-          update.deleteIds.map((metadataId) =>
-            deleteWaveMetadata({ waveId: wave.id, metadataId })
+          update.create.map((body) =>
+            createWaveMetadata({ waveId: wave.id, body })
           )
         );
         await Promise.all(
-          update.create.map((body) =>
-            createWaveMetadata({ waveId: wave.id, body })
+          update.deleteIds.map((metadataId) =>
+            deleteWaveMetadata({ waveId: wave.id, metadataId })
           )
         );
         await queryClient.invalidateQueries({
@@ -167,6 +192,7 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
         });
         closeEditor();
       } catch (error) {
+        setSaveError("Couldn't save these custom rules. Please try again.");
         setToast({
           type: "error",
           title: "Couldn't save these custom rules.",
@@ -189,9 +215,13 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
         <WaveCustomRulesEditor
           closeEditor={closeEditor}
           draft={draft}
+          errorMessage={saveError}
           isSaving={isSaving}
           submitDisabled={getSaveDisabled()}
-          onDraftChange={setDraft}
+          onDraftChange={(nextDraft) => {
+            setDraft(nextDraft);
+            setSaveError(null);
+          }}
           onSubmit={() => saveCustomRules(closeEditor, metadata, draft)}
         />
       )}

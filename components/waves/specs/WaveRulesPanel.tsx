@@ -83,9 +83,9 @@ export default function WaveRulesPanel({
       className={`tw-relative tw-overflow-hidden tw-bg-iron-950 ${ringClasses}`}
     >
       <div className="tw-px-4 tw-pt-6">
-        <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
+        <h2 className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
           {title}
-        </p>
+        </h2>
       </div>
 
       <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">

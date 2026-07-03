@@ -22,6 +22,7 @@ export default function CreateWaveTermsOfService({
   readonly helperText?: string | undefined;
 }) {
   const [enabled, setEnabled] = useState(!!terms);
+  const helperId = "terms-of-service-helper";
 
   const onEnabledChange = (enabled: boolean) => {
     setEnabled(enabled);
@@ -81,13 +82,18 @@ export default function CreateWaveTermsOfService({
           <div className="tw-group tw-w-full tw-relative">
             <textarea
               value={terms ?? ""}
+              aria-describedby={helperId}
               onChange={(e) => setTerms(e.target.value)}
               id="terms-of-service-text"
               rows={6}
               className="tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400 tw-caret-primary-400 tw-form-textarea tw-block tw-px-4 tw-py-4 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-600 tw-peer tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
               placeholder={placeholder}></textarea>
           </div>
-          <div className="tw-mt-2 tw-flex tw-justify-between tw-text-xs tw-text-iron-400">
+          <div
+            id={helperId}
+            aria-live="polite"
+            className="tw-mt-2 tw-flex tw-justify-between tw-text-xs tw-text-iron-400"
+          >
             <span>{helperText}</span>
             <span>{terms?.length ?? 0} characters</span>
           </div>

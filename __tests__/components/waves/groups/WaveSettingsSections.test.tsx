@@ -386,6 +386,141 @@ describe("WaveSettingsSections", () => {
     expect(createWaveMetadataMock).not.toHaveBeenCalled();
   });
 
+  it("creates replacement custom rules before deleting old metadata", async () => {
+    const user = userEvent.setup();
+    let resolveCreate: (() => void) | undefined;
+    const createPromise = new Promise((resolve) => {
+      resolveCreate = () =>
+        resolve({
+          id: 3,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: "New custom rule",
+        });
+    });
+    createWaveMetadataMock.mockReturnValueOnce(createPromise);
+    waveMetadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+        data_value: "Old custom rule",
+      },
+      {
+        id: 2,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+        data_value: "Older custom rule",
+      },
+    ];
+
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    expect(await screen.findByText("Added")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Edit custom rules" }));
+    await user.clear(screen.getByLabelText("Display-only rules"));
+    await user.type(
+      screen.getByLabelText("Display-only rules"),
+      "New custom rule"
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: "New custom rule",
+        },
+      });
+    });
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+
+    resolveCreate?.();
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledTimes(2);
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 1,
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 2,
+    });
+  });
+
+  it("keeps custom rules editor open when authentication fails", async () => {
+    const user = userEvent.setup();
+    const { requestAuth, setToast } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    requestAuth.mockResolvedValueOnce({ success: false });
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit custom rules" })
+    );
+    await user.type(
+      screen.getByLabelText("Display-only rules"),
+      "Keep submissions original."
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        message:
+          "Couldn't authenticate. Reconnect your wallet and try again.",
+      });
+    });
+    expect(
+      screen.getByText(
+        "Couldn't authenticate. Reconnect your wallet and try again."
+      )
+    ).toHaveAttribute("role", "alert");
+    expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
+  });
+
+  it("keeps custom rules editor open when metadata save fails", async () => {
+    createWaveMetadataMock.mockRejectedValueOnce(new Error("metadata failed"));
+    const user = userEvent.setup();
+    const { setToast } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit custom rules" })
+    );
+    await user.type(
+      screen.getByLabelText("Display-only rules"),
+      "Keep submissions original."
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        title: "Couldn't save these custom rules.",
+        description: "Please try again.",
+        details: "metadata failed.",
+      });
+    });
+    expect(
+      screen.getByText("Couldn't save these custom rules. Please try again.")
+    ).toHaveAttribute("role", "alert");
+    expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
+  });
+
   it("saves acceptance rules through participation terms", async () => {
     const user = userEvent.setup();
     renderSettings({

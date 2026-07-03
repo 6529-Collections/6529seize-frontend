@@ -35,7 +35,8 @@ export default function CreateWaveRules({
   );
 
   const customRules = config.display.customRules ?? "";
-  const normalizedCustomRules = normalizeWaveCustomRules(customRules);
+  const customRulesHelpId = "create-wave-custom-rules-help";
+  const customRulesCounterId = "create-wave-custom-rules-counter";
   const supportsAcceptanceRules = config.overview.type !== ApiWaveType.Chat;
 
   const setDisplayRules = (value: string) => {
@@ -81,13 +82,17 @@ export default function CreateWaveRules({
             >
               Display-only creator rules
             </label>
-            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+            <p
+              id={customRulesHelpId}
+              className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+            >
               These rules are shown in the wave rules panel. They do not require
               a signature.
             </p>
           </div>
           <textarea
             id="create-wave-custom-rules"
+            aria-describedby={`${customRulesHelpId} ${customRulesCounterId}`}
             value={customRules}
             maxLength={WAVE_CUSTOM_RULES_MAX_LENGTH}
             rows={5}
@@ -95,12 +100,16 @@ export default function CreateWaveRules({
             className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-4 tw-text-base tw-font-medium tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm"
             placeholder="Add optional display-only creator rules..."
           />
-          <div className="tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-font-medium tw-text-iron-400">
+          <div
+            id={customRulesCounterId}
+            aria-live="polite"
+            className="tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-font-medium tw-text-iron-400"
+          >
             <span>
               Leave blank when automatic rules already cover the wave.
             </span>
             <span>
-              {normalizedCustomRules.length}/{WAVE_CUSTOM_RULES_MAX_LENGTH}
+              {customRules.length}/{WAVE_CUSTOM_RULES_MAX_LENGTH}
             </span>
           </div>
         </div>
