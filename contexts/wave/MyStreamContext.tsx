@@ -128,8 +128,8 @@ const getWaveMuted = (wave: WaveMuteState | null | undefined): boolean =>
 
 const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
   let idleHandle: number | null = null;
-  const timeoutHandle = window.setTimeout(() => {
-    const idleWindow = window as unknown as BrowserIdleScheduler;
+  const timeoutHandle = globalThis.setTimeout(() => {
+    const idleWindow = globalThis as unknown as BrowserIdleScheduler;
     if (typeof idleWindow.requestIdleCallback === "function") {
       idleHandle = idleWindow.requestIdleCallback(runTask, {
         timeout: MAIN_WAVES_LIST_IDLE_TIMEOUT_MS,
@@ -141,10 +141,10 @@ const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
   }, MAIN_WAVES_LIST_IDLE_DELAY_MS);
 
   return () => {
-    window.clearTimeout(timeoutHandle);
+    globalThis.clearTimeout(timeoutHandle);
 
     if (idleHandle !== null) {
-      const idleWindow = window as unknown as BrowserIdleScheduler;
+      const idleWindow = globalThis as unknown as BrowserIdleScheduler;
       idleWindow.cancelIdleCallback?.(idleHandle);
     }
   };

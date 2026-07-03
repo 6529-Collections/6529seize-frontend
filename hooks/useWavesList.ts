@@ -625,9 +625,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   // Derived data should come directly from memoized inputs.
   const allWaves = useMemo(
     () =>
-      !shouldLoadMainWaves
-        ? []
-        : [
+      shouldLoadMainWaves
+        ? [
             ...combinedWaves,
             ...subwaves.filter(
               (wave) =>
@@ -635,7 +634,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
                 wave.subscribed ||
                 topSectionWaveIds.has(wave.parentWaveId ?? "")
             ),
-          ],
+          ]
+        : [],
     [
       combinedWaves,
       isJoinedMode,
