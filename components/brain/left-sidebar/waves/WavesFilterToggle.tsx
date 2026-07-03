@@ -28,27 +28,8 @@ const checkConnectedIdentity = (
  */
 const WavesFilterToggle = (): React.JSX.Element | null => {
   // Hooks must be called unconditionally at the top level
-  const followingHookResult = useShowFollowingWaves() as
-    | ReturnType<typeof useShowFollowingWaves>
-    | null
-    | undefined;
-  const authResult = useAuth() as ReturnType<typeof useAuth> | null | undefined;
-
-  if (
-    followingHookResult === null ||
-    followingHookResult === undefined ||
-    authResult === null ||
-    authResult === undefined
-  ) {
-    console.warn(
-      "[WavesFilterToggle] required hook state was unavailable - component will not render",
-      {
-        component: "WavesFilterToggle",
-        error: "hook_state_unavailable",
-      }
-    );
-    return null;
-  }
+  const followingHookResult = useShowFollowingWaves();
+  const authResult = useAuth();
 
   // Extract data before any early returns
   const [following, setFollowing] = followingHookResult;

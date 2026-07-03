@@ -219,7 +219,7 @@ export default function AppSidebarMenuItems({
 
   const visibleMenu = menu.filter((item) => {
     if (item.path === "/profile") {
-      return address !== undefined;
+      return typeof address === "string" && address.length > 0;
     }
     return true;
   });
