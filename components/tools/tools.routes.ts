@@ -1,5 +1,4 @@
-import { type MessageKey, t } from "@/i18n/messages";
-import type { SupportedLocale } from "@/i18n/locales";
+import type { MessageKey } from "@/i18n/messages";
 
 type ToolsContentsGroupId =
   | "nft-delegation"
@@ -180,19 +179,8 @@ export function getVisibleToolsNavGroups(options: ToolsVisibilityOptions) {
   })).filter((group) => group.items.length > 0);
 }
 
-export function getToolsNavItemHref(item: ToolsContentsNavItem): string {
-  return item.href;
-}
-
 export function getToolsNavItemId(item: {
   readonly id: ToolsNavItemId;
 }): ToolsNavItemId {
   return item.id;
-}
-
-export function getToolsNavItemLabel(
-  item: ToolsContentsNavItem,
-  locale: SupportedLocale
-): string {
-  return t(locale, item.labelKey);
 }
