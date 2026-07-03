@@ -19,7 +19,8 @@ Route scope:
 
 ### Right Sidebar (Thread View)
 
-- [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md)
+- [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md):
+  sidebar tab order, including `Rules` for all wave types.
 - [Wave Right Sidebar Leaderboard](feature-right-sidebar-leaderboard.md)
 - [Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md):
   canonical owner for serial-jump and drop-overlay open actions from

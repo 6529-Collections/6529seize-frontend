@@ -91,6 +91,7 @@ export function useWaveConfig() {
         maxWinners: null,
       },
       display: {
+        customRules: null,
         outcomesVisible: true,
         approve: {
           approvalsTabLabel: "",

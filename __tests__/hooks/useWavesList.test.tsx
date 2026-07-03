@@ -245,6 +245,73 @@ beforeEach(() => {
   });
 });
 
+test("pauses all main wave sources when explicitly disabled", () => {
+  const fetchNextPage = jest.fn();
+  const refetch = jest.fn();
+  const pinnedRefetch = jest.fn();
+  const pinWave = jest.fn();
+  const unpinWave = jest.fn();
+  const prefetchSpy = jest.spyOn(queryClient, "prefetchQuery");
+
+  useWavesV2Mock.mockReturnValue({
+    waves: [mainWave],
+    isFetching: true,
+    isFetchingNextPage: true,
+    hasNextPage: true,
+    fetchNextPage,
+    status: "success",
+    refetch,
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: ["2", "3"],
+    pinnedWaves: [pinnedExtra],
+    pinWave,
+    unpinWave,
+    isLoading: true,
+    isError: true,
+    refetch: pinnedRefetch,
+  });
+
+  const { result } = renderHook(() => useWavesList({ enabled: false }), {
+    wrapper,
+  });
+
+  expect(usePinnedWavesServerMock).toHaveBeenCalledWith({ enabled: false });
+  expect(
+    useWavesV2Mock.mock.calls.every(([args]) => args.enabled === false)
+  ).toBe(true);
+  expect(useWaveByIdMock).toHaveBeenCalledWith(null, { enabled: false });
+  expect(useWaveSubwavesMapMock).toHaveBeenCalledWith({
+    parentWaveIds: [],
+    viewerIdentityKey: null,
+  });
+  expect(result.current.waves).toEqual([]);
+  expect(result.current.mainWaves).toEqual([]);
+  expect(result.current.pinnedWaves).toEqual([]);
+  expect(result.current.isFetching).toBe(false);
+  expect(result.current.isFetchingNextPage).toBe(false);
+  expect(result.current.hasNextPage).toBe(false);
+  expect(result.current.isPinnedWavesLoading).toBe(false);
+  expect(result.current.hasPinnedWavesError).toBe(false);
+
+  act(() => {
+    result.current.fetchNextPage();
+    result.current.mainWavesRefetch();
+    result.current.refetchAllWaves();
+    result.current.addPinnedWave("2");
+    result.current.removePinnedWave("2");
+    result.current.loadSubwavesForParent("2");
+    result.current.prefetchSubwavesForParent("2");
+  });
+
+  expect(fetchNextPage).not.toHaveBeenCalled();
+  expect(refetch).not.toHaveBeenCalled();
+  expect(pinnedRefetch).not.toHaveBeenCalled();
+  expect(pinWave).not.toHaveBeenCalled();
+  expect(unpinWave).not.toHaveBeenCalled();
+  expect(prefetchSpy).not.toHaveBeenCalled();
+});
+
 test("pauses viewer-scoped wave sources while wallet auth is invalid", () => {
   const fetchNextPage = jest.fn();
   const refetch = jest.fn();

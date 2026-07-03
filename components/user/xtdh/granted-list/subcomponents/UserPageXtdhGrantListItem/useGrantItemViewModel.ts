@@ -17,9 +17,11 @@ import {
   getContractAddress,
   mapGrantChainToSupportedChain,
 } from "./formatters";
-import type { GrantDetails, GrantItemVariant } from "./types";
-
-
+import type {
+  GrantContractOverviewState,
+  GrantDetails,
+  GrantItemVariant,
+} from "./types";
 
 interface GrantItemViewModel {
   readonly contract: ContractOverview | null;
@@ -59,9 +61,12 @@ function deriveErrorDetails(
   return null;
 }
 
-export function useGrantItemViewModel(grant: ApiXTdhGrant): GrantItemViewModel {
+export function useGrantItemViewModel(
+  grant: ApiXTdhGrant,
+  contractOverviewState?: GrantContractOverviewState
+): GrantItemViewModel {
   const contractAddress = getContractAddress(grant.target_contract);
-  const rawContractLabel = grant.target_contract?.trim();
+  const rawContractLabel = grant.target_contract.trim();
   const contractLabel =
     contractAddress ?? (rawContractLabel || "this contract");
 
@@ -75,6 +80,7 @@ export function useGrantItemViewModel(grant: ApiXTdhGrant): GrantItemViewModel {
   }
 
   const shouldLoadContract = Boolean(contractAddress) && !isUnsupportedChain;
+  const hasProvidedContractState = contractOverviewState !== undefined;
   const {
     data: fetchedContract,
     isError: isContractError,
@@ -82,14 +88,20 @@ export function useGrantItemViewModel(grant: ApiXTdhGrant): GrantItemViewModel {
   } = useContractOverviewQuery({
     address: contractAddress,
     chain: chain ?? undefined,
-    enabled: shouldLoadContract,
+    enabled: shouldLoadContract && !hasProvidedContractState,
   });
   let contract: ContractOverview | null = null;
 
   if (!isUnsupportedChain) {
-    contract = fetchedContract ?? null;
+    contract = hasProvidedContractState
+      ? contractOverviewState.contract
+      : (fetchedContract ?? null);
   }
-  const isLoading = shouldLoadContract && isContractQueryLoading;
+  const isLoading =
+    shouldLoadContract &&
+    (hasProvidedContractState
+      ? contractOverviewState.isLoading
+      : isContractQueryLoading);
 
   const details = buildGrantDetails(grant, contract ?? undefined);
   const hasContractData = Boolean(contract);
@@ -98,7 +110,9 @@ export function useGrantItemViewModel(grant: ApiXTdhGrant): GrantItemViewModel {
     normalizedErrorDetails,
     isUnsupportedChain,
     grant.target_chain,
-    isContractError,
+    hasProvidedContractState
+      ? Boolean(contractOverviewState.errorMessage)
+      : isContractError,
     hasContractData
   );
 
@@ -136,16 +150,11 @@ function buildGrantDetails(
 }
 
 function createBaseGrantDetails(grant: ApiXTdhGrant): GrantDetails {
-  const tokensCountInfo = getTargetTokensCountInfo(
-    grant.target_tokens_count ?? null
-  );
+  const tokensCountInfo = getTargetTokensCountInfo(grant.target_tokens_count);
   const tokensCountValue =
     typeof tokensCountInfo.count === "number" ? tokensCountInfo.count : null;
   const tdhRateLabel = formatAmount(grant.rate);
-  const perTokenLabel = formatTdhRatePerToken(
-    grant.rate,
-    tokensCountValue
-  );
+  const perTokenLabel = formatTdhRatePerToken(grant.rate, tokensCountValue);
   const tokensDescription = (() => {
     if (tokensCountInfo.kind === "all") {
       return "all tokens in this collection";
@@ -171,7 +180,6 @@ function createBaseGrantDetails(grant: ApiXTdhGrant): GrantDetails {
       fallbackLabel: "Immediately",
       includeTime: false,
     }),
-
   };
 }
 

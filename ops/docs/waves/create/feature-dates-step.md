@@ -20,7 +20,7 @@ If recurring announcements are enabled, this step can also set an optional
 
 - Start a `Rank` or `Approve` create flow and continue
   `Overview -> Groups -> Dates`.
-- Use `Back` from `Drops`, `Voting`, `Outcomes`, or `Description`.
+- Use `Back` from `Drops`, `Rules`, `Voting`, `Outcomes`, or `Description`.
 - On large screens, use the step rail to return to `Dates` after you have
   moved past it.
 
@@ -99,5 +99,6 @@ For `Approve` waves:
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
+- [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
 - [Docs Home](../../README.md)
