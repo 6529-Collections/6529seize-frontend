@@ -10,7 +10,7 @@ import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { useEffect, useMemo, useState } from "react";
 import MemeSubscriptionRow from "./MemeSubscriptionRow";
-import styles from "./UserPageSubscriptions.module.scss";
+import styles from "./UserPageSubscriptions.module.css";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{

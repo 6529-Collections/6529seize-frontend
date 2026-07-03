@@ -12,7 +12,7 @@ import {
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "./GasRoyalties";
-import styles from "./GasRoyalties.module.scss";
+import styles from "./GasRoyalties.module.css";
 
 export default function GasComponent() {
   const router = useRouter();

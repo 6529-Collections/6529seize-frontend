@@ -1,8 +1,8 @@
 .toastContainer {
-  width: min(420px, calc(100vw - 32px));
   right: 16px;
   left: auto;
   z-index: 100000;
+  width: min(420px, calc(100vw - 32px));
 }
 
 .toastShell {
@@ -38,17 +38,17 @@
 
 .icon {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 22px;
   height: 22px;
   margin-top: 1px;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
+}
 
-  svg {
-    width: 16px;
-    height: 16px;
-  }
+.icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .text {
@@ -72,53 +72,53 @@
 .details {
   margin-top: 8px;
   color: #9ca3af;
+  overflow-wrap: anywhere;
   font-size: 0.78rem;
   line-height: 1.35;
-  overflow-wrap: anywhere;
 }
 
 .action {
   display: inline-flex;
+  margin-top: 10px;
+  cursor: pointer;
   align-items: center;
   gap: 5px;
-  margin-top: 10px;
   border: 0;
-  padding: 0;
   background: transparent;
+  padding: 0;
   color: #f8fafc;
   font-size: 0.82rem;
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 3px;
-  cursor: pointer;
+}
 
-  &:hover {
-    color: white;
-  }
+.action:hover {
+  color: white;
 }
 
 .closeButton {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 28px;
   height: 28px;
   margin: 8px 8px 0 0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 999px;
   background: transparent;
   color: #94a3b8;
-  cursor: pointer;
+}
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
-  }
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
 
-  svg {
-    width: 15px;
-    height: 15px;
-  }
+.closeButton svg {
+  width: 15px;
+  height: 15px;
 }
 
 .success {
@@ -177,6 +177,7 @@
   display: flex;
   width: min(372px, 100%);
   margin-left: auto;
+  cursor: pointer;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -184,14 +185,13 @@
   border-left: 4px solid #84adff;
   border-radius: 8px;
   background: rgba(18, 20, 24, 0.96);
-  color: #f8fafc;
   padding: 12px 14px;
+  color: #f8fafc;
   text-align: left;
   box-shadow:
     0 18px 44px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(16px);
-  cursor: pointer;
 }
 
 .newVersionTitle {

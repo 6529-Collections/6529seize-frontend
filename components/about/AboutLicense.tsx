@@ -4,7 +4,7 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
-import styles from "./About.module.scss";
+import styles from "./About.module.css";
 
 export default function AboutLicense() {
   return (

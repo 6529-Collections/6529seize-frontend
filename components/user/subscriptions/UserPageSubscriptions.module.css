@@ -1,0 +1,158 @@
+.topUpHistoryAccordionButton {
+  border: 1px solid rgb(55, 55, 61) !important;
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+  border-bottom-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  background-color: rgb(28, 28, 33) !important;
+  box-shadow: none !important;
+}
+
+.topUpHistoryAccordionBody {
+  border-right: 1px solid rgb(55, 55, 61) !important;
+  border-bottom: 1px solid rgb(55, 55, 61) !important;
+  border-left: 1px solid rgb(55, 55, 61) !important;
+  background-color: rgb(19, 19, 22) !important;
+  color: white;
+}
+
+.subscriptionHistoryEntry {
+  overflow: auto;
+  border: 1px solid rgb(55, 55, 61);
+  padding: 10px;
+}
+
+.nftSubscriptionsListItem {
+  border-top: none !important;
+  border-bottom: none !important;
+  background-color: #1c1c21 !important;
+  padding: 10px 20px !important;
+  color: #ddd !important;
+}
+
+.nftSubscriptionsListItem.odd {
+  background-color: #131316 !important;
+}
+
+.nftSubscriptionsListItem.even {
+  background-color: #0c0c0d !important;
+}
+
+.nftSubscriptionsListItem.last {
+  border-bottom: none !important;
+  padding: 5px 20px;
+}
+
+.tagContainer {
+  display: flex;
+  min-width: 150px;
+  justify-content: center;
+}
+
+.subscribedTag {
+  width: fit-content;
+  border: 1px solid #00aa00;
+  border-radius: 9999px;
+  background-color: #004400;
+  padding: 2px 10px;
+  color: #00ff00;
+  transition: opacity 0.5s;
+}
+
+.subscribedTag.clicked {
+  border: 1px solid #aa0000;
+  background-color: #440000;
+  color: #ff0000;
+}
+
+.notSubscribedTag {
+  border: 1px solid #777777;
+  border-radius: 9999px;
+  background-color: #242430;
+  padding: 2px 10px;
+  color: #999999;
+}
+
+.sendBtn {
+  width: auto;
+  min-width: 120px;
+  border-color: #2563eb !important;
+  border-radius: 8px !important;
+  background-color: #2563eb !important;
+  padding: 12px 32px !important;
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.sendBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #1d4ed8 !important;
+  background-color: #1d4ed8 !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+}
+
+.sendBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.sendBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.radioInput {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+  appearance: none;
+  border: 2px solid #6b7280;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: border-color 0.15s ease;
+  -webkit-appearance: none;
+}
+
+.radioInput:checked {
+  border-color: #2563eb;
+  border-width: 2px;
+  background-color: #2563eb;
+}
+
+.radioInput:checked::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background-color: white;
+  content: "";
+}
+
+.radioInput:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.cardCountOption {
+  appearance: none !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+.cardCountOption:focus-visible {
+  outline: 2px solid #2563eb !important;
+  outline-offset: 2px !important;
+}
+
+.cardCountOption:focus:not(:focus-visible) {
+  outline: none !important;
+}

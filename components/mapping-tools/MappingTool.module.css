@@ -1,0 +1,92 @@
+.placeholder {
+  height: 500px;
+}
+
+.formInput {
+  cursor: pointer;
+  border-color: rgb(154, 154, 154);
+  border-radius: 0 !important;
+  color: rgb(51, 51, 51) !important;
+}
+
+.formInput:focus {
+  border-color: #267c93 !important;
+}
+
+.formInputHidden {
+  display: none;
+}
+
+.submitBtn {
+  width: 100%;
+  margin-top: 15px;
+  margin-right: 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 0;
+  background-color: #208359;
+  padding: 12px 20px;
+  color: white;
+}
+
+.submitBtn:active {
+  background-color: #208359 !important;
+}
+
+.submitBtn:hover {
+  background-color: rgb(30.4, 124.45, 84.55);
+}
+
+.submitBtnDisabled {
+  pointer-events: none !important;
+  background-color: rgb(28.8, 117.9, 80.1);
+  color: rgb(154, 154, 154);
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.toolArea {
+  padding: 25px 30px;
+  background-color: rgb(30, 30, 30);
+}
+
+.uploadArea {
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  border: 2px dashed rgb(68, 68, 68);
+  background-color: rgb(34, 34, 34);
+  padding: 50px;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+
+.uploadArea:hover {
+  border: 2px dashed rgb(154, 154, 154);
+}
+
+.uploadAreaActive {
+  border: 2px dashed rgb(154, 154, 154);
+}
+
+.uploadIcon {
+  height: 4rem;
+}
+
+.clearBtn {
+  height: 25px;
+  cursor: pointer;
+}
+
+.clearBtn:focus {
+  outline: none !important;
+}

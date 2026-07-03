@@ -18,7 +18,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import DotLoader from "../dotLoader/DotLoader";
-import styles from "./GasRoyalties.module.scss";
+import styles from "./GasRoyalties.module.css";
 
 interface HeaderProps {
   title: string;

@@ -1,37 +1,34 @@
-@use "sass:color";
-@use "../../styles/variables.scss" as variables;
-
 .distributionHeader {
   display: flex;
+  flex-wrap: wrap;
+  gap: 1rem !important;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem !important;
-  flex-wrap: wrap;
+}
 
-  @media only screen and (max-width: 1200px) {
+@media only screen and (max-width: 1200px) {
+  .distributionHeader {
     justify-content: center !important;
   }
 }
 
-.distributionsTable {
-  tr {
-    border-bottom: 1px solid #333 !important;
-  }
-  tr td {
-    white-space: nowrap;
-  }
-  tr th {
-    min-width: 80px;
-    white-space: nowrap;
-    line-height: 30px;
-  }
+.distributionsTable tr {
+  border-bottom: 1px solid #333 !important;
+}
 
-  tr td {
-    vertical-align: middle;
-    a {
-      text-decoration: none;
-    }
-  }
+.distributionsTable tr td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.distributionsTable tr th {
+  min-width: 80px;
+  line-height: 30px;
+  white-space: nowrap;
+}
+
+.distributionsTable tr td a {
+  text-decoration: none;
 }
 
 .distributionsTableWallet {
@@ -39,9 +36,9 @@
 }
 
 .distributionsScrollContainer {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
   overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .distributionsScrollContainer::-webkit-scrollbar {
@@ -53,8 +50,8 @@
 }
 
 .distributionPlanLink {
-  text-decoration: underline;
   cursor: pointer;
+  text-decoration: underline;
 }
 
 .distributionCarousel {
@@ -62,36 +59,34 @@
   width: 90%;
   margin-left: 5%;
   overflow: hidden;
+}
 
-  img {
-    width: 80%;
-    margin-left: 10%;
-    height: auto;
-  }
+.distributionCarousel img {
+  width: 80%;
+  height: auto;
+  margin-left: 10%;
 }
 
 @media only screen and (max-width: 800px) {
-  .distributionCarousel {
-    img {
-      width: 100%;
-      margin-left: 0%;
-      height: auto;
-    }
+  .distributionCarousel img {
+    width: 100%;
+    height: auto;
+    margin-left: 0;
   }
 }
 
 .distributionPhaseLink {
-  line-height: 40px;
-  color: variables.$font-color-h;
   margin-right: 20px;
+  color: rgb(154, 154, 154);
+  cursor: pointer;
   font-size: larger;
   font-weight: bold;
+  line-height: 40px;
   text-decoration: none;
-  cursor: pointer;
+}
 
-  &:hover {
-    color: variables.$font-color;
-  }
+.distributionPhaseLink:hover {
+  color: white;
 }
 
 @media only screen and (max-width: 800px) {
@@ -101,14 +96,14 @@
 }
 
 .distributionPhaseLinkActive {
-  color: variables.$font-color;
+  color: white;
 }
 
 .totalResults {
-  font-size: larger;
   display: inline-block;
   margin-bottom: -5px;
   margin-left: 10px;
+  font-size: larger;
 }
 
 .distributionsCaretWrapper {
@@ -121,8 +116,9 @@
 }
 
 .distributionsCaretDisabled {
-  color: variables.$lightest-grey;
-  &:hover {
-    color: white;
-  }
+  color: rgb(154, 154, 154);
+}
+
+.distributionsCaretDisabled:hover {
+  color: white;
 }

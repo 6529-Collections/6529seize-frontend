@@ -37,6 +37,8 @@ const STATUS_CLASSNAMES = {
   unknown: "tw-text-[rgb(100,100,100)]",
   warning: "tw-text-[orange]",
 } as const;
+type StatusClassName =
+  (typeof STATUS_CLASSNAMES)[keyof typeof STATUS_CLASSNAMES];
 
 function getSyncStatusLabel(name: string, isSynced: boolean, known: boolean) {
   if (!known) {
@@ -134,11 +136,11 @@ export default function PrenodesStatus() {
     const createdAt: Time = Time.fromString(prenode.created_at.toString());
     const updatedAt: Time = Time.fromString(prenode.updated_at.toString());
 
-    let updatedAtStatus = STATUS_CLASSNAMES.error;
+    let updatedAtStatus: StatusClassName = STATUS_CLASSNAMES.error;
     let updatedAtIcon = faXmarkCircle;
-    let tdhStatus = STATUS_CLASSNAMES.unknown;
+    let tdhStatus: StatusClassName = STATUS_CLASSNAMES.unknown;
     let tdhIcon = faMinusCircle;
-    let blockStatus = STATUS_CLASSNAMES.unknown;
+    let blockStatus: StatusClassName = STATUS_CLASSNAMES.unknown;
     let blockIcon = faMinusCircle;
     if (prenode.ping_status === "green") {
       updatedAtStatus = STATUS_CLASSNAMES.success;
