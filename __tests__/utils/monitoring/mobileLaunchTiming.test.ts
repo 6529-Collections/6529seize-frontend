@@ -240,13 +240,37 @@ describe("mobileLaunchTiming", () => {
       expect.objectContaining({
         flush_reason: "waves_content_visible",
         step_waves_first_content_visible_ms: 100,
-        total_ms: 350,
+        total_ms: 100,
+        total_launch_bucket: "0_500",
       })
     );
 
     jest.advanceTimersByTime(5000);
 
     expect(sentry.logger.info).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the scheduled milestone time for delayed shell flushes", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    timing.startMobileLaunchTiming();
+    currentNow = 120;
+    timing.markMobileLaunchStep("first_useful_app_shell");
+    timing.scheduleMobileLaunchFlush("shell_paint", 5000);
+    currentNow = 5120;
+    jest.advanceTimersByTime(5000);
+
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        flush_reason: "shell_paint",
+        slow: false,
+        step_first_useful_app_shell_ms: 120,
+        total_ms: 120,
+        total_launch_bucket: "0_500",
+      })
+    );
+    expect(sentry.logger.warn).not.toHaveBeenCalled();
   });
 
   it("logs slow launches as warnings without sampling", async () => {

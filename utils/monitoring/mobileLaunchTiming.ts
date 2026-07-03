@@ -246,6 +246,7 @@ export function scheduleMobileLaunchFlush(
     clearTimeout(state.scheduledFlushId);
   }
 
+  const scheduledTotalMs = roundMs(elapsedSinceStart(state));
   state.scheduledFlushId = setTimeout(
     () => {
       const activeState = getActiveState();
@@ -254,13 +255,16 @@ export function scheduleMobileLaunchFlush(
       }
 
       delete activeState.scheduledFlushId;
-      flushMobileLaunchTiming(reason);
+      flushMobileLaunchTiming(reason, scheduledTotalMs);
     },
     Math.max(0, delayMs)
   );
 }
 
-function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
+function flushMobileLaunchTiming(
+  reason: FlushReason = "manual",
+  scheduledTotalMs?: number
+): void {
   const state = getActiveState();
   if (!state) {
     return;
@@ -276,7 +280,7 @@ function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
     delete state.timeoutId;
   }
 
-  const totalMs = roundMs(elapsedSinceStart(state));
+  const totalMs = scheduledTotalMs ?? roundMs(elapsedSinceStart(state));
   const slow = totalMs >= SLOW_LAUNCH_MS;
   const warn = slow || reason === "timeout" || reason === "error";
   const routeFamily = sanitizeRouteFamily(getCurrentPathname());
