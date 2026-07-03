@@ -9,6 +9,7 @@ const ABOUT_ROUTE_PREFIXES = [
   "/delegation",
   "/tools",
   "/open-data",
+  "/drop-forge",
   "/meme-accounting",
   "/meme-gas",
   "/emma",

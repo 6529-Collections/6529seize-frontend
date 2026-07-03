@@ -121,6 +121,7 @@ describe("isNavItemActive", () => {
       { pathname: "/join", activeItemName: "Join 6529" },
       { pathname: "/network", activeItemName: "About" },
       { pathname: "/tools/app-wallets", activeItemName: "About" },
+      { pathname: "/drop-forge", activeItemName: "About" },
       { pathname: "/meme-accounting", activeItemName: "About" },
     ];
 
