@@ -1345,13 +1345,13 @@ export default function HeaderSearchModal({
 
   const handleRetry = () => {
     const retryProfiles = () => {
-      void refetchProfiles().catch(() => undefined);
+      refetchProfiles().catch(() => undefined);
     };
     const retryNfts = () => {
-      void refetchNfts().catch(() => undefined);
+      refetchNfts().catch(() => undefined);
     };
     const retryWaves = () => {
-      void refetchWaves().catch(() => undefined);
+      refetchWaves().catch(() => undefined);
     };
 
     if (selectedSearchCategory === CATEGORY.PAGES) {

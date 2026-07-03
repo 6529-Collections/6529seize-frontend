@@ -31,7 +31,7 @@ interface WebSidebarNavProps {
 }
 
 const getBrowserWindow = (): Window | undefined =>
-  typeof window === "undefined" ? undefined : window;
+  typeof globalThis.window === "undefined" ? undefined : globalThis.window;
 
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },

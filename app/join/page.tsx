@@ -18,7 +18,7 @@ export default function JoinPage() {
         <h1 className="tw-m-0 tw-text-4xl tw-font-semibold tw-tracking-normal tw-text-white sm:tw-text-5xl">
           {t(DEFAULT_LOCALE, "join.heading")}
         </h1>
-        {/* TODO: Replace this placeholder with the approved Join 6529 page in a separate acquisition/onboarding task. */}
+        {/* Placeholder route only; the full Join page belongs in a separate acquisition/onboarding task. */}
         <p className="tw-m-0 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
           {t(DEFAULT_LOCALE, "join.placeholder")}
         </p>

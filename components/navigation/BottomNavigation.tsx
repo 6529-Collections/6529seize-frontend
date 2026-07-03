@@ -86,10 +86,10 @@ const getHiddenStyle = (hidden: boolean) =>
     : "tw-opacity-100 tw-translate-y-0";
 
 const getBrowserWindow = (): Window | undefined =>
-  typeof window === "undefined" ? undefined : window;
+  typeof globalThis.window === "undefined" ? undefined : globalThis.window;
 
 const getBrowserDocument = (): Document | undefined =>
-  typeof document === "undefined" ? undefined : document;
+  typeof globalThis.document === "undefined" ? undefined : globalThis.document;
 
 const getWindowScrollPosition = ({
   browserWindow,

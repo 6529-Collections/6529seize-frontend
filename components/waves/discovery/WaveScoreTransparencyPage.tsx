@@ -295,8 +295,8 @@ function getQualityGate(score: ApiWaveScore): ApiWaveScoreQualityGate {
 }
 
 function getCurrentOrigin(): string {
-  if (typeof window !== "undefined") {
-    return window.location.origin;
+  if (typeof globalThis.window !== "undefined") {
+    return globalThis.window.location.origin;
   }
   return "https://6529.io";
 }
