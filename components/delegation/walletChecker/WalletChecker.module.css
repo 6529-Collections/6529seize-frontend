@@ -1,0 +1,138 @@
+.formInput {
+  border-color: rgb(154, 154, 154);
+  border-radius: 0 !important;
+  color: rgb(51, 51, 51) !important;
+}
+
+.formInput:focus {
+  border-color: #267c93 !important;
+}
+
+.intro,
+.statusText {
+  margin-bottom: 0.75rem;
+  color: rgb(154, 154, 154);
+}
+
+.checkBtn {
+  border: none;
+  border-radius: 0;
+  background-color: #267c93;
+  padding: 10px 15px;
+  color: white;
+}
+
+.checkBtn:hover {
+  background-color: rgb(43.2378378378, 141.0918918919, 167.2621621622);
+}
+
+.checkBtn:active,
+.checkBtn:disabled {
+  background-color: rgb(36.1, 117.8, 139.65) !important;
+}
+
+.clearBtn {
+  border-radius: 0;
+  background-color: transparent;
+  padding: 10px 15px;
+  color: white;
+}
+
+.clearBtn:hover,
+.clearBtn:active,
+.clearBtn:disabled {
+  background-color: rgb(51, 51, 51);
+}
+
+.error {
+  color: #c51d34;
+  font-size: 1em;
+}
+
+.supportingAddress a {
+  font-weight: normal;
+}
+
+.consolidationPlusIcon {
+  height: 20px;
+  margin-right: 15px;
+  margin-left: 10px;
+}
+
+.arrowHead {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 25px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid white;
+}
+
+.arrowBody {
+  display: inline-block;
+  width: 75px;
+  height: 4px;
+  margin-left: 20px;
+  background-color: white;
+}
+
+.arrowBody::after {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: 50px;
+  height: 2px;
+  transform: translate(-50%, -50%);
+  content: "";
+}
+
+.recommendationsList {
+  padding-left: 1rem;
+}
+
+.consolidationRecommendationIcon {
+  height: 30px;
+  margin-right: 10px;
+  color: red;
+}
+
+.activeDelegationIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 18px;
+  background-color: green;
+  padding: 5px;
+  color: white;
+}
+
+.consolidationActiveIcon {
+  width: 30px;
+  height: 30px;
+  margin-left: 25px;
+  border-radius: 18px;
+  background-color: green;
+  padding: 5px;
+  color: white;
+}
+
+.walletCheckerContainer {
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.walletOk:focus {
+  border-color: #267c93 !important;
+}
+
+.walletInput {
+  all: unset;
+  width: 100%;
+  border: 1px solid rgb(68, 68, 68);
+  border-radius: 18px;
+  padding: 10px;
+}
+
+.infoOk {
+  color: greenyellow;
+}
