@@ -119,6 +119,12 @@ describe("useWaveShareCopyAction", () => {
 
     await waitFor(() => expect(result.current.isSharing).toBe(true));
 
+    act(() => {
+      result.current.onClick();
+    });
+
+    expect(mockCapacitorShare).toHaveBeenCalledTimes(1);
+
     await act(async () => {
       resolveShare({});
       await Promise.resolve();
@@ -149,14 +155,11 @@ describe("useWaveShareCopyAction", () => {
     await waitFor(() => expect(result.current.mode).toBe("copy"));
   });
 
-  it("can keep Capacitor share mode after non-abort share failure", async () => {
+  it("does not fallback to copy when Capacitor share is dismissed", async () => {
     mockCapacitorIsNativePlatform.mockReturnValue(true);
-    mockCapacitorShare.mockRejectedValue(new Error("Share failed"));
+    mockCapacitorShare.mockRejectedValue(new Error("Share cancelled"));
 
-    const { result } = renderUseWaveShareCopyAction({
-      copyOnShareFailure: false,
-      showShareFeedback: false,
-    });
+    const { result } = renderUseWaveShareCopyAction();
 
     act(() => {
       result.current.onClick();

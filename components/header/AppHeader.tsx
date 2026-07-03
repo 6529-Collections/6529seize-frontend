@@ -7,10 +7,12 @@ import {
   Squares2X2Icon,
   LinkIcon,
   CheckIcon,
+  ShareIcon as OutlineShareIcon,
 } from "@heroicons/react/24/outline";
-import { PlusIcon } from "@heroicons/react/24/solid";
-import { faShare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  PlusIcon,
+  ShareIcon as SolidShareIcon,
+} from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -324,7 +326,7 @@ const HeaderMoreMenu = ({
         className={clsx(
           "tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
           onlyItem.directActionActive
-            ? "tw-scale-95 tw-bg-iron-800 tw-text-iron-50 tw-ring-1 tw-ring-primary-400"
+            ? "tw-bg-black tw-text-iron-50"
             : "tw-bg-black tw-text-iron-300 hover:tw-text-iron-50"
         )}
       >
@@ -520,17 +522,18 @@ export default function AppHeader() {
     waveName: activeWave?.name ?? "",
     isDirectMessage: activeWave ? isDm : false,
     showShareFeedback: !isCapacitor,
-    copyOnShareFailure: !isCapacitor,
   });
-  const waveLinkActionIconColor =
-    waveLinkActionFeedbackState === "idle"
-      ? "tw-text-iron-300"
-      : "tw-text-emerald-300";
   const renderWaveLinkActionIcon = ({
     direct = false,
   }: {
     readonly direct?: boolean | undefined;
   } = {}) => {
+    const waveLinkActionIconColor =
+      direct && isWaveLinkSharing
+        ? "tw-text-iron-50"
+        : waveLinkActionFeedbackState === "idle"
+          ? "tw-text-iron-300"
+          : "tw-text-emerald-300";
     const iconSizeClassName = direct ? "tw-h-6 tw-w-6" : "tw-h-4 tw-w-4";
     const iconClassName = `${iconSizeClassName} ${waveLinkActionIconColor}`;
 
@@ -539,7 +542,9 @@ export default function AppHeader() {
     }
 
     if (waveLinkActionMode === "share") {
-      return <FontAwesomeIcon icon={faShare} className={iconClassName} />;
+      const Icon =
+        direct && isWaveLinkSharing ? SolidShareIcon : OutlineShareIcon;
+      return <Icon className={iconClassName} />;
     }
 
     return <LinkIcon className={iconClassName} />;
