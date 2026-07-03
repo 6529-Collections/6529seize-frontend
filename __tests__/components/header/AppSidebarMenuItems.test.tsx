@@ -77,4 +77,38 @@ describe("AppSidebarMenuItems", () => {
       "/item"
     );
   });
+
+  it("starts nested groups without a divider after the landing link", async () => {
+    (useCtx as jest.Mock).mockReturnValue({ address: undefined });
+    (useId as jest.Mock).mockReturnValue({ profile: null });
+    const menu: MenuItem[] = [
+      {
+        label: "About",
+        children: [
+          { label: "About", path: "/about" },
+          {
+            label: "About 6529",
+            section: true,
+            children: [{ label: "FAQ", path: "/about/faq" }],
+          },
+          {
+            label: "Legal",
+            section: true,
+            children: [{ label: "Terms", path: "/about/terms-of-service" }],
+          },
+        ],
+      },
+    ];
+    const { container } = render(
+      <AppSidebarMenuItems menu={menu} onNavigate={jest.fn()} />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "About" }));
+
+    expect(screen.getByRole("button", { name: "About 6529" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Legal" })).toBeVisible();
+    expect(container.querySelectorAll(".tw-h-px.tw-bg-iron-800")).toHaveLength(
+      1
+    );
+  });
 });

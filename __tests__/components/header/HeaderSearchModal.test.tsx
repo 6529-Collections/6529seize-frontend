@@ -139,6 +139,9 @@ jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
   };
 });
 
+const actualSidebarHooks = jest.requireActual(
+  "@/hooks/useSidebarSections"
+) as typeof import("@/hooks/useSidebarSections");
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
 const publicWaveScope = { group: null };
 const createWaveResult = (overrides: Record<string, unknown> = {}): ApiWave =>
@@ -233,6 +236,7 @@ interface SetupOptions {
   nftsRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   wavesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   sidebarSections?: SidebarSection[] | undefined;
+  useActualSidebarSections?: boolean | undefined;
   dropForgePermissions?: typeof DEFAULT_DROP_FORGE_PERMISSIONS | undefined;
 }
 
@@ -245,6 +249,7 @@ function setup(options: SetupOptions = {}) {
     nftsRefetch = jest.fn(() => Promise.resolve()),
     wavesRefetch = jest.fn(() => Promise.resolve()),
     sidebarSections = defaultSidebarSections,
+    useActualSidebarSections = false,
     dropForgePermissions,
   } = options;
   const push = jest.fn();
@@ -261,7 +266,18 @@ function setup(options: SetupOptions = {}) {
   useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });
   useCookieConsentMock.mockReturnValue({ country: "US" });
   capacitorMock.mockReturnValue({ isIos: false });
-  useSidebarSectionsMock.mockReturnValue(sidebarSections);
+  if (useActualSidebarSections) {
+    useSidebarSectionsMock.mockImplementation(
+      (appWalletsSupported: boolean, isIos: boolean, country: string | null) =>
+        actualSidebarHooks.useSidebarSections(
+          appWalletsSupported,
+          isIos,
+          country
+        )
+    );
+  } else {
+    useSidebarSectionsMock.mockReturnValue(sidebarSections);
+  }
   useDropForgePermissionsMock.mockReturnValue(
     dropForgePermissions ?? { ...DEFAULT_DROP_FORGE_PERMISSIONS }
   );
@@ -471,6 +487,7 @@ describe("HeaderSearchModal", () => {
   it("shows one Network Nerd page result for cards and interactions aliases", async () => {
     setup({
       selectedCategory: "PAGES",
+      useActualSidebarSections: true,
       queryImpl: () => ({
         isFetching: false,
         data: [],
