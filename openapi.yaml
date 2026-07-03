@@ -6649,6 +6649,30 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SubscriptionCounts"
+  /subscriptions/memes/{token_id}/count:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get meme subscription count
+      operationId: getMemeSubscriptionCount
+      parameters:
+        - name: token_id
+          in: path
+          description: Meme token ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionCounts"
+        "400":
+          description: Invalid token ID
   /subscriptions/redeemed-memes-counts:
     get:
       tags:

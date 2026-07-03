@@ -18,7 +18,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
-import EthereumIcon from "../utils/icons/EthereumIcon";
+import SubscriptionHeaderLinks, {
+  SubscriptionBalanceLabel,
+} from "./SubscriptionHeaderLinks";
 
 export default function MemeSubscriptionRow(
   props: Readonly<{
@@ -34,6 +36,8 @@ export default function MemeSubscriptionRow(
     variant?: "default" | "compact";
     balanceLabel?: string;
     subscribedView?: boolean;
+    infoHref?: string | undefined;
+    profileSubscriptionsHref?: string | undefined;
   }>
 ) {
   const id = `subscription-${props.subscription.token_id}`;
@@ -279,22 +283,19 @@ export default function MemeSubscriptionRow(
     return (
       <div className="tw-py-1">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
-            <span className="tw-font-medium tw-leading-none">
-              {isSubscribedView ? "Subscribed" : "Subscribe"}
-            </span>
+          <SubscriptionHeaderLinks
+            labelKey={
+              isSubscribedView
+                ? "home.mintSubscriptions.subscribedLabel"
+                : "home.mintSubscriptions.subscribeLabel"
+            }
+            infoHref={props.infoHref}
+            profileSubscriptionsHref={props.profileSubscriptionsHref}
+          >
             {props.balanceLabel && (
-              <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-leading-none tw-text-iron-400">
-                <span className="tw-leading-none">Balance</span>
-                <span className="tw-leading-none tw-text-iron-300">
-                  {props.balanceLabel}
-                </span>
-                <span className="tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-self-center tw-text-iron-400">
-                  <EthereumIcon />
-                </span>
-              </span>
+              <SubscriptionBalanceLabel balanceLabel={props.balanceLabel} />
             )}
-          </span>
+          </SubscriptionHeaderLinks>
           {isSubscribedView ? (
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300">
               {subscribedCount} / {props.eligibilityCount}

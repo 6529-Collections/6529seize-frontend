@@ -6,12 +6,10 @@ import {
 
 export default function AboutSubscriptions() {
   return (
-    <Container>
+    <Container className="!tw-px-0">
       <Row>
         <Col>
-          <h1>
-            Subscription Minting
-          </h1>
+          <h1>Subscription Minting</h1>
         </Col>
       </Row>
       <Row className="tw-pt-2">
