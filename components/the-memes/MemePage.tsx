@@ -453,10 +453,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 chainId={mainnet.id}
                 fullWidth
               />
-              <LatestDropNextMintSubscribe
-                tokenId={nft.id}
-                statusSource="none"
-              />
+              <div className="tw-mt-4">
+                <LatestDropNextMintSubscribe
+                  tokenId={nft.id}
+                  statusSource="none"
+                />
+              </div>
             </div>
           )}
           <MemePageLiveRightMenu

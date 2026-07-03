@@ -22,6 +22,8 @@ jest.mock("next/navigation", () => ({
 
 const mockRouterPush = jest.fn();
 const mockSeizeConnectFresh = jest.fn();
+const PROFILE_SUBSCRIPTIONS_PENDING_NAVIGATION_KEY =
+  "6529:profile-subscriptions-pending-navigation";
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     seizeConnectFresh: mockSeizeConnectFresh,
@@ -389,6 +391,11 @@ describe("About contents dropdown", () => {
       expect(requestAuth).toHaveBeenCalledTimes(1);
       expect(mockRouterPush).toHaveBeenCalledWith("/test-handle/subscriptions");
     });
+    expect(
+      globalThis.sessionStorage.getItem(
+        PROFILE_SUBSCRIPTIONS_PENDING_NAVIGATION_KEY
+      )
+    ).toBeNull();
   });
 
   it("preserves subscriptions redirect through connect/auth remounts", async () => {
@@ -506,6 +513,11 @@ describe("About contents dropdown", () => {
     act(() => {
       jest.advanceTimersByTime(5 * 60_000);
     });
+    expect(
+      globalThis.sessionStorage.getItem(
+        PROFILE_SUBSCRIPTIONS_PENDING_NAVIGATION_KEY
+      )
+    ).toBeNull();
 
     rerender(
       renderButton({

@@ -68,24 +68,24 @@ function expectReadonlySubscriptionToggle(
   tooltipLabel: string,
   checked: boolean
 ) {
-  const statusText = screen.getByText(tooltipLabel, {
-    selector: ".tw-sr-only",
-  });
+  const statusText = screen.getByTestId("readonly-subscription-toggle-status");
   expect(statusText).toBeInTheDocument();
+  expect(statusText).toHaveTextContent(tooltipLabel);
   expect(container).toContainElement(statusText);
   expect(screen.queryByRole("switch", { name: tooltipLabel })).toBeNull();
   expect(screen.queryByRole("img", { name: tooltipLabel })).toBeNull();
 
-  const trigger = container.querySelector(".tw-cursor-default");
-  expect(trigger).not.toBeNull();
-  const triggerElement = trigger as HTMLElement;
+  const triggerElement = screen.getByTestId(
+    "readonly-subscription-toggle-trigger"
+  );
   expect(triggerElement).not.toHaveAttribute("aria-checked");
   expect(triggerElement).not.toHaveAttribute("aria-disabled");
   expect(triggerElement).not.toHaveAttribute("tabindex");
 
-  const toggle = triggerElement.querySelector("[aria-hidden='true']");
-  expect(toggle).toBeInTheDocument();
-  expect(toggle).toHaveClass(checked ? "tw-bg-primary-500" : "tw-bg-black/35");
+  const toggle = screen.getByTestId("readonly-subscription-toggle-visual");
+  expect(triggerElement).toContainElement(toggle);
+  expect(toggle).toHaveAttribute("aria-hidden", "true");
+  expect(toggle).toHaveAttribute("data-checked", checked ? "true" : "false");
 }
 
 describe("LatestDropNextMintSubscribe", () => {

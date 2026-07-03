@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { ABOUT_SUBSCRIPTIONS_HREF } from "../../user/subscriptions/subscriptionNavigation";
 
 const SUBSCRIPTION_ROW_CLASS_NAME =
-  "tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-3 tw-py-3 md:tw-px-4";
+  "tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-3 tw-py-3 md:tw-px-4";
 
 function ReadonlySubscriptionToggle({
   checked,
@@ -33,9 +33,14 @@ function ReadonlySubscriptionToggle({
         offset={12}
         showArrow={false}
       >
-        <span className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full">
+        <span
+          data-testid="readonly-subscription-toggle-trigger"
+          className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full"
+        >
           <span
             aria-hidden="true"
+            data-checked={checked ? "true" : "false"}
+            data-testid="readonly-subscription-toggle-visual"
             className={clsx(
               "tw-pointer-events-none tw-inline-flex tw-h-5 tw-w-10 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors md:tw-h-6 md:tw-w-12",
               checked
@@ -54,7 +59,12 @@ function ReadonlySubscriptionToggle({
           </span>
         </span>
       </CustomTooltip>
-      <span className="tw-sr-only">{tooltipLabel}</span>
+      <span
+        data-testid="readonly-subscription-toggle-status"
+        className="tw-sr-only"
+      >
+        {tooltipLabel}
+      </span>
     </>
   );
 }
