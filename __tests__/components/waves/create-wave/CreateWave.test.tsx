@@ -55,6 +55,7 @@ jest.mock("@/components/waves/create-wave/services/waveApiService", () => ({
 
 jest.mock("@/helpers/waves/create-wave.helpers", () => ({
   getCreateNewWaveBody: jest.fn(),
+  getCreateWaveEndDate: jest.fn(({ config }) => config.dates.endDate),
 }));
 
 jest.mock("@/components/waves/create-wave/services/waveMediaService", () => ({
