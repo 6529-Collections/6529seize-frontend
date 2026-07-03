@@ -4,7 +4,6 @@ import {
   Bars3Icon,
   ChatBubbleLeftIcon,
   EllipsisHorizontalIcon,
-  PaperAirplaneIcon,
   Squares2X2Icon,
   LinkIcon,
   CheckIcon,
@@ -47,7 +46,6 @@ import WavePicture from "@/components/waves/WavePicture";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import useCreateModalState from "@/hooks/useCreateModalState";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
@@ -391,7 +389,6 @@ export default function AppHeader() {
   const { waveDropAction } = useHeaderContext();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
-  const { openDirectMessage } = useCreateModalState();
   const {
     address,
     hasValidWalletAuth: isAuthenticated,
@@ -509,8 +506,6 @@ export default function AppHeader() {
   });
   const isMessagesContext = activeView === "messages";
   const isWavesContext = activeView === "waves";
-  const isOnMessagesRoute = pathname === "/messages" && !waveParam;
-  const showCreateDmAction = isOnMessagesRoute || isMessagesContext;
   const showPageShareAction =
     !isWavesRoute &&
     !isMessagesRoute &&
@@ -606,15 +601,6 @@ export default function AppHeader() {
           <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
         ),
       onSelect: toggleViewMode,
-    });
-  }
-
-  if (showCreateDmAction) {
-    appHeaderMoreMenuItems.push({
-      id: "create-dm",
-      label: "Create DM",
-      icon: <PaperAirplaneIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />,
-      onSelect: openDirectMessage,
     });
   }
 

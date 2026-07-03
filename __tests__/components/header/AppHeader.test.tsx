@@ -275,6 +275,17 @@ describe("AppHeader", () => {
     expect(screen.getByText("Messages")).toBeInTheDocument();
   });
 
+  it("does not show duplicate Create DM overflow on messages route", () => {
+    setup({ asPath: "/messages" });
+
+    expect(
+      screen.queryByRole("button", { name: "More header actions" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("menuitem", { name: "Create DM" })
+    ).not.toBeInTheDocument();
+  });
+
   it("shows share-mode wave link action in app header for non-DM waves", () => {
     const wave = {
       id: "w1",
@@ -533,8 +544,9 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: true },
     });
 
-    expect(screen.getByRole("link", { name: "View prxt0's profile" }))
-      .toHaveAttribute("href", "/prxt0");
+    expect(
+      screen.getByRole("link", { name: "View prxt0's profile" })
+    ).toHaveAttribute("href", "/prxt0");
     expect(
       screen.queryByRole("button", { name: /copy wave link|share wave/i })
     ).not.toBeInTheDocument();
