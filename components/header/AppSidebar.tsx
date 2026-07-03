@@ -5,31 +5,19 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import {
-  DocumentTextIcon,
-  UserIcon,
-  WrenchIcon,
-} from "@heroicons/react/24/outline";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
-import {
-  getAboutNavItemHref,
-  getAboutNavItemLabel,
-  getVisibleAboutNavGroups,
-} from "@/components/about/about.routes";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useCapacitor from "@/hooks/useCapacitor";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import { useSidebarSections } from "@/hooks/useSidebarSections";
+import type { SidebarSection } from "@/components/navigation/navTypes";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
-import DropForgeIcon from "../common/icons/DropForgeIcon";
-import DiscoverIcon from "../common/icons/DiscoverIcon";
-import UsersIcon from "../common/icons/UsersIcon";
+import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
@@ -38,69 +26,55 @@ type SidebarMenu = Parameters<typeof AppSidebarMenuItems>[0]["menu"];
 
 type SidebarMenuChildren = NonNullable<SidebarMenu[number]["children"]>;
 
-const MENU: SidebarMenu = [
-  { label: "Profile", path: "/profile", icon: UserIcon },
-  { label: "Discovery", path: "/discover", icon: DiscoverIcon },
-  {
-    label: "Network",
-    icon: UsersIcon,
-    children: [
-      { label: "Identities", path: "/network" },
-      { label: "Activity", path: "/network/activity" },
-      { label: "Groups", path: "/network/groups" },
-      { label: "NFT Activity", path: "/nft-activity" },
-      { label: "Memes Calendar", path: "/meme-calendar" },
-      { label: "TDH", path: "/network/tdh" },
-      { label: "xTDH", path: "/xtdh" },
-      { label: "Wave Score", path: "/network/wave-score" },
-      {
-        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.repCategories"),
-        path: "/rep/categories",
-      },
-      { label: "Metrics", section: true },
-      { label: "Health", path: "/network/health" },
-      { label: "Definitions", path: "/network/definitions" },
-      { label: "Levels", path: "/network/levels" },
-      { label: "Network Stats", path: "/network/health/network-tdh" },
-    ],
-  },
-  {
-    label: "Tools",
-    icon: WrenchIcon,
-    children: [
-      { label: "NFT Delegation", section: true },
-      { label: "Delegation Center", path: "/delegation/delegation-center" },
-      { label: "Wallet Architecture", path: "/delegation/wallet-architecture" },
-      { label: "Delegation FAQ", path: "/delegation/delegation-faq" },
-      {
-        label: "Consolidation Use Cases",
-        path: "/delegation/consolidation-use-cases",
-      },
-      { label: "Wallet Checker", path: "/delegation/wallet-checker" },
-      { label: "The Memes Tools", section: true },
-      { label: "Memes Subscriptions", path: "/tools/subscriptions-report" },
-      { label: "Meme Accounting", path: "/meme-accounting?focus=the-memes" },
-      { label: "Meme Gas", path: "/meme-gas?focus=the-memes" },
-      {
-        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.otherTools"),
-        section: true,
-        dividerBefore: true,
-      },
-      {
-        label: t(DEFAULT_LOCALE, "rep.categories.sidebar.api"),
-        path: "/tools/api",
-      },
-      { label: "EMMA", path: "/emma" },
-      { label: "Block Finder", path: "/tools/block-finder" },
-      { label: "Open Data", path: "/open-data" },
-    ],
-  },
-  {
-    label: "About",
-    icon: DocumentTextIcon,
-    children: [],
-  },
-];
+function appendDropForgeToAbout(section: SidebarSection): SidebarSection {
+  const dropForgeItem = { name: DROP_FORGE_TITLE, href: DROP_FORGE_PATH };
+  const subsections = section.subsections ?? [];
+  const developerSectionName = "Developer & Open Data";
+  const hasDeveloperSection = subsections.some(
+    (subsection) => subsection.name === developerSectionName
+  );
+
+  return {
+    ...section,
+    subsections: hasDeveloperSection
+      ? subsections.map((subsection) =>
+          subsection.name === developerSectionName
+            ? { ...subsection, items: [...subsection.items, dropForgeItem] }
+            : subsection
+        )
+      : [
+          ...subsections,
+          {
+            name: developerSectionName,
+            items: [dropForgeItem],
+          },
+        ],
+  };
+}
+
+function mapSectionToMenuItem(section: SidebarSection): SidebarMenu[number] {
+  const children: SidebarMenuChildren = [
+    ...section.items.map((item) => ({
+      label: item.name,
+      path: item.href,
+    })),
+    ...(section.subsections?.flatMap(
+      (subsection): SidebarMenuChildren => [
+        { label: subsection.name, section: true },
+        ...subsection.items.map((item) => ({
+          label: item.name,
+          path: item.href,
+        })),
+      ]
+    ) ?? []),
+  ];
+
+  return {
+    label: section.name,
+    icon: section.icon,
+    children,
+  };
+}
 
 export default function AppSidebar({
   open,
@@ -113,68 +87,49 @@ export default function AppSidebar({
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
+  const sections = useSidebarSections(
+    appWalletsSupported,
+    capacitor.isIos,
+    cookieConsent === undefined ? "US" : cookieConsent.country
+  );
   const handleClose = useCallback(() => onClose(), [onClose]);
 
   const menu = useMemo(() => {
-    const hideSubscriptions =
-      cookieConsent === undefined
-        ? false
-        : shouldHideSubscriptions({
-            capacitorIsIos: capacitor.isIos,
-            country: cookieConsent.country,
-          });
-    const aboutChildren = getAboutSidebarChildren(hideSubscriptions);
-    const updatedMenu = MENU.map((item) => {
-      if (item.label === "Tools" && item.children) {
-        const updatedChildren = [...item.children];
+    const navigationSections = showDropForge
+      ? sections.map((section) =>
+          section.key === "about" ? appendDropForgeToAbout(section) : section
+        )
+      : sections;
+    const sectionMap = new Map(
+      navigationSections.map((section) => [section.key, section])
+    );
 
-        if (appWalletsSupported) {
-          updatedChildren.unshift({
-            label: "App Wallets",
-            path: "/tools/app-wallets",
-          });
-        }
-
-        return {
-          ...item,
-          children: updatedChildren,
-        };
+    return [
+      sectionMap.get("nfts"),
+      sectionMap.get("waves"),
+      {
+        label: "DMs",
+        path: "/messages",
+        icon: ChatBubbleIcon,
+      },
+      {
+        label: "Join 6529",
+        path: "/join",
+        icon: UserPlusIcon,
+      },
+      sectionMap.get("about"),
+    ].flatMap((item): SidebarMenu => {
+      if (item === undefined) {
+        return [];
       }
 
-      if (item.label === "About") {
-        return {
-          ...item,
-          children: aboutChildren,
-        };
+      if ("key" in item) {
+        return [mapSectionToMenuItem(item)];
       }
 
-      return item;
+      return [item];
     });
-
-    if (showDropForge) {
-      const aboutIndex = updatedMenu.findIndex(
-        (item) => item.label === "About"
-      );
-      const dropForgeItem: SidebarMenu[number] = {
-        label: DROP_FORGE_TITLE,
-        path: DROP_FORGE_PATH,
-        icon: DropForgeIcon,
-      };
-
-      if (aboutIndex >= 0) {
-        updatedMenu.splice(aboutIndex + 1, 0, dropForgeItem);
-      } else {
-        updatedMenu.push(dropForgeItem);
-      }
-    }
-
-    return updatedMenu;
-  }, [
-    appWalletsSupported,
-    capacitor.isIos,
-    cookieConsent?.country,
-    showDropForge,
-  ]);
+  }, [sections, showDropForge]);
 
   // Close on right-to-left swipe
   useEffect(() => {
@@ -234,7 +189,10 @@ export default function AppSidebar({
           >
             <DialogPanel className="tw-pointer-events-auto tw-flex tw-size-full tw-max-w-[22.75rem] tw-flex-col tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)] tw-pt-[env(safe-area-inset-top,0px)] tw-shadow-xl">
               <AppSidebarHeader onClose={handleClose} />
-              <nav className="tw-flex-1 tw-overflow-y-auto tw-py-6 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">
+              <nav
+                aria-label="Primary navigation"
+                className="tw-flex-1 tw-overflow-y-auto tw-py-6 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
+              >
                 <div className="tw-flex tw-h-full tw-flex-col">
                   <div className="tw-flex-1 tw-px-2">
                     <AppSidebarMenuItems menu={menu} onNavigate={handleClose} />
@@ -250,23 +208,4 @@ export default function AppSidebar({
       </Dialog>
     </Transition>
   );
-}
-
-function getAboutSidebarChildren(
-  hideSubscriptions: boolean
-): SidebarMenuChildren {
-  const locale = DEFAULT_LOCALE;
-
-  return [
-    { label: t(locale, "about.contents.aboutFallback"), path: "/about" },
-    ...getVisibleAboutNavGroups(hideSubscriptions).flatMap(
-      (group): SidebarMenuChildren => [
-        { label: t(locale, group.labelKey), section: true },
-        ...group.items.map((item) => ({
-          label: getAboutNavItemLabel(item, locale),
-          path: getAboutNavItemHref(item),
-        })),
-      ]
-    ),
-  ];
 }

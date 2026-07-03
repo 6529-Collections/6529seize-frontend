@@ -13,7 +13,7 @@ import {
 } from "../support/surfaceSimulation";
 
 const NAVIGATION_TIMEOUT_MS = 15000;
-const WAVE_SCORE_RESULT = /Wave Score.*Network/i;
+const WAVE_SCORE_RESULT = /Wave Score.*About.*Network Data/i;
 const WAVE_SCORE_HEADING = "Wave score transparency";
 const REQUIRED_DELEGATION_ACTIONS = [
   "Register Delegation",
@@ -86,7 +86,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     );
   });
 
-  test("desktop sidebar navigates Network to TDH", async ({
+  test("desktop sidebar navigates About Network Data to TDH", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -97,8 +97,9 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await forceExpandedDesktopSidebar(page);
     await gotoReady(page, "/");
 
-    const nav = page.getByRole("navigation", { name: "Desktop navigation" });
-    await nav.getByRole("button", { name: "Network" }).click();
+    const nav = page.getByRole("navigation", { name: "Primary navigation" });
+    await nav.getByRole("button", { name: "About" }).click();
+    await nav.getByRole("button", { name: "Network Data" }).click();
     await nav.getByRole("link", { name: "TDH", exact: true }).click();
 
     await expect(page).toHaveURL(/\/network\/tdh$/);
@@ -106,7 +107,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expectTdhExplainer(page);
   });
 
-  test("mobile menu navigates Collections to The Memes", async ({
+  test("mobile menu navigates NFTs to The Memes", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -118,9 +119,9 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
 
     await page.getByRole("button", { name: "Open menu" }).click();
     const nav = page.getByRole("navigation", { name: "Desktop navigation" });
-    await nav.getByRole("button", { name: "Collections" }).click();
+    await nav.getByRole("button", { name: "NFTs" }).click();
     await nav
-      .getByLabel("Collections items")
+      .getByLabel("NFTs items")
       .getByRole("link", { name: "The Memes", exact: true })
       .click();
 

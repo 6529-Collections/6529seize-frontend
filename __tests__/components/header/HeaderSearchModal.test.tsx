@@ -117,23 +117,45 @@ const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
 
 const defaultSidebarSections: SidebarSection[] = [
   {
-    key: "network",
-    name: "Network",
+    key: "nfts",
+    name: "NFTs",
     icon: () => null,
     items: [
-      { name: "xTDH", href: "/xtdh" },
-      { name: "Wave Score", href: "/network/wave-score" },
+      { name: "The Memes", href: "/the-memes" },
+      { name: "NFT Activity", href: "/nft-activity" },
     ],
     subsections: [],
   },
   {
-    key: "tools",
-    name: "Tools",
+    key: "waves",
+    name: "Waves",
     icon: () => null,
     items: [
-      { name: "Delegation Center", href: "/delegation/delegation-center" },
+      { name: "Waves", href: "/waves" },
+      { name: "Discover Waves", href: "/discover" },
     ],
     subsections: [],
+  },
+  {
+    key: "about",
+    name: "About",
+    icon: () => null,
+    items: [{ name: "About", href: "/about" }],
+    subsections: [
+      {
+        name: "Network Data",
+        items: [
+          { name: "xTDH", href: "/xtdh" },
+          { name: "Wave Score", href: "/network/wave-score" },
+        ],
+      },
+      {
+        name: "Delegation",
+        items: [
+          { name: "Delegation Center", href: "/delegation/delegation-center" },
+        ],
+      },
+    ],
   },
 ];
 
@@ -357,7 +379,7 @@ describe("HeaderSearchModal", () => {
         (content) =>
           content.includes('"title":"Wave Score"') &&
           content.includes('"/network/wave-score"') &&
-          content.includes('"breadcrumbs":["Network"]')
+          content.includes('"breadcrumbs":["About","Network Data"]')
       )
     ).toBe(true);
   });
@@ -385,6 +407,9 @@ describe("HeaderSearchModal", () => {
 
     expect(networkNerdItems).toHaveLength(1);
     expect(networkNerdItems[0]).toContain('"title":"Network Nerd"');
+    expect(networkNerdItems[0]).toContain(
+      '"breadcrumbs":["About","Network Data"]'
+    );
     expect(networkNerdItems[0]).not.toContain(
       '"title":"Network Nerd Cards Collected"'
     );
@@ -398,8 +423,8 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
+          key: "nfts",
+          name: "NFTs",
           icon: () => null,
           items: [{ name: "Memes Calendar", href: "/meme-calendar" }],
           subsections: [],
@@ -431,8 +456,8 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
+          key: "nfts",
+          name: "NFTs",
           icon: () => null,
           items: [{ name: "Meme Calendar", href: "/meme-calendar" }],
           subsections: [],
@@ -464,8 +489,8 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
+          key: "nfts",
+          name: "NFTs",
           icon: () => null,
           items: [{ name: "Memes Calendar", href: "/meme-calendar" }],
           subsections: [],
@@ -497,13 +522,13 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
+          key: "about",
+          name: "About",
           icon: () => null,
           items: [],
           subsections: [
             {
-              name: "Metrics",
+              name: "Network Data",
               items: [{ name: "Health", href: "/network/health" }],
             },
           ],
@@ -518,7 +543,7 @@ describe("HeaderSearchModal", () => {
     });
 
     const input = screen.getByRole("textbox", { name: "Search" });
-    fireEvent.change(input, { target: { value: "metrics health" } });
+    fireEvent.change(input, { target: { value: "network data health" } });
 
     const items = await screen.findAllByTestId("item");
     expect(
@@ -535,23 +560,16 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
-          icon: () => null,
-          items: [],
-          subsections: [
-            {
-              name: "Metrics",
-              items: [{ name: "Health", href: "/network/health" }],
-            },
-          ],
-        },
-        {
           key: "about",
           name: "About",
           icon: () => null,
           items: [{ name: "Network Health", href: "/about/network-health" }],
-          subsections: [],
+          subsections: [
+            {
+              name: "Network Data",
+              items: [{ name: "Health", href: "/network/health" }],
+            },
+          ],
         },
       ],
       queryImpl: () => ({
@@ -574,23 +592,16 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "network",
-          name: "Network",
-          icon: () => null,
-          items: [],
-          subsections: [
-            {
-              name: "Metrics",
-              items: [{ name: "Health", href: "/network/health" }],
-            },
-          ],
-        },
-        {
           key: "about",
           name: "About",
           icon: () => null,
           items: [{ name: "Network Health", href: "/about/network-health" }],
-          subsections: [],
+          subsections: [
+            {
+              name: "Network Data",
+              items: [{ name: "Health", href: "/network/health" }],
+            },
+          ],
         },
       ],
       queryImpl: () => ({
@@ -652,13 +663,13 @@ describe("HeaderSearchModal", () => {
       selectedCategory: "PAGES",
       sidebarSections: [
         {
-          key: "tools",
-          name: "Tools",
+          key: "about",
+          name: "About",
           icon: () => null,
           items: [],
           subsections: [
             {
-              name: "NFT Delegation",
+              name: "Delegation",
               items: [
                 {
                   name: "Delegation FAQ",
@@ -666,14 +677,6 @@ describe("HeaderSearchModal", () => {
                 },
               ],
             },
-          ],
-        },
-        {
-          key: "about",
-          name: "About",
-          icon: () => null,
-          items: [],
-          subsections: [
             {
               name: "Support",
               items: [{ name: "FAQ", href: "/about/faq" }],

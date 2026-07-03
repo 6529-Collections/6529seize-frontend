@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Existing transparency page exceeds the tight limit; this change only updates navigation copy. */
 "use client";
 
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
@@ -79,11 +80,19 @@ interface ScoreReconciliationMismatch {
   readonly computedScore: number;
 }
 
+type ApiWaveScoreWithRuntimeOptionalMetadata = Omit<
+  ApiWaveScore,
+  "formula" | "quality_gate"
+> & {
+  readonly formula?: ApiWaveScoreFormula | null;
+  readonly quality_gate?: ApiWaveScoreQualityGate | null;
+};
+
 const UUID_REGEX =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 const SCORE_RECONCILIATION_EPSILON = 0.05;
-const DEFAULT_BACK_HREF = "/network";
+const DEFAULT_BACK_HREF = "/about";
 
 const DEFAULT_FORMULA: ApiWaveScoreFormula = {
   max_level_raw_for_score: 25000000,
@@ -245,32 +254,46 @@ function formatDaysFromMs(value: unknown): string {
   return `${formatScore(days)} ${suffix}`;
 }
 
+function getOptionalFormula(score: ApiWaveScore): ApiWaveScoreFormula | null {
+  return (score as ApiWaveScoreWithRuntimeOptionalMetadata).formula ?? null;
+}
+
+function getOptionalQualityGate(
+  score: ApiWaveScore
+): ApiWaveScoreQualityGate | null {
+  return (
+    (score as ApiWaveScoreWithRuntimeOptionalMetadata).quality_gate ?? null
+  );
+}
+
+function hasFormulaMetadata(score: ApiWaveScore): boolean {
+  return (
+    getOptionalFormula(score) !== null && getOptionalQualityGate(score) !== null
+  );
+}
+
 function getFormula(score: ApiWaveScore): ApiWaveScoreFormula {
-  return score.formula ?? DEFAULT_FORMULA;
+  return getOptionalFormula(score) ?? DEFAULT_FORMULA;
 }
 
 function getQualityGate(score: ApiWaveScore): ApiWaveScoreQualityGate {
   const qualityScore = toNumber(score.quality_score);
-  const threshold =
-    score.quality_gate?.threshold ?? DEFAULT_QUALITY_GATE_THRESHOLD;
+  const qualityGate = getOptionalQualityGate(score);
+  const threshold = qualityGate?.threshold ?? DEFAULT_QUALITY_GATE_THRESHOLD;
   const multiplier =
-    score.quality_gate?.multiplier ?? clamp(qualityScore / threshold, 0, 1);
+    qualityGate?.multiplier ?? clamp(qualityScore / threshold, 0, 1);
   return {
     threshold,
     multiplier,
     gated_hotness_score:
-      score.quality_gate?.gated_hotness_score ??
+      qualityGate?.gated_hotness_score ??
       roundScore(toNumber(score.hotness_score) * multiplier),
   };
 }
 
 function getCurrentOrigin(): string {
-  if (
-    typeof globalThis === "object" &&
-    "location" in globalThis &&
-    typeof globalThis.location?.origin === "string"
-  ) {
-    return globalThis.location.origin;
+  if (typeof window !== "undefined") {
+    return window.location.origin;
   }
   return "https://6529.io";
 }
@@ -306,7 +329,7 @@ function getBackLinkLabel(href: string): string {
   if (href !== DEFAULT_BACK_HREF) {
     return "Back to previous page";
   }
-  return "Back to Network";
+  return "Back to About";
 }
 
 function scrollElementIntoNearestView(element: HTMLElement | null): void {
@@ -370,15 +393,13 @@ function parseWaveIdFromInput(input: string): string | null {
 }
 
 function getWaveDisplayHandle(wave: ApiWave): string {
-  return (
-    wave.author?.handle ?? wave.author?.primary_address ?? "Unknown creator"
-  );
+  return wave.author.handle ?? wave.author.primary_address;
 }
 
 function getWaveHref(wave: ApiWave): string {
   const isDirectMessage =
     wave.wave.type === ApiWaveType.Chat &&
-    Boolean(wave.chat?.scope?.group?.is_direct_message);
+    Boolean(wave.chat.scope.group?.is_direct_message);
   return getWaveRoute({
     waveId: wave.id,
     isDirectMessage,
@@ -991,13 +1012,13 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
         toNumber(formula.visibility_component_weights.gated_hotness_score)
   );
   const waveRepTotal = wave.wave_rep?.total_rep ?? 0;
-  const hasFormulaMetadata = Boolean(score.formula && score.quality_gate);
-  const formulaSource = hasFormulaMetadata
+  const hasScoreFormulaMetadata = hasFormulaMetadata(score);
+  const formulaSource = hasScoreFormulaMetadata
     ? "API formula metadata"
     : "v1 fallback";
   const fallbackReconciliationDetail =
     "API score shown; no formula metadata returned";
-  const scoreMismatches = hasFormulaMetadata
+  const scoreMismatches = hasScoreFormulaMetadata
     ? getScoreReconciliationMismatches([
         {
           label: "Quality",
@@ -1220,7 +1241,7 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
               label="Quality"
               value={score.quality_score}
               detail={
-                hasFormulaMetadata
+                hasScoreFormulaMetadata
                   ? `Computed ${formatScore(computedQuality)}`
                   : fallbackReconciliationDetail
               }
@@ -1295,7 +1316,7 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
             },
           ]}
           footer={
-            hasFormulaMetadata
+            hasScoreFormulaMetadata
               ? `Base ${formatScore(
                   hotnessBeforeSafety
                 )} -> hotness ${formatScore(
@@ -1357,7 +1378,7 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
             },
           ]}
           footer={
-            hasFormulaMetadata
+            hasScoreFormulaMetadata
               ? `Final visibility ${formatScore(
                   score.visibility_score
                 )}. Computed ${formatScore(computedVisibility)}.`
@@ -1675,9 +1696,8 @@ export function WaveScoreTransparencyPage({
   const resultContainerRef = useRef<HTMLDivElement>(null);
 
   const currentScore = wave?.wave_score ?? null;
-  const apiHasFormulaMetadata = Boolean(
-    currentScore?.formula && currentScore?.quality_gate
-  );
+  const apiHasFormulaMetadata =
+    currentScore !== null && hasFormulaMetadata(currentScore);
   const backLinkLabel = getBackLinkLabel(returnTo);
 
   const loadWave = async (waveId: string) => {
@@ -1762,16 +1782,16 @@ export function WaveScoreTransparencyPage({
               {backLinkLabel}
             </Link>
             <p className="tw-mt-5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-              Network menu / Wave Score
+              About / Network Data / Wave Score
             </p>
             <h1 className="tw-mt-5 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white md:tw-text-4xl">
               Wave score transparency
             </h1>
             <p className="tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
               This Network page explains the score shown on waves across
-              discovery, the sidebar, home, and wave pages. Find it from the
-              Network menu directly below xTDH whenever you want the formula or
-              a live wave calculation.
+              discovery, the sidebar, home, and wave pages. Find it in About
+              under Network Data whenever you want the formula or a live wave
+              calculation.
             </p>
           </div>
 

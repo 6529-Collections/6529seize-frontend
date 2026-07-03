@@ -262,7 +262,7 @@ describe("NavItem notifications", () => {
     mockUseLinkStatus.mockReturnValue({ pending: true });
     const item = {
       kind: "view",
-      name: "Messages",
+      name: "DMs",
       viewKey: "messages",
       icon: "messages",
     } as any;

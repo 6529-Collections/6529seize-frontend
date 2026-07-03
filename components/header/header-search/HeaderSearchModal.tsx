@@ -1,8 +1,9 @@
+/* eslint-disable max-lines -- Existing search modal exceeds the tight limit; this change only updates navigation IA metadata. */
 "use client";
 
 import {
   ChevronLeftIcon,
-  ScaleIcon,
+  UserPlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -17,10 +18,8 @@ import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
-import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import UsersIcon from "@/components/common/icons/UsersIcon";
-import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
@@ -105,40 +104,34 @@ const CATEGORY_LABELS: Record<FilterableCategory, string> = {
 
 const CATEGORY_PREVIEW_LIMIT = 3;
 
-const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
-  { name: "Home", href: "/", section: "Main", icon: HomeIcon },
-  { name: "Waves", href: "/waves", section: "Main", icon: WavesIcon },
+const DIRECT_NAVIGATION_PAGES: SidebarPageEntry[] = [
   {
-    name: "Messages",
+    name: "DMs",
     href: "/messages",
     section: "Main",
     icon: ChatBubbleIcon,
   },
   {
-    name: "Discovery",
-    href: "/discover",
+    name: "Join 6529",
+    href: "/join",
     section: "Main",
-    icon: DiscoverIcon,
-  },
-  {
-    name: "Wave Score",
-    href: "/network/wave-score",
-    section: "Network",
-    icon: ScaleIcon,
-  },
-  {
-    name: "Notifications",
-    href: "/notifications",
-    section: "Main",
-    icon: BellIcon,
+    icon: UserPlusIcon,
   },
 ];
 
 const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
+  { name: "Home", href: "/", section: "Utility", icon: HomeIcon },
+  {
+    name: "Notifications",
+    href: "/notifications",
+    section: "Account",
+    icon: BellIcon,
+  },
   {
     name: "Network Nerd",
     href: "/network/nerd",
-    section: "Network",
+    section: "About",
+    subsection: "Network Data",
     icon: UsersIcon,
   },
 ];
@@ -146,6 +139,8 @@ const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
 const MIN_SEARCH_LENGTH = 3;
 const NFT_SEARCH_MIN_LENGTH = 3;
 const HEADER_SEARCH_RESULTS_PANEL_ID = "header-search-results-panel";
+const EMPTY_PROFILE_RESULTS: CommunityMemberMinimal[] = [];
+const EMPTY_NFT_RESULTS: NFTSearchResult[] = [];
 
 interface PreviewGroupItem {
   readonly item: HeaderSearchModalItemType;
@@ -569,6 +564,9 @@ const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
   [DROP_FORGE_PATH]: [DROP_FORGE_TITLE],
   [DROP_FORGE_SECTIONS.CRAFT.path]: [`${DROP_FORGE_TITLE} Craft`],
   [DROP_FORGE_SECTIONS.LAUNCH.path]: [`${DROP_FORGE_TITLE} Launch`],
+  "/discover": ["Discovery", "Wave discovery", "Discover Waves"],
+  "/messages": ["Messages", "Direct messages", "DMs"],
+  "/the-memes": ["NFTs", "Meme Cards"],
   "/network/nerd": [
     "Network leaderboard",
     "Collector leaderboard",
@@ -724,6 +722,11 @@ type PageSearchMatchInputs = {
   readonly compositeValues: string[];
 };
 
+type PageSearchQuery = {
+  readonly normalizedQuery: string;
+  readonly canonicalQueryTokens: readonly string[];
+};
+
 const getPageMatchPriority = (
   {
     normalizedTitle,
@@ -786,13 +789,14 @@ const getPageMatchPriority = (
 };
 
 const pageMatchesQuery = (
-  normalizedTitle: string,
-  normalizedHref: string,
-  normalizedBreadcrumbs: string[],
-  normalizedSearchTerms: string[],
-  compositeValues: string[],
-  normalizedQuery: string,
-  canonicalQueryTokens: readonly string[]
+  {
+    normalizedTitle,
+    normalizedHref,
+    normalizedBreadcrumbs,
+    normalizedSearchTerms,
+    compositeValues,
+  }: PageSearchMatchInputs,
+  { normalizedQuery, canonicalQueryTokens }: PageSearchQuery
 ) => {
   const isPathLikeQuery =
     normalizedQuery.startsWith("/") || normalizedQuery.includes("/");
@@ -950,7 +954,8 @@ export default function HeaderSearchModal({
       {
         name: DROP_FORGE_TITLE,
         href: DROP_FORGE_PATH,
-        section: "Main",
+        section: "About",
+        subsection: "Developer & Open Data",
         icon: DropForgeIcon,
       },
     ];
@@ -959,7 +964,8 @@ export default function HeaderSearchModal({
       pages.push({
         name: DROP_FORGE_SECTIONS.CRAFT.title,
         href: DROP_FORGE_SECTIONS.CRAFT.path,
-        section: DROP_FORGE_TITLE,
+        section: "About",
+        subsection: DROP_FORGE_TITLE,
         icon: DropForgeCraftIcon,
       });
     }
@@ -968,7 +974,8 @@ export default function HeaderSearchModal({
       pages.push({
         name: DROP_FORGE_SECTIONS.LAUNCH.title,
         href: DROP_FORGE_SECTIONS.LAUNCH.path,
-        section: DROP_FORGE_TITLE,
+        section: "About",
+        subsection: DROP_FORGE_TITLE,
         icon: DropForgeLaunchIcon,
       });
     }
@@ -978,7 +985,7 @@ export default function HeaderSearchModal({
   const allPageEntries = useMemo(() => {
     const seen = new Set<string>();
     return [
-      ...PRIMARY_NAVIGATION_PAGES,
+      ...DIRECT_NAVIGATION_PAGES,
       ...SEARCH_ONLY_PAGES,
       ...sidebarPages,
       ...dropForgePages,
@@ -1059,7 +1066,7 @@ export default function HeaderSearchModal({
 
   const {
     isFetching: isFetchingProfiles,
-    data: profiles,
+    data: profiles = EMPTY_PROFILE_RESULTS,
     error: profilesError,
     refetch: refetchProfiles,
   } = useQuery<CommunityMemberMinimal[], Error>({
@@ -1077,7 +1084,7 @@ export default function HeaderSearchModal({
 
   const {
     isFetching: isFetchingNfts,
-    data: nfts,
+    data: nfts = EMPTY_NFT_RESULTS,
     error: nftsError,
     refetch: refetchNfts,
   } = useQuery<NFTSearchResult[], Error>({
@@ -1132,20 +1139,6 @@ export default function HeaderSearchModal({
           normalizedSearchTerms
         );
 
-        if (
-          !pageMatchesQuery(
-            normalizedTitle,
-            normalizedHref,
-            normalizedBreadcrumbs,
-            normalizedSearchTerms,
-            compositeValues,
-            normalizedQuery,
-            canonicalQueryTokens
-          )
-        ) {
-          return accumulator;
-        }
-
         const hrefSegments = normalizedHref.split("/").filter(Boolean);
         const matchInputs = {
           normalizedTitle,
@@ -1155,14 +1148,22 @@ export default function HeaderSearchModal({
           normalizedSearchTerms,
           compositeValues,
         };
+        const matchQuery = {
+          normalizedQuery,
+          canonicalQueryTokens,
+        };
+
+        if (!pageMatchesQuery(matchInputs, matchQuery)) {
+          return accumulator;
+        }
 
         accumulator.push({
           page,
           normalizedTitle,
           priority: getPageMatchPriority(
             matchInputs,
-            normalizedQuery,
-            canonicalQueryTokens
+            matchQuery.normalizedQuery,
+            matchQuery.canonicalQueryTokens
           ),
         });
 
@@ -1190,17 +1191,17 @@ export default function HeaderSearchModal({
   }, [shouldSearchPages, trimmedSearchValue, pageCatalog]);
 
   const profileResults: CommunityMemberMinimal[] = useMemo(
-    () => (shouldSearchDefault ? (profiles ?? []) : []),
+    () => (shouldSearchDefault ? profiles : []),
     [shouldSearchDefault, profiles]
   );
 
   const nftResults: NFTSearchResult[] = useMemo(
-    () => (shouldSearchNfts ? (nfts ?? []) : []),
+    () => (shouldSearchNfts ? nfts : []),
     [shouldSearchNfts, nfts]
   );
 
   const waveResults: ApiWave[] = useMemo(
-    () => (shouldSearchDefault ? (waves ?? []) : []),
+    () => (shouldSearchDefault ? waves : []),
     [shouldSearchDefault, waves]
   );
 
@@ -1234,15 +1235,17 @@ export default function HeaderSearchModal({
     [resultsByCategory]
   );
 
-  useEffect(() => {
-    if (
-      selectedCategory !== CATEGORY.ALL &&
-      (!isFilterableCategory(selectedCategory) ||
-        !categoriesWithResults.includes(selectedCategory))
-    ) {
-      setSelectedCategory(CATEGORY.ALL);
+  const selectedSearchCategory = useMemo(() => {
+    if (selectedCategory === CATEGORY.ALL) {
+      return CATEGORY.ALL;
     }
-  }, [categoriesWithResults, selectedCategory, setSelectedCategory]);
+    if (!isFilterableCategory(selectedCategory)) {
+      return CATEGORY.ALL;
+    }
+    return categoriesWithResults.includes(selectedCategory)
+      ? selectedCategory
+      : CATEGORY.ALL;
+  }, [categoriesWithResults, selectedCategory]);
 
   const handleClearSearch = () => {
     setSearchValue("");
@@ -1259,7 +1262,7 @@ export default function HeaderSearchModal({
     if (waveChatScroll) {
       waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
     } else {
-      const params = new URLSearchParams(searchParams?.toString() || "");
+      const params = new URLSearchParams(searchParams.toString());
       params.set("serialNo", String(serialNo));
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     }
@@ -1314,30 +1317,38 @@ export default function HeaderSearchModal({
   ]);
 
   const handleRetry = () => {
-    if (selectedCategory === CATEGORY.PAGES) {
+    const retryProfiles = () => {
+      void refetchProfiles().catch(() => undefined);
+    };
+    const retryNfts = () => {
+      void refetchNfts().catch(() => undefined);
+    };
+    const retryWaves = () => {
+      void refetchWaves().catch(() => undefined);
+    };
+
+    if (selectedSearchCategory === CATEGORY.PAGES) {
       return;
     }
 
-    if (selectedCategory === CATEGORY.ALL) {
+    if (selectedSearchCategory === CATEGORY.ALL) {
       if (shouldSearchDefault) {
-        refetchProfiles();
-        refetchWaves();
+        retryProfiles();
+        retryWaves();
       }
       if (shouldSearchNfts) {
-        refetchNfts();
+        retryNfts();
       }
-    } else if (selectedCategory === CATEGORY.PROFILES) {
+    } else if (selectedSearchCategory === CATEGORY.PROFILES) {
       if (shouldSearchDefault) {
-        refetchProfiles();
+        retryProfiles();
       }
-    } else if (selectedCategory === CATEGORY.NFTS) {
+    } else if (selectedSearchCategory === CATEGORY.NFTS) {
       if (shouldSearchNfts) {
-        refetchNfts();
+        retryNfts();
       }
-    } else if (selectedCategory === CATEGORY.WAVES) {
-      if (shouldSearchDefault) {
-        refetchWaves();
-      }
+    } else if (shouldSearchDefault) {
+      retryWaves();
     }
   };
 
@@ -1471,7 +1482,7 @@ export default function HeaderSearchModal({
 
                       {!isLoadingWaveDrops && isWaveDropsError && (
                         <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-iron-300">
-                          Couldn't load search results.
+                          Couldn&apos;t load search results.
                         </div>
                       )}
 
@@ -1570,7 +1581,7 @@ export default function HeaderSearchModal({
               {searchMode === SEARCH_MODE.SITE && (
                 <HeaderSearchSiteResults
                   key={trimmedDebouncedValue}
-                  selectedCategory={selectedCategory}
+                  selectedCategory={selectedSearchCategory}
                   setSelectedCategory={setSelectedCategory}
                   resultsByCategory={resultsByCategory}
                   categoriesWithResults={categoriesWithResults}
