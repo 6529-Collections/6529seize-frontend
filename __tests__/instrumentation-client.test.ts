@@ -22,6 +22,8 @@ describe("instrumentation-client", () => {
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
   const gifPickerTenorUndefinedTagsMessage =
     "undefined is not an object (evaluating 'e.tags')";
+  const gifPickerTenorUndefinedResultsMapMessage =
+    "undefined is not an object (evaluating 'e.results.map')";
   const reactDomRemoveChildMessage =
     "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
@@ -361,9 +363,62 @@ describe("instrumentation-client", () => {
           type: "http",
           category: "fetch",
           level: "error",
-          message: "GET: /v2/categories",
+          message: "GET: /v2/categories [403]",
           data: {
             url: "/v2/categories",
+            status_code: 403,
+            "url.is_first_party": false,
+            "url.is_first_party_api": false,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops gif-picker Tenor search errors with no app frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "gif-picker-tenor-search-event",
+      transaction: "/waves",
+      request: {
+        url: "https://6529.io/waves/1e2686e7-fa70-4be7-acf2-b763ed6b320b",
+      },
+      tags: {
+        transaction: "/waves",
+        url: "/waves/1e2686e7-fa70-4be7-acf2-b763ed6b320b",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: gifPickerTenorUndefinedResultsMapMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [gifPickerTenorManagerFrame],
+            },
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          category: "console",
+          level: "error",
+          message: "[gif-picker-react] Failed to fetch data from Tenor API",
+        },
+        {
+          type: "http",
+          category: "fetch",
+          level: "warning",
+          message: "GET: /v2/search [403]",
+          data: {
+            url: "/v2/search",
             "url.is_first_party": false,
             "url.is_first_party_api": false,
           },

@@ -87,6 +87,14 @@ export const ES_ES_MESSAGES = {
   "waves.chat.fileUploadAreaAriaLabel":
     "Área de carga de archivos del chat de wave",
   "waves.loadingStatus": "Cargando waves",
+  "waves.gifPicker.dialogTitle": "Busqueda de GIF",
+  "waves.gifPicker.status.checking": "Buscando GIF...",
+  "waves.gifPicker.status.ready": "La busqueda de GIF esta lista.",
+  "waves.gifPicker.unavailable.title":
+    "La busqueda de GIF no esta disponible temporalmente.",
+  "waves.gifPicker.unavailable.hint":
+    "Puedes subir un archivo GIF en su lugar.",
+  "common.close": "Cerrar",
   "memes.quickVote.leftThisRound": "{count} restantes esta ronda",
   "memes.quickVote.unrated": "{count} sin valorar",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",

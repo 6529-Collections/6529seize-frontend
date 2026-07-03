@@ -13,6 +13,10 @@ jest.mock("@/components/notifications/NotificationsContext", () => ({
   })),
 }));
 
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  markMobileLaunchStep: jest.fn(),
+}));
+
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: jest.fn(() => ({ isCapacitor: false, isActive: true })),
@@ -102,13 +106,32 @@ jest.mock("@/contexts/wave/hooks/useEnhancedWavesListCore", () => ({
 const useWavesListMock = require("@/hooks/useWavesList").default as jest.Mock;
 const useDmWavesListMock = require("@/hooks/useDmWavesList")
   .default as jest.Mock;
+const useCapacitorMock = require("@/hooks/useCapacitor").default as jest.Mock;
 const usePathnameMock = require("next/navigation").usePathname as jest.Mock;
+const useWaveByIdMock = require("@/hooks/useWaveById").useWaveById as jest.Mock;
+const useActiveWaveManagerMock =
+  require("@/contexts/wave/hooks/useActiveWaveManager")
+    .useActiveWaveManager as jest.Mock;
+const useEnhancedWavesListCoreMock =
+  require("@/contexts/wave/hooks/useEnhancedWavesListCore")
+    .default as jest.Mock;
+const markMobileLaunchStepMock =
+  require("@/utils/monitoring/mobileLaunchTiming")
+    .markMobileLaunchStep as jest.Mock;
 
 const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
   Object.defineProperty(document, "visibilityState", {
     configurable: true,
     value: state,
   });
+};
+
+type IdleWindow = Window & {
+  requestIdleCallback?: (
+    callback: () => void,
+    options?: { readonly timeout: number }
+  ) => number;
+  cancelIdleCallback?: (handle: number) => void;
 };
 
 const createListData = (refetchAllWaves: jest.Mock) => ({
@@ -142,7 +165,17 @@ describe("MyStreamProvider resume sync", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setDocumentVisibilityState("visible");
+    useCapacitorMock.mockReturnValue({ isCapacitor: false, isActive: true });
     usePathnameMock.mockReturnValue("/waves");
+    useWaveByIdMock.mockReturnValue({
+      wave: null,
+      isLoading: false,
+      isFetching: false,
+    });
+    useActiveWaveManagerMock.mockReturnValue({
+      activeWaveId: "wave-1",
+      setActiveWave: mockSetActiveWave,
+    });
     useWavesListMock.mockReturnValue(createListData(mainRefetch));
     useDmWavesListMock.mockReturnValue(createListData(dmRefetch));
   });
@@ -191,6 +224,117 @@ describe("MyStreamProvider resume sync", () => {
     expect(mainRefetch).toHaveBeenCalledTimes(1);
     expect(dmRefetch).not.toHaveBeenCalled();
     expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+  });
+
+  it("defers the main Waves list on native wave detail until it is requested", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/waves/wave-1");
+    let context: ReturnType<typeof useMyStream> | null = null;
+
+    render(
+      <MyStreamProvider>
+        <CaptureMyStream
+          onContext={(nextContext) => {
+            context = nextContext;
+          }}
+        />
+      </MyStreamProvider>
+    );
+
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+    expect(useEnhancedWavesListCoreMock.mock.calls[0][2]).toEqual(
+      expect.objectContaining({
+        enabled: false,
+        supportsPinning: true,
+      })
+    );
+    expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
+      "main_waves_list_deferred"
+    );
+
+    expect(context).not.toBeNull();
+    act(() => {
+      context!.requestMainWavesList();
+    });
+
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+    expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
+      "main_waves_list_enabled"
+    );
+  });
+
+  it("auto-enables the deferred main Waves list after route idle", () => {
+    jest.useFakeTimers();
+    const idleWindow = window as IdleWindow;
+    const originalRequestIdleCallback = idleWindow.requestIdleCallback;
+    const originalCancelIdleCallback = idleWindow.cancelIdleCallback;
+    Object.defineProperty(idleWindow, "requestIdleCallback", {
+      configurable: true,
+      value: jest.fn((callback: () => void) => {
+        callback();
+        return 1;
+      }),
+    });
+    Object.defineProperty(idleWindow, "cancelIdleCallback", {
+      configurable: true,
+      value: jest.fn(),
+    });
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/waves/wave-1");
+
+    try {
+      render(
+        <MyStreamProvider>
+          <div />
+        </MyStreamProvider>
+      );
+
+      expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+      expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
+        "main_waves_list_deferred"
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(999);
+      });
+      expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+
+      expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+      expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
+        "main_waves_list_enabled"
+      );
+    } finally {
+      Object.defineProperty(idleWindow, "requestIdleCallback", {
+        configurable: true,
+        value: originalRequestIdleCallback,
+      });
+      Object.defineProperty(idleWindow, "cancelIdleCallback", {
+        configurable: true,
+        value: originalCancelIdleCallback,
+      });
+      jest.useRealTimers();
+    }
+  });
+
+  it("handles active wave data without metrics", () => {
+    useWaveByIdMock.mockReturnValue({
+      wave: { id: "wave-1" },
+      isLoading: false,
+      isFetching: false,
+    });
+
+    expect(() => {
+      render(
+        <MyStreamProvider>
+          <div />
+        </MyStreamProvider>
+      );
+    }).not.toThrow();
   });
 
   it("treats a null pathname as a non-messages route", () => {
