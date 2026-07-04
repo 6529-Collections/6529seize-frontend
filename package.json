@@ -114,6 +114,8 @@
     "format:check": "node scripts/require-6529-command.cjs && prettier --check .",
     "format:changed": "node scripts/require-6529-command.cjs && bash -lc '{ git diff --name-only -z --diff-filter=ACMR main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
     "format:uncommitted": "node scripts/require-6529-command.cjs && bash -lc '{ git diff --name-only -z --diff-filter=ACMR HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
+    "debt:ratchet": "node scripts/require-6529-command.cjs && node scripts/debt-ratchet.cjs",
+    "debt:ratchet:update": "node scripts/require-6529-command.cjs && node scripts/debt-ratchet.cjs --update",
     "deadcode:knip": "node scripts/require-6529-command.cjs && knip",
     "deadcode:deps": "node scripts/require-6529-command.cjs && depcheck --ignores=\"eslint,eslint-*,@types/*,jest,ts-jest,playwright,@playwright/test,tailwindcss,postcss,autoprefixer\" --ignore-patterns=\".next,coverage,public,generated,tmp_gen_outp,tmp_gen_final,.generated-backup-*\"",
     "deadcode": "node scripts/require-6529-command.cjs && pnpm run deadcode:knip && pnpm run deadcode:deps",
