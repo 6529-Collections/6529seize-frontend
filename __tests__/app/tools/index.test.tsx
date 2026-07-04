@@ -69,7 +69,7 @@ describe("Tools index page", () => {
   it("exposes metadata", () => {
     expect(metadata.title).toEqual("Tools");
     expect(metadata.description).toEqual(
-      "6529 tools, reports, APIs, delegation utilities, and open data. | 6529.io"
+      "6529 Tools, reports and Open Data. | 6529.io"
     );
   });
 

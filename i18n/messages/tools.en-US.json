@@ -24,9 +24,8 @@
   "tools.contents.pages.team": "Team",
   "tools.contents.pages.royalties": "Royalties",
   "tools.index.metadata.title": "Tools",
-  "tools.index.metadata.description": "6529 tools, reports, APIs, delegation utilities, and open data.",
+  "tools.index.metadata.description": "6529 Tools, reports and Open Data.",
   "tools.index.eyebrow": "Tools",
   "tools.index.title": "6529 Tools",
-  "tools.index.lead": "Find the right utility for delegation, The Memes reporting, APIs, app wallets, EMMA, block lookup, and open data.",
   "tools.index.cardAriaLabel": "Open tool: {page}"
 }

@@ -123,7 +123,8 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards.",
+        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
+        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, and Minting links.",
         "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
         "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
@@ -5259,7 +5260,7 @@
       ],
       "facts": [
         "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
-        "It groups label-only tool cards into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
+        "It groups label-only tool cards with right-arrow affordances into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
         "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
         "Private operator routes and local-only tools are not listed on the public Tools index.",
