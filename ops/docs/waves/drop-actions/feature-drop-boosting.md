@@ -62,6 +62,54 @@ Sidebar layout and `Trending` shell behavior are documented in
 - When new drops arrive, in-thread boosted cards move upward with the feed; they
   do not stay pinned near the newest message.
 
+## Boosted Card Rendering Contract
+
+Boosted cards are compact card surfaces, but they must not change the meaning or
+primary content type of the original drop.
+
+- A drop that is media-first in the normal thread card must stay media-first when
+  boosted. This includes API media, standalone direct media URLs, and Markdown
+  images that would otherwise collapse into raw text or a tiny thumbnail.
+- A drop that is link-preview-first in the normal thread card must keep a
+  provider-specific preview when boosted when that provider has a specialized
+  card. Current shared preview handlers include GitHub, TikTok, Google
+  Workspace, NFT marketplace links, ENS, Compound, Twitter/X, Wikimedia, Tenor
+  GIFs, Art Blocks, `pepe.wtf`, Farcaster/Warpcast, first-party 6529 links, and
+  generic Open Graph previews.
+- If a boosted surface intentionally uses a smaller variant than the full thread
+  card, the compact variant still needs to preserve the recognizable card type:
+  image as image, video as video, tweet as tweet, collection preview as
+  collection preview, quote/internal link as quote/internal link, and generic URL
+  as link preview.
+- Boosted rendering must not expose Markdown syntax or raw media URLs that the
+  standard drop card would hide. Examples to guard against: `![alt](url)`
+  showing as text, leftover `!alt`, or a direct image URL rendered as a generic
+  metadata card.
+- When more than one rich object competes in a compact boosted card, choose the
+  first high-signal preview path and document any intentional fallback in the
+  relevant feature page or test name.
+
+## Card Visual QA
+
+When changing any card, card preview, media renderer, or Markdown/link handling,
+validate both the normal drop surface and the boosted-card surface across web,
+mobile, and desktop views.
+
+- Web/default view: normal thread card, in-thread boosted card, and sidebar or
+  home boosted card when applicable.
+- Mobile web: normal thread card and in-thread boosted card at a narrow
+  viewport.
+- Desktop web: normal thread card, in-thread boosted card, and any persistent
+  sidebar/home boosted placement.
+- Responsive desktop/tablet widths: confirm text, media actions, badges, and
+  preview controls do not overlap or escape their card bounds.
+- Boosted variants: confirm the card still uses the right content type, keeps
+  action controls usable, and avoids raw Markdown/URL residue.
+- For media and provider previews, verify rendered pixels as well as DOM text:
+  images should load, video/audio/model/html fallbacks should be coherent,
+  provider cards should not collapse into a generic fallback unexpectedly, and
+  console/network errors should be unrelated to the changed card.
+
 ## Edge Cases
 
 - Not connected:
