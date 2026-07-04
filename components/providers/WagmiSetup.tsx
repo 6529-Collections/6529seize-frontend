@@ -41,6 +41,10 @@ type MutableRef<T> = {
 
 type SetupAppKitAdapter = (wallets: AppWallet[]) => Promise<void>;
 
+// Ceiling on how long connect-intent callers wait for AppKit readiness; a hung
+// WalletConnect relay must surface as a connect error, not a stuck busy state.
+const APPKIT_READY_WAIT_TIMEOUT_MS = 15_000;
+
 type InitializeAdapterInput = {
   readonly currentAdapter: WagmiAdapter | null;
   readonly isInitializingRef: MutableRef<boolean>;
@@ -343,7 +347,22 @@ export default function WagmiSetup({
       return;
     }
 
-    await readyPromise;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    const timeoutPromise = new Promise<never>((_resolve, reject) => {
+      timeoutHandle = setTimeout(() => {
+        reject(
+          new Error(
+            "Timed out waiting for wallet connection services to become ready"
+          )
+        );
+      }, APPKIT_READY_WAIT_TIMEOUT_MS);
+    });
+
+    try {
+      await Promise.race([readyPromise, timeoutPromise]);
+    } finally {
+      clearTimeout(timeoutHandle);
+    }
   }, []);
 
   const appKitBootstrapValue = useMemo(
@@ -411,6 +430,10 @@ export default function WagmiSetup({
           .catch((error) => {
             if (isMountedRef.current) {
               setAppKitBootstrapStatus("error");
+              setToast({
+                message: sanitizeErrorForUser(error),
+                type: "error",
+              });
             }
             logErrorSecurely(
               "[WagmiSetup] AppKit ready failed after adapter mount",

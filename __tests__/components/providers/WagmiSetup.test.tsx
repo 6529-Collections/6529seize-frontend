@@ -836,6 +836,64 @@ describe("WagmiSetup Security Tests", () => {
         "[WagmiSetup] AppKit ready failed after adapter mount",
         readyError
       );
+      expect(mockSetToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      );
+    });
+
+    it("rejects connect-intent waiters when AppKit ready hangs past the timeout", async () => {
+      jest.useFakeTimers();
+      const ready = new Promise<void>(() => {
+        // Intentionally never settles to simulate a hung WalletConnect relay.
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
+      });
+
+      const WaitForReadyProbe = () => {
+        const bootstrap = useAppKitBootstrap();
+        const [waitState, setWaitState] = React.useState("waiting");
+        React.useEffect(() => {
+          bootstrap
+            .waitForReady()
+            .then(() => setWaitState("resolved"))
+            .catch(() => setWaitState("rejected"));
+        }, [bootstrap.waitForReady]);
+        return <div data-testid="wait-for-ready-state">{waitState}</div>;
+      };
+
+      const { container } = render(
+        <WagmiSetup>
+          <WaitForReadyProbe />
+        </WagmiSetup>
+      );
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(
+        container.querySelector('[data-testid="wait-for-ready-state"]')
+      ).toHaveTextContent("waiting");
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(15_000);
+      });
+      expect(
+        container.querySelector('[data-testid="wait-for-ready-state"]')
+      ).toHaveTextContent("rejected");
     });
   });
 
