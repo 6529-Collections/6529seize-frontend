@@ -1847,7 +1847,7 @@ export default function Auth({
       return;
     }
 
-    await seizeConnect();
+    seizeConnect();
   };
   const onConfirmSignRequest = () => {
     if (isDisconnectedWebSessionUpgradePrompt) {

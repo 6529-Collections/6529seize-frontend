@@ -45,7 +45,7 @@ export default function TransferToggle() {
       onClick={() => {
         if (!isConnected) {
           wantTransferAfterConnect.current = true;
-          void seizeConnect();
+          seizeConnect();
           return;
         }
 

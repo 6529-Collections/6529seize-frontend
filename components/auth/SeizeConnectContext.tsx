@@ -95,7 +95,7 @@ interface SeizeConnectContextType {
   isSafeWallet: boolean;
 
   /** Opens the wallet connection modal once AppKit is ready */
-  seizeConnect: () => Promise<void>;
+  seizeConnect: () => void;
 
   /**
    * Disconnects any live provider wallet before opening the connection modal.
@@ -867,11 +867,17 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const isActiveAppWalletConnector =
     activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
 
+  useEffect(() => {
+    if (state.open && isConnectIntentWaitingForAppKit) {
+      setIsConnectIntentWaitingForAppKit(false);
+    }
+  }, [isConnectIntentWaitingForAppKit, state.open]);
+
   const openConnectModal = useCallback(
     async (source: string): Promise<void> => {
       try {
+        setIsConnectIntentWaitingForAppKit(true);
         if (!isAppKitReady) {
-          setIsConnectIntentWaitingForAppKit(true);
           await waitForAppKitReady();
         }
 
@@ -885,31 +891,40 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           SecurityEventType.WALLET_MODAL_OPENED,
           createConnectionEventContext(source)
         );
+        if (state.open && isMountedRef.current) {
+          setIsConnectIntentWaitingForAppKit(false);
+        }
       } catch (error) {
+        if (isMountedRef.current) {
+          setIsConnectIntentWaitingForAppKit(false);
+        }
         const connectionError = new WalletConnectionError(
           "Failed to open wallet connection modal",
           error
         );
         logError(source, connectionError);
         throw connectionError;
-      } finally {
-        if (isMountedRef.current) {
-          setIsConnectIntentWaitingForAppKit(false);
-        }
       }
     },
-    [isAppKitReady, open, waitForAppKitReady]
+    [isAppKitReady, open, state.open, waitForAppKitReady]
   );
 
-  const seizeConnect = useCallback(async (): Promise<void> => {
-    // Log connection attempt for security monitoring
-    logSecurityEvent(
-      SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-      createConnectionEventContext("seizeConnect")
-    );
+  const seizeConnectOrThrow = useCallback(
+    async (source: string): Promise<void> => {
+      // Log connection attempt for security monitoring
+      logSecurityEvent(
+        SecurityEventType.WALLET_CONNECTION_ATTEMPT,
+        createConnectionEventContext(source)
+      );
 
-    await openConnectModal("seizeConnect");
-  }, [openConnectModal]);
+      await openConnectModal(source);
+    },
+    [openConnectModal]
+  );
+
+  const seizeConnect = useCallback((): void => {
+    void seizeConnectOrThrow("seizeConnect").catch(() => undefined);
+  }, [seizeConnectOrThrow]);
 
   const handleAddConnectedAccountConnectFailure = useCallback(
     (clearAddConnectedAccountGuard: () => void, error: unknown): void => {
@@ -932,7 +947,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         : null;
 
     if (!liveConnectedWallet || isActiveAppWalletConnector) {
-      await seizeConnect();
+      await seizeConnectOrThrow("seizeConnectFresh");
       return;
     }
 
@@ -956,13 +971,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    await seizeConnect();
+    await seizeConnectOrThrow("seizeConnectFresh");
   }, [
     account.address,
     account.isConnected,
     disconnect,
     isActiveAppWalletConnector,
-    seizeConnect,
+    seizeConnectOrThrow,
   ]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
@@ -1206,12 +1221,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       addFlowOriginAddressRef.current = liveConnectedWallet;
       setIsAddingConnectedAccount(true);
 
-      void seizeConnect().catch((error: unknown) => {
-        handleAddConnectedAccountConnectFailure(
-          clearAddConnectedAccountGuard,
-          error
-        );
-      });
+      void seizeConnectOrThrow("seizeAddConnectedAccount").catch(
+        (error: unknown) => {
+          handleAddConnectedAccountConnectFailure(
+            clearAddConnectedAccountGuard,
+            error
+          );
+        }
+      );
       return;
     }
 
@@ -1233,12 +1250,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
               clearAddConnectedAccountGuard();
               return;
             }
-            void seizeConnect().catch((error: unknown) => {
-              handleAddConnectedAccountConnectFailure(
-                clearAddConnectedAccountGuard,
-                error
-              );
-            });
+            void seizeConnectOrThrow("seizeAddConnectedAccount").catch(
+              (error: unknown) => {
+                handleAddConnectedAccountConnectFailure(
+                  clearAddConnectedAccountGuard,
+                  error
+                );
+              }
+            );
           }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
         })
         .catch((error: unknown) => {
@@ -1271,7 +1290,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isActiveAppWalletConnector,
     isAddingConnectedAccount,
     isConnectIntentWaitingForAppKit,
-    seizeConnect,
+    seizeConnectOrThrow,
     state.open,
   ]);
 

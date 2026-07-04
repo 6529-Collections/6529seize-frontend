@@ -420,6 +420,8 @@ export default function WagmiSetup({
           });
 
         appKitReadyPromiseRef.current = readyPromise;
+        // Keep the stored promise rejectable for connect-intent callers while
+        // preventing background readiness work from surfacing an unhandled rejection.
         void readyPromise.catch(() => undefined);
         setCurrentAdapter(result.adapter);
       } catch (error) {

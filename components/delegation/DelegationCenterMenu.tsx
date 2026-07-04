@@ -367,7 +367,7 @@ function DelegationConnectWalletState(
   props: Readonly<{
     title: string;
     body: string;
-    onConnect: () => Promise<void>;
+    onConnect: () => void;
   }>
 ) {
   return (

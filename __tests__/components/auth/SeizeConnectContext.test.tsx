@@ -130,9 +130,7 @@ const TestComponent: React.FC = () => {
   } = useSeizeConnectContext();
 
   const handleConnect = () => {
-    void seizeConnect().catch(() => {
-      // Errors are logged by the component
-    });
+    seizeConnect();
   };
 
   const handleAcceptValid = () => {
@@ -1514,7 +1512,7 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
       return (
         <button
           onClick={() => {
-            void seizeConnect();
+            seizeConnect();
           }}
           data-testid="connect-btn"
         >
@@ -1554,7 +1552,7 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
         <>
           <button
             onClick={() => {
-              void seizeConnect();
+              seizeConnect();
             }}
             data-testid="connect-btn"
           >
@@ -1565,7 +1563,11 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
       );
     };
 
-    render(
+    const { useAppKitState } = require("@reown/appkit/react");
+    const appKitState = { open: false };
+    (useAppKitState as jest.Mock).mockImplementation(() => appKitState);
+
+    const renderConnectTree = () => (
       <AppKitBootstrapContext.Provider
         value={{
           status: "initializing",
@@ -1579,6 +1581,8 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
         </SeizeConnectProvider>
       </AppKitBootstrapContext.Provider>
     );
+
+    const view = render(renderConnectTree());
 
     await userEvent.click(screen.getByTestId("connect-btn"));
 
@@ -1595,6 +1599,18 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
     await waitFor(() => {
       expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" });
+      expect(screen.getByTestId("connect-open")).toHaveTextContent("true");
+    });
+
+    appKitState.open = true;
+    view.rerender(renderConnectTree());
+    await waitFor(() => {
+      expect(screen.getByTestId("connect-open")).toHaveTextContent("true");
+    });
+
+    appKitState.open = false;
+    view.rerender(renderConnectTree());
+    await waitFor(() => {
       expect(screen.getByTestId("connect-open")).toHaveTextContent("false");
     });
   });

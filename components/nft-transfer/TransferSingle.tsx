@@ -191,7 +191,7 @@ function TransferSingleActionsImpl(
       onClick={() => {
         if (!isConnected) {
           wantModalAfterConnect.current = true;
-          void seizeConnect();
+          seizeConnect();
           return;
         }
         setShowModal(true);
