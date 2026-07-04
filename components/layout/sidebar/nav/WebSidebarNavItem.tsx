@@ -13,6 +13,7 @@ interface SidebarPrimaryItemProps {
   readonly iconSizeClass?: string | undefined;
   readonly label: string;
   readonly active?: boolean | undefined;
+  readonly ariaCurrent?: React.AriaAttributes["aria-current"] | undefined;
   readonly collapsed?: boolean | undefined;
   readonly ariaExpanded?: boolean | undefined;
   readonly ariaControls?: string | undefined;
@@ -28,6 +29,7 @@ function WebSidebarNavItem({
   iconSizeClass,
   label,
   active,
+  ariaCurrent,
   collapsed,
   ariaExpanded,
   ariaControls,
@@ -39,11 +41,11 @@ function WebSidebarNavItem({
 
   const content = (
     <div
-      className={`tw-flex tw-items-center tw-w-full tw-h-full ${
+      className={`tw-flex tw-h-full tw-w-full tw-items-center ${
         collapsed ? "" : "tw-gap-x-2"
       }`}
     >
-      <div className="tw-w-10 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0">
+      <div className="tw-flex tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
         {Icon && (
           <div className="tw-relative">
             <Icon
@@ -54,7 +56,7 @@ function WebSidebarNavItem({
             />
             {hasIndicator && (
               <>
-                <div className="tw-flex-shrink-0 tw-absolute tw-right-0 tw-top-0 tw-rounded-full tw-bg-red tw-h-2 tw-w-2" />
+                <div className="tw-absolute tw-right-0 tw-top-0 tw-h-2 tw-w-2 tw-flex-shrink-0 tw-rounded-full tw-bg-red" />
                 <span className="tw-sr-only">Unread</span>
               </>
             )}
@@ -63,7 +65,7 @@ function WebSidebarNavItem({
       </div>
       <span
         className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 motion-reduce:tw-transition-none ${
-          collapsed ? "tw-opacity-0 tw-w-0" : "tw-opacity-100 tw-flex-1"
+          collapsed ? "tw-w-0 tw-opacity-0" : "tw-flex-1 tw-opacity-100"
         }`}
       >
         {label}
@@ -86,12 +88,12 @@ function WebSidebarNavItem({
     return (
       <Link
         href={href}
-        className={`tw-w-full tw-block tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none tw-h-[2.875rem] tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base tw-px-2 tw-touch-action-manipulation ${
+        className={`tw-touch-action-manipulation tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-px-2 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
           active
-            ? "tw-text-white tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-text-white"
-            : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-text-white"
+            ? "tw-bg-transparent tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
+            : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
         }`}
-        aria-current={active ? "page" : undefined}
+        aria-current={active ? (ariaCurrent ?? "page") : undefined}
         {...commonProps}
       >
         {content}
@@ -103,10 +105,10 @@ function WebSidebarNavItem({
     <button
       type="button"
       onClick={(e) => onClick?.(e)}
-      className={`tw-w-full tw-block tw-text-left tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none tw-h-[2.875rem] tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base tw-px-2 tw-touch-action-manipulation tw-bg-transparent ${
+      className={`tw-touch-action-manipulation tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
         active
-          ? "tw-text-white tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-text-white"
-          : "tw-text-iron-400 tw-bg-transparent desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-text-white"
+          ? "tw-bg-transparent tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
+          : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
       }`}
       aria-expanded={ariaExpanded}
       aria-controls={ariaControls}

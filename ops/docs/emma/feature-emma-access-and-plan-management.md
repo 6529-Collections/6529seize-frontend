@@ -9,7 +9,7 @@
 ## Routes and Entry Points
 
 - Routes: `/emma`, `/emma/plans`, `/emma/plans/{planId}`
-- Navigation path: `Tools -> EMMA`
+- Navigation path: `About -> Data & Developer Tools -> EMMA`
 - Open directly: `/emma`, `/emma/plans`, `/emma/plans/{planId}`
 
 ## Access States at `/emma`

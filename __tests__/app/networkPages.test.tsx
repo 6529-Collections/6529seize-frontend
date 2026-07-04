@@ -25,6 +25,10 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useOptionalCookieConsent: () => ({ country: "US" }),
 }));
 
+jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
+  useAppWallets: () => ({ appWalletsSupported: false }),
+}));
+
 // ✅ Mock Groups component
 jest.mock("@/components/groups/page/Groups", () => ({
   __esModule: true,
@@ -97,7 +101,7 @@ describe("network pages render", () => {
     expect(screen.getByText(/Unique Memes/i)).toBeInTheDocument();
   });
 
-  it("renders Wave Score page under About network data", async () => {
+  it("renders Wave Score page under About network reputation", async () => {
     const page = await NetworkWaveScorePage({});
     renderWithAuth(page);
     expect(
@@ -107,7 +111,7 @@ describe("network pages render", () => {
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByText("About / Network Data / Wave Score")
+      screen.getByText("About / Network & Reputation / Wave Score")
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "Calculate a wave" })

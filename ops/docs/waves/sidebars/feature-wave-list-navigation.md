@@ -11,6 +11,8 @@ Wave and DM rows in the left list control which thread is open.
 - On expanded rows, pin/unpin sits in the trailing metadata cluster before the
   wave score instead of beside the wave name, keeping the score at the far
   right.
+- The expanded web Waves panel header includes a secondary `Discover Waves`
+  link to `/discover`.
 - Browser back/forward keeps the active row and URL in sync.
 
 ## Location in the Site
@@ -23,6 +25,8 @@ Wave and DM rows in the left list control which thread is open.
 ## Entry Points
 
 - Open the `Waves` or `Messages` shell with the left list visible.
+- From the expanded web Waves panel header, open `Discover Waves` for the
+  `/discover` route.
 - Select an inactive wave or DM row from the list by clicking the row body.
 - Use browser back/forward after navigating between rows.
 

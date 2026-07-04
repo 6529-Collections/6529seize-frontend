@@ -13,7 +13,7 @@ snapshots of up to 5,000 wallets each.
 
 ## Entry Points
 
-- Open `Tools -> EMMA`, complete connect/sign-in, then open a plan.
+- Open `About -> Data & Developer Tools -> EMMA`, complete connect/sign-in, then open a plan.
 - Open an existing plan from `/emma/plans`, or create one first.
 - In `/emma/plans/{planId}`, select `Create Custom Snapshot`.
 - Optional: click `Download example CSV file` to download `data.csv` with an

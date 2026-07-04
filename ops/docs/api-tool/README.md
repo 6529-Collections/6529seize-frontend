@@ -1,11 +1,11 @@
 # API Tool
 
-API Tool docs cover the Tools index, user-facing `/tools/*` utility routes,
-and the private `/tools/6529bot/admin` operator page.
+API Tool docs cover direct `/tools` and `/tools/*` utility routes, plus the
+private `/tools/6529bot/admin` operator page.
 
 ## Overview
 
-- `/tools`: landing page for grouped tool navigation.
+- `/tools`: direct secondary landing page for grouped tool navigation.
 - `/tools/api`: static guide for API authentication and multipart media-drop
   requests.
 - `/tools/block-finder`: estimate the closest block for a timestamp, or find
@@ -20,8 +20,7 @@ and the private `/tools/6529bot/admin` operator page.
 
 ## Read Order
 
-1. Start with `Tools Index` for the grouped `/tools` landing page and shared
-   sidebar categories.
+1. Start with `Tools Index` for the grouped direct `/tools` landing page.
 2. Read `API Authentication and Media Drop Flow` for API auth, multipart
    upload, and drop creation examples.
 3. Read `Block Finder` for timestamp lookup, include-sequence windows, and
@@ -45,19 +44,17 @@ and the private `/tools/6529bot/admin` operator page.
 ## Navigation and Visibility
 
 - Web sidebar paths:
-  - `Tools -> Tools`
-  - `Tools -> Builder Tools -> API`
-  - `Tools -> Builder Tools -> Block Finder`
-  - `Tools -> The Memes Tools -> Subscriptions Report`
-  - `Tools -> Builder Tools -> App Wallets` (only when app-wallet support is
-    enabled)
+  - `About -> Data & Developer Tools -> API`
+  - `About -> Data & Developer Tools -> Block Finder`
+  - `About -> Data & Developer Tools -> Subscriptions Report`
+  - `About -> Delegation & Wallets -> App Wallets` (only when app-wallet
+    support is enabled)
 - Native app sidebar paths:
-  - `Tools -> Tools`
-  - `Tools -> Builder Tools -> API`
-  - `Tools -> Builder Tools -> Block Finder`
-  - `Tools -> The Memes Tools -> Subscriptions Report`
-  - `Tools -> Builder Tools -> App Wallets` (only when app-wallet support is
-    enabled)
+  - `About -> Data & Developer Tools -> API`
+  - `About -> Data & Developer Tools -> Block Finder`
+  - `About -> Data & Developer Tools -> Subscriptions Report`
+  - `About -> Delegation & Wallets -> App Wallets` (only when app-wallet
+    support is enabled)
 - When app-wallet support is unavailable, direct `/tools/app-wallets*` routes
   still load but show an unsupported message panel instead of wallet controls.
 - `6529bot Admin` is direct-route only. It is not listed in sidebar menus and
@@ -67,7 +64,7 @@ and the private `/tools/6529bot/admin` operator page.
   routes.
 - On iOS outside the US, `Subscriptions Report` is hidden in web sidebar and
   search.
-- On native app, the Tools drawer uses the same `Subscriptions Report` label
+- On native app, the About drawer uses the same `Subscriptions Report` label
   when visible.
 - Direct route access still works when a menu row is hidden.
 

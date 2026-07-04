@@ -5,9 +5,9 @@ export default function XTDH() {
   return <XTDHMainPage />;
 }
 
-export const generateMetadata = async () => {
+export const generateMetadata = () => {
   return getAppMetadata({
-    title: "xTDH",
+    title: "xTDH Overview",
     description: "Network",
   });
 };

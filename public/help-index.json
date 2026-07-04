@@ -48,9 +48,10 @@
         "expand"
       ],
       "facts": [
-        "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
+        "The primary navigation concepts are NFTs, Waves, DMs, and About.",
         "Home remains available through the 6529 logo link to /.",
-        "Discovery lives under Waves as Discover Waves, while Network, Delegation, Tools, Open Data, and reference material live under About.",
+        "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
+        "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
       ],
@@ -59,8 +60,8 @@
         "/the-memes",
         "/waves",
         "/messages",
-        "/join",
         "/about",
+        "/drop-forge",
         "/discover",
         "/network",
         "/delegation/delegation-center"
@@ -79,7 +80,7 @@
       "keywords": ["join", "6529", "navigation", "getting-started"],
       "facts": [
         "The Join 6529 page lives at /join.",
-        "Join 6529 is a primary navigation item.",
+        "Join 6529 lives at /join but is not shown as a primary sidebar or app drawer menu item.",
         "The current page is a minimal placeholder; detailed join and onboarding content is not yet published there."
       ],
       "canonical_path": "/join",
@@ -104,11 +105,14 @@
         "contents",
         "navigation",
         "collections",
+        "minting",
         "digital rights",
         "gdrc",
         "delegation",
-        "resources",
-        "community",
+        "wallets",
+        "developer",
+        "tools",
+        "open data",
         "legal",
         "tdh",
         "xtdh",
@@ -119,10 +123,11 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into Collections, Digital Rights, Delegation, Network, Resources, Community, and Legal link cards with right-arrow affordances, including TDH, xTDH, Health, Definitions, Levels, Network Stats, and Subscription Minting links.",
-        "The GDRC page is listed under Digital Rights, separate from Delegation.",
-        "The primary About navigation menu also owns Network, Delegation, reporting tools, Open Data, technical, reference, and legal destinations.",
-        "Use the About index when users want to browse all About pages or find the right policy, collection, digital-rights, delegation, resource, community, or technical page."
+        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
+        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, and Minting links.",
+        "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
+        "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
+        "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
       ],
       "canonical_path": "/about",
       "related_paths": [
@@ -132,11 +137,15 @@
         "/about/tech",
         "/about/terms-of-service",
         "/network/tdh",
+        "/network/xtdh",
         "/xtdh",
         "/network/health",
         "/network/definitions",
         "/network/levels",
-        "/network/health/network-tdh"
+        "/network/health/network-tdh",
+        "/network/nerd",
+        "/network/prenodes",
+        "/network/tdh/historic-boosts"
       ],
       "tags": ["about", "navigation", "getting-started"],
       "source_refs": [
@@ -405,7 +414,7 @@
         "GDRC is separate from NFT Delegation and is not the Global Delegation Rights Contract.",
         "The page states that 6529 supports the Global Digital Rights Charter 1.",
         "The page links to digitalrightscharter.org and displays the full text of GDRC1.",
-        "The About index lists GDRC under Digital Rights, not Delegation."
+        "The About index lists GDRC under Delegation & Wallets."
       ],
       "canonical_path": "/about/gdrc1",
       "related_paths": ["/about/faq"],
@@ -1212,16 +1221,18 @@
     {
       "id": "network.xtdh",
       "kind": "glossary",
-      "title": "xTDH",
+      "title": "xTDH Overview",
       "aliases": [
         "xtdh",
         "x tdh",
         "extended tdh",
+        "xtdh overview",
+        "xtdh formulas",
+        "xtdh formulas overview",
         "what is xtdh",
         "what is x tdh",
         "xtdh grants",
-        "xTDH grants",
-        "xTDH grant allocations"
+        "xTDH grants"
       ],
       "keywords": [
         "xtdh",
@@ -1244,7 +1255,7 @@
       "facts": [
         "xTDH is an extension of TDH that lets TDH-like network participation flow beyond core 6529 holders to other NFT holders and communities.",
         "xTDH can be earned by holding eligible cards outside The Memes ecosystem.",
-        "The frontend /network/xtdh page describes xTDH as an extension of TDH that helps include other NFT holders in the 6529 ecosystem and offer them the benefits of TDH.",
+        "The frontend /network/xtdh page is labeled xTDH Overview and describes xTDH as an extension of TDH that helps include other NFT holders in the 6529 ecosystem and offer them the benefits of TDH.",
         "xTDH tracks how much xTDH your Memes produce, how much xTDH you receive from grants on tokens you own, and how much xTDH you have granted away.",
         "Produced xTDH comes from TDH production: produced_xTDH_today = TDH gained today * xTDH_coefficient.",
         "The current backend coefficient is 0.1.",
@@ -1257,16 +1268,51 @@
         "The first grant increment requires the grant and token ownership to have matured past the required midnight or 24-hour windows.",
         "xTDH is not simply TDH for external NFTs; it is a grant and allocation layer where TDH producers create xTDH, can grant future production outward, external token owners can receive it, and ungranted or ineligible flow remains with the grantor.",
         "No produced xTDH is intended to disappear; it is allocated to someone.",
-        "The live xTDH allocations dashboard at /xtdh shows network-wide stats and lets users drill down through Collections, Tokens, Contributors, and Grant details.",
+        "For live network-wide xTDH allocation data, use the xTDH Allocations Dashboard at /xtdh.",
         "Profile xTDH information is available under /{user}/xtdh when visible."
       ],
       "canonical_path": "/network/xtdh",
-      "related_paths": ["/{user}/xtdh", "/network"],
+      "related_paths": ["/xtdh", "/{user}/xtdh", "/network"],
       "tags": ["network", "xtdh"],
       "source_refs": [
-        "ops/docs/network/feature-xtdh-network-overview.md",
         "ops/docs/network/feature-xtdh-formulas.md",
         "ops/docs/profiles/tabs/feature-xtdh-tab.md"
+      ]
+    },
+    {
+      "id": "network.xtdh-allocations",
+      "kind": "route",
+      "title": "xTDH Allocations Dashboard",
+      "aliases": [
+        "xtdh allocations",
+        "xtdh allocations dashboard",
+        "xtdh dashboard",
+        "xtdh network overview",
+        "xTDH grant allocations"
+      ],
+      "keywords": [
+        "xtdh",
+        "allocations",
+        "dashboard",
+        "grants",
+        "collections",
+        "tokens",
+        "contributors",
+        "network"
+      ],
+      "facts": [
+        "The live xTDH Allocations Dashboard lives at /xtdh.",
+        "The /xtdh dashboard shows network-wide stats and lets users drill down through Collections, Tokens, Contributors, and Grant details.",
+        "Use /network/xtdh for the static xTDH Overview and formulas page.",
+        "Profile xTDH information is available under /{user}/xtdh when visible."
+      ],
+      "canonical_path": "/xtdh",
+      "related_paths": ["/network/xtdh", "/{user}/xtdh", "/network"],
+      "tags": ["network", "xtdh"],
+      "source_refs": [
+        "app/xtdh/page.tsx",
+        "components/xtdh/XtdhPage.tsx",
+        "ops/docs/network/feature-xtdh-network-overview.md"
       ]
     },
     {
@@ -1459,7 +1505,7 @@
         "Waves are the main social threads for conversations, drops, reactions, voting, and wave-specific activity.",
         "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
         "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
-        "The Waves panel includes wave lists, pinned waves, highly rated waves, and create controls."
+        "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves/create", "/messages"],
@@ -3839,7 +3885,7 @@
       "keywords": ["waves", "discover", "search", "sections", "cards"],
       "facts": [
         "Wave discovery docs cover discover cards, discover sections, and search behavior.",
-        "Discover Waves lives under the Waves primary navigation concept and routes to /discover.",
+        "Discover Waves is a secondary Waves experience link and searchable destination that routes to /discover.",
         "Wave discovery is for finding waves, while the Waves panel is for active navigation and participation.",
         "Search and section availability depend on the route state and access rules."
       ],
@@ -5216,11 +5262,12 @@
         "app wallets"
       ],
       "facts": [
-        "The Tools index page lives at /tools.",
-        "It groups tool cards with right-arrow affordances into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
+        "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
+        "It groups label-only tool cards with right-arrow affordances into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
         "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
-        "Private operator routes and local-only tools are not listed on the public Tools index."
+        "Private operator routes and local-only tools are not listed on the public Tools index.",
+        "Primary menu discovery for user-facing tools, developer routes, and Open Data remains under About."
       ],
       "canonical_path": "/tools",
       "related_paths": [

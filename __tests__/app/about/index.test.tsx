@@ -20,6 +20,10 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: () => ({ isIos: true }),
 }));
 
+jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
+  useAppWallets: () => ({ appWalletsSupported: false }),
+}));
+
 let country = "US";
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country }),
@@ -36,44 +40,47 @@ describe("About index page", () => {
     render(<AboutIndexPage />);
 
     expect(
-      screen.getByRole("heading", { name: "About 6529" })
+      screen.getByRole("heading", { level: 1, name: "About 6529" })
     ).toBeInTheDocument();
-    expect(screen.getByText("Collections")).toBeInTheDocument();
-    expect(screen.getByText("Digital Rights")).toBeInTheDocument();
-    expect(screen.getByText("Delegation")).toBeInTheDocument();
-    expect(screen.getByText("Network")).toBeInTheDocument();
-    expect(screen.getByText("Resources")).toBeInTheDocument();
-    expect(screen.getByText("Community")).toBeInTheDocument();
+    expect(screen.getAllByText("About 6529").length).toBeGreaterThan(0);
+    expect(screen.getByText("Collections & Minting")).toBeInTheDocument();
+    expect(screen.getByText("Network & Reputation")).toBeInTheDocument();
+    expect(screen.getByText("Delegation & Wallets")).toBeInTheDocument();
+    expect(screen.getByText("Data & Developer Tools")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /open page: the memes/i })
+      screen.getByRole("link", { name: /open page: about the memes/i })
     ).toHaveAttribute("href", "/about/the-memes");
-    expect(screen.getByText("GDRC")).toBeInTheDocument();
-    expect(
-      screen.queryByText(/global delegation rights contract/i)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/the core collection, mint context/i)
-    ).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /mission/i })).toBeNull();
     expect(
-      screen.getByRole("link", { name: /open page: tdh/i })
+      screen.getByRole("link", { name: "Open page: TDH" })
     ).toHaveAttribute("href", "/network/tdh");
     expect(
-      screen.getByRole("link", { name: /open page: xtdh/i })
+      screen.getByRole("link", { name: /open page: xtdh overview/i })
     ).toHaveAttribute("href", "/network/xtdh");
     expect(
-      screen.getByRole("link", { name: /open page: health/i })
+      screen.getByRole("link", {
+        name: /open page: xtdh allocations dashboard/i,
+      })
+    ).toHaveAttribute("href", "/xtdh");
+    expect(
+      screen.getByRole("link", { name: /open page: network health/i })
     ).toHaveAttribute("href", "/network/health");
     expect(
-      screen.getByRole("link", { name: /open page: definitions/i })
+      screen.getByRole("link", { name: /open page: network definitions/i })
     ).toHaveAttribute("href", "/network/definitions");
     expect(
       screen.getByRole("link", { name: /open page: levels/i })
     ).toHaveAttribute("href", "/network/levels");
     expect(
-      screen.getByRole("link", { name: /open page: network stats/i })
+      screen.getByRole("link", { name: /open page: network tdh stats/i })
     ).toHaveAttribute("href", "/network/health/network-tdh");
+    expect(
+      screen.getByRole("link", { name: /open page: network nerd/i })
+    ).toHaveAttribute("href", "/network/nerd");
+    expect(
+      screen.getByRole("link", { name: /open page: prenodes/i })
+    ).toHaveAttribute("href", "/network/prenodes");
   });
 
   it("does not render the sticky contents dropdown", () => {
@@ -91,6 +98,6 @@ describe("About index page", () => {
 
     render(<AboutIndexPage />);
 
-    expect(screen.queryByText("Subscriptions")).toBeNull();
+    expect(screen.queryByText("Subscription Minting")).toBeNull();
   });
 });

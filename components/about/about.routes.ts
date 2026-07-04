@@ -3,23 +3,29 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { AboutSection } from "@/types/enums";
 
 type AboutContentsGroupId =
-  | "collections"
-  | "digital-rights"
-  | "delegation"
-  | "network"
-  | "resources"
-  | "community"
+  | "about6529"
+  | "collectionsMinting"
+  | "networkReputation"
+  | "delegationWallets"
+  | "dataDeveloperTools"
   | "legal";
 
 type AboutContentsAboutNavItem = {
   readonly section: AboutSection;
   readonly labelKey: MessageKey;
+  readonly descriptionKey: MessageKey;
+  readonly requiresVisibleSubscriptions?: true | undefined;
+  readonly requiresAppWalletsSupported?: never;
 };
 
 type AboutContentsExternalNavItem = {
   readonly id: string;
   readonly href: string;
   readonly labelKey: MessageKey;
+  readonly descriptionKey: MessageKey;
+  readonly activePathPrefixes?: readonly string[] | undefined;
+  readonly requiresVisibleSubscriptions?: true | undefined;
+  readonly requiresAppWalletsSupported?: true | undefined;
 };
 
 type AboutContentsNavItem =
@@ -32,159 +38,194 @@ type AboutContentsNavGroup = {
   readonly items: readonly AboutContentsNavItem[];
 };
 
+type AboutNavVisibilityOptions = {
+  readonly hideSubscriptions: boolean;
+  readonly appWalletsSupported?: boolean | undefined;
+};
+
+type AboutSectionItemOptions = {
+  readonly descriptionId?: string | undefined;
+  readonly requiresVisibleSubscriptions?: true | undefined;
+};
+
+type AboutRouteItemOptions = AboutSectionItemOptions & {
+  readonly activePathPrefixes?: readonly string[] | undefined;
+  readonly requiresAppWalletsSupported?: true | undefined;
+};
+
+function aboutGroup(
+  id: AboutContentsGroupId,
+  items: readonly AboutContentsNavItem[]
+): AboutContentsNavGroup {
+  return {
+    id,
+    labelKey: `about.contents.groups.${id}` as MessageKey,
+    items,
+  };
+}
+
+function aboutPageKey(pageId: string): MessageKey {
+  return `about.contents.pages.${pageId}` as MessageKey;
+}
+
+function aboutDescriptionKey(descriptionId: string): MessageKey {
+  return `about.contents.descriptions.${descriptionId}` as MessageKey;
+}
+
+function aboutSectionItem(
+  section: AboutSection,
+  pageId: string,
+  options: AboutSectionItemOptions = {}
+): AboutContentsAboutNavItem {
+  return {
+    section,
+    labelKey: aboutPageKey(pageId),
+    descriptionKey: aboutDescriptionKey(options.descriptionId ?? pageId),
+    requiresVisibleSubscriptions: options.requiresVisibleSubscriptions,
+  };
+}
+
+function aboutRouteItem(
+  id: string,
+  href: string,
+  pageId: string,
+  options: AboutRouteItemOptions = {}
+): AboutContentsExternalNavItem {
+  return {
+    id,
+    href,
+    labelKey: aboutPageKey(pageId),
+    descriptionKey: aboutDescriptionKey(options.descriptionId ?? pageId),
+    activePathPrefixes: options.activePathPrefixes,
+    requiresVisibleSubscriptions: options.requiresVisibleSubscriptions,
+    requiresAppWalletsSupported: options.requiresAppWalletsSupported,
+  };
+}
+
 const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
-  {
-    id: "collections",
-    labelKey: "about.contents.groups.collections",
-    items: [
-      {
-        section: AboutSection.MEMES,
-        labelKey: "about.contents.pages.theMemes",
-      },
-      {
-        section: AboutSection.MEME_LAB,
-        labelKey: "about.contents.pages.memeLab",
-      },
-      {
-        section: AboutSection.GRADIENTS,
-        labelKey: "about.contents.pages.gradient",
-      },
-      {
-        section: AboutSection.SUBSCRIPTIONS,
-        labelKey: "about.contents.pages.subscriptions",
-      },
-    ],
-  },
-  {
-    id: "digital-rights",
-    labelKey: "about.contents.groups.digitalRights",
-    items: [
-      {
-        section: AboutSection.GDRC1,
-        labelKey: "about.contents.pages.gdrc",
-      },
-    ],
-  },
-  {
-    id: "delegation",
-    labelKey: "about.contents.groups.delegation",
-    items: [
-      {
-        section: AboutSection.NFT_DELEGATION,
-        labelKey: "about.contents.pages.nftDelegation",
-      },
-      {
-        section: AboutSection.PRIMARY_ADDRESS,
-        labelKey: "about.contents.pages.primaryAddress",
-      },
-    ],
-  },
-  {
-    id: "network",
-    labelKey: "about.contents.groups.network",
-    items: [
-      {
-        id: "network-tdh",
-        href: "/network/tdh",
-        labelKey: "about.contents.pages.tdh",
-      },
-      {
-        id: "network-xtdh",
-        href: "/network/xtdh",
-        labelKey: "about.contents.pages.xtdh",
-      },
-      {
-        id: "network-health",
-        href: "/network/health",
-        labelKey: "about.contents.pages.networkHealth",
-      },
-      {
-        id: "network-definitions",
-        href: "/network/definitions",
-        labelKey: "about.contents.pages.networkDefinitions",
-      },
-      {
-        id: "network-levels",
-        href: "/network/levels",
-        labelKey: "about.contents.pages.networkLevels",
-      },
-      {
-        id: "network-tdh-stats",
-        href: "/network/health/network-tdh",
-        labelKey: "about.contents.pages.networkTdhStats",
-      },
-    ],
-  },
-  {
-    id: "resources",
-    labelKey: "about.contents.groups.resources",
-    items: [
-      {
-        section: AboutSection.FAQ,
-        labelKey: "about.contents.pages.faq",
-      },
-      {
-        section: AboutSection.ENS,
-        labelKey: "about.contents.pages.ens",
-      },
-      {
-        section: AboutSection.MINTING,
-        labelKey: "about.contents.pages.minting",
-      },
-      {
-        section: AboutSection.NAKAMOTO_THRESHOLD,
-        labelKey: "about.contents.pages.nakamotoThreshold",
-      },
-      {
-        section: AboutSection.LICENSE,
-        labelKey: "about.contents.pages.license",
-      },
-    ],
-  },
-  {
-    id: "community",
-    labelKey: "about.contents.groups.community",
-    items: [
-      {
-        section: AboutSection.APPLY,
-        labelKey: "about.contents.pages.apply",
-      },
-      {
-        section: AboutSection.CONTACT_US,
-        labelKey: "about.contents.pages.contactUs",
-      },
-      {
-        section: AboutSection.TECH,
-        labelKey: "about.contents.pages.tech",
-      },
-      {
-        section: AboutSection.DATA_DECENTR,
-        labelKey: "about.contents.pages.dataDecentralization",
-      },
-    ],
-  },
-  {
-    id: "legal",
-    labelKey: "about.contents.groups.legal",
-    items: [
-      {
-        section: AboutSection.TERMS_OF_SERVICE,
-        labelKey: "about.contents.pages.termsOfService",
-      },
-      {
-        section: AboutSection.PRIVACY_POLICY,
-        labelKey: "about.contents.pages.privacyPolicy",
-      },
-      {
-        section: AboutSection.COOKIE_POLICY,
-        labelKey: "about.contents.pages.cookiePolicy",
-      },
-      {
-        section: AboutSection.COPYRIGHT,
-        labelKey: "about.contents.pages.copyright",
-      },
-    ],
-  },
+  aboutGroup("about6529", [
+    aboutSectionItem(AboutSection.FAQ, "faq"),
+    aboutSectionItem(AboutSection.ENS, "ens"),
+    aboutSectionItem(AboutSection.NAKAMOTO_THRESHOLD, "nakamotoThreshold"),
+    aboutSectionItem(AboutSection.APPLY, "apply"),
+    aboutSectionItem(AboutSection.CONTACT_US, "contactUs"),
+  ]),
+  aboutGroup("collectionsMinting", [
+    aboutSectionItem(AboutSection.MEMES, "aboutTheMemes"),
+    aboutSectionItem(AboutSection.SUBSCRIPTIONS, "subscriptions", {
+      requiresVisibleSubscriptions: true,
+    }),
+    aboutSectionItem(AboutSection.MEME_LAB, "memeLab"),
+    aboutSectionItem(AboutSection.GRADIENTS, "gradient"),
+    aboutSectionItem(AboutSection.MINTING, "minting"),
+  ]),
+  aboutGroup("networkReputation", [
+    aboutRouteItem("network-identities", "/network", "networkIdentities"),
+    aboutRouteItem("network-activity", "/network/activity", "networkActivity"),
+    aboutRouteItem("network-groups", "/network/groups", "networkGroups"),
+    aboutRouteItem("network-tdh", "/network/tdh", "tdh"),
+    aboutRouteItem("network-xtdh", "/network/xtdh", "xtdhOverview", {
+      descriptionId: "xtdh",
+    }),
+    aboutRouteItem("xtdh-allocations", "/xtdh", "xtdhAllocations"),
+    aboutRouteItem("network-wave-score", "/network/wave-score", "waveScore"),
+    aboutRouteItem("rep-categories", "/rep/categories", "repCategories", {
+      activePathPrefixes: ["/rep/categories/"],
+    }),
+    aboutRouteItem("network-health", "/network/health", "networkHealth"),
+    aboutRouteItem(
+      "network-definitions",
+      "/network/definitions",
+      "networkDefinitions"
+    ),
+    aboutRouteItem("network-levels", "/network/levels", "networkLevels"),
+    aboutRouteItem(
+      "network-tdh-stats",
+      "/network/health/network-tdh",
+      "networkTdhStats"
+    ),
+    aboutRouteItem("network-nerd", "/network/nerd", "networkNerd", {
+      activePathPrefixes: ["/network/nerd/"],
+    }),
+    aboutRouteItem("network-prenodes", "/network/prenodes", "prenodes"),
+    aboutRouteItem(
+      "network-tdh-historic-boosts",
+      "/network/tdh/historic-boosts",
+      "tdhHistoricBoosts"
+    ),
+  ]),
+  aboutGroup("delegationWallets", [
+    aboutSectionItem(AboutSection.GDRC1, "gdrc"),
+    aboutSectionItem(AboutSection.NFT_DELEGATION, "nftDelegation"),
+    aboutSectionItem(AboutSection.PRIMARY_ADDRESS, "primaryAddress"),
+    aboutRouteItem(
+      "delegation-center",
+      "/delegation/delegation-center",
+      "delegationCenter"
+    ),
+    aboutRouteItem(
+      "wallet-architecture",
+      "/delegation/wallet-architecture",
+      "walletArchitecture"
+    ),
+    aboutRouteItem(
+      "delegation-faq",
+      "/delegation/delegation-faq",
+      "delegationFaq"
+    ),
+    aboutRouteItem(
+      "consolidation-use-cases",
+      "/delegation/consolidation-use-cases",
+      "consolidationUseCases"
+    ),
+    aboutRouteItem(
+      "wallet-checker",
+      "/delegation/wallet-checker",
+      "walletChecker"
+    ),
+    aboutRouteItem("app-wallets", "/tools/app-wallets", "appWallets", {
+      activePathPrefixes: ["/tools/app-wallets/"],
+      requiresAppWalletsSupported: true,
+    }),
+  ]),
+  aboutGroup("dataDeveloperTools", [
+    aboutSectionItem(AboutSection.TECH, "tech"),
+    aboutSectionItem(AboutSection.DATA_DECENTR, "dataDecentralization"),
+    aboutRouteItem(
+      "subscriptions-report",
+      "/tools/subscriptions-report",
+      "subscriptionsReport",
+      { requiresVisibleSubscriptions: true }
+    ),
+    aboutRouteItem("memes-accounting", "/meme-accounting", "memesAccounting"),
+    aboutRouteItem("memes-gas", "/meme-gas", "memesGas"),
+    aboutRouteItem("api", "/tools/api", "api"),
+    aboutRouteItem("emma", "/emma", "emma"),
+    aboutRouteItem("block-finder", "/tools/block-finder", "blockFinder"),
+    aboutRouteItem("open-data", "/open-data", "openData"),
+    aboutRouteItem("6529bot-data", "/open-data/6529bot", "6529botData"),
+    aboutRouteItem(
+      "network-metrics",
+      "/open-data/network-metrics",
+      "networkMetrics"
+    ),
+    aboutRouteItem(
+      "meme-subscriptions-data",
+      "/open-data/meme-subscriptions",
+      "memeSubscriptionsData",
+      { requiresVisibleSubscriptions: true }
+    ),
+    aboutRouteItem("rememes-data", "/open-data/rememes", "rememesData"),
+    aboutRouteItem("team-data", "/open-data/team", "teamData"),
+    aboutRouteItem("royalties", "/open-data/royalties", "royalties"),
+  ]),
+  aboutGroup("legal", [
+    aboutSectionItem(AboutSection.LICENSE, "license"),
+    aboutSectionItem(AboutSection.TERMS_OF_SERVICE, "termsOfService"),
+    aboutSectionItem(AboutSection.PRIVACY_POLICY, "privacyPolicy"),
+    aboutSectionItem(AboutSection.COOKIE_POLICY, "cookiePolicy"),
+    aboutSectionItem(AboutSection.COPYRIGHT, "copyright"),
+  ]),
 ] as const;
 
 const ABOUT_CONTENTS_NAV_ITEMS = ABOUT_CONTENTS_NAV_GROUPS.flatMap(
@@ -200,6 +241,40 @@ const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>(
 const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
   [AboutSection.GRADIENTS, "about.contents.documentTitles.gradient"],
 ]);
+
+function normalizeVisibilityOptions(
+  options: AboutNavVisibilityOptions | boolean
+): Required<AboutNavVisibilityOptions> {
+  if (typeof options === "boolean") {
+    return {
+      hideSubscriptions: options,
+      appWalletsSupported: false,
+    };
+  }
+
+  return {
+    hideSubscriptions: options.hideSubscriptions,
+    appWalletsSupported: options.appWalletsSupported ?? false,
+  };
+}
+
+function isAboutNavItemVisible(
+  item: AboutContentsNavItem,
+  options: Required<AboutNavVisibilityOptions>
+): boolean {
+  if (item.requiresVisibleSubscriptions === true && options.hideSubscriptions) {
+    return false;
+  }
+
+  if (
+    item.requiresAppWalletsSupported === true &&
+    !options.appWalletsSupported
+  ) {
+    return false;
+  }
+
+  return true;
+}
 
 export function getAboutSectionLabel(
   section: AboutSection | undefined,
@@ -243,21 +318,26 @@ export function getAboutNavItemLabel(
 }
 
 export function getVisibleAboutNavGroups(
-  hideSubscriptions: boolean
+  options: AboutNavVisibilityOptions | boolean
 ): AboutContentsNavGroup[] {
+  const visibilityOptions = normalizeVisibilityOptions(options);
+
   return ABOUT_CONTENTS_NAV_GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter(
-      (item) =>
-        !("section" in item) ||
-        item.section !== AboutSection.SUBSCRIPTIONS ||
-        !hideSubscriptions
+    items: group.items.filter((item) =>
+      isAboutNavItemVisible(item, visibilityOptions)
     ),
   })).filter((group) => group.items.length > 0);
 }
 
 export function getAboutNavItemHref(item: AboutContentsNavItem): string {
   return "href" in item ? item.href : `/about/${item.section}`;
+}
+
+export function getAboutNavItemActivePathPrefixes(
+  item: AboutContentsNavItem
+): readonly string[] | undefined {
+  return "href" in item ? item.activePathPrefixes : undefined;
 }
 
 export function getAboutNavItemId(item: AboutContentsNavItem): string {

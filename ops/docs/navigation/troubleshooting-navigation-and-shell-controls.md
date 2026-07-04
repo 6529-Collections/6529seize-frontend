@@ -39,15 +39,17 @@ handoff does not behave as expected.
   (`/waves/create` or `/messages/create`), or profile route with valid in-app
   back history.
 - Sidebar rows are missing on web:
-  expand `NFTs`, `Waves`, or `About`; in collapsed rail, open the flyout
-  first. Network/reference/tool destinations live under `About`.
+  expand `NFTs` or `About`; in collapsed rail, open the flyout first.
+  `Waves` is a direct `/waves` row. Network/reference/tool destinations live
+  under `About`.
 - `Notifications` row is missing on web:
   it appears only when connected and sits above `Profile` near the sidebar
   account area, not in the main navigation list.
 - `Discovery` or `Discover Waves` is missing, or `/discover` looks empty:
-  web/sidebar exposes `Discover Waves` under the `Waves` navigation group, and
-  the app bottom bar exposes `Discovery`. If the page body is blank, refresh
-  `/discover` or compare against `/` and `/waves`.
+  web/sidebar opens `/waves` directly, then exposes `Discover Waves` in the
+  expanded Waves panel header and through search. The app bottom bar still
+  exposes `Discovery`. If the page body is blank, refresh `/discover` or
+  compare against `/` and `/waves`.
 - `Profile` shortcut is missing:
   connect wallet first; profile access is an account utility and is hidden
   while disconnected.
@@ -61,7 +63,7 @@ handoff does not behave as expected.
 - `App Wallets` row is missing:
   it appears only when app-wallet support is available.
 - Subscription rows are missing on iOS web:
-  `Subscriptions Report`, `Open Data > Meme Subscriptions`, and
+  `Subscriptions Report`, `Open Data > Meme Subscriptions Data`, and
   `About > Subscriptions` are shown only for `US` country context.
 - Search shortcut does nothing:
   use `⌘K` where search triggers are mounted; `Ctrl+K` works only from the

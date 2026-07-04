@@ -137,10 +137,7 @@ describe("WaveDropMobileMenuProvider", () => {
       return (
         <WaveDropMobileMenuProvider>
           {showOwner && (
-            <ControlledMenuOwner
-              dropId="drop-a"
-              onOpenChange={onOpenChange}
-            />
+            <ControlledMenuOwner dropId="drop-a" onOpenChange={onOpenChange} />
           )}
           <button
             type="button"

@@ -11,14 +11,14 @@ The page heading is `Meme Subscriptions Downloads`.
 
 - Route: `/open-data/meme-subscriptions`
 - Hub route: `/open-data`
-- Web sidebar path: `Tools -> Open Data -> Meme Subscriptions`
-- Native app menu path: `Tools -> Open Data -> Meme Subscriptions`, hub card,
+- Web sidebar path: `About -> Data & Developer Tools -> Meme Subscriptions Data`
+- Native app menu path: `About -> Data & Developer Tools -> Meme Subscriptions Data`, hub card,
   or direct URL.
 
 ## Entry Points
 
 - Open the `Meme Subscriptions` card on `/open-data`.
-- Open `Tools -> Open Data -> Meme Subscriptions` in the sidebar.
+- Open `About -> Data & Developer Tools -> Meme Subscriptions Data` in the sidebar.
 - Open `/open-data/meme-subscriptions` directly.
 
 ## Visibility Rules

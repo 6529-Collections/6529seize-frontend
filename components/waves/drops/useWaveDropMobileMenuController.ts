@@ -46,7 +46,6 @@ export const useWaveDropMobileMenuController = ({
       showCopyOption,
       showVoting,
     });
-
   }, [
     drop,
     enabled,

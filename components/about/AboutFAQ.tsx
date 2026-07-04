@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -8,6 +10,8 @@ import {
 import styles from "./About.module.css";
 
 export default function AboutFAQ() {
+  const locale = DEFAULT_LOCALE;
+
   return (
     <Container>
       <Row>
@@ -68,8 +72,8 @@ export default function AboutFAQ() {
                 <h3>What are Waves?</h3>
                 <p>
                   Waves are the communication and decision-making channels
-                  inside Brain. They are functionally similar to Channels on
-                  Discord.
+                  inside the 6529 coordination layer. They are functionally
+                  similar to Channels on Discord.
                 </p>
                 <p>
                   Each Wave is a space for a specific topic, group, or
@@ -84,7 +88,7 @@ export default function AboutFAQ() {
                 <Image
                   unoptimized
                   src="/faq-waves-view.jpg"
-                  alt="Waves view in 6529 Brain"
+                  alt={t(locale, "about.faq.images.wavesAlt")}
                   width={2626}
                   height={1284}
                   className={styles["faqImage"]}
@@ -289,7 +293,7 @@ export default function AboutFAQ() {
                   <li>Memes create culture and fund the system.</li>
                   <li>TDH measures alignment.</li>
                   <li>REP and NIC build identity and trust.</li>
-                  <li>Brain enables coordination and decisions.</li>
+                  <li>Waves enable coordination and decisions.</li>
                   <li>Decisions trigger real-world and on-chain outcomes.</li>
                 </ul>
                 <p>

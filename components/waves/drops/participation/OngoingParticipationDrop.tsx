@@ -164,10 +164,7 @@ function OngoingParticipationDropInner({
 
   const identityHeader =
     identityMode === "minimal" ? (
-      <DropMinimalIdentityRow
-        drop={drop}
-        timestampLayout={timestampLayout}
-      />
+      <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
     ) : (
       <ParticipationDropHeader
         drop={drop}
@@ -256,9 +253,7 @@ function OngoingParticipationDropInner({
             {showIdentity && (
               <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
                 <WaveDropAuthorPfp drop={drop} />
-                <div className="tw-min-w-0 tw-flex-1">
-                  {identityHeader}
-                </div>
+                <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
               </div>
             )}
             {content}

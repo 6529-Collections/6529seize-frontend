@@ -3,31 +3,39 @@ import WavesIcon from "@/components/common/icons/WavesIcon";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import {
+  getAboutNavItemActivePathPrefixes,
   getAboutNavItemHref,
   getAboutNavItemLabel,
   getVisibleAboutNavGroups,
 } from "@/components/about/about.routes";
-import {
-  getToolsNavItemHref,
-  getToolsNavItemLabel,
-  getVisibleToolsNavGroups,
-} from "@/components/tools/tools.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { DocumentTextIcon, WrenchIcon } from "@heroicons/react/24/outline";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useMemo, type ComponentType } from "react";
 
 type SidebarSubsection = NonNullable<SidebarSection["subsections"]>[number];
+type SidebarNavItem = SidebarSubsection["items"][number];
+
+function mapAboutNavItemToSidebarItem(
+  item: ReturnType<typeof getVisibleAboutNavGroups>[number]["items"][number]
+): SidebarNavItem {
+  const activePathPrefixes = getAboutNavItemActivePathPrefixes(item);
+  const sidebarItem = {
+    name: getAboutNavItemLabel(item, DEFAULT_LOCALE),
+    href: getAboutNavItemHref(item),
+  };
+
+  return activePathPrefixes === undefined
+    ? sidebarItem
+    : { ...sidebarItem, activePathPrefixes };
+}
 
 function mapAboutNavGroupToSubsection(
   group: ReturnType<typeof getVisibleAboutNavGroups>[number]
 ): SidebarSubsection {
   return {
     name: t(DEFAULT_LOCALE, group.labelKey),
-    items: group.items.map((item) => ({
-      name: getAboutNavItemLabel(item, DEFAULT_LOCALE),
-      href: getAboutNavItemHref(item),
-    })),
+    items: group.items.map(mapAboutNavItemToSidebarItem),
   };
 }
 
@@ -89,131 +97,14 @@ function getNftsSection(): SidebarSection {
   };
 }
 
-function getToolsSection(
-  appWalletsSupported: boolean,
-  hideSubscriptions: boolean
-): SidebarSection {
-  const visibleToolsGroups = getVisibleToolsNavGroups({
-    appWalletsSupported,
-    hideSubscriptions,
-  });
-
-  return {
-    key: "tools",
-    name: t(DEFAULT_LOCALE, "navigation.primary.tools"),
-    icon: WrenchIcon,
-    items: [
-      { name: t(DEFAULT_LOCALE, "tools.contents.pages.tools"), href: "/tools" },
-    ],
-    subsections: visibleToolsGroups.map((group) => ({
-      name: t(DEFAULT_LOCALE, group.labelKey),
-      items: group.items.map((item) => ({
-        name: getToolsNavItemLabel(item, DEFAULT_LOCALE),
-        href: getToolsNavItemHref(item),
-      })),
-    })),
-  };
-}
-
-function getAboutMovedSubsections(
-  appWalletsSupported: boolean,
-  hideSubscriptions: boolean
-): SidebarSubsection[] {
-  return [
-    {
-      name: t(DEFAULT_LOCALE, "navigation.subsection.networkPeople"),
-      items: [
-        { name: "Identities", href: "/network" },
-        { name: "Activity", href: "/network/activity" },
-        { name: "Groups", href: "/network/groups" },
-      ],
-    },
-    {
-      name: t(DEFAULT_LOCALE, "navigation.subsection.networkData"),
-      items: [
-        {
-          name: "TDH",
-          href: "/network/tdh",
-          activePathPrefixes: ["/network/tdh/"],
-        },
-        { name: "xTDH", href: "/xtdh" },
-        { name: "Wave Score", href: "/network/wave-score" },
-        {
-          name: "REP Categories",
-          href: "/rep/categories",
-          activePathPrefixes: ["/rep/categories/"],
-        },
-        { name: "Health", href: "/network/health" },
-        { name: "Definitions", href: "/network/definitions" },
-        { name: "Levels", href: "/network/levels" },
-        { name: "Network Stats", href: "/network/health/network-tdh" },
-      ],
-    },
-    {
-      name: t(DEFAULT_LOCALE, "navigation.subsection.nftReportingTools"),
-      items: [
-        ...(hideSubscriptions
-          ? []
-          : [
-              {
-                name: "Subscriptions Report",
-                href: "/tools/subscriptions-report",
-              },
-            ]),
-        { name: "Memes Accounting", href: "/meme-accounting" },
-        { name: "Memes Gas", href: "/meme-gas" },
-        ...(appWalletsSupported
-          ? [
-              {
-                name: "App Wallets",
-                href: "/tools/app-wallets",
-                activePathPrefixes: ["/tools/app-wallets/"],
-              },
-            ]
-          : []),
-      ],
-    },
-    {
-      name: t(DEFAULT_LOCALE, "navigation.subsection.developerOpenData"),
-      items: [
-        { name: "API", href: "/tools/api" },
-        { name: "EMMA", href: "/emma" },
-        { name: "Block Finder", href: "/tools/block-finder" },
-        { name: "Open Data", href: "/open-data" },
-        { name: "6529bot Data", href: "/open-data/6529bot" },
-        { name: "Network Metrics", href: "/open-data/network-metrics" },
-        ...(hideSubscriptions
-          ? []
-          : [
-              {
-                name: "Meme Subscriptions",
-                href: "/open-data/meme-subscriptions",
-              },
-            ]),
-        { name: "Rememes", href: "/open-data/rememes" },
-        { name: "Team", href: "/open-data/team" },
-        { name: "Royalties", href: "/open-data/royalties" },
-      ],
-    },
-  ];
-}
-
 function getAboutSection(
   appWalletsSupported: boolean,
   hideSubscriptions: boolean
 ): SidebarSection {
-  const aboutGroups = getVisibleAboutNavGroups(hideSubscriptions);
-  const aboutGroupById = new Map(aboutGroups.map((group) => [group.id, group]));
-  const collectionsGroup = aboutGroupById.get("collections");
-  const digitalRightsGroup = aboutGroupById.get("digital-rights");
-  const delegationGroup = aboutGroupById.get("delegation");
-  const resourcesGroup = aboutGroupById.get("resources");
-  const communityGroup = aboutGroupById.get("community");
-  const legalGroup = aboutGroupById.get("legal");
-  const movedSubsections = getAboutMovedSubsections(
+  const aboutGroups = getVisibleAboutNavGroups({
+    hideSubscriptions,
     appWalletsSupported,
-    hideSubscriptions
-  );
+  });
 
   return {
     key: "about",
@@ -226,46 +117,7 @@ function getAboutSection(
         activePathPrefixes: ["/about/"],
       },
     ],
-    subsections: [
-      ...(collectionsGroup
-        ? [mapAboutNavGroupToSubsection(collectionsGroup)]
-        : []),
-      ...movedSubsections.slice(0, 2),
-      ...(digitalRightsGroup
-        ? [mapAboutNavGroupToSubsection(digitalRightsGroup)]
-        : []),
-      ...(delegationGroup
-        ? [
-            {
-              name: t(DEFAULT_LOCALE, delegationGroup.labelKey),
-              items: [
-                ...delegationGroup.items.map((item) => ({
-                  name: getAboutNavItemLabel(item, DEFAULT_LOCALE),
-                  href: getAboutNavItemHref(item),
-                })),
-                {
-                  name: "Delegation Center",
-                  href: "/delegation/delegation-center",
-                },
-                {
-                  name: "Wallet Architecture",
-                  href: "/delegation/wallet-architecture",
-                },
-                { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
-                {
-                  name: "Consolidation Use Cases",
-                  href: "/delegation/consolidation-use-cases",
-                },
-                { name: "Wallet Checker", href: "/delegation/wallet-checker" },
-              ],
-            },
-          ]
-        : []),
-      ...movedSubsections.slice(2),
-      ...(resourcesGroup ? [mapAboutNavGroupToSubsection(resourcesGroup)] : []),
-      ...(communityGroup ? [mapAboutNavGroupToSubsection(communityGroup)] : []),
-      ...(legalGroup ? [mapAboutNavGroupToSubsection(legalGroup)] : []),
-    ],
+    subsections: aboutGroups.map(mapAboutNavGroupToSubsection),
   };
 }
 
@@ -276,7 +128,6 @@ function buildSidebarSections(
   return [
     getNftsSection(),
     getWavesSection(),
-    getToolsSection(appWalletsSupported, hideSubscriptions),
     getAboutSection(appWalletsSupported, hideSubscriptions),
   ];
 }

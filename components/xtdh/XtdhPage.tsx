@@ -55,7 +55,7 @@ export default function XtdhPage(): ReactElement {
             href="/network/xtdh"
             className="tw-inline-flex tw-w-fit tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-iron-100 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
           >
-            What is xTDH
+            xTDH Overview
           </Link>
         </header>
         <div className="tw-mt-2">{statsSection}</div>

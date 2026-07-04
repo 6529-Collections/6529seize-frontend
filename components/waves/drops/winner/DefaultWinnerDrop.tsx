@@ -330,7 +330,8 @@ const DefaultWinnerDropInner = ({
   );
 };
 
-const DefaultWinnerDrop =
-  withWaveDropMobileMenuProvider(DefaultWinnerDropInner);
+const DefaultWinnerDrop = withWaveDropMobileMenuProvider(
+  DefaultWinnerDropInner
+);
 
 export default memo(DefaultWinnerDrop);

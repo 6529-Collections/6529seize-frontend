@@ -13,8 +13,8 @@ time.
 ## Location in the Site
 
 - Route: `/tools/block-finder`
-- Web sidebar path: `Tools -> Builder Tools -> Block Finder`
-- Native app drawer path: `Tools -> Builder Tools -> Block Finder`
+- Web sidebar path: `About -> Data & Developer Tools -> Block Finder`
+- Native app drawer path: `About -> Data & Developer Tools -> Block Finder`
 
 ## Entry Points
 

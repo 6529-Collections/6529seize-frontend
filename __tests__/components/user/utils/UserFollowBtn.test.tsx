@@ -52,6 +52,7 @@ describe("UserFollowBtn", () => {
             size={size}
             onDirectMessage={onDirectMessage}
             directMessageLoading={directMessageLoading}
+            showMuteButton={false}
           />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>

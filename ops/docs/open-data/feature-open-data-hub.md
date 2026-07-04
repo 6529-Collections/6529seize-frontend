@@ -11,13 +11,13 @@ dataset routes.
 ## Location in the Site
 
 - Route: `/open-data`
-- Web sidebar path: `Tools -> Open Data -> Open Data`
-- Native app menu path: `Tools -> Open Data -> Open Data`
+- Web sidebar path: `About -> Data & Developer Tools -> Open Data`
+- Native app menu path: `About -> Data & Developer Tools -> Open Data`
 
 ## Entry Points
 
-- Open `Tools -> Open Data -> Open Data` from the web sidebar.
-- Open `Tools -> Open Data -> Open Data` from the native app menu.
+- Open `About -> Data & Developer Tools -> Open Data` from the web sidebar.
+- Open `About -> Data & Developer Tools -> Open Data` from the native app menu.
 - Open `/open-data` directly.
 - Open the `/open-data` links from `/about/minting` and
   `/about/data-decentralization`.

@@ -6,6 +6,7 @@ import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissio
 
 let headerProps: any = null;
 let connectProps: any = null;
+let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
 
 type AppSidebarMenuItemsProps = Parameters<typeof AppSidebarMenuItems>[0];
 type SidebarMenu = AppSidebarMenuItemsProps["menu"];
@@ -32,7 +33,7 @@ jest.mock("@/components/header/AppUserConnect", () => (props: any) => {
 
 jest.mock("@/components/app-wallets/AppWalletsContext");
 jest.mock("@/hooks/useDropForgePermissions", () => ({
-  useDropForgePermissions: () => ({ ...DEFAULT_DROP_FORGE_PERMISSIONS }),
+  useDropForgePermissions: () => mockDropForgePermissions,
 }));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
@@ -87,30 +88,49 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       return children;
     };
 
+    const flattenMenuChildren = (
+      children: SidebarMenuChildren
+    ): SidebarMenuChildren =>
+      children.flatMap((child) => [child, ...(child.children ?? [])]);
+
+    const getChildGroup = (
+      children: SidebarMenuChildren,
+      label: string
+    ): SidebarMenuItem => {
+      const group = children.find((child) => child.label === label);
+      if (group === undefined) {
+        throw new Error(`Missing ${label} child group.`);
+      }
+
+      return group;
+    };
+
     beforeEach(() => {
       headerProps = menuProps = connectProps = null;
+      mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
       setCookieCountry("US");
     });
 
-    it("renders the menu IA with Tools and About groups and handles close", () => {
+    it("renders the menu IA with App Wallets under About when supported and handles close", () => {
       const onClose = jest.fn();
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: true,
       });
       render(<AppSidebar open={true} onClose={onClose} />);
-
       expect(getMenu().map((item) => item.label)).toEqual([
         "NFTs",
         "Waves",
         "DMs",
-        "Join 6529",
-        "Tools",
         "About",
       ]);
       expect(getMenu()).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ label: "DMs", path: "/messages" }),
-          expect.objectContaining({ label: "Join 6529", path: "/join" }),
+        ])
+      );
+      expect(getMenu()).toEqual(
+        expect.not.arrayContaining([
+          expect.objectContaining({ label: "Join 6529" }),
         ])
       );
       expect(getMenuChildren("NFTs")).toEqual([
@@ -126,69 +146,114 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "Waves", path: "/waves" },
         { label: "Discover Waves", path: "/discover" },
       ]);
-      expect(getMenuChildren("Tools")).toEqual([
-        { label: "Tools", path: "/tools" },
-        { label: "NFT Delegation", section: true },
-        { label: "Delegation Center", path: "/delegation/delegation-center" },
-        {
-          label: "Wallet Architecture",
-          path: "/delegation/wallet-architecture",
-        },
-        { label: "Delegation FAQ", path: "/delegation/delegation-faq" },
-        {
-          label: "Consolidation Use Cases",
-          path: "/delegation/consolidation-use-cases",
-        },
-        { label: "Wallet Checker", path: "/delegation/wallet-checker" },
-        { label: "The Memes Tools", section: true },
-        { label: "Subscriptions Report", path: "/tools/subscriptions-report" },
-        { label: "Meme Accounting", path: "/meme-accounting" },
-        { label: "Meme Gas", path: "/meme-gas" },
-        { label: "Builder Tools", section: true },
-        { label: "App Wallets", path: "/tools/app-wallets" },
-        { label: "API", path: "/tools/api" },
-        { label: "EMMA", path: "/emma" },
-        { label: "Block Finder", path: "/tools/block-finder" },
-        { label: "Open Data", section: true },
-        { label: "Open Data", path: "/open-data" },
-        { label: "Network Metrics", path: "/open-data/network-metrics" },
-        { label: "Meme Subscriptions", path: "/open-data/meme-subscriptions" },
-        { label: "6529bot Usage", path: "/open-data/6529bot" },
-        { label: "Rememes", path: "/open-data/rememes" },
-        { label: "Team", path: "/open-data/team" },
-        { label: "Royalties", path: "/open-data/royalties" },
-      ]);
-
       const aboutChildren = getMenuChildren("About");
       expect(aboutChildren).toEqual(
         expect.arrayContaining([
-          { label: "Network & People", section: true },
-          { label: "Identities", path: "/network" },
-          { label: "Network Data", section: true },
-          { label: "xTDH", path: "/xtdh" },
-          { label: "Wave Score", path: "/network/wave-score" },
-          { label: "Digital Rights", section: true },
-          { label: "GDRC", path: "/about/gdrc1" },
-          { label: "Delegation", section: true },
-          { label: "Delegation Center", path: "/delegation/delegation-center" },
-          { label: "NFT & Reporting Tools", section: true },
-          { label: "App Wallets", path: "/tools/app-wallets" },
-          { label: "Developer & Open Data", section: true },
-          { label: "Open Data", path: "/open-data" },
+          expect.objectContaining({ label: "About 6529", section: true }),
+          expect.objectContaining({
+            label: "Collections & Minting",
+            section: true,
+          }),
+          expect.objectContaining({
+            label: "Network & Reputation",
+            section: true,
+          }),
+          expect.objectContaining({
+            label: "Delegation & Wallets",
+            section: true,
+          }),
+          expect.objectContaining({
+            label: "Data & Developer Tools",
+            section: true,
+          }),
+          expect.objectContaining({ label: "Legal", section: true }),
         ])
       );
-      expect(aboutChildren.slice(0, 5)).toEqual([
+      expect(aboutChildren.slice(0, 3)).toEqual([
         { label: "About", path: "/about" },
-        { label: "Collections", section: true },
-        { label: "The Memes", path: "/about/the-memes" },
+        expect.objectContaining({ label: "About 6529", section: true }),
+        expect.objectContaining({
+          label: "Collections & Minting",
+          section: true,
+        }),
+      ]);
+      expect(
+        getChildGroup(aboutChildren, "Collections & Minting").children
+      ).toEqual([
+        { label: "About The Memes", path: "/about/the-memes" },
         { label: "Subscriptions", path: "/about/subscriptions" },
         { label: "Meme Lab", path: "/about/meme-lab" },
+        { label: "6529 Gradient", path: "/about/6529-gradient" },
+        { label: "Minting", path: "/about/minting" },
       ]);
-
+      expect(
+        getChildGroup(aboutChildren, "Network & Reputation").children
+      ).toEqual(
+        expect.arrayContaining([
+          { label: "Identities", path: "/network" },
+          { label: "xTDH Overview", path: "/network/xtdh" },
+          { label: "xTDH Allocations Dashboard", path: "/xtdh" },
+          { label: "Wave Score", path: "/network/wave-score" },
+          { label: "Network Nerd", path: "/network/nerd" },
+          { label: "Prenodes", path: "/network/prenodes" },
+          {
+            label: "TDH Historic Boosts",
+            path: "/network/tdh/historic-boosts",
+          },
+        ])
+      );
+      expect(
+        getChildGroup(aboutChildren, "Delegation & Wallets").children
+      ).toEqual(
+        expect.arrayContaining([
+          { label: "Delegation Center", path: "/delegation/delegation-center" },
+          { label: "App Wallets", path: "/tools/app-wallets" },
+        ])
+      );
+      expect(
+        getChildGroup(aboutChildren, "Data & Developer Tools").children
+      ).toEqual(
+        expect.arrayContaining([
+          { label: "Open Data", path: "/open-data" },
+          { label: "ReMemes Data", path: "/open-data/rememes" },
+          { label: "Team Data", path: "/open-data/team" },
+        ])
+      );
       headerProps.onClose();
       expect(onClose).toHaveBeenCalled();
       connectProps.onNavigate();
       expect(onClose).toHaveBeenCalledTimes(2);
+    });
+
+    it("adds Drop Forge as a gated top-level row after About", () => {
+      mockDropForgePermissions = {
+        ...DEFAULT_DROP_FORGE_PERMISSIONS,
+        canAccessLanding: true,
+      };
+      (useAppWallets as jest.Mock).mockReturnValue({
+        appWalletsSupported: true,
+      });
+
+      render(<AppSidebar open={true} onClose={() => {}} />);
+
+      expect(getMenu().map((item) => item.label)).toEqual([
+        "NFTs",
+        "Waves",
+        "DMs",
+        "About",
+        "Drop Forge",
+      ]);
+      expect(getMenuItem("Drop Forge")).toEqual(
+        expect.objectContaining({
+          label: "Drop Forge",
+          path: "/drop-forge",
+        })
+      );
+      expect(getMenuChildren("About")).toEqual(
+        expect.not.arrayContaining([
+          expect.objectContaining({ label: "Drop Forge" }),
+        ])
+      );
     });
 
     it("omits App Wallets when unsupported", () => {
@@ -196,13 +261,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         appWalletsSupported: false,
       });
       render(<AppSidebar open={true} onClose={() => {}} />);
-
-      expect(getMenuChildren("Tools")).toEqual(
-        expect.not.arrayContaining([
-          expect.objectContaining({ label: "App Wallets" }),
-        ])
-      );
-      expect(getMenuChildren("About")).toEqual(
+      expect(flattenMenuChildren(getMenuChildren("About"))).toEqual(
         expect.not.arrayContaining([
           expect.objectContaining({ label: "App Wallets" }),
         ])
@@ -219,7 +278,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       expect(queryByTestId("menu")).toBeNull();
     });
 
-    it("hides subscriptions in the About and Tools submenus for restricted iOS users", () => {
+    it("hides subscriptions in the About submenu for restricted iOS users", () => {
       setCookieCountry("DE");
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -227,22 +286,15 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
       render(<AppSidebar open={true} onClose={() => {}} />);
 
-      expect(getMenuChildren("About")).toEqual(
+      const aboutChildren = getMenuChildren("About");
+      expect(flattenMenuChildren(aboutChildren)).toEqual(
         expect.not.arrayContaining([
           expect.objectContaining({ label: "Subscriptions" }),
-          expect.objectContaining({ label: "Subscriptions Report" }),
-          expect.objectContaining({ label: "Meme Subscriptions" }),
         ])
       );
-      expect(getMenuChildren("Tools")).toEqual(
-        expect.not.arrayContaining([
-          expect.objectContaining({ label: "Subscriptions Report" }),
-          expect.objectContaining({ label: "Meme Subscriptions" }),
-        ])
-      );
-      expect(getMenuChildren("About")).toEqual(
+      expect(flattenMenuChildren(aboutChildren)).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: "The Memes" }),
+          expect.objectContaining({ label: "About The Memes" }),
           expect.objectContaining({ label: "Meme Lab" }),
         ])
       );
@@ -256,15 +308,9 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
       render(<AppSidebar open={true} onClose={() => {}} />);
 
-      expect(getMenuChildren("About")).toEqual(
+      expect(flattenMenuChildren(getMenuChildren("About"))).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ label: "Subscriptions" }),
-        ])
-      );
-      expect(getMenuChildren("Tools")).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ label: "Subscriptions Report" }),
-          expect.objectContaining({ label: "Meme Subscriptions" }),
         ])
       );
     });
