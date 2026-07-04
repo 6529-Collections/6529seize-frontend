@@ -12,14 +12,13 @@ Each row includes a date and file link.
 
 - Route: `/open-data/rememes`
 - Hub route: `/open-data`
-- Desktop sidebar path: `Tools -> Open Data -> Rememes`
-- Mobile sidebar path: `Tools -> Open Data`; from there, open the `Rememes` card
-  or use a direct URL.
+- Desktop sidebar path: `About -> Data & Developer Tools -> ReMemes Data`
+- Mobile sidebar path: `About -> Data & Developer Tools -> ReMemes Data`
 
 ## Entry Points
 
 - Open the `Rememes` card on `/open-data`.
-- Open `Tools -> Open Data -> Rememes` in the desktop sidebar.
+- Open `About -> Data & Developer Tools -> ReMemes Data` in the sidebar.
 - Open `/open-data/rememes` directly.
 
 ## Data Source and Table

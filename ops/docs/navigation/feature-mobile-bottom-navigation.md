@@ -6,11 +6,11 @@ Parent: [Navigation Index](README.md)
 
 In native app layout, primary section switching uses a floating bottom icon bar.
 
-Tabs render left-to-right as `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
+Tabs render left-to-right as `Discovery`, `Waves`, `Messages`, `Home`,
+`Network`, `Collections`, and `Notifications`.
 
-`DMs` can show an unread dot for connected profiles. Notifications and profile
-access are account utilities and stay in header/account surfaces instead of the
-bottom product-tab set.
+`Messages` and `Notifications` can show unread dots for connected profiles.
+Profile access stays in the app drawer/account surfaces.
 
 ## Location in the Site
 
@@ -29,38 +29,44 @@ bottom product-tab set.
 
 1. Open an app-shell route.
 2. Tap a tab:
-   - `NFTs` -> `/the-memes`
+   - `Discovery` -> `/discover`
    - `Waves` -> `/waves`, or cached non-DM thread (`/waves/{waveId}`)
-   - `DMs` -> `/messages`, or cached DM thread (`/messages/{id}`)
-   - `Join 6529` -> `/join`
-   - `About` -> `/about`
+   - `Messages` -> `/messages`, or cached DM thread (`/messages/{waveId}`)
+   - `Home` -> `/`
+   - `Network` -> `/network`
+   - `Collections` -> `/the-memes`
+   - `Notifications` -> `/notifications`
 3. Active-tab highlight updates from route path plus `wave`/`view` query state.
 4. Keep switching primary sections without opening the app sidebar.
 
 ## Common Scenarios
 
-- From any app-shell route, tap `NFTs` to open The Memes collection area.
-- From `/discover`, tap `Waves` to return to Waves.
+- From any app-shell route, tap `Discovery` to open the dedicated wave
+  discovery page.
+- From `/waves` or `/messages`, tap `Home` to return to `/`.
 - Use the app drawer/profile avatar when you need your own profile route.
 - From `/waves/{waveId}`, tap `Waves` once to clear cached wave thread state
   and return to `/waves`.
-- From `/messages/{id}`, tap `DMs` once to clear cached DM thread
+- From `/messages/{id}`, tap `Messages` once to clear cached DM thread
   state and return to `/messages`.
 - From `/waves` or `/messages` roots, tap the same tab to reopen the last
   cached thread in that category (if one exists).
 
 ## Edge Cases
 
-- `NFTs` is active on `/the-memes`, `/6529-gradient`, `/nextgen`,
-  `/meme-lab`, `/rememes`, `/nft-activity`, and `/meme-calendar`.
-- `Waves` is active on `/waves`, `/discover`, and from `?view=waves`.
-- `DMs` is active on `/messages`, `/messages/*`, and from `?view=messages`
-  even when path is not `/messages`.
-- `Join 6529` is active on `/join`.
-- `About` is active on `/about`, `/about/*`, network/reference routes,
-  delegation routes, tools routes, `/open-data`, `/drop-forge`,
-  `/drop-forge/*`, `/xtdh`, and `/rep/categories`.
-- `DMs` unread dots show only when a connected profile has unread items.
+- `Discovery` is active only on `/discover`.
+- `Waves` and `Messages` can be active from `?view=waves` or `?view=messages`
+  even when path is not `/waves` or `/messages`.
+- `Network` is active on `/network`, `/network/*`, `/nft-activity`, and
+  `/xtdh` (`xTDH Allocations Dashboard`).
+- `Collections` is active on `/the-memes`, `/6529-gradient`, `/nextgen`,
+  `/meme-lab`, and `/rememes`.
+- `Home` is active only on `/` when no `wave`/`view` override is active.
+- `Notifications` is active only on `/notifications`.
+- `Messages` is active on `/messages` and `/messages/*` (for example
+  `/messages/create`).
+- `Messages` and `Notifications` unread dots show only when a connected profile
+  has unread items.
 - On non-stream routes (for example `/network`, `/the-memes`),
   layout reserves bottom space so content is not hidden behind the bar.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
@@ -71,9 +77,9 @@ bottom product-tab set.
 ## Failure and Recovery
 
 - If a tab switch does not apply, wait for in-flight transition and tap again.
-- If you expected profile or notifications tabs, use account/header surfaces
-  instead.
-- If `Waves` or `DMs` keeps reopening a stale thread, tap that tab from an
+- If you expected a profile tab, use the app drawer instead; profile access is
+  no longer part of bottom navigation.
+- If `Waves` or `Messages` keeps reopening a stale thread, tap that tab from an
   active thread once to reset to section root, then retry.
 - If the bar is hidden, dismiss keyboard and close drop/edit overlays first.
 - If content appears clipped under the bar, return to a section root route once
@@ -84,8 +90,7 @@ bottom product-tab set.
 
 - This page documents app-shell behavior only.
 - Bottom navigation uses icon buttons (no visible text labels in the bar).
-- Secondary destinations (profile/account actions and nested About/NFTs/Waves
-  links) are in
+- Secondary destinations (profile/network/tools/about/account actions) are in
   [App Sidebar Menu](feature-app-sidebar-menu.md).
 - Web desktop/small-screen routing is documented in
   [Web Sidebar Navigation](feature-sidebar-navigation.md).

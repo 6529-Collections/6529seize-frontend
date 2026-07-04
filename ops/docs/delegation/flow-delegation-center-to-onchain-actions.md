@@ -20,7 +20,7 @@ verify the result in Wallet Checker.
 
 ## Entry Points
 
-- Sidebar: `Tools -> NFT Delegation -> Delegation Center`
+- Sidebar: `About -> Delegation & Wallets -> Delegation Center`
 - Direct URLs to write or collection routes
 - Profile consolidated-addresses panel links:
   - `/delegation/wallet-checker?address=<primary-wallet>`

@@ -20,7 +20,6 @@ import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
-import UsersIcon from "@/components/common/icons/UsersIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
@@ -108,7 +107,6 @@ const HEADER_SEARCH_LABELS = {
   join6529: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
   main: t(DEFAULT_LOCALE, "navigation.section.main"),
   networkData: t(DEFAULT_LOCALE, "navigation.subsection.networkData"),
-  networkNerd: t(DEFAULT_LOCALE, "navigation.network.nerd"),
   nfts: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
   notifications: t(DEFAULT_LOCALE, "navigation.account.notifications"),
   utility: t(DEFAULT_LOCALE, "navigation.section.utility"),
@@ -151,13 +149,6 @@ const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
     href: "/notifications",
     section: HEADER_SEARCH_LABELS.account,
     icon: BellIcon,
-  },
-  {
-    name: HEADER_SEARCH_LABELS.networkNerd,
-    href: "/network/nerd",
-    section: HEADER_SEARCH_LABELS.about,
-    subsection: HEADER_SEARCH_LABELS.networkData,
-    icon: UsersIcon,
   },
 ];
 

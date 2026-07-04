@@ -39,14 +39,17 @@ handoff does not behave as expected.
   (`/waves/create` or `/messages/create`), or profile route with valid in-app
   back history.
 - Sidebar rows are missing on web:
-  expand `NFTs`, `Waves`, or `About`; in collapsed rail, open the flyout
-  first. Network/reference/tool destinations live under `About`.
+  expand `NFTs` or `About`; in collapsed rail, open the flyout first.
+  `Waves` is a direct `/waves` row. Network/reference/tool destinations live
+  under `About`.
 - `Notifications` row is missing on web:
   it appears only when connected and sits above `Profile` near the sidebar
   account area, not in the main navigation list.
-- `Discover Waves` is missing or `/discover` looks empty:
-  `Discover Waves` lives under the `Waves` navigation group. If the page body
-  is blank, refresh `/discover` or compare against `/` and `/waves`.
+- `Discovery` or `Discover Waves` is missing, or `/discover` looks empty:
+  web/sidebar opens `/waves` directly, then exposes `Discover Waves` in the
+  expanded Waves panel header and through search. The app bottom bar still
+  exposes `Discovery`. If the page body is blank, refresh `/discover` or
+  compare against `/` and `/waves`.
 - `Profile` shortcut is missing:
   connect wallet first; profile access is an account utility and is hidden
   while disconnected.
@@ -60,7 +63,7 @@ handoff does not behave as expected.
 - `App Wallets` row is missing:
   it appears only when app-wallet support is available.
 - Subscription rows are missing on iOS web:
-  `Subscriptions Report`, `Open Data > Meme Subscriptions`, and
+  `Subscriptions Report`, `Open Data > Meme Subscriptions Data`, and
   `About > Subscriptions` are shown only for `US` country context.
 - Search shortcut does nothing:
   use `⌘K` where search triggers are mounted; `Ctrl+K` works only from the
@@ -81,7 +84,7 @@ handoff does not behave as expected.
 - App bottom navigation is hidden:
   dismiss keyboard, close single-drop view (`?drop=...`), and finish inline
   drop edit mode.
-- `Waves` or `DMs` tab highlight looks wrong:
+- `Waves` or `Messages` tab highlight looks wrong:
   verify both route and query state (`wave` and `view`).
 - Pull-to-refresh does not trigger:
   use app-shell context, scroll to top, and start the gesture from the header

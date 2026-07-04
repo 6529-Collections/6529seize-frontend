@@ -16,8 +16,8 @@
 ## Location in the Site
 
 - Route family: `/tools/app-wallets*`
-- Web sidebar path: `Tools -> Other Tools -> App Wallets`
-- Native app sidebar path: `Tools -> App Wallets`
+- Web sidebar path: `About -> Delegation & Wallets -> App Wallets`
+- Native app sidebar path: `About -> Delegation & Wallets -> App Wallets`
 - The menu row appears only when app-wallet support is enabled.
 - Direct route access still works when unsupported, but all app-wallet routes
   show an unsupported panel:

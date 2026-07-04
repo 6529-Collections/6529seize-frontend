@@ -3331,6 +3331,81 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
+  /identities/{id}/mute:
+    get:
+      tags:
+        - Identities
+      summary: Get authenticated user's mute state for an identity.
+      operationId: getIdentityMuteState
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentityMuteState"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Identity not found
+    post:
+      tags:
+        - Identities
+      summary: Mute identity notifications for authenticated user.
+      operationId: muteIdentity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentityMuteState"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Identity not found
+    delete:
+      tags:
+        - Identities
+      summary: Unmute identity notifications for authenticated user.
+      operationId: unmuteIdentity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentityMuteState"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Identity not found
   /identities/{id}/activity:
     get:
       tags:
@@ -6649,6 +6724,30 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SubscriptionCounts"
+  /subscriptions/memes/{token_id}/count:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get meme subscription count
+      operationId: getMemeSubscriptionCount
+      parameters:
+        - name: token_id
+          in: path
+          description: Meme token ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionCounts"
+        "400":
+          description: Invalid token ID
   /subscriptions/redeemed-memes-counts:
     get:
       tags:
@@ -14535,6 +14634,13 @@ components:
         - subscribed
       properties:
         subscribed:
+          type: boolean
+    ApiIdentityMuteState:
+      type: object
+      required:
+        - muted
+      properties:
+        muted:
           type: boolean
     ApiIdentitySubscriptionActions:
       type: object

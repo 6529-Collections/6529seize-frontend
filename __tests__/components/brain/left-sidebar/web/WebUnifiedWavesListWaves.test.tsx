@@ -45,6 +45,7 @@ jest.mock(
       data-padding={props.paddingClassName}
     >
       {props.label}
+      {props.rightContent}
     </div>
   )
 );
@@ -181,6 +182,10 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(screen.getByTestId("header-Waves")).toHaveAttribute(
     "data-padding",
     "tw-px-4"
+  );
+  expect(screen.getByRole("link", { name: "Discover Waves" })).toHaveAttribute(
+    "href",
+    "/discover"
   );
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();

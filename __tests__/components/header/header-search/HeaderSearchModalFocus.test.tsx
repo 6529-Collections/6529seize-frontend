@@ -102,13 +102,18 @@ const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
 
 const defaultSidebarSections = [
   {
-    key: "tools",
-    name: "Tools",
+    key: "about",
+    name: "About",
     icon: () => null,
-    items: [
-      { name: "Delegation Center", href: "/delegation/delegation-center" },
+    items: [],
+    subsections: [
+      {
+        name: "Delegation & Wallets",
+        items: [
+          { name: "Delegation Center", href: "/delegation/delegation-center" },
+        ],
+      },
     ],
-    subsections: [],
   },
 ];
 

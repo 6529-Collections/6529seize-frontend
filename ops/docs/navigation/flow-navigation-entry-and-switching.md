@@ -17,10 +17,12 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `Join 6529`,
-  `About`) plus connected utility rows such as `Notifications`.
+- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `About`) plus
+  gated `Drop Forge` when available and connected utility rows
+  such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
-- App bottom navigation tabs (`NFTs`, `Waves`, `DMs`, `Join 6529`, `About`).
+- App bottom navigation tabs (`Discovery`, `Waves`, `Messages`, `Home`,
+  `Network`, `Collections`, `Notifications`).
 - App header menu/avatar button for drawer routes and account actions (when
   `Back` is not active).
 - Search entry points: sidebar `Search`, app header search button, `⌘K` on
@@ -42,19 +44,23 @@ context-aware `Back`).
      the connected profile avatar shortcut in the drawer header
 4. Confirm route change via active states and unread indicators.
 5. In app wave/message threads:
-   - tap `Waves` or `DMs` once to return to section root
+   - tap `Waves` or `Messages` once to return to section root
    - tap again from root to reopen last visited thread (when cached)
 
 ## Common Scenarios
 
-- Desktop web metrics jump: open `About` -> `Network Data`, then move between
-  `Health`, `Definitions`, `Levels`, and `Network Stats`.
+- Desktop web metrics jump: open `About` -> `Network & Reputation`, then move
+  between `Network Health`, `Network Definitions`, `Levels`,
+  `Network TDH Stats`, `xTDH Overview`, and `xTDH Allocations Dashboard`.
 - Collapsed desktop rail: open a flyout submenu and pick a nested route without
   expanding the rail.
-- Wave discovery jump: open `Waves` -> `Discover Waves` to open `/discover`,
-  then enter a wave from its card grid.
+- Wave discovery jump: on web/sidebar, open `/waves` with the `Waves` row, then
+  use the `Discover Waves` link in the Waves panel header or search; in the app
+  bottom bar, tap `Discovery`.
 - Desktop web notifications jump: use the lower connected-only `Notifications`
   row near the account area.
+- Drop Forge jump: use the standalone `Drop Forge` row after `About` when the
+  connected wallet has landing access.
 - Small-screen web: open overlay menu, pick a route, and continue after
   auto-close on navigation.
 - Desktop web share: while disconnected use the standalone lower `Share` row;
@@ -72,19 +78,24 @@ context-aware `Back`).
 
 - App top-left control switches between menu/avatar and `Back`; when `Back` is
   shown, sidebar drawer entry is not available.
-- `Discover Waves` lives under `Waves` and routes to `/discover`.
+- `Waves` is one-click from the web sidebar. `Discover Waves` is secondary in
+  the Waves experience and searchable, while the app bottom bar keeps a
+  dedicated `Discovery` tab for `/discover`.
 - The app-drawer profile avatar is connected-only and resolves handle-first
   profile routing with wallet fallback.
 - In the app drawer header, only the connected profile avatar is a profile
   shortcut; handle/wallet text and level badge are informational.
 - Web sidebar and search-page catalogs can vary by runtime constraints:
   iOS non-US hides subscription-related entries, and `App Wallets` appears only
-  when app-wallet support is enabled.
+  when app-wallet support is enabled. `About` keeps network/reference routes in
+  `Network & Reputation`, wallet/delegation routes in `Delegation & Wallets`,
+  and open-data/tool routes in `Data & Developer Tools`. `Drop Forge` appears
+  only when the connected wallet can access `/drop-forge`.
 - Sidebar `Share` is web-only: disconnected desktop web shows a standalone row,
   connected desktop web moves it into the user menu, and Capacitor/native plus
   mobile-device web hide it.
-- `DMs` and `Notifications` unread dots require a connected profile with
-  unread state.
+- `Messages`/`DMs` and `Notifications` unread dots require a connected profile
+  with unread state.
 - Bottom navigation is not rendered during single-drop open or inline mobile
   edit mode, and is hidden/non-interactive while the mobile keyboard is open.
 - In collapsed desktop mode, flyout submenu anchor position tracks trigger
@@ -98,7 +109,7 @@ context-aware `Back`).
 - If a route row is missing, verify auth/country/device/feature-gate constraints.
 - If search is still loading, wait for debounce/fetch; if no results, refine
   query; if error appears, use `Try Again`.
-- If `Waves`/`DMs` keeps reopening an outdated thread, open the active
+- If `Waves`/`Messages` keeps reopening an outdated thread, open the active
   thread and tap that tab once to clear cached last-visited target.
 - If app `Back` is unavailable in current context, use sidebar or bottom
   navigation to return to a section root route.

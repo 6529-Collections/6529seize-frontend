@@ -14,6 +14,7 @@ import {
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
+import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
@@ -267,10 +268,10 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "section.account": "Account",
   "waves.discover": "Discover Waves",
   "network.nerd": "Network Nerd",
-  "subsection.networkPeople": "Network & People",
-  "subsection.networkData": "Network Data",
-  "subsection.nftReportingTools": "NFT & Reporting Tools",
-  "subsection.developerOpenData": "Developer & Open Data",
+  "subsection.networkPeople": "Network & Reputation",
+  "subsection.networkData": "Network & Reputation",
+  "subsection.nftReportingTools": "Collections & Minting",
+  "subsection.developerOpenData": "Data & Developer Tools",
 } as const);
 
 const JOIN_PAGE_MESSAGES = objectMessages("join", {
@@ -285,9 +286,9 @@ const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
   "back.wave": "Back to wave",
   "back.previous": "Back to previous page",
   "back.about": "Back to About",
-  breadcrumb: "About / Network Data / Wave Score",
+  breadcrumb: "About / Network & Reputation / Wave Score",
   description:
-    "This Network page explains the score shown on waves across discovery, the sidebar, home, and wave pages. Find it in About under Network Data whenever you want the formula or a live wave calculation.",
+    "This Network page explains the score shown on waves across discovery, the sidebar, home, and wave pages. Find it in About under Network & Reputation whenever you want the formula or a live wave calculation.",
 } as const);
 
 const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
@@ -840,6 +841,37 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  "home.mintSubscriptions.balanceLabel": "Balance",
+  "home.mintSubscriptions.infoLinkAriaLabel":
+    "Learn more about The Memes subscriptions",
+  "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
+  "home.mintSubscriptions.manageSubscriptionsLink": "Manage",
+  "home.mintSubscriptions.connectToSubscribe": "Connect to Subscribe",
+  "home.mintSubscriptions.connectFailed":
+    "Failed to open wallet connection. Please try again.",
+  "home.mintSubscriptions.awarenessLabel": "Subscription Minting",
+  "home.mintSubscriptions.action.manage": "Manage",
+  "home.mintSubscriptions.action.setUp": "Set up",
+  "home.mintSubscriptions.subscribeLabel": "Subscribe",
+  "home.mintSubscriptions.subscribedLabel": "Subscribed",
+  "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
+  "home.mintSubscriptions.subscribersLoading": "Loading subscriber count",
+  "home.mintSubscriptions.tooltip.connect":
+    "Connect to set up subscription minting.",
+  "home.mintSubscriptions.tooltip.dropped":
+    "Subscription minting is closed for this drop.",
+  "home.mintSubscriptions.tooltip.manage.one":
+    "You are subscribed for x{count} copy of this drop.",
+  "home.mintSubscriptions.tooltip.manage.many":
+    "You are subscribed for x{count} copies of this drop.",
+  "home.mintSubscriptions.tooltip.manageFallback":
+    "You are subscribed for this drop.",
+  "home.mintSubscriptions.tooltip.mintDay":
+    "Subscription minting cannot be changed on mint day.",
+  "home.mintSubscriptions.tooltip.profileSubscribe":
+    "You are not subscribed for this drop.",
+  "home.mintSubscriptions.tooltip.proxy":
+    "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":
     "Choose how inserted boosted-drop cards appear in wave chat on this device.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
@@ -1308,6 +1340,17 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
+  "profile.mute.action.mute": "Mute notifications",
+  "profile.mute.action.unmute": "Unmute notifications",
+  "profile.mute.action.muteAriaLabel": "Mute notifications from this profile",
+  "profile.mute.action.unmuteAriaLabel":
+    "Unmute notifications from this profile",
+  "profile.mute.error.mute": "Couldn't mute this profile.",
+  "profile.mute.error.unmute": "Couldn't unmute this profile.",
+  "profile.mute.error.description": "Please try again.",
+  "profile.mute.status.muted": "Notifications from this profile are muted.",
+  "profile.mute.status.unmuted":
+    "Notifications from this profile are not muted.",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
   "drop.media.processingGeneric": "Processing media",
@@ -1347,6 +1390,7 @@ export const EN_US_MESSAGES = {
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
+  ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,

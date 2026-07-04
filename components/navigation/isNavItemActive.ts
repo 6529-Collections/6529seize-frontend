@@ -3,168 +3,99 @@ import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
 export type NavSearchParams = Pick<URLSearchParams, "get">;
 
-const ABOUT_ROUTE_PREFIXES = [
-  "/about",
-  "/network",
-  "/delegation",
-  "/tools",
-  "/open-data",
-  "/drop-forge",
-  "/meme-accounting",
-  "/meme-gas",
-  "/emma",
-  "/xtdh",
-  "/rep/categories",
-] as const;
-
-const NFT_ROUTE_PREFIXES = [
-  "/the-memes",
-  "/6529-gradient",
-  "/nextgen",
-  "/meme-lab",
-  "/rememes",
-  "/nft-activity",
-  "/meme-calendar",
-] as const;
-
-const LEGACY_COLLECTION_ROUTE_PREFIXES = [
-  "/the-memes",
-  "/6529-gradient",
-  "/nextgen",
-  "/meme-lab",
-  "/rememes",
-] as const;
-
-type WaveRouteState = {
+type ActiveContext = {
+  readonly pathname: string;
+  readonly activeView: ViewKey | null;
   readonly hasWaveParam: boolean;
-  readonly isDiscoverPath: boolean;
-  readonly isMessagesPath: boolean;
+  readonly isWavesView: boolean;
   readonly isMessagesView: boolean;
   readonly isWaveSubRoute: boolean;
-  readonly isWavesPath: boolean;
-  readonly isWavesView: boolean;
+  readonly isCurrentWaveDm: boolean;
 };
 
-const matchesRoutePrefix = (pathname: string, href: string): boolean =>
-  pathname === href || pathname.startsWith(`${href}/`);
+const COLLECTION_ROUTE_PREFIXES = [
+  "/the-memes",
+  "/6529-gradient",
+  "/nextgen",
+  "/meme-lab",
+  "/rememes",
+] as const;
 
-const matchesAnyRoutePrefix = (
-  pathname: string,
-  hrefs: readonly string[]
-): boolean => hrefs.some((href) => matchesRoutePrefix(pathname, href));
-
-const isLegacyNetworkRouteActive = (pathname: string): boolean =>
+const isNetworkRoute = (pathname: string): boolean =>
   pathname.startsWith("/[user]") ||
+  pathname === "/network" ||
+  pathname.startsWith("/network/") ||
   pathname === "/nft-activity" ||
-  pathname === "/xtdh" ||
-  matchesRoutePrefix(pathname, "/network");
+  pathname === "/xtdh";
 
-const getWaveRouteState = (
-  pathname: string,
-  searchParams: NavSearchParams
-): WaveRouteState => {
-  const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const hasWaveParam = typeof waveParam === "string" && waveParam.length > 0;
-  const isWavesPath = matchesRoutePrefix(pathname, "/waves");
-  const isDiscoverPath = matchesRoutePrefix(pathname, "/discover");
-  const isMessagesPath = matchesRoutePrefix(pathname, "/messages");
-  const isWaveSubRoute = hasWaveParam && (isWavesPath || isMessagesPath);
-  const viewParam = searchParams.get("view");
-  const isWavesView = isWavesPath || viewParam === "waves";
-  const isMessagesView = isMessagesPath || viewParam === "messages";
+const isCollectionsRoute = (pathname: string): boolean =>
+  COLLECTION_ROUTE_PREFIXES.some((href) => pathname.startsWith(href));
 
-  return {
-    hasWaveParam,
-    isDiscoverPath,
-    isMessagesPath,
-    isMessagesView,
-    isWaveSubRoute,
-    isWavesPath,
-    isWavesView,
-  };
-};
-
-const isRouteItemActive = ({
-  activeView,
-  item,
+const isHomeRouteActive = ({
   pathname,
-  routeState,
-}: {
-  readonly activeView: ViewKey | null;
-  readonly item: Extract<NavItemData, { kind: "route" }>;
-  readonly pathname: string;
-  readonly routeState: WaveRouteState;
-}): boolean => {
-  if (item.name === "Home") {
-    return (
-      pathname === "/" &&
-      activeView === null &&
-      !routeState.hasWaveParam &&
-      !routeState.isWavesView &&
-      !routeState.isMessagesView
-    );
-  }
-
-  return activeView === null && matchesRoutePrefix(pathname, item.href);
-};
-
-const isWavesItemActive = ({
   activeView,
-  isCurrentWaveDm,
-  routeState,
-}: {
-  readonly activeView: ViewKey | null;
-  readonly isCurrentWaveDm: boolean;
-  readonly routeState: WaveRouteState;
-}): boolean => {
-  if (activeView === "waves") return true;
-  if (activeView === "messages") return false;
-  if (routeState.isWaveSubRoute) return !isCurrentWaveDm;
-  return (
-    !routeState.hasWaveParam &&
-    (routeState.isWavesPath ||
-      routeState.isWavesView ||
-      routeState.isDiscoverPath)
-  );
-};
+  hasWaveParam,
+  isWavesView,
+  isMessagesView,
+}: ActiveContext): boolean =>
+  pathname === "/" &&
+  activeView === null &&
+  !hasWaveParam &&
+  !isWavesView &&
+  !isMessagesView;
 
-const isMessagesItemActive = ({
-  activeView,
-  isCurrentWaveDm,
-  routeState,
-}: {
-  readonly activeView: ViewKey | null;
-  readonly isCurrentWaveDm: boolean;
-  readonly routeState: WaveRouteState;
-}): boolean => {
-  if (activeView === "messages") return true;
-  if (activeView === "waves") return false;
-  if (routeState.isWaveSubRoute) return isCurrentWaveDm;
-  return (
-    !routeState.hasWaveParam &&
-    (routeState.isMessagesPath || routeState.isMessagesView)
-  );
-};
-
-const isLegacyNavGroupActive = (
-  itemName: string,
-  pathname: string
+const isRouteItemActive = (
+  item: Extract<NavItemData, { kind: "route" }>,
+  context: ActiveContext
 ): boolean => {
-  // Keep retired labels active-compatible for old app shells and tests that may
-  // still pass pre-cleanup nav configs during rollout.
-  if (itemName === "Network") {
-    return isLegacyNetworkRouteActive(pathname);
+  const { pathname, activeView } = context;
+
+  if (item.name === "Network") {
+    return activeView === null && isNetworkRoute(pathname);
   }
-  if (itemName === "About") {
-    return matchesAnyRoutePrefix(pathname, ABOUT_ROUTE_PREFIXES);
+
+  if (item.name === "Collections") {
+    return activeView === null && isCollectionsRoute(pathname);
   }
-  if (itemName === "NFTs") {
-    return matchesAnyRoutePrefix(pathname, NFT_ROUTE_PREFIXES);
+
+  if (item.name === "Home") {
+    return isHomeRouteActive(context);
   }
-  if (itemName === "Collections") {
-    return matchesAnyRoutePrefix(pathname, LEGACY_COLLECTION_ROUTE_PREFIXES);
+
+  return pathname === item.href && activeView === null;
+};
+
+const getWaveSubRouteView = ({
+  isWaveSubRoute,
+  isCurrentWaveDm,
+}: ActiveContext): ViewKey | null => {
+  if (!isWaveSubRoute) {
+    return null;
   }
-  return false;
+  return isCurrentWaveDm ? "messages" : "waves";
+};
+
+const isViewItemActive = (
+  item: Extract<NavItemData, { kind: "view" }>,
+  context: ActiveContext
+): boolean => {
+  const { activeView, hasWaveParam, isWavesView, isMessagesView } = context;
+
+  if (activeView !== null) {
+    return activeView === item.viewKey;
+  }
+
+  const waveSubRouteView = getWaveSubRouteView(context);
+
+  if (waveSubRouteView !== null) {
+    return waveSubRouteView === item.viewKey;
+  }
+
+  if (item.viewKey === "waves") {
+    return !hasWaveParam && isWavesView;
+  }
+
+  return !hasWaveParam && isMessagesView;
 };
 
 export const isNavItemActive = (
@@ -174,18 +105,25 @@ export const isNavItemActive = (
   activeView: ViewKey | null,
   isCurrentWaveDm: boolean
 ): boolean => {
-  if (activeView === null && isLegacyNavGroupActive(item.name, pathname)) {
-    return true;
-  }
+  const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const hasWaveParam = typeof waveParam === "string" && waveParam.length > 0;
+  const isWavesPath = pathname === "/waves" || pathname.startsWith("/waves/");
+  const isMessagesPath =
+    pathname === "/messages" || pathname.startsWith("/messages/");
+  const viewParam = searchParams.get("view");
+  const context: ActiveContext = {
+    pathname,
+    activeView,
+    hasWaveParam,
+    isWavesView: isWavesPath || viewParam === "waves",
+    isMessagesView: isMessagesPath || viewParam === "messages",
+    isWaveSubRoute: hasWaveParam && (isWavesPath || isMessagesPath),
+    isCurrentWaveDm,
+  };
 
-  const routeState = getWaveRouteState(pathname, searchParams);
   if (item.kind === "route") {
-    return isRouteItemActive({ activeView, item, pathname, routeState });
+    return isRouteItemActive(item, context);
   }
 
-  if (item.viewKey === "waves") {
-    return isWavesItemActive({ activeView, isCurrentWaveDm, routeState });
-  }
-
-  return isMessagesItemActive({ activeView, isCurrentWaveDm, routeState });
+  return isViewItemActive(item, context);
 };
