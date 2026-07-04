@@ -22,7 +22,7 @@ destination; primary discovery for these routes lives under About.
 
 1. Open `/tools`.
 2. Scan the category headings.
-3. Select a label-only tool card.
+3. Select a tool card.
 4. The selected route opens using its canonical path.
 
 ## Common Scenarios
@@ -55,7 +55,8 @@ destination; primary discovery for these routes lives under About.
 ## Limitations / Notes
 
 - The Tools index is navigation only. It does not run the tools inline.
-- Tool cards intentionally show only labels, without per-card descriptions.
+- Tool cards intentionally show only labels with right-arrow affordances,
+  without per-card descriptions.
 - The route is secondary/direct. Do not document it as a primary navigation
   concept.
 

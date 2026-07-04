@@ -118,6 +118,13 @@ export const ES_ES_MESSAGES = {
   "theMemes.sorting.ascendingLabel": "Orden ascendente",
   "theMemes.sorting.descendingLabel": "Orden descendente",
   "theMemes.sorting.sortButtonLabel": "Ordenar por {sort}",
+  "theMemes.filters.triggerAriaLabel": "{filter}: {value}",
+  "theMemes.filters.year.label": "Año",
+  "theMemes.filters.year.all": "Todos los años",
+  "theMemes.filters.year.option": "Año {year}",
+  "theMemes.filters.season.label": "Temporada",
+  "theMemes.filters.season.all": "Todas las temporadas",
+  "theMemes.filters.season.allForYear": "Todo el año {year}",
   "theMemes.loading.fetching": "Cargando",
   "theMemes.empty.title": "No se encontraron memes",
   "theMemes.empty.description":

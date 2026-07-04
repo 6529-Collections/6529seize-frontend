@@ -1,9 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import type {
-  ReactNode,
-  RefObject} from "react";
+import type { ReactNode, RefObject } from "react";
 import {
   useCallback,
   useEffect,
@@ -14,15 +12,17 @@ import {
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
-export default function SeasonsGridDropdownDesktopWrapper({
+export default function FilterGridDropdownDesktopWrapper({
   isOpen,
   setOpen,
   buttonRef,
+  gridColumnClassName,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement | null>;
+  readonly gridColumnClassName: string;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -92,7 +92,8 @@ export default function SeasonsGridDropdownDesktopWrapper({
     <div
       className="tw-absolute tw-z-[100]"
       ref={dropdownRef}
-      style={{ left: 0, top: 0 }}>
+      style={{ left: 0, top: 0 }}
+    >
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
@@ -103,8 +104,11 @@ export default function SeasonsGridDropdownDesktopWrapper({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}>
-            <div className="tw-grid tw-grid-cols-4 tw-gap-2">{children}</div>
+            transition={{ duration: 0.2 }}
+          >
+            <div className={`tw-grid ${gridColumnClassName} tw-gap-2`}>
+              {children}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

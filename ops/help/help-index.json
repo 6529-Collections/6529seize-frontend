@@ -123,7 +123,8 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards.",
+        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
+        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, and Minting links.",
         "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
         "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
@@ -1958,7 +1959,7 @@
         "eligibility"
       ],
       "facts": [
-        "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, grouping, decision timelines, and drop eligibility states.",
+        "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, decision timelines, and drop eligibility states.",
         "Leaderboard availability depends on the wave type and configuration.",
         "Use the right sidebar or wave-specific navigation to inspect leaderboard surfaces when available."
       ],
@@ -4518,7 +4519,7 @@
       "facts": [
         "The Sales tab is a documented wave leaderboard feature.",
         "It is available only for wave contexts where sales data is relevant.",
-        "Sorting and grouping controls can affect leaderboard views."
+        "Sorting and price controls can affect curation leaderboard views."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -4528,17 +4529,12 @@
     {
       "id": "waves.leaderboard.sort-group-filters",
       "kind": "ui_affordance",
-      "title": "Wave leaderboard sort, group, and price filters",
-      "aliases": [
-        "leaderboard filters",
-        "sort leaderboard",
-        "group leaderboard",
-        "price filter"
-      ],
-      "keywords": ["waves", "leaderboard", "sort", "group", "filters", "price"],
+      "title": "Wave leaderboard sort and price filters",
+      "aliases": ["leaderboard filters", "sort leaderboard", "price filter"],
+      "keywords": ["waves", "leaderboard", "sort", "filters", "price"],
       "facts": [
-        "Wave leaderboard sorting, grouping, and price filters are documented controls.",
-        "These controls affect leaderboard result ordering and grouping.",
+        "Wave leaderboard sorting and price filters are documented controls.",
+        "These controls affect leaderboard result ordering and curation-wave price filtering.",
         "Availability depends on leaderboard tab and wave data."
       ],
       "canonical_path": "/waves",
@@ -4736,12 +4732,14 @@
         "browse",
         "sort",
         "filter",
+        "year",
         "season",
         "query"
       ],
       "facts": [
         "The Memes list browsing and sorting behavior is documented under media docs.",
-        "URL query state can affect list filtering and sorting.",
+        "URL query state can affect list filtering and sorting, including year and season filters.",
+        "On The Memes list, Year scopes the Season dropdown; invalid year and season combinations reset back to the unfiltered list.",
         "Use individual Meme Card pages for card-specific details."
       ],
       "canonical_path": "/the-memes",
@@ -5296,7 +5294,7 @@
       ],
       "facts": [
         "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
-        "It groups label-only tool cards into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
+        "It groups label-only tool cards with right-arrow affordances into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
         "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
         "Private operator routes and local-only tools are not listed on the public Tools index.",

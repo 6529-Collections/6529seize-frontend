@@ -11,6 +11,7 @@ import { mainnet } from "viem/chains";
 
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
+import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -573,6 +574,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
   const isLastCard = nftMeta?.collection_size === nft?.id;
   const isLoadingNft = !nft && !nftNotFound;
+  const nftYear = nft === undefined ? null : getMemeYearFromMintNumber(nft.id);
 
   return (
     <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
@@ -602,6 +604,11 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                     id={nft.id}
                     locale={locale}
                     seasonHref={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
+                    yearHref={
+                      nftYear === null
+                        ? undefined
+                        : `/the-memes?year=${nftYear}&sort=age&sort_dir=ASC`
+                    }
                     showOnlySeasonOnMobile
                   />
                 </div>

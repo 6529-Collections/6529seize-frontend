@@ -10,7 +10,8 @@ works from the card.
 
 - `/waves/{waveId}` and `/messages/{waveId}` when `Leaderboard` is available.
 - `Leaderboard` tab with `Grid view` selected on memes waves.
-- Card order and membership follow active `Sort` and optional `Group` filter context.
+- Card order follows the active `Sort`; gallery membership is limited to drops
+  with media.
 
 ## Entry Points
 
@@ -78,14 +79,14 @@ works from the card.
 
 - Scope is memes leaderboard `Grid view` card behavior only.
 - Non-memes `Grid` and `Content only` views are separate surfaces.
-- Sort/group control behavior is owned by `feature-sort-and-group-filters.md`.
+- Sort and price filter behavior is owned by `feature-sort-and-group-filters.md`.
 - Cross-view loading and empty-state ownership is in `feature-drop-states.md`.
 
 ## Related Pages
 
 - [Wave Leaderboards Index](README.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
-- [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
+- [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Drop Actions: Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
 - [Vote Slider](../drop-actions/feature-vote-slider.md)

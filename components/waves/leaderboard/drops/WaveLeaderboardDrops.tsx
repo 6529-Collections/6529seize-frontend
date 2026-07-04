@@ -18,7 +18,6 @@ interface WaveLeaderboardDropsProps {
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onCreateDrop?: (() => void) | undefined;
-  readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
@@ -31,7 +30,6 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   isVotingControlsLocked = false,
   onDropClick,
   onCreateDrop,
-  curatedByGroupId,
   minPrice,
   maxPrice,
   priceCurrency,
@@ -46,7 +44,6 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   } = useWaveDropsLeaderboard({
     waveId: wave.id,
     sort,
-    curatedByGroupId,
     minPrice,
     maxPrice,
     priceCurrency,
@@ -56,11 +53,14 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     void refetch();
   }, [refetch]);
 
-  const intersectionElementRef = useIntersectionObserver(async () => {
-    if (hasNextPage && !isFetching && !isFetchingNextPage) {
-      await fetchNextPage();
+  const handleIntersection = React.useCallback(() => {
+    if (!hasNextPage || isFetching || isFetchingNextPage) {
+      return;
     }
-  });
+
+    Promise.resolve(fetchNextPage()).catch(() => undefined);
+  }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
+  const intersectionElementRef = useIntersectionObserver(handleIntersection);
 
   if (isFetching && drops.length === 0) {
     return <WaveLeaderboardLoading />;

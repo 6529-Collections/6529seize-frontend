@@ -1,4 +1,4 @@
-import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
+import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
 import type { MemeSeason } from "@/entities/ISeason";
 
 export default function UserPageCollectedFiltersSzn({
@@ -12,7 +12,7 @@ export default function UserPageCollectedFiltersSzn({
 }) {
   return (
     <div className="tw-w-36">
-      <SeasonsGridDropdown
+      <MemeSeasonGridDropdown
         selected={selected}
         setSelected={setSelected}
         initialSeasonId={initialSeasonId}

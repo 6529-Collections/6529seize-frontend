@@ -14,7 +14,7 @@
   "about.contents.groups.dataDeveloperTools": "Data & Developer Tools",
   "about.contents.groups.legal": "Legal",
   "about.contents.pages.aboutTheMemes": "About The Memes",
-  "about.contents.pages.subscriptions": "Subscriptions",
+  "about.contents.pages.subscriptions": "Subscription Minting",
   "about.contents.pages.memeLab": "Meme Lab",
   "about.contents.pages.gradient": "6529 Gradient",
   "about.contents.pages.gdrc": "GDRC",
@@ -126,6 +126,5 @@
   "about.index.metadata.description": "About 6529",
   "about.index.eyebrow": "About",
   "about.index.title": "About 6529",
-  "about.index.lead": "Find the right About page for 6529 basics, collections, network metrics, delegation, open data, developer tools, and policies.",
   "about.index.cardAriaLabel": "Open page: {page}"
 }

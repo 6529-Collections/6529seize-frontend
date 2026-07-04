@@ -19,15 +19,6 @@ const sortComponentMock = jest.fn((props: any) => (
     onClick={() => props.onSortChange("SORT" as any)}
   />
 ));
-const curationComponentMock = jest.fn((props: any) => (
-  <button
-    data-testid="curation-group-select"
-    data-mode={props.mode}
-    onClick={() => props.onChange("cg-1")}
-  >
-    Curation
-  </button>
-));
 const resolveHeaderLayoutMock = jest.fn();
 
 jest.mock("@/components/waves/leaderboard/header/WaveleaderboardSort", () => {
@@ -40,14 +31,6 @@ jest.mock("@/components/waves/leaderboard/header/WaveleaderboardSort", () => {
     WaveleaderboardSort: (props: any) => sortComponentMock(props),
   };
 });
-
-jest.mock(
-  "@/components/waves/leaderboard/header/WaveLeaderboardCurationGroupSelect",
-  () => ({
-    WaveLeaderboardCurationGroupSelect: (props: any) =>
-      curationComponentMock(props),
-  })
-);
 
 jest.mock(
   "@/components/waves/leaderboard/header/waveLeaderboardHeaderLayout",
@@ -104,11 +87,9 @@ const getLatestSortLabels = (): string[] => {
 
 beforeEach(() => {
   sortComponentMock.mockClear();
-  curationComponentMock.mockClear();
   resolveHeaderLayoutMock.mockReset();
   resolveHeaderLayoutMock.mockReturnValue({
     sortMode: "dropdown",
-    curationMode: "tabs",
     enableControlsScroll: false,
     actionMode: "full",
     wrapActions: false,
@@ -380,51 +361,6 @@ it("keeps curation price sort but hides projected vote without a time lock", () 
     "Newest",
     "Price",
   ]);
-});
-
-it("renders curation selector and handles curation filter changes", async () => {
-  const user = userEvent.setup();
-  const onCurationGroupChange = jest.fn();
-
-  render(
-    <AuthContext.Provider
-      value={
-        {
-          connectedProfile: { handle: "tester" },
-          activeProfileProxy: null,
-        } as any
-      }
-    >
-      <WaveLeaderboardHeader
-        wave={wave}
-        onCreateDrop={jest.fn()}
-        viewMode="list"
-        onViewModeChange={jest.fn()}
-        sort={WaveDropsLeaderboardSort.RANK}
-        onSortChange={jest.fn()}
-        curationGroups={[
-          {
-            id: "cg-1",
-            name: "Curators One",
-            wave_id: "w",
-            group_id: "g-1",
-            created_at: 1,
-            updated_at: 1,
-          },
-        ]}
-        curatedByGroupId={null}
-        onCurationGroupChange={onCurationGroupChange}
-      />
-    </AuthContext.Provider>
-  );
-
-  expect(screen.getByTestId("curation-group-select")).toBeInTheDocument();
-  expect(screen.getByTestId("curation-group-select")).toHaveAttribute(
-    "data-mode",
-    "tabs"
-  );
-  await user.click(screen.getByTestId("curation-group-select"));
-  expect(onCurationGroupChange).toHaveBeenCalledWith("cg-1");
 });
 
 it("renders curation price controls and commits range updates", async () => {
@@ -991,45 +927,9 @@ it("does not render price controls for non-curation waves", () => {
   ).not.toBeInTheDocument();
 });
 
-it("does not render curation selector when curation controls are unavailable", () => {
-  render(
-    <AuthContext.Provider
-      value={
-        {
-          connectedProfile: { handle: "tester" },
-          activeProfileProxy: null,
-        } as any
-      }
-    >
-      <WaveLeaderboardHeader
-        wave={wave}
-        onCreateDrop={jest.fn()}
-        viewMode="list"
-        onViewModeChange={jest.fn()}
-        sort={WaveDropsLeaderboardSort.RANK}
-        onSortChange={jest.fn()}
-        curationGroups={[
-          {
-            id: "cg-1",
-            name: "Curators One",
-            wave_id: "w",
-            group_id: "g-1",
-            created_at: 1,
-            updated_at: 1,
-          },
-        ]}
-        curatedByGroupId={null}
-      />
-    </AuthContext.Provider>
-  );
-
-  expect(screen.queryByTestId("curation-group-select")).not.toBeInTheDocument();
-});
-
 it("applies resolved modes and enables scroll fallback styling when requested", async () => {
   resolveHeaderLayoutMock.mockReturnValue({
     sortMode: "dropdown",
-    curationMode: "dropdown",
     enableControlsScroll: true,
     actionMode: "icon",
     wrapActions: false,
@@ -1044,27 +944,12 @@ it("applies resolved modes and enables scroll fallback styling when requested", 
         onViewModeChange={jest.fn()}
         sort={WaveDropsLeaderboardSort.RANK}
         onSortChange={jest.fn()}
-        curationGroups={[
-          {
-            id: "cg-1",
-            name: "Curators One",
-            wave_id: "w",
-            group_id: "g-1",
-            created_at: 1,
-            updated_at: 1,
-          },
-        ]}
-        curatedByGroupId={null}
-        onCurationGroupChange={jest.fn()}
       />
     </AuthContext.Provider>
   );
 
   await waitFor(() =>
-    expect(screen.getByTestId("curation-group-select")).toHaveAttribute(
-      "data-mode",
-      "dropdown"
-    )
+    expect(screen.getByTestId("sort")).toHaveAttribute("data-mode", "dropdown")
   );
   expect(
     screen.getByTestId("leaderboard-header-controls-row").className
@@ -1182,7 +1067,6 @@ it("uses full header row width when curation actions are inline", async () => {
 it("renders icon-only curation actions with drop glyph when layout requests compact mode", () => {
   resolveHeaderLayoutMock.mockReturnValue({
     sortMode: "dropdown",
-    curationMode: "tabs",
     enableControlsScroll: false,
     actionMode: "icon",
     wrapActions: false,
@@ -1227,7 +1111,6 @@ it("renders icon-only curation actions with drop glyph when layout requests comp
 it("marks the actions row as wrapped when layout requests wrapping", () => {
   resolveHeaderLayoutMock.mockReturnValue({
     sortMode: "dropdown",
-    curationMode: "dropdown",
     enableControlsScroll: false,
     actionMode: "icon",
     wrapActions: true,
@@ -1279,7 +1162,6 @@ it("marks the actions row as wrapped when layout requests wrapping", () => {
 it("moves actions to the price row when filters are open on wrapped layouts", () => {
   resolveHeaderLayoutMock.mockReturnValue({
     sortMode: "dropdown",
-    curationMode: "dropdown",
     enableControlsScroll: false,
     actionMode: "icon",
     wrapActions: true,

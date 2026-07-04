@@ -69,15 +69,13 @@ Not shown on:
 ## Limitations / Notes
 
 - Curation is independent from voting; it does not submit a vote.
-- Group-filter behavior (`curated_by_group`) is documented in leaderboard filter
-  docs.
 - Curation toggles are not available in gallery-card layouts.
 
 ## Related Pages
 
 - [Wave Drop Actions Index](README.md)
 - [Wave Drop Touch Menu](feature-touch-drop-menu.md)
-- [Wave Leaderboard Sort and Group Filters](../leaderboard/feature-sort-and-group-filters.md)
+- [Wave Leaderboard Sort and Price Filters](../leaderboard/feature-sort-and-group-filters.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
 - [Wave Leaderboard Gallery Cards](../leaderboard/feature-gallery-cards.md)
 - [Docs Home](../../README.md)

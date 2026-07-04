@@ -1,30 +1,27 @@
-# Wave Leaderboard Sort, Group, and Price Filters
+# Wave Leaderboard Sort and Price Filters
 
 ## Overview
 
 Use leaderboard header filters to:
 - reorder drops with `Sort`
-- filter to one curation `Group` when groups exist
 - narrow curation-wave results with ETH bounds from `Filters`
 
-`Sort` is saved per wave in local browser storage. `Group` is URL-synced with
-`curated_by_group={groupId}`. Price filters are local-only UI state.
+`Sort` is saved per wave in local browser storage. Price filters are local-only
+UI state.
 
 ## Location in the Site
 
 - `Leaderboard` tab header on `/waves/{waveId}`.
 - `Leaderboard` tab header on `/messages/{waveId}`.
 - Legacy wave links (`/waves?wave={waveId}`) redirect to `/waves/{waveId}` and
-  keep other query params, including `curated_by_group` (price-query params are
-  ignored by leaderboard header state).
+  keep other query params. Price-query params are ignored by leaderboard header
+  state.
 
 ## Entry Points
 
 - Open `/waves/{waveId}` and switch to `Leaderboard`.
 - Open `/messages/{waveId}` and switch to `Leaderboard`.
 - Change `Sort`.
-- If `Group` is visible, pick one curation group or `All submissions`.
-- Open a deep link with `curated_by_group` to pre-apply group filtering.
 - In curation waves, open `Filters` and set `Minimum ETH` and/or `Maximum ETH`.
 
 ## Control Behavior
@@ -39,12 +36,6 @@ Use leaderboard header filters to:
   options so the current mode remains easy to scan.
 - Inactive sort tabs keep a darker filled background and brighten on hover
   before selection.
-- `Group` is shown only when curation groups load for that wave.
-- `Group` options always include `All submissions` plus every loaded curation
-  group.
-- Group tabs can show a small avatar when group profile media is available.
-- Selecting a group updates `curated_by_group` with in-place URL replace (no
-  full-page navigation). Selecting `All submissions` removes that param.
 - In curation waves, `Filters` toggles a panel with `Minimum ETH` and
   `Maximum ETH` inputs.
 - Price changes commit on `Enter`, on input blur, or after a short typing pause.
@@ -52,29 +43,20 @@ Use leaderboard header filters to:
 - On narrow layouts, curation action controls can switch to compact icon mode
   and can move beside the price inputs when wrapping is needed.
 - Header layout is width-based:
-  - tries view-mode tabs + `Sort` tabs + `Group` tabs
-  - falls back to `Sort` dropdown + `Group` tabs
-  - falls back again to `Sort` dropdown + `Group` dropdown
-  - enables horizontal control-row scroll if even dropdown layout does not fit
+  - tries view-mode tabs + `Sort` tabs
+  - falls back to `Sort` dropdown
+  - enables horizontal control-row scroll if dropdown layout does not fit
 
 ## User Journey
 
 1. Open `Leaderboard`.
 2. Pick a `Sort` mode.
-3. Optional: pick a `Group`.
-4. Optional (curation waves): open `Filters` and set min/max ETH bounds.
-5. Compare results in the current leaderboard view mode.
+3. Optional (curation waves): open `Filters` and set min/max ETH bounds.
+4. Compare results in the current leaderboard view mode.
 
 ## Edge Cases
 
-- Some sort/group/price combinations validly return empty results.
-- If no curation groups exist, `Group` stays hidden.
-- While curation groups are still loading, URL `curated_by_group` can stay
-  active for requests until groups resolve.
-- If URL `curated_by_group` does not match loaded groups, active filtering
-  falls back to `All submissions`.
-- If curation groups fail to load, `Group` stays hidden and results load
-  unfiltered.
+- Some sort/price combinations validly return empty results.
 - URL `min_price` and `max_price` values are not used by leaderboard header UI.
 - If both price bounds are set in reverse order (`min > max`), request bounds
   are normalized before fetch.
@@ -83,20 +65,16 @@ Use leaderboard header filters to:
 
 ## Failure and Recovery
 
-- Any sort, group, or price change triggers a fresh leaderboard query.
+- Any sort or price change triggers a fresh leaderboard query.
 - If controls are clipped on small widths, scroll the controls row horizontally.
-- If URL filtering looks wrong, switch to `All submissions` to clear
-  `curated_by_group`.
 - If price filtering looks wrong, use `Clear filters` to reset ETH bounds.
 
 ## Limitations / Notes
 
-- Sort/group/price changes only affect leaderboard presentation.
+- Sort and price changes only affect leaderboard presentation.
 - Sort preference is local per wave and browser, and is not part of the URL.
-- URL persistence is only for `curated_by_group`.
 - Price filters are not URL-synced and reset with wave-context remounts
   (for example changing to another wave thread).
-- Group names and membership follow current curation-group configuration.
 - Curation price filtering uses ETH values.
 
 ## Related Pages

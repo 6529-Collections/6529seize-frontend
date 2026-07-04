@@ -28,7 +28,6 @@ interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly enabled?: boolean | undefined;
-  readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
@@ -47,11 +46,217 @@ const SORT_DIRECTION_MAP: Record<
   [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
 };
 
+interface CanonicalPriceFilters {
+  readonly normalizedPriceCurrency: string | undefined;
+  readonly normalizedPriceLower: string | undefined;
+  readonly normalizedPriceUpper: string | undefined;
+}
+
+interface LeaderboardQueryKeyInput {
+  readonly waveId: string;
+  readonly sort: WaveDropsLeaderboardSort;
+  readonly sortDirection: "ASC" | "DESC" | undefined;
+  readonly priceFilters: CanonicalPriceFilters;
+}
+
+interface LeaderboardParamsInput extends LeaderboardQueryKeyInput {
+  readonly pageParam: number | null;
+  readonly pageSize: number;
+}
+
+interface FetchLeaderboardPageInput extends LeaderboardParamsInput {
+  readonly signal?: AbortSignal | undefined;
+}
+
+const normalizePriceFilter = (value?: number): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? value
+    : undefined;
+
+const getCanonicalPriceFilters = ({
+  minPrice,
+  maxPrice,
+  priceCurrency,
+}: Pick<
+  UseWaveDropsLeaderboardProps,
+  "minPrice" | "maxPrice" | "priceCurrency"
+>): CanonicalPriceFilters => {
+  const trimmedPriceCurrency = priceCurrency?.trim();
+  const normalizedPriceCurrency =
+    trimmedPriceCurrency && trimmedPriceCurrency.length > 0
+      ? trimmedPriceCurrency
+      : undefined;
+  const normalizedMinPrice = normalizePriceFilter(minPrice);
+  const normalizedMaxPrice = normalizePriceFilter(maxPrice);
+
+  let normalizedPriceLower = normalizedMinPrice;
+  let normalizedPriceUpper = normalizedMaxPrice;
+
+  if (
+    typeof normalizedPriceLower === "number" &&
+    typeof normalizedPriceUpper === "number" &&
+    normalizedPriceLower > normalizedPriceUpper
+  ) {
+    normalizedPriceLower = normalizedMaxPrice;
+    normalizedPriceUpper = normalizedMinPrice;
+  }
+
+  return {
+    normalizedPriceCurrency,
+    normalizedPriceLower:
+      typeof normalizedPriceLower === "number"
+        ? normalizedPriceLower.toString()
+        : undefined,
+    normalizedPriceUpper:
+      typeof normalizedPriceUpper === "number"
+        ? normalizedPriceUpper.toString()
+        : undefined,
+  };
+};
+
+const buildLeaderboardQueryKey = ({
+  waveId,
+  sort,
+  sortDirection,
+  priceFilters,
+}: LeaderboardQueryKeyInput) =>
+  [
+    QueryKey.DROPS_LEADERBOARD,
+    {
+      waveId,
+      page_size: WAVE_DROPS_PARAMS.limit,
+      sort,
+      sort_direction: sortDirection,
+      min_price: priceFilters.normalizedPriceLower ?? null,
+      max_price: priceFilters.normalizedPriceUpper ?? null,
+      price_currency: priceFilters.normalizedPriceCurrency ?? null,
+    },
+  ] as const;
+
+const buildLeaderboardParams = ({
+  pageParam,
+  pageSize,
+  sort,
+  sortDirection,
+  priceFilters,
+}: LeaderboardParamsInput): Record<string, string> => {
+  const params: Record<string, string> = {
+    page_size: pageSize.toString(),
+    sort,
+  };
+
+  if (sortDirection) {
+    params["sort_direction"] = sortDirection;
+  }
+  if (typeof pageParam === "number") {
+    params["page"] = `${pageParam}`;
+  }
+  if (priceFilters.normalizedPriceLower) {
+    params["min_price"] = priceFilters.normalizedPriceLower;
+  }
+  if (priceFilters.normalizedPriceUpper) {
+    params["max_price"] = priceFilters.normalizedPriceUpper;
+  }
+  if (priceFilters.normalizedPriceCurrency) {
+    params["price_currency"] = priceFilters.normalizedPriceCurrency;
+  }
+
+  return params;
+};
+
+const fetchLeaderboardPage = ({
+  waveId,
+  pageParam,
+  pageSize,
+  sort,
+  sortDirection,
+  priceFilters,
+  signal,
+}: FetchLeaderboardPageInput) =>
+  fetchWaveLeaderboardV2({
+    waveId,
+    params: buildLeaderboardParams({
+      waveId,
+      pageParam,
+      pageSize,
+      sort,
+      sortDirection,
+      priceFilters,
+    }),
+    signal,
+  });
+
+const getNextLeaderboardPageParam = ({
+  lastPage,
+  sort,
+}: {
+  readonly lastPage: ApiDropsLeaderboardPage;
+  readonly sort: WaveDropsLeaderboardSort;
+}): number | null => {
+  if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
+    const haveZeroVotes = lastPage.drops.some(
+      (drop) => drop.context_profile_context?.rating === 0
+    );
+    if (haveZeroVotes) {
+      return null;
+    }
+  }
+  return lastPage.next ? lastPage.page + 1 : null;
+};
+
+const getLeaderboardDrops = ({
+  data,
+  sort,
+}: {
+  readonly data:
+    | {
+        readonly pages: readonly ApiDropsLeaderboardPage[];
+      }
+    | undefined;
+  readonly sort: WaveDropsLeaderboardSort;
+}) => {
+  if (!data?.pages) {
+    return [];
+  }
+
+  const mappedDrops = mapToExtendedDrops(
+    data.pages.map((page) => ({
+      wave: page.wave,
+      drops: page.drops,
+    })),
+    []
+  );
+  const uniqueDrops = generateUniqueKeys(mappedDrops, []);
+
+  if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
+    return uniqueDrops.filter(
+      (drop) => drop.context_profile_context?.rating !== 0
+    );
+  }
+
+  return uniqueDrops;
+};
+
+const useRemoveDropsQueryOnUnmount = ({
+  queryClient,
+  waveId,
+}: {
+  readonly queryClient: ReturnType<typeof useQueryClient>;
+  readonly waveId: string;
+}) => {
+  useEffect(() => {
+    return () => {
+      queryClient.removeQueries({
+        queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+      });
+    };
+  }, [waveId, queryClient]);
+};
+
 export function useWaveDropsLeaderboard({
   waveId,
   sort = WaveDropsLeaderboardSort.RANK,
   enabled = true,
-  curatedByGroupId,
   minPrice,
   maxPrice,
   priceCurrency,
@@ -61,157 +266,20 @@ export function useWaveDropsLeaderboard({
   const sortDirection = SORT_DIRECTION_MAP[sort];
   const isQueryEnabled = enabled && !!waveId;
 
-  const normalizedCuratedByGroupId = useMemo(
-    () => curatedByGroupId?.trim() ?? undefined,
-    [curatedByGroupId]
+  const canonicalPriceFilters = useMemo(
+    () => getCanonicalPriceFilters({ minPrice, maxPrice, priceCurrency }),
+    [maxPrice, minPrice, priceCurrency]
   );
-  const canonicalPriceFilters = useMemo(() => {
-    const trimmedPriceCurrency = priceCurrency?.trim();
-    const normalizedPriceCurrency =
-      trimmedPriceCurrency && trimmedPriceCurrency.length > 0
-        ? trimmedPriceCurrency
-        : undefined;
-    const normalizedMinPrice =
-      typeof minPrice === "number" && Number.isFinite(minPrice) && minPrice >= 0
-        ? minPrice
-        : undefined;
-    const normalizedMaxPrice =
-      typeof maxPrice === "number" && Number.isFinite(maxPrice) && maxPrice >= 0
-        ? maxPrice
-        : undefined;
-
-    let normalizedPriceLower = normalizedMinPrice;
-    let normalizedPriceUpper = normalizedMaxPrice;
-
-    if (
-      typeof normalizedPriceLower === "number" &&
-      typeof normalizedPriceUpper === "number" &&
-      normalizedPriceLower > normalizedPriceUpper
-    ) {
-      normalizedPriceLower = normalizedMaxPrice;
-      normalizedPriceUpper = normalizedMinPrice;
-    }
-
-    return {
-      normalizedPriceCurrency,
-      normalizedPriceLower:
-        typeof normalizedPriceLower === "number"
-          ? normalizedPriceLower.toString()
-          : undefined,
-      normalizedPriceUpper:
-        typeof normalizedPriceUpper === "number"
-          ? normalizedPriceUpper.toString()
-          : undefined,
-    };
-  }, [maxPrice, minPrice, priceCurrency]);
 
   const queryKey = useMemo(
     () =>
-      [
-        QueryKey.DROPS_LEADERBOARD,
-        {
-          waveId,
-          page_size: WAVE_DROPS_PARAMS.limit,
-          sort,
-          sort_direction: sortDirection,
-          curation_id: normalizedCuratedByGroupId ?? null,
-          min_price: canonicalPriceFilters.normalizedPriceLower ?? null,
-          max_price: canonicalPriceFilters.normalizedPriceUpper ?? null,
-          price_currency: canonicalPriceFilters.normalizedPriceCurrency ?? null,
-        },
-      ] as const,
-    [
-      waveId,
-      sort,
-      sortDirection,
-      normalizedCuratedByGroupId,
-      canonicalPriceFilters.normalizedPriceLower,
-      canonicalPriceFilters.normalizedPriceUpper,
-      canonicalPriceFilters.normalizedPriceCurrency,
-    ]
-  );
-
-  const buildLeaderboardParams = useCallback(
-    ({
-      pageParam,
-      pageSize,
-      targetSort,
-      targetSortDirection,
-    }: {
-      readonly pageParam: number | null;
-      readonly pageSize: number;
-      readonly targetSort: WaveDropsLeaderboardSort;
-      readonly targetSortDirection: "ASC" | "DESC" | undefined;
-    }) => {
-      const params: Record<string, string> = {
-        page_size: pageSize.toString(),
-        sort: targetSort,
-      };
-
-      if (targetSortDirection) {
-        params["sort_direction"] = targetSortDirection;
-      }
-
-      if (typeof pageParam === "number") {
-        params["page"] = `${pageParam}`;
-      }
-
-      if (normalizedCuratedByGroupId) {
-        params["curation_id"] = normalizedCuratedByGroupId;
-      }
-      if (canonicalPriceFilters.normalizedPriceLower) {
-        params["min_price"] = canonicalPriceFilters.normalizedPriceLower;
-      }
-      if (canonicalPriceFilters.normalizedPriceUpper) {
-        params["max_price"] = canonicalPriceFilters.normalizedPriceUpper;
-      }
-      if (canonicalPriceFilters.normalizedPriceCurrency) {
-        params["price_currency"] =
-          canonicalPriceFilters.normalizedPriceCurrency;
-      }
-
-      return params;
-    },
-    [normalizedCuratedByGroupId, canonicalPriceFilters]
-  );
-
-  const fetchLeaderboardPage = useCallback(
-    async ({
-      pageParam,
-      pageSize,
-      targetSort,
-      targetSortDirection,
-    }: {
-      readonly pageParam: number | null;
-      readonly pageSize: number;
-      readonly targetSort: WaveDropsLeaderboardSort;
-      readonly targetSortDirection: "ASC" | "DESC" | undefined;
-    }) =>
-      await fetchWaveLeaderboardV2({
+      buildLeaderboardQueryKey({
         waveId,
-        params: buildLeaderboardParams({
-          pageParam,
-          pageSize,
-          targetSort,
-          targetSortDirection,
-        }),
+        sort,
+        sortDirection,
+        priceFilters: canonicalPriceFilters,
       }),
-    [waveId, buildLeaderboardParams]
-  );
-
-  const getNextPageParam = useCallback(
-    (lastPage: ApiDropsLeaderboardPage) => {
-      if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
-        const haveZeroVotes = lastPage.drops.some(
-          (drop) => drop.context_profile_context?.rating === 0
-        );
-        if (haveZeroVotes) {
-          return null;
-        }
-      }
-      return lastPage.next ? lastPage.page + 1 : null;
-    },
-    [sort]
+    [canonicalPriceFilters, sort, sortDirection, waveId]
   );
 
   const {
@@ -224,53 +292,39 @@ export function useWaveDropsLeaderboard({
     refetch,
   } = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam: number | null }) =>
-      await fetchLeaderboardPage({
+    queryFn: ({
+      pageParam,
+      signal,
+    }: {
+      readonly pageParam: number | null;
+      readonly signal?: AbortSignal | undefined;
+    }) =>
+      fetchLeaderboardPage({
+        waveId,
         pageParam,
         pageSize: WAVE_DROPS_PARAMS.limit,
-        targetSort: sort,
-        targetSortDirection: sortDirection,
+        sort,
+        sortDirection,
+        priceFilters: canonicalPriceFilters,
+        signal,
       }),
     initialPageParam: null,
-    getNextPageParam,
+    getNextPageParam: (lastPage: ApiDropsLeaderboardPage) =>
+      getNextLeaderboardPageParam({ lastPage, sort }),
     enabled: isQueryEnabled,
     staleTime: 60000,
     ...getDefaultQueryRetry(),
   });
 
-  // Derive drops directly during render - no need for state
-  const drops = useMemo(() => {
-    if (!data?.pages) return [];
-
-    const mappedDrops = mapToExtendedDrops(
-      data.pages.map((page) => ({
-        wave: page.wave,
-        drops: page.drops,
-      })),
-      []
-    );
-
-    const uniqueDrops = generateUniqueKeys(mappedDrops, []);
-
-    if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
-      return uniqueDrops.filter(
-        (drop) => drop.context_profile_context?.rating !== 0
-      );
-    }
-
-    return uniqueDrops;
-  }, [data, sort]);
+  const drops = useMemo(
+    () => getLeaderboardDrops({ data, sort }),
+    [data, sort]
+  );
 
   // Derive hasInitialized from whether we have data
   const hasInitialized = !!data?.pages;
 
-  useEffect(() => {
-    return () => {
-      queryClient.removeQueries({
-        queryKey: [QueryKey.DROPS, { waveId }],
-      });
-    };
-  }, [waveId, queryClient]);
+  useRemoveDropsQueryOnUnmount({ queryClient, waveId });
 
   const manualFetch = useCallback(async () => {
     if (hasNextPage) {

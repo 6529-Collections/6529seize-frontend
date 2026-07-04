@@ -12,7 +12,6 @@ This area covers:
 - `Winners` after the first decision time passes.
 - `My Votes` in memes and curation waves.
 - Wave-level `Voters` plus non-chat single-drop `Top voters`.
-- Curation-group URL sync with `curated_by_group={groupId}`.
 - Curation-only ETH price filtering and `Price` sort.
 - Curation submit entry from leaderboard actions (`Drop Art` / empty-state
   `Drop`) into `Drop Artwork` modal flow.
@@ -25,8 +24,8 @@ This area covers:
   who can submit, where `Drop` appears, and restriction messages.
 - [Wave Leaderboard Drop States](feature-drop-states.md): loading, populated,
   and empty leaderboard behavior.
-- [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md):
-  sort options, group and price filtering, and URL/local-state behavior.
+- [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md):
+  sort options, curation-wave price filtering, and local-state behavior.
 - [Wave Leaderboard Gallery Cards](feature-gallery-cards.md): memes `Grid view`
   cards, media badges, and vote entry points.
 

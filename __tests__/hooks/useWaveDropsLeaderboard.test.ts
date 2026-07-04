@@ -71,7 +71,7 @@ describe("useWaveDropsLeaderboard", () => {
     );
     unmount();
     expect(queryClientMock.removeQueries).toHaveBeenCalledWith({
-      queryKey: ["DROPS", { waveId: "2" }],
+      queryKey: ["DROPS_LEADERBOARD", { waveId: "2" }],
     });
   });
 

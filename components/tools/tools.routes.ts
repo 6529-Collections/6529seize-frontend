@@ -154,9 +154,6 @@ const TOOLS_CONTENTS_NAV_GROUPS = [
   },
 ] as const satisfies readonly ToolsContentsNavGroup[];
 
-export type ToolsNavItemId =
-  (typeof TOOLS_CONTENTS_NAV_GROUPS)[number]["items"][number]["id"];
-
 function isToolsNavItemVisible(
   item: ToolsContentsNavItem,
   options: ToolsVisibilityOptions
@@ -177,10 +174,4 @@ export function getVisibleToolsNavGroups(options: ToolsVisibilityOptions) {
     ...group,
     items: group.items.filter((item) => isToolsNavItemVisible(item, options)),
   })).filter((group) => group.items.length > 0);
-}
-
-export function getToolsNavItemId(item: {
-  readonly id: ToolsNavItemId;
-}): ToolsNavItemId {
-  return item.id;
 }
