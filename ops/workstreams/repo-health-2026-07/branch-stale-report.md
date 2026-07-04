@@ -1,6 +1,7 @@
 # Stale unmerged branch report — 2026-07-05 (Thread B)
 
-Scope: remote branches not merged into `main`, last commit 30+ days ago (before 2026-06-04),
+Scope: remote branches not merged into `main` with last commit before 2026-06-04
+(the 30-day cutoff relative to the 2026-07-04 census snapshot),
 excluding protected branches (open-PR heads, <7d activity, `main`/`1a-staging`, campaign `ci/*`+`amnesty/*`, staging release candidates).
 Deletion requires user sign-off — nothing in this report has been deleted.
 

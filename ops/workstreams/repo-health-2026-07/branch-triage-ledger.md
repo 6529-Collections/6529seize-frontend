@@ -8,6 +8,9 @@ presence checks, PR-stack archaeology (gh), and per-cluster subagent review.
 
 ## How this branch relates to main
 
+- Commit counts: 138 pre-rescue commits + 1 rescue snapshot = the "139 ahead"
+  figure some tooling reports; this ledger accounts for the 138 and decomposes
+  the snapshot separately below.
 - The 138 commits (2026-06-11..14) were mirrored into a 40-PR stack
   (#2603-#2645, branches `codex/*-a11y-i18n`). PRs merged into each other's
   branches; the root PR #2604 squash-merged the accumulated stack into main as
@@ -19,7 +22,9 @@ presence checks, PR-stack archaeology (gh), and per-cluster subagent review.
   from both `main` and `1a-staging`.
 - Recovery: re-landed on current main as PR #3034 (stats row) and PR #3035
   (header identity + About), three-way merged with main's later profile-CMS
-  work and verified with typecheck + the full header/stats test suites.
+  work, reviewed by 6529bot (blocking findings addressed), and verified with
+  typecheck + the full header/stats test suites. This ledger merges only after
+  both PRs are confirmed merged, so the re-land claim is verified at read time.
 
 ## Disposition summary (138 pre-rescue commits)
 
@@ -44,7 +49,7 @@ presence checks, PR-stack archaeology (gh), and per-cluster subagent review.
 | EnsAddressInput a11y (id/aria-describedby), `scripts/nextgen/count-pebbles.cjs`, read-only Playwright e2e harness (`tests/e2e`, `tests/support/e2e`) | Novel-wanted — small, standalone candidates |
 | Durable specs: `ops/docs/specs/2026-06-15-wave-rep.md`, `2026-06-17-tech-hub.md`, `2026-06-18-6529-spatial-network.md`; delegation source-of-truth + IPFS pilot docs; `ops/scripts/wave-score-snapshot.mjs` | Novel-wanted docs/tooling — candidates for a docs-only PR pending orchestrator/user call |
 | `tmp/**` (219 files), `.reviewbot-responsiveness/` | Session debris — archived in the branch snapshot only, never to be PRed |
-| `tmp/punk6529bot-browser-auth.json` | SECURITY: contained live JWT + refresh token; excised from the pushed branch (rewritten `09ef4659c` -> `dac8f5cf1`), preserved off-repo for rotation. Credential must be revoked. |
+| `tmp/punk6529bot-browser-auth.json` | SECURITY: contained a live JWT + refresh token; excised from the pushed branch (rewritten `09ef4659c` -> `dac8f5cf1`) and preserved off-repo. History rewrite does NOT invalidate the exposed token (GitHub retains SHA-reachable objects); server-side revocation/rotation of the punk6529bot session + refresh token is REQUIRED and PENDING — owner: repo operator; tracked as an open campaign action in run-log.md. |
 
 Snapshot preservation: the full rescue tree (minus the excised credential)
 remains available as branch tip `dac8f5cf1` recorded in
