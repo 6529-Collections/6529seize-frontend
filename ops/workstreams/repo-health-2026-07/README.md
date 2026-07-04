@@ -34,7 +34,7 @@ a fresh Fable 5 thread that may fan out to cheaper subagents for mechanical work
 
 ## Conventions (hard rules for all threads)
 
-- Worktrees: sibling dirs `D:/repos/6529seize-frontend-<topic>` — NEVER `.claude/worktrees` (jest finds zero tests under dot-dirs).
+- Worktrees: sibling dirs `<repo-parent>/6529seize-frontend-<topic>` — NEVER `.claude/worktrees` (jest finds zero tests under dot-dirs).
 - Commands via repo wrapper: `./bin/6529 run <script>`; plain pnpm is blocked. In fresh worktrees, prepend real pnpm to PATH (bin/ shim shadows it) — see memory/worktree-and-tooling-gotchas.
 - Commits: `git commit -s` (DCO). Small, scoped PRs; reviewbot reviews every PR.
 - Never push to `1a-staging`; never trigger deploy workflows.

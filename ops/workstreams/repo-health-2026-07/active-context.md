@@ -3,7 +3,8 @@
 ## Resume first
 
 Read this after compaction or session handoff. Orchestrator session memory:
-`C:\Users\Administrator\.claude\projects\D--repos-6529seize-frontend\memory\repo-health-campaign-2026-07.md`
+`repo-health-campaign-2026-07.md` in the operator's Claude project auto-memory
+for this repo (machine-local; not tracked in the repository).
 
 ## Wave state
 
