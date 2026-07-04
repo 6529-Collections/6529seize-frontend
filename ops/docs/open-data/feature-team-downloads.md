@@ -11,8 +11,8 @@ The page heading is `Team Downloads`.
 
 - Route: `/open-data/team`
 - Hub route: `/open-data`
-- Desktop sidebar path: `Tools -> Open Data -> Team`
-- Mobile sidebar path: `Tools -> Open Data`, then open the `Team` card.
+- Desktop sidebar path: `About -> Data & Developer Tools -> Team Data`
+- Mobile sidebar path: `About -> Data & Developer Tools -> Team Data`.
 - Direct route: `/open-data/team`
 
 ## What You See

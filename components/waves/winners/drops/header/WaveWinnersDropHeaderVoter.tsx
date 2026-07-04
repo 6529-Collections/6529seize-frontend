@@ -30,7 +30,6 @@ export default function WaveWinnersDropHeaderVoter({
         <Link href={`/${voterLabel}`}>
           {voter.profile.pfp ? (
             // Winner voter avatars can come from arbitrary remote hosts, so this stays unoptimized.
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={getScaledImageUri(voter.profile.pfp, ImageScale.W_AUTO_H_50)}
               alt={`${voterLabel}'s Profile`}

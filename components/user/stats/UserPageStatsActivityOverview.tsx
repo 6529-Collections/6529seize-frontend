@@ -11,7 +11,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Fragment, useEffect, useState } from "react";
 import { getStatsPath } from "./userPageStats.helpers";
-import styles from "./UserPageStats.module.scss";
+import styles from "./UserPageStats.module.css";
 import {
   UserPageStatsTableHead,
   UserPageStatsTableHr,

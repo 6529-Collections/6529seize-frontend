@@ -2,7 +2,7 @@
 
 ## Summary
 
-`/join-6529` is a state-aware onboarding and acquisition route. It gives users
+`/join` is a state-aware onboarding and acquisition route. It gives users
 a short journey through the minimum useful setup path instead of a static block
 of instructions.
 

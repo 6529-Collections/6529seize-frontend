@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 
-jest.mock("@/styles/Home.module.scss", () => ({ shadowBox: "shadowBox" }));
+jest.mock("@/styles/Home.module.css", () => ({ shadowBox: "shadowBox" }));
 
 jest.mock("@/entities/IProfile", () => ({
   COLLECTED_COLLECTION_TYPE_TO_CONTRACT: {

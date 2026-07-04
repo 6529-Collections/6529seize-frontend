@@ -10,7 +10,7 @@ import {
   useId,
 } from "react";
 import mojs from "@mojs/core";
-import styles from "./VoteButton.module.scss";
+import styles from "./VoteButton.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";

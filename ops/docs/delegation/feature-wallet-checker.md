@@ -8,7 +8,7 @@ It checks delegations, delegation managers, and consolidation relationships.
 ## Location in the Site
 
 - Route: `/delegation/wallet-checker`
-- App navigation: `Tools -> NFT Delegation -> Wallet Checker`
+- App navigation: `About -> Delegation & Wallets -> Wallet Checker`
 - Profile identity panel link: `/delegation/wallet-checker?address=<primary-wallet>`
 
 ## Entry Points

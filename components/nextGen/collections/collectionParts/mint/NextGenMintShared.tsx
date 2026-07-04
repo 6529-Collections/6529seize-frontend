@@ -1,4 +1,4 @@
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import styles from "@/components/nextGen/collections/NextGen.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
@@ -35,15 +35,15 @@ export function NextGenMintingFor(
         <FontAwesomeIcon
           className={styles["infoIcon"]}
           icon={faInfoCircle}
-          data-tooltip-id="mint-for-address-info">
-        </FontAwesomeIcon>
-        <Tooltip 
+          data-tooltip-id="mint-for-address-info"
+        ></FontAwesomeIcon>
+        <Tooltip
           id="mint-for-address-info"
           content="The address you are minting for"
           place="top"
           style={{
             backgroundColor: "#1F2937",
-            color: "white", 
+            color: "white",
             padding: "4px 8px",
           }}
         />
@@ -53,11 +53,14 @@ export function NextGenMintingFor(
         value={props.mintForAddress}
         onChange={(e) => {
           props.setMintForAddress(e.currentTarget.value);
-        }}>
+        }}
+      >
         <option value="" disabled>
           Select Address to {props.title}
         </option>
-        {account.address && <NextGenMintAddressOption address={account.address} />}
+        {account.address && (
+          <NextGenMintAddressOption address={account.address} />
+        )}
         {props.delegators.map((delegator) => (
           <NextGenMintAddressOption
             address={delegator}

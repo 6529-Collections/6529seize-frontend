@@ -68,7 +68,7 @@ describe("CommunityStats", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: /Network Stats/i })
+        screen.getByRole("heading", { name: /Network TDH Stats/i })
       ).toBeInTheDocument();
     });
 

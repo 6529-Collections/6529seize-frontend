@@ -5,6 +5,8 @@ import {
   getApproveWaveDisplayMetadataUpdate,
   getApproveWaveTabLabelsFromMetadata,
   getCreateWaveDisplayMetadataRequests,
+  getWaveCustomRulesFromMetadata,
+  getWaveCustomRulesMetadataUpdate,
   getWaveOutcomeVisibilityFromMetadata,
   getWaveOutcomeVisibilityMetadataUpdate,
 } from "@/helpers/waves/wave-metadata.helpers";
@@ -12,6 +14,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 describe("wave-metadata.helpers", () => {
   const defaultDisplay = {
+    customRules: null,
     outcomesVisible: true,
     approve: {
       approvalsTabLabel: "",
@@ -75,12 +78,30 @@ describe("wave-metadata.helpers", () => {
     ]);
   });
 
-  it("does not create display metadata for chat waves", () => {
+  it("creates custom rules metadata for rank and approve waves", () => {
+    expect(
+      getCreateWaveDisplayMetadataRequests({
+        waveType: ApiWaveType.Rank,
+        display: {
+          ...defaultDisplay,
+          customRules: "  Use one submission per artist.  ",
+        },
+      })
+    ).toEqual([
+      {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+        data_value: "Use one submission per artist.",
+      },
+    ]);
+  });
+
+  it("creates custom rules metadata for chat waves without outcome or approve metadata", () => {
     expect(
       getCreateWaveDisplayMetadataRequests({
         waveType: ApiWaveType.Chat,
         display: {
           ...defaultDisplay,
+          customRules: "  Keep chat respectful.  ",
           outcomesVisible: false,
           approve: {
             approvalsTabLabel: "Candidates",
@@ -88,7 +109,93 @@ describe("wave-metadata.helpers", () => {
           },
         },
       })
-    ).toEqual([]);
+    ).toEqual([
+      {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+        data_value: "Keep chat respectful.",
+      },
+    ]);
+  });
+
+  it("extracts the latest custom rules metadata value", () => {
+    expect(
+      getWaveCustomRulesFromMetadata([
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: "Old rule",
+        },
+        {
+          id: 2,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: " Current rule ",
+        },
+      ])
+    ).toBe("Current rule");
+  });
+
+  it("creates, replaces, and deletes custom rules metadata updates", () => {
+    expect(
+      getWaveCustomRulesMetadataUpdate({
+        metadata: [],
+        customRules: "  New rule  ",
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: "New rule",
+        },
+      ],
+      deleteIds: [],
+    });
+
+    expect(
+      getWaveCustomRulesMetadataUpdate({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+            data_value: "Old",
+          },
+          {
+            id: 2,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+            data_value: "Current",
+          },
+        ],
+        customRules: "Replacement",
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+          data_value: "Replacement",
+        },
+      ],
+      deleteIds: [1, 2],
+    });
+
+    expect(
+      getWaveCustomRulesMetadataUpdate({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+            data_value: "Old",
+          },
+          {
+            id: 2,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.customRules,
+            data_value: "New",
+          },
+        ],
+        customRules: "",
+      })
+    ).toEqual({
+      create: [],
+      deleteIds: [1, 2],
+    });
   });
 
   it("extracts editable draft values from latest metadata", () => {

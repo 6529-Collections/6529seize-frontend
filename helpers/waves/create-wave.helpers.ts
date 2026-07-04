@@ -8,6 +8,7 @@ import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType"
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
 import type {
   CreateWaveConfig,
   CreateWaveDatesConfig,
@@ -101,12 +102,20 @@ export const getCreateWaveNextStep = ({
       return CreateWaveStep.GROUPS;
     case CreateWaveStep.GROUPS:
       if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.DESCRIPTION;
+        return CreateWaveStep.RULES;
       }
       return CreateWaveStep.DATES;
     case CreateWaveStep.DATES:
       return CreateWaveStep.DROPS;
     case CreateWaveStep.DROPS:
+      if (waveType === ApiWaveType.Chat) {
+        return CreateWaveStep.VOTING;
+      }
+      return CreateWaveStep.RULES;
+    case CreateWaveStep.RULES:
+      if (waveType === ApiWaveType.Chat) {
+        return CreateWaveStep.DESCRIPTION;
+      }
       return CreateWaveStep.VOTING;
     case CreateWaveStep.VOTING:
       if (waveType === ApiWaveType.Chat) {
@@ -144,7 +153,15 @@ export const getCreateWavePreviousStep = ({
         return CreateWaveStep.GROUPS;
       }
       return CreateWaveStep.DATES;
+    case CreateWaveStep.RULES:
+      if (waveType === ApiWaveType.Chat) {
+        return CreateWaveStep.GROUPS;
+      }
+      return CreateWaveStep.DROPS;
     case CreateWaveStep.VOTING:
+      if (waveType !== ApiWaveType.Chat) {
+        return CreateWaveStep.RULES;
+      }
       return CreateWaveStep.DROPS;
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.VOTING;
@@ -152,7 +169,7 @@ export const getCreateWavePreviousStep = ({
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.GROUPS;
+        return CreateWaveStep.RULES;
       }
       return CreateWaveStep.OUTCOMES;
     default:
@@ -355,7 +372,7 @@ export const calculateLastDecisionTime = (
  * @param dates The CreateWaveDatesConfig object
  * @returns The calculated end date in milliseconds, or null for open-ended rolling waves
  */
-const calculateEndDate = (dates: CreateWaveDatesConfig): number | null => {
+const calculateRankEndDate = (dates: CreateWaveDatesConfig): number | null => {
   // If subsequentDecisions is empty, end date is firstDecisionTime
   if (dates.subsequentDecisions.length === 0) {
     return dates.firstDecisionTime;
@@ -382,6 +399,22 @@ const calculateEndDate = (dates: CreateWaveDatesConfig): number | null => {
   );
 };
 
+export const getCreateWaveEndDate = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): number | null => {
+  if (config.overview.type === ApiWaveType.Chat) {
+    return null;
+  }
+
+  if (config.overview.type === ApiWaveType.Approve) {
+    return config.dates.endDate;
+  }
+
+  return calculateRankEndDate(config.dates);
+};
+
 export const getCreateNewWaveBody = ({
   drop,
   picture,
@@ -393,10 +426,14 @@ export const getCreateNewWaveBody = ({
   readonly config: CreateWaveConfig;
   readonly parentWaveId?: string | null | undefined;
 }): ApiCreateNewWave => {
-  const endDate =
-    config.overview.type === ApiWaveType.Approve
-      ? config.dates.endDate
-      : calculateEndDate(config.dates);
+  const endDate = getCreateWaveEndDate({ config });
+  const supportsParticipationTerms =
+    config.overview.type !== ApiWaveType.Chat;
+  const participationTerms = supportsParticipationTerms
+    ? normalizeWaveCustomRules(config.drops.terms)
+    : null;
+  const signatureRequired =
+    config.drops.signatureRequired && Boolean(participationTerms);
 
   return {
     name: config.overview.name,
@@ -444,12 +481,12 @@ export const getCreateNewWaveBody = ({
           type: metadata.type,
         }))
         .filter((metadata) => !!metadata.name),
-      signature_required: config.drops.signatureRequired,
+      signature_required: signatureRequired,
       period: {
         min: config.dates.submissionStartDate,
         max: endDate,
       },
-      terms: config.drops.terms,
+      terms: signatureRequired ? participationTerms : null,
       ...(config.drops.submissionStrategy
         ? {
             submission_strategy: config.drops.submissionStrategy,

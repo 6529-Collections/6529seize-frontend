@@ -41,15 +41,16 @@ Use this area to create:
      `Approve`)
   4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
      `Approve`)
-  5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
+  5. [Wave Creation Rules Step](feature-rules-step.md)
+  6. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
      `Approve`)
-  6. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
+  7. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
      `Approve`)
-  7. [Wave Creation Description Step](feature-description-step.md)
+  8. [Wave Creation Description Step](feature-description-step.md)
 - Step path by wave type:
-  - `Chat`: `Overview -> Groups -> Description`
-  - `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
-  - `Approve`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
+  - `Chat`: `Overview -> Groups -> Rules -> Description`
+  - `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
 
 ### Direct-Message Journey
 

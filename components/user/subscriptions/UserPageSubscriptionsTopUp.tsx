@@ -39,7 +39,7 @@ import {
   numberWithCommasFromString,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import styles from "./UserPageSubscriptions.module.scss";
+import styles from "./UserPageSubscriptions.module.css";
 
 function getEthForCards(count: number): number {
   return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;

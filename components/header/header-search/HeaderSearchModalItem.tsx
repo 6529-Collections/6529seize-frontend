@@ -2,7 +2,7 @@
 
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { type ComponentType, useEffect, useRef } from "react";
 import { useHoverDirty } from "react-use";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
@@ -20,11 +20,7 @@ import {
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
-import {
-  getActiveWaveIdFromUrl,
-  getWaveHomeRoute,
-  getWaveRoute,
-} from "@/helpers/navigation.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
 import HeaderSearchModalPfp from "./HeaderSearchModalPfp";
@@ -53,6 +49,38 @@ export type HeaderSearchModalItemType =
   | ApiWave
   | PageSearchResult;
 
+type HeaderSearchWaveDirectMessageCandidate = {
+  readonly chat?: {
+    readonly scope?: {
+      readonly group?: {
+        readonly is_direct_message?: boolean | null | undefined;
+      } | null;
+    } | null;
+  } | null;
+};
+
+export const isHeaderSearchWaveDirectMessage = (wave: ApiWave): boolean =>
+  Boolean(
+    (wave as HeaderSearchWaveDirectMessageCandidate).chat?.scope?.group
+      ?.is_direct_message
+  );
+
+export const getHeaderSearchWavePath = ({
+  wave,
+  isApp,
+}: {
+  readonly wave: ApiWave;
+  readonly isApp: boolean;
+}): string => {
+  const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
+
+  return getWaveRoute({
+    waveId: wave.id,
+    isDirectMessage,
+    isApp,
+  });
+};
+
 export const getNftCollectionMap = () => {
   return {
     [MEMES_CONTRACT.toLowerCase()]: {
@@ -80,15 +108,16 @@ export default function HeaderSearchModalItem({
   isSelected,
   onHover,
   onClose,
+  onWaveSelect,
 }: {
   readonly isSelected: boolean;
   readonly searchValue: string;
   readonly content: HeaderSearchModalItemType;
   readonly onHover: (state: boolean) => void;
   readonly onClose: () => void;
+  readonly onWaveSelect?: (wave: ApiWave) => void;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const ref = useRef<HTMLDivElement>(null);
   const isHovering = useHoverDirty(ref as React.RefObject<HTMLDivElement>);
   const { isApp } = useDeviceInfo();
@@ -101,7 +130,7 @@ export default function HeaderSearchModalItem({
   const isPage = () => (content as PageSearchResult).type === "PAGE";
   const isProfile = () => Object.hasOwn(content, "handle");
   const isNft = () => Object.hasOwn(content, "contract");
-  const isWave = () => !isProfile() && !isNft() && !isPage();
+  const isWave = () => Object.hasOwn(content, "serial_no");
   const getWave = () => content as ApiWave;
 
   const getProfile = () => content as CommunityMemberMinimal;
@@ -129,7 +158,7 @@ export default function HeaderSearchModalItem({
       const page = getPage();
       const Icon = page.icon ?? DocumentTextIcon;
       return getMediaIcon(Icon);
-    } else {
+    } else if (isWave()) {
       const wave = getWave();
       if (wave.picture) {
         return (
@@ -140,12 +169,14 @@ export default function HeaderSearchModalItem({
           />
         );
       }
-      const isDm = wave.wave.admin_group.group?.is_direct_message;
+      const isDm = isHeaderSearchWaveDirectMessage(wave);
       if (isDm) {
         return getMediaIcon(ChatBubbleIcon);
       }
       return getMediaIcon(WavesIcon);
     }
+
+    return getMediaIcon(DocumentTextIcon);
   };
 
   useEffect(() => {
@@ -169,26 +200,37 @@ export default function HeaderSearchModalItem({
       return `${collectionMap[key]?.path}/${nft.id}`;
     } else if (isPage()) {
       return getPage().href;
-    } else {
+    } else if (isWave()) {
       const wave = getWave();
-      const currentWaveId =
-        getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
-      const isDirectMessage =
-        wave.chat?.scope?.group?.is_direct_message ?? false;
-
-      if (currentWaveId === wave.id) {
-        return getWaveHomeRoute({
-          isDirectMessage,
-          isApp,
-        });
-      }
-
-      return getWaveRoute({
-        waveId: wave.id,
-        isDirectMessage,
+      return getHeaderSearchWavePath({
+        wave,
         isApp,
       });
     }
+
+    return "#";
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isWave() || !onWaveSelect || event.defaultPrevented) {
+      onClose();
+      return;
+    }
+
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button === 1 ||
+      event.button === 2
+    ) {
+      onClose();
+      return;
+    }
+
+    event.preventDefault();
+    onWaveSelect(getWave());
   };
 
   const getPrimaryText = () => {
@@ -198,9 +240,11 @@ export default function HeaderSearchModalItem({
       return getNft().name;
     } else if (isPage()) {
       return getPage().title;
-    } else {
+    } else if (isWave()) {
       return getWave().name;
     }
+
+    return "-";
   };
 
   const getSecondaryText = () => {
@@ -218,11 +262,13 @@ export default function HeaderSearchModalItem({
         return page.breadcrumbs.join(" • ");
       }
       return page.href;
-    } else {
+    } else if (isWave()) {
       const wave = getWave();
       const author = wave.author?.handle ?? wave.author?.primary_address;
       return author ? `by ${author}` : `Wave #${wave.serial_no}`;
     }
+
+    return null;
   };
 
   const getSecondaryTextClassName = () => {
@@ -251,7 +297,7 @@ export default function HeaderSearchModalItem({
     >
       <Link
         href={getPath()}
-        onClick={onClose}
+        onClick={handleClick}
         className="tw-group tw-flex tw-w-full tw-min-w-0 tw-select-none tw-items-center tw-gap-3 tw-text-left tw-text-sm tw-font-medium tw-no-underline"
       >
         {getMedia()}

@@ -22,6 +22,7 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
+import UserMuteButton from "./UserMuteButton";
 
 export enum UserFollowBtnSize {
   SMALL = "SMALL",
@@ -62,11 +63,13 @@ export default function UserFollowBtn({
   size = UserFollowBtnSize.MEDIUM,
   onDirectMessage,
   directMessageLoading,
+  showMuteButton = true,
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize | undefined;
   readonly onDirectMessage?: (() => void | Promise<void>) | undefined;
   readonly directMessageLoading?: boolean | undefined;
+  readonly showMuteButton?: boolean | undefined;
 }) {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -88,8 +91,9 @@ export default function UserFollowBtn({
   const getFollowing = () => !!subscriptions?.actions.length;
   const getLabel = () => (getFollowing() ? "Following" : "Follow");
 
-  const [following, setFollowing] = useState<boolean>(getFollowing());
-  const [label, setLabel] = useState<string>(getLabel());
+  const [following, setFollowing] = useState<boolean>(() => getFollowing());
+  const [label, setLabel] = useState<string>(() => getLabel());
+
   useEffect(() => {
     setFollowing(getFollowing());
     setLabel(getLabel());
@@ -236,6 +240,13 @@ export default function UserFollowBtn({
             <span className="tw-text-xs">Direct Message</span>
           </Tooltip>
         </>
+      )}
+      {showMuteButton && (
+        <UserMuteButton
+          handle={handle}
+          buttonClassName={DIRECT_MESSAGE_BUTTON_CLASSES[size]}
+          iconClassName={DIRECT_MESSAGE_ICON_CLASSES[size]}
+        />
       )}
       <button
         onClick={onFollow}

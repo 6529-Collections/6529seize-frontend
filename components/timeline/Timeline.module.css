@@ -1,0 +1,155 @@
+.timeline {
+  position: relative;
+  margin: 0 auto;
+  word-wrap: break-word;
+}
+
+.timeline h4,
+.timeline h5,
+.timeline p {
+  color: rgb(34, 34, 34) !important;
+}
+
+.timeline a {
+  color: rgb(34, 34, 34) !important;
+}
+
+.timeline a:hover {
+  opacity: 0.8;
+}
+
+.timeline::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 31px;
+  width: 6px;
+  margin-left: -3px;
+  background-color: white;
+  content: "";
+}
+
+.timelineContainer {
+  position: relative;
+  width: 100%;
+  padding: 20px 25px 20px 70px;
+  background-color: inherit;
+}
+
+.timelineContainer::after {
+  position: absolute;
+  top: 25px;
+  left: 18px;
+  z-index: 1;
+  width: 25px;
+  height: 25px;
+  border: 6px solid #1861ff;
+  border-radius: 50%;
+  background-color: white;
+  content: "";
+}
+
+.left,
+.right {
+  left: 0;
+}
+
+.left::before {
+  position: absolute;
+  top: 28px;
+  right: 16px;
+  z-index: 1;
+  width: 0;
+  height: 0;
+  border: medium solid white;
+  border-width: 10px 0 10px 10px;
+  border-color: transparent transparent transparent white;
+  content: " ";
+}
+
+.right::before,
+.timelineContainer::before {
+  position: absolute;
+  top: 28px;
+  left: 60px;
+  z-index: 1;
+  width: 0;
+  height: 0;
+  border: medium solid white;
+  border-width: 10px 10px 10px 0;
+  border-color: transparent white transparent transparent;
+  content: " ";
+}
+
+.content {
+  position: relative;
+  border-radius: 6px;
+  background-color: white;
+  padding: 20px;
+  color: rgb(34, 34, 34);
+}
+
+.externalLink {
+  text-decoration: none;
+}
+
+.linkIcon {
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.timelineTable tr {
+  border-bottom: 1px solid #333 !important;
+}
+
+.timelineTable tr td {
+  white-space: nowrap;
+}
+
+.timelineTable tr td:first-child {
+  width: 0;
+}
+
+.timelineTable tr th {
+  min-width: 80px;
+  line-height: 30px;
+  white-space: nowrap;
+}
+
+.timelineTableScrollContainer {
+  -ms-overflow-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.timelineTableScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.timelineTable > :not(caption) > * > * {
+  padding: 1.5rem !important;
+}
+
+.timelineMediaImage {
+  width: 100%;
+  min-width: 150px;
+  height: auto;
+}
+
+.changesUl {
+  padding-right: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.changeLink {
+  margin-top: 0;
+  margin-bottom: 0;
+  overflow-wrap: anywhere;
+  font-size: smaller;
+}
+
+.metadataValue {
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}

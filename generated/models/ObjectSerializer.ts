@@ -197,6 +197,7 @@ export * from '../models/ApiGroupTdhInclusionStrategy';
 export * from '../models/ApiIdentity';
 export * from '../models/ApiIdentityActivity';
 export * from '../models/ApiIdentityAndSubscriptionActions';
+export * from '../models/ApiIdentityMuteState';
 export * from '../models/ApiIdentityOverview';
 export * from '../models/ApiIdentityOverviewBadges';
 export * from '../models/ApiIdentityOverviewContextProfileContext';
@@ -706,6 +707,7 @@ import { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStra
 import { ApiIdentity                          } from '../models/ApiIdentity';
 import { ApiIdentityActivity } from '../models/ApiIdentityActivity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
+import { ApiIdentityMuteState } from '../models/ApiIdentityMuteState';
 import { ApiIdentityOverview         } from '../models/ApiIdentityOverview';
 import { ApiIdentityOverviewBadges } from '../models/ApiIdentityOverviewBadges';
 import { ApiIdentityOverviewContextProfileContext } from '../models/ApiIdentityOverviewContextProfileContext';
@@ -1313,6 +1315,7 @@ let typeMap: {[index: string]: any} = {
     "ApiIdentity": ApiIdentity,
     "ApiIdentityActivity": ApiIdentityActivity,
     "ApiIdentityAndSubscriptionActions": ApiIdentityAndSubscriptionActions,
+    "ApiIdentityMuteState": ApiIdentityMuteState,
     "ApiIdentityOverview": ApiIdentityOverview,
     "ApiIdentityOverviewBadges": ApiIdentityOverviewBadges,
     "ApiIdentityOverviewContextProfileContext": ApiIdentityOverviewContextProfileContext,

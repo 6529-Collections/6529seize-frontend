@@ -45,8 +45,8 @@ March 19, 2026.
 - Download datasets and exports: [Open Data](open-data/README.md)
 - Check app shell navigation and mobile handoff:
   [Navigation](navigation/README.md)
-- Use utility routes under `/tools/*`, including private 6529bot operator
-  tools: [API Tool](api-tool/README.md)
+- Use direct utility routes under `/tools/*`, including the secondary `/tools`
+  index and private 6529bot operator tools: [API Tool](api-tool/README.md)
 - Debug shared cross-route behavior: [Shared](shared/README.md)
 
 ## Area Index
@@ -67,7 +67,7 @@ March 19, 2026.
 - [Groups](groups/README.md): `/network/groups`
 - [Delegation](delegation/README.md): `/delegation` and `/delegation/{param+}`
 - [NextGen](nextgen/README.md): `/nextgen` and `/nextgen/{param*}`
-- [API Tool](api-tool/README.md): `/tools/api`, `/tools/block-finder`,
+- [API Tool](api-tool/README.md): `/tools`, `/tools/api`, `/tools/block-finder`,
   `/tools/subscriptions-report`, `/tools/app-wallets`,
   `/tools/app-wallets/import-wallet`, `/tools/app-wallets/{appWalletAddress}`
   and `/tools/6529bot/admin`
@@ -120,7 +120,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - EMMA:
   `/emma`, `/emma/plans`, `/emma/plans/{planId}`
 - Tools and open data:
-  `/tools/api`, `/tools/block-finder`, `/tools/subscriptions-report`,
+  `/tools`, `/tools/api`, `/tools/block-finder`, `/tools/subscriptions-report`,
   `/tools/app-wallets`, `/tools/app-wallets/import-wallet`,
   `/tools/app-wallets/{appWalletAddress}`, `/tools/6529bot/admin`,
   `/open-data`,

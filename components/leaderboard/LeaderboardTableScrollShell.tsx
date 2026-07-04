@@ -7,7 +7,7 @@ import {
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "./Leaderboard.module.scss";
+import styles from "./Leaderboard.module.css";
 
 const SCROLL_EDGE_TOLERANCE_PX = 2;
 const SCROLL_STEP_RATIO = 0.75;

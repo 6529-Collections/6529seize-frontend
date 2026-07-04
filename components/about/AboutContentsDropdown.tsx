@@ -1,14 +1,16 @@
 "use client";
 
+import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { AboutSection } from "@/types/enums";
+import type { AboutSection } from "@/types/enums";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import type { ReactNode } from "react";
 import {
   getAboutNavItemHref,
   getAboutNavItemId,
@@ -21,16 +23,19 @@ type AboutContentsDropdownProps = {
   readonly currentSection?: AboutSection | undefined;
   readonly currentHref?: string | undefined;
   readonly className?: string | undefined;
+  readonly leadingAction?: ReactNode;
 };
 
 export function AboutContentsDropdown({
   currentSection,
   currentHref,
   className,
+  leadingAction,
 }: AboutContentsDropdownProps) {
   const locale = DEFAULT_LOCALE;
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
+  const { appWalletsSupported } = useAppWallets();
   const hideSubscriptions =
     cookieConsent === undefined
       ? false
@@ -38,7 +43,10 @@ export function AboutContentsDropdown({
           capacitorIsIos: capacitor.isIos,
           country: cookieConsent.country,
         });
-  const groups = getVisibleAboutNavGroups(hideSubscriptions);
+  const groups = getVisibleAboutNavGroups({
+    hideSubscriptions,
+    appWalletsSupported,
+  });
   const normalizedCurrentHref = normalizeAboutHref(currentHref);
   const currentItem = groups
     .flatMap((group) => group.items)
@@ -97,23 +105,25 @@ export function AboutContentsDropdown({
   return (
     <div
       className={clsx(
-        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-justify-end tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
+        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
+        leadingAction ? "tw-justify-between" : "tw-justify-end",
         className
       )}
     >
+      {leadingAction}
       <CompactMenu
         aria-label={t(locale, "about.contents.triggerAriaLabel", {
           page: currentLabel,
         })}
         unstyledTrigger
-        triggerClassName="tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-3 tw-py-2 tw-text-left tw-shadow-sm tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+        triggerClassName="tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-3 tw-py-2 tw-text-left tw-shadow-sm tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
         trigger={<AboutContentsDropdownTrigger currentLabel={currentLabel} />}
         items={items}
         activeItemId={activeItemId}
         anchor={{ to: "bottom end", gap: 8, padding: 16 }}
         menuWidthClassName="tw-w-72 tw-max-w-[calc(100vw-2rem)] sm:tw-w-80"
         header={<AboutContentsDropdownHeader />}
-        headerClassName="tw-mb-1 tw-px-3 tw-pb-3 tw-pt-2"
+        headerClassName="tw-mb-1 tw-flex tw-min-h-14 tw-items-center tw-px-3 tw-py-2"
         itemsWrapperClassName="tw-pr-2"
         menuClassName="tw-[scrollbar-gutter:stable] tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-2 tw-pr-3 tw-shadow-2xl tw-backdrop-blur tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-max-h-96"
         itemClassName="!tw-no-underline hover:!tw-no-underline focus:!tw-no-underline tw-px-3 tw-py-2.5"
@@ -156,7 +166,7 @@ function AboutContentsDropdownHeader() {
   const locale = DEFAULT_LOCALE;
 
   return (
-    <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-50">
+    <div className="tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
       {t(locale, "about.contents.menuHeading")}
     </div>
   );

@@ -4,7 +4,7 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
-import styles from "./About.module.scss";
+import styles from "./About.module.css";
 
 export default function AboutLicense() {
   return (
@@ -15,11 +15,13 @@ export default function AboutLicense() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles["lastUpdateText"]} tw-text-right tw-pt-3 tw-pb-3`}>
+        <Col
+          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+        >
           Last Updated: February 23, 2023
         </Col>
       </Row>
-      <Row className="tw-pt-3 tw-pb-3">
+      <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <p>
             <b>The Memes and Meme Lab</b>
@@ -36,7 +38,8 @@ export default function AboutLicense() {
             <Link
               href="https://creativecommons.org/share-your-work/public-domain/cc0/"
               target="_blank"
-              rel="noopener noreferrer">
+              rel="noopener noreferrer"
+            >
               https://creativecommons.org/share-your-work/public-domain/cc0/
             </Link>
           </p>
@@ -63,7 +66,8 @@ export default function AboutLicense() {
             <Link
               href="https://x.com/6529er"
               target="_blank"
-              rel="noopener noreferrer">
+              rel="noopener noreferrer"
+            >
               6529er
             </Link>{" "}
             , the artist, is putting whatever rights he may have in Meme Card #1

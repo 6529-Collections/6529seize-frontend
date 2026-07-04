@@ -14,7 +14,7 @@ jest.mock("@/helpers/Helpers", () => ({
   enterArtFullScreen: jest.fn(),
   fullScreenSupported: () => true,
 }));
-jest.mock("@/components/lfg-slideshow/LFGSlideshow.module.scss", () => ({}));
+jest.mock("@/components/lfg-slideshow/LFGSlideshow.module.css", () => ({}));
 
 const mockFetch = commonApiFetch as jest.Mock;
 

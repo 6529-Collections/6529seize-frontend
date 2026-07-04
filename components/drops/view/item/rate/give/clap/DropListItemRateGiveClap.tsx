@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./Clap.module.scss";
+import styles from "./Clap.module.css";
 import mojs from "@mojs/core";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
@@ -232,7 +232,7 @@ export default function DropListItemRateGiveClap({
           id={`clap-${randomID}`}
           {...(canVote ? { "data-tooltip-id": tooltipId } : {})}
           aria-label="Clap for drop"
-          className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-current tw-transition tw-duration-300 tw-ease-out ${styles["clap"]}`}
+          className={`${clapClasses} tw-relative tw-z-10 tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-none tw-bg-current tw-outline-1 tw-outline-transparent tw-transition tw-duration-300 tw-ease-out ${styles["clap"]}`}
           onClick={(e) => {
             e.stopPropagation();
             handleClick();
@@ -255,7 +255,7 @@ export default function DropListItemRateGiveClap({
           </span>
           <span
             id={`clap--count-${randomID}`}
-            className={`${clapCountClasses} tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-xs tw-absolute ${styles["clapCount"]}`}
+            className={`${clapCountClasses} tw-absolute tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-xs ${styles["clapCount"]}`}
           >
             {countShort}
           </span>

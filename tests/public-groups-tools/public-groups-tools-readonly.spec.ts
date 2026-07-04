@@ -46,6 +46,34 @@ async function expectSubscriptionsSettled(page: Page) {
 }
 
 test.describe("Public groups, tools, and calendar read-only coverage @surface @medium @large @readonly", () => {
+  test("renders the Tools index with grouped utility links", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/tools");
+
+    await expect(page).toHaveURL((url) => url.pathname === "/tools");
+    await expect(page).toHaveTitle("Tools");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "6529 Tools" })
+    ).toBeVisible();
+    await expect(page.getByText("NFT Delegation")).toBeVisible();
+    await expect(page.getByText("The Memes Tools")).toBeVisible();
+    await expect(page.getByText("Builder Tools")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Open Data" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Open tool: API" })
+    ).toHaveAttribute("href", "/tools/api");
+    await expect(
+      page.getByRole("link", { name: "Open tool: 6529bot Usage" })
+    ).toHaveAttribute("href", "/open-data/6529bot");
+    await expect(
+      page.getByRole("link", { name: "Open tool: GDRC" })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("renders the public Groups browse surface without write controls", async ({
     page,
   }) => {

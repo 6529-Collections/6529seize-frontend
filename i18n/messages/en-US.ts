@@ -15,6 +15,7 @@ import {
 } from "@/i18n/messages/collection-detail";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
+import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 
@@ -255,6 +256,34 @@ const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
   eyebrow: "Yes, again!",
 } as const);
 
+const NAVIGATION_MESSAGES = objectMessages("navigation", {
+  "primary.nfts": "NFTs",
+  "primary.waves": "Waves",
+  "primary.dms": "DMs",
+  "primary.join6529": "Join 6529",
+  "primary.about": "About",
+  "primary.home": "Home",
+  "account.notifications": "Notifications",
+  "section.main": "Main",
+  "section.utility": "Utility",
+  "section.account": "Account",
+  "waves.discover": "Discover Waves",
+  "network.nerd": "Network Nerd",
+  "subsection.networkPeople": "Network & Reputation",
+  "subsection.networkData": "Network & Reputation",
+  "subsection.nftReportingTools": "Collections & Minting",
+  "subsection.developerOpenData": "Data & Developer Tools",
+} as const);
+
+const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
+  "back.wave": "Back to wave",
+  "back.previous": "Back to previous page",
+  "back.about": "Back to About",
+  breadcrumb: "About / Network & Reputation / Wave Score",
+  description:
+    "This Network page explains the score shown on waves across discovery, the sidebar, home, and wave pages. Find it in About under Network & Reputation whenever you want the formula or a live wave calculation.",
+} as const);
+
 const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
   leftThisRound: "{count} left this round",
   unrated: "{count} unrated",
@@ -455,6 +484,14 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
 
+const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
+  dialogTitle: "GIF search",
+  "status.checking": "Checking GIF search...",
+  "status.ready": "GIF search is ready.",
+  "unavailable.title": "GIF search is temporarily unavailable.",
+  "unavailable.hint": "You can upload a GIF file instead.",
+} as const);
+
 const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
   coverAlt: "{waveName} cover",
   "dropsCount.one": "{timeAgo} · {count} drop",
@@ -646,6 +683,10 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
   ["safety.viewDetails", "View safety details"],
 ] as const);
 
+const COMMON_MESSAGES = objectMessages("common", {
+  close: "Close",
+} as const);
+
 export const EN_US_MESSAGES = {
   ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
@@ -708,7 +749,7 @@ export const EN_US_MESSAGES = {
   "acceptConnection.toast.persistFailed": "Failed to store connected profile",
   "acceptConnection.toast.acceptFailed":
     "Couldn't accept this connection. Please try again.",
-  "navigation.primary.ariaLabel": "Primary",
+  "navigation.primary.ariaLabel": "Primary navigation",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":
@@ -759,6 +800,12 @@ export const EN_US_MESSAGES = {
   "headerShare.copy.ariaLabel": "Copy URL",
   "headerShare.copy.default": "Copy URL",
   "headerShare.copy.copied": "Copied!",
+  "headerPageShare.trigger.ariaLabel": "Share page",
+  "headerPageShare.trigger.title": "Share page",
+  "headerWaveLinkAction.share": "Share wave",
+  "headerWaveLinkAction.copy": "Copy wave link",
+  "headerWaveLinkAction.feedback.shared": "Link shared",
+  "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
   "tools.api.authentication.title": "Authentication",
   "tools.api.authentication.basedOnSignatures":
@@ -788,6 +835,37 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  "home.mintSubscriptions.balanceLabel": "Balance",
+  "home.mintSubscriptions.infoLinkAriaLabel":
+    "Learn more about The Memes subscriptions",
+  "home.mintSubscriptions.profileSubscriptionsLink": "My subscriptions",
+  "home.mintSubscriptions.manageSubscriptionsLink": "Manage",
+  "home.mintSubscriptions.connectToSubscribe": "Connect to Subscribe",
+  "home.mintSubscriptions.connectFailed":
+    "Failed to open wallet connection. Please try again.",
+  "home.mintSubscriptions.awarenessLabel": "Subscription Minting",
+  "home.mintSubscriptions.action.manage": "Manage",
+  "home.mintSubscriptions.action.setUp": "Set up",
+  "home.mintSubscriptions.subscribeLabel": "Subscribe",
+  "home.mintSubscriptions.subscribedLabel": "Subscribed",
+  "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
+  "home.mintSubscriptions.subscribersLoading": "Loading subscriber count",
+  "home.mintSubscriptions.tooltip.connect":
+    "Connect to set up subscription minting.",
+  "home.mintSubscriptions.tooltip.dropped":
+    "Subscription minting is closed for this drop.",
+  "home.mintSubscriptions.tooltip.manage.one":
+    "You are subscribed for x{count} copy of this drop.",
+  "home.mintSubscriptions.tooltip.manage.many":
+    "You are subscribed for x{count} copies of this drop.",
+  "home.mintSubscriptions.tooltip.manageFallback":
+    "You are subscribed for this drop.",
+  "home.mintSubscriptions.tooltip.mintDay":
+    "Subscription minting cannot be changed on mint day.",
+  "home.mintSubscriptions.tooltip.profileSubscribe":
+    "You are not subscribed for this drop.",
+  "home.mintSubscriptions.tooltip.proxy":
+    "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":
     "Choose how inserted boosted-drop cards appear in wave chat on this device.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
@@ -1256,6 +1334,17 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
+  "profile.mute.action.mute": "Mute notifications",
+  "profile.mute.action.unmute": "Unmute notifications",
+  "profile.mute.action.muteAriaLabel": "Mute notifications from this profile",
+  "profile.mute.action.unmuteAriaLabel":
+    "Unmute notifications from this profile",
+  "profile.mute.error.mute": "Couldn't mute this profile.",
+  "profile.mute.error.unmute": "Couldn't unmute this profile.",
+  "profile.mute.error.description": "Please try again.",
+  "profile.mute.status.muted": "Notifications from this profile are muted.",
+  "profile.mute.status.unmuted":
+    "Notifications from this profile are not muted.",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
   "drop.media.processingGeneric": "Processing media",
@@ -1284,6 +1373,7 @@ export const EN_US_MESSAGES = {
   ...QUICK_DM_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
+  ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
@@ -1294,13 +1384,17 @@ export const EN_US_MESSAGES = {
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
+  ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
+  ...COMMON_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
+  ...NAVIGATION_MESSAGES,
+  ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,

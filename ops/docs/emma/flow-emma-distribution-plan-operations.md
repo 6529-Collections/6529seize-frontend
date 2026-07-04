@@ -17,7 +17,7 @@ active-run blocking, and failed-run recovery.
 
 ## Entry Points
 
-1. Open `Tools -> EMMA`, connect a valid wallet, then use `Sign In with Web3`.
+1. Open `About -> Data & Developer Tools -> EMMA`, connect a valid wallet, then use `Sign In with Web3`.
 2. Open or create a plan in `/emma/plans`.
 3. Open `/emma/plans/{planId}` directly if you already have access.
 

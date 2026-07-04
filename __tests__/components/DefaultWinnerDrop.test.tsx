@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DefaultWinnerDrop from "@/components/waves/drops/winner/DefaultWinnerDrop";
 import { EmojiProvider } from "@/contexts/EmojiContext";
@@ -223,7 +223,7 @@ describe("DefaultWinnerDrop", () => {
     );
   });
 
-  it("opens mobile menu on wide touch-only viewports without hover", () => {
+  it("opens mobile menu on wide touch-only viewports without hover", async () => {
     mockUseHasTouchInput.mockReturnValue(true);
     mockUseIsTouchDevice.mockReturnValue(true);
     setViewportWidth(1440);
@@ -269,10 +269,10 @@ describe("DefaultWinnerDrop", () => {
       />
     );
 
-    expect(mobileMenuProps.isOpen).toBe(true);
+    await waitFor(() => expect(mobileMenuProps?.isOpen).toBe(true));
   });
 
-  it("clears an open touch sheet when the mode switches to desktop hover", () => {
+  it("clears an open touch sheet when the mode switches to desktop hover", async () => {
     mockUseHasTouchInput.mockReturnValue(true);
     mockUseIsTouchDevice.mockReturnValue(true);
     setViewportWidth(1440);
@@ -301,12 +301,12 @@ describe("DefaultWinnerDrop", () => {
       onLongPress();
     });
 
-    expect(mobileMenuProps.isOpen).toBe(true);
+    await waitFor(() => expect(mobileMenuProps?.isOpen).toBe(true));
 
     setHoverSupport(true);
     rerender(renderDrop());
 
-    expect(mobileMenuProps.isOpen).toBe(false);
+    await waitFor(() => expect(mobileMenuProps?.isOpen).toBe(false));
 
     setHoverSupport(false);
     rerender(renderDrop());

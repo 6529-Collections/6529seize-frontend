@@ -53,6 +53,7 @@ describe("create-wave.validation", () => {
     outcomes: [{ id: 1 }],
     approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
     display: {
+      customRules: null,
       outcomesVisible: true,
       approve: {
         approvalsTabLabel: "",

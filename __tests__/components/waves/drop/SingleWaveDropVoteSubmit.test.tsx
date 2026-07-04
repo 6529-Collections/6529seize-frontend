@@ -52,7 +52,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 // Mock CSS module
-jest.mock("@/components/waves/drop/VoteButton.module.scss", () => ({
+jest.mock("@/components/waves/drop/VoteButton.module.css", () => ({
   buttonContent: "buttonContent",
   buttonText: "buttonText",
   enter: "enter",

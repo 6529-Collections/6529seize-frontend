@@ -1,0 +1,286 @@
+@keyframes shockwave {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 2px var(--theme-primary, rgba(255, 255, 255, 0.9));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow:
+      0 0 50px var(--theme-secondary, rgba(255, 255, 255, 0.3)),
+      inset 0 0 10px var(--theme-primary, rgba(255, 255, 255, 0.9));
+  }
+}
+@keyframes glow {
+  0% {
+    box-shadow:
+      0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+      0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+  }
+  50% {
+    box-shadow:
+      0 0 20px var(--theme-primary, rgba(255, 255, 255, 0.2)),
+      0 0 30px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+  }
+  100% {
+    box-shadow:
+      0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+      0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+  }
+}
+@keyframes funSpin {
+  0% {
+    transform: rotate(0deg);
+    border-width: 2px;
+  }
+  20% {
+    transform: rotate(240deg);
+    border-width: 2px;
+  }
+  35% {
+    transform: rotate(480deg);
+    border-width: 2.2px;
+  }
+  45% {
+    transform: rotate(720deg);
+    border-width: 2.3px;
+  }
+  55% {
+    transform: rotate(1080deg);
+    border-width: 2.5px;
+  }
+  70% {
+    transform: rotate(1440deg);
+    border-width: 2.3px;
+  }
+  85% {
+    transform: rotate(1680deg);
+    border-width: 2.2px;
+  }
+  100% {
+    transform: rotate(1800deg);
+    border-width: 2px;
+  }
+}
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+@keyframes textScaleOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+@keyframes textScaleIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.voteButton,
+.voteButtonMini {
+  position: relative;
+  font-size: 14px;
+  border-radius: 8px;
+  width: 72px;
+  height: 40px;
+  background: #e5e5e5;
+  border: 1px solid white;
+  outline: none;
+  color: #0a0a0a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease-out;
+}
+.voteButton:not(:disabled):hover,
+.voteButtonMini:not(:disabled):hover {
+  background: #d4d4d4;
+  border-color: #d4d4d4;
+}
+.voteButton:disabled,
+.voteButtonMini:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.voteButton:focus-visible,
+.voteButtonMini:focus-visible {
+  outline: 2px solid rgba(64, 106, 254, 0.75);
+  outline-offset: 2px;
+}
+
+.voteButtonMini {
+  width: 48px;
+  height: 32px;
+  font-size: 12px !important;
+  border-radius: 6px;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #0a0a0a;
+  box-shadow: none;
+}
+.voteButtonMini:not(:disabled):hover {
+  background: #efeff1;
+  border-color: #efeff1;
+  color: #0a0a0a;
+}
+.voteButtonMini .buttonContent {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.voteButtonMini .spinner {
+  width: 18px;
+  height: 18px;
+  border-width: 1.5px;
+  border-color: rgba(10, 10, 10, 0.2);
+  border-top-color: #0a0a0a;
+  border-right-color: #0a0a0a;
+}
+
+.voteSubmitFull {
+  width: 100%;
+}
+.voteSubmitFull > div {
+  width: 100%;
+}
+.voteSubmitFull .voteButton,
+.voteSubmitFull .voteButtonMini {
+  width: 100%;
+  height: auto;
+  min-height: 40px;
+  padding: 10px 14px;
+  background: transparent;
+  border-color: #26272b;
+  color: #4c4c55;
+  box-shadow: none;
+}
+.voteSubmitFull .voteButton:not(:disabled):hover,
+.voteSubmitFull .voteButtonMini:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: #37373e;
+  color: #60606c;
+}
+.voteSubmitFull .voteButtonPositive {
+  background: #047857;
+  border-color: #047857;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: none;
+}
+.voteSubmitFull .voteButtonPositive:not(:disabled):hover {
+  background: #065f46;
+  border-color: #065f46;
+  box-shadow: none;
+  color: #fff;
+}
+.voteSubmitFull .voteButtonNegative {
+  background: #be123c;
+  border-color: #be123c;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: none;
+}
+.voteSubmitFull .voteButtonNegative:not(:disabled):hover {
+  background: #9f1239;
+  border-color: #9f1239;
+  box-shadow: none;
+  color: #fff;
+}
+.voteSubmitFull .voteButtonNeutral {
+  background: transparent;
+  border-color: #26272b;
+  color: #4c4c55;
+}
+.voteSubmitFull .buttonContent {
+  height: 20px;
+}
+
+.buttonContent {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttonText {
+  position: absolute;
+  width: 100%;
+  white-space: nowrap;
+  text-align: center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.buttonText.exit {
+  animation: textScaleOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.buttonText.enter {
+  animation: textScaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.spinner {
+  position: absolute;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(10, 10, 10, 0.2);
+  border-radius: 50%;
+  border-top-color: #0a0a0a;
+  border-right-color: #0a0a0a;
+  animation:
+    spinnerEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+    funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
+}
+.spinner.exit {
+  animation: spinnerExit 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.theme1 {
+  color: rgba(255, 215, 0, 0.9);
+}
+.theme1:hover {
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25) !important;
+  color: rgb(255, 215, 0) !important;
+}
+
+.theme2 {
+  background: rgba(45, 48, 52, 0.5);
+  border-color: rgba(192, 192, 192, 0.15);
+  color: rgba(192, 192, 192, 0.9);
+}
+.theme2:hover {
+  background: rgba(50, 53, 57, 0.6) !important;
+  box-shadow: 0 0 20px rgba(192, 192, 192, 0.3) !important;
+  border-color: rgba(192, 192, 192, 0.25) !important;
+  color: rgb(192, 192, 192) !important;
+}
+
+.theme3 {
+  color: rgba(205, 127, 50, 0.9);
+}
+.theme3:hover {
+  box-shadow: 0 0 20px rgba(205, 127, 50, 0.25) !important;
+  color: rgb(205, 127, 50) !important;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./AppWallet.module.scss";
+import styles from "./AppWallet.module.css";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
