@@ -13,7 +13,7 @@
 
 ## 2026-07-04 (Thread A — merge gate)
 
-- Worktree `D:/repos/6529seize-frontend-ci` created on `ci/pr-gate` from `origin/main` (6af669907).
+- Sibling worktree `6529seize-frontend-ci` created on `ci/pr-gate` from `origin/main` (6af669907).
 - Audit correction: the merge-gate baseline is stale. `origin/main` already ships
   `.github/workflows/app-pr-ci.yml` — a risk-plan-driven PR CI (jobs: "Plan risk and
   security checks" + "Installed app checks") covering secret scan, workflow security
