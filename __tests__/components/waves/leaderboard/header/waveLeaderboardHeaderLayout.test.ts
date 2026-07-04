@@ -5,9 +5,6 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
     viewModesWidth: 120,
     sortTabsWidth: 260,
     sortDropdownWidth: 140,
-    hasCurationControl: true,
-    curationTabsWidth: 280,
-    curationDropdownWidth: 170,
     hasActions: true,
     actionsFullWidth: 260,
     actionsIconWidth: 90,
@@ -20,8 +17,7 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
     });
 
     expect(result).toEqual({
-      sortMode: "dropdown",
-      curationMode: "dropdown",
+      sortMode: "tabs",
       enableControlsScroll: false,
       actionMode: "full",
       wrapActions: false,
@@ -31,12 +27,11 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
   it("uses icon-only actions before controls need scroll fallback", () => {
     const result = resolveWaveLeaderboardHeaderLayout({
       ...baseInput,
-      rowWidth: 590,
+      rowWidth: 550,
     });
 
     expect(result).toEqual({
-      sortMode: "dropdown",
-      curationMode: "dropdown",
+      sortMode: "tabs",
       enableControlsScroll: false,
       actionMode: "icon",
       wrapActions: false,
@@ -46,12 +41,11 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
   it("wraps actions early when space gets tight", () => {
     const result = resolveWaveLeaderboardHeaderLayout({
       ...baseInput,
-      rowWidth: 450,
+      rowWidth: 380,
     });
 
     expect(result).toEqual({
       sortMode: "dropdown",
-      curationMode: "dropdown",
       enableControlsScroll: false,
       actionMode: "icon",
       wrapActions: true,
@@ -61,13 +55,12 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
   it("keeps actions inline when wrapping is disabled and falls back to scroll", () => {
     const result = resolveWaveLeaderboardHeaderLayout({
       ...baseInput,
-      rowWidth: 450,
+      rowWidth: 340,
       allowActionWrap: false,
     });
 
     expect(result).toEqual({
       sortMode: "dropdown",
-      curationMode: "dropdown",
       enableControlsScroll: true,
       actionMode: "icon",
       wrapActions: false,
@@ -83,7 +76,6 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
 
     expect(result).toEqual({
       sortMode: "dropdown",
-      curationMode: "dropdown",
       enableControlsScroll: true,
       actionMode: "icon",
       wrapActions: false,
@@ -92,19 +84,15 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
 
   it("uses full controls width when actions are disabled", () => {
     const result = resolveWaveLeaderboardHeaderLayout({
-      rowWidth: 570,
+      rowWidth: 390,
       viewModesWidth: 120,
       sortTabsWidth: 260,
       sortDropdownWidth: 140,
-      hasCurationControl: true,
-      curationTabsWidth: 280,
-      curationDropdownWidth: 170,
       hasActions: false,
     });
 
     expect(result).toEqual({
-      sortMode: "dropdown",
-      curationMode: "tabs",
+      sortMode: "tabs",
       enableControlsScroll: false,
       actionMode: "full",
       wrapActions: false,

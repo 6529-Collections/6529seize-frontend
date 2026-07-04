@@ -10,10 +10,7 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 const useWave = jest.fn();
 const useLayout = jest.fn();
 const useLocalPreference = jest.fn();
-const useWaveCurations = jest.fn();
 const useWaveDecisions = jest.fn();
-const replace = jest.fn();
-let searchParamsString = "";
 let dropsProps: any;
 let galleryProps: any;
 let gridProps: any;
@@ -68,22 +65,10 @@ jest.mock(
     (...args: any[]) =>
       useLocalPreference(...args)
 );
-jest.mock("@/hooks/waves/useWaveCurations", () => ({
-  useWaveCurations: (...args: any[]) => useWaveCurations(...args),
-}));
 jest.mock("@/hooks/waves/useWaveDecisions", () => ({
   FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
   useWaveDecisions: (...args: any[]) => useWaveDecisions(...args),
 }));
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace }),
-  usePathname: () => "/waves",
-  useSearchParams: () => ({
-    get: (key: string) => new URLSearchParams(searchParamsString).get(key),
-    toString: () => searchParamsString,
-  }),
-}));
-
 jest.mock("@/components/waves/leaderboard/WaveLeaderboardTime", () => ({
   WaveLeaderboardTime: () => <div data-testid="time" />,
 }));
@@ -211,7 +196,6 @@ describe("MyStreamWaveLeaderboard", () => {
     jest.clearAllMocks();
     intersectionObserverInstances = [];
     resetIntersectionObserver();
-    searchParamsString = "";
     dropsProps = null;
     galleryProps = null;
     gridProps = null;
@@ -219,11 +203,6 @@ describe("MyStreamWaveLeaderboard", () => {
     curationModalProps = undefined;
     approvalStatusProps = undefined;
     useLayout.mockReturnValue({ leaderboardViewStyle: {} });
-    useWaveCurations.mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    });
     useWaveDecisions.mockReturnValue({
       decisionPoints: [],
       isFetching: false,
@@ -590,8 +569,7 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(gridProps.isVotingControlsLocked).toBe(false);
   });
 
-  it("reads curation group from URL and keeps price filters local", () => {
-    searchParamsString = "curation_id=group-1&min_price=1.5&max_price=4.2";
+  it("does not pass legacy curation filter props to header or content", () => {
     useWave.mockReturnValue({
       isMemesWave: false,
       isCurationWave: true,
@@ -601,11 +579,6 @@ describe("MyStreamWaveLeaderboard", () => {
         hasReachedLimit: false,
       },
     });
-    useWaveCurations.mockReturnValue({
-      data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
-      isLoading: false,
-      isError: false,
-    });
     useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
     useLocalPreference.mockReturnValueOnce([
       WaveDropsLeaderboardSort.RANK,
@@ -614,11 +587,13 @@ describe("MyStreamWaveLeaderboard", () => {
 
     renderLeaderboard();
 
-    expect(headerProps.curatedByGroupId).toBe("group-1");
+    expect(headerProps).not.toHaveProperty("curationGroups");
+    expect(headerProps).not.toHaveProperty("curatedByGroupId");
+    expect(headerProps).not.toHaveProperty("onCurationGroupChange");
     expect(headerProps.minPrice).toBeUndefined();
     expect(headerProps.maxPrice).toBeUndefined();
     expect(headerProps.onCreateDrop).toEqual(expect.any(Function));
-    expect(dropsProps.curatedByGroupId).toBe("group-1");
+    expect(dropsProps).not.toHaveProperty("curatedByGroupId");
     expect(dropsProps.minPrice).toBeUndefined();
     expect(dropsProps.maxPrice).toBeUndefined();
     expect(dropsProps.priceCurrency).toBeUndefined();
@@ -651,7 +626,7 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(curationModalProps.wave).toEqual(wave);
   });
 
-  it("updates URL when curation filter changes", () => {
+  it("updates local price filters", () => {
     useWave.mockReturnValue({
       isMemesWave: false,
       isCurationWave: true,
@@ -660,44 +635,6 @@ describe("MyStreamWaveLeaderboard", () => {
         canSubmitNow: true,
         hasReachedLimit: false,
       },
-    });
-    useWaveCurations.mockReturnValue({
-      data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
-      isLoading: false,
-      isError: false,
-    });
-    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
-    useLocalPreference.mockReturnValueOnce([
-      WaveDropsLeaderboardSort.RANK,
-      jest.fn(),
-    ]);
-
-    renderLeaderboard();
-
-    headerProps.onCurationGroupChange("group-1");
-    expect(replace).toHaveBeenCalledWith("/waves?curation_id=group-1", {
-      scroll: false,
-    });
-
-    headerProps.onCurationGroupChange(null);
-    expect(replace).toHaveBeenCalledWith("/waves", { scroll: false });
-  });
-
-  it("updates local price filters without touching URL", () => {
-    searchParamsString = "curation_id=group-1";
-    useWave.mockReturnValue({
-      isMemesWave: false,
-      isCurationWave: true,
-      participation: {
-        isEligible: true,
-        canSubmitNow: true,
-        hasReachedLimit: false,
-      },
-    });
-    useWaveCurations.mockReturnValue({
-      data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
-      isLoading: false,
-      isError: false,
     });
     useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
     useLocalPreference.mockReturnValueOnce([
@@ -710,7 +647,6 @@ describe("MyStreamWaveLeaderboard", () => {
     act(() => {
       headerProps.onPriceRangeChange({ minPrice: 1.25, maxPrice: undefined });
     });
-    expect(replace).not.toHaveBeenCalled();
     expect(dropsProps.minPrice).toBe(1.25);
     expect(dropsProps.maxPrice).toBeUndefined();
     expect(dropsProps.priceCurrency).toBe("ETH");
@@ -721,7 +657,6 @@ describe("MyStreamWaveLeaderboard", () => {
         maxPrice: undefined,
       });
     });
-    expect(replace).not.toHaveBeenCalled();
     expect(dropsProps.minPrice).toBeUndefined();
     expect(dropsProps.maxPrice).toBeUndefined();
     expect(dropsProps.priceCurrency).toBeUndefined();

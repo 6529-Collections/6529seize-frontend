@@ -11,7 +11,6 @@ import React, {
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
 import WaveApprovalStatusBar from "@/components/waves/approval/WaveApprovalStatusBar";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
@@ -30,8 +29,6 @@ import { useLayout } from "./layout/LayoutContext";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { normalizeWaveLeaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
@@ -63,7 +60,6 @@ interface LeaderboardContentProps {
   readonly isMemesWave: boolean;
   readonly isVotingClosed: boolean;
   readonly isVotingControlsLocked: boolean;
-  readonly curatedByGroupId: string | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly minPrice: number | undefined;
   readonly maxPrice: number | undefined;
@@ -178,7 +174,6 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
   isMemesWave,
   isVotingClosed,
   isVotingControlsLocked,
-  curatedByGroupId,
   onDropClick,
   minPrice,
   maxPrice,
@@ -192,7 +187,6 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
         sort={sort}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
-        curatedByGroupId={curatedByGroupId}
         onDropClick={onDropClick}
         minPrice={minPrice}
         maxPrice={maxPrice}
@@ -209,7 +203,6 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
         sort={sort}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
-        curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}
         priceCurrency={priceCurrency}
@@ -225,7 +218,6 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
       sort={sort}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
-      curatedByGroupId={curatedByGroupId}
       minPrice={minPrice}
       maxPrice={maxPrice}
       priceCurrency={priceCurrency}
@@ -238,9 +230,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
 }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const leaderboardContainerRef = useRef<HTMLDivElement | null>(null);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const {
@@ -328,14 +317,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     [isApproveWave, setSort, wave.wave.time_lock_ms]
   );
 
-  const {
-    data: curationGroups = [],
-    isLoading: isLoadingCurationGroups,
-    isError: isCurationGroupsError,
-  } = useWaveCurations({
-    waveId: wave.id,
-    enabled: wave.wave.type !== ApiWaveType.Chat,
-  });
   const cannotDeriveApprovedCount =
     isApproveWave && getApprovedDropsCount({ wave }) === null;
   const shouldLoadApprovalDecisionPoints = cannotDeriveApprovedCount;
@@ -451,35 +432,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     wave.id,
   ]);
 
-  const rawCuratedByGroupId = searchParams.get("curation_id");
-
-  const curationGroupIdSet = useMemo(
-    () => new Set(curationGroups.map((group) => group.id)),
-    [curationGroups]
-  );
-
-  const curatedByGroupId = useMemo(() => {
-    if (!rawCuratedByGroupId) {
-      return undefined;
-    }
-
-    if (isCurationGroupsError) {
-      return undefined;
-    }
-
-    if (isLoadingCurationGroups) {
-      return rawCuratedByGroupId;
-    }
-
-    return curationGroupIdSet.has(rawCuratedByGroupId)
-      ? rawCuratedByGroupId
-      : undefined;
-  }, [
-    rawCuratedByGroupId,
-    isCurationGroupsError,
-    isLoadingCurationGroups,
-    curationGroupIdSet,
-  ]);
   const priceCurrency = useMemo(() => {
     const hasPriceFilter =
       typeof minPrice === "number" || typeof maxPrice === "number";
@@ -491,23 +443,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     }
     return undefined;
   }, [effectiveSort, isCurationWave, maxPrice, minPrice]);
-
-  const updateCurationGroupInUrl = useCallback(
-    (groupId: string | null) => {
-      const nextParams = new URLSearchParams(searchParams.toString());
-
-      if (groupId) {
-        nextParams.set("curation_id", groupId);
-      } else {
-        nextParams.delete("curation_id");
-      }
-
-      const nextQuery = nextParams.toString();
-      const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
-      router.replace(nextUrl, { scroll: false });
-    },
-    [pathname, router, searchParams]
-  );
 
   const updatePriceRange = useCallback(
     ({
@@ -544,11 +479,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       onViewModeChange={(mode) => setViewMode(mode)}
       onCreateDrop={createDropAction}
       onSortChange={handleSortChange}
-      curationGroups={curationGroups}
-      curatedByGroupId={curatedByGroupId ?? null}
-      onCurationGroupChange={
-        curationGroups.length > 0 ? updateCurationGroupInUrl : undefined
-      }
       minPrice={minPrice}
       maxPrice={maxPrice}
       onPriceRangeChange={isCurationWave ? updatePriceRange : undefined}
@@ -640,7 +570,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           isMemesWave={isMemesWave}
           isVotingClosed={isApprovalVotingClosed}
           isVotingControlsLocked={isApprovalVotingControlsLocked}
-          curatedByGroupId={curatedByGroupId}
           onDropClick={onDropClick}
           minPrice={minPrice}
           maxPrice={maxPrice}

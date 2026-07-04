@@ -69,7 +69,7 @@ This page owns compact-list behavior only. Drop-open action ownership stays in
 ## Limitations / Notes
 
 - This is a compact summary surface with rank-order rows only.
-- No sidebar sort/group/view controls in this tab.
+- No sidebar sort, price, or view controls in this tab.
 - Use full leaderboard surfaces for broader sorting, filtering, and view modes.
 
 ## Related Pages
