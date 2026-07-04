@@ -76,17 +76,48 @@
       "id": "join.6529",
       "kind": "route",
       "title": "Join 6529",
-      "aliases": ["join", "join 6529", "join page", "get started"],
-      "keywords": ["join", "6529", "navigation", "getting-started"],
+      "aliases": [
+        "join",
+        "join 6529",
+        "join page",
+        "get started",
+        "getting started",
+        "start on 6529",
+        "onboarding",
+        "new user guide",
+        "how do i join 6529"
+      ],
+      "keywords": [
+        "join",
+        "6529",
+        "navigation",
+        "getting-started",
+        "wallet",
+        "profile",
+        "pfp",
+        "waves",
+        "first",
+        "message"
+      ],
       "facts": [
         "The Join 6529 page lives at /join.",
-        "Join 6529 lives at /join but is not shown as a primary sidebar or app drawer menu item.",
-        "The current page is a minimal placeholder; detailed join and onboarding content is not yet published there."
+        "It is a state-aware onboarding guide that adapts to the user's current state across wallet connection, wallet auth, profile setup, profile image, public Waves, and first public message.",
+        "The profile-image step remains incomplete until an image is uploaded, but it does not block public Waves or messaging steps.",
+        "Create Wave links from the guide use the web create URL /waves?create=wave.",
+        "Join 6529 lives at /join but is not shown as a primary sidebar or app drawer menu item."
       ],
       "canonical_path": "/join",
-      "related_paths": ["/", "/about", "/waves"],
-      "tags": ["join", "navigation", "getting-started"],
-      "source_refs": ["app/join/page.tsx"]
+      "related_paths": [
+        "/waves",
+        "/waves?create=wave",
+        "/open-data/meme-subscriptions",
+        "/delegation/delegation-center"
+      ],
+      "tags": ["join", "navigation", "getting-started", "waves"],
+      "source_refs": [
+        "app/join/page.tsx",
+        "ops/docs/navigation/feature-join-6529-journey.md"
+      ]
     },
     {
       "id": "about.index",
@@ -1508,7 +1539,7 @@
         "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves/create", "/messages"],
+      "related_paths": ["/waves?create=wave", "/messages"],
       "tags": ["waves"],
       "source_refs": [
         "ops/docs/waves/README.md",
@@ -1542,11 +1573,11 @@
         "sidebar"
       ],
       "facts": [
-        "To create a wave, click the + button at the top-right of the Waves panel.",
-        "The same flow is available directly at /waves/create.",
+        "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
+        "The app full-page create route remains /waves/create where app mode uses it.",
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],
-      "canonical_path": "/waves/create",
+      "canonical_path": "/waves?create=wave",
       "related_paths": ["/waves"],
       "tags": ["waves", "create", "ui"],
       "source_refs": ["ops/docs/waves/create/feature-modal-entry-points.md"]
@@ -1578,10 +1609,10 @@
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
-        "The docs for wave creation live under ops/docs/waves/create and the app route is /waves/create."
+        "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
       ],
-      "canonical_path": "/waves/create",
-      "related_paths": ["/waves/create"],
+      "canonical_path": "/waves?create=wave",
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "create", "workflow"],
       "source_refs": [
         "ops/docs/waves/create/README.md",
@@ -1609,8 +1640,8 @@
         "Chat wave creation uses Overview, Groups, Rules, and Description steps.",
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
-      "canonical_path": "/waves/create",
-      "related_paths": ["/waves"],
+      "canonical_path": "/waves?create=wave",
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "chat"],
       "source_refs": [
         "ops/docs/waves/create/feature-overview-step.md",
@@ -1638,7 +1669,7 @@
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation."
       ],
-      "canonical_path": "/waves/create",
+      "canonical_path": "/waves?create=wave",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "rank", "voting"],
       "source_refs": [
@@ -1667,7 +1698,7 @@
         "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
-      "canonical_path": "/waves/create",
+      "canonical_path": "/waves?create=wave",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "approve", "voting"],
       "source_refs": [
@@ -1856,7 +1887,7 @@
         "Slow mode must be at least 1 second when enabled."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves/create"],
+      "related_paths": ["/waves?create=wave"],
       "tags": ["waves", "chat", "settings"],
       "source_refs": [
         "components/waves/specs/WaveSlowMode.tsx",
@@ -3723,7 +3754,7 @@
       "facts": [
         "The profile Waves tab lives at /{user}/waves.",
         "It is for profile-specific wave activity and context.",
-        "General wave browsing and creation live under /waves and /waves/create."
+        "General wave browsing lives under /waves and web wave creation opens at /waves?create=wave."
       ],
       "canonical_path": "/{user}/waves",
       "related_paths": ["/waves"],
@@ -3890,7 +3921,7 @@
         "Search and section availability depend on the route state and access rules."
       ],
       "canonical_path": "/discover",
-      "related_paths": ["/waves", "/waves/create"],
+      "related_paths": ["/waves", "/waves?create=wave"],
       "tags": ["waves", "discovery"],
       "source_refs": [
         "ops/docs/waves/discovery/README.md",

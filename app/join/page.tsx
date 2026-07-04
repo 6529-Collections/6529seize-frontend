@@ -1,28 +1,29 @@
-import { getAppMetadata } from "@/components/providers/metadata";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "join.metadata.title"),
-  description: t(DEFAULT_LOCALE, "join.metadata.description"),
-});
+import { getAppMetadata } from "@/components/providers/metadata";
+import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
-export default function JoinPage() {
-  return (
-    <main className="tailwind-scope tw-min-h-dvh tw-bg-black tw-px-4 tw-py-12 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8">
-      <section className="tw-mx-auto tw-flex tw-max-w-3xl tw-flex-col tw-gap-4">
-        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-400">
-          {t(DEFAULT_LOCALE, "join.eyebrow")}
-        </p>
-        <h1 className="tw-m-0 tw-text-4xl tw-font-semibold tw-tracking-normal tw-text-white sm:tw-text-5xl">
-          {t(DEFAULT_LOCALE, "join.heading")}
-        </h1>
-        {/* Placeholder route only; the full Join page belongs in a separate acquisition/onboarding task. */}
-        <p className="tw-m-0 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "join.placeholder")}
-        </p>
-      </section>
-    </main>
-  );
+import Join6529PageClient from "./page.client";
+
+const resolveRequestLocale = async (): Promise<SupportedLocale> => {
+  const headersList = await headers();
+  const preferredLocale = (headersList.get("accept-language") ?? "")
+    .split(",")
+    .map((value) => value.split(";")[0]?.trim())
+    .find(Boolean);
+  return normalizeLocale(preferredLocale);
+};
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveRequestLocale();
+  return getAppMetadata({
+    title: t(locale, "join6529.metadata.title"),
+    description: t(locale, "join6529.metadata.description"),
+  });
+}
+
+export default function Join6529Page() {
+  return <Join6529PageClient />;
 }
