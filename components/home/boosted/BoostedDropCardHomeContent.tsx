@@ -16,7 +16,9 @@ import {
 } from "react";
 import BoostedDropLinkPreview from "./BoostedDropLinkPreview";
 import {
+  extractFirstMarkdownImage,
   extractFirstUrl,
+  extractStandaloneUrl,
   extractStandaloneMarkdownImage,
   removePreviewUrlFromContent,
 } from "./extractStandaloneUrl";
@@ -43,17 +45,32 @@ const HOME_PREVIEW_CONTAINER_CLASSES = `tw-relative tw-flex ${HOME_ASPECT_RATIO_
 const HOME_TEXT_CONTAINER_CLASSES = `tw-relative tw-flex ${HOME_ASPECT_RATIO_CLASSES} tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12`;
 const CHAT_PREVIEW_WRAPPER_BASE_CLASSES =
   "tw-pointer-events-none tw-relative tw-z-30 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto";
-const IMAGE_MIME_TYPES_BY_TOKEN: Readonly<Record<string, string>> = {
+const MEDIA_MIME_TYPES_BY_TOKEN: Readonly<Record<string, string>> = {
+  aac: "audio/aac",
   avif: "image/avif",
+  flac: "audio/flac",
   gif: "image/gif",
+  glb: "model/gltf-binary",
+  gltf: "model/gltf+json",
   jpeg: "image/jpeg",
   jpg: "image/jpeg",
+  m4a: "audio/mp4",
+  m4v: "video/mp4",
+  mkv: "video/x-matroska",
+  mov: "video/quicktime",
+  mp3: "audio/mpeg",
+  mp4: "video/mp4",
+  oga: "audio/ogg",
+  ogg: "video/ogg",
+  ogv: "video/ogg",
   png: "image/png",
   svg: "image/svg+xml",
+  wav: "audio/wav",
+  webm: "video/webm",
   webp: "image/webp",
 };
 
-const getImageMimeTypeFromToken = (
+const getMediaMimeTypeFromToken = (
   token: string | null | undefined
 ): string | null => {
   if (!token) {
@@ -61,13 +78,13 @@ const getImageMimeTypeFromToken = (
   }
 
   const normalizedToken = token.toLowerCase().replace(/^\./, "");
-  return IMAGE_MIME_TYPES_BY_TOKEN[normalizedToken] ?? null;
+  return MEDIA_MIME_TYPES_BY_TOKEN[normalizedToken] ?? null;
 };
 
-const getStandaloneMarkdownImageMimeType = (url: string): string => {
+const getMediaMimeTypeFromUrl = (url: string): string | null => {
   try {
     const parsedUrl = new URL(url);
-    const outputMimeType = getImageMimeTypeFromToken(
+    const outputMimeType = getMediaMimeTypeFromToken(
       parsedUrl.searchParams.get("output")
     );
 
@@ -76,21 +93,43 @@ const getStandaloneMarkdownImageMimeType = (url: string): string => {
     }
 
     const extension = parsedUrl.pathname.split(".").pop();
-    const extensionMimeType = getImageMimeTypeFromToken(extension);
+    const extensionMimeType = getMediaMimeTypeFromToken(extension);
 
     if (extensionMimeType) {
       return extensionMimeType;
     }
   } catch {
     const extension = url.split(/[?#]/)[0]?.split(".").pop();
-    const extensionMimeType = getImageMimeTypeFromToken(extension);
+    const extensionMimeType = getMediaMimeTypeFromToken(extension);
 
     if (extensionMimeType) {
       return extensionMimeType;
     }
   }
 
-  return "image/*";
+  return null;
+};
+
+const getMarkdownImageMimeType = (url: string): string =>
+  getMediaMimeTypeFromUrl(url) ?? "image/*";
+
+const getStandaloneDirectMedia = (
+  content: string | null | undefined
+): BoostedDropMediaItem | null => {
+  const standaloneUrl = extractStandaloneUrl(content);
+  if (!standaloneUrl) {
+    return null;
+  }
+
+  const mimeType = getMediaMimeTypeFromUrl(standaloneUrl);
+  if (!mimeType) {
+    return null;
+  }
+
+  return {
+    mime_type: mimeType,
+    url: standaloneUrl,
+  };
 };
 const HOME_PREVIEW_WRAPPER_BASE_CLASSES =
   "tw-pointer-events-none tw-relative tw-z-30 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto";
@@ -542,23 +581,36 @@ BoostedDropCardTextSection.displayName = "BoostedDropCardTextSection";
 
 const BoostedDropCardHomeContent = memo(
   ({ part, isChatVariant }: BoostedDropCardHomeContentProps) => {
+    const previewUrl = useMemo(
+      () => extractFirstUrl(part?.content),
+      [part?.content]
+    );
     const standaloneMarkdownImage = useMemo(
       () => extractStandaloneMarkdownImage(part?.content),
+      [part?.content]
+    );
+    const fallbackMarkdownImage = useMemo(
+      () =>
+        standaloneMarkdownImage ??
+        (previewUrl ? null : extractFirstMarkdownImage(part?.content)),
+      [part?.content, previewUrl, standaloneMarkdownImage]
+    );
+    const standaloneDirectMedia = useMemo(
+      () => getStandaloneDirectMedia(part?.content),
       [part?.content]
     );
     const attachedMedia = part?.media[0];
     const media = useMemo(
       () =>
         attachedMedia ??
-        (standaloneMarkdownImage
+        standaloneDirectMedia ??
+        (fallbackMarkdownImage
           ? {
-              mime_type: getStandaloneMarkdownImageMimeType(
-                standaloneMarkdownImage.url
-              ),
-              url: standaloneMarkdownImage.url,
+              mime_type: getMarkdownImageMimeType(fallbackMarkdownImage.url),
+              url: fallbackMarkdownImage.url,
             }
           : undefined),
-      [attachedMedia, standaloneMarkdownImage]
+      [attachedMedia, fallbackMarkdownImage, standaloneDirectMedia]
     );
 
     if (!media) {

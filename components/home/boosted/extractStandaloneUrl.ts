@@ -300,6 +300,73 @@ export const extractFirstUrl = (
 };
 
 /**
+ * Returns a raw standalone URL when it is the only visible content.
+ */
+export const extractStandaloneUrl = (
+  content: string | null | undefined
+): string | null => {
+  if (!content) {
+    return null;
+  }
+
+  const trimmed = content.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const candidates = collectUrlCandidates(trimmed);
+  if (candidates.length !== 1) {
+    return null;
+  }
+
+  const [candidate] = candidates;
+  if (!candidate) {
+    return null;
+  }
+
+  const normalizedUrl = normalizeUrlCandidate(candidate.url);
+  if (!normalizedUrl) {
+    return null;
+  }
+
+  const before = trimmed.slice(0, candidate.index);
+  const after = trimmed.slice(candidate.index + candidate.url.length);
+  if (before.trim() || after.trim()) {
+    return null;
+  }
+
+  return normalizedUrl;
+};
+
+/**
+ * Returns the first markdown image found in content.
+ */
+export const extractFirstMarkdownImage = (
+  content: string | null | undefined
+): MarkdownImage | null => {
+  if (!content) {
+    return null;
+  }
+
+  const imageCandidate = collectMarkdownLinkCandidates(content).find(
+    (candidate) => candidate.isImage
+  );
+  if (!imageCandidate) {
+    return null;
+  }
+
+  const normalizedUrl = normalizeUrlCandidate(imageCandidate.url);
+  if (!normalizedUrl) {
+    return null;
+  }
+
+  return {
+    alt: imageCandidate.label.trim() || "Media",
+    url: normalizedUrl,
+  };
+};
+
+/**
  * Returns a single markdown image when it is the only visible content.
  */
 export const extractStandaloneMarkdownImage = (
@@ -335,15 +402,12 @@ export const extractStandaloneMarkdownImage = (
     return null;
   }
 
-  const normalizedUrl = normalizeUrlCandidate(imageCandidate.url);
-  if (!normalizedUrl) {
+  const markdownImage = extractFirstMarkdownImage(trimmed);
+  if (!markdownImage) {
     return null;
   }
 
-  return {
-    alt: imageCandidate.label.trim() || "Media",
-    url: normalizedUrl,
-  };
+  return markdownImage;
 };
 
 /**

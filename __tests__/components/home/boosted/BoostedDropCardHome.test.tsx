@@ -509,6 +509,151 @@ describe("BoostedDropCardHome", () => {
     expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
   });
 
+  it("renders standalone direct image URLs as boosted media", () => {
+    const imageUrl = "https://example.com/art.jpg";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: imageUrl,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(screen.getByTestId("drop-media")).toBeInTheDocument();
+    expect(mockDropListItemContentMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        media_mime_type: "image/jpeg",
+        media_url: imageUrl,
+      })
+    );
+    expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("link-preview")).not.toBeInTheDocument();
+  });
+
+  it("renders standalone direct video URLs as boosted media", () => {
+    const videoUrl = "https://example.com/clip.mp4";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: videoUrl,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(screen.getByTestId("drop-media")).toBeInTheDocument();
+    expect(mockDropListItemContentMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        media_mime_type: "video/mp4",
+        media_url: videoUrl,
+      })
+    );
+    expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
+  });
+
+  it("renders captioned markdown images as boosted media when no link preview competes", () => {
+    const imageUrl = "https://example.com/captioned.webp";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: `Great one\n\n![Captioned](${imageUrl})`,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(screen.getByTestId("drop-media")).toBeInTheDocument();
+    expect(mockDropListItemContentMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        media_mime_type: "image/webp",
+        media_url: imageUrl,
+      })
+    );
+    expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("content-display")).not.toBeInTheDocument();
+  });
+
+  it("keeps non-media standalone URLs on the boosted link-preview path", () => {
+    const articleUrl = "https://example.com/article";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: articleUrl,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(mockBoostedDropLinkPreview).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        href: articleUrl,
+        variant: "chat",
+      })
+    );
+    expect(mockDropListItemContentMedia).not.toHaveBeenCalled();
+  });
+
+  it("keeps standalone webpage URLs on the boosted link-preview path", () => {
+    const pageUrl = "https://example.com/gallery/page.html";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: pageUrl,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(mockBoostedDropLinkPreview).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        href: pageUrl,
+        variant: "chat",
+      })
+    );
+    expect(mockDropListItemContentMedia).not.toHaveBeenCalled();
+  });
+
   it("does not render supplemental chat content after the lead media", () => {
     renderWithAuth(
       <BoostedDropCardHome
