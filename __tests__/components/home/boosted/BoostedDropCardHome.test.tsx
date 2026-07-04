@@ -598,6 +598,64 @@ describe("BoostedDropCardHome", () => {
     expect(screen.queryByTestId("content-display")).not.toBeInTheDocument();
   });
 
+  it("renders standalone direct audio URLs as boosted media", () => {
+    const audioUrl = "https://example.com/track.mp3";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: audioUrl,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(screen.getByTestId("drop-media")).toBeInTheDocument();
+    expect(mockDropListItemContentMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        media_mime_type: "audio/mpeg",
+        media_url: audioUrl,
+      })
+    );
+    expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
+  });
+
+  it("renders standalone direct 3D model URLs as boosted media", () => {
+    const modelUrl = "https://example.com/sculpture.glb";
+
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: modelUrl,
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(screen.getByTestId("drop-media")).toBeInTheDocument();
+    expect(mockDropListItemContentMedia).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        media_mime_type: "model/gltf-binary",
+        media_url: modelUrl,
+      })
+    );
+    expect(mockBoostedDropLinkPreview).not.toHaveBeenCalled();
+  });
+
   it("keeps non-media standalone URLs on the boosted link-preview path", () => {
     const articleUrl = "https://example.com/article";
 

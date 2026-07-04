@@ -61,7 +61,8 @@ const MEDIA_MIME_TYPES_BY_TOKEN: Readonly<Record<string, string>> = {
   mp3: "audio/mpeg",
   mp4: "video/mp4",
   oga: "audio/ogg",
-  ogg: "video/ogg",
+  // Bare .ogg is ambiguous; Vorbis audio is the dominant real-world case.
+  ogg: "audio/ogg",
   ogv: "video/ogg",
   png: "image/png",
   svg: "image/svg+xml",

@@ -340,6 +340,9 @@ export const extractStandaloneUrl = (
 
 /**
  * Returns the first markdown image found in content.
+ *
+ * Accepts untrimmed content: only the candidate's url/label are used, never
+ * its offsets, so callers must not rely on this for position-based slicing.
  */
 export const extractFirstMarkdownImage = (
   content: string | null | undefined
