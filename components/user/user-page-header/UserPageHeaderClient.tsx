@@ -29,7 +29,10 @@ import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
-import { getUserProfileHeaderDisplayName } from "./user-page-header.messages";
+import {
+  getUserProfileHeaderDisplayName,
+  getUserProfileHeaderMessage,
+} from "./user-page-header.messages";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -158,8 +161,12 @@ export default function UserPageHeaderClient({
       console.error(error);
       setToast({
         type: "error",
-        title: "Couldn't create this direct message.",
-        description: "Please try again.",
+        title: getUserProfileHeaderMessage(
+          "user.profileHeader.dm.createFailed.title"
+        ),
+        description: getUserProfileHeaderMessage(
+          "user.profileHeader.dm.createFailed.description"
+        ),
         details: getToastErrorDetails(error),
       });
     } finally {

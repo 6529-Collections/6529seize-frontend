@@ -32,7 +32,5 @@ export function getUserProfileHeaderDisplayName(
   profile: ApiIdentity,
   fallback: string
 ): string {
-  return (
-    profile.handle || profile.display || profile.primary_wallet || fallback
-  );
+  return profile.handle || profile.display || fallback;
 }

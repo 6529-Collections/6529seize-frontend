@@ -102,7 +102,9 @@ export default function UserPageHeaderAboutEdit({
     onError: (error) => {
       setErrorMsg(
         getToastErrorDetails(error) ??
-          "Couldn't save this about statement. Please try again."
+          getUserProfileHeaderMessage(
+            "user.profileHeader.aboutEdit.errors.saveFailed"
+          )
       );
     },
     onSettled: () => {

@@ -17,12 +17,12 @@ const ERROR_REGEX: { [k in OmitUnknown]: RegExp } = {
   [AboutEditError.DOXXING]: /doxxing\s+of\s+another\s+person/i,
 };
 
-const ERROR_TEXT: {
+const getErrorText = (): {
   [k in OmitUnknown]: {
     title: string;
     value: string;
   };
-} = {
+} => ({
   [AboutEditError.HATE_SPEECH]: {
     title: getUserProfileHeaderMessage(
       "user.profileHeader.aboutEdit.errors.hateSpeech.title"
@@ -55,7 +55,7 @@ const ERROR_TEXT: {
       "user.profileHeader.aboutEdit.errors.doxxing.value"
     ),
   },
-};
+});
 
 export default function UserPageHeaderAboutEditError({
   msg,
@@ -83,7 +83,7 @@ export default function UserPageHeaderAboutEditError({
           ),
           value: msg,
         }
-      : ERROR_TEXT[errorType];
+      : getErrorText()[errorType];
 
   return (
     <div>

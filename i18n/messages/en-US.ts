@@ -401,6 +401,8 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
 
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
+  "dm.createFailed.title": "Couldn't create this direct message.",
+  "dm.createFailed.description": "Please try again.",
   "name.profileEnabled": "Profile enabled: {date}",
   "pfp.alt": "{name}'s profile picture",
   "pfp.edit": "Edit {name}'s profile picture",
@@ -416,6 +418,8 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.cancel": "Cancel",
   "aboutEdit.save": "Save",
   "aboutEdit.success": "About statement added.",
+  "aboutEdit.errors.saveFailed":
+    "Couldn't save this about statement. Please try again.",
   "aboutEdit.errors.close": "Dismiss About statement error",
   "aboutEdit.errors.unknown.title": "Unknown Error",
   "aboutEdit.errors.hateSpeech.title": "Error: Hate Speech",

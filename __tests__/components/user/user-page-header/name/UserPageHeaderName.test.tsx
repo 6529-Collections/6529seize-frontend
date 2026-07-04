@@ -107,6 +107,15 @@ describe("UserPageHeaderName", () => {
     expect(screen.getByText("0x123")).toBeInTheDocument();
   });
 
+  it("renders the lowercased main address for wallet-only profiles", () => {
+    renderComponent(
+      { handle: null, display: "", primary_wallet: "0xAbCdEf" },
+      "0xabcdef"
+    );
+    expect(screen.getByText("0xabcdef")).toBeInTheDocument();
+    expect(screen.queryByText("0xAbCdEf")).not.toBeInTheDocument();
+  });
+
   it("shows a robot emoji for AI classification", () => {
     renderComponent({
       handle: "Robo",
