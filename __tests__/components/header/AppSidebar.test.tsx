@@ -181,7 +181,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         getChildGroup(aboutChildren, "Collections & Minting").children
       ).toEqual([
         { label: "About The Memes", path: "/about/the-memes" },
-        { label: "Subscriptions", path: "/about/subscriptions" },
+        { label: "Subscription Minting", path: "/about/subscriptions" },
         { label: "Meme Lab", path: "/about/meme-lab" },
         { label: "6529 Gradient", path: "/about/6529-gradient" },
         { label: "Minting", path: "/about/minting" },
@@ -289,7 +289,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       const aboutChildren = getMenuChildren("About");
       expect(flattenMenuChildren(aboutChildren)).toEqual(
         expect.not.arrayContaining([
-          expect.objectContaining({ label: "Subscriptions" }),
+          expect.objectContaining({ label: "Subscription Minting" }),
         ])
       );
       expect(flattenMenuChildren(aboutChildren)).toEqual(
@@ -310,7 +310,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
       expect(flattenMenuChildren(getMenuChildren("About"))).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: "Subscriptions" }),
+          expect.objectContaining({ label: "Subscription Minting" }),
         ])
       );
     });
