@@ -258,7 +258,7 @@ describe("About contents dropdown", () => {
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: "Go to page: Subscriptions" })
+      screen.getByRole("menuitem", { name: "Go to page: Subscription Minting" })
     ).toHaveAttribute("href", "/about/subscriptions");
   });
 
