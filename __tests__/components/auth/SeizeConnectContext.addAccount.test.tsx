@@ -10,6 +10,7 @@ import {
   SeizeConnectProvider,
   useSeizeConnectContext,
 } from "@/components/auth/SeizeConnectContext";
+import { AppKitBootstrapContext } from "@/components/providers/AppKitBootstrapContext";
 import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/wagmiAppWalletConnector";
 
 const ACTIVE_ADDRESS = "0x00000000000000000000000000000000000000AA";
@@ -186,7 +187,7 @@ describe("SeizeConnectProvider add-account flow", () => {
     jest.useRealTimers();
   });
 
-  it("opens the connect flow directly for app-wallet connectors and keeps add-account mode active", () => {
+  it("opens the connect flow directly for app-wallet connectors and keeps add-account mode active", async () => {
     mockWagmiAccount = {
       connector: {
         type: APP_WALLET_CONNECTOR_TYPE,
@@ -207,8 +208,10 @@ describe("SeizeConnectProvider add-account flow", () => {
     });
 
     expect(mockDisconnect).not.toHaveBeenCalled();
-    expect(mockOpen).toHaveBeenCalledTimes(1);
-    expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
+    await waitFor(() => {
+      expect(mockOpen).toHaveBeenCalledTimes(1);
+      expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
+    });
 
     act(() => {
       fireEvent.click(addButton);
@@ -218,7 +221,7 @@ describe("SeizeConnectProvider add-account flow", () => {
     expect(mockOpen).toHaveBeenCalledTimes(1);
   });
 
-  it("clears a stale add-flow guard before reopening connect for app-wallet connectors", () => {
+  it("clears a stale add-flow guard before reopening connect for app-wallet connectors", async () => {
     mockDisconnect.mockImplementation(() => createPendingPromise<void>());
 
     const { rerender } = render(
@@ -257,8 +260,10 @@ describe("SeizeConnectProvider add-account flow", () => {
     });
 
     expect(mockDisconnect).toHaveBeenCalledTimes(1);
-    expect(mockOpen).toHaveBeenCalledTimes(1);
-    expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
+    await waitFor(() => {
+      expect(mockOpen).toHaveBeenCalledTimes(1);
+      expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
+    });
   });
 
   it("keeps the disconnect-then-connect flow for browser-wallet connectors", async () => {
@@ -283,11 +288,13 @@ describe("SeizeConnectProvider add-account flow", () => {
       jest.advanceTimersByTime(100);
     });
 
-    expect(mockOpen).toHaveBeenCalledTimes(1);
-    expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
+    await waitFor(() => {
+      expect(mockOpen).toHaveBeenCalledTimes(1);
+      expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
+    });
   });
 
-  it("opens connect directly when there is no live connected wallet and keeps add-account mode active", () => {
+  it("opens connect directly when there is no live connected wallet and keeps add-account mode active", async () => {
     mockAppKitAccount = {
       address: undefined,
       isConnected: false,
@@ -312,7 +319,68 @@ describe("SeizeConnectProvider add-account flow", () => {
     });
 
     expect(mockDisconnect).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockOpen).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("keeps add-account mode active while waiting for AppKit readiness", async () => {
+    mockAppKitAccount = {
+      address: undefined,
+      isConnected: false,
+      status: "disconnected",
+    };
+    mockAppKitState = { open: false };
+
+    let resolveReady!: () => void;
+    const waitForReady = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveReady = resolve;
+        })
+    );
+
+    render(
+      <AppKitBootstrapContext.Provider
+        value={{
+          status: "initializing",
+          isReady: false,
+          isWaiting: true,
+          waitForReady,
+        }}
+      >
+        <SeizeConnectProvider>
+          <AddAccountButton />
+        </SeizeConnectProvider>
+      </AppKitBootstrapContext.Provider>
+    );
+
+    const addButton = screen.getByRole("button", { name: "Add account" });
+
+    act(() => {
+      fireEvent.click(addButton);
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(waitForReady).toHaveBeenCalledTimes(1);
+    expect(mockOpen).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.runOnlyPendingTimers();
+      fireEvent.click(addButton);
+    });
+
+    expect(waitForReady).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveReady();
+      await Promise.resolve();
+    });
+
     expect(mockOpen).toHaveBeenCalledTimes(1);
+    expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
   });
 
   it("starts add-account flow for web session v2 with an existing account", async () => {
@@ -343,8 +411,10 @@ describe("SeizeConnectProvider add-account flow", () => {
       jest.advanceTimersByTime(100);
     });
 
-    expect(mockOpen).toHaveBeenCalledTimes(1);
-    expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
+    await waitFor(() => {
+      expect(mockOpen).toHaveBeenCalledTimes(1);
+      expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
+    });
   });
 
   it("continues single logout cleanup when session revocation fails", async () => {

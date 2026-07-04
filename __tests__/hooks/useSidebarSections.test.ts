@@ -77,7 +77,7 @@ describe("useSidebarSections", () => {
     ).toEqual(["FAQ", "ENS", "Nakamoto Threshold", "Apply", "Contact Us"]);
     expect(aboutSection?.subsections[1]?.items).toEqual([
       { name: "About The Memes", href: "/about/the-memes" },
-      { name: "Subscriptions", href: "/about/subscriptions" },
+      { name: "Subscription Minting", href: "/about/subscriptions" },
       { name: "Meme Lab", href: "/about/meme-lab" },
       { name: "6529 Gradient", href: "/about/6529-gradient" },
       { name: "Minting", href: "/about/minting" },
@@ -191,7 +191,7 @@ describe("useSidebarSections", () => {
 
     expect(allItems).toEqual(
       expect.not.arrayContaining([
-        expect.objectContaining({ name: "Subscriptions" }),
+        expect.objectContaining({ name: "Subscription Minting" }),
         expect.objectContaining({ name: "Subscriptions Report" }),
         expect.objectContaining({ name: "Meme Subscriptions Data" }),
       ])

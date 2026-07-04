@@ -591,12 +591,24 @@ function buildMilestoneAttributes(
   addStepDurationAttr(attrs, state, "app_wallets_load");
 
   const wagmiUnblockedMs = getStepOffsetMs(state, "wagmi_children_unblocked");
+  const wagmiReadyMs = getStepOffsetMs(state, "wagmi_ready");
   const shellMs = getStepOffsetMs(state, "first_useful_app_shell");
   const wavesContentMs = getStepOffsetMs(state, "waves_first_content_visible");
 
   if (wagmiUnblockedMs !== undefined) {
     attrs["provider_gate_ms"] = wagmiUnblockedMs;
     attrs["provider_gate_bucket"] = bucketMs(wagmiUnblockedMs);
+  }
+
+  if (wagmiReadyMs !== undefined && wagmiUnblockedMs !== undefined) {
+    const appKitReadyAfterUnblockMs = Math.max(
+      0,
+      roundMs(wagmiReadyMs - wagmiUnblockedMs)
+    );
+    attrs["appkit_ready_after_unblock_ms"] = appKitReadyAfterUnblockMs;
+    attrs["appkit_ready_after_unblock_bucket"] = bucketMs(
+      appKitReadyAfterUnblockMs
+    );
   }
 
   if (shellMs !== undefined && wagmiUnblockedMs !== undefined) {

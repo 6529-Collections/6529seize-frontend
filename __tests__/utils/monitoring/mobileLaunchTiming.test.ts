@@ -143,6 +143,8 @@ describe("mobileLaunchTiming", () => {
     timing.markMobileLaunchStep("wagmi_children_unblocked");
     currentNow = 200;
     timing.markMobileLaunchStep("first_useful_app_shell");
+    currentNow = 300;
+    timing.markMobileLaunchStep("wagmi_ready");
     currentNow = 360;
     timing.markMobileLaunchStep("waves_first_content_visible");
     timing.setMobileLaunchContext({
@@ -163,6 +165,8 @@ describe("mobileLaunchTiming", () => {
           auth_state: "authenticated_profile",
           wallet_connection_state: "connected",
         },
+        appkit_ready_after_unblock_ms: 180,
+        appkit_ready_after_unblock_bucket: "0_500",
         provider_gate_ms: 120,
         provider_gate_bucket: "0_500",
         shell_after_wagmi_ms: 80,

@@ -1878,7 +1878,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                         <button
                           type="button"
                           className={styles["connectRequiredButton"]}
-                          onClick={accountResolution.seizeConnect}
+                          onClick={() => {
+                            accountResolution.seizeConnect();
+                          }}
                         >
                           Connect Wallet
                         </button>

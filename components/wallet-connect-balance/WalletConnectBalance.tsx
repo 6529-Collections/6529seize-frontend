@@ -67,7 +67,9 @@ export default function WalletConnectBalance() {
     return (
       <button
         type="button"
-        onClick={seizeConnect}
+        onClick={() => {
+          seizeConnect();
+        }}
         disabled={seizeConnectOpen}
         className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-bg-primary-500 tw-px-4 !tw-text-sm tw-font-medium tw-leading-none tw-text-white tw-shadow-sm tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
       >

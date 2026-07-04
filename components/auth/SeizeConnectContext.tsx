@@ -35,6 +35,7 @@ import {
 import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
 import { WalletInitializationError } from "@/src/errors/wallet";
 import { SecurityEventType } from "@/src/types/security";
 import {
@@ -93,7 +94,7 @@ interface SeizeConnectContextType {
   /** Whether the connected wallet is a Safe (Gnosis Safe) wallet */
   isSafeWallet: boolean;
 
-  /** Opens the wallet connection modal */
+  /** Opens the wallet connection modal once AppKit is ready */
   seizeConnect: () => void;
 
   /**
@@ -283,6 +284,7 @@ const normalizeAddress = (address: string): string => address.toLowerCase();
 
 const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
 const CONNECT_AFTER_DISCONNECT_DELAY_MS: number = 100;
+const CONNECT_INTENT_HANDOFF_GRACE_MS: number = 1000;
 
 const validateStoredAddress = (
   storedAddress: string
@@ -464,10 +466,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
   const state = useAppKitState();
+  const { isReady: isAppKitReady, waitForReady: waitForAppKitReady } =
+    useAppKitBootstrap();
   const [storedConnectedAccounts, setStoredConnectedAccounts] = useState<
     ConnectedWalletAccount[]
   >(() => getConnectedWalletAccounts());
   const [isAddingConnectedAccount, setIsAddingConnectedAccount] =
+    useState(false);
+  const [isConnectIntentWaitingForAppKit, setIsConnectIntentWaitingForAppKit] =
     useState(false);
 
   // Use consolidated wallet state management
@@ -484,6 +490,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addFlowOriginAddressRef = useRef<string | null>(null);
   const retryConnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const connectIntentHandoffTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isAddingConnectedAccountRef = useRef(false);
   const isMountedRef = useRef(true);
   const nodeEnv = getNodeEnv();
@@ -519,6 +526,30 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setStoredConnectedAccounts(getConnectedWalletAccounts());
   }, []);
 
+  const clearConnectIntentHandoffTimeout = useCallback((): void => {
+    if (connectIntentHandoffTimeoutRef.current) {
+      clearTimeout(connectIntentHandoffTimeoutRef.current);
+      connectIntentHandoffTimeoutRef.current = null;
+    }
+  }, []);
+
+  const clearConnectIntentWaitingForAppKit = useCallback((): void => {
+    clearConnectIntentHandoffTimeout();
+    if (isMountedRef.current) {
+      setIsConnectIntentWaitingForAppKit(false);
+    }
+  }, [clearConnectIntentHandoffTimeout]);
+
+  const scheduleConnectIntentHandoffFallback = useCallback((): void => {
+    clearConnectIntentHandoffTimeout();
+    connectIntentHandoffTimeoutRef.current = setTimeout(() => {
+      connectIntentHandoffTimeoutRef.current = null;
+      if (isMountedRef.current) {
+        setIsConnectIntentWaitingForAppKit(false);
+      }
+    }, CONNECT_INTENT_HANDOFF_GRACE_MS);
+  }, [clearConnectIntentHandoffTimeout]);
+
   useEffect(() => {
     isMountedRef.current = true;
 
@@ -528,8 +559,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         clearTimeout(retryConnectTimeoutRef.current);
         retryConnectTimeoutRef.current = null;
       }
+      clearConnectIntentHandoffTimeout();
     };
-  }, []);
+  }, [clearConnectIntentHandoffTimeout]);
 
   useEffect(() => {
     refreshStoredConnectedAccounts();
@@ -799,6 +831,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const addFlowReturnedToOrigin =
       !state.open &&
+      !isConnectIntentWaitingForAppKit &&
       !!liveConnectedWallet &&
       !!addFlowOriginAddress &&
       normalizeAddress(liveConnectedWallet) ===
@@ -817,6 +850,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const addFlowCancelled =
       !state.open &&
+      !isConnectIntentWaitingForAppKit &&
       account.status !== "connecting" &&
       account.status !== "reconnecting" &&
       !account.isConnected &&
@@ -841,6 +875,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     account.isConnected,
     account.status,
     isAddingConnectedAccount,
+    isConnectIntentWaitingForAppKit,
     state.open,
   ]);
 
@@ -859,30 +894,86 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const isActiveAppWalletConnector =
     activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
 
-  const seizeConnect = useCallback((): void => {
-    try {
+  useEffect(() => {
+    if (state.open && isConnectIntentWaitingForAppKit) {
+      clearConnectIntentWaitingForAppKit();
+    }
+  }, [
+    clearConnectIntentWaitingForAppKit,
+    isConnectIntentWaitingForAppKit,
+    state.open,
+  ]);
+
+  const openConnectModal = useCallback(
+    async (source: string): Promise<void> => {
+      try {
+        clearConnectIntentHandoffTimeout();
+        setIsConnectIntentWaitingForAppKit(true);
+        if (!isAppKitReady) {
+          await waitForAppKitReady();
+        }
+
+        if (!isMountedRef.current) {
+          return;
+        }
+
+        await open({ view: "Connect" });
+
+        logSecurityEvent(
+          SecurityEventType.WALLET_MODAL_OPENED,
+          createConnectionEventContext(source)
+        );
+        scheduleConnectIntentHandoffFallback();
+      } catch (error) {
+        clearConnectIntentWaitingForAppKit();
+        const connectionError = new WalletConnectionError(
+          "Failed to open wallet connection modal",
+          error
+        );
+        logError(source, connectionError);
+        throw connectionError;
+      }
+    },
+    [
+      clearConnectIntentHandoffTimeout,
+      clearConnectIntentWaitingForAppKit,
+      isAppKitReady,
+      open,
+      scheduleConnectIntentHandoffFallback,
+      waitForAppKitReady,
+    ]
+  );
+
+  const seizeConnectOrThrow = useCallback(
+    async (source: string): Promise<void> => {
       // Log connection attempt for security monitoring
       logSecurityEvent(
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-        createConnectionEventContext("seizeConnect")
+        createConnectionEventContext(source)
       );
 
-      open({ view: "Connect" });
+      await openConnectModal(source);
+    },
+    [openConnectModal]
+  );
 
-      // Log successful modal opening
-      logSecurityEvent(
-        SecurityEventType.WALLET_MODAL_OPENED,
-        createConnectionEventContext("seizeConnect")
-      );
-    } catch (error) {
-      const connectionError = new WalletConnectionError(
-        "Failed to open wallet connection modal",
+  const seizeConnect = useCallback((): void => {
+    seizeConnectOrThrow("seizeConnect").then(undefined, () => undefined);
+  }, [seizeConnectOrThrow]);
+
+  const handleAddConnectedAccountConnectFailure = useCallback(
+    (clearAddConnectedAccountGuard: () => void, error: unknown): void => {
+      clearAddConnectedAccountGuard();
+      setIsAddingConnectedAccount(false);
+      const connectionError = createWalletError(
+        WalletConnectionError,
+        "start add-account connection flow",
         error
       );
-      logError("seizeConnect", connectionError);
-      throw connectionError;
-    }
-  }, [open]);
+      logError("seizeAddConnectedAccount", connectionError);
+    },
+    []
+  );
 
   const seizeConnectFresh = useCallback(async (): Promise<void> => {
     const liveConnectedWallet =
@@ -891,7 +982,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         : null;
 
     if (!liveConnectedWallet || isActiveAppWalletConnector) {
-      seizeConnect();
+      await seizeConnectOrThrow("seizeConnectFresh");
       return;
     }
 
@@ -915,13 +1006,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    seizeConnect();
+    await seizeConnectOrThrow("seizeConnectFresh");
   }, [
     account.address,
     account.isConnected,
     disconnect,
     isActiveAppWalletConnector,
-    seizeConnect,
+    seizeConnectOrThrow,
   ]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
@@ -1114,6 +1205,20 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     return storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
   }, [storedConnectedAccounts]);
 
+  const openAddConnectedAccountModal = useCallback(
+    (clearAddConnectedAccountGuard: () => void): void => {
+      seizeConnectOrThrow("seizeAddConnectedAccount").catch(
+        (error: unknown) => {
+          handleAddConnectedAccountConnectFailure(
+            clearAddConnectedAccountGuard,
+            error
+          );
+        }
+      );
+    },
+    [handleAddConnectedAccountConnectFailure, seizeConnectOrThrow]
+  );
+
   const seizeAddConnectedAccount = useCallback((): void => {
     const clearAddConnectedAccountGuard = (): void => {
       isAddingConnectedAccountRef.current = false;
@@ -1135,6 +1240,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     const addFlowOriginAddress = addFlowOriginAddressRef.current;
     const addFlowReturnedToOrigin =
       !state.open &&
+      !isConnectIntentWaitingForAppKit &&
       !!liveConnectedWallet &&
       !!addFlowOriginAddress &&
       normalizeAddress(liveConnectedWallet) ===
@@ -1144,6 +1250,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       (!isAddingConnectedAccount ||
         addFlowReturnedToOrigin ||
         (!state.open &&
+          !isConnectIntentWaitingForAppKit &&
           !retryConnectTimeoutRef.current &&
           !liveConnectedWallet &&
           account.status !== "connecting" &&
@@ -1163,18 +1270,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       addFlowOriginAddressRef.current = liveConnectedWallet;
       setIsAddingConnectedAccount(true);
 
-      try {
-        seizeConnect();
-      } catch (error: unknown) {
-        clearAddConnectedAccountGuard();
-        setIsAddingConnectedAccount(false);
-        const connectionError = createWalletError(
-          WalletConnectionError,
-          "start add-account connection flow",
-          error
-        );
-        logError("seizeAddConnectedAccount", connectionError);
-      }
+      openAddConnectedAccountModal(clearAddConnectedAccountGuard);
       return;
     }
 
@@ -1196,18 +1292,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
               clearAddConnectedAccountGuard();
               return;
             }
-            try {
-              seizeConnect();
-            } catch (error: unknown) {
-              clearAddConnectedAccountGuard();
-              setIsAddingConnectedAccount(false);
-              const connectionError = createWalletError(
-                WalletConnectionError,
-                "start add-account connection flow",
-                error
-              );
-              logError("seizeAddConnectedAccount", connectionError);
-            }
+            openAddConnectedAccountModal(clearAddConnectedAccountGuard);
           }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
         })
         .catch((error: unknown) => {
@@ -1238,7 +1323,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     disconnect,
     isActiveAppWalletConnector,
     isAddingConnectedAccount,
-    seizeConnect,
+    isConnectIntentWaitingForAppKit,
+    openAddConnectedAccountModal,
     state.open,
   ]);
 
@@ -1359,7 +1445,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAcceptConnection,
       seizeSwitchConnectedAccount,
       seizeAddConnectedAccount,
-      seizeConnectOpen: state.open,
+      seizeConnectOpen: state.open || isConnectIntentWaitingForAppKit,
       isConnected: isActiveWalletConnected,
       canSignActiveWallet: isActiveWalletConnected,
       hasActiveWalletAddress,
@@ -1389,6 +1475,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAcceptConnection,
       seizeSwitchConnectedAccount,
       seizeAddConnectedAccount,
+      isConnectIntentWaitingForAppKit,
       state.open,
       account.isConnected,
       walletState,

@@ -230,6 +230,8 @@ function isAllowedBlockedExternalWrite(url: URL) {
     (url.hostname === "pulse.walletconnect.org" && url.pathname === "/batch") ||
     (url.hostname === "rpc.walletconnect.org" &&
       url.pathname.startsWith("/v1/")) ||
+    (url.hostname === "region1.google-analytics.com" &&
+      url.pathname === "/g/collect") ||
     (url.hostname === "www.google-analytics.com" &&
       url.pathname === "/g/collect") ||
     (url.hostname === "www.google.com" && url.pathname === "/g/collect")

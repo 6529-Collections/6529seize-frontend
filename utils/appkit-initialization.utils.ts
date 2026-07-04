@@ -27,7 +27,7 @@ interface AppKitInitializationResult {
   adapter: WagmiAdapter;
   /**
    * Optional to preserve backwards compatibility with mocks.
-   * When provided, callers can await it to ensure AppKit is ready before using the adapter.
+   * When provided, callers can await it before opening AppKit UI.
    */
   ready?: Promise<void> | undefined;
 }

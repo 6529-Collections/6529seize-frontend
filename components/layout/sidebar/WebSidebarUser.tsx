@@ -99,7 +99,9 @@ function WebSidebarUser({
         {isCollapsed ? (
           <button
             className="tw-block tw-h-12 tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 active:tw-bg-transparent desktop-hover:hover:tw-text-white"
-            onClick={() => seizeConnect()}
+            onClick={() => {
+              seizeConnect();
+            }}
             title="Connect Wallet"
             data-tooltip-id="sidebar-tooltip"
             data-tooltip-content="Connect Wallet"

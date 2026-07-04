@@ -2,6 +2,7 @@ import {
   SeizeConnectProvider,
   useSeizeConnectContext,
 } from "@/components/auth/SeizeConnectContext";
+import { AppKitBootstrapContext } from "@/components/providers/AppKitBootstrapContext";
 import { publicEnv } from "@/config/env";
 import * as authUtils from "@/services/auth/auth.utils";
 import { WalletInitializationError } from "@/src/errors/wallet";
@@ -129,11 +130,7 @@ const TestComponent: React.FC = () => {
   } = useSeizeConnectContext();
 
   const handleConnect = () => {
-    try {
-      seizeConnect();
-    } catch {
-      // Errors are logged by the component
-    }
+    seizeConnect();
   };
 
   const handleAcceptValid = () => {
@@ -1513,7 +1510,12 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     const ConnectTestComponent: React.FC = () => {
       const { seizeConnect } = useSeizeConnectContext();
       return (
-        <button onClick={seizeConnect} data-testid="connect-btn">
+        <button
+          onClick={() => {
+            seizeConnect();
+          }}
+          data-testid="connect-btn"
+        >
           Connect
         </button>
       );
@@ -1531,6 +1533,135 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
     await userEvent.click(screen.getByTestId("connect-btn"));
     expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" });
+  });
+
+  it("waits for AppKit readiness before opening the connect modal", async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+
+    let resolveReady!: () => void;
+    const waitForReady = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveReady = resolve;
+        })
+    );
+
+    const ConnectTestComponent: React.FC = () => {
+      const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
+      return (
+        <>
+          <button
+            onClick={() => {
+              seizeConnect();
+            }}
+            data-testid="connect-btn"
+          >
+            Connect
+          </button>
+          <div data-testid="connect-open">{String(seizeConnectOpen)}</div>
+        </>
+      );
+    };
+
+    const { useAppKitState } = require("@reown/appkit/react");
+    const appKitState = { open: false };
+    (useAppKitState as jest.Mock).mockImplementation(() => appKitState);
+
+    const renderConnectTree = () => (
+      <AppKitBootstrapContext.Provider
+        value={{
+          status: "initializing",
+          isReady: false,
+          isWaiting: true,
+          waitForReady,
+        }}
+      >
+        <SeizeConnectProvider>
+          <ConnectTestComponent />
+        </SeizeConnectProvider>
+      </AppKitBootstrapContext.Provider>
+    );
+
+    const view = render(renderConnectTree());
+
+    await userEvent.click(screen.getByTestId("connect-btn"));
+
+    await waitFor(() => {
+      expect(waitForReady).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("connect-open")).toHaveTextContent("true");
+    });
+    expect(mockOpen).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveReady();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" });
+      expect(screen.getByTestId("connect-open")).toHaveTextContent("true");
+    });
+
+    appKitState.open = true;
+    view.rerender(renderConnectTree());
+    await waitFor(() => {
+      expect(screen.getByTestId("connect-open")).toHaveTextContent("true");
+    });
+
+    appKitState.open = false;
+    view.rerender(renderConnectTree());
+    await waitFor(() => {
+      expect(screen.getByTestId("connect-open")).toHaveTextContent("false");
+    });
+  });
+
+  it("clears the connect intent fallback if AppKit never reports open", async () => {
+    jest.useFakeTimers();
+    try {
+      mockGetWalletAddress.mockReturnValue(null);
+
+      const { useAppKitState } = require("@reown/appkit/react");
+      (useAppKitState as jest.Mock).mockReturnValue({ open: false });
+
+      const ConnectTestComponent: React.FC = () => {
+        const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
+        return (
+          <>
+            <button
+              onClick={() => {
+                seizeConnect();
+              }}
+              data-testid="connect-btn"
+            >
+              Connect
+            </button>
+            <div data-testid="connect-open">{String(seizeConnectOpen)}</div>
+          </>
+        );
+      };
+
+      render(
+        <SeizeConnectProvider>
+          <ConnectTestComponent />
+        </SeizeConnectProvider>
+      );
+
+      fireEvent.click(screen.getByTestId("connect-btn"));
+
+      await waitFor(() => {
+        expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" });
+        expect(screen.getByTestId("connect-open")).toHaveTextContent("true");
+      });
+
+      await act(async () => {
+        jest.runOnlyPendingTimers();
+        await Promise.resolve();
+      });
+
+      expect(screen.getByTestId("connect-open")).toHaveTextContent("false");
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("should disconnect the live provider before fresh connect", async () => {
