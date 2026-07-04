@@ -29,6 +29,7 @@ import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
+import { getUserProfileHeaderDisplayName } from "./user-page-header.messages";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -85,6 +86,11 @@ export default function UserPageHeaderClient({
     }
     return fallbackMainAddress.toLowerCase();
   }, [profile.primary_wallet, fallbackMainAddress]);
+
+  const profileLabel = useMemo(
+    () => getUserProfileHeaderDisplayName(profile, mainAddress),
+    [profile, mainAddress]
+  );
 
   const [directMessageLoading, setDirectMessageLoading] =
     useState<boolean>(false);
@@ -170,6 +176,7 @@ export default function UserPageHeaderClient({
             defaultBanner1={banner1Color}
             defaultBanner2={banner2Color}
             canEdit={canEdit}
+            profileLabel={profileLabel}
           />
         </div>
 
@@ -177,9 +184,14 @@ export default function UserPageHeaderClient({
           <div className="tw-relative tw-z-10 tw-px-6 md:tw-px-9">
             <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-x-4 md:tw-pt-2">
               <div className="tw-relative tw-order-1 -tw-mt-10 tw-flex-shrink-0 tw-self-start sm:-tw-mt-[58px]">
-                <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
+                <UserPageHeaderPfpWrapper
+                  profile={profile}
+                  canEdit={canEdit}
+                  profileLabel={profileLabel}
+                >
                   <UserPageHeaderPfp
                     profile={profile}
+                    profileLabel={profileLabel}
                     defaultBanner1={banner1Color}
                     defaultBanner2={banner2Color}
                   />

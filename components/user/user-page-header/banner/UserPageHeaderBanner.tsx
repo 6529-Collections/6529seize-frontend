@@ -11,17 +11,20 @@ import {
   getBannerImageUrl,
 } from "@/helpers/profile-banner.helpers";
 import UserPageHeaderEditBanner from "./UserPageHeaderEditBanner";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 export default function UserPageHeaderBanner({
   profile,
   defaultBanner1,
   defaultBanner2,
   canEdit,
+  profileLabel,
 }: {
   readonly profile: ApiIdentity;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
   readonly canEdit: boolean;
+  readonly profileLabel: string;
 }) {
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const bannerImageUrl = getBannerImageUrl(profile.banner1);
@@ -54,12 +57,19 @@ export default function UserPageHeaderBanner({
 
       {canEdit && (
         <button
+          type="button"
           onClick={() => setIsEditOpen(true)}
           className="tw-absolute tw-inset-0 tw-z-10 tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0"
-          aria-label="Edit banner"
+          aria-label={getUserProfileHeaderMessage(
+            "user.profileHeader.banner.edit",
+            { name: profileLabel }
+          )}
         >
           <div className="edit-profile tw-absolute tw-inset-0 tw-bg-black/30">
-            <div className="tw-absolute tw-bottom-4 tw-right-4">
+            <div
+              aria-hidden="true"
+              className="tw-absolute tw-bottom-4 tw-right-4"
+            >
               <PencilIcon />
             </div>
           </div>

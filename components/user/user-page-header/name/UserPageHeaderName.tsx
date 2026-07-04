@@ -1,6 +1,5 @@
 import { CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatTimestampToMonthYear } from "@/helpers/Helpers";
 import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
 import UserCICAndLevel, {
@@ -9,6 +8,11 @@ import UserCICAndLevel, {
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 import ProfileCurationBadge from "./ProfileCurationBadge";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
+import {
+  formatUserProfileHeaderMonthYear,
+  getUserProfileHeaderDisplayName,
+  getUserProfileHeaderMessage,
+} from "../user-page-header.messages";
 
 export default function UserPageHeaderName({
   profile,
@@ -25,25 +29,9 @@ export default function UserPageHeaderName({
   readonly profileEnabledAt: string | null;
   readonly variant?: "full" | "title" | "meta";
 }) {
-  const getDisplayName = (): string => {
-    if (profile.handle) {
-      return profile.handle;
-    }
-
-    if (profile.display) {
-      return profile.display;
-    }
-
-    if (mainAddress.endsWith(".eth")) {
-      return mainAddress;
-    }
-
-    return mainAddress;
-  };
-
-  const displayName = getDisplayName();
+  const displayName = getUserProfileHeaderDisplayName(profile, mainAddress);
   const profileEnabledLabel = profileEnabledAt
-    ? formatTimestampToMonthYear(new Date(profileEnabledAt).getTime())
+    ? formatUserProfileHeaderMonthYear(profileEnabledAt)
     : null;
 
   const showTitle = variant !== "meta";
@@ -53,7 +41,11 @@ export default function UserPageHeaderName({
     <div className={showTitle && showMeta ? "tw-space-y-2" : ""}>
       {showTitle && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-          <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
+          <UserPageHeaderNameWrapper
+            profile={profile}
+            canEdit={canEdit}
+            profileLabel={displayName}
+          >
             <ProfileNameWithAiMarker
               classification={profile.classification}
               markerClassName="tw-text-base md:tw-text-lg"
@@ -88,7 +80,10 @@ export default function UserPageHeaderName({
               className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-500"
               suppressHydrationWarning
             >
-              Profile enabled: {profileEnabledLabel}
+              {getUserProfileHeaderMessage(
+                "user.profileHeader.name.profileEnabled",
+                { date: profileEnabledLabel }
+              )}
             </p>
           )}
         </div>
