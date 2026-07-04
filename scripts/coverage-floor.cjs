@@ -43,11 +43,17 @@ const TRACKED_METRICS = ["lines", "statements", "functions", "branches"];
 
 const roundPct = (value) => Math.round(value * 100) / 100;
 
-function readJsonFile(filePath, label) {
+// Reads and parses a JSON file in one step (no exists-then-read race).
+// Returns null when the file does not exist; exits with a friendly error
+// for any other read or parse failure.
+function readJsonFileOrNull(filePath, label) {
   let raw;
   try {
     raw = fs.readFileSync(filePath, "utf8");
   } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
     console.error(`Could not read ${label} at ${filePath}: ${error.message}`);
     process.exit(1);
   }
@@ -62,14 +68,14 @@ function readJsonFile(filePath, label) {
 }
 
 function readSummaryTotals() {
-  if (!fs.existsSync(SUMMARY_PATH)) {
+  const summary = readJsonFileOrNull(SUMMARY_PATH, "Coverage summary");
+  if (summary === null) {
     console.error(
       `Coverage summary not found at ${SUMMARY_PATH}. ` +
         "Run Jest with --coverage --coverageReporters=json-summary first."
     );
     process.exit(1);
   }
-  const summary = readJsonFile(SUMMARY_PATH, "Coverage summary");
   const totals = summary.total;
   if (!totals) {
     console.error("Coverage summary has no `total` section.");
@@ -88,14 +94,14 @@ function readSummaryTotals() {
 }
 
 function readBaseline() {
-  if (!fs.existsSync(BASELINE_PATH)) {
+  const baseline = readJsonFileOrNull(BASELINE_PATH, "Coverage baseline");
+  if (baseline === null) {
     console.error(
       `Baseline not found at ${path.relative(REPO_ROOT, BASELINE_PATH)}. ` +
         "Run `node scripts/coverage-floor.cjs --update` and commit the result."
     );
     process.exit(1);
   }
-  const baseline = readJsonFile(BASELINE_PATH, "Coverage baseline");
   if (baseline.schema_version !== SCHEMA_VERSION) {
     console.error(
       `Baseline schema_version ${baseline.schema_version} does not match ` +
@@ -212,8 +218,12 @@ function runCheck() {
 
 function runUpdate() {
   const totals = readSummaryTotals();
-  const existingTolerance = fs.existsSync(BASELINE_PATH)
-    ? toleranceFromBaseline(readJsonFile(BASELINE_PATH, "Coverage baseline"))
+  const existingBaseline = readJsonFileOrNull(
+    BASELINE_PATH,
+    "Coverage baseline"
+  );
+  const existingTolerance = existingBaseline
+    ? toleranceFromBaseline(existingBaseline)
     : DEFAULT_TOLERANCE_POINTS;
   const baseline = {
     schema_version: SCHEMA_VERSION,
