@@ -1,0 +1,27 @@
+# 6529.io
+
+> 6529.io is the home of The Memes by 6529 — an open-edition NFT art collection whose community tier is released under CC0 — and of the 6529 network: on-chain identity and reputation metrics (TDH, REP, NIC, Levels) plus Waves, the site's social threads. This file is the entry point for AI agents and lists the machine-readable files the site publishes.
+
+Site data such as TDH, REP, and Wave activity changes continuously. Fetch the files below for current definitions and routes instead of relying on cached copies. These files are generated from the site's curated help corpus at build time (corpus revision 2026-06-29T09:23:18.000Z).
+
+## Machine-readable files
+
+- [llms.txt](https://6529.io/llms.txt): this file — the stable entry point.
+- [help-index.json](https://6529.io/help-index.json): 188 curated records covering routes, workflows, UI affordances, business rules, and glossary terms. Each record has an id, title, aliases, facts, and a canonical_path that is validated against the app's real routes at build time. This is the primary reference for answering questions about 6529.io.
+- [glossary.json](https://6529.io/glossary.json): 27 term definitions (TDH, xTDH, REP, NIC, Waves, Drops, Groups, Subscriptions, and more) projected from the same help corpus. Each term carries its help-index record id, definition facts, and canonical page path.
+- [sitemap.xml](https://6529.io/sitemap.xml): the crawlable page list, regenerated on every deploy.
+- [robots.txt](https://6529.io/robots.txt): standard crawler directives; it also references the files above.
+
+## API
+
+- [Swagger docs](https://api.6529.io/docs): the 6529 REST API for identities, profiles, waves, drops, NFTs, and TDH. Respect the documented rate limits, cache responses where possible, and do not hammer endpoints.
+
+## Source code
+
+- [GitHub organization](https://github.com/6529-Collections): open-source repositories, including this site (6529seize-frontend, Apache-2.0) and the API server (6529seize-backend).
+
+## Usage policy
+
+- Link to the 6529.io page URL when citing site content; canonical paths are listed in help-index.json.
+- Do not present guesses as 6529 facts. If a term, metric, or feature is not described in glossary.json, help-index.json, or the API, say it is not documented instead of inventing it.
+- Do not expose wallet addresses, identity statements, or profile data beyond what the cited public page already shows.

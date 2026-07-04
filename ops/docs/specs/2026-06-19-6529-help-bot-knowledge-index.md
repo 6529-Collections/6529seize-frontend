@@ -282,6 +282,28 @@ The backend consumes the artifact from the deployed public site by default at
 `https://6529.io/help-index.json`, with `HELP_BOT_INDEX_URL` available as an
 override. The answer path consumes only the backend's cached copy.
 
+## Agent Discovery Artifacts
+
+The same corpus also feeds two public artifacts for external AI agents, so
+term definitions never fork from the help bot's source of truth:
+
+- `public/llms.txt`: the agent entry point, rendered from
+  `ops/help/llms.txt.template` with record and term counts injected at sync
+  time. The template must keep referencing `/llms.txt`, `/glossary.json`,
+  `/help-index.json`, and `/sitemap.xml`; the sync step fails otherwise.
+- `public/glossary.json`: a projection of glossary records. A record is
+  included when its `kind` is `glossary` or its `tags` include `glossary`.
+  Use the `glossary` tag to expose a route, workflow, or UI affordance record
+  whose facts define a product term (for example `waves.overview` or
+  `about.license`) without duplicating it as a second record.
+
+`6529 run agent-files:sync` regenerates both artifacts and runs in `prebuild`
+after `help-index:sync`. The generated files are committed;
+`__tests__/scripts/sync-agent-files.test.ts` fails CI when they drift from
+`ops/help/help-index.json`, so regenerate them in the same PR as any corpus
+change. The generated `robots.txt` (see `next-sitemap.config.ts`) appends a
+comment block pointing crawlers at these files.
+
 ## Validation Requirements
 
 The frontend `help-index:sync` step validates:

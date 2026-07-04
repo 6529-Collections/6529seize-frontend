@@ -1,0 +1,804 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-29T09:23:18.000Z",
+  "base_url": "https://6529.io",
+  "description": "Glossary of 6529 terms projected from the site's curated help corpus. Each term links back to its help-index.json record via id.",
+  "source": "/help-index.json",
+  "term_count": 27,
+  "terms": [
+    {
+      "id": "about.license",
+      "term": "6529 License",
+      "aliases": [
+        "license",
+        "6529 license",
+        "memes license",
+        "meme lab license",
+        "gradient license",
+        "cc0",
+        "can i use meme card art",
+        "can i use gradient art"
+      ],
+      "facts": [
+        "The License page lives at /about/license.",
+        "The Memes and Meme Lab NFTs are released by the artists under a Creative Commons 0 public-domain license to the maximum extent allowed by law.",
+        "The page says people can use The Memes and Meme Lab art for commercial or non-commercial purposes without seeking permission from the artists, subject to rights the artists do not control.",
+        "Gradient NFTs are treated differently: they have not been released under CC0, and the page warns against uses that could confuse people into thinking a product or service is offered by 6529."
+      ],
+      "canonical_path": "/about/license",
+      "related_paths": [
+        "/about/the-memes",
+        "/about/meme-lab",
+        "/about/6529-gradient"
+      ],
+      "tags": [
+        "about",
+        "license",
+        "cc0",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.definitions.cards-collected",
+      "term": "Cards Collected",
+      "aliases": [
+        "cards collected",
+        "card collected",
+        "what are cards collected",
+        "what is cards collected",
+        "total cards",
+        "total meme cards"
+      ],
+      "facts": [
+        "Cards Collected is the total number of The Memes NFTs owned.",
+        "The Network Definitions page lists Cards Collected as a core Network metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/tdh",
+        "/network/health/network-tdh"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "cards"
+      ]
+    },
+    {
+      "id": "delegation.overview",
+      "term": "Delegation center",
+      "aliases": [
+        "delegation",
+        "delegate",
+        "delegations",
+        "delegation center",
+        "delegation manager"
+      ],
+      "facts": [
+        "Delegation lets one wallet authorize another wallet for supported 6529 uses.",
+        "The delegation center provides wallet checking, action flows, collection management, and section navigation.",
+        "Delegation is useful for vault/hot-wallet patterns and airdrop-related workflows."
+      ],
+      "canonical_path": "/delegation/delegation-center",
+      "related_paths": [
+        "/delegation/wallet-checker",
+        "/delegation-mapping-tool",
+        "/consolidation-mapping-tool"
+      ],
+      "tags": [
+        "delegation",
+        "wallet",
+        "glossary"
+      ]
+    },
+    {
+      "id": "waves.drop",
+      "term": "Drop",
+      "aliases": [
+        "drop",
+        "drops",
+        "what is a drop",
+        "drop meaning",
+        "post a drop",
+        "message in a wave"
+      ],
+      "facts": [
+        "A drop is a message posted in a wave.",
+        "Drops are written with the wave composer and can include text, markdown, mentions, emoji shortcodes, image uploads, and NFT hashtag references.",
+        "Depending on the wave type and rules, other members can react to, vote on, quote, reply to, boost, or pin drops.",
+        "Standard wave threads live at /waves/{waveId}; direct-message drops live at /messages/{waveId}."
+      ],
+      "canonical_path": "/waves",
+      "tags": [
+        "waves",
+        "drop",
+        "glossary",
+        "concept"
+      ]
+    },
+    {
+      "id": "tools.emma",
+      "term": "EMMA distribution plan tool",
+      "aliases": [
+        "emma",
+        "emma plans",
+        "distribution plan tool",
+        "allowlist tool",
+        "multiphase allowlist",
+        "janus",
+        "airdrop plan",
+        "public mint phase"
+      ],
+      "facts": [
+        "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
+        "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
+        "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
+        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation."
+      ],
+      "canonical_path": "/emma",
+      "related_paths": [
+        "/emma/plans"
+      ],
+      "tags": [
+        "tools",
+        "emma",
+        "allowlist",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.definitions.genesis-sets",
+      "term": "Genesis Sets",
+      "aliases": [
+        "genesis set",
+        "genesis sets",
+        "what is genesis set",
+        "what are genesis sets",
+        "what is a genesis set",
+        "what are genesis set",
+        "genesis meme set",
+        "genesis meme sets"
+      ],
+      "facts": [
+        "Genesis Sets are complete sets of the first three Meme NFTs.",
+        "Genesis Sets appear in Network Definitions and are also referenced by TDH Category B boost rules."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/historic-boosts"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "memes",
+        "tdh"
+      ]
+    },
+    {
+      "id": "groups.overview",
+      "term": "Groups",
+      "aliases": [
+        "groups",
+        "community groups",
+        "group list",
+        "network groups"
+      ],
+      "facts": [
+        "Groups are reusable community/member sets used across app workflows such as waves.",
+        "The groups area provides list, filter, card, and create/edit surfaces.",
+        "Group routes include Network-scoped group discovery and profile group tabs."
+      ],
+      "canonical_path": "/network/groups",
+      "related_paths": [
+        "/{user}/groups"
+      ],
+      "tags": [
+        "groups",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.definitions.meme-sets",
+      "term": "Meme Sets",
+      "aliases": [
+        "meme set",
+        "meme sets",
+        "what is meme set",
+        "what are meme sets",
+        "complete meme set",
+        "complete meme sets",
+        "season set",
+        "season sets"
+      ],
+      "facts": [
+        "Meme Sets means the number of complete sets of The Memes owned, across all SZNs or for a specific SZN.",
+        "The Network Definitions page lists Meme Sets as a core Network metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/historic-boosts"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "memes",
+        "sets"
+      ]
+    },
+    {
+      "id": "network.definitions.meme-sets-minus",
+      "term": "Meme Sets -1 / -2",
+      "aliases": [
+        "meme sets -1",
+        "meme set -1",
+        "meme sets minus 1",
+        "meme set minus one",
+        "meme sets -2",
+        "meme set -2",
+        "meme sets minus 2",
+        "meme set minus two",
+        "sets missing one card",
+        "sets missing two cards"
+      ],
+      "facts": [
+        "Meme Sets -1 and Meme Sets -2 are complete Meme sets missing 1 or 2 cards respectively.",
+        "Use this definition when users ask about near-complete Meme sets."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/historic-boosts"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "memes",
+        "sets"
+      ]
+    },
+    {
+      "id": "network.tdh.nakamoto-set",
+      "term": "Nakamoto Set",
+      "aliases": [
+        "nakamoto set",
+        "nakamoto sets",
+        "what is nakamoto set",
+        "what are nakamoto sets",
+        "nakamoto tdh boost",
+        "nakamoto boost"
+      ],
+      "facts": [
+        "Nakamoto Set is a SZN1 Category B TDH boost term.",
+        "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
+        "The current Nakamoto Set boost shown on the TDH page is 1.01x."
+      ],
+      "canonical_path": "/network/tdh",
+      "related_paths": [
+        "/network/definitions",
+        "/network/tdh/historic-boosts",
+        "/about/nakamoto-threshold"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "tdh",
+        "boost"
+      ]
+    },
+    {
+      "id": "network.definitions",
+      "term": "Network definitions",
+      "aliases": [
+        "definitions",
+        "network definitions",
+        "tdh definitions",
+        "network glossary",
+        "genesis set",
+        "genesis sets"
+      ],
+      "facts": [
+        "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "Genesis Sets are complete sets of the first three Meme NFTs.",
+        "Use the definitions page when users ask what a Network metric means.",
+        "For a single TDH explanation, point users to the TDH page."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/historic-boosts",
+        "/network/health/network-tdh",
+        "/network/levels"
+      ],
+      "tags": [
+        "network",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.levels",
+      "term": "Network Levels",
+      "aliases": [
+        "levels",
+        "level",
+        "network levels",
+        "6529 level"
+      ],
+      "facts": [
+        "Network Levels are an integrated signal based on TDH and REP.",
+        "The levels page explains the current thresholds and how the displayed level is derived.",
+        "Levels are shown across profile and Network surfaces where relevant."
+      ],
+      "canonical_path": "/network/levels",
+      "related_paths": [
+        "/network/tdh",
+        "/rep/categories"
+      ],
+      "tags": [
+        "network",
+        "levels",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.wave-score",
+      "term": "Network wave score",
+      "aliases": [
+        "wave score",
+        "network wave score",
+        "wave score page",
+        "wave rep",
+        "raw wave rep",
+        "wave rep score",
+        "wave quality score"
+      ],
+      "facts": [
+        "Network wave score has a dedicated route at /network/wave-score.",
+        "Use this route when users ask where wave score information lives.",
+        "Wave REP is a TDH-credit REP signal for a wave; it is signed and log-scaled before weighting in Wave Score.",
+        "Wave REP is the largest single quality component on the Wave Score transparency page.",
+        "Raw Wave REP can be very large or very negative; the score maps it to a bounded component for discovery math.",
+        "Wave-specific participation remains under individual wave routes."
+      ],
+      "canonical_path": "/network/wave-score",
+      "related_paths": [
+        "/network",
+        "/waves"
+      ],
+      "tags": [
+        "network",
+        "waves",
+        "glossary"
+      ]
+    },
+    {
+      "id": "profiles.brain-tab",
+      "term": "Profile Brain tab",
+      "aliases": [
+        "brain tab",
+        "profile brain",
+        "brain activity",
+        "activity heatmap"
+      ],
+      "facts": [
+        "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
+        "Brain views include activity and wave sidebar surfaces where available.",
+        "Use /{user}/brain for profile-specific Brain context."
+      ],
+      "canonical_path": "/{user}/brain",
+      "related_paths": [
+        "/{user}/brain"
+      ],
+      "tags": [
+        "profiles",
+        "brain",
+        "glossary"
+      ]
+    },
+    {
+      "id": "profiles.identity-tab",
+      "term": "Profile Identity tab",
+      "aliases": [
+        "identity tab",
+        "profile identity",
+        "nic",
+        "what is nic",
+        "what does nic stand for",
+        "network identity credits",
+        "network identity check",
+        "rate nic",
+        "rep dialog",
+        "activity log"
+      ],
+      "facts": [
+        "The combined Identity tab is the default profile tab at /{user}; /{user}/identity is a legacy redirect.",
+        "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
+        "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
+        "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
+        "Owner and permission rules affect which identity actions are visible."
+      ],
+      "canonical_path": "/{user}",
+      "related_paths": [
+        "/{user}/identity",
+        "/rep/categories"
+      ],
+      "tags": [
+        "profiles",
+        "identity",
+        "glossary"
+      ]
+    },
+    {
+      "id": "profiles.proxy-tab",
+      "term": "Profile Proxy tab",
+      "aliases": [
+        "proxy tab",
+        "profile proxy",
+        "proxy actions",
+        "profile delegation",
+        "proxy credit",
+        "proxy credits",
+        "allocate rep proxy",
+        "allocate nic proxy",
+        "acting as proxy"
+      ],
+      "facts": [
+        "The Profile Proxy tab exposes profile proxy relationships and actions.",
+        "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
+        "Current proxy action creation supports Allocate Rep and Allocate NIC actions with a granted Credit amount and read-only Spent total.",
+        "Proxy action availability and profile rating behavior depend on whether the active proxy has the relevant Allocate Rep or Allocate NIC permission.",
+        "Proxy and delegation are related concepts but live in separate product areas."
+      ],
+      "canonical_path": "/{user}/proxy",
+      "related_paths": [
+        "/{user}/proxy",
+        "/delegation/delegation-center"
+      ],
+      "tags": [
+        "profiles",
+        "proxy",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.definitions.purchases-sales",
+      "term": "Purchases and Sales",
+      "aliases": [
+        "purchases",
+        "sales",
+        "purchases sales",
+        "purchase count",
+        "sales count",
+        "purchases eth",
+        "sales eth",
+        "eth spent",
+        "eth received"
+      ],
+      "facts": [
+        "Purchases and Sales count bought and sold NFTs for Memes or Gradients.",
+        "Purchases (ETH) and Sales (ETH) show ETH spent or received for those NFTs."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/activity",
+        "/network/health/network-tdh"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "activity"
+      ]
+    },
+    {
+      "id": "rep.cic",
+      "term": "REP and CIC",
+      "aliases": [
+        "rep",
+        "cic",
+        "reputation",
+        "community interaction count",
+        "rep categories"
+      ],
+      "facts": [
+        "REP is peer-given reputation in categories and waves.",
+        "CIC is the community interaction count signal shown on profiles and Network surfaces.",
+        "REP category analytics and category-level views live under /rep/categories."
+      ],
+      "canonical_path": "/rep/categories",
+      "related_paths": [
+        "/network/levels"
+      ],
+      "tags": [
+        "rep",
+        "cic",
+        "network",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.tdh",
+      "term": "TDH",
+      "aliases": [
+        "tdh",
+        "total days held",
+        "total day held",
+        "what does tdh stand for",
+        "tdh meaning",
+        "tdh rate",
+        "hodl rate",
+        "total dynamic head"
+      ],
+      "facts": [
+        "TDH means Total Days Held.",
+        "TDH does not stand for Total Dynamic Head.",
+        "TDH is 6529's time-weighted holding metric for eligible NFTs.",
+        "Conceptually, TDH measures long-term participation and skin in the 6529 ecosystem.",
+        "Each eligible NFT contributes value based on how long it has been held; that base holding time is then adjusted by edition-size weighting and by collection boosters.",
+        "The calculation has three layers: unweighted days, edition weighting, and boosts.",
+        "Unweighted days means each NFT contributes 1 unit per day it is held.",
+        "Edition weighting means days held are multiplied by a HODL or edition-size rate; on the frontend TDH page, FirstGM with edition size 3,941 is the 1.0 baseline.",
+        "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
+        "The backend stores the distinctions separately: tdh__raw is raw full days held, tdh is raw days multiplied by HODL or edition weighting, and boosted_tdh is weighted TDH multiplied by the active boost.",
+        "Current TDH 1.4 rules use the higher of Category A or Category B boosters, plus Category C.",
+        "Category A is the complete Meme Card set boost, with diminishing additional-set boosts.",
+        "Category B covers season, genesis, and nakamoto set boosts.",
+        "Category C is the Gradient boost, up to 5 Gradients.",
+        "TDH is calculated daily at 00:00 UTC and is used throughout the network: profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
+      ],
+      "canonical_path": "/network/tdh",
+      "related_paths": [
+        "/network/definitions",
+        "/network/tdh/historic-boosts",
+        "/network/health/network-tdh",
+        "/network/levels"
+      ],
+      "tags": [
+        "network",
+        "tdh",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.definitions.tdh-unboosted",
+      "term": "TDH (unboosted)",
+      "aliases": [
+        "tdh unboosted",
+        "unboosted tdh",
+        "weighted tdh",
+        "edition weighted tdh",
+        "what is tdh unboosted",
+        "what is unboosted tdh"
+      ],
+      "facts": [
+        "TDH (unboosted) is TDH weighted by edition size before boosters are applied.",
+        "FirstGM with edition size 3,941 is the 1.0 baseline for edition weighting on the TDH page."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/tdh",
+        "/network/health/network-tdh"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "tdh"
+      ]
+    },
+    {
+      "id": "network.definitions.tdh-unweighted",
+      "term": "TDH (unweighted)",
+      "aliases": [
+        "tdh unweighted",
+        "unweighted tdh",
+        "tdh raw",
+        "raw tdh",
+        "tdh__raw",
+        "what is tdh unweighted",
+        "what is unweighted tdh"
+      ],
+      "facts": [
+        "TDH (unweighted) is Total Days Held summed daily at 00:00 UTC.",
+        "In unweighted TDH, each NFT contributes one unit per day held before edition weighting or boosters."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/tdh",
+        "/network/health/network-tdh"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "tdh"
+      ]
+    },
+    {
+      "id": "the-memes.overview",
+      "term": "The Memes",
+      "aliases": [
+        "the memes",
+        "memes",
+        "meme",
+        "meme cards",
+        "meme card"
+      ],
+      "facts": [
+        "The Memes is the main Meme Card collection area.",
+        "Use The Memes routes to browse cards, card pages, distributions, and minting-related surfaces.",
+        "Individual Meme Card pages and distribution pages live under The Memes route family.",
+        "The Memes collection routes are separate from Memes wave submission surfaces in Waves."
+      ],
+      "canonical_path": "/the-memes",
+      "related_paths": [
+        "/meme-calendar",
+        "/meme-lab"
+      ],
+      "tags": [
+        "memes",
+        "collections",
+        "glossary"
+      ]
+    },
+    {
+      "id": "subscriptions.overview",
+      "term": "The Memes subscriptions",
+      "aliases": [
+        "subscriptions",
+        "meme subscriptions",
+        "memes subscriptions",
+        "subscription minting",
+        "subscribe to memes"
+      ],
+      "facts": [
+        "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
+        "Subscriptions are not a mintpass and do not create extra allowlist access.",
+        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab."
+      ],
+      "canonical_path": "/about/subscriptions",
+      "related_paths": [
+        "/{user}/subscriptions"
+      ],
+      "tags": [
+        "subscriptions",
+        "memes",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.definitions.transfers",
+      "term": "Transfers In / Out",
+      "aliases": [
+        "transfers",
+        "transfer in",
+        "transfer out",
+        "transfers in",
+        "transfers out",
+        "nfts transferred",
+        "moved in",
+        "moved out"
+      ],
+      "facts": [
+        "Transfers In and Transfers Out are NFTs moved into or out of an address.",
+        "The Network Definitions page lists transfers as a core Network activity metric."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/activity",
+        "/feed"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "activity"
+      ]
+    },
+    {
+      "id": "network.definitions.unique-memes",
+      "term": "Unique Memes",
+      "aliases": [
+        "unique memes",
+        "unique meme",
+        "what are unique memes",
+        "what is unique memes",
+        "unique meme cards",
+        "unique cards"
+      ],
+      "facts": [
+        "Unique Memes is the total number of unique Meme NFTs owned.",
+        "Use Unique Memes when comparing breadth of holdings rather than total card count."
+      ],
+      "canonical_path": "/network/definitions",
+      "related_paths": [
+        "/network/tdh",
+        "/network/health/network-tdh"
+      ],
+      "tags": [
+        "network",
+        "glossary",
+        "concept",
+        "memes"
+      ]
+    },
+    {
+      "id": "waves.overview",
+      "term": "Waves",
+      "aliases": [
+        "waves",
+        "wave",
+        "wave feed",
+        "wave thread",
+        "chat wave"
+      ],
+      "facts": [
+        "Waves are the main social threads for conversations, drops, reactions, voting, and wave-specific activity.",
+        "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
+        "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
+        "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": [
+        "/waves?create=wave",
+        "/messages"
+      ],
+      "tags": [
+        "waves",
+        "glossary"
+      ]
+    },
+    {
+      "id": "network.xtdh",
+      "term": "xTDH Overview",
+      "aliases": [
+        "xtdh",
+        "x tdh",
+        "extended tdh",
+        "xtdh overview",
+        "xtdh formulas",
+        "xtdh formulas overview",
+        "what is xtdh",
+        "what is x tdh",
+        "xtdh grants",
+        "xTDH grants"
+      ],
+      "facts": [
+        "xTDH is an extension of TDH that lets TDH-like network participation flow beyond core 6529 holders to other NFT holders and communities.",
+        "xTDH can be earned by holding eligible cards outside The Memes ecosystem.",
+        "The frontend /network/xtdh page is labeled xTDH Overview and describes xTDH as an extension of TDH that helps include other NFT holders in the 6529 ecosystem and offer them the benefits of TDH.",
+        "xTDH tracks how much xTDH your Memes produce, how much xTDH you receive from grants on tokens you own, and how much xTDH you have granted away.",
+        "Produced xTDH comes from TDH production: produced_xTDH_today = TDH gained today * xTDH_coefficient.",
+        "The current backend coefficient is 0.1.",
+        "Daily xTDH rate is xtdh_rate = produced_today - granted_out_today + received_today.",
+        "Total xTDH accumulates as xtdh_total = xtdh_total_previous + xtdh_rate.",
+        "The key idea is grants: a profile that produces xTDH can grant future xTDH flow to all tokens in an external ERC-721 collection or to a selected subset of tokens.",
+        "If you own a token with an active grant, you receive your share of that grant while you own the token.",
+        "Per-token grant flow is grant_amount_per_token = rate / denominator, where the denominator is either the collection total supply for full-collection grants or the number of selected tokens for partial grants.",
+        "Transfers inside the same consolidation group do not reset the ownership window; sales or transfers across groups do reset it.",
+        "The first grant increment requires the grant and token ownership to have matured past the required midnight or 24-hour windows.",
+        "xTDH is not simply TDH for external NFTs; it is a grant and allocation layer where TDH producers create xTDH, can grant future production outward, external token owners can receive it, and ungranted or ineligible flow remains with the grantor.",
+        "No produced xTDH is intended to disappear; it is allocated to someone.",
+        "For live network-wide xTDH allocation data, use the xTDH Allocations Dashboard at /xtdh.",
+        "Profile xTDH information is available under /{user}/xtdh when visible."
+      ],
+      "canonical_path": "/network/xtdh",
+      "related_paths": [
+        "/xtdh",
+        "/{user}/xtdh",
+        "/network"
+      ],
+      "tags": [
+        "network",
+        "xtdh",
+        "glossary"
+      ]
+    }
+  ]
+}

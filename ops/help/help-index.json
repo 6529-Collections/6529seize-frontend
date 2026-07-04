@@ -425,7 +425,7 @@
         "/about/meme-lab",
         "/about/6529-gradient"
       ],
-      "tags": ["about", "license", "cc0"],
+      "tags": ["about", "license", "cc0", "glossary"],
       "source_refs": ["components/about/AboutLicense.tsx"]
     },
     {
@@ -805,7 +805,7 @@
       ],
       "canonical_path": "/{user}/proxy",
       "related_paths": ["/{user}/proxy", "/delegation/delegation-center"],
-      "tags": ["profiles", "proxy"],
+      "tags": ["profiles", "proxy", "glossary"],
       "source_refs": [
         "ops/docs/profiles/tabs/feature-proxy-tab.md",
         "entities/IProxy.ts"
@@ -836,7 +836,7 @@
       ],
       "canonical_path": "/{user}/brain",
       "related_paths": ["/{user}/brain"],
-      "tags": ["profiles", "brain"],
+      "tags": ["profiles", "brain", "glossary"],
       "source_refs": [
         "ops/docs/profiles/tabs/feature-brain-tab.md",
         "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md"
@@ -1246,7 +1246,7 @@
       ],
       "canonical_path": "/network/levels",
       "related_paths": ["/network/tdh", "/rep/categories"],
-      "tags": ["network", "levels"],
+      "tags": ["network", "levels", "glossary"],
       "source_refs": ["ops/docs/network/feature-network-levels.md"]
     },
     {
@@ -1304,7 +1304,7 @@
       ],
       "canonical_path": "/network/xtdh",
       "related_paths": ["/xtdh", "/{user}/xtdh", "/network"],
-      "tags": ["network", "xtdh"],
+      "tags": ["network", "xtdh", "glossary"],
       "source_refs": [
         "ops/docs/network/feature-xtdh-formulas.md",
         "ops/docs/profiles/tabs/feature-xtdh-tab.md"
@@ -1471,7 +1471,7 @@
       ],
       "canonical_path": "/rep/categories",
       "related_paths": ["/network/levels"],
-      "tags": ["rep", "cic", "network"],
+      "tags": ["rep", "cic", "network", "glossary"],
       "source_refs": ["ops/docs/network/feature-network-levels.md"]
     },
     {
@@ -1540,11 +1540,45 @@
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave", "/messages"],
-      "tags": ["waves"],
+      "tags": ["waves", "glossary"],
       "source_refs": [
         "ops/docs/waves/README.md",
         "ops/docs/waves/sidebars/feature-wave-list-navigation.md"
       ]
+    },
+    {
+      "id": "waves.drop",
+      "kind": "glossary",
+      "title": "Drop",
+      "aliases": [
+        "drop",
+        "drops",
+        "what is a drop",
+        "drop meaning",
+        "post a drop",
+        "message in a wave"
+      ],
+      "keywords": [
+        "drop",
+        "drops",
+        "wave",
+        "message",
+        "post",
+        "composer",
+        "reactions",
+        "voting",
+        "boost",
+        "pin",
+        "reply"
+      ],
+      "facts": [
+        "A drop is a message posted in a wave.",
+        "Drops are written with the wave composer and can include text, markdown, mentions, emoji shortcodes, image uploads, and NFT hashtag references.",
+        "Depending on the wave type and rules, other members can react to, vote on, quote, reply to, boost, or pin drops.",
+        "Standard wave threads live at /waves/{waveId}; direct-message drops live at /messages/{waveId}."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "drop", "glossary", "concept"]
     },
     {
       "id": "waves.create.entrypoint.sidebar",
@@ -2039,7 +2073,7 @@
       ],
       "canonical_path": "/network/groups",
       "related_paths": ["/{user}/groups"],
-      "tags": ["groups"],
+      "tags": ["groups", "glossary"],
       "source_refs": [
         "ops/docs/groups/README.md",
         "ops/docs/groups/flow-groups-list-create-and-network-scope.md"
@@ -2105,7 +2139,7 @@
         "/delegation-mapping-tool",
         "/consolidation-mapping-tool"
       ],
-      "tags": ["delegation", "wallet"],
+      "tags": ["delegation", "wallet", "glossary"],
       "source_refs": [
         "ops/docs/delegation/README.md",
         "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md"
@@ -2679,7 +2713,7 @@
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions"],
-      "tags": ["subscriptions", "memes"],
+      "tags": ["subscriptions", "memes", "glossary"],
       "source_refs": [
         "ops/docs/open-data/feature-meme-subscriptions.md",
         "ops/docs/profiles/tabs/feature-subscriptions-tab.md"
@@ -2895,7 +2929,7 @@
       ],
       "canonical_path": "/the-memes",
       "related_paths": ["/meme-calendar", "/meme-lab"],
-      "tags": ["memes", "collections"],
+      "tags": ["memes", "collections", "glossary"],
       "source_refs": [
         "ops/docs/media/README.md",
         "ops/docs/waves/memes/README.md"
@@ -3571,7 +3605,7 @@
       "canonical_path": "/{user}",
       "link_label": "REP Categories",
       "related_paths": ["/{user}/identity", "/rep/categories"],
-      "tags": ["profiles", "identity"],
+      "tags": ["profiles", "identity", "glossary"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-tab.md"]
     },
     {
@@ -4659,7 +4693,7 @@
       ],
       "canonical_path": "/network/wave-score",
       "related_paths": ["/network", "/waves"],
-      "tags": ["network", "waves"],
+      "tags": ["network", "waves", "glossary"],
       "source_refs": [
         "app/network/wave-score/page.tsx",
         "components/waves/discovery/WaveScoreTransparencyPage.tsx"
@@ -5347,7 +5381,7 @@
       ],
       "canonical_path": "/emma",
       "related_paths": ["/emma/plans"],
-      "tags": ["tools", "emma", "allowlist"],
+      "tags": ["tools", "emma", "allowlist", "glossary"],
       "source_refs": ["app/emma/page.tsx", "app/emma/plans/page.tsx"]
     },
     {

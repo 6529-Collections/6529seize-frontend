@@ -452,9 +452,27 @@ function getRouteOverride(path: string): RouteOverride {
   return { changefreq: "weekly", priority: 0.65 };
 }
 
+// Appended to the generated robots.txt so crawlers and agent frameworks that
+// only read robots.txt can discover the agent-readable files. /llms.txt is the
+// canonical entry point; these lines are comments, not directives.
+export const AGENT_DISCOVERY_ROBOTS_BLOCK = [
+  "# Agent-readable files (start at /llms.txt)",
+  `# llms.txt: ${SITE_URL}/llms.txt`,
+  `# glossary.json: ${SITE_URL}/glossary.json`,
+  `# help-index.json: ${SITE_URL}/help-index.json`,
+].join("\n");
+
+export function appendAgentDiscoveryBlock(robotsTxt: string): string {
+  return `${robotsTxt.trimEnd()}\n\n${AGENT_DISCOVERY_ROBOTS_BLOCK}\n`;
+}
+
 const config: IConfig = {
   siteUrl: SITE_URL,
   generateRobotsTxt: true,
+  robotsTxtOptions: {
+    transformRobotsTxt: async (_config, robotsTxt) =>
+      appendAgentDiscoveryBlock(robotsTxt),
+  },
   sitemapSize: 50_000,
   changefreq: "weekly",
   priority: 0.65,
