@@ -11,8 +11,12 @@
 //
 // Rules enforced by the check:
 //   - Any tracked percentage more than the tolerance below its baseline fails.
+//     The tolerance comes from the baseline's `tolerance_points` field
+//     (default 0.1), so the checked-in value is authoritative.
 //   - Any tracked percentage more than the tolerance above its baseline passes
 //     with a warning suggesting a baseline bump so the gain is locked in.
+//   - A drop of exactly the tolerance passes: the gate is "more than
+//     `tolerance_points` points", intentionally, to absorb coverage jitter.
 //
 // Dependency-free so it can run before or without node_modules.
 
@@ -34,10 +38,28 @@ const SUMMARY_PATH = process.env["COVERAGE_SUMMARY_PATH"]
   : path.join(REPO_ROOT, "coverage", "coverage-summary.json");
 
 const SCHEMA_VERSION = 1;
-const TOLERANCE_POINTS = 0.1;
+const DEFAULT_TOLERANCE_POINTS = 0.1;
 const TRACKED_METRICS = ["lines", "statements", "functions", "branches"];
 
 const roundPct = (value) => Math.round(value * 100) / 100;
+
+function readJsonFile(filePath, label) {
+  let raw;
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    console.error(`Could not read ${label} at ${filePath}: ${error.message}`);
+    process.exit(1);
+  }
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.error(
+      `${label} at ${filePath} is not valid JSON: ${error.message}`
+    );
+    process.exit(1);
+  }
+}
 
 function readSummaryTotals() {
   if (!fs.existsSync(SUMMARY_PATH)) {
@@ -47,7 +69,7 @@ function readSummaryTotals() {
     );
     process.exit(1);
   }
-  const summary = JSON.parse(fs.readFileSync(SUMMARY_PATH, "utf8"));
+  const summary = readJsonFile(SUMMARY_PATH, "Coverage summary");
   const totals = summary.total;
   if (!totals) {
     console.error("Coverage summary has no `total` section.");
@@ -73,7 +95,7 @@ function readBaseline() {
     );
     process.exit(1);
   }
-  const baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, "utf8"));
+  const baseline = readJsonFile(BASELINE_PATH, "Coverage baseline");
   if (baseline.schema_version !== SCHEMA_VERSION) {
     console.error(
       `Baseline schema_version ${baseline.schema_version} does not match ` +
@@ -82,6 +104,14 @@ function readBaseline() {
     process.exit(1);
   }
   return baseline;
+}
+
+function toleranceFromBaseline(baseline) {
+  const tolerance = baseline.tolerance_points;
+  if (typeof tolerance !== "number" || tolerance < 0 || tolerance > 5) {
+    return DEFAULT_TOLERANCE_POINTS;
+  }
+  return tolerance;
 }
 
 function emitAnnotation(kind, message) {
@@ -98,6 +128,7 @@ function appendStepSummary(lines) {
 
 function runCheck() {
   const baseline = readBaseline();
+  const tolerancePoints = toleranceFromBaseline(baseline);
   const actuals = readSummaryTotals();
   const failures = [];
   const warnings = [];
@@ -115,15 +146,15 @@ function runCheck() {
 
     const delta = roundPct(actualPct - baselinePct);
     let status = "ok";
-    if (delta < -TOLERANCE_POINTS) {
+    if (delta < -tolerancePoints) {
       status = "DROP";
       failures.push(
         `Global ${metric} coverage dropped ${Math.abs(delta).toFixed(2)} ` +
           `points (baseline ${baselinePct.toFixed(2)}%, actual ` +
-          `${actualPct.toFixed(2)}%, tolerance ${TOLERANCE_POINTS}). ` +
+          `${actualPct.toFixed(2)}%, tolerance ${tolerancePoints}). ` +
           "Add or restore tests for the changed code."
       );
-    } else if (delta > TOLERANCE_POINTS) {
+    } else if (delta > tolerancePoints) {
       status = "stale baseline";
       warnings.push(
         `Global ${metric} coverage rose ${delta.toFixed(2)} points above ` +
@@ -135,6 +166,7 @@ function runCheck() {
   }
 
   console.log("Coverage floor report");
+  console.log(`(tolerance: ${tolerancePoints} points)`);
   console.log("=====================");
   for (const row of rows) {
     console.log(
@@ -180,9 +212,12 @@ function runCheck() {
 
 function runUpdate() {
   const totals = readSummaryTotals();
+  const existingTolerance = fs.existsSync(BASELINE_PATH)
+    ? toleranceFromBaseline(readJsonFile(BASELINE_PATH, "Coverage baseline"))
+    : DEFAULT_TOLERANCE_POINTS;
   const baseline = {
     schema_version: SCHEMA_VERSION,
-    tolerance_points: TOLERANCE_POINTS,
+    tolerance_points: existingTolerance,
     totals,
   };
   fs.mkdirSync(path.dirname(BASELINE_PATH), { recursive: true });
@@ -208,4 +243,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { TOLERANCE_POINTS, TRACKED_METRICS };
+module.exports = { DEFAULT_TOLERANCE_POINTS, TRACKED_METRICS };
