@@ -958,7 +958,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const seizeConnect = useCallback((): void => {
-    void seizeConnectOrThrow("seizeConnect").catch(() => undefined);
+    seizeConnectOrThrow("seizeConnect").then(undefined, () => undefined);
   }, [seizeConnectOrThrow]);
 
   const handleAddConnectedAccountConnectFailure = useCallback(
@@ -1205,6 +1205,20 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     return storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
   }, [storedConnectedAccounts]);
 
+  const openAddConnectedAccountModal = useCallback(
+    (clearAddConnectedAccountGuard: () => void): void => {
+      seizeConnectOrThrow("seizeAddConnectedAccount").catch(
+        (error: unknown) => {
+          handleAddConnectedAccountConnectFailure(
+            clearAddConnectedAccountGuard,
+            error
+          );
+        }
+      );
+    },
+    [handleAddConnectedAccountConnectFailure, seizeConnectOrThrow]
+  );
+
   const seizeAddConnectedAccount = useCallback((): void => {
     const clearAddConnectedAccountGuard = (): void => {
       isAddingConnectedAccountRef.current = false;
@@ -1256,14 +1270,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       addFlowOriginAddressRef.current = liveConnectedWallet;
       setIsAddingConnectedAccount(true);
 
-      void seizeConnectOrThrow("seizeAddConnectedAccount").catch(
-        (error: unknown) => {
-          handleAddConnectedAccountConnectFailure(
-            clearAddConnectedAccountGuard,
-            error
-          );
-        }
-      );
+      openAddConnectedAccountModal(clearAddConnectedAccountGuard);
       return;
     }
 
@@ -1285,14 +1292,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
               clearAddConnectedAccountGuard();
               return;
             }
-            void seizeConnectOrThrow("seizeAddConnectedAccount").catch(
-              (error: unknown) => {
-                handleAddConnectedAccountConnectFailure(
-                  clearAddConnectedAccountGuard,
-                  error
-                );
-              }
-            );
+            openAddConnectedAccountModal(clearAddConnectedAccountGuard);
           }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
         })
         .catch((error: unknown) => {
@@ -1321,11 +1321,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     account.status,
     canAddConnectedAccount,
     disconnect,
-    handleAddConnectedAccountConnectFailure,
     isActiveAppWalletConnector,
     isAddingConnectedAccount,
     isConnectIntentWaitingForAppKit,
-    seizeConnectOrThrow,
+    openAddConnectedAccountModal,
     state.open,
   ]);
 

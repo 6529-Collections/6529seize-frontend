@@ -381,7 +381,7 @@ function DelegationConnectWalletState(
         type="button"
         className={styles["connectRequiredButton"]}
         onClick={() => {
-          void props.onConnect();
+          props.onConnect();
         }}
       >
         Connect Wallet
