@@ -34,18 +34,21 @@ describe("proxy", () => {
     mockRedirect.mockClear();
   });
 
-  it("serves the help index without staging access-control fetches", async () => {
-    const fetchMock = jest
-      .spyOn(globalThis, "fetch")
-      .mockRejectedValue(new Error("access control should not run"));
+  it.each(["/help-index.json", "/llms.txt", "/glossary.json"])(
+    "serves %s without staging access-control fetches",
+    async (path) => {
+      const fetchMock = jest
+        .spyOn(globalThis, "fetch")
+        .mockRejectedValue(new Error("access control should not run"));
 
-    const response = await proxy(createRequest("/help-index.json"));
+      const response = await proxy(createRequest(path));
 
-    expect(response).toEqual({ kind: "next" });
-    expect(mockNext).toHaveBeenCalledTimes(1);
-    expect(mockRedirect).not.toHaveBeenCalled();
-    expect(fetchMock).not.toHaveBeenCalled();
+      expect(response).toEqual({ kind: "next" });
+      expect(mockNext).toHaveBeenCalledTimes(1);
+      expect(mockRedirect).not.toHaveBeenCalled();
+      expect(fetchMock).not.toHaveBeenCalled();
 
-    fetchMock.mockRestore();
-  });
+      fetchMock.mockRestore();
+    }
+  );
 });

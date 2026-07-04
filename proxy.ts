@@ -82,7 +82,11 @@ const STATIC_PATH_PREFIXES = [
   "/robots.txt",
   "/error",
 ] as const;
-const STATIC_PATHS = new Set<string>(["/help-index.json"]);
+const STATIC_PATHS = new Set<string>([
+  "/help-index.json",
+  "/llms.txt",
+  "/glossary.json",
+]);
 const STATIC_PATH_SUFFIXES = [
   "favicon.ico",
   ".jpg",
