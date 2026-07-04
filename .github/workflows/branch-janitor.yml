@@ -1,0 +1,117 @@
+name: Branch Janitor
+
+# Nightly retention: deletes remote branches that are fully merged into main
+# and whose last commit is older than 7 days. Protected branches, open-PR
+# heads, and release mechanics are never touched. Every deletion is logged
+# with its SHA in the run summary so any branch can be restored with
+# `git push origin <sha>:refs/heads/<name>`.
+
+on:
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "List candidates without deleting"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: branch-janitor
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged branches older than 7 days
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRY_RUN: ${{ inputs.dry_run == true && '1' || '0' }}
+          MAX_DELETIONS_PER_RUN: "200"
+        run: |
+          set -euo pipefail
+
+          cutoff=$(date -u -d '7 days ago' +%s)
+
+          # Branch names that must never be deleted.
+          is_protected() {
+            case "$1" in
+              main|1a-staging|HEAD) return 0 ;;
+              staging-merge-agent-*) return 0 ;;
+            esac
+            return 1
+          }
+
+          # Heads of open PRs in this repo (same-repo heads only).
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100" \
+            --jq '.[] | select(.head.repo.full_name == "'"${GITHUB_REPOSITORY}"'") | .head.ref' \
+            | sort -u > /tmp/open-pr-heads.txt
+
+          git fetch origin --prune --quiet
+
+          # Materialize the candidate list up front: deletions mutate
+          # remote-tracking refs, so we must not stream for-each-ref live.
+          git for-each-ref 'refs/remotes/origin' \
+            --merged origin/main \
+            --format='%(refname:short)|%(objectname)|%(committerdate:unix)|%(committerdate:short)' \
+            > /tmp/merged-refs.txt
+
+          deleted=0
+          failed=0
+          skipped_open_pr=0
+          skipped_recent=0
+          candidates_over_cap=0
+          echo "## Branch janitor — $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DRY_RUN" = "1" ]; then
+            echo "**DRY RUN — nothing deleted.**" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Branch | SHA | Last commit |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+
+          while IFS='|' read -r ref sha epoch date; do
+            name="${ref#origin/}"
+            if is_protected "$name"; then continue; fi
+            if grep -qxF "$name" /tmp/open-pr-heads.txt; then
+              skipped_open_pr=$((skipped_open_pr + 1)); continue
+            fi
+            if [ "$epoch" -ge "$cutoff" ]; then
+              skipped_recent=$((skipped_recent + 1)); continue
+            fi
+            if [ "$deleted" -ge "$MAX_DELETIONS_PER_RUN" ]; then
+              candidates_over_cap=$((candidates_over_cap + 1)); continue
+            fi
+            if [ "$DRY_RUN" != "1" ]; then
+              if ! git push origin --delete "$name" </dev/null; then
+                failed=$((failed + 1))
+                echo "| $name | $sha | $date (DELETE FAILED) |" >> "$GITHUB_STEP_SUMMARY"
+                continue
+              fi
+            fi
+            echo "| $name | $sha | $date |" >> "$GITHUB_STEP_SUMMARY"
+            deleted=$((deleted + 1))
+          done < /tmp/merged-refs.txt
+
+          {
+            echo ""
+            echo "- Deleted: $deleted (cap: $MAX_DELETIONS_PER_RUN)"
+            if [ "$failed" -gt 0 ]; then
+              echo "- Delete failures: $failed"
+            fi
+            echo "- Skipped (open PR head): $skipped_open_pr"
+            echo "- Skipped (merged but newer than 7 days): $skipped_recent"
+            if [ "$candidates_over_cap" -gt 0 ]; then
+              echo "- Deferred past cap (next run): $candidates_over_cap"
+            fi
+            echo "- Restore any branch with: \`git push origin <sha>:refs/heads/<name>\`"
+          } >> "$GITHUB_STEP_SUMMARY"
