@@ -3,9 +3,10 @@
 ## Overview
 
 - `/the-memes` is the main browse route for The Memes cards.
-- The list state is URL-backed by `sort`, `sort_dir`, and optional `szn`.
-- Sort, season, and volume-window changes rewrite the URL and reload from page
-  one.
+- The list state is URL-backed by `sort`, `sort_dir`, optional `year`, and
+  optional `szn`.
+- Sort, year, season, and volume-window changes rewrite the URL and reload from
+  page one.
 - Infinite scroll loads additional API pages while a `next` page exists.
 
 ## Location in the Site
@@ -24,6 +25,7 @@
   - `/the-memes?sort=age&sort_dir=desc`
   - `/the-memes?sort=volume_24_hours&sort_dir=desc`
   - `/the-memes?sort=meme&sort_dir=asc&szn=12`
+  - `/the-memes?sort=age&sort_dir=asc&year=4`
 
 ## URL Query Model
 
@@ -43,7 +45,15 @@
   - `volume_30_days`
   - `volume_all_time`
 - `sort_dir` accepts `asc` or `desc` (case-insensitive on input).
+- `year` accepts zero or positive integers that match loaded Meme Calendar
+  years. Year 0 is supported.
 - `szn` accepts positive integers only.
+- `year` scopes the season dropdown. With no year selected, the season dropdown
+  shows all loaded seasons. With a year selected, it shows only seasons in that
+  year and the all option becomes `All Year N` (for example `All Year 4`).
+- If `year` is present with no `szn`, the API request filters by all loaded
+  seasons in that year. For example, Year 4 filters the list to the loaded Year
+  4 seasons.
 - On initial load and after control changes, the route rewrites query values to
   lowercase canonical form and drops unrelated query keys.
 
@@ -61,14 +71,17 @@
      `Volume`.
 6. If using `Volume`, choose window: `24 Hours`, `7 Days`, `30 Days`,
    or `All Time`.
-7. Set a season with the season dropdown (`All Seasons` or a specific season).
-8. Each control change updates the query, clears loaded rows, and refetches
+7. Set a year with the year dropdown (`All Years`, `Year 0`, `Year 1`, and so
+   on).
+8. Set a season with the season dropdown (`All Seasons`, `All Year N`,
+   or a specific season in the active year).
+9. Each control change updates the query, clears loaded rows, and refetches
    from page one.
-9. When sorting by `Meme`, cards are grouped under meme headings. Heading order
+10. When sorting by `Meme`, cards are grouped under meme headings. Heading order
    follows `sort_dir`; cards inside each heading are ordered by card id
    ascending.
-10. Scroll near the page bottom to load more pages.
-11. Open a card to navigate to `/the-memes/{id}`.
+11. Scroll near the page bottom to load more pages.
+12. Open a card to navigate to `/the-memes/{id}`.
 
 ## Route States
 
@@ -92,10 +105,15 @@
   - Set `Volume`, then select `24 Hours`, `7 Days`, `30 Days`, or `All Time`.
 - Browse one season only:
   - Set a season filter (`szn`) and keep any sort.
+- Browse one year only:
+  - Set a year filter (`year`) and keep season on `All Year N`.
 - Group by meme:
   - Set sort to `Meme`.
 - Share exact list state:
   - Copy the rewritten route URL.
+- Open a year from a card page:
+  - Click the `YEAR N` breadcrumb on `/the-memes/{id}` to return to the list
+    filtered to that year.
 
 ## Edge Cases
 
@@ -103,12 +121,15 @@
 - `sort=volume_*` with an unsupported suffix falls back to `Volume (All Time)`.
 - Unsupported `sort_dir` values fall back to ascending (`asc`).
 - Invalid or non-positive `szn` values are ignored.
-- If `szn` is positive but not present in loaded season options, filtering still
-  applies and the dropdown label can remain `All Seasons`.
+- Invalid `year` values are ignored.
+- If `szn` is not present in loaded season options, `szn` is removed; a valid
+  `year` is kept.
+- If both `year` and `szn` are present but the season is not in that year, both
+  filters are removed and the route returns to the default unfiltered list.
 - Choosing a volume window while not already on `Volume` switches the active
   sort to `Volume`.
 - Query input matching for `sort` and `sort_dir` is case-insensitive.
-- Query keys outside `sort`, `sort_dir`, and `szn` are removed by route
+- Query keys outside `sort`, `sort_dir`, `year`, and `szn` are removed by route
   rewrites.
 - Infinite scroll only continues while another API page exists.
 
