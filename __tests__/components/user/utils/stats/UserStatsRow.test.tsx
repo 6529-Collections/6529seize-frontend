@@ -87,4 +87,48 @@ describe("UserStatsRow", () => {
       })
     ).toBeInTheDocument();
   });
+
+  it("treats null follower counts as zero", () => {
+    render(
+      <UserStatsRow
+        handle="bob"
+        tdh={1234}
+        tdh_rate={0}
+        xtdh={56}
+        xtdh_rate={0}
+        cic={7}
+        rep={8}
+        followersCount={null}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "View bob's followers: 0 Followers",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("formats numbers with the provided locale's grouping", () => {
+    render(
+      <UserStatsRow
+        handle="bob"
+        tdh={1234}
+        tdh_rate={0}
+        xtdh={56}
+        xtdh_rate={0}
+        cic={7}
+        rep={8}
+        followersCount={9}
+        locale="de-DE"
+      />
+    );
+
+    expect(screen.getByText("1.234")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "View bob's collected TDH: 1.234",
+      })
+    ).toHaveAttribute("href", "/bob/collected");
+  });
 });
