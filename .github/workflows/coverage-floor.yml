@@ -5,19 +5,29 @@ name: Coverage Floor
 # (scripts/coverage-floor-baseline.json), so coverage can only ratchet up.
 # Refresh the baseline with `node scripts/coverage-floor.cjs --update` after
 # running the suite with coverage. Runs post-merge on purpose: PR latency
-# stays owned by the risk-plan lanes in app-pr-ci.yml.
+# stays owned by the risk-plan lanes in app-pr-ci.yml. PRs that change the
+# coverage gate itself (workflow, script, or baseline) also run it so gate
+# changes and baseline bumps are validated before merge. Not a required
+# status check: the paths filter means most PRs never create this check run.
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/coverage-floor.yml"
+      - "scripts/coverage-floor.cjs"
+      - "scripts/coverage-floor-baseline.json"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: coverage-floor-${{ github.ref }}
+  group: coverage-floor-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
