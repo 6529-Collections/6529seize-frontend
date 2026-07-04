@@ -13,6 +13,7 @@ generated
 coverage
 content/delegation
 public/delegation-content
+public/glossary.json
 
 # Package manager
 pnpm-lock.yaml

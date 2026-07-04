@@ -7,3 +7,8 @@ Host: https://6529.io
 
 # Sitemaps
 Sitemap: https://6529.io/sitemap.xml
+
+# Agent-readable files (start at /llms.txt)
+# llms.txt: https://6529.io/llms.txt
+# glossary.json: https://6529.io/glossary.json
+# help-index.json: https://6529.io/help-index.json
