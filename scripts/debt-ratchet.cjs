@@ -18,6 +18,16 @@
 //   - A count below its baseline passes with a stale-baseline warning; lower
 //     the baseline in the same PR with `--update` so the improvement sticks.
 //
+// Counting semantics (deliberate trade-offs):
+//   - Metrics are textual heuristics, not AST analysis: the `any` and
+//     TODO/FIXME/HACK regexes also match inside strings, comments, and JSDoc.
+//     Counts are symmetric between baseline and actuals, so the ratchet
+//     still moves in the right direction; do not read them as exact.
+//   - The oversized grandfather list keys on exact relative paths. Renaming
+//     or moving a grandfathered file makes it count as a NEW oversized file
+//     (fail-closed); run `--update` in the same PR to re-grandfather the new
+//     path, or use the move as the moment to split the file.
+//
 // The script is dependency-free on purpose so CI can run it on a bare
 // checkout without installing node_modules.
 
@@ -319,16 +329,19 @@ function runCheck() {
   }
 
   const allowlist = new Set(baseline.oversized_file_allowlist ?? []);
+  const oversizedNow = new Set(actuals.oversizedFiles);
   const newOversized = actuals.oversizedFiles.filter(
     (file) => !allowlist.has(file)
   );
   const healedOversized = [...allowlist].filter(
-    (file) => !actuals.oversizedFiles.includes(file)
+    (file) => !oversizedNow.has(file)
   );
   for (const file of newOversized) {
     failures.push(
       `${file} exceeds ${MAX_SOURCE_FILE_LINES} lines and is not in the ` +
-        "grandfather list. Split it instead of growing the list."
+        "grandfather list. Split it instead of growing the list. If this " +
+        "path is a rename/move of a grandfathered file, run --update in " +
+        "this PR to carry the grandfather entry to the new path."
     );
   }
   if (healedOversized.length > 0) {

@@ -32,6 +32,9 @@ jobs:
         with:
           persist-credentials: false
 
+      # No dependency install and no package-manager cache by design: the
+      # ratchet script is dependency-free Node, which keeps this required
+      # check fast (<1 min) on a bare checkout. Do not add `cache: pnpm`.
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:

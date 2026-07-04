@@ -144,4 +144,47 @@ describe("debt-ratchet check mode", () => {
     expect(check.stdout).toContain("stale baseline");
     expect(check.stdout).toContain("--update");
   });
+
+  it("fails on a baseline schema-version mismatch", () => {
+    expect(runRatchet(root, ["--update"]).status).toBe(0);
+    const baselinePath = path.join(root, "scripts/debt-ratchet-baseline.json");
+    const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
+    baseline.schema_version = 999;
+    fs.writeFileSync(baselinePath, JSON.stringify(baseline));
+
+    const check = runRatchet(root);
+    expect(check.status).toBe(1);
+    expect(check.stderr).toContain("schema_version 999 does not match");
+  });
+
+  it("emits the baseline shape from --json", () => {
+    const result = runRatchet(root, ["--json"]);
+    expect(result.status).toBe(0);
+    const parsed = JSON.parse(result.stdout);
+    expect(Object.keys(parsed).sort()).toEqual([
+      "counts",
+      "max_source_file_lines",
+      "oversized_file_allowlist",
+      "schema_version",
+    ]);
+    expect(Object.keys(parsed.counts).sort()).toEqual([
+      "any_casts",
+      "bootstrap_imports",
+      "oversized_files",
+      "pages_router_files",
+      "redux_imports",
+      "todo_comments",
+    ]);
+  });
+
+  it("prints per-file counts from --details", () => {
+    const result = runRatchet(root, ["--details", "any_casts"]);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("components/Sample.tsx");
+    expect(result.stdout).toMatch(/^\s*1\s+components\/Sample\.tsx/m);
+
+    const unknown = runRatchet(root, ["--details", "nope"]);
+    expect(unknown.status).toBe(1);
+    expect(unknown.stderr).toContain('Unknown metric "nope"');
+  });
 });
