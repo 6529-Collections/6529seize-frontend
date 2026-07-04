@@ -39,7 +39,7 @@ function readJson(filePath) {
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch (error) {
-    fail(`Failed to read ${filePath}: ${error.message}`);
+    throw new Error(`Failed to read ${filePath}: ${error.message}`);
   }
 }
 
@@ -170,6 +170,7 @@ module.exports = {
   GLOSSARY_TAG,
   MIN_GLOSSARY_TERMS,
   REQUIRED_LLMS_PATHS,
+  repoRoot,
   buildGlossaryArtifact,
   isGlossaryRecord,
   renderLlmsTemplate,

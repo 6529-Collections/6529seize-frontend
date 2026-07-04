@@ -5,6 +5,7 @@ const {
   GLOSSARY_TAG,
   MIN_GLOSSARY_TERMS,
   REQUIRED_LLMS_PATHS,
+  repoRoot,
   buildGlossaryArtifact,
   isGlossaryRecord,
   renderLlmsTemplate,
@@ -173,8 +174,14 @@ describe("sync-agent-files", () => {
 
     it("matches the committed public artifacts (run `6529 run agent-files:sync` after editing the corpus)", () => {
       const result = syncAgentFiles({ outputDir });
-      const committedGlossary = fs.readFileSync("public/glossary.json", "utf8");
-      const committedLlms = fs.readFileSync("public/llms.txt", "utf8");
+      const committedGlossary = fs.readFileSync(
+        path.join(repoRoot, "public/glossary.json"),
+        "utf8"
+      );
+      const committedLlms = fs.readFileSync(
+        path.join(repoRoot, "public/llms.txt"),
+        "utf8"
+      );
       expect(fs.readFileSync(result.glossaryOutputPath, "utf8")).toBe(
         committedGlossary
       );
@@ -196,7 +203,10 @@ describe("sync-agent-files", () => {
     });
 
     it("matches the committed public/robots.txt", () => {
-      const committed = fs.readFileSync("public/robots.txt", "utf8");
+      const committed = fs.readFileSync(
+        path.join(repoRoot, "public/robots.txt"),
+        "utf8"
+      );
       expect(committed.endsWith(`\n${AGENT_DISCOVERY_ROBOTS_BLOCK}\n`)).toBe(
         true
       );
