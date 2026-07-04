@@ -48,12 +48,15 @@ describe("debt-ratchet counting helpers", () => {
       'const redux = require("react-redux");',
       'export { thing } from "@reduxjs/toolkit";',
       'import notMatched from "bootstrap-icons-lookalike";',
+      'import alsoNotMatched from "ng-bootstrap";',
+      'import stillNot from "my-react-redux-utils";',
       'import other from "some-lib";',
       '@import "bootstrap/scss/functions";',
+      "@use '~bootstrap/scss/mixins';",
     ].join("\n");
     expect(
       countImportStatements(content, ["react-bootstrap", "bootstrap"])
-    ).toBe(3);
+    ).toBe(4);
     expect(
       countImportStatements(content, ["react-redux", "@reduxjs/toolkit"])
     ).toBe(2);

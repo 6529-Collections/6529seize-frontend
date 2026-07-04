@@ -157,8 +157,11 @@ function countImportStatements(content, packageNames) {
   const packageAlternation = packageNames
     .map((name) => name.replaceAll(/[.*+?^${}()|[\]\\/-]/g, "\\$&"))
     .join("|");
+  // The specifier must start at an opening quote (optionally followed by the
+  // Sass "~" prefix) so package names that merely contain a target name as a
+  // substring ("ng-bootstrap", "my-react-redux-utils") never match.
   const specifier = new RegExp(
-    `["'~]?(?:${packageAlternation})(?:/[^"'\`]*)?["'\`]`
+    `["'\`]~?(?:${packageAlternation})(?:/[^"'\`]*)?["'\`]`
   );
   const importKeyword = /(?:^|\s)(?:import|export|from|require|@import|@use)\b/;
 
