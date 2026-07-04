@@ -1615,6 +1615,55 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     });
   });
 
+  it("clears the connect intent fallback if AppKit never reports open", async () => {
+    jest.useFakeTimers();
+    try {
+      mockGetWalletAddress.mockReturnValue(null);
+
+      const { useAppKitState } = require("@reown/appkit/react");
+      (useAppKitState as jest.Mock).mockReturnValue({ open: false });
+
+      const ConnectTestComponent: React.FC = () => {
+        const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
+        return (
+          <>
+            <button
+              onClick={() => {
+                seizeConnect();
+              }}
+              data-testid="connect-btn"
+            >
+              Connect
+            </button>
+            <div data-testid="connect-open">{String(seizeConnectOpen)}</div>
+          </>
+        );
+      };
+
+      render(
+        <SeizeConnectProvider>
+          <ConnectTestComponent />
+        </SeizeConnectProvider>
+      );
+
+      fireEvent.click(screen.getByTestId("connect-btn"));
+
+      await waitFor(() => {
+        expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" });
+        expect(screen.getByTestId("connect-open")).toHaveTextContent("true");
+      });
+
+      await act(async () => {
+        jest.runOnlyPendingTimers();
+        await Promise.resolve();
+      });
+
+      expect(screen.getByTestId("connect-open")).toHaveTextContent("false");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("should disconnect the live provider before fresh connect", async () => {
     const liveAddress = "0x1234567890abcdef1234567890abcdef12345678";
     const { useAppKitAccount } = require("@reown/appkit/react");

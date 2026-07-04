@@ -284,6 +284,7 @@ const normalizeAddress = (address: string): string => address.toLowerCase();
 
 const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
 const CONNECT_AFTER_DISCONNECT_DELAY_MS: number = 100;
+const CONNECT_INTENT_HANDOFF_GRACE_MS: number = 1000;
 
 const validateStoredAddress = (
   storedAddress: string
@@ -489,6 +490,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addFlowOriginAddressRef = useRef<string | null>(null);
   const retryConnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const connectIntentHandoffTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isAddingConnectedAccountRef = useRef(false);
   const isMountedRef = useRef(true);
   const nodeEnv = getNodeEnv();
@@ -524,6 +526,30 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setStoredConnectedAccounts(getConnectedWalletAccounts());
   }, []);
 
+  const clearConnectIntentHandoffTimeout = useCallback((): void => {
+    if (connectIntentHandoffTimeoutRef.current) {
+      clearTimeout(connectIntentHandoffTimeoutRef.current);
+      connectIntentHandoffTimeoutRef.current = null;
+    }
+  }, []);
+
+  const clearConnectIntentWaitingForAppKit = useCallback((): void => {
+    clearConnectIntentHandoffTimeout();
+    if (isMountedRef.current) {
+      setIsConnectIntentWaitingForAppKit(false);
+    }
+  }, [clearConnectIntentHandoffTimeout]);
+
+  const scheduleConnectIntentHandoffFallback = useCallback((): void => {
+    clearConnectIntentHandoffTimeout();
+    connectIntentHandoffTimeoutRef.current = setTimeout(() => {
+      connectIntentHandoffTimeoutRef.current = null;
+      if (isMountedRef.current) {
+        setIsConnectIntentWaitingForAppKit(false);
+      }
+    }, CONNECT_INTENT_HANDOFF_GRACE_MS);
+  }, [clearConnectIntentHandoffTimeout]);
+
   useEffect(() => {
     isMountedRef.current = true;
 
@@ -533,8 +559,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         clearTimeout(retryConnectTimeoutRef.current);
         retryConnectTimeoutRef.current = null;
       }
+      clearConnectIntentHandoffTimeout();
     };
-  }, []);
+  }, [clearConnectIntentHandoffTimeout]);
 
   useEffect(() => {
     refreshStoredConnectedAccounts();
@@ -869,13 +896,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (state.open && isConnectIntentWaitingForAppKit) {
-      setIsConnectIntentWaitingForAppKit(false);
+      clearConnectIntentWaitingForAppKit();
     }
-  }, [isConnectIntentWaitingForAppKit, state.open]);
+  }, [
+    clearConnectIntentWaitingForAppKit,
+    isConnectIntentWaitingForAppKit,
+    state.open,
+  ]);
 
   const openConnectModal = useCallback(
     async (source: string): Promise<void> => {
       try {
+        clearConnectIntentHandoffTimeout();
         setIsConnectIntentWaitingForAppKit(true);
         if (!isAppKitReady) {
           await waitForAppKitReady();
@@ -891,13 +923,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           SecurityEventType.WALLET_MODAL_OPENED,
           createConnectionEventContext(source)
         );
-        if (state.open && isMountedRef.current) {
-          setIsConnectIntentWaitingForAppKit(false);
-        }
+        scheduleConnectIntentHandoffFallback();
       } catch (error) {
-        if (isMountedRef.current) {
-          setIsConnectIntentWaitingForAppKit(false);
-        }
+        clearConnectIntentWaitingForAppKit();
         const connectionError = new WalletConnectionError(
           "Failed to open wallet connection modal",
           error
@@ -906,7 +934,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         throw connectionError;
       }
     },
-    [isAppKitReady, open, state.open, waitForAppKitReady]
+    [
+      clearConnectIntentHandoffTimeout,
+      clearConnectIntentWaitingForAppKit,
+      isAppKitReady,
+      open,
+      scheduleConnectIntentHandoffFallback,
+      waitForAppKitReady,
+    ]
   );
 
   const seizeConnectOrThrow = useCallback(
