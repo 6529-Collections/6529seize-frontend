@@ -256,7 +256,7 @@ const USER_STATS_ROW_MESSAGES = objectMessages("user.statsRow", {
   "labels.nic": "NIC",
   "labels.rep": "Rep",
   "labels.followers.one": "Follower",
-  "labels.followers.many": "Followers",
+  "labels.followers.other": "Followers",
   "links.tdh": "View {handle}'s collected TDH: {value}",
   "links.tdhWithRate": "View {handle}'s collected TDH: {value}, +{rate}",
   "links.xtdh": "View {handle}'s xTDH: {value}",

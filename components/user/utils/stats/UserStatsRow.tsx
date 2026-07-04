@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { formatStatFloor } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
   formatUserStatsRowInteger,
+  formatUserStatsRowStatFloor,
   getUserStatsRowMessage,
 } from "./user-stats-row.messages";
 
@@ -38,6 +39,7 @@ interface UserStatsRowProps {
   readonly className?: string | undefined;
   readonly size?: UserStatsRowSize | undefined;
   readonly onFollowersClick?: (() => void) | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }
 
 export default function UserStatsRow({
@@ -52,33 +54,38 @@ export default function UserStatsRow({
   className = "",
   size = UserStatsRowSize.MEDIUM,
   onFollowersClick,
+  locale = DEFAULT_LOCALE,
 }: UserStatsRowProps) {
   const routeHandle = encodeURIComponent(handle.toLowerCase());
   const count = followersCount ?? 0;
   const followerLabel = getUserStatsRowMessage(
     count === 1
       ? "user.statsRow.labels.followers.one"
-      : "user.statsRow.labels.followers.many"
+      : "user.statsRow.labels.followers.other",
+    {},
+    locale
   );
   const classes = SIZE_CLASSES[size];
-  const tdhValue = formatStatFloor(tdh);
-  const tdhRateValue = formatStatFloor(tdh_rate);
-  const xtdhValue = formatStatFloor(xtdh);
-  const xtdhRateValue = formatStatFloor(xtdh_rate);
-  const nicValue = formatStatFloor(cic);
-  const repValue = formatStatFloor(rep);
-  const followersValue = formatUserStatsRowInteger(count);
+  const tdhValue = formatUserStatsRowStatFloor(tdh, locale);
+  const tdhRateValue = formatUserStatsRowStatFloor(tdh_rate, locale);
+  const xtdhValue = formatUserStatsRowStatFloor(xtdh, locale);
+  const xtdhRateValue = formatUserStatsRowStatFloor(xtdh_rate, locale);
+  const nicValue = formatUserStatsRowStatFloor(cic, locale);
+  const repValue = formatUserStatsRowStatFloor(rep, locale);
+  const followersValue = formatUserStatsRowInteger(count, locale);
   const tdhLinkLabel = getUserStatsRowMessage(
     tdh_rate > 0
       ? "user.statsRow.links.tdhWithRate"
       : "user.statsRow.links.tdh",
-    { handle, value: tdhValue, rate: tdhRateValue }
+    { handle, value: tdhValue, rate: tdhRateValue },
+    locale
   );
   const xtdhLinkLabel = getUserStatsRowMessage(
     xtdh_rate > 0
       ? "user.statsRow.links.xtdhWithRate"
       : "user.statsRow.links.xtdh",
-    { handle, value: xtdhValue, rate: xtdhRateValue }
+    { handle, value: xtdhValue, rate: xtdhRateValue },
+    locale
   );
   const followersActionLabel = {
     handle,
@@ -98,7 +105,7 @@ export default function UserStatsRow({
             {tdhValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.tdh")}
+            {getUserStatsRowMessage("user.statsRow.labels.tdh", {}, locale)}
           </span>
           {tdh_rate > 0 && (
             <>
@@ -121,7 +128,7 @@ export default function UserStatsRow({
             {xtdhValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.xtdh")}
+            {getUserStatsRowMessage("user.statsRow.labels.xtdh", {}, locale)}
           </span>
           {xtdh_rate > 0 && (
             <>
@@ -137,33 +144,35 @@ export default function UserStatsRow({
 
         <Link
           href={`/${routeHandle}`}
-          aria-label={getUserStatsRowMessage("user.statsRow.links.nic", {
-            handle,
-            value: nicValue,
-          })}
+          aria-label={getUserStatsRowMessage(
+            "user.statsRow.links.nic",
+            { handle, value: nicValue },
+            locale
+          )}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {nicValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.nic")}
+            {getUserStatsRowMessage("user.statsRow.labels.nic", {}, locale)}
           </span>
         </Link>
 
         <Link
           href={`/${routeHandle}`}
-          aria-label={getUserStatsRowMessage("user.statsRow.links.rep", {
-            handle,
-            value: repValue,
-          })}
+          aria-label={getUserStatsRowMessage(
+            "user.statsRow.links.rep",
+            { handle, value: repValue },
+            locale
+          )}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {repValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.rep")}
+            {getUserStatsRowMessage("user.statsRow.labels.rep", {}, locale)}
           </span>
         </Link>
 
@@ -173,7 +182,8 @@ export default function UserStatsRow({
             onClick={onFollowersClick}
             aria-label={getUserStatsRowMessage(
               "user.statsRow.buttons.followers",
-              followersActionLabel
+              followersActionLabel,
+              locale
             )}
             className="tw-bg-transparent tw-border-none tw-p-0 tw-cursor-pointer tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
           >
@@ -189,7 +199,8 @@ export default function UserStatsRow({
             href={`/${routeHandle}`}
             aria-label={getUserStatsRowMessage(
               "user.statsRow.links.followers",
-              followersActionLabel
+              followersActionLabel,
+              locale
             )}
             className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
           >
