@@ -58,7 +58,7 @@ into a horizontal decision strip.
 
 - [Waves Index](../README.md)
 - [Wave Leaderboards Index](README.md)
-- [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
+- [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md)
 - [Wave Winners Tab](feature-winners-tab.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
 - [Docs Home](../../README.md)

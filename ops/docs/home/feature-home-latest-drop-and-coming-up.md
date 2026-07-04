@@ -152,5 +152,5 @@ Use this page for visibility rules, state switches, and route targets.
 - [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
 - [Now Minting Countdown](../media/memes/feature-now-minting-countdown.md)
 - [Latest Drop Stats Grid](../media/memes/feature-latest-drop-stats-grid.md)
-- [Wave Sort and Group Filters](../waves/leaderboard/feature-sort-and-group-filters.md)
+- [Wave Sort and Price Filters](../waves/leaderboard/feature-sort-and-group-filters.md)
 - [Docs Home](../README.md)

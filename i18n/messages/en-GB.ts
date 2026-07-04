@@ -107,4 +107,11 @@ export const EN_GB_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  "theMemes.filters.triggerAriaLabel": "{filter}: {value}",
+  "theMemes.filters.year.label": "Year",
+  "theMemes.filters.year.all": "All Years",
+  "theMemes.filters.year.option": "Year {year}",
+  "theMemes.filters.season.label": "Season",
+  "theMemes.filters.season.all": "All Seasons",
+  "theMemes.filters.season.allForYear": "All Year {year}",
 } satisfies Partial<Record<MessageKey, string>>;

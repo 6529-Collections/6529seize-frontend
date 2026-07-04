@@ -117,7 +117,7 @@ Entry behavior differs by wave type:
 
 - [Wave Leaderboards Index](README.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
-- [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
+- [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
 - [Wave Curation URL Submissions](../composer/feature-curation-url-submissions.md)
 - [Memes Submission Workflows](../memes/feature-memes-submission.md)

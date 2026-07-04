@@ -98,6 +98,6 @@ describe("About index page", () => {
 
     render(<AboutIndexPage />);
 
-    expect(screen.queryByText("Subscriptions")).toBeNull();
+    expect(screen.queryByText("Subscription Minting")).toBeNull();
   });
 });

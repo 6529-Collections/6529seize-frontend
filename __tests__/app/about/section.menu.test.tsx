@@ -118,7 +118,7 @@ describe("About contents dropdown", () => {
 
     openContentsMenu();
 
-    expect(screen.queryByText("Subscriptions")).toBeNull();
+    expect(screen.queryByText("Subscription Minting")).toBeNull();
   });
 
   it("shows subscriptions row for iOS users in the US", async () => {
@@ -127,7 +127,9 @@ describe("About contents dropdown", () => {
 
     openContentsMenu();
 
-    expect(screen.getAllByText("Subscriptions").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Subscription Minting").length).toBeGreaterThan(
+      0
+    );
   });
 
   it("shows only the current page in the sticky trigger", async () => {
@@ -256,7 +258,7 @@ describe("About contents dropdown", () => {
     openContentsMenu();
 
     expect(
-      screen.getByRole("menuitem", { name: "Go to page: Subscriptions" })
+      screen.getByRole("menuitem", { name: "Go to page: Subscription Minting" })
     ).toHaveAttribute("href", "/about/subscriptions");
   });
 

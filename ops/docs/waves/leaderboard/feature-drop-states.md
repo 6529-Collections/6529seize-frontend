@@ -83,7 +83,7 @@ This page covers:
 - [Wave Leaderboard Drop Entry and Eligibility](feature-drop-entry-and-eligibility.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
-- [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
+- [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md)
 - [Wave Right Sidebar Leaderboard](../sidebars/feature-right-sidebar-leaderboard.md)
 - [Pagination Controls](../../shared/feature-pagination-controls.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)

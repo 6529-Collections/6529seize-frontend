@@ -28,7 +28,7 @@ test.describe("About Pages @smoke @medium @large", () => {
   test("should load the about/the-memes page", async ({ page }) => {
     await page.goto("/about/the-memes", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    await expect(page).toHaveTitle("The Memes");
+    await expect(page).toHaveTitle("About The Memes | About");
     await expectNoHorizontalOverflow(page);
     const text = page.getByText("large edition, CCO (public domain) NFTs");
     await expect(text).toBeVisible();
@@ -37,7 +37,7 @@ test.describe("About Pages @smoke @medium @large", () => {
   test("should display AboutGradients Page", async ({ page }) => {
     await page.goto("/about/6529-gradient", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    await expect(page).toHaveTitle("6529 Gradient");
+    await expect(page).toHaveTitle("6529 Gradient | About");
     await expectNoHorizontalOverflow(page);
 
     const gradients = page.locator('[src="/gradients-preview.png"]');
@@ -50,7 +50,7 @@ test.describe("About Pages @smoke @medium @large", () => {
   test("should display AboutSubscriptions Page", async ({ page }) => {
     await page.goto("/about/subscriptions", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    await expect(page).toHaveTitle("Subscriptions");
+    await expect(page).toHaveTitle("Subscription Minting | About");
     await expectNoHorizontalOverflow(page);
 
     // Look for the specific paragraph containing "Remote Minting"
