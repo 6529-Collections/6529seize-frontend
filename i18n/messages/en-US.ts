@@ -14,6 +14,7 @@ import {
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
+import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
@@ -272,14 +273,6 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "subsection.networkData": "Network & Reputation",
   "subsection.nftReportingTools": "Collections & Minting",
   "subsection.developerOpenData": "Data & Developer Tools",
-} as const);
-
-const JOIN_PAGE_MESSAGES = objectMessages("join", {
-  "metadata.title": "Join 6529",
-  "metadata.description": "Join 6529",
-  eyebrow: "6529",
-  heading: "Join 6529",
-  placeholder: "Join 6529 details are coming soon.",
 } as const);
 
 const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
@@ -695,6 +688,7 @@ const COMMON_MESSAGES = objectMessages("common", {
 } as const);
 
 export const EN_US_MESSAGES = {
+  ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
@@ -1407,7 +1401,6 @@ export const EN_US_MESSAGES = {
   ...COMMON_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
-  ...JOIN_PAGE_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,

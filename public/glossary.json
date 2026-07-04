@@ -746,7 +746,7 @@
       ],
       "canonical_path": "/waves",
       "related_paths": [
-        "/waves/create",
+        "/waves?create=wave",
         "/messages"
       ],
       "tags": [

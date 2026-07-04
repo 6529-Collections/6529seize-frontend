@@ -14,6 +14,7 @@ Use this area to create:
 - Desktop wave create mode (`create=wave`) can open on:
   `/waves`, `/waves/{waveId}`, `/messages`, or
   `/messages/{waveId}`.
+- Use `/waves?create=wave` as the direct web link for creating a Wave.
 - Desktop wave-create controls are available on:
   - `/waves` and `/waves/{waveId}` left-sidebar `Waves` section (`+`)
   - `/waves` empty-content placeholder (`Create Wave`)
