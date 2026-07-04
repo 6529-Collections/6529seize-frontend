@@ -16,6 +16,13 @@ const {
   appendAgentDiscoveryBlock,
 } = require("../../next-sitemap.config");
 
+type GlossaryTerm = {
+  id: string;
+  term: string;
+  canonical_path?: string;
+  related_paths?: string[];
+};
+
 function record(overrides: Record<string, unknown> = {}) {
   return {
     id: "network.example",
@@ -77,15 +84,15 @@ describe("sync-agent-files", () => {
 
       expect(artifact.term_count).toBe(MIN_GLOSSARY_TERMS);
       expect(artifact.terms).toHaveLength(MIN_GLOSSARY_TERMS);
-      expect(artifact.terms.map((term: any) => term.id)).not.toContain(
+      expect(artifact.terms.map((term: GlossaryTerm) => term.id)).not.toContain(
         "not-a-term"
       );
-      const titles = artifact.terms.map((term: any) => term.term);
+      const titles = artifact.terms.map((term: GlossaryTerm) => term.term);
       expect([...titles].sort((a, b) => a.localeCompare(b, "en"))).toEqual(
         titles
       );
       const waves = artifact.terms.find(
-        (term: any) => term.id === "waves.overview"
+        (term: GlossaryTerm) => term.id === "waves.overview"
       );
       expect(waves).toMatchObject({
         term: "Waves",
@@ -157,7 +164,7 @@ describe("sync-agent-files", () => {
       expect(glossary.schema_version).toBe(1);
       expect(glossary.term_count).toBe(glossary.terms.length);
       expect(glossary.term_count).toBeGreaterThanOrEqual(MIN_GLOSSARY_TERMS);
-      const ids = glossary.terms.map((term: any) => term.id);
+      const ids = glossary.terms.map((term: GlossaryTerm) => term.id);
       expect(new Set(ids).size).toBe(ids.length);
       expect(ids).toEqual(
         expect.arrayContaining(["network.tdh", "waves.drop"])
