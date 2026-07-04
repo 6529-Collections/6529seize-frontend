@@ -5,6 +5,7 @@
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
+import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
 import WagmiSetup from "@/components/providers/WagmiSetup";
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
@@ -264,6 +265,11 @@ describe("WagmiSetup Security Tests", () => {
     );
 
     return result;
+  };
+
+  const AppKitBootstrapProbe = () => {
+    const bootstrap = useAppKitBootstrap();
+    return <div data-testid="appkit-bootstrap-status">{bootstrap.status}</div>;
   };
 
   afterEach(() => {
@@ -725,39 +731,111 @@ describe("WagmiSetup Security Tests", () => {
       });
     });
 
-    it("enforces proper initialization sequence before rendering children", async () => {
-      // This test verifies the security pattern of not exposing children
-      // until the wallet connection system is properly initialized
-
-      let container!: HTMLElement;
-
-      await act(async () => {
-        const result = render(
-          <WagmiSetup>
-            <div data-testid="children">Test</div>
-          </WagmiSetup>
-        );
-        container = result.container;
-
-        // Allow full component lifecycle to complete
-        jest.runOnlyPendingTimers();
-        jest.runOnlyPendingTimers();
+    it("renders children after adapter creation without waiting for AppKit ready", async () => {
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
       });
 
-      // Verify initialization was attempted (security requirement)
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+          <div data-testid="children">Test</div>
+        </WagmiSetup>
+      );
+
       await waitFor(() => {
         expect(mockInitializeAppKit).toHaveBeenCalled();
-      });
-
-      // After successful initialization, children should be rendered within WagmiProvider
-      await waitFor(() => {
         expect(
           container.querySelector('[data-testid="wagmi-provider"]')
         ).toBeTruthy();
+        expect(
+          container.querySelector('[data-testid="children"]')
+        ).toBeTruthy();
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("initializing");
+
+      await act(async () => {
+        resolveReady();
+        await ready;
       });
 
-      // Verify that children are properly rendered within the provider context
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="appkit-bootstrap-status"]')
+        ).toHaveTextContent("ready");
+      });
+    });
+
+    it("keeps children mounted when AppKit ready fails after adapter creation", async () => {
+      let rejectReady!: (error: Error) => void;
+      const ready = new Promise<void>((_resolve, reject) => {
+        rejectReady = reject;
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
+      });
+
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+          <div data-testid="children">Test</div>
+        </WagmiSetup>
+      );
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="children"]')
+        ).toBeTruthy();
+      });
+
+      const readyError = new Error("ready failed");
+      await act(async () => {
+        rejectReady(readyError);
+        await ready.catch(() => undefined);
+      });
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="appkit-bootstrap-status"]')
+        ).toHaveTextContent("error");
+      });
       expect(container.querySelector('[data-testid="children"]')).toBeTruthy();
+      expect(mockLogErrorSecurely).toHaveBeenCalledWith(
+        "[WagmiSetup] AppKit ready failed after adapter mount",
+        readyError
+      );
     });
   });
 

@@ -1194,6 +1194,15 @@ function isExpectedReactionMutation(method, pathname, body) {
   return method === "DELETE" && isEmptyRequestBody(body);
 }
 
+function isExpectedSessionRefreshBody(body) {
+  return (
+    hasOnlyKeys(body, ["client_address", "client_type"]) &&
+    body.client_type === "web" &&
+    typeof body.client_address === "string" &&
+    body.client_address.toLowerCase() === SANDBOX_WALLET.toLowerCase()
+  );
+}
+
 function hasEmptySearchParams(searchParams) {
   return searchParams.toString() === "";
 }
@@ -1213,6 +1222,10 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 
   if (pathname === "/api/notifications/read") {
     return isEmptyRequestBody(body);
+  }
+
+  if (pathname === "/api/auth/session-refresh") {
+    return isExpectedSessionRefreshBody(body);
   }
 
   if (pathname === "/api/drops") {
@@ -1558,6 +1571,19 @@ const mockApiKnownPostRoutes = [
   {
     matches: isNotificationMutationPath,
     respond: (res) => writeEmptyResponse(res, 204),
+  },
+  {
+    matches: (pathname) => pathname === "/api/auth/session-refresh",
+    respond: (res) =>
+      writeJsonResponse(res, {
+        address: SANDBOX_WALLET,
+        role: null,
+        access_token: buildSyntheticJwt(),
+        access_token_expires_at: new Date(
+          Date.now() + 60 * 60 * 1000
+        ).toISOString(),
+        client_type: "web",
+      }),
   },
   {
     matches: (pathname) => pathname === "/api/waves/direct-message/new",

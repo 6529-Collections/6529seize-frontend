@@ -31,7 +31,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   const handleRedirect = useEffectEvent((target: DelegationCenterSection) => {
     if (!isConnected) {
       setOpenConnect(true);
-      seizeConnect();
+      void seizeConnect();
       return;
     }
 

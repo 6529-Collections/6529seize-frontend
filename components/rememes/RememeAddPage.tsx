@@ -406,7 +406,9 @@ export default function RememeAddPage() {
                     type="button"
                     className={WHITE_BUTTON_CLASS}
                     disabled={seizeConnectOpen}
-                    onClick={() => seizeConnect()}
+                    onClick={() => {
+                      void seizeConnect();
+                    }}
                   >
                     {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
                   </button>

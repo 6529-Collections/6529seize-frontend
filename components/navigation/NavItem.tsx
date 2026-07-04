@@ -276,7 +276,7 @@ const NavItemContent = ({
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (item.kind === "route" && item.name === "Profile" && !address) {
       event.preventDefault();
-      seizeConnect();
+      void seizeConnect();
       return;
     }
 

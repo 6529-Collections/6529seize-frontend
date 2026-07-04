@@ -201,7 +201,7 @@ let connectedAccountsOverride:
 
 const mockSeizeDisconnectAndLogout = jest.fn(() => Promise.resolve());
 const mockSeizeDisconnect = jest.fn(() => Promise.resolve());
-const mockSeizeConnect = jest.fn();
+const mockSeizeConnect = jest.fn(() => Promise.resolve());
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => {

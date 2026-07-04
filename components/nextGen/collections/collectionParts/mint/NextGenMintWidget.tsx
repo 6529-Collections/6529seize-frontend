@@ -211,10 +211,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           setIsMinting(true);
         }
       } else {
-        seizeConnect();
+        void seizeConnect();
       }
     } else {
-      seizeConnect();
+      void seizeConnect();
     }
   };
 

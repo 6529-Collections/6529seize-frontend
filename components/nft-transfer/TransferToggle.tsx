@@ -45,7 +45,7 @@ export default function TransferToggle() {
       onClick={() => {
         if (!isConnected) {
           wantTransferAfterConnect.current = true;
-          seizeConnect();
+          void seizeConnect();
           return;
         }
 
@@ -58,9 +58,10 @@ export default function TransferToggle() {
         }
       }}
       className={[
-        "tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-white hover:tw-ring-iron-300 tw-shadow-sm tw-px-3.5 tw-py-2.5 tw-font-semibold tw-text-sm",
-        "tw-text-iron-800 tw-bg-iron-200 hover:tw-bg-iron-300 tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out",
-      ].join(" ")}>
+        "tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border-0 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white hover:tw-ring-iron-300",
+        "tw-whitespace-nowrap tw-bg-iron-200 tw-text-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-300",
+      ].join(" ")}
+    >
       {t.enabled ? "Exit Transfer" : "Transfer"}
       <FontAwesomeIcon icon={faRightLeft} />
     </button>

@@ -367,7 +367,7 @@ function DelegationConnectWalletState(
   props: Readonly<{
     title: string;
     body: string;
-    onConnect: () => void;
+    onConnect: () => Promise<void>;
   }>
 ) {
   return (
@@ -380,7 +380,9 @@ function DelegationConnectWalletState(
       <button
         type="button"
         className={styles["connectRequiredButton"]}
-        onClick={props.onConnect}
+        onClick={() => {
+          void props.onConnect();
+        }}
       >
         Connect Wallet
       </button>

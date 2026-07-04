@@ -178,10 +178,10 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
           setIsMinting(true);
         }
       } else {
-        seizeConnect();
+        void seizeConnect();
       }
     } else {
-      seizeConnect();
+      void seizeConnect();
     }
   };
 
