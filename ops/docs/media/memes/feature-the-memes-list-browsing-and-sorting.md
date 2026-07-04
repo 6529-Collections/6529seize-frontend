@@ -50,7 +50,7 @@
 - `szn` accepts positive integers only.
 - `year` scopes the season dropdown. With no year selected, the season dropdown
   shows all loaded seasons. With a year selected, it shows only seasons in that
-  year and the all option becomes `All Year N Seasons`.
+  year and the all option becomes `All Year N` (for example `All Year 4`).
 - If `year` is present with no `szn`, the API request filters by all loaded
   seasons in that year. For example, Year 4 filters the list to the loaded Year
   4 seasons.
@@ -73,7 +73,7 @@
    or `All Time`.
 7. Set a year with the year dropdown (`All Years`, `Year 0`, `Year 1`, and so
    on).
-8. Set a season with the season dropdown (`All Seasons`, `All Year N Seasons`,
+8. Set a season with the season dropdown (`All Seasons`, `All Year N`,
    or a specific season in the active year).
 9. Each control change updates the query, clears loaded rows, and refetches
    from page one.
@@ -106,7 +106,7 @@
 - Browse one season only:
   - Set a season filter (`szn`) and keep any sort.
 - Browse one year only:
-  - Set a year filter (`year`) and keep season on `All Year N Seasons`.
+  - Set a year filter (`year`) and keep season on `All Year N`.
 - Group by meme:
   - Set sort to `Meme`.
 - Share exact list state:
@@ -122,8 +122,8 @@
 - Unsupported `sort_dir` values fall back to ascending (`asc`).
 - Invalid or non-positive `szn` values are ignored.
 - Invalid `year` values are ignored.
-- If `szn` is not present in loaded season options, both `year` and `szn` are
-  removed.
+- If `szn` is not present in loaded season options, `szn` is removed; a valid
+  `year` is kept.
 - If both `year` and `szn` are present but the season is not in that year, both
   filters are removed and the route returns to the default unfiltered list.
 - Choosing a volume window while not already on `Volume` switches the active
