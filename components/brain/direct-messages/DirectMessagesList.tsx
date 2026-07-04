@@ -33,9 +33,13 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
 
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
   const hasFetchedRef = useRef(false);
-  const { directMessages, registerWave } = useMyStream();
+  const { directMessages, registerWave, requestDirectMessagesList } =
+    useMyStream();
   const { list, hasNextPage, isFetchingNextPage, isFetching, fetchNextPage } =
     directMessages;
+  const hasDirectMessages = list.length > 0;
+
+  useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
 
   useEffect(() => {
     hasFetchedRef.current = false;
@@ -65,7 +69,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
         }
       },
       {
-        root: listHandle?.containerRef.current,
+        root: listHandle.containerRef.current,
         rootMargin: "100px",
       }
     );
@@ -73,7 +77,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, list.length > 0]);
+  }, [hasNextPage, isFetchingNextPage, hasDirectMessages]);
 
   const shouldShowPlaceholder =
     !hasValidWalletAuth || !connectedProfile?.handle;

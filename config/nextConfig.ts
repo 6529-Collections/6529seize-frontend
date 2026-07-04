@@ -4,18 +4,9 @@ import { NextConfig } from "next";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 import { getMediaResolverHostname } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
-import path from "node:path";
 
 const HTML_LIMITED_METADATA_BOTS =
   /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
-const REPO_ROOT = path.resolve(process.cwd());
-const NODE_MODULES_PATH = path.resolve(REPO_ROOT, "node_modules");
-const SASS_LOAD_PATHS = [
-  path.resolve(NODE_MODULES_PATH, "bootstrap", "scss"),
-  NODE_MODULES_PATH,
-];
-const BOOTSTRAP_PROGRESS_PARTIAL =
-  "./node_modules/bootstrap/scss/_progress.scss";
 
 function getAllowedDevOrigins(): string[] {
   return (
@@ -36,16 +27,6 @@ export function sharedConfig(
     reactStrictMode: false,
     htmlLimitedBots: HTML_LIMITED_METADATA_BOTS,
     compress: true,
-    sassOptions: {
-      loadPaths: SASS_LOAD_PATHS,
-      quietDeps: true,
-      silenceDeprecations: [
-        "color-functions",
-        "global-builtin",
-        "if-function",
-        "import",
-      ],
-    },
     allowedDevOrigins: getAllowedDevOrigins(),
     images: {
       loader: "default",
@@ -109,7 +90,6 @@ export function sharedConfig(
       resolveAlias: {
         canvas: "./stubs/empty.js",
         encoding: "./stubs/empty.js",
-        progress: BOOTSTRAP_PROGRESS_PARTIAL,
         "@react-native-async-storage/async-storage": "./stubs/empty.js",
         "react-native": "./stubs/empty.js",
         "idb-keyval": "./lib/storage/idb-keyval.ts",

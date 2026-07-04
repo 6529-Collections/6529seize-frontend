@@ -1,4 +1,4 @@
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import CommunityDownloadsRoyalties from "@/components/community-downloads/CommunityDownloadsRoyalties";
 import { getAppMetadata } from "@/components/providers/metadata";
 import type { Metadata } from "next";

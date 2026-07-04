@@ -19,7 +19,7 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 
 import { DELEGATION_ABI } from "@/abis/abis";
 import {
@@ -1039,7 +1039,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       <span className="tw-flex tw-flex-col tw-gap-1">
         <DelegationWallet address={w.wallet} />
         <span className="tw-flex tw-items-center tw-gap-3">
-          <span className="font-color-h">
+          <span className="tw-text-[#9a9a9a]">
             {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
           </span>
           <span
@@ -1840,7 +1840,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     }
                   >
                     <FontAwesomeIcon icon={faCircleArrowLeft} />
-                    <span className="font-smaller">
+                    <span className="tw-text-sm">
                       Back to Delegation Center
                     </span>
                   </button>
@@ -1901,7 +1901,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                                 }
                               >
                                 <FontAwesomeIcon icon={faCircleArrowLeft} />
-                                <span className="font-smaller">
+                                <span className="tw-text-sm">
                                   Back to Delegation Center
                                 </span>
                               </button>

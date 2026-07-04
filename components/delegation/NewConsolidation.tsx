@@ -10,7 +10,7 @@ import { useState } from "react";
 import type { DelegationCollection } from "./delegation-constants";
 import { CONSOLIDATION_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
-import styles from "./Delegation.module.scss";
+import styles from "./Delegation.module.css";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,

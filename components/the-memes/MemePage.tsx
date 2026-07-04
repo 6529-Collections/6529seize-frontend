@@ -9,6 +9,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
+import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
@@ -16,9 +17,10 @@ import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
-import type { MemesExtendedData, NFT, NftRank, NftTDH } from "@/entities/INFT";
+import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
@@ -47,7 +49,7 @@ import {
   MEME_FOCUS,
   MEME_TABS,
 } from "./MemeShared";
-import styles from "./TheMemes.module.scss";
+import styles from "./TheMemes.module.css";
 import UpcomingMemePage from "./UpcomingMemePage";
 
 const MemePageActivity = dynamic(() =>
@@ -218,7 +220,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
   const [nft, setNft] = useState<NFT>();
   const [nftNotFound, setNftNotFound] = useState(false);
-  const [nftMeta, setNftMeta] = useState<MemesExtendedData>();
+  const [nftMeta, setNftMeta] = useState<ApiMemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
@@ -416,7 +418,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
       ? `${artworkColumnBaseClassName} tw-order-2 tw-mt-6 tw-self-start lg:tw-order-none lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-mt-0`
       : artworkColumnBaseClassName;
     const detailsColumnClassName = hasMintingBox
-      ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-4 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-block lg:[&>*]:tw-order-none lg:[&>*]:tw-w-full lg:[&>*:nth-child(2)]:tw-pt-8"
+      ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-3 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-block lg:[&>*]:tw-order-none lg:[&>*]:tw-w-full lg:[&>*:nth-child(2)]:tw-pt-5"
       : undefined;
 
     return (
@@ -445,12 +447,20 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         </div>
         <div className={detailsColumnClassName}>
           {isLastCard && (
-            <NowMintingCountdown
-              nftId={nft.id}
-              contract={MEMES_CONTRACT}
-              chainId={mainnet.id}
-              fullWidth
-            />
+            <div className="tw-w-full">
+              <NowMintingCountdown
+                nftId={nft.id}
+                contract={MEMES_CONTRACT}
+                chainId={mainnet.id}
+                fullWidth
+              />
+              <div className="tw-mt-4">
+                <LatestDropNextMintSubscribe
+                  tokenId={nft.id}
+                  statusSource="none"
+                />
+              </div>
+            </div>
           )}
           <MemePageLiveRightMenu
             show={true}

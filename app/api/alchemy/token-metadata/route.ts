@@ -8,6 +8,7 @@ import { isValidEthAddress } from "@/helpers/Helpers";
 import { fetchPublicJson, UrlGuardError } from "@/lib/security/urlGuard";
 import { normaliseAddress, resolveNetwork } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
+import { readJsonBody } from "../readJsonBody";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 const MAX_BATCH_SIZE = 100;
@@ -202,14 +203,17 @@ function parseRequestBody(body: TokenMetadataRequestBody): ParseResult {
     return withChain(parseTokensArray(tokens), chain);
   }
 
-  if (address && tokenIds !== undefined && !Array.isArray(tokenIds)) {
+  const hasAddress =
+    address !== undefined && address !== null && address !== "";
+
+  if (hasAddress && tokenIds !== undefined && !Array.isArray(tokenIds)) {
     return {
       ok: false,
       response: jsonError("tokenIds must be an array"),
     };
   }
 
-  if (address && Array.isArray(tokenIds) && tokenIds.length > 0) {
+  if (hasAddress && Array.isArray(tokenIds) && tokenIds.length > 0) {
     return withChain(parseAddressAndIds(address, tokenIds), chain);
   }
 
@@ -323,60 +327,6 @@ function enforceRateLimit(request: NextRequest): NextResponse | null {
   );
 }
 
-async function readJsonBody(
-  request: NextRequest
-): Promise<
-  | { ok: true; body: TokenMetadataRequestBody }
-  | { ok: false; response: NextResponse }
-> {
-  const contentLengthHeader = request.headers.get("content-length");
-  if (contentLengthHeader) {
-    const contentLength = Number(contentLengthHeader);
-    if (
-      !Number.isFinite(contentLength) ||
-      contentLength < 0 ||
-      contentLength > MAX_BODY_BYTES
-    ) {
-      return {
-        ok: false,
-        response: jsonError("Request body is too large", 413),
-      };
-    }
-  }
-
-  const reader = request.body?.getReader();
-  if (!reader) {
-    return { ok: false, response: jsonError("Invalid JSON payload") };
-  }
-
-  const decoder = new TextDecoder();
-  let totalBytes = 0;
-  let rawBody = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    totalBytes += value.byteLength;
-    if (totalBytes > MAX_BODY_BYTES) {
-      return {
-        ok: false,
-        response: jsonError("Request body is too large", 413),
-      };
-    }
-    rawBody += decoder.decode(value, { stream: true });
-  }
-
-  rawBody += decoder.decode();
-
-  try {
-    return { ok: true, body: JSON.parse(rawBody) };
-  } catch {
-    return { ok: false, response: jsonError("Invalid JSON payload") };
-  }
-}
-
 function getBatchCacheKey(
   chain: SupportedChain,
   tokens: readonly TokenToFetch[]
@@ -466,7 +416,11 @@ export async function POST(request: NextRequest) {
     return rateLimitResponse;
   }
 
-  const bodyResult = await readJsonBody(request);
+  const bodyResult = await readJsonBody<TokenMetadataRequestBody>({
+    request,
+    maxBodyBytes: MAX_BODY_BYTES,
+    jsonError,
+  });
   if (!bodyResult.ok) {
     return bodyResult.response;
   }

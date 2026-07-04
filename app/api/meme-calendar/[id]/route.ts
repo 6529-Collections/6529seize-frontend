@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import {
   buildMemeCalendarMintResponse,
   MEME_CALENDAR_API_CACHE_HEADERS,
+  MEME_CALENDAR_UNRESOLVED_TIMELINE_ERROR,
 } from "../meme-calendar-response";
 
 const POSITIVE_INTEGER_PATTERN = /^[1-9]\d*$/;
@@ -21,8 +22,7 @@ const invalidIdResponse = () =>
 const unresolvedTimelineResponse = () =>
   NextResponse.json(
     {
-      error:
-        "Unable to resolve calendar details for this mint id. The id may be out of range.",
+      error: MEME_CALENDAR_UNRESOLVED_TIMELINE_ERROR,
     },
     { status: 422 }
   );
@@ -47,7 +47,7 @@ export async function GET(
   const { id } = await params;
   const mintId = parseMintId(id);
 
-  if (mintId == null) {
+  if (mintId === null) {
     return invalidIdResponse();
   }
 
@@ -58,7 +58,12 @@ export async function GET(
       return unresolvedTimelineResponse();
     }
 
-    return NextResponse.json(buildMemeCalendarMintResponse(timeline, now), {
+    const response = buildMemeCalendarMintResponse(timeline, now);
+    if (response === null) {
+      return unresolvedTimelineResponse();
+    }
+
+    return NextResponse.json(response, {
       headers: MEME_CALENDAR_API_CACHE_HEADERS,
     });
   } catch {

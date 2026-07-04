@@ -19,7 +19,7 @@ import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";
-import styles from "./Leaderboard.module.scss";
+import styles from "./Leaderboard.module.css";
 import LeaderboardCardsCollectedComponent from "./LeaderboardCardsCollected";
 import LeaderboardInteractionsComponent from "./LeaderboardInteractions";
 
@@ -418,7 +418,7 @@ export default function Leaderboard(
               ) : (
                 <>
                   {numberWithCommas(selectedNetworkTdhChange)}{" "}
-                  <span className="font-smaller">
+                  <span className="tw-text-sm">
                     ({selectedGlobalTdhRateChangeLabel})
                   </span>
                 </>

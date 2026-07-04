@@ -1,159 +1,123 @@
 import CollectionsMenuIcon from "@/components/common/icons/CollectionsMenuIcon";
+import WavesIcon from "@/components/common/icons/WavesIcon";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import {
+  getAboutNavItemActivePathPrefixes,
   getAboutNavItemHref,
   getAboutNavItemLabel,
   getVisibleAboutNavGroups,
-  isAboutSectionNavItem,
 } from "@/components/about/about.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  DocumentTextIcon,
-  UsersIcon,
-  WrenchIcon,
-} from "@heroicons/react/24/outline";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useMemo, type ComponentType } from "react";
 
-function getNetworkSection(): SidebarSection {
+type SidebarSubsection = NonNullable<SidebarSection["subsections"]>[number];
+type SidebarNavItem = SidebarSubsection["items"][number];
+
+function mapAboutNavItemToSidebarItem(
+  item: ReturnType<typeof getVisibleAboutNavGroups>[number]["items"][number]
+): SidebarNavItem {
+  const activePathPrefixes = getAboutNavItemActivePathPrefixes(item);
+  const sidebarItem = {
+    name: getAboutNavItemLabel(item, DEFAULT_LOCALE),
+    href: getAboutNavItemHref(item),
+  };
+
+  return activePathPrefixes === undefined
+    ? sidebarItem
+    : { ...sidebarItem, activePathPrefixes };
+}
+
+function mapAboutNavGroupToSubsection(
+  group: ReturnType<typeof getVisibleAboutNavGroups>[number]
+): SidebarSubsection {
   return {
-    key: "network",
-    name: "Network",
-    icon: UsersIcon,
-    items: [
-      { name: "Identities", href: "/network" },
-      { name: "Activity", href: "/network/activity" },
-      { name: "Groups", href: "/network/groups" },
-      { name: "NFT Activity", href: "/nft-activity" },
-      { name: "Memes Calendar", href: "/meme-calendar" },
-      { name: "TDH", href: "/network/tdh" },
-      { name: "xTDH", href: "/xtdh" },
-      { name: "Wave Score", href: "/network/wave-score" },
-      { name: "REP Categories", href: "/rep/categories" },
-    ],
-    subsections: [
-      {
-        name: "Metrics",
-        items: [
-          { name: "Health", href: "/network/health" },
-          { name: "Definitions", href: "/network/definitions" },
-          { name: "Levels", href: "/network/levels" },
-          { name: "Network Stats", href: "/network/health/network-tdh" },
-        ],
-      },
-    ],
+    name: t(DEFAULT_LOCALE, group.labelKey),
+    items: group.items.map(mapAboutNavItemToSidebarItem),
   };
 }
 
-function getCollectionsSection(): SidebarSection {
+function getWavesSection(): SidebarSection {
   return {
-    key: "collections",
-    name: "Collections",
-    icon: CollectionsMenuIcon,
+    key: "waves",
+    name: t(DEFAULT_LOCALE, "navigation.primary.waves"),
+    icon: WavesIcon,
     items: [
-      { name: "The Memes", href: "/the-memes" },
-      { name: "6529 Gradient", href: "/6529-gradient" },
-      { name: "NextGen", href: "/nextgen" },
-      { name: "Meme Lab", href: "/meme-lab" },
-      { name: "ReMemes", href: "/rememes" },
+      {
+        name: t(DEFAULT_LOCALE, "navigation.primary.waves"),
+        href: "/waves",
+        activePathPrefixes: ["/waves/"],
+      },
+      {
+        name: t(DEFAULT_LOCALE, "navigation.waves.discover"),
+        href: "/discover",
+      },
     ],
     subsections: [],
   };
 }
 
-function getToolsSection(
-  appWalletsSupported: boolean,
-  hideSubscriptions: boolean
-): SidebarSection {
+function getNftsSection(): SidebarSection {
   return {
-    key: "tools",
-    name: "Tools",
-    icon: WrenchIcon,
-    items: [],
-    subsections: [
+    key: "nfts",
+    name: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
+    icon: CollectionsMenuIcon,
+    items: [
       {
-        name: "NFT Delegation",
-        items: [
-          { name: "Delegation Center", href: "/delegation/delegation-center" },
-          {
-            name: "Wallet Architecture",
-            href: "/delegation/wallet-architecture",
-          },
-          { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
-          {
-            name: "Consolidation Use Cases",
-            href: "/delegation/consolidation-use-cases",
-          },
-          { name: "Wallet Checker", href: "/delegation/wallet-checker" },
-        ],
+        name: "The Memes",
+        href: "/the-memes",
+        activePathPrefixes: ["/the-memes/"],
       },
       {
-        name: "The Memes Tools",
-        items: [
-          ...(hideSubscriptions
-            ? []
-            : [
-                {
-                  name: "Subscriptions Report",
-                  href: "/tools/subscriptions-report",
-                },
-              ]),
-          { name: "Memes Accounting", href: "/meme-accounting" },
-          { name: "Memes Gas", href: "/meme-gas" },
-        ],
+        name: "6529 Gradient",
+        href: "/6529-gradient",
+        activePathPrefixes: ["/6529-gradient/"],
       },
       {
-        name: "Other Tools",
-        items: [
-          ...(appWalletsSupported
-            ? [{ name: "App Wallets", href: "/tools/app-wallets" }]
-            : []),
-          { name: "API", href: "/tools/api" },
-          { name: "EMMA", href: "/emma" },
-          { name: "Block Finder", href: "/tools/block-finder" },
-        ],
+        name: "NextGen",
+        href: "/nextgen",
+        activePathPrefixes: ["/nextgen/"],
       },
       {
-        name: "Open Data",
-        items: [
-          { name: "Open Data", href: "/open-data" },
-          { name: "Network Metrics", href: "/open-data/network-metrics" },
-          ...(hideSubscriptions
-            ? []
-            : [
-                {
-                  name: "Meme Subscriptions",
-                  href: "/open-data/meme-subscriptions",
-                },
-              ]),
-          { name: "Rememes", href: "/open-data/rememes" },
-          { name: "Team", href: "/open-data/team" },
-          { name: "Royalties", href: "/open-data/royalties" },
-        ],
+        name: "Meme Lab",
+        href: "/meme-lab",
+        activePathPrefixes: ["/meme-lab/"],
       },
+      {
+        name: "ReMemes",
+        href: "/rememes",
+        activePathPrefixes: ["/rememes/"],
+      },
+      { name: "NFT Activity", href: "/nft-activity" },
+      { name: "Memes Calendar", href: "/meme-calendar" },
     ],
+    subsections: [],
   };
 }
 
-function getAboutSection(hideSubscriptions: boolean): SidebarSection {
+function getAboutSection(
+  appWalletsSupported: boolean,
+  hideSubscriptions: boolean
+): SidebarSection {
+  const aboutGroups = getVisibleAboutNavGroups({
+    hideSubscriptions,
+    appWalletsSupported,
+  });
+
   return {
     key: "about",
-    name: "About",
+    name: t(DEFAULT_LOCALE, "navigation.primary.about"),
     icon: DocumentTextIcon,
-    items: [{ name: "About", href: "/about" }],
-    subsections: getVisibleAboutNavGroups(hideSubscriptions).map((group) => ({
-      name: t(DEFAULT_LOCALE, group.labelKey),
-      items: group.items.map((item) => {
-        const href = getAboutNavItemHref(item);
-
-        return {
-          name: getAboutNavItemLabel(item, DEFAULT_LOCALE),
-          href,
-          ...(isAboutSectionNavItem(item) ? {} : { activatesSection: false }),
-        };
-      }),
-    })),
+    items: [
+      {
+        name: t(DEFAULT_LOCALE, "navigation.primary.about"),
+        href: "/about",
+        activePathPrefixes: ["/about/"],
+      },
+    ],
+    subsections: aboutGroups.map(mapAboutNavGroupToSubsection),
   };
 }
 
@@ -162,10 +126,9 @@ function buildSidebarSections(
   hideSubscriptions: boolean
 ): SidebarSection[] {
   return [
-    getNetworkSection(),
-    getCollectionsSection(),
-    getToolsSection(appWalletsSupported, hideSubscriptions),
-    getAboutSection(hideSubscriptions),
+    getNftsSection(),
+    getWavesSection(),
+    getAboutSection(appWalletsSupported, hideSubscriptions),
   ];
 }
 

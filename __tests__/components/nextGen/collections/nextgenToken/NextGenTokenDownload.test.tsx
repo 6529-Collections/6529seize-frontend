@@ -5,19 +5,6 @@ import NextGenTokenDownload, {
   Resolution,
 } from "@/components/nextGen/collections/nextgenToken/NextGenTokenDownload";
 
-// Mock react-bootstrap components
-jest.mock("react-bootstrap", () => {
-  const Dropdown: any = (p: any) => <div {...p} />;
-  Dropdown.Item = (p: any) => <button {...p} />;
-  const RB: any = {
-    Container: (p: any) => <div data-testid="container" {...p} />,
-    Row: (p: any) => <div data-testid="row" {...p} />,
-    Col: (p: any) => <div data-testid="col" {...p} />,
-    Dropdown,
-  };
-  return RB;
-});
-
 // Mock external components
 jest.mock("@/components/dotLoader/DotLoader", () => ({
   __esModule: true,

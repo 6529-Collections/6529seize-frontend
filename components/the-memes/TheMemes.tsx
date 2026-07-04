@@ -22,10 +22,10 @@ import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -315,13 +315,13 @@ export default function TheMemesComponent({
 
   const [fetching, setFetching] = useState(true);
 
-  const [nfts, setNfts] = useState<NFTWithMemesExtendedData[]>([]);
+  const [nfts, setNfts] = useState<ApiMemesExtendedData[]>([]);
   const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
   const [nftsNextPage, setNftsNextPage] = useState<string>();
 
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
   const [nftsByMeme, setNftsByMeme] = useState<
-    Map<number, NFTWithMemesExtendedData[]>
+    Map<number, ApiMemesExtendedData[]>
   >(new Map());
 
   useEffect(() => {
@@ -350,7 +350,7 @@ export default function TheMemesComponent({
   useEffect(() => {
     const memesMap = new Map<
       number,
-      { meme: Meme; items: NFTWithMemesExtendedData[] }
+      { meme: Meme; items: ApiMemesExtendedData[] }
     >();
 
     for (const nft of nfts) {
@@ -377,7 +377,7 @@ export default function TheMemesComponent({
 
     setNftMemes(sortedMemes);
 
-    const nextNftsByMeme = new Map<number, NFTWithMemesExtendedData[]>();
+    const nextNftsByMeme = new Map<number, ApiMemesExtendedData[]>();
 
     for (const [key, { items }] of Array.from(memesMap.entries())) {
       nextNftsByMeme.set(
@@ -395,7 +395,7 @@ export default function TheMemesComponent({
       return;
     }
     fetchUrl(nftsNextPage)
-      .then((responseNfts: Partial<DBResponse<NFTWithMemesExtendedData>>) => {
+      .then((responseNfts: Partial<DBResponse<ApiMemesExtendedData>>) => {
         setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
         setNftsNextPage(
           typeof responseNfts.next === "string" ? responseNfts.next : undefined
@@ -489,7 +489,7 @@ export default function TheMemesComponent({
     );
   }
 
-  function printNft(nft: NFTWithMemesExtendedData) {
+  function printNft(nft: ApiMemesExtendedData) {
     return (
       <TheMemesCard
         key={`${nft.contract}-${nft.id}`}

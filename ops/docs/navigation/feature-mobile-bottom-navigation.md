@@ -4,16 +4,13 @@ Parent: [Navigation Index](README.md)
 
 ## Overview
 
-In native app layout, primary section switching uses a fixed bottom icon bar.
-The bar uses a fixed `85px` shell height with top-aligned icon buttons in a
-shared icon slot.
+In native app layout, primary section switching uses a floating bottom icon bar.
 
 Tabs render left-to-right as `Discovery`, `Waves`, `Messages`, `Home`,
 `Network`, `Collections`, and `Notifications`.
 
 `Messages` and `Notifications` can show unread dots for connected profiles.
-Profile access is no longer part of the bottom-tab set and stays in the app
-drawer/account surfaces.
+Profile access stays in the app drawer/account surfaces.
 
 ## Location in the Site
 
@@ -60,7 +57,8 @@ drawer/account surfaces.
 - `Discovery` is active only on `/discover`.
 - `Waves` and `Messages` can be active from `?view=waves` or `?view=messages`
   even when path is not `/waves` or `/messages`.
-- `Network` is active on `/network`, `/network/*`, `/nft-activity`, and `/xtdh`.
+- `Network` is active on `/network`, `/network/*`, `/nft-activity`, and
+  `/xtdh` (`xTDH Allocations Dashboard`).
 - `Collections` is active on `/the-memes`, `/6529-gradient`, `/nextgen`,
   `/meme-lab`, and `/rememes`.
 - `Home` is active only on `/` when no `wave`/`view` override is active.
@@ -69,11 +67,8 @@ drawer/account surfaces.
   `/messages/create`).
 - `Messages` and `Notifications` unread dots show only when a connected profile
   has unread items.
-- Active-tab underline stays pinned to the top edge for every tab, including
-  `Home`.
 - On non-stream routes (for example `/network`, `/the-memes`),
-  layout adds `85px` bottom reserve spacing so content is not hidden behind the
-  bar.
+  layout reserves bottom space so content is not hidden behind the bar.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
   view and is non-interactive.
 - While a single drop is open (`?drop=...`) or an inline drop edit is active,
@@ -95,7 +90,6 @@ drawer/account surfaces.
 
 - This page documents app-shell behavior only.
 - Bottom navigation uses icon buttons (no visible text labels in the bar).
-- Standard shell reserve height is `85px` when the bar is visible.
 - Secondary destinations (profile/network/tools/about/account actions) are in
   [App Sidebar Menu](feature-app-sidebar-menu.md).
 - Web desktop/small-screen routing is documented in

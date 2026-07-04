@@ -4,18 +4,18 @@ import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
-import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
-import HomeIcon from "@/components/common/icons/HomeIcon";
-import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
+import type { SidebarSection } from "@/components/navigation/navTypes";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { usePathname } from "next/navigation";
 import React, {
   useCallback,
@@ -33,11 +33,21 @@ interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
 }
 
+type BrowserGlobal = typeof globalThis & {
+  readonly window?: Window;
+};
+
+const getBrowserWindow = (): Window | undefined =>
+  (globalThis as BrowserGlobal).window;
+
+const getSafePathname = (pathname: string | null): string => pathname ?? "";
+
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
 >(({ isCollapsed = false }, ref) => {
   const pathname = usePathname();
+  const safePathname = getSafePathname(pathname);
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
@@ -48,7 +58,8 @@ const WebSidebarNav = React.forwardRef<
     handle: connectedProfile?.handle ?? null,
   });
 
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [manualExpandedKeys, setManualExpandedKeys] = useState<string[]>([]);
+  const [manualCollapsedKeys, setManualCollapsedKeys] = useState<string[]>([]);
   const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
   const [submenuAnchor, setSubmenuAnchor] = useState<{
     left: number;
@@ -65,8 +76,9 @@ const WebSidebarNav = React.forwardRef<
     country
   );
   const sectionMap = useSectionMap(sections);
-  const networkSection = sectionMap.get("network");
-  const collectionsSection = sectionMap.get("collections");
+  const nftsSection = sectionMap.get("nfts");
+  const wavesSection = sectionMap.get("waves");
+  const aboutSection = sectionMap.get("about");
 
   const closeSubmenu = useCallback(() => {
     setOpenSubmenuKey(null);
@@ -91,20 +103,13 @@ const WebSidebarNav = React.forwardRef<
     return null;
   }, [pathname, sections]);
 
-  useEffect(() => {
-    if (activeSectionKey) {
-      setExpandedKeys([activeSectionKey]);
-    } else {
-      setExpandedKeys([]);
+  const expandedKeys = useMemo(() => {
+    const keys = new Set(manualExpandedKeys);
+    if (activeSectionKey && !manualCollapsedKeys.includes(activeSectionKey)) {
+      keys.add(activeSectionKey);
     }
-    closeSubmenu();
-  }, [activeSectionKey, closeSubmenu]);
-
-  useEffect(() => {
-    if (!isCollapsed) {
-      closeSubmenu();
-    }
-  }, [isCollapsed, closeSubmenu]);
+    return Array.from(keys);
+  }, [activeSectionKey, manualCollapsedKeys, manualExpandedKeys]);
 
   const handleSectionToggle = useCallback(
     (sectionKey: string, event?: React.MouseEvent) => {
@@ -131,46 +136,62 @@ const WebSidebarNav = React.forwardRef<
         return;
       }
 
-      setExpandedKeys((prev) =>
-        prev.includes(sectionKey)
-          ? prev.filter((key) => key !== sectionKey)
-          : [...prev, sectionKey]
+      const isExpanded = expandedKeys.includes(sectionKey);
+      if (isExpanded) {
+        setManualExpandedKeys((prev) =>
+          prev.filter((key) => key !== sectionKey)
+        );
+        setManualCollapsedKeys((prev) =>
+          prev.includes(sectionKey) ? prev : [...prev, sectionKey]
+        );
+        return;
+      }
+
+      setManualCollapsedKeys((prev) =>
+        prev.filter((key) => key !== sectionKey)
+      );
+      setManualExpandedKeys((prev) =>
+        prev.includes(sectionKey) ? prev : [...prev, sectionKey]
       );
     },
-    [isCollapsed, openSubmenuKey]
+    [expandedKeys, isCollapsed, openSubmenuKey]
   );
 
   useEffect(() => {
     if (isCollapsed && submenuTrigger) {
       const updateAnchor = () => {
         const rect = submenuTrigger.getBoundingClientRect();
-        setSubmenuAnchor({
+        const nextAnchor = {
           left: rect.right + 12,
           top: rect.top,
           height: rect.height,
-        });
+        };
+        setSubmenuAnchor((previous) =>
+          previous?.left === nextAnchor.left &&
+          previous.top === nextAnchor.top &&
+          previous.height === nextAnchor.height
+            ? previous
+            : nextAnchor
+        );
       };
 
-      const browserWindow = globalThis.window ?? undefined;
+      const browserWindow = getBrowserWindow();
+      if (browserWindow === undefined) {
+        return undefined;
+      }
+
       const scrollContainer = submenuTrigger.closest(
         "[data-sidebar-scroll='true']"
-      ) as HTMLElement | null;
-      const canObserve = typeof ResizeObserver === "function";
-      const resizeObserver = canObserve
-        ? new ResizeObserver(updateAnchor)
-        : null;
+      );
 
-      updateAnchor();
-      browserWindow?.addEventListener("resize", updateAnchor);
+      browserWindow.addEventListener("resize", updateAnchor);
       scrollContainer?.addEventListener("scroll", updateAnchor, {
         passive: true,
       });
-      resizeObserver?.observe(submenuTrigger);
 
       return () => {
-        browserWindow?.removeEventListener("resize", updateAnchor);
+        browserWindow.removeEventListener("resize", updateAnchor);
         scrollContainer?.removeEventListener("scroll", updateAnchor);
-        resizeObserver?.disconnect();
       };
     }
 
@@ -214,115 +235,84 @@ const WebSidebarNav = React.forwardRef<
     ]
   );
 
+  const renderExpandableSection = (section: SidebarSection) => (
+    <li className={isCollapsed ? "tw-relative" : undefined} key={section.key}>
+      <WebSidebarExpandable
+        section={section}
+        expanded={expandedKeys.includes(section.key)}
+        onToggle={(event) => handleSectionToggle(section.key, event)}
+        collapsed={isCollapsed}
+        pathname={pathname}
+        data-section={section.key}
+      />
+      {renderCollapsedSubmenu(section.key)}
+    </li>
+  );
+
+  const renderDirectSectionLink = (section: SidebarSection) => {
+    const primaryItem = section.items[0];
+
+    if (primaryItem === undefined) {
+      return null;
+    }
+
+    const isPrimaryItemActive = isSidebarNavItemActive(primaryItem, pathname);
+    const hasActiveSectionItem = section.items.some((item) =>
+      isSidebarNavItemActive(item, pathname)
+    );
+
+    return (
+      <li key={section.key}>
+        <WebSidebarNavItem
+          href={primaryItem.href}
+          icon={section.icon}
+          active={hasActiveSectionItem}
+          ariaCurrent={isPrimaryItemActive ? "page" : "location"}
+          collapsed={isCollapsed}
+          label={section.name}
+          data-section={section.key}
+        />
+      </li>
+    );
+  };
+
   return (
     <nav
       className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
       aria-label="Desktop navigation"
     >
       <ul className="tw-m-0 tw-list-none tw-p-0">
-        <li>
-          <WebSidebarNavItem
-            href="/"
-            icon={HomeIcon}
-            active={pathname === "/"}
-            collapsed={isCollapsed}
-            label="Home"
-          />
-        </li>
+        {nftsSection && renderExpandableSection(nftsSection)}
 
-        <li>
-          <WebSidebarNavItem
-            href="/waves"
-            icon={WavesIcon}
-            active={pathname?.startsWith("/waves") || false}
-            collapsed={isCollapsed}
-            label="Waves"
-          />
-        </li>
+        {wavesSection && renderDirectSectionLink(wavesSection)}
 
         <li>
           <WebSidebarNavItem
             href="/messages"
             icon={ChatBubbleIcon}
-            active={pathname?.startsWith("/messages") || false}
+            active={safePathname.startsWith("/messages")}
             collapsed={isCollapsed}
-            label="Messages"
+            label={t(DEFAULT_LOCALE, "navigation.primary.dms")}
             hasIndicator={hasUnreadMessages}
           />
         </li>
 
-        <li>
-          <WebSidebarNavItem
-            href="/discover"
-            icon={DiscoverIcon}
-            active={pathname.startsWith("/discover")}
-            collapsed={isCollapsed}
-            label="Discovery"
-          />
-        </li>
+        {aboutSection && renderExpandableSection(aboutSection)}
 
-        {networkSection && (
-          <li className={isCollapsed ? "tw-relative" : undefined}>
-            <WebSidebarExpandable
-              section={networkSection}
-              expanded={expandedKeys.includes("network")}
-              onToggle={(event) => handleSectionToggle("network", event)}
+        {showDropForge && (
+          <li>
+            <WebSidebarNavItem
+              href={DROP_FORGE_PATH}
+              icon={DropForgeIcon}
+              active={
+                safePathname === DROP_FORGE_PATH ||
+                safePathname.startsWith(`${DROP_FORGE_PATH}/`)
+              }
               collapsed={isCollapsed}
-              pathname={pathname}
-              data-section="network"
+              label={DROP_FORGE_TITLE}
             />
-            {renderCollapsedSubmenu("network")}
           </li>
         )}
-
-        {collectionsSection && (
-          <li className={isCollapsed ? "tw-relative" : undefined}>
-            <WebSidebarExpandable
-              section={collectionsSection}
-              expanded={expandedKeys.includes("collections")}
-              onToggle={(event) => handleSectionToggle("collections", event)}
-              collapsed={isCollapsed}
-              pathname={pathname}
-              data-section="collections"
-            />
-            {renderCollapsedSubmenu("collections")}
-          </li>
-        )}
-
-        {sections
-          .filter(
-            (section) =>
-              section.key !== "network" && section.key !== "collections"
-          )
-          .map((section) => (
-            <React.Fragment key={section.key}>
-              <li className={isCollapsed ? "tw-relative" : undefined}>
-                <WebSidebarExpandable
-                  section={section}
-                  expanded={expandedKeys.includes(section.key)}
-                  onToggle={(event) => handleSectionToggle(section.key, event)}
-                  collapsed={isCollapsed}
-                  pathname={pathname}
-                  data-section={section.key}
-                />
-                {renderCollapsedSubmenu(section.key)}
-              </li>
-              {section.key === "about" && showDropForge && (
-                <li>
-                  <WebSidebarNavItem
-                    href={DROP_FORGE_PATH}
-                    icon={DropForgeIcon}
-                    active={
-                      pathname === DROP_FORGE_PATH ||
-                      pathname?.startsWith(`${DROP_FORGE_PATH}/`)
-                    }
-                    collapsed={isCollapsed}
-                    label={DROP_FORGE_TITLE}
-                  />
-                </li>
-              )}
-            </React.Fragment>
-          ))}
       </ul>
     </nav>
   );

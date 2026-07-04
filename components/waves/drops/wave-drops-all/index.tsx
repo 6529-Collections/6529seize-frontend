@@ -20,6 +20,7 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplayPreference";
 import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -27,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
+import { useFirstVisibleDropsPainted } from "./hooks/useFirstVisibleDropsPainted";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
@@ -97,13 +99,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const { setUnreadDividerSerialNo } = useUnreadDivider();
 
-  const typingMessage = useWaveIsTyping(
-    waveId,
-    connectedProfile?.handle ?? null,
-    isMuted
-  );
-
-  const { data: boostedDrops } = useWaveBoostedDrops({ waveId, wave });
+  const [boostedDropsDisplayPreference] = useBoostedDropsDisplayPreference();
+  const shouldRenderInsertedBoostedDrops =
+    boostedDropsDisplayPreference !== "hidden";
 
   const scrollBehavior = useScrollBehavior();
   const {
@@ -170,6 +168,26 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       ),
     };
   }, [renderedWaveMessages, wave]);
+  const hasVisibleDrops =
+    (renderedWaveMessagesWithFullWave?.drops.length ?? 0) > 0;
+  const firstVisibleDropsPainted = useFirstVisibleDropsPainted(hasVisibleDrops);
+
+  const typingMessage = useWaveIsTyping(
+    waveId,
+    connectedProfile?.handle ?? null,
+    isMuted,
+    { enabled: firstVisibleDropsPainted }
+  );
+
+  const { data: boostedDrops } = useWaveBoostedDrops({
+    waveId,
+    wave,
+    enabled: shouldRenderInsertedBoostedDrops && firstVisibleDropsPainted,
+  });
+  const visibleBoostedDrops =
+    shouldRenderInsertedBoostedDrops && firstVisibleDropsPainted
+      ? boostedDrops
+      : undefined;
 
   const {
     serialTarget,
@@ -316,7 +334,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         pendingCount={pendingDropsCount}
         onRevealPending={revealPendingDrops}
         bottomPaddingClassName={bottomPaddingClassName}
-        boostedDrops={boostedDrops}
+        boostedDrops={visibleBoostedDrops}
+        boostedDropsDisplayPreference={boostedDropsDisplayPreference}
         onBoostedDropClick={queueSerialTarget}
         onScrollToUnread={queueSerialTarget}
         unreadCount={unreadCount}

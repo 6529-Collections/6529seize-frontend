@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
 import type { Nft, NftContract } from "./alchemy-sdk-types";
-import styles from "./Rememes.module.scss";
+import styles from "./Rememes.module.css";
 
 export interface ProcessedRememe {
   valid: boolean;
@@ -36,9 +36,9 @@ interface Props {
 }
 
 const PRIMARY_BUTTON_CLASS =
-  "seize-btn tw-bg-[#267c93] tw-py-[0.375rem] tw-leading-6 tw-text-white tw-transition-colors disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#2b8aa3]";
+  "tw-rounded-none tw-border-0 tw-bg-[#267c93] tw-px-5 tw-py-[0.375rem] tw-font-bold tw-leading-6 tw-text-white tw-transition-colors disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#2b8aa3]";
 const LINK_BUTTON_CLASS =
-  "seize-btn-link tw-bg-transparent tw-py-[0.375rem] tw-leading-6";
+  "tw-rounded-none tw-border-0 tw-bg-transparent tw-px-5 tw-py-[0.375rem] tw-font-bold tw-leading-6 tw-text-white tw-underline desktop-hover:hover:tw-text-[#9a9a9a]";
 
 export default function RememeAddComponent(props: Readonly<Props>) {
   const [contract, setContract] = useState("");

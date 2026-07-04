@@ -4,7 +4,7 @@ import {
 } from "@/components/drop-forge/drop-forge.constants";
 import DropForgeLaunchPageClient from "@/components/drop-forge/launch/DropForgeLaunchPageClient";
 import { getAppMetadata } from "@/components/providers/metadata";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 
 const LAUNCH = DROP_FORGE_SECTIONS.LAUNCH;

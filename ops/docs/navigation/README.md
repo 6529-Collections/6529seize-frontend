@@ -15,11 +15,17 @@ and mobile app layouts.
 
 ## Route Coverage
 
-- Primary section switching: `/`, `/discover`, `/waves`, `/messages`,
-  `/network`, `/the-memes`, `/notifications`, and connected profile routes
-  (`/{normalized-handle}` with wallet-address fallback).
-- Secondary jumps: `/network/*`, `/nft-activity`, `/meme-calendar`,
-  collections routes, tools routes, and about routes.
+- Web/sidebar primary section switching: `NFTs` (`/the-memes`), `Waves`
+  (`/waves`), `DMs` (`/messages`), and `About` (`/about`), plus gated
+  `Drop Forge` (`/drop-forge`) when the connected wallet can access it. Home
+  remains available through the 6529 logo link to `/`.
+- App bottom section switching: `/discover`, `/waves`, `/messages`, `/`,
+  `/network`, `/the-memes`, and `/notifications`.
+- Secondary jumps: `Discover Waves` (`/discover`), `/network/*`,
+  `/xtdh` (`xTDH Allocations Dashboard`), `/nft-activity`, `/meme-calendar`,
+  collection routes, tools routes, and about routes grouped under `About 6529`,
+  `Collections & Minting`, `Network & Reputation`, `Delegation & Wallets`,
+  `Data & Developer Tools`, and `Legal`.
 
 ## Features
 
@@ -30,10 +36,10 @@ and mobile app layouts.
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): app primary
   tabs for `Discovery`, `Waves`, `Messages`, `Home`, `Network`,
   `Collections`, and `Notifications`.
-- [App Sidebar Menu](feature-app-sidebar-menu.md): app drawer with direct rows
-  for connected `Profile` and `Discovery`, a connected profile-avatar
-  shortcut, grouped links (`Network`, `Tools`, `About`), and footer account
-  actions.
+- [App Sidebar Menu](feature-app-sidebar-menu.md): app drawer with sidebar
+  primary concepts, a connected profile-avatar shortcut, gated `Drop Forge`
+  access when available, grouped secondary links under `NFTs`, `Waves`, and
+  `About`, and footer account actions.
 
 ### Shared Shell Controls
 

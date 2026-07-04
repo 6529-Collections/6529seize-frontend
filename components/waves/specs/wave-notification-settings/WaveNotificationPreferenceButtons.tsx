@@ -1,6 +1,12 @@
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
-import { AtSymbolIcon, BellSlashIcon } from "@heroicons/react/24/outline";
+import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
+import {
+  AtSymbolIcon,
+  CheckIcon,
+  SpeakerWaveIcon,
+} from "@heroicons/react/24/outline";
+import { useRef, useState } from "react";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
 
 interface WaveNotificationPreferenceButtonsProps {
@@ -15,113 +21,179 @@ const getButtonStyle = (active: boolean) => {
     : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent tw-border-iron-700";
 };
 
-function getAllDropsButtonStyle(settings: WaveNotificationSettingsState) {
-  const buttonStyle = getButtonStyle(settings.allDropsEnabled);
-  return settings.disableAllDropsSelection && !settings.allDropsEnabled
-    ? `${buttonStyle} tw-cursor-not-allowed`
-    : buttonStyle;
-}
+const getMenuItemStyle = ({
+  active,
+  disabled,
+}: {
+  readonly active: boolean;
+  readonly disabled: boolean;
+}) => {
+  if (disabled) {
+    return "tw-cursor-not-allowed tw-text-iron-500";
+  }
 
-function AllDropsIcon({ className }: { readonly className: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth="2"
-      stroke="currentColor"
-      className={className}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46"
-      />
-    </svg>
-  );
-}
+  if (active) {
+    return "tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/10";
+  }
+
+  return "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800";
+};
 
 export default function WaveNotificationPreferenceButtons({
   waveId,
   settings,
   compact = false,
 }: WaveNotificationPreferenceButtonsProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const allDropsSelectionDisabled =
     settings.disableAllDropsSelection && !settings.allDropsEnabled;
   const tooltipId = `wave-notification-actions-${waveId}`;
+  const triggerId = `${tooltipId}-trigger`;
+  const menuId = `${tooltipId}-menu`;
   const allDropsDisabledDescriptionId = `${tooltipId}-all-drops-disabled-description`;
-  const allDropsButtonSizeClass = compact
+  const triggerActive =
+    settings.allGroupNotificationsEnabled || settings.allDropsEnabled;
+  const triggerSizeClass = compact
     ? "tw-size-9 tw-p-0"
     : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
-  const allGroupButtonSizeClass = compact
-    ? "tw-h-9 tw-min-w-9 tw-gap-0 tw-px-2"
-    : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
 
-  let allDropsButtonContent = (
-    <AllDropsIcon className="tw-size-4 tw-flex-shrink-0" />
-  );
-  if (settings.loadingTarget === "all-drops") {
-    allDropsButtonContent = <Spinner dimension={12} />;
-  } else if (allDropsSelectionDisabled) {
-    allDropsButtonContent = (
-      <BellSlashIcon className="tw-size-4 tw-flex-shrink-0" />
+  const renderItemCheck = (active: boolean) =>
+    active ? (
+      <CheckIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+    ) : (
+      <span className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
     );
-  }
 
-  const allDropsButton = (
-    <button
-      type="button"
-      disabled={settings.loading}
-      aria-disabled={allDropsSelectionDisabled || undefined}
-      aria-describedby={
-        allDropsSelectionDisabled ? allDropsDisabledDescriptionId : undefined
-      }
-      data-tooltip-id={tooltipId}
-      data-tooltip-content={settings.allDropsTooltip}
-      onClick={
-        allDropsSelectionDisabled
-          ? undefined
-          : settings.onAllDropsNotificationsClick
-      }
-      className={`tw-flex ${allDropsButtonSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${getAllDropsButtonStyle(settings)}`}
-      aria-label="Receive all drop notifications"
-    >
-      {allDropsButtonContent}
-      {allDropsSelectionDisabled && (
-        <span id={allDropsDisabledDescriptionId} className="tw-sr-only">
-          {settings.allDropsTooltip}
-        </span>
-      )}
-    </button>
+  const triggerContent = settings.loadingTarget ? (
+    <Spinner dimension={12} />
+  ) : (
+    <SpeakerWaveIcon
+      className="tw-size-4 tw-flex-shrink-0"
+      aria-hidden="true"
+    />
   );
 
   return (
     <div
       className={
-        compact
-          ? "tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs"
-          : "tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs"
+        compact ? "tw-relative tw-z-20" : "tw-relative tw-z-20 tw-w-full"
       }
     >
       <button
+        id={triggerId}
+        ref={buttonRef}
+        type="button"
         disabled={settings.loading}
-        onClick={settings.onAllGroupNotificationsClick}
+        onClick={(event) => {
+          event.stopPropagation();
+          setIsOpen((open) => !open);
+        }}
         data-tooltip-id={tooltipId}
-        data-tooltip-content={settings.allGroupTooltip}
-        className={`tw-flex ${allGroupButtonSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-transition tw-duration-300 tw-ease-out ${getButtonStyle(settings.allGroupNotificationsEnabled)}`}
-        aria-label="Receive ALL mention notifications"
+        data-tooltip-content="Notification settings"
+        className={`tw-flex ${triggerSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getButtonStyle(triggerActive)}`}
+        aria-label="Open notification settings"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        aria-controls={isOpen ? menuId : undefined}
       >
-        {settings.loadingTarget === "all-group" ? (
-          <Spinner dimension={12} />
-        ) : (
-          <>
-            <AtSymbolIcon className="tw-size-4 tw-flex-shrink-0" />
-            <span className="-tw-ml-0.5">ALL</span>
-          </>
-        )}
+        {triggerContent}
       </button>
 
-      {allDropsButton}
+      <CommonDropdownItemsDefaultWrapper
+        isOpen={isOpen}
+        setOpen={setIsOpen}
+        buttonRef={buttonRef}
+        horizontalAlign="right"
+        minWidth={260}
+        menuId={menuId}
+        menuLabelledBy={triggerId}
+      >
+        <li role="none" className="tw-list-none">
+          <button
+            type="button"
+            disabled={settings.loading}
+            role="menuitemcheckbox"
+            aria-checked={settings.allGroupNotificationsEnabled}
+            data-tooltip-id={tooltipId}
+            data-tooltip-content={settings.allGroupTooltip}
+            onClick={(event) => {
+              event.stopPropagation();
+              settings.onAllGroupNotificationsClick();
+              setIsOpen(false);
+            }}
+            className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
+              {
+                active: settings.allGroupNotificationsEnabled,
+                disabled: settings.loading,
+              }
+            )}`}
+            aria-label="Receive ALL mention notifications"
+          >
+            <AtSymbolIcon
+              className="tw-size-4 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
+            <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium">
+              @ALL
+            </span>
+            {settings.loadingTarget === "all-group" ? (
+              <Spinner dimension={12} />
+            ) : (
+              renderItemCheck(settings.allGroupNotificationsEnabled)
+            )}
+          </button>
+        </li>
+        <li role="none" className="tw-list-none">
+          <button
+            type="button"
+            disabled={settings.loading}
+            role="menuitemcheckbox"
+            aria-checked={settings.allDropsEnabled}
+            aria-disabled={allDropsSelectionDisabled || undefined}
+            aria-describedby={
+              allDropsSelectionDisabled
+                ? allDropsDisabledDescriptionId
+                : undefined
+            }
+            data-tooltip-id={tooltipId}
+            data-tooltip-content={settings.allDropsTooltip}
+            onClick={(event) => {
+              event.stopPropagation();
+              if (allDropsSelectionDisabled) {
+                return;
+              }
+              settings.onAllDropsNotificationsClick();
+              setIsOpen(false);
+            }}
+            className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
+              {
+                active: settings.allDropsEnabled,
+                disabled: settings.loading || allDropsSelectionDisabled,
+              }
+            )}`}
+            aria-label="Receive notifications for all messages"
+          >
+            <SpeakerWaveIcon
+              className="tw-size-4 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
+            <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium">
+              Notify for all messages
+            </span>
+            {settings.loadingTarget === "all-drops" ? (
+              <Spinner dimension={12} />
+            ) : (
+              renderItemCheck(settings.allDropsEnabled)
+            )}
+            {allDropsSelectionDisabled && (
+              <span id={allDropsDisabledDescriptionId} className="tw-sr-only">
+                {settings.allDropsTooltip}
+              </span>
+            )}
+          </button>
+        </li>
+      </CommonDropdownItemsDefaultWrapper>
       <MyStreamActionTooltip id={tooltipId} />
     </div>
   );

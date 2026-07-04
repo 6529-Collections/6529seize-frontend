@@ -27,6 +27,9 @@ import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
+const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
+  "waveChatBoostedDropsDisplayPreference";
+
 // Mock hooks and dependencies
 jest.mock("@/hooks/useVirtualizedWaveDrops");
 jest.mock("@/hooks/useScrollBehavior");
@@ -314,8 +317,13 @@ function setupMocks(options: MockSetupOptions = {}) {
   });
 
   // Setup typing mock
-  require("@/hooks/useWaveIsTyping").useWaveIsTyping.mockReturnValue(
-    options.typingMessage ?? null
+  require("@/hooks/useWaveIsTyping").useWaveIsTyping.mockImplementation(
+    (
+      _waveId: string,
+      _myHandle: string | null,
+      _disabled: boolean,
+      typingOptions?: { readonly enabled?: boolean | undefined }
+    ) => (typingOptions?.enabled ? (options.typingMessage ?? "") : "")
   );
 
   require("@/hooks/useWaveBoostedDrops").useWaveBoostedDrops.mockReturnValue({
@@ -376,10 +384,20 @@ function renderComponent(options: RenderOptions = {}) {
   };
 }
 
+function flushFirstVisibleDropsPaint() {
+  act(() => {
+    jest.runOnlyPendingTimers();
+  });
+  act(() => {
+    jest.runOnlyPendingTimers();
+  });
+}
+
 describe("WaveDropsAll", () => {
   beforeEach(() => {
     // Mock setTimeout for tests that need it
     jest.useFakeTimers();
+    localStorage.clear();
     mockScrollContainerRef.current = document.createElement("div");
     setupMocks();
   });
@@ -496,10 +514,91 @@ describe("WaveDropsAll", () => {
         dropViewDropId: "target-drop",
         onReply: props.onReply,
         onQuoteClick: expect.any(Function),
+        boostedDropsDisplayPreference: "compact",
         winningThreshold: 11,
         winningThresholdMinDurationMs: 120_000,
         isVotingClosed: true,
         isVotingControlsLocked: true,
+      });
+    });
+
+    it("disables inserted boosted drops when the local preference is hidden", () => {
+      localStorage.setItem(
+        BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY,
+        JSON.stringify("hidden")
+      );
+      const mockDrops = [createMockDrop()];
+      const boostedDrops = [
+        createMockDrop({ id: "boosted-drop", serial_no: 99 }),
+      ];
+      const useWaveBoostedDropsMock =
+        require("@/hooks/useWaveBoostedDrops").useWaveBoostedDrops;
+
+      setupMocks({
+        waveMessages: { drops: mockDrops as any },
+      });
+      useWaveBoostedDropsMock.mockReturnValue({
+        data: boostedDrops,
+      });
+
+      renderComponent({ waveId: "test-wave" });
+
+      expect(useWaveBoostedDropsMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          waveId: "test-wave",
+          enabled: false,
+        })
+      );
+      expect(dropsProps).toMatchObject({
+        drops: mockDrops,
+        boostedDrops: undefined,
+        boostedDropsDisplayPreference: "hidden",
+      });
+    });
+
+    it("delays inserted boosted drops until visible drops have painted", () => {
+      const mockDrops = [createMockDrop()];
+      const boostedDrops = [
+        createMockDrop({ id: "boosted-drop", serial_no: 99 }),
+      ];
+      const useWaveBoostedDropsMock =
+        require("@/hooks/useWaveBoostedDrops").useWaveBoostedDrops;
+
+      setupMocks({
+        waveMessages: { drops: mockDrops as any },
+      });
+      useWaveBoostedDropsMock.mockImplementation(
+        ({ enabled }: { readonly enabled?: boolean | undefined }) => ({
+          data: enabled ? boostedDrops : undefined,
+        })
+      );
+
+      renderComponent({ waveId: "test-wave" });
+
+      expect(useWaveBoostedDropsMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          waveId: "test-wave",
+          enabled: false,
+        })
+      );
+      expect(dropsProps).toMatchObject({
+        drops: mockDrops,
+        boostedDrops: undefined,
+        boostedDropsDisplayPreference: "compact",
+      });
+
+      flushFirstVisibleDropsPaint();
+
+      expect(useWaveBoostedDropsMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          waveId: "test-wave",
+          enabled: true,
+        })
+      );
+      expect(dropsProps).toMatchObject({
+        drops: mockDrops,
+        boostedDrops,
+        boostedDropsDisplayPreference: "compact",
       });
     });
   });
@@ -615,10 +714,30 @@ describe("WaveDropsAll", () => {
         auth: { connectedProfile: { handle: "testuser" } },
         typingMessage: "someone is typing...",
       });
+      const useWaveIsTypingMock =
+        require("@/hooks/useWaveIsTyping").useWaveIsTyping;
 
       renderComponent();
 
+      expect(
+        screen.queryByText("someone is typing...")
+      ).not.toBeInTheDocument();
+      expect(useWaveIsTypingMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        "testuser",
+        false,
+        { enabled: false }
+      );
+
+      flushFirstVisibleDropsPaint();
+
       expect(screen.getByText("someone is typing...")).toBeInTheDocument();
+      expect(useWaveIsTypingMock).toHaveBeenLastCalledWith(
+        "test-wave-1",
+        "testuser",
+        false,
+        { enabled: true }
+      );
       expect(screen.getAllByTestId("typing-icon")).toHaveLength(3); // Three dots
     });
 

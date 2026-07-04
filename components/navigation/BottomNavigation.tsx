@@ -37,6 +37,8 @@ import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import type { NavItem as NavItemData } from "./navTypes";
 import { getActiveViewFromUrl } from "./ViewContext";
 
+const BOTTOM_NAVIGATION_LOCALE = DEFAULT_LOCALE;
+
 const items: NavItemData[] = [
   {
     kind: "route",
@@ -97,22 +99,34 @@ interface BottomNavigationProps {
 
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
-const BOTTOM_NAVIGATION_LOCALE = DEFAULT_LOCALE;
 
 const getHiddenStyle = (hidden: boolean) =>
   hidden
     ? "tw-opacity-0 tw-translate-y-[calc(100%+1.5rem)]"
     : "tw-opacity-100 tw-translate-y-0";
 
-const getWindowScrollPosition = () => {
-  const browserWindow = globalThis.window;
-  const documentElement = globalThis.document?.documentElement;
-  const body = globalThis.document?.body;
+type BrowserGlobal = typeof globalThis & {
+  readonly window?: Window;
+  readonly document?: Document;
+};
 
+const getBrowserWindow = (): Window | undefined =>
+  (globalThis as BrowserGlobal).window;
+
+const getBrowserDocument = (): Document | undefined =>
+  (globalThis as BrowserGlobal).document;
+
+const getWindowScrollPosition = ({
+  browserWindow,
+  browserDocument,
+}: {
+  readonly browserWindow: Window;
+  readonly browserDocument: Document;
+}) => {
   return Math.max(
-    browserWindow?.scrollY ?? 0,
-    documentElement?.scrollTop ?? 0,
-    body?.scrollTop ?? 0
+    browserWindow.scrollY,
+    browserDocument.documentElement.scrollTop,
+    browserDocument.body.scrollTop
   );
 };
 
@@ -124,12 +138,20 @@ const isTrackedScrollElement = (
   target.matches(MOBILE_BOTTOM_NAV_SCROLL_TARGET_SELECTOR) &&
   target.scrollHeight > target.clientHeight;
 
-const getScrollPosition = (target: EventTarget | null | undefined) => {
+const getScrollPosition = ({
+  browserDocument,
+  browserWindow,
+  target,
+}: {
+  readonly browserDocument: Document;
+  readonly browserWindow: Window;
+  readonly target: EventTarget | null | undefined;
+}) => {
   if (isTrackedScrollElement(target)) {
     return target.scrollTop;
   }
 
-  return getWindowScrollPosition();
+  return getWindowScrollPosition({ browserDocument, browserWindow });
 };
 
 const getTrackedScrollTarget = ({
@@ -139,17 +161,21 @@ const getTrackedScrollTarget = ({
   readonly browserWindow: Window;
   readonly target: EventTarget | null | undefined;
 }): EventTarget | null => {
-  const browserDocument = globalThis.document;
+  const browserDocument = getBrowserDocument();
 
   if (isTrackedScrollElement(target)) {
     return target;
   }
 
+  if (browserDocument === undefined) {
+    return target === browserWindow ? browserWindow : null;
+  }
+
   if (
     target === browserWindow ||
     target === browserDocument ||
-    target === browserDocument?.documentElement ||
-    target === browserDocument?.body
+    target === browserDocument.documentElement ||
+    target === browserDocument.body
   ) {
     return browserWindow;
   }
@@ -166,15 +192,29 @@ const useCompactDock = ({
   readonly resetKey: string;
   readonly reverseScrollDirection: boolean;
 }) => {
-  const [compact, setCompact] = useState(false);
+  const [compactState, setCompactState] = useState({
+    resetKey,
+    compact: false,
+  });
   const previousScrollPositionsRef = useRef<WeakMap<EventTarget, number>>(
     new WeakMap()
   );
   const frameRef = useRef<number | null>(null);
   const pendingScrollTargetsRef = useRef<Set<EventTarget>>(new Set());
+  const compact =
+    compactState.resetKey === resetKey ? compactState.compact : false;
+  const setCompact = useCallback(
+    (nextCompact: boolean) => {
+      setCompactState((current) =>
+        current.resetKey === resetKey && current.compact === nextCompact
+          ? current
+          : { resetKey, compact: nextCompact }
+      );
+    },
+    [resetKey]
+  );
 
   useEffect(() => {
-    setCompact(false);
     previousScrollPositionsRef.current = new WeakMap();
     pendingScrollTargetsRef.current.clear();
     if (frameRef.current !== null) {
@@ -185,21 +225,24 @@ const useCompactDock = ({
 
   useEffect(() => {
     if (hidden) {
-      setCompact(false);
-      return;
+      return undefined;
     }
 
-    const browserWindow = globalThis.window;
-    const browserDocument = globalThis.document;
-    if (browserWindow === undefined) {
-      return;
+    const browserWindow = getBrowserWindow();
+    const browserDocument = getBrowserDocument();
+    if (browserWindow === undefined || browserDocument === undefined) {
+      return undefined;
     }
 
     previousScrollPositionsRef.current = new WeakMap();
     pendingScrollTargetsRef.current = new Set();
 
     const syncCompactState = (target: EventTarget) => {
-      const currentScrollPosition = getScrollPosition(target);
+      const currentScrollPosition = getScrollPosition({
+        browserDocument,
+        browserWindow,
+        target,
+      });
       const previousScrollPosition =
         previousScrollPositionsRef.current.get(target) ?? currentScrollPosition;
       const delta = currentScrollPosition - previousScrollPosition;
@@ -247,15 +290,18 @@ const useCompactDock = ({
     };
 
     browserWindow.addEventListener("scroll", handleScroll, { passive: true });
-    browserDocument?.addEventListener("scroll", handleScroll, {
+    browserDocument.addEventListener("scroll", handleScroll, {
       capture: true,
       passive: true,
     });
-    syncCompactState(browserWindow);
+    previousScrollPositionsRef.current.set(
+      browserWindow,
+      getWindowScrollPosition({ browserDocument, browserWindow })
+    );
 
     return () => {
       browserWindow.removeEventListener("scroll", handleScroll);
-      browserDocument?.removeEventListener("scroll", handleScroll, {
+      browserDocument.removeEventListener("scroll", handleScroll, {
         capture: true,
       });
       if (frameRef.current !== null) {
@@ -264,7 +310,7 @@ const useCompactDock = ({
       }
       pendingScrollTargetsRef.current.clear();
     };
-  }, [hidden, reverseScrollDirection]);
+  }, [hidden, reverseScrollDirection, setCompact]);
 
   return hidden ? false : compact;
 };
@@ -282,7 +328,7 @@ const getDockClassName = (compact: boolean) =>
 const floatingNavInnerClassName = "tw-relative tw-h-full";
 
 const getFloatingNavListClassName = (compact: boolean) =>
-  `tw-flex tw-h-full tw-items-center ${
+  `tw-m-0 tw-flex tw-h-full tw-list-none tw-items-center ${
     compact ? "tw-gap-0 tw-px-2.5" : "tw-gap-0.5 tw-px-4"
   }`;
 

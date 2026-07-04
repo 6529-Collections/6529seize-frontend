@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import styles from "./DateCountdown.module.scss";
 
 interface Props {
   title?: string | undefined;
@@ -14,6 +13,9 @@ interface TimeLeft {
   minutes: number;
   seconds: number;
 }
+
+const SKELETON_TEXT_CLASS =
+  "tw-animate-[shimmer_1.5s_infinite] tw-rounded tw-bg-[linear-gradient(90deg,#444_25%,#555_50%,#444_75%)] tw-bg-[length:200%_100%]";
 
 export default function DateCountdown(props: Readonly<Props>) {
   const { title, date } = props;
@@ -94,20 +96,18 @@ export default function DateCountdown(props: Readonly<Props>) {
     `${n.toLocaleString()} ${word}${n === 1 ? "" : "s"}`;
 
   return (
-    <div className="d-flex flex-column">
+    <div className="tw-flex tw-flex-col">
       {/* Title */}
       {isReady ? (
         <div>{title}</div>
       ) : (
-        <div
-          className={`${styles["skeletonText"]} ${styles["skeletonTitle"]}`}
-          aria-hidden="true">
+        <div className={`${SKELETON_TEXT_CLASS} tw-w-1/2`} aria-hidden="true">
           &nbsp;
         </div>
       )}
 
       {/* Countdown */}
-      <div className="pt-2 font-larger font-bolder" aria-live="polite">
+      <div className="tw-pt-2 tw-text-lg tw-font-bold" aria-live="polite">
         {isReady && timeLeft ? (
           <>
             {timeLeft.days > 0 && <>{plural(timeLeft.days, "day")}, </>}
@@ -118,9 +118,7 @@ export default function DateCountdown(props: Readonly<Props>) {
             {plural(timeLeft.seconds, "second")}
           </>
         ) : (
-          <div
-            className={`${styles["skeletonText"]} ${styles["skeletonCountdown"]}`}
-            aria-hidden="true">
+          <div className={`${SKELETON_TEXT_CLASS} tw-w-4/5`} aria-hidden="true">
             &nbsp;
           </div>
         )}

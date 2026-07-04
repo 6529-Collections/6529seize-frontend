@@ -6,7 +6,7 @@ import type { NextGenToken } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
 import { mainnet } from "wagmi/chains";
-import styles from "./NextGenToken.module.scss";
+import styles from "./NextGenToken.module.css";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 
 export default function NextgenTokenRenderCenter(
@@ -15,16 +15,16 @@ export default function NextgenTokenRenderCenter(
   return (
     <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-[padding-bottom:1rem] tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h3 className="tw-[margin-bottom:0]">Display Center</h3>
+        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
+          <h3 className="tw-mb-0">Display Center</h3>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div
-          className="tw-[padding-bottom:1rem] tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-wrap tw-gap-2 tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+          className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-wrap tw-gap-2 tw-px-3 tw-pb-4 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
           style={{ maxWidth: "100%" }}
         >
-          <span className="font-color-h">Rendered Versions:</span>
+          <span className="tw-text-[#9a9a9a]">Rendered Versions:</span>
           <NextGenTokenDownload
             token={props.token}
             resolution={Resolution["1K"]}
@@ -47,10 +47,10 @@ export default function NextgenTokenRenderCenter(
           />
         </div>
         <div
-          className="tw-[padding-bottom:1rem] tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-gap-2 tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+          className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-gap-2 tw-px-3 tw-pb-4 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
           style={{ maxWidth: "100%" }}
         >
-          <span className="font-color-h">For Thumbnail Use Only :</span>
+          <span className="tw-text-[#9a9a9a]">For Thumbnail Use Only :</span>
           <NextGenTokenDownload
             token={props.token}
             resolution={Resolution["Thumbnail"]}
@@ -61,7 +61,7 @@ export default function NextgenTokenRenderCenter(
           />
         </div>
       </div>
-      <div className="tw-[padding-top:1rem] -tw-mx-3 tw-flex tw-flex-wrap">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
         <CustomRender token={props.token} />
       </div>
     </div>
@@ -115,7 +115,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
     >
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <span className="font-color-h">Custom Render:</span>
+          <span className="tw-text-[#9a9a9a]">Custom Render:</span>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
@@ -123,7 +123,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           <label
             className={`${styles["customRenderDropdown"]} tw-flex tw-items-center tw-gap-2`}
           >
-            <span className="font-color-h">Render Type:</span>
+            <span className="tw-text-[#9a9a9a]">Render Type:</span>
             <select
               value={renderType}
               onChange={(event) => {
@@ -146,7 +146,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           <label
             className={`${styles["customRenderDropdown"]} tw-flex tw-items-center tw-gap-2`}
           >
-            <span className="font-color-h">Script Version:</span>
+            <span className="tw-text-[#9a9a9a]">Script Version:</span>
             <select
               value={scriptVersion}
               onChange={(event) => {
@@ -169,7 +169,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           <label
             className={`${styles["customRenderDropdown"]} tw-flex tw-items-center tw-gap-2`}
           >
-            <span className="font-color-h">Height:</span>
+            <span className="tw-text-[#9a9a9a]">Height:</span>
             <span className="tw-flex tw-items-center tw-gap-2">
               <span className="tw-min-w-[88px] tw-text-left tw-text-lg tw-font-bold tw-text-white">
                 {height ? `${numberWithCommas(height)} px` : "Screen Size"}
@@ -193,7 +193,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
             </span>
           </label>
           <button
-            className={`seize-btn no-wrap tw-py-2 ${styles["sceneBtn"]}`}
+            className={`tw-min-w-fit tw-whitespace-nowrap tw-rounded-none tw-border-0 tw-px-5 tw-py-2 tw-font-bold ${styles["sceneBtn"]}`}
             onClick={() => {
               go();
             }}

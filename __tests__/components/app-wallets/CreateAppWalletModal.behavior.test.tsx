@@ -3,21 +3,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CreateAppWalletModal } from "@/components/app-wallets/AppWalletModal";
 
-jest.mock("react-bootstrap", () => {
-  const Modal = ({ show, children }: any) =>
-    show ? <div data-testid="modal">{children}</div> : null;
-  Modal.Header = ({ children }: any) => <div>{children}</div>;
-  Modal.Title = ({ children }: any) => <h1>{children}</h1>;
-  Modal.Body = ({ children }: any) => <div>{children}</div>;
-  Modal.Footer = ({ children }: any) => <div>{children}</div>;
-  return { Modal, Button: (props: any) => <button {...props} /> };
-});
-
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <svg />,
 }));
 
-jest.mock("@/components/app-wallets/AppWallet.module.scss", () => ({
+jest.mock("@/components/app-wallets/AppWallet.module.css", () => ({
   newWalletInput: "input",
   modalHeader: "header",
   modalContent: "content",

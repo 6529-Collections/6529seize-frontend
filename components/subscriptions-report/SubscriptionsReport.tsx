@@ -251,7 +251,7 @@ export default function SubscriptionsReportComponent() {
             {connectedProfile && !hideSubscriptions && (
               <Link
                 href={`/${connectedProfile.normalised_handle}/subscriptions`}
-                className="decoration-none"
+                className="tw-no-underline"
                 aria-label="Learn more about The Memes subscriptions"
               >
                 <button className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-p-2 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600">
@@ -272,7 +272,7 @@ export default function SubscriptionsReportComponent() {
       <div ref={upcomingTableTopRef} />
       <div className="tw-pt-3">
         <div className="tw-flex tw-items-center tw-gap-3">
-          <span className="font-larger font-bolder decoration-none">
+          <span className="tw-text-lg tw-font-bold tw-no-underline">
             Upcoming Drops
           </span>
           {upcomingLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
@@ -367,7 +367,7 @@ export default function SubscriptionsReportComponent() {
       </div>
       <div className="tw-pt-5">
         <div className="tw-flex tw-items-center tw-gap-3">
-          <span className="font-larger font-bolder decoration-none">
+          <span className="tw-text-lg tw-font-bold tw-no-underline">
             Past Drops
           </span>
           {redeemedLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}

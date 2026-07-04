@@ -28,7 +28,7 @@ import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import type { ProcessedRememe } from "./RememeAddComponent";
 import RememeAddComponent from "./RememeAddComponent";
-import styles from "./Rememes.module.scss";
+import styles from "./Rememes.module.css";
 
 interface CheckList {
   status: boolean;
@@ -36,9 +36,9 @@ interface CheckList {
 }
 
 const PRIMARY_BUTTON_CLASS =
-  "seize-btn tw-bg-[#267c93] tw-py-[0.375rem] tw-leading-6 tw-text-white tw-transition-colors disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#2b8aa3]";
+  "tw-rounded-none tw-border-0 tw-bg-[#267c93] tw-px-5 tw-py-[0.375rem] tw-font-bold tw-leading-6 tw-text-white tw-transition-colors disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#2b8aa3]";
 const WHITE_BUTTON_CLASS =
-  "seize-btn btn-white tw-py-[0.375rem] tw-leading-6 disabled:tw-pointer-events-none disabled:tw-opacity-65";
+  "tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-[0.375rem] tw-font-bold tw-leading-6 tw-text-black disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#d7d7d7]";
 
 function getSubmissionErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) {

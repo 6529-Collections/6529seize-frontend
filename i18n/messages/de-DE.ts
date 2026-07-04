@@ -86,6 +86,15 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Datei-Upload-Bereich für den Wave-Chat",
+  "waves.loadingStatus": "Waves werden geladen",
+  "waves.gifPicker.dialogTitle": "GIF-Suche",
+  "waves.gifPicker.status.checking": "GIF-Suche wird geprueft...",
+  "waves.gifPicker.status.ready": "GIF-Suche ist bereit.",
+  "waves.gifPicker.unavailable.title":
+    "GIF-Suche ist voruebergehend nicht verfuegbar.",
+  "waves.gifPicker.unavailable.hint":
+    "Du kannst stattdessen eine GIF-Datei hochladen.",
+  "common.close": "Schliessen",
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",

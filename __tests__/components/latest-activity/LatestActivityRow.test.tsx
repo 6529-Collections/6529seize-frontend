@@ -21,11 +21,6 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
     return <svg data-testid="icon" />;
   },
 }));
-jest.mock("react-bootstrap", () => ({
-  Container: (p: any) => <div data-testid="container">{p.children}</div>,
-  Row: (p: any) => <div>{p.children}</div>,
-  Col: (p: any) => <div>{p.children}</div>,
-}));
 jest.mock("@/components/address/Address", () => (p: any) => (
   <span>{p.display}</span>
 ));

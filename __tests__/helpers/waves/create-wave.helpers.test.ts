@@ -87,7 +87,25 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.GROUPS,
           waveType: ApiWaveType.Chat,
         })
+      ).toBe(CreateWaveStep.RULES);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.RULES,
+          waveType: ApiWaveType.Chat,
+        })
       ).toBe(CreateWaveStep.DESCRIPTION);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.DROPS,
+          waveType: ApiWaveType.Approve,
+        })
+      ).toBe(CreateWaveStep.RULES);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.RULES,
+          waveType: ApiWaveType.Approve,
+        })
+      ).toBe(CreateWaveStep.VOTING);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.VOTING,
@@ -110,7 +128,19 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.DESCRIPTION,
           waveType: ApiWaveType.Chat,
         })
+      ).toBe(CreateWaveStep.RULES);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.RULES,
+          waveType: ApiWaveType.Chat,
+        })
       ).toBe(CreateWaveStep.GROUPS);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.VOTING,
+          waveType: ApiWaveType.Approve,
+        })
+      ).toBe(CreateWaveStep.RULES);
       expect(
         getCreateWavePreviousStep({
           step: CreateWaveStep.OUTCOMES,
@@ -194,7 +224,8 @@ describe("create-wave.helpers", () => {
         { name: "m", type: ApiWaveMetadataType.String },
       ]);
       expect(res.voting.credit_scope).toBe(ApiWaveCreditScope.Wave);
-      expect(res.voting.period.max).toBe(2 + 3 + 5);
+      expect(res.participation.period.max).toBeNull();
+      expect(res.voting.period.max).toBeNull();
       expect(res.voting.forbid_negative_votes).toBe(false);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
       expect(res.wave.max_votes_per_identity_to_drop).toBeNull();
@@ -220,6 +251,51 @@ describe("create-wave.helpers", () => {
           parentWaveId: "parent-wave",
         })
       ).toHaveProperty("parent_wave_id", "parent-wave");
+    });
+
+    it("ignores participation terms for chat waves", () => {
+      const config = createBaseConfig(ApiWaveType.Chat);
+      config.drops.terms = "Should not apply to chat.";
+      config.drops.signatureRequired = true;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.terms).toBeNull();
+      expect(res.participation.signature_required).toBe(false);
+    });
+
+    it("normalizes participation terms for rank waves at the API boundary", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.drops.terms = "  First rule.\n\nSecond rule.  ";
+      config.drops.signatureRequired = true;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.terms).toBe("First rule.\n\nSecond rule.");
+      expect(res.participation.signature_required).toBe(true);
+    });
+
+    it("clears whitespace-only participation terms for rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.drops.terms = "   \n  ";
+      config.drops.signatureRequired = true;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.terms).toBeNull();
+      expect(res.participation.signature_required).toBe(false);
     });
 
     it("maps allowed negative votes to the inverse backend flag", () => {

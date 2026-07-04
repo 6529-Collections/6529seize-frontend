@@ -10,7 +10,7 @@ import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import { useEffect, useState } from "react";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionArtist from "./NextGenCollectionArtist";
@@ -26,13 +26,15 @@ export function printViewButton(
   return (
     <button
       onClick={() => setView(v)}
-      className={`btn-link decoration-none ${
+      className={`tw-cursor-pointer tw-border-0 tw-bg-transparent !tw-p-0 tw-font-[inherit] tw-text-inherit tw-no-underline tw-outline-[inherit] hover:tw-bg-transparent hover:tw-text-[#9a9a9a] focus:tw-bg-transparent focus:tw-text-[#9a9a9a] active:tw-bg-transparent active:tw-text-[#9a9a9a] ${
         v === currentView ? styles["nextgenTokenDetailsLinkSelected"] : ""
       }`}
     >
       <h4
         className={
-          v === currentView ? "font-color" : "font-color-h cursor-pointer"
+          v === currentView
+            ? "tw-text-white"
+            : "tw-cursor-pointer tw-text-[#9a9a9a]"
         }
       >
         {v}
@@ -88,10 +90,10 @@ export default function NextGenCollectionComponent({
       {collection.mint_count > 0 && (
         <NextGenCollectionSlideshow collection={collection} />
       )}
-      <div className="pt-3 pb-2 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-2 tw-pt-4 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
         <NextGenCollectionHeader collection={collection} show_links={true} />
-        <div className="pt-5 -tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="d-flex gap-4 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-12">
+          <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-6 tw-px-3">
             {printViewButton(view, NextgenCollectionView.OVERVIEW, updateView)}
             {printViewButton(view, NextgenCollectionView.ABOUT, updateView)}
             {printViewButton(
@@ -106,12 +108,12 @@ export default function NextGenCollectionComponent({
             )}
           </div>
         </div>
-        <div className="pt-3 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionDetails collection={collection} view={view} />
           </div>
         </div>
-        <div className="pt-4 -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <NextGenCollectionArt
               collection={collection}
@@ -120,7 +122,7 @@ export default function NextGenCollectionComponent({
           </div>
         </div>
       </div>
-      <div className="pt-4 pb-4 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-6 tw-pt-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             <h4>About the Artist</h4>

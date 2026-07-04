@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import styles from "./Address.module.scss";
+import styles from "./Address.module.css";
 import { WalletAddress } from "./WalletAddress";
 
 interface Props {
@@ -138,7 +138,7 @@ export default function Address(props: Readonly<Props>) {
           </button>
           &nbsp;&nbsp;
           <Link
-            className="decoration-none decoration-hover-underline"
+            className="decoration-hover-underline tw-no-underline"
             href={getProfileLink()}
           >
             <span

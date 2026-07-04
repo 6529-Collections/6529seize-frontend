@@ -25,8 +25,8 @@ This area covers:
 
 - `Drop Forge` appears in page search only when the connected wallet can access
   the landing route.
-- The app sidebar inserts `Drop Forge` after `About` when the connected wallet
-  can access the landing route.
+- The web and app sidebars insert `Drop Forge` after `About` when the connected
+  wallet can access the landing route.
 - Search can additionally expose `Craft Claims` and `Launch Claims` when the
   current wallet can open those sections.
 - Landing access requires a connected wallet with at least one of:

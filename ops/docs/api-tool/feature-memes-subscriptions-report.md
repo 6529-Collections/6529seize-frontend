@@ -13,14 +13,14 @@ subscription counts.
 
 - Route: `/tools/subscriptions-report`
 - Web sidebar/search path (when visible):
-  `Tools -> The Memes Tools -> Subscriptions Report`
+  `About -> Data & Developer Tools -> Subscriptions Report`
 - Native app drawer path:
-  `Tools -> The Memes Tools -> Memes Subscriptions`
+  `About -> Data & Developer Tools -> Subscriptions Report`
 - Related open-data route: `/open-data/meme-subscriptions`
 
 ## Entry Points
 
-- Open from `Tools -> The Memes Tools` (when visible in current nav).
+- Open from `About -> Data & Developer Tools` (when visible in current nav).
 - Open `/tools/subscriptions-report` directly (route always loads).
 - Use header actions:
   - `My Subscriptions` -> `/{your-handle}/subscriptions` (when shown)
@@ -49,7 +49,7 @@ subscription counts.
 
 - The route itself is not geo-blocked.
 - On iOS outside the US, this route is hidden from web sidebar and search.
-- Native app drawer still lists `Memes Subscriptions`.
+- Native app drawer uses the same `Subscriptions Report` label when visible.
 - `My Subscriptions` is hidden when no profile is connected.
 - On iOS, `My Subscriptions` is shown only when country is `US`.
 - `Show More` / `Show Less` appears only when upcoming rows are greater than 10.

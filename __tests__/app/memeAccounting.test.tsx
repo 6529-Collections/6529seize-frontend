@@ -10,7 +10,7 @@ jest.mock("@/components/gas-royalties/Royalties", () => () => (
   <div data-testid="royalties" />
 ));
 
-jest.mock("@/styles/Home.module.scss", () => ({
+jest.mock("@/styles/Home.module.css", () => ({
   main: "main-class",
 }));
 

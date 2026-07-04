@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styles from "./LFGSlideshow.module.scss";
+import styles from "./LFGSlideshow.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "@/services/api/common-api";

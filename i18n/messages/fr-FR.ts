@@ -87,6 +87,15 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
+  "waves.loadingStatus": "Chargement des waves",
+  "waves.gifPicker.dialogTitle": "Recherche de GIF",
+  "waves.gifPicker.status.checking": "Recherche de GIF...",
+  "waves.gifPicker.status.ready": "La recherche de GIF est prete.",
+  "waves.gifPicker.unavailable.title":
+    "La recherche de GIF est temporairement indisponible.",
+  "waves.gifPicker.unavailable.hint":
+    "Vous pouvez televerser un fichier GIF a la place.",
+  "common.close": "Fermer",
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",

@@ -13,7 +13,7 @@ import type { Page } from "@/helpers/Types";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
-import styles from "./UserPageSubscriptions.module.scss";
+import styles from "./UserPageSubscriptions.module.css";
 
 function className(...classNames: readonly (string | undefined)[]): string {
   return classNames
@@ -97,7 +97,7 @@ function RedeemedSubscriptionsAccordion(
               <RedeemedEntry key={redeem.transaction} redeem={redeem} />
             ))
           ) : (
-            <div className="font-color-silver">
+            <div className="tw-text-iron-400">
               No Redeemed Subscriptions found
             </div>
           )}
@@ -136,7 +136,7 @@ function LogAccordion(
               <LogEntry key={getSubscriptionLogKey(log, index)} log={log} />
             ))
           ) : (
-            <div className="font-color-silver">No logs found</div>
+            <div className="tw-text-iron-400">No logs found</div>
           )}
           {props.logs.count > 0 && props.logs.count / 10 > 1 && (
             <div className="tw-mt-3 tw-text-center">
@@ -173,7 +173,7 @@ function TopUpAccordion(
               <TopUpEntry key={topUp.hash} topUp={topUp} />
             ))
           ) : (
-            <div className="font-color-silver">No Top Ups found</div>
+            <div className="tw-text-iron-400">No Top Ups found</div>
           )}
         </div>
         {props.history.count > 0 && props.history.count / 10 > 1 && (
@@ -209,7 +209,7 @@ function TopUpEntry(
           <span>from: {props.topUp.from_wallet}</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="font-color-silver tw-whitespace-nowrap">
+          <div className="tw-whitespace-nowrap tw-text-iron-400">
             {getDateDisplay(new Date(props.topUp.transaction_date))}
           </div>
           <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
@@ -240,13 +240,13 @@ function LogEntry(
         <div className="tw-flex tw-flex-col tw-gap-1">
           <div>{props.log.log}</div>
           {props.log.additional_info && (
-            <div className="font-smaller font-color-silver">
+            <div className="tw-text-sm tw-text-iron-400">
               {props.log.additional_info}
             </div>
           )}
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="font-color-silver tw-whitespace-nowrap">
+          <div className="tw-whitespace-nowrap tw-text-iron-400">
             {props.log.created_at &&
               getDateDisplay(new Date(props.log.created_at))}
           </div>
@@ -273,13 +273,13 @@ function RedeemedEntry(
             Redeemed Subscription for {contractName} #{props.redeem.token_id} x
             {props.redeem.count}
           </div>
-          <div className="font-smaller font-color-silver">
+          <div className="tw-text-sm tw-text-iron-400">
             Airdrop Address: {formatAddress(props.redeem.address)} - Balance
             after redemption: {props.redeem.balance_after} ETH
           </div>
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="font-color-silver tw-whitespace-nowrap">
+          <div className="tw-whitespace-nowrap tw-text-iron-400">
             {(props.redeem.transaction_date ?? props.redeem.created_at) &&
               getDateDisplay(
                 new Date(

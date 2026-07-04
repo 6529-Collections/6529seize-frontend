@@ -75,14 +75,6 @@ interface ExtendedDataBase {
   percent_unique_not_burnt_rank: number;
 }
 
-export interface MemesExtendedData extends ExtendedDataBase {
-  season: number;
-  meme: number;
-  meme_name: string;
-}
-
-export type NFTWithMemesExtendedData = NFT & MemesExtendedData;
-
 export interface NftRank {
   id: number;
   tdh_rank: number;

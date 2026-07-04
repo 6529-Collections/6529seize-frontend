@@ -42,13 +42,6 @@ jest.mock(
   )
 );
 
-jest.mock(
-  "@/components/waves/create-wave/drops/terms/CreateWaveTermsOfService",
-  () => (props: any) => (
-    <button onClick={() => props.setTerms("terms")} data-testid="terms" />
-  )
-);
-
 describe("CreateWaveDrops", () => {
   it("updates drops config based on user input", async () => {
     const user = userEvent.setup();
@@ -94,11 +87,6 @@ describe("CreateWaveDrops", () => {
     await user.click(screen.getByTestId("metadata"));
     expect(setDrops).toHaveBeenLastCalledWith(
       expect.objectContaining({ requiredMetadata: [{ foo: "bar" }] })
-    );
-
-    await user.click(screen.getByTestId("terms"));
-    expect(setDrops).toHaveBeenLastCalledWith(
-      expect.objectContaining({ terms: "terms", signatureRequired: true })
     );
   });
 });

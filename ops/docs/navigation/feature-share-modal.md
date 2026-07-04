@@ -7,12 +7,20 @@ clients, copy the active browser URL, and share an authenticated connection
 into supported 6529 apps. The same dialog also surfaces mobile-app and desktop-
 app download targets.
 
+Native app route sharing is separate from this modal: supported native app
+routes outside `/`, Waves, Messages, and Notifications show a direct
+`Share page` header button that opens the platform share sheet for the exact
+current route.
+
 ## Location in the Site
 
 - Disconnected desktop-web sidebar lower `Share` row.
 - Connected desktop-web account dropdown `Share` action.
 - Desktop-web routes that render those sidebar/account entry points.
 - Modal overlay above the current route.
+- Native app `Share page` header button is documented with
+  [App Header Context](feature-app-header-context.md) and does not open this
+  modal.
 
 ## Entry Points
 
@@ -67,10 +75,14 @@ app download targets.
 - Use the dialog as an install/open surface for 6529 apps.
 - Share routes with query state preserved; generated targets keep the current
   pathname plus search params.
+- From the native app, use the header `Share page` control on supported routes
+  for platform-native page sharing instead of this desktop modal.
 
 ## Edge Cases
 
 - Share entry is hidden entirely in Capacitor/native and mobile-device web.
+- Capacitor/native page sharing is available through the app header on
+  supported routes outside `/`, Waves, Messages, and Notifications.
 - `Connection` is always visible in the modal. For `6529 Mobile`, it creates a
   backend session-v2 connection-share code when an active wallet address has a
   valid session-v2 web session. For `6529 Desktop`, it uses a legacy

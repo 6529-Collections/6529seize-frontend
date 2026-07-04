@@ -1,16 +1,15 @@
 "use client";
-import type {
-  SeasonMintRow} from "@/components/meme-calendar/meme-calendar.helpers";
+import type { SeasonMintRow } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   getUpcomingMintsAcrossSeasons,
-  isMintingToday
+  isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { useEffect, useMemo, useState } from "react";
 import MemeSubscriptionRow from "./MemeSubscriptionRow";
-import styles from "./UserPageSubscriptions.module.scss";
+import styles from "./UserPageSubscriptions.module.css";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
@@ -51,7 +50,7 @@ export default function UserPageSubscriptionsUpcoming(
           <h5 className="tw-mb-0 tw-font-semibold">Upcoming Drops</h5>
         </div>
       </div>
-      <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1 tw-mb-0" />
+      <hr className="tw-mb-0 tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
       <div>
         <div>
           <div>
@@ -60,7 +59,8 @@ export default function UserPageSubscriptionsUpcoming(
                 key={subscription.token_id}
                 className={`${styles["nftSubscriptionsListItem"]} ${
                   index % 2 === 0 ? styles["odd"] : styles["even"]
-                } ${index === subscriptions.length - 1 ? styles["last"] : ""}`}>
+                } ${index === subscriptions.length - 1 ? styles["last"] : ""}`}
+              >
                 <MemeSubscriptionRow
                   profileKey={props.profileKey}
                   title="The Memes"

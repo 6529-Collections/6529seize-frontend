@@ -39,7 +39,7 @@ import {
   numberWithCommasFromString,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import styles from "./UserPageSubscriptions.module.scss";
+import styles from "./UserPageSubscriptions.module.css";
 
 function getEthForCards(count: number): number {
   return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
@@ -506,7 +506,7 @@ export default function UserPageSubscriptionsTopUp() {
         <div className="tw-pb-2">
           <div className="tw-flex tw-items-end tw-gap-2 tw-whitespace-nowrap">
             <h4 className="tw-mb-0 tw-font-semibold">Top Up</h4>
-            <span className="font-color-h font-smaller tw-flex tw-items-center tw-gap-1">
+            <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-text-[#9a9a9a]">
               Sending to{" "}
               <>
                 <span data-tooltip-id="subscription-address">

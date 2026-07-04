@@ -27,7 +27,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DistributionLink } from "../NextGen";
-import styles from "../NextGen.module.scss";
+import styles from "../NextGen.module.css";
 
 interface Props {
   collection: NextGenCollection;
@@ -64,7 +64,7 @@ export function NextGenBackToCollectionPageLink(
   return (
     <Link
       href={link}
-      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2"
+      className="tw-flex tw-items-center tw-gap-2 tw-pb-2 tw-pt-2 tw-no-underline"
     >
       <FontAwesomeIcon
         icon={faArrowCircleLeft}
@@ -125,7 +125,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
             )}/mint`}
           >
             <button
-              className={`pt-2 pb-2 btn-block no-wrap ${styles["exploreBtn"]}`}
+              className={`tw-w-full tw-min-w-fit tw-whitespace-nowrap tw-pb-2 tw-pt-2 ${styles["exploreBtn"]}`}
             >
               {getButtonLabel()}
             </button>
@@ -183,10 +183,10 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
   }
 
   return (
-    <span className="pt-2 pb-2 d-flex align-items-center gap-2 align-items-center">
+    <span className="tw-flex tw-items-center tw-gap-2 tw-pb-2 tw-pt-2">
       {alStatus !== Status.UNAVAILABLE && (
         <span
-          className={`d-flex align-items-center font-bolder font-smaller ${
+          className={`tw-flex tw-items-center tw-text-sm tw-font-bold ${
             styles["nextgenTag"]
           } ${getAllowlistClassName()}`}
         >
@@ -195,7 +195,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
       )}
       {publicStatus !== Status.UNAVAILABLE && (
         <span
-          className={`d-flex align-items-center font-bolder font-smaller ${
+          className={`tw-flex tw-items-center tw-text-sm tw-font-bold ${
             styles["nextgenTag"]
           } ${getPublicStatusClassName()}`}
         >
@@ -234,9 +234,9 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
   }
 
   return (
-    <div className="no-padding tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="d-flex justify-content-between align-items-center flex-wrap tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-flex-wrap tw-items-center tw-justify-between tw-px-3">
           {
             <NextGenPhases
               collection={props.collection}
@@ -244,7 +244,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             />
           }
           {props.show_links && (!capacitor.isIos || country === "US") && (
-            <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-2">
+            <span className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pb-2 tw-pt-2">
               <Link
                 href={
                   props.collection.opensea_link ||
@@ -295,14 +295,14 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="d-flex flex-column align-items-start pt-3 gap-3 tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <span className="d-flex flex-column align-items-start">
-            <h1 className="mb-0 font-color">{props.collection.name}</h1>
+        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-flex-col tw-items-start tw-gap-4 tw-px-3 tw-pt-4">
+          <span className="tw-flex tw-flex-col tw-items-start">
+            <h1 className="tw-mb-0 tw-text-white">{props.collection.name}</h1>
             {props.collection_link && (
               <NextGenBackToCollectionPageLink collection={props.collection} />
             )}
           </span>
-          <span className="font-larger">
+          <span className="tw-text-lg">
             by{" "}
             <b>
               <Link href={`/${props.collection.artist_address}`}>
@@ -310,7 +310,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               </Link>
             </b>
           </span>
-          <span className="pt-2 font-larger d-inline-flex align-items-center">
+          <span className="tw-inline-flex tw-items-center tw-pt-2 tw-text-lg">
             <NextGenMintCounts
               collection={props.collection}
               setAvailable={setAvailable}
@@ -319,7 +319,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
         </div>
         {showMint() && (
           <div
-            className="pt-3 d-flex flex-column align-items-center tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
+            className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-items-center tw-px-3 tw-pt-4 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
             style={{ maxWidth: "100%" }}
           >
             <NextGenCountdown collection={props.collection} />

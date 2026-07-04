@@ -1,0 +1,54 @@
+.loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dot {
+  margin: 0 3px;
+  width: 5px;
+  height: 5px;
+  animation: blink 0.9s infinite ease-in-out;
+  border-radius: 50%;
+  background-color: white;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  animation: circle 0.5s steps(8) infinite;
+  cursor: pointer;
+}
+
+@keyframes circle {
+  from {
+    transform: rotate(90deg);
+  }
+
+  to {
+    transform: rotate(450deg);
+  }
+}

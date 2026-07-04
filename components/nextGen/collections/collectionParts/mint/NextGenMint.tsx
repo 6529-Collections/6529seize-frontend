@@ -7,7 +7,7 @@ import {
   MINTING_USE_CASE,
 } from "@/components/delegation/delegation-constants";
 import DotLoader from "@/components/dotLoader/DotLoader";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import styles from "@/components/nextGen/collections/NextGen.module.css";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -358,11 +358,11 @@ export default function NextGenMint(props: Readonly<Props>) {
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}`}
-            className="decoration-hover-underline"
+            className="tw-no-underline hover:tw-underline"
           >
-            <h1 className="font-color tw-mb-0">{props.collection.name}</h1>
+            <h1 className="tw-mb-0 tw-text-white">{props.collection.name}</h1>
           </Link>
-          <span className="font-larger">
+          <span className="tw-text-lg">
             by{" "}
             <b>
               <Link href={`/${props.collection.artist_address}`}>
@@ -370,7 +370,7 @@ export default function NextGenMint(props: Readonly<Props>) {
               </Link>
             </b>
           </span>
-          <span className="font-larger tw-inline-flex tw-items-center tw-pt-2">
+          <span className="tw-inline-flex tw-items-center tw-pt-2 tw-text-lg">
             <NextGenMintCounts
               collection={props.collection}
               setAvailable={setAvailable}
@@ -409,19 +409,19 @@ export default function NextGenMint(props: Readonly<Props>) {
             <div className="tw-pt-2">
               <div className="tw-flex tw-gap-2">
                 <span
-                  className={`tw-mb-0 tw-flex tw-items-center tw-gap-2 no-wrap ${styles["nextgenTag"]}`}
+                  className={`tw-mb-0 tw-flex tw-min-w-fit tw-items-center tw-gap-2 tw-whitespace-nowrap ${styles["nextgenTag"]}`}
                 >
                   <span>Mint Cost:</span>
-                  <span className="font-bolder">
+                  <span className="tw-font-bold">
                     {props.mint_price > 0 ? fromGWEI(props.mint_price) : `Free`}{" "}
                     {props.mint_price > 0 ? `ETH` : ``}
                   </span>
                 </span>
                 <span
-                  className={`tw-mb-0 tw-flex tw-items-center tw-gap-2 no-wrap ${styles["nextgenTag"]}`}
+                  className={`tw-mb-0 tw-flex tw-min-w-fit tw-items-center tw-gap-2 tw-whitespace-nowrap ${styles["nextgenTag"]}`}
                 >
                   <span>Sales Model:</span>
-                  <span className="font-bolder">{getSalesModel()}</span>
+                  <span className="tw-font-bold">{getSalesModel()}</span>
                 </span>
               </div>
             </div>

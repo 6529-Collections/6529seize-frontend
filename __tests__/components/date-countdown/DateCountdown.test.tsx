@@ -340,10 +340,12 @@ describe("DateCountdown", () => {
         <DateCountdown title="CSS Test" date={futureDate} />
       );
 
-      const outerSpan = container.querySelector(".d-flex.flex-column");
+      const outerSpan = container.querySelector(".tw-flex.tw-flex-col");
       expect(outerSpan).toBeInTheDocument();
 
-      const timeSpan = container.querySelector(".pt-2.font-larger.font-bolder");
+      const timeSpan = container.querySelector(
+        ".tw-pt-2.tw-text-lg.tw-font-bold"
+      );
       expect(timeSpan).toBeInTheDocument();
     });
 

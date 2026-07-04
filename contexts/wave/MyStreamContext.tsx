@@ -8,8 +8,10 @@ import useCapacitor from "@/hooks/useCapacitor";
 import useDmWavesList from "@/hooks/useDmWavesList";
 import { useWaveById } from "@/hooks/useWaveById";
 import useWavesList from "@/hooks/useWavesList";
+import { usePathname } from "next/navigation";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import type { ReactNode } from "react";
 import React, {
   createContext,
@@ -21,6 +23,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import type { WaveMessages } from "./hooks/types";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
@@ -75,6 +78,8 @@ interface MyStreamContextType {
   readonly directMessages: WavesContextData;
   readonly activeWave: ActiveWaveContextData;
   readonly waveMessagesStore: WaveMessagesStoreData;
+  readonly requestMainWavesList: () => () => void;
+  readonly requestDirectMessagesList: () => () => void;
   readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
   readonly fetchNextPageForWave: (
     props: NextPageProps
@@ -83,7 +88,7 @@ interface MyStreamContextType {
   readonly processIncomingDrop: (
     drop: ApiDrop,
     type: ProcessIncomingDropType
-  ) => void;
+  ) => Promise<void>;
   readonly processDropRemoved: (waveId: string, dropId: string) => void;
   readonly applyOptimisticDropUpdate: ({
     waveId,
@@ -101,6 +106,49 @@ interface MyStreamProviderProps {
 }
 
 const BROWSER_RESUME_SYNC_COOLDOWN_MS = 1000;
+const MAIN_WAVES_LIST_IDLE_DELAY_MS = 1000;
+const MAIN_WAVES_LIST_IDLE_TIMEOUT_MS = 2500;
+
+type BrowserIdleScheduler = {
+  readonly requestIdleCallback?: (
+    runTask: () => void,
+    options?: { readonly timeout: number }
+  ) => number;
+  readonly cancelIdleCallback?: (handle: number) => void;
+};
+
+type WaveMuteState = {
+  readonly metrics?: {
+    readonly muted?: boolean;
+  } | null;
+};
+
+const getWaveMuted = (wave: WaveMuteState | null | undefined): boolean =>
+  wave?.metrics?.muted ?? false;
+
+const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
+  let idleHandle: number | null = null;
+  const timeoutHandle = globalThis.setTimeout(() => {
+    const idleWindow = globalThis as unknown as BrowserIdleScheduler;
+    if (typeof idleWindow.requestIdleCallback === "function") {
+      idleHandle = idleWindow.requestIdleCallback(runTask, {
+        timeout: MAIN_WAVES_LIST_IDLE_TIMEOUT_MS,
+      });
+      return;
+    }
+
+    runTask();
+  }, MAIN_WAVES_LIST_IDLE_DELAY_MS);
+
+  return () => {
+    globalThis.clearTimeout(timeoutHandle);
+
+    if (idleHandle !== null) {
+      const idleWindow = globalThis as unknown as BrowserIdleScheduler;
+      idleWindow.cancelIdleCallback?.(idleHandle);
+    }
+  };
+};
 
 // Create the context
 const MyStreamContext = createContext<MyStreamContextType | null>(null);
@@ -110,12 +158,32 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   children,
 }) => {
   const { isCapacitor, isActive } = useCapacitor();
+  const pathname = usePathname() as string | null;
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
+  const [
+    directMessagesListActivationCount,
+    setDirectMessagesListActivationCount,
+  ] = useState(0);
+  const isDirectMessagesRoute = pathname?.startsWith("/messages") ?? false;
+  const isWaveDetailRoute = pathname?.startsWith("/waves/") ?? false;
+  const shouldDeferMainWavesList =
+    isCapacitor && isWaveDetailRoute && !isDirectMessagesRoute;
+  const [hasMainWavesListBeenRequested, setHasMainWavesListBeenRequested] =
+    useState(false);
+  const hasMainWavesListBeenRequestedRef = useRef(false);
+  const isMainWavesListEnabled =
+    !shouldDeferMainWavesList || hasMainWavesListBeenRequested;
+  const isDirectMessagesListEnabled =
+    isDirectMessagesRoute || directMessagesListActivationCount > 0;
   const { wave: activeWaveData } = useWaveById(activeWaveId, {
     enabled: Boolean(activeWaveId),
   });
-  const mainWavesData = useWavesList();
-  const dmWavesData = useDmWavesList();
+  const mainWavesData = useWavesList({
+    enabled: isMainWavesListEnabled,
+  });
+  const dmWavesData = useDmWavesList({
+    enabled: isDirectMessagesListEnabled,
+  });
   const mainWaveIds = useMemo<ReadonlySet<string>>(
     () => new Set(mainWavesData.waves.map((wave) => wave.id)),
     [mainWavesData.waves]
@@ -125,11 +193,13 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     [dmWavesData.waves]
   );
   const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
+    enabled: isMainWavesListEnabled,
     supportsPinning: true,
     otherListWaveIds: dmWaveIds,
     preserveBackendWaveOrder: true,
   });
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
+    enabled: isDirectMessagesListEnabled,
     supportsPinning: false,
     otherListWaveIds: mainWaveIds,
     sortMutedLast: false,
@@ -159,6 +229,44 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const resetAllDmWavesNewDropsCount =
     dmWavesHookData.resetAllWavesNewDropsCount;
 
+  const enableMainWavesList = useCallback(() => {
+    if (hasMainWavesListBeenRequestedRef.current) {
+      return;
+    }
+
+    hasMainWavesListBeenRequestedRef.current = true;
+    markMobileLaunchStep("main_waves_list_enabled");
+    setHasMainWavesListBeenRequested(true);
+  }, []);
+
+  const requestMainWavesList = useCallback(() => {
+    enableMainWavesList();
+    return () => {};
+  }, [enableMainWavesList]);
+
+  const requestDirectMessagesList = useCallback(() => {
+    let didRelease = false;
+    setDirectMessagesListActivationCount((count) => count + 1);
+
+    return () => {
+      if (didRelease) {
+        return;
+      }
+
+      didRelease = true;
+      setDirectMessagesListActivationCount((count) => Math.max(0, count - 1));
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!shouldDeferMainWavesList || isMainWavesListEnabled) {
+      return;
+    }
+
+    markMobileLaunchStep("main_waves_list_deferred");
+    return scheduleAfterRouteIdle(enableMainWavesList);
+  }, [enableMainWavesList, isMainWavesListEnabled, shouldDeferMainWavesList]);
+
   const wavesRef = useRef(wavesHookData.waves);
   const dmWavesRef = useRef(dmWavesHookData.waves);
 
@@ -167,13 +275,19 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesRef.current = dmWavesHookData.waves;
   }, [wavesHookData.waves, dmWavesHookData.waves]);
 
-  const isWaveMuted = useCallback((waveId: string): boolean => {
-    const wave = wavesRef.current.find((w) => w.id === waveId);
-    if (wave) return wave.isMuted;
-    const dmWave = dmWavesRef.current.find((w) => w.id === waveId);
-    if (dmWave) return dmWave.isMuted;
-    return false;
-  }, []);
+  const activeWaveDataId = activeWaveData?.id ?? null;
+  const activeWaveMuted = getWaveMuted(activeWaveData);
+  const isWaveMuted = useCallback(
+    (waveId: string): boolean => {
+      const wave = wavesRef.current.find((w) => w.id === waveId);
+      if (wave) return wave.isMuted;
+      const dmWave = dmWavesRef.current.find((w) => w.id === waveId);
+      if (dmWave) return dmWave.isMuted;
+      if (activeWaveDataId === waveId) return activeWaveMuted;
+      return false;
+    },
+    [activeWaveDataId, activeWaveMuted]
+  );
 
   // Instantiate the real-time updater hook
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
@@ -202,7 +316,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       registerWave(activeWaveId, true);
     }
     refetchAllMainWaves();
-    refetchAllDmWaves();
+    if (isDirectMessagesListEnabled) {
+      refetchAllDmWaves();
+    }
   });
 
   const runBrowserResumeSync = useEffectEvent(() => {
@@ -226,14 +342,18 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
     if (isCapacitor) {
       resetAllMainWavesNewDropsCount();
-      resetAllDmWavesNewDropsCount();
+      if (isDirectMessagesListEnabled) {
+        resetAllDmWavesNewDropsCount();
+      }
     }
   });
 
   const handleCapacitorResume = useEffectEvent(() => {
     syncActiveWaveAndRefetch();
     resetAllMainWavesNewDropsCount();
-    resetAllDmWavesNewDropsCount();
+    if (isDirectMessagesListEnabled) {
+      resetAllDmWavesNewDropsCount();
+    }
   });
 
   useEffect(() => {
@@ -351,6 +471,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       directMessages,
       activeWave,
       waveMessagesStore: waveMessagesStoreData,
+      requestMainWavesList,
+      requestDirectMessagesList,
       registerWave,
       fetchNextPageForWave: fetchNextPage,
       fetchAroundSerialNo,
@@ -386,6 +508,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     activeWaveId,
     activeWaveData,
     setActiveWaveAndRegister,
+    requestMainWavesList,
+    requestDirectMessagesList,
     waveMessagesStore.getData,
     waveMessagesStore.subscribe,
     waveMessagesStore.unsubscribe,
@@ -424,52 +548,26 @@ export function useMyStreamWaveMessages(
   const { waveMessagesStore } = useMyStream();
   const { getData, subscribe, unsubscribe } = waveMessagesStore;
 
-  // Use useState to hold the data for the specific waveId
-  // Initialize with the current data for that waveId
-  const [data, setData] = useState<WaveMessages | undefined>(() =>
-    waveId ? getData(waveId) : undefined
+  const getSnapshot = useCallback(
+    () => (waveId ? getData(waveId) : undefined),
+    [getData, waveId]
   );
 
-  useEffect(() => {
-    // If waveId is null or undefined, don't subscribe
-    if (!waveId) {
-      setData(undefined); // Clear data if waveId becomes null/undefined
-      return;
-    }
+  const subscribeToWave = useCallback(
+    (onStoreChange: () => void) => {
+      if (!waveId) {
+        return () => {};
+      }
 
-    // Define the listener callback
-    const listener: WaveMessagesListener = (
-      newData: WaveMessages | undefined
-    ) => {
-      // Update local state only if data actually differs
-      // Use a proper comparison if needed (e.g., deep compare for complex objects)
-      setData((currentData: WaveMessages | undefined) => {
-        const didChange =
-          JSON.stringify(currentData) !== JSON.stringify(newData);
+      const listener: WaveMessagesListener = () => onStoreChange();
+      subscribe(waveId, listener);
 
-        if (didChange) {
-          return newData;
-        }
-        return currentData;
-      });
-    };
+      return () => {
+        unsubscribe(waveId, listener);
+      };
+    },
+    [subscribe, unsubscribe, waveId]
+  );
 
-    // Subscribe to changes for the specific waveId
-    subscribe(waveId, listener);
-
-    // Cleanup function: Unsubscribe when component unmounts or waveId changes
-    return () => {
-      unsubscribe(waveId, listener);
-    };
-    // Re-run effect if waveId changes or if the stable subscribe/unsubscribe functions change (unlikely but safe)
-  }, [waveId, subscribe, unsubscribe]);
-
-  // Re-initialize state if the key changes and getData is available
-  // This handles cases where the component using the hook changes the key it's interested in.
-  useEffect(() => {
-    const nextData = waveId ? getData(waveId) : undefined;
-    setData(nextData);
-  }, [waveId, getData]);
-
-  return data;
+  return useSyncExternalStore(subscribeToWave, getSnapshot, getSnapshot);
 }

@@ -9,14 +9,28 @@
       "kind": "route",
       "title": "6529.io home",
       "aliases": ["home", "homepage", "landing page", "6529 home"],
-      "keywords": ["home", "latest", "mint", "coming", "discover", "mission"],
+      "keywords": [
+        "home",
+        "latest",
+        "mint",
+        "coming",
+        "discover",
+        "mission",
+        "subscriptions"
+      ],
       "facts": [
         "The home page is the main 6529.io entry point.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",
-      "related_paths": ["/the-memes", "/waves"],
+      "related_paths": [
+        "/the-memes",
+        "/waves",
+        "/about/subscriptions",
+        "/{user}/subscriptions"
+      ],
       "tags": ["home", "navigation"],
       "source_refs": ["ops/docs/home/README.md"]
     },
@@ -34,17 +48,45 @@
         "expand"
       ],
       "facts": [
-        "The app sidebar is the main navigation surface for sections such as Waves, Network, Groups, Delegation, and other app areas.",
+        "The primary navigation concepts are NFTs, Waves, DMs, and About.",
+        "Home remains available through the 6529 logo link to /.",
+        "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
+        "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
-        "On mobile, primary navigation is also available through mobile app navigation surfaces."
+        "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/network", "/delegation/delegation-center"],
+      "related_paths": [
+        "/the-memes",
+        "/waves",
+        "/messages",
+        "/about",
+        "/drop-forge",
+        "/discover",
+        "/network",
+        "/delegation/delegation-center"
+      ],
       "tags": ["navigation", "ui"],
       "source_refs": [
         "ops/docs/navigation/feature-sidebar-navigation.md",
         "ops/docs/navigation/feature-app-sidebar-menu.md"
       ]
+    },
+    {
+      "id": "join.6529",
+      "kind": "route",
+      "title": "Join 6529",
+      "aliases": ["join", "join 6529", "join page", "get started"],
+      "keywords": ["join", "6529", "navigation", "getting-started"],
+      "facts": [
+        "The Join 6529 page lives at /join.",
+        "Join 6529 lives at /join but is not shown as a primary sidebar or app drawer menu item.",
+        "The current page is a minimal placeholder; detailed join and onboarding content is not yet published there."
+      ],
+      "canonical_path": "/join",
+      "related_paths": ["/", "/about", "/waves"],
+      "tags": ["join", "navigation", "getting-started"],
+      "source_refs": ["app/join/page.tsx"]
     },
     {
       "id": "about.index",
@@ -63,9 +105,14 @@
         "contents",
         "navigation",
         "collections",
+        "minting",
+        "digital rights",
+        "gdrc",
         "delegation",
-        "resources",
-        "community",
+        "wallets",
+        "developer",
+        "tools",
+        "open data",
         "legal",
         "tdh",
         "xtdh",
@@ -76,21 +123,28 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into Collections, Delegation, Network, Resources, Community, and Legal link cards, including TDH, xTDH, Health, Definitions, Levels, and Network Stats links that keep their canonical /network paths.",
-        "Use the About index when users want to browse all About pages or find the right policy, collection, delegation, resource, community, or technical page."
+        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards.",
+        "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
+        "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
+        "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
       ],
       "canonical_path": "/about",
       "related_paths": [
         "/about/the-memes",
+        "/about/gdrc1",
         "/about/faq",
         "/about/tech",
         "/about/terms-of-service",
         "/network/tdh",
         "/network/xtdh",
+        "/xtdh",
         "/network/health",
         "/network/definitions",
         "/network/levels",
-        "/network/health/network-tdh"
+        "/network/health/network-tdh",
+        "/network/nerd",
+        "/network/prenodes",
+        "/network/tdh/historic-boosts"
       ],
       "tags": ["about", "navigation", "getting-started"],
       "source_refs": [
@@ -355,13 +409,19 @@
       "keywords": ["gdrc1", "gdrc", "charter", "digital", "rights", "about"],
       "facts": [
         "The GDRC1 page lives at /about/gdrc1.",
+        "GDRC stands for Global Digital Rights Charter.",
+        "GDRC is separate from NFT Delegation and is not the Global Delegation Rights Contract.",
         "The page states that 6529 supports the Global Digital Rights Charter 1.",
-        "The page links to digitalrightscharter.org and displays the full text of GDRC1."
+        "The page links to digitalrightscharter.org and displays the full text of GDRC1.",
+        "The About index lists GDRC under Delegation & Wallets."
       ],
       "canonical_path": "/about/gdrc1",
       "related_paths": ["/about/faq"],
       "tags": ["about", "rights", "gdrc1"],
-      "source_refs": ["components/about/AboutGDRC1.tsx"]
+      "source_refs": [
+        "components/about/AboutGDRC1.tsx",
+        "components/about/about.routes.ts"
+      ]
     },
     {
       "id": "about.nft-delegation",
@@ -559,7 +619,8 @@
         "Connection sharing can show a QR code for 6529 Mobile or a deep link for 6529 Desktop.",
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
         "If the Share menu says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
-        "The same Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection."
+        "The desktop Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection.",
+        "In the native app, supported non-wave pages use the header Share page button for current-page sharing."
       ],
       "canonical_path": "/",
       "suppress_source_links": true,
@@ -1159,16 +1220,18 @@
     {
       "id": "network.xtdh",
       "kind": "glossary",
-      "title": "xTDH",
+      "title": "xTDH Overview",
       "aliases": [
         "xtdh",
         "x tdh",
         "extended tdh",
+        "xtdh overview",
+        "xtdh formulas",
+        "xtdh formulas overview",
         "what is xtdh",
         "what is x tdh",
         "xtdh grants",
-        "xTDH grants",
-        "xTDH grant allocations"
+        "xTDH grants"
       ],
       "keywords": [
         "xtdh",
@@ -1191,7 +1254,7 @@
       "facts": [
         "xTDH is an extension of TDH that lets TDH-like network participation flow beyond core 6529 holders to other NFT holders and communities.",
         "xTDH can be earned by holding eligible cards outside The Memes ecosystem.",
-        "The frontend /network/xtdh page describes xTDH as an extension of TDH that helps include other NFT holders in the 6529 ecosystem and offer them the benefits of TDH.",
+        "The frontend /network/xtdh page is labeled xTDH Overview and describes xTDH as an extension of TDH that helps include other NFT holders in the 6529 ecosystem and offer them the benefits of TDH.",
         "xTDH tracks how much xTDH your Memes produce, how much xTDH you receive from grants on tokens you own, and how much xTDH you have granted away.",
         "Produced xTDH comes from TDH production: produced_xTDH_today = TDH gained today * xTDH_coefficient.",
         "The current backend coefficient is 0.1.",
@@ -1204,16 +1267,51 @@
         "The first grant increment requires the grant and token ownership to have matured past the required midnight or 24-hour windows.",
         "xTDH is not simply TDH for external NFTs; it is a grant and allocation layer where TDH producers create xTDH, can grant future production outward, external token owners can receive it, and ungranted or ineligible flow remains with the grantor.",
         "No produced xTDH is intended to disappear; it is allocated to someone.",
-        "The live xTDH allocations dashboard at /xtdh shows network-wide stats and lets users drill down through Collections, Tokens, Contributors, and Grant details.",
+        "For live network-wide xTDH allocation data, use the xTDH Allocations Dashboard at /xtdh.",
         "Profile xTDH information is available under /{user}/xtdh when visible."
       ],
       "canonical_path": "/network/xtdh",
-      "related_paths": ["/{user}/xtdh", "/network"],
+      "related_paths": ["/xtdh", "/{user}/xtdh", "/network"],
       "tags": ["network", "xtdh"],
       "source_refs": [
-        "ops/docs/network/feature-xtdh-network-overview.md",
         "ops/docs/network/feature-xtdh-formulas.md",
         "ops/docs/profiles/tabs/feature-xtdh-tab.md"
+      ]
+    },
+    {
+      "id": "network.xtdh-allocations",
+      "kind": "route",
+      "title": "xTDH Allocations Dashboard",
+      "aliases": [
+        "xtdh allocations",
+        "xtdh allocations dashboard",
+        "xtdh dashboard",
+        "xtdh network overview",
+        "xTDH grant allocations"
+      ],
+      "keywords": [
+        "xtdh",
+        "allocations",
+        "dashboard",
+        "grants",
+        "collections",
+        "tokens",
+        "contributors",
+        "network"
+      ],
+      "facts": [
+        "The live xTDH Allocations Dashboard lives at /xtdh.",
+        "The /xtdh dashboard shows network-wide stats and lets users drill down through Collections, Tokens, Contributors, and Grant details.",
+        "Use /network/xtdh for the static xTDH Overview and formulas page.",
+        "Profile xTDH information is available under /{user}/xtdh when visible."
+      ],
+      "canonical_path": "/xtdh",
+      "related_paths": ["/network/xtdh", "/{user}/xtdh", "/network"],
+      "tags": ["network", "xtdh"],
+      "source_refs": [
+        "app/xtdh/page.tsx",
+        "components/xtdh/XtdhPage.tsx",
+        "ops/docs/network/feature-xtdh-network-overview.md"
       ]
     },
     {
@@ -1405,7 +1503,8 @@
       "facts": [
         "Waves are the main social threads for conversations, drops, reactions, voting, and wave-specific activity.",
         "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
-        "The Waves panel includes wave lists, pinned waves, highly rated waves, and create controls."
+        "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
+        "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves/create", "/messages"],
@@ -1469,13 +1568,15 @@
         "groups",
         "dates",
         "drops",
+        "rules",
         "voting",
         "outcomes",
         "description"
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
-        "Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "The docs for wave creation live under ops/docs/waves/create and the app route is /waves/create."
       ],
       "canonical_path": "/waves/create",
@@ -1484,7 +1585,8 @@
       "source_refs": [
         "ops/docs/waves/create/README.md",
         "ops/docs/waves/create/feature-overview-step.md",
-        "ops/docs/waves/create/feature-groups-step.md"
+        "ops/docs/waves/create/feature-groups-step.md",
+        "ops/docs/waves/create/feature-rules-step.md"
       ]
     },
     {
@@ -1498,11 +1600,12 @@
         "conversation",
         "overview",
         "groups",
+        "rules",
         "description"
       ],
       "facts": [
         "Chat waves are conversation-focused waves.",
-        "Chat wave creation uses Overview, Groups, and Description steps.",
+        "Chat wave creation uses Overview, Groups, Rules, and Description steps.",
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
       "canonical_path": "/waves/create",
@@ -1525,17 +1628,20 @@
         "leaderboard",
         "winners",
         "outcomes",
-        "drops"
+        "drops",
+        "rules"
       ],
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
-        "Rank wave setup includes Dates, Drops, Voting, Outcomes, Groups, and Description.",
+        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
+        "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "rank", "voting"],
       "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
         "ops/docs/waves/create/feature-voting-step.md",
         "ops/docs/waves/leaderboard/README.md"
       ]
@@ -1551,19 +1657,64 @@
         "wave",
         "voting",
         "outcomes",
-        "drops"
+        "drops",
+        "rules"
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Dates, Drops, Voting, Outcomes, Groups, and Description.",
+        "Approve wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
+        "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "approve", "voting"],
       "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
         "ops/docs/waves/create/feature-voting-step.md",
         "ops/docs/waves/create/feature-outcomes-step.md"
+      ]
+    },
+    {
+      "id": "waves.rules",
+      "kind": "workflow",
+      "title": "Wave rules",
+      "aliases": [
+        "wave rules",
+        "rules tab",
+        "rules step",
+        "creator rules",
+        "custom rules",
+        "participation terms",
+        "wave terms"
+      ],
+      "keywords": [
+        "wave",
+        "rules",
+        "chat",
+        "rank",
+        "approve",
+        "terms",
+        "signature",
+        "metadata",
+        "sidebar",
+        "mobile"
+      ],
+      "facts": [
+        "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
+        "Automatic rules are generated from wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
+        "Creators can add display-only custom rules that are saved as wave metadata.",
+        "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
+        "Wave admins can edit display-only custom rules later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
+        "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
+      ],
+      "canonical_path": "/waves/create",
+      "related_paths": ["/waves", "/waves/create"],
+      "tags": ["waves", "rules", "chat", "rank", "approve"],
+      "source_refs": [
+        "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/flow-wave-participation.md",
+        "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md"
       ]
     },
     {
@@ -1581,7 +1732,8 @@
       "facts": [
         "Direct-message waves live under /messages and individual message threads use /messages/{waveId}.",
         "A direct-message creation flow is available at /messages/create.",
-        "Direct messages use wave mechanics but are surfaced separately from standard public wave routes."
+        "Direct messages use wave mechanics but are surfaced separately from standard public wave routes.",
+        "Direct-message content stays gated until wallet and profile prerequisites are resolved."
       ],
       "canonical_path": "/messages",
       "related_paths": ["/messages/create"],
@@ -1614,7 +1766,8 @@
       "facts": [
         "The wave composer is where users post drops and replies inside a wave.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
-        "Composer availability depends on the wave, groups, permissions, and current state."
+        "Composer availability depends on the wave, groups, permissions, and current state.",
+        "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -1708,6 +1861,45 @@
         "components/waves/specs/WaveSlowMode.tsx",
         "components/waves/SlowModeChatNotice.tsx",
         "generated/models/ApiWaveChatConfig.ts"
+      ]
+    },
+    {
+      "id": "waves.boosted-drops-display",
+      "kind": "ui_affordance",
+      "title": "Boosted drops display preference",
+      "aliases": [
+        "boosted drops",
+        "hide boosted drops",
+        "compact boosted drops",
+        "boosted drop cards",
+        "wave chat boost cards"
+      ],
+      "keywords": [
+        "waves",
+        "chat",
+        "boosted",
+        "drops",
+        "display",
+        "compact",
+        "expanded",
+        "hidden",
+        "settings",
+        "mobile"
+      ],
+      "facts": [
+        "Wave chat can insert boosted-drop promo cards between normal chronological drops.",
+        "The Boosted drops display preference is local to the current device/browser and can be set to Expanded, Compact, or Hidden.",
+        "Expanded shows the full inserted boosted-drop card, Compact shows a slim row, and Hidden removes only inserted boosted-drop cards.",
+        "Hidden does not hide normal chronological drops that happen to have boosts.",
+        "On desktop the control is in the wave right sidebar Settings under Your display; on compact/mobile it is available from the wave header overflow menu."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "chat", "settings", "boosted-drops"],
+      "source_refs": [
+        "components/waves/boosted-drops/BoostedDropsDisplayPreference.tsx",
+        "components/drops/view/DropsList.tsx",
+        "components/brain/my-stream/tabs/MyStreamWaveTabsDefault.tsx"
       ]
     },
     {
@@ -2911,6 +3103,7 @@
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
+        "Native app page sharing appears next to Search on supported non-wave, non-message, and non-notification routes.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
       ],
       "canonical_path": "/waves",
@@ -2930,12 +3123,20 @@
       ],
       "keywords": ["mobile", "bottom", "navigation", "phone", "app", "tabs"],
       "facts": [
-        "Mobile layouts use bottom navigation for common app destinations.",
-        "The mobile navigation surface is separate from the desktop sidebar.",
+        "Mobile layouts use bottom navigation for Discovery, Waves, Messages, Home, Network, Collections, and Notifications.",
+        "The mobile bottom navigation surface is separate from the desktop and app sidebar IA.",
         "Mobile keyboard and viewport behavior can affect how navigation and composer controls fit on screen."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves", "/notifications"],
+      "related_paths": [
+        "/discover",
+        "/waves",
+        "/messages",
+        "/",
+        "/network",
+        "/the-memes",
+        "/notifications"
+      ],
       "tags": ["navigation", "mobile"],
       "source_refs": [
         "ops/docs/navigation/feature-mobile-bottom-navigation.md",
@@ -2987,16 +3188,19 @@
       "kind": "ui_affordance",
       "title": "Share modal",
       "aliases": ["share", "share modal", "copy link", "share page"],
-      "keywords": ["share", "copy", "link", "modal", "url"],
+      "keywords": ["share", "copy", "link", "modal", "url", "native"],
       "facts": [
-        "Shared app surfaces can open a share modal for copying or sharing links.",
+        "Desktop web surfaces can open a share modal for copying or sharing links.",
+        "Native app pages outside home, Waves, Messages, and Notifications use a direct Share page header button instead of the desktop share modal.",
         "Wave-specific link sharing also exists in the wave header.",
-        "Use the share modal when users ask how to copy a route or send someone a page."
+        "Use share controls when users ask how to copy a route or send someone a page."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["navigation", "share"],
       "source_refs": [
+        "components/header/share/HeaderPageShareButton.tsx",
+        "ops/docs/navigation/feature-app-header-context.md",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/docs/waves/header/feature-wave-link-share-copy.md"
       ]
@@ -3680,11 +3884,12 @@
       "keywords": ["waves", "discover", "search", "sections", "cards"],
       "facts": [
         "Wave discovery docs cover discover cards, discover sections, and search behavior.",
-        "Discovery is for finding waves, while the Waves panel is for active navigation and participation.",
+        "Discover Waves is a secondary Waves experience link and searchable destination that routes to /discover.",
+        "Wave discovery is for finding waves, while the Waves panel is for active navigation and participation.",
         "Search and section availability depend on the route state and access rules."
       ],
-      "canonical_path": "/waves",
-      "related_paths": ["/waves/create"],
+      "canonical_path": "/discover",
+      "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "discovery"],
       "source_refs": [
         "ops/docs/waves/discovery/README.md",
@@ -3986,6 +4191,49 @@
       "related_paths": ["/waves"],
       "tags": ["waves", "header"],
       "source_refs": ["ops/docs/waves/header/feature-wave-header-controls.md"]
+    },
+    {
+      "id": "waves.notification-controls",
+      "kind": "ui_affordance",
+      "title": "Wave notification and mute controls",
+      "aliases": [
+        "wave notifications",
+        "wave mute",
+        "mute wave",
+        "unmute wave",
+        "bell slash",
+        "crossed out bell",
+        "speaker button",
+        "all message notifications"
+      ],
+      "keywords": [
+        "waves",
+        "notifications",
+        "mute",
+        "unmute",
+        "bell",
+        "speaker",
+        "all",
+        "messages",
+        "ALL"
+      ],
+      "facts": [
+        "The speaker button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
+        "The speaker menu has an @ALL option for @ALL mention notifications.",
+        "The speaker menu has a Notify for all messages option for every-message notifications.",
+        "When all-message notifications are unavailable and not already enabled, the speaker menu keeps that option visible but disabled.",
+        "The bell-slash button mutes waves before or after joining.",
+        "When a wave is muted, the bell-slash Muted control unmutes it.",
+        "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/messages"],
+      "tags": ["waves", "notifications", "mute"],
+      "source_refs": [
+        "components/waves/specs/WaveNotificationSettings.tsx",
+        "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
+        "ops/docs/waves/sidebars/feature-wave-notification-controls.md"
+      ]
     },
     {
       "id": "waves.header.share-link",
@@ -4607,7 +4855,7 @@
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
         "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",
-        "Calendar API responses include the mint number, UTC mint date, UTC start and end timestamps, live/past/upcoming status, SZN, Year, Epoch, Period, Era, Eon, /meme-calendar, and /the-memes/{id} paths.",
+        "Calendar API responses include the mint number, UTC mint date, UTC start and end timestamps, live/past/upcoming status, SZN, Year, Epoch, Period, Era, Eon, position_in_season, position_in_year, position_in_epoch, position_in_period, position_in_era, position_in_eon, /meme-calendar, and /the-memes/{id} paths.",
         "The bot can use the calendar API for exact next/current/past drop timing and overall mint-window answers.",
         "Mint windows are schedule information only; wallet eligibility, allowlists, and actual mint success are still enforced by the mint flow."
       ],
@@ -4989,6 +5237,54 @@
       "source_refs": [
         "app/open-data/royalties/page.tsx",
         "ops/docs/open-data/feature-royalties-uploads.md"
+      ]
+    },
+    {
+      "id": "tools.index",
+      "kind": "route",
+      "title": "Tools index",
+      "aliases": [
+        "tools",
+        "tools page",
+        "tools index",
+        "tools landing page",
+        "6529 tools",
+        "tool categories"
+      ],
+      "keywords": [
+        "tools",
+        "navigation",
+        "delegation",
+        "memes",
+        "api",
+        "emma",
+        "block finder",
+        "open data",
+        "app wallets"
+      ],
+      "facts": [
+        "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
+        "It groups label-only tool cards into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
+        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
+        "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
+        "Private operator routes and local-only tools are not listed on the public Tools index.",
+        "Primary menu discovery for user-facing tools, developer routes, and Open Data remains under About."
+      ],
+      "canonical_path": "/tools",
+      "related_paths": [
+        "/delegation/delegation-center",
+        "/tools/subscriptions-report",
+        "/tools/api",
+        "/tools/block-finder",
+        "/emma",
+        "/open-data"
+      ],
+      "tags": ["tools", "navigation"],
+      "source_refs": [
+        "app/tools/page.tsx",
+        "components/tools/ToolsIndex.tsx",
+        "components/tools/tools.routes.ts",
+        "ops/docs/api-tool/feature-tools-index.md"
       ]
     },
     {

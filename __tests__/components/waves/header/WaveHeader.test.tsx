@@ -34,9 +34,19 @@ jest.mock("@/components/waves/header/WaveHeaderPinButton", () => () => (
   <div data-testid="wave-header-pin" />
 ));
 jest.mock("@/components/waves/WavePicture", () => () => <div />);
-jest.mock("@/components/waves/specs/WaveNotificationSettings", () => () => (
-  <div data-testid="wave-notification-settings" />
-));
+jest.mock(
+  "@/components/waves/specs/WaveNotificationSettings",
+  () =>
+    ({ wave }: any) => (
+      <div data-testid="wave-notification-settings">
+        {wave.subscribed_actions.length > 0 ? (
+          <button type="button" aria-label="Open notification settings" />
+        ) : (
+          <button type="button" aria-label="Mute wave" />
+        )}
+      </div>
+    )
+);
 jest.mock("@/helpers/waves/waves.helpers", () => ({ canEditWave: jest.fn() }));
 
 const { canEditWave } = require("@/helpers/waves/waves.helpers");
@@ -113,6 +123,20 @@ describe("WaveHeader", () => {
     });
 
     expect(screen.getByTestId("wave-header-pin")).toBeInTheDocument();
+  });
+
+  it("mounts notification settings for connected users before joining", () => {
+    wrapper(baseWave, undefined, {
+      connectedProfile: { handle: "alice" },
+    });
+
+    expect(
+      screen.getByTestId("wave-notification-settings")
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Mute wave")).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Open notification settings")
+    ).not.toBeInTheDocument();
   });
 
   it("hides pin action for subwaves", () => {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextGenTokenProvenance from '@/components/nextGen/collections/nextgenToken/NextGenTokenProvenance';
@@ -23,16 +22,6 @@ jest.mock('@/components/pagination/Pagination', () => (props: any) => (
     <button onClick={() => props.setPage(props.page + 1)}>next</button>
   </div>
 ));
-
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  return {
-    Container: (p: any) => <div {...p} />,
-    Row: (p: any) => <div {...p} />,
-    Col: (p: any) => <div {...p} />,
-    Table: (p: any) => <table {...p} />,
-  };
-});
 
 const { commonApiFetch } = require('@/services/api/common-api');
 

@@ -4,7 +4,7 @@ import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -61,7 +61,7 @@ export default function AccessPage() {
         <input
           disabled={inputDisabled}
           type="text"
-          className={inputDisabled ? "text-center" : ""}
+          className={inputDisabled ? "tw-text-center" : ""}
           defaultValue={inputDisabled ? "Go to 6529.io" : ""}
           aria-label="Team access code"
           placeholder={inputDisabled ? "Go to 6529.io" : "Team Login"}

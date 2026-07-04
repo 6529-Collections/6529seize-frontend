@@ -92,13 +92,43 @@ async function fetchJsonWithFailover<T>(
 type TokenMetadataParams = {
   readonly address?: `0x${string}` | undefined;
   readonly tokenIds?: readonly string[] | undefined;
-  readonly tokens?: readonly { contract: string; tokenId: string }[] | undefined;
+  readonly tokens?:
+    | readonly { contract: string; tokenId: string }[]
+    | undefined;
   readonly chain?: SupportedChain | undefined;
   readonly signal?: AbortSignal | undefined;
 };
 
+export type ContractOverviewBatchRequest = {
+  readonly address: `0x${string}`;
+  readonly chain?: SupportedChain | undefined;
+};
+
+type ContractMetadataBatchResponseEntry = {
+  readonly address?: string | undefined;
+  readonly chain?: SupportedChain | undefined;
+  readonly metadata?:
+    | (AlchemyContractMetadataResponse & { _checksum?: string | undefined })
+    | null
+    | undefined;
+  readonly error?: string | undefined;
+};
+
+type ContractMetadataBatchResponse = {
+  readonly contracts?:
+    | readonly ContractMetadataBatchResponseEntry[]
+    | undefined;
+};
+
+type ContractOverviewBatchResult = {
+  readonly contractsByKey: ReadonlyMap<string, ContractOverview | null>;
+  readonly errorsByKey: ReadonlyMap<string, string>;
+};
+
 async function fetchCollectionsFromApi(
-  params: UseCollectionSearchParams & { readonly signal?: AbortSignal | undefined }
+  params: UseCollectionSearchParams & {
+    readonly signal?: AbortSignal | undefined;
+  }
 ): Promise<SearchContractsResult> {
   const { query, chain = "ethereum", hideSpam = true, signal } = params;
   const search = new URLSearchParams();
@@ -116,7 +146,9 @@ async function fetchCollectionsFromApi(
 }
 
 async function fetchContractOverviewFromApi(
-  params: UseContractOverviewParams & { readonly signal?: AbortSignal | undefined }
+  params: UseContractOverviewParams & {
+    readonly signal?: AbortSignal | undefined;
+  }
 ): Promise<ContractOverview | null> {
   const { address, chain = "ethereum", signal } = params;
   if (!address) {
@@ -134,7 +166,8 @@ async function fetchContractOverviewFromApi(
   const queryString = search.toString();
 
   const payload = await fetchJsonWithFailover<
-    (AlchemyContractMetadataResponse & { _checksum?: string | undefined }) | null
+    | (AlchemyContractMetadataResponse & { _checksum?: string | undefined })
+    | null
   >(`/api/alchemy/contract?${queryString}`, `/contract?${queryString}`, {
     ...(signal !== undefined ? { signal: signal } : {}),
   });
@@ -145,6 +178,79 @@ async function fetchContractOverviewFromApi(
 
   const checksumFromResponse = (payload._checksum ?? checksum) as `0x${string}`;
   return processContractMetadataResponse(payload, checksumFromResponse);
+}
+
+async function fetchContractOverviewsFromApi({
+  contracts,
+  signal,
+}: {
+  readonly contracts: readonly ContractOverviewBatchRequest[];
+  readonly signal?: AbortSignal | undefined;
+}): Promise<ContractOverviewBatchResult> {
+  if (contracts.length === 0) {
+    return {
+      contractsByKey: new Map<string, ContractOverview | null>(),
+      errorsByKey: new Map<string, string>(),
+    };
+  }
+
+  const body = JSON.stringify({
+    contracts: contracts.map((contract) => ({
+      address: contract.address,
+      chain: contract.chain ?? "ethereum",
+    })),
+  });
+
+  const payload = await fetchJsonWithFailover<ContractMetadataBatchResponse>(
+    "/api/alchemy/contracts",
+    "/contracts",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      ...(signal === undefined ? {} : { signal: signal }),
+    }
+  );
+
+  const contractsByKey = new Map<string, ContractOverview | null>();
+  const errorsByKey = new Map<string, string>();
+
+  for (const entry of payload.contracts ?? []) {
+    const chain = entry.chain ?? "ethereum";
+    const checksum = normaliseAddress(entry.address);
+    if (!checksum) {
+      continue;
+    }
+
+    const key = getContractOverviewLookupKey(checksum, chain);
+    if (entry.error) {
+      errorsByKey.set(key, entry.error);
+      continue;
+    }
+
+    if (!entry.metadata) {
+      contractsByKey.set(key, null);
+      contractCache.set(key, {
+        data: null,
+        expires: Date.now() + CONTRACT_TTL,
+      });
+      continue;
+    }
+
+    const checksumFromResponse = (entry.metadata._checksum ??
+      checksum) as `0x${string}`;
+    const contract = processContractMetadataResponse(
+      entry.metadata,
+      checksumFromResponse
+    );
+    contractsByKey.set(key, contract);
+    contractCache.set(key, {
+      data: contract,
+      expires: Date.now() + CONTRACT_TTL,
+    });
+  }
+
+  return { contractsByKey, errorsByKey };
 }
 
 async function fetchTokenMetadataFromApi(
@@ -193,6 +299,22 @@ function getContractCacheKey(
   chain: SupportedChain
 ): string {
   return `${chain}:${address.toLowerCase()}`;
+}
+
+export function getContractOverviewLookupKey(
+  address: `0x${string}`,
+  chain: SupportedChain = "ethereum"
+): string {
+  return getContractCacheKey(address, chain);
+}
+
+function getContractOverviewBatchRequestKey(
+  contract: ContractOverviewBatchRequest
+): string {
+  return getContractOverviewLookupKey(
+    contract.address,
+    contract.chain ?? "ethereum"
+  );
 }
 
 function getTokenCacheKey(params: TokenMetadataParams): string {
@@ -244,7 +366,9 @@ type UseContractOverviewParams = {
 type UseTokenMetadataParams = {
   readonly address?: `0x${string}` | undefined;
   readonly tokenIds?: readonly string[] | undefined;
-  readonly tokens?: readonly { contract: string; tokenId: string }[] | undefined;
+  readonly tokens?:
+    | readonly { contract: string; tokenId: string }[]
+    | undefined;
   readonly chain?: SupportedChain | undefined;
   readonly enabled?: boolean | undefined;
 };
@@ -341,6 +465,63 @@ export function useContractOverviewQuery({
       return data;
     },
   });
+}
+
+export function useContractOverviewsQuery({
+  contracts,
+  enabled = true,
+}: {
+  readonly contracts: readonly ContractOverviewBatchRequest[];
+  readonly enabled?: boolean | undefined;
+}) {
+  const normalizedContracts = useMemo(() => {
+    const seen = new Set<string>();
+    const deduped: ContractOverviewBatchRequest[] = [];
+
+    for (const contract of contracts) {
+      const checksum = normaliseAddress(contract.address);
+      if (!checksum) {
+        continue;
+      }
+
+      const chain = contract.chain ?? "ethereum";
+      const key = getContractOverviewLookupKey(checksum, chain);
+      if (seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      deduped.push({ address: checksum, chain });
+    }
+
+    return deduped.sort((left, right) =>
+      getContractOverviewBatchRequestKey(left).localeCompare(
+        getContractOverviewBatchRequestKey(right)
+      )
+    );
+  }, [contracts]);
+  const contractLookupKey = useMemo(
+    () => normalizedContracts.map(getContractOverviewBatchRequestKey).join("|"),
+    [normalizedContracts]
+  );
+  const query = useQuery({
+    queryKey: [QueryKey.NFT_CONTRACT_OVERVIEW, "batch", contractLookupKey],
+    enabled: enabled && normalizedContracts.length > 0,
+    staleTime: CONTRACT_TTL,
+    gcTime: CONTRACT_TTL,
+    queryFn: async ({ signal }) =>
+      fetchContractOverviewsFromApi({
+        contracts: normalizedContracts,
+        signal,
+      }),
+  });
+
+  return {
+    ...query,
+    contractsByKey:
+      query.data?.contractsByKey ?? new Map<string, ContractOverview | null>(),
+    errorsByKey: query.data?.errorsByKey ?? new Map<string, string>(),
+  };
 }
 
 export function useTokenMetadataQuery({
@@ -449,5 +630,5 @@ export async function fetchOwnerNfts(
     { ...(signal !== undefined ? { signal: signal } : {}) }
   );
 
-  return processOwnerNftsResponse(payload.ownedNfts ?? []);
+  return processOwnerNftsResponse(payload.ownedNfts);
 }

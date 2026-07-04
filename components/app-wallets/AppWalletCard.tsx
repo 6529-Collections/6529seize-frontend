@@ -1,4 +1,4 @@
-import styles from "./AppWallet.module.scss";
+import styles from "./AppWallet.module.css";
 import Link from "next/link";
 import type { AppWallet } from "./AppWalletsContext";
 import AppWalletAvatar from "./AppWalletAvatar";

@@ -69,7 +69,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           >
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
               <p
-                className={`tw-mb-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
+                className={`tw-m-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
               >
                 <UserProfileTooltipWrapper user={authorIdentity}>
                   <Link

@@ -1,6 +1,6 @@
 "use client";
 
-import type { RefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
 import React, {
   useCallback,
   useEffect,
@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { CUSTOM_TOOLTIP_CLOSE_ALL_EVENT } from "@/helpers/tooltip.helpers";
-import styles from "./CustomTooltip.module.scss";
+import styles from "./CustomTooltip.module.css";
 import {
   calculateTooltipLayout,
   getTooltipWindow,
@@ -30,6 +30,7 @@ interface CustomTooltipProps {
   readonly disabled?: boolean | undefined;
   readonly offset?: number | undefined;
   readonly hoverTransitionDelay?: number | undefined;
+  readonly showArrow?: boolean | undefined;
 }
 
 const ARIA_DESCRIBED_BY_ATTRIBUTE = "aria-describedby";
@@ -81,6 +82,7 @@ export default function CustomTooltip({
   disabled = false,
   offset = 8,
   hoverTransitionDelay = 150,
+  showArrow = true,
 }: CustomTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState<TooltipCoordinates>({ x: 0, y: 0 });
@@ -410,6 +412,17 @@ export default function CustomTooltip({
     };
   }, [closeTooltipImmediately]);
 
+  const arrowStyle: CSSProperties =
+    actualPlacement === "top" || actualPlacement === "bottom"
+      ? {
+          left: `${arrowPosition.x}px`,
+          transform: "translateX(-50%)",
+        }
+      : {
+          top: `${arrowPosition.y}px`,
+          transform: "translateY(-50%)",
+        };
+
   return (
     <>
       <span
@@ -443,24 +456,15 @@ export default function CustomTooltip({
             }}
           >
             <div className={styles["tooltipContent"]}>{content}</div>
-            <div
-              className={joinTooltipClassNames(
-                styles["tooltipArrow"],
-                styles["tooltipArrow--" + actualPlacement]
-              )}
-              style={{
-                ...((actualPlacement === "top" ||
-                  actualPlacement === "bottom") && {
-                  left: `${arrowPosition.x}px`,
-                  transform: "translateX(-50%)",
-                }),
-                ...((actualPlacement === "left" ||
-                  actualPlacement === "right") && {
-                  top: `${arrowPosition.y}px`,
-                  transform: "translateY(-50%)",
-                }),
-              }}
-            />
+            {showArrow && (
+              <div
+                className={joinTooltipClassNames(
+                  styles["tooltipArrow"],
+                  styles["tooltipArrow--" + actualPlacement]
+                )}
+                style={arrowStyle}
+              />
+            )}
           </div>,
           document.body
         )}

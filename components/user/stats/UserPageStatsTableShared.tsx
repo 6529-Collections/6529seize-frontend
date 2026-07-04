@@ -1,6 +1,6 @@
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import styles from "./UserPageStats.module.scss";
+import styles from "./UserPageStats.module.css";
 
 function getTableColumnLabels(locale: SupportedLocale) {
   return {
@@ -57,7 +57,7 @@ export function UserPageStatsTableHr(
   return (
     <tr aria-hidden="true">
       <td colSpan={props.span} className={styles["collectedAccordionTableHr"]}>
-        <hr className="mb-1 mt-1 tw-border-[#93939f]" />
+        <hr className="tw-mb-1 tw-mt-1 tw-border-[#93939f]" />
       </td>
     </tr>
   );

@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SortDirection } from "@/entities/ISort";
-import styles from "./Leaderboard.module.scss";
+import styles from "./Leaderboard.module.css";
 import {
   faSquareCaretDown,
   faSquareCaretUp,
@@ -20,7 +20,7 @@ export default function LeaderboardSort<LeaderboardSortType>(
   }>
 ) {
   return (
-    <span className="d-flex flex-column">
+    <span className="tw-flex tw-flex-col">
       <FontAwesomeIcon
         icon={faSquareCaretUp}
         onClick={() =>

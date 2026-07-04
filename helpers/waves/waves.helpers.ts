@@ -3,6 +3,7 @@ import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { commonApiPost } from "@/services/api/common-api";
 import { CreateWaveStepStatus } from "@/types/waves.types";
 
@@ -112,9 +113,13 @@ export const convertWaveToUpdateWave = (
       wave.participation.no_of_applications_allowed_per_participant,
     required_media: wave.participation.required_media,
     required_metadata: wave.participation.required_metadata,
-    signature_required: !!wave.participation.signature_required,
+    signature_required:
+      wave.wave.type === ApiWaveType.Chat
+        ? false
+        : !!wave.participation.signature_required,
     ...getPeriodUpdate(wave.participation.period),
-    terms: wave.participation.terms,
+    terms:
+      wave.wave.type === ApiWaveType.Chat ? null : wave.participation.terms,
   },
   wave: {
     admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,

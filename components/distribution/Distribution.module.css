@@ -1,0 +1,124 @@
+.distributionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem !important;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media only screen and (max-width: 1200px) {
+  .distributionHeader {
+    justify-content: center !important;
+  }
+}
+
+.distributionsTable tr {
+  border-bottom: 1px solid #333 !important;
+}
+
+.distributionsTable tr td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.distributionsTable tr th {
+  min-width: 80px;
+  line-height: 30px;
+  white-space: nowrap;
+}
+
+.distributionsTable tr td a {
+  text-decoration: none;
+}
+
+.distributionsTableWallet {
+  font-size: smaller;
+}
+
+.distributionsScrollContainer {
+  -ms-overflow-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.distributionsScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.distributionsTable > :not(caption) > * > * {
+  padding: 0.5rem !important;
+}
+
+.distributionPlanLink {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.distributionCarousel {
+  position: relative;
+  width: 90%;
+  margin-left: 5%;
+  overflow: hidden;
+}
+
+.distributionCarousel img {
+  width: 80%;
+  height: auto;
+  margin-left: 10%;
+}
+
+@media only screen and (max-width: 800px) {
+  .distributionCarousel img {
+    width: 100%;
+    height: auto;
+    margin-left: 0;
+  }
+}
+
+.distributionPhaseLink {
+  margin-right: 20px;
+  color: rgb(154, 154, 154);
+  cursor: pointer;
+  font-size: larger;
+  font-weight: bold;
+  line-height: 40px;
+  text-decoration: none;
+}
+
+.distributionPhaseLink:hover {
+  color: white;
+}
+
+@media only screen and (max-width: 800px) {
+  .distributionPhaseLink {
+    line-height: 32px;
+  }
+}
+
+.distributionPhaseLinkActive {
+  color: white;
+}
+
+.totalResults {
+  display: inline-block;
+  margin-bottom: -5px;
+  margin-left: 10px;
+  font-size: larger;
+}
+
+.distributionsCaretWrapper {
+  float: right;
+}
+
+.distributionsCaret {
+  height: 14px;
+  cursor: pointer;
+}
+
+.distributionsCaretDisabled {
+  color: rgb(154, 154, 154);
+}
+
+.distributionsCaretDisabled:hover {
+  color: white;
+}

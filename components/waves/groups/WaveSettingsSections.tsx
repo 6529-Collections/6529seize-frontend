@@ -5,12 +5,17 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import WaveApprovalThresholds from "@/components/waves/specs/WaveApprovalThresholds";
 import WaveApproveTabLabels from "@/components/waves/specs/WaveApproveTabLabels";
+import WaveBindingRules from "@/components/waves/specs/WaveBindingRules";
+import WaveCustomRules from "@/components/waves/specs/WaveCustomRules";
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveGroup from "@/components/waves/specs/groups/group/WaveGroup";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import WaveOutcomesVisibility from "@/components/waves/specs/WaveOutcomesVisibility";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
 import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
+import BoostedDropsDisplayPreference from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface WaveSettingsSectionsProps {
   readonly wave: ApiWave;
@@ -42,11 +47,28 @@ export default function WaveSettingsSections({
   const isDisplaySettingsWave =
     wave.wave.type === ApiWaveType.Rank ||
     wave.wave.type === ApiWaveType.Approve;
+  const supportsAcceptanceRules = wave.wave.type !== ApiWaveType.Chat;
   const showChatSettings = wave.chat.enabled;
 
   return (
     <div className="tw-pb-4">
       <WaveActiveCurationSection wave={wave} />
+
+      <SettingsSection title="Rules">
+        <WaveCustomRules wave={wave} />
+        {supportsAcceptanceRules && <WaveBindingRules wave={wave} />}
+      </SettingsSection>
+
+      {showChatSettings && (
+        <SettingsSection
+          title={t(
+            DEFAULT_LOCALE,
+            "waveChat.boostedDrops.display.sectionTitle"
+          )}
+        >
+          <BoostedDropsDisplayPreference />
+        </SettingsSection>
+      )}
 
       {isDisplaySettingsWave && (
         <SettingsSection title="Display">

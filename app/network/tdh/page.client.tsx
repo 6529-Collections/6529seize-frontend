@@ -1,6 +1,7 @@
 "use client";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
+import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 
@@ -11,7 +12,7 @@ export default function TDHMainPage() {
   useSetTitle("TDH | Network");
 
   return (
-    <main className="tailwind-scope [min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-min-h-screen tw-w-full tw-px-3 tw-pb-12 tw-pt-12 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
+    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
       <AboutContentsDropdown currentHref="/network/tdh" />
       <h1>TDH</h1>
       <p className="tw-mt-2">
@@ -205,7 +206,7 @@ export default function TDHMainPage() {
       {/* Cross-links */}
       <div className="tw-mt-10 tw-grid tw-gap-6 md:tw-grid-cols-2">
         <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">
-          <h3>Network Stats</h3>
+          <h3>Network TDH Stats</h3>
           <p className="tw-mt-1">
             Aggregate community activity, holdings, trading, and time-based
             metrics across the network.
@@ -214,7 +215,7 @@ export default function TDHMainPage() {
             href="/network/health/network-tdh"
             className={BUTTON_LINK_CLASSES}
           >
-            View Network Stats
+            View Network TDH Stats
           </Link>
         </div>
         <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">

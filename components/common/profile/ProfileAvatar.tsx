@@ -38,7 +38,6 @@ export default function ProfileAvatar({
           <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
             {pfpUrl ? (
               // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
                 alt={alt}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import UnifiedWavesList from "./UnifiedWavesList";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
@@ -9,7 +9,9 @@ interface BrainLeftSidebarWavesProps {
 const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
   scrollContainerRef,
 }) => {
-  const { waves, registerWave } = useMyStream();
+  const { waves, registerWave, requestMainWavesList } = useMyStream();
+
+  useEffect(() => requestMainWavesList(), [requestMainWavesList]);
 
   const onNextPage = () => {
     if (waves.hasNextPage && !waves.isFetchingNextPage && !waves.isFetching) {

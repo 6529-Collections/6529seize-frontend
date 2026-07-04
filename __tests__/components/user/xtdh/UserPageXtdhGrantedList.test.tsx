@@ -23,6 +23,17 @@ jest.mock("@/hooks/usePendingGrantsCount", () => ({
     mockUsePendingGrantsCount(...args),
 }));
 
+jest.mock("@/hooks/useAlchemyNftQueries", () => ({
+  getContractOverviewLookupKey: (address: `0x${string}`, chain = "ethereum") =>
+    `${chain}:${address.toLowerCase()}`,
+  useContractOverviewsQuery: jest.fn(() => ({
+    contractsByKey: new Map(),
+    errorsByKey: new Map(),
+    isError: false,
+    isLoading: false,
+  })),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
   usePathname: () => "/profiles/test", // stable path for tests

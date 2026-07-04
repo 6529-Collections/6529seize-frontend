@@ -30,7 +30,7 @@ import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
-import styles from "./Distribution.module.scss";
+import styles from "./Distribution.module.css";
 
 interface Props {
   header: string;
@@ -405,7 +405,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                       {fetching ? (
                         <DotLoader />
                       ) : (
-                        <span className="font-larger">
+                        <span className="tw-text-lg">
                           {t(locale, "distribution.table.walletCount", {
                             count: formatInteger(locale, totalResults),
                           })}
@@ -432,7 +432,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                 <tbody>
                   {distributions.map((d) => (
                     <tr key={`${d.wallet}`}>
-                      <th className="font-smaller" scope="row">
+                      <th className="tw-text-sm" scope="row">
                         {d.wallet}
                       </th>
                       <td>

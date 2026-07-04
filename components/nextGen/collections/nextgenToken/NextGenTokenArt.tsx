@@ -16,7 +16,7 @@ import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Lightbulb from "./Lightbulb";
-import styles from "./NextGenToken.module.scss";
+import styles from "./NextGenToken.module.css";
 import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
@@ -137,7 +137,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   }
 
   const iconButtonClassName =
-    "tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
+    "tw-rounded-md tw-border-0 tw-bg-transparent !tw-p-0 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
 
   function getCurrentHref() {
     if (mode === Mode.LIVE) {
@@ -171,7 +171,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
         >
           <button
             type="button"
-            className={`unselectable ${styles["imageResolutionBtn"]} ${
+            className={`tw-select-none ${styles["imageResolutionBtn"]} ${
               mode === Mode.IMAGE ? styles["imageResolutionBtnSelected"] : ""
             }`}
             onClick={() => setMode(Mode.IMAGE)}
@@ -180,7 +180,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           </button>
           <button
             type="button"
-            className={`unselectable ${styles["imageResolutionBtn"]} ${
+            className={`tw-select-none ${styles["imageResolutionBtn"]} ${
               mode === Mode.HIGH_RES ? styles["imageResolutionBtnSelected"] : ""
             }`}
             onClick={() => setMode(Mode.HIGH_RES)}
@@ -235,7 +235,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                     }}
                   />
                 </button>
-                <span className="unselectable">Scale: {zoomScale}</span>
+                <span className="tw-select-none">Scale: {zoomScale}</span>
                 <button
                   type="button"
                   aria-label="Zoom in"
@@ -436,7 +436,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                     className={
                       showLightbox || showBlackbox
                         ? styles["lightBoxContent"]
-                        : "tw-[padding-top:1rem] tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"
+                        : "tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pt-4"
                     }
                     ref={tokenImageRef}
                   >
@@ -462,14 +462,14 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           <div
             className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["modeRow"]}`}
           >
-            <div className="tw-[padding-bottom:0.25rem] tw-[padding-top:0.5rem] -tw-mx-3 tw-flex tw-flex-wrap">
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-1 tw-pt-2">
               {printModeIcons()}
             </div>
           </div>
         </div>
       </div>
       {mode === Mode.LIVE && (
-        <div className="font-color-h font-smaller tw-[padding-top:0.5rem] -tw-mx-3 tw-flex tw-flex-wrap">
+        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2 tw-text-sm tw-text-[#9a9a9a]">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
             * Live view generates the image dynamically from scratch in your
             browser. Pebbles have a computationally expensive script and the

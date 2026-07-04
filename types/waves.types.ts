@@ -84,6 +84,7 @@ export enum CreateWaveStep {
   GROUPS = "GROUPS",
   DATES = "DATES",
   DROPS = "DROPS",
+  RULES = "RULES",
   VOTING = "VOTING",
   APPROVAL = "APPROVAL",
   OUTCOMES = "OUTCOMES",
@@ -112,6 +113,7 @@ export interface CreateWaveApproveDisplayConfig {
 
 export interface CreateWaveDisplayConfig {
   readonly approve: CreateWaveApproveDisplayConfig;
+  readonly customRules: string | null;
   readonly outcomesVisible: boolean;
 }
 

@@ -73,7 +73,7 @@ const wavesItem: NavItem = {
 
 const messagesItem: NavItem = {
   kind: "view",
-  name: "Messages",
+  name: "DMs",
   viewKey: "messages",
   icon: "m",
 };

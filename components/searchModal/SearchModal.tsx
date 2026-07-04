@@ -11,7 +11,7 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { formatAddress } from "@/helpers/Helpers";
-import styles from "./SearchModal.module.scss";
+import styles from "./SearchModal.module.css";
 
 interface Props {
   show: boolean;

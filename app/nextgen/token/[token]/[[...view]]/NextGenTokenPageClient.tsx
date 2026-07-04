@@ -9,7 +9,7 @@ import type {
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
-import styles from "@/styles/Home.module.scss";
+import styles from "@/styles/Home.module.css";
 import { NextgenCollectionView } from "@/types/enums";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

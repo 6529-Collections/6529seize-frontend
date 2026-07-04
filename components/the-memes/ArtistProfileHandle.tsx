@@ -28,5 +28,5 @@ export default function ArtistProfileHandle(
     return <>{handleElements}</>;
   }
 
-  return <span className="font-color-h">not available</span>;
+  return <span className="tw-text-[#9a9a9a]">not available</span>;
 }

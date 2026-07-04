@@ -14,6 +14,7 @@ import { useCallback, useContext, useState } from "react";
 
 type WaveChatUpdate = ApiUpdateWaveRequest["chat"];
 type WaveConfigUpdate = ApiUpdateWaveRequest["wave"];
+type WaveParticipationUpdate = ApiUpdateWaveRequest["participation"];
 
 export const useWaveSettingUpdater = (wave: ApiWave) => {
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -72,13 +73,13 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
       }
 
       const body = convertWaveToUpdateWave(wave);
-      void updateWave(
+      updateWave(
         {
           ...body,
           chat: getChatUpdate(body.chat),
         },
         closeEditor
-      );
+      ).catch(() => undefined);
     },
     [mutating, updateWave, wave]
   );
@@ -94,14 +95,37 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
       }
 
       const body = convertWaveToUpdateWave(wave);
-      void updateWave(
+      updateWave(
         {
           ...body,
           wave: getWaveConfigUpdate(body.wave),
         },
         closeEditor,
         onSuccess
-      );
+      ).catch(() => undefined);
+    },
+    [mutating, updateWave, wave]
+  );
+
+  const saveParticipationUpdate = useCallback(
+    (
+      closeEditor: () => void,
+      getParticipationUpdate: (
+        participation: WaveParticipationUpdate
+      ) => WaveParticipationUpdate
+    ) => {
+      if (mutating) {
+        return;
+      }
+
+      const body = convertWaveToUpdateWave(wave);
+      updateWave(
+        {
+          ...body,
+          participation: getParticipationUpdate(body.participation),
+        },
+        closeEditor
+      ).catch(() => undefined);
     },
     [mutating, updateWave, wave]
   );
@@ -110,6 +134,7 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
     canEdit,
     mutating,
     saveChatUpdate,
+    saveParticipationUpdate,
     saveWaveConfigUpdate,
     setToast,
   };

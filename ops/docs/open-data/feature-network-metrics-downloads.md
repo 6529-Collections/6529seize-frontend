@@ -11,12 +11,12 @@ The page heading is `Consolidated Network Metrics Downloads`.
 
 - Route: `/open-data/network-metrics`
 - Hub route: `/open-data`
-- Sidebar path: `Tools -> Open Data -> Network Metrics`
+- Sidebar path: `About -> Data & Developer Tools -> Network Metrics`
 
 ## Entry Points
 
 - Open the `Network Metrics` card on `/open-data`.
-- Open `Tools -> Open Data -> Network Metrics` in the sidebar.
+- Open `About -> Data & Developer Tools -> Network Metrics` in the sidebar.
 - Open `/open-data/network-metrics` directly.
 
 ## Data Source and Table Content

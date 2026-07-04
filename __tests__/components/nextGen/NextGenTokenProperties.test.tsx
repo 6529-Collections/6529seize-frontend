@@ -6,27 +6,34 @@ import {
 } from "@/components/nextGen/collections/nextgenToken/NextGenTokenProperties";
 
 // Mock the displayScore function to ensure consistent locale behavior
-jest.mock("@/components/nextGen/collections/nextgenToken/NextGenTokenProperties", () => ({
-  ...jest.requireActual("../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties"),
-  displayScore: jest.fn((number: number) => {
-    const precision = 3;
-    if (number >= 0.01) {
-      return number.toLocaleString('en-US', {
-        minimumFractionDigits: precision,
-        maximumFractionDigits: precision,
-      });
-    }
-    
-    if (0.001 > number) {
-      return number.toExponential(precision);
-    }
-    
-    return number.toPrecision(precision);
-  }),
-}));
+jest.mock(
+  "@/components/nextGen/collections/nextgenToken/NextGenTokenProperties",
+  () => ({
+    ...jest.requireActual(
+      "../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties"
+    ),
+    displayScore: jest.fn((number: number) => {
+      const precision = 3;
+      if (number >= 0.01) {
+        return number.toLocaleString("en-US", {
+          minimumFractionDigits: precision,
+          maximumFractionDigits: precision,
+        });
+      }
+
+      if (0.001 > number) {
+        return number.toExponential(precision);
+      }
+
+      return number.toPrecision(precision);
+    }),
+  })
+);
 
 // Import the mocked function for testing
-const { displayScore } = require("@/components/nextGen/collections/nextgenToken/NextGenTokenProperties");
+const {
+  displayScore,
+} = require("@/components/nextGen/collections/nextgenToken/NextGenTokenProperties");
 
 describe("displayScore", () => {
   it("formats numbers >= 0.01 with three decimals", () => {
@@ -54,12 +61,17 @@ describe("NextgenRarityToggle", () => {
 
   it("respects disabled state", () => {
     render(
-      <NextgenRarityToggle title="Dis" show={true} disabled={true} setShow={jest.fn()} />
+      <NextgenRarityToggle
+        title="Dis"
+        show={true}
+        disabled={true}
+        setShow={jest.fn()}
+      />
     );
     const checkbox = screen.getByRole("checkbox");
     expect(checkbox).toBeDisabled();
     const label = screen.getByText("Dis");
-    expect(label.parentElement).toHaveClass("font-color-h");
+    expect(label.parentElement).toHaveClass("tw-text-[#9a9a9a]");
   });
 });
 
@@ -87,4 +99,3 @@ describe("NextgenTokenTraits", () => {
     expect(screen.getByText("5/10")).toBeInTheDocument();
   });
 });
-

@@ -42,7 +42,6 @@ export function useObjectUrls(
         const emptyUrls = new Map<Blob, string>();
         latestUrlBySource.current = emptyUrls;
         // Object URLs must be created after commit; this state publishes the ready URLs.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUrlBySource(emptyUrls);
       }
       return;
@@ -72,7 +71,6 @@ export function useObjectUrls(
       const resolvedUrls = nextUrls;
       latestUrlBySource.current = resolvedUrls;
       // Object URLs must be created after commit; this state publishes the ready URLs.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUrlBySource(resolvedUrls);
     }
   }, [sources, urlBySource]);

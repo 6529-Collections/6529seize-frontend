@@ -14,11 +14,11 @@ You write the first wave drop here, then click `Complete`.
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Groups` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
-  `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
-  `Outcomes` -> `Description`
+- `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
+- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+  `Voting` -> `Outcomes` -> `Description`
+- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+  `Voting` -> `Outcomes` -> `Description`
 
 ## What You Can Add
 
@@ -75,6 +75,7 @@ You write the first wave drop here, then click `Complete`.
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Outcomes Setup](feature-outcomes-step.md)
 - [Wave Drop Composer Metadata Submissions](../composer/feature-metadata-submissions.md)
 - [Wave Participation Flow](../flow-wave-participation.md)

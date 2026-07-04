@@ -128,7 +128,7 @@ export default function LatestDropNextMintSection({
                   </p>
                 )}
 
-                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                   {media?.mime_type && (
                     <MediaTypeBadge
                       mimeType={media.mime_type}
@@ -145,10 +145,12 @@ export default function LatestDropNextMintSection({
                   />
                 </div>
 
-                <LatestDropNextMintSubscribe />
+                <div className="tw-mt-4">
+                  <LatestDropNextMintSubscribe tokenId={nextMintCardNumber} />
+                </div>
               </div>
 
-              <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
+              <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4">
                 <div className="tw-col-span-2">
                   <NowMintingStatsItem
                     label="Wave"

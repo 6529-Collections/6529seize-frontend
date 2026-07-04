@@ -4,16 +4,21 @@ import InteractiveMediaLoadGate from "@/components/drops/media/InteractiveMediaL
 import { useEffect, useMemo, useState } from "react";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getMediaType } from "@/components/nft-image/utils/media-type";
-import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import { toBaseNftFromApiMemesExtendedData } from "@/components/the-memes/apiMemesExtendedDataAdapter";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface NowMintingArtworkProps {
-  readonly nft: NFTWithMemesExtendedData;
+  readonly nft: ApiMemesExtendedData;
 }
 
 export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
   const { hasTouchScreen } = useDeviceInfo();
-  const isHtml = useMemo(() => getMediaType(nft, true) === "html", [nft]);
+  const mediaNft = useMemo(() => toBaseNftFromApiMemesExtendedData(nft), [nft]);
+  const isHtml = useMemo(
+    () => getMediaType(mediaNft, true) === "html",
+    [mediaNft]
+  );
   const [hasMounted, setHasMounted] = useState(false);
   const shouldGate = hasTouchScreen && isHtml;
   const [interactiveEnabled, setInteractiveEnabled] = useState(false);
@@ -40,7 +45,7 @@ export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
           className="tw-w-full"
         >
           <NFTImage
-            nft={nft}
+            nft={mediaNft}
             animation={shouldAnimate}
             height={650}
             transparentBG
@@ -50,7 +55,7 @@ export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
       ) : (
         <div className="tw-relative tw-w-full">
           <NFTImage
-            nft={nft}
+            nft={mediaNft}
             animation={shouldAnimate}
             height={650}
             transparentBG

@@ -22,7 +22,7 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
-import styles from "./NextGenAdmin.module.scss";
+import styles from "./NextGenAdmin.module.css";
 import {
   Button,
   Col,
@@ -242,12 +242,12 @@ export default function NextGenAdminInitializeExternalBurnSwap(
   }, [contractWrite.isSuccess || contractWrite.isError]);
 
   return (
-    <Container className="no-padding">
+    <Container className="!tw-p-0">
       <NextGenAdminHeadingRow
         title="Initialize External Burn/Swap"
         close={props.close}
       />
-      <Row className="pt-3">
+      <Row className="tw-pt-4">
         <Col>
           <Form>
             <NextGenAdminTextFormGroup
@@ -260,7 +260,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
               value={burnCollectionID}
               setValue={setBurnCollectionID}
             />
-            <Form.Group className="mb-3">
+            <Form.Group className="tw-mb-4">
               <Form.Label>Mint Collection ID</Form.Label>
               <Form.Select
                 className={`${styles["formInput"]}`}
@@ -301,9 +301,9 @@ export default function NextGenAdminInitializeExternalBurnSwap(
               setStatus={setStatus}
             />
             {!loading && errors.length > 0 && printAdminErrors(errors)}
-            <Form.Group className="mb-3 d-flex gap-3">
+            <Form.Group className="tw-mb-4 tw-flex tw-gap-4">
               <Button
-                className="seize-btn"
+                className="tw-rounded-none tw-border-0 tw-px-5 tw-py-1.5 tw-font-bold disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                 disabled={submitting || loading}
                 onClick={() => syncDB()}
               >
