@@ -107,6 +107,15 @@ describe("LayoutWrapper layout selection", () => {
     expect(screen.getByTestId("small-screen-layout")).toBeInTheDocument();
   });
 
+  it("uses SmallScreenLayout for touch-first tablets between the small and tablet breakpoints", () => {
+    // 900px: wider than the small-screen cutoff (750) but inside the tablet
+    // viewport (<1024) — exercises the isTouchTabletViewport OR-branch.
+    setDeviceInfo({ hasTouchScreen: true });
+    setViewportWidth(900);
+    renderLayout();
+    expect(screen.getByTestId("small-screen-layout")).toBeInTheDocument();
+  });
+
   it("keeps SmallScreenLayout for phone user agents even with a mouse attached", () => {
     // A mouse gives the phone a fine pointer, so touch-first detection turns
     // false — the mobile UA must still pin the phone to the small layout.
