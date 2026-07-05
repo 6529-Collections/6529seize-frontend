@@ -12,7 +12,7 @@ interface Props {
 
 export default function DownloadUrlWidget(props: Readonly<Props>) {
   const apiAuth = getStagingAuth();
-  let headers: any = {};
+  const headers: Record<string, string> = {};
   if (apiAuth) {
     headers["x-6529-auth"] = apiAuth;
   }

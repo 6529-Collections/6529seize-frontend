@@ -2,12 +2,14 @@ import React from "react";
 import type { DropPartMarkdownProps } from "./DropPartMarkdown";
 import DropPartMarkdown from "./DropPartMarkdown";
 
-function areArraysEqual(arr1: any[], arr2: any[]): boolean {
+function areArraysEqual(arr1: unknown[], arr2: unknown[]): boolean {
   if (arr1.length !== arr2.length) return false;
   for (let i = 0; i < arr1.length; i++) {
-    if (Array.isArray(arr1[i]) && Array.isArray(arr2[i])) {
-      if (!areArraysEqual(arr1[i], arr2[i])) return false;
-    } else if (arr1[i] !== arr2[i]) {
+    const item1 = arr1[i];
+    const item2 = arr2[i];
+    if (Array.isArray(item1) && Array.isArray(item2)) {
+      if (!areArraysEqual(item1, item2)) return false;
+    } else if (item1 !== item2) {
       return false;
     }
   }

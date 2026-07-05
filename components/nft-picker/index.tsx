@@ -3,7 +3,12 @@
 import { useRef, useId, useMemo, useEffect, useState } from "react";
 import clsx from "clsx";
 
-import type { NftPickerProps, Suggestion, SupportedChain } from "./types";
+import type {
+  NftPickerProps,
+  ParseError,
+  Suggestion,
+  SupportedChain,
+} from "./types";
 import { mapSuggestionToOverview } from "./utils/mappers";
 import {
   BIGINT_ONE,
@@ -31,7 +36,7 @@ const DEFAULT_CHAIN: SupportedChain = "ethereum";
 type MaxSelectedCountValidationSource = "add-input" | "text-editor";
 
 function ensureChain(value?: string): SupportedChain {
-  return (value as any) ?? DEFAULT_CHAIN;
+  return (value as SupportedChain | undefined) ?? DEFAULT_CHAIN;
 }
 
 function countRanges(
@@ -332,7 +337,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
       setIsEditingText(false);
     } catch (error) {
       if (Array.isArray(error)) {
-        setParseErrors(error as any);
+        setParseErrors(error as ParseError[]);
       }
     }
   };

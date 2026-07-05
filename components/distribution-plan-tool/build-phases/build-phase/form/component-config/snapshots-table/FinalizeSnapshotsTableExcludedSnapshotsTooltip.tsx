@@ -1,10 +1,9 @@
 "use client";
 
-import type {
-    AllowlistOperation} from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistOperation } from "@/components/allowlist-tool/allowlist-tool.types";
 import {
-    AllowlistOperationCode,
-    Pool,
+  AllowlistOperationCode,
+  Pool,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
 import DistributionPlanTableHeaderWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableHeaderWrapper";
@@ -57,8 +56,9 @@ export default function FinalizeSnapshotsTableExcludedSnapshotsTooltip({
     id: operation.params["id"],
     name: operation.params["name"],
     type: "Custom Snapshot",
-    walletsCount: new Set(operation.params["tokens"].map((t: any) => t.owner))
-      .size,
+    walletsCount: new Set(
+      operation.params["tokens"].map((t: { owner: string }) => t.owner)
+    ).size,
     tokensCount: operation.params["tokens"].length,
   });
 
@@ -89,26 +89,26 @@ export default function FinalizeSnapshotsTableExcludedSnapshotsTooltip({
       <DistributionPlanTableHeaderWrapper>
         <th
           scope="col"
-          className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left 
-      tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6">
+          className="tw-whitespace-nowrap tw-py-3 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400 sm:tw-pl-6"
+        >
           Name
         </th>
         <th
           scope="col"
-          className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase 
-      tw-tracking-[0.25px]">
+          className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
+        >
           Type
         </th>
         <th
           scope="col"
-          className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase 
-      tw-tracking-[0.25px]">
+          className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
+        >
           Wallets
         </th>
         <th
           scope="col"
-          className="tw-pl-3 tw-pr-4 tw-py-3 tw-whitespace-nowrap tw-text-left 
-      tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
+          className="tw-whitespace-nowrap tw-py-3 tw-pl-3 tw-pr-4 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
+        >
           Tokens
         </th>
       </DistributionPlanTableHeaderWrapper>

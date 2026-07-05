@@ -2,15 +2,12 @@
 
 import { useContext, useEffect, useState } from "react";
 import {
-    DistributionPlanToolContext,
-    DistributionPlanToolStep,
+  DistributionPlanToolContext,
+  DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 
-import type {
-    AllowlistCustomTokenPool} from "@/components/allowlist-tool/allowlist-tool.types";
-import {
-    AllowlistOperationCode,
-} from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistCustomTokenPool } from "@/components/allowlist-tool/allowlist-tool.types";
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolCsvIcon from "@/components/allowlist-tool/icons/AllowlistToolCsvIcon";
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
 import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
@@ -42,7 +39,9 @@ export default function CreateCustomSnapshots() {
         allowlistId: distributionPlan.id,
         name: o.params["name"],
         description: o.params["description"],
-        walletsCount: new Set(o.params["tokens"].map((t: any) => t.owner)).size,
+        walletsCount: new Set(
+          o.params["tokens"].map((t: { owner: string }) => t.owner)
+        ).size,
         tokensCount: o.params["tokens"].length,
       }))
     );
@@ -101,12 +100,14 @@ export default function CreateCustomSnapshots() {
       <StepHeader step={DistributionPlanToolStep.CREATE_CUSTOM_SNAPSHOT} />
       <div
         onClick={downloadExampleCsv}
-        className="tw-group tw-mt-4 tw-cursor-pointer tw-items-center tw-font-light tw-text-sm tw-text-iron-400 hover:tw-text-iron-50 tw-inline-flex tw-gap-x-2 tw-transition-all tw-duration-300 tw-ease-out">
+        className="tw-group tw-mt-4 tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-2 tw-text-sm tw-font-light tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out hover:tw-text-iron-50"
+      >
         Download example CSV file
         <button
           type="button"
-          className="-tw-mt-0.5 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20 group-hover:tw-bg-iron-400/20 tw-ease-out tw-transition tw-duration-300">
-          <div className="tw-h-3.5 tw-w-3.5 tw-flex tw-items-center tw-justify-center">
+          className="tw-group -tw-mt-0.5 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-400/10 tw-text-xs tw-font-medium tw-text-iron-400 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-400/20"
+        >
+          <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-items-center tw-justify-center">
             <AllowlistToolCsvIcon />
           </div>
         </button>

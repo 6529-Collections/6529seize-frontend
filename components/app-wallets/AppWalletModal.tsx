@@ -1,6 +1,6 @@
 "use client";
 import styles from "./AppWallet.module.css";
-import type { ReactNode, RefObject } from "react";
+import type { KeyboardEvent, ReactNode, RefObject } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
@@ -316,7 +316,7 @@ export function CreateAppWalletModal(
         placeholder="******"
         value={walletPass}
         className={styles["newWalletInput"]}
-        onChange={(e: any) => {
+        onChange={(e) => {
           const value = e.target.value;
           if (/^\S*$/.test(value)) {
             setWalletPass(value);
@@ -392,7 +392,7 @@ export function UnlockAppWalletModal(
     onHide();
   }, [onHide]);
 
-  const handleKeyPress = (e: any) => {
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && canUnlock) {
       handleUnlock();
     }

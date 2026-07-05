@@ -443,7 +443,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       "pointsSpeed",
     ];
 
-    const items: { label: string; value: any }[] = [];
+    const items: { label: string; value: string | number | boolean }[] = [];
 
     // First add items in priority order
     priorityKeys.forEach((key) => {

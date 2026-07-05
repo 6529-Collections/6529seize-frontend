@@ -6,6 +6,7 @@ import { cicToType, numberWithCommas } from "@/helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import type { CICType } from "@/entities/IProfile";
+import type { DBResponse } from "@/entities/IDBResponse";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import {
   SearchModalDisplay,
@@ -39,12 +40,7 @@ export async function fetchNftTdhResults(
   sort_direction: string
 ) {
   const url = `tdh/nft`;
-  const results = await commonApiFetch<{
-    count: number;
-    page: number;
-    next: any;
-    data: NftTDH[];
-  }>({
+  const results = await commonApiFetch<DBResponse<NftTDH>>({
     endpoint: `${url}/${contract}/${nftId}?${walletFilter}&page_size=${PAGE_SIZE}&page=${page}&sort=${sort}&sort_direction=${sort_direction}`,
   });
   results.data.forEach((lead: NftTDH) => {

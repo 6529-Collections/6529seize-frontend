@@ -21,10 +21,11 @@ import {
 import { useIsMobileDeviceStatus } from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useIdentity } from "@/hooks/useIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 interface WebSidebarUserProps {
   readonly isCollapsed: boolean;
-  readonly profile: any;
+  readonly profile: ApiIdentity | null;
 }
 
 function WebSidebarUser({

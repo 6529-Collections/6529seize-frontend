@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import type { UseQueryResult } from "@tanstack/react-query";
 import type { TokenMetadata } from "@/components/nft-picker/NftPicker.types";
 import type { TokenListAction, TokenWindowEntry } from "../types";
 import { TokenThumbnail } from "./TokenThumbnail";
@@ -6,7 +7,7 @@ import { TokenThumbnail } from "./TokenThumbnail";
 type GridRowProps = Readonly<{
   tokens: TokenWindowEntry[];
   metadataMap: Map<string, TokenMetadata>;
-  metadataQuery: any;
+  metadataQuery: UseQueryResult<TokenMetadata[], Error>;
   renderTokenExtra?:
     | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
     | undefined
@@ -41,7 +42,7 @@ export function GridRow({
         return (
           <div
             key={token.decimalId}
-            className="tw-flex tw-flex-col tw-rounded-lg tw-overflow-hidden"
+            className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-lg"
           >
             <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-iron-900">
               <TokenThumbnail
@@ -51,7 +52,7 @@ export function GridRow({
                 hasError={hasMetadataError}
               />
             </div>
-            <div className="tw-flex tw-flex-col tw-p-3 tw-gap-3">
+            <div className="tw-flex tw-flex-col tw-gap-3 tw-p-3">
               <div className="tw-flex tw-items-center tw-justify-between tw-text-xs tw-text-iron-400">
                 <span className="tw-truncate">
                   {metadata?.collectionName ?? "Collection"}
@@ -60,10 +61,10 @@ export function GridRow({
               </div>
 
               <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-                <div className="tw-font-medium tw-text-white tw-truncate">
+                <div className="tw-truncate tw-font-medium tw-text-white">
                   {metadata?.name ?? `Token #${token.decimalId}`}
                 </div>
-                <div className="tw-flex tw-gap-1 tw-text-xs tw-shrink-0">
+                <div className="tw-flex tw-shrink-0 tw-gap-1 tw-text-xs">
                   <span className="tw-text-iron-400">xTDH</span>
                   <span className="tw-text-white">
                     {Math.floor((token.xtdh ?? 0) * 10) / 10}

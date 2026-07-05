@@ -61,7 +61,7 @@ export default function UserPageSubscriptionsMode(
         type: "success",
       });
       props.refresh();
-    } catch (e: any) {
+    } catch (e) {
       setIsUpdating(false);
       setToast({
         type: "error",

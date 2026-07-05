@@ -35,7 +35,9 @@ export default function FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot({
     {
       name: "Wallets count",
       value:
-        new Set(customPool?.params["tokens"].map((t: any) => t.owner)).size ?? "",
+        new Set(
+          customPool?.params["tokens"].map((t: { owner: string }) => t.owner)
+        ).size ?? "",
     },
     {
       name: "Tokens count",

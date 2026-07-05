@@ -21,9 +21,11 @@ export default function AccessPage() {
       const apiAuth = getStagingAuth();
       fetch(`${publicEnv.API_ENDPOINT}/api/`, {
         headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
-      }).then((r: any) => {
-        r.json().then((response: any) => {
-          setImage(response.image);
+      }).then((r: Response) => {
+        r.json().then((response: { image?: string | undefined }) => {
+          if (response.image) {
+            setImage(response.image);
+          }
         });
         if (r.status !== 401) {
           router.push("/");
@@ -38,7 +40,7 @@ export default function AccessPage() {
     const pass = target.value;
     fetch(`${publicEnv.API_ENDPOINT}/api/`, {
       headers: { "x-6529-auth": pass },
-    }).then((r: any) => {
+    }).then((r: Response) => {
       if (r.status === 401) {
         alert("Access Denied!");
       } else {

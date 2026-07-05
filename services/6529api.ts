@@ -77,7 +77,7 @@ export async function fetchAllPages<T>(
   return all;
 }
 
-function getNextUrl(currentUrl: string, next?: string | boolean): string {
+function getNextUrl(currentUrl: string, next?: unknown): string {
   if (!next) return "";
 
   if (typeof next === "string") {

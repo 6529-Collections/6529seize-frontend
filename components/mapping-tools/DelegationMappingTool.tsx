@@ -9,6 +9,7 @@ import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
+import csvParser from "csv-parser";
 import { useEffect, useState } from "react";
 import {
   MappingToolSubmitButton,
@@ -16,16 +17,14 @@ import {
 } from "./MappingToolControls";
 import styles from "./MappingTool.module.css";
 
-const csvParser = require("csv-parser");
-
 export default function DelegationMappingTool() {
-  const [file, setFile] = useState<any>();
+  const [file, setFile] = useState<File | undefined>();
   const [collection, setCollection] = useState<string>("0");
   const [useCase, setUseCase] = useState<number>(0);
   const [processing, setProcessing] = useState(false);
   const [delegations, setDelegations] = useState<Delegation[]>([]);
 
-  const [csvData, setCsvData] = useState<any[]>([]);
+  const [csvData, setCsvData] = useState<string[]>([]);
   function submit() {
     setProcessing(true);
   }
@@ -64,16 +63,16 @@ export default function DelegationMappingTool() {
 
         reader.onload = async () => {
           const data = reader.result;
-          const results: any[] = [];
+          const results: string[] = [];
 
           const parser = csvParser({ headers: true })
-            .on("data", (row: any) => {
-              results.push(row["_0"]);
+            .on("data", (row: Record<string, string>) => {
+              results.push(row["_0"]!);
             })
             .on("end", () => {
               setCsvData(results);
             })
-            .on("error", (err: any) => {
+            .on("error", (err: Error) => {
               console.error(err);
             });
 
@@ -81,7 +80,9 @@ export default function DelegationMappingTool() {
           parser.end();
         };
 
-        reader.readAsText(file);
+        if (file) {
+          reader.readAsText(file);
+        }
       });
     }
     if (processing) {

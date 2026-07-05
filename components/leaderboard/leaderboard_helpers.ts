@@ -2,6 +2,7 @@
 
 import { publicEnv } from "@/config/env";
 import { useCallback, useEffect, useState } from "react";
+import type { DBResponse } from "@/entities/IDBResponse";
 import type { CICType } from "@/entities/IProfile";
 import type { SortDirection } from "@/entities/ISort";
 import type { ApiConsolidatedTdhMetrics } from "@/generated/models/ApiConsolidatedTdhMetrics";
@@ -89,7 +90,7 @@ export function getLeaderboardDownloadFileName(
   return `${csvFileName}.csv`;
 }
 
-async function fetchLeaderboardData<T>(
+async function fetchLeaderboardData<T extends LeaderboardItem>(
   endpoint: string,
   pageSize: number,
   page: number,
@@ -144,16 +145,11 @@ async function fetchLeaderboardData<T>(
   }
 
   const url = `${endpoint}?${params.toString()}`;
-  const response = await commonApiFetch<{
-    count: number;
-    page: number;
-    next: any;
-    data: T[];
-  }>({
+  const response = await commonApiFetch<DBResponse<T>>({
     endpoint: url,
   });
-  response.data.forEach((lead: any) => {
-    lead.cic_type = cicToType(lead.cic_score);
+  response.data.forEach((lead: T) => {
+    lead.cic_type = cicToType(Number(lead.cic_score));
   });
   return {
     count: response.count,

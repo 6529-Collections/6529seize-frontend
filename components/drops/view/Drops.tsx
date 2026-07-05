@@ -17,6 +17,16 @@ import DropsList from "./DropsList";
 
 const REQUEST_SIZE = 10;
 
+type WaveWithChatScope = {
+  readonly chat?: {
+    readonly scope?: {
+      readonly group?: {
+        readonly is_direct_message?: boolean | undefined;
+      } | null;
+    } | null;
+  } | null;
+};
+
 export default function Drops() {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
@@ -137,9 +147,9 @@ export default function Drops() {
   }, [drops]);
 
   const navigateToDropWave = (drop: Pick<ApiDrop, "wave" | "serial_no">) => {
-    const waveInfo = drop.wave as any;
+    const waveInfo = drop.wave as WaveWithChatScope;
     const isDirectMessage =
-      waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
+      waveInfo.chat?.scope?.group?.is_direct_message ?? false;
     router.push(
       getWaveRoute({
         waveId: drop.wave.id,

@@ -64,7 +64,7 @@ export default function UserPageSubscriptionsEditionPreference(
           : "One edition is included.",
       });
       props.refresh();
-    } catch (e: any) {
+    } catch (e) {
       setToast({
         type: "error",
         title: "Couldn't update edition preference.",
