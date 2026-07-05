@@ -128,9 +128,11 @@ const handleSentinelPointerEvent = (event: Event) => {
   }
   if (pointerEvent.sourceCapabilities?.firesTouchEvents) {
     // Guard 3 of 3: Chromium flags compatibility mouse events synthesized
-    // from touch via sourceCapabilities.firesTouchEvents (supported since
-    // Chrome 49, which covers every Chromium old enough to run on Win 8).
-    // Not a real cursor — treat exactly like touch input.
+    // from touch via sourceCapabilities.firesTouchEvents (Chromium-only,
+    // shipped in Chrome 47 — present on every Chromium old enough to run on
+    // Win 8). Firefox/Safari lack the API, so there this guard is a no-op
+    // and Guards 1–2 carry the load. Not a real cursor — treat exactly like
+    // touch input.
     discountTouchDerivedEvidence();
     return;
   }

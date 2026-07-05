@@ -51,8 +51,8 @@ function loadHelpersWithSentinel(): {
     throw new Error("failed to load touch-first helpers");
   }
 
-  const getSentinel = () =>
-    addSpy.mock.calls.find(([type]) => type === "pointermove")?.[1] as
+  const getSentinel = (eventType: "pointermove" | "pointerdown" = "pointermove") =>
+    addSpy.mock.calls.find(([type]) => type === eventType)?.[1] as
       | SentinelHandler
       | undefined;
 
@@ -243,13 +243,47 @@ describe("behavioral fine-pointer latch", () => {
     }
   });
 
+  it("arms the suppression window from a plain tap (pointerdown, no move)", () => {
+    const nowSpy = jest.spyOn(Date, "now");
+    try {
+      const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+      const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+      const pointerDownSentinel = getSentinel("pointerdown");
+      const pointerMoveSentinel = getSentinel("pointermove");
+      expect(pointerDownSentinel).toBeDefined();
+      expect(pointerMoveSentinel).toBeDefined();
+
+      // A plain tap: touch pointerdown, NO touch pointermove — followed
+      // milliseconds later by the OS's synthesized mouse moves. This is the
+      // exact Win 8 sequence the pointerdown listener exists for.
+      let clock = 300_000;
+      nowSpy.mockReturnValue(clock);
+      pointerDownSentinel!({ isTrusted: true, pointerType: "touch" });
+      for (let i = 0; i < 3; i++) {
+        clock += 40;
+        nowSpy.mockReturnValue(clock);
+        pointerMoveSentinel!({ isTrusted: true, pointerType: "mouse" });
+      }
+
+      expect(helpers.isTouchFirstEnvironment()).toBe(true);
+      expect(document.body.hasAttribute("data-fine-pointer")).toBe(false);
+
+      unsubscribe();
+      restore();
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
   it("uninstalls the sentinel when the last subscriber leaves", () => {
     const removeSpy = jest.spyOn(globalThis, "removeEventListener");
     const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
 
     const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
     const sentinel = getSentinel();
+    const pointerDownSentinel = getSentinel("pointerdown");
     expect(sentinel).toBeDefined();
+    expect(pointerDownSentinel).toBeDefined();
 
     unsubscribe();
 
@@ -257,6 +291,11 @@ describe("behavioral fine-pointer latch", () => {
       ([type, handler]) => type === "pointermove" && handler === sentinel
     );
     expect(sentinelRemoved).toBe(true);
+    const pointerDownRemoved = removeSpy.mock.calls.some(
+      ([type, handler]) =>
+        type === "pointerdown" && handler === pointerDownSentinel
+    );
+    expect(pointerDownRemoved).toBe(true);
 
     restore();
     removeSpy.mockRestore();

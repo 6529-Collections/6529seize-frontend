@@ -20,11 +20,14 @@ const {
 
 const PAGE_LOAD_TIMEOUT_MS = 90000;
 
-// Public wave (6529 Releases) — readable logged-out, so the smoke can cover
-// the wave surface: it runs websockets and the touch action sheet, both of
-// which have shipped device-specific crashes/regressions that the static
-// pages above cannot catch.
-const PUBLIC_WAVE_PATH = "/waves/05b14183-e153-4e47-bc66-42a0f49102d4";
+// Public wave (6529 Releases by default) — readable logged-out, so the smoke
+// can cover the wave surface: it runs websockets and the touch action sheet,
+// both of which have shipped device-specific crashes/regressions that the
+// static pages above cannot catch. Override via TARGET_WAVE_PATH when running
+// against an environment where this wave does not exist.
+const PUBLIC_WAVE_PATH =
+  process.env.TARGET_WAVE_PATH ||
+  "/waves/05b14183-e153-4e47-bc66-42a0f49102d4";
 
 const PAGES = [
   { name: "home", path: "/", expectBodyText: null },
@@ -138,40 +141,46 @@ describe("6529 mobile web smoke (real device)", function () {
 
     await longPress(driver, row);
 
-    // The sheet is a dialog listing drop actions; "Copy text" is present for
-    // both signed-in and logged-out sheets since 4.69.0.
-    await driver.waitUntil(
-      async () =>
-        await driver.execute(() => {
-          const dialog = document.querySelector("dialog[open], [role='dialog']");
-          return Boolean(dialog && dialog.textContent.includes("Copy text"));
-        }),
-      {
-        timeout: 20000,
-        interval: 1000,
-        timeoutMsg:
-          "long-press did not open the wave action sheet (touch affordances lost?)",
-      }
-    );
-    await saveScreenshot(driver, "web-wave-action-sheet");
-
-    // The page must have survived the interaction (no error boundary).
-    const bodyText = await driver.execute(() => document.body.innerText || "");
-    assertNoCrashMarkers(assert, bodyText, `${PUBLIC_WAVE_PATH} action sheet`);
-
-    // Leave the page clean for subsequent tests.
-    const closed = await driver.execute(() => {
-      const dialog = document.querySelector("dialog[open], [role='dialog']");
-      if (!dialog) return true;
-      const cancel = [...dialog.querySelectorAll("button")].find((button) =>
-        button.textContent.trim().toLowerCase().startsWith("cancel")
+    try {
+      // The sheet is a dialog listing drop actions; "Copy text" is present
+      // for both signed-in and logged-out sheets since 4.69.0.
+      await driver.waitUntil(
+        async () =>
+          await driver.execute(() => {
+            const dialog = document.querySelector(
+              "dialog[open], [role='dialog']"
+            );
+            return Boolean(dialog && dialog.textContent.includes("Copy text"));
+          }),
+        {
+          timeout: 20000,
+          interval: 1000,
+          timeoutMsg:
+            "long-press did not open the wave action sheet (touch affordances lost?)",
+        }
       );
-      if (cancel) {
-        cancel.click();
-        return true;
-      }
-      return false;
-    });
-    assert.ok(closed, "could not dismiss the action sheet via Cancel");
+      await saveScreenshot(driver, "web-wave-action-sheet");
+
+      // The page must have survived the interaction (no error boundary).
+      const bodyText = await driver.execute(
+        () => document.body.innerText || ""
+      );
+      assertNoCrashMarkers(assert, bodyText, `${PUBLIC_WAVE_PATH} action sheet`);
+    } finally {
+      // Leave the page clean for subsequent tests even when an assertion
+      // above fails; never mask that failure with a dismissal error.
+      await driver
+        .execute(() => {
+          const dialog = document.querySelector(
+            "dialog[open], [role='dialog']"
+          );
+          if (!dialog) return;
+          const cancel = [...dialog.querySelectorAll("button")].find((button) =>
+            button.textContent.trim().toLowerCase().startsWith("cancel")
+          );
+          if (cancel) cancel.click();
+        })
+        .catch(() => {});
+    }
   });
 });
