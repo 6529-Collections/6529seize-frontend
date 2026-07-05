@@ -1,0 +1,44 @@
+name: Debt Ratchet
+
+# Structural-debt gate: fails any PR that raises a debt counter above the
+# checked-in baseline (scripts/debt-ratchet-baseline.json). Runs on every PR
+# so it can serve as a required status check; it is dependency-free and does
+# not install node_modules. See scripts/debt-ratchet.cjs for the metrics and
+# the one-command baseline update (`node scripts/debt-ratchet.cjs --update`).
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: debt-ratchet-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  debt-ratchet:
+    name: Debt ratchet
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      # No dependency install and no package-manager cache by design: the
+      # ratchet script is dependency-free Node, which keeps this required
+      # check fast (<1 min) on a bare checkout. Do not add `cache: pnpm`.
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Check debt counters against baseline
+        run: node scripts/debt-ratchet.cjs

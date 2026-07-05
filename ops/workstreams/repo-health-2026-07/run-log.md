@@ -34,3 +34,23 @@
 - Adjusted Thread A deliverables: PR 1 = campaign state dir (this PR); PR 2 = debt
   ratchet (script + baseline + install-free CI job); PR 3 = coverage floor on main
   pushes; PR 4 = e2e harness verify/fix; then ruleset update for required checks.
+
+## 2026-07-04 (Thread A — debt ratchet + e2e verification)
+
+- E2E harness verified FIXED on `origin/main`: `playwright test --list` enumerates
+  1050 tests in 40 files with no module-resolution errors (`tests/testHelpers.ts`
+  plus the `tests/support/` fixtures landed via the a11y-i18n harness-repair work),
+  and the latest heavy app-pr-ci run (PR #3028) executed both the small smoke pack
+  and the critical route-shell pack green. Campaign "PR 4 — e2e harness fix" is
+  therefore a no-op; staging-gated packs still need `PLAYWRIGHT_STAGING_ACCESS_CODE`
+  and stay out of CI by design.
+- Debt ratchet added: `scripts/debt-ratchet.cjs` + checked-in
+  `scripts/debt-ratchet-baseline.json` + always-on `Debt Ratchet` PR workflow
+  (install-free, ~1 min) + Jest coverage. Metrics recomputed at `origin/main`
+  6af669907 — audit corrections: bootstrap/react-bootstrap imports are already 0
+  and both deps are gone from package.json (workstream C's import-removal half is
+  done on main; the audit had measured the stale dirty branch); TODO/FIXME/HACK in
+  shippable source dirs is 6, not ~2.8k (the audit number included test/tooling
+  trees); no root `pages/` dir remains. Live baseline: any_casts 358,
+  todo_comments 6, oversized_files 139 (grandfathered by path), redux_imports 21,
+  bootstrap_imports 0, pages_router_files 0.
