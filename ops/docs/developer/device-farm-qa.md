@@ -30,7 +30,7 @@ shell gains meaningful iOS-native behavior.
 
 | Pack | Device Farm test type | Devices | What it validates |
 | --- | --- | --- | --- |
-| `devicefarm:mobile-web-smoke` | `APPIUM_WEB_NODE` | Android phones (pool `android-phones-smoke`), iPhone (pool `ios-phones-web-smoke`) | Deployed frontend renders `/`, `/the-memes`, `/network` without crash markers, exposes navigation chrome, no horizontal overflow. Read-only. |
+| `devicefarm:mobile-web-smoke` | `APPIUM_WEB_NODE` | Android phones (pool `android-phones-smoke`), iPhone (pool `ios-phones-web-smoke`) | Deployed frontend renders `/`, `/the-memes`, `/network`, and the public `6529 Releases` wave without crash markers (including the app's branded "Page of Doom" error boundary), exposes navigation chrome, no horizontal overflow, and long-press on a wave message opens the touch action sheet. Read-only. |
 | `devicefarm:native-android-smoke` | `APPIUM_NODE` | Android phones | Debug shell APK launches, WebView boots `6529.io`, `mobile6529://navigate/...` deep links navigate the WebView. Read-only. |
 | `devicefarm:native-android-fuzz` | `BUILTIN_FUZZ` | Android phones | 2500 random UI events per device (fixed seed `6529`) surface crashes/ANRs in the shell. |
 
@@ -71,11 +71,27 @@ stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
    bash ops/scripts/devicefarm-bootstrap.sh
    ```
 
-   Defaults: project `6529-mobile-qa`, pools `android-phones-smoke` (max 2,
-   Android 13+ highly-available public phones) and `ios-phones-web-smoke`
-   (max 1, iOS 16+). Override names via env vars and mirror them in repository
-   variables `DEVICEFARM_PROJECT_NAME`, `DEVICEFARM_ANDROID_POOL_NAME`,
+   Defaults: project `6529-mobile-qa`, pools `android-phones-smoke` (max 3)
+   and `ios-phones-web-smoke` (max 2). The script is idempotent and
+   *converging*: re-running it updates existing pools to the rules in the
+   script, so pool composition is version-controlled here. Override names via
+   env vars and mirror them in repository variables
+   `DEVICEFARM_PROJECT_NAME`, `DEVICEFARM_ANDROID_POOL_NAME`,
    `DEVICEFARM_IOS_POOL_NAME` (the workflow resolves resources by name).
+
+   Pool composition is a deliberate representative mix, not "any available
+   phone" (an open rule tends to hand out two near-identical Pixels):
+
+   | Pool | Devices | Why |
+   | --- | --- | --- |
+   | `android-phones-smoke` | Samsung Galaxy S24, Google Pixel 8, Samsung Galaxy A15 | One UI flagship (dominant real-world OEM skin), stock Android, and the mid-range/low-perf class that is the most common Android tier globally. |
+   | `ios-phones-web-smoke` | iPhone 16, iPhone SE (2022) | Current mainstream iOS, plus the 4.7" small screen on the oldest supported Safari — the viewport that makes the horizontal-overflow check earn its keep. |
+
+   Model rules pick whichever of the named devices are highly available at
+   scheduling time (a busy model just shrinks that run's coverage). Recheck
+   the model list against the fleet (`aws devicefarm list-devices`) roughly
+   yearly, and calibrate against real visitor device analytics (CloudWatch
+   RUM / Mixpanel user agents) when adjusting.
 
 2. **CI IAM principal** — create a dedicated IAM user (or role) for the
    workflow with this policy (Device Farm resources exist only in us-west-2):
