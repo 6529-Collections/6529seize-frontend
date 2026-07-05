@@ -26,6 +26,16 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
+jest.mock("@/hooks/profile-cms/useProfileCmsPublishSign", () => ({
+  useProfileCmsPublishSign: () => ({
+    signTypedData: jest.fn(async () => ({ ok: true, signature: "0xsig" })),
+    chainId: 1,
+    signerAddress: "0x1111111111111111111111111111111111111111",
+    isConnected: true,
+    isSafe: false,
+  }),
+}));
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
@@ -653,8 +663,7 @@ describe("ProfileCmsBuilder", () => {
     expect(screen.queryByText("draft-1")).not.toBeInTheDocument();
   });
 
-  it("keeps production publish disabled until the signed storage flow exists", async () => {
-    const user = userEvent.setup();
+  it("exposes the signed-storage publish panel for the connected owner", async () => {
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: { id: "profile-punk6529" },
@@ -667,20 +676,18 @@ describe("ProfileCmsBuilder", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Publish" }));
-
+    // The publish flow now lives in its own panel with visible step progress,
+    // not a header button that fakes a production publish.
     expect(
-      screen.getByText(
-        "Publishing needs the signed decentralized storage flow and is not enabled in this MVP."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("profile-cms/packages/:id/publish")
-    ).toBeInTheDocument();
+      screen.getByRole("button", { name: "Publish website" })
+    ).toBeEnabled();
+    expect(screen.getByText("Save and validate draft")).toBeInTheDocument();
+    expect(screen.getByText("Upload to storage")).toBeInTheDocument();
+    expect(screen.getByText("Sign with wallet")).toBeInTheDocument();
+    expect(screen.getByText("Publish primary pointer")).toBeInTheDocument();
   });
 
-  it("blocks publish unless the connected profile owns the target", async () => {
-    const user = userEvent.setup();
+  it("disables publish unless the connected profile owns the target", async () => {
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: { id: "profile-other" },
@@ -694,16 +701,9 @@ describe("ProfileCmsBuilder", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Publish" }));
-
     expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("profile-cms/packages/:id/publish")
-    ).toBeInTheDocument();
+      screen.getByRole("button", { name: "Publish website" })
+    ).toBeDisabled();
   });
 
   it("adds a 3D room primitive and previews it through the CMS renderer", async () => {

@@ -294,24 +294,36 @@ describe("profile CMS builder API adapter", () => {
       );
     });
 
-    it("keeps publish hard-blocked regardless of the API-enabled flag", async () => {
+    it("surfaces the server-assigned version and payload hash from a saved draft", async () => {
       process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
       const state = createDefaultCmsBuilderState("punk6529");
       const { cmsPackage } = validateCmsBuilderState(state);
+      commonApiPostMock.mockResolvedValue({
+        id: "draft-123",
+        profile_id: "profile-punk6529",
+        profile_handle: "punk6529",
+        package_id: "pkg-punk6529-builder-mvp",
+        version: 4,
+        status: "draft",
+        package_hash: cmsPackage.integrity.package_hash,
+        payload_hash: cmsPackage.integrity.payload_hash,
+        updated_at: 1750204800000,
+        created_at: 1750204800000,
+      });
 
       const result = await runProfileCmsBuilderAction({
-        action: "publish",
+        action: "save_draft",
         cmsPackage,
-        draftId: "draft-123",
         profileId: "profile-punk6529",
       });
 
-      expect(commonApiPostMock).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
-          ok: false,
-          code: "publish_requires_signed_storage",
-          expectedEndpoint: "profile-cms/packages/draft-123/publish",
+          ok: true,
+          code: "draft_saved",
+          draftId: "draft-123",
+          version: 4,
+          payloadHash: cmsPackage.integrity.payload_hash,
         })
       );
     });

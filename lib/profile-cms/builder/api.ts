@@ -28,11 +28,11 @@ export const PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT =
 export const PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT = "profile-cms/packages";
 export const PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT =
   "profile-cms/packages/validate";
-export const PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT =
+const PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT =
   "profile-cms/packages/{id}/publish";
-export const PROFILE_CMS_BUILDER_STORAGE_UPLOAD_ENDPOINT =
+const PROFILE_CMS_BUILDER_STORAGE_UPLOAD_ENDPOINT =
   "profile-cms/packages/{id}/storage/upload";
-export const PROFILE_CMS_BUILDER_ROLLBACK_ENDPOINT =
+const PROFILE_CMS_BUILDER_ROLLBACK_ENDPOINT =
   "profile-cms/packages/{id}/rollback";
 const PROFILE_CMS_BUILDER_PACKAGE_BY_ID_ENDPOINT = "profile-cms/packages/{id}";
 const PROFILE_CMS_BUILDER_PROFILE_PACKAGES_ENDPOINT =
@@ -112,7 +112,7 @@ export type ProfileCmsPublishRequest = {
  * Rollback request body. Mirrors `ApiRollbackProfileCmsPackageRequest` and the
  * backend Joi `RollbackBodySchema`.
  */
-export type ProfileCmsRollbackRequest = {
+type ProfileCmsRollbackRequest = {
   readonly expected_current_package_id: string;
   readonly expected_current_package_hash?: string | undefined;
 };

@@ -23,7 +23,7 @@ const PUBLISH_STEPS: readonly ProfileCmsPublishStep[] = [
   "publish",
 ];
 
-export type ProfileCmsPublishPanelProps = {
+type ProfileCmsPublishPanelProps = {
   readonly cmsPackage: CmsPackageV1;
   readonly profileId: string | undefined;
   readonly canUseBuilderApi: boolean;
@@ -362,9 +362,7 @@ function getStepGlyph(status: StepStatus, index: number): string {
   }
 }
 
-function getStepLabelKey(
-  step: ProfileCmsPublishStep
-): Parameters<typeof t>[1] {
+function getStepLabelKey(step: ProfileCmsPublishStep): Parameters<typeof t>[1] {
   switch (step) {
     case "validate":
       return "profileCms.builder.publish.step.validate";

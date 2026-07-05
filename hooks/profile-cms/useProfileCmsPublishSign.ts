@@ -11,7 +11,7 @@ import type {
   ProfileCmsSignTypedDataResult,
 } from "@/lib/profile-cms/builder/publish";
 
-export type ProfileCmsPublishSigner = {
+type ProfileCmsPublishSigner = {
   readonly signTypedData: ProfileCmsSignTypedData;
   readonly chainId: number;
   readonly signerAddress: string | undefined;
@@ -57,11 +57,28 @@ export function useProfileCmsPublishSign(): ProfileCmsPublishSigner {
       typedData: ProfileCmsPublishTypedData
     ): Promise<ProfileCmsSignTypedDataResult> => {
       try {
+        // viem encodes EIP-712 uint256 fields as bigint and addresses as
+        // `0x`-prefixed hex; ethers on the backend encodes the same numeric
+        // values from plain numbers, so the signable hash is identical.
+        const { message, domain } = typedData;
         const signature = await signTypedDataAsync({
-          domain: typedData.domain,
+          domain: {
+            name: domain.name,
+            version: domain.version,
+            chainId: domain.chainId,
+            ...(domain.verifyingContract
+              ? {
+                  verifyingContract: domain.verifyingContract as `0x${string}`,
+                }
+              : {}),
+          },
           types: typedData.types,
           primaryType: typedData.primaryType,
-          message: typedData.message,
+          message: {
+            ...message,
+            version: BigInt(message.version),
+            deadline: BigInt(message.deadline),
+          },
         });
         return { ok: true, signature };
       } catch (error) {

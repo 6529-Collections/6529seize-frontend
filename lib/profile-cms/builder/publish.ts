@@ -81,13 +81,9 @@ export type ProfileCmsPublishTypedData = {
   readonly message: ProfileCmsPublishMessage;
 };
 
-export type ProfileCmsPublishStep =
-  | "validate"
-  | "upload"
-  | "sign"
-  | "publish";
+export type ProfileCmsPublishStep = "validate" | "upload" | "sign" | "publish";
 
-export type ProfileCmsPublishErrorCode =
+type ProfileCmsPublishErrorCode =
   | "server_validation_invalid"
   | "save_failed"
   | "validate_failed"
@@ -142,7 +138,7 @@ export type ProfileCmsSignTypedData = (
   typedData: ProfileCmsPublishTypedData
 ) => Promise<ProfileCmsSignTypedDataResult>;
 
-export type RunProfileCmsPublishInput = {
+type RunProfileCmsPublishInput = {
   readonly cmsPackage: CmsPackageV1;
   readonly profileId: string;
   readonly chainId: number;
@@ -211,7 +207,10 @@ export function getProfileCmsPublishedUrl(
  */
 export async function prepareProfileCmsPublish(
   input: RunProfileCmsPublishInput
-): Promise<ProfileCmsPublishFailure | { readonly ok: true; readonly context: ProfileCmsPublishContext }> {
+): Promise<
+  | ProfileCmsPublishFailure
+  | { readonly ok: true; readonly context: ProfileCmsPublishContext }
+> {
   const { cmsPackage, profileId } = input;
 
   const saved = await runProfileCmsBuilderAction({
@@ -235,19 +234,22 @@ export async function prepareProfileCmsPublish(
     profileId,
   });
   if (!validated.ok) {
+    // A rejected server validation is a completed request whose outcome is
+    // "not valid" — abort before upload and surface it as a validation
+    // failure, distinct from a transport error.
+    if (validated.code === "server_validation_invalid") {
+      return {
+        ok: false,
+        step: "validate",
+        code: "server_validation_invalid",
+        message: "Server rejected the package as invalid.",
+      };
+    }
     return {
       ok: false,
       step: "validate",
       code: "validate_failed",
       message: "Server validation request failed.",
-    };
-  }
-  if (validated.code === "server_validation_invalid") {
-    return {
-      ok: false,
-      step: "validate",
-      code: "server_validation_invalid",
-      message: "Server rejected the package as invalid.",
     };
   }
 
@@ -403,10 +405,12 @@ export async function runProfileCmsPublish(
     chainId: input.chainId,
     signerAddress: input.signerAddress,
     signTypedData: input.signTypedData,
-    isSafe: input.isSafe,
-    verifyingContract: input.verifyingContract,
-    now: input.now,
-    baseUrl: input.baseUrl,
+    ...(input.isSafe === undefined ? {} : { isSafe: input.isSafe }),
+    ...(input.verifyingContract === undefined
+      ? {}
+      : { verifyingContract: input.verifyingContract }),
+    ...(input.now === undefined ? {} : { now: input.now }),
+    ...(input.baseUrl === undefined ? {} : { baseUrl: input.baseUrl }),
   });
 }
 
