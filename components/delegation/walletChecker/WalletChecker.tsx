@@ -85,7 +85,7 @@ function CheckedWalletAddress(
 export default function WalletCheckerComponent(
   props: Readonly<{
     address_query: string;
-    setAddressQuery(address: string): any;
+    setAddressQuery(address: string): void;
   }>
 ) {
   const { address_query, setAddressQuery } = props;
