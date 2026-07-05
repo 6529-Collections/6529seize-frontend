@@ -330,8 +330,10 @@ Production validation:
 - avoid public posts, purchases, transfers, signer changes, destructive data
   work, or other irreversible actions unless the user explicitly requested
   that live action
-- post public release notes and a Follow The Repo deployment overview only
-  after production validation is green, following `ops/skills/deploy-6529`
+- post the public numbered release note only after production validation is
+  green, following `ops/skills/deploy-6529`; all deploy communication goes to
+  the `6529 Releases` wave as one numbered note, never to `Follow The Repo` or
+  any other chat wave
 
 ## Cross-Repo Release Ordering
 

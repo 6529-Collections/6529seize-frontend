@@ -198,13 +198,16 @@ gh run list -R 6529-Collections/6529seize-frontend --workflow staging-e2e.yml -L
 
 ## Release Notes Publication
 
-Publish public release notes after production is deployed and production validation passes, unless the user explicitly asked to skip public notes.
+Publish release notes after production is deployed and production validation passes, unless the user explicitly asked to skip public notes.
+
+The `6529 Releases` wave is the single channel for deploy communication. Every production deploy — frontend or backend — gets exactly one numbered release note there. Do not post deployment overviews, deploy notes, or release announcements to the `Follow The Repo` wave or any other chat wave: those waves are for live human and agent discussion, not release notes. Operational detail (PR links, merge SHAs, deploy run URLs) lives in the GitHub PR and the deploy workflow run, not in a wave post.
 
 1. Use an authorized 6529.io account/profile that the current operator personally has access to. This account may vary by developer. Confirm the browser is logged in as the intended profile and that the profile can post in the `6529 Releases` wave before drafting. If no authorized account is available, treat release-note publication as blocked and ask the user or release owner to post; do not use shared wallets, another person's account, or automation keys unless that was explicitly approved for the release.
 2. Open the `6529 Releases` wave at `https://6529.io/waves/05b14183-e153-4e47-bc66-42a0f49102d4`.
-3. Determine the next web release number from the latest release-note drop in that wave immediately before posting:
+3. Determine the next 6529 release number from the latest release-note drop in that wave immediately before posting. Frontend and backend deploys share this one version line:
    - normal user-facing feature or grouped release: bump the minor number, e.g. `4.38.0` to `4.39.0`
    - small fix, copy change, narrow polish, or follow-up to an existing release: bump the patch number, e.g. `4.38.0` to `4.38.1`
+   - backend-only or infrastructure/maintenance deploy with no visible user change: bump the patch number and describe the operator-facing effect honestly, stating plainly when there are no visible user changes
    - broad site-wide, platform, or intentionally breaking release: bump the major number and reset minor/patch, e.g. `4.38.0` to `5.0.0`
    - when unsure whether a change deserves a minor or patch bump, prefer the smaller patch bump unless the release adds a clear new user-facing capability
 4. Draft the release note in plain user-facing language, at a DETAILED level
@@ -234,7 +237,7 @@ battery result, production checks) in user-comprehensible terms.
 
 5. Write the note from production reality, not PR internals:
    - name specific visible behavior, affected pages, and operationally relevant changes; give concrete counts where they exist
-   - avoid raw PR numbers, commit SHAs, implementation trivia, private links, secrets, local paths, hidden prompts, or internal-only risk notes (that layer belongs in the Follow The Repo overview)
+   - avoid raw PR numbers, commit SHAs, implementation trivia, private links, secrets, local paths, hidden prompts, or internal-only risk notes; that operational layer lives in the GitHub PR and the deploy workflow run
    - do not disclose unremediated security specifics (e.g. an unrotated credential); "secret scanning added" is fine, the incident behind it is not, until remediation is complete
    - group many small changes under clear theme headings rather than dropping them; detail beats brevity, but every line must carry information
    - include screenshots or links only when they help users understand the change and are safe to publish
@@ -246,34 +249,6 @@ battery result, production checks) in user-comprehensible terms.
    dry-run first; `--send` before `--file` (LF file for multiline, never
    inline `--text`); verify the stored content with `drops get <id> --json`;
    5-minute edit window with delete+repost recovery.
-
-## Follow The Repo Deployment Overview
-
-After production validation passes, post a detailed deployment overview to the `Follow The Repo` wave unless the user explicitly asked to skip repo-facing deploy notes. This is separate from the public `6529 Releases` note: use it for repo watchers who need enough operational detail to understand exactly what shipped.
-
-1. Use any authorized 6529.io account/profile or posting credential that the current operator personally controls or is explicitly approved to use for this release, such as an existing browser session or an approved local helper/API token. Do not request raw credentials, expose tokens, use shared wallets, use another person's account, or use automation keys unless that access was explicitly approved for this release.
-2. Resolve the wave immediately before posting. The current `Follow The Repo` wave is `https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4`; if using the local helper, verify it first:
-
-```powershell
-punk6529bot waves search --name "follow the repo"
-```
-
-3. Draft the overview from deployed production reality, at LEAST as detailed as the public release note. Unlike the public release note, this repo-facing overview should include public PR links and SHAs. Include:
-   - what user-facing and operator-facing changes were deployed
-   - frontend and backend PRs, merge SHAs, production deployed SHA/version label, and deploy run links
-   - staging and production validation performed, including E2E or smoke results
-   - incidents, failed gates, fix-forward or rollback decisions, and final state
-   - known follow-ups, skipped checks, and remaining risks
-4. Keep the post detailed but safe to publish. Use public GitHub/workflow links when possible, but omit secrets, credentials, cookies, private URLs, raw production data, local paths, hidden prompts, and internal-only exploit or incident details.
-5. Re-check the wave before sending so the overview is not duplicating a newer deploy note. Publish per the posting contract in `ops/skills/post-6529/SKILL.md` (dry-run, then `--send --file`, then stored-content verification):
-
-```powershell
-punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --file overview.txt
-punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --send --file overview.txt
-punk6529bot drops get <drop-id> --json
-```
-
-6. Capture the wave drop URL or serial number for closeout evidence. If no authorized 6529.io posting credential is available, include the exact ready-to-post overview in the closeout and mark the wave publication as blocked.
 
 ## Backend Coordination
 
@@ -313,7 +288,6 @@ Report:
 - staging deploy run, deployed SHA, and E2E result
 - production deploy run, deployed SHA, and E2E result
 - release-note wave drop URL or serial number, or why publication was skipped/blocked
-- `Follow The Repo` wave drop URL or serial number, or the ready-to-post overview if publication was blocked
 - backend deploy status when involved
 - failures encountered and fixes or rollbacks performed
 - remaining risks, skipped checks, and any human follow-up required
