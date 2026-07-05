@@ -121,12 +121,31 @@ shared lane.
 
 ## Staging E2E
 
-1. Run the strongest deployed-staging validation available. Inspect package scripts and Playwright config before assuming a target-specific command exists.
-2. If available, start with the read-only deployed staging smoke pack:
-   `6529 run test:e2e:staging`. It points Playwright at
-   `https://staging.6529.io` and skips the local web server. Add
-   release-specific Playwright or browser checks for changed behavior.
-3. If a staging E2E script does not exist in a future worktree, use Playwright or browser automation against `https://staging.6529.io` for the release-critical flows and record that no dedicated staging E2E script exists.
+1. PRIMARY PATH (since 2026-07-05): the `Staging E2E` workflow
+   (`.github/workflows/staging-e2e.yml`) triggers automatically after every
+   successful `Web Deploy - STAGING` run and executes all 12 staging Playwright
+   packs (~160 read-only browser tests, desktop + mobile) against
+   `https://staging.6529.io`, authenticated via the
+   `PLAYWRIGHT_STAGING_ACCESS_CODE` repo secret. Find the run for the deployed
+   SHA and read its per-pack step summary (failing packs attach log tails):
+
+```bash
+gh run list -R 6529-Collections/6529seize-frontend --workflow staging-e2e.yml -L 3
+```
+
+   Re-run via `workflow_dispatch` when needed, noting that dispatch runs test
+   the branch tip, not necessarily the deployed SHA.
+2. Local fallback and targeted reruns: the `test:e2e:staging*` scripts in
+   package.json run individual packs directly against staging with
+   `STAGING_AUTH=<access code>` (or `PLAYWRIGHT_STAGING_ACCESS_CODE`) in the
+   environment; without the code, gated pages redirect to `/access`. Add
+   release-specific Playwright or browser checks for changed behavior beyond
+   the packs.
+3. When a staging pack fails, run the SAME pack against production
+   (`test:e2e:production:*`) before deciding the fix loop: an identical
+   failure signature on the currently-deployed production build means a
+   pre-existing issue (document it, track it, do not block promotion on it);
+   a staging-only failure means a release regression (block and fix).
 4. Cover the changed behavior plus core smoke:
    - page loads and navigation for touched routes
    - wallet/auth-sensitive paths when relevant, using approved test identity only
