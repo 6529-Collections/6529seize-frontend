@@ -37,7 +37,8 @@ echo "  project ARN: ${project_arn}"
 ensure_pool() {
   local name="$1"
   local max_devices="$2"
-  local rules="$3"
+  local description="$3"
+  local rules="$4"
   local arn
 
   arn="$(aws devicefarm list-device-pools --region "$REGION" \
@@ -48,36 +49,50 @@ ensure_pool() {
     arn="$(aws devicefarm create-device-pool --region "$REGION" \
       --project-arn "$project_arn" \
       --name "$name" \
-      --description "Managed by ops/scripts/devicefarm-bootstrap.sh" \
+      --description "$description" \
       --max-devices "$max_devices" \
       --rules "$rules" \
       --query 'devicePool.arn' --output text)"
   else
-    echo "Device pool already exists: ${name}"
+    echo "Updating device pool: ${name} (max ${max_devices} devices)"
+    aws devicefarm update-device-pool --region "$REGION" \
+      --arn "$arn" \
+      --description "$description" \
+      --max-devices "$max_devices" \
+      --rules "$rules" \
+      --query 'devicePool.arn' --output text > /dev/null
   fi
   echo "  pool ARN: ${arn}"
 }
 
-# Highly-available public Android phones on OS 13+ (native + web packs).
+# Representative Android mix rather than "any available phone": a Samsung
+# One UI flagship (the dominant real-world OEM skin), a stock-Android Pixel,
+# and a mid-range A-series (the most common device class globally, lower
+# perf tier). Whichever of the three are highly available get picked, up to
+# the pool max. Model names must match the Device Farm public fleet exactly
+# (`aws devicefarm list-devices`).
 ANDROID_RULES='[
-  {"attribute":"PLATFORM","operator":"EQUALS","value":"\"ANDROID\""},
-  {"attribute":"FORM_FACTOR","operator":"EQUALS","value":"\"PHONE\""},
-  {"attribute":"OS_VERSION","operator":"GREATER_THAN_OR_EQUALS","value":"\"13\""},
+  {"attribute":"MODEL","operator":"IN","value":"[\"Samsung Galaxy S24\",\"Google Pixel 8\",\"Samsung Galaxy A15\"]"},
   {"attribute":"AVAILABILITY","operator":"EQUALS","value":"\"HIGHLY_AVAILABLE\""},
   {"attribute":"FLEET_TYPE","operator":"EQUALS","value":"\"PUBLIC\""}
 ]'
 
-# Highly-available public iPhones on iOS 16+ (mobile web Safari pack).
+# Representative iOS mix: the current mainstream iPhone plus the small-screen
+# SE on the oldest supported Safari — the 4.7" viewport is what makes the
+# horizontal-overflow check meaningful.
 IOS_RULES='[
-  {"attribute":"PLATFORM","operator":"EQUALS","value":"\"IOS\""},
-  {"attribute":"FORM_FACTOR","operator":"EQUALS","value":"\"PHONE\""},
+  {"attribute":"MODEL","operator":"IN","value":"[\"Apple iPhone 16\",\"Apple iPhone SE (2022)\"]"},
   {"attribute":"OS_VERSION","operator":"GREATER_THAN_OR_EQUALS","value":"\"16\""},
   {"attribute":"AVAILABILITY","operator":"EQUALS","value":"\"HIGHLY_AVAILABLE\""},
   {"attribute":"FLEET_TYPE","operator":"EQUALS","value":"\"PUBLIC\""}
 ]'
 
-ensure_pool "$ANDROID_POOL_NAME" 2 "$ANDROID_RULES"
-ensure_pool "$IOS_POOL_NAME" 1 "$IOS_RULES"
+ensure_pool "$ANDROID_POOL_NAME" 3 \
+  "Representative Android mix: One UI flagship + stock Pixel + mid-range A-series" \
+  "$ANDROID_RULES"
+ensure_pool "$IOS_POOL_NAME" 2 \
+  "Representative iOS mix: current mainstream + small-screen/oldest-Safari SE" \
+  "$IOS_RULES"
 
 cat <<SUMMARY
 
