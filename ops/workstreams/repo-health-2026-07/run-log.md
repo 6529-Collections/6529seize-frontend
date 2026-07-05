@@ -267,3 +267,41 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   "remove after codemod" re-export shims, 1 secure-logging work item,
   1 stale API-shape comment). Triage PR follows: shims completed+deleted,
   work items become consolidated GitHub issues, stale comment deleted.
+## 2026-07-05 (orchestrator — Redux verification + production deploy train)
+
+- User mandate: full E2E verification of the Redux removal (#3047), bot-iterated
+  PRs, staging + production deploys per ops/skills/deploy-6529, fix-forward
+  until perfect.
+- Local phase: semantic review passed (old groupSlice HYDRATE handler read
+  payload.counter — dead code; contexts strictly safer). New browser E2E:
+  tests/social/wave-edit-drop-sandbox.spec.ts (escape-cancel + edit-save via
+  the real affordance + tamper 409) with exact-shape edit mutation support in
+  composerSandboxServer; group-filter test in public-groups-tools (deep-link
+  hydration + UI clear). Composer spec hardened against the quick-DM FAB
+  pointer interception (investigation task spun off; running in a user
+  session). PR #3070 merged after bot iteration (CodeRabbit major fixed:
+  deterministic clear assertions; all 6529bot lanes clean).
+- Staging: main merged to 1a-staging → 8fced9f36 deployed green. Access code
+  recovered from Windows Credential Manager (STAGING_AUTH), validated against
+  the gate, stored as repo secret PLAYWRIGHT_STAGING_ACCESS_CODE. 12-pack
+  battery: green everywhere except collections (9F/20) and network-open-data
+  (2F/14), whose failures reproduce byte-identically on the PRE-train
+  production build — pre-existing, not release regressions.
+- New Staging E2E workflow merged (#3071) after security-lane iteration:
+  workflow_run trust-gated to head_repository == this repo AND head_branch ==
+  1a-staging; runs all 12 packs after every staging deploy.
+- Production: dispatched run 28738949386 on main 306e55a3d — ancestry-verified
+  equal to the staging-validated set — green, EB healthy. Post-deploy packs:
+  combined readonly 63/70 with the exact same 7 pre-existing failures as
+  before the deploy (before/after match), social 6/6, groups 5/5 (the new
+  Redux-surface test against production data).
+- Release notes posted: 4.68.0 to 6529 Releases (drop dacb1f08-6c6e-43a3-9910-
+  d1fd7c8948ed) and a deployment overview to Follow The Repo (drop ed681802-
+  fc7b-4dec-9da2-776630509b99).
+- New standing items: pre-existing NextGen collections desktop-width overflow
+  + one network-metrics test failure need an owner (reproduce on prior build);
+  punk6529bot CLI gotcha recorded (--send must precede --text).
+- Note: the primary checkout carries ANOTHER session's uncommitted work
+  (clipboard/copy-text feature); orchestrator records moved to disposable
+  worktrees — do not branch-switch the primary checkout while that work is
+  live.
