@@ -42,9 +42,9 @@ export function DelegationRowDetails(
         {isConsolidation && (
           <span
             className={
-              !pending
-                ? styles["consolidationActiveLabel"]
-                : styles["consolidationNotAcceptedLabel"]
+              pending
+                ? styles["consolidationNotAcceptedLabel"]
+                : styles["consolidationActiveLabel"]
             }
           >
             {consolidationStatus}

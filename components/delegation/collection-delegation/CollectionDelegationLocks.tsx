@@ -32,6 +32,24 @@ import { LOCK_SELECT_CLASS } from "./collection-delegation-helpers";
 import type { CollectionLocks } from "./useCollectionLocks";
 
 /**
+ * Maps a selected use-case number to its index in the lock-status
+ * multicall arrays. NOTE: the special use cases land one position before
+ * their actual array slots — issue #3108 tracks correcting this mapping.
+ */
+function getLockUseCaseIndex(value: number) {
+  if (value === CONSOLIDATION_USE_CASE.use_case) {
+    return 18;
+  }
+  if (value === SUB_DELEGATION_USE_CASE.use_case) {
+    return 17;
+  }
+  if (value === PRIMARY_ADDRESS_USE_CASE.use_case) {
+    return 16;
+  }
+  return value - 1;
+}
+
+/**
  * The "Locks" section of the collection-delegation screen: the wallet-level
  * lock button and the per-use-case lock select/button pair.
  */
@@ -133,17 +151,9 @@ export function CollectionDelegationLocks(
             }`}
             value={locks.lockUseCaseValue}
             onChange={(e) => {
-              const value = parseInt(e.target.value);
+              const value = Number.parseInt(e.target.value);
               locks.setLockUseCaseValue(value);
-              if (value === CONSOLIDATION_USE_CASE.use_case) {
-                locks.setLockUseCaseIndex(18);
-              } else if (value === SUB_DELEGATION_USE_CASE.use_case) {
-                locks.setLockUseCaseIndex(17);
-              } else if (value === PRIMARY_ADDRESS_USE_CASE.use_case) {
-                locks.setLockUseCaseIndex(16);
-              } else {
-                locks.setLockUseCaseIndex(value - 1);
-              }
+              locks.setLockUseCaseIndex(getLockUseCaseIndex(value));
               locks.useCaseLockToastTitleRef.current = "Locking Wallet";
               locks.useCaseLockWrite.reset();
             }}

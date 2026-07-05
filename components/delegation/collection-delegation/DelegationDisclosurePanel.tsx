@@ -17,7 +17,7 @@ export function toggleDisclosureKey(
   setChanged(true);
 }
 
-function getDelegationsCount(delegations: ContractDelegation[]) {
+export function getDelegationsCount(delegations: ContractDelegation[]) {
   let count = 0;
   for (const delegation of delegations) {
     if (delegation.wallets.length > 0) {

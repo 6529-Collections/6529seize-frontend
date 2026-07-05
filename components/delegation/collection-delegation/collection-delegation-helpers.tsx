@@ -68,33 +68,32 @@ export function getTransactionErrorToastMessage(
 }
 
 export function getActiveDelegationsReadParams(
-  address: `0x${string}` | string | undefined,
-  collection: `0x${string}` | string | undefined,
+  address: string | undefined,
+  collection: string | undefined,
   functionName: string
 ) {
   return getParams(address, collection, functionName, DELEGATION_USE_CASES);
 }
 
 export function getConsolidationReadParams(
-  address: `0x${string}` | string | undefined,
-  collection: `0x${string}` | string | undefined,
+  address: string | undefined,
+  collection: string | undefined,
   consolidationAddresses: ContractDelegation
 ) {
-  const params: DelegationReadParams[] = [];
-  if (consolidationAddresses) {
-    consolidationAddresses.wallets.map((ca) =>
-      params.push({
-        address: DELEGATION_CONTRACT.contract,
-        abi: DELEGATION_ABI,
-        chainId: DELEGATION_CONTRACT.chain_id,
-        functionName: "checkConsolidationStatus",
-        args: [address, ca.wallet, collection],
-      })
-    );
-
-    return params;
+  if (!consolidationAddresses) {
+    return [];
   }
-  return [];
+  const params: DelegationReadParams[] = [];
+  for (const ca of consolidationAddresses.wallets) {
+    params.push({
+      address: DELEGATION_CONTRACT.contract,
+      abi: DELEGATION_ABI,
+      chainId: DELEGATION_CONTRACT.chain_id,
+      functionName: "checkConsolidationStatus",
+      args: [address, ca.wallet, collection],
+    });
+  }
+  return params;
 }
 
 export function getCollectionScopeDescription(
