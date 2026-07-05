@@ -24,6 +24,7 @@ import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
 import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
+import WaveDropMobileMenuCopyText from "./WaveDropMobileMenuCopyText";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -175,7 +176,10 @@ function WaveDropMobileMenuAuthenticatedActions({
       )}
 
       {showCopyOption && (
-        <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
+        <>
+          <WaveDropMobileMenuCopyText drop={drop} onCopy={closeMenu} />
+          <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
+        </>
       )}
 
       {showCurationsAction && (
@@ -309,7 +313,10 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           >
             {showGuestCopyOnly ? (
               showCopyOption && (
-                <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
+                <>
+                  <WaveDropMobileMenuCopyText drop={drop} onCopy={closeMenu} />
+                  <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
+                </>
               )
             ) : (
               <WaveDropMobileMenuAuthenticatedActions
