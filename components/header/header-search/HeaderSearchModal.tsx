@@ -131,7 +131,7 @@ const DIRECT_NAVIGATION_PAGES: SidebarPageEntry[] = [
   },
   {
     name: HEADER_SEARCH_LABELS.join6529,
-    href: "/join",
+    href: "/join-6529",
     section: HEADER_SEARCH_LABELS.main,
     icon: UserPlusIcon,
   },
