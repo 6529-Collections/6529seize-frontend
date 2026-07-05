@@ -11,6 +11,7 @@
 const assert = require("node:assert");
 const {
   assertNoCrashMarkers,
+  longPress,
   openPage,
   saveScreenshot,
   startWebSession,
@@ -19,10 +20,20 @@ const {
 
 const PAGE_LOAD_TIMEOUT_MS = 90000;
 
+// Public wave (6529 Releases by default) — readable logged-out, so the smoke
+// can cover the wave surface: it runs websockets and the touch action sheet,
+// both of which have shipped device-specific crashes/regressions that the
+// static pages above cannot catch. Override via TARGET_WAVE_PATH when running
+// against an environment where this wave does not exist.
+const PUBLIC_WAVE_PATH =
+  process.env.TARGET_WAVE_PATH ||
+  "/waves/05b14183-e153-4e47-bc66-42a0f49102d4";
+
 const PAGES = [
   { name: "home", path: "/", expectBodyText: null },
   { name: "the-memes", path: "/the-memes", expectBodyText: "meme" },
   { name: "network", path: "/network", expectBodyText: null },
+  { name: "releases-wave", path: PUBLIC_WAVE_PATH, expectBodyText: null },
 ];
 
 describe("6529 mobile web smoke (real device)", function () {
@@ -96,5 +107,80 @@ describe("6529 mobile web smoke (real device)", function () {
       overflowPx <= 1,
       `home page overflows the viewport horizontally by ${overflowPx}px`
     );
+  });
+
+  // Regression net for the touch-affordance surface: real phones must keep
+  // the long-press action sheet. Two shipped incidents motivate this exact
+  // flow — an iOS-only crash class around the wave surface (branded "Page of
+  // Doom" error boundary), and touch devices being misclassified as
+  // mouse-driven (fine-pointer latch), which silently removes long-press and
+  // leaves hover-only menus a finger cannot reach. Read-only: the sheet is
+  // opened and dismissed, nothing is posted.
+  it("long-press on a wave message opens the touch action sheet", async function () {
+    await openPage(
+      driver,
+      new URL(PUBLIC_WAVE_PATH, targetUrl()).toString(),
+      PAGE_LOAD_TIMEOUT_MS
+    );
+
+    // Wave messages hydrate after the shell; wait for a long-pressable row.
+    // `.touch-select-none` is the app's own marker for rows whose text
+    // selection is disabled in favor of the long-press interaction. Target
+    // the last matching row in the document (the newest message) — CSS
+    // `:last-of-type` would resolve per-parent, not document-wide.
+    await driver.waitUntil(
+      async () => (await driver.$$(".touch-select-none")).length > 0,
+      {
+        timeout: 60000,
+        interval: 2000,
+        timeoutMsg: "no long-pressable wave rows appeared",
+      }
+    );
+    const rows = await driver.$$(".touch-select-none");
+    const row = rows[rows.length - 1];
+
+    await longPress(driver, row);
+
+    try {
+      // The sheet is a dialog listing drop actions; "Copy text" is present
+      // for both signed-in and logged-out sheets since 4.69.0.
+      await driver.waitUntil(
+        async () =>
+          await driver.execute(() => {
+            const dialog = document.querySelector(
+              "dialog[open], [role='dialog']"
+            );
+            return Boolean(dialog && dialog.textContent.includes("Copy text"));
+          }),
+        {
+          timeout: 20000,
+          interval: 1000,
+          timeoutMsg:
+            "long-press did not open the wave action sheet (touch affordances lost?)",
+        }
+      );
+      await saveScreenshot(driver, "web-wave-action-sheet");
+
+      // The page must have survived the interaction (no error boundary).
+      const bodyText = await driver.execute(
+        () => document.body.innerText || ""
+      );
+      assertNoCrashMarkers(assert, bodyText, `${PUBLIC_WAVE_PATH} action sheet`);
+    } finally {
+      // Leave the page clean for subsequent tests even when an assertion
+      // above fails; never mask that failure with a dismissal error.
+      await driver
+        .execute(() => {
+          const dialog = document.querySelector(
+            "dialog[open], [role='dialog']"
+          );
+          if (!dialog) return;
+          const cancel = [...dialog.querySelectorAll("button")].find((button) =>
+            button.textContent.trim().toLowerCase().startsWith("cancel")
+          );
+          if (cancel) cancel.click();
+        })
+        .catch(() => {});
+    }
   });
 });

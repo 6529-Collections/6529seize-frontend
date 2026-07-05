@@ -30,7 +30,7 @@ shell gains meaningful iOS-native behavior.
 
 | Pack | Device Farm test type | Devices | What it validates |
 | --- | --- | --- | --- |
-| `devicefarm:mobile-web-smoke` | `APPIUM_WEB_NODE` | Android phones (pool `android-phones-smoke`), iPhone (pool `ios-phones-web-smoke`) | Deployed frontend renders `/`, `/the-memes`, `/network` without crash markers, exposes navigation chrome, no horizontal overflow. Read-only. |
+| `devicefarm:mobile-web-smoke` | `APPIUM_WEB_NODE` | Android phones (pool `android-phones-smoke`), iPhone (pool `ios-phones-web-smoke`) | Deployed frontend renders `/`, `/the-memes`, `/network`, and the public `6529 Releases` wave without crash markers (including the app's branded "Page of Doom" error boundary), exposes navigation chrome, no horizontal overflow, and long-press on a wave message opens the touch action sheet. Read-only. |
 | `devicefarm:native-android-smoke` | `APPIUM_NODE` | Android phones | Debug shell APK launches, WebView boots `6529.io`, `mobile6529://navigate/...` deep links navigate the WebView. Read-only. |
 | `devicefarm:native-android-fuzz` | `BUILTIN_FUZZ` | Android phones | 2500 random UI events per device (fixed seed `6529`) surface crashes/ANRs in the shell. |
 
