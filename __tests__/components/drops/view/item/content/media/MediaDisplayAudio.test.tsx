@@ -12,3 +12,11 @@ test('renders audio element when controls shown', () => {
   expect(audioEl).toBeInTheDocument();
   expect(audioEl?.querySelector('source')?.getAttribute('src')).toBe('a.mp3');
 });
+
+test('does not render controls for unsafe audio URLs', () => {
+  const { container } = render(
+    <MediaDisplayAudio src="javascript:alert(1)" showControls />
+  );
+  expect(container.querySelector('audio')).not.toBeInTheDocument();
+  expect(screen.getByText('Audio')).toBeInTheDocument();
+});

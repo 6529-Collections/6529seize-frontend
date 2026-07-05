@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 // - allow-scripts: Required for interactive HTML content.
 // - intentionally omits allow-pointer-lock, allow-same-origin and allow-popups to preserve isolation and block window spawning.
 const DEFAULT_SANDBOX = "allow-scripts";
+const SAFE_EXTERNAL_LINK_PROTOCOLS = new Set(["https:", "http:"]);
 
 interface SandboxedExternalIframeProps {
   readonly src: string;
@@ -23,6 +24,14 @@ interface SandboxedExternalIframeProps {
   readonly iframeRef?: React.Ref<HTMLIFrameElement> | undefined;
   /** Fires once when the container scrolls into view and the iframe is about to render. */
   readonly onVisible?: (() => void) | undefined;
+}
+
+function getSafeExternalHref(parsedUrl: URL | null): string | null {
+  if (!parsedUrl || !SAFE_EXTERNAL_LINK_PROTOCOLS.has(parsedUrl.protocol)) {
+    return null;
+  }
+
+  return parsedUrl.toString();
 }
 
 /**
@@ -119,6 +128,11 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     return `${title}: ${canonicalSrc}`;
   }, [canonicalSrc, title]);
 
+  const safeExternalHref = useMemo(
+    () => getSafeExternalHref(parsedCanonicalUrl),
+    [parsedCanonicalUrl]
+  );
+
   const iframeProps = useMemo(() => {
     if (!canonicalSrc) {
       return null;
@@ -160,9 +174,9 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
       <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-300">
         Untrusted interactive content
       </span>
-      {parsedCanonicalUrl ? (
+      {parsedCanonicalUrl && safeExternalHref ? (
         <a
-          href={canonicalSrc}
+          href={safeExternalHref}
           target="_blank"
           rel="noopener noreferrer"
           className="tw-text-xs tw-font-medium tw-text-primary-300 tw-transition hover:tw-text-primary-300"

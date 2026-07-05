@@ -1,4 +1,5 @@
 import React from "react";
+import { getSafeMediaSource } from "@/lib/media/safe-media-url";
 
 /**
  * Audio display component without interactive modal functionality.
@@ -11,11 +12,13 @@ function MediaDisplayAudio({
   readonly src: string;
   readonly showControls?: boolean | undefined;
 }) {
+  const safeSrc = getSafeMediaSource(src);
+
   return (
     <div className="tw-w-full tw-h-full">
-      {showControls ? (
+      {showControls && safeSrc ? (
         <audio controls className="tw-w-full tw-max-h-10">
-          <source src={src} type="audio/mpeg" />
+          <source src={encodeURI(safeSrc)} type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>
       ) : (

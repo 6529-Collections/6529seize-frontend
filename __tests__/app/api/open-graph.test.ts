@@ -23,9 +23,6 @@ const { lookup } = require("node:dns/promises") as {
   lookup: jest.Mock;
 };
 
-const originalFetch = global.fetch;
-const mockFetch = jest.fn();
-
 const createMockFetchResponse = (status: number, body: string, url: string) => {
   const headerMap = new Map<string, string>();
   headerMap.set("content-type", "text/html");
@@ -42,17 +39,7 @@ const createMockFetchResponse = (status: number, body: string, url: string) => {
 
 beforeEach(() => {
   lookup.mockReset();
-  mockFetch.mockReset();
   mockUndiciFetch.mockReset();
-  global.fetch = mockFetch as unknown as typeof fetch;
-});
-
-afterEach(() => {
-  expect(mockUndiciFetch).not.toHaveBeenCalled();
-});
-
-afterAll(() => {
-  global.fetch = originalFetch;
 });
 
 describe("open-graph route helpers", () => {
@@ -211,13 +198,12 @@ describe("open-graph route helpers", () => {
     const previewHtml =
       "<html><head><title>Preview Title</title></head><body></body></html>";
 
-    mockFetch.mockResolvedValueOnce(
-      Promise.resolve(
-        createMockFetchResponse(
-          200,
-          previewHtml,
-          "https://docs.google.com/document/d/abc/preview"
-        )
+    lookup.mockResolvedValue([{ address: "142.250.190.14", family: 4 }]);
+    mockUndiciFetch.mockResolvedValueOnce(
+      createMockFetchResponse(
+        200,
+        previewHtml,
+        "https://docs.google.com/document/d/abc/preview"
       )
     );
 
@@ -239,13 +225,21 @@ describe("open-graph route helpers", () => {
       },
     });
 
-    expect(mockFetch).toHaveBeenCalledWith(
+    expect(mockUndiciFetch).toHaveBeenCalledWith(
       "https://docs.google.com/document/d/abc/preview",
       expect.objectContaining({
-        headers: expect.objectContaining({
-          "user-agent": expect.stringContaining("6529seize-link-preview"),
-        }),
+        headers: expect.any(Headers),
+        redirect: "manual",
       })
+    );
+    const requestHeaders = mockUndiciFetch.mock.calls[0]?.[1]?.headers as
+      | Headers
+      | undefined;
+    expect(requestHeaders?.get("accept")).toBe(
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+    );
+    expect(requestHeaders?.get("user-agent")).toContain(
+      "6529seize-link-preview"
     );
   });
 
@@ -260,7 +254,7 @@ describe("open-graph route helpers", () => {
       resolvedUrl
     );
 
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockUndiciFetch).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       type: "google.docs",
       availability: "restricted",
@@ -269,13 +263,12 @@ describe("open-graph route helpers", () => {
   });
 
   it("builds a Google Sheets preview and marks restricted access on failure", async () => {
-    mockFetch.mockResolvedValueOnce(
-      Promise.resolve(
-        createMockFetchResponse(
-          403,
-          "",
-          "https://docs.google.com/spreadsheets/d/def/htmlview"
-        )
+    lookup.mockResolvedValue([{ address: "142.250.190.14", family: 4 }]);
+    mockUndiciFetch.mockResolvedValueOnce(
+      createMockFetchResponse(
+        403,
+        "",
+        "https://docs.google.com/spreadsheets/d/def/htmlview"
       )
     );
 
@@ -307,7 +300,7 @@ describe("open-graph route helpers", () => {
     );
 
     expect(result).toBeNull();
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockUndiciFetch).not.toHaveBeenCalled();
   });
 
   it("rejects localhost URLs", async () => {

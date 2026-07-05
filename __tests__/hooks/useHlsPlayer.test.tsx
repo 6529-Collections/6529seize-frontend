@@ -42,6 +42,24 @@ describe('useHlsPlayer', () => {
     expect(video.getAttribute('data-loading')).toBe('false');
   });
 
+  it('encodes non-HLS video sources before assigning the DOM src', () => {
+    const { getByTestId } = render(
+      <TestComponent src="video file.mp4" isHls={false} />
+    );
+    const video = getByTestId('vid') as HTMLVideoElement;
+    expect(video.src).toContain('video%20file.mp4');
+  });
+
+  it('does not assign unsafe non-HLS video sources', () => {
+    const { getByTestId } = render(
+      <TestComponent src="javascript:alert(1)" isHls={false} />
+    );
+    const video = getByTestId('vid') as HTMLVideoElement;
+    expect(video.getAttribute('src')).toBeNull();
+    expect(video.src).toBe('');
+    expect(video.getAttribute('data-loading')).toBe('false');
+  });
+
   it('sets src correctly for HLS when fallback is provided and HLS fails', async () => {
     const { getByTestId } = render(
       <TestComponent src="video.m3u8" isHls={true} fallbackSrc="fallback.mp4" />

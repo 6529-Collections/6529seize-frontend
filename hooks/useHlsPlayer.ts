@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type HlsType from "hls.js";
+import { getSafeMediaSource } from "@/lib/media/safe-media-url";
 
 interface UseHlsPlayerParams {
   /** The final video URL to load (m3u8 if isHls=true, or MP4, etc.) */
@@ -84,7 +85,13 @@ export function useHlsPlayer({
    * Fallback to a raw MP4 (or original src) if HLS is unsupported or fails.
    */
   function fallbackToSrc(videoEl: HTMLVideoElement, fallback: string) {
-    videoEl.src = fallback;
+    const safeFallback = getSafeMediaSource(fallback);
+    if (!safeFallback) {
+      setIsLoading(false);
+      return;
+    }
+
+    videoEl.src = encodeURI(safeFallback);
     videoEl.load();
     setIsLoading(false);
     if (autoPlay) {
@@ -147,13 +154,24 @@ export function useHlsPlayer({
    * Sets up the Hls instance, attaches to the <video>, and starts loading.
    */
   async function initHls(videoEl: HTMLVideoElement, changedSource: boolean) {
+    const safeSrc = getSafeMediaSource(src);
+    const safeFallbackSrc = getSafeMediaSource(fallbackSrc);
+    if (!safeSrc) {
+      if (safeFallbackSrc) {
+        fallbackToSrc(videoEl, safeFallbackSrc);
+      } else {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     try {
       const mod = await import("hls.js");
       const HlsConstructor = mod.default; // typed import (no "as any")
 
       // If Hls is unsupported in this browser, fallback to direct src
       if (!HlsConstructor || !HlsConstructor.isSupported()) {
-        fallbackToSrc(videoEl, fallbackSrc || src);
+        fallbackToSrc(videoEl, safeFallbackSrc || safeSrc);
         return;
       }
 
@@ -185,7 +203,7 @@ export function useHlsPlayer({
       hlsRef.current = hls;
 
       // Configure error handlers
-      setupHlsErrorHandlers(hls, HlsConstructor, videoEl, src);
+      setupHlsErrorHandlers(hls, HlsConstructor, videoEl, encodeURI(safeSrc));
 
       // Once the manifest is parsed, we can attempt autoplay
       hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {
@@ -196,14 +214,14 @@ export function useHlsPlayer({
         }
       });
 
-      hls.loadSource(src);
+      hls.loadSource(encodeURI(safeSrc));
       hls.attachMedia(videoEl);
     } catch (error) {
       // If dynamic import fails, fallback if possible
       console.error("HLS import/setup error:", error);
       setIsLoading(false);
-      if (fallbackSrc) {
-        fallbackToSrc(videoEl, fallbackSrc);
+      if (safeFallbackSrc) {
+        fallbackToSrc(videoEl, safeFallbackSrc);
       } else {
         // If no fallback is provided, we log the error and let the user handle it
         throw error; // or console.warn("No fallback source provided.");
@@ -240,7 +258,13 @@ export function useHlsPlayer({
       initHls(videoEl, changedSource);
     } else {
       // Not HLS => just assign the src
-      videoEl.src = src;
+      const safeSrc = getSafeMediaSource(src);
+      if (!safeSrc) {
+        setIsLoading(false);
+        return;
+      }
+
+      videoEl.src = encodeURI(safeSrc);
       videoEl.load();
       setIsLoading(false);
       if (autoPlay) {
