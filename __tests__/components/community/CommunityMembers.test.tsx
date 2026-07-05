@@ -3,14 +3,16 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
   useRouter: jest.fn(),
 }));
-jest.mock("react-redux", () => ({ useSelector: jest.fn() }));
+jest.mock("@/contexts/ActiveGroupContext", () => ({
+  useActiveGroup: jest.fn(),
+}));
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
@@ -59,7 +61,10 @@ const searchParamsMock = new Map<string, string | null>();
   get: (key: string) => searchParamsMock.get(key) ?? null,
 });
 (useRouter as jest.Mock).mockReturnValue({ push, replace });
-(useSelector as unknown as jest.Mock).mockReturnValue("1");
+(useActiveGroup as unknown as jest.Mock).mockReturnValue({
+  activeGroupId: "1",
+  setActiveGroupId: jest.fn(),
+});
 
 function renderComponent() {
   return render(
@@ -78,7 +83,10 @@ describe("CommunityMembers", () => {
       get: (key: string) => searchParamsMock.get(key) ?? null,
     });
     (useRouter as jest.Mock).mockReturnValue({ push, replace });
-    (useSelector as unknown as jest.Mock).mockReturnValue("1");
+    (useActiveGroup as unknown as jest.Mock).mockReturnValue({
+      activeGroupId: "1",
+      setActiveGroupId: jest.fn(),
+    });
   });
 
   it("shows skeleton while no members", () => {

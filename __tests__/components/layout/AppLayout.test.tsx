@@ -1,9 +1,7 @@
-import { editSlice } from "@/store/editSlice";
 import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
-import { configureStore } from "@reduxjs/toolkit";
+import { EditingDropProvider } from "@/contexts/EditingDropContext";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { Provider } from "react-redux";
 
 const registerRef = jest.fn();
 const setHeaderRef = jest.fn();
@@ -43,7 +41,9 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     return MockDynamicMessages;
   }
 
-  throw new Error(`Unexpected dynamic import in AppLayout test: ${loaderSource}`);
+  throw new Error(
+    `Unexpected dynamic import in AppLayout test: ${loaderSource}`
+  );
 });
 jest.mock(
   "@/components/navigation/BottomNavigation",
@@ -154,15 +154,11 @@ jest.mock(
 const AppLayout = require("@/components/layout/AppLayout").default;
 
 describe("AppLayout", () => {
-  let store: any;
   const bottomReserveProperty = "--stream-route-loading-bottom-reserve";
   const headerReserveProperty = "--stream-route-loading-header-reserve";
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = configureStore({
-      reducer: { edit: editSlice.reducer },
-    });
     usePathname.mockReturnValue("/");
     getSearchParams.mockReturnValue(new URLSearchParams());
     mockDialogMountCount = 0;
@@ -180,7 +176,7 @@ describe("AppLayout", () => {
   });
 
   const renderWithProvider = (children: React.ReactElement) => {
-    return render(<Provider store={store}>{children}</Provider>);
+    return render(<EditingDropProvider>{children}</EditingDropProvider>);
   };
 
   it("renders main content when no active view", () => {
@@ -262,9 +258,9 @@ describe("AppLayout", () => {
 
     usePathname.mockReturnValue("/messages");
     rerender(
-      <Provider store={store}>
+      <EditingDropProvider>
         <AppLayout>child</AppLayout>
-      </Provider>
+      </EditingDropProvider>
     );
 
     expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
@@ -346,9 +342,9 @@ describe("AppLayout", () => {
 
     getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
     rerender(
-      <Provider store={store}>
+      <EditingDropProvider>
         <AppLayout>child</AppLayout>
-      </Provider>
+      </EditingDropProvider>
     );
     expect(screen.getByTestId("messages")).toBeInTheDocument();
     expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
@@ -367,9 +363,9 @@ describe("AppLayout", () => {
 
     getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
     rerender(
-      <Provider store={store}>
+      <EditingDropProvider>
         <AppLayout>child</AppLayout>
-      </Provider>
+      </EditingDropProvider>
     );
 
     expect(screen.getByTestId("messages")).toBeInTheDocument();
@@ -416,9 +412,9 @@ describe("AppLayout", () => {
 
     getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
     rerender(
-      <Provider store={store}>
+      <EditingDropProvider>
         <AppLayout>child</AppLayout>
-      </Provider>
+      </EditingDropProvider>
     );
 
     expect(screen.getByTestId("messages")).toBeInTheDocument();
@@ -426,9 +422,9 @@ describe("AppLayout", () => {
 
     getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
     rerender(
-      <Provider store={store}>
+      <EditingDropProvider>
         <AppLayout>child</AppLayout>
-      </Provider>
+      </EditingDropProvider>
     );
 
     expect(screen.getByTestId("waves")).toBeInTheDocument();

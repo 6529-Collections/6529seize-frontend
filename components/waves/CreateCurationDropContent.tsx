@@ -7,7 +7,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
-import { selectEditingDropId } from "@/store/editSlice";
+import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import dynamic from "next/dynamic";
@@ -19,7 +19,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
@@ -71,7 +70,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   termsSignatureFlowEnabled = true,
 }) => {
   const { isApp } = useDeviceInfo();
-  const editingDropId = useSelector(selectEditingDropId);
+  const { editingDropId } = useEditingDrop();
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);

@@ -3,8 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { selectActiveGroupId, setActiveGroupId } from "@/store/groupSlice";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import NetworkPageLayoutApp from "./NetworkPageLayoutApp";
 
@@ -14,8 +13,7 @@ export default function NetworkPageLayout({
   readonly children: ReactNode;
 }) {
   const searchParams = useSearchParams();
-  const activeGroupId = useSelector(selectActiveGroupId);
-  const dispatch = useDispatch();
+  const { activeGroupId, setActiveGroupId } = useActiveGroup();
   const { isApp } = useDeviceInfo();
 
   const initRef = useRef(false);
@@ -26,11 +24,11 @@ export default function NetworkPageLayout({
       initRef.current = true;
       const group = searchParams.get("group");
       if (group && group !== activeGroupId) {
-        dispatch(setActiveGroupId(group));
+        setActiveGroupId(group);
       }
       setIsReady(true);
     }
-  }, [searchParams, activeGroupId, dispatch]);
+  }, [searchParams, activeGroupId, setActiveGroupId]);
 
   if (isApp) {
     return <NetworkPageLayoutApp>{children}</NetworkPageLayoutApp>;

@@ -6,13 +6,11 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
+import { EditingDropProvider } from "@/contexts/EditingDropContext";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { editSlice } from "@/store/editSlice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { DropLocation } from "@/components/waves/drops/drop.types";
 
@@ -167,17 +165,8 @@ const setViewportWidth = (width: number) => {
   globalThis.window.dispatchEvent(new Event("resize"));
 };
 
-// Create a test store
-const createTestStore = () =>
-  configureStore({
-    reducer: {
-      edit: editSlice.reducer,
-    },
-  });
-
-const renderWithRedux = (component: React.ReactElement) => {
-  const store = createTestStore();
-  return render(<Provider store={store}>{component}</Provider>);
+const renderWithEditingDropProvider = (component: React.ReactElement) => {
+  return render(<EditingDropProvider>{component}</EditingDropProvider>);
 };
 
 const drop: any = {
@@ -241,7 +230,7 @@ describe("WaveDrop", () => {
   it("shows actions on desktop", () => {
     setHoverSupport(true);
 
-    const { getByTestId } = renderWithRedux(
+    const { getByTestId } = renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -266,7 +255,7 @@ describe("WaveDrop", () => {
     isTouchDeviceMock.mockReturnValue(false);
     setHoverSupport(true);
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -299,7 +288,7 @@ describe("WaveDrop", () => {
     setHoverSupport(false);
     setViewportWidth(1440);
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -340,7 +329,7 @@ describe("WaveDrop", () => {
     setHoverSupport(true);
     setViewportWidth(800);
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -373,7 +362,7 @@ describe("WaveDrop", () => {
     setHoverSupport(true);
     setViewportWidth(800);
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -417,7 +406,7 @@ describe("WaveDrop", () => {
     isTouchDeviceMock.mockReturnValue(false);
     setViewportWidth(390);
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -447,7 +436,7 @@ describe("WaveDrop", () => {
     setHoverSupport(false);
     setViewportWidth(800);
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -480,7 +469,7 @@ describe("WaveDrop", () => {
     setHoverSupport(false);
     setViewportWidth(800);
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -515,7 +504,7 @@ describe("WaveDrop", () => {
     setViewportWidth(800);
     const onDropContentClick = jest.fn();
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -554,7 +543,7 @@ describe("WaveDrop", () => {
     setViewportWidth(800);
     const onDropContentClick = jest.fn();
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -596,7 +585,7 @@ describe("WaveDrop", () => {
       stableHash: "current-grouped",
     };
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={groupedDrop}
         previousDrop={previousGroupedDrop}
@@ -643,7 +632,7 @@ describe("WaveDrop", () => {
       stableHash: "current-grouped",
     };
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={groupedDrop}
         previousDrop={previousGroupedDrop}
@@ -701,7 +690,7 @@ describe("WaveDrop", () => {
 
   it("hides actions on mobile", () => {
     isMobileMock.mockReturnValue(true);
-    const { queryByTestId } = renderWithRedux(
+    const { queryByTestId } = renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -724,7 +713,7 @@ describe("WaveDrop", () => {
     isMobileMock.mockReturnValue(false);
     setHoverSupport(true);
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}
@@ -760,7 +749,7 @@ describe("WaveDrop", () => {
       ],
     };
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={stormDrop}
         previousDrop={null}
@@ -792,7 +781,7 @@ describe("WaveDrop", () => {
       maxEmbedDepth: 4,
     };
 
-    renderWithRedux(
+    renderWithEditingDropProvider(
       <WaveDrop
         drop={drop}
         previousDrop={null}

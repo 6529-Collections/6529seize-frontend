@@ -6,7 +6,7 @@
     "todo_comments": 6,
     "oversized_files": 139,
     "bootstrap_imports": 0,
-    "redux_imports": 21,
+    "redux_imports": 0,
     "pages_router_files": 0
   },
   "oversized_file_allowlist": [

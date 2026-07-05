@@ -7,9 +7,8 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
-import { setEditingDropId } from "@/store/editSlice";
 
-const mockDispatch = jest.fn();
+const mockSetEditingDropId = jest.fn();
 const mockRequestScrollToSerialNo = jest.fn();
 const mockRequestAuth = jest.fn(async () => ({ success: true }));
 const mockSetToast = jest.fn();
@@ -59,9 +58,11 @@ jest.mock("framer-motion", () => {
   };
 });
 
-jest.mock("react-redux", () => ({
-  useDispatch: () => mockDispatch,
-  useSelector: () => mockEditingDropId,
+jest.mock("@/contexts/EditingDropContext", () => ({
+  useEditingDrop: () => ({
+    editingDropId: mockEditingDropId,
+    setEditingDropId: mockSetEditingDropId,
+  }),
 }));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
@@ -281,7 +282,7 @@ describe("CreateDropContent edit last drop shortcut", () => {
 
     await userEvent.click(screen.getByTestId("request-edit-last-drop"));
 
-    expect(mockDispatch).toHaveBeenCalledWith(setEditingDropId("drop-latest"));
+    expect(mockSetEditingDropId).toHaveBeenCalledWith("drop-latest");
     expect(mockRequestScrollToSerialNo).toHaveBeenCalledWith({
       waveId: "wave-1",
       serialNo: 42,
@@ -300,7 +301,7 @@ describe("CreateDropContent edit last drop shortcut", () => {
     );
     await userEvent.click(screen.getByTestId("request-edit-last-drop"));
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockSetEditingDropId).not.toHaveBeenCalled();
   });
 
   it.each([ActiveDropAction.REPLY, ActiveDropAction.QUOTE])(
@@ -316,7 +317,7 @@ describe("CreateDropContent edit last drop shortcut", () => {
 
       await userEvent.click(screen.getByTestId("request-edit-last-drop"));
 
-      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockSetEditingDropId).not.toHaveBeenCalled();
     }
   );
 
@@ -331,10 +332,10 @@ describe("CreateDropContent edit last drop shortcut", () => {
       )
     );
     await userEvent.click(screen.getByTestId("request-edit-last-drop"));
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockSetEditingDropId).not.toHaveBeenCalled();
 
     unmount();
-    mockDispatch.mockClear();
+    mockSetEditingDropId.mockClear();
     renderSubject({
       drop: {
         title: null,
@@ -361,7 +362,7 @@ describe("CreateDropContent edit last drop shortcut", () => {
 
     await userEvent.click(screen.getByTestId("request-edit-last-drop"));
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockSetEditingDropId).not.toHaveBeenCalled();
   });
 
   it("does not open edit in drop mode", async () => {
@@ -369,7 +370,7 @@ describe("CreateDropContent edit last drop shortcut", () => {
 
     await userEvent.click(screen.getByTestId("request-edit-last-drop"));
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockSetEditingDropId).not.toHaveBeenCalled();
   });
 
   it("does not open edit without an editable target", async () => {
@@ -378,6 +379,6 @@ describe("CreateDropContent edit last drop shortcut", () => {
 
     await userEvent.click(screen.getByTestId("request-edit-last-drop"));
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockSetEditingDropId).not.toHaveBeenCalled();
   });
 });

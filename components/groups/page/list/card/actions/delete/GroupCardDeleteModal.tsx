@@ -2,12 +2,11 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
-import { selectActiveGroupId, setActiveGroupId } from "@/store/groupSlice";
 import { useContext, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useDispatch, useSelector } from "react-redux";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function GroupCardDeleteModal({
@@ -19,8 +18,7 @@ export default function GroupCardDeleteModal({
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onGroupRemoved } = useContext(ReactQueryWrapperContext);
-  const activeGroupId = useSelector(selectActiveGroupId);
-  const dispatch = useDispatch();
+  const { activeGroupId, setActiveGroupId } = useActiveGroup();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
@@ -57,7 +55,7 @@ export default function GroupCardDeleteModal({
     });
     onGroupRemoved({ groupId: group.id });
     if (activeGroupId === group.id) {
-      dispatch(setActiveGroupId(null));
+      setActiveGroupId(null);
     }
     onClose();
   };

@@ -34,8 +34,11 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   })),
 }));
 
-jest.mock("react-redux", () => ({
-  useSelector: jest.fn(() => null),
+jest.mock("@/contexts/EditingDropContext", () => ({
+  useEditingDrop: jest.fn(() => ({
+    editingDropId: null,
+    setEditingDropId: jest.fn(),
+  })),
 }));
 
 jest.mock("@/components/waves/CreateDropReplyingWrapper", () => ({

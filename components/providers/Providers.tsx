@@ -9,6 +9,8 @@ import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirect
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import NewVersionToast from "@/components/utils/NewVersionToast";
+import { ActiveGroupProvider } from "@/contexts/ActiveGroupContext";
+import { EditingDropProvider } from "@/contexts/EditingDropContext";
 import { EmojiProvider } from "@/contexts/EmojiContext";
 import { HeaderProvider } from "@/contexts/HeaderContext";
 import { NavigationHistoryProvider } from "@/contexts/NavigationHistoryContext";
@@ -55,7 +57,7 @@ export default function Providers({
     </TitleProvider>
   );
 
-  return (
+  const appProviders = (
     <QueryClientSetup>
       <AppWalletsProvider>
         <WagmiSetup>
@@ -109,5 +111,11 @@ export default function Providers({
         </WagmiSetup>
       </AppWalletsProvider>
     </QueryClientSetup>
+  );
+
+  return (
+    <EditingDropProvider>
+      <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
+    </EditingDropProvider>
   );
 }

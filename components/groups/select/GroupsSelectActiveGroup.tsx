@@ -9,8 +9,7 @@ import type { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
 import { useEffect, useState } from "react";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { useDispatch } from "react-redux";
-import { setActiveGroupId } from "@/store/groupSlice";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { GroupSelectVariant } from "./groupSelect.types";
@@ -70,10 +69,10 @@ export default function GroupsSelectActiveGroup({
     }
   }, [members]);
 
-  const dispatch = useDispatch();
+  const { setActiveGroupId } = useActiveGroup();
 
   const onActiveGroupId = (groupId: string | null) => {
-    dispatch(setActiveGroupId(groupId));
+    setActiveGroupId(groupId);
   };
 
   if (!data) {

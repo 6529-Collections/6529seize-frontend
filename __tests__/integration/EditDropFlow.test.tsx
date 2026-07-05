@@ -1,13 +1,14 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { editSlice } from "@/store/editSlice";
+import {
+  EditingDropProvider,
+  useEditingDrop,
+} from "@/contexts/EditingDropContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { commonApiPost } from "@/services/api/common-api";
 
@@ -105,13 +106,26 @@ const TestEditContext = React.createContext<{
   onCancel?: (() => void) | undefined;
 }>({});
 
+// Captures the live editing-drop context value so tests can read and drive
+// edit state from outside the tree (the pre-context tests used a Redux store
+// handle for this).
+type EditingDropController = ReturnType<typeof useEditingDrop>;
+const editingDropControllerRef: { current: EditingDropController | null } = {
+  current: null,
+};
+
+function EditingDropControllerProbe() {
+  editingDropControllerRef.current = useEditingDrop();
+  return null;
+}
+
 // Mock WaveDropPartContentMarkdown to check for edit state
 jest.mock("@/components/waves/drops/WaveDropPartContentMarkdown", () => {
-  const { useSelector } = require("react-redux");
+  const { useEditingDrop } = require("@/contexts/EditingDropContext");
 
   return function MockWaveDropPartContentMarkdown({ part }: any) {
-    const editState = useSelector((state: any) => state.edit);
-    const isEditing = editState.editingDropId === "drop-123";
+    const { editingDropId } = useEditingDrop();
+    const isEditing = editingDropId === "drop-123";
 
     if (isEditing) {
       return (
@@ -204,13 +218,12 @@ const createMockDrop = (overrides = {}) => ({
 });
 
 const createEditHandlers = (
-  store: any,
   mockSetToast: jest.Mock,
   mockInvalidateDrops: jest.Mock,
   dropId = "drop-123"
 ) => {
   const handleEdit = () => {
-    store.dispatch(editSlice.actions.setEditingDropId(dropId));
+    editingDropControllerRef.current!.setEditingDropId(dropId);
   };
 
   const handleSave = async (content: string, mentions: any[]) => {
@@ -228,7 +241,7 @@ const createEditHandlers = (
         type: "success",
       });
       mockInvalidateDrops();
-      store.dispatch(editSlice.actions.setEditingDropId(null));
+      editingDropControllerRef.current!.setEditingDropId(null);
     } catch (error) {
       // Explicitly handle test error scenario - log error for debugging
       console.error("Test error scenario triggered:", error);
@@ -240,26 +253,25 @@ const createEditHandlers = (
   };
 
   const handleCancel = () => {
-    store.dispatch(editSlice.actions.setEditingDropId(null));
+    editingDropControllerRef.current!.setEditingDropId(null);
   };
 
   return { handleEdit, handleSave, handleCancel };
 };
 
 const createCustomEditHandlers = (
-  store: any,
   mockSetToast: jest.Mock,
   mockInvalidateDrops: jest.Mock,
   customSaveLogic: (content: string, mentions: any[]) => Promise<void>
 ) => {
   const handleEdit = () => {
-    store.dispatch(editSlice.actions.setEditingDropId("drop-123"));
+    editingDropControllerRef.current!.setEditingDropId("drop-123");
   };
 
   const handleSave = customSaveLogic;
 
   const handleCancel = () => {
-    store.dispatch(editSlice.actions.setEditingDropId(null));
+    editingDropControllerRef.current!.setEditingDropId(null);
   };
 
   return { handleEdit, handleSave, handleCancel };
@@ -312,7 +324,6 @@ const createWaveDropProps = (drop: any, onEdit?: () => void) => ({
 
 describe("Edit Drop Integration Flow", () => {
   let queryClient: QueryClient;
-  let store: any;
   let mockSetToast: jest.Mock;
   let mockInvalidateDrops: jest.Mock;
   let mockDrop: any;
@@ -326,10 +337,7 @@ describe("Edit Drop Integration Flow", () => {
       },
     });
 
-    store = configureStore({
-      reducer: { edit: editSlice.reducer },
-    });
-
+    editingDropControllerRef.current = null;
     mockSetToast = jest.fn();
     mockInvalidateDrops = jest.fn();
     mockDrop = createMockDrop();
@@ -354,13 +362,14 @@ describe("Edit Drop Integration Flow", () => {
 
     return render(
       <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
+        <EditingDropProvider>
+          <EditingDropControllerProbe />
           <AuthContext.Provider value={authContextValue}>
             <ReactQueryWrapperContext.Provider value={reactQueryContextValue}>
               {component}
             </ReactQueryWrapperContext.Provider>
           </AuthContext.Provider>
-        </Provider>
+        </EditingDropProvider>
       </QueryClientProvider>
     );
   };
@@ -375,7 +384,6 @@ describe("Edit Drop Integration Flow", () => {
       mockedCommonApiPost.mockResolvedValue(updatedDrop);
 
       const { handleEdit, handleSave, handleCancel } = createEditHandlers(
-        store,
         mockSetToast,
         mockInvalidateDrops
       );
@@ -416,7 +424,6 @@ describe("Edit Drop Integration Flow", () => {
     it("should handle edit cancellation flow", async () => {
       const user = userEvent.setup();
       const { handleEdit, handleCancel } = createEditHandlers(
-        store,
         mockSetToast,
         mockInvalidateDrops
       );
@@ -435,15 +442,13 @@ describe("Edit Drop Integration Flow", () => {
       // Verify no API call was made
       expect(mockedCommonApiPost).not.toHaveBeenCalled();
 
-      // Verify edit mode is closed (Redux state)
-      const editState = store.getState().edit;
-      expect(editState.editingDropId).toBeNull();
+      // Verify edit mode is closed (context state)
+      expect(editingDropControllerRef.current!.editingDropId).toBeNull();
     });
 
     it("should handle no-changes save gracefully", async () => {
       const user = userEvent.setup();
       const { handleEdit } = createEditHandlers(
-        store,
         mockSetToast,
         mockInvalidateDrops
       );
@@ -453,8 +458,10 @@ describe("Edit Drop Integration Flow", () => {
       );
       const editTest = setupEditTest(user);
 
-      // Start edit mode directly via Redux for this test
-      store.dispatch(editSlice.actions.setEditingDropId("drop-123"));
+      // Start edit mode directly via the context for this test
+      act(() => {
+        editingDropControllerRef.current!.setEditingDropId("drop-123");
+      });
 
       await waitFor(() => {
         expect(screen.getByTestId("edit-drop-lexical")).toBeInTheDocument();
@@ -474,7 +481,6 @@ describe("Edit Drop Integration Flow", () => {
       mockedCommonApiPost.mockRejectedValue(new Error("Network error"));
 
       const { handleEdit, handleSave } = createEditHandlers(
-        store,
         mockSetToast,
         mockInvalidateDrops
       );
@@ -519,7 +525,7 @@ describe("Edit Drop Integration Flow", () => {
             type: "success",
           });
           mockInvalidateDrops();
-          store.dispatch(editSlice.actions.setEditingDropId(null));
+          editingDropControllerRef.current!.setEditingDropId(null);
         } catch (error) {
           // Explicitly handle time limit error in test - log for debugging
           console.error("Time limit error in test:", error);
@@ -531,7 +537,6 @@ describe("Edit Drop Integration Flow", () => {
         }
       };
       const { handleEdit, handleSave } = createCustomEditHandlers(
-        store,
         mockSetToast,
         mockInvalidateDrops,
         customSaveLogic
@@ -569,7 +574,6 @@ describe("Edit Drop Integration Flow", () => {
       mockedCommonApiPost.mockResolvedValue(updatedDrop);
 
       const { handleEdit, handleSave } = createEditHandlers(
-        store,
         mockSetToast,
         mockInvalidateDrops
       );
@@ -587,8 +591,7 @@ describe("Edit Drop Integration Flow", () => {
 
       // Verify the edit mode is closed after successful save
       await waitFor(() => {
-        const editState = store.getState().edit;
-        expect(editState.editingDropId).toBeNull();
+        expect(editingDropControllerRef.current!.editingDropId).toBeNull();
       });
 
       // Verify cache invalidation triggers UI refresh

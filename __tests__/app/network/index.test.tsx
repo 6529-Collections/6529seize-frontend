@@ -4,10 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 
-jest.mock("react-redux", () => ({
-  useSelector: jest.fn(),
+jest.mock("@/contexts/ActiveGroupContext", () => ({
+  useActiveGroup: jest.fn(),
 }));
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
@@ -65,7 +65,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 describe("CommunityPage (App Router)", () => {
-  const useSelectorMock = useSelector as unknown as jest.Mock;
+  const useActiveGroupMock = useActiveGroup as unknown as jest.Mock;
   const useQueryMock = useQuery as jest.Mock;
   const useSearchParamsMock = useSearchParams as jest.Mock;
   const usePathnameMock = usePathname as jest.Mock;
@@ -74,7 +74,10 @@ describe("CommunityPage (App Router)", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    useSelectorMock.mockReturnValue("g1");
+    useActiveGroupMock.mockReturnValue({
+      activeGroupId: "g1",
+      setActiveGroupId: jest.fn(),
+    });
 
     useSearchParamsMock.mockReturnValue({
       get: (key: string) => {

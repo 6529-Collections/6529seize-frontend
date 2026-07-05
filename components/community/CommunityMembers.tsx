@@ -16,15 +16,14 @@ import CommunityMembersTableSkeleton from "./members-table/CommunityMembersTable
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
-import { selectActiveGroupId } from "@/store/groupSlice";
 import {
   BarsArrowDownIcon,
   ChevronRightIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
-import { useSelector } from "react-redux";
 import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 
@@ -99,7 +98,7 @@ export default function CommunityMembers() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const activeGroupId = useSelector(selectActiveGroupId);
+  const { activeGroupId } = useActiveGroup();
 
   const convertSortBy = useCallback(
     (sort: string | null): ApiCommunityMembersSortOption => {

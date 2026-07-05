@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
 import { useAuth } from "@/components/auth/Auth";
 import { useSetWaveData } from "@/contexts/TitleContext";
 import {
@@ -42,7 +41,7 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import { selectEditingDropId } from "@/store/editSlice";
+import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type {
   ChatSubmitDropAction,
   ChatSubmitDropState,
@@ -260,7 +259,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { activeContentTab } = useContentTab();
   const activeCurationId = searchParams.get("curation");
   const loadedWaveId = wave?.id ?? null;
-  const editingDropId = useSelector(selectEditingDropId);
+  const { editingDropId } = useEditingDrop();
 
   // View mode for chat/gallery toggle
   const { viewMode, setViewMode, toggleViewMode } = useWaveViewMode(waveId);

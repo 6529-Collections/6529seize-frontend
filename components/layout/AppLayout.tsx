@@ -11,8 +11,7 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "@/contexts/HeaderContext";
 import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
-import { useSelector } from "react-redux";
-import { selectEditingDropId } from "@/store/editSlice";
+import { useEditingDrop } from "@/contexts/EditingDropContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import PullToRefresh from "../providers/PullToRefresh";
@@ -145,7 +144,7 @@ function AppLayoutContent({ children }: Props) {
   const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
     pathname,
   });
-  const editingDropId = useSelector(selectEditingDropId);
+  const { editingDropId } = useEditingDrop();
   const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const isEditingOnMobile = isApp && editingDropId !== null;
