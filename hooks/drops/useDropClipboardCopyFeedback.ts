@@ -76,6 +76,10 @@ export function useDropClipboardCopyFeedback(): UseDropClipboardCopyFeedbackResu
           return;
         }
 
+        // Surface the transient "copied" state before invoking onCopied.
+        // Consumers that close their surface on success (the drop dropdown /
+        // action sheet) only reveal it during the close animation; it stays
+        // fully visible for any consumer that keeps its surface open.
         showTransientStatus("copied");
         onCopied?.();
       })
