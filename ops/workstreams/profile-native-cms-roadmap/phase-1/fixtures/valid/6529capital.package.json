@@ -1,0 +1,578 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-6529capital-static-migration",
+  "profile": {
+    "handle": "6529capital"
+  },
+  "site": {
+    "title": "6529 Capital",
+    "description": "6529 Capital helps larger, more traditional investors invest in NFTs, in an NFT-native manner.",
+    "base_path": "/6529capital/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "system",
+      "accent": "#1f6feb"
+    },
+    "navigation_id": "nav-main",
+    "required_renderer_capabilities": [
+      "static_blocks",
+      "profile_cms_v1"
+    ]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/6529capital/index.html",
+        "kind": "page",
+        "page_id": "page-home"
+      },
+      {
+        "path": "/6529capital/fund/index.html",
+        "kind": "page",
+        "page_id": "page-fund"
+      },
+      {
+        "path": "/6529capital/company-portfolio/index.html",
+        "kind": "page",
+        "page_id": "page-company-portfolio"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-home",
+        "type": "page",
+        "path": "/6529capital/index.html",
+        "metadata": {
+          "title": "6529 CAPITAL",
+          "description": "6529 CAPITAL HELPS LARGER, MORE TRADITIONAL INVESTORS INVEST IN NFTS, IN AN NFT-NATIVE MANNER Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values. While the current funds are currently traditional fund structure, we hope, in tim",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529capital/index.html",
+          "navigation_label": "Home",
+          "search": "include",
+          "robots": "index",
+          "social_image_asset_id": "asset-page-home-9"
+        },
+        "source": {
+          "field_sources": {
+            "content": "app/capital/page.tsx"
+          }
+        },
+        "blocks": [
+          {
+            "id": "block-page-home-heading-1",
+            "block_type": "heading",
+            "level": 1,
+            "text": "6529 CAPITAL HELPS LARGER, MORE TRADITIONAL INVESTORS INVEST IN NFTS, IN AN NFT-NATIVE MANNER"
+          },
+          {
+            "id": "block-page-home-rich-text-2",
+            "block_type": "rich_text",
+            "content": "Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values. While the current funds are currently traditional fund structure, we hope, in time, to reach a decentralized, tokenized end-state.\n\nNFT investing is difficult specifically due to its non-fungibility, with the market value fragmented across and within collections. We believe there is no substitute for individual expertise in order to succeed in this field.\n\nThe 6529 Capital collecting team includes who we believe are some of the best regarded NFT collectors in the world.\n\nA full list of companies in our portfolio can be found here.\n\n@punk6529\n\n@krybharat\n\n@batsoupyum\n\n@ACthecollector\n\n@phon_ro\n\n@bonafidehan\n\nThe collecting team is complemented by a top tier administrative team handling financial, operational, investor relations, legal and regulatory matters.\n\n@6529Guardian\n\n@itsjpower\n\n6529 Capital is currently investing through the 6529 NFT Fund."
+          },
+          {
+            "id": "block-page-home-gallery-3",
+            "block_type": "gallery",
+            "asset_ids": [
+              "asset-page-home-1",
+              "asset-page-home-2",
+              "asset-page-home-3",
+              "asset-page-home-4",
+              "asset-page-home-5",
+              "asset-page-home-6",
+              "asset-page-home-7",
+              "asset-page-home-8"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "page-fund",
+        "type": "page",
+        "path": "/6529capital/fund/index.html",
+        "metadata": {
+          "title": "6529 FUND",
+          "description": "THE 6529 NFT FUND IS A SERIES OF CLOSED-END QUARTERLY FUNDS OPEN TO ACCREDITED INVESTORS AND QUALIFIED PURCHASERS It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529capital/fund/index.html",
+          "navigation_label": "Fund",
+          "search": "include",
+          "robots": "index",
+          "social_image_asset_id": "asset-page-fund-1"
+        },
+        "source": {
+          "field_sources": {
+            "content": "app/capital/fund/page.tsx"
+          }
+        },
+        "blocks": [
+          {
+            "id": "block-page-fund-heading-1",
+            "block_type": "heading",
+            "level": 1,
+            "text": "THE 6529 NFT FUND IS A SERIES OF CLOSED-END QUARTERLY FUNDS OPEN TO ACCREDITED INVESTORS AND QUALIFIED PURCHASERS"
+          },
+          {
+            "id": "block-page-fund-heading-2",
+            "block_type": "heading",
+            "level": 1,
+            "text": "6529 NFT FUND GALLERIES"
+          },
+          {
+            "id": "block-page-fund-rich-text-3",
+            "block_type": "rich_text",
+            "content": "It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it may make early stage investments in project teams and NFT infrastructure.\n\nIf you are an accredited investor or qualified purchaser and would like to learn more about the 6529 NFT Fund, please contact us at jeff@6529.io.\n\nAlternatively, you can access the fund information on Angellist here.\n\n6529 NFT FUND SEASON 1\n\n6529 NFT FUND SEASON 2\n\nLIVING ARCHITECTURE – CASA BATLLO"
+          }
+        ]
+      },
+      {
+        "id": "page-company-portfolio",
+        "type": "page",
+        "path": "/6529capital/company-portfolio/index.html",
+        "metadata": {
+          "title": "COMPANY PORTFOLIO",
+          "description": "6529 HAS MADE SEED INVESTMENTS FROM ITS OWN CAPITAL (ON BALANCE SHEET) IN THE FOLLOWING FIRMS Arbitrum Blur Deca Doppel farcaster OnCyber Ready Player Me tokenproof Transient Labs",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529capital/company-portfolio/index.html",
+          "navigation_label": "Company Portfolio",
+          "search": "include",
+          "robots": "index",
+          "social_image_asset_id": "asset-page-company-portfolio-15"
+        },
+        "source": {
+          "field_sources": {
+            "content": "app/capital/company-portfolio/page.tsx"
+          }
+        },
+        "blocks": [
+          {
+            "id": "block-page-company-portfolio-heading-1",
+            "block_type": "heading",
+            "level": 1,
+            "text": "6529 HAS MADE SEED INVESTMENTS FROM ITS OWN CAPITAL (ON BALANCE SHEET) IN THE FOLLOWING FIRMS"
+          },
+          {
+            "id": "block-page-company-portfolio-rich-text-2",
+            "block_type": "rich_text",
+            "content": "Arbitrum\n\nBlur\n\nDeca\n\nDoppel\n\nfarcaster\n\nOnCyber\n\nReady Player Me\n\ntokenproof\n\nTransient Labs\n\nUNXD\n\nSafe\n\nMonad\n\nmmERCH\n\nSound"
+          },
+          {
+            "id": "block-page-company-portfolio-gallery-3",
+            "block_type": "gallery",
+            "asset_ids": [
+              "asset-page-company-portfolio-1",
+              "asset-page-company-portfolio-2",
+              "asset-page-company-portfolio-3",
+              "asset-page-company-portfolio-4",
+              "asset-page-company-portfolio-5",
+              "asset-page-company-portfolio-6",
+              "asset-page-company-portfolio-7",
+              "asset-page-company-portfolio-8",
+              "asset-page-company-portfolio-9",
+              "asset-page-company-portfolio-10",
+              "asset-page-company-portfolio-11",
+              "asset-page-company-portfolio-12",
+              "asset-page-company-portfolio-13",
+              "asset-page-company-portfolio-14"
+            ]
+          }
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-page-home-1",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/A4p6F07H_400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-home-2",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/RAbo4fcp_400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 285,
+        "height": 285,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-home-3",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/FmzPXecL_400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-home-4",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/ac-pfp.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-home-5",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/lGcHrVSg_400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-home-6",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/ekkgBxC__400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-home-7",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/i3-qQJiP_400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-home-8",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/qIQbeDUJ_400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-home-9",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-header-logo.png",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 1200,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529 CAPITAL social preview"
+      },
+      {
+        "id": "asset-page-fund-1",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-header-logo.png",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 1200,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529 FUND social preview"
+      },
+      {
+        "id": "asset-page-company-portfolio-1",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/arbitrum.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-2",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/blur.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-3",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/bZR1ispi_400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-4",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/doppel400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-5",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/farcaster400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-6",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/619d1814d8ad3fec88f199dd_tZsfzEpX_400x400.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-7",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/readyplayerme.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-8",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/tokenproof400.png",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/png",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-9",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/11/transientlabs.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-10",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/unxd-square-black.jpg",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/jpeg",
+        "width": 400,
+        "height": 400,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-11",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2024/03/Safe_Logos_Symbol_White-600x600.png",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/png",
+        "width": 600,
+        "height": 600,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-12",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2024/03/monad-logo-600x600.png",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/png",
+        "width": 600,
+        "height": 600,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-13",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2024/03/mmerch-logo-600x600.png",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/png",
+        "width": 600,
+        "height": 600,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-14",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2024/03/Sound.xyz_-600x600.png",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/png",
+        "width": 600,
+        "height": 600,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "6529.io"
+      },
+      {
+        "id": "asset-page-company-portfolio-15",
+        "kind": "image",
+        "uri": "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/6529-header-logo.png",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 1200,
+        "roles": [
+          "detail"
+        ],
+        "alt_text": "COMPANY PORTFOLIO social preview"
+      }
+    ],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Home",
+            "page_id": "page-home"
+          },
+          {
+            "label": "Fund",
+            "page_id": "page-fund"
+          },
+          {
+            "label": "Company Portfolio",
+            "page_id": "page-company-portfolio"
+          }
+        ]
+      }
+    ],
+    "source_packets": [
+      {
+        "id": "source-static-migration",
+        "source_type": "import",
+        "captured_at": "2026-07-05T00:00:00.000Z",
+        "legacy_route_root": "/capital",
+        "legacy_page_count": 3
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-cms-static-migration-tool",
+      "renderer_version": "0.1.0",
+      "route_count": 3,
+      "asset_count": 25,
+      "warnings": []
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:44a352f1d6d8a96bc069b86d42bf602a0740c5757476340c8ac905712b435cdb",
+    "package_hash": "sha256:5ca6e90a8c01be203751a2c6b69d1fd6883f0543a11c6fbeb8b1d3038dc30e5d",
+    "note": "Draft migration candidate; final publish must be signed and stored by backend."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:6529capital",
+      "signature": "static-migration-draft-signature-placeholder",
+      "signed_at": "2026-07-05T00:00:00.000Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://static-migration-6529capital",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "provider_content_id": "static-migration-6529capital",
+      "pinned": false,
+      "canonical": false,
+      "recorded_at": "2026-07-05T00:00:00.000Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-static-migration-tool",
+    "builder_version": "0.1.0",
+    "created_at": "2026-07-05T00:00:00.000Z",
+    "notes": "Generated from 3 legacy page(s) under /capital."
+  }
+}
