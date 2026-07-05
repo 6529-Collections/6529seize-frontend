@@ -19,6 +19,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { QuickDmChat } from "./QuickDmChat";
 import { QuickDmListPanel } from "./QuickDmListPanel";
 import { QuickDmLoadingRows } from "./QuickDmPanelPieces";
@@ -123,21 +124,27 @@ export default function QuickDirectMessages() {
 
   useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
 
-  useEffect(() => {
-    const measureLauncherZone = () => {
-      setIsLauncherZoneCovered(
-        dockedComposers.some((composer) => {
-          const rect = composer.getBoundingClientRect();
-          return (
-            rect.width > 0 &&
-            rect.height > 0 &&
-            globalThis.window.innerWidth - rect.right <
-              QUICK_DM_LAUNCHER_CLEARANCE_PX
-          );
-        })
-      );
-    };
+  const measureLauncherZone = useCallback(() => {
+    setIsLauncherZoneCovered(
+      dockedComposers.some((composer) => {
+        const rect = composer.getBoundingClientRect();
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          globalThis.window.innerWidth - rect.right <
+            QUICK_DM_LAUNCHER_CLEARANCE_PX
+        );
+      })
+    );
+  }, [dockedComposers]);
+  const debouncedMeasureLauncherZone = useDebouncedCallback(
+    measureLauncherZone,
+    100
+  );
 
+  useEffect(() => {
+    // Immediate measurement so dock changes take effect without a flash;
+    // resize streams below go through the debounced path.
     measureLauncherZone();
     if (dockedComposers.length === 0) {
       return;
@@ -145,15 +152,19 @@ export default function QuickDirectMessages() {
 
     // Width changes (sidebar toggles, layout shifts) re-run the measurement;
     // viewport resizes are caught by the window listener.
-    const observer = new ResizeObserver(measureLauncherZone);
+    const observer = new ResizeObserver(debouncedMeasureLauncherZone);
     dockedComposers.forEach((composer) => observer.observe(composer));
-    globalThis.window.addEventListener("resize", measureLauncherZone);
+    globalThis.window.addEventListener("resize", debouncedMeasureLauncherZone);
 
     return () => {
       observer.disconnect();
-      globalThis.window.removeEventListener("resize", measureLauncherZone);
+      globalThis.window.removeEventListener(
+        "resize",
+        debouncedMeasureLauncherZone
+      );
+      debouncedMeasureLauncherZone.cancel();
     };
-  }, [dockedComposers]);
+  }, [dockedComposers, measureLauncherZone, debouncedMeasureLauncherZone]);
 
   const setAndStoreState = useCallback((nextState: QuickDmState) => {
     setState(nextState);
