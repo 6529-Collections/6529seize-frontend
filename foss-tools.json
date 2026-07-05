@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-26",
+  "description": "FOSS tools for 6529 community members pointing agents at 6529.io. Self-hosted, privacy-preserving, agent-native. No API keys, no rate limits, no vendor lock-in.",
+  "philosophy": "The 6529 ethos is self-sovereignty. These tools let you build your own agent stack without depending on proprietary services. Each tool replaces a paid/tracked alternative with a self-hosted equivalent that an agent can interact with programmatically.",
+  "tools": [
+    {
+      "name": "SearXNG",
+      "category": "search",
+      "what": "Self-hosted meta-search engine aggregating results from 70+ sources",
+      "why_for_6529": "Agents researching 6529 topics need search without API rate limits or tracking",
+      "license": "AGPL-3.0",
+      "self_hosted": true,
+      "agent_integration": "HTTP API — agents query via curl/requests, get JSON results",
+      "difficulty": "medium",
+      "replaces": "Google Search API, Bing Search API, SerpAPI"
+    },
+    {
+      "name": "Crawl4AI",
+      "category": "extraction",
+      "what": "Open-source web crawler optimized for LLMs. Converts any webpage to clean markdown for agent ingestion",
+      "why_for_6529": "Extract 6529.io pages as clean markdown for your agent to read and analyze",
+      "license": "Apache-2.0",
+      "self_hosted": true,
+      "agent_integration": "Python library or HTTP API — agents pass a URL, get clean markdown back",
+      "difficulty": "easy",
+      "replaces": "Firecrawl, Jina Reader, proprietary scraping APIs"
+    },
+    {
+      "name": "Meilisearch",
+      "category": "search",
+      "what": "Open-source full-text search engine. Lightning-fast typo-tolerant search",
+      "why_for_6529": "Index 6529.io content locally for fast agent queries across meme cards, profiles, waves, and network data",
+      "license": "MIT",
+      "self_hosted": true,
+      "agent_integration": "REST API — agents search via HTTP POST, get JSON results",
+      "difficulty": "easy",
+      "replaces": "Algolia, ElasticSearch (for small-medium scale)"
+    },
+    {
+      "name": "Gitea",
+      "category": "versioning",
+      "what": "Self-hosted Git. Open source, lightweight, API-driven",
+      "why_for_6529": "Agents can read/write repos programmatically. Host your own 6529-related tools, forks, or contributions",
+      "license": "MIT",
+      "self_hosted": true,
+      "agent_integration": "REST API — full CRUD for repos, issues, PRs, releases",
+      "difficulty": "easy",
+      "replaces": "GitHub Enterprise, GitLab Self-Managed, Bitbucket"
+    },
+    {
+      "name": "Ghost",
+      "category": "publishing",
+      "what": "Open-source publishing platform. SQLite backend, agent-readable database",
+      "why_for_6529": "Publish 6529 analysis, blog posts, or community content. Agents can write directly to the database",
+      "license": "MIT",
+      "self_hosted": true,
+      "agent_integration": "SQLite DB direct access or Admin REST API — agents can read/write posts",
+      "difficulty": "medium",
+      "replaces": "Substack, Medium, WordPress.com"
+    },
+    {
+      "name": "Quartz",
+      "category": "publishing",
+      "what": "Static site generator from Obsidian markdown. Agent writes markdown, Quartz renders to HTML",
+      "why_for_6529": "Publish 6529 research notes or knowledge bases. Agents write Obsidian-compatible markdown, Quartz handles rendering",
+      "license": "MIT",
+      "self_hosted": true,
+      "agent_integration": "Filesystem — agents write .md files, Quartz builds static HTML",
+      "difficulty": "easy",
+      "replaces": "Hugo, Jekyll, Gatsby (for markdown-driven sites)"
+    },
+    {
+      "name": "faster-whisper",
+      "category": "ai",
+      "what": "FOSS speech-to-text. Local, private, no API costs. Medium model runs on CPU",
+      "why_for_6529": "Transcribe 6529 community audio (spaces, AMAs, podcasts) for agent analysis. Also used for the OM Album karaoke lyrics pipeline",
+      "license": "MIT",
+      "self_hosted": true,
+      "agent_integration": "Python library — agents call transcribe(), get word-level timestamps",
+      "difficulty": "easy",
+      "replaces": "OpenAI Whisper API, Google Speech-to-Text, AWS Transcribe"
+    },
+    {
+      "name": "Ollama",
+      "category": "ai",
+      "what": "Run LLMs locally. Open source, no API costs. Agents can use local models for inference",
+      "why_for_6529": "Run a local LLM to analyze 6529 data without sending it to external APIs. Privacy-preserving for sensitive wallet analysis",
+      "license": "MIT",
+      "self_hosted": true,
+      "agent_integration": "REST API — agents send prompts, get completions. Compatible with OpenAI API format",
+      "difficulty": "easy",
+      "replaces": "OpenAI API, Anthropic API, Google Gemini API (for local inference)"
+    },
+    {
+      "name": "Cloudflare Tunnel",
+      "category": "infra",
+      "what": "Free, open tunneling. Expose local services to the internet without opening ports",
+      "why_for_6529": "Share your 6529 analysis dashboard, search index, or agent tools with the community without exposing your home network",
+      "license": "Apache-2.0",
+      "self_hosted": false,
+      "agent_integration": "CLI — agents can configure tunnels programmatically via config files",
+      "difficulty": "easy",
+      "replaces": "ngrok, Tailscale Funnel, port forwarding"
+    },
+    {
+      "name": "Tailscale",
+      "category": "infra",
+      "what": "WireGuard-based mesh VPN. Private network between machines",
+      "why_for_6529": "Connect your agent's machine to your data sources privately. Agents can reach services across machines as if local",
+      "license": "BSD-3-Clause",
+      "self_hosted": false,
+      "agent_integration": "CLI/systemd — transparent network access, agents don't need special integration",
+      "difficulty": "easy",
+      "replaces": "Traditional VPN, SSH tunneling, manual network configuration"
+    },
+    {
+      "name": "Docker",
+      "category": "infra",
+      "what": "Container runtime. Isolated services, reproducible environments",
+      "why_for_6529": "Run SearXNG, Meilisearch, Ghost, Gitea all in isolated containers on one machine. Reproducible 6529 research environments",
+      "license": "Apache-2.0",
+      "self_hosted": true,
+      "agent_integration": "CLI — agents can start/stop/manage containers via docker command",
+      "difficulty": "medium",
+      "replaces": "Manual service management, virtual machines, bare-metal deployment"
+    },
+    {
+      "name": "Hermes Agent",
+      "category": "agent",
+      "what": "Open-source autonomous agent framework. CLI-first, MCP-native, skills system, cron scheduling",
+      "why_for_6529": "Run an agent that can fetch 6529.io data, analyze meme cards, track TDH, and publish findings. The agent-native files in this PR are designed for agents like Hermes",
+      "license": "MIT",
+      "self_hosted": true,
+      "agent_integration": "CLI — the agent IS the integration. It fetches files, processes data, and takes actions",
+      "difficulty": "medium",
+      "replaces": "Manual API scripting, custom agent frameworks, proprietary AI assistants",
+      "alternatives": "OpenClaw — another open-source stateful agent system with different architecture"
+    },
+    {
+      "name": "MCP (Model Context Protocol)",
+      "category": "agent",
+      "what": "Open protocol for connecting AI agents to tools and data sources. Standardized, vendor-neutral",
+      "why_for_6529": "The 6529 MCP server exists — it exposes TDH, identities, ecosystem data, wave scores, and card details via standardized tools that any MCP-compatible agent can use",
+      "license": "Open protocol",
+      "self_hosted": true,
+      "agent_integration": "Protocol — agents connect via MCP, get structured tool results. No custom API integration needed",
+      "difficulty": "medium",
+      "replaces": "Custom API wrappers, proprietary tool integrations, manual data fetching"
+    },
+    {
+      "name": "OpenClaw",
+      "category": "agent",
+      "what": "Open-source stateful agent system with persistent memory and tool integration",
+      "why_for_6529": "Alternative to Hermes Agent for running agents that interact with 6529.io data. Different architecture, same goal: agent-native interaction with the 6529 ecosystem",
+      "license": "MIT",
+      "self_hosted": true,
+      "agent_integration": "CLI — agents connect to tools via integrations, process data, and take actions",
+      "difficulty": "medium",
+      "replaces": "Manual API scripting, custom agent frameworks, proprietary AI assistants"
+    }
+  ],
+  "freshness": "stable"
+}
