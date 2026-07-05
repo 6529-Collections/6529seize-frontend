@@ -1,6 +1,6 @@
 # Active Context
 
-Last updated: 2026-06-18.
+Last updated: 2026-07-05.
 
 ## Current State
 
@@ -58,16 +58,22 @@ Available now:
 
 Important limits:
 
-- No production publish endpoint, storage upload adapter, or backend write model
-  is landed in frontend. The builder MVP documents its expected backend write
-  endpoints in `builder-mvp-integration-assumptions.md` and must not fake a
-  production publish.
+- Backend profile-cms implementation is merged to backend main with 13 endpoints:
+  draft/validate/publish/rollback/archive/export/list/by-hash/versions for
+  packages; agent schema-bundle + patch validate + source packet; wallet-gallery
+  snapshot. Signature verification with EIP-712 + EIP-1271 and replay
+  protection. Arweave/IPFS storage receipt validation.
+- Storage upload endpoint is in progress on codex/cms-arweave-storage-upload.
+  Storage decision: Arweave-first canonical receipts, IPFS pinning fast-follow.
+- First institutional migration pilot decided: 6529Museum and 6529capital static
+  pages.
+- Frontend builder MVP documents its expected backend write endpoints in
+  `builder-mvp-integration-assumptions.md` and must not fake a production
+  publish.
 - The frontend runtime adapter assumes `GET /api/profile-cms/:handle/primary`
   and documents that boundary in
   `runtime-bridge-integration-assumptions.md`.
 - The broader schema is ahead of any authoring experience.
-- Real IPFS and Arweave upload adapters are still needed.
-- Real wallet signature verification is still needed.
 - The executable validator is currently a Zod mirror plus semantic pass. The
   JSON Schema files remain the protocol reference; a later shared-package pass
   should decide whether to add direct AJV execution.
