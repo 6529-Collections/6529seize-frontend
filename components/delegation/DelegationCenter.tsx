@@ -18,7 +18,7 @@ import { useEffect, useEffectEvent, useState } from "react";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 
 interface Props {
-  setSection(section: DelegationCenterSection): any;
+  setSection(section: DelegationCenterSection): void;
 }
 
 export default function DelegationCenterComponent(props: Readonly<Props>) {

@@ -28,7 +28,7 @@ describe("EMMA page", () => {
 
   it("exports metadata", async () => {
     const metadata = await generateMetadata();
-    expect(metadata.title).toBe("EMMA");
+    expect(metadata.title).toBe("EMMA | Tools");
     expect(metadata.description).toBe("Tools | 6529.io");
   });
 });

@@ -1,0 +1,55 @@
+# AWS Device Farm test spec: native Android shell smoke.
+# Executed by Device Farm, not by GitHub Actions. Device Farm installs the
+# debug APK of 6529-Collections/6529-core-mobile on the device before this
+# spec runs; the suite launches it by package/activity. Reference:
+# https://docs.aws.amazon.com/devicefarm/latest/developerguide/custom-test-environment-test-spec.html
+version: 0.1
+
+android_test_host: amazon_linux_2
+
+phases:
+  install:
+    commands:
+      # The suite in tests/device-farm targets Node 20+ and Appium 2.
+      - devicefarm-cli use node 20
+      - node --version
+      - devicefarm-cli use appium 2
+      - appium --version
+      - export APPIUM_BASE_PATH=
+
+  pre_test:
+    commands:
+      # The shell WebView loads the production frontend; the suite asserts the
+      # loaded host matches this value.
+      - export EXPECTED_WEB_HOST=6529.io
+      # The suite builds its capabilities (including the chromedriver directory
+      # required to attach to the shell's WebView) from DEVICEFARM_* environment
+      # variables — see tests/device-farm/lib/driver.cjs.
+      - |-
+        appium --base-path=$APPIUM_BASE_PATH --log-timestamp \
+          --log-no-colors --relaxed-security \
+          >> $DEVICEFARM_LOG_DIR/appium.log 2>&1 &
+      - |-
+        appium_initialization_time=0;
+        until curl --silent --fail "http://0.0.0.0:4723${APPIUM_BASE_PATH}/status"; do
+          if [[ $appium_initialization_time -gt 30 ]]; then
+            echo "Appium did not start within 30 seconds. Exiting...";
+            exit 1;
+          fi;
+          appium_initialization_time=$((appium_initialization_time + 1));
+          echo "Waiting for Appium to start on port 4723...";
+          sleep 1;
+        done;
+
+  test:
+    commands:
+      - cd $DEVICEFARM_TEST_PACKAGE_PATH
+      - npm install *.tgz
+      - cd node_modules/6529-device-farm-tests
+      - npm run test:native
+
+  post_test:
+    commands:
+
+artifacts:
+  - $DEVICEFARM_LOG_DIR

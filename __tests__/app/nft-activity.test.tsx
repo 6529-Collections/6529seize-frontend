@@ -97,7 +97,7 @@ describe("NFTActivityPage", () => {
   it("has correct metadata", async () => {
     const metadata = await generateMetadata();
     expect(metadata).toMatchObject({
-      title: "NFT Activity",
+      title: "NFT Activity | Network",
       description: "Network | 6529.io",
     });
   });

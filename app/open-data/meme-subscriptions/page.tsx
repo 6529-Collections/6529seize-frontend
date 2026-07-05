@@ -13,7 +13,7 @@ export default function MemeSubscriptions() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "Meme Subscriptions",
+    title: "Meme Subscriptions | Open Data",
     description: "Open Data",
   });
 }

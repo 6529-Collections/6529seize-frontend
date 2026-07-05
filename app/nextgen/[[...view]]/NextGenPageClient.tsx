@@ -26,7 +26,7 @@ export default function NextGenPageClient({
   const [view, setView] = useState<NextgenView | undefined>(initialView);
 
   useEffect(() => {
-    setTitle("NextGen " + (view ?? ""));
+    setTitle(view ? `NextGen ${view}` : "NextGen");
   }, [setTitle, view]);
 
   const updateView = (newView?: NextgenView) => {

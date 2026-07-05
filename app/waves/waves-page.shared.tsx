@@ -275,7 +275,7 @@ export async function buildWavesMetadata(
 ): Promise<Metadata> {
   if (waveId === null) {
     return getAppMetadata({
-      title: "Waves",
+      title: "Waves | Brain",
       description: "Browse and explore waves",
     });
   }

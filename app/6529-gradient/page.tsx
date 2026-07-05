@@ -29,7 +29,7 @@ export default function GradientsPage() {
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title: "6529 Gradient",
+      title: "6529 Gradient | Collections",
       description: "Collections",
       ogImage: getCollectionSocialCardImagePath("6529-gradient"),
       ogImageAlt: "6529 Gradient collection social card",

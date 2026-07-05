@@ -14,6 +14,14 @@ interface WaveDropMobileMenuCopyActionProps {
   readonly onCopy: () => void;
 }
 
+type CopyStatus = "idle" | "copied" | "failed";
+
+const STATUS_LABEL_CLASSES: Record<CopyStatus, string> = {
+  idle: "tw-text-iron-300",
+  copied: "tw-text-primary-400",
+  failed: "tw-text-red",
+};
+
 export default function WaveDropMobileMenuCopyAction({
   labelKey,
   icon,
@@ -21,8 +29,8 @@ export default function WaveDropMobileMenuCopyAction({
   getText,
   onCopy,
 }: WaveDropMobileMenuCopyActionProps) {
-  const [copied, setCopied] = useState(false);
-  const copiedResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+  const [status, setStatus] = useState<CopyStatus>("idle");
+  const statusResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
   const isMountedRef = useRef(true);
@@ -33,11 +41,24 @@ export default function WaveDropMobileMenuCopyAction({
 
     return () => {
       isMountedRef.current = false;
-      if (copiedResetTimeoutRef.current !== null) {
-        globalThis.clearTimeout(copiedResetTimeoutRef.current);
+      if (statusResetTimeoutRef.current !== null) {
+        globalThis.clearTimeout(statusResetTimeoutRef.current);
       }
     };
   }, []);
+
+  const showTransientStatus = (nextStatus: CopyStatus) => {
+    setStatus(nextStatus);
+    if (statusResetTimeoutRef.current !== null) {
+      globalThis.clearTimeout(statusResetTimeoutRef.current);
+    }
+    statusResetTimeoutRef.current = globalThis.setTimeout(() => {
+      if (isMountedRef.current) {
+        setStatus("idle");
+        statusResetTimeoutRef.current = null;
+      }
+    }, 2000);
+  };
 
   const copyToClipboard = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -51,7 +72,9 @@ export default function WaveDropMobileMenuCopyAction({
       | undefined;
 
     if (typeof clipboard?.writeText !== "function") {
-      onCopy();
+      // Keep the menu open so the user sees the failure instead of a
+      // silent close that looks like success.
+      showTransientStatus("failed");
       return;
     }
 
@@ -62,22 +85,22 @@ export default function WaveDropMobileMenuCopyAction({
           return;
         }
 
-        setCopied(true);
+        showTransientStatus("copied");
         onCopy();
-        if (copiedResetTimeoutRef.current !== null) {
-          globalThis.clearTimeout(copiedResetTimeoutRef.current);
-        }
-        copiedResetTimeoutRef.current = globalThis.setTimeout(() => {
-          if (isMountedRef.current) {
-            setCopied(false);
-            copiedResetTimeoutRef.current = null;
-          }
-        }, 2000);
       })
       .catch(() => {
-        onCopy();
+        if (isMountedRef.current) {
+          showTransientStatus("failed");
+        }
       });
   };
+
+  let statusMessage = "";
+  if (status === "copied") {
+    statusMessage = t(locale, "waves.drop.actions.copied");
+  } else if (status === "failed") {
+    statusMessage = t(locale, "waves.drop.actions.copyFailed");
+  }
 
   return (
     <button
@@ -90,18 +113,14 @@ export default function WaveDropMobileMenuCopyAction({
     >
       {icon}
       <span
-        className={`tw-text-base tw-font-semibold ${
-          copied ? "tw-text-primary-400" : "tw-text-iron-300"
-        }`}
+        className={`tw-text-base tw-font-semibold ${STATUS_LABEL_CLASSES[status]}`}
       >
-        {copied
-          ? t(locale, "waves.drop.actions.copied")
-          : t(locale, labelKey)}
+        {statusMessage || t(locale, labelKey)}
       </span>
       {/* role="status" must live outside the label: Chromium drops live-region
           content from the button's name-from-contents computation */}
       <span role="status" className="tw-sr-only">
-        {copied ? t(locale, "waves.drop.actions.copied") : ""}
+        {statusMessage}
       </span>
     </button>
   );

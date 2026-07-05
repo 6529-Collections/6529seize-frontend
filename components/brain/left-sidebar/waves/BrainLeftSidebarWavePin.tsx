@@ -10,6 +10,7 @@ import {
 } from "@/hooks/usePinnedWavesServer";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;
@@ -56,7 +57,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const { pinnedIds, isOperationInProgress, canPinWave } =
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const isTouchDevice = useIsTouchDevice();
   const [maxLimitTooltipRequest, setMaxLimitTooltipRequest] =
     useState<MaxLimitTooltipRequest | null>(null);
 
@@ -79,24 +80,6 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     const timer = setTimeout(() => setMaxLimitTooltipRequest(null), 3000);
     return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
-
-  // Detect touch device on component mount
-  useEffect(() => {
-    const checkTouch = () => {
-      const hasCoarsePointer =
-        typeof globalThis.matchMedia === "function" &&
-        globalThis.matchMedia("(pointer: coarse)").matches;
-
-      setIsTouchDevice((navigator.maxTouchPoints ?? 0) > 0 || hasCoarsePointer);
-    };
-
-    checkTouch();
-    globalThis.addEventListener("resize", checkTouch);
-
-    return () => {
-      globalThis.removeEventListener("resize", checkTouch);
-    };
-  }, []);
 
   if (!connectedProfile?.handle || activeProfileProxy) {
     return null;

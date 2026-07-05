@@ -510,15 +510,32 @@ const shouldShowGroupedDropTimestamp = ({
 const GroupedDropTimestamp = ({
   swipeOffset = 0,
   timestamp,
+  variant,
 }: {
   readonly swipeOffset?: number;
   readonly timestamp: number;
+  readonly variant: "swipe" | "hover";
 }) => {
+  // "swipe": revealed by the touch swipe gesture via inline opacity.
+  // "hover": desktop affordance — swiping would hijack text selection, so the
+  // timestamp reveals on row hover instead.
+  const isHoverVariant = variant === "hover";
+
   return (
     <div
-      className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 tw-flex tw-w-[9.25rem] -tw-translate-y-1/2 tw-justify-end tw-overflow-visible tw-text-right tw-transition-opacity tw-duration-150"
-      data-testid="grouped-drop-swipe-timestamp"
-      style={getGroupedTimestampOpacityStyle(swipeOffset)}
+      className={`tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 tw-flex tw-w-[9.25rem] -tw-translate-y-1/2 tw-justify-end tw-overflow-visible tw-text-right tw-transition-opacity tw-duration-150 ${
+        isHoverVariant
+          ? "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100"
+          : ""
+      }`}
+      data-testid={
+        isHoverVariant
+          ? "grouped-drop-hover-timestamp"
+          : "grouped-drop-swipe-timestamp"
+      }
+      style={
+        isHoverVariant ? undefined : getGroupedTimestampOpacityStyle(swipeOffset)
+      }
     >
       <WaveDropTime timestamp={timestamp} size="xs" variant="compactReveal" />
     </div>
@@ -1043,6 +1060,10 @@ const WaveDropInner = ({
     (event: React.PointerEvent<HTMLDivElement>) => {
       const pointerType = getPointerType(event);
       if (
+        // Pointer-driven timestamp swipe only belongs to touch-sheet mode
+        // (e.g. pen on a touch-first device). On desktop it would hijack
+        // drag-to-select — the timestamp reveals on hover there instead.
+        !canUseTouchActionSheet ||
         pointerType === "touch" ||
         !isPrimaryPointerButton(event) ||
         !showGroupedTimestamp ||
@@ -1060,7 +1081,7 @@ const WaveDropInner = ({
       setTimestampSwipeOffset(0);
       setIsTimestampSwipeDragging(false);
     },
-    [isEditing, showGroupedTimestamp]
+    [canUseTouchActionSheet, isEditing, showGroupedTimestamp]
   );
 
   const handlePointerMove = useCallback(
@@ -1439,6 +1460,7 @@ const WaveDropInner = ({
           <GroupedDropTimestamp
             swipeOffset={timestampSwipeOffset}
             timestamp={drop.created_at}
+            variant={canUseTouchActionSheet ? "swipe" : "hover"}
           />
         )}
         <div

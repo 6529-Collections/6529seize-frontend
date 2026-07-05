@@ -13,7 +13,7 @@ export default function TeamDownloads() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "Team",
+    title: "Team | Open Data",
     description: "Open Data",
   });
 }

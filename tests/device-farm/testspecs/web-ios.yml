@@ -1,0 +1,76 @@
+# AWS Device Farm test spec: mobile web smoke on iOS (Safari).
+# Executed by Device Farm, not by GitHub Actions. The workflow substitutes
+# __TARGET_URL__ before upload. The WebDriverAgent selection and UDID
+# adjustment blocks follow the AWS-provided Appium iOS template:
+# https://docs.aws.amazon.com/devicefarm/latest/developerguide/custom-test-environment-test-spec.html
+version: 0.1
+
+ios_test_host: macos_sequoia
+
+phases:
+  install:
+    commands:
+      # The suite in tests/device-farm targets Node 20+ and Appium 2.
+      - devicefarm-cli use node 20
+      - node --version
+      - devicefarm-cli use appium 2
+      - appium --version
+      - export APPIUM_BASE_PATH=
+
+  pre_test:
+    commands:
+      # Substituted by .github/workflows/device-farm-qa.yml before upload.
+      - export TARGET_URL=__TARGET_URL__
+      - echo "Running mobile web smoke against $TARGET_URL"
+      # Select the prebuilt WebDriverAgent that matches the installed XCUITest
+      # driver, falling back to the newest one Device Farm provides.
+      - |-
+        APPIUM_DRIVER_VERSION=$(appium driver list --installed --json | jq -r ".xcuitest.version" | cut -d "." -f 1);
+        CORRESPONDING_APPIUM_WDA=$(env | grep "DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH_V${APPIUM_DRIVER_VERSION}")
+        if [[ ! -z "$APPIUM_DRIVER_VERSION" ]] && [[ ! -z "$CORRESPONDING_APPIUM_WDA" ]]; then
+          echo "Using Device Farm's prebuilt WDA version ${APPIUM_DRIVER_VERSION}.x, which corresponds with your driver";
+          DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH=$(echo $CORRESPONDING_APPIUM_WDA | cut -d "=" -f2)
+        else
+          LATEST_SUPPORTED_WDA_VERSION=$(env | grep "DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH_V" | sort -V -r | head -n 1)
+          echo "Unknown driver version $APPIUM_DRIVER_VERSION; falling back to the Device Farm default version of $LATEST_SUPPORTED_WDA_VERSION";
+          DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH=$(echo $LATEST_SUPPORTED_WDA_VERSION | cut -d "=" -f2)
+        fi;
+        export DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH;
+      # iOS 16 and below needs the device UDID without hyphens for Appium.
+      - |-
+        DEVICEFARM_DEVICE_UDID_FOR_APPIUM=$DEVICEFARM_DEVICE_UDID;
+        if [ $(echo $DEVICEFARM_DEVICE_OS_VERSION | cut -d "." -f 1) -le 16 ]; then
+          DEVICEFARM_DEVICE_UDID_FOR_APPIUM=$(echo $DEVICEFARM_DEVICE_UDID | tr -d "-");
+        fi;
+        export DEVICEFARM_DEVICE_UDID_FOR_APPIUM;
+      # The suite builds its capabilities from DEVICEFARM_* environment
+      # variables (see tests/device-farm/lib/driver.cjs), so the server is
+      # started without default capabilities.
+      - |-
+        appium --base-path=$APPIUM_BASE_PATH --log-timestamp \
+          --log-no-colors --relaxed-security \
+          >> $DEVICEFARM_LOG_DIR/appium.log 2>&1 &
+      - |-
+        appium_initialization_time=0;
+        until curl --silent --fail "http://0.0.0.0:4723${APPIUM_BASE_PATH}/status"; do
+          if [[ $appium_initialization_time -gt 30 ]]; then
+            echo "Appium did not start within 30 seconds. Exiting...";
+            exit 1;
+          fi;
+          appium_initialization_time=$((appium_initialization_time + 1));
+          echo "Waiting for Appium to start on port 4723...";
+          sleep 1;
+        done;
+
+  test:
+    commands:
+      - cd $DEVICEFARM_TEST_PACKAGE_PATH
+      - npm install *.tgz
+      - cd node_modules/6529-device-farm-tests
+      - npm run test:web
+
+  post_test:
+    commands:
+
+artifacts:
+  - $DEVICEFARM_LOG_DIR

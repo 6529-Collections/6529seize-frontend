@@ -133,25 +133,25 @@ describe("network pages render", () => {
 
   it("generates metadata for Groups page", async () => {
     const metadata = await generateGroupsMetadata();
-    expect(metadata.title).toEqual("Groups");
+    expect(metadata.title).toEqual("Groups | Network");
     expect(metadata.description).toEqual("Network | 6529.io");
   });
 
   it("generates metadata for TDH page", async () => {
     const metadata = await generateTDHMetadata();
-    expect(metadata.title).toEqual("TDH");
+    expect(metadata.title).toEqual("TDH | Network");
     expect(metadata.description).toEqual("Network | 6529.io");
   });
 
   it("generates metadata for Definitions page", async () => {
     const metadata = await generateDefinitionsMetadata();
-    expect(metadata.title).toEqual("Definitions");
+    expect(metadata.title).toEqual("Definitions | Network");
     expect(metadata.description).toEqual("Network | 6529.io");
   });
 
   it("generates metadata for Wave Score page", async () => {
     const metadata = await generateWaveScoreMetadata();
-    expect(metadata.title).toEqual("Wave Score");
+    expect(metadata.title).toEqual("Wave Score | Network");
     expect(metadata.description).toEqual(
       "Network wave score formula and calculator | 6529.io"
     );

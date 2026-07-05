@@ -1,10 +1,11 @@
 "use client";
 
 import { Tooltip } from "react-tooltip";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCopyToClipboard } from "react-use";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 export default function ProfileActivityLogItemValueWithCopy({
   title,
@@ -13,10 +14,7 @@ export default function ProfileActivityLogItemValueWithCopy({
   readonly title: string;
   readonly value: string;
 }) {
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
-  useEffect(() => {
-    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
+  const isTouchScreen = useIsTouchDevice();
 
   const [_, copyToClipboard] = useCopyToClipboard();
 

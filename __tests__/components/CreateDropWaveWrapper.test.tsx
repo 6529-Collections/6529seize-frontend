@@ -43,4 +43,26 @@ describe("CreateDropWaveWrapper", () => {
     const div = screen.getByText("ok").parentElement as HTMLElement;
     expect(div.className).toContain("tw-max-h-[calc(100vh-8.5rem)]");
   });
+
+  it("registers its container as a composer dock while mounted", () => {
+    const {
+      CreateDropWaveWrapper,
+    } = require("@/components/waves/CreateDropWaveWrapper");
+    const {
+      getWaveComposerDockElements,
+    } = require("@/components/waves/WaveComposerDockVisibility");
+
+    expect(getWaveComposerDockElements()).toEqual([]);
+
+    const { unmount } = render(
+      <CreateDropWaveWrapper>
+        <span>ok</span>
+      </CreateDropWaveWrapper>
+    );
+    const container = screen.getByText("ok").parentElement as HTMLElement;
+    expect(getWaveComposerDockElements()).toEqual([container]);
+
+    unmount();
+    expect(getWaveComposerDockElements()).toEqual([]);
+  });
 });

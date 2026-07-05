@@ -2,7 +2,7 @@
   "schema_version": 1,
   "max_source_file_lines": 800,
   "counts": {
-    "any_casts": 45,
+    "any_casts": 4,
     "todo_comments": 0,
     "oversized_files": 89,
     "bootstrap_imports": 0,

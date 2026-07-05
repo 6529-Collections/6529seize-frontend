@@ -109,17 +109,21 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
 
-    // Programmatic click: the floating quick-DM button can overlay the Post
-    // button at some viewports and intercept a pointer click (same idiom as
-    // showDropActionsIfCollapsed).
-    await page
-      .getByRole("button", { name: "Post" })
-      .last()
-      .evaluate((element) => {
-        if (element instanceof HTMLElement) {
-          element.click();
-        }
+    // Inside the covered band (1280-1455px wide, right sidebar closed) the
+    // quick-DM launcher yields to the docked composer
+    // (WaveComposerDockVisibility): pointer-inert (keyboard/screen-reader
+    // reachable) so the real pointer click below must land on Post. The
+    // desktop project's 1280x720 viewport sits in that band; mobile projects
+    // never render the launcher.
+    const viewportWidth = page.viewportSize()?.width ?? 0;
+    if (viewportWidth >= 1280 && viewportWidth <= 1455) {
+      await expect(
+        page.getByRole("button", { name: /Open quick direct messages/ })
+      ).toHaveCSS("pointer-events", "none", {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
       });
+    }
+    await page.getByRole("button", { name: "Post" }).last().click();
 
     await expect
       .poll(

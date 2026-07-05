@@ -8,6 +8,7 @@ import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUB_DELEGATION_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import type { DelegationToastState } from "./DelegationToast";
 import styles from "./Delegation.module.css";
 import {
   DelegationAddressDisabledInput,
@@ -30,8 +31,8 @@ interface Props {
       }
     | undefined;
   ens: string | null | undefined;
-  onHide(): any;
-  onSetToast(toast: any): any;
+  onHide(): void;
+  onSetToast(toast: DelegationToastState): void;
 }
 
 export default function NewSubDelegationComponent(props: Readonly<Props>) {
@@ -60,7 +61,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
           validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
-        onSettled(data: any, error: any) {
+        onSettled(data: unknown, error: Error | null) {
           if (data) {
             setGasError(undefined);
           }
@@ -83,7 +84,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
         ],
         functionName:
           validate().length === 0 ? "registerDelegationAddress" : undefined,
-        onSettled(data: any, error: any) {
+        onSettled(data: unknown, error: Error | null) {
           if (data) {
             setGasError(undefined);
           }

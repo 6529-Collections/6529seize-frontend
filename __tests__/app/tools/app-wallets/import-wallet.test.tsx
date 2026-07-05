@@ -44,7 +44,7 @@ describe("Import App Wallet Page", () => {
 
   it("exposes metadata", async () => {
     const metadata = await generateMetadata();
-    expect(metadata.title).toEqual("App Wallets | Import");
+    expect(metadata.title).toEqual("Import App Wallet | Tools");
     expect(metadata.description).toEqual("Tools | 6529.io");
   });
 });

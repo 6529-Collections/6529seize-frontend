@@ -7,6 +7,7 @@ import {
   SIDEBAR_MOBILE_BREAKPOINT,
 } from "../constants/sidebar";
 import { safeSessionStorage } from "../helpers/safeSessionStorage";
+import useIsTouchDevice from "./useIsTouchDevice";
 
 const getBrowserWindow = () => {
   const { window: browserWindow } = globalThis as typeof globalThis & {
@@ -44,14 +45,15 @@ export function useSidebarController() {
     () => createMediaQuery(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`),
     [createMediaQuery]
   );
-  const coarseMql = useMemo(() => createMediaQuery("(pointer: coarse)"), [createMediaQuery]);
   const mobileWidthMql = useMemo(
     () => createMediaQuery(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`),
     [createMediaQuery]
   );
 
   const [isNarrow, setIsNarrow] = useState(() => narrowMql?.matches ?? false);
-  const [isTouchScreen, setIsTouchScreen] = useState(() => coarseMql?.matches ?? false);
+  // Touch-first (no mouse/trackpad/hover), NOT merely "has a touch screen" —
+  // hybrid touch laptops must keep the desktop sidebar behavior.
+  const isTouchScreen = useIsTouchDevice();
   const [isMobileWidth, setIsMobileWidth] = useState(() => mobileWidthMql?.matches ?? false);
 
   const lastIsNarrowRef = useRef(isNarrow);
@@ -112,16 +114,6 @@ export function useSidebarController() {
     narrowMql.addEventListener("change", handleChange);
     return () => narrowMql.removeEventListener("change", handleChange);
   }, [narrowMql]);
-
-  useEffect(() => {
-    if (!coarseMql) {
-      return;
-    }
-    const handleChange = (event: MediaQueryListEvent) => setIsTouchScreen(event.matches);
-    setIsTouchScreen(coarseMql.matches);
-    coarseMql.addEventListener("change", handleChange);
-    return () => coarseMql.removeEventListener("change", handleChange);
-  }, [coarseMql]);
 
   useEffect(() => {
     if (!mobileWidthMql) {

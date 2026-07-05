@@ -19,7 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { "app-wallet-address": address } = await params;
   return getAppMetadata({
-    title: `${formatAddress(address)} | App Wallets`,
+    title: `${formatAddress(address)} | App Wallets | 6529.io`,
     description: "Tools",
   });
 }

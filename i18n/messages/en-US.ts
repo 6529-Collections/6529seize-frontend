@@ -341,6 +341,7 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyText: "Copy text",
   copyLink: "Copy link",
   copied: "Copied!",
+  copyFailed: "Copy failed",
 } as const);
 
 const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(

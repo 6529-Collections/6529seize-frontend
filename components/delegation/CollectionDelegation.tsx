@@ -49,6 +49,7 @@ import {
   getReadParams,
   type ContractDelegation,
   type ContractWalletDelegation,
+  type DelegationReadParams,
 } from "./CollectionDelegation.utils";
 import type { DelegationCollection } from "./delegation-constants";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
@@ -73,7 +74,7 @@ import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
 import UpdateDelegationComponent from "./UpdateDelegation";
 
 interface Props {
-  setSection(section: DelegationCenterSection): any;
+  setSection(section: DelegationCenterSection): void;
   collection: DelegationCollection;
 }
 
@@ -148,7 +149,7 @@ function getConsolidationReadParams(
   collection: `0x${string}` | string | undefined,
   consolidationAddresses: ContractDelegation
 ) {
-  const params: any = [];
+  const params: DelegationReadParams[] = [];
   if (consolidationAddresses) {
     consolidationAddresses.wallets.map((ca) =>
       params.push({
@@ -1738,9 +1739,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             <div className="tw-flex tw-w-full tw-items-center tw-px-3 tw-pb-2 tw-pt-2 md:tw-w-2/3">
               {!useCaseLockStatusesGlobal.data ||
               (useCaseLockStatusesGlobal?.data &&
+                // Double cast preserves the existing comparison against the
+                // multicall envelope object (issue #3078 tracks reading
+                // `.result` here); typing it honestly would change behavior.
                 (useCaseLockStatusesGlobal?.data[
                   lockUseCaseIndex
-                ] as any as boolean) === false) ? (
+                ] as unknown as boolean) === false) ? (
                 <button
                   className={`${styles["lockUseCaseBtn"]}`}
                   onClick={() => {

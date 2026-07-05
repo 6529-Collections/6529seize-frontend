@@ -49,15 +49,37 @@
 - App-wide follow-up flagged (out of scope, evidence attached): every
   `useSetTitle` suffix app-wide is silently lost to streamed metadata
   since the Next 16 upgrade — spawned as a separate task for scoping.
-- Environment notes for other threads: `quality.js --changed` fails on
-  Windows Node 24 (spawnSync of .cmd without shell) — run
-  `format:changed`/`lint:changed`/`typecheck:changed` directly; in fresh
-  worktrees use `./bin/6529 env prod` (then verify with `env status` —
-  the switcher comments out non-matching managed keys but only appends
-  missing ones, so a local-target `.env` can end up with no active
-  API/WS endpoint) instead of relying on shell-var overrides reaching
-  the client env bake; dev servers watched by piped `head`/`tail` die on
-  SIGPIPE once the pipe closes — redirect to a file instead.
+- Environment notes for other threads:
+  - `quality.js --changed` failed on Windows Node 24 (spawnSync of .cmd
+    without shell) — fixed in PR #3100 (`quality.js`/`dev-open.cjs` now
+    run `.cmd` shims through a shell; `dev:open` also needed `run dev`
+    instead of bare `dev`). Until a checkout has the fix, run
+    `format:changed`/`lint:changed`/`typecheck:changed` directly.
+  - knip reports ~23 false unused-file/export findings (`ops/scripts/*`
+    files, gate-script exports) when run from a worktree nested under
+    `.claude/worktrees/`; identical content knips clean from a
+    short-path worktree or the main checkout — treat knip failures under
+    `.claude/worktrees/` as suspect before chasing them.
+  - Nested bare-`pnpm` hops (`check:changed`, `predev`) execute in
+    whichever checkout's `bin/` is on PATH (`bin/pnpm.cmd` does
+    `cd /d "%~dp0.."`), so from a secondary worktree they silently run
+    against the main checkout — strip the other checkout's `bin` from
+    PATH when verifying.
+  - A stale local `main` ref inflates the `:changed` sets until
+    `lint:changed` overflows the Windows command-line length limit
+    ("The command line is too long", xargs exit 123).
+  - Turbopack refuses a junctioned `node_modules` ("symlink points out
+    of the filesystem root") — use `USE_TURBO=false` in junction-based
+    scratch worktrees.
+  - In fresh worktrees use `./bin/6529 env prod` (then verify with
+    `env status` — the switcher comments out non-matching managed keys
+    but only appends missing ones, so a local-target `.env` can end up
+    with no active API/WS endpoint) instead of relying on shell-var
+    overrides reaching the client env bake; `.env.sample` placeholders
+    also fail schema validation (`IPFS_GATEWAY_ENDPOINT` URL,
+    positive-number vars) — seed from a known-good `.env` instead.
+  - Dev servers watched by piped `head`/`tail` die on SIGPIPE once the
+    pipe closes — redirect to a file instead.
 
 ## 2026-07-05 (Thread D — one layout)
 
@@ -396,3 +418,38 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
 - Pre-existing latent bug found while typing (NOT fixed here, behavior
   preserved): the CollectionDelegation use-case lock UI reads wagmi
   multicall envelopes as booleans instead of `.result` — issue #3078.
+
+## 2026-07-05 (Thread G — any burn-down tail, wave 2b)
+
+- Delegation any-tail slice 2 of 3: NewConsolidation, NewSubDelegation,
+  RevokeDelegationWithSub, UpdateDelegation receive the identical
+  mechanical treatment slice 1 gave their siblings (onHide/onSetToast
+  props -> void/DelegationToastState, inert onSettled annotations ->
+  unknown/Error | null). Clone edits produced by a Sonnet work packet
+  under a strict per-line spec, reviewed hunk-by-hunk before commit.
+  `any_casts` 45 -> 21.
+
+## 2026-07-05 (Thread G — any burn-down tail complete; workstream E COMPLETE)
+
+- Delegation any-tail slice 3 of 3: the read path. `DelegationUseCase`
+  types the use-case constants' consumers; `DelegationReadParams` types
+  the `useReadContracts` param builders (`getParams`/`getReadParams`/
+  consolidation reader); `getDelegationsFromData` takes the minimal
+  multicall envelope shape and narrows results to a typed 4-tuple, with
+  expiries normalized via `Number()` so viem's runtime bigints and the
+  fixtures' numbers share one code path; `tokens` widened to
+  `number | bigint` to match uint256 decoding. Center/menu/wallet-checker
+  callbacks typed `void`. The lock-status envelope comparison keeps its
+  exact (pre-existing, latently buggy — issue #3078) behavior under an
+  `as unknown as boolean` double cast. `any_casts` 21 -> 4.
+- Final state: `any_casts` = 4 = the exceptions ledger exactly (3
+  permanent wagmi connector sites + 1 blog-prose scan false positive);
+  ledger rewritten to enumerate kept sites, record the resolved
+  delegation deferral, and note the scanner's generic-argument blind
+  spot (`useState<any>` is invisible to the regex; a handful remain in
+  CollectionDelegation.tsx for Thread D's split to absorb).
+- Workstream E definition of done met: Redux removed (#3047, deps gone),
+  `any` driven to documented exceptions only (358 -> 64 by Thread E's
+  #3052, 64 -> 4 by Thread G's three-slice tail), TODO/FIXME/HACK at 0
+  in ratchet scope (#3056: 4 shims completed, 2 items ticketed as #3053,
+  1 stale comment deleted). Ratchet backstops all three metrics.
