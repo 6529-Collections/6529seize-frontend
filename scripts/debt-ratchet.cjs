@@ -83,10 +83,20 @@ const CODE_EXTENSIONS = new Set([
 const TYPESCRIPT_EXTENSIONS = new Set([".ts", ".tsx", ".cts", ".mts"]);
 const STYLE_EXTENSIONS = new Set([".css", ".scss"]);
 
+// Matches explicit `: any` annotations, `as any` casts, and `any` used as a
+// generic type argument (`useState<any>`, `Record<string, any>`, `<any[]>`,
+// `Map<any, T>`). The generic-argument alternation requires a `<` or `,`
+// before `any` and a `,`/`>`/`[`/`)`/`|`/`&` after it, so prose such as
+// "as powerful as any art", ", any websites", or placeholder text like
+// `<any-string>` never matches. Known blind spot kept deliberately: `any`
+// as a tuple member (`[any, string]`) has no such delimiters; extend the
+// pattern when a real one appears.
+const ANY_CASTS_PATTERN = /:\s*any\b|\bas\s+any\b|[<,]\s*any\b(?=\s*[,>[)|&])/g;
+
 const METRIC_DEFINITIONS = {
   any_casts: {
     description:
-      "`: any` and `as any` occurrences in TypeScript source (tests excluded)",
+      "`: any`, `as any`, and generic-argument `any` occurrences in TypeScript source (tests excluded)",
     hint: "Replace `any` with a real type or `unknown` plus narrowing.",
   },
   todo_comments: {
@@ -224,7 +234,7 @@ function computeActuals() {
     if (!isCode) continue;
 
     if (TYPESCRIPT_EXTENSIONS.has(extension)) {
-      const anyCount = countMatches(content, /:\s*any\b|\bas\s+any\b/g);
+      const anyCount = countMatches(content, ANY_CASTS_PATTERN);
       if (anyCount > 0) perFile.any_casts.set(relativePath, anyCount);
     }
 
@@ -465,6 +475,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  ANY_CASTS_PATTERN,
   MAX_SOURCE_FILE_LINES,
   SCAN_DIRS,
   countImportStatements,

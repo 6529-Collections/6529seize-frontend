@@ -15,6 +15,25 @@ import {
 } from "./collection-delegation-helpers";
 
 /**
+ * A queued `revokeDelegationAddress` write; `loading` flips once the
+ * write has been handed to the wallet.
+ */
+export interface RevokeDelegationRequest {
+  readonly collection: string;
+  readonly address: string;
+  readonly use_case: number;
+  readonly loading?: boolean;
+}
+
+/** A queued `batchRevocations` write over parallel arrays. */
+export interface BatchRevokeDelegationRequest {
+  readonly collections: string[];
+  readonly addresses: string[];
+  readonly use_cases: number[];
+  readonly loading?: boolean;
+}
+
+/**
  * Revocation writes for the collection-delegation screen: single revocation,
  * batch revocation, and the bulk-selection state feeding the batch call.
  * Setting the corresponding params state triggers the contract write.
@@ -26,9 +45,11 @@ export function useDelegationRevocation(options: {
 
   const [bulkRevocations, setBulkRevocations] = useState<Revocation[]>([]);
 
-  const [revokeDelegationParams, setRevokeDelegationParams] = useState<any>();
+  const [revokeDelegationParams, setRevokeDelegationParams] = useState<
+    RevokeDelegationRequest | undefined
+  >();
   const [batchRevokeDelegationParams, setBatchRevokeDelegationParams] =
-    useState<any>();
+    useState<BatchRevokeDelegationRequest | undefined>();
 
   const contractWriteRevoke = useWriteContract();
 
