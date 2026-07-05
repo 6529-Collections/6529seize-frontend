@@ -1,27 +1,30 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { GrantTokensDisclosure } from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/subcomponents/GrantTokensDisclosure";
-import { SupportedChain } from "@/components/nft-picker/NftPicker.types";
+import { SupportedChain } from "@/components/nft-picker/types";
 
 // Mock the hook
-jest.mock("@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/hooks/useGrantTokensDisclosure", () => ({
-  useGrantTokensDisclosure: jest.fn(() => ({
-    isOpen: false,
-    panelId: "panel-id",
-    toggleOpen: jest.fn(),
-    disclosureState: {
-      showInitialLoading: false,
-      showInitialError: false,
-      tokenRanges: [],
-      errorMessage: "",
-      onRetry: jest.fn(),
-      contractAddress: null,
-      chain: null,
-      grantId: "grant-id",
-      onEndReached: jest.fn(),
-      isFetchingNextPage: false,
-    }
-  })),
-}));
+jest.mock(
+  "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/hooks/useGrantTokensDisclosure",
+  () => ({
+    useGrantTokensDisclosure: jest.fn(() => ({
+      isOpen: false,
+      panelId: "panel-id",
+      toggleOpen: jest.fn(),
+      disclosureState: {
+        showInitialLoading: false,
+        showInitialError: false,
+        tokenRanges: [],
+        errorMessage: "",
+        onRetry: jest.fn(),
+        contractAddress: null,
+        chain: null,
+        grantId: "grant-id",
+        onEndReached: jest.fn(),
+        isFetchingNextPage: false,
+      },
+    })),
+  })
+);
 
 import { useGrantTokensDisclosure } from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/hooks/useGrantTokensDisclosure";
 
@@ -56,7 +59,7 @@ describe("GrantTokensDisclosure", () => {
         grantId: "grant-id",
         onEndReached: jest.fn(),
         isFetchingNextPage: false,
-      }
+      },
     });
 
     render(
@@ -88,7 +91,7 @@ describe("GrantTokensDisclosure", () => {
         grantId: "grant-id",
         onEndReached: jest.fn(),
         isFetchingNextPage: false,
-      }
+      },
     });
 
     render(

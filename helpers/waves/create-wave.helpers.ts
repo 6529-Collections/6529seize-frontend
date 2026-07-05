@@ -427,8 +427,7 @@ export const getCreateNewWaveBody = ({
   readonly parentWaveId?: string | null | undefined;
 }): ApiCreateNewWave => {
   const endDate = getCreateWaveEndDate({ config });
-  const supportsParticipationTerms =
-    config.overview.type !== ApiWaveType.Chat;
+  const supportsParticipationTerms = config.overview.type !== ApiWaveType.Chat;
   const participationTerms = supportsParticipationTerms
     ? normalizeWaveCustomRules(config.drops.terms)
     : null;
@@ -511,7 +510,6 @@ export const getCreateNewWaveBody = ({
         config.overview.type === ApiWaveType.Approve
           ? (config.approval.thresholdTimeMs ?? 0)
           : null,
-      // TODO - should be in outcomes
       max_winners: getApproveMaxWinners({ config }),
       max_votes_per_identity_to_drop:
         config.overview.type === ApiWaveType.Chat

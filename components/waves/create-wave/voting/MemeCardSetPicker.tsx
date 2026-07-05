@@ -2,8 +2,8 @@
 
 import { type ReactNode, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { NftPicker } from "@/components/nft-picker/NftPicker";
-import type { NftPickerChange } from "@/components/nft-picker/NftPicker.types";
+import { NftPicker } from "@/components/nft-picker";
+import type { NftPickerChange } from "@/components/nft-picker/types";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import { MEMES_CONTRACT } from "@/constants/constants";

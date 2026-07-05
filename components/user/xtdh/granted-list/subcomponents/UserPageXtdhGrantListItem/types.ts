@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
+import type { TokenRange } from "@/components/nft-picker/types";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 
 import type { ContractOverview, SupportedChain } from "@/types/nft";

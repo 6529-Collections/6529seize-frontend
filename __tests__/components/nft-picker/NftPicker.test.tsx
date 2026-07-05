@@ -2,11 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
-import { NftPicker } from "@/components/nft-picker/NftPicker";
+import { NftPicker } from "@/components/nft-picker";
 import type {
   ContractOverview,
   NftPickerProps,
-} from "@/components/nft-picker/NftPicker.types";
+} from "@/components/nft-picker/types";
 import {
   useCollectionSearch,
   useContractOverviewQuery,

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import Spinner from "@/components/utils/Spinner";
-import type { TokenMetadata } from "@/components/nft-picker/NftPicker.types";
+import type { TokenMetadata } from "@/components/nft-picker/types";
 
 type TokenThumbnailProps = Readonly<{
   metadata?: TokenMetadata | undefined;
@@ -10,7 +10,12 @@ type TokenThumbnailProps = Readonly<{
   hasError: boolean;
 }>;
 
-export function TokenThumbnail({ metadata, decimalId, isLoading, hasError }: Readonly<TokenThumbnailProps>) {
+export function TokenThumbnail({
+  metadata,
+  decimalId,
+  isLoading,
+  hasError,
+}: Readonly<TokenThumbnailProps>) {
   let content: ReactNode;
 
   if (metadata?.imageUrl) {
@@ -37,7 +42,7 @@ export function TokenThumbnail({ metadata, decimalId, isLoading, hasError }: Rea
     content = (
       <div
         aria-label="Failed to load thumbnail"
-        className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-leading-tight tw-text-red-300"
+        className="tw-text-red-300 tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-leading-tight"
       >
         <span>Load</span>
         <span>Error</span>

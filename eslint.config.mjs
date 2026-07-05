@@ -404,7 +404,7 @@ export const baseRules = deepFreezeRuleConfig({
   "tailwindcss/enforces-negative-arbitrary-values": "error", // Use -top-[5px] not top-[-5px]
   "tailwindcss/enforces-shorthand": "off",
   "tailwindcss/no-arbitrary-value": "off", // Allow arbitrary values like w-[123px]
-  "tailwindcss/no-custom-classname": "off", // TODO: enable later
+  "tailwindcss/no-custom-classname": "off", // enabling tracked in issue #3053
   "tailwindcss/no-contradicting-classname": "off",
   "tailwindcss/no-unnecessary-arbitrary-value": "off",
 

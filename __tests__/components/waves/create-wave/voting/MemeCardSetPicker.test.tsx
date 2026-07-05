@@ -10,7 +10,7 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock("@/components/nft-picker/NftPicker", () => {
+jest.mock("@/components/nft-picker", () => {
   const { MEMES_CONTRACT } = jest.requireActual("@/constants/constants");
   const nonMemeContract = "0x0000000000000000000000000000000000000001";
 
