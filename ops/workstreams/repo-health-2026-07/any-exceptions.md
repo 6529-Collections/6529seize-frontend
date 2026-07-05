@@ -22,7 +22,7 @@ enforcement backstop.
 - `components/delegation/**` (~60 sites at last count): owned by the styling
   workstream (Thread C), which is rewriting these files; typing them here
   would churn against that migration.
-- `src/types/window.d.ts` (1 site): the `src/` tree is being folded by the
-  layout workstream (Thread D); the file moves or dies there.
+- `src/types/window.d.ts` was listed here until the layout workstream's
+  `src/` fold removed the file (resolved 2026-07-05).
 
 Counts and per-file locations: `node scripts/debt-ratchet.cjs --details any_casts`.
