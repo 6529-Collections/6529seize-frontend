@@ -155,9 +155,9 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("heading", { level: 1, name: "Collections" })
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Status: ALL" })
-    ).toBeVisible();
+    const statusFilter = page.getByRole("combobox", { name: "Status:" });
+    await expect(statusFilter).toBeVisible();
+    await expect(statusFilter).toHaveValue("ALL");
     await expectCardsOrEmpty(
       page,
       page.locator('main a[href*="/nextgen/collection/"]'),

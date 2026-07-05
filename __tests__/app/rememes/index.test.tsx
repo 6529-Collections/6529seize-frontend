@@ -93,7 +93,7 @@ describe("ReMemes page", () => {
     const meta = await generateMetadata({
       searchParams: Promise.resolve({}),
     });
-    expect(meta.title).toBe("ReMemes");
+    expect(meta.title).toBe("ReMemes | Collections");
     expect(meta.description).toContain("Collections");
     const images = Array.isArray(meta.openGraph?.images)
       ? meta.openGraph?.images

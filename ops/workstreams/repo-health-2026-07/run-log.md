@@ -380,3 +380,19 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
 - Non-source TODO mentions that remain are intentional: skill docs that
   document TODO conventions, the campaign docs, and the ratchet's own
   detection patterns/fixtures.
+
+## 2026-07-05 (Thread G — any burn-down tail, wave 2a)
+
+- Delegation any-tail slice 1 of 3: the write-config path. DELEGATION_ABI
+  annotated `: Abi` at the source (NextGen-ABI precedent from #3052), new
+  `DelegationWriteParams` in delegation-shared typed into
+  `DelegationSubmitGroups.writeParams` (with a functionName narrowing
+  guard on the already-validate()-gated submit), `getGasError` takes
+  `Error`, `DelegationToastState` exported and used by NewDelegation +
+  NewAssignPrimaryAddress props; legacy inert `onSettled(data, error)`
+  annotations typed `unknown`/`Error | null`. `any_casts` 64 -> 45.
+- Rode along per ratchet protocol: `oversized_files` 90 -> 89
+  (useWaveDropsClipboard.ts healed by #3072; --update shrank the list).
+- Pre-existing latent bug found while typing (NOT fixed here, behavior
+  preserved): the CollectionDelegation use-case lock UI reads wagmi
+  multicall envelopes as booleans instead of `.result` — issue #3078.
