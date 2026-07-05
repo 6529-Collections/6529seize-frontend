@@ -127,7 +127,9 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   function getError(e: unknown) {
     const record = e as { message?: unknown } | null;
-    return String(record?.message).split("Request Arguments")[0];
+    const message =
+      typeof record?.message === "string" ? record.message : "";
+    return message.split("Request Arguments")[0];
   }
 
   useEffect(() => {

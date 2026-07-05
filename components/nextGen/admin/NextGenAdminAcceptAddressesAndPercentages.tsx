@@ -89,7 +89,8 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   });
 
   useEffect(() => {
-    const d = primaryRead.data as readonly unknown[];
+    const d = primaryRead.data as readonly unknown[] | undefined;
+    if (!d) return;
     setPrimary1({
       address: String(d[0]),
       percentage: `${d[3]} %`,
@@ -117,7 +118,8 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   });
 
   useEffect(() => {
-    const d = secondaryRead.data as readonly unknown[];
+    const d = secondaryRead.data as readonly unknown[] | undefined;
+    if (!d) return;
     setSecondary1({
       address: String(d[0]),
       percentage: `${d[3]} %`,

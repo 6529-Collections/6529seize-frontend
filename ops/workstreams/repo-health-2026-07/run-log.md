@@ -221,7 +221,7 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   annotated); ~90 cargo-cult `(x.data as any) === true|false` casts dropped
   by script; the remaining 51 nextGen sites + platform layer (helpers/lib/
   services/hooks/entities) + component scatter typed precisely.
-  `any_casts` baseline 358 -> (final count in PR). Exceptions ledger:
+  `any_casts` baseline 358 -> 65. Exceptions ledger:
   `any-exceptions.md` (wagmi connector conditional return, 3 sites).
   Delegation (~60 sites) deferred to Thread C's rewrite; `src/` d.ts to
   Thread D.

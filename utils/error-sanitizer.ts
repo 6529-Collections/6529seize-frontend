@@ -168,7 +168,8 @@ const extractErrorMessage = (
     try {
       const record = error as Record<string, unknown>;
       const errorString = JSON.stringify(error);
-      const message = (record["message"] || record["error"] || "") as string;
+      const rawMessage = record["message"] || record["error"] || "";
+      const message = typeof rawMessage === "string" ? rawMessage : "";
       return { message, errorString };
     } catch {
       return { message: "", errorString: "Complex error object" };

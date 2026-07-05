@@ -305,9 +305,10 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
                   value={scriptIndex}
                   onChange={(e) => {
                     const i = e.target.value;
+                    const index = Number(i);
                     setScriptIndex(i);
-                    if (existingScripts.length > Number(i)) {
-                      setScripts([existingScripts[i as unknown as number]!]);
+                    if (existingScripts.length > index) {
+                      setScripts([existingScripts[index]!]);
                     } else {
                       setScripts([]);
                     }

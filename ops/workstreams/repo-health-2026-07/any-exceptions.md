@@ -10,7 +10,12 @@ enforcement backstop.
 | Site | Count | Justification |
 | --- | --- | --- |
 | `wagmiConfig/wagmiAppWalletConnector.ts` | 3 | wagmi `createConnector`'s `connect()` return type is conditional on the `withCapabilities` parameter; expressing it without `any` requires `as unknown as` double-casts that add no safety. Runtime shape matches the wagmi v2 connector contract. |
-| `app/blog/disney-deekay-their-secret-to-animation/page.tsx` | 1 | Regex false positive: the ratchet's textual `\bas\s+any\b` matches the prose "…as powerfully as any great art can" inside JSX copy. No TypeScript cast exists in the file; editorial copy is not changed to satisfy a counter. |
+
+## Scan false positives (not `any` usages)
+
+| Site | Count | Explanation |
+| --- | --- | --- |
+| `app/blog/disney-deekay-their-secret-to-animation/page.tsx` | 1 | The ratchet's textual `\bas\s+any\b` matches the prose "…as powerfully as any great art can" inside JSX copy. No TypeScript cast exists in the file; editorial copy is not changed to satisfy a counter. |
 
 ## Deferred to other workstreams (not exceptions)
 
