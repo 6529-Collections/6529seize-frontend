@@ -1,7 +1,6 @@
 import CommunityDownloadsComponent from "@/components/community-downloads/CommunityDownloadsComponent";
-import CommunityDownloadsTDH, {
-  VIEW,
-} from "@/components/community-downloads/CommunityDownloadsTDH";
+import CommunityDownloadsTDH from "@/components/community-downloads/CommunityDownloadsTDH";
+import { VIEW } from "@/components/community-downloads/views";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { render } from "@testing-library/react";
 
