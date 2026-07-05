@@ -1,9 +1,20 @@
-import { configureStore } from "@reduxjs/toolkit";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
-import { editSlice } from "@/store/editSlice";
-import { Provider } from "react-redux";
+
+const mockEditingDropState: {
+  editingDropId: string | null;
+  setEditingDropId: jest.Mock;
+} = {
+  editingDropId: null,
+  setEditingDropId: jest.fn(),
+};
+
+jest.mock("@/contexts/EditingDropContext", () => ({
+  useEditingDrop: () => mockEditingDropState,
+  EditingDropProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
+}));
 
 const mockRegisterWave = jest.fn();
 const mockSetQueryData = jest.fn();
@@ -223,21 +234,13 @@ const HeaderActionProbe = () => {
 };
 
 const renderWave = (editingDropId: string | null = null) => {
-  const store = configureStore({
-    reducer: { edit: editSlice.reducer },
-  });
-
-  if (editingDropId !== null) {
-    store.dispatch(editSlice.actions.setEditingDropId(editingDropId));
-  }
+  mockEditingDropState.editingDropId = editingDropId;
 
   return render(
-    <Provider store={store}>
-      <HeaderProvider>
-        <MyStreamWave waveId="wave-1" />
-        <HeaderActionProbe />
-      </HeaderProvider>
-    </Provider>
+    <HeaderProvider>
+      <MyStreamWave waveId="wave-1" />
+      <HeaderActionProbe />
+    </HeaderProvider>
   );
 };
 

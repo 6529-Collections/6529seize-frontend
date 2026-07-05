@@ -1,10 +1,11 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { Provider } from "react-redux";
 import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { configureStore } from "@reduxjs/toolkit";
-import { groupSlice } from "@/store/groupSlice";
+import {
+  ActiveGroupProvider,
+  useActiveGroup,
+} from "@/contexts/ActiveGroupContext";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(() => new URLSearchParams()),
@@ -25,22 +26,14 @@ const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
 >;
 
-const createTestStore = () =>
-  configureStore({
-    reducer: {
-      group: groupSlice.reducer,
-    },
-  });
-
-type TestStore = ReturnType<typeof createTestStore>;
+function ActiveGroupProbe() {
+  const { activeGroupId } = useActiveGroup();
+  return <div data-testid="active-group-id">{activeGroupId ?? "none"}</div>;
+}
 
 describe("NetworkPageLayout", () => {
-  let store: TestStore;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    store = createTestStore();
 
     useDeviceInfoMock.mockReturnValue({
       isApp: false,
@@ -51,11 +44,11 @@ describe("NetworkPageLayout", () => {
 
   const renderComponent = () => {
     return render(
-      <Provider store={store}>
+      <ActiveGroupProvider>
         <NetworkPageLayout>
           <div data-testid="test-content">Test Content</div>
         </NetworkPageLayout>
-      </Provider>
+      </ActiveGroupProvider>
     );
   };
 
@@ -94,19 +87,18 @@ describe("NetworkPageLayout", () => {
       new URLSearchParams({ group: "test-group-id" })
     );
 
-    const testStore = createTestStore();
-
     render(
-      <Provider store={testStore}>
+      <ActiveGroupProvider>
         <NetworkPageLayout>
           <div data-testid="test-content">Test Content</div>
         </NetworkPageLayout>
-      </Provider>
+        <ActiveGroupProbe />
+      </ActiveGroupProvider>
     );
 
     expect(screen.getByTestId("test-content")).toBeInTheDocument();
-
-    const state = testStore.getState();
-    expect(state.group.activeGroupId).toBe("test-group-id");
+    expect(screen.getByTestId("active-group-id")).toHaveTextContent(
+      "test-group-id"
+    );
   });
 });

@@ -19,7 +19,7 @@ import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
+import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
@@ -35,7 +35,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
@@ -555,8 +554,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const shouldAnimateOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
   const [isWideContainer, setIsWideContainer] = useState(false);
-  const dispatch = useDispatch();
-  const editingDropId = useSelector(selectEditingDropId);
+  const { editingDropId, setEditingDropId } = useEditingDrop();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useAuth();
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
@@ -892,7 +890,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return false;
     }
 
-    dispatch(setEditingDropId(latestEditableChatDropTarget.id));
+    setEditingDropId(latestEditableChatDropTarget.id);
     waveChatScroll?.requestScrollToSerialNo({
       waveId: wave.id,
       serialNo: latestEditableChatDropTarget.serialNo,
@@ -900,7 +898,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return true;
   }, [
     canEditLastDropWithArrow,
-    dispatch,
+    setEditingDropId,
     latestEditableChatDropTarget,
     wave.id,
     waveChatScroll,

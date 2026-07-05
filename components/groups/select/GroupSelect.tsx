@@ -6,8 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import GroupItems from "./GroupItems";
-import { useSelector } from "react-redux";
-import { selectActiveGroupId } from "@/store/groupSlice";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import GroupsSelectActiveGroup from "./GroupsSelectActiveGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { GroupsRequestParams } from "@/entities/IGroup";
@@ -139,7 +138,7 @@ export default function GroupSelect({
 }: {
   readonly variant?: GroupSelectVariant | undefined;
 }) {
-  const activeGroupId = useSelector(selectActiveGroupId);
+  const { activeGroupId } = useActiveGroup();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const isMobileSheet = variant === "mobile-sheet";
   const [filters, setFilters] = useState<GroupsRequestParams>({

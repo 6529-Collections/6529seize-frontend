@@ -13,7 +13,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
-import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
+import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import {
   memo,
@@ -23,7 +23,6 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import type {
   DropIdentityMode,
   DropInteractionParams,
@@ -835,8 +834,7 @@ const WaveDropInner = ({
   const [boostAnimation, setBoostAnimation] =
     useState<BoostAnimationState | null>(null);
   const dropRef = useRef<HTMLDivElement>(null);
-  const dispatch = useDispatch();
-  const editingDropId = useSelector(selectEditingDropId);
+  const { editingDropId, setEditingDropId } = useEditingDrop();
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
@@ -916,11 +914,16 @@ const WaveDropInner = ({
     markNextClickForSuppression();
     // Cancel any active edit mode first
     if (editingDropId) {
-      dispatch(setEditingDropId(null));
+      setEditingDropId(null);
     }
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [allowLongPress, editingDropId, dispatch, markNextClickForSuppression]);
+  }, [
+    allowLongPress,
+    editingDropId,
+    setEditingDropId,
+    markNextClickForSuppression,
+  ]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -1125,21 +1128,28 @@ const WaveDropInner = ({
   const handleOnReply = useCallback(() => {
     // Cancel any active edit mode first
     if (editingDropId) {
-      dispatch(setEditingDropId(null));
+      setEditingDropId(null);
     }
     mobileMenu?.close();
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]!.part_id });
-  }, [onReply, drop, activePartIndex, editingDropId, dispatch, mobileMenu]);
+  }, [
+    onReply,
+    drop,
+    activePartIndex,
+    editingDropId,
+    setEditingDropId,
+    mobileMenu,
+  ]);
 
   const handleOnAddReaction = useCallback(() => {
     // Cancel any active edit mode first
     if (editingDropId) {
-      dispatch(setEditingDropId(null));
+      setEditingDropId(null);
     }
     mobileMenu?.close();
     setIsSlideUp(false);
-  }, [editingDropId, dispatch, mobileMenu]);
+  }, [editingDropId, setEditingDropId, mobileMenu]);
 
   const handleOpenTouchActions = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -1165,8 +1175,8 @@ const WaveDropInner = ({
   const handleOnEdit = useCallback(() => {
     mobileMenu?.close();
     setIsSlideUp(false); // Close mobile menu when entering edit mode
-    dispatch(setEditingDropId(drop.id));
-  }, [dispatch, drop.id, mobileMenu]);
+    setEditingDropId(drop.id);
+  }, [setEditingDropId, drop.id, mobileMenu]);
 
   const handleEditSave = useCallback(
     (
@@ -1219,7 +1229,7 @@ const WaveDropInner = ({
       };
 
       // Optimistically close the editor
-      dispatch(setEditingDropId(null));
+      setEditingDropId(null);
 
       // Execute the mutation
       dropUpdateMutation.mutate({
@@ -1228,12 +1238,12 @@ const WaveDropInner = ({
         currentDrop: drop,
       });
     },
-    [drop, activePartIndex, dropUpdateMutation, dispatch]
+    [drop, activePartIndex, dropUpdateMutation, setEditingDropId]
   );
 
   const handleEditCancel = useCallback(() => {
-    dispatch(setEditingDropId(null));
-  }, [dispatch]);
+    setEditingDropId(null);
+  }, [setEditingDropId]);
 
   const handleBoostAnimationComplete = useCallback(() => {
     setBoostAnimation(null);

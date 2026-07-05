@@ -21,7 +21,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { t } from "@/i18n/messages";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
-import { selectEditingDropId } from "@/store/editSlice";
+import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import {
@@ -37,7 +37,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
 import { useWaveChatLeaveCleanup } from "./useWaveChatLeaveCleanup";
 import type {
@@ -192,7 +191,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const dragCounterRef = useRef(0);
   const externalAttachmentDropTokenRef = useRef(0);
   const { connectedProfile, setToast } = useAuth();
-  const editingDropId = useSelector(selectEditingDropId);
+  const { editingDropId } = useEditingDrop();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
   const [isDragDropActive, setIsDragDropActive] = useState(false);

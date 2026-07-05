@@ -1,7 +1,6 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import GroupItem from "./item/GroupItem";
-import { selectActiveGroupId, setActiveGroupId } from "@/store/groupSlice";
 import type { GroupSelectVariant } from "./groupSelect.types";
 
 export default function GroupItems({
@@ -11,10 +10,9 @@ export default function GroupItems({
   readonly groups: ApiGroupFull[];
   readonly variant?: GroupSelectVariant | undefined;
 }) {
-  const activeGroupId = useSelector(selectActiveGroupId);
-  const dispatch = useDispatch();
+  const { activeGroupId, setActiveGroupId } = useActiveGroup();
   const onActiveGroupId = (groupId: string | null) => {
-    dispatch(setActiveGroupId(groupId));
+    setActiveGroupId(groupId);
   };
 
   return (

@@ -72,9 +72,11 @@ jest.mock("framer-motion", () => {
   };
 });
 
-jest.mock("react-redux", () => ({
-  useDispatch: jest.fn(() => jest.fn()),
-  useSelector: jest.fn(() => null),
+jest.mock("@/contexts/EditingDropContext", () => ({
+  useEditingDrop: jest.fn(() => ({
+    editingDropId: null,
+    setEditingDropId: jest.fn(),
+  })),
 }));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({

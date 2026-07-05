@@ -8,14 +8,13 @@ import { useEffect, useState } from "react";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
 
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
-import { selectActiveGroupId } from "@/store/groupSlice";
 import {
   ProfileActivityFilterTargetType,
   type ProfileActivityLogType,
   RateMatter,
 } from "@/types/enums";
-import { useSelector } from "react-redux";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 import type { CommonSelectItem } from "../utils/select/CommonSelect";
@@ -77,7 +76,7 @@ export default function ProfileActivityLogs({
   readonly disableActiveGroup?: boolean | undefined;
   readonly children?: React.ReactNode | undefined;
 }) {
-  const activeGroupId = useSelector(selectActiveGroupId);
+  const { activeGroupId } = useActiveGroup();
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
@@ -85,9 +84,7 @@ export default function ProfileActivityLogs({
     initialParams.targetType
   );
   const [currentPage, setCurrentPage] = useState<number>(initialParams.page);
-  const [matter, setMatter] = useState<RateMatter | null>(
-    initialParams.matter
-  );
+  const [matter, setMatter] = useState<RateMatter | null>(initialParams.matter);
 
   useEffect(() => {
     setSelectedFilters(initialParams.logTypes);
@@ -208,7 +205,7 @@ export default function ProfileActivityLogs({
               </div>
             )}
             {matter === RateMatter.NIC && (
-              <div className="md:tw-ml-auto tw-flex-1 md:tw-flex-none md:tw-w-[17.5rem] min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
+              <div className="tw-flex-1 md:tw-ml-auto md:tw-w-[17.5rem] md:tw-flex-none min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
                 <ProfileActivityLogsFilter
                   user={initialParams.handleOrWallet}
                   options={initialParams.logTypes}
