@@ -63,6 +63,34 @@
   measurement artifact (exit code read after piping through `tail`); Jest exit
   codes are correct, which is exactly why the Coverage Floor job needed main's
   suite green before it could ship.
+## 2026-07-05 (Thread C — styling / Bootstrap exit, closeout)
+
+- PR #3042 (verification plan) and PR #3046 (residue cleanup + reintroduction
+  ban) merged. #3046 delivered R1–R7: ESLint `no-restricted-imports` error for
+  `bootstrap`/`react-bootstrap` (+subpaths) in `baseRules` (proven by scratch
+  file failing `lint:changed` with both messages), dead `dom-helpers/css` Jest
+  mapping + `__mocks__/css-functions.js` removed, stale AGENTS.md
+  Bootstrap-Sass instruction replaced with a do-not-reintroduce note, design
+  standard/skill + deepsec stack descriptions updated to the post-exit
+  reality. Full Jest on the branch: 1958 suites / 11044 tests green.
+- Visual verification executed (scripted Chromium on local dev + public API):
+  23 former-Bootstrap routes — all 200, zero horizontal overflow, zero app
+  console errors; every screenshot individually reviewed. Delegation cluster
+  checked deepest, incl. an interactive wallet-checker lookup (ENS resolved,
+  delegations/consolidations rendered from live contract data). No
+  Bootstrap-exit regressions found; no fix PRs needed.
+- Footprint numbers recorded in `styling-migration-plan.md`: global CSS graph
+  previously imported the full bootstrap 5.3.8 bundle (~232 KiB minified dist
+  for scale) on every page; post-exit production CSS totals 529.3 KiB across
+  9 chunks; 11 lockfile package entries removed (#2979/#2998). Production
+  build exit 0 with the ban active in `lint:quiet`; ratchet
+  `bootstrap_imports` 0/0. "Before" build unreproducible on this
+  Windows/pnpm setup (documented Turbopack/Bootstrap-Sass resolution
+  failure), so package-scale evidence is used instead of a byte-exact diff.
+- Thread C definition of done met: zero bootstrap/react-bootstrap imports,
+  both deps removed, delegation area Bootstrap-free and verified, guards
+  active (module resolution + debt ratchet + ESLint ban).
+
 ## 2026-07-05 (Thread C — styling / Bootstrap exit)
 
 - Phase 0 inventory on `main` @ 98cd4984e: the 2026-07-04 "Bootstrap coexists"
