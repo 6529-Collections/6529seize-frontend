@@ -49,13 +49,88 @@ const getMediaQueryList = (query: string): MediaQueryList | null => {
 const someQueryMatches = (queries: readonly string[]): boolean =>
   queries.some((query) => getMediaQueryList(query)?.matches ?? false);
 
+/**
+ * Behavioral fine-pointer evidence.
+ *
+ * Some Windows browsers mis-report pointer/hover capabilities — e.g. a
+ * convertible whose media queries claim "no hover, coarse only" while the
+ * user is actively driving a trackpad cursor. A real `pointerType: "mouse"`
+ * event is ground truth that a fine, hover-capable pointer exists: latch it,
+ * tag <body> with `has-fine-pointer` so CSS can participate (see
+ * globals.css and the tailwind `desktop-hover`/`touch-only` variants), and
+ * notify subscribers so hooks re-evaluate.
+ */
+// Attribute (not a class) so tailwind's `tw-` prefix cannot rewrite it in
+// variant selectors.
+const FINE_POINTER_BODY_ATTRIBUTE = "data-fine-pointer";
+
+// A single event is not proof: some tools emit stray synthetic mouse events
+// on genuine touch devices, and jsdom/test events must never latch. Require
+// a short stream of TRUSTED mouse moves — a real cursor glide.
+const FINE_POINTER_EVIDENCE_THRESHOLD = 3;
+
+const capabilityChangeListeners = new Set<() => void>();
+
+let finePointerObserved = false;
+let pointerSentinelInstalled = false;
+let trustedMouseMoveCount = 0;
+
+const notifyCapabilityChange = () => {
+  for (const listener of capabilityChangeListeners) {
+    listener();
+  }
+};
+
+const handleSentinelPointerEvent = (event: Event) => {
+  if (!event.isTrusted || (event as PointerEvent).pointerType !== "mouse") {
+    return;
+  }
+
+  trustedMouseMoveCount += 1;
+  if (trustedMouseMoveCount < FINE_POINTER_EVIDENCE_THRESHOLD) {
+    return;
+  }
+
+  uninstallPointerSentinel();
+  finePointerObserved = true;
+  (
+    globalThis as typeof globalThis & { document?: Document }
+  ).document?.body?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
+  notifyCapabilityChange();
+};
+
+const installPointerSentinel = () => {
+  if (
+    pointerSentinelInstalled ||
+    finePointerObserved ||
+    typeof globalThis.addEventListener !== "function"
+  ) {
+    return;
+  }
+  pointerSentinelInstalled = true;
+  globalThis.addEventListener("pointermove", handleSentinelPointerEvent, {
+    passive: true,
+    capture: true,
+  });
+};
+
+const uninstallPointerSentinel = () => {
+  if (!pointerSentinelInstalled) {
+    return;
+  }
+  pointerSentinelInstalled = false;
+  globalThis.removeEventListener("pointermove", handleSentinelPointerEvent, {
+    capture: true,
+  });
+};
+
 /** A mouse or trackpad (or similar precise pointer) is available. */
 export const hasFinePointerCapability = (): boolean =>
-  someQueryMatches(FINE_POINTER_QUERIES);
+  finePointerObserved || someQueryMatches(FINE_POINTER_QUERIES);
 
 /** Some input can hover (mouse, trackpad, stylus with hover). */
 export const hasHoverCapability = (): boolean =>
-  someQueryMatches(HOVER_QUERIES);
+  finePointerObserved || someQueryMatches(HOVER_QUERIES);
 
 /**
  * Touch input exists at all (says nothing about it being primary).
@@ -119,11 +194,15 @@ export const isTouchFirstEnvironment = (options?: {
 
 /**
  * Re-runs `onChange` whenever a capability media query flips (mouse plugged
- * in/out, convertible posture change). Returns an unsubscribe function.
+ * in/out, convertible posture change) or behavioral fine-pointer evidence
+ * arrives. Returns an unsubscribe function.
  */
 export const subscribeToTouchFirstChanges = (
   onChange: () => void
 ): (() => void) => {
+  installPointerSentinel();
+  capabilityChangeListeners.add(onChange);
+
   const unsubscribers: Array<() => void> = [];
 
   for (const query of TOUCH_FIRST_MEDIA_QUERIES) {
@@ -142,6 +221,12 @@ export const subscribeToTouchFirstChanges = (
   }
 
   return () => {
+    capabilityChangeListeners.delete(onChange);
+    if (capabilityChangeListeners.size === 0) {
+      // No subscribers left — drop the global capture listener so genuine
+      // touch devices don't pay a page-lifetime hot-path cost.
+      uninstallPointerSentinel();
+    }
     for (const unsubscribe of unsubscribers) {
       unsubscribe();
     }
