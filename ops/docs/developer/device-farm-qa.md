@@ -71,27 +71,30 @@ stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
    bash ops/scripts/devicefarm-bootstrap.sh
    ```
 
-   Defaults: project `6529-mobile-qa`, pools `android-phones-smoke` (max 3)
-   and `ios-phones-web-smoke` (max 2). The script is idempotent and
-   *converging*: re-running it updates existing pools to the rules in the
-   script, so pool composition is version-controlled here. Override names via
-   env vars and mirror them in repository variables
-   `DEVICEFARM_PROJECT_NAME`, `DEVICEFARM_ANDROID_POOL_NAME`,
-   `DEVICEFARM_IOS_POOL_NAME` (the workflow resolves resources by name).
+   Defaults: project `6529-mobile-qa`, pools `android-phones-smoke` and
+   `ios-phones-web-smoke`. The script is idempotent and *converging*:
+   re-running it updates existing pools to the rules in the script, so pool
+   composition is version-controlled here. Override names via env vars and
+   mirror them in repository variables `DEVICEFARM_PROJECT_NAME`,
+   `DEVICEFARM_ANDROID_POOL_NAME`, `DEVICEFARM_IOS_POOL_NAME` (the workflow
+   resolves resources by name).
 
-   Pool composition is a deliberate representative mix, not "any available
-   phone" (an open rule tends to hand out two near-identical Pixels):
+   Pool composition is a deliberate representative set, ARN-pinned to exact
+   device+OS combinations. (Open availability rules handed out two
+   near-identical Pixels; `MODEL IN` rules select the same model on multiple
+   OS versions — both observed live.)
 
    | Pool | Devices | Why |
    | --- | --- | --- |
-   | `android-phones-smoke` | Samsung Galaxy S24, Google Pixel 8, Samsung Galaxy A15 | One UI flagship (dominant real-world OEM skin), stock Android, and the mid-range/low-perf class that is the most common Android tier globally. |
-   | `ios-phones-web-smoke` | iPhone 16, iPhone SE (2022) | Current mainstream iOS, plus the 4.7" small screen on the oldest supported Safari — the viewport that makes the horizontal-overflow check earn its keep. |
+   | `android-phones-smoke` | Samsung Galaxy S24 (Android 14), Google Pixel 8 (Android 15), Samsung Galaxy A15 (Android 14) | One UI flagship (dominant real-world OEM skin), stock Android, and the mid-range/low-perf class that is the most common Android tier globally. |
+   | `ios-phones-web-smoke` | iPhone 16 (iOS 18.6.2), iPhone SE 2022 (iOS 16.4) | Current mainstream iOS, plus the 4.7" small screen on the oldest supported Safari — the viewport that makes the horizontal-overflow check earn its keep. |
 
-   Model rules pick whichever of the named devices are highly available at
-   scheduling time (a busy model just shrinks that run's coverage). Recheck
-   the model list against the fleet (`aws devicefarm list-devices`) roughly
-   yearly, and calibrate against real visitor device analytics (CloudWatch
-   RUM / Mixpanel user agents) when adjusting.
+   ARN-pinned (static) pools queue for a busy device instead of silently
+   substituting another. If a pinned device is retired from the public fleet,
+   re-resolve its ARN per the comment in the bootstrap script. Recheck the
+   set against the fleet (`aws devicefarm list-devices`) roughly yearly, and
+   calibrate against real visitor device analytics (CloudWatch RUM / Mixpanel
+   user agents) when adjusting.
 
 2. **CI IAM principal** — create a dedicated IAM user (or role) for the
    workflow with this policy (Device Farm resources exist only in us-west-2):

@@ -91,6 +91,11 @@ async function startWebSession() {
   if (isIos()) {
     capabilities.browserName = "Safari";
     capabilities["appium:automationName"] = "XCUITest";
+    // Safari's remote debugger can take longer than the 5s driver default to
+    // expose the page (session creation failed on a Device Farm iPhone 16 /
+    // iOS 18.6.2 with "remote debugger did not return any connected web
+    // applications after ~5s").
+    capabilities["appium:webviewConnectTimeout"] = 30000;
     const derivedDataPath = env("DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH");
     if (derivedDataPath) {
       capabilities["appium:derivedDataPath"] = derivedDataPath;
