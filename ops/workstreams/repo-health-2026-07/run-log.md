@@ -100,3 +100,29 @@
   `-pr-followups` (1.6G, on 1a-staging with untracked release-check tests),
   `-rememes-2609-node_modules-partial` (488M, no .git),
   `-native-package-evidence` + `-pr2680` (16K each, no .git).
+
+## 2026-07-05 (orchestrator — Wave 1 close, Wave 2 launch)
+
+- Thread B accepted as COMPLETE (all 5 phases). Follow-up dispatched: rescue the
+  `-desktop-hardening` dirty WIP (with a secrets pre-scan this time), delete the
+  no-.git debris dirs, hands off `-pr-followups` (plausibly the external release
+  thread's). Task board: B done.
+- SECURITY: punk6529bot token exposure escalated to the user (server-side
+  revoke/rotate is a user action; the local punk6529bot CLI has no revoke
+  command). Preventive secret-hygiene deliverable added to Thread A's wrapup
+  (gitignore tmp/ + credential patterns; evaluate push-triggered secret scan;
+  sweep for other tracked credential-shaped files).
+- Branch-janitor dry-run dispatched:
+  https://github.com/6529-Collections/6529seize-frontend/actions/runs/28724614088
+  — orchestrator reviews output, then arms via BRANCH_JANITOR_ENABLED=true.
+- Wave 2 LAUNCHED (three fresh Fable 5 threads): C = Bootstrap exit
+  (style/bootstrap-exit, owns components/delegation/* and
+  styling-migration-plan.md), D = layout unification (layout/unify, owns src/
+  fold-in, pages-router retirement, giant-file splits ex-delegation,
+  layout-unification-plan.md), E = dead patterns (cleanup/dead-patterns, Redux
+  removal now, any/TODO burn-down once Thread A's ratchet lands).
+- Pending user decisions: (1) rotate punk6529bot credential; (2) stale-branch
+  report sign-off (739 branches: 352 pre-2025 / 248 2025 / 139 recent-stale);
+  (3) tech hub + specs/scripts relanding vs archive (recoverable from
+  `dac8f5cf1`); (4) janitor arming (orchestrator proceeds after dry-run review
+  unless user objects).

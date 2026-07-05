@@ -8,9 +8,10 @@ for this repo (machine-local; not tracked in the repository).
 
 ## Wave state
 
-- Wave 1 (launched 2026-07-04): Thread A (merge gate) + Thread B (branch amnesty). Thread ids in run-log.md.
-- Wave 2 (blocked on A's gate + B's rescue): Thread C (styling), Thread D (layout/splits), Thread E (dead patterns).
+- Wave 1: Thread B COMPLETE 2026-07-05 (see run-log; 167 branches pruned, 138 commits accounted, PRs #3034-#3037 merged). Thread A in wrapup (gate LIVE: ruleset 18018081 requires DCO, snyk, "Plan risk and security checks", "Installed app checks"; coverage floor on main pushes; debt-ratchet PR + e2e verify + secret-hygiene PR outstanding).
+- Wave 2 LAUNCHED 2026-07-05: Thread C (Bootstrap exit; owns components/delegation/*), Thread D (layout unification; src/ fold-in, pages-router retirement, splits ex-delegation), Thread E (dead patterns; Redux first, then any/TODO burn-down behind A's ratchet).
 - Wave 3: burn-down loops until every ratchet metric hits its target, then remove grandfather lists.
+- Ownership map: A = .github/workflows + ratchet/coverage scripts; B = branches/worktrees; C = styling + delegation dir; D = src/, pages remnants, giant-file splits elsewhere; E = store/redux, typing sweeps, TODO triage.
 
 ## Sequencing constraints
 
