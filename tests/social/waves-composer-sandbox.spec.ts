@@ -109,10 +109,14 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
 
-    // The quick-DM launcher yields to the docked composer at this viewport
+    // Inside the covered band (1280-1455px wide, right sidebar closed) the
+    // quick-DM launcher yields to the docked composer
     // (WaveComposerDockVisibility): pointer-inert (keyboard/screen-reader
-    // reachable) so the real pointer click below must land on Post.
-    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+    // reachable) so the real pointer click below must land on Post. The
+    // desktop project's 1280x720 viewport sits in that band; mobile projects
+    // never render the launcher.
+    const viewportWidth = page.viewportSize()?.width ?? 0;
+    if (viewportWidth >= 1280 && viewportWidth <= 1455) {
       await expect(
         page.getByRole("button", { name: /Open quick direct messages/ })
       ).toHaveCSS("pointer-events", "none", {

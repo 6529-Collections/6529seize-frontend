@@ -77,6 +77,10 @@ export function CreateDropWaveWrapper({
   const shouldObserve = context !== CreateDropWaveWrapperContext.SINGLE_DROP;
   useResizeObserver(containerRef, fixedBottomRef, shouldObserve);
 
+  // Registration is deliberately unconditional (unlike shouldObserve):
+  // the SINGLE_DROP chat panel also docks at the viewport's right edge on
+  // desktop, and its collapsed w-0 state is excluded by the consumer's
+  // zero-size rect check.
   useEffect(() => {
     const element = containerRef.current;
     if (!element) {
