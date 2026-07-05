@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 
+import { DEFAULT_LONG_PRESS_DURATION_MS } from "../../hooks/useLongPressInteraction";
 import { expect, test } from "../testHelpers";
 
 /**
@@ -32,19 +33,40 @@ const WIN8_CHROME_UA =
 const bodyHasFinePointer = (page: Page) =>
   page.evaluate(() => document.body.hasAttribute("data-fine-pointer"));
 
-async function openFirstWaveWithRows(page: Page) {
+async function openWaveWithRows(page: Page) {
   await page.goto("/waves", { waitUntil: "domcontentloaded" });
-  const waveLink = page.locator('a[href^="/waves/"]').first();
-  await expect(waveLink).toBeVisible({ timeout: 30000 });
-  const href = await waveLink.getAttribute("href");
-  expect(href).toBeTruthy();
-  await page.goto(href!, { waitUntil: "domcontentloaded" });
-  // `.touch-select-none` marks rows whose selection is disabled in favor of
-  // long-press — it is only styled away when the device is (mis)classified,
-  // so its presence participates in the assertion.
-  await expect(page.locator(".touch-select-none").last()).toBeAttached({
-    timeout: 60000,
-  });
+  const waveLinks = page.locator('a[href^="/waves/"]');
+  await expect(waveLinks.first()).toBeVisible({ timeout: 30000 });
+  // Wave content varies per environment; anonymously-readable waves with
+  // message rows exist on both production and staging, but a specific wave's
+  // rows are not guaranteed — walk the first few listed waves until one
+  // yields long-pressable rows instead of pinning the pack to a single wave.
+  const candidates = (
+    await waveLinks.evaluateAll((links) =>
+      links
+        .map((link) => link.getAttribute("href"))
+        .filter((href): href is string => Boolean(href))
+    )
+  )
+    .filter((href, index, all) => all.indexOf(href) === index)
+    .slice(0, 5);
+  for (const href of candidates) {
+    await page.goto(href, { waitUntil: "domcontentloaded" });
+    // `.touch-select-none` marks rows whose selection is disabled in favor
+    // of long-press — it only renders while the app classifies the device
+    // as touch-first, so its presence participates in the assertion.
+    try {
+      await expect(page.locator(".touch-select-none").last()).toBeAttached({
+        timeout: 20000,
+      });
+      return;
+    } catch {
+      // next candidate
+    }
+  }
+  throw new Error(
+    `none of the first ${candidates.length} anonymously-listed waves rendered long-pressable rows`
+  );
 }
 
 async function longPressViaTouchEvents(page: Page) {
@@ -72,7 +94,8 @@ async function longPressViaTouchEvents(page: Page) {
       })
     );
   });
-  await page.waitForTimeout(1100); // > longPressDuration
+  // Hold past the app's real threshold with margin for remote-target latency.
+  await page.waitForTimeout(DEFAULT_LONG_PRESS_DURATION_MS + 600);
   await page.evaluate(() => {
     const rows = document.querySelectorAll(".touch-select-none");
     const el = rows[rows.length - 1] as HTMLElement;
@@ -107,20 +130,19 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
   test("taps followed by synthesized mouse moves never flip the device to desktop", async ({
     page,
   }) => {
-    await openFirstWaveWithRows(page);
+    await openWaveWithRows(page);
 
     // The Win 8 sequence, three times over: a real (trusted) touch tap, then
     // trusted mouse moves milliseconds later. Chromium's own touch pipeline
     // additionally emits compatibility mouse events after each tap — exactly
-    // like the legacy OS — and none of it may latch.
+    // like the legacy OS — and none of it may latch. Element-relative tap()
+    // keeps coordinate resolution atomic against feed re-layout between
+    // rounds; the near-corner position lands in row padding, clear of links
+    // and media that a centered tap could activate.
     for (let round = 0; round < 3; round++) {
       const row = page.locator(".touch-select-none").last();
-      const box = await row.boundingBox();
-      expect(box).toBeTruthy();
-      await page.touchscreen.tap(
-        box!.x + box!.width / 2,
-        box!.y + Math.min(10, box!.height / 2)
-      );
+      await row.scrollIntoViewIfNeeded();
+      await row.tap({ position: { x: 10, y: 8 } });
       await page.mouse.move(200 + round * 50, 300, { steps: 3 });
     }
 
@@ -131,11 +153,14 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
     // a zero-size positioning shell that Playwright's visibility heuristic
     // reports as hidden even while its content is on screen.
     await longPressViaTouchEvents(page);
-    await expect(
-      page.getByRole("button", { name: /copy text/i }).first()
-    ).toBeVisible({ timeout: 15000 });
+    const copyTextAction = page
+      .getByRole("button", { name: /copy text/i })
+      .first();
+    await expect(copyTextAction).toBeVisible({ timeout: 15000 });
 
+    // Read-only hygiene: verify the sheet actually closed again.
     await page.keyboard.press("Escape");
+    await expect(copyTextAction).toBeHidden({ timeout: 10000 });
   });
 });
 
@@ -151,6 +176,9 @@ test.describe("genuine mouse control (guards the #3099 Surface fix)", () => {
     await expect(page.locator('a[href^="/waves/"]').first()).toBeVisible({
       timeout: 30000,
     });
+
+    // Two-sided guard: nothing may have latched from page load alone.
+    expect(await bodyHasFinePointer(page)).toBe(false);
 
     await page.mouse.move(100, 200);
     await page.mouse.move(400, 350, { steps: 4 });
