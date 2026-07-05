@@ -80,8 +80,8 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
 
 jest.mock("@emoji-mart/react", () => ({
   __esModule: true,
-  default: ({ onEmojiSelect }: any) => (
-    <div data-testid="mock-picker">
+  default: ({ onEmojiSelect, autoFocus }: any) => (
+    <div data-testid="mock-picker" data-auto-focus={String(autoFocus)}>
       <button onClick={() => onEmojiSelect({ id: "smile" })}>
         Select Emoji
       </button>
@@ -241,6 +241,30 @@ describe("WaveDropActionsAddReaction", () => {
 
     fireEvent.click(button);
     expect(await screen.findByTestId("mock-picker")).toBeInTheDocument();
+  });
+
+  it("auto-focuses the picker search input on desktop", async () => {
+    renderWithQueryClient(<WaveDropActionsAddReaction drop={mockDrop} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /add reaction/i }));
+
+    expect(await screen.findByTestId("mock-picker")).toHaveAttribute(
+      "data-auto-focus",
+      "true"
+    );
+  });
+
+  it("auto-focuses the picker search input on mobile", async () => {
+    renderWithQueryClient(
+      <WaveDropActionsAddReaction drop={mockDrop} isMobile={true} />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /add reaction/i }));
+
+    expect(await screen.findByTestId("mock-picker")).toHaveAttribute(
+      "data-auto-focus",
+      "true"
+    );
   });
 
   it("forwards custom dialog z-index to the mobile wrapper", async () => {

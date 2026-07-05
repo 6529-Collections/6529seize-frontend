@@ -164,7 +164,7 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
               }}
               className="tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-shadow-lg"
             >
-              <LazyEmojiPicker onEmojiSelect={addEmoji} />
+              <LazyEmojiPicker onEmojiSelect={addEmoji} autoFocus />
             </div>,
             document.body
           )}
@@ -180,7 +180,7 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
             className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
             onTouchMove={(e) => e.stopPropagation()}
           >
-            <LazyEmojiPicker onEmojiSelect={addEmoji} />
+            <LazyEmojiPicker onEmojiSelect={addEmoji} autoFocus />
           </div>
         </MobileWrapperDialog>
       )}
