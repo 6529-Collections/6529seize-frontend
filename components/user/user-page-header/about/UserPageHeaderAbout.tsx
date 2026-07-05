@@ -6,6 +6,7 @@ import PencilIcon from "@/components/utils/icons/PencilIcon";
 import UserPageHeaderAboutStatement from "./UserPageHeaderAboutStatement";
 import UserPageHeaderAboutEdit from "./UserPageHeaderAboutEdit";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 enum AboutStatementView {
   STATEMENT = "STATEMENT",
@@ -38,6 +39,9 @@ function UserPageHeaderAboutContent({
       toggleView();
     }
   };
+  const editActionLabel = getUserProfileHeaderMessage(
+    statement ? "user.profileHeader.about.edit" : "user.profileHeader.about.add"
+  );
 
   return (
     <>
@@ -51,13 +55,11 @@ function UserPageHeaderAboutContent({
               .filter(Boolean)
               .join(" ")}
           >
-            {canEdit ? (
+            {canEdit && !statement ? (
               <button
                 type="button"
                 onClick={onEditClick}
-                aria-label={
-                  statement ? "Edit About statement" : "Add About statement"
-                }
+                aria-label={editActionLabel}
                 className="tw-flex-1 tw-border-none tw-bg-transparent tw-p-0 tw-text-left"
               >
                 <UserPageHeaderAboutStatement statement={statement} />
@@ -65,16 +67,16 @@ function UserPageHeaderAboutContent({
             ) : (
               <UserPageHeaderAboutStatement statement={statement} />
             )}
-            {canEdit && (
+            {canEdit && statement && (
               <button
                 type="button"
                 onClick={onEditClick}
-                aria-label={
-                  statement ? "Edit About statement" : "Add About statement"
-                }
+                aria-label={editActionLabel}
                 className="tw-pointer-events-none tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 group-focus-within:tw-pointer-events-auto group-focus-within:tw-opacity-100 group-hover:tw-pointer-events-auto group-hover:tw-opacity-100 hover:tw-text-iron-200"
               >
-                <PencilIcon />
+                <span aria-hidden="true">
+                  <PencilIcon />
+                </span>
               </button>
             )}
           </div>

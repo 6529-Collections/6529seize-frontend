@@ -798,11 +798,6 @@ export function getRoyaltyImage(royaltiesPercentage: number) {
     : "pepe-smile.png";
 }
 
-export const formatTimestampToMonthYear = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  return date.toLocaleString("default", { month: "long", year: "numeric" });
-};
-
 export const formatLargeNumber = (num: number): string => {
   const isNegative = num < 0;
   const absNum = Math.abs(num);
