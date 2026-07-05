@@ -20,6 +20,8 @@ This folder stores repo-local Codex skills and agent guidance.
   interaction-state, media, and visual evidence standards.
 - [I18n Localization](i18n-localization/SKILL.md): guides progressive
   frontend message extraction, locale formatting, and fallback review.
+- [Post 6529](post-6529/SKILL.md): publishes, verifies, edits, and deletes
+  agent-authored 6529.io wave drops via the punk6529bot helper.
 - [React Doctor](react-doctor/SKILL.md): provides React-focused review and
   troubleshooting guidance.
 - [Sonar Guardrails](sonar-guardrails/SKILL.md): captures Sonar-oriented
