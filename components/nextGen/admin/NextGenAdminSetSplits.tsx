@@ -45,8 +45,8 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
   const collectionIndex = useCollectionIndex();
   const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionIds = getCollectionIdsForAddress(
-    (globalAdmin.data as any) === true,
-    (functionAdmin.data as any) === true,
+    globalAdmin.data === true,
+    functionAdmin.data === true,
     undefined,
     parsedCollectionIndex
   );

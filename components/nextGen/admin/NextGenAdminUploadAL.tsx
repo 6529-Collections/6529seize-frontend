@@ -61,8 +61,8 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     parsedCollectionIndex
   );
   const collectionIds = getCollectionIdsForAddress(
-    (globalAdmin.data as any) === true,
-    (functionAdmin.data as any) === true,
+    globalAdmin.data === true,
+    functionAdmin.data === true,
     collectionAdmin.data,
     parsedCollectionIndex
   );

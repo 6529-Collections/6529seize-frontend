@@ -719,7 +719,7 @@ export const DELEGATION_ABI = [
   },
 ];
 
-export const NEXTGEN_CORE_ABI = [
+export const NEXTGEN_CORE_ABI: Abi = [
   {
     inputs: [
       {
@@ -2278,7 +2278,7 @@ export const NEXTGEN_CORE_ABI = [
   },
 ];
 
-export const NEXTGEN_MINTER_ABI = [
+export const NEXTGEN_MINTER_ABI: Abi = [
   {
     inputs: [
       { internalType: "address", name: "_gencore", type: "address" },
@@ -2732,7 +2732,7 @@ export const NEXTGEN_MINTER_ABI = [
   },
 ];
 
-export const NEXTGEN_ADMIN_ABI = [
+export const NEXTGEN_ADMIN_ABI: Abi = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {
     anonymous: false,

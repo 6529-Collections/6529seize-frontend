@@ -56,7 +56,7 @@ export enum AllowlistType {
 export interface CollectionWithMerkle {
   collection_id: number;
   merkle_root: string;
-  merkle_tree: any;
+  merkle_tree: unknown;
   al_type: AllowlistType;
   phase: string;
   burn_collection: string;
@@ -69,7 +69,7 @@ export interface CollectionWithMerkle {
 
 export interface ProofResponseBurn {
   keccak: string;
-  info: any;
+  info: unknown;
   proof: string[];
 }
 

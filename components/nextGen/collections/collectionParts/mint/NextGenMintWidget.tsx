@@ -36,8 +36,8 @@ import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
 import { NextGenMintErrors, NextGenMintingFor } from "./NextGenMintShared";
 
-export function getJsonData(keccak: string, data: string) {
-  const parsed = JSON.parse(data);
+export function getJsonData(keccak: string, data: unknown) {
+  const parsed = JSON.parse(String(data));
   const results: any[] = [];
   Object.entries(parsed).forEach(([key, value]) => {
     results.push({
