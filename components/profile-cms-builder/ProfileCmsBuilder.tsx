@@ -9,6 +9,8 @@ import {
   ProfileCmsAgentPanel,
   downloadJsonFile,
 } from "@/components/profile-cms-builder/ProfileCmsAgentPanel";
+import ProfileCmsPublishPanel from "@/components/profile-cms-builder/ProfileCmsPublishPanel";
+import ProfileCmsVersionHistoryPanel from "@/components/profile-cms-builder/ProfileCmsVersionHistoryPanel";
 import { isProfileCmsBuilderApiEnabledEnv } from "@/config/profileCmsBuilderEnv";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -21,7 +23,6 @@ import {
   getProfileCmsPackageById,
   listProfileCmsPackagesForProfile,
   PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
-  PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT,
   PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
   requestProfileCmsGallerySnapshot,
   runProfileCmsBuilderAction,
@@ -102,6 +103,7 @@ export default function ProfileCmsBuilder({
   const [drafts, setDrafts] = useState<readonly ProfileCmsPackageRecord[]>([]);
   const [loadingDraftId, setLoadingDraftId] = useState<string | null>(null);
   const [draftLoadFailed, setDraftLoadFailed] = useState(false);
+  const [publishRefreshToken, setPublishRefreshToken] = useState(0);
   const actionRequestIdRef = useRef(0);
   const gallerySnapshotRequestIdRef = useRef(0);
   const draftsRequestIdRef = useRef(0);
@@ -299,7 +301,7 @@ export default function ProfileCmsBuilder({
       setActionResult({
         ok: false,
         action,
-        expectedEndpoint: getExpectedBuilderEndpoint(action, draftId),
+        expectedEndpoint: getExpectedBuilderEndpoint(action),
         code: "profile_not_authorized",
       });
       return;
@@ -314,7 +316,6 @@ export default function ProfileCmsBuilder({
       const result = await runProfileCmsBuilderAction({
         action,
         cmsPackage: validation.cmsPackage,
-        draftId,
         profileId: canUseBuilderApi ? profileId : undefined,
       });
       if (
@@ -420,12 +421,6 @@ export default function ProfileCmsBuilder({
               disabled={isSubmitting}
               label={t(locale, "profileCms.builder.cta.serverValidate")}
               onClick={() => void runAction("validate")}
-            />
-            <BuilderActionButton
-              disabled={isSubmitting || !validation.result.valid}
-              label={t(locale, "profileCms.builder.cta.publish")}
-              onClick={() => void runAction("publish")}
-              variant="primary"
             />
           </div>
         </div>
@@ -541,6 +536,21 @@ export default function ProfileCmsBuilder({
             locale={locale}
             packageHash={validation.cmsPackage.integrity.package_hash}
             payloadHash={validation.cmsPackage.integrity.payload_hash}
+          />
+          <ProfileCmsPublishPanel
+            canPublish={validation.result.valid}
+            canUseBuilderApi={canUseBuilderApi}
+            cmsPackage={validation.cmsPackage}
+            locale={locale}
+            onPublished={() => setPublishRefreshToken((token) => token + 1)}
+            profileId={profileId}
+          />
+          <ProfileCmsVersionHistoryPanel
+            builderApiEnabled={builderApiEnabled}
+            canUseBuilderApi={canUseBuilderApi}
+            locale={locale}
+            profileId={profileId}
+            refreshToken={publishRefreshToken}
           />
           <DraftsPanel
             builderApiEnabled={builderApiEnabled}
@@ -1849,8 +1859,6 @@ function getActionResultMessage(
       return t(locale, "profileCms.builder.api.missingProfileId");
     case "profile_not_authorized":
       return t(locale, "profileCms.builder.api.profileNotAuthorized");
-    case "publish_requires_signed_storage":
-      return t(locale, "profileCms.builder.api.publishRequiresSignedStorage");
     case "request_failed":
       return t(locale, "profileCms.builder.api.failed");
     case "server_validation_completed":
@@ -1862,20 +1870,12 @@ function getActionResultMessage(
   }
 }
 
-function getExpectedBuilderEndpoint(
-  action: ProfileCmsBuilderAction,
-  draftId: string | undefined
-): string {
+function getExpectedBuilderEndpoint(action: ProfileCmsBuilderAction): string {
   switch (action) {
     case "save_draft":
       return PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT;
     case "validate":
       return PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT;
-    case "publish":
-      return PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT.replace(
-        "{id}",
-        draftId ? encodeURIComponent(draftId) : ":id"
-      );
   }
 }
 

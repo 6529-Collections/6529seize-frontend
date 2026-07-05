@@ -1407,6 +1407,58 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.drafts.status.superseded": "Superseded",
   "profileCms.builder.drafts.loadFailed":
     "This draft could not be loaded into the editor.",
+  "profileCms.builder.publish.title": "Publish",
+  "profileCms.builder.publish.description":
+    "Save, validate, upload to decentralized storage, sign with your wallet, then publish this package as your primary profile website.",
+  "profileCms.builder.publish.publish": "Publish website",
+  "profileCms.builder.publish.publishing": "Publishing...",
+  "profileCms.builder.publish.retry": "Retry",
+  "profileCms.builder.publish.reSign": "Sign again",
+  "profileCms.builder.publish.walletRequired":
+    "Connect the wallet linked to this profile to sign the publish.",
+  "profileCms.builder.publish.safeNotice":
+    "Safe / smart-contract wallet detected. Publishing requests an EIP-1271 signature; if your Safe cannot complete it, publish from the profile's EOA wallet instead.",
+  "profileCms.builder.publish.success":
+    "Published. Your profile website is now live at:",
+  "profileCms.builder.publish.step.validate": "Save and validate draft",
+  "profileCms.builder.publish.step.upload": "Upload to storage",
+  "profileCms.builder.publish.step.sign": "Sign with wallet",
+  "profileCms.builder.publish.step.publish": "Publish primary pointer",
+  "profileCms.builder.publish.error.validationInvalid":
+    "Server validation found blocking issues. Fix them, then publish again.",
+  "profileCms.builder.publish.error.saveFailed":
+    "Could not save the draft before publishing.",
+  "profileCms.builder.publish.error.validateFailed":
+    "The server validation request failed.",
+  "profileCms.builder.publish.error.uploadFailed":
+    "Uploading the package to decentralized storage failed.",
+  "profileCms.builder.publish.error.signatureRejected":
+    "The signature request was canceled in your wallet.",
+  "profileCms.builder.publish.error.signatureFailed":
+    "Wallet signing failed. Check your wallet and try again.",
+  "profileCms.builder.publish.error.deadlineExpired":
+    "The signature deadline expired before publishing. Sign again to continue.",
+  "profileCms.builder.publish.error.publishConflict":
+    "The draft changed on the server since it was signed. Retry to re-sign and publish.",
+  "profileCms.builder.publish.error.publishFailed":
+    "Publishing failed. Please try again.",
+  "profileCms.builder.history.title": "Version history",
+  "profileCms.builder.history.refresh": "Refresh",
+  "profileCms.builder.history.loading": "Loading...",
+  "profileCms.builder.history.unavailable":
+    "Connect as this profile owner to view published versions.",
+  "profileCms.builder.history.failed": "Could not load version history.",
+  "profileCms.builder.history.empty": "No published versions yet.",
+  "profileCms.builder.history.version": "Version {version}",
+  "profileCms.builder.history.primary": "Primary",
+  "profileCms.builder.history.rollback": "Make primary",
+  "profileCms.builder.history.rollbackFailed": "Rollback failed.",
+  "profileCms.builder.history.confirm.title": "Confirm rollback",
+  "profileCms.builder.history.confirm.body":
+    "Point your primary profile website back to version {version}? This replaces the currently published version.",
+  "profileCms.builder.history.confirm.confirm": "Roll back",
+  "profileCms.builder.history.confirm.working": "Rolling back...",
+  "profileCms.builder.history.confirm.cancel": "Cancel",
   ...USER_COLLECTED_STATS_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
