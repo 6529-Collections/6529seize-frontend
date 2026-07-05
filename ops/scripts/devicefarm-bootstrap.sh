@@ -34,64 +34,63 @@ else
 fi
 echo "  project ARN: ${project_arn}"
 
+# Pools are STATIC (ARN-pinned, one exact device+OS each): a MODEL IN rule
+# happily selects the same model on two OS versions and squeezes out the rest
+# (observed live: two Pixel 8s / two iPhone 16s). Static pools take no
+# --max-devices parameter.
 ensure_pool() {
   local name="$1"
-  local max_devices="$2"
-  local description="$3"
-  local rules="$4"
+  local description="$2"
+  local rules="$3"
   local arn
 
   arn="$(aws devicefarm list-device-pools --region "$REGION" \
     --arn "$project_arn" --type PRIVATE \
     --query "devicePools[?name=='${name}'].arn | [0]" --output text)"
   if [[ -z "$arn" || "$arn" == "None" ]]; then
-    echo "Creating device pool: ${name} (max ${max_devices} devices)"
+    echo "Creating device pool: ${name}"
     arn="$(aws devicefarm create-device-pool --region "$REGION" \
       --project-arn "$project_arn" \
       --name "$name" \
       --description "$description" \
-      --max-devices "$max_devices" \
       --rules "$rules" \
       --query 'devicePool.arn' --output text)"
   else
-    echo "Updating device pool: ${name} (max ${max_devices} devices)"
+    echo "Updating device pool: ${name}"
     aws devicefarm update-device-pool --region "$REGION" \
       --arn "$arn" \
       --description "$description" \
-      --max-devices "$max_devices" \
+      --clear-max-devices \
       --rules "$rules" \
       --query 'devicePool.arn' --output text > /dev/null
   fi
   echo "  pool ARN: ${arn}"
 }
 
-# Representative Android mix rather than "any available phone": a Samsung
+# Representative Android devices rather than "any available phone": a Samsung
 # One UI flagship (the dominant real-world OEM skin), a stock-Android Pixel,
-# and a mid-range A-series (the most common device class globally, lower
-# perf tier). Whichever of the three are highly available get picked, up to
-# the pool max. Model names must match the Device Farm public fleet exactly
-# (`aws devicefarm list-devices`).
-ANDROID_RULES='[
-  {"attribute":"MODEL","operator":"IN","value":"[\"Samsung Galaxy S24\",\"Google Pixel 8\",\"Samsung Galaxy A15\"]"},
-  {"attribute":"AVAILABILITY","operator":"EQUALS","value":"\"HIGHLY_AVAILABLE\""},
-  {"attribute":"FLEET_TYPE","operator":"EQUALS","value":"\"PUBLIC\""}
-]'
+# and a mid-range A-series (the most common device class globally, lower perf
+# tier). Device ARNs are public-fleet identifiers (account-independent); a
+# busy device makes the run queue for it rather than dropping coverage. If a
+# device is retired from the fleet, re-resolve with:
+#   aws devicefarm list-devices --region us-west-2 \
+#     --query "devices[?model=='<model>'].{os:os,arn:arn}"
+# Galaxy S24 / Android 14, Pixel 8 / Android 15, Galaxy A15 / Android 14.
+# (The value must stay single-line: it is a JSON-encoded array inside a JSON
+# string, and raw newlines inside a JSON string are invalid.)
+ANDROID_RULES='[{"attribute":"ARN","operator":"IN","value":"[\"arn:aws:devicefarm:us-west-2::device:E0BD1EDDDF1B4E1A8FF5668759831BD6\",\"arn:aws:devicefarm:us-west-2::device:DE5BD47FF3BD42C3A14BF7A6EFB1BFE7\",\"arn:aws:devicefarm:us-west-2::device:9B74AD95597D4BF39827A4EAD83B9F6D\"]"}]'
 
-# Representative iOS mix: the current mainstream iPhone plus the small-screen
-# SE on the oldest supported Safari — the 4.7" viewport is what makes the
-# horizontal-overflow check meaningful.
-IOS_RULES='[
-  {"attribute":"MODEL","operator":"IN","value":"[\"Apple iPhone 16\",\"Apple iPhone SE (2022)\"]"},
-  {"attribute":"OS_VERSION","operator":"GREATER_THAN_OR_EQUALS","value":"\"16\""},
-  {"attribute":"AVAILABILITY","operator":"EQUALS","value":"\"HIGHLY_AVAILABLE\""},
-  {"attribute":"FLEET_TYPE","operator":"EQUALS","value":"\"PUBLIC\""}
-]'
+# Representative iOS devices: the current mainstream iPhone plus the
+# small-screen SE on the oldest supported Safari — the 4.7" viewport is what
+# makes the horizontal-overflow check meaningful.
+# iPhone 16 / iOS 18.6.2, iPhone SE 2022 / iOS 16.4.
+IOS_RULES='[{"attribute":"ARN","operator":"IN","value":"[\"arn:aws:devicefarm:us-west-2::device:3D8FC46FCD034EF8B617E538C1651422\",\"arn:aws:devicefarm:us-west-2::device:9769808870C54DD798C7985DA7515A05\"]"}]'
 
-ensure_pool "$ANDROID_POOL_NAME" 3 \
-  "Representative Android mix: One UI flagship + stock Pixel + mid-range A-series" \
+ensure_pool "$ANDROID_POOL_NAME" \
+  "Pinned representative Android devices: Galaxy S24 (14), Pixel 8 (15), Galaxy A15 (14)" \
   "$ANDROID_RULES"
-ensure_pool "$IOS_POOL_NAME" 2 \
-  "Representative iOS mix: current mainstream + small-screen/oldest-Safari SE" \
+ensure_pool "$IOS_POOL_NAME" \
+  "Pinned representative iOS devices: iPhone 16 (18.6.2), iPhone SE 2022 (16.4)" \
   "$IOS_RULES"
 
 cat <<SUMMARY
