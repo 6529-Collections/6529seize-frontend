@@ -12,6 +12,7 @@ import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
+import WaveDropActionsCopyText from "./WaveDropActionsCopyText";
 import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
 import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
@@ -106,6 +107,7 @@ export default function WaveDropActionsMore({
               isDropdownItem={true}
               onCopy={closeDropdown}
             />
+            <WaveDropActionsCopyText drop={drop} onCopy={closeDropdown} />
             {showCurationsAction && (
               <button
                 type="button"
