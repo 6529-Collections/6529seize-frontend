@@ -1,6 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { GrantTokensDisclosure } from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/subcomponents/GrantTokensDisclosure";
-import { SupportedChain } from "@/components/nft-picker/types";
 
 // Mock the hook
 jest.mock(
