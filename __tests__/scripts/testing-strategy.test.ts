@@ -454,6 +454,27 @@ describe("testing strategy CI security checks", () => {
     );
   });
 
+  it("reports raw JWT-shaped tokens in JSON payload files", () => {
+    const fakeJwt = [
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+      "eyJzdWIiOiJmYWtlLXVzZXIiLCJpYXQiOjE1MTYyMzkwMjJ9",
+      "fake_signature_segment",
+    ].join(".");
+    fs.mkdirSync(path.join(tempDir, "tmp"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "tmp", "browser-auth.json"),
+      `${JSON.stringify({ jwt: fakeJwt, refreshToken: fakeJwt })}\n`
+    );
+
+    const result = scanFilesForSecrets(["tmp/browser-auth.json"], tempDir);
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining(["jwt-like-token"])
+    );
+    expect(JSON.stringify(result)).not.toContain("fake_signature_segment");
+  });
+
   it("accepts a read-only pull_request workflow", () => {
     fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
       recursive: true,
