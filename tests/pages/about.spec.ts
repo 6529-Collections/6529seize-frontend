@@ -50,7 +50,7 @@ test.describe("About Pages @smoke @medium @large", () => {
   test("should display AboutSubscriptions Page", async ({ page }) => {
     await page.goto("/about/subscriptions", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    await expect(page).toHaveTitle("Subscriptions | About");
+    await expect(page).toHaveTitle("Subscription Minting | About");
     await expectNoHorizontalOverflow(page);
 
     // Look for the specific paragraph containing "Remote Minting"
