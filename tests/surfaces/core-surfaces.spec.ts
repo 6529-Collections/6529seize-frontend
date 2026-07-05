@@ -13,7 +13,7 @@ import {
 } from "../support/surfaceSimulation";
 
 const NAVIGATION_TIMEOUT_MS = 15000;
-const WAVE_SCORE_RESULT = /Wave Score.*About.*Network Data/i;
+const WAVE_SCORE_RESULT = /Wave Score.*About.*Network & Reputation/i;
 const WAVE_SCORE_HEADING = "Wave score transparency";
 const REQUIRED_DELEGATION_ACTIONS = [
   "Register Delegation",
@@ -98,8 +98,8 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await gotoReady(page, "/");
 
     const nav = page.getByRole("navigation", { name: "Desktop navigation" });
-    await nav.getByRole("button", { name: "About" }).click();
-    await nav.getByRole("button", { name: "Network Data" }).click();
+    await nav.getByRole("button", { name: "About", exact: true }).click();
+    await nav.getByRole("button", { name: "Network & Reputation" }).click();
     await nav.getByRole("link", { name: "TDH", exact: true }).click();
 
     await expect(page).toHaveURL(/\/network\/tdh$/);
@@ -186,7 +186,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expectLinkHref(page, "Definitions", "/network/definitions");
     await expectLinkHref(
       page,
-      "View Network Stats",
+      "View Network TDH Stats",
       "/network/health/network-tdh"
     );
     await expectLinkHref(page, "View Levels", "/network/levels");
