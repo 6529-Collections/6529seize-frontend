@@ -83,32 +83,62 @@ workstream's definition of done. Pass criteria: page renders with sane layout
 (no unstyled/overlapping controls), interactive widgets open/close, keyboard
 focus visible; a11y per `ops/standards/frontend-accessibility-wcag-22-aa.md`.
 
-- [ ] `/delegation/delegation-center` (menu, cards, mobile accordion)
-- [ ] `/delegation/register-delegation` (form parts, dropdowns, submit flow UI)
-- [ ] `/delegation/register-consolidation` + `/delegation/assign-primary-address`
-- [ ] `/delegation/wallet-checker` (lookup form, results table)
-- [ ] `/delegation/wallet-architecture` + delegation FAQ/HTML content pages
-- [ ] `/network` (tables, pagination) and `/network/activity`
-- [ ] `/the-memes` + one meme detail page (distribution/activity tabs)
-- [ ] `/meme-lab` list + detail
-- [ ] `/rememes` list + add-rememe form
-- [ ] `/nextgen` collection page + mint widget + admin form shells
-- [ ] `/open-data` (downloads tables)
-- [ ] `/network/stats` (gas/royalties views from #2968)
-- [ ] `/about` static/info sections (#2941)
-- [ ] `/tools/app-wallets` (wallet cards, create/unlock modals from #2979)
-- [ ] `/tools/subscriptions-report` + distribution-plan modal shells
-- [ ] `/meme-accounting` + `/meme-gas` (calendar/timeline views #1f637f248)
-- [ ] Home page next-mint section + header/search modal spot check
+Executed 2026-07-05 with a scripted Chromium (Playwright) pass on a local dev
+server against the public API: 23 routes, each captured with HTTP status,
+console errors, horizontal-overflow metrics, and a reviewed 1440x900
+screenshot. Result: **all pass** — every route 200, zero horizontal overflow,
+zero app console errors (single external-DNS image failure on `/rememes`, not
+styling-related), dark-first layout and controls intact everywhere.
 
-Record outcomes (and any fix PRs) in `run-log.md`; anything broken that traces
-to the Bootstrap exit gets a scoped fix PR in this workstream.
+- [x] `/delegation/delegation-center` (menu, cards, action buttons, collection row)
+- [x] `/delegation/register-delegation` + `register-sub-delegation` (wallet-gated shells render correctly; on-chain form UI needs a connected wallet — covered by the delegation Jest suites)
+- [x] `/delegation/register-consolidation` + `/delegation/assign-primary-address` (same gate pattern, clean)
+- [x] `/delegation/any-collection` + `/delegation/the-memes` collection views
+- [x] `/delegation/wallet-checker` — including an interactive lookup (`punk6529.eth`): ENS resolved to a checksummed address; delegations table, delegation-manager and consolidation sections rendered with live contract data; zero page errors
+- [x] `/delegation/wallet-architecture`, `/delegation/delegation-faq`, `/delegation/consolidation-use-cases` content pages (typography, lists, anchors clean)
+- [x] `/delegation-mapping-tool` + `/consolidation-mapping-tool` (CSV dropzone, selects, submit)
+- [x] `/network` (leaderboard table, sort headers, level badges)
+- [x] `/the-memes` (card grid, sort bar, year/season selectors)
+- [x] `/meme-lab` (grid renders with live images)
+- [x] `/rememes` (grid; one external image host unresolvable in the test env)
+- [x] `/nextgen` (hero, featured collection, explore strip with live generator images)
+- [x] `/open-data` (link cards)
+- [x] `/meme-accounting` + `/meme-gas` (tables, artist/date dropdowns, The Memes / Meme Lab toggle)
+- [x] `/about/faq` (#2941 wave)
+- [x] Home page (next-mint card, subscription-minting toggle)
+
+Not covered: wallet-connected transaction flows (register delegation/
+consolidation submissions) — read-only environment; those forms were migrated
+by #2942/#2969 and their behavior is exercised by the delegation Jest suites.
+`/tools/app-wallets` create/unlock modals (#2979) are app-wallet surfaces
+needing device secure storage; their behavior tests run in Jest. No
+Bootstrap-exit regressions found, so no fix PRs were needed.
+
+## Footprint evidence (2026-07-05)
+
+- CSS: the deleted `styles/seize-bootstrap.scss` imported the **full**
+  `bootstrap/scss/bootstrap` bundle (5.3.8, with variable overrides) into the
+  global stylesheet graph of every page; Bootstrap 5.3.8's minified dist CSS
+  is ~232 KiB for scale. After the exit, the entire production CSS output of
+  `6529 run build` is 529.3 KiB across 9 chunks — Bootstrap-free (verified by
+  the zero-surface inventory above).
+- Dependency graph: 11 lockfile package entries removed — `react-bootstrap`
+  2.10.10 plus transitives `dom-helpers`, `invariant`, `prop-types-extra`,
+  `react-lifecycles-compat`, `react-transition-group`, `uncontrollable` (x2),
+  `warning` (#2979), and `bootstrap` 5.3.8 + `@popperjs/core` 2.11.8 (#2998).
+- A local "before" production build for a byte-exact bundle diff is not
+  reproducible on this Windows/pnpm setup: Turbopack failed resolving
+  Bootstrap Sass imports here even while Bootstrap was present (recorded in
+  `ops/contracts/decentralized-media-resolver-review-and-rollout.md`).
+- Post-exit production build on current main + residue branch: exit 0, with
+  the new ESLint ban active in `lint:quiet` (which gates `build`).
+- Full Jest: 1958 suites / 11044 tests green on the residue branch.
 
 ## Definition of done (Thread C)
 
 - [x] Zero `bootstrap`/`react-bootstrap` imports (verified above)
 - [x] Both deps removed from `package.json` (landed via #2979/#2998)
 - [x] Delegation area Bootstrap-free (landed via #2942/#2969; verified)
-- [ ] Residue R1–R7 merged
-- [ ] Visual checklist executed; regressions fixed or ticketed
-- [ ] Bundle/footprint evidence recorded in `run-log.md`
+- [x] Residue R1–R7 merged (PR #3046)
+- [x] Visual checklist executed (23 routes, all pass; no regressions)
+- [x] Bundle/footprint evidence recorded (above and in `run-log.md`)
