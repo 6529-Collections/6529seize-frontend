@@ -1,5 +1,49 @@
 # Run Log
 
+## 2026-07-05 (Thread H — CollectionDelegation split + #3078 + generic-any scanner)
+
+- Three-PR stacked series, all requiring human review by prxt (live wallet
+  UI; no agent merges): #3106 -> #3107 -> the scanner PR carrying this
+  entry.
+- PR #3106 (split): CollectionDelegation.tsx (2,033 lines) decomposed
+  behavior-preserving into 10 single-concern modules under
+  `components/delegation/collection-delegation/` + a 387-line composition
+  shell at the old path (public interface unchanged). Wagmi hook call
+  order preserved exactly — existing suites mock wagmi by call sequence.
+  The #3078 envelope bug and the `useState<any>` sites moved byte-for-byte
+  by design. `oversized_files` 89 -> 88. Validation: full Jest
+  1,968/11,117, delegation-readonly e2e 30/30 (desktop+mobile), browser
+  walk of 7 /delegation routes + interactive wallet-checker lookup
+  (punk6529.eth) — 200/0 overflow/0 errors everywhere, react-doctor
+  98/100.
+- PR #3107 (fix #3078): use-case lock UI read multicall envelopes as
+  booleans; now reads `.result` honoring `status` via new
+  `readMulticallBoolean` (failure/missing = unlocked, never locked).
+  Beyond the issue's four sites, the write arg was also envelope-derived:
+  `setCollectionUsecaseLock` always submitted lock=false once statuses
+  loaded (the UI could never lock). Before/after screenshots from a
+  local-only fixture harness are embedded in the PR; unit + component
+  suites pin labels, asterisks, toast titles, and exact write args
+  (incl. failure envelopes). react-doctor 100/100 on the diff.
+- Bug found while fixing, filed NOT fixed (different class, same flow):
+  #3108 — special use cases 997/998/999 map to lockUseCaseIndex 16/17/18
+  but the multicall arrays put them at 17/18/19, so their post-selection
+  button state/write args/toast read the wrong entry ("#undefined -
+  undefined" titles for 998/999). Masked until #3107 lands.
+- PR 3 (this entry): ratchet `any_casts` regex extended to catch
+  generic-argument `any` (`useState<any>`, `Record<string, any>`; pattern
+  exported as ANY_CASTS_PATTERN, jest-pinned incl. prose non-matches).
+  The five delegation `useState<any>` stragglers typed
+  (RevokeDelegationRequest/BatchRevokeDelegationRequest + string[] keys);
+  delegation area now counts zero. Baseline 4 -> 27: the 23 newly visible
+  pre-existing sites across 11 non-delegation files are inventoried in
+  any-exceptions.md as owned burn-down backlog, not exceptions.
+- Environment notes for other threads: fresh-worktree `run dev`/e2e needs
+  `./bin/6529 run build:env-schema` once (next.config.compiled.js
+  requires the generated env schema; the predev hop does not cover the
+  Playwright webServer path). `gh` cannot attach images to PRs — push
+  PNGs to a gist via git and embed the raw URLs.
+
 ## 2026-07-05 (Thread F — collection surfaces quality pass)
 
 - Phase 1 (overflow): root cause pinned with production evidence — the
