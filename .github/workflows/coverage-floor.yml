@@ -26,9 +26,12 @@ on:
 permissions:
   contents: read
 
+# PR runs cancel superseded heads; main-push runs queue instead (GitHub keeps
+# only the newest pending run per group), so a busy merge train still gets a
+# completed coverage verdict on its final state instead of a cancel cascade.
 concurrency:
   group: coverage-floor-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   coverage-floor:
