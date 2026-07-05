@@ -266,7 +266,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     return (
       <>
         <div
-          className={`tw-w-full tw-max-w-none ${styles["tokenContainer"]} tw-pb-6 tw-pt-6`}
+          className={`tw-w-full tw-max-w-none tw-px-3 ${styles["tokenContainer"]} tw-pb-6 tw-pt-6`}
         >
           <div className="-tw-mx-3 tw-flex tw-flex-wrap">
             <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
