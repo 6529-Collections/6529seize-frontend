@@ -3,6 +3,7 @@
 import React, { useEffect, useCallback, useMemo, useRef } from "react";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDebouncedCallback } from "use-debounce";
+import { registerWaveComposerDock } from "./WaveComposerDockVisibility";
 
 export enum CreateDropWaveWrapperContext {
   WAVE_CHAT = "WAVE_CHAT",
@@ -75,6 +76,15 @@ export function CreateDropWaveWrapper({
 
   const shouldObserve = context !== CreateDropWaveWrapperContext.SINGLE_DROP;
   useResizeObserver(containerRef, fixedBottomRef, shouldObserve);
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) {
+      return;
+    }
+
+    return registerWaveComposerDock(element);
+  }, []);
 
   const containerClassName = useMemo(() => {
     if (capacitor.isIos) {

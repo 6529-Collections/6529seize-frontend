@@ -109,17 +109,12 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
 
-    // Programmatic click: the floating quick-DM button can overlay the Post
-    // button at some viewports and intercept a pointer click (same idiom as
-    // showDropActionsIfCollapsed).
-    await page
-      .getByRole("button", { name: "Post" })
-      .last()
-      .evaluate((element) => {
-        if (element instanceof HTMLElement) {
-          element.click();
-        }
-      });
+    // The quick-DM launcher yields to the docked composer at this viewport
+    // (WaveComposerDockVisibility), so a real pointer click must land on Post.
+    await expect(
+      page.getByRole("button", { name: /Open quick direct messages/ })
+    ).toBeHidden();
+    await page.getByRole("button", { name: "Post" }).last().click();
 
     await expect
       .poll(

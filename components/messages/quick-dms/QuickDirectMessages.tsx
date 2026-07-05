@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useWaveDropsScrollControlsVisible } from "@/components/waves/drops/WaveDropsScrollControlsVisibility";
+import { useWaveComposerDockElements } from "@/components/waves/WaveComposerDockVisibility";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -38,6 +39,11 @@ const QUICK_DM_PANEL_POSITION_CLASS = `${QUICK_DM_BASE_POSITION_CLASS} tw-bottom
 const QUICK_DM_LAUNCHER_BASE_POSITION_CLASS = `${QUICK_DM_BASE_POSITION_CLASS} tw-transition-[bottom] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
 const QUICK_DM_LAUNCHER_RESTING_POSITION_CLASS = "tw-bottom-24 xl:tw-bottom-6";
 const QUICK_DM_LAUNCHER_LIFTED_POSITION_CLASS = "tw-bottom-32 xl:tw-bottom-32";
+// Right inset (tw-right-6) + launcher diameter (tw-size-14) + breathing room.
+// When a bottom-docked wave composer extends into that strip, any fixed
+// bottom-right spot would cover its Post button or the newest drop's hover
+// actions and swallow pointer clicks, so the launcher yields instead.
+const QUICK_DM_LAUNCHER_CLEARANCE_PX = 88;
 
 const getDesktopViewportSnapshot = (): boolean => {
   if (typeof window === "undefined") {
@@ -79,6 +85,8 @@ export default function QuickDirectMessages() {
   const { directMessages, registerWave, requestDirectMessagesList } =
     useMyStream();
   const shouldLiftLauncher = useWaveDropsScrollControlsVisible();
+  const dockedComposers = useWaveComposerDockElements();
+  const [isLauncherZoneCovered, setIsLauncherZoneCovered] = useState(false);
   const [state, setState] = useState<QuickDmState>(() => readStoredState());
   const [isCreateDirectMessageOpen, setIsCreateDirectMessageOpen] =
     useState(false);
@@ -114,6 +122,38 @@ export default function QuickDirectMessages() {
   );
 
   useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
+
+  useEffect(() => {
+    const measureLauncherZone = () => {
+      setIsLauncherZoneCovered(
+        dockedComposers.some((composer) => {
+          const rect = composer.getBoundingClientRect();
+          return (
+            rect.width > 0 &&
+            rect.height > 0 &&
+            globalThis.window.innerWidth - rect.right <
+              QUICK_DM_LAUNCHER_CLEARANCE_PX
+          );
+        })
+      );
+    };
+
+    measureLauncherZone();
+    if (dockedComposers.length === 0) {
+      return;
+    }
+
+    // Width changes (sidebar toggles, layout shifts) re-run the measurement;
+    // viewport resizes are caught by the window listener.
+    const observer = new ResizeObserver(measureLauncherZone);
+    dockedComposers.forEach((composer) => observer.observe(composer));
+    globalThis.window.addEventListener("resize", measureLauncherZone);
+
+    return () => {
+      observer.disconnect();
+      globalThis.window.removeEventListener("resize", measureLauncherZone);
+    };
+  }, [dockedComposers]);
 
   const setAndStoreState = useCallback((nextState: QuickDmState) => {
     setState(nextState);
@@ -247,6 +287,10 @@ export default function QuickDirectMessages() {
     : undefined;
 
   if (state.view === "closed") {
+    if (isLauncherZoneCovered) {
+      return createDirectMessageModal;
+    }
+
     const launcherPositionClassName = `${QUICK_DM_LAUNCHER_BASE_POSITION_CLASS} ${
       shouldLiftLauncher
         ? QUICK_DM_LAUNCHER_LIFTED_POSITION_CLASS
