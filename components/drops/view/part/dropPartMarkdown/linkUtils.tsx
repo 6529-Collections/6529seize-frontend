@@ -4,7 +4,7 @@ import type { ExtraProps } from "react-markdown";
 import { publicEnv } from "@/config/env";
 import { isLikelyEnsTarget } from "@/lib/ens/detect";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
-import { parseYoutubeLink } from "@/src/services/youtube/url";
+import { parseYoutubeLink } from "@/services/youtube/url";
 
 import { isPepeHost } from "./pepe";
 import { TWITTER_DOMAINS } from "./twitter";

@@ -1,4 +1,4 @@
-import { parseWikimediaLink } from "@/src/services/wikimedia/url";
+import { parseWikimediaLink } from "@/services/wikimedia/url";
 
 describe("parseWikimediaLink", () => {
   it("detects wikipedia hosts", () => {

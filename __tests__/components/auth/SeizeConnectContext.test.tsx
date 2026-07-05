@@ -5,7 +5,7 @@ import {
 import { AppKitBootstrapContext } from "@/components/providers/AppKitBootstrapContext";
 import { publicEnv } from "@/config/env";
 import * as authUtils from "@/services/auth/auth.utils";
-import { WalletInitializationError } from "@/src/errors/wallet";
+import { WalletInitializationError } from "@/errors/wallet";
 import {
   fireEvent,
   render,

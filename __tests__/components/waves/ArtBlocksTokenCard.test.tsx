@@ -1,13 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
+import ArtBlocksTokenCard from "@/components/waves/ArtBlocksTokenCard";
 import {
   fetchArtBlocksMeta,
   type ArtBlocksMeta,
-} from "@/src/services/api/artblocks";
+} from "@/services/api/artblocks";
 
-jest.mock("@/src/services/api/artblocks", () => {
-  const actual = jest.requireActual("@/src/services/api/artblocks");
+jest.mock("@/services/api/artblocks", () => {
+  const actual = jest.requireActual("@/services/api/artblocks");
   return {
     ...actual,
     fetchArtBlocksMeta: jest.fn(),

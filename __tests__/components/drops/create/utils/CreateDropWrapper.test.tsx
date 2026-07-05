@@ -2,7 +2,7 @@ import React from "react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CreateDropWrapper from "@/components/drops/create/utils/CreateDropWrapper";
-import { WalletValidationError } from "@/src/errors/wallet";
+import { WalletValidationError } from "@/errors/wallet";
 import {
   CreateDropType,
   CreateDropViewType,

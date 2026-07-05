@@ -1,7 +1,7 @@
 import {
   fetchArtBlocksMeta,
   inferSeries,
-} from "@/src/services/api/artblocks";
+} from "@/services/api/artblocks";
 
 const originalFetch = global.fetch;
 

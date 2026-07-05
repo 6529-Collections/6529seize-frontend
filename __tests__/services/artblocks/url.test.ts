@@ -3,7 +3,7 @@ import {
   buildMediaUrl,
   buildTokenApiUrl,
   parseArtBlocksLink,
-} from "@/src/services/artblocks/url";
+} from "@/services/artblocks/url";
 
 describe("parseArtBlocksLink", () => {
   it("parses flagship token URLs", () => {

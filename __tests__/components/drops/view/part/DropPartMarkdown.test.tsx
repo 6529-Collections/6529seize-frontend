@@ -145,7 +145,7 @@ jest.mock("@/components/waves/LinkPreviewCard", () => ({
   default: (props: any) => mockLinkPreviewCard(props),
 }));
 
-jest.mock("@/src/components/waves/ArtBlocksTokenCard", () => ({
+jest.mock("@/components/waves/ArtBlocksTokenCard", () => ({
   __esModule: true,
   default: (props: any) => mockArtBlocksTokenCard(props),
 }));

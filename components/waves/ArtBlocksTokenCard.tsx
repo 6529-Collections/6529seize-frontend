@@ -14,12 +14,12 @@ import {
   fetchArtBlocksMeta,
   inferSeries,
   type ArtBlocksMeta,
-} from "@/src/services/api/artblocks";
+} from "@/services/api/artblocks";
 import {
   buildLiveUrl,
   buildMediaUrl,
   type ArtBlocksTokenIdentifier,
-} from "@/src/services/artblocks/url";
+} from "@/services/artblocks/url";
 
 interface ArtBlocksTokenCardProps {
   readonly href: string;

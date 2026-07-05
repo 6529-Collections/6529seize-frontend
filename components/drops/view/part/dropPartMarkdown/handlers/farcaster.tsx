@@ -1,5 +1,5 @@
 import FarcasterCard from "@/components/waves/FarcasterCard";
-import { parseFarcasterResource } from "@/src/services/farcaster/url";
+import { parseFarcasterResource } from "@/services/farcaster/url";
 
 import type { LinkHandler } from "../linkTypes";
 

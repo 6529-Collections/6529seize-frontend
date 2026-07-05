@@ -36,14 +36,14 @@ import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
-import { WalletInitializationError } from "@/src/errors/wallet";
-import { SecurityEventType } from "@/src/types/security";
+import { WalletInitializationError } from "@/errors/wallet";
+import { SecurityEventType } from "@/types/security";
 import {
   createConnectionEventContext,
   createValidationEventContext,
   logError,
   logSecurityEvent,
-} from "@/src/utils/security-logger";
+} from "@/utils/security-logger";
 import { isSafeWalletInfo } from "@/utils/wallet-detection";
 import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { WalletErrorBoundary } from "./error-boundary";

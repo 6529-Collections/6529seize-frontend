@@ -1,6 +1,6 @@
 import type { ErrorInfo, ReactNode } from "react";
 import { Component } from "react";
-import { sanitizeErrorMessage, logError } from "@/src/utils/security-logger";
+import { sanitizeErrorMessage, logError } from "@/utils/security-logger";
 import { clearAllWalletAuth } from "@/services/auth/auth.utils";
 
 interface Props {

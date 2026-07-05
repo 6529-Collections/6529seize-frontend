@@ -1,10 +1,10 @@
-import { SecurityEventType } from "@/src/types/security";
+import { SecurityEventType } from "@/types/security";
 import {
   createConnectionEventContext,
   createValidationEventContext,
   logError,
   logSecurityEvent,
-} from "@/src/utils/security-logger";
+} from "@/utils/security-logger";
 
 let mockConsoleDebug: jest.SpyInstance;
 let mockConsoleWarn: jest.SpyInstance;

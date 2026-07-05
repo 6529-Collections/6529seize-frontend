@@ -23,7 +23,7 @@ import LruTtlCache from "@/lib/cache/lruTtl";
 import {
   parseFarcasterResource,
   type FarcasterResourceIdentifier,
-} from "@/src/services/farcaster/url";
+} from "@/services/farcaster/url";
 import type {
   FarcasterCastPreview,
   FarcasterChannelPreview,
