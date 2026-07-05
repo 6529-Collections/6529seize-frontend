@@ -25,7 +25,7 @@ IOS_POOL_NAME="${DEVICEFARM_IOS_POOL_NAME:-ios-phones-web-smoke}"
 
 project_arn="$(aws devicefarm list-projects --region "$REGION" \
   --query "projects[?name=='${PROJECT_NAME}'].arn | [0]" --output text)"
-if [ -z "$project_arn" ] || [ "$project_arn" = "None" ]; then
+if [[ -z "$project_arn" || "$project_arn" == "None" ]]; then
   echo "Creating Device Farm project: ${PROJECT_NAME}"
   project_arn="$(aws devicefarm create-project --region "$REGION" \
     --name "$PROJECT_NAME" --query 'project.arn' --output text)"
@@ -43,7 +43,7 @@ ensure_pool() {
   arn="$(aws devicefarm list-device-pools --region "$REGION" \
     --arn "$project_arn" --type PRIVATE \
     --query "devicePools[?name=='${name}'].arn | [0]" --output text)"
-  if [ -z "$arn" ] || [ "$arn" = "None" ]; then
+  if [[ -z "$arn" || "$arn" == "None" ]]; then
     echo "Creating device pool: ${name} (max ${max_devices} devices)"
     arn="$(aws devicefarm create-device-pool --region "$REGION" \
       --project-arn "$project_arn" \

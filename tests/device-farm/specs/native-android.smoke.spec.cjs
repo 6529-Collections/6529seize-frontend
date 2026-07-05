@@ -102,6 +102,11 @@ describe("6529 native Android shell smoke (real device)", function () {
         timeoutMsg: "deep link did not navigate the WebView to /the-memes",
       }
     );
+    const pathname = await driver.execute(() => window.location.pathname);
+    assert.ok(
+      pathname.startsWith("/the-memes"),
+      `deep link landed on ${pathname}, expected /the-memes`
+    );
     await saveScreenshot(driver, "native-deeplink-the-memes");
   });
 });

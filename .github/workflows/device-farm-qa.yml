@@ -36,8 +36,8 @@ on:
     # Weekly full pack against production (read-only smoke + native shell QA).
     - cron: "0 4 * * 1"
 
-permissions:
-  contents: read
+# Permissions are declared per job; no workflow-level grants.
+permissions: {}
 
 concurrency:
   group: device-farm-qa
@@ -117,6 +117,8 @@ jobs:
     needs: plan
     if: needs.plan.outputs.web == 'true' || needs.plan.outputs.native == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -154,6 +156,8 @@ jobs:
     needs: [plan, package-tests]
     if: needs.plan.outputs.web == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -240,6 +244,8 @@ jobs:
     needs: [plan, package-tests]
     if: needs.plan.outputs.native == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -419,7 +425,7 @@ jobs:
           fi
 
       - name: Notify about scheduled failure
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
         if: failure() && github.event_name == 'schedule'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

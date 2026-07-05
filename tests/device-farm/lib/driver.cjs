@@ -134,7 +134,7 @@ async function waitForWebviewContext(driver, timeout) {
       const contexts = await driver.getContexts();
       webviewContext = contexts
         .map((context) => (typeof context === "string" ? context : context.id))
-        .find((id) => id && id.includes("WEBVIEW"));
+        .find((id) => id?.includes("WEBVIEW"));
       return Boolean(webviewContext);
     },
     { timeout, interval: 3000, timeoutMsg: "no WEBVIEW context appeared" }
