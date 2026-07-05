@@ -1,0 +1,447 @@
+name: Device Farm Mobile QA
+
+# Real-device QA for the 6529 mobile experience on AWS Device Farm.
+# Regime docs, provisioning steps, and IAM policy:
+# ops/docs/developer/device-farm-qa.md
+#
+# Packs:
+#   web    - Appium smoke of the deployed frontend in real device browsers
+#            (Android Chrome + iOS Safari), read-only.
+#   native - Debug APK of the Capacitor shell (6529-Collections/6529-core-mobile)
+#            exercised with an Appium smoke suite plus Device Farm's built-in
+#            fuzz (monkey) test.
+#
+# Every job no-ops with a notice until the Device Farm secrets are configured,
+# so the schedule stays green before provisioning.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Environment the mobile web pack runs against"
+        type: choice
+        options:
+          - production
+          - staging
+        default: production
+      packs:
+        description: "Which QA packs to run"
+        type: choice
+        options:
+          - all
+          - web
+          - native
+        default: all
+  schedule:
+    # Weekly full pack against production (read-only smoke + native shell QA).
+    - cron: "0 4 * * 1"
+
+# Permissions are declared per job; no workflow-level grants.
+permissions: {}
+
+concurrency:
+  group: device-farm-qa
+  cancel-in-progress: false
+
+env:
+  # AWS Device Farm is only available in us-west-2.
+  DEVICEFARM_REGION: "us-west-2"
+  DEVICEFARM_PROJECT: ${{ vars.DEVICEFARM_PROJECT_NAME || '6529-mobile-qa' }}
+  DEVICEFARM_ANDROID_POOL: ${{ vars.DEVICEFARM_ANDROID_POOL_NAME || 'android-phones-smoke' }}
+  DEVICEFARM_IOS_POOL: ${{ vars.DEVICEFARM_IOS_POOL_NAME || 'ios-phones-web-smoke' }}
+  MOBILE_SHELL_REPO: "6529-Collections/6529-core-mobile"
+  MOBILE_SHELL_REF: "main"
+
+jobs:
+  plan:
+    name: Plan QA packs
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      web: ${{ steps.decide.outputs.web }}
+      native: ${{ steps.decide.outputs.native }}
+      target-url: ${{ steps.decide.outputs.target-url }}
+    env:
+      HAS_DEVICEFARM_CREDENTIALS: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID != '' && secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY != '' }}
+      HAS_MOBILE_REPO_TOKEN: ${{ secrets.MOBILE_REPO_TOKEN != '' }}
+      PACKS_INPUT: ${{ inputs.packs || 'all' }}
+      TARGET_INPUT: ${{ inputs.target || 'production' }}
+    steps:
+      - name: Decide packs and target
+        id: decide
+        run: |
+          set -euo pipefail
+
+          if [ "$TARGET_INPUT" = "staging" ]; then
+            target_url="https://staging.6529.io"
+          else
+            target_url="https://6529.io"
+          fi
+
+          web=false
+          native=false
+          if [ "$HAS_DEVICEFARM_CREDENTIALS" = "true" ]; then
+            case "$PACKS_INPUT" in
+              all) web=true; native=true ;;
+              web) web=true ;;
+              native) native=true ;;
+            esac
+          else
+            echo "::notice::Device Farm credentials (DEVICEFARM_AWS_ACCESS_KEY_ID / DEVICEFARM_AWS_SECRET_ACCESS_KEY) are not configured; skipping all Device Farm packs. See ops/docs/developer/device-farm-qa.md."
+          fi
+
+          if [ "$native" = "true" ] && [ "$HAS_MOBILE_REPO_TOKEN" != "true" ]; then
+            echo "::notice::MOBILE_REPO_TOKEN is not configured; skipping the native Android pack (cannot check out ${MOBILE_SHELL_REPO})."
+            native=false
+          fi
+
+          {
+            echo "web=$web"
+            echo "native=$native"
+            echo "target-url=$target_url"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Device Farm Mobile QA plan"
+            echo ""
+            echo "| Pack | Enabled |"
+            echo "| --- | --- |"
+            echo "| mobile web smoke | $web |"
+            echo "| native Android shell | $native |"
+            echo ""
+            echo "Mobile web target: \`$target_url\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  package-tests:
+    name: Package Appium test bundle
+    needs: plan
+    if: needs.plan.outputs.web == 'true' || needs.plan.outputs.native == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "22"
+
+      - name: Bundle tests for Device Farm upload
+        working-directory: tests/device-farm
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          # bundleDependencies: true in package.json makes npm pack embed
+          # node_modules in the tarball, which is the layout Device Farm's
+          # APPIUM_NODE/APPIUM_WEB_NODE test types expect inside the zip.
+          npm pack
+          mkdir -p dist
+          zip -j dist/devicefarm-tests.zip ./*.tgz
+          unzip -l dist/devicefarm-tests.zip
+
+      - name: Upload test bundle artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: devicefarm-test-package
+          path: tests/device-farm/dist/devicefarm-tests.zip
+          retention-days: 7
+          if-no-files-found: error
+
+  web-smoke:
+    name: Mobile web smoke (${{ matrix.platform }})
+    needs: [plan, package-tests]
+    if: needs.plan.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: android-chrome
+            testspec: web-android.yml
+          - platform: ios-safari
+            testspec: web-ios.yml
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Download test bundle artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: devicefarm-test-package
+          path: tests/device-farm/dist
+
+      - name: Render test spec for target
+        env:
+          TARGET_URL: ${{ needs.plan.outputs.target-url }}
+          TESTSPEC: ${{ matrix.testspec }}
+        run: |
+          set -euo pipefail
+          sed "s|__TARGET_URL__|${TARGET_URL}|g" \
+            "tests/device-farm/testspecs/${TESTSPEC}" \
+            > "tests/device-farm/dist/${TESTSPEC}"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-access-key-id: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.DEVICEFARM_REGION }}
+
+      - name: Run mobile web smoke on Device Farm
+        id: devicefarm
+        uses: aws-actions/aws-devicefarm-mobile-device-testing@5a6c9fbb66ca99cb92ce07381c8be038f654eff6 # v3.0
+        with:
+          run-settings-json: |
+            {
+              "name": "mobile-web-${{ matrix.platform }}_${{ github.run_id }}_${{ github.run_attempt }}",
+              "projectArn": "${{ env.DEVICEFARM_PROJECT }}",
+              "devicePoolArn": "${{ matrix.platform == 'ios-safari' && env.DEVICEFARM_IOS_POOL || env.DEVICEFARM_ANDROID_POOL }}",
+              "test": {
+                "type": "APPIUM_WEB_NODE",
+                "testPackageArn": "tests/device-farm/dist/devicefarm-tests.zip",
+                "testSpecArn": "tests/device-farm/dist/${{ matrix.testspec }}"
+              },
+              "executionConfiguration": {
+                "jobTimeoutMinutes": 30
+              }
+            }
+          artifact-types: ALL
+
+      - name: Record run summary
+        if: always()
+        env:
+          RUN_RESULT: ${{ steps.devicefarm.outputs.result }}
+          RUN_STATUS: ${{ steps.devicefarm.outputs.status }}
+          CONSOLE_URL: ${{ steps.devicefarm.outputs.console-url }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          {
+            echo "### Mobile web smoke (${PLATFORM})"
+            echo ""
+            echo "- Result: \`${RUN_RESULT:-unknown}\` (status \`${RUN_STATUS:-unknown}\`)"
+            echo "- Device Farm console: ${CONSOLE_URL:-n/a}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Device Farm artifacts
+        if: always() && steps.devicefarm.outputs.artifact-folder != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: devicefarm-web-${{ matrix.platform }}-artifacts
+          path: ${{ steps.devicefarm.outputs.artifact-folder }}
+          retention-days: 14
+          if-no-files-found: ignore
+
+  native-android:
+    name: Native Android shell QA
+    needs: [plan, package-tests]
+    if: needs.plan.outputs.native == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Checkout mobile shell
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          repository: 6529-Collections/6529-core-mobile
+          ref: ${{ env.MOBILE_SHELL_REF }}
+          token: ${{ secrets.MOBILE_REPO_TOKEN }}
+          path: mobile-shell
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "22"
+
+      - name: Install Java
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build debug APK of the Capacitor shell
+        id: build-apk
+        working-directory: mobile-shell
+        env:
+          MOBILE_GOOGLE_SERVICES_JSON: ${{ secrets.MOBILE_GOOGLE_SERVICES_JSON }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+
+          # The shell loads https://6529.io remotely, but Capacitor still
+          # requires a local web asset directory for `cap sync`.
+          if [ ! -d www ]; then
+            mkdir -p www
+            printf '<!doctype html><title>6529</title>' > www/index.html
+          fi
+
+          # Firebase push config is optional for QA builds: the Gradle project
+          # only applies the google-services plugin when the file exists.
+          if [ -n "${MOBILE_GOOGLE_SERVICES_JSON}" ]; then
+            printf '%s' "${MOBILE_GOOGLE_SERVICES_JSON}" > android/app/google-services.json
+            echo "google-services.json provisioned from secret."
+          else
+            echo "::notice::MOBILE_GOOGLE_SERVICES_JSON not set; building the shell without Firebase push configuration."
+          fi
+
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+          test -f app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload shell APK artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: 6529-shell-debug-apk
+          path: mobile-shell/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+
+      - name: Download test bundle artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: devicefarm-test-package
+          path: tests/device-farm/dist
+
+      # The native spec has no placeholders today; rendering it through the
+      # same substitution as the web specs keeps future placeholder additions
+      # from silently uploading unrendered templates.
+      - name: Render test spec for target
+        env:
+          TARGET_URL: ${{ needs.plan.outputs.target-url }}
+        run: |
+          set -euo pipefail
+          sed "s|__TARGET_URL__|${TARGET_URL}|g" \
+            tests/device-farm/testspecs/native-android.yml \
+            > tests/device-farm/dist/native-android.yml
+
+      - name: Configure AWS Credentials
+        id: aws-credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-access-key-id: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.DEVICEFARM_REGION }}
+
+      - name: Run native Appium smoke on Device Farm
+        id: devicefarm-smoke
+        uses: aws-actions/aws-devicefarm-mobile-device-testing@5a6c9fbb66ca99cb92ce07381c8be038f654eff6 # v3.0
+        with:
+          run-settings-json: |
+            {
+              "name": "native-android-smoke_${{ github.run_id }}_${{ github.run_attempt }}",
+              "projectArn": "${{ env.DEVICEFARM_PROJECT }}",
+              "devicePoolArn": "${{ env.DEVICEFARM_ANDROID_POOL }}",
+              "appArn": "mobile-shell/android/app/build/outputs/apk/debug/app-debug.apk",
+              "test": {
+                "type": "APPIUM_NODE",
+                "testPackageArn": "tests/device-farm/dist/devicefarm-tests.zip",
+                "testSpecArn": "tests/device-farm/dist/native-android.yml"
+              },
+              "executionConfiguration": {
+                "jobTimeoutMinutes": 30
+              }
+            }
+          artifact-types: ALL
+
+      # Run the fuzz pass even when the smoke suite fails: a crash signal from
+      # random UI input is valuable exactly when the shell is misbehaving.
+      - name: Run built-in fuzz on Device Farm
+        id: devicefarm-fuzz
+        if: always() && steps.build-apk.outcome == 'success' && steps.aws-credentials.outcome == 'success'
+        uses: aws-actions/aws-devicefarm-mobile-device-testing@5a6c9fbb66ca99cb92ce07381c8be038f654eff6 # v3.0
+        with:
+          run-settings-json: |
+            {
+              "name": "native-android-fuzz_${{ github.run_id }}_${{ github.run_attempt }}",
+              "projectArn": "${{ env.DEVICEFARM_PROJECT }}",
+              "devicePoolArn": "${{ env.DEVICEFARM_ANDROID_POOL }}",
+              "appArn": "mobile-shell/android/app/build/outputs/apk/debug/app-debug.apk",
+              "test": {
+                "type": "BUILTIN_FUZZ",
+                "parameters": {
+                  "event_count": "2500",
+                  "throttle": "50",
+                  "seed": "6529"
+                }
+              },
+              "executionConfiguration": {
+                "jobTimeoutMinutes": 20
+              }
+            }
+          artifact-types: ALL
+
+      - name: Record run summary
+        if: always()
+        env:
+          SMOKE_RESULT: ${{ steps.devicefarm-smoke.outputs.result }}
+          SMOKE_CONSOLE_URL: ${{ steps.devicefarm-smoke.outputs.console-url }}
+          FUZZ_RESULT: ${{ steps.devicefarm-fuzz.outputs.result }}
+          FUZZ_CONSOLE_URL: ${{ steps.devicefarm-fuzz.outputs.console-url }}
+        run: |
+          {
+            echo "### Native Android shell QA"
+            echo ""
+            echo "- Appium smoke: \`${SMOKE_RESULT:-unknown}\` (${SMOKE_CONSOLE_URL:-n/a})"
+            echo "- Built-in fuzz: \`${FUZZ_RESULT:-unknown}\` (${FUZZ_CONSOLE_URL:-n/a})"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Device Farm artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: devicefarm-native-android-artifacts
+          path: |
+            ${{ steps.devicefarm-smoke.outputs.artifact-folder }}
+            ${{ steps.devicefarm-fuzz.outputs.artifact-folder }}
+          retention-days: 14
+          if-no-files-found: ignore
+
+  report:
+    name: QA report
+    needs: [plan, web-smoke, native-android]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Summarize pack results
+        env:
+          WEB_RESULT: ${{ needs.web-smoke.result }}
+          NATIVE_RESULT: ${{ needs.native-android.result }}
+        run: |
+          {
+            echo "## Device Farm Mobile QA results"
+            echo ""
+            echo "| Pack | Result |"
+            echo "| --- | --- |"
+            echo "| mobile web smoke | ${WEB_RESULT} |"
+            echo "| native Android shell | ${NATIVE_RESULT} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${WEB_RESULT}" = "failure" ] || [ "${NATIVE_RESULT}" = "failure" ]; then
+            echo "::error::At least one Device Farm QA pack failed."
+            exit 1
+          fi
+
+      - name: Notify about scheduled failure
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
+        if: failure() && github.event_name == 'schedule'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          title: "Device Farm Mobile QA: weekly real-device pack failed"
+          description: "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          color: 0xff0000
