@@ -122,9 +122,19 @@ describe("6529 mobile web smoke (real device)", function () {
 
     // Wave messages hydrate after the shell; wait for a long-pressable row.
     // `.touch-select-none` is the app's own marker for rows whose text
-    // selection is disabled in favor of the long-press interaction.
-    const row = await driver.$(".touch-select-none:last-of-type");
-    await row.waitForExist({ timeout: 60000 });
+    // selection is disabled in favor of the long-press interaction. Target
+    // the last matching row in the document (the newest message) — CSS
+    // `:last-of-type` would resolve per-parent, not document-wide.
+    await driver.waitUntil(
+      async () => (await driver.$$(".touch-select-none")).length > 0,
+      {
+        timeout: 60000,
+        interval: 2000,
+        timeoutMsg: "no long-pressable wave rows appeared",
+      }
+    );
+    const rows = await driver.$$(".touch-select-none");
+    const row = rows[rows.length - 1];
 
     await longPress(driver, row);
 

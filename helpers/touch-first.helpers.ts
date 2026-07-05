@@ -74,7 +74,8 @@ const FINE_POINTER_BODY_ATTRIBUTE = "data-fine-pointer";
 
 // A single event is not proof: some tools emit stray synthetic mouse events
 // on genuine touch devices, and jsdom/test events must never latch. Require
-// a short stream of TRUSTED mouse moves — a real cursor glide.
+// a short stream of TRUSTED mouse pointer events (moves, or the pointerdown
+// of a click) — a real cursor glide or interaction.
 const FINE_POINTER_EVIDENCE_THRESHOLD = 3;
 
 // Guard 1 of 3 (see handleSentinelPointerEvent for the other two): mouse
@@ -94,7 +95,7 @@ const capabilityChangeListeners = new Set<() => void>();
 
 let finePointerObserved = false;
 let pointerSentinelInstalled = false;
-let trustedMouseMoveCount = 0;
+let trustedMouseEvidenceCount = 0;
 let lastTrustedTouchAt = Number.NEGATIVE_INFINITY;
 
 const notifyCapabilityChange = () => {
@@ -105,7 +106,7 @@ const notifyCapabilityChange = () => {
 
 const discountTouchDerivedEvidence = () => {
   lastTrustedTouchAt = Date.now();
-  trustedMouseMoveCount = 0;
+  trustedMouseEvidenceCount = 0;
 };
 
 const handleSentinelPointerEvent = (event: Event) => {
@@ -137,8 +138,8 @@ const handleSentinelPointerEvent = (event: Event) => {
     return;
   }
 
-  trustedMouseMoveCount += 1;
-  if (trustedMouseMoveCount < FINE_POINTER_EVIDENCE_THRESHOLD) {
+  trustedMouseEvidenceCount += 1;
+  if (trustedMouseEvidenceCount < FINE_POINTER_EVIDENCE_THRESHOLD) {
     return;
   }
 
