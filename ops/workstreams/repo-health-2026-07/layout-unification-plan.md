@@ -204,6 +204,6 @@ before/after diff with only sanctioned normalizations (font-preload
 - [x] Phase 1: `src/` folded (PR #3048)
 - [x] Phase 2: router hygiene (PR #3050 — pages-router ledger closed)
 - [ ] Phase 3 W1: data movers
-- [ ] Phase 3 W2: WP-scrape cluster (batch 1: 20 pages, 139 -> 119)
+- [ ] Phase 3 W2: WP-scrape cluster (batches 1-2 merged: 55 pages, 139 -> 90; ~21 body-split pages remain)
 - [ ] Phase 3 W3: interactive giants (now incl. delegation)
 - [ ] Grandfather list empty
