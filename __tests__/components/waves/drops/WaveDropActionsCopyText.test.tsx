@@ -1,7 +1,13 @@
 import WaveDropActionsCopyText from "@/components/waves/drops/WaveDropActionsCopyText";
 import { buildDropClipboardText } from "@/helpers/waves/drop-clipboard.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
 const writeText = jest.fn().mockResolvedValue(undefined);
 
