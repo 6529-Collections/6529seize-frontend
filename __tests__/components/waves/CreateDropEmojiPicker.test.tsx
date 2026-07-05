@@ -23,9 +23,16 @@ jest.mock("@lexical/react/LexicalComposerContext", () => ({
 }));
 jest.mock("@emoji-mart/react", () => ({
   __esModule: true,
-  default: ({ onEmojiSelect }: { onEmojiSelect: (emoji: any) => void }) => (
+  default: ({
+    onEmojiSelect,
+    autoFocus,
+  }: {
+    onEmojiSelect: (emoji: any) => void;
+    autoFocus?: boolean;
+  }) => (
     <button
       data-testid="picker"
+      data-auto-focus={String(autoFocus)}
       onClick={() => onEmojiSelect({ native: "😊", id: "smile" })}
     >
       Pick Emoji
@@ -108,6 +115,9 @@ describe("CreateDropEmojiPicker", () => {
     fireEvent.click(toggleButton);
     const picker = await screen.findByTestId("picker");
     expect(picker).toBeInTheDocument();
+
+    // Search input should be set to auto-focus
+    expect(picker).toHaveAttribute("data-auto-focus", "true");
 
     // The portal wrapper should have updated styles
     const wrapper = picker.parentElement!;
@@ -213,6 +223,7 @@ describe("CreateDropEmojiPicker", () => {
 
     // Emoji pick action
     const picker = await screen.findByTestId("picker");
+    expect(picker).toHaveAttribute("data-auto-focus", "true");
     fireEvent.click(picker);
     expect(fakeEditor.update).toHaveBeenCalled();
     await waitFor(() =>

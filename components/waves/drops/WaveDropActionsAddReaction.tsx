@@ -174,7 +174,7 @@ const WaveDropActionsAddReaction: React.FC<{
               ref={pickerContainerRef}
               className="tw-rounded-lg tw-bg-iron-800 tw-p-px tw-shadow-lg"
             >
-              <LazyEmojiPicker onEmojiSelect={handleEmojiSelect} />
+              <LazyEmojiPicker onEmojiSelect={handleEmojiSelect} autoFocus />
             </div>
           </div>,
           document.body
@@ -191,7 +191,7 @@ const WaveDropActionsAddReaction: React.FC<{
             className="tw-flex tw-size-full tw-items-center tw-justify-center"
             onTouchMove={(e) => e.stopPropagation()}
           >
-            <LazyEmojiPicker onEmojiSelect={handleEmojiSelect} />
+            <LazyEmojiPicker onEmojiSelect={handleEmojiSelect} autoFocus />
           </div>
         </MobileWrapperDialog>
       )}

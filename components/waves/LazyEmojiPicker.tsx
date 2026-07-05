@@ -20,10 +20,12 @@ interface EmojiMartPickerProps {
   readonly custom: EmojiCategory[];
   readonly categories: string[];
   readonly categoryIcons: Record<string, { src: string }>;
+  readonly autoFocus?: boolean | undefined;
 }
 
 interface LazyEmojiPickerProps {
   readonly onEmojiSelect: (emoji: EmojiPickerSelection) => void;
+  readonly autoFocus?: boolean | undefined;
 }
 
 type EmojiMartPickerComponent = ComponentType<EmojiMartPickerProps>;
@@ -51,6 +53,7 @@ const loadEmojiMartPicker = async (): Promise<EmojiMartPickerComponent> => {
 
 export default function LazyEmojiPicker({
   onEmojiSelect,
+  autoFocus,
 }: LazyEmojiPickerProps) {
   const {
     categories,
@@ -118,6 +121,7 @@ export default function LazyEmojiPicker({
       custom={emojiMap}
       categories={categories}
       categoryIcons={categoryIcons}
+      autoFocus={autoFocus}
     />
   );
 }
