@@ -1,55 +1,74 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useRef, useSyncExternalStore } from "react";
+import {
+  hasFinePointerCapability,
+  hasHoverCapability,
+  hasTouchCapability,
+  isTouchFirstEnvironment,
+  subscribeToTouchFirstChanges,
+} from "@/helpers/touch-first.helpers";
 
+/**
+ * True only when the device is touch-first (phone/tablet). Hybrid devices
+ * (touchscreen + trackpad/mouse, e.g. Windows Surface laptops) report a fine
+ * pointer or hover support and are classified as NOT touch, even after the
+ * user touches the screen.
+ */
 export default function useIsTouchDevice(): boolean {
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const touchDetectedRef = useRef(false);
 
-  useEffect(() => {
-    if (typeof globalThis === "undefined") {
-      return;
-    }
+  const subscribe = useCallback((onStoreChange: () => void) => {
+    // Capability media queries flip when a mouse is (un)plugged or a
+    // convertible changes posture.
+    const unsubscribeCapabilities = subscribeToTouchFirstChanges(onStoreChange);
 
-    const win = globalThis as typeof globalThis & {
-      matchMedia?: (query: string) => MediaQueryList;
-    };
+    let touchListenerAttached = false;
 
-    const nav = globalThis.navigator as Navigator | undefined;
-    const maxTouchPoints = nav?.maxTouchPoints ?? 0;
-
-    // Prefer "any-*" media queries so hybrid devices (touchscreen + trackpad/mouse)
-    // aren't misclassified as touch-only when the primary pointer is coarse.
-    const hasAnyFinePointer = win.matchMedia?.("(any-pointer: fine)")?.matches ?? false;
-    const hasPrimaryFinePointer = win.matchMedia?.("(pointer: fine)")?.matches ?? false;
-    const hasFinePointer = hasAnyFinePointer || hasPrimaryFinePointer;
-
-    const hasAnyHover = win.matchMedia?.("(any-hover: hover)")?.matches ?? false;
-    const hasPrimaryHover = win.matchMedia?.("(hover: hover)")?.matches ?? false;
-    const hasHover = hasAnyHover || hasPrimaryHover;
-
-    if (hasFinePointer || hasHover) {
-      setIsTouchDevice(false);
-      return;
-    }
-
-    // If there's no fine pointer and the device advertises touch points, treat it
-    // as touch (important for first-touch interactions like long-press menus).
-    if (maxTouchPoints > 0) {
-      setIsTouchDevice(true);
-      return;
-    }
-
-    const onTouchStart = () => {
-      setIsTouchDevice(true);
+    const detachTouchListener = () => {
+      if (!touchListenerAttached) {
+        return;
+      }
+      touchListenerAttached = false;
       globalThis.removeEventListener("touchstart", onTouchStart);
     };
 
-    globalThis.addEventListener("touchstart", onTouchStart, { passive: true });
+    function onTouchStart() {
+      touchDetectedRef.current = true;
+      detachTouchListener();
+      onStoreChange();
+    }
+
+    // Some devices advertise no capabilities at all until the first touch —
+    // wait for it (important for first-touch interactions like long-press).
+    const shouldAwaitFirstTouch =
+      !touchDetectedRef.current &&
+      !hasTouchCapability() &&
+      !hasFinePointerCapability() &&
+      !hasHoverCapability();
+
+    if (
+      shouldAwaitFirstTouch &&
+      typeof globalThis.addEventListener === "function"
+    ) {
+      touchListenerAttached = true;
+      globalThis.addEventListener("touchstart", onTouchStart, {
+        passive: true,
+      });
+    }
 
     return () => {
-      globalThis.removeEventListener("touchstart", onTouchStart);
+      unsubscribeCapabilities();
+      detachTouchListener();
     };
   }, []);
 
-  return isTouchDevice;
+  const getSnapshot = useCallback(
+    () => isTouchFirstEnvironment({ touchDetected: touchDetectedRef.current }),
+    []
+  );
+
+  const getServerSnapshot = useCallback(() => false, []);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

@@ -407,7 +407,11 @@ function isLikelyMobileWeb(): boolean {
     return false;
   }
 
-  return window.matchMedia("(pointer: coarse) and (max-width: 900px)").matches;
+  // "hover: none" keeps hybrid touch laptops (coarse-capable but with a
+  // mouse/trackpad) out of the mobile-web telemetry bucket.
+  return window.matchMedia(
+    "(pointer: coarse) and (hover: none) and (max-width: 900px)"
+  ).matches;
 }
 
 function getCurrentPathname(): string {

@@ -9,6 +9,7 @@ import {
   MAX_PINNED_WAVES,
 } from "@/hooks/usePinnedWavesServer";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { isTouchFirstEnvironment } from "@/helpers/touch-first.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface BrainLeftSidebarWavePinProps {
@@ -80,14 +81,11 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
 
-  // Detect touch device on component mount
+  // Detect touch-first devices on component mount (hybrid touch laptops
+  // keep the desktop hover behavior).
   useEffect(() => {
     const checkTouch = () => {
-      const hasCoarsePointer =
-        typeof globalThis.matchMedia === "function" &&
-        globalThis.matchMedia("(pointer: coarse)").matches;
-
-      setIsTouchDevice((navigator.maxTouchPoints ?? 0) > 0 || hasCoarsePointer);
+      setIsTouchDevice(isTouchFirstEnvironment());
     };
 
     checkTouch();

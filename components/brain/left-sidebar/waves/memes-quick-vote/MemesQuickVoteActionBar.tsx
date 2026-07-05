@@ -2,7 +2,7 @@
 
 import MemesWaveZapIcon from "@/components/brain/left-sidebar/waves/MemesWaveZapIcon";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
 import MemesQuickVoteCustomAmountRow from "./MemesQuickVoteCustomAmountRow";
@@ -47,7 +47,7 @@ export default function MemesQuickVoteActionBar({
   onSkip,
   onVoteAmount,
 }: MemesQuickVoteActionBarProps) {
-  const hasTouchInput = useHasTouchInput();
+  const isTouchDevice = useIsTouchDevice();
   const hasQuickAmounts = quickAmounts.length > 0;
   const isCustomRowVisible = !hasQuickAmounts || isCustomOpen;
   const customInputRef = useRef<HTMLInputElement | null>(null);
@@ -67,7 +67,7 @@ export default function MemesQuickVoteActionBar({
     const justOpenedCustomRow = !wasCustomRowVisible && isCustomRowVisible;
 
     if (
-      hasTouchInput ||
+      isTouchDevice ||
       !hasQuickAmounts ||
       !justOpenedCustomRow ||
       isSubmitting
@@ -76,7 +76,7 @@ export default function MemesQuickVoteActionBar({
     }
 
     customInputRef.current?.focus();
-  }, [hasQuickAmounts, hasTouchInput, isCustomRowVisible, isSubmitting]);
+  }, [hasQuickAmounts, isTouchDevice, isCustomRowVisible, isSubmitting]);
 
   const handleToggleCustom = () => {
     if (isSubmitting) {

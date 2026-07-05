@@ -92,10 +92,25 @@ describe("useDropActionInteractionMode", () => {
     );
   });
 
-  it("uses the touch sheet instead of desktop actions on compact touch devices with hover", () => {
+  it("keeps desktop actions on compact-width hybrid touch devices with hover (e.g. Windows touch laptops)", () => {
     hasTouchInputMock.mockReturnValue(true);
     setViewportWidth(800);
     setHoverSupport(true);
+
+    const { result } = renderHook(() => useDropActionInteractionMode());
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        canUseDesktopHoverActions: true,
+        canUseTouchActionSheet: false,
+      })
+    );
+  });
+
+  it("uses the touch sheet on compact-width touch devices without hover", () => {
+    hasTouchInputMock.mockReturnValue(true);
+    setViewportWidth(800);
+    setHoverSupport(false);
 
     const { result } = renderHook(() => useDropActionInteractionMode());
 
