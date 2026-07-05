@@ -3,6 +3,7 @@ import {
   getDelegationsFromData,
   getParams,
   getReadParams,
+  readMulticallBoolean,
 } from "@/components/delegation/CollectionDelegation.utils";
 import {
   CONSOLIDATION_USE_CASE,
@@ -93,5 +94,42 @@ describe("CollectionDelegation utility functions", () => {
     expect(primary?.wallets[0].expiry).toBe("active - non-expiring");
     expect(subDelegation?.wallets[0].expiry).toBe("active - non-expiring");
     expect(consolidation?.wallets[0].expiry).toBe("active - non-expiring");
+  });
+});
+
+describe("readMulticallBoolean", () => {
+  it("reads true only from a successful envelope with result true", () => {
+    const data = [
+      { status: "success" as const, result: true },
+      { status: "success" as const, result: false },
+    ];
+    expect(readMulticallBoolean(data, 0)).toBe(true);
+    expect(readMulticallBoolean(data, 1)).toBe(false);
+  });
+
+  it("treats failed entries as false regardless of result", () => {
+    const data = [
+      { status: "failure" as const, result: undefined },
+      { status: "failure" as const, result: true },
+    ];
+    expect(readMulticallBoolean(data, 0)).toBe(false);
+    expect(readMulticallBoolean(data, 1)).toBe(false);
+  });
+
+  it("treats missing entries and missing data as false", () => {
+    expect(readMulticallBoolean(undefined, 0)).toBe(false);
+    expect(readMulticallBoolean([], 3)).toBe(false);
+    expect(readMulticallBoolean([undefined], 0)).toBe(false);
+  });
+
+  it("does not treat truthy non-boolean results as locked", () => {
+    const data = [
+      { status: "success" as const, result: {} },
+      { status: "success" as const, result: 1 },
+      { status: "success" as const, result: "true" },
+    ];
+    expect(readMulticallBoolean(data, 0)).toBe(false);
+    expect(readMulticallBoolean(data, 1)).toBe(false);
+    expect(readMulticallBoolean(data, 2)).toBe(false);
   });
 });

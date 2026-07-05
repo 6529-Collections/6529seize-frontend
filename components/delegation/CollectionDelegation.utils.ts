@@ -47,6 +47,30 @@ type DelegationsResultTuple = readonly [
   readonly (number | bigint)[],
 ];
 
+/**
+ * One entry of a wagmi `useReadContracts` (multicall) result. With the
+ * default `allowFailure: true`, `data[i]` is this envelope object — the
+ * decoded value lives at `.result` and is only meaningful when `status`
+ * is `"success"`.
+ */
+export interface MulticallEnvelope {
+  readonly status: "success" | "failure";
+  readonly result?: unknown;
+}
+
+/**
+ * Reads one decoded boolean out of a multicall result. Failed or missing
+ * entries read as `false`, so lock UI treats an unknown status as
+ * unlocked instead of locked.
+ */
+export function readMulticallBoolean(
+  data: readonly (MulticallEnvelope | undefined)[] | undefined,
+  index: number
+): boolean {
+  const entry = data?.[index];
+  return entry?.status === "success" && entry.result === true;
+}
+
 function formatExpiry(myDate: number) {
   const date = new Date(myDate * 1000);
   const year = date.getUTCFullYear();

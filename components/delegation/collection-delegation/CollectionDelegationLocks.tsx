@@ -27,6 +27,7 @@ import {
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "../delegation-constants";
+import { readMulticallBoolean } from "../CollectionDelegation.utils";
 import type { DelegationToastState } from "../DelegationToast";
 import { LOCK_SELECT_CLASS } from "./collection-delegation-helpers";
 import type { CollectionLocks } from "./useCollectionLocks";
@@ -64,6 +65,18 @@ export function CollectionDelegationLocks(
 ) {
   const { collection, locks, chainsMatch, getSwitchToMessage } = props;
   const { showDelegationToast } = props;
+
+  // Multicall entries are envelopes ({ status, result }), not decoded
+  // booleans — read them through readMulticallBoolean so a failed or
+  // missing entry counts as unlocked (issue #3078).
+  const selectedUseCaseLocked = readMulticallBoolean(
+    locks.useCaseLockStatuses.data,
+    locks.lockUseCaseIndex
+  );
+  const selectedUseCaseLockedGlobally = readMulticallBoolean(
+    locks.useCaseLockStatusesGlobal.data,
+    locks.lockUseCaseIndex
+  );
 
   return (
     <div className="tw-w-full tw-p-0">
@@ -167,14 +180,14 @@ export function CollectionDelegationLocks(
             </option>
             {ALL_USE_CASES.map((uc, index) => {
               if (uc.use_case === 1) return null;
-              const asteriskDisplay = locks.useCaseLockStatusesGlobal.data?.[
+              const lockedGlobally = readMulticallBoolean(
+                locks.useCaseLockStatusesGlobal.data,
                 index
-              ]
-                ? ` *`
-                : ``;
+              );
+              const asteriskDisplay = lockedGlobally ? ` *` : ``;
               const lockDisplay =
-                locks.useCaseLockStatuses.data?.[index] ||
-                locks.useCaseLockStatusesGlobal.data?.[index] ||
+                readMulticallBoolean(locks.useCaseLockStatuses.data, index) ||
+                lockedGlobally ||
                 locks.collectionLockRead.data
                   ? ` - LOCKED${asteriskDisplay}`
                   : ` - UNLOCKED`;
@@ -192,22 +205,13 @@ export function CollectionDelegationLocks(
         </div>
         {locks.lockUseCaseValue != 0 && (
           <div className="tw-flex tw-w-full tw-items-center tw-px-3 tw-pb-2 tw-pt-2 md:tw-w-2/3">
-            {!locks.useCaseLockStatusesGlobal.data ||
-            (locks.useCaseLockStatusesGlobal?.data &&
-              // Double cast preserves the existing comparison against the
-              // multicall envelope object (issue #3078 tracks reading
-              // `.result` here); typing it honestly would change behavior.
-              (locks.useCaseLockStatusesGlobal?.data[
-                locks.lockUseCaseIndex
-              ] as unknown as boolean) === false) ? (
+            {!selectedUseCaseLockedGlobally ? (
               <button
                 className={`${styles["lockUseCaseBtn"]}`}
                 onClick={() => {
                   const useCase = DELEGATION_USE_CASES[locks.lockUseCaseIndex];
                   const title = `${
-                    locks.useCaseLockStatuses?.data?.[locks.lockUseCaseIndex]
-                      ? "Unlocking"
-                      : "Locking"
+                    selectedUseCaseLocked ? "Unlocking" : "Locking"
                   } Wallet on Use Case #${useCase?.use_case} - ${
                     useCase?.display
                   }`;
@@ -222,9 +226,7 @@ export function CollectionDelegationLocks(
                       args: [
                         collection.contract,
                         locks.lockUseCaseValue,
-                        !locks.useCaseLockStatuses.data?.[
-                          locks.lockUseCaseIndex
-                        ],
+                        !selectedUseCaseLocked,
                       ],
                       functionName: "setCollectionUsecaseLock",
                     });
@@ -235,17 +237,10 @@ export function CollectionDelegationLocks(
                 }}
               >
                 <FontAwesomeIcon
-                  icon={
-                    locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
-                      ? faLock
-                      : faLockOpen
-                  }
+                  icon={selectedUseCaseLocked ? faLock : faLockOpen}
                   className={styles["buttonIcon"]}
                 />
-                {locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
-                  ? "Unlock"
-                  : "Lock"}{" "}
-                Use Case
+                {selectedUseCaseLocked ? "Unlock" : "Lock"} Use Case
                 {(locks.useCaseLockWrite.isPending ||
                   locks.waitUseCaseLockWrite.isLoading) && <Spinner />}
               </button>
