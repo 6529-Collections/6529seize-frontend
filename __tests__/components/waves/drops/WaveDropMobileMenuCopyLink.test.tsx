@@ -72,7 +72,8 @@ describe("WaveDropMobileMenuCopyLink", () => {
         await clipboardWrite.promise;
       });
 
-      expect(screen.getByText("Copied!")).toBeInTheDocument();
+      expect(screen.getAllByText("Copied!").length).toBeGreaterThan(0);
+      expect(screen.getByRole("status")).toHaveTextContent("Copied!");
       expect(onCopy).toHaveBeenCalledTimes(1);
 
       act(() => {

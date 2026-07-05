@@ -4,6 +4,9 @@ import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const DE_DE_MESSAGES = {
+  "waves.drop.actions.copyText": "Text kopieren",
+  "waves.drop.actions.copyLink": "Link kopieren",
+  "waves.drop.actions.copied": "Kopiert!",
   "media.video.captions": "Untertitel",
   "media.video.download": "Medien herunterladen",
   "media.video.downloading": "Medien werden heruntergeladen",
