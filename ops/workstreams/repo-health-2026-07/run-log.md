@@ -79,7 +79,7 @@
       lost their plugin-entry "ignore exports" exemption, so
       `includeEntryExports: true` surfaced their 16 `module.exports`
       members as UNUSED EXPORT. Fix: anchor the line to `/.claude/`
-      (with an explanatory comment) — knip then derives `.claude/**`,
+      (PR #3121, with an explanatory comment) — knip then derives `.claude/**`,
       which matches neither absolute paths nor anything outside a
       top-level `.claude/`. Verified clean (exit 0, zero findings) in
       both the nested worktree and the short-path control at the same
