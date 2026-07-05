@@ -17,7 +17,6 @@ import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import Providers from "@/components/providers/Providers";
-import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import type { Viewport } from "next";
@@ -54,12 +53,10 @@ export default function RootLayout({
       <body>
         <MobileLaunchTimingReporter />
         <AwsRumProvider>
-          <StoreSetup>
-            <Providers>
-              <DynamicHeadTitle />
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </Providers>
-          </StoreSetup>
+          <Providers>
+            <DynamicHeadTitle />
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </Providers>
         </AwsRumProvider>
       </body>
     </html>

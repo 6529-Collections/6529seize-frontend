@@ -6,7 +6,6 @@ import "@/styles/globals.css";
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import Providers from "@/components/providers/Providers";
-import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { SeizeSettingsMode } from "@/types/enums";
@@ -32,18 +31,16 @@ export default function RootLayout({
         <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
       </head>
       <body>
-        <StoreSetup>
-          <Providers
-            enableVersionCheck={false}
-            enableWalletAuthentication={false}
-            enableCookieConsent={false}
-            enableMyStream={false}
-            settingsMode={SeizeSettingsMode.LOCAL}
-          >
-            <DynamicHeadTitle />
-            {children}
-          </Providers>
-        </StoreSetup>
+        <Providers
+          enableVersionCheck={false}
+          enableWalletAuthentication={false}
+          enableCookieConsent={false}
+          enableMyStream={false}
+          settingsMode={SeizeSettingsMode.LOCAL}
+        >
+          <DynamicHeadTitle />
+          {children}
+        </Providers>
       </body>
     </html>
   );
