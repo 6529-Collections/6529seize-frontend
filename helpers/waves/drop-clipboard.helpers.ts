@@ -1,6 +1,8 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { formatTime } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 
 export type ClipboardFormat = "plain" | "markdown";
 
@@ -551,17 +553,6 @@ export const buildClipboardMessage = (
   };
 };
 
-const formatTimestamp = (timestamp: number): string => {
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(timestamp));
-  } catch {
-    return "";
-  }
-};
-
 type FormatContent = {
   primaryContent: string;
   embedLines: string[];
@@ -627,9 +618,10 @@ const createHeading = (
 export const formatMessage = (
   message: ClipboardMessage,
   format: ClipboardFormat,
-  isSingle: boolean
+  isSingle: boolean,
+  locale: SupportedLocale
 ): string => {
-  const timeLabel = formatTimestamp(message.timestamp);
+  const timeLabel = formatTime(locale, message.timestamp);
   const authorLabel = message.author || "Unknown";
   const formatContent = resolveFormatContent(message, format);
   const heading = createHeading(authorLabel, timeLabel, format, isSingle);
@@ -656,7 +648,8 @@ export const formatMessage = (
 
 export const formatMessages = (
   messages: ClipboardMessage[],
-  format: ClipboardFormat
+  format: ClipboardFormat,
+  locale: SupportedLocale
 ): string => {
   if (messages.length === 0) {
     return "";
@@ -664,7 +657,7 @@ export const formatMessages = (
 
   const isSingle = messages.length === 1;
   const segments = messages.map((message) =>
-    formatMessage(message, format, isSingle)
+    formatMessage(message, format, isSingle, locale)
   );
 
   return segments.join("\n\n");
@@ -672,9 +665,10 @@ export const formatMessages = (
 
 export const buildDropClipboardText = (
   drop: ClipboardDropSource,
+  locale: SupportedLocale,
   format: ClipboardFormat = "plain"
 ): string => {
   const quoteLookup = buildQuoteDropLookup([drop]);
   const message = buildClipboardMessage(drop, quoteLookup);
-  return formatMessage(message, format, true);
+  return formatMessage(message, format, true, locale);
 };

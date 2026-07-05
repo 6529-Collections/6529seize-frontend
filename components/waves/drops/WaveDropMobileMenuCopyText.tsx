@@ -2,6 +2,7 @@
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { buildDropClipboardText } from "@/helpers/waves/drop-clipboard.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import WaveDropMobileMenuCopyAction from "./WaveDropMobileMenuCopyAction";
 
 interface WaveDropMobileMenuCopyTextProps {
@@ -13,11 +14,13 @@ export default function WaveDropMobileMenuCopyText({
   drop,
   onCopy,
 }: WaveDropMobileMenuCopyTextProps) {
+  const locale = useBrowserLocale();
+
   return (
     <WaveDropMobileMenuCopyAction
       labelKey="waves.drop.actions.copyText"
       disabled={drop.id.startsWith("temp-")}
-      getText={() => buildDropClipboardText(drop)}
+      getText={() => buildDropClipboardText(drop, locale)}
       onCopy={onCopy}
       icon={
         <svg

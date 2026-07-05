@@ -4,6 +4,7 @@ import {
   formatInteger,
   formatNumber,
   formatRelativeTime,
+  formatTime,
 } from "@/i18n/format";
 import {
   DEFAULT_LOCALE,
@@ -398,6 +399,25 @@ describe("frontend i18n helpers", () => {
     );
     expect(formatRelativeTime("en-US", -1, "day")).toBe("yesterday");
     expect(compareLocalized("en-US", "2", "10")).toBeLessThan(0);
+    const sampleTime = new Date("2024-01-02T13:05:00.000Z");
+    expect(formatTime("en-US", sampleTime)).toMatch(/AM|PM/);
+    expect(formatTime("de-DE", sampleTime)).toMatch(/^\d{2}:\d{2}$/);
+    expect(formatTime("en-US", Number.NaN)).toBe("");
+    expect(formatTime("en-US", null)).toBe("");
+  });
+
+  it("translates the wave drop copy action messages", () => {
+    expect(t("en-US", "waves.drop.actions.copyFailed")).toBe("Copy failed");
+    expect(t("en-GB", "waves.drop.actions.copyFailed")).toBe("Copy failed");
+    expect(t("fr-FR", "waves.drop.actions.copyFailed")).toBe(
+      "Echec de la copie"
+    );
+    expect(t("es-ES", "waves.drop.actions.copyFailed")).toBe(
+      "No se pudo copiar"
+    );
+    expect(t("de-DE", "waves.drop.actions.copyFailed")).toBe(
+      "Kopieren fehlgeschlagen"
+    );
   });
 
   it("keeps file-kind labels distinguishable within each locale", () => {

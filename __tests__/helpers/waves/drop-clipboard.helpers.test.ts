@@ -23,9 +23,34 @@ const createDrop = (overrides: Record<string, unknown> = {}): any => ({
 
 describe("buildDropClipboardText", () => {
   it("formats a plain-text message with author heading and content", () => {
-    const text = buildDropClipboardText(createDrop());
+    const text = buildDropClipboardText(createDrop(), "en-US");
 
     expect(text).toMatch(/^alice \(.+\): gm$/);
+  });
+
+  it("formats the heading timestamp using the provided locale", () => {
+    const drop = createDrop();
+    const timeFor = (locale: string) =>
+      new Intl.DateTimeFormat(locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(drop.created_at));
+
+    expect(buildDropClipboardText(drop, "en-US")).toContain(
+      `alice (${timeFor("en-US")}):`
+    );
+    expect(buildDropClipboardText(drop, "de-DE")).toContain(
+      `alice (${timeFor("de-DE")}):`
+    );
+  });
+
+  it("omits the time suffix for invalid timestamps", () => {
+    const text = buildDropClipboardText(
+      createDrop({ created_at: Number.NaN }),
+      "en-US"
+    );
+
+    expect(text).toBe("alice: gm");
   });
 
   it("strips markdown markup in plain format and keeps it in markdown format", () => {
@@ -40,11 +65,11 @@ describe("buildDropClipboardText", () => {
       ],
     });
 
-    const plain = buildDropClipboardText(drop);
+    const plain = buildDropClipboardText(drop, "en-US");
     expect(plain).toContain("hello bold site (https://example.com)");
     expect(plain).not.toContain("**");
 
-    const markdown = buildDropClipboardText(drop, "markdown");
+    const markdown = buildDropClipboardText(drop, "en-US", "markdown");
     expect(markdown).toContain("hello **bold** [site](https://example.com)");
   });
 
@@ -62,7 +87,7 @@ describe("buildDropClipboardText", () => {
       },
     });
 
-    const text = buildDropClipboardText(drop);
+    const text = buildDropClipboardText(drop, "en-US");
 
     expect(text).toContain("Replying to bob");
     expect(text).toContain("original message");
@@ -88,7 +113,7 @@ describe("buildDropClipboardText", () => {
       ],
     });
 
-    const text = buildDropClipboardText(drop);
+    const text = buildDropClipboardText(drop, "en-US");
 
     expect(text).toContain("check this out");
     expect(text).toContain("Quote from carol");
@@ -111,7 +136,7 @@ describe("buildDropClipboardText", () => {
       ],
     });
 
-    const text = buildDropClipboardText(drop);
+    const text = buildDropClipboardText(drop, "en-US");
 
     expect(text).toContain("https://media.example/a.png");
     expect(text).toContain("https://media.example/b.png");
@@ -124,7 +149,7 @@ describe("buildDropClipboardText", () => {
       winning_context: { place: 2 },
     });
 
-    const text = buildDropClipboardText(drop);
+    const text = buildDropClipboardText(drop, "en-US");
 
     expect(text).toContain("Type: WINNER");
     expect(text).toContain("Rank: 2");
