@@ -93,6 +93,7 @@ stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
            "devicefarm:ListUploads",
            "devicefarm:CreateUpload",
            "devicefarm:GetUpload",
+           "devicefarm:DeleteUpload",
            "devicefarm:ScheduleRun",
            "devicefarm:GetRun",
            "devicefarm:StopRun",
@@ -120,6 +121,27 @@ stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
 
    Until the secrets exist, every job in the workflow skips with a `::notice`
    and the scheduled run stays green — provisioning can land after the code.
+
+4. **Actions allowlist** — this repository runs the "allow selected actions"
+   policy (GitHub-owned + Marketplace-verified + explicit patterns). The
+   workflow's SHA-pinned third-party actions must appear as exact patterns in
+   the allowlist or every run ends in `startup_failure` with zero jobs:
+
+   ```
+   aws-actions/aws-devicefarm-mobile-device-testing@<pinned SHA>
+   sarisia/actions-status-discord@<pinned SHA>
+   ```
+
+   (Both are in place as of 2026-07-05; re-add the new SHA whenever the pin is
+   bumped. Note the policy/CodeQL tension: CodeQL requires SHA pins while the
+   allowlist previously only allowed `sarisia/actions-status-discord@v1`.)
+
+### Test spec gotcha
+
+The AWS docs render test-host selectors as `{{amazon_linux_2}}` — that is doc
+templating, not syntax. Device Farm rejects the braces with
+`TEST_SPEC_INVALID_YAML_FILE`; test spec files must use the bare tokens
+(`android_test_host: amazon_linux_2`, `ios_test_host: macos_sequoia`).
 
 ## Reading results
 
