@@ -15,6 +15,10 @@ import { useMyStreamOptional } from "./wave/MyStreamContext";
 
 type TitleContextType = {
   title: string;
+  // True when a page explicitly claimed the title (setTitle/wave data), as
+  // opposed to the provider's route-default placeholder. Only owned titles
+  // may overwrite the route's server metadata <title>.
+  isTitleOwned: boolean;
   setTitle: (title: string) => void;
   notificationCount: number;
   setNotificationCount: (count: number) => void;
@@ -81,6 +85,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const [title, setTitle] = useState<string>(() =>
     getDefaultTitleForRoute(pathname)
   );
+  const [hasExplicitTitle, setHasExplicitTitle] = useState(false);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [waveData, setWaveData] = useState<{
     name: string;
@@ -113,6 +118,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (pathnameChanged) {
       setTitle(getDefaultTitleForRoute(pathname));
+      setHasExplicitTitle(false);
       setWaveData(null);
       return;
     }
@@ -127,6 +133,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
     ) {
       setTitle(getDefaultTitleForRoute(pathname));
+      setHasExplicitTitle(false);
       setWaveData(null);
     }
   }, [pathname, searchParams]);
@@ -134,6 +141,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateTitle = (newTitle: string) => {
     if (routeRef.current === pathname) {
       setTitle(newTitle);
+      setHasExplicitTitle(true);
     }
   };
 
@@ -157,6 +165,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     return title;
   }, [isWaveRoute, waveParam, waveData, title, notificationCount]);
 
+  const isTitleOwned =
+    hasExplicitTitle || Boolean(isWaveRoute && waveParam && waveData);
+
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
     let notificationText = "";
@@ -170,12 +181,13 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       : computedTitle;
     return {
       title: finalTitle,
+      isTitleOwned,
       setTitle: updateTitle,
       notificationCount,
       setNotificationCount,
       setWaveData,
     };
-  }, [computedTitle, notificationCount]);
+  }, [computedTitle, isTitleOwned, notificationCount]);
 
   return (
     <TitleContext.Provider value={contextValue}>
