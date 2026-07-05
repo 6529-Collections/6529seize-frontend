@@ -16,7 +16,7 @@ export interface ClipboardMessage {
   readonly attachmentMarkdownLines: string[];
 }
 
-export type ClipboardDropSource = ApiDrop & {
+type ClipboardDropSource = ApiDrop & {
   readonly stableHash?: string | undefined;
 };
 
@@ -209,7 +209,7 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
   );
 };
 
-export type QuoteDropSource = {
+type QuoteDropSource = {
   readonly author?: { readonly handle?: string | null | undefined } | undefined;
   readonly parts?: ReadonlyArray<{
     readonly part_id: number;
