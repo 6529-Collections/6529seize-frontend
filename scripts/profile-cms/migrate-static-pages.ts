@@ -257,13 +257,11 @@ type ExtractedImage = {
   readonly alt: string;
   readonly width?: number;
   readonly height?: number;
-  readonly caption?: string;
-  readonly linkHref?: string;
 };
 
-/** Finds every <img .../> tag inside a fragment, plus caption text from an adjacent fusion-text sibling and any wrapping external <a href>. */
-function extractImages(fragment: string): ExtractedImage[] {
-  const images: ExtractedImage[] = [];
+/** Finds every <img .../> tag inside a fragment, with its source position. Caption attribution happens later, in document-order assembly. */
+function extractImages(fragment: string): PositionedImage[] {
+  const images: PositionedImage[] = [];
   const imgPattern = /<img\b([^>]*)\/?>/g;
   let match: RegExpExecArray | null;
   while ((match = imgPattern.exec(fragment))) {
@@ -275,83 +273,67 @@ function extractImages(fragment: string): ExtractedImage[] {
     const alt = extractFirst(attrs, /\balt="([^"]*)"/) ?? "";
     const widthRaw = extractFirst(attrs, /\bwidth=\{?"?(\d+)"?\}?/);
     const heightRaw = extractFirst(attrs, /\bheight=\{?"?(\d+)"?\}?/);
-    const precedingHref = findPrecedingAnchorHref(fragment, match.index);
-    const caption = findAdjacentCaption(fragment, imgPattern.lastIndex);
     images.push({
       src,
       alt: decodeHtmlEntities(alt),
       ...(widthRaw ? { width: Number.parseInt(widthRaw, 10) } : {}),
       ...(heightRaw ? { height: Number.parseInt(heightRaw, 10) } : {}),
-      ...(caption ? { caption } : {}),
-      ...(precedingHref ? { linkHref: precedingHref } : {}),
+      start: match.index,
+      end: imgPattern.lastIndex,
     });
   }
   return images;
 }
 
-/** Looks backward from an <img> for the nearest enclosing <a href="..."> within a short window (handles fusion-lightbox / external-link wrapping anchors). */
-function findPrecedingAnchorHref(
-  fragment: string,
-  imgIndex: number
-): string | undefined {
-  const windowStart = Math.max(0, imgIndex - 600);
-  const preceding = fragment.slice(windowStart, imgIndex);
-  const anchorMatches = [...preceding.matchAll(/<a\b([^>]*)>/g)];
-  const lastAnchor = anchorMatches.at(-1);
-  if (!lastAnchor) {
-    return undefined;
-  }
-  // Make sure this anchor hasn't already been closed before the image.
-  const closingAfterAnchor = preceding
-    .slice(lastAnchor.index + lastAnchor[0].length)
-    .includes("</a>");
-  if (closingAfterAnchor) {
-    return undefined;
-  }
-  return extractFirst(lastAnchor[1] ?? "", /\bhref="([^"]+)"/);
-}
-
-/** Looks forward from just after an <img> tag for the next fusion-text/caption paragraph within a short window. */
-function findAdjacentCaption(
-  fragment: string,
-  afterImgIndex: number
-): string | undefined {
-  const windowEnd = Math.min(fragment.length, afterImgIndex + 400);
-  const following = fragment.slice(afterImgIndex, windowEnd);
-  const paragraphMatch = /<p[^>]*>([\s\S]*?)<\/p>/.exec(following);
-  if (!paragraphMatch) {
-    return undefined;
-  }
-  const text = stripTags(paragraphMatch[1] ?? "");
-  return text || undefined;
-}
-
 type ExtractedHeading = { readonly level: number; readonly text: string };
 
-function extractHeadings(fragment: string): ExtractedHeading[] {
-  const headings: ExtractedHeading[] = [];
-  const headingPattern = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/g;
+type Positioned = { readonly start: number; readonly end: number };
+type PositionedHeading = ExtractedHeading & Positioned;
+type PositionedParagraph = { readonly text: string } & Positioned;
+type PositionedImage = ExtractedImage & Positioned;
+type PositionedButton = ExtractedButton & Positioned;
+
+function extractHeadings(fragment: string): PositionedHeading[] {
+  const headings: PositionedHeading[] = [];
+  const headingPattern = /<h([1-6])([^>]*)>([\s\S]*?)<\/h\1>/g;
   let match: RegExpExecArray | null;
   while ((match = headingPattern.exec(fragment))) {
-    const text = stripTags(match[2] ?? "");
+    const attrs = match[2] ?? "";
+    if (attrs.endsWith("/")) {
+      // Self-closing <hN ... /> (fusion-title markup renders empty heading
+      // tags this way). It is not a real heading pair: the lazy body match
+      // would otherwise swallow everything up to some unrelated later
+      // </hN>, hiding images and paragraphs inside the fake span. Skip it
+      // and resume scanning immediately after the tag itself.
+      headingPattern.lastIndex = match.index + 4 + attrs.length;
+      continue;
+    }
+    const text = stripTags(match[3] ?? "");
     if (text) {
-      headings.push({ level: Number.parseInt(match[1] ?? "2", 10), text });
+      headings.push({
+        level: Number.parseInt(match[1] ?? "2", 10),
+        text,
+        start: match.index,
+        end: headingPattern.lastIndex,
+      });
     }
   }
   return headings;
 }
 
-type ExtractedParagraph = { readonly text: string };
-
-/** Extracts top-level <p> paragraphs that are not themselves inside an <img>'s caption window (best-effort; duplicates are pruned by the caller). */
-function extractParagraphs(fragment: string): ExtractedParagraph[] {
-  const paragraphs: ExtractedParagraph[] = [];
+/** Extracts every <p> paragraph with its source position. */
+function extractParagraphs(fragment: string): PositionedParagraph[] {
+  const paragraphs: PositionedParagraph[] = [];
   const paragraphPattern = /<p[^>]*>([\s\S]*?)<\/p>/g;
   let match: RegExpExecArray | null;
   while ((match = paragraphPattern.exec(fragment))) {
     const text = stripTags(match[1] ?? "");
     if (text) {
-      paragraphs.push({ text });
+      paragraphs.push({
+        text,
+        start: match.index,
+        end: paragraphPattern.lastIndex,
+      });
     }
   }
   return paragraphs;
@@ -360,8 +342,8 @@ function extractParagraphs(fragment: string): ExtractedParagraph[] {
 type ExtractedButton = { readonly label: string; readonly href: string };
 
 /** Finds fusion-button style CTAs: an <a> whose className contains "fusion-button" and an inner fusion-button-text span. */
-function extractButtons(fragment: string): ExtractedButton[] {
-  const buttons: ExtractedButton[] = [];
+function extractButtons(fragment: string): PositionedButton[] {
+  const buttons: PositionedButton[] = [];
   const anchorPattern = /<a\b([^>]*fusion-button[^>]*)>([\s\S]*?)<\/a>/g;
   let match: RegExpExecArray | null;
   while ((match = anchorPattern.exec(fragment))) {
@@ -372,10 +354,102 @@ function extractButtons(fragment: string): ExtractedButton[] {
       stripTags(extractFirst(inner, /fusion-button-text">([\s\S]*?)<\/span>/) ?? "") ||
       stripTags(inner);
     if (href && label) {
-      buttons.push({ label, href });
+      buttons.push({
+        label,
+        href,
+        start: match.index,
+        end: anchorPattern.lastIndex,
+      });
     }
   }
   return buttons;
+}
+
+type PageEvent =
+  | ({ readonly kind: "heading"; readonly heading: PositionedHeading } & Positioned)
+  | ({ readonly kind: "paragraph"; readonly paragraph: PositionedParagraph } & Positioned)
+  | ({ readonly kind: "image"; readonly image: PositionedImage } & Positioned)
+  | ({ readonly kind: "button"; readonly button: PositionedButton } & Positioned);
+
+/**
+ * Collects every recognizable element in the fragment as a positioned event,
+ * sorted in document order. Events fully nested inside an earlier event's
+ * span (e.g. a paragraph swallowed by a heading match, or an image inside a
+ * button anchor) are dropped so their text is not emitted twice.
+ */
+function collectPageEvents(fragment: string): PageEvent[] {
+  const events: PageEvent[] = [
+    ...extractHeadings(fragment).map((heading) => ({
+      kind: "heading" as const,
+      heading,
+      start: heading.start,
+      end: heading.end,
+    })),
+    ...extractParagraphs(fragment).map((paragraph) => ({
+      kind: "paragraph" as const,
+      paragraph,
+      start: paragraph.start,
+      end: paragraph.end,
+    })),
+    ...extractImages(fragment).map((image) => ({
+      kind: "image" as const,
+      image,
+      start: image.start,
+      end: image.end,
+    })),
+    ...extractButtons(fragment).map((button) => ({
+      kind: "button" as const,
+      button,
+      start: button.start,
+      end: button.end,
+    })),
+  ];
+  events.sort((a, b) => a.start - b.start || a.end - b.end);
+
+  const ordered: PageEvent[] = [];
+  let maxEnd = -1;
+  for (const event of events) {
+    if (event.start < maxEnd) {
+      continue;
+    }
+    ordered.push(event);
+    maxEnd = Math.max(maxEnd, event.end);
+  }
+  return ordered;
+}
+
+const CAPTION_WINDOW_CHARS = 600;
+const CAPTION_MAX_LENGTH = 80;
+
+/**
+ * Conservative caption test: a paragraph is only claimed as an image's
+ * caption when it is structurally adjacent (immediately follows the image
+ * within the same fusion column — no new column, image, or heading starts
+ * in between) AND reads like a caption (short, no sentence-ending prose,
+ * e.g. "Token: 508" or "@punk6529"). When unsure the paragraph stays in
+ * the prose flow — a wrongly-claimed caption silently relocates body text.
+ */
+function isCaptionCandidate(
+  fragment: string,
+  image: PositionedImage,
+  paragraph: PositionedParagraph
+): boolean {
+  if (
+    paragraph.start < image.end ||
+    paragraph.start - image.end > CAPTION_WINDOW_CHARS
+  ) {
+    return false;
+  }
+  const between = fragment.slice(image.end, paragraph.start);
+  if (
+    between.includes("<img") ||
+    between.includes("fusion-layout-column") ||
+    /<h[1-6]\b/.test(between)
+  ) {
+    return false;
+  }
+  const text = paragraph.text;
+  return text.length <= CAPTION_MAX_LENGTH && !/[.!?](\s|$)/.test(text);
 }
 
 type ExtractedEmbeddedMedia = {
@@ -451,7 +525,8 @@ function nextBlockId(context: BlockBuildContext, kind: string): string {
 
 function getOrCreateImageAsset(
   context: BlockBuildContext,
-  image: ExtractedImage
+  image: ExtractedImage,
+  caption?: string
 ): string | undefined {
   const existing = context.seenImageSrcs.get(image.src);
   if (existing) {
@@ -484,7 +559,7 @@ function getOrCreateImageAsset(
     width,
     height,
     roles: ["detail"],
-    alt_text: image.alt || image.caption || "Migrated museum artwork image",
+    alt_text: image.alt || caption || "Migrated museum artwork image",
   });
   context.seenImageSrcs.set(image.src, assetId);
   return assetId;
@@ -526,9 +601,10 @@ function pushRichTextBlock(context: BlockBuildContext, content: string): void {
 
 function pushImageBlock(
   context: BlockBuildContext,
-  image: ExtractedImage
+  image: ExtractedImage,
+  caption?: string
 ): void {
-  const assetId = getOrCreateImageAsset(context, image);
+  const assetId = getOrCreateImageAsset(context, image, caption);
   if (!assetId) {
     return;
   }
@@ -536,7 +612,7 @@ function pushImageBlock(
     id: nextBlockId(context, "image"),
     block_type: "image",
     asset_id: assetId,
-    ...(image.caption ? { caption: image.caption } : {}),
+    ...(caption ? { caption } : {}),
   } as CmsBlockV1);
 }
 
@@ -581,10 +657,20 @@ function pushButtonLinkBlock(
 }
 
 /**
- * Converts one legacy static page source file into CMS blocks. Falls back to
- * a single rich_text block (recording a warning) when the page body cannot
- * be decomposed into recognizable structural fragments - content is never
- * silently dropped.
+ * Converts one legacy static page source file into CMS blocks by walking
+ * the page fragment in document order: headings, prose runs, images, and
+ * buttons are emitted as encountered, so interleaved layouts
+ * (heading -> text -> image -> heading -> text) keep their reading order.
+ *
+ * - Contiguous paragraph runs become one rich_text block each, broken at
+ *   headings/images/buttons, so prose keeps its position relative to media.
+ * - Contiguous image runs longer than 3 become a gallery block; shorter
+ *   runs become individual image blocks. A paragraph only travels with an
+ *   image as its caption when isCaptionCandidate() accepts it; captions of
+ *   gallery-sized runs are re-emitted as a rich_text block right after the
+ *   gallery so no text is dropped.
+ * - Falls back to a single rich_text block (recording a warning) when the
+ *   body cannot be decomposed at all - content is never silently dropped.
  */
 function convertPageBody(
   fragment: string,
@@ -600,12 +686,9 @@ function convertPageBody(
     return;
   }
 
-  const headings = extractHeadings(fragment);
-  const paragraphs = extractParagraphs(fragment);
-  const images = extractImages(fragment);
-  const buttons = extractButtons(fragment);
+  const events = collectPageEvents(fragment);
 
-  if (!headings.length && !paragraphs.length && !images.length && !buttons.length) {
+  if (!events.length) {
     const fallbackText = stripTags(fragment);
     if (fallbackText) {
       context.warnings.push({
@@ -620,28 +703,76 @@ function convertPageBody(
     return;
   }
 
-  headings.forEach((heading) => pushHeadingBlock(context, heading));
+  const paragraphBuffer: string[] = [];
+  const flushParagraphs = (): void => {
+    if (paragraphBuffer.length) {
+      pushRichTextBlock(context, paragraphBuffer.join("\n\n"));
+      paragraphBuffer.length = 0;
+    }
+  };
 
-  // Paragraphs that were already consumed as an image's caption should not
-  // also be emitted as standalone rich_text blocks.
-  const captionTexts = new Set(
-    images.map((image) => image.caption).filter((value): value is string => !!value)
-  );
-  const remainingParagraphs = paragraphs.filter(
-    (paragraph) => !captionTexts.has(paragraph.text)
-  );
-  const combinedText = remainingParagraphs.map((p) => p.text).join("\n\n");
-  if (combinedText) {
-    pushRichTextBlock(context, combinedText);
+  let index = 0;
+  while (index < events.length) {
+    const event = events[index]!;
+    switch (event.kind) {
+      case "heading":
+        flushParagraphs();
+        pushHeadingBlock(context, event.heading);
+        index += 1;
+        break;
+      case "button":
+        flushParagraphs();
+        pushButtonLinkBlock(context, event.button);
+        index += 1;
+        break;
+      case "paragraph":
+        paragraphBuffer.push(event.paragraph.text);
+        index += 1;
+        break;
+      case "image": {
+        flushParagraphs();
+        // Consume a contiguous image run: images plus each image's own
+        // caption candidate keep the run going; anything else ends it.
+        const runImages: PositionedImage[] = [];
+        const runCaptions: Array<string | undefined> = [];
+        while (index < events.length) {
+          const current = events[index]!;
+          if (current.kind !== "image") {
+            break;
+          }
+          runImages.push(current.image);
+          index += 1;
+          const next = events[index];
+          if (
+            next?.kind === "paragraph" &&
+            isCaptionCandidate(fragment, current.image, next.paragraph)
+          ) {
+            runCaptions.push(next.paragraph.text);
+            index += 1;
+          } else {
+            runCaptions.push(undefined);
+          }
+        }
+        if (runImages.length > 3) {
+          pushGalleryBlock(context, runImages);
+          // gallery blocks carry no per-image captions; re-emit claimed
+          // captions as prose right after so the text is not dropped.
+          const releasedCaptions = runCaptions.filter(
+            (caption): caption is string => !!caption
+          );
+          if (releasedCaptions.length) {
+            pushRichTextBlock(context, releasedCaptions.join("\n\n"));
+          }
+        } else {
+          runImages.forEach((image, runIndex) =>
+            pushImageBlock(context, image, runCaptions[runIndex])
+          );
+        }
+        break;
+      }
+    }
   }
-
-  if (images.length > 3) {
-    pushGalleryBlock(context, images);
-  } else {
-    images.forEach((image) => pushImageBlock(context, image));
-  }
-
-  buttons.forEach((button) => pushButtonLinkBlock(context, button));
+  flushParagraphs();
 
   extractEmbeddedMedia(fragment).forEach((embed) => {
     context.warnings.push({
@@ -987,10 +1118,11 @@ function runCli(argv: readonly string[], repoRoot: string): void {
   const outFileName = `${manifest.handle}.package.json`;
   const outFile = path.join(outDir, outFileName);
   fs.writeFileSync(outFile, `${JSON.stringify(result.cmsPackage, null, 2)}\n`);
-  // Log only summaries (file basename, counts, page ids, warning codes).
-  // Never log absolute local paths, page content, or raw source URLs — the
-  // full details go into the report file, not the console.
-  console.log(`[migrate-static-pages] wrote ${outFileName}`);
+  // Log only fixed strings, counts, page ids, and warning codes. Never log
+  // values derived from file contents or filesystem paths (package
+  // filename, absolute paths, page content, raw source URLs) — the full
+  // details go into the report file, not the console.
+  console.log("[migrate-static-pages] package written");
   console.log(
     `[migrate-static-pages] ${result.pageSummaries.length} page(s), ${result.warnings.length} warning(s)`
   );
@@ -1011,9 +1143,7 @@ function runCli(argv: readonly string[], repoRoot: string): void {
         2
       )}\n`
     );
-    console.log(
-      `[migrate-static-pages] wrote report ${path.basename(reportPath)}`
-    );
+    console.log("[migrate-static-pages] report written");
   }
 
   for (const warning of result.warnings) {
@@ -1027,8 +1157,10 @@ if (require.main === module) {
   try {
     runCli(process.argv.slice(2), process.cwd());
   } catch (error) {
+    // Error messages from fs failures embed absolute local paths; log only
+    // the error class name to avoid leaking environment details.
     console.error(
-      `[migrate-static-pages] Failed: ${error instanceof Error ? error.message : String(error)}`
+      `[migrate-static-pages] Failed: ${error instanceof Error ? error.name : "UnknownError"}`
     );
     process.exit(1);
   }

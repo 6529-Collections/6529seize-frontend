@@ -5,21 +5,22 @@
       "pageId": "page-home",
       "sourceFile": "app/capital/page.tsx",
       "path": "/6529capital/index.html",
-      "blockCount": 3,
+      "blockCount": 8,
       "blockTypeCounts": {
         "heading": 1,
-        "rich_text": 1,
-        "gallery": 1
+        "rich_text": 4,
+        "gallery": 1,
+        "image": 2
       }
     },
     {
       "pageId": "page-fund",
       "sourceFile": "app/capital/fund/page.tsx",
       "path": "/6529capital/fund/index.html",
-      "blockCount": 3,
+      "blockCount": 4,
       "blockTypeCounts": {
         "heading": 2,
-        "rich_text": 1
+        "rich_text": 2
       }
     },
     {
@@ -29,8 +30,8 @@
       "blockCount": 3,
       "blockTypeCounts": {
         "heading": 1,
-        "rich_text": 1,
-        "gallery": 1
+        "gallery": 1,
+        "rich_text": 1
       }
     }
   ],

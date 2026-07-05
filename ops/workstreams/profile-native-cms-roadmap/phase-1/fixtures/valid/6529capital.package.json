@@ -69,7 +69,7 @@
           {
             "id": "block-page-home-rich-text-2",
             "block_type": "rich_text",
-            "content": "Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values. While the current funds are currently traditional fund structure, we hope, in time, to reach a decentralized, tokenized end-state.\n\nNFT investing is difficult specifically due to its non-fungibility, with the market value fragmented across and within collections. We believe there is no substitute for individual expertise in order to succeed in this field.\n\nThe 6529 Capital collecting team includes who we believe are some of the best regarded NFT collectors in the world.\n\nA full list of companies in our portfolio can be found here.\n\n@punk6529\n\n@krybharat\n\n@batsoupyum\n\n@ACthecollector\n\n@phon_ro\n\n@bonafidehan\n\nThe collecting team is complemented by a top tier administrative team handling financial, operational, investor relations, legal and regulatory matters.\n\n@6529Guardian\n\n@itsjpower\n\n6529 Capital is currently investing through the 6529 NFT Fund."
+            "content": "Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values. While the current funds are currently traditional fund structure, we hope, in time, to reach a decentralized, tokenized end-state.\n\nNFT investing is difficult specifically due to its non-fungibility, with the market value fragmented across and within collections. We believe there is no substitute for individual expertise in order to succeed in this field.\n\nThe 6529 Capital collecting team includes who we believe are some of the best regarded NFT collectors in the world.\n\nA full list of companies in our portfolio can be found here."
           },
           {
             "id": "block-page-home-gallery-3",
@@ -80,10 +80,35 @@
               "asset-page-home-3",
               "asset-page-home-4",
               "asset-page-home-5",
-              "asset-page-home-6",
-              "asset-page-home-7",
-              "asset-page-home-8"
+              "asset-page-home-6"
             ]
+          },
+          {
+            "id": "block-page-home-rich-text-4",
+            "block_type": "rich_text",
+            "content": "@punk6529\n\n@krybharat\n\n@batsoupyum\n\n@ACthecollector\n\n@phon_ro\n\n@bonafidehan"
+          },
+          {
+            "id": "block-page-home-rich-text-5",
+            "block_type": "rich_text",
+            "content": "The collecting team is complemented by a top tier administrative team handling financial, operational, investor relations, legal and regulatory matters."
+          },
+          {
+            "id": "block-page-home-image-6",
+            "block_type": "image",
+            "asset_id": "asset-page-home-7",
+            "caption": "@6529Guardian"
+          },
+          {
+            "id": "block-page-home-image-7",
+            "block_type": "image",
+            "asset_id": "asset-page-home-8",
+            "caption": "@itsjpower"
+          },
+          {
+            "id": "block-page-home-rich-text-8",
+            "block_type": "rich_text",
+            "content": "6529 Capital is currently investing through the 6529 NFT Fund."
           }
         ]
       },
@@ -114,15 +139,20 @@
             "text": "THE 6529 NFT FUND IS A SERIES OF CLOSED-END QUARTERLY FUNDS OPEN TO ACCREDITED INVESTORS AND QUALIFIED PURCHASERS"
           },
           {
-            "id": "block-page-fund-heading-2",
+            "id": "block-page-fund-rich-text-2",
+            "block_type": "rich_text",
+            "content": "It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it may make early stage investments in project teams and NFT infrastructure.\n\nIf you are an accredited investor or qualified purchaser and would like to learn more about the 6529 NFT Fund, please contact us at jeff@6529.io.\n\nAlternatively, you can access the fund information on Angellist here."
+          },
+          {
+            "id": "block-page-fund-heading-3",
             "block_type": "heading",
             "level": 1,
             "text": "6529 NFT FUND GALLERIES"
           },
           {
-            "id": "block-page-fund-rich-text-3",
+            "id": "block-page-fund-rich-text-4",
             "block_type": "rich_text",
-            "content": "It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it may make early stage investments in project teams and NFT infrastructure.\n\nIf you are an accredited investor or qualified purchaser and would like to learn more about the 6529 NFT Fund, please contact us at jeff@6529.io.\n\nAlternatively, you can access the fund information on Angellist here.\n\n6529 NFT FUND SEASON 1\n\n6529 NFT FUND SEASON 2\n\nLIVING ARCHITECTURE – CASA BATLLO"
+            "content": "6529 NFT FUND SEASON 1\n\n6529 NFT FUND SEASON 2\n\nLIVING ARCHITECTURE – CASA BATLLO"
           }
         ]
       },
@@ -153,12 +183,7 @@
             "text": "6529 HAS MADE SEED INVESTMENTS FROM ITS OWN CAPITAL (ON BALANCE SHEET) IN THE FOLLOWING FIRMS"
           },
           {
-            "id": "block-page-company-portfolio-rich-text-2",
-            "block_type": "rich_text",
-            "content": "Arbitrum\n\nBlur\n\nDeca\n\nDoppel\n\nfarcaster\n\nOnCyber\n\nReady Player Me\n\ntokenproof\n\nTransient Labs\n\nUNXD\n\nSafe\n\nMonad\n\nmmERCH\n\nSound"
-          },
-          {
-            "id": "block-page-company-portfolio-gallery-3",
+            "id": "block-page-company-portfolio-gallery-2",
             "block_type": "gallery",
             "asset_ids": [
               "asset-page-company-portfolio-1",
@@ -176,6 +201,11 @@
               "asset-page-company-portfolio-13",
               "asset-page-company-portfolio-14"
             ]
+          },
+          {
+            "id": "block-page-company-portfolio-rich-text-3",
+            "block_type": "rich_text",
+            "content": "Arbitrum\n\nBlur\n\nDeca\n\nDoppel\n\nfarcaster\n\nOnCyber\n\nReady Player Me\n\ntokenproof\n\nTransient Labs\n\nUNXD\n\nSafe\n\nMonad\n\nmmERCH\n\nSound"
           }
         ]
       }
@@ -546,8 +576,8 @@
   "integrity": {
     "canonicalization": "jcs-rfc8785",
     "hash_algorithm": "sha256",
-    "payload_hash": "sha256:44a352f1d6d8a96bc069b86d42bf602a0740c5757476340c8ac905712b435cdb",
-    "package_hash": "sha256:5ca6e90a8c01be203751a2c6b69d1fd6883f0543a11c6fbeb8b1d3038dc30e5d",
+    "payload_hash": "sha256:6b47cf5d2c2f5f70d2fcbb3119cb70406556825c150ff25808fdf3c908bb8b0e",
+    "package_hash": "sha256:67241dfb758d54aabc7f7222cb8ada6a6c50ee61e1680078721f51454ef6b29d",
     "note": "Draft migration candidate; final publish must be signed and stored by backend."
   },
   "signatures": [

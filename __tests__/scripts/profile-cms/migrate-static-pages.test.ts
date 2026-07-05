@@ -117,6 +117,100 @@ describe("convertSourcePage", () => {
     const warningCodes = result.warnings.map((warning) => warning.code);
     expect(warningCodes).not.toContain("page.unrecognized_structure");
   });
+
+  it("preserves document order for interleaved heading/text/image/text pages", () => {
+    const manifest: MigrationManifest = {
+      ...SAMPLE_MANIFEST,
+      pages: [
+        {
+          slug: "interleaved",
+          sourceFile:
+            "__tests__/scripts/profile-cms/fixtures/interleaved-page.tsx",
+        },
+      ],
+    };
+
+    const result = convertSourcePage(manifest, manifest.pages[0]!, REPO_ROOT);
+
+    expect(result.page.blocks.map((block) => block.block_type)).toEqual([
+      "heading",
+      "rich_text",
+      "image",
+      "rich_text",
+      "heading",
+      "rich_text",
+    ]);
+    const [first, intro, , narrative, second, closing] = result.page.blocks as Array<{
+      text?: string;
+      content?: string;
+    }>;
+    expect(first?.text).toBe("First Section");
+    expect(intro?.content).toBe("Intro paragraph before the artwork image.");
+    expect(second?.text).toBe("Second Section");
+    expect(closing?.content).toBe("Closing paragraph under the second heading.");
+    expect(narrative?.content).toContain("must remain in the body text flow");
+  });
+
+  it("keeps a non-caption paragraph after an image in the prose flow instead of claiming it as caption", () => {
+    const manifest: MigrationManifest = {
+      ...SAMPLE_MANIFEST,
+      pages: [
+        {
+          slug: "interleaved",
+          sourceFile:
+            "__tests__/scripts/profile-cms/fixtures/interleaved-page.tsx",
+        },
+      ],
+    };
+
+    const result = convertSourcePage(manifest, manifest.pages[0]!, REPO_ROOT);
+
+    const imageBlock = result.page.blocks.find(
+      (block) => block.block_type === "image"
+    ) as { caption?: string } | undefined;
+    expect(imageBlock).toBeDefined();
+    // The following paragraph is full-sentence prose, so the conservative
+    // caption heuristic must NOT claim it — it stays in a rich_text block.
+    expect(imageBlock?.caption).toBeUndefined();
+    const proseBlocks = result.page.blocks.filter(
+      (block) => block.block_type === "rich_text"
+    ) as Array<{ content: string }>;
+    expect(
+      proseBlocks.some((block) =>
+        block.content.includes("must remain in the body text flow")
+      )
+    ).toBe(true);
+  });
+
+  it("splits fund-page prose at the galleries heading instead of merging all paragraphs", () => {
+    const manifest: MigrationManifest = {
+      ...SAMPLE_MANIFEST,
+      legacyRouteRoot: "/capital",
+      pages: [
+        {
+          slug: "fund",
+          sourceFile: "app/capital/fund/page.tsx",
+          navigationLabel: "Fund",
+        },
+      ],
+    };
+
+    const result = convertSourcePage(manifest, manifest.pages[0]!, REPO_ROOT);
+
+    expect(result.page.blocks.map((block) => block.block_type)).toEqual([
+      "heading",
+      "rich_text",
+      "heading",
+      "rich_text",
+    ]);
+    const [, narrative, galleriesHeading, galleryLinks] = result.page
+      .blocks as Array<{ text?: string; content?: string }>;
+    expect(galleriesHeading?.text).toBe("6529 NFT FUND GALLERIES");
+    expect(narrative?.content).toContain("It is targeting approximately");
+    expect(narrative?.content).not.toContain("LIVING ARCHITECTURE");
+    expect(galleryLinks?.content).toContain("6529 NFT FUND SEASON 1");
+    expect(galleryLinks?.content).toContain("LIVING ARCHITECTURE – CASA BATLLO");
+  });
 });
 
 describe("buildMigratedCmsPackage", () => {
