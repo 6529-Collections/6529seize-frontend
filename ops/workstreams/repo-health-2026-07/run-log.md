@@ -396,3 +396,13 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
 - Pre-existing latent bug found while typing (NOT fixed here, behavior
   preserved): the CollectionDelegation use-case lock UI reads wagmi
   multicall envelopes as booleans instead of `.result` — issue #3078.
+
+## 2026-07-05 (Thread G — any burn-down tail, wave 2b)
+
+- Delegation any-tail slice 2 of 3: NewConsolidation, NewSubDelegation,
+  RevokeDelegationWithSub, UpdateDelegation receive the identical
+  mechanical treatment slice 1 gave their siblings (onHide/onSetToast
+  props -> void/DelegationToastState, inert onSettled annotations ->
+  unknown/Error | null). Clone edits produced by a Sonnet work packet
+  under a strict per-line spec, reviewed hunk-by-hunk before commit.
+  `any_casts` 45 -> 21.
