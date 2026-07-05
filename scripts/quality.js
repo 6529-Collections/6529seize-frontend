@@ -20,12 +20,23 @@ const enableCoderabbit = args.has("--coderabbit");
 const changedMode = args.has("--changed");
 
 const runCommand = ({ command, args = [], inheritOutput = false }) => {
+  // Node refuses to spawn .cmd/.bat files without a shell (CVE-2024-27980),
+  // and combining shell:true with an args array is deprecated (DEP0190), so
+  // shim invocations collapse into one command line. Safe here: every token
+  // is a static string, and the quoted shim path survives a repo path with
+  // spaces under cmd.exe.
+  const useShell = /\.(cmd|bat)$/i.test(command);
   // Sonar hotspot accepted: this is a trusted local developer script.
-  const result = spawnSync(command, args, {
-    encoding: "utf8",
-    cwd: repoRoot,
-    stdio: inheritOutput ? "inherit" : ["ignore", "pipe", "pipe"],
-  });
+  const result = spawnSync(
+    useShell ? [`"${command}"`, ...args].join(" ") : command,
+    useShell ? [] : args,
+    {
+      encoding: "utf8",
+      cwd: repoRoot,
+      stdio: inheritOutput ? "inherit" : ["ignore", "pipe", "pipe"],
+      shell: useShell,
+    }
+  );
 
   if (result.error) {
     throw result.error;
