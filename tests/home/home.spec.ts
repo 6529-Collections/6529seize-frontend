@@ -12,7 +12,8 @@ test.describe("Home Page @smoke @medium @large", () => {
   });
 
   test("should display the home landing content", async ({ page }) => {
-    await expect(page).toHaveTitle("6529.io");
+    // Prod serves "6529.io"; staging serves "6529 Staging".
+    await expect(page).toHaveTitle(/^6529(\.io| Staging)$/);
     await expectNoHorizontalOverflow(page);
 
     await expect(page.getByText(/^(Latest|Next) Drop$/)).toBeVisible();
