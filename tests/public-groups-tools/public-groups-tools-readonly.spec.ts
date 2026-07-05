@@ -120,10 +120,10 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     page,
   }) => {
     await gotoReady(page, "/network");
-    await openGroupFilters(page);
 
-    // Resolve a real group id from the app's own groups request so the test
-    // stays portable across local, staging, and production data sets.
+    // Resolve a real group id from the app's own unfiltered groups request
+    // (fired when the filter panel opens) so the test stays portable across
+    // local, staging, and production data sets.
     const groupsResponsePromise = page.waitForResponse(
       (response) =>
         response.request().method() === "GET" &&
@@ -131,11 +131,10 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
         response.ok(),
       { timeout: 30000 }
     );
-    const groupNameInput = page
-      .getByLabel(/^(By )?Group [Nn]ame$/)
-      .first();
-    await expect(groupNameInput).toBeVisible({ timeout: 30000 });
-    await groupNameInput.fill("memes");
+    await openGroupFilters(page);
+    await expect(
+      page.getByLabel(/^(By )?Group [Nn]ame$/).first()
+    ).toBeVisible({ timeout: 30000 });
     const groupsResponse = await groupsResponsePromise;
     const groupsPayload = (await groupsResponse.json()) as
       | { readonly id?: string; readonly name?: string }[]
@@ -156,26 +155,23 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     );
     await openGroupFilters(page);
 
-    const activeGroupMembers = page.getByText("Members:", { exact: false });
-    if (
-      await activeGroupMembers
-        .first()
-        .isVisible({ timeout: 15000 })
-        .catch(() => false)
-    ) {
-      // Desktop sidebar shows the active group block; clearing it exercises
-      // the state transition back to null and drops the URL param.
-      const clearButton = page
-        .getByRole("button", { name: /remove|clear group/i })
-        .first();
-      if (await clearButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await clearButton.click();
-        await expect(page).toHaveURL(
-          (url) => url.searchParams.get("group") === null,
-          { timeout: 15000 }
-        );
-      }
-    }
+    // The active-group block is required: "Members:" in the desktop sidebar,
+    // "Active filter" in the mobile sheet.
+    await expect(
+      page.getByText(/Members:|Active filter/).first()
+    ).toBeVisible({ timeout: 30000 });
+
+    // Clearing the group exercises the state transition back to null and
+    // must drop the URL param.
+    const clearButton = page
+      .getByRole("button", { name: /remove|clear group/i })
+      .first();
+    await expect(clearButton).toBeVisible({ timeout: 15000 });
+    await clearButton.click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("group") === null,
+      { timeout: 15000 }
+    );
 
     await expectNoHorizontalOverflow(page);
   });
