@@ -127,11 +127,11 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
         url.searchParams.get("page") === "1"
     );
 
-    await expect(page).toHaveTitle("Network Metrics | Open Data");
+    await expect(page).toHaveTitle("Consolidated Network Metrics | Open Data");
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "Network Metrics Downloads",
+        name: "Consolidated Network Metrics Downloads",
       })
     ).toBeVisible();
     const body = (await response.json()) as { data?: unknown };

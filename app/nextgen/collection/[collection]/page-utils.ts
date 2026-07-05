@@ -52,16 +52,18 @@ export function getContentViewKeyByValue(value: string): string {
 
 export function getNextgenCollectionMetadata({
   collection,
+  documentTitle,
   subtitle,
   title,
 }: {
   readonly collection: NextGenCollection;
+  readonly documentTitle?: string | undefined;
   readonly subtitle?: string | undefined;
   readonly title: string;
 }): Metadata {
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title,
+      title: documentTitle ?? title,
       description: "NextGen",
       ogImage: getCollectionSocialCardImagePath("nextgen", {
         image: collection.banner || collection.image,

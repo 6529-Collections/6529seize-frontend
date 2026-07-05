@@ -77,6 +77,12 @@ describe("TitleContext", () => {
     await waitFor(() => {
       expect(screen.getByText("Memes Minting Calendar")).toBeInTheDocument();
     });
+
+    // Across a route change the context leaves document.title to the new
+    // route's server metadata commit (jsdom has no App Router, so simulate
+    // it: /meme-calendar's metadata title is "Memes Minting Calendar"); the
+    // context must not fight it afterwards.
+    document.title = "Memes Minting Calendar";
     await waitFor(() => {
       expect(document.title).toBe("Memes Minting Calendar");
     });

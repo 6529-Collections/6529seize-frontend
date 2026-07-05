@@ -155,9 +155,9 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("heading", { level: 1, name: "Collections" })
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Status: ALL" })
-    ).toBeVisible();
+    const statusFilter = page.getByRole("combobox", { name: "Status:" });
+    await expect(statusFilter).toBeVisible();
+    await expect(statusFilter).toHaveValue("ALL");
     await expectCardsOrEmpty(
       page,
       page.locator('main a[href*="/nextgen/collection/"]'),
@@ -225,7 +225,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/the-memes");
 
-    await expect(page).toHaveTitle("The Memes");
+    await expect(page).toHaveTitle("The Memes | Collections");
     await expectCollectionTitle(page, testInfo.project.name, "The Memes");
     await expect(
       page.getByRole("region", { name: "Meme sorting" })
@@ -242,7 +242,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/meme-lab");
 
-    await expect(page).toHaveTitle("Meme Lab");
+    await expect(page).toHaveTitle("Meme Lab | Collections");
     await expectCollectionTitle(page, testInfo.project.name, "Meme Lab");
     await expect(
       page.getByRole("region", { name: "Meme Lab sorting" })
@@ -259,7 +259,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/6529-gradient?sort=id&sort_dir=asc");
 
-    await expect(page).toHaveTitle(/^6529 Gradient(?: \| Collections)?$/);
+    await expect(page).toHaveTitle("6529 Gradient | Collections");
     await expectCollectionTitle(page, testInfo.project.name, "6529 Gradient");
     await expect(
       page.getByRole("region", { name: "Gradient sorting" })

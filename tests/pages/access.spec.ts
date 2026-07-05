@@ -6,7 +6,7 @@ test.describe("Access Page", () => {
   });
 
   test("should load with correct title and input state", async ({ page }) => {
-    await expect(page).toHaveTitle("Access Page | 6529.io");
+    await expect(page).toHaveTitle("Access Page");
   });
 
   test("should show input as disabled when logged in", async ({ page }) => {

@@ -46,7 +46,7 @@ describe("ReMemes metadata", () => {
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
-    expect(metadata.title).toBe("ReMemes");
+    expect(metadata.title).toBe("ReMemes | Collections");
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(image).toMatchObject({
       alt: "ReMemes collection social card",
@@ -62,7 +62,7 @@ describe("ReMemes metadata", () => {
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
-    expect(metadata.title).toBe("ReMemes | Add");
+    expect(metadata.title).toBe("Add ReMemes | Collections");
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(image).toMatchObject({
       alt: "Add ReMeme social card",

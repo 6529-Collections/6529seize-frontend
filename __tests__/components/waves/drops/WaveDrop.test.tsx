@@ -322,7 +322,9 @@ describe("WaveDrop", () => {
     await waitFor(() => expect(mobileMenuProps?.isOpen).toBe(true));
   });
 
-  it("keeps touch entry in compact touch layouts even when hover is available", () => {
+  it("keeps hybrid touchscreen laptops on desktop interactions even in compact layouts", () => {
+    // Regression: a Windows touch laptop in a snapped/narrow window must NOT
+    // switch to the touch sheet — it still has hover input.
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(false);
@@ -346,20 +348,20 @@ describe("WaveDrop", () => {
       />
     );
 
-    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    expect(screen.getByTestId("actions")).toBeInTheDocument();
     expect(getLastMockProps(mockWaveDropHeader)).toEqual(
-      expect.objectContaining({ showActionsButton: true })
+      expect.objectContaining({ showActionsButton: false })
     );
     expect(getLastMockProps(mockWaveDropContent)).toEqual(
-      expect.objectContaining({ hasTouch: true })
+      expect.objectContaining({ hasTouch: false })
     );
   });
 
-  it("clears an open touch sheet when the layout switches to desktop hover mode", async () => {
+  it("clears an open touch sheet when hover input appears at desktop width", async () => {
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
-    isTouchDeviceMock.mockReturnValue(false);
-    setHoverSupport(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
     setViewportWidth(800);
 
     renderWithEditingDropProvider(
@@ -388,6 +390,8 @@ describe("WaveDrop", () => {
     await waitFor(() => expect(mobileMenuProps?.isOpen).toBe(true));
 
     act(() => {
+      // e.g. iPad gaining a trackpad: hover appears and the viewport widens.
+      setHoverSupport(true);
       setViewportWidth(1440);
     });
 

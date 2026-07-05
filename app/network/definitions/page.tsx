@@ -7,7 +7,7 @@ export default function Definitions() {
 
 export const generateMetadata = async () => {
   return getAppMetadata({
-    title: "Definitions",
+    title: "Definitions | Network",
     description: "Network",
   });
 };

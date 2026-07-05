@@ -7,5 +7,5 @@ export default function DisputeResolutionPage() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: 'Dispute Resolution' });
+  return getAppMetadata({ title: 'Dispute Resolution | 6529.io' });
 }

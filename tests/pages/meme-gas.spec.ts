@@ -6,7 +6,7 @@ test.describe("Meme Gas Page", () => {
   });
 
   test("should load with correct title and heading", async ({ page }) => {
-    await expect(page).toHaveTitle("Meme Gas | 6529.io");
+    await expect(page).toHaveTitle("Meme Gas - The Memes");
 
     const heading = page.locator("h1");
     await expect(heading).toContainText("Meme Gas");

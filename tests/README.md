@@ -368,3 +368,21 @@ Large-pack ownership:
 - Large-pack failures belong to the PR or train owner until they are diagnosed
   as unrelated infrastructure. Do not quarantine, skip, or downgrade a failing
   large pack without recording the reason in the PR or release report.
+
+Real-device evidence (AWS Device Farm):
+
+- `tests/device-farm/` contains Appium smoke suites that run on AWS Device
+  Farm physical devices via `.github/workflows/device-farm-qa.yml`. They are
+  mocha `.cjs` specs in a self-contained npm package, intentionally outside
+  the Playwright `testMatch` and the pnpm workspace.
+- These packs provide the `real-device` evidence tier that the Playwright
+  Capacitor/Electron simulations explicitly do not: real Android Chrome and
+  iOS Safari rendering of the deployed frontend, plus the real Capacitor shell
+  APK (launch, WebView boot of `6529.io`, `mobile6529://` deep links, built-in
+  fuzz crash detection).
+- Deployment-bus manifests know these as `devicefarm:mobile-web-smoke`,
+  `devicefarm:native-android-smoke`, and `devicefarm:native-android-fuzz`.
+  They are scheduled/dispatch packs, not PR CI packs, and stay read-only
+  against live environments.
+- Regime documentation, provisioning, cost model, and triage:
+  `ops/docs/developer/device-farm-qa.md`.

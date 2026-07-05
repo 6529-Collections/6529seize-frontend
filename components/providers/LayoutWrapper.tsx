@@ -50,7 +50,7 @@ export default function LayoutWrapper({
 }: {
   readonly children: ReactNode;
 }) {
-  const { isApp, hasTouchScreen } = useDeviceInfo();
+  const { isApp, hasTouchScreen, isMobileDevice } = useDeviceInfo();
   const { refreshKey } = useGlobalRefresh();
   const isSmallScreen = useIsMobileScreen();
   const isTouchTabletViewport = useSyncExternalStore(
@@ -85,8 +85,12 @@ export default function LayoutWrapper({
   let LayoutComponent: ComponentType<{ readonly children: ReactNode }> =
     WebLayout;
 
+  // hasTouchScreen covers touch-first hardware; isMobileDevice (UA-based)
+  // keeps phones on the small layout even when a mouse or trackpad is
+  // attached. Hybrid touch laptops match neither, so they stay on WebLayout.
   const isSmallLayout =
-    hasTouchScreen && (isSmallScreen || isTouchTabletViewport);
+    (hasTouchScreen || isMobileDevice) &&
+    (isSmallScreen || isTouchTabletViewport);
 
   if (isApp) {
     LayoutComponent = MobileLayout;

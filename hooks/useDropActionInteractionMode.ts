@@ -82,7 +82,10 @@ export default function useDropActionInteractionMode(): DropActionInteractionMod
   const hasTouchInput = useHasTouchInput();
   const hasHoverActionInput = useHasHoverInput();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const hasTouchActionInput = isMobileDevice || isTouchDevice || hasTouchInput;
+  // Raw touch capability only counts when no hover input exists — otherwise
+  // hybrid devices (touch-screen laptops) would lose desktop hover actions.
+  const hasTouchActionInput =
+    isMobileDevice || isTouchDevice || (hasTouchInput && !hasHoverActionInput);
   const canUseTouchActionSheet =
     hasTouchActionInput && (isMobileLayoutViewport || !hasHoverActionInput);
 

@@ -180,7 +180,16 @@ gh run list -R 6529-Collections/6529seize-frontend --workflow staging-e2e.yml -L
    - critical console/network errors absent
    - static assets load from the expected build
    - backend/frontend version expectations match when visible
-4. If production validation fails:
+4. For releases that touch mobile-web behavior, native shell handoff
+   (`/open-mobile`, header share/QR, deep links), or mobile navigation, also
+   dispatch the real-device pack and record the run URL as release evidence:
+   `gh workflow run device-farm-qa.yml --ref main -R 6529-Collections/6529seize-frontend`.
+   It runs read-only Appium smoke on AWS Device Farm physical devices plus a
+   native Android shell check (see `ops/docs/developer/device-farm-qa.md`).
+   Treat it as non-gating post-deploy evidence unless the release is
+   mobile-focused; if the workflow reports that Device Farm secrets are not
+   configured, record that and continue.
+5. If production validation fails:
    - coordinate immediately and keep ownership of the incident loop
    - decide rollback versus fix-forward based on severity and reversibility, then execute the chosen path if it is within existing authorization
    - do not start unrelated deploys until production is stable or explicitly handed off

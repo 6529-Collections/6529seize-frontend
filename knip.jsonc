@@ -94,7 +94,10 @@
       "stubs/empty.js"
     ],
     "ignoreBinaries": [
-      "coderabbit"
+      "coderabbit",
+      // Capacitor CLI, run via npx inside the 6529-core-mobile checkout in
+      // .github/workflows/device-farm-qa.yml — not a dependency of this repo.
+      "cap"
     ],
     "ignoreDependencies": [
       "pino-pretty",

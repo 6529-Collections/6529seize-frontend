@@ -32,7 +32,7 @@ describe("prenodes page", () => {
 
   it("has correct metadata", async () => {
     const metadata = await generateMetadata();
-    expect(metadata.title).toEqual("Prenodes");
+    expect(metadata.title).toEqual("Prenodes | Network");
     expect(metadata.description).toEqual("Network | 6529.io");
   });
 });

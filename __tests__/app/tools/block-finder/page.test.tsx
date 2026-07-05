@@ -31,7 +31,7 @@ describe("tools/block-finder/page.tsx (server)", () => {
     );
     const md = await generateMetadata();
     expect(getAppMetadata).toHaveBeenCalledWith({
-      title: "Block Finder",
+      title: "Block Finder | Tools",
       description: "Tools",
     });
     expect(md).toEqual({

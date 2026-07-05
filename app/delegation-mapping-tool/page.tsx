@@ -7,5 +7,5 @@ export default function DelegationMappingToolPage() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: 'Delegation Mapping Tool', description: 'Tools' });
+  return getAppMetadata({ title: 'Delegation Mapping Tool | Tools', description: 'Tools' });
 }

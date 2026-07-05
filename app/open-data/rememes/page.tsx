@@ -13,7 +13,7 @@ export default function RememesDownloads() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "Rememes",
+    title: "Rememes | Open Data",
     description: "Open Data",
   });
 }

@@ -18,7 +18,7 @@ export default function ReMemesAddPage() {
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title: "ReMemes | Add",
+      title: "Add ReMemes | Collections",
       description: "Collections",
       ogImage: getCollectionSocialCardImagePath("rememes", {
         subtitle: "Submit a community remix or derivative",

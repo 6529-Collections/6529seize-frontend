@@ -8,7 +8,7 @@ export default function BlockFinderPage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "Block Finder",
+    title: "Block Finder | Tools",
     description: "Tools",
   });
 }

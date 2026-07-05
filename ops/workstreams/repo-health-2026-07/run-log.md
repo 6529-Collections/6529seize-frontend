@@ -1,5 +1,86 @@
 # Run Log
 
+## 2026-07-05 (Thread F — collection surfaces quality pass)
+
+- Phase 1 (overflow): root cause pinned with production evidence — the
+  Bootstrap exit ported `<Container fluid>` as `tw-w-full tw-max-w-none`,
+  dropping Bootstrap's intrinsic 12px container padding, so `.row` ports
+  (`-tw-mx-3`) overhang the viewport by 12px. At 1280 that is
+  `scrollWidth - clientWidth` = +11/12 (rows at x=1291/1292, the exact
+  e2e offenders); at 1440 the overhang lands inside the html scroll area
+  (measured -30, zero offenders), which is why the earlier 1440 sweep
+  missed it. Fix = restore `tw-px-3` on the five container-fluid ports
+  (PR #3080). After: 0 overflow at 1280 on all five NextGen routes, 1440
+  unchanged, mobile restored to the pre-migration 24px inset. Swiper
+  needed no fix: `swiper/css` base `overflow: hidden` is imported and
+  working; slide rects in older failure JSON never contributed to
+  scrollWidth.
+- Phase 2 (network-metrics): the one failing desktop test decomposed into
+  two app bugs (PR #3081): the `VIEW` enum imported from a "use client"
+  module serialized as `$undefined` across the RSC boundary (silently
+  dropping the intended "Consolidated" qualifier while jsdom suites
+  false-greened it), and Next 16 streamed metadata overwrites
+  client-set titles ~16ms after hydration (MutationObserver evidence),
+  so only `generateMetadata` titles are durable. Enum moved to a shared
+  module; SSR title set to the intended
+  "Consolidated Network Metrics | Open Data"; e2e + unit tests aligned.
+- Collections-pack residuals unmasked by the overflow fix (PR #3082):
+  `/rememes` and `/nextgen/collection/*` SSR titles aligned with their
+  client-intended titles (same streamed-metadata class), and the
+  collections-list spec locator updated from the Bootstrap-era
+  "Status: ALL" button to the native select shipped in #2965.
+- Local verification: collections pack 20/20 (desktop + mobile),
+  network-open-data pack 14/14, related Jest suites green,
+  react-doctor:diff 100/100. Production packs stay red for the changed
+  expectations until the next deploy (old build serves old titles/markup);
+  the post-deploy Staging E2E workflow re-verifies automatically.
+- Phase 3 (slow routes): measured clean-browser production performance for
+  /rememes /the-memes /meme-lab /network /meme-calendar — all sub-second
+  (TTFB 62-174ms, DCL 119-290ms, load 640-835ms). The 20s/60s harness
+  budget blowouts are measurement artifacts: network-idle waits never
+  settle (RUM/mixpanel beacons + trickling arweave/ipfs media deny a
+  500ms quiet window) and the readonly harness's global route
+  interception disables the HTTP cache under pack load. The historical
+  "ReMemes 60s/empty-title" only reproduced under full-pack load; in
+  isolation it was the title-value bug fixed in #3082. Full measurement
+  table, classification, and recommendations in
+  `slow-collection-routes.md`. No frontend rewrite is justified; slowest
+  backend endpoints (all sub-second) handed off as observability data.
+- App-wide follow-up flagged (out of scope, evidence attached): every
+  `useSetTitle` suffix app-wide is silently lost to streamed metadata
+  since the Next 16 upgrade — spawned as a separate task for scoping.
+- Environment notes for other threads:
+  - `quality.js --changed` failed on Windows Node 24 (spawnSync of .cmd
+    without shell) — fixed in PR #3100 (`quality.js`/`dev-open.cjs` now
+    run `.cmd` shims through a shell; `dev:open` also needed `run dev`
+    instead of bare `dev`). Until a checkout has the fix, run
+    `format:changed`/`lint:changed`/`typecheck:changed` directly.
+  - knip reports ~23 false unused-file/export findings (`ops/scripts/*`
+    files, gate-script exports) when run from a worktree nested under
+    `.claude/worktrees/`; identical content knips clean from a
+    short-path worktree or the main checkout — treat knip failures under
+    `.claude/worktrees/` as suspect before chasing them.
+  - Nested bare-`pnpm` hops (`check:changed`, `predev`) execute in
+    whichever checkout's `bin/` is on PATH (`bin/pnpm.cmd` does
+    `cd /d "%~dp0.."`), so from a secondary worktree they silently run
+    against the main checkout — strip the other checkout's `bin` from
+    PATH when verifying.
+  - A stale local `main` ref inflates the `:changed` sets until
+    `lint:changed` overflows the Windows command-line length limit
+    ("The command line is too long", xargs exit 123).
+  - Turbopack refuses a junctioned `node_modules` ("symlink points out
+    of the filesystem root") — use `USE_TURBO=false` in junction-based
+    scratch worktrees.
+  - In fresh worktrees use `./bin/6529 env prod` (then verify with
+    `env status` — the switcher comments out non-matching managed keys
+    but only appends missing ones, so a local-target `.env` can end up
+    with no active API/WS endpoint) instead of relying on shell-var
+    overrides reaching the client env bake; `.env.sample` placeholders
+    also fail schema validation (`IPFS_GATEWAY_ENDPOINT` URL,
+    positive-number vars) — seed from a known-good `.env` instead.
+  - Dev servers watched by piped `head`/`tail` die on SIGPIPE once the
+    pipe closes — redirect to a file instead.
+
 ## 2026-07-05 (Thread D — one layout)
 
 - Phase 0 (inventory) merged as PR #3041 (`layout-unification-plan.md`). Key
@@ -321,3 +402,54 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
 - Non-source TODO mentions that remain are intentional: skill docs that
   document TODO conventions, the campaign docs, and the ratchet's own
   detection patterns/fixtures.
+
+## 2026-07-05 (Thread G — any burn-down tail, wave 2a)
+
+- Delegation any-tail slice 1 of 3: the write-config path. DELEGATION_ABI
+  annotated `: Abi` at the source (NextGen-ABI precedent from #3052), new
+  `DelegationWriteParams` in delegation-shared typed into
+  `DelegationSubmitGroups.writeParams` (with a functionName narrowing
+  guard on the already-validate()-gated submit), `getGasError` takes
+  `Error`, `DelegationToastState` exported and used by NewDelegation +
+  NewAssignPrimaryAddress props; legacy inert `onSettled(data, error)`
+  annotations typed `unknown`/`Error | null`. `any_casts` 64 -> 45.
+- Rode along per ratchet protocol: `oversized_files` 90 -> 89
+  (useWaveDropsClipboard.ts healed by #3072; --update shrank the list).
+- Pre-existing latent bug found while typing (NOT fixed here, behavior
+  preserved): the CollectionDelegation use-case lock UI reads wagmi
+  multicall envelopes as booleans instead of `.result` — issue #3078.
+
+## 2026-07-05 (Thread G — any burn-down tail, wave 2b)
+
+- Delegation any-tail slice 2 of 3: NewConsolidation, NewSubDelegation,
+  RevokeDelegationWithSub, UpdateDelegation receive the identical
+  mechanical treatment slice 1 gave their siblings (onHide/onSetToast
+  props -> void/DelegationToastState, inert onSettled annotations ->
+  unknown/Error | null). Clone edits produced by a Sonnet work packet
+  under a strict per-line spec, reviewed hunk-by-hunk before commit.
+  `any_casts` 45 -> 21.
+
+## 2026-07-05 (Thread G — any burn-down tail complete; workstream E COMPLETE)
+
+- Delegation any-tail slice 3 of 3: the read path. `DelegationUseCase`
+  types the use-case constants' consumers; `DelegationReadParams` types
+  the `useReadContracts` param builders (`getParams`/`getReadParams`/
+  consolidation reader); `getDelegationsFromData` takes the minimal
+  multicall envelope shape and narrows results to a typed 4-tuple, with
+  expiries normalized via `Number()` so viem's runtime bigints and the
+  fixtures' numbers share one code path; `tokens` widened to
+  `number | bigint` to match uint256 decoding. Center/menu/wallet-checker
+  callbacks typed `void`. The lock-status envelope comparison keeps its
+  exact (pre-existing, latently buggy — issue #3078) behavior under an
+  `as unknown as boolean` double cast. `any_casts` 21 -> 4.
+- Final state: `any_casts` = 4 = the exceptions ledger exactly (3
+  permanent wagmi connector sites + 1 blog-prose scan false positive);
+  ledger rewritten to enumerate kept sites, record the resolved
+  delegation deferral, and note the scanner's generic-argument blind
+  spot (`useState<any>` is invisible to the regex; a handful remain in
+  CollectionDelegation.tsx for Thread D's split to absorb).
+- Workstream E definition of done met: Redux removed (#3047, deps gone),
+  `any` driven to documented exceptions only (358 -> 64 by Thread E's
+  #3052, 64 -> 4 by Thread G's three-slice tail), TODO/FIXME/HACK at 0
+  in ratchet scope (#3056: 4 shims completed, 2 items ticketed as #3053,
+  1 stale comment deleted). Ratchet backstops all three metrics.

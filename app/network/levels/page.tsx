@@ -7,7 +7,7 @@ export default function Levels() {
 
 export const generateMetadata = async () => {
   return getAppMetadata({
-    title: "Levels",
+    title: "Levels | Network",
     description: "Network",
   });
 };

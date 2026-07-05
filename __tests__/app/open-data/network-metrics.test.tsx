@@ -26,10 +26,7 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn().mockReturnValue({
-    title: "Network Metrics",
-    description: "Open Data",
-  }),
+  getAppMetadata: jest.fn((customMetadata) => customMetadata),
 }));
 
 describe("Open Data network metrics page", () => {
@@ -42,7 +39,7 @@ describe("Open Data network metrics page", () => {
 
   it("exposes metadata", async () => {
     await expect(generateMetadata()).resolves.toEqual({
-      title: "Network Metrics",
+      title: "Consolidated Network Metrics | Open Data",
       description: "Open Data",
     });
   });
