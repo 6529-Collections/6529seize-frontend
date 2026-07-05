@@ -16,14 +16,27 @@ concurrency:
 jobs:
   staging-packs:
     name: Staging E2E packs
+    # Trust gate: this job holds a secret and executes checked-out code, so
+    # workflow_run triggers must come from this repository's own 1a-staging
+    # branch (staging deploys are push-triggered; forks cannot push there).
+    # The explicit head_repository/head_branch conditions keep that invariant
+    # enforced even if the upstream deploy workflow's triggers ever change.
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_repository.full_name == github.repository &&
+        github.event.workflow_run.head_branch == '1a-staging'
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
       PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
     steps:
+      # workflow_run: the exact SHA the staging deploy shipped. Manual
+      # dispatch falls back to the branch tip, which may differ from what is
+      # currently deployed to staging — fine for ad-hoc reruns, but prefer
+      # letting the deploy trigger this workflow for deployed-SHA fidelity.
       - name: Check out the deployed ref
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -78,12 +91,24 @@ jobs:
           failed=0
           echo "## Staging E2E packs" >> "$GITHUB_STEP_SUMMARY"
           for pack in "${packs[@]}"; do
-            if ./bin/6529 run "$pack"; then
+            log="$(mktemp)"
+            if ./bin/6529 run "$pack" 2>&1 | tee "$log"; then
               echo "- :white_check_mark: \`$pack\`" >> "$GITHUB_STEP_SUMMARY"
             else
               failed=1
-              echo "- :x: \`$pack\`" >> "$GITHUB_STEP_SUMMARY"
+              {
+                echo "- :x: \`$pack\`"
+                echo ""
+                echo "<details><summary>Last 25 log lines for \`$pack\`</summary>"
+                echo ""
+                echo '```'
+                tail -25 "$log"
+                echo '```'
+                echo ""
+                echo "</details>"
+              } >> "$GITHUB_STEP_SUMMARY"
             fi
+            rm -f "$log"
           done
           exit "$failed"
 
