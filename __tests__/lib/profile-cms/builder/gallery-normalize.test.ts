@@ -248,6 +248,42 @@ describe("wallet gallery snapshot normalization", () => {
     expect(snapshot.warnings).toEqual(["backend_snapshot_unresolved_wallets"]);
   });
 
+  it("maps a resolved ENS wallet to its address and skips unresolved inputs", () => {
+    const snapshot = normalizeWalletGallerySnapshotResponse(
+      buildBackendSnapshot({
+        wallets: [
+          {
+            input: "punk6529.eth",
+            address: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+            ens: "punk6529.eth",
+            display: "punk6529.eth",
+            status: "resolved",
+            reason: null,
+          },
+          {
+            input: "not-a-wallet",
+            address: null,
+            ens: null,
+            display: null,
+            status: "unresolved",
+            reason: "unresolvable_input",
+          },
+        ],
+      }),
+      REQUESTED_SOURCES
+    );
+
+    // The resolved ENS source becomes kind "address" so package generation
+    // can pick profile.primary_wallet; the ENS string stays on `input`.
+    expect(snapshot.wallets).toEqual([
+      {
+        kind: "address",
+        input: "punk6529.eth",
+        normalized: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+      },
+    ]);
+  });
+
   it("falls back to the requested wallet sources when the backend cannot resolve any wallet", () => {
     const snapshot = normalizeWalletGallerySnapshotResponse(
       buildBackendSnapshot({

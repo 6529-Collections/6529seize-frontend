@@ -316,22 +316,25 @@ describe("profile CMS builder API adapter", () => {
       );
     });
 
-    it("reports invalid server validation results instead of pretending success", async () => {
+    it("models a rejected server validation as a failure that still carries the target", async () => {
       process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
       const state = createDefaultCmsBuilderState("punk6529");
       const { cmsPackage } = validateCmsBuilderState(state);
+      const issue = {
+        severity: "error",
+        code: "package.hash_mismatch",
+        message: "Package hash mismatch.",
+        path: "/integrity/package_hash",
+      };
       commonApiPostMock.mockResolvedValue({
         schema: "6529.cms.validation_result.v1",
         valid: false,
         checked_at: "2026-06-18T00:00:00.000Z",
-        issues: [
-          {
-            severity: "error",
-            code: "package.hash_mismatch",
-            message: "Package hash mismatch.",
-            path: "/integrity/package_hash",
-          },
-        ],
+        issues: [issue],
+        target: {
+          package_hash: cmsPackage.integrity.package_hash,
+          draft_id: "draft-from-validate",
+        },
       });
 
       const result = await runProfileCmsBuilderAction({
@@ -340,12 +343,15 @@ describe("profile CMS builder API adapter", () => {
         profileId: "profile-punk6529",
       });
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          ok: true,
-          code: "server_validation_invalid",
-        })
-      );
+      expect(result).toEqual({
+        ok: false,
+        action: "validate",
+        code: "server_validation_invalid",
+        expectedEndpoint: "profile-cms/packages/validate",
+        draftId: "draft-from-validate",
+        packageHash: cmsPackage.integrity.package_hash,
+        serverIssues: [issue],
+      });
     });
 
     it("lists saved packages for a profile from the real profile packages endpoint", async () => {

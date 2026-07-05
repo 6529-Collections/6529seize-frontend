@@ -473,6 +473,51 @@ describe("ProfileCmsBuilder", () => {
     expect(screen.getByText("draft-123")).toBeInTheDocument();
   });
 
+  it("surfaces a load failure when a saved draft cannot be fetched", async () => {
+    const user = userEvent.setup();
+    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-punk6529" },
+    });
+    const record = {
+      id: "draft-123",
+      package: { schema: "not-a-cms-package" },
+      profile_id: "profile-punk6529",
+      profile_handle: "punk6529",
+      package_id: "pkg-punk6529-builder-mvp",
+      version: 3,
+      status: "draft",
+      package_hash: "sha256:abc",
+      payload_hash: "sha256:def",
+      updated_at: 1750204800000,
+      created_at: 1750204700000,
+    };
+    commonApiFetchMock.mockImplementation(
+      ({ endpoint }: { readonly endpoint: string }) =>
+        endpoint === "profile-cms/profiles/profile-punk6529/packages"
+          ? Promise.resolve([record])
+          : Promise.reject(new Error("request_failed"))
+    );
+
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Refresh drafts" }));
+    expect(await screen.findByText(/Version 3/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Load" }));
+
+    expect(
+      await screen.findByText("This draft could not be loaded into the editor.")
+    ).toBeInTheDocument();
+  });
+
   it("keeps the drafts panel honest while the builder API flag is disabled", async () => {
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
