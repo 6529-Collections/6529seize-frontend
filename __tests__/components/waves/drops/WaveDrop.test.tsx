@@ -606,13 +606,68 @@ describe("WaveDrop", () => {
     );
 
     expect(screen.queryByTestId("header")).not.toBeInTheDocument();
+    // Desktop (no touch sheet): the timestamp reveals on hover, never via the
+    // pointer swipe that would hijack drag-to-select.
     expect(
-      screen.queryByTestId("grouped-drop-hover-timestamp")
+      screen.queryByTestId("grouped-drop-swipe-timestamp")
     ).not.toBeInTheDocument();
-    const timestamp = screen.getByTestId("grouped-drop-swipe-timestamp");
+    const timestamp = screen.getByTestId("grouped-drop-hover-timestamp");
     expect(timestamp).toBeInTheDocument();
     expect(timestamp).toHaveClass("tw-w-[9.25rem]");
+    expect(timestamp).toHaveClass("desktop-hover:group-hover:tw-opacity-100");
     expect(timestamp.querySelector("p")).toHaveClass("tw-whitespace-nowrap");
+  });
+
+  it("does not hijack mouse drags for the timestamp swipe on desktop", () => {
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const groupedDrop = {
+      ...drop,
+      id: "current-grouped",
+      created_at: 1_700_000_040_000,
+      stableHash: "current-grouped",
+    };
+
+    renderWithEditingDropProvider(
+      <WaveDrop
+        drop={groupedDrop}
+        previousDrop={previousGroupedDrop}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const swipeable = screen.getByTestId("grouped-drop-swipeable-content");
+    const dropRoot = swipeable.parentElement!;
+
+    // A leftward mouse drag (the shape of a text-selection gesture).
+    fireEvent.pointerDown(dropRoot, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 220,
+      clientY: 40,
+    });
+    fireEvent.pointerMove(dropRoot, {
+      pointerId: 1,
+      pointerType: "mouse",
+      clientX: 48,
+      clientY: 44,
+    });
+
+    expect(swipeable.style.transform).toBe("");
+    fireEvent.pointerUp(dropRoot, { pointerId: 1, pointerType: "mouse" });
   });
 
   it("reveals a grouped message timestamp on left swipe without opening long press actions", () => {
