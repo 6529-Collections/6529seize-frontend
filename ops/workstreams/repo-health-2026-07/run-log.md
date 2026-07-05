@@ -55,7 +55,7 @@
   rises. Seed baseline (local clean-main run): lines 74.76 / statements 74.39 /
   functions 70.31 / branches 60.98.
 - Pre-existing red fixed here as a gate prerequisite: `__tests__/hooks/
-  useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
+useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   drops `registerPlugin`/`WebPlugin`, which capacitor-secure-storage-plugin needs
   when pulled in through the jest.setup requireActual chain). Fixed with a local
   `capacitor-secure-storage-plugin` mock in that suite (6 tests now run). Note for
@@ -168,3 +168,40 @@
   release-tender thread's working dir.
 - Unrelated observation for the record: stale June 21-22 vim/git-rebase orphan
   processes exist for `D:\repos\6529reviewbot` (different repo, left alone).
+
+## 2026-07-05 (Thread A — merge gate complete + secret hygiene)
+
+- PR #3032 (debt ratchet) merged to main (8d4dbe072); PR #3033 (coverage floor)
+  merged to main (a7cf009dc). Coverage Floor validated green repeatedly on
+  ubuntu against the checked-in baseline (lines 74.81 / statements 74.44 /
+  functions 70.34 / branches 61.03 after fixing the load-broken useDownloader
+  suite); first main-push run also green. PR #3038 scoped the workflow's
+  cancel-in-progress to PR events after a 3-pushes-in-16-min merge train
+  cancelled two main runs in a row.
+- Ruleset 18018081 final required-check set on main: `DCO`,
+  `security/snyk (6529)`, `Plan risk and security checks`,
+  `Installed app checks`, `Debt ratchet`. Review policy, update/deletion/
+  non-fast-forward rules, and team bypass preserved. Verified live: campaign
+  PRs from other threads merged through the new gate. Deploy flows unaffected
+  (ruleset targets only the default branch; staging deploys from `1a-staging`
+  pushes, prod from the manual workflow).
+- Workstream A definition of done met: PR CI required and blocking; debt
+  ratchet active (baseline: any_casts 358, todo 6, oversized 139 grandfathered,
+  redux_imports 21, bootstrap_imports 0, pages_router_files 0 — Wave 2 lowers
+  these with `node scripts/debt-ratchet.cjs --update` per PR); coverage ratchet
+  active; Playwright harness verified working (1050 tests enumerable, smoke +
+  critical-shell packs green in PR CI). Staging-gated e2e packs stay out of CI
+  (need `PLAYWRIGHT_STAGING_ACCESS_CODE`), by design.
+- Secret hygiene (response to the 2026-07-04 token-leak incident): new
+  `Push Secret Scan` workflow scans every branch push's changed range with the
+  repo-local scanner (PR CI only covered pull requests); `/tmp/` and
+  credential-shaped filename patterns gitignored repo-wide; scanner now
+  detects raw three-part JWTs (the leaked file's shape); full-tree sweep of
+  all 6,556 tracked files found no real secrets (only scanner false positives
+  on zod/env config expressions and fake test fixtures — both classes fixed,
+  post-fix sweep clean).
+- Standing perf item for the orchestrator (from reviewbot responsiveness
+  runs): `/rememes` exceeded the 60s harness timeout and `/the-memes`,
+  `/meme-lab`, `/network`, `/meme-calendar` repeatedly blow the 20s full-page
+  screenshot budget — slow collection-route data fetches predate this
+  workstream and deserve an owner.
