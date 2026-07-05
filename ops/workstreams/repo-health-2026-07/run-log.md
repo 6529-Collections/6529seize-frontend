@@ -49,15 +49,37 @@
 - App-wide follow-up flagged (out of scope, evidence attached): every
   `useSetTitle` suffix app-wide is silently lost to streamed metadata
   since the Next 16 upgrade — spawned as a separate task for scoping.
-- Environment notes for other threads: `quality.js --changed` fails on
-  Windows Node 24 (spawnSync of .cmd without shell) — run
-  `format:changed`/`lint:changed`/`typecheck:changed` directly; in fresh
-  worktrees use `./bin/6529 env prod` (then verify with `env status` —
-  the switcher comments out non-matching managed keys but only appends
-  missing ones, so a local-target `.env` can end up with no active
-  API/WS endpoint) instead of relying on shell-var overrides reaching
-  the client env bake; dev servers watched by piped `head`/`tail` die on
-  SIGPIPE once the pipe closes — redirect to a file instead.
+- Environment notes for other threads:
+  - `quality.js --changed` failed on Windows Node 24 (spawnSync of .cmd
+    without shell) — fixed in PR #3100 (`quality.js`/`dev-open.cjs` now
+    run `.cmd` shims through a shell; `dev:open` also needed `run dev`
+    instead of bare `dev`). Until a checkout has the fix, run
+    `format:changed`/`lint:changed`/`typecheck:changed` directly.
+  - knip reports ~23 false unused-file/export findings (`ops/scripts/*`
+    files, gate-script exports) when run from a worktree nested under
+    `.claude/worktrees/`; identical content knips clean from a
+    short-path worktree or the main checkout — treat knip failures under
+    `.claude/worktrees/` as suspect before chasing them.
+  - Nested bare-`pnpm` hops (`check:changed`, `predev`) execute in
+    whichever checkout's `bin/` is on PATH (`bin/pnpm.cmd` does
+    `cd /d "%~dp0.."`), so from a secondary worktree they silently run
+    against the main checkout — strip the other checkout's `bin` from
+    PATH when verifying.
+  - A stale local `main` ref inflates the `:changed` sets until
+    `lint:changed` overflows the Windows command-line length limit
+    ("The command line is too long", xargs exit 123).
+  - Turbopack refuses a junctioned `node_modules` ("symlink points out
+    of the filesystem root") — use `USE_TURBO=false` in junction-based
+    scratch worktrees.
+  - In fresh worktrees use `./bin/6529 env prod` (then verify with
+    `env status` — the switcher comments out non-matching managed keys
+    but only appends missing ones, so a local-target `.env` can end up
+    with no active API/WS endpoint) instead of relying on shell-var
+    overrides reaching the client env bake; `.env.sample` placeholders
+    also fail schema validation (`IPFS_GATEWAY_ENDPOINT` URL,
+    positive-number vars) — seed from a known-good `.env` instead.
+  - Dev servers watched by piped `head`/`tail` die on SIGPIPE once the
+    pipe closes — redirect to a file instead.
 
 ## 2026-07-05 (Thread D — one layout)
 
