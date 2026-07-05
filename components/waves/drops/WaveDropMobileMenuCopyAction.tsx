@@ -90,7 +90,6 @@ export default function WaveDropMobileMenuCopyAction({
     >
       {icon}
       <span
-        role="status"
         className={`tw-text-base tw-font-semibold ${
           copied ? "tw-text-primary-400" : "tw-text-iron-300"
         }`}
@@ -98,6 +97,11 @@ export default function WaveDropMobileMenuCopyAction({
         {copied
           ? t(locale, "waves.drop.actions.copied")
           : t(locale, labelKey)}
+      </span>
+      {/* role="status" must live outside the label: Chromium drops live-region
+          content from the button's name-from-contents computation */}
+      <span role="status" className="tw-sr-only">
+        {copied ? t(locale, "waves.drop.actions.copied") : ""}
       </span>
     </button>
   );

@@ -1,0 +1,208 @@
+{
+  "schema_version": "deployment-bus.v1",
+  "release_id": "fe-staging-20260705T115818Z-14f0714e9457",
+  "repository": "6529-Collections/6529seize-frontend",
+  "environment": "staging",
+  "status": "deploying",
+  "created_at": "2026-07-05T11:58:18.571Z",
+  "updated_at": "2026-07-05T12:00:55.264Z",
+  "release_captain": "claude-fable-5-copytext-session",
+  "complexity": "standard",
+  "production_eligible": false,
+  "staging_branch": "1a-staging",
+  "shas": {
+    "staging_deploy_sha": "14f0714e9457c5c50b1484315b60fa9470b2e6dd",
+    "production_candidate_sha": null
+  },
+  "lane": {
+    "owner": "claude-fable-5-copytext-session",
+    "acquired_at": "2026-07-05T11:58:18.571Z",
+    "heartbeat_at": "2026-07-05T12:00:55.264Z",
+    "heartbeat_interval_minutes": 15,
+    "stale_after_minutes": 45,
+    "expected_duration_minutes": 75,
+    "expected_completion_at": "2026-07-05T13:13:18.571Z"
+  },
+  "included_prs": [
+    {
+      "number": 3072,
+      "title": "Add Copy text option to wave drop mobile menu",
+      "owner": "punk6529",
+      "branch": "feat/wave-mobile-copy-text",
+      "head_sha": "8b77a9efe",
+      "risk": "low - additive mobile action-sheet item plus verbatim helper extraction; touched files shared with desktop copy path",
+      "validation_slice": "wave drop mobile menu copy actions + wave chat routes"
+    }
+  ],
+  "backend_dependencies": [],
+  "validation": {
+    "core_smoke_owner": "claude-fable-5-copytext-session",
+    "required_packs": [
+      "playwright:core-smoke",
+      "playwright:surface-matrix",
+      "playwright:wcag-i18n"
+    ],
+    "pack_plan": [
+      {
+        "id": "playwright:core-smoke",
+        "known": true,
+        "command": "seize run test:e2e:staging:smoke",
+        "size": "large",
+        "surfaces": [
+          "web:desktop-chromium",
+          "web:mobile-chromium"
+        ],
+        "artifact_paths": [
+          "test-results/playwright/**",
+          "playwright-report/**"
+        ],
+        "description": "Read-only core route smoke pack for deployed web health."
+      },
+      {
+        "id": "playwright:surface-matrix",
+        "known": true,
+        "command": "seize run test:e2e:staging",
+        "size": "large",
+        "surfaces": [
+          "web:desktop-chromium",
+          "web:mobile-chromium"
+        ],
+        "artifact_paths": [
+          "test-results/playwright/**",
+          "playwright-report/**"
+        ],
+        "description": "Read-only route, navigation, search, network, and delegation surface matrix."
+      },
+      {
+        "id": "playwright:wcag-i18n",
+        "known": true,
+        "command": "PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix",
+        "size": "large",
+        "surfaces": [
+          "web:desktop-chromium",
+          "web:mobile-chromium"
+        ],
+        "artifact_paths": [
+          "test-results/playwright/**",
+          "playwright-report/**"
+        ],
+        "description": "Read-only WCAG/i18n route evidence pack for deployed public routes."
+      }
+    ],
+    "exploratory_checks": [],
+    "checks": [],
+    "durable_artifacts": {
+      "required": false,
+      "accepted_prefixes": [
+        "s3://6529-artifacts/",
+        "s3://6529reviewbot-prod-artifacts/frontend-deployment/",
+        "https://artifacts.6529.io/",
+        "ipfs://"
+      ],
+      "git_lfs_allowed": false,
+      "notes": "Retained deployment evidence belongs on 6529-controlled artifact storage. Git LFS and committed generated artifacts are not durable evidence stores."
+    },
+    "auto_hold_criteria": [
+      {
+        "id": "required-pack-failed",
+        "hold_when": "Any required validation pack records status failed, blocked, or timed_out.",
+        "recovery": "Fix forward or rerun once with evidence; repeated failures hold production."
+      },
+      {
+        "id": "required-pack-missing-terminal-evidence",
+        "hold_when": "A terminal passed/released manifest is missing a passed check for any required validation pack.",
+        "recovery": "Run the missing pack or record a release-captain exception before promotion."
+      },
+      {
+        "id": "durable-artifact-pointer-missing",
+        "hold_when": "A production-eligible terminal manifest lacks approved durable artifact pointers.",
+        "recovery": "Upload redacted evidence to approved storage and record the URI, hash/CID/ETag, retention, and redaction status."
+      },
+      {
+        "id": "required-pack-command-mismatch",
+        "hold_when": "A standard required validation pack's latest passing check does not record the expected pack-plan command.",
+        "recovery": "Rerun the standard command or record a release-captain exception outside the standard pack."
+      },
+      {
+        "id": "required-pack-surface-evidence-missing",
+        "hold_when": "A standard required validation pack's latest passing check does not list all required pack-plan surfaces.",
+        "recovery": "Rerun the full pack or record all covered surfaces before promotion."
+      },
+      {
+        "id": "candidate-sha-mismatch",
+        "hold_when": "Production candidate SHA differs from current origin/main or from the staging-validated release set.",
+        "recovery": "Rerun staging for the current candidate or remove superseded work from the train."
+      },
+      {
+        "id": "post-deploy-watch-validation-checkpoint-missing",
+        "hold_when": "A production release manifest lacks a passed release-captain-validation checkpoint with evidence.",
+        "recovery": "Run production-safe validation, then record the release-captain-validation checkpoint with canonical evidence before release notes."
+      }
+    ]
+  },
+  "post_deploy_watch": {
+    "required": false,
+    "status": "not_started",
+    "min_duration_minutes": 0,
+    "observed_duration_minutes": 0,
+    "started_at": null,
+    "completed_at": null,
+    "checkpoints": [],
+    "notes": "Post-deploy watch records health evidence before release notes. It is separate from traffic-split canary rollout."
+  },
+  "canary_readiness": {
+    "current_capability": "not-applicable",
+    "traffic_splitting_supported": false,
+    "feature_flag_strategy": "App-specific flags only; no deployment-bus traffic splitting.",
+    "candidate_control_metrics": [
+      "version-match",
+      "core-route-smoke",
+      "api-health",
+      "static-asset-health",
+      "frontend-error-rate"
+    ],
+    "prerequisites_for_traffic_split": [
+      "traffic-router-support",
+      "automated-health-thresholds",
+      "rollback-automation",
+      "artifact-storage-ready"
+    ],
+    "notes": "Current deployment bus supports auto-hold plus explicit watch. Traffic-split canary rollout is a future infrastructure capability."
+  },
+  "deployment": {
+    "github_deployment_id": null,
+    "workflow_run_url": null,
+    "environment_url": "https://staging.6529.io",
+    "ssm_command_id": null,
+    "elastic_beanstalk_version_label": null
+  },
+  "long_running": {
+    "enabled": false
+  },
+  "plans": {
+    "rollback": "Use the release captain decision log to choose rollback or fix-forward before production promotion.",
+    "fix_forward": "Fix through the normal PR path, merge to origin/main, redeploy staging, and rerun failed validation."
+  },
+  "human_gates": {
+    "production_approval_required": false,
+    "approvals": [],
+    "override_reason": null
+  },
+  "progress": [
+    {
+      "at": "2026-07-05T11:58:18.571Z",
+      "phase": "queued",
+      "message": "staging deployment bus manifest created for 14f0714e9457"
+    },
+    {
+      "at": "2026-07-05T11:58:42.751Z",
+      "phase": "deploying",
+      "message": "staging deploy push 14f0714e9 (main sync + PR #3072); Web Deploy - STAGING triggered"
+    },
+    {
+      "at": "2026-07-05T12:00:55.264Z",
+      "phase": "deploy",
+      "message": "Web Deploy - STAGING run 28739993444 in progress for 14f0714e9"
+    }
+  ]
+}
