@@ -1,0 +1,140 @@
+name: Branch Janitor
+
+# Nightly retention: deletes remote branches that are fully merged into main
+# and whose last commit is older than 7 days. Protected branches, open-PR
+# heads, and release mechanics are never touched. Every deletion is logged
+# with its SHA in the run summary so any branch can be restored with
+# `git push origin <sha>:refs/heads/<name>`.
+#
+# Arming: scheduled runs stay in DRY RUN until the repository variable
+# BRANCH_JANITOR_ENABLED is set to "true". Manual dispatches can also force a
+# dry run via the dry_run input. This gives a safe first-run review of the
+# candidate list before destructive mode is enabled.
+
+on:
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "List candidates without deleting"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: branch-janitor
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged branches older than 7 days
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Dry run unless explicitly armed: manual dispatch honors the
+          # dry_run input; scheduled runs are live only when the repo
+          # variable BRANCH_JANITOR_ENABLED is "true".
+          DRY_RUN: ${{ (inputs.dry_run == true || (github.event_name == 'schedule' && vars.BRANCH_JANITOR_ENABLED != 'true')) && '1' || '0' }}
+          MAX_DELETIONS_PER_RUN: "200"
+        run: |
+          set -euo pipefail
+
+          cutoff=$(date -u -d '7 days ago' +%s)
+
+          # Branch names that must never be deleted.
+          is_protected() {
+            case "$1" in
+              main|1a-staging|HEAD) return 0 ;;
+              staging-merge-agent-*) return 0 ;;
+            esac
+            return 1
+          }
+
+          # Heads of open PRs in this repo (same-repo heads only; fork heads
+          # do not live in origin). Fail closed: verify the API call succeeds
+          # and cross-check against the search count so a silently-empty
+          # result can never expose open-PR branches to deletion.
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100" \
+            --jq '.[] | select(.head.repo.full_name == env.GITHUB_REPOSITORY) | .head.ref' \
+            > /tmp/open-pr-heads-raw.txt
+          sort -u /tmp/open-pr-heads-raw.txt > /tmp/open-pr-heads.txt
+          open_pr_total=$(gh api "search/issues?q=repo:${GITHUB_REPOSITORY}+type:pr+state:open&per_page=1" --jq '.total_count')
+          if [ "$open_pr_total" -gt 0 ] && [ ! -s /tmp/open-pr-heads.txt ]; then
+            echo "::error::Open PRs exist ($open_pr_total) but the heads list is empty; aborting to avoid unsafe deletions."
+            exit 1
+          fi
+
+          git fetch origin --prune --quiet
+          git rev-parse --verify --quiet refs/remotes/origin/main > /dev/null
+
+          # Materialize the candidate list up front: deletions mutate
+          # remote-tracking refs, so we must not stream for-each-ref live.
+          # Tab delimiter: ASCII control chars cannot appear in ref names.
+          git for-each-ref 'refs/remotes/origin' \
+            --merged origin/main \
+            --format='%(refname:short)%09%(objectname)%09%(committerdate:unix)%09%(committerdate:short)' \
+            > /tmp/merged-refs.txt
+
+          deleted=0
+          failed=0
+          skipped_open_pr=0
+          skipped_recent=0
+          candidates_over_cap=0
+          echo "## Branch janitor — $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DRY_RUN" = "1" ]; then
+            echo "**DRY RUN — nothing deleted.** (Scheduled runs go live once the repo variable \`BRANCH_JANITOR_ENABLED\` is \`true\`.)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Branch | SHA | Last commit |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+
+          while IFS=$'\t' read -r ref sha epoch cdate; do
+            name="${ref#origin/}"
+            if is_protected "$name"; then continue; fi
+            case "$epoch" in
+              ''|*[!0-9]*) continue ;;
+            esac
+            if grep -qxF "$name" /tmp/open-pr-heads.txt; then
+              skipped_open_pr=$((skipped_open_pr + 1)); continue
+            fi
+            if [ "$epoch" -ge "$cutoff" ]; then
+              skipped_recent=$((skipped_recent + 1)); continue
+            fi
+            if [ "$deleted" -ge "$MAX_DELETIONS_PER_RUN" ]; then
+              candidates_over_cap=$((candidates_over_cap + 1)); continue
+            fi
+            if [ "$DRY_RUN" != "1" ]; then
+              if ! git push origin --delete "$name" </dev/null; then
+                failed=$((failed + 1))
+                echo "| $name | $sha | $cdate (DELETE FAILED) |" >> "$GITHUB_STEP_SUMMARY"
+                continue
+              fi
+            fi
+            echo "| $name | $sha | $cdate |" >> "$GITHUB_STEP_SUMMARY"
+            deleted=$((deleted + 1))
+          done < /tmp/merged-refs.txt
+
+          {
+            echo ""
+            echo "- Deleted: $deleted (cap: $MAX_DELETIONS_PER_RUN)"
+            if [ "$failed" -gt 0 ]; then
+              echo "- Delete failures: $failed"
+            fi
+            echo "- Skipped (open PR head): $skipped_open_pr"
+            echo "- Skipped (merged but newer than 7 days): $skipped_recent"
+            if [ "$candidates_over_cap" -gt 0 ]; then
+              echo "- Deferred past cap (next run): $candidates_over_cap"
+            fi
+            echo "- Restore any branch with: \`git push origin <sha>:refs/heads/<name>\`"
+          } >> "$GITHUB_STEP_SUMMARY"
