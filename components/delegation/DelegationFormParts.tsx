@@ -20,6 +20,7 @@ import { Tooltip } from "react-tooltip";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
+import type { DelegationWriteParams } from "./delegation-shared";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
 import styles from "./Delegation.module.css";
 
@@ -353,7 +354,7 @@ export function DelegationFormDelegateAddressFormGroup(
 export function DelegationSubmitGroups(
   props: Readonly<{
     title: string;
-    writeParams: any;
+    writeParams: DelegationWriteParams;
     showCancel: boolean;
     gasError?: string | undefined;
     validate: () => string[];
@@ -390,7 +391,13 @@ export function DelegationSubmitGroups(
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
-      writeDelegation.writeContract(writeParams);
+      const { functionName } = writeParams;
+      if (!functionName) {
+        // Unreachable: submission is gated by the same validate() predicate
+        // the form components use to decide whether functionName is set.
+        return;
+      }
+      writeDelegation.writeContract({ ...writeParams, functionName });
       onSetToast({
         title,
         message: "Confirm in your wallet...",

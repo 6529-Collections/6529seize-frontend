@@ -57,7 +57,7 @@ describe("DelegationSubmitGroups", () => {
     render(
       <DelegationSubmitGroups
         title="T"
-        writeParams={{ foo: "bar" }}
+        writeParams={{ foo: "bar", functionName: "registerDelegationAddress" }}
         showCancel={true}
         gasError={undefined}
         validate={() => []}
@@ -67,11 +67,32 @@ describe("DelegationSubmitGroups", () => {
     );
     expect(screen.getByText("Cancel")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
-    expect(mockWriteContract).toHaveBeenCalledWith({ foo: "bar" });
+    expect(mockWriteContract).toHaveBeenCalledWith({
+      foo: "bar",
+      functionName: "registerDelegationAddress",
+    });
     expect(onSetToast).toHaveBeenCalledWith({
       title: "T",
       message: "Confirm in your wallet...",
     });
+  });
+
+  it("does not submit while writeParams lack a functionName", () => {
+    const onSetToast = jest.fn();
+    render(
+      <DelegationSubmitGroups
+        title="T"
+        writeParams={{ foo: "bar", functionName: undefined }}
+        showCancel={false}
+        gasError={undefined}
+        validate={() => []}
+        onHide={jest.fn()}
+        onSetToast={onSetToast}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+    expect(mockWriteContract).not.toHaveBeenCalled();
+    expect(onSetToast).not.toHaveBeenCalled();
   });
 
   it("shows receipt errors instead of success toast", () => {
