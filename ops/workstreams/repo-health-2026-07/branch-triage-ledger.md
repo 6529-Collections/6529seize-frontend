@@ -51,6 +51,11 @@ presence checks, PR-stack archaeology (gh), and per-cluster subagent review.
 | `tmp/**` (219 files), `.reviewbot-responsiveness/` | Session debris — archived in the branch snapshot only, never to be PRed |
 | `tmp/punk6529bot-browser-auth.json` | SECURITY: contained a live JWT + refresh token; excised from the pushed branch (rewritten `09ef4659c` -> `dac8f5cf1`) and preserved off-repo. History rewrite does NOT invalidate the exposed token (GitHub retains SHA-reachable objects); server-side revocation/rotation of the punk6529bot session + refresh token is REQUIRED and PENDING — owner: repo operator; tracked as an open campaign action in run-log.md. |
 
+Related rescue (Phase 5 follow-up, 2026-07-05): the orphaned
+`-desktop-hardening` clone's uncommitted media-URL-sink hardening was
+secrets-scanned and preserved as `origin/codex/harden-media-url-sinks-for-desktop-sync`
+(`0c88192b9`) before the clone dir was removed.
+
 Snapshot preservation: the full rescue tree (minus the excised credential)
 remains available as branch tip `dac8f5cf1` recorded in
 `.git/branch-cleanup-manifest-2026-07-05.txt` when the branch is deleted.
