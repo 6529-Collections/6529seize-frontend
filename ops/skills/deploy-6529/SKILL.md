@@ -233,14 +233,10 @@ battery result, production checks) in user-comprehensible terms.
    - a reference example of the expected depth: the 4.68.0 note (drop `6988d363-53f1-4559-8c0a-c5075bcc0742` in the releases wave)
 6. Re-check the latest wave drop before posting so the number did not advance while the deploy was running. If another release note appeared, renumber and adjust the draft.
 7. Post the release note only after production validation is green. Capture the wave drop URL or serial number for closeout evidence.
-8. Posting mechanics for multiline notes via the `punk6529bot` helper: pass
-   content with `--file <path>` (an LF text file), never inline `--text` from
-   PowerShell (everything after the first newline is silently lost). Place
-   `--send` before the content flag. After sending, VERIFY the stored content
-   with `punk6529bot drops get <drop-id> --json` (check parts count and
-   content length) - the "Sent drop" acknowledgment does not prove the body
-   posted. Drops are editable for only 5 minutes; after that, recover a
-   botched post with `drops delete <id> --send --force` and a fresh post.
+8. Publish via the posting contract in `ops/skills/post-6529/SKILL.md` —
+   dry-run first; `--send` before `--file` (LF file for multiline, never
+   inline `--text`); verify the stored content with `drops get <id> --json`;
+   5-minute edit window with delete+repost recovery.
 
 ## Follow The Repo Deployment Overview
 
@@ -260,11 +256,12 @@ punk6529bot waves search --name "follow the repo"
    - incidents, failed gates, fix-forward or rollback decisions, and final state
    - known follow-ups, skipped checks, and remaining risks
 4. Keep the post detailed but safe to publish. Use public GitHub/workflow links when possible, but omit secrets, credentials, cookies, private URLs, raw production data, local paths, hidden prompts, and internal-only exploit or incident details.
-5. Re-check the wave before sending so the overview is not duplicating a newer deploy note. If the local helper is available, dry-run or draft first, then send after the content passes the safety check:
+5. Re-check the wave before sending so the overview is not duplicating a newer deploy note. Publish per the posting contract in `ops/skills/post-6529/SKILL.md` (dry-run, then `--send --file`, then stored-content verification):
 
 ```powershell
-punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --text "<deployment overview>"
-punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --text "<deployment overview>" --send
+punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --file overview.txt
+punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --send --file overview.txt
+punk6529bot drops get <drop-id> --json
 ```
 
 6. Capture the wave drop URL or serial number for closeout evidence. If no authorized 6529.io posting credential is available, include the exact ready-to-post overview in the closeout and mark the wave publication as blocked.

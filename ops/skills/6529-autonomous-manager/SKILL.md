@@ -30,6 +30,7 @@ Before planning or editing, read only the context that matters:
 6. Narrower repo-local skills when relevant:
    - `ops/skills/write-prs/SKILL.md` for PR creation, review iteration, and readiness.
    - `ops/skills/deploy-6529/SKILL.md` for merge execution, staging, production, E2E validation, backend coordination, or release coordination.
+   - `ops/skills/post-6529/SKILL.md` for publishing agent-authored posts, replies, edits, or deletions to 6529.io waves.
    - `ops/skills/commit-docs-updater/SKILL.md` for user-facing docs updates from code changes.
    - `ops/skills/sonar-guardrails/SKILL.md` for TypeScript and JavaScript quality-sensitive edits.
    - `ops/skills/react-doctor/SKILL.md` for React, Next.js, hook, routing, or UI state changes.
