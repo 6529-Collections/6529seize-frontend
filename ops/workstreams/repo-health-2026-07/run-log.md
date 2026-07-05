@@ -100,3 +100,23 @@
   `-pr-followups` (1.6G, on 1a-staging with untracked release-check tests),
   `-rememes-2609-node_modules-partial` (488M, no .git),
   `-native-package-evidence` + `-pr2680` (16K each, no .git).
+
+## 2026-07-05 (Thread B — Phase 5 follow-up: orphan dir cleanup)
+
+- Rescued `D:\repos\6529seize-frontend-desktop-hardening` (standalone clone,
+  1.1G): 8 dirty files of media-URL-sink hardening (new `lib/media/safe-media-url.ts`,
+  open-graph utils, HLS player, sandboxed iframe, audio display + tests)
+  secrets-scanned (clean), committed as `0c88192b9` and pushed as
+  `origin/codex/harden-media-url-sinks-for-desktop-sync` (new remote branch; no
+  other unpushed branches/stashes). Local dir deleted after push verification.
+- Deleted debris dirs: `-rememes-2609-node_modules-partial` (488M, only .pnpm
+  fragments) and `-native-package-evidence` (empty; was held by an orphaned
+  June-23 `git commit`+vim pair whose worktree metadata was pruned on 07-04 —
+  both processes killed). `-pr2680` (empty, 0 bytes) is still held as CWD by an
+  unidentified process among live sessions — deferred rather than blind-killing;
+  delete after the holder exits.
+- `D:\repos\6529seize-frontend-pr-followups` (on `1a-staging`, untracked
+  release-check tests) intentionally untouched — plausibly the external
+  release-tender thread's working dir.
+- Unrelated observation for the record: stale June 21-22 vim/git-rebase orphan
+  processes exist for `D:\repos\6529reviewbot` (different repo, left alone).
