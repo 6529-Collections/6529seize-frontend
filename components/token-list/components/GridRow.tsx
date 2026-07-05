@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
-import type { TokenMetadata } from "@/components/nft-picker/NftPicker.types";
+import type { TokenMetadata } from "@/components/nft-picker/types";
 import type { TokenListAction, TokenWindowEntry } from "../types";
 import { TokenThumbnail } from "./TokenThumbnail";
 

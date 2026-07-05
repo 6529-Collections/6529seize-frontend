@@ -1,6 +1,6 @@
 import { getNodeEnv } from "@/config/env";
-import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
-import { toCanonicalRanges } from "@/components/nft-picker/NftPicker.utils";
+import type { TokenRange } from "@/components/nft-picker/types";
+import { toCanonicalRanges } from "@/components/nft-picker/utils";
 
 const DEFAULT_GRANT_TOKENS_ERROR_MESSAGE =
   "We couldn't load the granted tokens right now. Please try again.";

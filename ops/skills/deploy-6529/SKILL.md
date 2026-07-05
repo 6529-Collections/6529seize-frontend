@@ -121,12 +121,31 @@ shared lane.
 
 ## Staging E2E
 
-1. Run the strongest deployed-staging validation available. Inspect package scripts and Playwright config before assuming a target-specific command exists.
-2. If available, start with the read-only deployed staging smoke pack:
-   `6529 run test:e2e:staging`. It points Playwright at
-   `https://staging.6529.io` and skips the local web server. Add
-   release-specific Playwright or browser checks for changed behavior.
-3. If a staging E2E script does not exist in a future worktree, use Playwright or browser automation against `https://staging.6529.io` for the release-critical flows and record that no dedicated staging E2E script exists.
+1. PRIMARY PATH (since 2026-07-05): the `Staging E2E` workflow
+   (`.github/workflows/staging-e2e.yml`) triggers automatically after every
+   successful `Web Deploy - STAGING` run and executes all 12 staging Playwright
+   packs (~160 read-only browser tests, desktop + mobile) against
+   `https://staging.6529.io`, authenticated via the
+   `PLAYWRIGHT_STAGING_ACCESS_CODE` repo secret. Find the run for the deployed
+   SHA and read its per-pack step summary (failing packs attach log tails):
+
+```bash
+gh run list -R 6529-Collections/6529seize-frontend --workflow staging-e2e.yml -L 3
+```
+
+   Re-run via `workflow_dispatch` when needed, noting that dispatch runs test
+   the branch tip, not necessarily the deployed SHA.
+2. Local fallback and targeted reruns: the `test:e2e:staging*` scripts in
+   package.json run individual packs directly against staging with
+   `STAGING_AUTH=<access code>` (or `PLAYWRIGHT_STAGING_ACCESS_CODE`) in the
+   environment; without the code, gated pages redirect to `/access`. Add
+   release-specific Playwright or browser checks for changed behavior beyond
+   the packs.
+3. When a staging pack fails, run the SAME pack against production
+   (`test:e2e:production:*`) before deciding the fix loop: an identical
+   failure signature on the currently-deployed production build means a
+   pre-existing issue (document it, track it, do not block promotion on it);
+   a staging-only failure means a release regression (block and fix).
 4. Cover the changed behavior plus core smoke:
    - page loads and navigation for touched routes
    - wallet/auth-sensitive paths when relevant, using approved test identity only
@@ -179,24 +198,45 @@ Publish public release notes after production is deployed and production validat
    - small fix, copy change, narrow polish, or follow-up to an existing release: bump the patch number, e.g. `4.38.0` to `4.38.1`
    - broad site-wide, platform, or intentionally breaking release: bump the major number and reset minor/patch, e.g. `4.38.0` to `5.0.0`
    - when unsure whether a change deserves a minor or patch bump, prefer the smaller patch bump unless the release adds a clear new user-facing capability
-4. Draft the release note in plain user-facing language. Recommended shape:
+4. Draft the release note in plain user-facing language, at a DETAILED level
+   (owner direction, 2026-07-05: vague category summaries like "localization
+   polish and under-the-hood cleanup" are not useful). Required shape:
 
 ```text
-4.39.0: Short summary of the release
+4.39.0: Title naming the release's actual themes, not generic words
 
-- What users can now do or see
-- Important changed behavior
-- Fixes that matter to users or operators
+<Theme heading> (visible now):
+- Name the specific surfaces changed (exact pages, routes, components in
+  product terms: "profile header identity block, stats row, About editor,
+  followers list" - never just "profile pages improved")
+- State the concrete behavior change and any review-driven fixes included
+
+<Theme heading> (under the hood):
+- What was removed/added/replaced and why it is safe, with concrete numbers
+  where they exist (pages rebuilt, casts removed, dependencies dropped,
+  tests added)
+
+Known issues shipped as-is: list each transparently with its status
+("fix in progress", "scheduled") - omit the section only when empty.
+
+Validation: one line on what was run and the result (suite green, staging
+battery result, production checks) in user-comprehensible terms.
 ```
 
 5. Write the note from production reality, not PR internals:
-   - mention visible behavior, affected pages, and operationally relevant changes
-   - avoid raw PR numbers, commit SHAs, implementation trivia, private links, secrets, local paths, hidden prompts, unreleased follow-ups, or internal-only risk notes
-   - keep it concise; combine tiny changes under one clear bullet
+   - name specific visible behavior, affected pages, and operationally relevant changes; give concrete counts where they exist
+   - avoid raw PR numbers, commit SHAs, implementation trivia, private links, secrets, local paths, hidden prompts, or internal-only risk notes (that layer belongs in the Follow The Repo overview)
+   - do not disclose unremediated security specifics (e.g. an unrotated credential); "secret scanning added" is fine, the incident behind it is not, until remediation is complete
+   - group many small changes under clear theme headings rather than dropping them; detail beats brevity, but every line must carry information
    - include screenshots or links only when they help users understand the change and are safe to publish
    - if the release contains backend and frontend work, describe the product behavior rather than the service boundary
+   - a reference example of the expected depth: the 4.68.0 note (drop `6988d363-53f1-4559-8c0a-c5075bcc0742` in the releases wave)
 6. Re-check the latest wave drop before posting so the number did not advance while the deploy was running. If another release note appeared, renumber and adjust the draft.
 7. Post the release note only after production validation is green. Capture the wave drop URL or serial number for closeout evidence.
+8. Publish via the posting contract in `ops/skills/post-6529/SKILL.md` —
+   dry-run first; `--send` before `--file` (LF file for multiline, never
+   inline `--text`); verify the stored content with `drops get <id> --json`;
+   5-minute edit window with delete+repost recovery.
 
 ## Follow The Repo Deployment Overview
 
@@ -209,18 +249,19 @@ After production validation passes, post a detailed deployment overview to the `
 punk6529bot waves search --name "follow the repo"
 ```
 
-3. Draft the overview from deployed production reality. Unlike the public release note, this repo-facing overview should include public PR links and SHAs. Include:
+3. Draft the overview from deployed production reality, at LEAST as detailed as the public release note. Unlike the public release note, this repo-facing overview should include public PR links and SHAs. Include:
    - what user-facing and operator-facing changes were deployed
    - frontend and backend PRs, merge SHAs, production deployed SHA/version label, and deploy run links
    - staging and production validation performed, including E2E or smoke results
    - incidents, failed gates, fix-forward or rollback decisions, and final state
    - known follow-ups, skipped checks, and remaining risks
 4. Keep the post detailed but safe to publish. Use public GitHub/workflow links when possible, but omit secrets, credentials, cookies, private URLs, raw production data, local paths, hidden prompts, and internal-only exploit or incident details.
-5. Re-check the wave before sending so the overview is not duplicating a newer deploy note. If the local helper is available, dry-run or draft first, then send after the content passes the safety check:
+5. Re-check the wave before sending so the overview is not duplicating a newer deploy note. Publish per the posting contract in `ops/skills/post-6529/SKILL.md` (dry-run, then `--send --file`, then stored-content verification):
 
 ```powershell
-punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --text "<deployment overview>"
-punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --text "<deployment overview>" --send
+punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --file overview.txt
+punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --send --file overview.txt
+punk6529bot drops get <drop-id> --json
 ```
 
 6. Capture the wave drop URL or serial number for closeout evidence. If no authorized 6529.io posting credential is available, include the exact ready-to-post overview in the closeout and mark the wave publication as blocked.

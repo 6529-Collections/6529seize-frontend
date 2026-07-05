@@ -3,7 +3,7 @@ import type {
   NftPickerChange,
   NftPickerSelection,
   NftPickerSelectionError,
-} from "@/components/nft-picker/NftPicker.types";
+} from "@/components/nft-picker/types";
 import {
   formatDateTime,
   formatTdhRatePerToken,

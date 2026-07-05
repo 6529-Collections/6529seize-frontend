@@ -267,6 +267,7 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   "remove after codemod" re-export shims, 1 secure-logging work item,
   1 stale API-shape comment). Triage PR follows: shims completed+deleted,
   work items become consolidated GitHub issues, stale comment deleted.
+
 ## 2026-07-05 (orchestrator — Redux verification + production deploy train)
 
 - User mandate: full E2E verification of the Redux removal (#3047), bot-iterated
@@ -305,3 +306,18 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   (clipboard/copy-text feature); orchestrator records moved to disposable
   worktrees — do not branch-switch the primary checkout while that work is
   live.
+
+## 2026-07-05 (Thread E — TODO triage complete)
+
+- Ratchet `todo_comments` 6 -> 0. Disposition: 4 "remove after codemod"
+  re-export shims completed (importers migrated to the real modules;
+  shims deleted: nft-picker NftPicker/NftPicker.types/NftPicker.utils,
+  xtdh granted-list UserPageXtdhGrantedListContent); 2 real work items
+  consolidated into issue #3053 (error-sanitizer secure-logging
+  integration, tailwindcss/no-custom-classname enablement) with the
+  in-code comments now referencing the issue; 1 stale API-shape comment
+  deleted (create-wave max_winners placement is fixed by the generated
+  API contract, not frontend-actionable).
+- Non-source TODO mentions that remain are intentional: skill docs that
+  document TODO conventions, the campaign docs, and the ratchet's own
+  detection patterns/fixtures.

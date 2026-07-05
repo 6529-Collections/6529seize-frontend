@@ -4,7 +4,7 @@ import type {
   ContractOverview,
   NftPickerChange,
   NftPickerSelectionError,
-} from "@/components/nft-picker/NftPicker.types";
+} from "@/components/nft-picker/types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface UserPageXtdhGrantSubmitProps {

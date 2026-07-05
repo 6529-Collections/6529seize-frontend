@@ -1,10 +1,10 @@
 "use client";
 
-import { NftPicker } from "@/components/nft-picker/NftPicker";
+import { NftPicker } from "@/components/nft-picker";
 import type {
   ContractOverview,
   NftPickerChange,
-} from "@/components/nft-picker/NftPicker.types";
+} from "@/components/nft-picker/types";
 
 export default function UserPageXtdhGrantSelection({
   onContractChange,

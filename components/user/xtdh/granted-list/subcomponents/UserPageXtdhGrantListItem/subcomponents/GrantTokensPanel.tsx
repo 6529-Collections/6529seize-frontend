@@ -1,6 +1,6 @@
 "use client";
 
-import type { SupportedChain } from "@/components/nft-picker/NftPicker.types";
+import type { SupportedChain } from "@/components/nft-picker/types";
 
 import type { TokenPanelState } from "../types";
 
