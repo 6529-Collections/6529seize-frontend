@@ -13,6 +13,7 @@ type Helpers = typeof import("@/helpers/touch-first.helpers");
 type SentinelHandler = (event: {
   readonly isTrusted: boolean;
   readonly pointerType: string;
+  readonly sourceCapabilities?: { readonly firesTouchEvents?: boolean };
 }) => void;
 
 function defineMatchMedia(queryMatches: Record<string, boolean>) {
@@ -139,6 +140,106 @@ describe("behavioral fine-pointer latch", () => {
       restore();
     } finally {
       Reflect.deleteProperty(globalThis.navigator, "userAgentData");
+    }
+  });
+
+  it("never latches on mouse events synthesized from touch (firesTouchEvents)", () => {
+    const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+    const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+    const sentinel = getSentinel();
+    expect(sentinel).toBeDefined();
+
+    // Windows 8-era compatibility mouse events: trusted, pointerType "mouse",
+    // but flagged as originating from a touch input device.
+    for (let i = 0; i < 6; i++) {
+      sentinel!({
+        isTrusted: true,
+        pointerType: "mouse",
+        sourceCapabilities: { firesTouchEvents: true },
+      });
+    }
+
+    expect(helpers.isTouchFirstEnvironment()).toBe(true);
+    expect(document.body.hasAttribute("data-fine-pointer")).toBe(false);
+
+    unsubscribe();
+    restore();
+  });
+
+  it("suppresses mouse evidence arriving right after trusted touch input", () => {
+    const nowSpy = jest.spyOn(Date, "now");
+    try {
+      const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+      const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+      const sentinel = getSentinel();
+      expect(sentinel).toBeDefined();
+
+      // A tap, then OS-synthesized mouse moves a few ms later — the classic
+      // legacy Windows touch emulation sequence. Repeated taps must never
+      // accumulate into a latch.
+      let clock = 100_000;
+      for (let tap = 0; tap < 4; tap++) {
+        nowSpy.mockReturnValue(clock);
+        sentinel!({ isTrusted: true, pointerType: "touch" });
+        for (let i = 0; i < 3; i++) {
+          clock += 50;
+          nowSpy.mockReturnValue(clock);
+          sentinel!({ isTrusted: true, pointerType: "mouse" });
+        }
+        clock += 5_000; // user pauses between taps
+      }
+
+      expect(helpers.isTouchFirstEnvironment()).toBe(true);
+      expect(document.body.hasAttribute("data-fine-pointer")).toBe(false);
+
+      // A genuine cursor glide well clear of any touch still latches.
+      for (let i = 0; i < 3; i++) {
+        clock += 100;
+        nowSpy.mockReturnValue(clock);
+        sentinel!({ isTrusted: true, pointerType: "mouse" });
+      }
+      expect(helpers.isTouchFirstEnvironment()).toBe(false);
+      expect(document.body.getAttribute("data-fine-pointer")).toBe("true");
+
+      unsubscribe();
+      restore();
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it("resets accumulated mouse evidence when touch input arrives", () => {
+    const nowSpy = jest.spyOn(Date, "now");
+    try {
+      const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+      const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+      const sentinel = getSentinel();
+      expect(sentinel).toBeDefined();
+
+      let clock = 200_000;
+      nowSpy.mockReturnValue(clock);
+
+      // Two stray mouse moves (below threshold), then a touch: the counter
+      // must reset rather than carry across the interaction.
+      sentinel!({ isTrusted: true, pointerType: "mouse" });
+      sentinel!({ isTrusted: true, pointerType: "mouse" });
+      sentinel!({ isTrusted: true, pointerType: "touch" });
+
+      // Two more mouse moves after the suppression window — still only two.
+      clock += 10_000;
+      nowSpy.mockReturnValue(clock);
+      sentinel!({ isTrusted: true, pointerType: "mouse" });
+      sentinel!({ isTrusted: true, pointerType: "mouse" });
+      expect(helpers.isTouchFirstEnvironment()).toBe(true);
+
+      // The third contiguous move completes a real glide and latches.
+      sentinel!({ isTrusted: true, pointerType: "mouse" });
+      expect(helpers.isTouchFirstEnvironment()).toBe(false);
+
+      unsubscribe();
+      restore();
+    } finally {
+      nowSpy.mockRestore();
     }
   });
 

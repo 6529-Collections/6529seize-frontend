@@ -22,7 +22,13 @@ const APP_ACTIVITY = ".MainActivity";
 const DEEP_LINK_SCHEME = "mobile6529";
 
 // Body-text markers that indicate the frontend crashed rather than rendered.
+// "Page of Doom" is this app's own error boundary (components/error/Error.tsx)
+// — an uncaught client exception renders it INSTEAD of Next.js's default
+// "Application error" text, so the branded copy must be matched here or real
+// crashes pass the smoke undetected (the default markers are kept for
+// framework-level failures that bypass the boundary).
 const CRASH_MARKERS = [
+  "Welcome to the 6529 Page of Doom",
   "Application error: a client-side exception has occurred",
   "Internal Server Error",
 ];
@@ -173,6 +179,31 @@ async function openPage(driver, pageUrl, timeout) {
   );
 }
 
+/**
+ * Real-device long-press (W3C touch pointer: down, hold, up) on an element.
+ * The hold must exceed the app's long-press threshold
+ * (hooks/useLongPressInteraction.ts) with margin for device input latency.
+ * W3C pointer actions address the VIEWPORT, so the element is scrolled into
+ * view first and targeted via its client rect (not page coordinates).
+ */
+async function longPress(driver, element, holdMs = 900) {
+  await element.scrollIntoView({ block: "center" });
+  const { x, y } = await driver.execute((el) => {
+    const rect = el.getBoundingClientRect();
+    return {
+      x: Math.round(rect.x + rect.width / 2),
+      y: Math.round(rect.y + rect.height / 2),
+    };
+  }, element);
+  await driver
+    .action("pointer", { parameters: { pointerType: "touch" } })
+    .move({ x, y })
+    .down()
+    .pause(holdMs)
+    .up()
+    .perform();
+}
+
 async function waitForWebviewContext(driver, timeout) {
   let webviewContext;
   await driver.waitUntil(
@@ -215,6 +246,7 @@ module.exports = {
   DEEP_LINK_SCHEME,
   assertNoCrashMarkers,
   isIos,
+  longPress,
   openPage,
   saveScreenshot,
   startNativeAndroidSession,
