@@ -11,11 +11,13 @@ The goal is consistency and usability, not a broad redesign or a new component
 language. Agents should derive decisions from the current codebase and rendered
 product before adding new UI patterns.
 
-The frontend is in a progressive styling migration. Tailwind CSS with the repo
-`tw-` prefix is the preferred direction for new and touched UI. Bootstrap,
-React Bootstrap, global Sass, and Sass modules still exist and may be correct
-for legacy or not-yet-migrated surfaces, but their presence is not permission to
-copy old colors, spacing, or component chrome into new work.
+Tailwind CSS with the repo `tw-` prefix is the styling system. Bootstrap,
+React Bootstrap, and Sass were fully removed in 2026-07 and must not be
+reintroduced (an ESLint ban and the debt-ratchet `bootstrap_imports` metric
+enforce this). Legacy plain-CSS modules and a small set of global CSS files
+still exist and may be correct for not-yet-migrated surfaces, but their
+presence is not permission to copy old colors, spacing, or component chrome
+into new work.
 
 ## Applies To
 
@@ -55,10 +57,10 @@ generic admin patterns or decorative filler.
 - Match the local surface. A feed row, media grid, admin/tool form, modal, and
   collection card may have different density, but each new piece should look
   native to its neighboring route.
-- Do not treat legacy styling as the future design system. Older Bootstrap,
-  WordPress/Fusion, global CSS, and pre-migration module styles can be useful
-  evidence for layout constraints or product behavior, but modern Tailwind
-  surfaces are the stronger visual reference for new or migrated UI.
+- Do not treat legacy styling as the future design system. Older
+  WordPress/Fusion content, global CSS, and pre-migration CSS-module styles can
+  be useful evidence for layout constraints or product behavior, but modern
+  Tailwind surfaces are the stronger visual reference for new or migrated UI.
 
 ## Source Of Truth
 
@@ -77,9 +79,10 @@ Before designing or reviewing touched UI, inspect the closest relevant source:
   UI details against code and browser evidence.
 
 Use existing tokens or patterns for colors, font families, spacing, icon sets,
-and styling libraries whenever they cover the need. Keep React Bootstrap,
-Bootstrap utility classes, and Sass-only styling limited to deliberately
-maintained legacy surfaces, with the exception documented.
+and styling libraries whenever they cover the need. Do not add new styling
+systems: Bootstrap, React Bootstrap, and Sass are removed and banned; keep
+plain-CSS modules limited to selectors or behavior Tailwind cannot express
+cleanly, with the exception documented.
 
 ## Shape, Color, And Surface Tokens
 
@@ -112,13 +115,13 @@ Use the existing Tailwind visual language for new and substantially touched UI:
 ## New PR Requirements
 
 - Reuse existing layout and component patterns before creating a new pattern,
-  but prefer migrated Tailwind patterns over older Bootstrap/Sass patterns when
+  but prefer migrated Tailwind patterns over older CSS-module patterns when
   both are available.
 - Use Tailwind utilities and shared Tailwind-based components for new or
-  substantially touched UI. Use Sass modules only when they are already local to
+  substantially touched UI. Use CSS modules only when they are already local to
   the surface or when scoped CSS is needed for selectors, third-party markup, or
-  CSS behavior Tailwind cannot represent cleanly.
-- Keep legacy changes narrow. If a Bootstrap/Sass page is only being fixed,
+  CSS behavior Tailwind cannot represent cleanly. Never add Bootstrap or Sass.
+- Keep legacy changes narrow. If a legacy-CSS page is only being fixed,
   preserve behavior and avoid a broad redesign; migrate the touched UI toward
   Tailwind when practical and record remaining styling debt when not.
 - Keep text readable and contained at mobile and desktop widths. Long labels,
@@ -156,7 +159,7 @@ For visible UI changes, also collect browser evidence that covers:
 - Source evidence: the nearby components, style modules, tokens, and docs used
   as the pattern.
 - Migration evidence: whether the touched surface is modern Tailwind, legacy
-  Bootstrap/Sass, or mixed, and why the chosen styling approach is appropriate.
+  CSS, or mixed, and why the chosen styling approach is appropriate.
 - Browser evidence: desktop and mobile render checks for the touched route or a
   representative route shell.
 - State evidence: loading, empty, error, disabled, selected, and interaction
@@ -181,11 +184,12 @@ therefore check both DOM geometry and rendered pixels.
 For each touched page or component:
 
 - Which existing route, component, or style source did it match?
-- Is the touched surface modern Tailwind, legacy Bootstrap/Sass, or mixed?
+- Is the touched surface modern Tailwind, legacy CSS, or mixed?
 - Which `tw-` utilities, Tailwind tokens, fonts, colors, spacing, and surface
   patterns were reused?
-- Did the PR avoid adding new Bootstrap, React Bootstrap, global Sass, or
-  Sass-only design debt unless it is intentionally maintaining legacy UI?
+- Did the PR avoid reintroducing removed styling systems (Bootstrap, React
+  Bootstrap, Sass) and avoid new global-CSS design debt unless it is
+  intentionally maintaining legacy UI?
 - Which desktop and mobile widths were checked?
 - Which loading, empty, error, and disabled states were checked or unaffected?
 - How were focus, hover, touch, and keyboard affordances preserved?

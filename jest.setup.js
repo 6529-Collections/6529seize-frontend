@@ -118,7 +118,7 @@ if (globalThis.window !== undefined) {
     }),
   });
 
-  // Mock DOM methods that Bootstrap modals might use
+  // Mock scroll methods jsdom does not implement
   Object.defineProperty(window, "scrollTo", {
     value: () => {},
     writable: true,

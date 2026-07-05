@@ -29,7 +29,6 @@ const config = {
     "^.+\\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$":
       "<rootDir>/__mocks__/fileMock.js",
     "^nano-css(.*)$": "<rootDir>/__mocks__/nanoCssMock.js",
-    "^dom-helpers/css$": "<rootDir>/__mocks__/css-functions.js",
     "^@next/font/(.*)$": "<rootDir>/__mocks__/nextFontMock.js",
     "^next/font/(.*)$": "<rootDir>/__mocks__/nextFontMock.js",
   },

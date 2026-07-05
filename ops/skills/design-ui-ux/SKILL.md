@@ -1,6 +1,6 @@
 ---
 name: design-ui-ux
-description: Review, build, or revise 6529 frontend UI against the repo-specific design and UX standard. Use when changing user-facing routes, components, layouts, cards, forms, dialogs, menus, media surfaces, loading/empty/error states, responsive behavior, visual styling, Tailwind/Bootstrap/Sass migration choices, or PR feedback about UI consistency, UX quality, or visual evidence.
+description: Review, build, or revise 6529 frontend UI against the repo-specific design and UX standard. Use when changing user-facing routes, components, layouts, cards, forms, dialogs, menus, media surfaces, loading/empty/error states, responsive behavior, visual styling, Tailwind or legacy-CSS migration choices, or PR feedback about UI consistency, UX quality, or visual evidence.
 ---
 
 # Design UI/UX
@@ -12,13 +12,14 @@ Use this skill for user-facing design and UX work in this repository.
 1. Read `ops/standards/frontend-design-ui-ux.md`.
 2. Inspect the nearest existing route, component, style module, and shared
    primitive before proposing or changing UI.
-3. Classify the touched surface as modern Tailwind, legacy Bootstrap/Sass, or
-   mixed. Treat legacy styling as compatibility evidence, not automatically as
-   the target for new UI.
+3. Classify the touched surface as modern Tailwind, legacy CSS (plain-CSS
+   modules or global CSS), or mixed. Treat legacy styling as compatibility
+   evidence, not automatically as the target for new UI.
 4. Prefer prefixed Tailwind utilities, `tailwind-scope`, `tailwind.config.ts`
    tokens, and shared Tailwind-based components for new or migrated UI. Use
-   existing Sass or Bootstrap patterns only when maintaining a legacy surface or
-   when a narrow exception is justified.
+   existing CSS-module patterns only when maintaining a legacy surface or when
+   a narrow exception is justified. Bootstrap, React Bootstrap, and Sass are
+   removed from this repo and must not be reintroduced.
 5. Check shape, color, and surface-token choices against the standard, especially
    the product radius hierarchy and local Tailwind token usage.
 6. Keep the change scoped to the touched surface. Reuse the existing visual
@@ -44,7 +45,7 @@ Use this skill for user-facing design and UX work in this repository.
 - New or migrated UI uses `tw-` Tailwind classes and modern tokens unless the
   touched surface is intentionally still legacy.
 - Dark-first surfaces, `iron-*` greys, typography, and compact spacing match
-  current Tailwind patterns before older Bootstrap/Sass patterns.
+  current Tailwind patterns before older legacy-CSS patterns.
 - Cards, dialogs, controls, and framed surfaces use the product radius hierarchy:
   `tw-rounded-xl` for larger framed surfaces, `tw-rounded-lg` for standard
   controls and rows, `tw-rounded-md` only for compact details, and
