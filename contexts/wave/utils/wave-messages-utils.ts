@@ -6,6 +6,7 @@ import type { Drop } from "@/helpers/waves/drop.helpers";
 import { DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
 import { commonApiFetchWithRetry } from "@/services/api/common-api";
 import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
+import type { WaveEligibility } from "../WaveEligibilityContext";
 import type { WaveMessagesUpdate } from "../hooks/types";
 
 /**
@@ -20,7 +21,10 @@ export async function fetchWaveMessages(
   waveId: string,
   serialNo: number | null,
   signal?: AbortSignal,
-  updateEligibility?: (waveId: string, eligibility: any) => void
+  updateEligibility?: (
+    waveId: string,
+    eligibility: Partial<WaveEligibility>
+  ) => void
 ): Promise<ApiDrop[] | null> {
   try {
     const data = await fetchWaveDropsFeedV2({
@@ -308,7 +312,10 @@ export async function fetchNewestWaveMessages(
   sinceSerialNo: number | null,
   limit: number,
   signal?: AbortSignal,
-  updateEligibility?: (waveId: string, eligibility: any) => void
+  updateEligibility?: (
+    waveId: string,
+    eligibility: Partial<WaveEligibility>
+  ) => void
 ): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> {
   try {
     const data = await fetchWaveDropsFeedV2({

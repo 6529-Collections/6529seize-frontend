@@ -101,7 +101,7 @@ function getNextUrl(currentUrl: string, next?: string | boolean): string {
   }
 }
 
-export async function postData(url: string, body: any, init?: RequestInit) {
+export async function postData(url: string, body: unknown, init?: RequestInit) {
   const requestStartedAtMs = getRequestTimingNow();
   let status: number | "network_error" | "unknown" = "unknown";
 

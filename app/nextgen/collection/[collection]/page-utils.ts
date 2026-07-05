@@ -18,7 +18,7 @@ export async function fetchCollection(
     endpoint: `nextgen/collections/${parsedId}`,
     headers: headers,
   }).catch(() => null);
-  return isEmptyObject(collection) ? null : collection;
+  return collection === null || isEmptyObject(collection) ? null : collection;
 }
 
 export function getCollectionView(view: string): NextgenCollectionView {

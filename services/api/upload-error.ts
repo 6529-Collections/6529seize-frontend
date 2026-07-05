@@ -1,7 +1,6 @@
 import type { AxiosError } from "axios";
 
-const NETWORK_HINT =
-  "Can't reach image upload server. Please try again.";
+const NETWORK_HINT = "Can't reach image upload server. Please try again.";
 const BLOCKED_HINT =
   "Upload was blocked by the server (403). Please try again later.";
 const TOO_LARGE_HINT = "Image is too large; max 2MB.";
@@ -29,7 +28,8 @@ export function getUploadErrorMessage(error: unknown): string {
     if (status === 413) return TOO_LARGE_HINT;
 
     let serverMsg: string | null = null;
-    const dataError = (error.response?.data as any)?.error;
+    const dataError = (error.response?.data as { error?: unknown } | undefined)
+      ?.error;
     if (typeof dataError === "string") {
       serverMsg = dataError;
     } else if (dataError && typeof dataError === "object") {

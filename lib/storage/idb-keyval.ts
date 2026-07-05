@@ -6,10 +6,10 @@ type StoreFn = <T>(
 type RequestLike<T = unknown> = {
   result?: T | undefined;
   error?: unknown | undefined;
-  onsuccess: ((this: any, ev: Event) => any) | null;
-  onerror: ((this: any, ev: Event) => any) | null;
-  oncomplete?: ((this: any, ev: Event) => any) | null | undefined;
-  onabort?: ((this: any, ev: Event) => any) | null | undefined;
+  onsuccess: ((this: unknown, ev: Event) => unknown) | null;
+  onerror: ((this: unknown, ev: Event) => unknown) | null;
+  oncomplete?: ((this: unknown, ev: Event) => unknown) | null | undefined;
+  onabort?: ((this: unknown, ev: Event) => unknown) | null | undefined;
 };
 
 function extractErrorMessage(error: unknown): string {
@@ -17,7 +17,8 @@ function extractErrorMessage(error: unknown): string {
   if (typeof error === "string") return error;
   if (error instanceof Error) return error.message;
   if (typeof error === "object") {
-    const maybeMessage = (error as any)?.message ?? (error as any)?.error;
+    const record = error as Record<string, unknown>;
+    const maybeMessage = record["message"] ?? record["error"];
     if (maybeMessage) return String(maybeMessage);
     try {
       return JSON.stringify(error);
@@ -38,7 +39,8 @@ function extractErrorMessage(error: unknown): string {
 function extractErrorName(error: unknown): string {
   if (error == null) return "";
   if (error instanceof Error) return error.name;
-  return (error as any)?.name ?? (error as any)?.constructor?.name ?? "";
+  const record = error as { name?: unknown; constructor?: { name?: unknown } };
+  return String(record?.name ?? record?.constructor?.name ?? "");
 }
 
 function isDatabaseClosingError(error: unknown): boolean {
@@ -53,7 +55,9 @@ function isDatabaseClosingError(error: unknown): boolean {
   );
 }
 
-export function promisifyRequest<T = unknown>(request: RequestLike<T>): Promise<T> {
+export function promisifyRequest<T = unknown>(
+  request: RequestLike<T>
+): Promise<T> {
   return new Promise((resolve, reject) => {
     request.oncomplete = request.onsuccess = () => resolve(request.result as T);
     request.onabort = request.onerror = () => reject(request.error);
@@ -64,7 +68,9 @@ const dbPromiseCache = new Map<string, Promise<IDBDatabase>>();
 
 function openDatabase(dbName: string, storeName: string): Promise<IDBDatabase> {
   if (typeof indexedDB === "undefined") {
-    return Promise.reject(new Error("IndexedDB is not available in this environment."));
+    return Promise.reject(
+      new Error("IndexedDB is not available in this environment.")
+    );
   }
 
   const request = indexedDB.open(dbName);
@@ -74,7 +80,9 @@ function openDatabase(dbName: string, storeName: string): Promise<IDBDatabase> {
       db.createObjectStore(storeName);
     }
   };
-  return promisifyRequest<IDBDatabase>(request as unknown as RequestLike<IDBDatabase>);
+  return promisifyRequest<IDBDatabase>(
+    request as unknown as RequestLike<IDBDatabase>
+  );
 }
 
 function getCacheKey(dbName: string, storeName: string): string {
@@ -247,7 +255,11 @@ export function update<T = unknown>(
           try {
             store.put(updater(request.result), key);
             settled = true;
-            resolve(promisifyRequest<void>(transaction as unknown as RequestLike<void>));
+            resolve(
+              promisifyRequest<void>(
+                transaction as unknown as RequestLike<void>
+              )
+            );
           } catch (err) {
             rejectOnce(err);
           }
@@ -256,10 +268,7 @@ export function update<T = unknown>(
   );
 }
 
-export function del(
-  key: IDBValidKey,
-  customStore?: StoreFn
-): Promise<void> {
+export function del(key: IDBValidKey, customStore?: StoreFn): Promise<void> {
   const useStore = customStore ?? defaultGetStore();
   return useStore("readwrite", (store) => {
     store.delete(key);
@@ -301,7 +310,9 @@ function eachCursor(
     callback(this.result);
     this.result.continue();
   };
-  return promisifyRequest<void>(store.transaction as unknown as RequestLike<void>);
+  return promisifyRequest<void>(
+    store.transaction as unknown as RequestLike<void>
+  );
 }
 
 export function keys(customStore?: StoreFn): Promise<IDBValidKey[]> {
@@ -323,7 +334,9 @@ export function values<T = unknown>(customStore?: StoreFn): Promise<T[]> {
   const useStore = customStore ?? defaultGetStore();
   return useStore("readonly", (store) => {
     if (store.getAll) {
-      return promisifyRequest<T[]>(store.getAll() as unknown as RequestLike<T[]>);
+      return promisifyRequest<T[]>(
+        store.getAll() as unknown as RequestLike<T[]>
+      );
     }
     const items: T[] = [];
     return eachCursor(store, (cursor) => items.push(cursor.value as T)).then(

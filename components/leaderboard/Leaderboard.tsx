@@ -190,8 +190,10 @@ export default function Leaderboard(
   }, [content, collector]);
 
   useEffect(() => {
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/blocks?page_size=${1}`)
-      .then((response: ApiBlocksPage) => {
+    fetchUrl<ApiBlocksPage>(
+      `${publicEnv.API_ENDPOINT}/api/blocks?page_size=${1}`
+    )
+      .then((response) => {
         if (response.data.length > 0) {
           const latestTDH = {
             block: response.data[0]?.block_number!,

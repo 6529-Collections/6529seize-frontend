@@ -74,7 +74,8 @@ export const isIndexedDBError = (error: unknown): boolean => {
   } else if (typeof error === "string") {
     errorMessage = error;
   } else if (typeof error === "object") {
-    const msg = (error as any)?.message ?? (error as any)?.error;
+    const record = error as Record<string, unknown>;
+    const msg = record["message"] ?? record["error"];
 
     if (msg) {
       errorMessage = String(msg);
@@ -92,7 +93,10 @@ export const isIndexedDBError = (error: unknown): boolean => {
   const errorName =
     error instanceof Error
       ? error.name
-      : (error as any)?.constructor?.name || "";
+      : String(
+          (error as { constructor?: { name?: unknown } })?.constructor?.name ??
+            ""
+        );
 
   const indexedDBPatterns = [
     /indexed\s*database/i,
@@ -114,7 +118,7 @@ export const isIndexedDBError = (error: unknown): boolean => {
  * Handles adapter-specific error messages
  */
 const getAdapterErrorMessage = (error: Error): string | null => {
-  const errorName = (error as any)?.constructor?.name;
+  const errorName = error?.constructor?.name ?? "";
 
   if (
     !["AdapterError", "AdapterCacheError", "AdapterCleanupError"].includes(
@@ -161,8 +165,9 @@ const extractErrorMessage = (
 
   if (typeof error === "object") {
     try {
+      const record = error as Record<string, unknown>;
       const errorString = JSON.stringify(error);
-      const message = (error as any).message || (error as any).error || "";
+      const message = String(record["message"] || record["error"] || "");
       return { message, errorString };
     } catch {
       return { message: "", errorString: "Complex error object" };

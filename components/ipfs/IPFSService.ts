@@ -24,8 +24,11 @@ class IpfsService {
       await axios.post(
         `${this.apiEndpoint}/api/v0/files/mkdir?arg=/${this.mfsPath}&parents=true`
       );
-    } catch (error: any) {
-      console.error("Failed to configure MFS:", error.message);
+    } catch (error) {
+      console.error(
+        "Failed to configure MFS:",
+        (error as { message?: unknown })?.message
+      );
       throw error;
     }
   }
@@ -67,8 +70,11 @@ class IpfsService {
       await this.validateFileName(cid, file);
 
       return cid;
-    } catch (error: any) {
-      console.error("Failed to add file to IPFS or MFS:", error.message);
+    } catch (error) {
+      console.error(
+        "Failed to add file to IPFS or MFS:",
+        (error as { message?: unknown })?.message
+      );
       throw error;
     }
   }

@@ -29,10 +29,10 @@ export const useWaveData = ({
     enabled: !!waveId,
     refetchInterval,
     retry: (failureCount, error) => {
-      if ((error as any)?.message === "Attempted fetch with null waveId") {
+      if (error?.message === "Attempted fetch with null waveId") {
         return false; // Don't retry our artificial error
       }
-      if ((error as any) === `Wave ${waveId} not found`) {
+      if ((error as unknown) === `Wave ${waveId} not found`) {
         onWaveNotFound();
         return false;
       }
