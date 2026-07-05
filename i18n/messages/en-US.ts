@@ -250,6 +250,23 @@ const USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_STATS_ROW_MESSAGES = objectMessages("user.statsRow", {
+  "labels.tdh": "TDH",
+  "labels.xtdh": "xTDH",
+  "labels.nic": "NIC",
+  "labels.rep": "Rep",
+  "labels.followers.one": "Follower",
+  "labels.followers.other": "Followers",
+  "links.tdh": "View {handle}'s collected TDH: {value}",
+  "links.tdhWithRate": "View {handle}'s collected TDH: {value}, +{rate}",
+  "links.xtdh": "View {handle}'s xTDH: {value}",
+  "links.xtdhWithRate": "View {handle}'s xTDH: {value}, +{rate}",
+  "links.nic": "View {handle}'s NIC: {value}",
+  "links.rep": "View {handle}'s Rep: {value}",
+  "links.followers": "View {handle}'s followers: {value} {followersLabel}",
+  "buttons.followers": "Open {handle}'s followers: {value} {followersLabel}",
+} as const);
+
 const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
   refreshAction: "Refresh page",
   title: "A new version is available",
@@ -1330,6 +1347,7 @@ export const EN_US_MESSAGES = {
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES,
+  ...USER_STATS_ROW_MESSAGES,
   ...USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES,
   ...USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES,
   ...USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES,
