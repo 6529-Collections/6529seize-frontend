@@ -174,6 +174,28 @@ describe("DynamicHeadTitle", () => {
     );
   });
 
+  it("does not let a stale observer fight the next route's metadata commit", async () => {
+    mockTitle = "Wave One | Brain";
+    mockIsTitleOwned = true;
+    mockTitlePathname = "/messages";
+    mockPathname = "/messages";
+    document.title = "Messages";
+
+    render(<DynamicHeadTitle />);
+    expect(document.title).toBe("Wave One | Brain");
+
+    // SPA navigation: the browser location moves before the next route's
+    // head commit lands, while this observer's cleanup is still pending.
+    window.history.pushState({}, "", "/tools/api");
+    try {
+      document.title = "API";
+      await flushObservers();
+      expect(document.title).toBe("API");
+    } finally {
+      window.history.pushState({}, "", "/");
+    }
+  });
+
   it("stops re-asserting after unmount", async () => {
     mockTitle = "Network Metrics | Open Data";
     mockIsTitleOwned = true;

@@ -52,7 +52,17 @@ export default function DynamicHeadTitle() {
     // owned titles: a text observer scoped to the <title> node catches
     // overwrites, and a shallow head observer re-arms it when the commit
     // replaces the node itself.
+    //
+    // MutationObserver callbacks are microtasks and can fire between an SPA
+    // navigation's head commit and this effect's cleanup, so a stale
+    // observer would re-assert the previous route's title over the new
+    // route's metadata. Bail once the live location moves off the pathname
+    // this observation was armed for.
+    const ownedLocationPathname = window.location.pathname;
     const reassertTitle = () => {
+      if (window.location.pathname !== ownedLocationPathname) {
+        return;
+      }
       if (document.title !== title) {
         document.title = title;
       }
