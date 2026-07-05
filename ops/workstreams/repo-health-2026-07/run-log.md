@@ -63,3 +63,40 @@
   measurement artifact (exit code read after piping through `tail`); Jest exit
   codes are correct, which is exactly why the Coverage Floor job needed main's
   suite green before it could ship.
+## 2026-07-04/05 (Thread B — branch amnesty)
+
+- Phase 1 (rescue): 117-status-entry dirty tree committed on
+  `codex/polish-boosted-link-cards` and pushed to origin as backup. SECURITY
+  incident found during triage: the snapshot included
+  `tmp/punk6529bot-browser-auth.json` (live JWT + refresh token, exp
+  ~2026-07-17), public on origin ~1-2h. Mitigated same day: commit rewritten
+  without the file (`09ef4659c` -> `dac8f5cf1`), branch force-pushed, primary
+  checkout reset to match, credential preserved off-repo. ACTION: rotate/revoke
+  the punk6529bot session + refresh token server-side.
+- Phase 2 (triage): all 138 commits accounted — 76 superseded / 56 records / 6
+  re-landed via PR #3034 (profile stats row i18n) + PR #3035 (profile header
+  identity + About i18n), both merged 2026-07-05 after green CI and clean
+  reviewbot follow-ups. Root cause: the stack tail (#2642-#2645) never cascaded
+  into the #2604 squash. Full accounting in `branch-triage-ledger.md`.
+  Rescue-snapshot clusters: delegation/boosted/CMS superseded; tech hub
+  (~5.4k lines) + several specs/scripts/e2e-harness novel — listed for
+  orchestrator/user decision.
+- Phase 3 (census + prune): 1,019 remote branches -> 202 merged into main; 167
+  deleted (manifest `.git/branch-cleanup-manifest-2026-07-05.txt`, scheme as
+  07-04); 44 protected (open-PR heads, <7d activity, named, campaign
+  branches); 4 staged-only release candidates preserved
+  (`codex/mobile-dock-active-pill-centering`, `codex/my-votes-sort-desc`,
+  `codex/video-click-pause`); 739 stale-unmerged branches documented in
+  `branch-stale-report.md` for user sign-off (352 pre-2025 / 248 from 2025 /
+  139 recent-stale). Zero local branches merged -> none deleted.
+- Phase 4 (retention): nightly `.github/workflows/branch-janitor.yml` merged as
+  PR #3036 (merged-into-main + >7d, protected/open-PR exclusions, 200/run cap,
+  scheduled runs dry-run until repo var BRANCH_JANITOR_ENABLED=true, SHA-logged
+  run summary). Repo setting `delete_branch_on_merge` enabled via API (was
+  false).
+- Phase 5 (worktrees): registrations clean (amnesty = Thread B, ci = Thread A).
+  Orphan sibling dirs reported for orchestrator decision:
+  `-desktop-hardening` (1.1G, DIRTY WIP on codex/harden-media-url-sinks…),
+  `-pr-followups` (1.6G, on 1a-staging with untracked release-check tests),
+  `-rememes-2609-node_modules-partial` (488M, no .git),
+  `-native-package-evidence` + `-pr2680` (16K each, no .git).
