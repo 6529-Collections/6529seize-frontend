@@ -549,6 +549,7 @@ export const createEslintConfig = ({
     {
       files: [
         "ops/scripts/publish-delegation-docs-content.mjs",
+        "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}",
         "standalone/standalone-memes-mint/scripts/**/*.{js,cjs,mjs}",
       ],
       rules: {
