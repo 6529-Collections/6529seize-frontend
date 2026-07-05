@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 import { DELEGATION_ABI } from "@/abis/abis";
-import { DELEGATION_CONTRACT, NULL_ADDRESS } from "@/constants/constants";
+import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import type { ContractDelegation } from "../CollectionDelegation.utils";
 import type { DelegationToastState } from "../DelegationToast";
@@ -140,13 +140,9 @@ export function useDelegationRevocation(options: {
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
         args: [
-          revokeDelegationParams
-            ? revokeDelegationParams.collection
-            : NULL_ADDRESS,
-          revokeDelegationParams
-            ? revokeDelegationParams.address
-            : NULL_ADDRESS,
-          revokeDelegationParams ? revokeDelegationParams.use_case : 0,
+          revokeDelegationParams.collection,
+          revokeDelegationParams.address,
+          revokeDelegationParams.use_case,
         ],
         functionName: "revokeDelegationAddress",
       });
