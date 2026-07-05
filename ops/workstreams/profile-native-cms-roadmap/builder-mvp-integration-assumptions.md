@@ -30,7 +30,7 @@ canonicalization semantics.
   matching `exhibition_room` payload entry and display asset.
 - The candidate uses the existing `withComputedCmsHashes` helper and validates
   with `validateCmsPackageV1(..., { allowFixtureSignatures: true,
-  allowFixtureStorage: true, enforceHashes: true })`.
+allowFixtureStorage: true, enforceHashes: true })`.
 - Fixture signature and storage artifacts are allowed only because this is an
   unsigned draft candidate. Production publish must replace them with real
   backend signing/storage outputs before the runtime primary endpoint serves the
@@ -89,14 +89,14 @@ Frontend endpoint constants:
 
 - `PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT = "profile-cms/packages"`
 - `PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT =
-  "profile-cms/packages/validate"`
+"profile-cms/packages/validate"`
 - `PROFILE_CMS_BUILDER_PACKAGE_BY_ID_ENDPOINT = "profile-cms/packages/{id}"`
 - `PROFILE_CMS_BUILDER_PROFILE_PACKAGES_ENDPOINT =
-  "profile-cms/profiles/{profile_id}/packages"`
+"profile-cms/profiles/{profile_id}/packages"`
 - `PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT =
-  "profile-cms/packages/{id}/publish"`
+"profile-cms/packages/{id}/publish"`
 - `PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT =
-  "profile-cms/wallet-gallery/snapshot"`
+"profile-cms/wallet-gallery/snapshot"`
 
 ## Wallet Gallery Snapshot And Generator Contract
 
@@ -157,13 +157,35 @@ are derived by grouping assets on `collection_key`; unresolved wallets and
 truncation surface as review warnings).
 
 The backend Phase 5 deterministic wallet-snapshot -> CMS V1 package generator
-is the durable source of truth for generated packages. Until that generator is
-available to this frontend lane, the local fallback only converts the reviewed
-snapshot plus simple UI choices into an existing `CmsPackageV1` shape for
-preview. It must not introduce new CMS package fields or a second permanent
-generation contract.
+(`D:\repos\6529seize-backend src/profile-cms/profile-cms-gallery-package-generator.ts`)
+is the durable source of truth for generated packages. As of this note it
+exists only as a module with its own unit test
+(`profile-cms-gallery-package-generator.test.ts`); no backend API handler or
+route calls it yet (checked `src/api-serverless/src/profile-cms/*.handlers.ts`
+-- `profile-cms.handlers.ts` only exposes save/validate/publish/list/get
+/export/rollback/archive on already-built packages, and
+`wallet-gallery.handlers.ts` only exposes the raw snapshot endpoint, not
+package generation).
 
-Replacement path when the backend generator lands:
+Because there is no endpoint to call, `buildWalletGalleryCmsPackage(...)` in
+`lib/profile-cms/builder/gallery.ts` now mirrors the backend generator's
+deterministic semantics instead of using an ad-hoc shape: it groups visible
+assets into collections and drops empty ones, sorts collections
+featured-first then alphabetically by id (matching
+`sortCollections`/`prepareGallery` in the backend module), emits one
+collections-index page plus one page per collection (`lightbox_gallery`
+block) and one detail page per NFT, and orders NFT detail pages by the same
+grouped-collection sequence used for collection pages. It intentionally does
+not import the backend module (frontend/backend are separate deployables) and
+its input snapshot shape differs (flatter `WalletGallerySnapshotAsset` vs the
+backend's nested per-asset media/curation model), so equivalence is locked by
+a hand-translated jest fixture
+(`__tests__/lib/profile-cms/builder/gallery.test.ts`, the
+"...mirroring the backend generator's contract" case) rather than a shared
+import. It must not introduce new CMS package fields or a second permanent
+generation contract -- only existing `CmsPackageV1` shapes are used.
+
+Replacement path when the backend generator lands behind an endpoint:
 
 - Keep the wallet parser and snapshot review controls.
 - Send the reviewed snapshot id plus hidden, featured, and priority choices to
@@ -173,6 +195,30 @@ Replacement path when the backend generator lands:
   existing builder save/validate/publish shell.
 - Keep tests that verify snake_case snapshot fields normalize cleanly into the
   frontend review model.
+- The mirrored page/block structure in `gallery.ts` can then be deleted in
+  favor of the backend response; keep the round-trip contract described below
+  (or an equivalent one) so saved drafts keep loading into the gallery editor.
+
+### Saved gallery draft round-trip
+
+Loading a saved package back into the builder
+(`createBuilderStateFromPackage` in `lib/profile-cms/builder/package.ts`)
+used to always reconstruct "homepage" template state, which misread a
+generated gallery package's home/collection/NFT pages as authored homepage
+blocks. `buildWalletGalleryCmsPackage(...)` now tags every package it
+generates with `build_manifest.renderer = "6529-cms-gallery-builder-mvp"` and
+embeds the full reviewed snapshot plus hidden/featured/order curation choices
+as an internal namespaced field on the wallet source packet (allowed by the
+V1 schema's source-packet catchall). `createBuilderStateFromPackage` checks
+that renderer marker and, when present, restores `template: "wallet_gallery"`
+and the gallery editor state (wallet input, snapshot, curation) instead of
+falling through to the homepage path. A gallery package without the embedded
+payload (e.g. hand-authored) still resolves to the `wallet_gallery` template
+with a fresh gallery state keyed off the profile handle, rather than
+crashing or silently losing the template. This round-trip contract is
+frontend-only bookkeeping today; it should be revisited (or dropped in favor
+of whatever the backend generator's own response affords) once the backend
+generator is wired behind an endpoint and becomes the save/load path.
 
 The route resolves the profile handle to `profile_id` server-side through the
 existing identity lookup before mounting the builder. If that lookup cannot

@@ -12,6 +12,11 @@ import type { ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import ProfileCmsBuilder from "@/components/profile-cms-builder/ProfileCmsBuilder";
 import {
+  buildWalletGalleryCmsPackage,
+  createMockWalletGallerySnapshot,
+  parseWalletGallerySources,
+} from "@/lib/profile-cms/builder/gallery";
+import {
   buildCmsPackageCandidate,
   createDefaultCmsBuilderState,
 } from "@/lib/profile-cms/builder/package";
@@ -471,6 +476,78 @@ describe("ProfileCmsBuilder", () => {
       expect(screen.getByLabelText("Site title")).toHaveValue("Restored site")
     );
     expect(screen.getByText("draft-123")).toBeInTheDocument();
+  });
+
+  it("loads a saved wallet-gallery draft back into the gallery editor instead of a homepage template", async () => {
+    const user = userEvent.setup();
+    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-punk6529" },
+    });
+    const sources = parseWalletGallerySources(
+      "punk6529.eth 0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0"
+    ).sources;
+    const storedPackage = buildWalletGalleryCmsPackage({
+      handle: "punk6529",
+      siteTitle: "Restored gallery",
+      siteDescription: "A reviewed wallet gallery.",
+      themeAccent: "#00a86b",
+      walletInput: "punk6529.eth 0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+      snapshot: createMockWalletGallerySnapshot({
+        handle: "punk6529",
+        sources,
+      }),
+      hiddenAssetIds: ["work-memes-2"],
+      featuredAssetIds: ["work-memes-1"],
+      featuredCollectionIds: ["collection-the-memes"],
+      orderedAssetIds: [],
+      now: new Date("2026-06-18T00:00:00.000Z"),
+    });
+    const record = {
+      id: "draft-gallery-123",
+      package: storedPackage,
+      profile_id: "profile-punk6529",
+      profile_handle: "punk6529",
+      package_id: "pkg-punk6529-wallet-gallery",
+      version: 2,
+      status: "draft",
+      package_hash: storedPackage.integrity.package_hash,
+      payload_hash: storedPackage.integrity.payload_hash,
+      updated_at: 1750204800000,
+      created_at: 1750204700000,
+    };
+    commonApiFetchMock.mockImplementation(
+      ({ endpoint }: { readonly endpoint: string }) =>
+        endpoint === "profile-cms/profiles/profile-punk6529/packages"
+          ? Promise.resolve([record])
+          : Promise.resolve(record)
+    );
+
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Refresh drafts" }));
+    expect(await screen.findByText(/Version 2/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Load" }));
+
+    await waitFor(() =>
+      expect(screen.getByLabelText("Site title")).toHaveValue(
+        "Restored gallery"
+      )
+    );
+    // The gallery-only wallet input field only renders when the loaded draft
+    // restored the "wallet_gallery" template instead of re-importing the
+    // generated pages as homepage blocks.
+    expect(screen.getByLabelText("Wallets or ENS names")).toHaveValue(
+      "punk6529.eth 0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0"
+    );
   });
 
   it("surfaces a load failure when a saved draft cannot be fetched", async () => {
