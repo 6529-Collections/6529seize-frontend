@@ -12,6 +12,18 @@ updates:
     labels:
       - "dependencies"
       - "dependabot"
+    # Lexical is 0.x, so a "minor" bump behaves like a major and breaks the
+    # drop composer (e.g. 0.14 -> 0.46 changed the LexicalErrorBoundary export
+    # and broke the build in PR #3015). Keep the whole family out of the grouped
+    # runtime PRs and stop dependabot proposing the breaking 0.x jumps; the
+    # upgrade needs a dedicated, hand-tested migration instead.
+    ignore:
+      - dependency-name: "lexical"
+        update-types:
+          - "version-update:semver-minor"
+      - dependency-name: "@lexical/*"
+        update-types:
+          - "version-update:semver-minor"
     groups:
       dev-patch:
         dependency-type: "development"
@@ -23,9 +35,15 @@ updates:
           - "minor"
       runtime-patch:
         dependency-type: "production"
+        exclude-patterns:
+          - "lexical"
+          - "@lexical/*"
         update-types:
           - "patch"
       runtime-minor:
         dependency-type: "production"
+        exclude-patterns:
+          - "lexical"
+          - "@lexical/*"
         update-types:
           - "minor"
