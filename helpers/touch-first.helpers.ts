@@ -64,6 +64,12 @@ const someQueryMatches = (queries: readonly string[]): boolean =>
 // variant selectors.
 const FINE_POINTER_BODY_ATTRIBUTE = "data-fine-pointer";
 
+// Once a machine has proven it has a mouse, remember it: without persistence
+// every page load on a capability-lying browser starts in touch mode and
+// visibly flips to desktop on the first cursor glide (mobile buttons flash
+// and disappear, and clicks land in a dead transitional window).
+const FINE_POINTER_STORAGE_KEY = "6529-fine-pointer";
+
 // A single event is not proof: some tools emit stray synthetic mouse events
 // on genuine touch devices, and jsdom/test events must never latch. Require
 // a short stream of TRUSTED mouse moves — a real cursor glide.
@@ -81,6 +87,41 @@ const notifyCapabilityChange = () => {
   }
 };
 
+const tagBodyWithFinePointer = () => {
+  (
+    globalThis as typeof globalThis & { document?: Document }
+  ).document?.body?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
+};
+
+const readPersistedFinePointer = (): boolean => {
+  try {
+    return (
+      (
+        globalThis as typeof globalThis & { localStorage?: Storage }
+      ).localStorage?.getItem(FINE_POINTER_STORAGE_KEY) === "1"
+    );
+  } catch {
+    return false;
+  }
+};
+
+const persistFinePointer = () => {
+  try {
+    (
+      globalThis as typeof globalThis & { localStorage?: Storage }
+    ).localStorage?.setItem(FINE_POINTER_STORAGE_KEY, "1");
+  } catch {
+    // Storage may be unavailable (private mode, blocked) — session-only latch.
+  }
+};
+
+// Hydrate the latch from a previous session at module load so the very first
+// client render is already in desktop mode on machines with mouse history.
+if (readPersistedFinePointer()) {
+  finePointerObserved = true;
+  tagBodyWithFinePointer();
+}
+
 const handleSentinelPointerEvent = (event: Event) => {
   if (!event.isTrusted || (event as PointerEvent).pointerType !== "mouse") {
     return;
@@ -93,9 +134,8 @@ const handleSentinelPointerEvent = (event: Event) => {
 
   uninstallPointerSentinel();
   finePointerObserved = true;
-  (
-    globalThis as typeof globalThis & { document?: Document }
-  ).document?.body?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
+  tagBodyWithFinePointer();
+  persistFinePointer();
   notifyCapabilityChange();
 };
 

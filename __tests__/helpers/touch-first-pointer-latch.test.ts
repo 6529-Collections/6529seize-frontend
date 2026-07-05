@@ -70,6 +70,36 @@ describe("behavioral fine-pointer latch", () => {
   afterEach(() => {
     defineMaxTouchPoints(0);
     document.body.removeAttribute("data-fine-pointer");
+    localStorage.removeItem("6529-fine-pointer");
+  });
+
+  it("hydrates the latch from a previous session at module load", () => {
+    localStorage.setItem("6529-fine-pointer", "1");
+
+    const { helpers, restore } = loadHelpersWithSentinel();
+
+    // Desktop from the very first read — no events required, no flicker.
+    expect(helpers.hasFinePointerCapability()).toBe(true);
+    expect(helpers.hasHoverCapability()).toBe(true);
+    expect(helpers.isTouchFirstEnvironment()).toBe(false);
+    expect(document.body.getAttribute("data-fine-pointer")).toBe("true");
+
+    restore();
+  });
+
+  it("persists the latch for future sessions", () => {
+    const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+    const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+    const sentinel = getSentinel();
+
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+
+    expect(localStorage.getItem("6529-fine-pointer")).toBe("1");
+
+    unsubscribe();
+    restore();
   });
 
   it("flips to desktop after a stream of trusted mouse moves", () => {
