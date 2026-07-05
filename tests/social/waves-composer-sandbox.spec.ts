@@ -109,7 +109,17 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
 
-    await page.getByRole("button", { name: "Post" }).last().click();
+    // Programmatic click: the floating quick-DM button can overlay the Post
+    // button at some viewports and intercept a pointer click (same idiom as
+    // showDropActionsIfCollapsed).
+    await page
+      .getByRole("button", { name: "Post" })
+      .last()
+      .evaluate((element) => {
+        if (element instanceof HTMLElement) {
+          element.click();
+        }
+      });
 
     await expect
       .poll(
