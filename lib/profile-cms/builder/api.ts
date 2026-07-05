@@ -1,4 +1,5 @@
 import { isProfileCmsBuilderApiEnabledEnv } from "@/config/profileCmsBuilderEnv";
+import type { ApiProfileCmsValidationIssue } from "@/generated/models/ApiProfileCmsValidationIssue";
 import type { ApiProfileCmsValidationResult } from "@/generated/models/ApiProfileCmsValidationResult";
 import type { ApiProfileCmsWalletGallerySnapshot } from "@/generated/models/ApiProfileCmsWalletGallerySnapshot";
 import {
@@ -63,6 +64,14 @@ export type ProfileCmsBuilderActionResult =
       readonly action: ProfileCmsBuilderAction;
       readonly code: ProfileCmsBuilderActionCode;
       readonly expectedEndpoint: string;
+      // A rejected server validation is a completed request whose outcome is
+      // "not valid": the server can still return the validation target (and,
+      // if it persisted one, a draft id) plus the blocking issues to display.
+      readonly draftId?: string | undefined;
+      readonly packageHash?: string | undefined;
+      readonly serverIssues?:
+        | readonly ApiProfileCmsValidationIssue[]
+        | undefined;
     };
 
 export type { ProfileCmsPackageRecord } from "@/lib/profile-cms/builder/package-normalize";
@@ -144,13 +153,22 @@ export async function runProfileCmsBuilderAction({
     profileId,
   });
 
+  if (response.serverValid === false) {
+    return {
+      ok: false,
+      action,
+      code: "server_validation_invalid",
+      expectedEndpoint: endpoint,
+      ...(response.draftId ? { draftId: response.draftId } : {}),
+      ...(response.packageHash ? { packageHash: response.packageHash } : {}),
+      ...(response.issues?.length ? { serverIssues: response.issues } : {}),
+    };
+  }
+
   return {
     ok: true,
     action,
-    code:
-      response.serverValid === false
-        ? "server_validation_invalid"
-        : getSuccessCode(action),
+    code: getSuccessCode(action),
     ...(response.draftId ? { draftId: response.draftId } : {}),
     ...(response.packageHash ? { packageHash: response.packageHash } : {}),
     ...(response.payloadHash ? { payloadHash: response.payloadHash } : {}),
@@ -319,6 +337,7 @@ type BuilderActionResponse = {
   readonly payloadHash?: string | undefined;
   readonly serverValid?: boolean | undefined;
   readonly version?: number | undefined;
+  readonly issues?: readonly ApiProfileCmsValidationIssue[] | undefined;
 };
 
 async function postBuilderAction({
@@ -372,6 +391,7 @@ async function postBuilderAction({
         draftId: response.target?.draft_id,
         packageHash: response.target?.package_hash,
         serverValid: response.valid,
+        issues: response.issues,
       };
     }
   }

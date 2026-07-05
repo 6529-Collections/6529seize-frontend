@@ -75,6 +75,12 @@ function normalizeWallets(
       if (!normalizedValue) {
         return null;
       }
+      // A resolved ENS input carries both `ens` and `address`. It is mapped
+      // as kind "address" with normalized=address on purpose: package
+      // generation picks profile.primary_wallet from the first
+      // kind==="address" source (gallery.ts getPrimaryAddress), and the
+      // review UI only renders wallet counts — the original ENS string stays
+      // available on `input` if a display name is ever needed.
       return {
         kind: wallet.ens && !wallet.address ? "ens" : "address",
         input: wallet.input,

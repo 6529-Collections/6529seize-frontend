@@ -323,7 +323,9 @@ export default function ProfileCmsBuilder({
       ) {
         return;
       }
-      if (result.ok && result.draftId) {
+      // A rejected server validation (ok: false) can still return a
+      // persisted draft id in its validation target — keep it either way.
+      if (result.draftId) {
         setDraftId(result.draftId);
       }
       setActionResult(result);
@@ -1694,16 +1696,30 @@ function PublishStatePanel({
       {actionResult ? (
         <div
           className={`tw-mt-4 tw-border tw-border-solid tw-p-3 tw-text-sm ${
-            actionResult.ok && actionResult.code !== "server_validation_invalid"
+            actionResult.ok
               ? "tw-border-green tw-bg-green/10 tw-text-green"
               : "tw-text-primary-200 tw-border-primary-400 tw-bg-primary-500/10"
           }`}
         >
           <p>{getActionResultMessage(locale, actionResult.code)}</p>
           {actionResult.ok ? null : (
-            <p className="tw-mt-2 tw-font-mono tw-text-xs">
-              {actionResult.expectedEndpoint}
-            </p>
+            <>
+              <p className="tw-mt-2 tw-font-mono tw-text-xs">
+                {actionResult.expectedEndpoint}
+              </p>
+              {actionResult.serverIssues?.length ? (
+                <ul className="tw-mt-2 tw-flex tw-flex-col tw-gap-1">
+                  {actionResult.serverIssues.map((issue) => (
+                    <li
+                      className="tw-font-mono tw-text-xs"
+                      key={`${issue.code}-${issue.path}`}
+                    >
+                      {issue.severity} · {issue.code} · {issue.path}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </>
           )}
         </div>
       ) : (
@@ -1753,11 +1769,11 @@ function DraftsPanel({
           onClick={onRequestDrafts}
         />
       </div>
-      {!builderApiEnabled ? (
+      {builderApiEnabled ? null : (
         <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, "profileCms.builder.api.disabled")}
         </p>
-      ) : null}
+      )}
       {builderApiEnabled && !canUseBuilderApi ? (
         <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, "profileCms.builder.api.profileNotAuthorized")}
