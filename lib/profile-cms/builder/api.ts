@@ -1,22 +1,36 @@
 import { isProfileCmsBuilderApiEnabledEnv } from "@/config/profileCmsBuilderEnv";
+import type { ApiProfileCmsValidationResult } from "@/generated/models/ApiProfileCmsValidationResult";
+import type { ApiProfileCmsWalletGallerySnapshot } from "@/generated/models/ApiProfileCmsWalletGallerySnapshot";
 import {
   createMockWalletGallerySnapshot,
   type WalletGallerySnapshot,
-  type WalletGallerySnapshotAsset,
-  type WalletGallerySnapshotCollection,
-  type WalletGallerySnapshotSource,
   type WalletGallerySource,
 } from "@/lib/profile-cms/builder/gallery";
+import { normalizeWalletGallerySnapshotResponse } from "@/lib/profile-cms/builder/gallery-normalize";
+import {
+  normalizeLoadedProfileCmsPackageRecord,
+  normalizeProfileCmsPackageRecord,
+  type LoadedProfileCmsPackageRecord,
+  type ProfileCmsPackageRecord,
+  type ProfileCmsPackageWire,
+} from "@/lib/profile-cms/builder/package-normalize";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
-import { commonApiPost } from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
+// Real backend contract (see D:\repos\6529seize-backend
+// src/api-serverless/src/generated/routes/openapi-generated.routes.ts and
+// src/api-serverless/src/profile-cms/*.handlers.ts). Publish stays hard
+// blocked client-side below regardless of what the backend exposes.
 export const PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT =
-  "profile-cms/gallery/snapshots";
+  "profile-cms/wallet-gallery/snapshot";
 export const PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT = "profile-cms/packages";
 export const PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT =
   "profile-cms/packages/validate";
 export const PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT =
   "profile-cms/packages/{id}/publish";
+const PROFILE_CMS_BUILDER_PACKAGE_BY_ID_ENDPOINT = "profile-cms/packages/{id}";
+const PROFILE_CMS_BUILDER_PROFILE_PACKAGES_ENDPOINT =
+  "profile-cms/profiles/{profile_id}/packages";
 
 export type ProfileCmsBuilderAction = "save_draft" | "validate" | "publish";
 export type ProfileCmsBuilderActionCode =
@@ -27,6 +41,7 @@ export type ProfileCmsBuilderActionCode =
   | "publish_requires_signed_storage"
   | "request_failed"
   | "server_validation_completed"
+  | "server_validation_invalid"
   | "draft_saved";
 
 export type ProfileCmsBuilderActionResult =
@@ -44,49 +59,7 @@ export type ProfileCmsBuilderActionResult =
       readonly expectedEndpoint: string;
     };
 
-type BuilderActionResponse = {
-  readonly draft_id?: string | undefined;
-  readonly package_hash?: string | undefined;
-  readonly message?: string | undefined;
-};
-
-type GallerySnapshotResponse = {
-  readonly snapshot_id?: string | undefined;
-  readonly source?: string | undefined;
-  readonly wallets?: readonly {
-    readonly kind?: "address" | "ens" | undefined;
-    readonly input?: string | undefined;
-    readonly normalized?: string | undefined;
-  }[];
-  readonly captured_at?: string | undefined;
-  readonly block_number?: number | undefined;
-  readonly assets?: readonly {
-    readonly id?: string | undefined;
-    readonly title?: string | undefined;
-    readonly collection_id?: string | undefined;
-    readonly collection_name?: string | undefined;
-    readonly contract?: string | undefined;
-    readonly token_id?: string | undefined;
-    readonly chain_id?: number | undefined;
-    readonly owner?: string | undefined;
-    readonly image_uri?: string | undefined;
-    readonly mime_type?: string | undefined;
-    readonly width?: number | undefined;
-    readonly height?: number | undefined;
-    readonly metadata_uri?: string | undefined;
-    readonly media_state?: "ready" | "partial" | "missing" | undefined;
-    readonly alt_text?: string | undefined;
-  }[];
-  readonly collections?: readonly {
-    readonly id?: string | undefined;
-    readonly name?: string | undefined;
-    readonly slug?: string | undefined;
-    readonly contract?: string | undefined;
-    readonly chain_id?: number | undefined;
-    readonly asset_ids?: readonly string[] | undefined;
-  }[];
-  readonly warnings?: readonly string[] | undefined;
-};
+export type { ProfileCmsPackageRecord } from "@/lib/profile-cms/builder/package-normalize";
 
 export async function runProfileCmsBuilderAction({
   action,
@@ -138,19 +111,20 @@ export async function runProfileCmsBuilderAction({
   return {
     ok: true,
     action,
-    code: getSuccessCode(action),
-    ...(response.draft_id ? { draftId: response.draft_id } : {}),
-    ...(response.package_hash ? { packageHash: response.package_hash } : {}),
+    code:
+      response.serverValid === false
+        ? "server_validation_invalid"
+        : getSuccessCode(action),
+    ...(response.draftId ? { draftId: response.draftId } : {}),
+    ...(response.packageHash ? { packageHash: response.packageHash } : {}),
   };
 }
 
 export async function requestProfileCmsGallerySnapshot({
   handle,
-  profileId,
   sources,
 }: {
   readonly handle: string;
-  readonly profileId?: string | undefined;
   readonly sources: readonly WalletGallerySource[];
 }): Promise<WalletGallerySnapshot> {
   if (!isProfileCmsBuilderApiEnabledEnv()) {
@@ -158,29 +132,60 @@ export async function requestProfileCmsGallerySnapshot({
   }
 
   const response = await commonApiPost<
-    {
-      readonly profile_id?: string | undefined;
-      readonly wallets: readonly {
-        readonly kind: WalletGallerySource["kind"];
-        readonly input: string;
-        readonly normalized: string;
-      }[];
-    },
-    GallerySnapshotResponse
+    { readonly wallets: readonly string[] },
+    ApiProfileCmsWalletGallerySnapshot
   >({
     endpoint: PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT,
     body: {
-      ...(profileId ? { profile_id: profileId } : {}),
-      wallets: sources.map((source) => ({
-        kind: source.kind,
-        input: source.input,
-        normalized: source.normalized,
-      })),
+      wallets: sources.map((source) => source.normalized),
     },
     errorMode: "structured",
   });
 
-  return normalizeGallerySnapshotResponse(response, sources);
+  return normalizeWalletGallerySnapshotResponse(response, sources);
+}
+
+/**
+ * List saved drafts (and any published/archived versions) for a profile.
+ * Backing endpoint: `GET profile-cms/profiles/:profile_id/packages`.
+ */
+export async function listProfileCmsPackagesForProfile(
+  profileId: string
+): Promise<readonly ProfileCmsPackageRecord[]> {
+  assertProfileCmsBuilderApiEnabled();
+  const response = await commonApiFetch<readonly ProfileCmsPackageWire[]>({
+    endpoint: PROFILE_CMS_BUILDER_PROFILE_PACKAGES_ENDPOINT.replace(
+      "{profile_id}",
+      encodeURIComponent(profileId)
+    ),
+  });
+
+  return response.map(normalizeProfileCmsPackageRecord);
+}
+
+/**
+ * Load a single saved draft/package by id, including its CMS package payload
+ * (validated against the local V1 schema before it can enter editor state).
+ * Backing endpoint: `GET profile-cms/packages/:id`.
+ */
+export async function getProfileCmsPackageById(
+  id: string
+): Promise<LoadedProfileCmsPackageRecord> {
+  assertProfileCmsBuilderApiEnabled();
+  const response = await commonApiFetch<ProfileCmsPackageWire>({
+    endpoint: PROFILE_CMS_BUILDER_PACKAGE_BY_ID_ENDPOINT.replace(
+      "{id}",
+      encodeURIComponent(id)
+    ),
+  });
+
+  return normalizeLoadedProfileCmsPackageRecord(response);
+}
+
+function assertProfileCmsBuilderApiEnabled(): void {
+  if (!isProfileCmsBuilderApiEnabledEnv()) {
+    throw new Error("profile_cms_builder_api_disabled");
+  }
 }
 
 function getEndpoint({
@@ -205,6 +210,12 @@ function getEndpoint({
   }
 }
 
+type BuilderActionResponse = {
+  readonly draftId?: string | undefined;
+  readonly packageHash?: string | undefined;
+  readonly serverValid?: boolean | undefined;
+};
+
 async function postBuilderAction({
   action,
   cmsPackage,
@@ -217,24 +228,29 @@ async function postBuilderAction({
   readonly profileId?: string | undefined;
 }): Promise<BuilderActionResponse> {
   switch (action) {
-    case "save_draft":
-      return await commonApiPost<
+    case "save_draft": {
+      const response = await commonApiPost<
         { readonly cms_package: CmsPackageV1; readonly profile_id: string },
-        BuilderActionResponse
+        ProfileCmsPackageWire
       >({
         endpoint,
         body: { profile_id: profileId ?? "", cms_package: cmsPackage },
         errorMode: "structured",
       });
-    case "validate":
-      return await commonApiPost<
+      return {
+        draftId: response.id,
+        packageHash: response.package_hash,
+      };
+    }
+    case "validate": {
+      const response = await commonApiPost<
         {
           readonly allow_fixture_signatures: boolean;
           readonly allow_fixture_storage: boolean;
           readonly cms_package: CmsPackageV1;
           readonly enforce_hashes: boolean;
         },
-        BuilderActionResponse
+        ApiProfileCmsValidationResult
       >({
         endpoint,
         body: {
@@ -245,6 +261,12 @@ async function postBuilderAction({
         },
         errorMode: "structured",
       });
+      return {
+        draftId: response.target?.draft_id,
+        packageHash: response.target?.package_hash,
+        serverValid: response.valid,
+      };
+    }
     case "publish":
       throw new Error("unsupported_publish_action");
   }
@@ -261,152 +283,4 @@ function getSuccessCode(
     case "publish":
       return "publish_requires_signed_storage";
   }
-}
-
-function normalizeGallerySnapshotResponse(
-  response: GallerySnapshotResponse,
-  requestedSources: readonly WalletGallerySource[]
-): WalletGallerySnapshot {
-  const wallets = normalizeWallets(response.wallets, requestedSources);
-  const assets = normalizeSnapshotAssets(response.assets);
-  const collections = normalizeSnapshotCollections(
-    response.collections,
-    assets
-  );
-  const source = normalizeGallerySnapshotSource(response.source);
-
-  return {
-    snapshotId: response.snapshot_id ?? `${source}-${Date.now()}`,
-    source,
-    wallets,
-    capturedAt: response.captured_at ?? new Date().toISOString(),
-    ...(response.block_number !== undefined
-      ? { blockNumber: response.block_number }
-      : {}),
-    assets,
-    collections,
-    warnings: response.warnings ?? [],
-  };
-}
-
-function normalizeGallerySnapshotSource(
-  source: GallerySnapshotResponse["source"]
-): WalletGallerySnapshotSource {
-  return source === "fixture" ? "fixture" : "backend";
-}
-
-function normalizeWallets(
-  wallets: GallerySnapshotResponse["wallets"],
-  fallback: readonly WalletGallerySource[]
-): readonly WalletGallerySource[] {
-  const normalized = wallets
-    ?.map((wallet): WalletGallerySource | null => {
-      if (!wallet.kind || !wallet.normalized) {
-        return null;
-      }
-
-      return {
-        kind: wallet.kind,
-        input: wallet.input ?? wallet.normalized,
-        normalized: wallet.normalized,
-      };
-    })
-    .filter((wallet): wallet is WalletGallerySource => !!wallet);
-
-  return normalized?.length ? normalized : fallback;
-}
-
-function normalizeSnapshotAssets(
-  assets: GallerySnapshotResponse["assets"]
-): readonly WalletGallerySnapshotAsset[] {
-  return (
-    assets
-      ?.map((asset): WalletGallerySnapshotAsset | null => {
-        if (
-          !asset.id ||
-          !asset.title ||
-          !asset.collection_id ||
-          !asset.collection_name ||
-          !asset.contract ||
-          !asset.token_id ||
-          !asset.owner
-        ) {
-          return null;
-        }
-
-        return {
-          id: asset.id,
-          title: asset.title,
-          collectionId: asset.collection_id,
-          collectionName: asset.collection_name,
-          contract: asset.contract,
-          tokenId: asset.token_id,
-          chainId: asset.chain_id ?? 1,
-          owner: asset.owner,
-          ...(asset.image_uri ? { imageUri: asset.image_uri } : {}),
-          ...(asset.mime_type ? { mimeType: asset.mime_type } : {}),
-          ...(asset.width ? { width: asset.width } : {}),
-          ...(asset.height ? { height: asset.height } : {}),
-          ...(asset.metadata_uri ? { metadataUri: asset.metadata_uri } : {}),
-          mediaState:
-            asset.media_state ?? (asset.image_uri ? "ready" : "partial"),
-          altText: asset.alt_text ?? asset.title,
-        };
-      })
-      .filter((asset): asset is WalletGallerySnapshotAsset => !!asset) ?? []
-  );
-}
-
-function normalizeSnapshotCollections(
-  collections: GallerySnapshotResponse["collections"],
-  assets: readonly WalletGallerySnapshotAsset[]
-): readonly WalletGallerySnapshotCollection[] {
-  const normalized =
-    collections
-      ?.map((collection): WalletGallerySnapshotCollection | null => {
-        if (
-          !collection.id ||
-          !collection.name ||
-          !collection.slug ||
-          !collection.contract
-        ) {
-          return null;
-        }
-
-        return {
-          id: collection.id,
-          name: collection.name,
-          slug: collection.slug,
-          contract: collection.contract,
-          chainId: collection.chain_id ?? 1,
-          assetIds: collection.asset_ids ?? [],
-        };
-      })
-      .filter(
-        (collection): collection is WalletGallerySnapshotCollection =>
-          !!collection
-      ) ?? [];
-
-  if (normalized.length) {
-    return normalized;
-  }
-
-  const byCollection = new Map<string, WalletGallerySnapshotAsset[]>();
-  assets.forEach((asset) => {
-    const current = byCollection.get(asset.collectionId) ?? [];
-    byCollection.set(asset.collectionId, [...current, asset]);
-  });
-
-  return [...byCollection.entries()].map(([collectionId, collectionAssets]) => {
-    const firstAsset = collectionAssets[0];
-    return {
-      id: collectionId,
-      name: firstAsset?.collectionName ?? "Collection",
-      slug: collectionId.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      contract:
-        firstAsset?.contract ?? "0x0000000000000000000000000000000000000000",
-      chainId: firstAsset?.chainId ?? 1,
-      assetIds: collectionAssets.map((asset) => asset.id),
-    };
-  });
 }

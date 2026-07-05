@@ -1215,6 +1215,10 @@ export const EN_US_MESSAGES = {
     "Fixture snapshot used until the gallery backend snapshot endpoint is enabled.",
   "profileCms.builder.gallery.snapshot.warning.partialMedia":
     "Some media may be pending or unavailable in the reviewed snapshot.",
+  "profileCms.builder.gallery.snapshot.warning.unresolvedWallets":
+    "Some wallet entries could not be resolved and are not part of this snapshot.",
+  "profileCms.builder.gallery.snapshot.warning.truncated":
+    "The snapshot hit the asset limit, so some indexed works are not shown.",
   "profileCms.builder.gallery.review.title": "Snapshot review",
   "profileCms.builder.gallery.review.description":
     "Review the frozen wallet snapshot before saving the generated gallery package.",
@@ -1385,7 +1389,24 @@ export const EN_US_MESSAGES = {
     "Publishing needs the signed decentralized storage flow and is not enabled in this MVP.",
   "profileCms.builder.api.serverValidationCompleted":
     "Server validation completed.",
+  "profileCms.builder.api.serverValidationInvalid":
+    "Server validation found blocking issues in this package.",
   "profileCms.builder.api.draftSaved": "Draft saved.",
+  "profileCms.builder.drafts.title": "Saved drafts",
+  "profileCms.builder.drafts.refresh": "Refresh drafts",
+  "profileCms.builder.drafts.loading": "Loading...",
+  "profileCms.builder.drafts.failed": "Could not load saved drafts.",
+  "profileCms.builder.drafts.empty": "No saved drafts yet.",
+  "profileCms.builder.drafts.version": "Version {version}",
+  "profileCms.builder.drafts.load": "Load",
+  "profileCms.builder.drafts.status.draft": "Draft",
+  "profileCms.builder.drafts.status.validating": "Validating",
+  "profileCms.builder.drafts.status.published": "Published",
+  "profileCms.builder.drafts.status.failed": "Failed",
+  "profileCms.builder.drafts.status.archived": "Archived",
+  "profileCms.builder.drafts.status.superseded": "Superseded",
+  "profileCms.builder.drafts.loadFailed":
+    "This draft could not be loaded into the editor.",
   ...USER_COLLECTED_STATS_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
