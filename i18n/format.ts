@@ -5,6 +5,10 @@ const SHORT_DATE_FORMAT = {
   month: "short",
   year: "numeric",
 } satisfies Intl.DateTimeFormatOptions;
+const SHORT_TIME_FORMAT = {
+  hour: "2-digit",
+  minute: "2-digit",
+} satisfies Intl.DateTimeFormatOptions;
 const DEFAULT_RELATIVE_TIME_FORMAT_OPTIONS = {
   numeric: "auto",
 } satisfies Intl.RelativeTimeFormatOptions;
@@ -65,6 +69,21 @@ export function formatDate(
   const date = toValidDate(value);
   if (date === null) {
     return "-";
+  }
+
+  return new Intl.DateTimeFormat(locale, options).format(date);
+}
+
+// Returns "" (not "-") so callers rendering optional time suffixes can omit
+// them entirely when the value is invalid.
+export function formatTime(
+  locale: SupportedLocale,
+  value: Date | string | number | null | undefined,
+  options: Intl.DateTimeFormatOptions = SHORT_TIME_FORMAT
+): string {
+  const date = toValidDate(value);
+  if (date === null) {
+    return "";
   }
 
   return new Intl.DateTimeFormat(locale, options).format(date);

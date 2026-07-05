@@ -18,6 +18,8 @@ import {
   formatMessage,
   formatMessages,
 } from "@/helpers/waves/drop-clipboard.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 
 interface UseWaveDropsClipboardOptions {
   readonly containerRef: RefObject<HTMLDivElement | null>;
@@ -265,7 +267,8 @@ const buildRangePayload = (
   selectedIds: string[],
   container: HTMLElement,
   messages: ClipboardMessage[],
-  format: ClipboardFormat
+  format: ClipboardFormat,
+  locale: SupportedLocale
 ): string | undefined => {
   const messagesById = new Map(
     messages.map((message) => [message.id, message] as const)
@@ -283,6 +286,7 @@ const buildRangePayload = (
     partialSegments,
     messagesById,
     format,
+    locale,
   });
 
   if (segments.length > 0 || usedPartialHandling) {
@@ -399,6 +403,7 @@ type BuildSegmentsOptions = {
   readonly partialSegments: Map<string, string>;
   readonly messagesById: Map<string, ClipboardMessage>;
   readonly format: ClipboardFormat;
+  readonly locale: SupportedLocale;
 };
 
 const buildSegmentsFromSelection = ({
@@ -406,6 +411,7 @@ const buildSegmentsFromSelection = ({
   partialSegments,
   messagesById,
   format,
+  locale,
 }: BuildSegmentsOptions): string[] => {
   const fullMessageIds = selectedIds.filter((id) => !partialSegments.has(id));
   const totalFullMessages = fullMessageIds.length;
@@ -426,7 +432,8 @@ const buildSegmentsFromSelection = ({
     const segment = formatMessage(
       message,
       format,
-      totalFullMessages === 1
+      totalFullMessages === 1,
+      locale
     );
 
     segments.push(segment);
@@ -439,6 +446,7 @@ export const useWaveDropsClipboard = ({
   containerRef,
   drops,
 }: UseWaveDropsClipboardOptions): void => {
+  const locale = useBrowserLocale();
   const fullDrops = useMemo(
     () =>
       (drops ?? []).filter(
@@ -521,12 +529,14 @@ export const useWaveDropsClipboard = ({
             context.selectedIds,
             container,
             context.messages,
-            formatRef.current
+            formatRef.current,
+            locale
           )
         : undefined;
 
       const payload =
-        rangePayload ?? formatMessages(context.messages, formatRef.current);
+        rangePayload ??
+        formatMessages(context.messages, formatRef.current, locale);
 
       if (!payload) {
         formatRef.current = "plain";
@@ -556,5 +566,5 @@ export const useWaveDropsClipboard = ({
       globalThis.removeEventListener?.("keydown", handleKeyDown);
       container.removeEventListener("copy", handleCopy);
     };
-  }, [clipboardMessages, containerRef]);
+  }, [clipboardMessages, containerRef, locale]);
 };

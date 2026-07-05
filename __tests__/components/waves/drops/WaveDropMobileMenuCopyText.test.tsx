@@ -126,25 +126,84 @@ describe("WaveDropMobileMenuCopyText", () => {
     expect(parentClick).not.toHaveBeenCalled();
   });
 
-  it("closes the menu once when clipboard write fails", async () => {
+  it("keeps the menu open and shows failure feedback when clipboard write fails", async () => {
+    jest.useFakeTimers();
     const clipboardWrite = createDeferredClipboardWrite();
     writeText.mockReturnValueOnce(clipboardWrite.promise);
+    const onCopy = jest.fn();
+
+    try {
+      render(
+        <WaveDropMobileMenuCopyText drop={createDrop()} onCopy={onCopy} />
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Copy text" }));
+
+      expect(writeText).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        clipboardWrite.reject(new Error("Clipboard write failed"));
+        await clipboardWrite.promise.catch(() => undefined);
+      });
+
+      expect(onCopy).not.toHaveBeenCalled();
+      expect(screen.getAllByText("Copy failed").length).toBeGreaterThan(0);
+      expect(screen.getByRole("status")).toHaveTextContent("Copy failed");
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(screen.getByText("Copy text")).toBeInTheDocument();
+      expect(screen.getByRole("status")).toBeEmptyDOMElement();
+      expect(onCopy).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("shows failure feedback without closing the menu when the clipboard API is unavailable", async () => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: undefined,
+    });
     const onCopy = jest.fn();
 
     render(<WaveDropMobileMenuCopyText drop={createDrop()} onCopy={onCopy} />);
 
     await userEvent.click(screen.getByRole("button", { name: "Copy text" }));
 
-    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).not.toHaveBeenCalled();
     expect(onCopy).not.toHaveBeenCalled();
+    expect(screen.getAllByText("Copy failed").length).toBeGreaterThan(0);
+    expect(screen.getByRole("status")).toHaveTextContent("Copy failed");
+  });
 
-    await act(async () => {
-      clipboardWrite.reject(new Error("Clipboard write failed"));
-      await clipboardWrite.promise.catch(() => undefined);
+  it("formats the copied timestamp using the browser locale", async () => {
+    const drop = createDrop();
+    const onCopy = jest.fn();
+    Object.defineProperty(navigator, "languages", {
+      configurable: true,
+      value: ["de-DE"],
     });
 
-    await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
-    expect(screen.getByText("Copy text")).toBeInTheDocument();
+    try {
+      render(<WaveDropMobileMenuCopyText drop={drop} onCopy={onCopy} />);
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Text kopieren" })
+      );
+
+      const expectedTime = new Intl.DateTimeFormat("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(drop.created_at));
+      const payload = writeText.mock.calls[0][0] as string;
+      expect(payload).toContain(`alice (${expectedTime}):`);
+      await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
+    } finally {
+      delete (navigator as { languages?: unknown }).languages;
+    }
   });
 
   it("disables copy for temporary drops", async () => {
