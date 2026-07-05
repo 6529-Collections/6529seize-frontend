@@ -54,7 +54,7 @@ export async function generateMetadata({
 
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title: t(locale, "rememes.title"),
+      title: t(locale, "rememes.documentTitle"),
       description: t(locale, "rememes.description.collections"),
       ogImage: getCollectionSocialCardImagePath("rememes"),
       ogImageAlt: "ReMemes collection social card",

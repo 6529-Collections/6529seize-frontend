@@ -31,6 +31,7 @@ export async function generateMetadata({
   }
   return getNextgenCollectionMetadata({
     collection: resolvedCollection,
+    documentTitle: `${title} | NextGen`,
     title,
   });
 }

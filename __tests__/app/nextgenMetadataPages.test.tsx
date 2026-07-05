@@ -211,7 +211,7 @@ describe("NextGen metadata", () => {
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
-    expect(metadata.title).toBe("Pebbles | Rarity");
+    expect(metadata.title).toBe("Pebbles | Rarity | NextGen");
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(image).toMatchObject({
       alt: "Pebbles | Rarity social card",
