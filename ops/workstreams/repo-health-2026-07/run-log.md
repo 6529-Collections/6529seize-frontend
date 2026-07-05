@@ -1,5 +1,45 @@
 # Run Log
 
+## 2026-07-05 (Thread I — 1,500+ splits, Tier S first wave)
+
+- Roadmap PR #3111 (`split-1500-plan.md`): fresh ratchet-aligned scan found
+  27 files >1,500 lines at origin/main — the kickoff list was stale
+  (tech-content.ts gone; 12 unlisted files incl. the repo's largest,
+  sentry-client-filters.ts at 2,796). Tiering, invariants, per-file module
+  maps, validation bars. Museum-vs-CMS-migration decision flagged for the
+  reviewer (PR #3094 targets app/museum/** as a future CMS surface).
+- Tier S splits, all parity-proven byte-identical via the WP-scrape
+  hydrated-DOM harness (double-capture calibration + served-marker checks):
+  PR #3112 press page 2,005 -> 367 + 3 sections + shared PressArticleRow;
+  PR #3113 om-district/museum twins (88% line-identical scrape twins) ->
+  one shared data module rendering both variants; PR #3114 fund-szn1
+  capsule-house + cod -> shared tile/slider/carousel renderers + per-page
+  data sections. `oversized_files` 89 -> 84.
+- SonarCloud lesson (now with precedent): a plain verbatim move of
+  scrape content FAILS the new-code duplication gate (#3112 first push:
+  23.7% vs 3%). The fix that keeps the parity guarantee is shared
+  components/data modules for the byte-repeated skeletons, verified by the
+  same DOM captures — #3112 went 23.7% -> 0.0% and #3113/#3114 passed gate
+  on first try with the technique built in.
+- Environment gotchas for the record: prettier-plugin-tailwindcss strips
+  the scrape's stray leading/trailing spaces inside className literals
+  (DOM-parity-relevant; solved with class-string constants + pinning
+  tests); `format:changed`/`lint:changed` explode when local `main` is
+  stale (run prettier/eslint on explicit files instead); the Next dev
+  toolbar's __nextjs-Geist font-face style block shifts <head> position
+  between captures (documented normalization in #3114); build dirties
+  generated/models/ApiIdentityMuteState.ts (discard before commit).
+- Review protocol per owner: no agent merges; maintainers-team review
+  requested on every PR; @prxt mentioned in-body (formal reviewer request
+  still silently dropped — not a collaborator). All four PRs at
+  ready-for-review with every bot lane clean; GLM-advisory suggestions
+  adopted as invariants suites (district + fund) or answered with parity
+  evidence.
+- Next in sequence: genesis x4 (video-token showcases; same shared-blocks
+  treatment — profiled: rows of video+traits column pairs), then Tier A
+  (sentry filters, github-preview), OG-image route with render-parity
+  harness, Tier C components, auth pair, composer, drop-forge trio last.
+
 ## 2026-07-05 (Thread F — collection surfaces quality pass)
 
 - Phase 1 (overflow): root cause pinned with production evidence — the
