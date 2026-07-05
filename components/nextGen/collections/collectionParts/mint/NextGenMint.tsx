@@ -184,7 +184,7 @@ export default function NextGenMint(props: Readonly<Props>) {
   useEffect(() => {
     const data = addressMintCountAirdropRead.data;
     if (data) {
-      const air = parseInt(String(data));
+      const air = parseInt((data as bigint).toString());
       setAddressMintCounts((amc) => {
         amc.airdrop = air;
         amc.total = amc.airdrop + amc.allowlist + amc.public;
@@ -201,7 +201,7 @@ export default function NextGenMint(props: Readonly<Props>) {
   useEffect(() => {
     const data = addressMintCountMintedALRead.data;
     if (data) {
-      const allow = parseInt(String(data));
+      const allow = parseInt((data as bigint).toString());
       setAddressMintCounts((amc) => {
         amc.allowlist = allow;
         amc.total = amc.airdrop + amc.allowlist + amc.public;
@@ -218,7 +218,7 @@ export default function NextGenMint(props: Readonly<Props>) {
   useEffect(() => {
     const data = addressMintCountMintedPublicRead.data;
     if (data) {
-      const pub = parseInt(String(data));
+      const pub = parseInt((data as bigint).toString());
       setAddressMintCounts((amc) => {
         amc.public = pub;
         amc.total = amc.airdrop + amc.allowlist + amc.public;

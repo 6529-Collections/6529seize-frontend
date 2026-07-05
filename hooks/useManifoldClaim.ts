@@ -331,7 +331,7 @@ function buildClaimFromReadData({
   return {
     identifier,
     instanceId,
-    location: String(claimData.location ?? ""),
+    location: (claimData.location ?? "") as string,
     total: Number(claimData.total),
     totalMax: Number(claimData.totalMax),
     remaining,

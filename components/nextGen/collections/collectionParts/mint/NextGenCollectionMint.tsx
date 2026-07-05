@@ -33,7 +33,7 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   useEffect(() => {
     const data = burnAmountRead.data;
     if (data) {
-      setBurnAmount(parseInt(String(data)));
+      setBurnAmount(parseInt((data as bigint).toString()));
     }
   }, [burnAmountRead.data]);
 

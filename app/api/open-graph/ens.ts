@@ -141,7 +141,7 @@ function normalizeEnsName(name: string): {
     console.error("normalizeEnsName error", error);
     const record = error as { message?: unknown } | null;
     let message = "Invalid ENS name provided";
-    if (record?.message) {
+    if (typeof record?.message === "string" && record.message) {
       message = `${message}: ${record.message}`;
     }
     throw new EnsPreviewError(400, message);

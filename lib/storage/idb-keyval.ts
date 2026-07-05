@@ -19,7 +19,7 @@ function extractErrorMessage(error: unknown): string {
   if (typeof error === "object") {
     const record = error as Record<string, unknown>;
     const maybeMessage = record["message"] ?? record["error"];
-    if (maybeMessage) return String(maybeMessage);
+    if (typeof maybeMessage === "string" && maybeMessage) return maybeMessage;
     try {
       return JSON.stringify(error);
     } catch {
@@ -40,7 +40,8 @@ function extractErrorName(error: unknown): string {
   if (error == null) return "";
   if (error instanceof Error) return error.name;
   const record = error as { name?: unknown; constructor?: { name?: unknown } };
-  return String(record?.name ?? record?.constructor?.name ?? "");
+  const name = record?.name ?? record?.constructor?.name;
+  return typeof name === "string" ? name : "";
 }
 
 function isDatabaseClosingError(error: unknown): boolean {

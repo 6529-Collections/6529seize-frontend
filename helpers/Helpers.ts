@@ -196,8 +196,8 @@ export function getDateDisplay(date: Date) {
 }
 
 export function areEqualAddresses(w1: unknown, w2: unknown): boolean {
-  if (w1 && w2) {
-    return String(w1).toUpperCase() === String(w2).toUpperCase();
+  if (typeof w1 === "string" && typeof w2 === "string" && w1 && w2) {
+    return w1.toUpperCase() === w2.toUpperCase();
   }
   return false;
 }

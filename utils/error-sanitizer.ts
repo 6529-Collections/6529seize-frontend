@@ -77,8 +77,8 @@ export const isIndexedDBError = (error: unknown): boolean => {
     const record = error as Record<string, unknown>;
     const msg = record["message"] ?? record["error"];
 
-    if (msg) {
-      errorMessage = String(msg);
+    if (typeof msg === "string" && msg) {
+      errorMessage = msg;
     } else {
       try {
         errorMessage = JSON.stringify(error);
@@ -90,13 +90,14 @@ export const isIndexedDBError = (error: unknown): boolean => {
     errorMessage = `[non-string error: ${typeof error}]`;
   }
 
+  const rawErrorName = (error as { constructor?: { name?: unknown } })
+    ?.constructor?.name;
   const errorName =
     error instanceof Error
       ? error.name
-      : String(
-          (error as { constructor?: { name?: unknown } })?.constructor?.name ??
-            ""
-        );
+      : typeof rawErrorName === "string"
+        ? rawErrorName
+        : "";
 
   const indexedDBPatterns = [
     /indexed\s*database/i,
@@ -167,7 +168,7 @@ const extractErrorMessage = (
     try {
       const record = error as Record<string, unknown>;
       const errorString = JSON.stringify(error);
-      const message = String(record["message"] || record["error"] || "");
+      const message = (record["message"] || record["error"] || "") as string;
       return { message, errorString };
     } catch {
       return { message: "", errorString: "Complex error object" };

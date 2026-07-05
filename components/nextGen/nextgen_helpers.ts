@@ -66,7 +66,9 @@ export function useParsedCollectionIndex(
   collectionIndex: { data?: unknown } | undefined
 ) {
   const collectionIndexData = collectionIndex?.data;
-  return collectionIndexData ? parseInt(String(collectionIndexData)) : 0;
+  return collectionIndexData
+    ? parseInt((collectionIndexData as bigint).toString())
+    : 0;
 }
 
 interface NextGenReadParams {
