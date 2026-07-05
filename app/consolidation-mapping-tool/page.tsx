@@ -8,7 +8,7 @@ export default function ConsolidationMappingToolPage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "Consolidation Mapping Tool",
+    title: "Consolidation Mapping Tool | Tools",
     description: "Tools",
   });
 }

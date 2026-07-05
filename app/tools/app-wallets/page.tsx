@@ -7,5 +7,5 @@ export default function AppWalletsPage() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "App Wallets", description: "Tools" });
+  return getAppMetadata({ title: "App Wallets | Tools", description: "Tools" });
 }

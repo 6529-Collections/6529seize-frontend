@@ -13,7 +13,7 @@ export default function RoyaltiesDownloads() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "Royalties",
+    title: "Royalties | Open Data",
     description: "Open Data",
   });
 }

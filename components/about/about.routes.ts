@@ -240,6 +240,7 @@ const ABOUT_SECTION_LABEL_KEYS = new Map<AboutSection, MessageKey>(
 
 const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
   [AboutSection.GRADIENTS, "about.contents.documentTitles.gradient"],
+  [AboutSection.MEMES, "about.contents.documentTitles.memes"],
 ]);
 
 function normalizeVisibilityOptions(

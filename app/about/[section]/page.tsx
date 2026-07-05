@@ -1,13 +1,15 @@
 import styles from "@/styles/Home.module.css";
 
 import About from "@/components/about/About";
+import { getAboutSectionDocumentTitle } from "@/components/about/about.routes";
 import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
 } from "@/components/about/AboutLayout";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { capitalizeEveryWord } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -53,10 +55,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     section &&
     Object.values(AboutSection).includes(section as AboutSection)
   ) {
-    const sectionTitle = capitalizeEveryWord(section.replaceAll("-", " "));
+    const sectionTitle = getAboutSectionDocumentTitle(
+      section as AboutSection,
+      DEFAULT_LOCALE
+    );
 
     return getAppMetadata({
-      title: sectionTitle,
+      title: t(DEFAULT_LOCALE, "about.contents.documentTitle", {
+        section: sectionTitle,
+      }),
       description: "About",
     });
   }

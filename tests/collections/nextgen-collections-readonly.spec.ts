@@ -225,7 +225,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/the-memes");
 
-    await expect(page).toHaveTitle("The Memes");
+    await expect(page).toHaveTitle("The Memes | Collections");
     await expectCollectionTitle(page, testInfo.project.name, "The Memes");
     await expect(
       page.getByRole("region", { name: "Meme sorting" })
@@ -242,7 +242,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/meme-lab");
 
-    await expect(page).toHaveTitle("Meme Lab");
+    await expect(page).toHaveTitle("Meme Lab | Collections");
     await expectCollectionTitle(page, testInfo.project.name, "Meme Lab");
     await expect(
       page.getByRole("region", { name: "Meme Lab sorting" })
@@ -259,7 +259,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/6529-gradient?sort=id&sort_dir=asc");
 
-    await expect(page).toHaveTitle(/^6529 Gradient(?: \| Collections)?$/);
+    await expect(page).toHaveTitle("6529 Gradient | Collections");
     await expectCollectionTitle(page, testInfo.project.name, "6529 Gradient");
     await expect(
       page.getByRole("region", { name: "Gradient sorting" })
