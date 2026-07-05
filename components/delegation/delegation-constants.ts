@@ -14,6 +14,11 @@ export interface DelegationCollection {
   readonly preview: string;
 }
 
+export interface DelegationUseCase {
+  readonly use_case: number;
+  readonly display: string;
+}
+
 export const ANY_COLLECTION_PATH = "any-collection";
 
 export const ANY_COLLECTION: DelegationCollection = {

@@ -54,13 +54,13 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
 interface Props {
   section: DelegationCenterSection;
   path?: string[] | undefined;
-  setActiveSection(section: DelegationCenterSection): any;
+  setActiveSection(section: DelegationCenterSection): void;
   address_query: string;
-  setAddressQuery(address: string): any;
+  setAddressQuery(address: string): void;
   collection_query: string;
-  setCollectionQuery(collection: string): any;
+  setCollectionQuery(collection: string): void;
   use_case_query: number;
-  setUseCaseQuery(use_case: number): any;
+  setUseCaseQuery(use_case: number): void;
 }
 
 export default function DelegationCenterMenu(props: Readonly<Props>) {
