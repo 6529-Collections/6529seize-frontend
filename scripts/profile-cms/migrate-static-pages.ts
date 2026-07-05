@@ -132,24 +132,39 @@ function decodeHtmlEntities(value: string): string {
  * migrated copy.
  */
 function stripTags(value: string): string {
-  const withoutTags = value.replaceAll(/<[^>]*>/g, " ");
+  // [^<>]* (not [^>]*) keeps the scan linear: a run of `<` characters can
+  // never make one match attempt re-scan the rest of the string.
+  const withoutTags = value.replaceAll(/<[^<>]*>/g, " ");
   const withoutJsxExpressions = withoutTags.replaceAll(
     /\{"((?:[^"\\]|\\.)*)"\}/g,
     (_match, inner: string) => inner
   );
+  // After the \s+ collapse below, every whitespace run is exactly one
+  // space, so the punctuation-tightening pass can use a literal single
+  // space instead of a backtracking-prone `\s+` prefix.
   return decodeHtmlEntities(withoutJsxExpressions)
     .replaceAll(/\s+/g, " ")
-    .replaceAll(/\s+([.,;:!?])/g, "$1")
+    .replaceAll(/ ([.,;:!?])/g, "$1")
     .trim();
 }
 
 function slugify(value: string, fallback = "item"): string {
-  const slug = value
+  const dashed = value
     .trim()
     .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, "-")
-    .replaceAll(/^-+|-+$/g, "")
-    .slice(0, 80);
+    .replaceAll(/[^a-z0-9]+/g, "-");
+  // Trim leading/trailing dashes with index arithmetic instead of the
+  // `/^-+|-+$/` regex, whose `-+$` alternative backtracks quadratically on
+  // long dash runs.
+  let start = 0;
+  let end = dashed.length;
+  while (start < end && dashed[start] === "-") {
+    start += 1;
+  }
+  while (end > start && dashed[end - 1] === "-") {
+    end -= 1;
+  }
+  const slug = dashed.slice(start, end).slice(0, 80);
   return slug || fallback;
 }
 
@@ -170,28 +185,36 @@ function extractTitle(source: string): string | undefined {
     return undefined;
   }
   const decoded = stripTags(raw);
-  return decoded.replace(/\s*-\s*6529\.io\s*$/i, "").trim() || undefined;
+  // stripTags already collapsed every whitespace run to a single space and
+  // trimmed the ends, so bounded ` ?` quantifiers fully replace the
+  // unbounded (and mutually ambiguous) `\s*` ones here.
+  return decoded.replace(/ ?- ?6529\.io$/i, "").trim() || undefined;
 }
 
 /** Extracts the raw Yoast <meta name="description" content="..."/> value (the real per-page copy). */
 function extractDescription(source: string): string | undefined {
+  // `\s*` already covers the newline the old `\s*\n?\s*` spelled out (that
+  // ambiguity is what made it super-linear), and `[^"]*` is exact for a JSX
+  // attribute value, which cannot contain an unescaped quote.
   const raw = extractFirst(
     source,
-    /name="description"\s*\n?\s*content="([\s\S]*?)"\s*\/?>/
+    /name="description"\s*content="([^"]*)"\s*\/?>/
   );
   if (!raw) {
     return undefined;
   }
-  const collapsed = decodeHtmlEntities(raw)
-    .replaceAll(/\s*\n\s*/g, " ")
-    .replaceAll(/\s+/g, " ")
-    .trim();
+  // A single `\s+` collapse subsumes the old newline-specific first pass
+  // (`\s*\n\s*` overlapped with it and was another super-linear pattern).
+  const collapsed = decodeHtmlEntities(raw).replaceAll(/\s+/g, " ").trim();
   return collapsed || undefined;
 }
 
 /** Extracts the canonical og:image URL, if present. */
 function extractSocialImage(source: string): string | undefined {
-  return extractFirst(source, /property="og:image"\s*\n?\s*content="([^"]+)"/);
+  // `\s*` covers the optional newline; the old `\s*\n?\s*` was ambiguous
+  // (three overlapping whitespace quantifiers) and backtracked super-
+  // linearly on long whitespace runs.
+  return extractFirst(source, /property="og:image"\s*content="([^"]+)"/);
 }
 
 /** Extracts the content of the WordPress `.post-content` container, which holds the actual page body. */
@@ -961,9 +984,13 @@ function runCli(argv: readonly string[], repoRoot: string): void {
 
   const outDir = resolveFromRepoRoot(repoRoot, args.outDir);
   fs.mkdirSync(outDir, { recursive: true });
-  const outFile = path.join(outDir, `${manifest.handle}.package.json`);
+  const outFileName = `${manifest.handle}.package.json`;
+  const outFile = path.join(outDir, outFileName);
   fs.writeFileSync(outFile, `${JSON.stringify(result.cmsPackage, null, 2)}\n`);
-  console.log(`[migrate-static-pages] wrote ${outFile}`);
+  // Log only summaries (file basename, counts, page ids, warning codes).
+  // Never log absolute local paths, page content, or raw source URLs — the
+  // full details go into the report file, not the console.
+  console.log(`[migrate-static-pages] wrote ${outFileName}`);
   console.log(
     `[migrate-static-pages] ${result.pageSummaries.length} page(s), ${result.warnings.length} warning(s)`
   );
@@ -984,11 +1011,15 @@ function runCli(argv: readonly string[], repoRoot: string): void {
         2
       )}\n`
     );
-    console.log(`[migrate-static-pages] wrote report ${reportPath}`);
+    console.log(
+      `[migrate-static-pages] wrote report ${path.basename(reportPath)}`
+    );
   }
 
   for (const warning of result.warnings) {
-    console.warn(`[migrate-static-pages] WARNING ${warning.pageId}: ${warning.message}`);
+    console.warn(
+      `[migrate-static-pages] WARNING ${warning.pageId}: ${warning.code} (details in report)`
+    );
   }
 }
 
