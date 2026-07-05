@@ -206,3 +206,27 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   `/meme-lab`, `/network`, `/meme-calendar` repeatedly blow the 20s full-page
   screenshot budget — slow collection-route data fetches predate this
   workstream and deserve an owner.
+
+## 2026-07-05 (orchestrator — Wave 1 closed, Wave 2 mid-flight)
+
+- Thread A COMPLETE: main is machine-gated (required: DCO, snyk, Plan risk and
+  security checks, Installed app checks, Debt ratchet). Coverage floor + push
+  secret scan live. E2E harness verified already-fixed upstream (1050 tests
+  enumerable). Authoritative ratchet baselines: any_casts 358 / todo 6 /
+  oversized 139 / redux_imports 21 / bootstrap_imports 0 / pages_router_files 0
+  — several 07-04 audit figures were stale-branch noise (TODO 2,841 and
+  pages ~134 especially).
+- Thread B COMPLETE incl. follow-up: media-hardening WIP rescued to
+  origin/codex/harden-media-url-sinks-for-desktop-sync (secrets-scanned clean);
+  debris worktrees removed; janitor live-fire verified (0 deletions, guards
+  held) and ARMED for nightly runs (BRANCH_JANITOR_ENABLED=true); repo
+  allow_auto_merge enabled by orchestrator.
+- Thread C COMPLETE: Bootstrap exit verified-zero on main (release lane had
+  migrated June 28–Jul 3), residue purged, 3 reintroduction guards, 23-route
+  visual sweep clean.
+- Thread D/E rescoped on ratchet truth (D: no pages/ dir — split burn-down is
+  the core; E: TODO phase collapses to 6 items, any-burn-down is the long
+  pole). Delegation ownership transferred C→D.
+- Candidate new workstreams surfaced to user: slow collection routes
+  (/rememes 60s+, /the-memes /meme-lab /network /meme-calendar 20s+) and 33
+  open dependabot vulns (7 high). Awaiting user scope decision.
