@@ -179,24 +179,49 @@ Publish public release notes after production is deployed and production validat
    - small fix, copy change, narrow polish, or follow-up to an existing release: bump the patch number, e.g. `4.38.0` to `4.38.1`
    - broad site-wide, platform, or intentionally breaking release: bump the major number and reset minor/patch, e.g. `4.38.0` to `5.0.0`
    - when unsure whether a change deserves a minor or patch bump, prefer the smaller patch bump unless the release adds a clear new user-facing capability
-4. Draft the release note in plain user-facing language. Recommended shape:
+4. Draft the release note in plain user-facing language, at a DETAILED level
+   (owner direction, 2026-07-05: vague category summaries like "localization
+   polish and under-the-hood cleanup" are not useful). Required shape:
 
 ```text
-4.39.0: Short summary of the release
+4.39.0: Title naming the release's actual themes, not generic words
 
-- What users can now do or see
-- Important changed behavior
-- Fixes that matter to users or operators
+<Theme heading> (visible now):
+- Name the specific surfaces changed (exact pages, routes, components in
+  product terms: "profile header identity block, stats row, About editor,
+  followers list" - never just "profile pages improved")
+- State the concrete behavior change and any review-driven fixes included
+
+<Theme heading> (under the hood):
+- What was removed/added/replaced and why it is safe, with concrete numbers
+  where they exist (pages rebuilt, casts removed, dependencies dropped,
+  tests added)
+
+Known issues shipped as-is: list each transparently with its status
+("fix in progress", "scheduled") - omit the section only when empty.
+
+Validation: one line on what was run and the result (suite green, staging
+battery result, production checks) in user-comprehensible terms.
 ```
 
 5. Write the note from production reality, not PR internals:
-   - mention visible behavior, affected pages, and operationally relevant changes
-   - avoid raw PR numbers, commit SHAs, implementation trivia, private links, secrets, local paths, hidden prompts, unreleased follow-ups, or internal-only risk notes
-   - keep it concise; combine tiny changes under one clear bullet
+   - name specific visible behavior, affected pages, and operationally relevant changes; give concrete counts where they exist
+   - avoid raw PR numbers, commit SHAs, implementation trivia, private links, secrets, local paths, hidden prompts, or internal-only risk notes (that layer belongs in the Follow The Repo overview)
+   - do not disclose unremediated security specifics (e.g. an unrotated credential); "secret scanning added" is fine, the incident behind it is not, until remediation is complete
+   - group many small changes under clear theme headings rather than dropping them; detail beats brevity, but every line must carry information
    - include screenshots or links only when they help users understand the change and are safe to publish
    - if the release contains backend and frontend work, describe the product behavior rather than the service boundary
+   - a reference example of the expected depth: the 4.68.0 note (drop `6988d363-53f1-4559-8c0a-c5075bcc0742` in the releases wave)
 6. Re-check the latest wave drop before posting so the number did not advance while the deploy was running. If another release note appeared, renumber and adjust the draft.
 7. Post the release note only after production validation is green. Capture the wave drop URL or serial number for closeout evidence.
+8. Posting mechanics for multiline notes via the `punk6529bot` helper: pass
+   content with `--file <path>` (an LF text file), never inline `--text` from
+   PowerShell (everything after the first newline is silently lost). Place
+   `--send` before the content flag. After sending, VERIFY the stored content
+   with `punk6529bot drops get <drop-id> --json` (check parts count and
+   content length) - the "Sent drop" acknowledgment does not prove the body
+   posted. Drops are editable for only 5 minutes; after that, recover a
+   botched post with `drops delete <id> --send --force` and a fresh post.
 
 ## Follow The Repo Deployment Overview
 
@@ -209,7 +234,7 @@ After production validation passes, post a detailed deployment overview to the `
 punk6529bot waves search --name "follow the repo"
 ```
 
-3. Draft the overview from deployed production reality. Unlike the public release note, this repo-facing overview should include public PR links and SHAs. Include:
+3. Draft the overview from deployed production reality, at LEAST as detailed as the public release note. Unlike the public release note, this repo-facing overview should include public PR links and SHAs. Include:
    - what user-facing and operator-facing changes were deployed
    - frontend and backend PRs, merge SHAs, production deployed SHA/version label, and deploy run links
    - staging and production validation performed, including E2E or smoke results
