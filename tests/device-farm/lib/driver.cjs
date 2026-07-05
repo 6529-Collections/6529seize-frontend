@@ -136,20 +136,30 @@ async function waitForDocumentReady(driver, timeout) {
  */
 async function openPage(driver, pageUrl, timeout) {
   const expectedPath = new URL(pageUrl).pathname.replace(/\/$/, "") || "/";
+  const onExpectedPath = async () => {
+    const pathname = await driver.execute(() =>
+      window.location.pathname.replace(/\/$/, "")
+    );
+    return (pathname || "/") === expectedPath;
+  };
+  // Safari on real devices occasionally swallows a navigation command
+  // outright (observed on Device Farm iPhones), so re-issue url() once if the
+  // pathname has not changed within half the budget.
   await driver.url(pageUrl);
-  await driver.waitUntil(
-    async () => {
-      const pathname = await driver.execute(() =>
-        window.location.pathname.replace(/\/$/, "")
-      );
-      return (pathname || "/") === expectedPath;
-    },
-    {
-      timeout,
+  try {
+    await driver.waitUntil(onExpectedPath, {
+      timeout: Math.floor(timeout / 2),
       interval: 2000,
-      timeoutMsg: `browser never navigated to ${expectedPath}`,
-    }
-  );
+    });
+  } catch {
+    console.warn(`navigation to ${expectedPath} did not start; retrying url()`);
+    await driver.url(pageUrl);
+    await driver.waitUntil(onExpectedPath, {
+      timeout: Math.floor(timeout / 2),
+      interval: 2000,
+      timeoutMsg: `browser never navigated to ${expectedPath} (after retry)`,
+    });
+  }
   await waitForDocumentReady(driver, timeout);
   await driver.waitUntil(
     async () =>
