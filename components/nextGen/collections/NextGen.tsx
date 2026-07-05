@@ -106,7 +106,7 @@ export default function NextGen(props: Readonly<Props>) {
         </div>
       </div>
       <div
-        className="tw-w-full tw-max-w-none tw-pb-12 tw-pt-12"
+        className="tw-w-full tw-max-w-none tw-px-3 tw-pb-12 tw-pt-12"
         style={{ backgroundColor: "black" }}
       >
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
