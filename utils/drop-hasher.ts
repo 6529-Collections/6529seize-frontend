@@ -32,7 +32,14 @@ export class DropHasher {
     }
 
     const record = obj as Record<string, unknown>;
-    const keys = Object.keys(record).sort();
+    // Deliberately locale-independent: this feeds drop signature hashing,
+    // so key order must be stable across environments (UTF-16 code units,
+    // same ordering the default Array#sort applies to strings).
+    const keys = Object.keys(record).sort((a, b) => {
+      if (a < b) return -1;
+      if (a > b) return 1;
+      return 0;
+    });
     const keyValuePairs = keys
       .filter((key) => record[key] !== undefined)
       .map((key) => {
