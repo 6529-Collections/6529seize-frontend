@@ -4,13 +4,13 @@ import os from "node:os";
 import path from "node:path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { countImportStatements, countLines, countMatches } = require(
-  path.join(process.cwd(), "scripts", "debt-ratchet.cjs")
-) as {
-  countImportStatements: (content: string, packages: string[]) => number;
-  countLines: (content: string) => number;
-  countMatches: (content: string, pattern: RegExp) => number;
-};
+const { ANY_CASTS_PATTERN, countImportStatements, countLines, countMatches } =
+  require(path.join(process.cwd(), "scripts", "debt-ratchet.cjs")) as {
+    ANY_CASTS_PATTERN: RegExp;
+    countImportStatements: (content: string, packages: string[]) => number;
+    countLines: (content: string) => number;
+    countMatches: (content: string, pattern: RegExp) => number;
+  };
 
 const SCRIPT_PATH = path.join(process.cwd(), "scripts", "debt-ratchet.cjs");
 
@@ -26,14 +26,38 @@ describe("debt-ratchet counting helpers", () => {
       "const a: any = 1;",
       "const b = value as any;",
       "const c: any[] = [];",
-      "const inner: Record<string, any> = {}; // generic arg is not counted",
       "const many = anything; // not a match",
       "function f(x: number): number { return x; }",
     ].join("\n");
-    // ": any" direct annotations and "as any" casts count; an "any" buried in
-    // a generic argument list (Record<string, any>) does not carry a ": any"
-    // or "as any" token, so it is intentionally outside this metric.
-    expect(countMatches(content, /:\s*any\b|\bas\s+any\b/g)).toBe(3);
+    expect(countMatches(content, ANY_CASTS_PATTERN)).toBe(3);
+  });
+
+  it("counts any used as a generic type argument", () => {
+    const content = [
+      "const a = useState<any>();",
+      "const b = useState<any[]>([]);",
+      "const c: Record<string, any> = {};", // ": Record" is not ": any"
+      "const d = new Map<any, string>();",
+      "const e = new Map<string, any>();",
+      "const f = fetchJson<any>(url);",
+      "type G = Promise<any> | undefined;",
+      "type H = Wrapped< any >;", // whitespace inside the generic
+      "const both = new Map<any, any>();", // two arguments, two matches
+    ].join("\n");
+    expect(countMatches(content, ANY_CASTS_PATTERN)).toBe(10);
+  });
+
+  it("does not count prose or identifiers that merely contain any", () => {
+    const content = [
+      "// smaller than any of the configured values",
+      "// applies to, any websites hosted at sub-domains",
+      "// placeholder form: <any-string>",
+      "const cmp = a < anyLimit && b > anyFloor;",
+      "const word = many < anyone.count;",
+      'const text = "pick any, or all, of the options";',
+      "type Tuple = [unknown, string];",
+    ].join("\n");
+    expect(countMatches(content, ANY_CASTS_PATTERN)).toBe(0);
   });
 
   it("counts TODO markers without matching longer words", () => {

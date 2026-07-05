@@ -52,12 +52,12 @@ export function CollectionDelegationSections(
   const { subDelegationOriginalDelegator } = props;
   const { outgoingDelegations, incomingDelegations } = reads;
 
-  const [delegationKeys, setDelegationKeys] = useState<any[]>([]);
+  const [delegationKeys, setDelegationKeys] = useState<string[]>([]);
   const [delegationKeysChanged, setDelegationKeysChanged] = useState(false);
-  const [subDelegationKeys, setSubDelegationKeys] = useState<any[]>([]);
+  const [subDelegationKeys, setSubDelegationKeys] = useState<string[]>([]);
   const [subDelegationKeysChanged, setSubDelegationKeysChanged] =
     useState(false);
-  const [consolidationKeys, setConsolidationKeys] = useState<any[]>([]);
+  const [consolidationKeys, setConsolidationKeys] = useState<string[]>([]);
   const [consolidationKeysChanged, setConsolidationKeysChanged] =
     useState(false);
 
