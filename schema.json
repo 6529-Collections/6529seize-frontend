@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schema.json",
+  "title": "6529.io Agent-Native Files Schema",
+  "description": "JSON Schema definitions for agent-native JSON files in this PR. Each file validates against its $ref below. Agents can use this schema to verify file structure before consuming the data.",
+  "type": "object",
+  "definitions": {
+    "common_fields": {
+      "type": "object",
+      "required": ["schema_version", "generated_at", "freshness", "description"],
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1, "description": "Schema version. Increment when breaking changes are made." },
+        "generated_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "description": "Date the file was generated (YYYY-MM-DD)." },
+        "freshness": { "type": "string", "enum": ["stable", "versioned", "dynamic"], "description": "stable = content unlikely to change; versioned = updates tracked by schema_version; dynamic = may change between snapshots." },
+        "description": { "type": "string", "description": "Human-readable summary of what the file contains." }
+      }
+    },
+
+    "api_for_agents": {
+      "allOf": [
+        { "$ref": "#/definitions/common_fields" },
+        {
+          "type": "object",
+          "required": ["base_url", "rate_limits", "endpoints", "common_queries"],
+          "properties": {
+            "base_url": { "type": "string", "format": "uri" },
+            "headers_required": { "type": "object" },
+            "rate_limits": {
+              "type": "object",
+              "required": ["burst", "sustained", "unit"],
+              "properties": {
+                "burst": { "type": "integer" },
+                "sustained": { "type": "integer" },
+                "unit": { "type": "string" },
+                "recommended_delay": { "type": "string" },
+                "backoff_on_429": { "type": "string" },
+                "note": { "type": "string" }
+              }
+            },
+            "swagger_docs": { "type": "string", "format": "uri" },
+            "openapi_spec": { "type": "string" },
+            "oracle_base_url": { "type": "string" },
+            "oracle_note": { "type": "string" },
+            "endpoints": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["category", "path", "method", "what", "returns", "example", "agent_use_case", "pitfalls"],
+                "properties": {
+                  "category": { "type": "string" },
+                  "path": { "type": "string" },
+                  "method": { "type": "string", "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"] },
+                  "what": { "type": "string" },
+                  "returns": { "type": "string" },
+                  "example": { "type": "string" },
+                  "agent_use_case": { "type": "string" },
+                  "pitfalls": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            },
+            "common_queries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["question"],
+                "properties": {
+                  "question": { "type": "string" },
+                  "primary": { "type": "string", "description": "Primary API path to answer this question" },
+                  "alternative": { "type": "string" },
+                  "full_breakdown": { "type": "string" },
+                  "steps": { "type": "array", "items": { "type": "string" }, "description": "Multi-step answer path" },
+                  "note": { "type": "string" },
+                  "see_also": { "type": ["array", "null"], "items": { "type": "string" } }
+                }
+              }
+            },
+            "contracts": { "type": "object" },
+            "source_code": { "type": "object" }
+          }
+        }
+      ]
+    },
+
+    "on_chain_basics": {
+      "allOf": [
+        { "$ref": "#/definitions/common_fields" },
+        {
+          "type": "object",
+          "required": ["blockchain_basics", "querying_on_chain_data"],
+          "properties": {
+            "blockchain_basics": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["concept", "beginner_definition", "technical_definition", "why_for_6529"],
+                "properties": {
+                  "concept": { "type": "string" },
+                  "beginner_definition": { "type": "string" },
+                  "technical_definition": { "type": "string" },
+                  "why_for_6529": { "type": "string" },
+                  "cross_ref": { "type": ["string", "null"] }
+                }
+              }
+            },
+            "nfts_as_coordination_substrate": { "type": "object" },
+            "querying_on_chain_data": { "type": "object" },
+            "eth_price_data": { "type": "object" },
+            "common_on_chain_queries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["question"],
+                "properties": {
+                  "question": { "type": "string" },
+                  "on_chain": { "type": "string", "description": "How to query this on-chain" },
+                  "answer": { "type": "string", "description": "Direct answer for factual queries" },
+                  "off_chain": { "type": "string", "description": "When on-chain is not the right approach" },
+                  "contract": { "type": "string" },
+                  "cross_ref": { "type": ["object", "null"] }
+                }
+              }
+            },
+            "when_on_chain_is_not_enough": { "type": "object" },
+            "tools_for_on_chain_queries": { "type": "object" },
+            "see_also": { "type": "array", "items": { "type": "string" } },
+            "cross_references": { "type": "object" }
+          }
+        }
+      ]
+    },
+
+    "license_overview": {
+      "allOf": [
+        { "$ref": "#/definitions/common_fields" },
+        {
+          "type": "object",
+          "required": ["spectrum", "strategy"],
+          "properties": {
+            "spectrum": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["level", "license", "description", "who_uses_this"],
+                "properties": {
+                  "level": { "type": "integer", "minimum": 0, "maximum": 6 },
+                  "license": { "type": "string" },
+                  "description": { "type": "string" },
+                  "who_uses_this": { "type": "string" }
+                }
+              }
+            },
+            "strategy": { "type": "object" },
+            "cultural_context": { "type": "object" },
+            "design_principle": { "type": "object" }
+          }
+        }
+      ]
+    }
+  },
+
+  "file_validations": {
+    "description": "Map of filename to schema definition. Use the $ref to validate each file.",
+    "api-for-agents.json": { "$ref": "#/definitions/api_for_agents" },
+    "on-chain-basics.json": { "$ref": "#/definitions/on_chain_basics" },
+    "license-overview.json": { "$ref": "#/definitions/license_overview" }
+  }
+}

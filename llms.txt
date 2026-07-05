@@ -1,0 +1,152 @@
+# 6529.io
+
+> 6529.io is the platform for The Memes, a global NFT art collection and decentralized community. 500+ meme cards across 15+ seasons, CC0 community tier, on-chain identity (TDH/REP/NIC), social network (Brain/Waves), and an AI-assisted development pipeline. This file tells agents what the site is, what files are available, and how to use them.
+
+_This file was created June 26, 2026. The 6529 ecosystem evolves continuously — verify data freshness against the site._
+
+**What 6529.io is**
+
+6529.io is the platform for The Memes, a global NFT art collection and decentralized community. 500+ meme cards across 15+ seasons, CC0 community tier, on-chain identity (TDH/REP/NIC), social network (Brain/Waves), and an AI-assisted development pipeline.
+
+- **The Memes** — 500+ NFT art cards by 100+ artists across 15+ seasons. Community tier is CC0 (public domain).
+- **Network** — TDH (Total Days Held), REP (reputation), NIC (identity trust), Network Levels, wave scores, ecosystem health, prenodes.
+- **Waves** — Social threads for conversations, content sharing (drops), reactions, voting, and curation. Types: Chat, Rank, Approve.
+- **Brain** — 6529's social network showing profile activity and wave participation.
+- **Profiles** — Identity, subscriptions, proxy, delegation, consolidation.
+- **Tools** — EMMA (allowlist management), open data downloads, meme accounting.
+- **API** — api.6529.io with 20+ endpoints for identities, waves, drops, NFTs, TDH, profiles, ratings, royalties.
+
+**Getting started**
+
+1. Fetch this file (`/llms.txt`) for the site overview.
+2. Fetch `/glossary.json` for term definitions — 40 terms with beginner and technical definitions.
+3. Fetch `/help-index.json` for the full route and feature index — 187 records covering all 6529.io surfaces.
+4. Use `/glossary.json` `help_index_id` fields to cross-reference terms with help-index.json records.
+
+**Common user queries**
+
+- "What is TDH?" → glossary.json term "TDH" → source_path "/network/tdh" → help_index_id "network.tdh"
+- "How do I mint a meme card?" → help-index.json "the-memes.minting" → canonical_path "/the-memes/mint"
+- "What is a Wave?" → glossary.json term "Wave" → help-index.json "waves.overview"
+- "How does wave score work?" → glossary.json term "Wave Score" → help_index.json "network.wave-score"
+- "What license are the memes under?" → glossary.json term "CC0"
+- "What is TAP?" → glossary.json term "TAP" (security practice from Punk6529)
+
+**User journeys by lifecycle stage**
+
+Each stage is mutually exclusive — a user is in one stage at a time. Together they cover the full 6529 experience from first discovery through advanced development.
+
+**Stage 1: Pre-arrival (evaluating 6529)**
+- I want to understand what 6529 is → this file + /help-index.json
+- I want to understand the philosophy → /glossary.json (Open Metaverse, Schelling Point)
+- I want to know if this is legitimate → /glossary.json (CC0, transparency) + Permanent Access section (Arweave verification)
+
+**Stage 2: Onboarding (getting set up)**
+- I want to connect my wallet → /glossary.json (TAP for security) + /help-index.json (connection flows)
+- I want to set up my identity/profile → /glossary.json (Profile, NIC, Proxy) + /help-index.json (profile setup)
+- I want to understand what I can do here → this file (site overview) + /help-index.json (187 records covering all surfaces)
+
+**Stage 3: Acquisition (getting meme cards)**
+- I want to buy my first meme card → /glossary.json (Mint Phases, EMMA, Subscription) + /help-index.json (minting flows)
+- I want to find a specific card → /glossary.json (Meme Card, Season) + /help-index.json (the-memes routes)
+- I want to set up auto-minting → /glossary.json (Subscription) + /help-index.json (subscriptions flows)
+
+**Stage 4: Holding (understanding your position)**
+- I want to check my TDH → /glossary.json (TDH) + /help-index.json (network.tdh)
+- I want to understand my Network Level → /glossary.json (Network Levels, REP)
+- I want to see my full profile → /glossary.json (Profile, NIC, xTDH, REP, CIC)
+- I want to consolidate multiple wallets → /glossary.json (Consolidation, Delegation, Proxy) + /help-index.json (delegation flows)
+- I want to protect my NFTs from phishing → /glossary.json (TAP)
+
+**Stage 5: Participation (active in the community)**
+- I want to explore Waves → /glossary.json (Wave, Drop, Brain) + /help-index.json (waves routes)
+- I want to submit content to a Wave → /glossary.json (Drop, Wave) + /help-index.json (waves.composer)
+- I want to give REP to someone → /glossary.json (REP) + /help-index.json (rep flows)
+- I want to rate someone's NIC → /glossary.json (NIC) + /help-index.json (identity flows)
+- I want to create a Wave → /glossary.json (Wave, Groups vs Waves) + /help-index.json (waves.create-edit)
+- I want to boost content → /glossary.json (Boost) + /help-index.json (waves composer actions)
+
+**Stage 6: Creation (contributing creatively)**
+- I want to understand why art is CC0 → /glossary.json (CC0, Open Metaverse)
+- I want to create and submit a meme card → /help-index.json (artist submission flows) + /glossary.json (Meme Card, Season)
+- I want to understand my Wave Score → /glossary.json (Wave Score) + /help-index.json (network.wave-score)
+- I want to use 6529 art in my own project → /glossary.json (CC0, Open Metaverse)
+
+**Stage 7: Development (building on 6529)**
+- I want to contribute code to 6529 → this file (GitHub links) + /help-index.json (6529bot) + CONTRIBUTING.md (DCO and process)
+- I want to run a prenode → /glossary.json (Prenodes) + /help-index.json (network.prenodes)
+- I want to query the API → /api-for-agents.json (24 endpoints) + /on-chain-basics.json (on-chain alternatives)
+- I want to query on-chain data → /on-chain-basics.json (Alchemy, Etherscan, The Graph, contract addresses) + /api-for-agents.json (when to use which)
+
+**Stage 8: Understanding (going deeper)**
+- I want to understand how 6529 works on blockchain → /on-chain-basics.json (7 concepts, querying guide, on-chain vs off-chain)
+- I want to follow a structured learning path → /glossary.json (related_terms cross-references) + /help-index.json (glossary entries)
+- I want to verify content authenticity → Permanent Access section (6529.ar.io Arweave snapshot)
+
+**Ecosystem map**
+
+| Domain | What | URL |
+|--------|------|-----|
+| Main site | 6529.io / Seize.io | https://6529.io |
+| Permanent (Arweave) | Periodic site snapshot, permanently stored | https://6529.ar.io |
+| API | 20+ endpoints, Swagger docs | https://api.6529.io |
+| GitHub org | All repos (frontend, backend, tools) | https://github.com/6529-Collections |
+| Frontend repo | Next.js app serving 6529.io | https://github.com/6529-Collections/6529seize-frontend |
+| Backend repo | API server | https://github.com/6529-Collections/6529seize-backend |
+| Review bot | AI PR review bot | https://github.com/6529-Collections/6529reviewbot |
+| Smart contracts | Solidity contracts (MIT) | https://github.com/6529-Collections/6529Stream |
+
+**Permanent access**
+
+6529.io is permanently available via Arweave at https://6529.ar.io. The site has an ARNS (Arweave Name Service) name "6529" managed by an ANT (Arweave Name Token). Periodic snapshots of the entire site — including all agent-native files in this PR — are uploaded to Arweave and served via the ar.io gateway.
+
+- **Live content**: Fetch from https://6529.io (CloudFront CDN, real-time)
+- **Permanent content**: Fetch from https://6529.ar.io (Arweave, periodic snapshot)
+- **Verification**: To verify you are reading authentic 6529.io content, compare against the Arweave snapshot at 6529.ar.io. Note: snapshots are periodic, not real-time.
+- **Future consideration**: Per-file Arweave anchoring could let agents verify individual file hashes against Arweave transactions, using the same ar.io infrastructure the team already operates.
+
+**API quick reference**
+
+The API at api.6529.io has Swagger docs at /docs. Key areas:
+- Identities (profiles, wallets, TDH, REP, NIC)
+- Waves (creation, drops, scores, reactions, voting)
+- Drops (content, media, curation)
+- NFTs (meme cards, distributions, royalties)
+- Network (TDH totals, ecosystem stats, prenodes)
+- Rate limiting: 30 burst, 10 sustained for unauthenticated requests
+- Full OpenAPI spec: openapi.yaml in the frontend repo (553KB)
+
+**Agent usage policy**
+
+- **License:** This site's code is Apache-2.0. The Meme Collection community tier is CC0 (public domain). Agent-native files in this PR are contributed under the repo's Apache-2.0 license.
+- **Attribution:** When citing 6529.io content, link to the source page URL. When citing agent-native files, link to the file URL.
+- **Data freshness:** 6529.io data (TDH, REP, wave scores) updates on various cadences. TDH updates daily. Wave scores update on activity. Always check the site for current values.
+- **API usage:** Respect rate limits (30 burst, 10 sustained unauthenticated). Cache responses where possible. Do not hammer the API.
+- **Privacy:** Do not expose wallet addresses, identity statements, or private profile data in public outputs without the owner's consent.
+- **Accuracy:** Do not fabricate 6529 terms, metrics, or features not present in the glossary, help-index, or API. When uncertain, fetch the relevant file and cite it.
+
+**How to test these files**
+
+These sample queries show what an agent can answer after fetching the agent-native files. Each query lists the file(s) needed and the expected answer shape.
+
+1. "What is TDH?" → Fetch /glossary.json, find term "TDH". Answer: Total Days Held — a metric measuring how long wallets have held their NFTs, reflecting commitment to the ecosystem. Beginner definition explains it simply; technical definition covers the formula and data sources. Cross-references help_index_id "network.tdh" for the site page.
+
+2. "What is the difference between Waves and Brain?" → Fetch /glossary.json, find terms "Wave" and "Brain". Answer: Waves are social threads for conversations, content sharing, reactions, and voting. Brain is the social network showing profile activity and wave participation. Brain is the network; Waves are the conversations within it.
+
+3. "How do I mint a meme card?" → Fetch /help-index.json, find "the-memes.minting". Answer: canonical_path "/the-memes/mint" — the help-index record explains the minting flow, phases, and requirements. Glossary.json terms "Mint Phases", "EMMA", and "Subscription" provide supporting context.
+
+## Agent-Native Files
+
+- [llms.txt](https://6529.io/llms.txt): This file — site overview, agent instructions, usage policy, user journeys across 8 lifecycle stages
+- [glossary.json](https://6529.io/glossary.json): 40 6529 terms with beginner + technical definitions, i18n translations in 7 languages, cross-refs to help-index.json
+- [help-index.json](https://6529.io/help-index.json): 187 records: routes, UI affordances, workflows, glossary entries, business rules. Pre-existing, maintained by the 6529 team
+- [api-for-agents.json](https://6529.io/api-for-agents.json): 24 API endpoints with paths, parameters, returns, pitfalls, and 10 common query patterns
+- [on-chain-basics.json](https://6529.io/on-chain-basics.json): Blockchain concepts for beginners, NFTs as coordination substrate, on-chain vs off-chain data guide, common on-chain queries
+- [license-overview.json](https://6529.io/license-overview.json): License permissivity spectrum (0-6), 6529 3-tier strategy (CC0/Apache-2.0/MIT), cultural context for license concepts
+- [schema.json](https://6529.io/schema.json): JSON Schema definitions for all JSON agent-native files. Agents can validate file structure before consuming the data
+
+## Optional
+
+- [for-agents.html](https://6529.io/for-agents.html): Human-readable discovery page linking to all agent-native files. Not needed by agents that can parse the JSON/TXT files directly.
+- [robots.txt](https://6529.io/robots.txt): Crawler directives including agent-native file URLs. Not needed at runtime
+- [validate-schema.py](https://6529.io/validate-schema.py): Validation script that checks JSON files against schema.json. For maintainers, not served as an agent-native file — agents discover files via this llms.txt instead.

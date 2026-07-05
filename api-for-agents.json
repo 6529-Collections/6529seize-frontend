@@ -1,0 +1,407 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-26",
+  "description": "Curated API endpoint map for 6529.io. Distilled from the 6529 MCP server skill and backend source code. Not a replacement for the full OpenAPI spec (553KB in the repo) — this is a curated entry point for agents to discover what queries are possible and how to make them.",
+  "base_url": "https://api.6529.io",
+  "headers_required": {
+    "Origin": "https://6529.io",
+    "Referer": "https://6529.io/"
+  },
+  "rate_limits": {
+    "burst": 30,
+    "sustained": 10,
+    "unit": "requests per minute (unauthenticated)",
+    "recommended_delay": "0.5s between requests for bulk queries",
+    "backoff_on_429": "10 seconds",
+    "note": "Authenticated requests may have higher limits. Check api.6529.io/docs for current limits."
+  },
+  "swagger_docs": "https://api.6529.io/docs",
+  "openapi_spec": "openapi.yaml in github.com/6529-Collections/6529seize-frontend (553KB, not served publicly)",
+  "oracle_base_url": "https://your-prenode-oracle.example.com",
+  "oracle_note": "The prenode oracle is a community-run data source for TDH and card data. It is separate from api.6529.io and has its own rate limits (~60 rapid requests before 429).",
+  "endpoints": [
+    {
+      "category": "identities",
+      "path": "/api/identities/by-wallet/{address}",
+      "method": "GET",
+      "what": "Map any Ethereum wallet address to full 6529.io identity profile",
+      "returns": "id, handle, normalised_handle, cic, rep, tdh, tdh_rate, xtdh, xtdh_rate, level, display (ENS), primary_wallet, pfp, banner1, banner2, wallets[], classification, sub_classification, consolidation_key, is_wave_creator, profile_wave_id, artist_of_prevote_cards[], winner_main_stage_drop_ids",
+      "example": "GET /api/identities/by-wallet/0x0000000000000000000000000000000000000001",
+      "agent_use_case": "Look up someone's 6529 profile from their wallet address",
+      "pitfalls": [
+        "Use 0.5s delay between bulk requests",
+        "Handle 429 with 10s backoff",
+        "Some fields like artist_of_prevote_cards can be stale — cross-reference with card-snapshot data"
+      ]
+    },
+    {
+      "category": "identities",
+      "path": "/api/identities/{handle}",
+      "method": "GET",
+      "what": "Get identity profile by handle (e.g. punk6529)",
+      "returns": "Same fields as by-wallet endpoint",
+      "example": "GET /api/identities/punk6529",
+      "agent_use_case": "Look up someone's 6529 profile from their handle",
+      "pitfalls": [
+        "Some old identity endpoints (e.g. /api/6529Profile/) return 404 — use /api/identities/ pattern"
+      ]
+    },
+    {
+      "category": "profiles",
+      "path": "/api/profiles/{identity}",
+      "method": "GET",
+      "what": "Get profile data by identity key",
+      "returns": "Profile details including display info, wallet data, and profile-level metrics",
+      "example": "GET /api/profiles/punk6529",
+      "agent_use_case": "Get detailed profile information beyond what identities endpoint returns",
+      "pitfalls": []
+    },
+    {
+      "category": "profiles",
+      "path": "/api/profiles/{handle}/wave",
+      "method": "GET",
+      "what": "Get a profile's wave ID and curation ID",
+      "returns": "{profile_wave_id, profile_curation_id}",
+      "example": "GET /api/profiles/example-handle/wave",
+      "agent_use_case": "Find someone's wave to audit their wave score",
+      "pitfalls": [
+        "Returns null if the user hasn't created a wave"
+      ]
+    },
+    {
+      "category": "profiles",
+      "path": "/api/profiles/{handle}/availability",
+      "method": "GET",
+      "what": "Check if a handle is available",
+      "returns": "Availability status",
+      "example": "GET /api/profiles/newuser/availability",
+      "agent_use_case": "Check handle availability before suggesting a profile name",
+      "pitfalls": []
+    },
+    {
+      "category": "rep",
+      "path": "/api/profile-rep/overview",
+      "method": "GET",
+      "what": "REP overview across the network",
+      "returns": "REP category overview data",
+      "example": "GET /api/profile-rep/overview",
+      "agent_use_case": "Understand REP distribution across categories",
+      "pitfalls": []
+    },
+    {
+      "category": "rep",
+      "path": "/api/profile-rep/categories",
+      "method": "GET",
+      "what": "List all REP categories",
+      "returns": "Array of category objects with names and metadata",
+      "example": "GET /api/profile-rep/categories",
+      "agent_use_case": "Discover what REP categories exist in the 6529 network",
+      "pitfalls": []
+    },
+    {
+      "category": "rep",
+      "path": "/api/profile-rep/ratings/received",
+      "method": "GET",
+      "what": "Get REP ratings received by a profile",
+      "returns": "Array of ratings with rater, category, amount, timestamp",
+      "example": "GET /api/profile-rep/ratings/received?identity=punk6529",
+      "agent_use_case": "See who has given REP to a profile and in which categories",
+      "pitfalls": [
+        "May require authentication or identity parameter"
+      ]
+    },
+    {
+      "category": "rep",
+      "path": "/api/profile-rep/ratings/by-rater",
+      "method": "GET",
+      "what": "Get REP ratings given by a profile",
+      "returns": "Array of ratings with recipient, category, amount, timestamp",
+      "example": "GET /api/profile-rep/ratings/by-rater?identity=punk6529",
+      "agent_use_case": "See who a profile has given REP to",
+      "pitfalls": [
+        "May require authentication or identity parameter"
+      ]
+    },
+    {
+      "category": "tdh",
+      "path": "/api/tdh/consolidated_metrics",
+      "method": "GET",
+      "what": "Paginated list of ALL ecosystem wallets with identity and TDH data",
+      "returns": "count, data[] with handle, level, rep_score, cic_score, tdh, boosted_tdh, unboosted_tdh, balance, unique_memes, memes_cards_sets, consolidation_key, pfp_url, consolidation_display, day_change",
+      "example": "GET /api/tdh/consolidated_metrics?page=1&pageSize=50",
+      "agent_use_case": "Get the full TDH leaderboard or benchmark multiple wallets",
+      "pitfalls": [
+        "~17,934 wallets total",
+        "50-100 per page",
+        "Use 0.5s delay between page fetches"
+      ]
+    },
+    {
+      "category": "tdh",
+      "path": "/api/tdh/nft/{contract}/{token_id}",
+      "method": "GET",
+      "what": "Get per-NFT holder data with full identity",
+      "returns": "data[] with token_id, contract, balance, consolidation_key, tdh, boost, boosted_tdh, tdh_rank, handle, pfp_url, rep_score, cic_score, primary_wallet, xtdh, consolidation_display, total_balance, total_tdh, level",
+      "example": "GET /api/tdh/nft/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/401",
+      "agent_use_case": "Find who holds a specific meme card or gradient, with their full identity",
+      "pitfalls": [
+        "Meme contract: 0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+        "Gradient contract: 0x0c58ef43ff3032005e472cb5709f8908acb00205"
+      ]
+    },
+    {
+      "category": "collection",
+      "path": "/api/collected-stats/{handle_or_wallet}",
+      "method": "GET",
+      "what": "Per-season collection depth for a profile",
+      "returns": "boost, memes_balance, unique_memes, gradients_balance, nextgen_balance, seasons[] with per-season sets_held, partial_set_unique_cards_held, total_cards_held, total_cards_in_season",
+      "example": "GET /api/collected-stats/punk6529",
+      "agent_use_case": "See how many season sets a collector has completed and their collection depth",
+      "pitfalls": []
+    },
+    {
+      "category": "nfts",
+      "path": "/api/nfts",
+      "method": "GET",
+      "what": "Per-card market data (price, volume, hodl rate, supply)",
+      "returns": "Array of card objects: mint_price, supply, floor_price, market_cap, total_volume, total_volume_last_24_hours, total_volume_last_7_days, total_volume_last_1_month, highest_offer, hodl_rate, mint_date",
+      "example": "GET /api/nfts?contract=0x33FD426905F149f8376e227d0C9D3340AaD17aF1&page=1",
+      "agent_use_case": "Get market data for all meme cards — volume, floor prices, hodl rates",
+      "pitfalls": [
+        "101 cards per page",
+        "6 pages for 512 cards",
+        "Mint price is 0.06529 ETH standard, 0 for free mints"
+      ]
+    },
+    {
+      "category": "royalties",
+      "path": "/api/royalties/collection/{collection_type}",
+      "method": "GET",
+      "what": "Per-card royalty and proceeds data",
+      "returns": "Array of {token_id, contract, name, artist, thumbnail, volume, proceeds, artist_split, artist_take}",
+      "example": "GET /api/royalties/collection/memes",
+      "agent_use_case": "See how much each card has generated in secondary volume and primary proceeds",
+      "pitfalls": [
+        "collection_type='memes' works; others may not"
+      ]
+    },
+    {
+      "category": "activity",
+      "path": "/api/aggregated-activity",
+      "method": "GET",
+      "what": "Per-holder purchase/sale/transfer history",
+      "returns": "data[] with primary_purchases_count/value, secondary_purchases_count/value, sales_count/value, transfers_in/out, airdrops, burns",
+      "example": "GET /api/aggregated-activity?consolidation_key={ckey}&pageSize=100",
+      "agent_use_case": "Track a collector's full transaction history (buys, sells, transfers)",
+      "pitfalls": [
+        "CRITICAL: Returns ALL wallets that interacted WITH the given consolidation_key, sorted by volume. The first entry is punk6529 (most active), NOT the queried holder. Search data[] for matching consolidation_key to find the holder's own activity.",
+        "Less active holders may need up to 5 pages",
+        "26K+ entries per holder — pagination is expensive"
+      ]
+    },
+    {
+      "category": "waves",
+      "path": "/api/waves/{waveId}",
+      "method": "GET",
+      "what": "Get wave data including score breakdown",
+      "returns": "Wave metadata, score components, penalties, safety multiplier, quality gate, visibility tier, wave REP, formula constants",
+      "example": "GET /api/waves/{waveId}",
+      "agent_use_case": "Audit a wave's discovery score and understand why it's visible or demoted",
+      "pitfalls": [
+        "Need the wave UUID, not the name — use wave search or profile wave endpoint to get it"
+      ]
+    },
+    {
+      "category": "waves",
+      "path": "/api/waves/{waveId}/leaderboard",
+      "method": "GET",
+      "what": "Get ranked PARTICIPATORY drops (art submissions) with full author profiles, ratings, media, and content",
+      "returns": "Array of ranked drops with rank, rating, top_raters, reactions, media URLs, author profiles, content",
+      "example": "GET /api/waves/{waveId}/leaderboard",
+      "agent_use_case": "Get the actual art submissions and their rankings from a wave",
+      "pitfalls": [
+        "Use /leaderboard for art submissions, NOT /drops (which returns CHAT messages only)",
+        "Art submissions have drop_type 'PARTICIPATORY'; chat messages have drop_type 'CHAT'"
+      ]
+    },
+    {
+      "category": "waves",
+      "path": "/api/waves/{waveId}/drops",
+      "method": "GET",
+      "what": "Get CHAT drops (messages) from a wave's community feed",
+      "returns": "Array of chat message drops with content, author, reactions",
+      "example": "GET /api/waves/{waveId}/drops?sort=newest",
+      "agent_use_case": "Read the conversation in a wave's chat feed",
+      "pitfalls": [
+        "Returns CHAT drops only, not PARTICIPATORY art submissions. Use /leaderboard for art."
+      ]
+    },
+    {
+      "category": "waves",
+      "path": "/api/drops/{dropUUID}",
+      "method": "GET",
+      "what": "Get full content of a single drop by UUID",
+      "returns": "Full drop JSON: content, media, author, rank, rating, top_raters, reactions, is_signed, drop_type",
+      "example": "GET /api/drops/{dropUUID}",
+      "agent_use_case": "Read the full content of a specific drop when you have its UUID",
+      "pitfalls": []
+    },
+    {
+      "category": "oracle",
+      "path": "/oracle/tdh/total",
+      "method": "GET",
+      "base_url_override": "https://your-prenode-oracle.example.com",
+      "what": "Ecosystem-wide TDH totals",
+      "returns": "Total TDH, memes/gradients/nextgen breakdown, merkle root, block number",
+      "example": "GET https://your-prenode-oracle.example.com/oracle/tdh/total",
+      "agent_use_case": "Get the current total TDH across the entire 6529 ecosystem",
+      "pitfalls": [
+        "Oracle is community-run — may be temporarily unavailable"
+      ]
+    },
+    {
+      "category": "oracle",
+      "path": "/oracle/tdh/above/{value}/entries",
+      "method": "GET",
+      "base_url_override": "https://your-prenode-oracle.example.com",
+      "what": "TDH leaderboard above a threshold",
+      "returns": "Array of {consolidation_key, tdh, addresses[]}",
+      "example": "GET https://your-prenode-oracle.example.com/oracle/tdh/above/1000000/entries",
+      "agent_use_case": "Get all wallets above a TDH threshold for benchmarking",
+      "pitfalls": [
+        "Returns ~244 entries for TDH > 1,000,000"
+      ]
+    },
+    {
+      "category": "oracle",
+      "path": "/oracle/address/{address}/breakdown",
+      "method": "GET",
+      "base_url_override": "https://your-prenode-oracle.example.com",
+      "what": "Full TDH breakdown for a wallet: memes, gradients, nextgen, per-season",
+      "returns": "memes_balance, memes[], gradients_balance, gradients[], nextgen_balance, nextgen[], block, merkle_root",
+      "example": "GET https://your-prenode-oracle.example.com/oracle/address/0x0000000000000000000000000000000000000001/breakdown",
+      "agent_use_case": "Get detailed TDH breakdown showing which collections contribute to a wallet's TDH",
+      "pitfalls": [
+        "gradients and gradients_balance are at TOP LEVEL of response, NOT nested under a 'breakdown' key",
+        "Oracle returns 429 after ~60 rapid requests — use 0.5-1s delay"
+      ]
+    },
+    {
+      "category": "oracle",
+      "path": "/oracle/nfts/{contract}/{id}",
+      "method": "GET",
+      "base_url_override": "https://your-prenode-oracle.example.com",
+      "what": "Single NFT metadata (TDH, mint_date, edition_size)",
+      "returns": "NFT metadata with TDH data",
+      "example": "GET https://your-prenode-oracle.example.com/oracle/nfts/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/401",
+      "agent_use_case": "Get TDH and metadata for a specific meme card or gradient",
+      "pitfalls": []
+    },
+    {
+      "category": "oracle",
+      "path": "/oracle/cards",
+      "method": "GET",
+      "base_url_override": "https://your-prenode-oracle.example.com",
+      "what": "Card snapshot data for all meme cards",
+      "returns": "Array of card objects with TDH, rank, artist, season, supply, mint date",
+      "example": "GET https://your-prenode-oracle.example.com/oracle/cards",
+      "agent_use_case": "Get all meme card data in one request for local indexing",
+      "pitfalls": [
+        "Large response — may be slow",
+        "Not auto-regenerated — check freshness"
+      ]
+    }
+  ],
+  "common_queries": [
+    {
+      "question": "What is someone's TDH?",
+      "primary": "GET /api/identities/by-wallet/{address} → tdh field",
+      "alternative": "GET https://your-prenode-oracle.example.com/oracle/address/{address} for just TDH",
+      "full_breakdown": "GET https://your-prenode-oracle.example.com/oracle/address/{address}/breakdown for per-collection TDH",
+      "see_also": [
+        "For on-chain alternatives (direct Ethereum queries), see /on-chain-basics.json"
+      ]
+    },
+    {
+      "question": "List all meme cards",
+      "primary": "GET /api/nfts?contract=0x33FD426905F149f8376e227d0C9D3340AaD17aF1&page={N}",
+      "note": "101 cards per page, 6 pages for 512 cards. Each card has market data (volume, floor, hodl rate).",
+      "see_also": [
+        "For on-chain alternatives (direct Ethereum queries), see /on-chain-basics.json"
+      ]
+    },
+    {
+      "question": "Who holds a specific meme card?",
+      "primary": "GET /api/tdh/nft/{contract}/{token_id}",
+      "returns": "Current holder's handle, level, REP, CIC, TDH, xTDH",
+      "see_also": [
+        "For on-chain alternatives (direct Ethereum queries), see /on-chain-basics.json"
+      ]
+    },
+    {
+      "question": "What is someone's wave score?",
+      "steps": [
+        "GET /api/profiles/{handle}/wave → get profile_wave_id",
+        "GET /api/waves/{waveId} → full score breakdown"
+      ],
+      "note": "Wave score includes 5 quality components, 4 penalties, safety multiplier, quality gate, and visibility tier.",
+      "see_also": null
+    },
+    {
+      "question": "What art was submitted to a wave?",
+      "primary": "GET /api/waves/{waveId}/leaderboard",
+      "note": "Use /leaderboard NOT /drops. /drops returns chat messages only. /leaderboard returns PARTICIPATORY art submissions with rankings, ratings, and media.",
+      "see_also": null
+    },
+    {
+      "question": "What are the total ecosystem TDH stats?",
+      "primary": "GET https://your-prenode-oracle.example.com/oracle/tdh/total",
+      "alternative": "GET /api/tdh/consolidated_metrics?page=1&pageSize=1 → count field gives total wallets",
+      "see_also": null
+    },
+    {
+      "question": "How much volume has a card generated?",
+      "primary": "GET /api/royalties/collection/memes → find card by token_id",
+      "returns": "volume (secondary), proceeds (primary), artist_split, artist_take",
+      "see_also": null
+    },
+    {
+      "question": "What seasons has someone collected?",
+      "primary": "GET /api/collected-stats/{handle_or_wallet}",
+      "returns": "Per-season sets_held, total_cards_held, total_cards_in_season — shows collection completeness",
+      "see_also": null
+    },
+    {
+      "question": "What is someone's full transaction history?",
+      "primary": "GET /api/aggregated-activity?consolidation_key={ckey}&pageSize=100",
+      "pitfall": "Returns ALL wallets that interacted WITH the ckey, sorted by volume. Search data[] for matching consolidation_key to find the holder's OWN activity.",
+      "see_also": null
+    },
+    {
+      "question": "Who are the top TDH holders?",
+      "primary": "GET https://your-prenode-oracle.example.com/oracle/tdh/above/{threshold}/entries",
+      "alternative": "GET /api/tdh/consolidated_metrics?page=1&pageSize=100 (sorted by TDH)",
+      "see_also": null
+    }
+  ],
+  "contracts": {
+    "memes": "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+    "gradients": "0x0c58ef43ff3032005e472cb5709f8908acb00205",
+    "note": "Meme contract has 512+ tokens. Gradient contract has 101 tokens (minted Oct 2021)."
+  },
+  "source_code": {
+    "backend_repo": "https://github.com/6529-Collections/6529seize-backend",
+    "route_files": "Search for *.routes.ts in src/api-serverless/src/ to find all endpoints",
+    "key_route_files": [
+      "identities/identities.routes.ts",
+      "profiles/profiles.routes.ts",
+      "profiles/profile-rep.routes.ts",
+      "waves/waves.routes.ts",
+      "drops/drops.routes.ts",
+      "ratings/ratings.routes.ts",
+      "nft-owners/api.nft-owners.routes.ts",
+      "royalties/royalties.routes.ts"
+    ]
+  },
+  "freshness": "versioned"
+}

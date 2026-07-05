@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-26",
+  "description": "License permissivity spectrum and 6529's licensing strategy with cultural context for internationalization.",
+  "spectrum": [
+    {
+      "level": 0,
+      "license": "All Rights Reserved",
+      "description": "Default copyright. No reuse without explicit permission from the rights holder.",
+      "who_uses_this": "Traditional media, corporate content, default state of any unlicensed creative work"
+    },
+    {
+      "level": 1,
+      "license": "CC BY-NC-ND",
+      "description": "Creative Commons with attribution, no commercial use, no derivatives. Most restrictive CC license.",
+      "who_uses_this": "Artists who want attribution and control over modifications and commercial use"
+    },
+    {
+      "level": 2,
+      "license": "CC BY-SA",
+      "description": "Creative Commons share-alike. Derivatives must use the same license. Copyleft for creative works.",
+      "who_uses_this": "Wikipedia, open educational resources, some open art projects"
+    },
+    {
+      "level": 3,
+      "license": "GPL-3.0",
+      "description": "Strong copyleft software license. Derivatives must also be open source under GPL.",
+      "who_uses_this": "Linux kernel, many FOSS projects"
+    },
+    {
+      "level": 4,
+      "license": "Apache-2.0",
+      "description": "Permissive software license with patent protection clause. Contributors grant patent rights to users.",
+      "who_uses_this": "6529 production code repos, many enterprise open-source projects"
+    },
+    {
+      "level": 5,
+      "license": "MIT",
+      "description": "Most permissive software license. Do anything, just keep the copyright notice. No patent protection.",
+      "who_uses_this": "6529 standalone tool/bot repos, many developer tools, React, .NET"
+    },
+    {
+      "level": 6,
+      "license": "CC0",
+      "description": "Public domain dedication. No rights reserved. Anyone can use, remix, commercialize, or build on the work without any restriction or attribution requirement.",
+      "who_uses_this": "6529 Meme Collection community tier, 1939 color engine, public domain archives"
+    }
+  ],
+  "strategy": {
+    "memes": {
+      "license": "CC0",
+      "repos": [
+        "6529 Meme Collection community tier"
+      ],
+      "why": "Releasing novel creative value into the public domain is an intentional design choice. CC0 memes maximize cultural propagation — anyone can use, remix, commercialize, or build on them without friction. The meme spreads because there is no legal barrier. This is the network effects strategy: value flows out, adoption flows in.",
+      "source": "https://6529.io/about/license"
+    },
+    "production_code": {
+      "license": "Apache-2.0",
+      "repos": [
+        "6529seize-frontend",
+        "6529seize-backend",
+        "6529seize-admin",
+        "nextgen",
+        "Janus",
+        "6529-Prenode"
+      ],
+      "why": "Production code uses Apache-2.0 for the patent protection clause — contributors grant patent rights to users. This protects the ecosystem from patent trolls while remaining permissive. The patent grant is a formal trust framework: you give permission, but with legal guardrails.",
+      "source": "https://github.com/6529-Collections/6529seize-frontend/blob/main/LICENSE"
+    },
+    "agent_skills": {
+      "license": "Apache-2.0",
+      "repos": [
+        "6529seize-frontend/ops/skills/ (11 repo-local skills)"
+      ],
+      "why": "Repo-local agent skills inherit the parent repo's Apache-2.0 license. They are part of the production codebase, not standalone tools. The patent clause protects both the skill authors and the users of those skills.",
+      "source": "https://github.com/6529-Collections/6529seize-frontend/tree/main/ops/skills"
+    },
+    "standalone_tools": {
+      "license": "MIT",
+      "repos": [
+        "6529Stream (Solidity contracts)",
+        "6529reviewbot (AI PR review bot)",
+        "nftdelegation (delegation contract)",
+        "ai-code-review-action (code review action)"
+      ],
+      "why": "Standalone tools and bots use MIT — the most permissive software license. Anyone can copy, modify, commercialize without restriction. Maximum adoption with minimal friction. No patent overhead for utility tools.",
+      "source": "https://github.com/6529-Collections"
+    },
+    "unlicensed": {
+      "license": "No license file (default copyright)",
+      "repos": [
+        "thememecards",
+        "gradient",
+        "6529-core",
+        "allowlist-lib",
+        "allowlist-api",
+        "6529node"
+      ],
+      "why": "Documentation and configuration repos without a license file. These repos may benefit from adopting a license for clarity.",
+      "source": "https://github.com/6529-Collections"
+    }
+  },
+  "cultural_context": {
+    "description": "How cultures understand the license spectrum — from control to freedom. These mappings help agents translate license concepts for non-English speakers and contextualize CC0 within local traditions of shared property and gift culture.",
+    "cultures": {
+      "ko": {
+        "language": "Korean",
+        "translations": {
+          "All Rights Reserved": "모든 권리 보유 (modeun gwolli boyu)",
+          "Copyright": "저작권 (jeojakgwon)",
+          "Open Source": "오픈소스 (open source)",
+          "Public Domain": "퍼블릭 도메인 (public domain) / 공유지 (gongyujji)",
+          "Creative Commons": "크리에이티브 커먼즈 (creative commons)",
+          "CC0": "CC0 (공유지 헌정 — gongyujji heonjeong)",
+          "Permissive License": "관대한 라이선스 (gandaehan license)",
+          "Copyleft": "카피레프트 (copyleft)",
+          "Patent Protection": "특허 보호 (teukyeo boho)"
+        },
+        "cultural_equivalents": {
+          "CC0_public_domain": {
+            "concept": "공유지 (gongyujji) — shared commons",
+            "mapping": "CC0 maps to the traditional Korean concept of jeong (정) — bonds that strengthen through shared experience. Just as jeong accumulates through mutual giving without expectation of return, CC0 releases creative work to the commons without reservation.",
+            "notes": "The Korean concept of 누리 (nuri) means 'world' or 'shared space' — the digital commons. CC0 work enters the nuri for anyone to use. The hanok (traditional house) principle of openness to the community also maps here."
+          },
+          "Apache_patent_protection": {
+            "concept": "신뢰 (sinroe) — trust with structure",
+            "mapping": "Apache-2.0's patent clause maps to Korea's corporate culture of formal trust frameworks (계약서, gyeyakseo) — you give permission but with legal protections in place. Not pure generosity — generosity with guardrails.",
+            "notes": "Korean business culture values formal agreements even among allies. Apache-2.0's patent grant is like a 계약서 (contract) that protects both sides."
+          },
+          "MIT_max_adoption": {
+            "concept": "선물 (seonmul) — gift",
+            "mapping": "MIT maps to the Korean gift-giving tradition — you give something useful with minimal strings attached. The receiver can use it however they want. Like a graduation gift: take it and build your future.",
+            "notes": "Korean gift culture (선물 문화) emphasizes usefulness and lack of obligation. MIT's 'do anything, just keep the notice' is the closest license equivalent."
+          },
+          "copyleft_share_alike": {
+            "concept": "한길 (hangil) — the same path",
+            "mapping": "GPL/CC-BY-SA maps to the Korean community work ethic (협동, hyeopdong) — if you benefit from collective effort, you must contribute back equally. The 'share-alike' principle resonates with Korean notions of mutual obligation.",
+            "notes": "Korean 농협 (Nonghyup, agricultural cooperative) tradition: what you take from the commons, you must give back proportionally."
+          }
+        },
+        "ip_attitude": "South Korea has strong IP laws (KIPO) and is a signatory to major IP treaties. However, Korean digital culture has a strong tradition of 공유 (gongyu, sharing) — Naver cafes, DC Inside galleries, and fan communities operate on sharing norms. The tension between formal IP law and informal sharing culture is ongoing.",
+        "traditional_commons": "Jeul (즐) — communal joy through shared experience. Nongak (농악) — farmers' music performed collectively, no single owner. Pansori — oral tradition passed down through generations, owned by no one. Madang (마당) — the open courtyard where community gathered, belonged to everyone.",
+        "sensitivity_notes": "Avoid equating CC0 with 'free' without context — Korean speakers may interpret 'free' as 무료 (no cost) rather than 자유 (freedom). Use '공유지 헌정' (dedicated to commons) to clarify."
+      },
+      "es": {
+        "language": "Spanish",
+        "translations": {
+          "All Rights Reserved": "Todos los derechos reservados",
+          "Copyright": "Derechos de autor",
+          "Open Source": "Código abierto / Software libre",
+          "Public Domain": "Dominio público",
+          "Creative Commons": "Creative Commons",
+          "CC0": "CC0 (Dominio público dedicado)",
+          "Permissive License": "Licencia permisiva",
+          "Copyleft": "Copyleft / Licencia viral",
+          "Patent Protection": "Protección de patentes"
+        },
+        "cultural_equivalents": {
+          "CC0_public_domain": {
+            "concept": "Bien común — the common good",
+            "mapping": "CC0 maps to the Spanish/Latin American concept of bien común (common good) and the tradition of copyleft in Latin America (Brazil's Lula government adopted open source nationally). The Mexican corrido tradition — songs that belong to everyone and evolve through collective retelling — is a cultural precursor to CC0.",
+            "notes": "Hispanic culture has a strong tradition of collective creation: flamenco (recognized by UNESCO as intangible cultural heritage), corridos, rancheras — these are cultural forms no single person owns. CC0 formalizes what folk culture has always practiced."
+          },
+          "Apache_patent_protection": {
+            "concept": "Compromiso formal — formal commitment",
+            "mapping": "Apache-2.0's patent clause maps to the Hispanic concept of compromiso (formal commitment) — you give your word, but with legal backing. In Latin American business culture, contracts reinforce personal trust rather than replacing it.",
+            "notes": "The Apache patent grant is like a escritura pública (notarized document) — trust reinforced by formal structure."
+          },
+          "MIT_max_adoption": {
+            "concept": "Regalo — gift",
+            "mapping": "MIT maps to the Hispanic tradition of regalo (gift) — given freely, received with gratitude, used as the recipient sees fit. Like a birthday gift: once given, the giver doesn't control how it's used.",
+            "notes": "Hispanic gift culture (cultura del regalo) is about generosity without conditions. MIT's permissiveness feels natural in this cultural context."
+          },
+          "copyleft_share_alike": {
+            "concept": "Reciprocidad — reciprocity",
+            "mapping": " GPL/CC-BY-SA maps to the Andean concept of reciprocidad (reciprocity) — if you receive from the community, you must give back equally. The Inca principle of ayni (today for you, tomorrow for me) is the original share-alike.",
+            "notes": "Latin American indigenous traditions (ayni, minga) embody the share-alike principle: collective labor where everyone contributes and everyone benefits proportionally."
+          }
+        },
+        "ip_attitude": "Spain and Latin America have modern IP laws but enforcement varies widely. Hispanic culture has a strong tradition of collective creation — flamenco, corridos, muralism — where 'ownership' is communal. Open source adoption in Latin America is high (Brazil, Argentina, Mexico all have strong FOSS communities). The term 'software libre' emphasizes freedom over cost.",
+        "traditional_commons": "Los bienes comunales (communal lands) — in Spain and Latin America, traditional commons like montes vecinales (neighborhood forests) are collectively owned and managed. Flamenco palmas (handclap rhythms) — no one owns a rhythm. Corridos — folk songs that evolve through collective performance.",
+        "sensitivity_notes": "Distinguish between 'gratis' (free as in beer) and 'libre' (free as in freedom) — this distinction is well-established in Hispanic FOSS culture. Use 'libertad' not 'gratis' when discussing CC0."
+      },
+      "ja": {
+        "language": "Japanese",
+        "translations": {
+          "All Rights Reserved": "全著作権留保 (zen chosakuken ryūho)",
+          "Copyright": "著作権 (chosakuken)",
+          "Open Source": "オープンソース (ōpun sōsu)",
+          "Public Domain": "パブリックドメイン (public domain) / 著作権切れ (chosakuken-gire)",
+          "Creative Commons": "クリエイティブ・コモンズ (creative commons)",
+          "CC0": "CC0 (パブリックドメイン提供 — public domain teikyō)",
+          "Permissive License": "寛容なライセンス (kan'yō na license)",
+          "Copyleft": "コピーレフト (copyleft)",
+          "Patent Protection": "特許保護 (tokkyo hogo)"
+        },
+        "cultural_equivalents": {
+          "CC0_public_domain": {
+            "concept": "公有 (kōyū) — public ownership / 無償 (mushō) — without compensation",
+            "mapping": "CC0 maps to the Japanese concept of 公有 (kōyū, public ownership) and the tradition of 無償 (mushō, without compensation) in Japanese culture. Traditional crafts like 着物 (kimono) patterns and 書道 (shodō, calligraphy) strokes are part of a shared cultural vocabulary that no single creator owns. The concept of 我慢 (gaman, endurance) — contributing to collective harmony without expecting individual reward — also maps here.",
+            "notes": "Japan's doujin (同人) culture operates in a gray zone between copyright and communal sharing — fan works are technically infringing but culturally tolerated. CC0 provides a legal framework for what doujin culture has always practiced informally."
+          },
+          "Apache_patent_protection": {
+            "concept": "信頼と契約 (shinrai to keiyaku) — trust and contract",
+            "mapping": "Apache-2.0 maps to Japanese business culture's combination of 信頼 (shinrai, trust) and 契約 (keiyaku, formal contract). Japanese business relationships are trust-first but always backed by formal agreements. The patent clause is like a 誓約書 (seikasho, pledge document).",
+            "notes": "Japanese corporate culture values formal commitment. Apache-2.0's patent grant provides the legal structure that Japanese business practice expects."
+          },
+          "MIT_max_adoption": {
+            "concept": "贈り物 (okurimono) — gift / お返し (okaeshi) — return gift",
+            "mapping": "MIT maps to the Japanese concept of 贈り物 (okurimono, gift) within the tradition of 義理 (giri, social obligation). A gift is given freely, but Japanese culture expects acknowledgment (お礼, orei). MIT's requirement to 'keep the notice' maps naturally to the orei expectation.",
+            "notes": "Japanese gift culture (贈答文化, shōtō bunka) is highly ritualized — the gift itself is unrestricted, but acknowledgment is culturally mandatory. MIT's 'keep the notice' requirement fits this pattern perfectly."
+          },
+          "copyleft_share_alike": {
+            "concept": "共存共栄 (kyōson kyōei) — coexistence and mutual prosperity",
+            "mapping": "GPL/CC-BY-SA maps to the Japanese concept of 共存共栄 (coexistence and mutual prosperity) — if you benefit from the ecosystem, you must contribute back to sustain it. Like a Japanese moss garden (苔庭, kokeniwa): everyone tends it, everyone enjoys it, but nobody owns it exclusively.",
+            "notes": "Japan's 均等 (kintō, equality/balance) principle in community organizations — everyone contributes proportionally. Share-alike resonates with this."
+          }
+        },
+        "ip_attitude": "Japan has extremely strong IP laws (one of the world's most aggressive enforcers). However, Japanese culture has a paradoxical relationship with copying: 山寨 (san-zai, imitation) is historically respected as a form of learning. The doujin (self-published fan comics) market generates billions annually in technically-infringing works. Open source adoption is high in Japanese tech.",
+        "traditional_commons": "入会地 (iriaichi) — traditional communal lands where villagers shared grazing and forest rights. 寄付 (kifu) — donation to temples that becomes communal property. 伝統工芸 (dentō kōgei) — traditional crafts where techniques are shared across guilds without individual ownership.",
+        "sensitivity_notes": "Avoid 著作権切れ (chosakuken-gire, literally 'copyright expired') for CC0 — it implies passivity or neglect. Use パブリックドメイン提供 (public domain dedication) to emphasize intentional choice, matching 6529's framing of CC0 as deliberate."
+      },
+      "sw": {
+        "language": "Swahili",
+        "translations": {
+          "All Rights Reserved": "Haki zote zimehifadhiwa",
+          "Copyright": "Hakimiliki / Hakimiliki ya mwandishi",
+          "Open Source": "Chanzo wazi / Open source",
+          "Public Domain": "Mali ya umma / Public domain",
+          "Creative Commons": "Creative Commons",
+          "CC0": "CC0 (Mali ya umma bila masharti)",
+          "Permissive License": "Leseni yenye ruhusa pana",
+          "Copyleft": "Copyleft",
+          "Patent Protection": "Ulinda wa patent"
+        },
+        "cultural_equivalents": {
+          "CC0_public_domain": {
+            "concept": "Mali ya umma — wealth of the community / Ubuntu",
+            "mapping": "CC0 maps to the Swahili/East African concept of mali ya umma (public wealth) and the Ubuntu philosophy ('I am because we are'). In Ubuntu, knowledge and creativity belong to the community — individual creation is an expression of collective capacity. CC0 formalizes this: creative work returns to the community that enabled it.",
+            "notes": "The Kiswahili proverb 'Kidole kimoja hakivunji chawa' (one finger cannot crush a louse) — collective action requires collective resources. CC0 makes creative work available for collective use."
+          },
+          "Apache_patent_protection": {
+            "concept": "Mkataba — formal agreement",
+            "mapping": "Apache-2.0 maps to the East African concept of mkataba (formal contract). In Kenyan and Tanzanian business culture, verbal agreements (mazungumzo) establish trust, but mkataba formalizes it. Apache's patent clause is the mkataba that makes trust enforceable.",
+            "notes": "East African business culture values formal agreements alongside personal relationships. Apache-2.0's patent grant provides both."
+          },
+          "MIT_max_adoption": {
+            "concept": "Zawadi — gift",
+            "mapping": "MIT maps to the Swahili concept of zawadi (gift) — given without conditions, received with gratitude. In East African culture, a zawadi is a mark of generosity. The giver doesn't control how it's used. Like Harambee contributions: once given, they belong to the community.",
+            "notes": "Zawadi in Swahili culture carries the weight of generosity and community bond. MIT's permissiveness aligns with this — take it, use it, don't forget where it came from (keep the notice)."
+          },
+          "copyleft_share_alike": {
+            "concept": "Harambee — pull together / Chama — mutual aid group",
+            "mapping": "GPL/CC-BY-SA maps to the Swahili concept of Harambee ('all pull together') — Kenya's national motto. If you benefit from the community's collective effort, you must contribute back equally. The Chama (savings/mutual aid group) tradition embodies share-alike: everyone puts in, everyone takes out proportionally.",
+            "notes": "Harambee is literally on Kenya's coat of arms. Share-alike licensing maps to this fundamental East African principle of mutual contribution."
+          }
+        },
+        "ip_attitude": "East African countries have modern IP laws (Kenya Copyright Board, Tanzania Copyright Society) but enforcement is limited. Traditional knowledge systems emphasize communal ownership — folklore, music, and oral traditions are collectively owned. Open source and open data movements are growing in Kenya's tech hubs (Nairobi's 'Silicon Savannah'). The concept of 'ubuntu licensing' — sharing because community enables you — is gaining traction.",
+        "traditional_commons": "Ushamba (communal grazing land) — pastoralist communities share rangelands without individual ownership. Ngoma (traditional drumming/dance) — rhythms and songs belong to the community, not individuals. Methali (Swahili proverbs) — collective wisdom owned by no one. Harambee — collective fundraising for community projects (schools, wells).",
+        "sensitivity_notes": "The word 'huru' (free) in Swahili can mean 'free of cost' or 'free of constraint' — like English, this ambiguity exists. Use 'mali ya umma bila masharti' (public wealth without conditions) for CC0 to be precise."
+      },
+      "hi": {
+        "language": "Hindi",
+        "translations": {
+          "All Rights Reserved": "सर्वाधिकार सुरक्षित (sarvādhikār surakṣit)",
+          "Copyright": "कॉपीराइट / सर्वाधिकार (sarvādhikār)",
+          "Open Source": "ओपन सोर्स / मुक्त स्रोत (mukta srota)",
+          "Public Domain": "सार्वजनिक संपदा (sārvajanik sampadā) / Public domain",
+          "Creative Commons": "क्रिएटिव कॉमन्स / Creative Commons",
+          "CC0": "CC0 (सार्वजनिक संपदा समर्पण — sārvajanik sampadā samarpaṇ)",
+          "Permissive License": "अनुमतिप्रद लाइसेंस (anumati-prad license)",
+          "Copyleft": "कॉपीलेफ्ट (copyleft)",
+          "Patent Protection": "पेटेंट सुरक्षा (patent surakṣā)"
+        },
+        "cultural_equivalents": {
+          "CC0_public_domain": {
+            "concept": "सार्वजनिक संपदा (sārvajanik sampadā) — public wealth / गुरुकुल (gurukul) tradition",
+            "mapping": "CC0 maps to the Indian concept of सार्वजनिक संपदा (public wealth) and the ancient गुरुकुल (gurukul, guru's school) tradition where knowledge was freely given by teachers to students without expectation of payment. The Sanskrit concept of दान (dāna, charitable giving) — giving without expectation of return — is the spiritual equivalent of CC0. The Buddha's teachings and ancient texts like the Vedas were never 'owned' — they were passed freely.",
+            "notes": "India's open knowledge movement draws from this tradition — the National Knowledge Commission and initiatives like Open Government Data India. CC0 aligns with the dharmic principle that knowledge, once created, should flow freely."
+          },
+          "Apache_patent_protection": {
+            "concept": "लिखित समझौता (likhit samjhautā) — written agreement",
+            "mapping": "Apache-2.0 maps to the Indian business concept of लिखित समझौता (written agreement). In Indian business culture, verbal agreements establish विश्वास (vishvas, trust), but formal documents provide कानूनी सुरक्षा (legal protection). The patent clause is the formal layer over trust.",
+            "notes": "India's IT industry relies heavily on formal contracts alongside relationship-based trust. Apache-2.0's dual nature (permissive + protective) maps to this Indian business practice."
+          },
+          "MIT_max_adoption": {
+            "concept": "उपहार (upahār) — gift / प्रसाद (prasād) — blessing/offering",
+            "mapping": "MIT maps to the Hindu/Buddhist/Jain concept of प्रसाद (prasād) — a blessed offering given freely to all. Prasād is distributed at temples without conditions — take it, use it, benefit from it. The giver does not control how prasād is used. MIT's 'keep the notice' maps to the cultural expectation of acknowledging the source (गुरु, guru).",
+            "notes": "Prasād is one of India's most universal cultural concepts — offered at every Hindu temple, freely given, unconditionally received. MIT's minimal requirement (acknowledge origin) aligns with the guru-shishya (teacher-student) acknowledgment tradition."
+          },
+          "copyleft_share_alike": {
+            "concept": "सहकारिता (sahakāritā) — cooperation / चौपाल (chaupāl) — community gathering",
+            "mapping": "GPL/CC-BY-SA maps to the Indian concept of सहकारिता (cooperation) and the village चौपाल (chaupāl, community gathering space) — shared resources maintained collectively. The choupal belongs to everyone; everyone must maintain it. If you use the shared well, you must help repair it.",
+            "notes": "India's cooperative movement (अमूल/Amul dairy cooperative, sugar cooperatives) embodies share-alike — collective input, proportional output. The Panchayat (village council) tradition manages commons through collective obligation."
+          }
+        },
+        "ip_attitude": "India has modern IP laws (Copyright Act 1957, updated 2012) but enforcement is notoriously uneven. Indian culture has a complex relationship with copying — the term 'jugaad' (frugal innovation) often involves adapting existing ideas. India's pharmaceutical industry historically used compulsory licensing for medicines. Open source adoption is very high in India's IT sector (Bangalore, Hyderabad). The concept of 'मुफ्त' (muft, free) vs 'आज़ाद' (āzād, free/independent) mirrors the English gratis/libre distinction.",
+        "traditional_commons": "गाँव का चौबहरा (gaon ka chaubata) — village commons. बरगद का पेड़ (bargad ka ped) — the banyan tree under which villagers gather — a shared space owned by no one. सरोवर (sarovar) — community ponds maintained collectively. गुरुकुल — ancient education where knowledge flowed freely from guru to shishya. Manuscript traditions where texts were copied and shared across temples and monasteries without ownership claims.",
+        "sensitivity_notes": "Use आज़ाद (āzād, free as in freedom) rather than मुफ्त (muft, free as in cost) when discussing open source. For CC0, 'सार्वजनिक संपदा समर्पण' (public wealth dedication) is clearer than direct translation of 'public domain.' Avoid equating CC0 with 'ज़ेरो कॉस्ट' (zero cost) — it's about freedom, not price."
+      }
+    }
+  },
+  "design_principle": {
+    "principle": "License choice is not a legal afterthought in 6529 — it is a design decision with strategic intent.",
+    "spectrum_mapping": "More permissive = more propagation = more network effects. The spectrum from All Rights Reserved to CC0 maps to a spectrum from control to freedom, and 6529 consistently chooses the freedom end.",
+    "three_tiers": "CC0 = cultural layer (memes) — maximize propagation. Apache-2.0 = platform layer (code + skills) — patent protection. MIT = tool layer (standalone bots) — maximum adoption."
+  },
+  "freshness": "stable"
+}

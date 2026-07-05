@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-26",
+  "freshness": "stable",
+  "description": "Blockchain concepts for beginners and on-chain querying guide for agents. Explains the blockchain layer 6529 runs on, how NFTs function as a coordination substrate, and when to use on-chain vs off-chain data. Cross-references glossary.json for 6529-specific terms and api-for-agents.json for API queries.",
+  "blockchain_basics": [
+    {
+      "concept": "Blockchain",
+      "beginner_definition": "A shared, public ledger that records transactions permanently. Once data is written, it cannot be changed. Many people hold copies, so no single person controls it.",
+      "technical_definition": "A distributed, append-only ledger secured by cryptographic consensus. Ethereum uses proof-of-stake consensus where validators stake ETH to propose and verify blocks.",
+      "why_for_6529": "6529 meme cards, gradients, and nextgen collections are all on Ethereum. Every mint, transfer, and sale is permanently recorded on-chain.",
+      "cross_ref": null
+    },
+    {
+      "concept": "Ethereum",
+      "beginner_definition": "The blockchain network where 6529 NFTs live. Ethereum is like the operating system — it runs the programs (smart contracts) that create and manage NFTs.",
+      "technical_definition": "A Layer 1 blockchain with smart contract functionality. 6529's meme contract (ERC-721) runs on Ethereum mainnet. Gas costs are higher than L2s but security and decentralization are maximum.",
+      "why_for_6529": "All 6529 collections (Memes, Gradients, NextGen) are on Ethereum mainnet. This is deliberate — maximum security for valuable art.",
+      "cross_ref": {
+        "glossary.json": "Meme Card",
+        "note": "Meme cards are ERC-721 tokens on Ethereum"
+      }
+    },
+    {
+      "concept": "NFT (Non-Fungible Token)",
+      "beginner_definition": "A unique digital item on a blockchain. Each NFT has a unique ID and belongs to one wallet at a time. You can prove you own it because the blockchain records it.",
+      "technical_definition": "A non-fungible token standard (ERC-721 for unique items, ERC-1155 for semi-fungible). Each token has a unique token_id within a smart contract. Ownership is tracked on-chain via transfer events.",
+      "why_for_6529": "Meme cards are NFTs. Each card has an edition size (supply), mint date, and artist. The 6529 community tier is CC0 — the art is public domain, but the token proving you hold it is yours.",
+      "cross_ref": {
+        "glossary.json": "Meme Card",
+        "license-overview.json": "strategy.memes",
+        "note": "NFTs as tokens (here) vs CC0 as license (license-overview)"
+      }
+    },
+    {
+      "concept": "Smart Contract",
+      "beginner_definition": "A program that runs on a blockchain. Once deployed, it cannot be changed. It automatically follows its rules — nobody can override it. 6529's minting and distribution are governed by smart contracts.",
+      "technical_definition": "Self-executing code deployed to a blockchain address. 6529's meme contract at 0x33FD... is an ERC-721 smart contract that handles minting, transfers, and ownership tracking. The code is immutable once deployed.",
+      "why_for_6529": "The meme contract is open source (MIT licensed at github.com/6529-Collections/6529Stream). Anyone can read the code and verify how minting works.",
+      "cross_ref": {
+        "license-overview.json": "strategy.standalone_tools",
+        "note": "6529Stream smart contracts are MIT-licensed"
+      }
+    },
+    {
+      "concept": "Wallet",
+      "beginner_definition": "Your wallet is your identity on the blockchain. It has a public address (like an email) and a private key (like a password). You use it to hold NFTs, sign transactions, and prove who you are.",
+      "technical_definition": "A key pair (public address + private key) used to sign transactions. Ethereum uses ECDSA with secp256k1. The public address is derived from the public key. Never share your private key.",
+      "why_for_6529": "Your 6529 wallet holds your meme cards. Your wallet address is your identity on 6529.io. TAP (Three Address Protocol) recommends using separate wallets for different purposes.",
+      "cross_ref": {
+        "glossary.json": "TAP",
+        "note": "TAP explains why you should use multiple wallets"
+      }
+    },
+    {
+      "concept": "Gas",
+      "beginner_definition": "The fee you pay to do anything on Ethereum. Minting, buying, transferring — each action costs gas. Gas prices go up when the network is busy.",
+      "technical_definition": "A unit of computation cost on Ethereum. Each transaction consumes gas proportional to its complexity. Gas price (gwei) fluctuates with network demand. Minting a 6529 meme card costs gas plus the mint price (0.06529 ETH).",
+      "why_for_6529": "Gas is why subscriptions exist — they let you mint remotely with potential gas savings by batching. Gas also affects secondary market trading costs.",
+      "cross_ref": {
+        "glossary.json": "Subscription",
+        "note": "Subscriptions can save on gas costs"
+      }
+    },
+    {
+      "concept": "Why are NFTs on different chains?",
+      "beginner_definition": "Different blockchains have different trade-offs. Ethereum is the most secure but most expensive. Layer 2s (like Arbitrum, Optimism) are cheaper but less established. Some NFT projects choose cheaper chains; 6529 chose Ethereum for maximum security and permanence.",
+      "technical_definition": "Blockchain selection involves trade-offs between security, cost, speed, and ecosystem. Ethereum L1 has highest security but highest gas. L2s (rollups) inherit L1 security but add complexity. Sidechains (Polygon) have independent security. 6529 chose Ethereum L1 for all collections.",
+      "why_for_6529": "6529 meme cards, gradients, and nextgen are all on Ethereum L1. This is intentional — the art is meant to be permanent and maximally secure. The higher gas cost is accepted as the price of permanence.",
+      "cross_ref": null
+    }
+  ],
+  "nfts_as_coordination_substrate": {
+    "description": "In the 6529 framework, NFTs are not just art — they are a coordination substrate. Holding an NFT is a signal. The network reads these signals to measure commitment, calculate influence, and coordinate without central authority.",
+    "concepts": [
+      {
+        "concept": "Holding = voting with your wallet",
+        "explanation": "When you hold a 6529 meme card instead of selling it, you signal commitment to the network. The longer you hold (measured by TDH), the more your signal counts. This is coordination without voting — no ballot, no proposal, just economic commitment recorded on-chain.",
+        "cross_ref": {
+          "glossary.json": "TDH",
+          "note": "TDH measures this holding commitment"
+        }
+      },
+      {
+        "concept": "HODL rate as collective signal",
+        "explanation": "When a card's HODL rate is high (most editions held, few traded), it signals collective conviction. The community is saying: this card matters to us. Low HODL rate signals the opposite. These signals emerge from individual choices without coordination.",
+        "cross_ref": {
+          "glossary.json": "Hodl Rate",
+          "note": "Per-card HODL rate is visible on NFT surfaces"
+        }
+      },
+      {
+        "concept": "CC0 as cultural infrastructure",
+        "explanation": "By releasing meme cards as CC0 (public domain), 6529 creates open cultural infrastructure. Anyone can use, remix, or commercialize the art without permission. This maximizes propagation — the meme spreads because there is no legal barrier. The NFT token proves you were there; the CC0 license lets anyone build on the art.",
+        "cross_ref": {
+          "glossary.json": "CC0",
+          "license-overview.json": "strategy.memes",
+          "note": "CC0 = public domain; NFT = proof of holding. Different layers."
+        }
+      },
+      {
+        "concept": "dGDP — measuring network output",
+        "explanation": "dGDP (decentralized Gross Domestic Product) measures the total on-chain economic output of a network. For 6529, this means summing all meme card transaction values (primary mints + secondary trades) converted to time-adjusted USD at daily ETH close. dGDP answers: how much economic activity does this network generate?",
+        "cross_ref": {
+          "glossary.json": "Meme Card",
+          "note": "dGDP is measured from meme card transactions on Ethereum"
+        }
+      },
+      {
+        "concept": "Schelling Point coordination",
+        "explanation": "A Schelling Point is when people independently choose the same thing without communicating. In 6529, the community coordinates around shared values (open culture, self-custody, permissionless participation) without a central authority telling them what to do. The blockchain records their choices, and the pattern emerges.",
+        "cross_ref": {
+          "glossary.json": "Schelling Point",
+          "cultural-mappings.json": "Schelling Point",
+          "note": "Cultural equivalents: Korean nunchi, Swahili harambee, Chinese moqi"
+        }
+      },
+      {
+        "concept": "Arweave as permanent storage",
+        "explanation": "6529.io is permanently available via Arweave at 6529.ar.io. Arweave is a blockchain optimized for permanent data storage. When the 6529 team updates the site, a snapshot is uploaded to Arweave via the ANT (Arweave Name Token) protocol. This means the site — including these agent-native files — has a permanent, immutable backup that survives even if 6529.io goes down.",
+        "cross_ref": {
+          "llms.txt": "Permanent Access section",
+          "note": "6529.ar.io is the Arweave gateway for 6529.io"
+        }
+      }
+    ]
+  },
+  "querying_on_chain_data": {
+    "description": "Understanding what data is on-chain vs off-chain is critical for agents querying 6529 data.",
+    "on_chain_data": {
+      "what": "Data recorded on Ethereum blockchain — permanently, immutably, verifiable by anyone",
+      "examples": [
+        "Token ownership (who holds which NFT)",
+        "Transfer events (when NFT moved from A to B)",
+        "Mint events (when and by whom a card was minted)",
+        "Contract state (total supply, token URIs)",
+        "Transaction values (sale prices in ETH)"
+      ],
+      "how_to_query": [
+        {
+          "tool": "Alchemy API",
+          "what": "Token data, transfers, metadata, prices",
+          "free_tier": "Yes, sufficient for 6529 queries",
+          "languages": "JavaScript, Python, REST",
+          "website": "alchemy.com"
+        },
+        {
+          "tool": "Etherscan API",
+          "what": "Transaction history, contract source code, event logs",
+          "free_tier": "Yes, 5 calls/sec",
+          "languages": "REST",
+          "website": "etherscan.io/apis"
+        },
+        {
+          "tool": "The Graph",
+          "what": "Indexed subgraph queries — faster than scanning logs",
+          "free_tier": "Yes, hosted subgraphs",
+          "languages": "GraphQL",
+          "website": "thegraph.com"
+        },
+        {
+          "tool": "Direct RPC (eth_call, eth_getLogs)",
+          "what": "Low-level blockchain queries",
+          "free_tier": "Yes, public RPC endpoints",
+          "languages": "Any HTTP client",
+          "website": "Various (Infura, Alchemy, public nodes)"
+        }
+      ]
+    },
+    "off_chain_data": {
+      "what": "Data calculated or stored by 6529's backend — not on Ethereum",
+      "examples": [
+        "TDH calculations (time-weighted, computed by prenodes)",
+        "REP ratings (peer-given, stored in 6529 database)",
+        "NIC ratings (identity trust, stored in 6529 database)",
+        "Wave scores (computed by backend from multiple signals)",
+        "Profile data (handle, level, classification, followers)"
+      ],
+      "how_to_query": [
+        {
+          "tool": "api.6529.io",
+          "what": "All off-chain 6529 data",
+          "reference": "api-for-agents.json",
+          "note": "See api-for-agents.json for full endpoint map"
+        },
+        {
+          "tool": "node.6529.io oracle",
+          "what": "TDH and card data from community prenodes",
+          "reference": "api-for-agents.json",
+          "note": "Community-run, separate from api.6529.io"
+        }
+      ]
+    },
+    "the_key_distinction": {
+      "rule": "Use on-chain queries for ownership ground truth (who holds what, when it was minted, what was paid). Use api.6529.io for derived metrics (TDH, REP, wave scores, profiles). An agent that only reads the blockchain cannot calculate TDH — it needs the prenode oracle or the API.",
+      "cross_ref": {
+        "api-for-agents.json": "Full API endpoint map for off-chain queries",
+        "glossary.json": "TDH term explains why it's off-chain"
+      }
+    }
+  },
+  "eth_price_data": {
+    "description": "6529 transactions happen in ETH (Ethereum's native currency), not USD. To understand dollar values, you need ETH price data.",
+    "why_it_matters": "dGDP (decentralized GDP) measurement requires converting every ETH transaction to USD at the daily close price. A meme card sold for 0.5 ETH is worth different USD amounts depending on when it sold. Without ETH price data, you can only measure volume in ETH, not in time-adjusted USD.",
+    "how_to_get_eth_prices": [
+      {
+        "source": "CoinGecko API",
+        "what": "Historical daily close prices (free)",
+        "url": "api.coingecko.com/api/v3/coins/ethereum/history",
+        "use_case": "Bulk historical price cache for dGDP calculation"
+      },
+      {
+        "source": "Chainlink Price Feeds",
+        "what": "On-chain real-time ETH/USD price (no API needed)",
+        "url": "data.chain.link/ethereum/main-net",
+        "use_case": "Current price verification directly from blockchain"
+      },
+      {
+        "source": "Alchemy getTokenPrice",
+        "what": "Current and historical prices via API",
+        "url": "docs.alchemy.com",
+        "use_case": "Programmatic price queries within agent workflows"
+      }
+    ],
+    "caching_pattern": {
+      "description": "Our pattern for dGDP calculation: cache daily ETH/USD close prices in a local JSON file, indexed by date. Query as needed when processing transactions. Avoids rate limits and ensures consistent historical pricing.",
+      "pitfall": "Different sources give slightly different 'daily close' values. CoinGecko's daily close may differ from Chainlink's by 0.1-0.5%. Pick one source and be consistent."
+    }
+  },
+  "common_on_chain_queries": [
+    {
+      "question": "Who owns meme card #N?",
+      "on_chain": "Query the ERC-721 ownerOf(tokenId) on the meme contract via Alchemy or Etherscan",
+      "contract": "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+      "cross_ref": {
+        "api-for-agents.json": "GET /api/tdh/nft/{contract}/{token_id} for the holder's full identity"
+      }
+    },
+    {
+      "question": "When was card #N minted?",
+      "on_chain": "Query Alchemy getAssetTransfers for the contract, filter by tokenId, find the mint transaction",
+      "contract": "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+      "cross_ref": {
+        "api-for-agents.json": "GET /api/nfts for mint_date field in market data"
+      }
+    },
+    {
+      "question": "What is the meme contract address?",
+      "answer": "0x33FD426905F149f8376e227d0C9D3340AaD17aF1 (Ethereum mainnet, ERC-721)",
+      "cross_ref": {
+        "api-for-agents.json": "contracts section"
+      }
+    },
+    {
+      "question": "What is the gradient contract address?",
+      "answer": "0x0c58ef43ff3032005e472cb5709f8908acb00205 (Ethereum mainnet, ERC-721, 101 tokens minted Oct 2021)",
+      "cross_ref": {
+        "api-for-agents.json": "contracts section"
+      }
+    },
+    {
+      "question": "How many editions of card #N exist?",
+      "on_chain": "Query ERC-721 totalSupply or check the card's edition size in metadata",
+      "cross_ref": {
+        "glossary.json": "Meme Card — edition size is a card property"
+      }
+    },
+    {
+      "question": "What was the mint price?",
+      "answer": "Standard mint price is 0.06529 ETH. Some cards have free mints (0 ETH). Check the card's distribution page on 6529.io.",
+      "cross_ref": {
+        "api-for-agents.json": "GET /api/nfts for mint_price field"
+      }
+    },
+    {
+      "question": "How much volume has card #N traded?",
+      "off_chain": "This requires summing all secondary market trades. Use the API instead of on-chain scanning.",
+      "cross_ref": {
+        "api-for-agents.json": "GET /api/nfts for total_volume field, or GET /api/royalties/collection/memes for per-card volume"
+      }
+    }
+  ],
+  "when_on_chain_is_not_enough": {
+    "description": "Many 6529 metrics are computed off-chain. An agent that only reads the blockchain will miss critical data.",
+    "off_chain_metrics": [
+      {
+        "metric": "TDH",
+        "why_off_chain": "Time-weighted calculation with edition-size weighting and boosters — too complex for on-chain computation",
+        "where_to_get": "api.6529.io or node.6529.io oracle",
+        "cross_ref": "glossary.json TDH term"
+      },
+      {
+        "metric": "REP",
+        "why_off_chain": "Peer-given reputation stored in 6529 database, not on Ethereum",
+        "where_to_get": "api.6529.io /api/profile-rep/*",
+        "cross_ref": "glossary.json REP term"
+      },
+      {
+        "metric": "NIC",
+        "why_off_chain": "Identity trust ratings stored in 6529 database",
+        "where_to_get": "api.6529.io /api/identities/*",
+        "cross_ref": "glossary.json NIC term"
+      },
+      {
+        "metric": "Wave Scores",
+        "why_off_chain": "Computed from 5 quality components + 4 penalties — backend computation",
+        "where_to_get": "api.6529.io /api/waves/{id}",
+        "cross_ref": "glossary.json Wave Score term"
+      },
+      {
+        "metric": "Network Levels",
+        "why_off_chain": "Integrated TDH + REP signal — computed, not stored on-chain",
+        "where_to_get": "api.6529.io /api/identities/* → level field",
+        "cross_ref": "glossary.json Network Levels term"
+      },
+      {
+        "metric": "Profile data",
+        "why_off_chain": "Handle, classification, followers — all in 6529 database",
+        "where_to_get": "api.6529.io /api/identities/*",
+        "cross_ref": "api-for-agents.json identities endpoints"
+      }
+    ],
+    "rule": "On-chain = ownership ground truth (who holds what). Off-chain = derived metrics (how much it means). Use both.",
+    "cross_ref": "api-for-agents.json for all off-chain queries"
+  },
+  "tools_for_on_chain_queries": {
+    "description": "Generic tools for querying Ethereum blockchain data. These are external APIs (not self-hosted). For self-hosted infrastructure tools, see foss-tools.json.",
+    "tools": [
+      {
+        "name": "Alchemy",
+        "what": "Blockchain developer platform — token data, transfers, metadata, prices",
+        "free_tier": "Yes, generous free tier sufficient for 6529",
+        "languages": "JavaScript SDK, Python SDK, REST API",
+        "use_case": "Query meme card ownership, transfer history, metadata",
+        "website": "alchemy.com"
+      },
+      {
+        "name": "Etherscan API",
+        "what": "Block explorer API — transaction history, contract source, event logs",
+        "free_tier": "Yes, 5 calls/sec, 100K calls/day",
+        "languages": "REST API",
+        "use_case": "Verify transactions, read contract source, browse event logs",
+        "website": "etherscan.io/apis"
+      },
+      {
+        "name": "The Graph",
+        "what": "Indexed subgraph queries — faster than scanning raw blockchain logs",
+        "free_tier": "Yes, hosted subgraphs on the decentralized network",
+        "languages": "GraphQL",
+        "use_case": "Query indexed NFT transfer data without scanning all blocks",
+        "website": "thegraph.com"
+      },
+      {
+        "name": "viem / wagmi",
+        "what": "Modern TypeScript libraries for Ethereum interaction",
+        "free_tier": "Open source (MIT)",
+        "languages": "TypeScript",
+        "use_case": "Build agent frontends that interact with Ethereum directly",
+        "website": "viem.sh, wagmi.sh"
+      },
+      {
+        "name": "web3.py / ethers.js",
+        "what": "Classic libraries for direct Ethereum RPC calls",
+        "free_tier": "Open source",
+        "languages": "Python (web3.py), JavaScript (ethers.js)",
+        "use_case": "Low-level blockchain queries, contract interaction, signing",
+        "website": "web3.py: web3py.readthedocs.io, ethers: docs.ethers.org"
+      }
+    ],
+    "cross_ref": {
+      "foss-tools.json": "For self-hosted infrastructure (SearXNG, Gitea, Ghost, etc.), see foss-tools.json. These tools here are external blockchain APIs, not self-hosted."
+    }
+  },
+  "see_also": [
+    "glossary.json",
+    "api-for-agents.json",
+    "license-overview.json",
+    "cultural-mappings.json",
+    "foss-tools.json",
+    "llms.txt"
+  ],
+  "cross_references": {
+    "glossary.json": "6529-specific term definitions (TDH, REP, NIC, Meme Card, TAP, CC0)",
+    "api-for-agents.json": "How to query 6529's off-chain API for derived metrics (TDH, wave scores, REP)",
+    "license-overview.json": "How 6529 licenses its content (CC0 for memes, Apache-2.0 for code)",
+    "cultural-mappings.json": "How Schelling Point and coordination concepts map across cultures",
+    "foss-tools.json": "Self-hosted infrastructure tools (complementary to on-chain query tools here)",
+    "llms.txt": "Agent entry point, including Arweave permanent access info"
+  }
+}
