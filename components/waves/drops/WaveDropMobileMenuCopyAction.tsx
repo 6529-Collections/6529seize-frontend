@@ -72,7 +72,8 @@ export default function WaveDropMobileMenuCopyAction({
       | undefined;
 
     if (typeof clipboard?.writeText !== "function") {
-      // Keep the menu open so the user sees the failure and can retry.
+      // Keep the menu open so the user sees the failure instead of a
+      // silent close that looks like success.
       showTransientStatus("failed");
       return;
     }
