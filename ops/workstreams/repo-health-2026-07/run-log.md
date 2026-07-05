@@ -1,5 +1,41 @@
 # Run Log
 
+## 2026-07-05 (Thread D — one layout)
+
+- Phase 0 (inventory) merged as PR #3041 (`layout-unification-plan.md`). Key
+  corrections to the audit baseline: the pages router was fully retired back
+  in PR #1378 (2025-09-03) — zero `pages/` files on main AND in the rescue
+  snapshot; the "~134 legacy pages-router files" line was stale. `src/` was
+  14 files / 1,616 lines, all imported via `@/src/*`.
+- Phase 1 (fold `src/`): PR #3048 — `git mv` all 14 modules into root-level
+  dirs, `@/src/` -> `@/` rewrite in 28 files, `src/` deleted. Validation:
+  typecheck, full Jest twice green (1958 suites / 11,044 tests), production
+  build + sitemap, knip clean, react-doctor:diff 96/100 (all warnings
+  pre-existing), ratchet + coverage-floor baselines refreshed per their
+  stale-baseline warnings (coverage ROSE — folded modules enter
+  `collectCoverageFrom`).
+- Phase 2 (router hygiene): PR #3050 — removed the last two pages-router
+  idioms (`next/head` in `app/sentry-example-page/page.tsx` +
+  `components/messages/layout/MessagesLayout.tsx`). Live-browser evidence
+  both were no-ops in the App Router (the /messages
+  `body { overflow: hidden }` style never reached the DOM). Zero `next/head`
+  imports remain; pages-router ledger closed.
+- Phase 3 W2 opened (reordered ahead of W1 after the conformance scan showed
+  all scrape pages uniform): batch 1 replaces the duplicated WordPress asset
+  chrome + footer in 20 museum pages with the existing
+  `WordPressLegacyAssets`/`WordPressLegacyFooter` components (pattern from
+  PR #2593). Fail-closed codemod + hydrated-DOM parity diffs: only sanctioned
+  normalizations (font-preload `crossorigin`, oembed URL cleanup fixing a
+  scrape-era `#038;` mangling, footer a11y attrs). `oversized_files`
+  139 -> 119.
+- Environment note for other threads: concurrent full-Jest runs across
+  worktrees corrupt the shared transform cache (random suite fails to LOAD
+  with a `readCacheFile` stack; passes alone). Use a private
+  `--cacheDirectory` per worktree.
+- Scope update from orchestrator: Thread C complete, so
+  `components/delegation/**` splitting (CollectionDelegation.tsx 2,029,
+  WalletChecker.tsx) is now in Thread D scope for W3.
+
 ## 2026-07-04
 
 - Audit completed (Explore agent + orchestrator): see README baseline section.
