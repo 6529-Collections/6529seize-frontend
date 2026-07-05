@@ -281,7 +281,7 @@ export const DE_DE_MESSAGES = {
   "profileCms.header.openWebsite": "Website {handle} öffnen",
   "profileCms.header.website": "Website",
   "profileCms.interactive.budgetWarning":
-    "Dieses 3D-Asset überschreitet das deklarierte Performance-Budget, daher das Laden langsam sein kann.",
+    "Dieses 3D-Asset überschreitet das deklarierte Performance-Budget, sodass das Laden langsam sein kann.",
   "profileCms.interactive.canvasLabel": "Interaktive 3D-Vorschau",
   "profileCms.interactive.deepZoom.description":
     "Dieser V1-Renderer hält Deep Zoom statisch, bis der interaktive Viewer aktiviert wird.",
