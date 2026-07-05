@@ -49,6 +49,19 @@ describe("WaveDropActionsCopyText", () => {
     await waitFor(() => expect(onCopy).toHaveBeenCalled());
   });
 
+  it("closes the menu without crashing when the clipboard API is unavailable", async () => {
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      configurable: true,
+      value: undefined,
+    });
+    const onCopy = jest.fn();
+
+    render(<WaveDropActionsCopyText drop={createDrop()} onCopy={onCopy} />);
+    fireEvent.click(screen.getByRole("button", { name: "Copy text" }));
+
+    await waitFor(() => expect(onCopy).toHaveBeenCalled());
+  });
+
   it("is disabled for temporary drops and copies nothing", () => {
     const onCopy = jest.fn();
 

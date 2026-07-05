@@ -27,12 +27,25 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
       return;
     }
 
-    void navigator.clipboard
+    const clipboard = globalThis.navigator?.clipboard as
+      | { writeText?: (text: string) => Promise<void> }
+      | undefined;
+
+    // Close the menu even when the clipboard API is unavailable or the write
+    // fails — mirrors the mobile copy action's behavior.
+    if (typeof clipboard?.writeText !== "function") {
+      onCopy?.();
+      return;
+    }
+
+    void clipboard
       .writeText(buildDropClipboardText(drop))
       .then(() => {
         onCopy?.();
       })
-      .catch(() => undefined);
+      .catch(() => {
+        onCopy?.();
+      });
   };
 
   return (
