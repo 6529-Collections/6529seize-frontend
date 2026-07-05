@@ -113,7 +113,11 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   test("renders The Memes mint page read-only", async ({ page }) => {
     await gotoReady(page, "/the-memes/mint");
 
-    await expect(page).toHaveTitle(/^Mint #\d+ \| [^|]+ \| The Memes$/);
+    // The numbered "Mint #<id> | <name> | The Memes" title comes from the
+    // client TitleContext and only sticks while a mint is live; outside mint
+    // windows (Memes mint Mon/Wed/Fri) deployed envs settle on the static
+    // generateMetadata title "Mint | The Memes", so accept both.
+    await expect(page).toHaveTitle(/^Mint(?: #\d+ \| [^|]+)? \| The Memes$/);
     await expect(page.getByText("Retrieving Mint information")).toBeHidden({
       timeout: 15000,
     });
