@@ -19,6 +19,10 @@ type TitleContextType = {
   // opposed to the provider's route-default placeholder. Only owned titles
   // may overwrite the route's server metadata <title>.
   isTitleOwned: boolean;
+  // Pathname the current title text was computed for. During a navigation
+  // there is a render window where the text still belongs to the previous
+  // route; consumers must not act on it for the new route until they match.
+  titlePathname: string | null;
   setTitle: (title: string) => void;
   notificationCount: number;
   setNotificationCount: (count: number) => void;
@@ -85,6 +89,8 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const [title, setTitle] = useState<string>(() =>
     getDefaultTitleForRoute(pathname)
   );
+  // Pathname the current title text was computed for.
+  const [titlePathname, setTitlePathname] = useState<string | null>(pathname);
   // Pathname the explicit title was claimed for: ownership evaporates in the
   // same render as a navigation, before any effect-based reset runs.
   const [explicitTitlePathname, setExplicitTitlePathname] = useState<
@@ -122,6 +128,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (pathnameChanged) {
       setTitle(getDefaultTitleForRoute(pathname));
+      setTitlePathname(pathname);
       setExplicitTitlePathname(null);
       setWaveData(null);
       return;
@@ -137,6 +144,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
     ) {
       setTitle(getDefaultTitleForRoute(pathname));
+      setTitlePathname(pathname);
       setExplicitTitlePathname(null);
       setWaveData(null);
     }
@@ -145,6 +153,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateTitle = (newTitle: string) => {
     if (routeRef.current === pathname) {
       setTitle(newTitle);
+      setTitlePathname(pathname);
       setExplicitTitlePathname(pathname);
     }
   };
@@ -187,12 +196,13 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     return {
       title: finalTitle,
       isTitleOwned,
+      titlePathname,
       setTitle: updateTitle,
       notificationCount,
       setNotificationCount,
       setWaveData,
     };
-  }, [computedTitle, isTitleOwned, notificationCount]);
+  }, [computedTitle, isTitleOwned, notificationCount, titlePathname]);
 
   return (
     <TitleContext.Provider value={contextValue}>

@@ -3,11 +3,16 @@ import React from "react";
 
 let mockTitle = "6529.io";
 let mockIsTitleOwned = false;
+let mockTitlePathname: string | null = "/network";
 let mockPathname = "/network";
 
 jest.mock("@/contexts/TitleContext", () => ({
   DEFAULT_TITLE: "6529.io",
-  useTitle: () => ({ title: mockTitle, isTitleOwned: mockIsTitleOwned }),
+  useTitle: () => ({
+    title: mockTitle,
+    isTitleOwned: mockIsTitleOwned,
+    titlePathname: mockTitlePathname,
+  }),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -29,12 +34,15 @@ describe("DynamicHeadTitle", () => {
   beforeEach(() => {
     mockTitle = "6529.io";
     mockIsTitleOwned = false;
+    mockTitlePathname = "/network";
     mockPathname = "/network";
   });
 
   it("re-asserts an owned title after a later head commit overwrites it", async () => {
     mockTitle = "Network Metrics | Open Data";
     mockIsTitleOwned = true;
+    mockTitlePathname = "/open-data/network-metrics";
+    mockPathname = "/open-data/network-metrics";
     document.title = "Network Metrics"; // SSR metadata title
 
     render(<DynamicHeadTitle />);
@@ -51,6 +59,8 @@ describe("DynamicHeadTitle", () => {
   it("lets server metadata win over route-default placeholders", async () => {
     mockTitle = "Open Data | Tools"; // provider route default, not owned
     mockIsTitleOwned = false;
+    mockTitlePathname = "/open-data";
+    mockPathname = "/open-data";
     document.title = "Open Data";
 
     render(<DynamicHeadTitle />);
@@ -64,6 +74,8 @@ describe("DynamicHeadTitle", () => {
   it("writes a one-shot fallback when the document title is empty", async () => {
     mockTitle = "Open Data | Tools";
     mockIsTitleOwned = false;
+    mockTitlePathname = "/open-data";
+    mockPathname = "/open-data";
     document.title = "";
 
     render(<DynamicHeadTitle />);
@@ -78,6 +90,7 @@ describe("DynamicHeadTitle", () => {
   it("owns the default title on the root path", async () => {
     mockTitle = "6529.io";
     mockIsTitleOwned = false;
+    mockTitlePathname = "/";
     mockPathname = "/";
     document.title = "Something Else";
 
@@ -88,30 +101,42 @@ describe("DynamicHeadTitle", () => {
     await waitFor(() => expect(document.title).toBe("6529.io"));
   });
 
-  it("releases the title to the next route's metadata on navigation", async () => {
+  it("never writes route defaults across a route change, whichever side of the metadata commit", async () => {
+    // Owned title on the source route.
     mockTitle = "Network Metrics | Open Data";
     mockIsTitleOwned = true;
+    mockTitlePathname = "/open-data/network-metrics";
+    mockPathname = "/open-data/network-metrics";
     document.title = "Network Metrics";
 
     const view = render(<DynamicHeadTitle />);
     expect(document.title).toBe("Network Metrics | Open Data");
 
-    // Client-side navigation: ownership evaporates in the same render
-    // (pathname-keyed), before the provider's reset effect would run.
-    mockTitle = "Open Data | Tools";
+    // Navigation render: ownership evaporates render-time; the context text
+    // still belongs to the previous route (titlePathname lags pathname).
     mockIsTitleOwned = false;
     mockPathname = "/open-data";
     view.rerender(<DynamicHeadTitle />);
-
-    // The next route's metadata commit must win without a fight.
-    document.title = "Open Data";
     await flushObservers();
+    expect(document.title).toBe("Network Metrics | Open Data"); // untouched
+
+    // Metadata commit for the new route lands BEFORE the provider reset.
+    document.title = "Open Data";
+
+    // Provider reset render: context becomes consistent for the new route.
+    mockTitle = "Open Data | Tools";
+    mockTitlePathname = "/open-data";
+    view.rerender(<DynamicHeadTitle />);
+    await flushObservers();
+    // The route-default placeholder must not clobber the committed metadata.
     expect(document.title).toBe("Open Data");
   });
 
   it("restores the new context title once when ownership is released on the same pathname", async () => {
     mockTitle = "Wave One | Brain";
     mockIsTitleOwned = true;
+    mockTitlePathname = "/messages";
+    mockPathname = "/messages";
     document.title = "Messages";
 
     const view = render(<DynamicHeadTitle />);
@@ -133,6 +158,8 @@ describe("DynamicHeadTitle", () => {
   it("keeps owning the title when the head commit replaces the <title> node", async () => {
     mockTitle = "Network Metrics | Open Data";
     mockIsTitleOwned = true;
+    mockTitlePathname = "/open-data/network-metrics";
+    mockPathname = "/open-data/network-metrics";
     document.title = "Network Metrics";
 
     render(<DynamicHeadTitle />);
@@ -150,6 +177,8 @@ describe("DynamicHeadTitle", () => {
   it("stops re-asserting after unmount", async () => {
     mockTitle = "Network Metrics | Open Data";
     mockIsTitleOwned = true;
+    mockTitlePathname = "/open-data/network-metrics";
+    mockPathname = "/open-data/network-metrics";
     document.title = "Network Metrics";
 
     const { unmount } = render(<DynamicHeadTitle />);
