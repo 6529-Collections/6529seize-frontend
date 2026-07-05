@@ -60,6 +60,37 @@
     `.claude/worktrees/`; identical content knips clean from a
     short-path worktree or the main checkout — treat knip failures under
     `.claude/worktrees/` as suspect before chasing them.
+    - SOLVED 2026-07-05 (root cause via `knip --debug` A/B at e70de6a90,
+      nested worktree vs `D:\wt-knipctl` short-path control, identical
+      junctioned node_modules). Mechanism: the root `.gitignore` had an
+      unanchored `.claude` line; knip converts every root-gitignore rule
+      into picomatch ignores (`.claude` → `**/.claude` + `**/.claude/**`)
+      and hands them to fast-glob with `absolute: true`. Entries that
+      plugins resolve to absolute-path patterns — everything referenced
+      as `node <file>` from package.json scripts and from
+      `.github/workflows/*.yml` (github-actions plugin), plus
+      workflow-launched Playwright specs — are then matched against
+      their full absolute path, and under
+      `.claude/worktrees/<wt>` every one of them contains a `.claude`
+      segment, so fast-glob drops them. 28 files fell out of the graph
+      (3954 → 3926 analyzed): the 7 unreferenced-elsewhere scripts
+      became UNUSED FILE, 21 `tests/**` drops were masked by
+      `ignoreFiles`, and coverage-floor/debt-ratchet/dependency-risk-gate
+      lost their plugin-entry "ignore exports" exemption, so
+      `includeEntryExports: true` surfaced their 16 `module.exports`
+      members as UNUSED EXPORT. Fix: anchor the line to `/.claude/`
+      (with an explanatory comment) — knip then derives `.claude/**`,
+      which matches neither absolute paths nor anything outside a
+      top-level `.claude/`. Verified clean (exit 0, zero findings) in
+      both the nested worktree and the short-path control at the same
+      commit; `git check-ignore` confirms `.claude/` at the repo root is
+      still ignored. Caveats: checkouts of commits predating the fix
+      still show the false findings, and the same class of bug fires for
+      any unanchored root-gitignore token that equals a path segment of
+      the checkout's own location (e.g. a worktree under a dir named
+      `logs` or `tasks`). Side-finding, not fixed: knip's `getGitDir()`
+      does `join(cwd, <absolute gitdir>)`, so `.git/info/exclude` is
+      never honored in linked worktrees (harmless for us).
   - Nested bare-`pnpm` hops (`check:changed`, `predev`) execute in
     whichever checkout's `bin/` is on PATH (`bin/pnpm.cmd` does
     `cd /d "%~dp0.."`), so from a secondary worktree they silently run
