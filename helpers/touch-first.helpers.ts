@@ -72,10 +72,35 @@ export const hasTouchCapability = (): boolean => {
   return getMediaQueryList(COARSE_POINTER_QUERY)?.matches ?? false;
 };
 
+const MOBILE_USER_AGENT_REGEX =
+  /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i;
+
+/**
+ * Phone signal from client hints or the user agent. Client hints win when
+ * present: Android tablets report `userAgentData.mobile === false`, so a
+ * tablet with a trackpad still gets the desktop experience.
+ */
+const isMobileUserAgent = (): boolean => {
+  const nav = (globalThis as typeof globalThis & { navigator?: Navigator })
+    .navigator as
+    | (Navigator & { userAgentData?: { mobile?: boolean } })
+    | undefined;
+  if (!nav) {
+    return false;
+  }
+  const uaDataMobile = nav.userAgentData?.mobile;
+  if (typeof uaDataMobile === "boolean") {
+    return uaDataMobile;
+  }
+  return MOBILE_USER_AGENT_REGEX.test(nav.userAgent);
+};
+
 /**
  * True only for devices whose primary interaction is touch (phones/tablets).
- * `touchDetected` lets callers feed in an observed `touchstart` for devices
- * that hide their touch capability until first use.
+ * Phones stay touch-first even when a paired mouse or hovering stylus adds a
+ * fine pointer or hover capability; hybrids (touch laptops) are identified by
+ * capabilities alone. `touchDetected` lets callers feed in an observed
+ * `touchstart` for devices that hide their touch capability until first use.
  */
 export const isTouchFirstEnvironment = (options?: {
   readonly touchDetected?: boolean;
@@ -83,6 +108,9 @@ export const isTouchFirstEnvironment = (options?: {
   const touchCapable = (options?.touchDetected ?? false) || hasTouchCapability();
   if (!touchCapable) {
     return false;
+  }
+  if (isMobileUserAgent()) {
+    return true;
   }
   return !hasFinePointerCapability() && !hasHoverCapability();
 };

@@ -9,8 +9,8 @@ import {
   MAX_PINNED_WAVES,
 } from "@/hooks/usePinnedWavesServer";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { isTouchFirstEnvironment } from "@/helpers/touch-first.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;
@@ -57,7 +57,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const { pinnedIds, isOperationInProgress, canPinWave } =
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const isTouchDevice = useIsTouchDevice();
   const [maxLimitTooltipRequest, setMaxLimitTooltipRequest] =
     useState<MaxLimitTooltipRequest | null>(null);
 
@@ -80,21 +80,6 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     const timer = setTimeout(() => setMaxLimitTooltipRequest(null), 3000);
     return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
-
-  // Detect touch-first devices on component mount (hybrid touch laptops
-  // keep the desktop hover behavior).
-  useEffect(() => {
-    const checkTouch = () => {
-      setIsTouchDevice(isTouchFirstEnvironment());
-    };
-
-    checkTouch();
-    globalThis.addEventListener("resize", checkTouch);
-
-    return () => {
-      globalThis.removeEventListener("resize", checkTouch);
-    };
-  }, []);
 
   if (!connectedProfile?.handle || activeProfileProxy) {
     return null;

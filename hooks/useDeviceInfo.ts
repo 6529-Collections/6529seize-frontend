@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
-  hasFinePointerCapability,
-  hasHoverCapability,
+  isTouchFirstEnvironment,
   subscribeToTouchFirstChanges,
 } from "@/helpers/touch-first.helpers";
 import useCapacitor from "./useCapacitor";
@@ -11,10 +10,11 @@ import useCapacitor from "./useCapacitor";
 interface DeviceInfo {
   readonly isMobileDevice: boolean;
   /**
-   * Touch-first device: touch input exists AND there is no fine pointer
-   * (mouse/trackpad) and no hover support. Hybrid touch-screen laptops
-   * (e.g. Windows Surface) are NOT touch-first — they get the desktop
-   * experience. Use this for choosing touch vs desktop affordances.
+   * Touch-first device (see helpers/touch-first.helpers.ts): phones and
+   * tablets, including phones with a paired mouse or hovering stylus.
+   * Hybrid touch-screen laptops (e.g. Windows Surface) are NOT touch-first —
+   * they get the desktop experience. Use this for choosing touch vs desktop
+   * affordances.
    */
   readonly hasTouchScreen: boolean;
   readonly isApp: boolean;
@@ -52,10 +52,7 @@ export default function useDeviceInfo(): DeviceInfo {
       // Raw capability — true when touch input exists at all. Only used for
       // UA disambiguation (iPads pretending to be Macs) — never for UI mode.
       const hasTouchInput = touchDetected || maxTouchPoints > 0;
-      // Touch-first: touch without mouse/trackpad/hover. Windows touch
-      // laptops have a fine pointer and hover, so they stay desktop.
-      const hasTouchScreen =
-        hasTouchInput && !hasFinePointerCapability() && !hasHoverCapability();
+      const hasTouchScreen = isTouchFirstEnvironment({ touchDetected });
 
       const ua = nav.userAgent;
       const uaDataMobile = nav.userAgentData?.mobile;

@@ -44,8 +44,27 @@ function defineMaxTouchPoints(value: number) {
   });
 }
 
+function defineUserAgent(value: string) {
+  Object.defineProperty(globalThis.navigator, "userAgent", {
+    configurable: true,
+    value,
+  });
+}
+
+function defineUserAgentData(mobile: boolean | undefined) {
+  if (mobile === undefined) {
+    Reflect.deleteProperty(globalThis.navigator, "userAgentData");
+    return;
+  }
+  Object.defineProperty(globalThis.navigator, "userAgentData", {
+    configurable: true,
+    value: { mobile },
+  });
+}
+
 describe("touch-first helpers", () => {
   const originalMatchMedia = globalThis.matchMedia;
+  const originalUserAgent = globalThis.navigator.userAgent;
 
   afterEach(() => {
     Object.defineProperty(globalThis, "matchMedia", {
@@ -54,6 +73,8 @@ describe("touch-first helpers", () => {
       value: originalMatchMedia,
     });
     defineMaxTouchPoints(0);
+    defineUserAgent(originalUserAgent);
+    defineUserAgentData(undefined);
   });
 
   describe("isTouchFirstEnvironment", () => {
@@ -106,6 +127,49 @@ describe("touch-first helpers", () => {
         "(any-pointer: fine)": true,
         "(any-hover: hover)": true,
       });
+
+      expect(isTouchFirstEnvironment()).toBe(false);
+    });
+
+    it("keeps phones touch-first when a paired mouse adds hover and a fine pointer", () => {
+      defineMaxTouchPoints(5);
+      defineMatchMedia({
+        "(any-pointer: fine)": true,
+        "(any-hover: hover)": true,
+        "(any-pointer: coarse)": true,
+      });
+      defineUserAgentData(true);
+
+      expect(isTouchFirstEnvironment()).toBe(true);
+    });
+
+    it("keeps stylus phones touch-first via the user-agent fallback", () => {
+      defineMaxTouchPoints(5);
+      defineMatchMedia({
+        "(any-hover: hover)": true,
+        "(any-pointer: coarse)": true,
+      });
+      defineUserAgentData(undefined);
+      defineUserAgent(
+        "Mozilla/5.0 (Linux; Android 15; SM-S928B) AppleWebKit/537.36 Chrome/126 Mobile Safari/537.36"
+      );
+
+      expect(isTouchFirstEnvironment()).toBe(true);
+    });
+
+    it("keeps tablets with a trackpad on desktop when client hints say not mobile", () => {
+      // Android tablet UAs still contain "Android", but client hints report
+      // mobile=false — the tablet+trackpad combo must stay desktop.
+      defineMaxTouchPoints(5);
+      defineMatchMedia({
+        "(any-pointer: fine)": true,
+        "(any-hover: hover)": true,
+        "(any-pointer: coarse)": true,
+      });
+      defineUserAgentData(false);
+      defineUserAgent(
+        "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/126 Safari/537.36"
+      );
 
       expect(isTouchFirstEnvironment()).toBe(false);
     });

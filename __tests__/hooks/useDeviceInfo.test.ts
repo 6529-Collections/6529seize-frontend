@@ -166,4 +166,16 @@ describe("useDeviceInfo", () => {
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.hasTouchScreen).toBe(true);
   });
+
+  it("keeps hasTouchScreen true for phones that pair a mouse (hover + fine pointer)", () => {
+    // A Bluetooth mouse on a phone adds hover and a fine pointer, but the
+    // mobile UA keeps the device touch-first.
+    capacitorMock.mockReturnValue({ isCapacitor: false });
+    defineUserAgent("iPhone");
+    defineMaxTouchPoints(5);
+    defineMatchMedia({ finePointer: true, hover: true });
+    const { result } = renderHook(() => useDeviceInfo());
+    expect(result.current.hasTouchScreen).toBe(true);
+    expect(result.current.isMobileDevice).toBe(true);
+  });
 });
