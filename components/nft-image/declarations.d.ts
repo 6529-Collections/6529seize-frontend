@@ -3,9 +3,12 @@ declare namespace JSX {
     "model-viewer": ModelViewerElementAttributes;
   }
 
-  interface ModelViewerElementAttributes
-    extends React.HTMLAttributes<HTMLElement> {
-    ref?: React.RefObject<any> | React.MutableRefObject<any> | ((instance: any) => void) | null;
+  interface ModelViewerElementAttributes extends React.HTMLAttributes<HTMLElement> {
+    ref?:
+      | React.RefObject<HTMLElement | null>
+      | React.MutableRefObject<HTMLElement | null>
+      | ((instance: HTMLElement | null) => void)
+      | null;
     src?: string;
     alt?: string;
     "auto-rotate"?: boolean;

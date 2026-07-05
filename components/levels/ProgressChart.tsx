@@ -10,6 +10,9 @@ import {
   Filler,
   Tooltip,
   LogarithmicScale,
+  type ActiveElement,
+  type ChartEvent,
+  type TooltipItem,
 } from "chart.js";
 import levels from "@/constants/levels.json";
 import { useEffect, useState } from "react";
@@ -74,15 +77,16 @@ export default function ProgressChart() {
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (ctx: any) =>
-            `Level ${ctx.label}: ${ctx.parsed.y.toLocaleString()} TDH+Rep`,
+          label: (ctx: TooltipItem<"line">) =>
+            `Level ${ctx.label}: ${(ctx.parsed.y ?? 0).toLocaleString()} TDH+Rep`,
         },
       },
     },
     animation: prefersReducedMotion ? (false as const) : undefined,
-    onHover: (_: any, activeElements: any[]) => {
-      if (activeElements.length > 0) {
-        const idx = activeElements[0].index;
+    onHover: (_: ChartEvent, activeElements: ActiveElement[]) => {
+      const firstActiveElement = activeElements[0];
+      if (firstActiveElement) {
+        const idx = firstActiveElement.index;
         const level = (levels as LevelData[])[idx]?.level;
         window.dispatchEvent(
           new CustomEvent("level-hover", { detail: { level } })

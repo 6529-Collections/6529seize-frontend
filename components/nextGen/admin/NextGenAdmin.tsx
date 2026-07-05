@@ -285,7 +285,7 @@ export default function NextGenAdmin() {
   function printCreateCollection() {
     return (
       (isGlobalAdmin() ||
-        (createCollectionFunctionAdmin.data as any) === true) && (
+        createCollectionFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.CREATE_COLLECTION)}
@@ -299,7 +299,7 @@ export default function NextGenAdmin() {
   function printAirdropTokens() {
     return (
       (isGlobalAdmin() ||
-        (airdropTokensFunctionAdmin.data as any) === true) && (
+        airdropTokensFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.AIRDROP_TOKENS)}
@@ -313,7 +313,7 @@ export default function NextGenAdmin() {
   function printUpdateImagesAttributes() {
     return (
       (isGlobalAdmin() ||
-        (updateImagesAttributesFunctionAdmin.data as any) === true) && (
+        updateImagesAttributesFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.UPDATE_IMAGES_ATTRIBUTES)}
@@ -327,7 +327,7 @@ export default function NextGenAdmin() {
   function printSetFinalSupply() {
     return (
       (isGlobalAdmin() ||
-        (setFinalSupplyFunctionAdmin.data as any) === true) && (
+        setFinalSupplyFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.SET_FINAL_SUPPLY)}
@@ -341,7 +341,7 @@ export default function NextGenAdmin() {
   function printInitBurn() {
     return (
       (isGlobalAdmin() ||
-        (initializeBurnFunctionAdmin.data as any) === true) && (
+        initializeBurnFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.INITIALIZE_BURN)}
@@ -355,7 +355,7 @@ export default function NextGenAdmin() {
   function printInitExternalBurnSwap() {
     return (
       (isGlobalAdmin() ||
-        (initializeExternalBurnSwapFunctionAdmin.data as any) === true) && (
+        initializeExternalBurnSwapFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() =>
@@ -371,7 +371,7 @@ export default function NextGenAdmin() {
   function printMintAuction() {
     return (
       (isGlobalAdmin() ||
-        (mintAndAuctionFunctionAdmin.data as any) === true) && (
+        mintAndAuctionFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.MINT_AND_AUCTION)}
@@ -385,13 +385,13 @@ export default function NextGenAdmin() {
   function printAdminCollectionActions() {
     return (
       (isGlobalAdmin() ||
-        (createCollectionFunctionAdmin.data as any) === true ||
-        (airdropTokensFunctionAdmin.data as any) === true ||
-        (updateImagesAttributesFunctionAdmin.data as any) === true ||
-        (setFinalSupplyFunctionAdmin.data as any) === true ||
-        (initializeBurnFunctionAdmin.data as any) === true ||
-        (mintAndAuctionFunctionAdmin.data as any) === true ||
-        (initializeExternalBurnSwapFunctionAdmin.data as any) === true) && (
+        createCollectionFunctionAdmin.data === true ||
+        airdropTokensFunctionAdmin.data === true ||
+        updateImagesAttributesFunctionAdmin.data === true ||
+        setFinalSupplyFunctionAdmin.data === true ||
+        initializeBurnFunctionAdmin.data === true ||
+        mintAndAuctionFunctionAdmin.data === true ||
+        initializeExternalBurnSwapFunctionAdmin.data === true) && (
         <>
           <Row className="tw-pt-6">
             <Col xs={12}>
@@ -449,7 +449,7 @@ export default function NextGenAdmin() {
 
   function printSetSplits() {
     return (
-      (isGlobalAdmin() || (setSplitsFunctionAdmin.data as any) === true) && (
+      (isGlobalAdmin() || setSplitsFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() =>
@@ -465,8 +465,7 @@ export default function NextGenAdmin() {
   function printProposePrimary() {
     return (
       (isGlobalAdmin() ||
-        (proposePrimaryAddressesAndPercentagesFunctionAdmin.data as any) ===
-          true) && (
+        proposePrimaryAddressesAndPercentagesFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() =>
@@ -484,8 +483,7 @@ export default function NextGenAdmin() {
   function printProposeSecondary() {
     return (
       (isGlobalAdmin() ||
-        (proposeSecondaryAddressesAndPercentagesFunctionAdmin.data as any) ===
-          true) && (
+        proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() =>
@@ -503,7 +501,7 @@ export default function NextGenAdmin() {
   function printAcceptAddressesAndPercentages() {
     return (
       (isGlobalAdmin() ||
-        (acceptAddressesAndPercentagesFunctionAdmin.data as any) === true) && (
+        acceptAddressesAndPercentagesFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() =>
@@ -518,7 +516,7 @@ export default function NextGenAdmin() {
 
   function printPayArtist() {
     return (
-      (isGlobalAdmin() || (payArtistFunctionAdmin.data as any) === true) && (
+      (isGlobalAdmin() || payArtistFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.PAY_ARTIST)}
@@ -532,13 +530,11 @@ export default function NextGenAdmin() {
   function printPayActions() {
     return (
       (isGlobalAdmin() ||
-        (setSplitsFunctionAdmin.data as any) === true ||
-        (proposePrimaryAddressesAndPercentagesFunctionAdmin.data as any) ===
-          true ||
-        (proposeSecondaryAddressesAndPercentagesFunctionAdmin.data as any) ===
-          true ||
-        (acceptAddressesAndPercentagesFunctionAdmin.data as any) === true ||
-        (payArtistFunctionAdmin.data as any) === true) && (
+        setSplitsFunctionAdmin.data === true ||
+        proposePrimaryAddressesAndPercentagesFunctionAdmin.data === true ||
+        proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === true ||
+        acceptAddressesAndPercentagesFunctionAdmin.data === true ||
+        payArtistFunctionAdmin.data === true) && (
         <>
           <Row className="tw-pt-6">
             <Col xs={12}>
@@ -594,20 +590,18 @@ export default function NextGenAdmin() {
   function printGlobal() {
     if (
       !isGlobalAdmin() &&
-      (createCollectionFunctionAdmin.data as any) === false &&
-      (airdropTokensFunctionAdmin.data as any) === false &&
-      (setSplitsFunctionAdmin.data as any) === false &&
-      (updateImagesAttributesFunctionAdmin.data as any) === false &&
-      (setFinalSupplyFunctionAdmin.data as any) === false &&
-      (initializeBurnFunctionAdmin.data as any) === false &&
-      (proposePrimaryAddressesAndPercentagesFunctionAdmin.data as any) ===
-        false &&
-      (proposeSecondaryAddressesAndPercentagesFunctionAdmin.data as any) ===
-        false &&
-      (acceptAddressesAndPercentagesFunctionAdmin.data as any) === false &&
-      (payArtistFunctionAdmin.data as any) === false &&
-      (mintAndAuctionFunctionAdmin.data as any) === false &&
-      (initializeExternalBurnSwapFunctionAdmin.data as any) === false
+      createCollectionFunctionAdmin.data === false &&
+      airdropTokensFunctionAdmin.data === false &&
+      setSplitsFunctionAdmin.data === false &&
+      updateImagesAttributesFunctionAdmin.data === false &&
+      setFinalSupplyFunctionAdmin.data === false &&
+      initializeBurnFunctionAdmin.data === false &&
+      proposePrimaryAddressesAndPercentagesFunctionAdmin.data === false &&
+      proposeSecondaryAddressesAndPercentagesFunctionAdmin.data === false &&
+      acceptAddressesAndPercentagesFunctionAdmin.data === false &&
+      payArtistFunctionAdmin.data === false &&
+      mintAndAuctionFunctionAdmin.data === false &&
+      initializeExternalBurnSwapFunctionAdmin.data === false
     ) {
       return printAdminRestrictionMessage();
     }
@@ -679,7 +673,7 @@ export default function NextGenAdmin() {
           </>
         )}
         {(isGlobalAdmin() ||
-          (addRandomizerFunctionAdmin.data as any) === true) && (
+          addRandomizerFunctionAdmin.data === true) && (
           <>
             <Row className="tw-pt-6">
               <Col xs={12}>
@@ -692,7 +686,7 @@ export default function NextGenAdmin() {
                 className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 tw-pt-2"
               >
                 {(isGlobalAdmin() ||
-                  (addRandomizerFunctionAdmin.data as any) === true) && (
+                  addRandomizerFunctionAdmin.data === true) && (
                   <Button
                     className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                     onClick={() => setGlobalFocus(GlobalFocus.ADD_RANDOMIZER)}
@@ -719,9 +713,9 @@ export default function NextGenAdmin() {
     return (
       (isGlobalAdmin() ||
         isWalletCollectionAdmin ||
-        (setDataFunctionAdmin.data as any) === true ||
-        (setCostsFunctionAdmin.data as any) === true ||
-        (setPhasesFunctionAdmin.data as any) === true) && (
+        setDataFunctionAdmin.data === true ||
+        setCostsFunctionAdmin.data === true ||
+        setPhasesFunctionAdmin.data === true) && (
         <>
           <Row className="tw-pt-6">
             <Col xs={12}>
@@ -735,7 +729,7 @@ export default function NextGenAdmin() {
             >
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                (setDataFunctionAdmin.data as any) === true) && (
+                setDataFunctionAdmin.data === true) && (
                 <Button
                   className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                   onClick={() => setCollectionFocus(CollectionFocus.SET_DATA)}
@@ -745,7 +739,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                (setCostsFunctionAdmin.data as any) === true) && (
+                setCostsFunctionAdmin.data === true) && (
                 <Button
                   className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                   onClick={() => setCollectionFocus(CollectionFocus.SET_COSTS)}
@@ -755,7 +749,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                (setPhasesFunctionAdmin.data as any) === true) && (
+                setPhasesFunctionAdmin.data === true) && (
                 <>
                   <Button
                     className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
@@ -802,8 +796,8 @@ export default function NextGenAdmin() {
     return (
       (isGlobalAdmin() ||
         isWalletCollectionAdmin ||
-        (updateInfoFunctionAdmin.data as any) === true ||
-        (changeMetadataViewFunctionAdmin.data as any) === true) && (
+        updateInfoFunctionAdmin.data === true ||
+        changeMetadataViewFunctionAdmin.data === true) && (
         <>
           <Row className="tw-pt-6">
             <Col xs={12}>
@@ -817,7 +811,7 @@ export default function NextGenAdmin() {
             >
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                (updateInfoFunctionAdmin.data as any) === true) && (
+                updateInfoFunctionAdmin.data === true) && (
                 <Button
                   className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                   onClick={() =>
@@ -829,7 +823,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                (updateInfoFunctionAdmin.data as any) === true) && (
+                updateInfoFunctionAdmin.data === true) && (
                 <Button
                   className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                   onClick={() =>
@@ -841,7 +835,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                (updateInfoFunctionAdmin.data as any) === true) && (
+                updateInfoFunctionAdmin.data === true) && (
                 <Button
                   className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                   onClick={() =>
@@ -853,7 +847,7 @@ export default function NextGenAdmin() {
               )}
               {(isGlobalAdmin() ||
                 isWalletCollectionAdmin ||
-                (changeMetadataViewFunctionAdmin.data as any) === true) && (
+                changeMetadataViewFunctionAdmin.data === true) && (
                 <Button
                   className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                   onClick={() =>
@@ -899,11 +893,11 @@ export default function NextGenAdmin() {
     if (
       !isGlobalAdmin() &&
       !isWalletCollectionAdmin &&
-      (setDataFunctionAdmin.data as any) === false &&
-      (setCostsFunctionAdmin.data as any) === false &&
-      (setPhasesFunctionAdmin.data as any) === false &&
-      (updateInfoFunctionAdmin.data as any) === false &&
-      (changeMetadataViewFunctionAdmin.data as any) === false
+      setDataFunctionAdmin.data === false &&
+      setCostsFunctionAdmin.data === false &&
+      setPhasesFunctionAdmin.data === false &&
+      updateInfoFunctionAdmin.data === false &&
+      changeMetadataViewFunctionAdmin.data === false
     ) {
       return printAdminRestrictionMessage();
     }
@@ -1014,7 +1008,7 @@ export default function NextGenAdmin() {
   }
 
   function isGlobalAdmin() {
-    return (globalAdmin.data as any) === true;
+    return globalAdmin.data === true;
   }
 
   return (

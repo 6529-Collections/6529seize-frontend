@@ -137,11 +137,12 @@ function normalizeEnsName(name: string): {
     const normalized = ens_normalize(name);
     const display = toUnicode(normalized);
     return { normalized, display };
-  } catch (error: any) {
+  } catch (error) {
     console.error("normalizeEnsName error", error);
+    const record = error as { message?: unknown } | null;
     let message = "Invalid ENS name provided";
-    if (error?.message) {
-      message = `${message}: ${error.message}`;
+    if (typeof record?.message === "string" && record.message) {
+      message = `${message}: ${record.message}`;
     }
     throw new EnsPreviewError(400, message);
   }

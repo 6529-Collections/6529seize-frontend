@@ -61,8 +61,8 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     parsedCollectionIndex
   );
   const collectionIds = getCollectionIdsForAddress(
-    (globalAdmin.data as any) === true,
-    (functionAdmin.data as any) === true,
+    globalAdmin.data === true,
+    functionAdmin.data === true,
     collectionAdmin.data,
     parsedCollectionIndex
   );
@@ -227,7 +227,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 type="string"
                 placeholder="...Phase name"
                 value={phaseName}
-                onChange={(e: any) => setPhaseName(e.target.value)}
+                onChange={(e) => setPhaseName(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -235,7 +235,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 type="file"
                 accept={".csv"}
                 value={allowlistFile ? allowlistFile.fileName : ""}
-                onChange={(e: any) => {
+                onChange={(e) => {
                   if (e.target.files) {
                     const f = e.target.files[0];
                     setAllowlistFile(f);
@@ -249,7 +249,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 type="integer"
                 placeholder="Unix epoch time"
                 value={allowlistStartTime}
-                onChange={(e: any) => setAllowlistStartTime(e.target.value)}
+                onChange={(e) => setAllowlistStartTime(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -258,7 +258,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 type="integer"
                 placeholder="Unix epoch time"
                 value={allowlistEndTime}
-                onChange={(e: any) => setAllowlistEndTime(e.target.value)}
+                onChange={(e) => setAllowlistEndTime(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -267,7 +267,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                 type="integer"
                 placeholder="...0.06529"
                 value={mintPrice}
-                onChange={(e: any) => setMintPrice(e.target.value)}
+                onChange={(e) => setMintPrice(e.target.value)}
               />
             </Form.Group>
             {!uploading && errors.length > 0 && printAdminErrors(errors)}

@@ -3,7 +3,8 @@
 import type {
   AllowlistOperation,
   AllowlistOperationBase,
-  DistributionPlanSearchContractMetadataResult} from "@/components/allowlist-tool/allowlist-tool.types";
+  DistributionPlanSearchContractMetadataResult,
+} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
   AllowlistOperationCode,
   Pool,
@@ -153,7 +154,7 @@ export default function BuildPhaseFormConfigModal({
         return null;
       }
 
-      return new Set(tokens.map((t: any) => t.owner)).size;
+      return new Set(tokens.map((t: { owner: string }) => t.owner)).size;
     };
 
     const pools = operations
@@ -436,10 +437,7 @@ export default function BuildPhaseFormConfigModal({
     ops,
     distributionPlanId,
   }: {
-    ops: {
-      code: AllowlistOperationCode;
-      params: any;
-    }[];
+    ops: AllowlistOperationBase[];
     distributionPlanId: string;
   }): Promise<{ success: boolean }> => {
     const endpoint = `/allowlists/${distributionPlanId}/operations/batch`;

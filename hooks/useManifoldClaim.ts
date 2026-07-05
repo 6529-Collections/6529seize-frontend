@@ -231,6 +231,26 @@ export interface ManifoldClaim {
 }
 
 type ManifoldClaimReadMethod = "getClaimForToken" | "getClaim";
+
+/**
+ * Loosely-decoded contract read payload. Every field is validated or
+ * coerced (Number/String/parse helpers) before use, so values stay unknown.
+ */
+interface ManifoldClaimReadValues {
+  readonly startDate?: unknown;
+  readonly endDate?: unknown;
+  readonly cost?: unknown;
+  readonly merkleRoot?: unknown;
+  readonly tokenId?: unknown;
+  readonly paymentReceiver?: unknown;
+  readonly erc20?: unknown;
+  readonly signingAddress?: unknown;
+  readonly total?: unknown;
+  readonly totalMax?: unknown;
+  readonly location?: unknown;
+  readonly walletMax?: unknown;
+  readonly storageProtocol?: unknown;
+}
 interface UseManifoldClaimResult {
   claim: ManifoldClaim | undefined;
   isFetching: boolean;
@@ -269,11 +289,16 @@ function buildClaimFromReadData({
     start: number
   ) => MemePhase | undefined;
 }): ManifoldClaim | undefined {
-  const readData = data as any;
-  const claimData =
+  const readData = data as {
+    readonly claim?: unknown;
+    readonly instanceId?: unknown;
+    readonly [index: number]: unknown;
+  };
+  const claimData = (
     readMethod === "getClaimForToken"
       ? (readData.claim ?? readData[1])
-      : readData;
+      : readData
+  ) as ManifoldClaimReadValues | null | undefined;
 
   if (!claimData) {
     return undefined;
@@ -306,7 +331,7 @@ function buildClaimFromReadData({
   return {
     identifier,
     instanceId,
-    location: String(claimData.location ?? ""),
+    location: (claimData.location ?? "") as string,
     total: Number(claimData.total),
     totalMax: Number(claimData.totalMax),
     remaining,

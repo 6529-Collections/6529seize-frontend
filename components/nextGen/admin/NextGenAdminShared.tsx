@@ -380,7 +380,7 @@ export function NextGenAdminTextFormGroup(
         type="text"
         placeholder={`...${props.title}`}
         value={props.value}
-        onChange={(e: any) => props.setValue(e.target.value)}
+        onChange={(e) => props.setValue(e.target.value)}
       />
     </Form.Group>
   );

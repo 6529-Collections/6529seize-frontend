@@ -4,13 +4,14 @@ import {
   NEXTGEN_MINTER_ABI,
 } from "@/abis/abis";
 import { publicEnv } from "@/config/env";
+import type { Abi } from "viem";
 import { goerli, mainnet, sepolia } from "viem/chains";
 
 export interface NextGenContract {
   [goerli.id]: string;
   [sepolia.id]: string;
   [mainnet.id]: string;
-  abi: any;
+  abi: Abi;
 }
 
 function getNextGenChainId() {

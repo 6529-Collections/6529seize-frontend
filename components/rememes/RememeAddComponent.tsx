@@ -158,8 +158,9 @@ export default function RememeAddComponent(props: Readonly<Props>) {
             references.map((r) => r.id)
           );
         }
-      } catch (e: any) {
-        setVerificationErrors([e.message]);
+      } catch (e) {
+        const record = e as { message?: unknown } | null;
+        setVerificationErrors([String(record?.message)]);
       }
     } else {
       setVerificationErrors(["Invalid token ID(s)"]);

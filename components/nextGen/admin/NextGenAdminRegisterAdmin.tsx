@@ -77,7 +77,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
   const collectionIndex = useCollectionIndex();
   const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
   const collectionIds = getCollectionIdsForAddress(
-    (globalAdmin.data as any) === true,
+    globalAdmin.data === true,
     false,
     undefined,
     parsedCollectionIndex
@@ -161,7 +161,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
                   as="select"
                   multiple
                   value={selectors}
-                  onChange={(e: any) => {
+                  onChange={(e) => {
                     if (selectors.includes(e.target.value)) {
                       setSelectors((selectors) =>
                         selectors.filter(

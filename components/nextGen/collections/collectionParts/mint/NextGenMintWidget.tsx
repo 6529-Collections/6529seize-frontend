@@ -30,15 +30,16 @@ import {
 import { fetchUrl } from "@/services/6529api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
 import { NextGenMintErrors, NextGenMintingFor } from "./NextGenMintShared";
 
-export function getJsonData(keccak: string, data: string) {
-  const parsed = JSON.parse(data);
-  const results: any[] = [];
+export function getJsonData(keccak: string, data: unknown) {
+  const parsed = JSON.parse(String(data));
+  const results: { key: string; value: unknown }[] = [];
   Object.entries(parsed).forEach(([key, value]) => {
     results.push({
       key,
@@ -49,7 +50,7 @@ export function getJsonData(keccak: string, data: string) {
     <ul className="tw-mb-0">
       {results.map((r) => (
         <li key={`ul-${keccak}-${r.key}-${r.value}`}>
-          {capitalizeFirstChar(r.key)}: {r.value}
+          {capitalizeFirstChar(r.key)}: {r.value as ReactNode}
         </li>
       ))}
     </ul>
@@ -543,7 +544,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   currentProof.proof.spots <= 0) ||
                 disableMint()
               }
-              onChange={(e: any) => {
+              onChange={(e) => {
                 setMintCount(parseInt(e.currentTarget.value));
               }}
             >

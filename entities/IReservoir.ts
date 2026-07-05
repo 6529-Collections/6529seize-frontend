@@ -74,7 +74,7 @@ interface ReservoirTokensResponseTokenToken {
   rarityRank: number;
   collection: ReservoirTokensResponseCollection;
   owner: string;
-  mintStages: any[];
+  mintStages: unknown[];
 }
 
 interface ReservoirTokensResponseCollection {

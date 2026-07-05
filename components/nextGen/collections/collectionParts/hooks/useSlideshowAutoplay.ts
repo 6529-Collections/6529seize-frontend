@@ -1,10 +1,11 @@
 import type { RefObject } from "react";
 import { useEffect, useState } from "react";
+import type SwiperClass from "swiper";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
 interface UseSlideshowAutoplayReturn {
   isInViewport: boolean;
-  setSwiperInstance: (swiper: any) => void;
+  setSwiperInstance: (swiper: SwiperClass) => void;
 }
 
 export function useSlideshowAutoplay(

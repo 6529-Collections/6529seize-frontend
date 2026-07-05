@@ -150,8 +150,8 @@ const convertCodeNodesToFences = (root: RootNode) => {
 };
 
 function reconstructSplitMention(
-  currentNode: any,
-  nextNode: any,
+  currentNode: TextNode,
+  nextNode: TextNode,
   mentionStart: RegExpMatchArray,
   mentionEnd: RegExpMatchArray
 ) {
@@ -192,8 +192,8 @@ function reconstructSplitMention(
 }
 
 function reconstructSplitWaveMention(
-  currentNode: any,
-  nextNode: any,
+  currentNode: TextNode,
+  nextNode: TextNode,
   mentionStart: RegExpMatchArray,
   mentionEnd: RegExpMatchArray
 ) {
@@ -236,9 +236,12 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
   for (let i = 0; i < textNodes.length - 1; i++) {
     const currentNode = textNodes[i];
     const nextNode = textNodes[i + 1];
+    if (!currentNode || !nextNode) {
+      continue;
+    }
 
-    const currentText = currentNode?.getTextContent();
-    const nextText = nextNode?.getTextContent();
+    const currentText = currentNode.getTextContent();
+    const nextText = nextNode.getTextContent();
 
     const mentionStart = currentText?.match(/@\[\w*$/);
     const mentionEnd = nextText?.match(/^\w*\]/);

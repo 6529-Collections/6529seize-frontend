@@ -10,7 +10,7 @@ export const useAppWalletPasswordModal = (
 ) => {
   const [isOpen, setIsOpen] = useState(false);
   const [resolve, setResolve] = useState<(password: string) => void>();
-  const [reject, setReject] = useState<(reason?: any) => void>();
+  const [reject, setReject] = useState<(reason?: unknown) => void>();
 
   const [address, setAddress] = useState("");
   const [addressHashed, setAddressHashed] = useState("");

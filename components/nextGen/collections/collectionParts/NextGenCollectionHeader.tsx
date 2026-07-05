@@ -364,7 +364,7 @@ export function NextGenMintCounts(
   }, [collectionMintCount.isFetching]);
 
   useEffect(() => {
-    const mintC = parseInt(collectionMintCount.data as any);
+    const mintC = parseInt(String(collectionMintCount.data));
     setMintCount(mintC);
     const avail = props.collection.total_supply - mintC;
     setAvailable(avail);

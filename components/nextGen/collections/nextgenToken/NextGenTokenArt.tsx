@@ -86,11 +86,11 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   const [zoomScale, setZoomScale] = useState(1);
   const [showZoomControls, setShowZoomControls] = useState(false);
 
-  const tokenImageRef = useRef(null);
+  const tokenImageRef = useRef<HTMLDivElement>(null);
   const downloadMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleKeyDown = (event: any) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setShowLightbox(false);
         setShowBlackbox(false);
@@ -399,9 +399,10 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   const toggleFullScreen = () => {
     if (tokenImageRef.current) {
       if (!document.fullscreenElement) {
-        (tokenImageRef.current as any).requestFullscreen().catch((err: any) => {
+        tokenImageRef.current.requestFullscreen().catch((err: unknown) => {
+          const error = err as { message?: unknown; name?: unknown };
           alert(
-            `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
+            `Error attempting to enable full-screen mode: ${error.message} (${error.name})`
           );
         });
       } else {

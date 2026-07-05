@@ -1,7 +1,4 @@
-import {
-  CollectedCollectionType,
-  CollectionSort,
-} from "@/entities/IProfile";
+import { CollectedCollectionType, CollectionSort } from "@/entities/IProfile";
 
 interface CollectedCollectionMeta {
   readonly label: string;
@@ -88,5 +85,5 @@ export const COLLECTED_COLLECTIONS_META: Record<
   },
 };
 
-export const convertAddressToLowerCase = (address: any) =>
+export const convertAddressToLowerCase = (address: unknown) =>
   typeof address === "string" && address.length ? address.toLowerCase() : null;

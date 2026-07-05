@@ -67,7 +67,9 @@ type CompoundTarget =
 const TX_HASH_LENGTH = 66;
 
 function isPossibleTxHash(value: string): value is Hash {
-  return value.startsWith("0x") && value.length === TX_HASH_LENGTH && isHex(value);
+  return (
+    value.startsWith("0x") && value.length === TX_HASH_LENGTH && isHex(value)
+  );
 }
 
 function normalizeAddress(value: string): Address | null {
@@ -224,21 +226,25 @@ async function fetchV2MarketState(
       { address: cToken, abi: cTokenAbi, functionName: "totalReserves" },
       { address: cToken, abi: cTokenAbi, functionName: "totalSupply" },
       { address: cToken, abi: cTokenAbi, functionName: "cash" },
-      { address: cToken, abi: cTokenAbi, functionName: "reserveFactorMantissa" },
+      {
+        address: cToken,
+        abi: cTokenAbi,
+        functionName: "reserveFactorMantissa",
+      },
       { address: cToken, abi: cTokenAbi, functionName: "supplyRatePerBlock" },
       { address: cToken, abi: cTokenAbi, functionName: "borrowRatePerBlock" },
     ],
   });
 
   const cTokenDecimalsRaw = marketResults[0] as number;
-  const exchangeRateStored = marketResults[1] ;
-  const totalBorrows = marketResults[2] ;
-  const totalReserves = marketResults[3] ;
-  const totalSupply = marketResults[4] ;
-  const cash = marketResults[5] ;
-  const reserveFactorMantissa = marketResults[6] ;
-  const supplyRatePerBlock = marketResults[7] ;
-  const borrowRatePerBlock = marketResults[8] ;
+  const exchangeRateStored = marketResults[1];
+  const totalBorrows = marketResults[2];
+  const totalReserves = marketResults[3];
+  const totalSupply = marketResults[4];
+  const cash = marketResults[5];
+  const reserveFactorMantissa = marketResults[6];
+  const supplyRatePerBlock = marketResults[7];
+  const borrowRatePerBlock = marketResults[8];
 
   const [_, collateralFactorMantissa] = await publicClient.readContract({
     address: compoundRegistry.comptroller as Address,
@@ -268,8 +274,14 @@ async function fetchV2MarketState(
 
   const cTokenDecimals = Number(cTokenDecimalsRaw ?? 0);
   const underlyingDecimals = market.underlying.decimals;
-  const exchangeRateScale = getExchangeRateScale(underlyingDecimals, cTokenDecimals);
-  const tvlUnderlying = (cash ?? BIGINT_ZERO) + (totalBorrows ?? BIGINT_ZERO) - (totalReserves ?? BIGINT_ZERO);
+  const exchangeRateScale = getExchangeRateScale(
+    underlyingDecimals,
+    cTokenDecimals
+  );
+  const tvlUnderlying =
+    (cash ?? BIGINT_ZERO) +
+    (totalBorrows ?? BIGINT_ZERO) -
+    (totalReserves ?? BIGINT_ZERO);
 
   const supplyApy = calculateApyFromRatePerBlock(supplyRatePerBlock);
   const borrowApy = calculateApyFromRatePerBlock(borrowRatePerBlock);
@@ -293,8 +305,7 @@ async function fetchV2MarketState(
   let tvlUsd: string | undefined;
 
   if (underlyingPrice && underlyingPrice > BIGINT_ZERO) {
-    const tvlUsdScaled =
-      (tvlUnderlying * underlyingPrice) / pow10BigInt(18);
+    const tvlUsdScaled = (tvlUnderlying * underlyingPrice) / pow10BigInt(18);
     tvlUsd = formatUnitsWithPrecision(tvlUsdScaled, 18, 2);
   }
 
@@ -309,7 +320,7 @@ async function fetchV2MarketState(
     totalSupply: totalSupply ?? BIGINT_ZERO,
     cash: cash ?? BIGINT_ZERO,
     reserveFactorMantissa: reserveFactorMantissa ?? BIGINT_ZERO,
-    collateralFactorMantissa: collateralFactorMantissa ,
+    collateralFactorMantissa: collateralFactorMantissa,
     underlyingPrice: underlyingPrice ?? null,
     metrics: {
       supplyApy,
@@ -341,7 +352,7 @@ async function fetchV3MarketState(
 
   const decimalsRaw = marketCoreResults[0] as number;
   const totalsBasic = marketCoreResults[1] as unknown;
-  const utilizationRaw = marketCoreResults[2] ;
+  const utilizationRaw = marketCoreResults[2];
   const numAssetsRaw = marketCoreResults[3] as number;
   const priceFeedAddress = marketCoreResults[4] as Address;
 
@@ -366,22 +377,23 @@ async function fetchV3MarketState(
   });
 
   const decimals = Number(decimalsRaw ?? 0);
-  const {
-    totalSupplyBase,
-    totalBorrowBase,
-  } = totalsBasic as {
+  const { totalSupplyBase, totalBorrowBase } = totalsBasic as {
     totalSupplyBase: bigint;
     totalBorrowBase: bigint;
   };
 
   const numAssets = Number(numAssetsRaw ?? 0);
   const collaterals: V3CollateralInfo[] = [];
-  const collateralCalls = Array.from({ length: numAssets }, (_, index) => ({
-    address: comet,
-    abi: cometAbi,
-    functionName: "getAssetInfo",
-    args: [BigInt(index)],
-  } as const));
+  const collateralCalls = Array.from(
+    { length: numAssets },
+    (_, index) =>
+      ({
+        address: comet,
+        abi: cometAbi,
+        functionName: "getAssetInfo",
+        args: [BigInt(index)],
+      }) as const
+  );
 
   if (collateralCalls.length > 0) {
     const collateralResults = await publicClient.multicall({
@@ -432,7 +444,7 @@ async function fetchV3MarketState(
               ],
             });
 
-            const priceValue = priceResults[0] ;
+            const priceValue = priceResults[0];
             const priceDecimals = Number(priceResults[1] ?? 8);
             if (priceValue && priceValue > BIGINT_ZERO) {
               usdPrice = formatUnitsWithPrecision(priceValue, priceDecimals, 6);
@@ -485,7 +497,7 @@ async function fetchV3MarketState(
           },
         ],
       });
-      basePrice = basePriceResults[0] ;
+      basePrice = basePriceResults[0];
       basePriceDecimals = Number(basePriceResults[1] ?? 8);
     } catch {
       basePrice = null;
@@ -493,8 +505,8 @@ async function fetchV3MarketState(
     }
   }
 
-  const supplyApy = calculateApyFromRatePerSecond(supplyRate );
-  const borrowApy = calculateApyFromRatePerSecond(borrowRate );
+  const supplyApy = calculateApyFromRatePerSecond(supplyRate);
+  const borrowApy = calculateApyFromRatePerSecond(borrowRate);
   const utilization = formatMantissa(utilizationValue);
   const totalSupplyBaseDisplay = formatUnitsWithPrecision(
     totalSupplyBase,
@@ -517,9 +529,9 @@ async function fetchV3MarketState(
   return {
     config: market,
     decimals,
-    supplyRate: supplyRate ,
-    borrowRate: borrowRate ,
-    utilization: utilizationRaw ,
+    supplyRate: supplyRate,
+    borrowRate: borrowRate,
+    utilization: utilizationRaw,
     totalSupplyBase,
     totalBorrowBase,
     basePrice,
@@ -589,7 +601,9 @@ function buildV3MarketResponse(state: V3MarketState): LinkPreviewResponse {
 
 async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
   const markets = Array.from(v2MarketsByAddress.values());
-  const states = await Promise.all(markets.map((market) => fetchV2MarketState(market)));
+  const states = await Promise.all(
+    markets.map((market) => fetchV2MarketState(market))
+  );
 
   const positionsRaw = await Promise.all(
     states.map(async (state) => {
@@ -597,7 +611,12 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
       const [balanceResult, borrowResult] = await publicClient.multicall({
         allowFailure: false,
         contracts: [
-          { address: cToken, abi: cTokenAbi, functionName: "balanceOf", args: [address] },
+          {
+            address: cToken,
+            abi: cTokenAbi,
+            functionName: "balanceOf",
+            args: [address],
+          },
           {
             address: cToken,
             abi: cTokenAbi,
@@ -607,16 +626,15 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
         ],
       });
 
-      const balance = balanceResult ;
-      const borrowBalance = borrowResult ;
+      const balance = balanceResult;
+      const borrowBalance = borrowResult;
       const exchangeRateScale = getExchangeRateScale(
         state.config.underlying.decimals,
         state.cTokenDecimals
       );
 
       const supplyUnderlyingRaw =
-        (balance * state.exchangeRateStored) /
-        pow10BigInt(exchangeRateScale);
+        (balance * state.exchangeRateStored) / pow10BigInt(exchangeRateScale);
       const supplyDisplay = formatUnitsWithPrecision(
         supplyUnderlyingRaw,
         state.config.underlying.decimals,
@@ -642,7 +660,8 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
         borrowApy: state.metrics.borrowApy,
         collateralFactor: state.metrics.collateralFactor,
         usdPrice: usdPrice ?? undefined,
-        hasPosition: supplyUnderlyingRaw > BIGINT_ZERO || borrowBalance > BIGINT_ZERO,
+        hasPosition:
+          supplyUnderlyingRaw > BIGINT_ZERO || borrowBalance > BIGINT_ZERO,
       };
     })
   );
@@ -658,10 +677,10 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
     args: [address],
   });
 
-  const liquidityUsd = formatUnitsWithPrecision(liquidityRaw , 18, 2);
-  const shortfallUsd = formatUnitsWithPrecision(shortfallRaw , 18, 2);
-  const liquidityValue = liquidityRaw ;
-  const shortfallValue = shortfallRaw ;
+  const liquidityUsd = formatUnitsWithPrecision(liquidityRaw, 18, 2);
+  const shortfallUsd = formatUnitsWithPrecision(shortfallRaw, 18, 2);
+  const liquidityValue = liquidityRaw;
+  const shortfallValue = shortfallRaw;
 
   let healthLabel = "safe";
   if (shortfallValue > BIGINT_ZERO) {
@@ -708,12 +727,31 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
   } as LinkPreviewResponse;
 }
 
+type V3CollateralEntry = {
+  readonly asset: string;
+  readonly amount: string;
+  readonly usdPrice?: string | undefined;
+  readonly collateralFactor: string;
+};
+
+type V3AccountPosition = {
+  readonly comet: Address;
+  readonly baseSymbol: string;
+  readonly supplyBase: string;
+  readonly borrowBase: string;
+  readonly collateral: V3CollateralEntry[];
+  readonly supplyApy: string;
+  readonly borrowApy: string;
+};
+
 async function fetchV3Account(address: Address): Promise<{
-  readonly v3Positions: any[];
+  readonly v3Positions: V3AccountPosition[];
   readonly v3Rewards?: string | undefined;
 }> {
   const markets = Array.from(v3MarketsByAddress.values());
-  const states = await Promise.all(markets.map((market) => fetchV3MarketState(market)));
+  const states = await Promise.all(
+    markets.map((market) => fetchV3MarketState(market))
+  );
 
   const v3Positions = await Promise.all(
     states.map(async (state) => {
@@ -721,12 +759,22 @@ async function fetchV3Account(address: Address): Promise<{
       const [balanceResult, borrowResult] = await publicClient.multicall({
         allowFailure: false,
         contracts: [
-          { address: comet, abi: cometAbi, functionName: "balanceOf", args: [address] },
-          { address: comet, abi: cometAbi, functionName: "borrowBalanceOf", args: [address] },
+          {
+            address: comet,
+            abi: cometAbi,
+            functionName: "balanceOf",
+            args: [address],
+          },
+          {
+            address: comet,
+            abi: cometAbi,
+            functionName: "borrowBalanceOf",
+            args: [address],
+          },
         ],
       });
 
-      const baseSupplyRaw = balanceResult ;
+      const baseSupplyRaw = balanceResult;
       const baseSupply = formatUnitsWithPrecision(
         baseSupplyRaw,
         state.config.base.decimals,
@@ -735,7 +783,7 @@ async function fetchV3Account(address: Address): Promise<{
       let baseBorrow = "0";
       let baseBorrowRaw = BIGINT_ZERO;
       try {
-        baseBorrowRaw = borrowResult ;
+        baseBorrowRaw = borrowResult;
         baseBorrow = formatUnitsWithPrecision(
           baseBorrowRaw,
           state.config.base.decimals,
@@ -780,7 +828,9 @@ async function fetchV3Account(address: Address): Promise<{
         }));
 
       const hasPosition =
-        baseSupplyRaw > BIGINT_ZERO || baseBorrowRaw > BIGINT_ZERO || collateralEntries.length > 0;
+        baseSupplyRaw > BIGINT_ZERO ||
+        baseBorrowRaw > BIGINT_ZERO ||
+        collateralEntries.length > 0;
 
       return {
         comet: getAddress(state.config.address),
@@ -802,28 +852,39 @@ async function fetchV3Account(address: Address): Promise<{
   };
 }
 
-async function fetchCompoundAccount(address: Address): Promise<LinkPreviewResponse> {
+type CompoundAccountResponse = LinkPreviewResponse & {
+  positions: { v2: unknown; v3: unknown };
+  rewards?: { [key: string]: unknown } | undefined;
+};
+
+async function fetchCompoundAccount(
+  address: Address
+): Promise<LinkPreviewResponse> {
   const [v2Response, v3Response] = await Promise.all([
     fetchV2Account(address),
     fetchV3Account(address),
   ]);
 
-  const combined = v2Response as any;
+  const combined = v2Response as CompoundAccountResponse;
   combined.positions.v3 = v3Response.v3Positions;
   if (!combined.rewards) {
     combined.rewards = {};
   }
-  combined.rewards.v3Claimable = v3Response.v3Rewards ?? "0";
+  combined.rewards["v3Claimable"] = v3Response.v3Rewards ?? "0";
   return combined;
 }
 
-function decodeV2Event(log: { address: Address; data: `0x${string}`; topics: readonly `0x${string}`[] }) {
+function decodeV2Event(log: {
+  address: Address;
+  data: `0x${string}`;
+  topics: readonly `0x${string}`[];
+}) {
   try {
-    const topics =
-      (log.topics.length === 0
+    const topics = (
+      log.topics.length === 0
         ? []
-        : ([...log.topics] as [`0x${string}`, ...`0x${string}`[]])) as
-      [] | [`0x${string}`, ...`0x${string}`[]];
+        : ([...log.topics] as [`0x${string}`, ...`0x${string}`[]])
+    ) as [] | [`0x${string}`, ...`0x${string}`[]];
     return decodeEventLog({
       abi: cTokenAbi,
       data: log.data,
@@ -834,13 +895,17 @@ function decodeV2Event(log: { address: Address; data: `0x${string}`; topics: rea
   }
 }
 
-function decodeV3Event(log: { address: Address; data: `0x${string}`; topics: readonly `0x${string}`[] }) {
+function decodeV3Event(log: {
+  address: Address;
+  data: `0x${string}`;
+  topics: readonly `0x${string}`[];
+}) {
   try {
-    const topics =
-      (log.topics.length === 0
+    const topics = (
+      log.topics.length === 0
         ? []
-        : ([...log.topics] as [`0x${string}`, ...`0x${string}`[]])) as
-      [] | [`0x${string}`, ...`0x${string}`[]];
+        : ([...log.topics] as [`0x${string}`, ...`0x${string}`[]])
+    ) as [] | [`0x${string}`, ...`0x${string}`[]];
     return decodeEventLog({
       abi: cometAbi,
       data: log.data,
@@ -853,9 +918,13 @@ function decodeV3Event(log: { address: Address; data: `0x${string}`; topics: rea
 
 async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
   const transaction = await publicClient.getTransaction({ hash });
-  const { receipt, status, blockNumber } = await getTransactionReceiptDetails(hash);
+  const { receipt, status, blockNumber } =
+    await getTransactionReceiptDetails(hash);
   const participants = extractTransactionParticipants(transaction);
-  const summary = buildCompoundSummaryFromLogs(receipt?.logs ?? [], participants);
+  const summary = buildCompoundSummaryFromLogs(
+    receipt?.logs ?? [],
+    participants
+  );
 
   return {
     type: "compound.tx",
@@ -870,7 +939,9 @@ async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
   } as LinkPreviewResponse;
 }
 
-type PublicClientReceipt = Awaited<ReturnType<typeof publicClient.getTransactionReceipt>>;
+type PublicClientReceipt = Awaited<
+  ReturnType<typeof publicClient.getTransactionReceipt>
+>;
 
 type ReceiptDetails = {
   readonly receipt: PublicClientReceipt | null;
@@ -904,7 +975,9 @@ type TxParticipants = {
   readonly to?: Address | undefined;
 };
 
-async function getTransactionReceiptDetails(hash: Hash): Promise<ReceiptDetails> {
+async function getTransactionReceiptDetails(
+  hash: Hash
+): Promise<ReceiptDetails> {
   try {
     const receipt = await publicClient.getTransactionReceipt({ hash });
     return {
@@ -940,7 +1013,8 @@ function buildCompoundSummaryFromLogs(
   participants: TxParticipants
 ): CompoundTransactionSummary | null {
   for (const log of logs) {
-    const summary = buildV2Summary(log, participants) ?? buildV3Summary(log, participants);
+    const summary =
+      buildV2Summary(log, participants) ?? buildV3Summary(log, participants);
     if (summary) {
       return summary;
     }
@@ -992,7 +1066,11 @@ function buildV2Summary(
   const amountRaw = decoded.args[
     config.amountKey as keyof typeof decoded.args
   ] as bigint;
-  const amount = formatUnitsWithPrecision(amountRaw, market.underlying.decimals, 6);
+  const amount = formatUnitsWithPrecision(
+    amountRaw,
+    market.underlying.decimals,
+    6
+  );
   return createCompoundSummary({
     version: "v2",
     action: config.action,
@@ -1063,7 +1141,10 @@ function createCompoundSummary(options: {
   };
 }
 
-function detectAppCompoundAccount(url: URL, pathname: string): CompoundTarget | null {
+function detectAppCompoundAccount(
+  url: URL,
+  pathname: string
+): CompoundTarget | null {
   if (!pathname.startsWith("/account")) {
     return null;
   }
@@ -1092,7 +1173,10 @@ function detectAppCompoundMarket(pathname: string): CompoundTarget | null {
   return null;
 }
 
-function detectAppCompoundTarget(url: URL, pathname: string): CompoundTarget | null {
+function detectAppCompoundTarget(
+  url: URL,
+  pathname: string
+): CompoundTarget | null {
   const account = detectAppCompoundAccount(url, pathname);
   if (account) {
     return account;
@@ -1139,7 +1223,9 @@ function detectEtherscanMarket(pathname: string): CompoundTarget | null {
   return null;
 }
 
-function detectEtherscanCompoundTarget(pathname: string): CompoundTarget | null {
+function detectEtherscanCompoundTarget(
+  pathname: string
+): CompoundTarget | null {
   const txTarget = detectEtherscanTx(pathname);
   if (txTarget) {
     return txTarget;
@@ -1204,7 +1290,8 @@ export function createCompoundPlan(url: URL): PreviewPlan | null {
       cacheKey: `compound:tx:${target.hash.toLowerCase()}`,
       execute: async () => {
         const data = await decodeCompoundTx(target.hash);
-        const ttl = data["status"] === "pending" ? TX_TTL_PENDING_MS : TX_TTL_SUCCESS_MS;
+        const ttl =
+          data["status"] === "pending" ? TX_TTL_PENDING_MS : TX_TTL_SUCCESS_MS;
         return { data, ttl };
       },
     };

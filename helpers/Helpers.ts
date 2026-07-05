@@ -78,14 +78,14 @@ function isNumeric(str: string) {
   return /^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(str);
 }
 
-export function numberWithCommasFromString(x: any) {
-  x = x.toString();
-  if (!x || !isNumeric(x) || isNaN(parseFloat(x))) return x;
-  if (x.includes(" ") || x.includes(",")) return x;
-  const cleanedInput = x.replaceAll(/[^\d.-]/g, "");
-  if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return x;
+export function numberWithCommasFromString(x: string | number) {
+  const str = x.toString();
+  if (!str || !isNumeric(str) || isNaN(parseFloat(str))) return str;
+  if (str.includes(" ") || str.includes(",")) return str;
+  const cleanedInput = str.replaceAll(/[^\d.-]/g, "");
+  if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return str;
   const num = parseFloat(cleanedInput);
-  if (isNaN(num)) return x;
+  if (isNaN(num)) return str;
   return numberWithCommas(num);
 }
 
@@ -195,16 +195,24 @@ export function getDateDisplay(date: Date) {
   return `${days.toLocaleString()} days ago`;
 }
 
-export function areEqualAddresses(w1: any, w2: any) {
-  if (w1 && w2) {
+export function areEqualAddresses(w1: unknown, w2: unknown): boolean {
+  if (typeof w1 === "string" && typeof w2 === "string" && w1 && w2) {
     return w1.toUpperCase() === w2.toUpperCase();
   }
   return false;
 }
 
 export const fullScreenSupported = (): boolean => {
-  const doc: any = document;
-  const el: any = doc.body;
+  const doc = document as Document & {
+    readonly mozCancelFullScreen?: unknown;
+    readonly webkitExitFullscreen?: unknown;
+    readonly msExitFullscreen?: unknown;
+  };
+  const el = doc.body as HTMLElement & {
+    readonly mozRequestFullScreen?: unknown;
+    readonly webkitRequestFullscreen?: unknown;
+    readonly msRequestFullscreen?: unknown;
+  };
   const check =
     typeof el.requestFullscreen !== "undefined" ||
     typeof el.mozRequestFullScreen !== "undefined" ||
@@ -360,7 +368,7 @@ export function parseIpfsUrlToGateway(url: string) {
   );
 }
 
-export function isEmptyObject(obj: any) {
+export function isEmptyObject(obj: object) {
   return Object.keys(obj).length === 0 && obj.constructor === Object;
 }
 
@@ -394,8 +402,8 @@ export function parseEmojis(s: string) {
   });
 }
 
-function isValidDate(date?: any): date is Date {
-  return date && !isNaN(new Date(date).getTime());
+function isValidDate(date?: Date): date is Date {
+  return !!date && !isNaN(new Date(date).getTime());
 }
 
 export function printMintDate(date?: Date) {

@@ -53,14 +53,14 @@ import type {
   ArweaveMetadata,
   ManifoldMintMetadata,
 } from "./manifold-mint-metadata";
-import type { Chain } from "viem";
+import type { Abi, Chain } from "viem";
 import WalletConnectBalance from "@/components/wallet-connect-balance/WalletConnectBalance";
 
 interface Props {
   title: string;
   contract: string;
   chain: Chain;
-  abi: any;
+  abi: Abi;
   mint_date: Time;
   mintMetadata: ManifoldMintMetadata;
   standalone?: boolean;
@@ -380,15 +380,15 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   const descriptionRef = useRef<HTMLDivElement>(null);
 
   const manifoldClaimState = useManifoldClaim({
-      chainId: props.chain.id,
-      contract: props.contract,
-      proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
-      abi: props.abi,
-      identifier: props.mintMetadata.tokenId,
-      onError: () => {
-        setIsError(true);
-      },
-    });
+    chainId: props.chain.id,
+    contract: props.contract,
+    proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
+    abi: props.abi,
+    identifier: props.mintMetadata.tokenId,
+    onError: () => {
+      setIsError(true);
+    },
+  });
   const manifoldClaim = manifoldClaimState?.claim;
   const isManifoldClaimFetching = manifoldClaimState?.isFetching ?? false;
 

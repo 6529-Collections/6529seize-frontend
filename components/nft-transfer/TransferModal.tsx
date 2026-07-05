@@ -19,7 +19,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import type { Address, PublicClient } from "viem";
+import type { Address, PublicClient, WalletClient } from "viem";
 import { isAddress, type WriteContractParameters } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
@@ -110,8 +110,10 @@ const waitForPaint = async () => {
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 };
 
-function hasWriteContract(client: any): client is WalletClientWithWrite {
-  return client && typeof client.writeContract === "function";
+function hasWriteContract(
+  client: WalletClient | undefined
+): client is WalletClient & WalletClientWithWrite {
+  return !!client && typeof client.writeContract === "function";
 }
 
 function computeFlowTitle(
@@ -264,7 +266,6 @@ function SelectedSummaryList({
     </div>
   );
 }
-
 
 function TxStatusList({
   txs,
@@ -857,8 +858,13 @@ export default function TransferModal({
             )
           );
           await waitForPaint();
-        } catch (e: any) {
+        } catch (e) {
           console.error("Error in batch 1155 transfer", e);
+          const record = e as {
+            details?: unknown;
+            shortMessage?: unknown;
+            message?: unknown;
+          } | null;
           setTxs((prev) =>
             prev.map((te) =>
               te.id === `${key}-batch`
@@ -866,7 +872,8 @@ export default function TransferModal({
                     ...te,
                     state: "error",
                     error: String(
-                      e?.details ?? (e?.shortMessage || e?.message || e)
+                      record?.details ??
+                        (record?.shortMessage || record?.message || e)
                     ),
                   }
                 : te
@@ -915,21 +922,31 @@ export default function TransferModal({
                 )
               );
               await waitForPaint();
-            } catch (e: any) {
+            } catch (e) {
               console.error("Error in 721 transfer", e);
+              const record = e as {
+                shortMessage?: unknown;
+                message?: unknown;
+              } | null;
               setTxs((prev) =>
                 prev.map((te) =>
                   te.id === tid
                     ? {
                         ...te,
                         state: "error",
-                        error: String(e?.shortMessage || e?.message || e),
+                        error: String(
+                          record?.shortMessage || record?.message || e
+                        ),
                       }
                     : te
                 )
               );
             }
-          } catch (error: any) {
+          } catch (error) {
+            const record = error as {
+              shortMessage?: unknown;
+              message?: unknown;
+            } | null;
             setTxs((prev) =>
               prev.map((te) =>
                 te.id === tid
@@ -937,7 +954,7 @@ export default function TransferModal({
                       ...te,
                       state: "error",
                       error: String(
-                        error?.shortMessage || error?.message || error
+                        record?.shortMessage || record?.message || error
                       ),
                     }
                   : te

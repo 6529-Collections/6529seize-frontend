@@ -17,19 +17,26 @@ export default function RestrictedPage() {
       const apiAuth = getStagingAuth();
       fetch(`${publicEnv.API_ENDPOINT}/api/`, {
         headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
-      }).then((r: any) => {
-        r.json().then((response: any) => {
-          setImage(response.image);
-          if (r.status === 403) {
-            const country = response.country;
-            const msg = `Access from your country ${
-              country ? "(" + country + ") " : ""
-            }is restricted`;
-            setMessage(msg);
-          } else {
-            setMessage("Go to 6529.io");
+      }).then((r: Response) => {
+        r.json().then(
+          (response: {
+            image?: string | undefined;
+            country?: string | undefined;
+          }) => {
+            if (response.image) {
+              setImage(response.image);
+            }
+            if (r.status === 403) {
+              const country = response.country;
+              const msg = `Access from your country ${
+                country ? "(" + country + ") " : ""
+              }is restricted`;
+              setMessage(msg);
+            } else {
+              setMessage("Go to 6529.io");
+            }
           }
-        });
+        );
       });
     }
   }, [image]);

@@ -59,8 +59,8 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   );
 
   const collectionIds = getCollectionIdsForAddress(
-    (globalAdmin.data as any) === true,
-    (functionAdmin.data as any) === true,
+    globalAdmin.data === true,
+    functionAdmin.data === true,
     collectionAdmin.data,
     parsedCollectionIndex
   );
@@ -105,7 +105,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   });
 
   function getParams() {
-    const params: any[] = [];
+    const params: (string | number | string[])[] = [];
     params.push(collectionID);
     params.push(collectionName);
     params.push(artist);
@@ -176,7 +176,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
   }
 
   function validateUpdateInfoInputs(errors: string[]): void {
-    const requiredFields: { value: any; message: string }[] = [
+    const requiredFields: { value: string; message: string }[] = [
       { value: collectionName, message: "Collection name is required" },
       { value: artist, message: "Artist is required" },
       { value: description, message: "Description is required" },
@@ -303,11 +303,12 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
                   type="text"
                   placeholder="...index"
                   value={scriptIndex}
-                  onChange={(e: any) => {
+                  onChange={(e) => {
                     const i = e.target.value;
+                    const index = Number(i);
                     setScriptIndex(i);
-                    if (existingScripts.length > i) {
-                      setScripts([existingScripts[i]!]);
+                    if (existingScripts.length > index) {
+                      setScripts([existingScripts[index]!]);
                     } else {
                       setScripts([]);
                     }

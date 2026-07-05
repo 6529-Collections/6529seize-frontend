@@ -35,7 +35,7 @@ interface AppKitInitializationResult {
 /**
  * Debug logger helper to reduce conditional complexity
  */
-function debugLog(message: string, ...args: any[]): void {
+function debugLog(message: string, ...args: unknown[]): void {
   if (publicEnv.NODE_ENV === "development") {
     console.warn(`[AppKitInitialization] ${message}`, ...args);
   }

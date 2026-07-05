@@ -22,9 +22,18 @@ import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-cla
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
-import { isAddress, type Chain } from "viem";
+import {
+  isAddress,
+  type Abi,
+  type Chain,
+  type ContractFunctionParameters,
+} from "viem";
 
 const MINT_PROXY_FUNCTION_NAME = "mintProxy";
+
+type ReadContractCall = ContractFunctionParameters & {
+  readonly chainId?: number | undefined;
+};
 
 function normalizeMintCount(value: number | string | null | undefined): number {
   const parsed =
@@ -70,7 +79,7 @@ export default function ManifoldMintingWidget(
   props: Readonly<{
     contract: string;
     chain: Chain;
-    abi: any;
+    abi: Abi;
     claim: ManifoldClaim;
     local_timezone: boolean;
     hideConnect?: boolean;
@@ -159,7 +168,7 @@ export default function ManifoldMintingWidget(
   ]);
 
   function getReadContractsParams() {
-    const params: any = [];
+    const params: ReadContractCall[] = [];
     merkleProofs.forEach((mp) => {
       params.push({
         address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
@@ -234,7 +243,7 @@ export default function ManifoldMintingWidget(
       connectedAddress.address,
       mintForAddress
     );
-    const args: any[] = [props.contract, props.claim.instanceId];
+    const args: unknown[] = [props.contract, props.claim.instanceId];
     const mintArgs = getMintArgsList(isProxy);
 
     args.push(...mintArgs, mintForAddress);

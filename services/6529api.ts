@@ -77,7 +77,7 @@ export async function fetchAllPages<T>(
   return all;
 }
 
-function getNextUrl(currentUrl: string, next?: string | boolean): string {
+function getNextUrl(currentUrl: string, next?: unknown): string {
   if (!next) return "";
 
   if (typeof next === "string") {
@@ -101,7 +101,7 @@ function getNextUrl(currentUrl: string, next?: string | boolean): string {
   }
 }
 
-export async function postData(url: string, body: any, init?: RequestInit) {
+export async function postData(url: string, body: unknown, init?: RequestInit) {
   const requestStartedAtMs = getRequestTimingNow();
   let status: number | "network_error" | "unknown" = "unknown";
 

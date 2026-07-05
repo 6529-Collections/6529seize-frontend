@@ -131,7 +131,7 @@ function isCounterpartyAssetCode(value: string): boolean {
 }
 
 type ScrapeNextDataResult = {
-  nextData: any | null;
+  nextData: unknown | null;
   metaImages: string[];
 };
 
@@ -759,9 +759,13 @@ async function resolveAsset(slug: string): Promise<AssetPreview> {
   let bestAskSats: number | undefined;
   if (Array.isArray(dispensersOpen?.data)) {
     const satsValues = dispensersOpen.data
-      .map((entry: any) =>
-        Number(entry?.satoshi_price ?? entry?.satoshirate ?? 0)
-      )
+      .map((entry: unknown) => {
+        const record = entry as {
+          satoshi_price?: unknown;
+          satoshirate?: unknown;
+        } | null;
+        return Number(record?.satoshi_price ?? record?.satoshirate ?? 0);
+      })
       .filter((value: number) => Number.isFinite(value) && value > 0);
     if (satsValues.length) {
       bestAskSats = Math.min(...satsValues);

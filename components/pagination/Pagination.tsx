@@ -13,13 +13,13 @@ interface Props {
   page: number;
   pageSize: number;
   totalResults: number;
-  setPage(page: number): any;
+  setPage(page: number): void;
 }
 
 export interface Paginated<T> {
   count: number;
   page: number;
-  next: any;
+  next: unknown;
   data: T[];
 }
 

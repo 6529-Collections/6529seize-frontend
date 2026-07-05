@@ -1,3 +1,23 @@
+interface NFTMetadataMediaDetails {
+  readonly format?: string | null | undefined;
+  readonly width?: number | null | undefined;
+  readonly height?: number | null | undefined;
+  readonly [key: string]: unknown;
+}
+
+/**
+ * Token-metadata JSON blob attached to an NFT. Only the fields the app
+ * actually reads are declared; everything else stays index-signature-typed.
+ */
+export interface NFTTokenMetadata {
+  readonly name?: string | undefined;
+  readonly image?: string | undefined;
+  readonly animation?: string | undefined;
+  readonly animation_details?: NFTMetadataMediaDetails | null | undefined;
+  readonly image_details?: NFTMetadataMediaDetails | null | undefined;
+  readonly [key: string]: unknown;
+}
+
 export interface BaseNFT {
   id: number;
   contract: string;
@@ -18,7 +38,7 @@ export interface BaseNFT {
   image: string;
   compressed_animation?: string | undefined;
   animation: string;
-  metadata?: any | undefined;
+  metadata?: NFTTokenMetadata | undefined;
   market_cap: number;
   floor_price: number;
   total_volume_last_24_hours: number;
@@ -134,7 +154,7 @@ export interface Rememe {
   image: string;
   animation: string;
   meme_references: number[];
-  metadata: any;
+  metadata: NFTTokenMetadata;
   contract_opensea_data: {
     imageUrl: string;
     discordUrl: string;

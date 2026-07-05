@@ -47,8 +47,8 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
   );
 
   const collectionIds = getCollectionIdsForAddress(
-    (globalAdmin.data as any) === true,
-    (functionAdmin.data as any) === true,
+    globalAdmin.data === true,
+    functionAdmin.data === true,
     collectionAdmin.data,
     parsedCollectionIndex
   );
@@ -165,7 +165,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 type="integer"
                 placeholder="Cost in wei"
                 value={collectionStartCost}
-                onChange={(e: any) => setCollectionStartCost(e.target.value)}
+                onChange={(e) => setCollectionStartCost(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -174,7 +174,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 type="integer"
                 placeholder="Cost in wei"
                 value={collectionEndCost}
-                onChange={(e: any) => setCollectionEndCost(e.target.value)}
+                onChange={(e) => setCollectionEndCost(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -185,7 +185,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 type="integer"
                 placeholder="either % or in wei"
                 value={rate}
-                onChange={(e: any) => setRate(e.target.value)}
+                onChange={(e) => setRate(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -196,7 +196,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 type="integer"
                 placeholder="unix epoch time eg. 86400 (seconds in a day)"
                 value={timePeriod}
-                onChange={(e: any) => setTimePeriod(e.target.value)}
+                onChange={(e) => setTimePeriod(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -205,7 +205,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 type="integer"
                 placeholder="1. Fixed Price, 2. Exponential/Linear decrease, 3. Periodic Sale"
                 value={salesOption}
-                onChange={(e: any) => setSalesOption(e.target.value)}
+                onChange={(e) => setSalesOption(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -214,7 +214,7 @@ export default function NextGenAdminSetCosts(props: Readonly<Props>) {
                 type="integer"
                 placeholder="0x..."
                 value={delegationAddress}
-                onChange={(e: any) => setDelegationAddress(e.target.value)}
+                onChange={(e) => setDelegationAddress(e.target.value)}
               />
             </Form.Group>
             {!loading && errors.length > 0 && printAdminErrors(errors)}

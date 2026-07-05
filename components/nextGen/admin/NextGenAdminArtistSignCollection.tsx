@@ -127,7 +127,7 @@ export default function NextGenAdminArtistSignCollection(
                   rows={3}
                   placeholder="signature..."
                   value={signature}
-                  onChange={(e: any) => {
+                  onChange={(e) => {
                     setSignature(e.target.value);
                   }}
                 />

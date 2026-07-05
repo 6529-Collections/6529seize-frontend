@@ -132,10 +132,13 @@ export function useNotificationsQuery({
       return undefined;
     },
     retry: (failureCount, error: unknown) => {
+      const record = error as {
+        status?: unknown;
+        response?: { status?: unknown };
+        cause?: { status?: unknown };
+      } | null;
       const status =
-        (error as any)?.status ??
-        (error as any)?.response?.status ??
-        (error as any)?.cause?.status;
+        record?.status ?? record?.response?.status ?? record?.cause?.status;
       if (status === 401) return false;
       if (typeof error === "string" && /unauthorized/i.test(error))
         return false;

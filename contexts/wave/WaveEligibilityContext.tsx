@@ -12,7 +12,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ChatRestriction } from "@/hooks/useDropPriviledges";
 
-interface WaveEligibility {
+export interface WaveEligibility {
   authenticated_user_eligible_to_chat: boolean;
   authenticated_user_chat_restriction?: ChatRestriction | null;
   authenticated_user_eligible_to_vote: boolean;

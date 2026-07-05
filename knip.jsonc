@@ -53,6 +53,9 @@
       "tests/**": ["files", "exports", "types"],
       ".deepsec/deepsec.config.ts": ["unlisted", "exports"],
       "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
+      // Backend operation-code catalog; several codes are intentionally
+      // declared before the tool implements them (see inline comments).
+      "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
       "components/brain/left-sidebar/waves/HighlyRatedWavesToggle.tsx": [
         "exports",
         "types"

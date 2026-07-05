@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatNameForUrl, normalizeNextgenTokenID } from "@/helpers/nextgen-utils";
 import { goerli, mainnet, sepolia } from "viem/chains";
+import type { Abi } from "viem";
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -61,16 +62,28 @@ export function useCollectionIndex() {
   });
 }
 
-export function useParsedCollectionIndex(collectionIndex: any) {
+export function useParsedCollectionIndex(
+  collectionIndex: { data?: unknown } | undefined
+) {
   const collectionIndexData = collectionIndex?.data;
-  return collectionIndexData ? parseInt(collectionIndexData.toString()) : 0;
+  return collectionIndexData
+    ? parseInt((collectionIndexData as bigint).toString())
+    : 0;
+}
+
+interface NextGenReadParams {
+  address: `0x${string}`;
+  abi: Abi;
+  chainId: number;
+  functionName: string;
+  args: (string | number)[];
 }
 
 function getCollectionAdminReadParams(
   collectionIndex: number,
   address: string
 ) {
-  const params: any = [];
+  const params: NextGenReadParams[] = [];
   for (let i = 1; i <= collectionIndex - 1; i++) {
     params.push({
       address: NEXTGEN_ADMIN[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -89,12 +102,16 @@ export function useCollectionAdmin(address: string, collectionIndex: number) {
   });
 }
 
-export function isCollectionAdmin(collectionAdmin: any) {
-  return collectionAdmin?.data?.some((d: any) => d.result === true);
+type ContractReadResults =
+  | { data?: readonly { result?: unknown }[] | undefined }
+  | undefined;
+
+export function isCollectionAdmin(collectionAdmin: ContractReadResults) {
+  return collectionAdmin?.data?.some((d) => d.result === true);
 }
 
 function getCollectionArtistReadParams(collectionIndex: number) {
-  const params: any = [];
+  const params: NextGenReadParams[] = [];
   for (let i = 1; i <= collectionIndex - 1; i++) {
     params.push({
       address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -113,8 +130,11 @@ export function useCollectionArtist(collectionIndex: number) {
   });
 }
 
-export function isCollectionArtist(address: string, collectionArtists: any) {
-  return collectionArtists?.data?.some((a: any) =>
+export function isCollectionArtist(
+  address: string,
+  collectionArtists: ContractReadResults
+) {
+  return collectionArtists?.data?.some((a) =>
     areEqualAddresses(address, a.result)
   );
 }
@@ -122,7 +142,10 @@ export function isCollectionArtist(address: string, collectionArtists: any) {
 export function getCollectionIdsForAddress(
   globalAdmin: boolean,
   functionAdmin: boolean,
-  collectionAdmin: any,
+  // Callers pass either the whole useReadContracts result or its `.data`
+  // array. The array form has no `.data`, so (as before this was typed) it
+  // contributes no collection ids; only the result-object form does.
+  collectionAdmin: ContractReadResults | readonly { result?: unknown }[],
   collectionIndex: number
 ) {
   const collectionIndexArray: string[] = [];
@@ -130,8 +153,12 @@ export function getCollectionIdsForAddress(
     for (let i = 1; i <= collectionIndex - 1; i++) {
       collectionIndexArray.push(i.toString());
     }
-  } else if (collectionAdmin?.data) {
-    collectionAdmin.data.forEach((d: any, i: number) => {
+  } else if (
+    collectionAdmin &&
+    "data" in collectionAdmin &&
+    collectionAdmin.data
+  ) {
+    collectionAdmin.data.forEach((d, i) => {
       if (d.result === true) {
         collectionIndexArray.push((i + 1).toString());
       }
@@ -143,7 +170,7 @@ export function getCollectionIdsForAddress(
 
 export function useCollectionPhases(
   collection: number | string,
-  callback: (data: any) => void,
+  callback: (data: PhaseTimes) => void,
   watch: boolean = false
 ) {
   const { data, error, isLoading } = useReadContract({
@@ -159,7 +186,7 @@ export function useCollectionPhases(
 
   useEffect(() => {
     if (data) {
-      callback(extractPhases(data as any[]));
+      callback(extractPhases(data as readonly unknown[]));
     }
   }, [data, callback]);
 
@@ -168,7 +195,7 @@ export function useCollectionPhases(
 
 export function useCollectionAdditionalData(
   collection: number | string,
-  callback: (data: any) => void,
+  callback: (data: AdditionalData) => void,
   watch: boolean = false
 ) {
   const { data, error, isLoading } = useReadContract({
@@ -184,14 +211,14 @@ export function useCollectionAdditionalData(
 
   useEffect(() => {
     if (data) {
-      const d = data as any[];
+      const d = data as readonly unknown[];
       const ad: AdditionalData = {
-        artist_address: d[0],
-        max_purchases: parseInt(d[1]),
-        circulation_supply: parseInt(d[2]),
-        total_supply: parseInt(d[3]),
-        final_supply_after_mint: parseInt(d[4]),
-        randomizer: d[5],
+        artist_address: String(d[0]),
+        max_purchases: parseInt(String(d[1])),
+        circulation_supply: parseInt(String(d[2])),
+        total_supply: parseInt(String(d[3])),
+        final_supply_after_mint: parseInt(String(d[4])),
+        randomizer: String(d[5]),
       };
       callback(ad);
     }
@@ -202,7 +229,7 @@ export function useCollectionAdditionalData(
 
 export function useCollectionInfo(
   collection: number | string,
-  callback: (data: any) => void,
+  callback: (data: Info) => void,
   watch: boolean = false
 ) {
   const { data, error, isLoading } = useReadContract({
@@ -218,15 +245,15 @@ export function useCollectionInfo(
 
   useEffect(() => {
     if (data) {
-      const d = data as any[];
+      const d = data as readonly unknown[];
       if (d.some((e) => e)) {
         const i1: Info = {
-          name: d[0],
-          artist: d[1],
-          description: d[2],
-          website: d[3],
-          licence: d[4],
-          base_uri: d[5],
+          name: String(d[0]),
+          artist: String(d[1]),
+          description: String(d[2]),
+          website: String(d[3]),
+          licence: String(d[4]),
+          base_uri: String(d[5]),
         };
         callback(i1);
       }
@@ -238,7 +265,7 @@ export function useCollectionInfo(
 
 export function useCollectionLibraryAndScript(
   collection: number | string,
-  callback: (data: any) => void,
+  callback: (data: LibraryScript) => void,
   watch: boolean = false
 ) {
   const { data, error, isLoading } = useReadContract({
@@ -254,11 +281,11 @@ export function useCollectionLibraryAndScript(
 
   useEffect(() => {
     if (data) {
-      const d = data as any[];
+      const d = data as readonly unknown[];
       const ls: LibraryScript = {
-        library: d[0],
-        dependency_script: d[1],
-        script: d[2],
+        library: String(d[0]),
+        dependency_script: String(d[1]),
+        script: d[2] as string[],
       };
       callback(ls);
     }
@@ -269,7 +296,7 @@ export function useCollectionLibraryAndScript(
 
 export function useCollectionCosts(
   collection: number | string,
-  callback: (data: any) => void,
+  callback: (data: MintingDetails) => void,
   watch: boolean = false
 ) {
   const { data, error, isLoading } = useReadContract({
@@ -286,14 +313,14 @@ export function useCollectionCosts(
 
   useEffect(() => {
     if (data) {
-      const d = data as any[];
+      const d = data as readonly unknown[];
       const md: MintingDetails = {
-        mint_cost: parseInt(d[1]),
-        end_mint_cost: parseInt(d[1]),
-        rate: parseInt(d[2]),
-        time_period: parseInt(d[3]),
-        sales_option: parseInt(d[4]),
-        del_address: d[5],
+        mint_cost: parseInt(String(d[1])),
+        end_mint_cost: parseInt(String(d[1])),
+        rate: parseInt(String(d[2])),
+        time_period: parseInt(String(d[3])),
+        sales_option: parseInt(String(d[4])),
+        del_address: String(d[5]),
       };
       callback(md);
     }
@@ -333,11 +360,11 @@ export function getStatusFromDates(startTime: number, endTime: number) {
   return Status.UNAVAILABLE;
 }
 
-function extractPhases(d: any[]) {
-  const al_start = parseInt(d[0]);
-  const al_end = parseInt(d[1]);
-  const public_start = parseInt(d[3]);
-  const public_end = parseInt(d[4]);
+function extractPhases(d: readonly unknown[]) {
+  const al_start = parseInt(String(d[0]));
+  const al_end = parseInt(String(d[1]));
+  const public_start = parseInt(String(d[3]));
+  const public_end = parseInt(String(d[4]));
 
   const alStatus = getStatusFromDates(al_start, al_end);
   const publicStatus = getStatusFromDates(public_start, public_end);
@@ -345,7 +372,7 @@ function extractPhases(d: any[]) {
   const phases: PhaseTimes = {
     allowlist_start_time: al_start,
     allowlist_end_time: al_end,
-    merkle_root: d[2],
+    merkle_root: String(d[2]),
     public_start_time: public_start,
     public_end_time: public_end,
     al_status: alStatus,

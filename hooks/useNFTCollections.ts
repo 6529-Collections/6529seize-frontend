@@ -81,7 +81,7 @@ export function useNFTCollections(initialCollections?: {
     commonApiFetch<{
       count: number;
       page: number;
-      next: any;
+      next: unknown;
       data: NextGenCollection[];
     }>({
       endpoint: `nextgen/collections`,

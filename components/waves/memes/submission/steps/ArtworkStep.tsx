@@ -47,7 +47,7 @@ function getSubmitButtonTooltip(
     // This helps the user understand what's missing
     for (const field of Object.keys(traits) as Array<keyof TraitsData>) {
       // Skip read-only fields
-      if (READ_ONLY_FIELDS.includes(field as any)) continue;
+      if ((READ_ONLY_FIELDS as readonly string[]).includes(field)) continue;
 
       const value = traits[field];
       const fieldName = field.replace(/([A-Z])/g, " $1").toLowerCase();
@@ -100,7 +100,7 @@ function checkFormCompleteness(
   // Check every field in TraitsData
   for (const field of Object.keys(traits) as Array<keyof TraitsData>) {
     // Skip read-only fields that are pre-populated
-    if (READ_ONLY_FIELDS.includes(field as any)) continue;
+    if ((READ_ONLY_FIELDS as readonly string[]).includes(field)) continue;
 
     const value = traits[field];
 

@@ -4,14 +4,13 @@ import { publicEnv } from "@/config/env";
 import type { Consolidation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
+import csvParser from "csv-parser";
 import { useEffect, useState } from "react";
 import {
   MappingToolSubmitButton,
   MappingToolUpload,
 } from "./MappingToolControls";
 import styles from "./MappingTool.module.css";
-
-const csvParser = require("csv-parser");
 
 interface ConsolidationData {
   address: string;
@@ -22,7 +21,7 @@ interface ConsolidationData {
 }
 
 export default function ConsolidationMappingTool() {
-  const [file, setFile] = useState<any>();
+  const [file, setFile] = useState<File | undefined>();
   const [processing, setProcessing] = useState(false);
   const [consolidations, setConsolidations] = useState<Consolidation[]>([]);
 
@@ -85,22 +84,22 @@ export default function ConsolidationMappingTool() {
           let isFirstRow = true;
 
           const parser = csvParser({ headers: true })
-            .on("data", (row: any) => {
+            .on("data", (row: Record<string, string>) => {
               if (isFirstRow) {
                 isFirstRow = false;
               } else {
-                const address = row["_0"];
-                const token_id = Number.parseInt(row["_1"], 10);
-                const balance = Number.parseInt(row["_2"], 10);
-                const contract = row["_3"];
-                const name = row["_4"];
+                const address = row["_0"]!;
+                const token_id = Number.parseInt(row["_1"]!, 10);
+                const balance = Number.parseInt(row["_2"]!, 10);
+                const contract = row["_3"]!;
+                const name = row["_4"]!;
                 results.push({ address, token_id, balance, contract, name });
               }
             })
             .on("end", () => {
               setCsvData(results);
             })
-            .on("error", (err: any) => {
+            .on("error", (err: Error) => {
               console.error(err);
             });
 
@@ -108,7 +107,9 @@ export default function ConsolidationMappingTool() {
           parser.end();
         };
 
-        reader.readAsText(file);
+        if (file) {
+          reader.readAsText(file);
+        }
       });
     }
     if (processing) {

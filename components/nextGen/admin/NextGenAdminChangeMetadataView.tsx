@@ -49,8 +49,8 @@ export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
   );
 
   const collectionIds = getCollectionIdsForAddress(
-    (globalAdmin.data as any) === true,
-    (functionAdmin.data as any) === true,
+    globalAdmin.data === true,
+    functionAdmin.data === true,
     collectionAdmin.data,
     parsedCollectionIndex
   );
@@ -74,7 +74,7 @@ export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    setStatus(metadataRead.data as any);
+    setStatus(metadataRead.data as boolean);
   }, [metadataRead.data]);
 
   const contractWrite = useCoreContractWrite("updateBaseURI", () => {

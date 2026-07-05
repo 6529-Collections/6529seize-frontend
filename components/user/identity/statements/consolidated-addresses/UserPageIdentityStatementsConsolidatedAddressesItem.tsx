@@ -125,8 +125,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     hash: writeDelegation.data,
   });
 
-  function getError(e: any) {
-    return e.message.split("Request Arguments")[0];
+  function getError(e: unknown) {
+    const record = e as { message?: unknown } | null;
+    const message =
+      typeof record?.message === "string" ? record.message : "";
+    return message.split("Request Arguments")[0];
   }
 
   useEffect(() => {

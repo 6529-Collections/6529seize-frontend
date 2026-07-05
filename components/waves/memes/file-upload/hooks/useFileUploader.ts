@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useCallback, useReducer } from "react";
+import type { TypeOptions } from "react-toastify";
 import {
   fileUploaderReducer,
   initialFileUploaderState,
@@ -38,7 +39,10 @@ interface UseFileUploaderProps {
   setUploaded: (uploaded: boolean) => void;
   /** Callback to show toast notifications */
   showToast?:
-    | ((toast: { type: any; message: string | React.ReactNode }) => void)
+    | ((toast: {
+        type: TypeOptions;
+        message: string | React.ReactNode;
+      }) => void)
     | undefined
     | undefined;
 }
@@ -124,7 +128,7 @@ const useFileUploader = ({
 
           if (showToast) {
             showToast({
-              type: "error" as any, // Cast to any to avoid TypeScript errors
+              type: "error",
               message: errorMessage,
             });
           }
@@ -138,7 +142,7 @@ const useFileUploader = ({
         // Show toast for better user feedback
         if (showToast) {
           showToast({
-            type: "error" as any, // Cast to any to avoid TypeScript errors
+            type: "error",
             message: errorMessage,
           });
         }

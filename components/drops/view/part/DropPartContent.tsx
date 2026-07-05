@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import DropPartMarkdown from "./DropPartMarkdown";
 import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { MentionedWave } from "@/entities/IDrop";
@@ -19,7 +20,7 @@ interface DropPartContentProps {
   readonly mentionedWaves: MentionedWave[];
   readonly referencedNfts: ApiDropReferencedNFT[];
   readonly partContent: string | null;
-  readonly onQuoteClick: (drop: any) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly currentDropId?: string | undefined;
   readonly partMedias: Array<{
     mimeType: string;
