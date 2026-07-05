@@ -2,9 +2,9 @@
   "schema_version": 1,
   "max_source_file_lines": 800,
   "counts": {
-    "any_casts": 64,
+    "any_casts": 45,
     "todo_comments": 0,
-    "oversized_files": 90,
+    "oversized_files": 89,
     "bootstrap_imports": 0,
     "redux_imports": 0,
     "pages_router_files": 0
@@ -89,7 +89,6 @@
     "components/waves/discovery/WaveScoreTransparencyPage.tsx",
     "components/waves/drops/WaveDrop.tsx",
     "components/waves/drops/WaveDropReactions.tsx",
-    "components/waves/drops/wave-drops-all/hooks/useWaveDropsClipboard.ts",
     "components/waves/github/GithubLinkPreview.tsx",
     "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
     "helpers/Helpers.ts",
