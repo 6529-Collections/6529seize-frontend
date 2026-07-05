@@ -63,6 +63,7 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   measurement artifact (exit code read after piping through `tail`); Jest exit
   codes are correct, which is exactly why the Coverage Floor job needed main's
   suite green before it could ship.
+
 ## 2026-07-05 (Thread C — styling / Bootstrap exit, closeout)
 
 - PR #3042 (verification plan) and PR #3046 (residue cleanup + reintroduction
