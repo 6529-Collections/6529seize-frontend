@@ -3,7 +3,7 @@
   "max_source_file_lines": 800,
   "counts": {
     "any_casts": 64,
-    "todo_comments": 6,
+    "todo_comments": 0,
     "oversized_files": 90,
     "bootstrap_imports": 0,
     "redux_imports": 0,

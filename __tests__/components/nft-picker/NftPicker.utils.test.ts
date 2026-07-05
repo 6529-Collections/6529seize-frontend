@@ -11,9 +11,9 @@ import {
   sortAndDedupIds,
   toCanonicalRanges,
   tryToNumberArray,
-} from "@/components/nft-picker/NftPicker.utils";
+} from "@/components/nft-picker/utils";
 
-import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
+import type { TokenRange } from "@/components/nft-picker/types";
 
 describe("NftPicker.utils", () => {
   describe("parseTokenExpressionToBigints", () => {
@@ -59,8 +59,7 @@ describe("NftPicker.utils", () => {
     });
 
     it("throws parse errors for invalid segments", () => {
-      expect(() => parseTokenExpressionToBigints("1,foo"))
-        .toThrow();
+      expect(() => parseTokenExpressionToBigints("1,foo")).toThrow();
       try {
         parseTokenExpressionToBigints("1,foo");
       } catch (error) {
@@ -71,13 +70,15 @@ describe("NftPicker.utils", () => {
     });
 
     it("throws a parse error when a single range exceeds the enumeration ceiling", () => {
-      expect(() => parseTokenExpressionToRanges("0-10000"))
-        .toThrow();
+      expect(() => parseTokenExpressionToRanges("0-10000")).toThrow();
       try {
         parseTokenExpressionToRanges("0-10000");
       } catch (error) {
         expect(Array.isArray(error)).toBe(true);
-        const errors = error as { code?: string | undefined; message: string }[];
+        const errors = error as {
+          code?: string | undefined;
+          message: string;
+        }[];
         expect(errors[0]?.code).toBe("range-too-large");
         expect(errors[0]?.message).toContain("exceeding the limit");
       }
@@ -90,7 +91,10 @@ describe("NftPicker.utils", () => {
         parseTokenExpressionToBigints(input);
       } catch (error) {
         expect(Array.isArray(error)).toBe(true);
-        const errors = error as { code?: string | undefined; message: string }[];
+        const errors = error as {
+          code?: string | undefined;
+          message: string;
+        }[];
         expect(errors[0]?.code).toBe("range-too-large");
         expect(errors[0]?.message).toContain(MAX_ENUMERATION.toString());
       }
@@ -98,13 +102,7 @@ describe("NftPicker.utils", () => {
   });
 
   it("sorts and deduplicates token ids", () => {
-    const result = sortAndDedupIds([
-      5n,
-      3n,
-      3n,
-      4n,
-      1n,
-    ]);
+    const result = sortAndDedupIds([5n, 3n, 3n, 4n, 1n]);
     expect(result).toEqual([1n, 3n, 4n, 5n]);
   });
 

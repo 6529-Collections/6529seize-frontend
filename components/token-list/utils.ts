@@ -1,7 +1,4 @@
-import type {
-  TokenMetadata,
-  TokenRange,
-} from "@/components/nft-picker/NftPicker.types";
+import type { TokenMetadata, TokenRange } from "@/components/nft-picker/types";
 
 export const ROW_HEIGHT = 72;
 export const GRID_ROW_HEIGHT = 380; // Taller rows for grid items

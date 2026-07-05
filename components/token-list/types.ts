@@ -3,7 +3,7 @@ import type {
   SupportedChain,
   TokenMetadata,
   TokenRange,
-} from "@/components/nft-picker/NftPicker.types";
+} from "@/components/nft-picker/types";
 
 export type TokenListAction = {
   label: string;
