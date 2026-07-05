@@ -5,6 +5,7 @@ import { Tooltip } from "react-tooltip";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 interface WaveSmallLeaderboardItemOutcomesProps {
   readonly drop: ApiDrop;
@@ -15,9 +16,7 @@ interface WaveSmallLeaderboardItemOutcomesProps {
 const WaveSmallLeaderboardItemOutcomesContent: React.FC<
   WaveSmallLeaderboardItemOutcomesProps
 > = ({ drop, isMobile: _isMobile = false }) => {
-  const [isTouch] = useState(
-    () => typeof globalThis !== "undefined" && "ontouchstart" in globalThis
-  );
+  const isTouch = useIsTouchDevice();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClick = (e: React.MouseEvent) => {
