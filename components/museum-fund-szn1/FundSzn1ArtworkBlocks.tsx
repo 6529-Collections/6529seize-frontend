@@ -22,6 +22,52 @@ export interface FundSzn1Image {
   readonly sizes?: string;
 }
 
+const UPLOADS_PREFIX =
+  "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/08/";
+
+export const FUND_SZN1_IMAGE_SIZES = {
+  slider: "(max-width: 640px) 100vw, 600px",
+  carousel:
+    "(min-width: 2200px) 100vw, (min-width: 864px) 391px, (min-width: 752px) 587px, (min-width: 640px) 752px, ",
+} as const;
+
+/**
+ * The scrape's slider/carousel images all follow the WordPress asset
+ * naming scheme, so the bulk data encodes each image as a compact
+ * descriptor instead of repeating five URL variants per entry:
+ * `base|width|height[|wpN][|full][|set]` — `full` means the src is the
+ * original upload (no -400x400 suffix), `set` means the standard
+ * 200/400/600/800/full srcSet is present. The descriptor round-trip was
+ * asserted byte-identical against every captured URL before the data
+ * was committed, and DOM parity re-verified after the switch.
+ */
+export function parseFundSzn1ImageDescriptor(
+  descriptor: string,
+  context: keyof typeof FUND_SZN1_IMAGE_SIZES
+): FundSzn1Image {
+  const [base, width, height, ...flags] = descriptor.split("|");
+  if (!base || !width || !height) {
+    throw new Error(`Malformed fund-szn1 image descriptor: ${descriptor}`);
+  }
+  const wpFlag = flags.find((flag) => flag.startsWith("wp"));
+  const full = flags.includes("full");
+  const withSrcSet = flags.includes("set");
+  const src = full
+    ? `${UPLOADS_PREFIX}${base}.png`
+    : `${UPLOADS_PREFIX}${base}-400x400.png`;
+  const srcSet = [200, 400, 600, 800]
+    .map((size) => `${UPLOADS_PREFIX}${base}-${size}x${size}.png ${size}w`)
+    .concat(`${UPLOADS_PREFIX}${base}.png 1000w`)
+    .join(", ");
+  return {
+    width: Number(width),
+    height: Number(height),
+    src,
+    ...(wpFlag ? { wpImage: Number(wpFlag.slice(2)) } : {}),
+    ...(withSrcSet ? { srcSet, sizes: FUND_SZN1_IMAGE_SIZES[context] } : {}),
+  };
+}
+
 export type FundSzn1Block =
   | {
       readonly kind: "tile";

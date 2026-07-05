@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react";
 
 import type { FundSzn1Block } from "@/components/museum-fund-szn1/FundSzn1ArtworkBlocks";
+import { parseFundSzn1ImageDescriptor } from "@/components/museum-fund-szn1/FundSzn1ArtworkBlocks";
 import FundSzn1ArtworkBlocks from "@/components/museum-fund-szn1/FundSzn1ArtworkBlocks";
 
 const TILE: Extract<FundSzn1Block, { kind: "tile" }> = {
@@ -111,5 +112,44 @@ describe("fund szn1 artwork blocks", () => {
     ).toHaveLength(2);
     const img = container.querySelector(".swiper-slide img");
     expect(img?.getAttribute("class")).toBe("attachment-full size-full");
+  });
+});
+
+describe("fund szn1 image descriptors", () => {
+  const prefix =
+    "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/08/";
+
+  it("derives the -400x400 src, wp image and full srcSet from a descriptor", () => {
+    const image = parseFundSzn1ImageDescriptor(
+      "Zodiac-Capsule-09122|400|400|wp1522|set",
+      "slider"
+    );
+    expect(image).toEqual({
+      width: 400,
+      height: 400,
+      src: `${prefix}Zodiac-Capsule-09122-400x400.png`,
+      wpImage: 1522,
+      srcSet: [200, 400, 600, 800]
+        .map((s) => `${prefix}Zodiac-Capsule-09122-${s}x${s}.png ${s}w`)
+        .concat(`${prefix}Zodiac-Capsule-09122.png 1000w`)
+        .join(", "),
+      sizes: "(max-width: 640px) 100vw, 600px",
+    });
+  });
+
+  it("derives a full-size src without srcSet when flagged", () => {
+    const image = parseFundSzn1ImageDescriptor(
+      "Zodiac-Capsule-06849|400|400|wp1523|full",
+      "slider"
+    );
+    expect(image.src).toBe(`${prefix}Zodiac-Capsule-06849.png`);
+    expect(image.srcSet).toBeUndefined();
+    expect(image.sizes).toBeUndefined();
+  });
+
+  it("throws on malformed descriptors", () => {
+    expect(() => parseFundSzn1ImageDescriptor("only-base", "slider")).toThrow(
+      "Malformed fund-szn1 image descriptor"
+    );
   });
 });
