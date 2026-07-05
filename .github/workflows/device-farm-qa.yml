@@ -316,6 +316,18 @@ jobs:
           name: devicefarm-test-package
           path: tests/device-farm/dist
 
+      # The native spec has no placeholders today; rendering it through the
+      # same substitution as the web specs keeps future placeholder additions
+      # from silently uploading unrendered templates.
+      - name: Render test spec for target
+        env:
+          TARGET_URL: ${{ needs.plan.outputs.target-url }}
+        run: |
+          set -euo pipefail
+          sed "s|__TARGET_URL__|${TARGET_URL}|g" \
+            tests/device-farm/testspecs/native-android.yml \
+            > tests/device-farm/dist/native-android.yml
+
       - name: Configure AWS Credentials
         id: aws-credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -337,7 +349,7 @@ jobs:
               "test": {
                 "type": "APPIUM_NODE",
                 "testPackageArn": "tests/device-farm/dist/devicefarm-tests.zip",
-                "testSpecArn": "tests/device-farm/testspecs/native-android.yml"
+                "testSpecArn": "tests/device-farm/dist/native-android.yml"
               },
               "executionConfiguration": {
                 "jobTimeoutMinutes": 30
