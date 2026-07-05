@@ -63,6 +63,26 @@
   measurement artifact (exit code read after piping through `tail`); Jest exit
   codes are correct, which is exactly why the Coverage Floor job needed main's
   suite green before it could ship.
+## 2026-07-05 (Thread C — styling / Bootstrap exit)
+
+- Phase 0 inventory on `main` @ 98cd4984e: the 2026-07-04 "Bootstrap coexists"
+  baseline is stale. Bootstrap → Tailwind migration already landed on main via
+  the release lane's PR wave #2933–#2969 (component conversions, incl.
+  Delegation #2942/#2969), #2979 (react-bootstrap dep removed), #2991/#2992/
+  #2994 (mock + global class cleanup), #2998 (bootstrap dep, global Sass
+  import, `seize-bootstrap.scss`, Sass load-paths, build guard removed), #3020
+  (Waves spacing fix). Verified zero imports / `data-bs-*` / `--bs-` vars /
+  Bootstrap-only classes; deps absent from package.json + lockfile;
+  `debt:ratchet` green with `bootstrap_imports 0/0`. Repo has also fully
+  exited Sass (0 `.scss` files, no `sass` dep).
+- Thread C scope re-planned to verification + residue burn-down + guards:
+  `styling-migration-plan.md` (this PR) documents evidence, residue items
+  R1–R7 (stale AGENTS.md Bootstrap-Sass instruction, dead `dom-helpers/css`
+  jest mapping + mock, stale jest.setup comment, stale design standard/skill/
+  deepsec stack descriptions, ESLint `no-restricted-imports` ban), and a
+  page-level visual checklist of former Bootstrap surfaces (#2998 shipped with
+  browser QA pending).
+
 ## 2026-07-04/05 (Thread B — branch amnesty)
 
 - Phase 1 (rescue): 117-status-entry dirty tree committed on
