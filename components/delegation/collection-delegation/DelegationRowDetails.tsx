@@ -53,10 +53,10 @@ export function DelegationRowDetails(
                 <FontAwesomeIcon
                   className={styles["infoIcon"]}
                   icon={faInfoCircle}
-                  data-tooltip-id={`consolidation-missing-${label}`}
+                  data-tooltip-id={`consolidation-missing-${label}-${w.wallet}`}
                 ></FontAwesomeIcon>
                 <Tooltip
-                  id={`consolidation-missing-${label}`}
+                  id={`consolidation-missing-${label}-${w.wallet}`}
                   style={{
                     backgroundColor: "#1F2937",
                     color: "white",
