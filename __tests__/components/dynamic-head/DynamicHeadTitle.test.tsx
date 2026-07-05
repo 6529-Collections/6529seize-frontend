@@ -16,7 +16,12 @@ jest.mock("next/navigation", () => ({
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 
+// MutationObserver callbacks are microtask-scheduled; flush microtasks and
+// two macrotask ticks so negative assertions are deterministic.
 const flushObservers = async () => {
+  await Promise.resolve();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
 };
 
@@ -81,6 +86,65 @@ describe("DynamicHeadTitle", () => {
 
     document.title = "Something Else";
     await waitFor(() => expect(document.title).toBe("6529.io"));
+  });
+
+  it("releases the title to the next route's metadata on navigation", async () => {
+    mockTitle = "Network Metrics | Open Data";
+    mockIsTitleOwned = true;
+    document.title = "Network Metrics";
+
+    const view = render(<DynamicHeadTitle />);
+    expect(document.title).toBe("Network Metrics | Open Data");
+
+    // Client-side navigation: ownership evaporates in the same render
+    // (pathname-keyed), before the provider's reset effect would run.
+    mockTitle = "Open Data | Tools";
+    mockIsTitleOwned = false;
+    mockPathname = "/open-data";
+    view.rerender(<DynamicHeadTitle />);
+
+    // The next route's metadata commit must win without a fight.
+    document.title = "Open Data";
+    await flushObservers();
+    expect(document.title).toBe("Open Data");
+  });
+
+  it("restores the new context title once when ownership is released on the same pathname", async () => {
+    mockTitle = "Wave One | Brain";
+    mockIsTitleOwned = true;
+    document.title = "Messages";
+
+    const view = render(<DynamicHeadTitle />);
+    expect(document.title).toBe("Wave One | Brain");
+
+    // Leaving a wave without a pathname change: no metadata commit fires,
+    // so the context's route-default reset must reach document.title.
+    mockTitle = "Messages | Brain";
+    mockIsTitleOwned = false;
+    view.rerender(<DynamicHeadTitle />);
+    expect(document.title).toBe("Messages | Brain");
+
+    // But it is not sticky: a later external write stands.
+    document.title = "External";
+    await flushObservers();
+    expect(document.title).toBe("External");
+  });
+
+  it("keeps owning the title when the head commit replaces the <title> node", async () => {
+    mockTitle = "Network Metrics | Open Data";
+    mockIsTitleOwned = true;
+    document.title = "Network Metrics";
+
+    render(<DynamicHeadTitle />);
+    expect(document.title).toBe("Network Metrics | Open Data");
+
+    // Simulate a head commit that swaps the <title> element entirely.
+    const replacement = document.createElement("title");
+    replacement.textContent = "Network Metrics";
+    document.querySelector("title")?.replaceWith(replacement);
+    await waitFor(() =>
+      expect(document.title).toBe("Network Metrics | Open Data")
+    );
   });
 
   it("stops re-asserting after unmount", async () => {

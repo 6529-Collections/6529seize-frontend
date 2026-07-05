@@ -85,7 +85,11 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const [title, setTitle] = useState<string>(() =>
     getDefaultTitleForRoute(pathname)
   );
-  const [hasExplicitTitle, setHasExplicitTitle] = useState(false);
+  // Pathname the explicit title was claimed for: ownership evaporates in the
+  // same render as a navigation, before any effect-based reset runs.
+  const [explicitTitlePathname, setExplicitTitlePathname] = useState<
+    string | null
+  >(null);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [waveData, setWaveData] = useState<{
     name: string;
@@ -118,7 +122,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (pathnameChanged) {
       setTitle(getDefaultTitleForRoute(pathname));
-      setHasExplicitTitle(false);
+      setExplicitTitlePathname(null);
       setWaveData(null);
       return;
     }
@@ -133,7 +137,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
     ) {
       setTitle(getDefaultTitleForRoute(pathname));
-      setHasExplicitTitle(false);
+      setExplicitTitlePathname(null);
       setWaveData(null);
     }
   }, [pathname, searchParams]);
@@ -141,7 +145,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateTitle = (newTitle: string) => {
     if (routeRef.current === pathname) {
       setTitle(newTitle);
-      setHasExplicitTitle(true);
+      setExplicitTitlePathname(pathname);
     }
   };
 
@@ -166,7 +170,8 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [isWaveRoute, waveParam, waveData, title, notificationCount]);
 
   const isTitleOwned =
-    hasExplicitTitle || Boolean(isWaveRoute && waveParam && waveData);
+    (explicitTitlePathname !== null && explicitTitlePathname === pathname) ||
+    Boolean(isWaveRoute && waveParam && waveData);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
