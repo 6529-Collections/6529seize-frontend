@@ -8,7 +8,7 @@ export default function SubscriptionsReportPage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "Subscriptions Report",
+    title: "Subscriptions Report | Tools",
     description: "Tools",
   });
 }

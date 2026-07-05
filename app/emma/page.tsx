@@ -68,5 +68,5 @@ export default function DistributionPlanTool() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "EMMA", description: "Tools" });
+  return getAppMetadata({ title: "EMMA | Tools", description: "Tools" });
 }

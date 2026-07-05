@@ -55,7 +55,7 @@ export async function generateMetadata({
 
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title: t(locale, "memeLab.title"),
+      title: t(locale, "memeLab.documentTitle"),
       ogImage: getCollectionSocialCardImagePath("meme-lab"),
       ogImageAlt: "Meme Lab collection social card",
       description: t(locale, "memeLab.description.collections"),

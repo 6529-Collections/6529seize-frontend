@@ -17,7 +17,7 @@ export default function CommunityStatsPage() {
 
 export const generateMetadata = () => {
   return getAppMetadata({
-    title: "Stats",
+    title: "Stats | Network",
     description: "Network",
   });
 };

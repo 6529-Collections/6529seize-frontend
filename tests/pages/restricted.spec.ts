@@ -6,7 +6,7 @@ test.describe("Restricted Page", () => {
   });
 
   test("should load with correct title and input state", async ({ page }) => {
-    await expect(page).toHaveTitle("Restricted | 6529.io");
+    await expect(page).toHaveTitle("Restricted");
 
     const input = page.locator('input[type="text"]');
     await expect(input).toBeVisible();

@@ -25,7 +25,7 @@ export default async function NetworkWaveScorePage({
 
 export function generateMetadata(): Metadata {
   return getAppMetadata({
-    title: "Wave Score",
+    title: "Wave Score | Network",
     description: "Network wave score formula and calculator",
   });
 }

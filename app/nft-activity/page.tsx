@@ -7,5 +7,5 @@ export default function NFTActivityPage() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: 'NFT Activity', description: 'Network' });
+  return getAppMetadata({ title: 'NFT Activity | Network', description: 'Network' });
 }
