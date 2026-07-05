@@ -70,7 +70,7 @@ export default function Timeline(props: Readonly<Props>) {
     return ["animation_url", "image_url"].includes(key);
   };
 
-  function printAttribute(label: string, value: any, fullWidth?: boolean) {
+  function printAttribute(label: string, value: string, fullWidth?: boolean) {
     const displayValue = String(numberWithCommasFromString(value));
 
     return (
@@ -87,7 +87,7 @@ export default function Timeline(props: Readonly<Props>) {
     );
   }
 
-  function printFromToFields(from: any, to: any) {
+  function printFromToFields(from: string, to: string) {
     if (from && to) {
       return (
         <>
@@ -104,7 +104,7 @@ export default function Timeline(props: Readonly<Props>) {
     return printAttribute(label, nonUndefined, true);
   }
 
-  function printLink(label: string, value: any) {
+  function printLink(label: string, value: string) {
     return (
       <div className={FULL_WIDTH_COLUMN_CLASS_NAME}>
         <b>{label}:</b>{" "}
@@ -115,7 +115,7 @@ export default function Timeline(props: Readonly<Props>) {
     );
   }
 
-  function printFromToUrls(from: any, to: any) {
+  function printFromToUrls(from: string, to: string) {
     if (from && to) {
       return (
         <>
@@ -132,7 +132,7 @@ export default function Timeline(props: Readonly<Props>) {
     return printLink(label, nonUndefined);
   }
 
-  function printImage(label: string, value: any) {
+  function printImage(label: string, value: string) {
     return (
       <div
         className={`${FLEX_COLUMN_CLASS_NAME} tw-flex tw-flex-col tw-items-start tw-gap-1`}
@@ -148,7 +148,7 @@ export default function Timeline(props: Readonly<Props>) {
     );
   }
 
-  function printFromToImages(from: any, to: any) {
+  function printFromToImages(from: string, to: string) {
     if (from && to) {
       return (
         <>
@@ -165,7 +165,7 @@ export default function Timeline(props: Readonly<Props>) {
     return printImage(label, nonUndefined);
   }
 
-  function printAnimation(label: string, value: any) {
+  function printAnimation(label: string, value: string) {
     return (
       <div
         className={`${FLEX_COLUMN_CLASS_NAME} tw-flex tw-flex-col tw-items-start tw-gap-1`}
@@ -181,7 +181,7 @@ export default function Timeline(props: Readonly<Props>) {
     );
   }
 
-  function printFromToAnimation(from: any, to: any) {
+  function printFromToAnimation(from: string, to: string) {
     if (from && to) {
       return (
         <>
@@ -198,7 +198,7 @@ export default function Timeline(props: Readonly<Props>) {
     return printAnimation(label, nonUndefined);
   }
 
-  function printContent(change: { key: string; from: any; to: any }) {
+  function printContent(change: { key: string; from: string; to: string }) {
     let content;
     if (isImage(change.key)) {
       content = printFromToImages(change.from, change.to);

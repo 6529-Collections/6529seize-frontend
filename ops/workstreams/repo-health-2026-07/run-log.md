@@ -206,3 +206,28 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   `/meme-lab`, `/network`, `/meme-calendar` repeatedly blow the 20s full-page
   screenshot budget — slow collection-route data fetches predate this
   workstream and deserve an owner.
+
+## 2026-07-05 (Thread E — dead patterns)
+
+- Redux removal (PR #3047): all 13 slice consumers migrated to two new
+  focused contexts (`EditingDropContext`, `ActiveGroupContext`) mounted in
+  `Providers`; `store/` + `StoreSetup` deleted; `@reduxjs/toolkit`,
+  `react-redux`, `next-redux-wrapper` dropped from package.json + lockfile.
+  Ratchet `redux_imports` 21 -> 0. Full suite 1959/11047 green, typecheck,
+  lint, prod build green. Knip forced the consumer-migration and removal
+  commits into one PR (dead slice exports fail the gate between them).
+- `any` burn-down wave 1 (PR pending on `cleanup/any-nextgen`): NextGen
+  contract layer typed at the root (`NextGenContract.abi: any -> Abi`, ABIs
+  annotated); ~90 cargo-cult `(x.data as any) === true|false` casts dropped
+  by script; the remaining 51 nextGen sites + platform layer (helpers/lib/
+  services/hooks/entities) + component scatter typed precisely.
+  `any_casts` baseline 358 -> (final count in PR). Exceptions ledger:
+  `any-exceptions.md` (wagmi connector conditional return, 3 sites).
+  Delegation (~60 sites) deferred to Thread C's rewrite; `src/` d.ts to
+  Thread D.
+- TODO triage recount: the audit's 2,841 figure does not reproduce under a
+  word-boundary count. Actual repo-wide `\b(TODO|FIXME|HACK)\b` outside
+  node_modules/generated: 22, of which 6 in ratchet-scanned source (4 are
+  "remove after codemod" re-export shims, 1 secure-logging work item,
+  1 stale API-shape comment). Triage PR follows: shims completed+deleted,
+  work items become consolidated GitHub issues, stale comment deleted.

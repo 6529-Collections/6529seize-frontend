@@ -1,4 +1,4 @@
-export interface NFTMetadataMediaDetails {
+interface NFTMetadataMediaDetails {
   readonly format?: string | null | undefined;
   readonly width?: number | null | undefined;
   readonly height?: number | null | undefined;
