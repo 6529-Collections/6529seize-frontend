@@ -406,3 +406,28 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   unknown/Error | null). Clone edits produced by a Sonnet work packet
   under a strict per-line spec, reviewed hunk-by-hunk before commit.
   `any_casts` 45 -> 21.
+
+## 2026-07-05 (Thread G — any burn-down tail complete; workstream E COMPLETE)
+
+- Delegation any-tail slice 3 of 3: the read path. `DelegationUseCase`
+  types the use-case constants' consumers; `DelegationReadParams` types
+  the `useReadContracts` param builders (`getParams`/`getReadParams`/
+  consolidation reader); `getDelegationsFromData` takes the minimal
+  multicall envelope shape and narrows results to a typed 4-tuple, with
+  expiries normalized via `Number()` so viem's runtime bigints and the
+  fixtures' numbers share one code path; `tokens` widened to
+  `number | bigint` to match uint256 decoding. Center/menu/wallet-checker
+  callbacks typed `void`. The lock-status envelope comparison keeps its
+  exact (pre-existing, latently buggy — issue #3078) behavior under an
+  `as unknown as boolean` double cast. `any_casts` 21 -> 4.
+- Final state: `any_casts` = 4 = the exceptions ledger exactly (3
+  permanent wagmi connector sites + 1 blog-prose scan false positive);
+  ledger rewritten to enumerate kept sites, record the resolved
+  delegation deferral, and note the scanner's generic-argument blind
+  spot (`useState<any>` is invisible to the regex; a handful remain in
+  CollectionDelegation.tsx for Thread D's split to absorb).
+- Workstream E definition of done met: Redux removed (#3047, deps gone),
+  `any` driven to documented exceptions only (358 -> 64 by Thread E's
+  #3052, 64 -> 4 by Thread G's three-slice tail), TODO/FIXME/HACK at 0
+  in ratchet scope (#3056: 4 shims completed, 2 items ticketed as #3053,
+  1 stale comment deleted). Ratchet backstops all three metrics.
