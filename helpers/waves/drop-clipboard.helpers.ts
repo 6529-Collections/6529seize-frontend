@@ -232,7 +232,7 @@ const mergeQuoteDropSources = (
   }
 
   if (!secondary) {
-    return primary ?? undefined;
+    return primary;
   }
 
   return {
