@@ -130,6 +130,11 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
   test("taps followed by synthesized mouse moves never flip the device to desktop", async ({
     page,
   }) => {
+    // Wave discovery may walk up to five candidates (30s listing + 20s per
+    // candidate ≈ 130s worst case), which exceeds the project's default test
+    // timeout — raise it so the helper's descriptive error surfaces instead
+    // of a generic timeout.
+    test.setTimeout(180_000);
     await openWaveWithRows(page);
 
     // The Win 8 sequence, three times over: a real (trusted) touch tap, then
