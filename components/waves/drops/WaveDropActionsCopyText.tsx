@@ -33,15 +33,16 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
       | { writeText?: (text: string) => Promise<void> }
       | undefined;
 
-    // Close the menu even when the clipboard API is unavailable or the write
-    // fails — mirrors the mobile copy action's behavior.
+    // The desktop dropdown closes even when the clipboard API is unavailable
+    // or the write fails; unlike the mobile action sheet it has no inline
+    // failure affordance yet.
     if (typeof clipboard?.writeText !== "function") {
       onCopy?.();
       return;
     }
 
     void clipboard
-      .writeText(buildDropClipboardText(drop))
+      .writeText(buildDropClipboardText(drop, locale))
       .then(() => {
         onCopy?.();
       })

@@ -45,7 +45,9 @@ describe("WaveDropActionsCopyText", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Copy text" }));
 
-    expect(writeText).toHaveBeenCalledWith(buildDropClipboardText(drop));
+    expect(writeText).toHaveBeenCalledWith(
+      buildDropClipboardText(drop, "en-US")
+    );
     await waitFor(() => expect(onCopy).toHaveBeenCalled());
   });
 
