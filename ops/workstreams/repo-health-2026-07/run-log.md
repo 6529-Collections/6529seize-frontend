@@ -35,22 +35,31 @@
   ratchet (script + baseline + install-free CI job); PR 3 = coverage floor on main
   pushes; PR 4 = e2e harness verify/fix; then ruleset update for required checks.
 
-## 2026-07-04 (Thread A — debt ratchet + e2e verification)
+## 2026-07-04 (Thread A — coverage floor + required checks step 1)
 
-- E2E harness verified FIXED on `origin/main`: `playwright test --list` enumerates
-  1050 tests in 40 files with no module-resolution errors (`tests/testHelpers.ts`
-  plus the `tests/support/` fixtures landed via the a11y-i18n harness-repair work),
-  and the latest heavy app-pr-ci run (PR #3028) executed both the small smoke pack
-  and the critical route-shell pack green. Campaign "PR 4 — e2e harness fix" is
-  therefore a no-op; staging-gated packs still need `PLAYWRIGHT_STAGING_ACCESS_CODE`
-  and stay out of CI by design.
-- Debt ratchet added: `scripts/debt-ratchet.cjs` + checked-in
-  `scripts/debt-ratchet-baseline.json` + always-on `Debt Ratchet` PR workflow
-  (install-free, ~1 min) + Jest coverage. Metrics recomputed at `origin/main`
-  6af669907 — audit corrections: bootstrap/react-bootstrap imports are already 0
-  and both deps are gone from package.json (workstream C's import-removal half is
-  done on main; the audit had measured the stale dirty branch); TODO/FIXME/HACK in
-  shippable source dirs is 6, not ~2.8k (the audit number included test/tooling
-  trees); no root `pages/` dir remains. Live baseline: any_casts 358,
-  todo_comments 6, oversized_files 139 (grandfathered by path), redux_imports 21,
-  bootstrap_imports 0, pages_router_files 0.
+- PR #3031 (campaign state dir) merged to main after green checks and clean
+  reviewbot lanes.
+- Ruleset 18018081 updated via API: required status checks are now `DCO`,
+  `security/snyk (6529)`, `Plan risk and security checks`, `Installed app checks`
+  (the last two from app-pr-ci, GitHub Actions integration). Review policy, update/
+  deletion/non-fast-forward rules, and team bypass preserved unchanged. Red PR CI
+  now blocks merges to main. `Debt ratchet` joins the required list once its PR
+  has merged and burned in.
+- Full Jest suite measured on a clean main checkout: 1957 suites / 11018 tests in
+  ~6 min wall (with coverage). Well under the 20-minute bar, but PR lanes stay
+  risk-plan-driven; the full suite runs with coverage on every main push instead
+  (Coverage Floor workflow), keeping PR latency owned by app-pr-ci.
+- Coverage floor added: `scripts/coverage-floor.cjs` + checked-in
+  `scripts/coverage-floor-baseline.json` compared on every main push; fails when a
+  global metric drops more than 0.1 points, warns to bump the baseline when it
+  rises. Seed baseline (local clean-main run): lines 74.76 / statements 74.39 /
+  functions 70.31 / branches 60.98.
+- Pre-existing red fixed here as a gate prerequisite: `__tests__/hooks/
+  useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
+  drops `registerPlugin`/`WebPlugin`, which capacitor-secure-storage-plugin needs
+  when pulled in through the jest.setup requireActual chain). Fixed with a local
+  `capacitor-secure-storage-plugin` mock in that suite (6 tests now run). Note for
+  the record: an earlier claim that "Jest exits 0 despite the failed suite" was a
+  measurement artifact (exit code read after piping through `tail`); Jest exit
+  codes are correct, which is exactly why the Coverage Floor job needed main's
+  suite green before it could ship.

@@ -1,0 +1,87 @@
+name: Coverage Floor
+
+# Full Jest suite with coverage on every push to main. Fails when global
+# coverage drops more than the tolerance below the checked-in baseline
+# (scripts/coverage-floor-baseline.json), so coverage can only ratchet up.
+# Refresh the baseline with `node scripts/coverage-floor.cjs --update` after
+# running the suite with coverage. Runs post-merge on purpose: PR latency
+# stays owned by the risk-plan lanes in app-pr-ci.yml. PRs that change the
+# coverage gate itself (workflow, script, or baseline) also run it so gate
+# changes and baseline bumps are validated before merge. Not a required
+# status check: the paths filter means most PRs never create this check run.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/coverage-floor.yml"
+      - "scripts/coverage-floor.cjs"
+      - "scripts/coverage-floor-baseline.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coverage-floor-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage-floor:
+    name: Coverage floor
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Run full Jest suite with coverage
+        run: |
+          NODE_ENV=test ./bin/6529 exec jest --silent --verbose=false --ci \
+            --coverage --coverageReporters=json-summary
+
+      - name: Check coverage against baseline
+        run: node scripts/coverage-floor.cjs
+
+      - name: Upload coverage summary
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage-summary-${{ github.sha }}
+          path: coverage/coverage-summary.json
+          if-no-files-found: ignore
+          retention-days: 30
