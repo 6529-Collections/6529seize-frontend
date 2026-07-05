@@ -185,17 +185,25 @@ Wave order (re-ranked from current main):
   `TwitterPreviewCard.tsx`, `NotificationsContext.tsx`,
   `ReactQueryWrapper.tsx`, then the remaining `components/**`,
   hooks and contexts under 1,500 lines.
-- **Skip:** `components/delegation/CollectionDelegation.tsx`,
-  `components/delegation/walletChecker/WalletChecker.tsx` (Thread C). If
-  Thread C's migration leaves them oversized, they stay on the allowlist
-  and this thread picks them up only after C signs off.
+- ~~Skip: `components/delegation/*` (Thread C).~~ Scope update 2026-07-05:
+  Thread C closed (Bootstrap exit verified), so delegation files are back in
+  Thread D's W3 scope — `CollectionDelegation.tsx` (2,029) and
+  `walletChecker/WalletChecker.tsx` split with the same behavior-preserving
+  bar plus extra manual verification (wallet flows).
+
+Wave-order update (2026-07-05): W2 runs before W1 — the conformance scan
+found every scrape page uniform against the shared components that already
+shipped in PR #2593, making W2 the highest count reduction per unit of
+risk. W2 parity gate per batch: fail-closed codemod + hydrated-DOM
+before/after diff with only sanctioned normalizations (font-preload
+`crossorigin`, oembed URL cleanup, footer a11y attributes).
 
 ## Progress ledger
 
 - [x] Phase 0 inventory (this PR)
-- [ ] Phase 1: `src/` folded
-- [ ] Phase 2: router hygiene (2 `next/head` remnants)
+- [x] Phase 1: `src/` folded (PR #3048)
+- [x] Phase 2: router hygiene (PR #3050 — pages-router ledger closed)
 - [ ] Phase 3 W1: data movers
-- [ ] Phase 3 W2: WP-scrape cluster
-- [ ] Phase 3 W3: interactive giants
-- [ ] Grandfather list empty (excl. any Thread C holdover)
+- [ ] Phase 3 W2: WP-scrape cluster (batch 1: 20 pages, 139 -> 119)
+- [ ] Phase 3 W3: interactive giants (now incl. delegation)
+- [ ] Grandfather list empty
