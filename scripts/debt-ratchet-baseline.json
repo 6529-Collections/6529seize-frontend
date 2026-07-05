@@ -4,7 +4,7 @@
   "counts": {
     "any_casts": 4,
     "todo_comments": 0,
-    "oversized_files": 89,
+    "oversized_files": 88,
     "bootstrap_imports": 0,
     "redux_imports": 0,
     "pages_router_files": 0
@@ -57,7 +57,6 @@
     "components/auth/Auth.tsx",
     "components/auth/SeizeConnectContext.tsx",
     "components/brain/left-sidebar/waves/memes-quick-vote/useMemesQuickVotePreviewSwipe.ts",
-    "components/delegation/CollectionDelegation.tsx",
     "components/delegation/walletChecker/WalletChecker.tsx",
     "components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal.tsx",
     "components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooter.tsx",
