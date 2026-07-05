@@ -6,6 +6,7 @@ import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDr
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import { useSyncExternalStore } from "react";
 
 const MOBILE_HEADER_MAX_WIDTH = 750;
@@ -41,7 +42,10 @@ export default function NextGenNavigationHeader(
   const isStackedHeader = headerViewportWidth <= STACKED_HEADER_MAX_WIDTH;
 
   function printView(v: NextgenView | undefined) {
-    let styles: any = { borderBottom: "1px solid white", cursor: "default" };
+    let styles: CSSProperties = {
+      borderBottom: "1px solid white",
+      cursor: "default",
+    };
     if (!props.setView || (!v && props.view) || (v && v !== props.view)) {
       styles = {};
     }

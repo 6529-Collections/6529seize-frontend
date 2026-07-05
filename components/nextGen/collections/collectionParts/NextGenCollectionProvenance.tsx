@@ -19,6 +19,7 @@ import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import styles from "../NextGen.module.css";
 import {
@@ -45,7 +46,7 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
     commonApiFetch<{
       count: number;
       page: number;
-      next: any;
+      next: unknown;
       data: NextGenLog[];
     }>({
       endpoint: `nextgen/collections/${props.collection.id}/logs?page_size=${PAGE_SIZE}&page=${mypage}`,
@@ -164,7 +165,7 @@ export function NextGenCollectionProvenanceRow(
           </>
         );
 
-        let fromTo: any;
+        let fromTo: ReactNode;
         if (isTransaction) {
           fromTo = (
             <span className="tw-flex tw-gap-1">

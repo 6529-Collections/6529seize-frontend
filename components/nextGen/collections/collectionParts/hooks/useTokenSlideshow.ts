@@ -28,13 +28,13 @@ export function useTokenSlideshow(
     commonApiFetch<{
       count: number;
       page: number;
-      next: any;
+      next: unknown;
       data: NextGenToken[];
     }>({
       endpoint: `nextgen/collections/${collectionId}/tokens?page_size=${FETCH_SIZE}&page=${currentPage}&sort=random`,
     }).then((response) => {
       setAllTokens((prev) => [...prev, ...response.data]);
-      setHasMoreOnServer(response.next);
+      setHasMoreOnServer(Boolean(response.next));
       setIsLoading(false);
     });
   }, [collectionId, currentPage]);

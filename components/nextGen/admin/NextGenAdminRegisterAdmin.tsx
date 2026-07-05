@@ -161,7 +161,7 @@ export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
                   as="select"
                   multiple
                   value={selectors}
-                  onChange={(e: any) => {
+                  onChange={(e) => {
                     if (selectors.includes(e.target.value)) {
                       setSelectors((selectors) =>
                         selectors.filter(

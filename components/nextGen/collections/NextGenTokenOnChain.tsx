@@ -81,7 +81,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    const data = ownerRead.data as any;
+    const data = ownerRead.data as `0x${string}` | undefined;
     if (data) {
       setOwner(data);
     }

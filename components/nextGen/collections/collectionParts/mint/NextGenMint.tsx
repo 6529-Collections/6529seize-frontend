@@ -32,6 +32,7 @@ import { fetchUrl } from "@/services/6529api";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import type { Abi } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
 import {
   NextGenCountdown,
@@ -101,7 +102,7 @@ export default function NextGenMint(props: Readonly<Props>) {
     contracts: [
       {
         address: DELEGATION_CONTRACT.contract,
-        abi: DELEGATION_ABI as any,
+        abi: DELEGATION_ABI as Abi,
         chainId: DELEGATION_CONTRACT.chain_id,
         functionName: "retrieveDelegators",
         args: [
@@ -112,7 +113,7 @@ export default function NextGenMint(props: Readonly<Props>) {
       },
       {
         address: DELEGATION_CONTRACT.contract,
-        abi: DELEGATION_ABI as any,
+        abi: DELEGATION_ABI as Abi,
         chainId: DELEGATION_CONTRACT.chain_id,
         functionName: "retrieveDelegators",
         args: [
@@ -123,7 +124,7 @@ export default function NextGenMint(props: Readonly<Props>) {
       },
       {
         address: DELEGATION_CONTRACT.contract,
-        abi: DELEGATION_ABI as any,
+        abi: DELEGATION_ABI as Abi,
         chainId: DELEGATION_CONTRACT.chain_id,
         functionName: "retrieveDelegators",
         args: [
@@ -134,7 +135,7 @@ export default function NextGenMint(props: Readonly<Props>) {
       },
       {
         address: DELEGATION_CONTRACT.contract,
-        abi: DELEGATION_ABI as any,
+        abi: DELEGATION_ABI as Abi,
         chainId: DELEGATION_CONTRACT.chain_id,
         functionName: "retrieveDelegators",
         args: [
@@ -154,12 +155,11 @@ export default function NextGenMint(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    const data = delegationsRead.data as any;
+    const data = delegationsRead.data;
     if (data) {
       const del: string[] = [];
-      const d = data as any[];
-      d.forEach((r) => {
-        r.result.forEach((a: string) => del.push(a));
+      data.forEach((r) => {
+        (r.result as string[]).forEach((a) => del.push(a));
       });
       setDelegators(del);
     }
@@ -182,9 +182,9 @@ export default function NextGenMint(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    const data = addressMintCountAirdropRead.data as any;
+    const data = addressMintCountAirdropRead.data;
     if (data) {
-      const air = parseInt(data);
+      const air = parseInt(String(data));
       setAddressMintCounts((amc) => {
         amc.airdrop = air;
         amc.total = amc.airdrop + amc.allowlist + amc.public;
@@ -199,9 +199,9 @@ export default function NextGenMint(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    const data = addressMintCountMintedALRead.data as any;
+    const data = addressMintCountMintedALRead.data;
     if (data) {
-      const allow = parseInt(data);
+      const allow = parseInt(String(data));
       setAddressMintCounts((amc) => {
         amc.allowlist = allow;
         amc.total = amc.airdrop + amc.allowlist + amc.public;
@@ -216,9 +216,9 @@ export default function NextGenMint(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    const data = addressMintCountMintedPublicRead.data as any;
+    const data = addressMintCountMintedPublicRead.data;
     if (data) {
-      const pub = parseInt(data);
+      const pub = parseInt(String(data));
       setAddressMintCounts((amc) => {
         amc.public = pub;
         amc.total = amc.airdrop + amc.allowlist + amc.public;

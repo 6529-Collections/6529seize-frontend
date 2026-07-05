@@ -35,7 +35,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
     commonApiFetch<{
       count: number;
       page: number;
-      next: any;
+      next: unknown;
       data: Transaction[];
     }>({
       endpoint: `nextgen/tokens/${props.token_id}/transactions?page_size=${PAGE_SIZE}&page=${mypage}`,
@@ -55,7 +55,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
     commonApiFetch<{
       count: number;
       page: number;
-      next: any;
+      next: unknown;
       data: NextGenLog[];
     }>({
       endpoint: `nextgen/collections/${props.collection.id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${mypage}`,

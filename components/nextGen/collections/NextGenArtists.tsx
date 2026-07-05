@@ -17,9 +17,11 @@ export default function NextGenArtists() {
     let url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections`;
     fetchUrl(url).then((response: DBResponse) => {
       setArtistCollections(
-        response.data.reduce((acc, collection) => {
+        response.data.reduce<
+          { address: string; collections: NextGenCollection[] }[]
+        >((acc, collection) => {
           if (
-            !acc.find((a: any) =>
+            !acc.find((a) =>
               areEqualAddresses(a.address, collection.artist_address)
             )
           ) {
@@ -43,8 +45,8 @@ export default function NextGenArtists() {
   }, []);
 
   return (
-    <div className="!tw-p-0 tw-pt-6 tw-pb-6 tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="tw-pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
+    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 tw-pb-6 tw-pt-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <h1>Artists</h1>
         </div>

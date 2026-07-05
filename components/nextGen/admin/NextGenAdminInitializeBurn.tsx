@@ -94,7 +94,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    setStatus(burnRead.data as any);
+    setStatus(burnRead.data as boolean);
   }, [burnRead.data]);
 
   useEffect(() => {

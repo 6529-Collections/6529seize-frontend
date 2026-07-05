@@ -257,7 +257,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
                 type="integer"
                 placeholder="Unix epoch time"
                 value={publicStartTime}
-                onChange={(e: any) => setPublicStartTime(e.target.value)}
+                onChange={(e) => setPublicStartTime(e.target.value)}
               />
             </Form.Group>
             <Form.Group className="tw-mb-4">
@@ -266,7 +266,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
                 type="integer"
                 placeholder="Unix epoch time"
                 value={publicEndTime}
-                onChange={(e: any) => setPublicEndTime(e.target.value)}
+                onChange={(e) => setPublicEndTime(e.target.value)}
               />
             </Form.Group>
             {!loading && errors.length > 0 && printAdminErrors(errors)}

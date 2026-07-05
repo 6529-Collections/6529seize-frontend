@@ -74,7 +74,7 @@ export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    setStatus(metadataRead.data as any);
+    setStatus(metadataRead.data as boolean);
   }, [metadataRead.data]);
 
   const contractWrite = useCoreContractWrite("updateBaseURI", () => {

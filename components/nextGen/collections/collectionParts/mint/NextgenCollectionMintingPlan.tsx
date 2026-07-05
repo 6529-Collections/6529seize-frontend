@@ -78,7 +78,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     commonApiFetch<{
       count: number;
       page: number;
-      next: any;
+      next: unknown;
       data: NextgenAllowlist[];
     }>({
       endpoint: `nextgen/${props.collection.id}/allowlist_merkle/${

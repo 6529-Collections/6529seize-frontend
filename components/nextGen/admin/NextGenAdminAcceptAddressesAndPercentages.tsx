@@ -89,20 +89,20 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   });
 
   useEffect(() => {
-    const d = primaryRead.data as any[];
+    const d = primaryRead.data as readonly unknown[];
     setPrimary1({
-      address: d[0],
+      address: String(d[0]),
       percentage: `${d[3]} %`,
     });
     setPrimary2({
-      address: d[1],
+      address: String(d[1]),
       percentage: `${d[4]} %`,
     });
     setPrimary3({
-      address: d[2],
+      address: String(d[2]),
       percentage: `${d[5]} %`,
     });
-    setPrimaryStatus(d[6]);
+    setPrimaryStatus(d[6] as boolean);
   }, [primaryRead.data]);
 
   const secondaryRead = useReadContract({
@@ -117,20 +117,20 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
   });
 
   useEffect(() => {
-    const d = secondaryRead.data as any[];
+    const d = secondaryRead.data as readonly unknown[];
     setSecondary1({
-      address: d[0],
+      address: String(d[0]),
       percentage: `${d[3]} %`,
     });
     setSecondary2({
-      address: d[1],
+      address: String(d[1]),
       percentage: `${d[4]} %`,
     });
     setSecondary3({
-      address: d[2],
+      address: String(d[2]),
       percentage: `${d[5]} %`,
     });
-    setSecondaryStatus(d[6]);
+    setSecondaryStatus(d[6] as boolean);
   }, [secondaryRead.data]);
 
   const contractWrite = useMinterContractWrite(

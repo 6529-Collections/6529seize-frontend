@@ -4,6 +4,7 @@ import { NULL_MERKLE } from "@/constants/constants";
 import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useWaitForTransactionReceipt } from "wagmi";
 import DotLoader from "../dotLoader/DotLoader";
@@ -15,7 +16,7 @@ const TRANSFER_EVENT =
 interface Props {
   hash?: `0x${string}` | undefined;
   isLoading: boolean;
-  error: any;
+  error: unknown;
   onSuccess?: (() => void) | undefined;
 }
 
@@ -57,16 +58,19 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
     }
   }, [waitContractWrite.isSuccess]);
 
-  function getError() {
-    const error = props.error;
-    if (error.shortMessage) {
-      return error.shortMessage;
+  function getError(): ReactNode {
+    const error = props.error as
+      | { shortMessage?: unknown; details?: unknown; message?: unknown }
+      | null
+      | undefined;
+    if (error?.shortMessage) {
+      return error.shortMessage as ReactNode;
     }
-    if (error.details) {
-      return error.details;
+    if (error?.details) {
+      return error.details as ReactNode;
     }
-    if (error.message) {
-      return error.message;
+    if (error?.message) {
+      return error.message as ReactNode;
     }
     return sanitizeErrorForUser(props.error);
   }

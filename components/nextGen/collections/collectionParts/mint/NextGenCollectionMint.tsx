@@ -31,9 +31,9 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    const data = burnAmountRead.data as any;
+    const data = burnAmountRead.data;
     if (data) {
-      setBurnAmount(parseInt(data));
+      setBurnAmount(parseInt(String(data)));
     }
   }, [burnAmountRead.data]);
 
@@ -49,9 +49,9 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    const data = mintPriceRead.data as any;
-    if (!isNaN(parseInt(data))) {
-      setMintPrice(parseInt(data));
+    const data = mintPriceRead.data;
+    if (!isNaN(parseInt(String(data)))) {
+      setMintPrice(parseInt(String(data)));
     }
   }, [mintPriceRead.data]);
 
