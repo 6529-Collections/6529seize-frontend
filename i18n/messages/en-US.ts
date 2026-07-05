@@ -250,6 +250,23 @@ const USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_STATS_ROW_MESSAGES = objectMessages("user.statsRow", {
+  "labels.tdh": "TDH",
+  "labels.xtdh": "xTDH",
+  "labels.nic": "NIC",
+  "labels.rep": "Rep",
+  "labels.followers.one": "Follower",
+  "labels.followers.other": "Followers",
+  "links.tdh": "View {handle}'s collected TDH: {value}",
+  "links.tdhWithRate": "View {handle}'s collected TDH: {value}, +{rate}",
+  "links.xtdh": "View {handle}'s xTDH: {value}",
+  "links.xtdhWithRate": "View {handle}'s xTDH: {value}, +{rate}",
+  "links.nic": "View {handle}'s NIC: {value}",
+  "links.rep": "View {handle}'s Rep: {value}",
+  "links.followers": "View {handle}'s followers: {value} {followersLabel}",
+  "buttons.followers": "Open {handle}'s followers: {value} {followersLabel}",
+} as const);
+
 const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
   refreshAction: "Refresh page",
   title: "A new version is available",
@@ -397,6 +414,44 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   subscriptions: "Subscriptions",
   proxy: "Proxy",
   "badges.beta": "Beta",
+} as const);
+
+const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
+  "name.edit": "Edit {name}'s profile name",
+  "dm.createFailed.title": "Couldn't create this direct message.",
+  "dm.createFailed.description": "Please try again.",
+  "name.profileEnabled": "Profile enabled: {date}",
+  "pfp.alt": "{name}'s profile picture",
+  "pfp.edit": "Edit {name}'s profile picture",
+  "banner.edit": "Edit {name}'s profile banner",
+  "about.add": "Add About statement",
+  "about.edit": "Edit About statement",
+  "about.empty": "Click to add an About statement",
+  "about.expand": "See more",
+  "about.collapse": "See less",
+  "aboutEdit.textareaLabel": "About statement",
+  "aboutEdit.placeholder": "Write an About statement",
+  "aboutEdit.characterCount": "{count}/{max}",
+  "aboutEdit.cancel": "Cancel",
+  "aboutEdit.save": "Save",
+  "aboutEdit.success": "About statement added.",
+  "aboutEdit.errors.saveFailed":
+    "Couldn't save this about statement. Please try again.",
+  "aboutEdit.errors.close": "Dismiss About statement error",
+  "aboutEdit.errors.unknown.title": "Unknown Error",
+  "aboutEdit.errors.hateSpeech.title": "Error: Hate Speech",
+  "aboutEdit.errors.hateSpeech.value":
+    "Your About text was not accepted because our automated checks flagged it for potentially containing hate speech. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
+  "aboutEdit.errors.personalInsults.title": "Error: Personal Insults",
+  "aboutEdit.errors.personalInsults.value":
+    "Your About text was not accepted because our automated checks flagged it for potentially containing a personal insult. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
+  "aboutEdit.errors.inappropriateLanguage.title":
+    "Error: Inappropriate Language",
+  "aboutEdit.errors.inappropriateLanguage.value":
+    "Your About text was not accepted because our automated checks flagged it for potentially containing inappropriate language that may make others uncomfortable. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
+  "aboutEdit.errors.doxxing.title": "Error: Doxxing of Another Person",
+  "aboutEdit.errors.doxxing.value":
+    "Your About text was not accepted because our automated checks flagged it for potentially doxxing another user of the system. We have a strong cultural value around respecting pseudonymity, so we'd appreciate it if you adjusted your text.",
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
@@ -1330,6 +1385,7 @@ export const EN_US_MESSAGES = {
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES,
+  ...USER_STATS_ROW_MESSAGES,
   ...USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES,
   ...USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES,
   ...USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES,
@@ -1375,6 +1431,7 @@ export const EN_US_MESSAGES = {
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...USER_PROFILE_HEADER_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...QUICK_DM_MESSAGES,

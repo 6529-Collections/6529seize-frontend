@@ -24,6 +24,19 @@ jest.mock("@capacitor/core", () => ({
   },
 }));
 
+// The bare @capacitor/core mock above drops registerPlugin/WebPlugin, which
+// capacitor-secure-storage-plugin needs at module load. That module is pulled
+// in through the jest.setup requireActual chain (SeizeSettingsContext ->
+// 6529api -> auth.utils -> native-refresh-token-storage), so without this
+// mock the whole suite fails to load.
+jest.mock("capacitor-secure-storage-plugin", () => ({
+  SecureStoragePlugin: {
+    get: jest.fn(),
+    set: jest.fn(),
+    remove: jest.fn(),
+  },
+}));
+
 jest.mock("@/helpers/capacitorBlobDownload.helpers", () => ({
   shareFetchedBlobInNativeApp: (...args: unknown[]) =>
     shareFetchedBlobInNativeAppMock(...args),
