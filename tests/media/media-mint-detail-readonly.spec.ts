@@ -113,7 +113,11 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   test("renders The Memes mint page read-only", async ({ page }) => {
     await gotoReady(page, "/the-memes/mint");
 
-    await expect(page).toHaveTitle(/^Mint #\d+ \| [^|]+ \| The Memes$/);
+    // The "Mint #N | <name>" prefix is client-side enrichment (TitleContext)
+    // that races the App Router's metadata commit on deployed builds; the
+    // server metadata title is "Mint | The Memes". Accept both so the pack
+    // asserts the page, not the race.
+    await expect(page).toHaveTitle(/^Mint( #\d+ \| [^|]+)? \| The Memes$/);
     await expect(page.getByText("Retrieving Mint information")).toBeHidden({
       timeout: 15000,
     });
