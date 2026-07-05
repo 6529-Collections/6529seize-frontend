@@ -72,8 +72,10 @@ export const hasTouchCapability = (): boolean => {
   return getMediaQueryList(COARSE_POINTER_QUERY)?.matches ?? false;
 };
 
+// "Android.*Mobile" keeps Android tablets (which omit "Mobile" from the UA)
+// out of the phone fallback when client hints are unavailable.
 const MOBILE_USER_AGENT_REGEX =
-  /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i;
+  /iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Android.*Mobile/i;
 
 /**
  * Phone signal from client hints or the user agent. Client hints win when

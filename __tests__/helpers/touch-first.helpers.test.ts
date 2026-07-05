@@ -157,6 +157,22 @@ describe("touch-first helpers", () => {
       expect(isTouchFirstEnvironment()).toBe(true);
     });
 
+    it("keeps Android tablets on desktop via the UA fallback when client hints are unavailable", () => {
+      // Tablet UAs omit "Mobile"; the phone fallback must not match them.
+      defineMaxTouchPoints(5);
+      defineMatchMedia({
+        "(any-pointer: fine)": true,
+        "(any-hover: hover)": true,
+        "(any-pointer: coarse)": true,
+      });
+      defineUserAgentData(undefined);
+      defineUserAgent(
+        "Mozilla/5.0 (Linux; Android 15; Pixel Tablet) AppleWebKit/537.36 Chrome/126 Safari/537.36"
+      );
+
+      expect(isTouchFirstEnvironment()).toBe(false);
+    });
+
     it("keeps tablets with a trackpad on desktop when client hints say not mobile", () => {
       // Android tablet UAs still contain "Android", but client hints report
       // mobile=false — the tablet+trackpad combo must stay desktop.

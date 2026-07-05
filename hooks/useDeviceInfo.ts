@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
+  hasTouchCapability,
   isTouchFirstEnvironment,
   subscribeToTouchFirstChanges,
 } from "@/helpers/touch-first.helpers";
@@ -43,15 +44,13 @@ export default function useDeviceInfo(): DeviceInfo {
         matchMedia: (query: string) => MediaQueryList;
       };
       const nav = navigator as Navigator & {
-        msMaxTouchPoints?: number | undefined;
         userAgentData?: { mobile?: boolean | undefined } | undefined;
         standalone?: boolean | undefined;
       };
 
-      const maxTouchPoints = nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0;
       // Raw capability — true when touch input exists at all. Only used for
       // UA disambiguation (iPads pretending to be Macs) — never for UI mode.
-      const hasTouchInput = touchDetected || maxTouchPoints > 0;
+      const hasTouchInput = touchDetected || hasTouchCapability();
       const hasTouchScreen = isTouchFirstEnvironment({ touchDetected });
 
       const ua = nav.userAgent;
