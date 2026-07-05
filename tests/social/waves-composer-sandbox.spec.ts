@@ -110,10 +110,15 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     ).toBeEnabled();
 
     // The quick-DM launcher yields to the docked composer at this viewport
-    // (WaveComposerDockVisibility), so a real pointer click must land on Post.
-    await expect(
-      page.getByRole("button", { name: /Open quick direct messages/ })
-    ).toBeHidden();
+    // (WaveComposerDockVisibility): pointer-inert (keyboard/screen-reader
+    // reachable) so the real pointer click below must land on Post.
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      await expect(
+        page.getByRole("button", { name: /Open quick direct messages/ })
+      ).toHaveCSS("pointer-events", "none", {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+    }
     await page.getByRole("button", { name: "Post" }).last().click();
 
     await expect

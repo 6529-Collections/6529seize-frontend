@@ -3,7 +3,10 @@
 import { useAuth } from "@/components/auth/Auth";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useWaveDropsScrollControlsVisible } from "@/components/waves/drops/WaveDropsScrollControlsVisibility";
-import { useWaveComposerDockElements } from "@/components/waves/WaveComposerDockVisibility";
+import {
+  isAnyDockInsideRightEdgeClearance,
+  useWaveComposerDockElements,
+} from "@/components/waves/WaveComposerDockVisibility";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -45,6 +48,11 @@ const QUICK_DM_LAUNCHER_LIFTED_POSITION_CLASS = "tw-bottom-32 xl:tw-bottom-32";
 // bottom-right spot would cover its Post button or the newest drop's hover
 // actions and swallow pointer clicks, so the launcher yields instead.
 const QUICK_DM_LAUNCHER_CLEARANCE_PX = 88;
+// Pointer-inert but still keyboard/screen-reader reachable: tabbing to the
+// suppressed launcher reveals it (at the lifted offset, clear of the
+// composer's Post button) so quick DMs never lose their entry point.
+const QUICK_DM_LAUNCHER_SUPPRESSED_CLASS =
+  "tw-pointer-events-none tw-opacity-0 focus-within:tw-pointer-events-auto focus-within:tw-opacity-100";
 
 const getDesktopViewportSnapshot = (): boolean => {
   if (typeof window === "undefined") {
@@ -125,16 +133,15 @@ export default function QuickDirectMessages() {
   useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
 
   const measureLauncherZone = useCallback(() => {
+    if (typeof globalThis.window === "undefined") {
+      return;
+    }
+
     setIsLauncherZoneCovered(
-      dockedComposers.some((composer) => {
-        const rect = composer.getBoundingClientRect();
-        return (
-          rect.width > 0 &&
-          rect.height > 0 &&
-          globalThis.window.innerWidth - rect.right <
-            QUICK_DM_LAUNCHER_CLEARANCE_PX
-        );
-      })
+      isAnyDockInsideRightEdgeClearance(
+        dockedComposers,
+        QUICK_DM_LAUNCHER_CLEARANCE_PX
+      )
     );
   }, [dockedComposers]);
   const debouncedMeasureLauncherZone = useDebouncedCallback(
@@ -143,6 +150,12 @@ export default function QuickDirectMessages() {
   );
 
   useEffect(() => {
+    // Hidden instances (mobile, logged out, waves disabled) render nothing,
+    // so they skip measuring and never attach observers.
+    if (!isVisible) {
+      return;
+    }
+
     // Immediate measurement so dock changes take effect without a flash;
     // resize streams below go through the debounced path.
     measureLauncherZone();
@@ -164,7 +177,12 @@ export default function QuickDirectMessages() {
       );
       debouncedMeasureLauncherZone.cancel();
     };
-  }, [dockedComposers, measureLauncherZone, debouncedMeasureLauncherZone]);
+  }, [
+    dockedComposers,
+    isVisible,
+    measureLauncherZone,
+    debouncedMeasureLauncherZone,
+  ]);
 
   const setAndStoreState = useCallback((nextState: QuickDmState) => {
     setState(nextState);
@@ -298,14 +316,14 @@ export default function QuickDirectMessages() {
     : undefined;
 
   if (state.view === "closed") {
-    if (isLauncherZoneCovered) {
-      return createDirectMessageModal;
-    }
-
-    const launcherPositionClassName = `${QUICK_DM_LAUNCHER_BASE_POSITION_CLASS} ${
-      shouldLiftLauncher
+    // While the launcher zone is covered it reveals at the lifted offset on
+    // focus, clear of the docked composer's Post button.
+    const launcherOffsetClassName =
+      shouldLiftLauncher || isLauncherZoneCovered
         ? QUICK_DM_LAUNCHER_LIFTED_POSITION_CLASS
-        : QUICK_DM_LAUNCHER_RESTING_POSITION_CLASS
+        : QUICK_DM_LAUNCHER_RESTING_POSITION_CLASS;
+    const launcherPositionClassName = `${QUICK_DM_LAUNCHER_BASE_POSITION_CLASS} ${launcherOffsetClassName}${
+      isLauncherZoneCovered ? ` ${QUICK_DM_LAUNCHER_SUPPRESSED_CLASS}` : ""
     }`;
 
     return (

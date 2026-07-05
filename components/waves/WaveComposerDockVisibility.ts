@@ -44,6 +44,21 @@ export const registerWaveComposerDock = (element: HTMLElement): (() => void) => 
 export const getWaveComposerDockElements = (): readonly HTMLElement[] =>
   dockElementsSnapshot;
 
+// True when any visible dock extends into the right-edge strip that a fixed
+// bottom-right overlay of the given clearance would occupy.
+export const isAnyDockInsideRightEdgeClearance = (
+  docks: readonly HTMLElement[],
+  clearancePx: number
+): boolean =>
+  docks.some((dock) => {
+    const rect = dock.getBoundingClientRect();
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      globalThis.window.innerWidth - rect.right < clearancePx
+    );
+  });
+
 // Snapshot identity changes whenever a composer dock mounts or unmounts.
 export const useWaveComposerDockElements = (): readonly HTMLElement[] =>
   useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
