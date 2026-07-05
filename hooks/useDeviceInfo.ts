@@ -49,8 +49,8 @@ export default function useDeviceInfo(): DeviceInfo {
       };
 
       const maxTouchPoints = nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0;
-      // Raw capability: any touch input at all. Only used for UA
-      // disambiguation (iPads pretending to be Macs) — never for UI mode.
+      // Raw capability — true when touch input exists at all. Only used for
+      // UA disambiguation (iPads pretending to be Macs) — never for UI mode.
       const hasTouchInput = touchDetected || maxTouchPoints > 0;
       // Touch-first: touch without mouse/trackpad/hover. Windows touch
       // laptops have a fine pointer and hover, so they stay desktop.
