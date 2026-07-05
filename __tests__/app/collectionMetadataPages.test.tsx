@@ -34,19 +34,19 @@ describe("collection landing metadata", () => {
       alt: "The Memes collection social card",
       generateMetadata: generateTheMemesMetadata,
       slug: "the-memes",
-      title: "The Memes",
+      title: "The Memes | Collections",
     },
     {
       alt: "Meme Lab collection social card",
       generateMetadata: generateMemeLabMetadata,
       slug: "meme-lab",
-      title: "Meme Lab",
+      title: "Meme Lab | Collections",
     },
     {
       alt: "6529 Gradient collection social card",
       generateMetadata: generateGradientMetadata,
       slug: "6529-gradient",
-      title: "6529 Gradient",
+      title: "6529 Gradient | Collections",
     },
   ])("uses branded collection card metadata for $title", async (route) => {
     const metadata = await route.generateMetadata();
