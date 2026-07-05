@@ -247,6 +247,10 @@ const TEXT_SECRET_PATTERNS = [
     // The negative lookahead skips code expressions that legitimately sit
     // to the right of a secret-named key in schema/config sources
     // (zod chains, env plumbing) so only literal-looking values match.
+    // Accepted trade-off: a real secret VALUE that itself begins with one
+    // of these identifier prefixes would be suppressed — vanishingly
+    // unlikely for generated credentials, and the value must also sit on
+    // a line naming one of these specific keys.
     name: "named-secret-assignment",
     pattern:
       /\b(?:ANTHROPIC_API_KEY|OPENROUTER_API_KEY|STAGING_AUTH|STAGING_API_KEY|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|SENTRY_AUTH_TOKEN|ALCHEMY_API_KEY|SSR_CLIENT_SECRET)\b\s*[:=]\s*['"]?(?!z\.|process\.|publicEnv\.|privateEnv\.|serverEnv\.|import\.|env\.)[A-Za-z0-9_./+=:@-]{8,}/i,
@@ -271,7 +275,10 @@ const TEXT_SECRET_PATTERNS = [
     // Three-part base64url token starting with the JWT header prefix
     // ("eyJ" is base64 for '{"'). Catches raw session/refresh tokens in
     // JSON or source even without an Authorization header around them —
-    // the shape of the 2026-07-04 tmp/ bot-token leak.
+    // the shape of the 2026-07-04 tmp/ bot-token leak. The segment length
+    // floors ({10,}/{5,}) are a deliberate noise/coverage trade-off, not
+    // exhaustive JWT detection: degenerate tokens with a sub-10-char
+    // payload or sub-5-char signature slip past this net.
     name: "jwt-like-token",
     pattern: /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}/,
   },
