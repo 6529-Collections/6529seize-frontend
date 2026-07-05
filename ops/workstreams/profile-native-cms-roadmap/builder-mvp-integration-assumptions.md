@@ -1,6 +1,8 @@
 # Builder MVP Integration Assumptions
 
-Last updated: 2026-06-18.
+Last updated: 2026-07-05 (aligned to the real backend contract that landed on
+`6529seize-backend` main; the "expected" endpoint shapes below were replaced
+with the actual generated `ApiProfileCms*` models).
 
 ## Scope
 
@@ -45,31 +47,42 @@ canonicalization semantics.
   chain/contract/token data and point room placements at the existing NFT detail
   convention when that data is available.
 
-## Expected Backend Write API
+## Backend Write API (real contract)
 
-The frontend adapter is localized under `lib/profile-cms/builder/api.ts`.
-Backend models can replace that boundary later.
+The frontend adapter is localized under `lib/profile-cms/builder/api.ts` and
+now targets the real backend routes. Response models are the generated
+`ApiProfileCms*` OpenAPI models (already present in the frontend
+`generated/models/` output).
 
-Expected endpoints:
+Real endpoints used by the builder:
 
 ```ts
 POST /api/profile-cms/packages
 body: { profile_id: string, cms_package: CmsPackageV1 }
-returns: { draft_id: string, package_hash: string, message?: string }
+returns: ApiProfileCmsPackage
+  // { id, package, profile_id, profile_handle, package_id, version,
+  //   status, package_hash, payload_hash, updated_at, created_at,
+  //   published_at? } — epoch-millis timestamps, snake_case keys
 
 POST /api/profile-cms/packages/validate
 body: {
   cms_package: CmsPackageV1,
-  allow_fixture_signatures: boolean,
-  allow_fixture_storage: boolean,
-  enforce_hashes: boolean
+  allow_fixture_signatures?: boolean,
+  allow_fixture_storage?: boolean,
+  enforce_hashes?: boolean
 }
-returns: { draft_id?: string, package_hash: string, message?: string }
+returns: ApiProfileCmsValidationResult
+  // { schema, valid, checked_at, issues[], target?{package_hash, draft_id} }
+
+GET /api/profile-cms/packages/{id}
+returns: ApiProfileCmsPackage
+
+GET /api/profile-cms/profiles/{profile_id}/packages
+returns: ApiProfileCmsPackage[]
 
 POST /api/profile-cms/packages/{id}/publish
-body: signed decentralized publish request fields, storage receipts, package
-      hash, payload hash, and profile authority proof (exact BE model pending)
-returns: { package_hash: string, message?: string }
+// Exists on the backend, but the frontend MVP keeps publish hard-blocked
+// until the signed decentralized storage flow is wired end to end.
 ```
 
 Frontend endpoint constants:
@@ -77,10 +90,13 @@ Frontend endpoint constants:
 - `PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT = "profile-cms/packages"`
 - `PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT =
   "profile-cms/packages/validate"`
+- `PROFILE_CMS_BUILDER_PACKAGE_BY_ID_ENDPOINT = "profile-cms/packages/{id}"`
+- `PROFILE_CMS_BUILDER_PROFILE_PACKAGES_ENDPOINT =
+  "profile-cms/profiles/{profile_id}/packages"`
 - `PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT =
   "profile-cms/packages/{id}/publish"`
 - `PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT =
-  "profile-cms/gallery/snapshots"`
+  "profile-cms/wallet-gallery/snapshot"`
 
 ## Wallet Gallery Snapshot And Generator Contract
 
@@ -88,47 +104,57 @@ The frontend gallery builder shell requests a reviewed wallet snapshot through
 `lib/profile-cms/builder/api.ts` and keeps the package-generation fallback under
 `lib/profile-cms/builder/gallery.ts` deliberately temporary.
 
-Expected snapshot endpoint:
+Real snapshot endpoint (see `ApiProfileCmsWalletGallerySnapshot` and
+`ProfileCmsWalletGalleryApiService#createSnapshot` in the backend):
 
 ```ts
-POST /api/profile-cms/gallery/snapshots
+POST /api/profile-cms/wallet-gallery/snapshot
 body: {
-  profile_id?: string,
-  wallets: Array<{
-    kind: "address" | "ens",
-    input: string,
-    normalized: string
-  }>
+  wallets: string[],                 // addresses or ENS names, 1-25
+  exclude_contracts?: string[],
+  exclude_assets?: Array<{ contract: string, token_id: number }>,
+  include_spam?: boolean,
+  max_assets?: number                // default 200, max 500
 }
 returns: {
-  snapshot_id: string,
-  source: "backend" | "fixture" | string,
-  wallets: Array<{ kind: "address" | "ens", input: string, normalized: string }>,
-  captured_at: string,
-  block_number?: number,
+  generated_at: number,              // epoch millis
+  source: "indexed_ownership",
+  block_reference: number,
+  wallets: Array<{
+    input: string, address: string | null, ens: string | null,
+    display: string | null, status: "resolved" | "unresolved",
+    reason: string | null
+  }>,
   assets: Array<{
-    id: string,
-    title: string,
-    collection_id: string,
-    collection_name: string,
-    contract: string,
-    token_id: string,
-    owner: string,
-    image_uri?: string,
-    media_state: "ready" | "partial" | "missing",
-    metadata_uri?: string,
-    permalink?: string
+    contract: string, token_id: number, balance: number,
+    owner_wallet: string, owner_display: string | null,
+    collection: string, collection_key: "MEMES" | "MEMELAB" | "GRADIENTS" | "NEXTGEN",
+    name: string, description: string | null, artist: string | null,
+    artist_seize_handle: string | null, token_type: string | null,
+    media: {
+      image: string | null, image_preview: string | null,
+      thumbnail: string | null, animation: string | null,
+      animation_preview: string | null, mime_type: string | null
+    },
+    metadata: unknown,
+    flags: { spam: boolean, excluded: boolean, exclusion_reason: string | null }
   }>,
-  collections: Array<{
-    id: string,
-    name: string,
-    contract?: string,
-    description?: string,
-    asset_count: number
+  excluded_assets: Array<{
+    contract: string, token_id: number, owner_wallet: string, reason: string
   }>,
-  warnings?: string[]
+  totals: {
+    requested_wallets: number, resolved_wallets: number,
+    unresolved_wallets: number, indexed_assets: number,
+    visible_assets: number, excluded_assets: number,
+    spam_assets: number, truncated: boolean
+  }
 }
 ```
+
+The adapter maps this into the existing frontend `WalletGallerySnapshot`
+review model in `lib/profile-cms/builder/gallery-normalize.ts` (collections
+are derived by grouping assets on `collection_key`; unresolved wallets and
+truncation surface as review warnings).
 
 The backend Phase 5 deterministic wallet-snapshot -> CMS V1 package generator
 is the durable source of truth for generated packages. Until that generator is

@@ -1,4 +1,5 @@
 import { detectEnsTarget } from "@/lib/ens/detect";
+import { slugifyBuilderId } from "@/lib/profile-cms/builder/normalize";
 import {
   CMS_CANONICALIZATION,
   CMS_HASH_ALGORITHM,
@@ -32,6 +33,12 @@ type WalletGalleryInputResult =
       readonly errors: readonly string[];
     };
 
+export type WalletGallerySnapshotAssetFlags = {
+  readonly spam: boolean;
+  readonly excluded: boolean;
+  readonly reason?: string | undefined;
+};
+
 export type WalletGallerySnapshotAsset = {
   readonly id: string;
   readonly title: string;
@@ -48,6 +55,13 @@ export type WalletGallerySnapshotAsset = {
   readonly metadataUri?: string | undefined;
   readonly mediaState: "ready" | "partial" | "missing";
   readonly altText: string;
+  /**
+   * Curation flags. Mirrors the backend's per-asset `flags` (spam/excluded
+   * with an optional reason) so the review UI can eventually surface backend
+   * exclusions, even though the wallet-gallery snapshot endpoint already
+   * removes excluded assets into `excludedAssets` before this array is built.
+   */
+  readonly flags: WalletGallerySnapshotAssetFlags;
 };
 
 export type WalletGallerySnapshotCollection = {
@@ -57,6 +71,24 @@ export type WalletGallerySnapshotCollection = {
   readonly contract: string;
   readonly chainId: number;
   readonly assetIds: readonly string[];
+};
+
+export type WalletGallerySnapshotExcludedAsset = {
+  readonly contract: string;
+  readonly tokenId: string;
+  readonly owner: string;
+  readonly reason: string;
+};
+
+export type WalletGallerySnapshotTotals = {
+  readonly requestedWallets: number;
+  readonly resolvedWallets: number;
+  readonly unresolvedWallets: number;
+  readonly indexedAssets: number;
+  readonly visibleAssets: number;
+  readonly excludedAssets: number;
+  readonly spamAssets: number;
+  readonly truncated: boolean;
 };
 
 export type WalletGallerySnapshotSource = "backend" | "fixture";
@@ -69,6 +101,8 @@ export type WalletGallerySnapshot = {
   readonly blockNumber?: number | undefined;
   readonly assets: readonly WalletGallerySnapshotAsset[];
   readonly collections: readonly WalletGallerySnapshotCollection[];
+  readonly excludedAssets: readonly WalletGallerySnapshotExcludedAsset[];
+  readonly totals?: WalletGallerySnapshotTotals | undefined;
   readonly warnings: readonly string[];
 };
 
@@ -97,6 +131,14 @@ type WalletGalleryPackageOptions = {
 export const WALLET_GALLERY_FIXTURE_WARNING_CODES = {
   backendDisabled: "fixture_snapshot_backend_disabled",
   partialMedia: "fixture_snapshot_partial_media",
+} as const;
+
+// Frontend-authored warning codes derived from the real backend
+// wallet-gallery snapshot totals (unresolved wallet inputs, truncated asset
+// list). Rendered through profileCms.builder.gallery.snapshot.warning.* keys.
+export const WALLET_GALLERY_BACKEND_WARNING_CODES = {
+  unresolvedWallets: "backend_snapshot_unresolved_wallets",
+  truncated: "backend_snapshot_truncated",
 } as const;
 
 const FIXTURE_ZERO_HASH =
@@ -195,6 +237,7 @@ export function createMockWalletGallerySnapshot({
       metadataUri: "ipfs://bafyfixturegallery/metadata/1.json",
       mediaState: "ready",
       altText: "The Memes by 6529 card number 1",
+      flags: { spam: false, excluded: false },
     },
     {
       id: "work-memes-2",
@@ -212,6 +255,7 @@ export function createMockWalletGallerySnapshot({
       metadataUri: "ipfs://bafyfixturegallery/metadata/2.json",
       mediaState: "ready",
       altText: "The Memes by 6529 card number 2",
+      flags: { spam: false, excluded: false },
     },
     {
       id: "work-memes-partial",
@@ -225,6 +269,7 @@ export function createMockWalletGallerySnapshot({
       metadataUri: "ipfs://bafyfixturegallery/metadata/404.json",
       mediaState: "partial",
       altText: "NFT metadata was found but preview media is pending",
+      flags: { spam: false, excluded: false },
     },
   ];
 
@@ -237,6 +282,7 @@ export function createMockWalletGallerySnapshot({
     capturedAt,
     blockNumber: 22000000,
     assets,
+    excludedAssets: [],
     collections: [
       {
         id: "collection-the-memes",
@@ -727,28 +773,7 @@ function getNftPageId(assetId: string, index: number): string {
   return `page-nft-${slugify(assetId) || index + 1}`;
 }
 
-function slugify(value: string): string {
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-");
-  return trimHyphenEdges(normalized).slice(0, 80) || "item";
-}
-
-function trimHyphenEdges(value: string): string {
-  let start = 0;
-  let end = value.length;
-
-  while (start < end && value[start] === "-") {
-    start += 1;
-  }
-
-  while (end > start && value[end - 1] === "-") {
-    end -= 1;
-  }
-
-  return value.slice(start, end);
-}
+const slugify = slugifyBuilderId;
 
 function normalizeHandle(value: string): string {
   const normalized = value

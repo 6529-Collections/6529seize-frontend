@@ -9,6 +9,7 @@ import {
   ProfileCmsAgentPanel,
   downloadJsonFile,
 } from "@/components/profile-cms-builder/ProfileCmsAgentPanel";
+import { isProfileCmsBuilderApiEnabledEnv } from "@/config/profileCmsBuilderEnv";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -17,6 +18,8 @@ import {
   createCmsBuilderSourcePacket,
 } from "@/lib/profile-cms/builder/agent";
 import {
+  getProfileCmsPackageById,
+  listProfileCmsPackagesForProfile,
   PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
   PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT,
   PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
@@ -25,8 +28,10 @@ import {
   type ProfileCmsBuilderAction,
   type ProfileCmsBuilderActionCode,
   type ProfileCmsBuilderActionResult,
+  type ProfileCmsPackageRecord,
 } from "@/lib/profile-cms/builder/api";
 import {
+  WALLET_GALLERY_BACKEND_WARNING_CODES,
   WALLET_GALLERY_FIXTURE_WARNING_CODES,
   parseWalletGallerySources,
   type WalletGalleryBuilderState,
@@ -53,6 +58,7 @@ import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
 
 type BuilderTab = "editor" | "preview" | "json" | "agent";
 type GallerySnapshotStatus = "idle" | "loading" | "ready" | "error";
+type DraftsListStatus = "idle" | "loading" | "ready" | "error";
 
 const BLOCK_OPTIONS: ReadonlyArray<{
   readonly kind: CmsBuilderBlockKind;
@@ -92,8 +98,13 @@ export default function ProfileCmsBuilder({
   const [gallerySnapshotStatus, setGallerySnapshotStatus] =
     useState<GallerySnapshotStatus>("idle");
   const [gallerySnapshotError, setGallerySnapshotError] = useState("");
+  const [draftsStatus, setDraftsStatus] = useState<DraftsListStatus>("idle");
+  const [drafts, setDrafts] = useState<readonly ProfileCmsPackageRecord[]>([]);
+  const [loadingDraftId, setLoadingDraftId] = useState<string | null>(null);
+  const [draftLoadFailed, setDraftLoadFailed] = useState(false);
   const actionRequestIdRef = useRef(0);
   const gallerySnapshotRequestIdRef = useRef(0);
+  const draftsRequestIdRef = useRef(0);
   const stateVersionRef = useRef(0);
   const { activeProfileProxy, connectedProfile } = useAuth();
 
@@ -206,7 +217,6 @@ export default function ProfileCmsBuilder({
     try {
       const snapshot = await requestProfileCmsGallerySnapshot({
         handle: state.handle,
-        profileId: canUseBuilderApi ? profileId : undefined,
         sources: parsed.sources,
       });
       if (requestId !== gallerySnapshotRequestIdRef.current) {
@@ -313,7 +323,9 @@ export default function ProfileCmsBuilder({
       ) {
         return;
       }
-      if (result.ok && result.draftId) {
+      // A rejected server validation (ok: false) can still return a
+      // persisted draft id in its validation target — keep it either way.
+      if (result.draftId) {
         setDraftId(result.draftId);
       }
       setActionResult(result);
@@ -334,6 +346,55 @@ export default function ProfileCmsBuilder({
       if (actionRequestId === actionRequestIdRef.current) {
         setIsSubmitting(false);
       }
+    }
+  };
+
+  const builderApiEnabled = isProfileCmsBuilderApiEnabledEnv();
+
+  const loadDrafts = async () => {
+    if (!canUseBuilderApi || !profileId || !builderApiEnabled) {
+      return;
+    }
+
+    const requestId = draftsRequestIdRef.current + 1;
+    draftsRequestIdRef.current = requestId;
+    setDraftsStatus("loading");
+    setDraftLoadFailed(false);
+
+    try {
+      const records = await listProfileCmsPackagesForProfile(profileId);
+      if (requestId !== draftsRequestIdRef.current) {
+        return;
+      }
+      setDrafts(records);
+      setDraftsStatus("ready");
+    } catch {
+      if (requestId !== draftsRequestIdRef.current) {
+        return;
+      }
+      setDraftsStatus("error");
+    }
+  };
+
+  const loadDraft = async (record: ProfileCmsPackageRecord) => {
+    if (!canUseBuilderApi || !builderApiEnabled || loadingDraftId) {
+      return;
+    }
+
+    setLoadingDraftId(record.id);
+    setDraftLoadFailed(false);
+    try {
+      // Refetch by id so the editor always loads the freshest stored
+      // package, validated against the local V1 schema by the adapter.
+      const loaded = await getProfileCmsPackageById(record.id);
+      setState(createBuilderStateFromPackage(loaded.cmsPackage));
+      setDraftId(loaded.id);
+      clearActionResult();
+      setActiveTab("editor");
+    } catch {
+      setDraftLoadFailed(true);
+    } finally {
+      setLoadingDraftId(null);
     }
   };
 
@@ -480,6 +541,17 @@ export default function ProfileCmsBuilder({
             locale={locale}
             packageHash={validation.cmsPackage.integrity.package_hash}
             payloadHash={validation.cmsPackage.integrity.payload_hash}
+          />
+          <DraftsPanel
+            builderApiEnabled={builderApiEnabled}
+            canUseBuilderApi={canUseBuilderApi}
+            drafts={drafts}
+            loadFailed={draftLoadFailed}
+            loadingDraftId={loadingDraftId}
+            locale={locale}
+            onLoadDraft={(record) => void loadDraft(record)}
+            onRequestDrafts={() => void loadDrafts()}
+            status={draftsStatus}
           />
         </aside>
       </div>
@@ -910,6 +982,13 @@ function formatGallerySnapshotWarning(
         locale,
         "profileCms.builder.gallery.snapshot.warning.partialMedia"
       );
+    case WALLET_GALLERY_BACKEND_WARNING_CODES.unresolvedWallets:
+      return t(
+        locale,
+        "profileCms.builder.gallery.snapshot.warning.unresolvedWallets"
+      );
+    case WALLET_GALLERY_BACKEND_WARNING_CODES.truncated:
+      return t(locale, "profileCms.builder.gallery.snapshot.warning.truncated");
     default:
       return warning;
   }
@@ -1624,9 +1703,23 @@ function PublishStatePanel({
         >
           <p>{getActionResultMessage(locale, actionResult.code)}</p>
           {actionResult.ok ? null : (
-            <p className="tw-mt-2 tw-font-mono tw-text-xs">
-              {actionResult.expectedEndpoint}
-            </p>
+            <>
+              <p className="tw-mt-2 tw-font-mono tw-text-xs">
+                {actionResult.expectedEndpoint}
+              </p>
+              {actionResult.serverIssues?.length ? (
+                <ul className="tw-mt-2 tw-flex tw-flex-col tw-gap-1">
+                  {actionResult.serverIssues.map((issue) => (
+                    <li
+                      className="tw-font-mono tw-text-xs"
+                      key={`${issue.code}-${issue.path}`}
+                    >
+                      {issue.severity} · {issue.code} · {issue.path}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </>
           )}
         </div>
       ) : (
@@ -1634,6 +1727,111 @@ function PublishStatePanel({
           {t(locale, "profileCms.builder.publishState.pending")}
         </p>
       )}
+    </section>
+  );
+}
+
+function DraftsPanel({
+  builderApiEnabled,
+  canUseBuilderApi,
+  drafts,
+  loadFailed,
+  loadingDraftId,
+  locale,
+  onLoadDraft,
+  onRequestDrafts,
+  status,
+}: {
+  readonly builderApiEnabled: boolean;
+  readonly canUseBuilderApi: boolean;
+  readonly drafts: readonly ProfileCmsPackageRecord[];
+  readonly loadFailed: boolean;
+  readonly loadingDraftId: string | null;
+  readonly locale: SupportedLocale;
+  readonly onLoadDraft: (record: ProfileCmsPackageRecord) => void;
+  readonly onRequestDrafts: () => void;
+  readonly status: "idle" | "loading" | "ready" | "error";
+}) {
+  const canRequest = canUseBuilderApi && builderApiEnabled;
+  return (
+    <section className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
+        <h2 className="tw-text-base tw-font-semibold tw-text-white">
+          {t(locale, "profileCms.builder.drafts.title")}
+        </h2>
+        <BuilderActionButton
+          disabled={!canRequest || status === "loading"}
+          label={
+            status === "loading"
+              ? t(locale, "profileCms.builder.drafts.loading")
+              : t(locale, "profileCms.builder.drafts.refresh")
+          }
+          onClick={onRequestDrafts}
+        />
+      </div>
+      {builderApiEnabled ? null : (
+        <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          {t(locale, "profileCms.builder.api.disabled")}
+        </p>
+      )}
+      {builderApiEnabled && !canUseBuilderApi ? (
+        <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          {t(locale, "profileCms.builder.api.profileNotAuthorized")}
+        </p>
+      ) : null}
+      {canRequest && status === "error" ? (
+        <p
+          className="tw-mt-3 tw-border tw-border-solid tw-border-red tw-bg-red/10 tw-p-3 tw-text-sm tw-text-red"
+          role="alert"
+        >
+          {t(locale, "profileCms.builder.drafts.failed")}
+        </p>
+      ) : null}
+      {canRequest && loadFailed ? (
+        <p
+          className="tw-mt-3 tw-border tw-border-solid tw-border-red tw-bg-red/10 tw-p-3 tw-text-sm tw-text-red"
+          role="alert"
+        >
+          {t(locale, "profileCms.builder.drafts.loadFailed")}
+        </p>
+      ) : null}
+      {canRequest && status === "ready" && !drafts.length ? (
+        <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          {t(locale, "profileCms.builder.drafts.empty")}
+        </p>
+      ) : null}
+      {drafts.length ? (
+        <ul className="tw-mt-3 tw-flex tw-flex-col tw-gap-2">
+          {drafts.map((draft) => (
+            <li
+              className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-p-3"
+              key={draft.id}
+            >
+              <div className="tw-min-w-0">
+                <p className="tw-truncate tw-text-sm tw-font-semibold tw-text-white">
+                  {t(locale, "profileCms.builder.drafts.version", {
+                    version: formatInteger(locale, draft.version),
+                  })}{" "}
+                  · {t(locale, getDraftStatusLabelKey(draft.status))}
+                </p>
+                <p className="tw-mt-1 tw-truncate tw-font-mono tw-text-xs tw-text-iron-500">
+                  {draft.packageHash}
+                </p>
+              </div>
+              <button
+                className="tw-min-h-9 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 hover:tw-border-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                disabled={!canRequest || !!loadingDraftId}
+                onClick={() => onLoadDraft(draft)}
+                type="button"
+              >
+                {loadingDraftId === draft.id
+                  ? t(locale, "profileCms.builder.drafts.loading")
+                  : t(locale, "profileCms.builder.drafts.load")}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </section>
   );
 }
@@ -1657,6 +1855,8 @@ function getActionResultMessage(
       return t(locale, "profileCms.builder.api.failed");
     case "server_validation_completed":
       return t(locale, "profileCms.builder.api.serverValidationCompleted");
+    case "server_validation_invalid":
+      return t(locale, "profileCms.builder.api.serverValidationInvalid");
     case "draft_saved":
       return t(locale, "profileCms.builder.api.draftSaved");
   }
@@ -1686,6 +1886,27 @@ function getBlockLabelKey(
     BLOCK_OPTIONS.find((option) => option.kind === kind)?.labelKey ??
     "profileCms.builder.block.heading"
   );
+}
+
+function getDraftStatusLabelKey(
+  status: ProfileCmsPackageRecord["status"]
+): Parameters<typeof t>[1] {
+  switch (status) {
+    case "draft":
+      return "profileCms.builder.drafts.status.draft";
+    case "validating":
+      return "profileCms.builder.drafts.status.validating";
+    case "published":
+      return "profileCms.builder.drafts.status.published";
+    case "failed":
+      return "profileCms.builder.drafts.status.failed";
+    case "archived":
+      return "profileCms.builder.drafts.status.archived";
+    case "superseded":
+      return "profileCms.builder.drafts.status.superseded";
+    default:
+      return "profileCms.builder.drafts.status.draft";
+  }
 }
 
 function getValidationSeverityKey(
