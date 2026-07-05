@@ -380,6 +380,9 @@ const localDrop = {
   nft_links: [],
 };
 
+const SANDBOX_EDITED_CHAT_DROP_CONTENT =
+  "Local-only chat drop from Playwright. (edited)";
+
 const submittedChatDrop = {
   id: SANDBOX_SUBMITTED_CHAT_DROP_ID,
   serial_no: 2,
@@ -1194,6 +1197,46 @@ function isExpectedReactionMutation(method, pathname, body) {
   return method === "DELETE" && isEmptyRequestBody(body);
 }
 
+function isExpectedChatDropEditBody(body) {
+  if (
+    !hasOnlyKeys(body, [
+      "parts",
+      "title",
+      "metadata",
+      "referenced_nfts",
+      "mentioned_users",
+      "mentioned_waves",
+      "signature",
+    ])
+  ) {
+    return false;
+  }
+
+  if (!Array.isArray(body.parts) || body.parts.length !== 1) {
+    return false;
+  }
+
+  const part = body.parts[0];
+  return (
+    isPlainObject(part) &&
+    hasOnlyKeys(part, ["content", "quoted_drop", "media"]) &&
+    part.content === SANDBOX_EDITED_CHAT_DROP_CONTENT &&
+    part.quoted_drop === null &&
+    Array.isArray(part.media) &&
+    part.media.length === 0 &&
+    body.title === null &&
+    Array.isArray(body.metadata) &&
+    body.metadata.length === 0 &&
+    Array.isArray(body.referenced_nfts) &&
+    body.referenced_nfts.length === 0 &&
+    Array.isArray(body.mentioned_users) &&
+    body.mentioned_users.length === 0 &&
+    Array.isArray(body.mentioned_waves) &&
+    body.mentioned_waves.length === 0 &&
+    body.signature === null
+  );
+}
+
 function isExpectedSessionRefreshBody(body) {
   return (
     hasOnlyKeys(body, ["client_address", "client_type"]) &&
@@ -1231,6 +1274,10 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   if (pathname === "/api/drops") {
     // The diagnostics reset bounds this synthetic chat submit to one accepted request.
     return isExpectedChatDropBody(body) && !hasAcceptedChatDropSubmit();
+  }
+
+  if (pathname === `/api/drops/${SANDBOX_SUBMITTED_CHAT_DROP_ID}`) {
+    return isExpectedChatDropEditBody(body);
   }
 
   if (pathname === "/api/groups") {
@@ -1317,6 +1364,18 @@ function loggedRequestBody(pathname, body) {
     return {
       visible: body.visible,
       old_version_id: body.old_version_id,
+    };
+  }
+
+  if (pathname === `/api/drops/${SANDBOX_SUBMITTED_CHAT_DROP_ID}`) {
+    const firstPart = Array.isArray(body.parts) ? body.parts[0] : null;
+    return {
+      content: isPlainObject(firstPart) ? firstPart.content : null,
+      part_count: Array.isArray(body.parts) ? body.parts.length : 0,
+      mentioned_users_count: Array.isArray(body.mentioned_users)
+        ? body.mentioned_users.length
+        : 0,
+      keys: sortedKeys(body),
     };
   }
 
@@ -1603,6 +1662,30 @@ function handleAllowedChatDropPost(method, pathname, requestKind, res) {
   return writeJsonResponse(res, submittedChatDrop);
 }
 
+function handleAllowedChatDropEditPost(method, pathname, requestKind, res) {
+  if (
+    method !== "POST" ||
+    pathname !== `/api/drops/${SANDBOX_SUBMITTED_CHAT_DROP_ID}`
+  ) {
+    return false;
+  }
+
+  if (requestKind !== "allowed-sandbox-mutation") {
+    return false;
+  }
+
+  return writeJsonResponse(res, {
+    ...submittedChatDrop,
+    updated_at: CREATED_AT + 3000,
+    parts: [
+      {
+        ...submittedChatDrop.parts[0],
+        content: SANDBOX_EDITED_CHAT_DROP_CONTENT,
+      },
+    ],
+  });
+}
+
 function handleAllowedReactionMutation(method, pathname, url, body, res) {
   if (
     !isSandboxReactionPath(pathname) ||
@@ -1645,6 +1728,7 @@ function handleMockApi(method, pathname, url, body, res, requestKind) {
   return (
     handleMockApiRead(method, pathname, url, res) ||
     handleAllowedChatDropPost(method, pathname, requestKind, res) ||
+    handleAllowedChatDropEditPost(method, pathname, requestKind, res) ||
     handleAllowedReactionMutation(method, pathname, url, body, res) ||
     handleKnownSandboxPost(method, pathname, url, body, res)
   );
