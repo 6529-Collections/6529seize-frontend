@@ -15,6 +15,7 @@
       "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
       "bin/**/*.mjs",                // repo-local Node CLIs launched from shell helpers
       "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
+      "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
