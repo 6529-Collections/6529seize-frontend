@@ -11,7 +11,7 @@ import {
   getYoutubeFetchUrl,
   getYoutubeWatchUrl,
   parseYoutubeLink,
-} from "@/src/services/youtube/url";
+} from "@/services/youtube/url";
 import LruTtlCache from "@/lib/cache/lruTtl";
 
 import type { PreviewPlan } from "../compound/service";

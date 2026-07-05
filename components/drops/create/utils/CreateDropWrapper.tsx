@@ -39,7 +39,7 @@ import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTransformers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { WalletValidationError } from "@/src/errors/wallet";
+import { WalletValidationError } from "@/errors/wallet";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { hasPendingInlineImageUploadMarkdown } from "@/helpers/waves/inline-image-upload.helpers";
 

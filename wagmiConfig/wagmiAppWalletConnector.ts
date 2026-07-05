@@ -5,7 +5,7 @@ import {
   InvalidPasswordError,
   PrivateKeyDecryptionError,
   WalletAuthenticationError,
-} from "@/src/errors/wallet-auth";
+} from "@/errors/wallet-auth";
 import type { Address, Chain, Hex, WalletClient } from "viem";
 import { createWalletClient, fallback, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";

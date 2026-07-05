@@ -1,9 +1,9 @@
 import { publicEnv } from "@/config/env";
-import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
+import ArtBlocksTokenCard from "@/components/waves/ArtBlocksTokenCard";
 import {
   parseArtBlocksLink,
   type ArtBlocksTokenIdentifier,
-} from "@/src/services/artblocks/url";
+} from "@/services/artblocks/url";
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 
 import type { LinkHandler } from "../linkTypes";

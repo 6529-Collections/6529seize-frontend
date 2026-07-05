@@ -4,7 +4,7 @@ import {
   getYoutubeWatchUrl,
   parseYoutubeLink,
   parseYoutubeStartSeconds,
-} from "@/src/services/youtube/url";
+} from "@/services/youtube/url";
 
 describe("YouTube URL helpers", () => {
   it.each([

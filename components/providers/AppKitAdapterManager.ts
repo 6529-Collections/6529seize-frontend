@@ -6,11 +6,11 @@ import {
   AdapterCacheError,
   AdapterCleanupError,
   AdapterError,
-} from "@/src/errors/adapter";
+} from "@/errors/adapter";
 import {
   WalletSecurityError,
   WalletValidationError,
-} from "@/src/errors/wallet-validation";
+} from "@/errors/wallet-validation";
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import type { AppWallet } from "../app-wallets/AppWalletsContext";

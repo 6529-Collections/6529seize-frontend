@@ -8,7 +8,7 @@ import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import type { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
 import { publicEnv } from "@/config/env";
 import { CW_PROJECT_ID } from "@/constants/constants";
-import { AdapterCacheError, AdapterError } from "@/src/errors/adapter";
+import { AdapterCacheError, AdapterError } from "@/errors/adapter";
 import { isIndexedDBError, logErrorSecurely } from "@/utils/error-sanitizer";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { AppKitNetwork } from "@reown/appkit-common";

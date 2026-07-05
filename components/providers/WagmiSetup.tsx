@@ -16,7 +16,7 @@ import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManage
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { publicEnv } from "@/config/env";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-import { AppKitValidationError } from "@/src/errors/appkit-initialization";
+import { AppKitValidationError } from "@/errors/appkit-initialization";
 import type { AppKitInitializationConfig } from "@/utils/appkit-initialization.utils";
 import { initializeAppKit } from "@/utils/appkit-initialization.utils";
 import {

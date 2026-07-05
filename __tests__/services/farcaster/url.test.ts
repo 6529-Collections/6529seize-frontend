@@ -1,4 +1,4 @@
-import { parseFarcasterResource } from "@/src/services/farcaster/url";
+import { parseFarcasterResource } from "@/services/farcaster/url";
 
 describe("farcaster URL parsing", () => {
   it("parses user profiles", () => {

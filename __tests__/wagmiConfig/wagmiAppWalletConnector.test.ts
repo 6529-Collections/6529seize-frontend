@@ -4,7 +4,7 @@ import {
   InvalidPasswordError,
   PrivateKeyDecryptionError,
   WalletAuthenticationError,
-} from "@/src/errors/wallet-auth";
+} from "@/errors/wallet-auth";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import {
   afterEach,

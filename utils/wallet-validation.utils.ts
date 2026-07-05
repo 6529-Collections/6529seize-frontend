@@ -3,7 +3,7 @@ import { isAppWalletEncryptedEnvelope } from "@/components/app-wallets/app-walle
 import {
   WalletValidationError,
   WalletSecurityError,
-} from "@/src/errors/wallet-validation";
+} from "@/errors/wallet-validation";
 
 const ETHEREUM_ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/;
 const MIN_NAME_LENGTH = 1;

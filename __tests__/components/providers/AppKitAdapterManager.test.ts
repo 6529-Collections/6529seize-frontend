@@ -1,6 +1,6 @@
 import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
-import { AdapterError } from "@/src/errors/adapter";
-import { WalletValidationError } from "@/src/errors/wallet-validation";
+import { AdapterError } from "@/errors/adapter";
+import { WalletValidationError } from "@/errors/wallet-validation";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "viem/chains";
