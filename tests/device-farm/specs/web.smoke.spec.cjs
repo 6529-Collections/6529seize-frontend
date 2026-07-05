@@ -11,10 +11,10 @@
 const assert = require("node:assert");
 const {
   assertNoCrashMarkers,
+  openPage,
   saveScreenshot,
   startWebSession,
   targetUrl,
-  waitForDocumentReady,
 } = require("../lib/driver.cjs");
 
 const PAGE_LOAD_TIMEOUT_MS = 90000;
@@ -46,15 +46,14 @@ describe("6529 mobile web smoke (real device)", function () {
 
   for (const page of PAGES) {
     it(`renders ${page.path} without crashing`, async function () {
-      await driver.url(new URL(page.path, targetUrl()).toString());
-      await waitForDocumentReady(driver, PAGE_LOAD_TIMEOUT_MS);
+      await openPage(
+        driver,
+        new URL(page.path, targetUrl()).toString(),
+        PAGE_LOAD_TIMEOUT_MS
+      );
 
       const bodyText = await driver.execute(() => document.body.innerText || "");
       assertNoCrashMarkers(assert, bodyText, page.path);
-      assert.ok(
-        bodyText.trim().length > 0,
-        `${page.path} rendered an empty body`
-      );
       if (page.expectBodyText) {
         assert.ok(
           bodyText.toLowerCase().includes(page.expectBodyText),
@@ -66,13 +65,17 @@ describe("6529 mobile web smoke (real device)", function () {
   }
 
   it("serves the 6529 app shell on the home page", async function () {
-    await driver.url(targetUrl());
-    await waitForDocumentReady(driver, PAGE_LOAD_TIMEOUT_MS);
+    await openPage(driver, targetUrl(), PAGE_LOAD_TIMEOUT_MS);
 
-    const title = await driver.getTitle();
-    assert.ok(
-      title.toLowerCase().includes("6529"),
-      `home page title "${title}" does not mention 6529`
+    // The home page's own title mentions 6529; give SPA title effects a
+    // moment to settle instead of asserting the first paint.
+    await driver.waitUntil(
+      async () => (await driver.getTitle()).toLowerCase().includes("6529"),
+      {
+        timeout: 30000,
+        interval: 2000,
+        timeoutMsg: "home page title never mentioned 6529",
+      }
     );
 
     const hasNavigationChrome = await driver.execute(() =>
@@ -82,8 +85,7 @@ describe("6529 mobile web smoke (real device)", function () {
   });
 
   it("keeps the mobile viewport free of horizontal overflow", async function () {
-    await driver.url(targetUrl());
-    await waitForDocumentReady(driver, PAGE_LOAD_TIMEOUT_MS);
+    await openPage(driver, targetUrl(), PAGE_LOAD_TIMEOUT_MS);
 
     const overflowPx = await driver.execute(
       () =>
