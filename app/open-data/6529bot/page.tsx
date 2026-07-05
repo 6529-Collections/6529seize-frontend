@@ -16,7 +16,7 @@ export default async function ReviewbotUsagePage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "6529bot Usage",
+    title: "6529bot Usage | Open Data",
     description: "Open Data",
   });
 }

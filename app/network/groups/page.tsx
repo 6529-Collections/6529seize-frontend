@@ -13,7 +13,7 @@ export default function GroupsPage() {
 
 export const generateMetadata = async () => {
   return getAppMetadata({
-    title: "Groups",
+    title: "Groups | Network",
     description: "Network",
   });
 };

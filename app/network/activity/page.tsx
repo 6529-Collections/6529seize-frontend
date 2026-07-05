@@ -29,7 +29,7 @@ export default async function CommunityActivityPage() {
 
 export const generateMetadata = async () => {
   return getAppMetadata({
-    title: "Activity",
+    title: "Activity | Network",
     description: "Network",
   });
 };

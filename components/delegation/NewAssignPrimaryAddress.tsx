@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { DelegationCollection } from "./delegation-constants";
 import { PRIMARY_ADDRESS_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import type { DelegationToastState } from "./DelegationToast";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
@@ -36,10 +37,10 @@ interface Props {
       }
     | undefined;
   ens: string | null | undefined;
-  onHide(): any;
+  onHide(): void;
   new_primary_address_query?: string | undefined;
-  setNewPrimaryAddressQuery?(query: string): any;
-  onSetToast(toast: any): any;
+  setNewPrimaryAddressQuery?(query: string): void;
+  onSetToast(toast: DelegationToastState): void;
 }
 
 export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
@@ -77,7 +78,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
           validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
-        onSettled(data: any, error: any) {
+        onSettled(data: unknown, error: Error | null) {
           if (data) {
             setGasError(undefined);
           }
@@ -100,7 +101,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
         ],
         functionName:
           validate().length === 0 ? "registerDelegationAddress" : undefined,
-        onSettled(data: any, error: any) {
+        onSettled(data: unknown, error: Error | null) {
           if (data) {
             setGasError(undefined);
           }

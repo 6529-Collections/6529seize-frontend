@@ -9,7 +9,7 @@ import {
 } from "react";
 import styles from "./Delegation.module.css";
 
-interface DelegationToastState {
+export interface DelegationToastState {
   title: string;
   message?: ReactNode;
 }

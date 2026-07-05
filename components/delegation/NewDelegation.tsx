@@ -10,6 +10,7 @@ import { useState } from "react";
 import type { DelegationCollection } from "./delegation-constants";
 import { DELEGATION_USE_CASES } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import type { DelegationToastState } from "./DelegationToast";
 import styles from "./Delegation.module.css";
 import {
   DelegationAddressDisabledInput,
@@ -37,11 +38,11 @@ interface Props {
     | undefined;
   ens: string | null | undefined;
   collection_query?: string | undefined;
-  setCollectionQuery?(collection: string): any;
+  setCollectionQuery?(collection: string): void;
   use_case_query?: number | undefined;
-  setUseCaseQuery?(useCase: number): any;
-  onHide(): any;
-  onSetToast(toast: any): any;
+  setUseCaseQuery?(useCase: number): void;
+  onHide(): void;
+  onSetToast(toast: DelegationToastState): void;
 }
 
 export default function NewDelegationComponent(props: Readonly<Props>) {
@@ -84,7 +85,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
           validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
-        onSettled(data: any, error: any) {
+        onSettled(data: unknown, error: Error | null) {
           if (data) {
             setGasError(undefined);
           }
@@ -109,7 +110,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         ],
         functionName:
           validate().length === 0 ? "registerDelegationAddress" : undefined,
-        onSettled(data: any, error: any) {
+        onSettled(data: unknown, error: Error | null) {
           if (data) {
             setGasError(undefined);
           }

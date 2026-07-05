@@ -14,7 +14,7 @@ export default function PrenodesPage() {
 
 export const generateMetadata = () => {
   return getAppMetadata({
-    title: "Prenodes",
+    title: "Prenodes | Network",
     description: "Network",
   });
 };

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
-import type { SupportedChain } from "@/components/nft-picker/NftPicker.types";
+import type { SupportedChain } from "@/components/nft-picker/types";
 import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
 import Spinner from "@/components/utils/Spinner";
 
@@ -20,7 +20,6 @@ interface GrantTokensDisclosureProps {
   readonly grantId: string;
   readonly tokensCount: number | null;
   readonly tokensCountLabel: string;
-
 }
 
 export function GrantTokensDisclosure({
@@ -29,7 +28,6 @@ export function GrantTokensDisclosure({
   grantId,
   tokensCount,
   tokensCountLabel,
-
 }: Readonly<GrantTokensDisclosureProps>) {
   const { isOpen, panelId, toggleOpen, disclosureState } =
     useGrantTokensDisclosure({
@@ -50,7 +48,7 @@ export function GrantTokensDisclosure({
       <button
         type="button"
         className={clsx(
-          "tw-group tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-none tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-appearance-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-bg-iron-900",
+          "tw-group tw-flex tw-w-full tw-appearance-none tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-none tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-bg-iron-900",
           isOpen ? "tw-bg-iron-900" : "tw-bg-iron-900/30"
         )}
         onClick={toggleOpen}
@@ -83,29 +81,25 @@ export function GrantTokensDisclosure({
   );
 }
 
-function renderGrantTokensDisclosureBody(
-  {
-    showInitialLoading,
-    showInitialError,
-    tokenRanges,
-    tokens,
-    errorMessage,
-    onRetry,
-    contractAddress,
-    chain,
-    grantId,
-    onEndReached,
-    isFetchingNextPage,
-  }: GrantTokensDisclosureState,
-): ReactNode {
+function renderGrantTokensDisclosureBody({
+  showInitialLoading,
+  showInitialError,
+  tokenRanges,
+  tokens,
+  errorMessage,
+  onRetry,
+  contractAddress,
+  chain,
+  grantId,
+  onEndReached,
+  isFetchingNextPage,
+}: GrantTokensDisclosureState): ReactNode {
   if (showInitialLoading) {
     return <GrantTokensLoadingState />;
   }
 
   if (showInitialError) {
-    return (
-      <GrantTokensErrorState message={errorMessage} onRetry={onRetry} />
-    );
+    return <GrantTokensErrorState message={errorMessage} onRetry={onRetry} />;
   }
 
   if (tokenRanges.length === 0) {
@@ -149,11 +143,11 @@ function GrantTokensErrorState({
   onRetry,
 }: Readonly<{ message: string; onRetry: () => void }>) {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-red-500/40 tw-bg-red-500/5 tw-p-4">
-      <p className="tw-m-0 tw-text-sm tw-text-red-300">{message}</p>
+    <div className="tw-border-red-500/40 tw-bg-red-500/5 tw-rounded-lg tw-border tw-p-4">
+      <p className="tw-text-red-300 tw-m-0 tw-text-sm">{message}</p>
       <button
         type="button"
-        className="tw-mt-3 tw-rounded-md tw-border tw-border-red-500/60 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-red-200 desktop-hover:hover:tw-bg-red-500/10"
+        className="tw-border-red-500/60 tw-text-red-200 desktop-hover:hover:tw-bg-red-500/10 tw-mt-3 tw-rounded-md tw-border tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold"
         onClick={onRetry}
       >
         Retry
@@ -164,7 +158,7 @@ function GrantTokensErrorState({
 
 function GrantTokensEmptyState() {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-925 tw-p-4">
+    <div className="tw-bg-iron-925 tw-rounded-lg tw-border tw-border-iron-800 tw-p-4">
       <p className="tw-m-0 tw-text-sm tw-text-iron-300">
         No specific token IDs were returned for this grant.
       </p>

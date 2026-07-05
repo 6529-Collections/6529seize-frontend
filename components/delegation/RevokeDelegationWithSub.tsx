@@ -10,6 +10,7 @@ import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import { ALL_USE_CASES } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import type { DelegationToastState } from "./DelegationToast";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
@@ -29,8 +30,8 @@ interface Props {
   originalDelegator: string;
   collection: DelegationCollection;
   showAddMore: boolean;
-  onHide(): any;
-  onSetToast(toast: any): any;
+  onHide(): void;
+  onSetToast(toast: DelegationToastState): void;
 }
 
 export default function RevokeDelegationWithSubComponent(
@@ -65,7 +66,7 @@ export default function RevokeDelegationWithSubComponent(
       validate().length === 0
         ? "revokeDelegationAddressUsingSubdelegation"
         : undefined,
-    onSettled(data: any, error: any) {
+    onSettled(data: unknown, error: Error | null) {
       if (data) {
         setGasError(undefined);
       }

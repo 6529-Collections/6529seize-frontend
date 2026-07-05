@@ -1,6 +1,6 @@
 import type { Abi } from "viem";
 
-export const DELEGATION_ABI = [
+export const DELEGATION_ABI: Abi = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {
     anonymous: false,

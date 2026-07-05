@@ -9,7 +9,7 @@ import {
 } from "@headlessui/react";
 import type { ReactNode } from "react";
 import { Fragment } from "react";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 export default function CommonDropdownItemsMobileWrapper({
   isOpen,
@@ -28,8 +28,8 @@ export default function CommonDropdownItemsMobileWrapper({
   readonly onAfterLeave?: (() => void) | undefined;
   readonly children: ReactNode;
 }) {
-  const hasTouchInput = useHasTouchInput();
-  const shouldHideOnDesktopHover = hideOnDesktopHover && !hasTouchInput;
+  const isTouchDevice = useIsTouchDevice();
+  const shouldHideOnDesktopHover = hideOnDesktopHover && !isTouchDevice;
 
   return (
     <Transition show={isOpen} as={Fragment}>

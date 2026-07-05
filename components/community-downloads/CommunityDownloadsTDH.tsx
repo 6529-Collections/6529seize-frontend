@@ -3,11 +3,7 @@
 import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import CommunityDownloadsComponent from "./CommunityDownloadsComponent";
-
-export enum VIEW {
-  CONSOLIDATION,
-  WALLET,
-}
+import { VIEW } from "./views";
 
 interface Props {
   view: VIEW;

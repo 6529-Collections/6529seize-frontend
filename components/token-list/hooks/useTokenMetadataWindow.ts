@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
-import type { SupportedChain, TokenMetadata } from "@/components/nft-picker/NftPicker.types";
+import type {
+  SupportedChain,
+  TokenMetadata,
+} from "@/components/nft-picker/types";
 import { EMPTY_METADATA_MAP } from "../utils";
 import type { TokenWindowEntry } from "../types";
 
@@ -20,9 +23,7 @@ export function useTokenMetadataWindow({
     [windowTokens]
   );
   const canLoadMetadata = Boolean(
-    contractAddress &&
-    chain &&
-    decimalTokenIds.length > 0
+    contractAddress && chain && decimalTokenIds.length > 0
   );
 
   const metadataQuery = useTokenMetadataQuery({

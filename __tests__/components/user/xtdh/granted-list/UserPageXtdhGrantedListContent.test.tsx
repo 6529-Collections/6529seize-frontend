@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { UserPageXtdhGrantedListContent } from "@/components/user/xtdh/granted-list/UserPageXtdhGrantedListContent";
+import UserPageXtdhGrantedListContent from "@/components/user/xtdh/granted-list";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 
 describe("UserPageXtdhGrantedListContent", () => {
@@ -15,10 +15,7 @@ describe("UserPageXtdhGrantedListContent", () => {
 
   it("shows filter-specific empty state when a status filter is active", () => {
     render(
-      <UserPageXtdhGrantedListContent
-        {...baseProps}
-        statuses={["PENDING"]}
-      />
+      <UserPageXtdhGrantedListContent {...baseProps} statuses={["PENDING"]} />
     );
 
     expect(screen.getByText("No grants found")).toBeInTheDocument();
@@ -26,10 +23,7 @@ describe("UserPageXtdhGrantedListContent", () => {
 
   it("falls back to the default empty state when no status filter is applied", () => {
     render(
-      <UserPageXtdhGrantedListContent
-        {...baseProps}
-        statuses={["ALL"]}
-      />
+      <UserPageXtdhGrantedListContent {...baseProps} statuses={["ALL"]} />
     );
 
     expect(screen.getByText("No grants yet")).toBeInTheDocument();

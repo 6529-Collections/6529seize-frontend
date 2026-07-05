@@ -2,7 +2,7 @@ import type {
   ContractOverview,
   NftPickerChange,
   NftPickerSelection,
-} from "@/components/nft-picker/NftPicker.types";
+} from "@/components/nft-picker/types";
 
 interface UserPageXtdhGrantFormState {
   contract: ContractOverview | null;

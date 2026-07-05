@@ -219,7 +219,7 @@ describe("Subscriptions report page", () => {
 
   it("exposes metadata", async () => {
     const metadata = await generateMetadata();
-    expect(metadata.title).toEqual("Subscriptions Report");
+    expect(metadata.title).toEqual("Subscriptions Report | Tools");
     expect(metadata.description).toEqual("Tools | 6529.io");
   });
 });

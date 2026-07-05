@@ -44,7 +44,7 @@ export default async function NotificationsPage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "Notifications | My Stream",
+    title: "Notifications | My Stream | Brain",
     description: "Brain",
   });
 }

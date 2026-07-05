@@ -8,7 +8,7 @@ export default function AppWalletImportPage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
-    title: "App Wallets | Import",
+    title: "Import App Wallet | Tools",
     description: "Tools",
   });
 }

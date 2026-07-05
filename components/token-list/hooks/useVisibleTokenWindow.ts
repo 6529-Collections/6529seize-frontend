@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { expandRangesWindow } from "@/components/nft-picker/NftPicker.utils";
-import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
+import { expandRangesWindow } from "@/components/nft-picker/utils";
+import type { TokenRange } from "@/components/nft-picker/types";
 import { toDecimalString } from "../utils";
 import type { TokenWindowEntry } from "../types";
 
@@ -24,10 +24,12 @@ export function useVisibleTokenWindow(
     }
 
     const windowSize = lastTokenIndex - firstTokenIndex + 1;
-    return expandRangesWindow(ranges, firstTokenIndex, windowSize).map((tokenId) => ({
-      tokenId,
-      decimalId: toDecimalString(tokenId),
-      xtdh: 0, // Default to 0 for ranges
-    }));
+    return expandRangesWindow(ranges, firstTokenIndex, windowSize).map(
+      (tokenId) => ({
+        tokenId,
+        decimalId: toDecimalString(tokenId),
+        xtdh: 0, // Default to 0 for ranges
+      })
+    );
   }, [ranges, firstTokenIndex, lastTokenIndex, tokens]);
 }

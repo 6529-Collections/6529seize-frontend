@@ -15,7 +15,7 @@ test.describe("The Memes Page @smoke @medium @large", () => {
   test("should load with correct title and heading", async ({
     page,
   }, testInfo) => {
-    await expect(page).toHaveTitle("The Memes");
+    await expect(page).toHaveTitle("The Memes | Collections");
     await expectNoHorizontalOverflow(page);
 
     if (isMobileSurfaceProject(testInfo.project.name)) {

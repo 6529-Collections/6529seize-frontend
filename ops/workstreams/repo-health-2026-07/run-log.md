@@ -1,5 +1,64 @@
 # Run Log
 
+## 2026-07-05 (Thread F — collection surfaces quality pass)
+
+- Phase 1 (overflow): root cause pinned with production evidence — the
+  Bootstrap exit ported `<Container fluid>` as `tw-w-full tw-max-w-none`,
+  dropping Bootstrap's intrinsic 12px container padding, so `.row` ports
+  (`-tw-mx-3`) overhang the viewport by 12px. At 1280 that is
+  `scrollWidth - clientWidth` = +11/12 (rows at x=1291/1292, the exact
+  e2e offenders); at 1440 the overhang lands inside the html scroll area
+  (measured -30, zero offenders), which is why the earlier 1440 sweep
+  missed it. Fix = restore `tw-px-3` on the five container-fluid ports
+  (PR #3080). After: 0 overflow at 1280 on all five NextGen routes, 1440
+  unchanged, mobile restored to the pre-migration 24px inset. Swiper
+  needed no fix: `swiper/css` base `overflow: hidden` is imported and
+  working; slide rects in older failure JSON never contributed to
+  scrollWidth.
+- Phase 2 (network-metrics): the one failing desktop test decomposed into
+  two app bugs (PR #3081): the `VIEW` enum imported from a "use client"
+  module serialized as `$undefined` across the RSC boundary (silently
+  dropping the intended "Consolidated" qualifier while jsdom suites
+  false-greened it), and Next 16 streamed metadata overwrites
+  client-set titles ~16ms after hydration (MutationObserver evidence),
+  so only `generateMetadata` titles are durable. Enum moved to a shared
+  module; SSR title set to the intended
+  "Consolidated Network Metrics | Open Data"; e2e + unit tests aligned.
+- Collections-pack residuals unmasked by the overflow fix (PR #3082):
+  `/rememes` and `/nextgen/collection/*` SSR titles aligned with their
+  client-intended titles (same streamed-metadata class), and the
+  collections-list spec locator updated from the Bootstrap-era
+  "Status: ALL" button to the native select shipped in #2965.
+- Local verification: collections pack 20/20 (desktop + mobile),
+  network-open-data pack 14/14, related Jest suites green,
+  react-doctor:diff 100/100. Production packs stay red for the changed
+  expectations until the next deploy (old build serves old titles/markup);
+  the post-deploy Staging E2E workflow re-verifies automatically.
+- Phase 3 (slow routes): measured clean-browser production performance for
+  /rememes /the-memes /meme-lab /network /meme-calendar — all sub-second
+  (TTFB 62-174ms, DCL 119-290ms, load 640-835ms). The 20s/60s harness
+  budget blowouts are measurement artifacts: network-idle waits never
+  settle (RUM/mixpanel beacons + trickling arweave/ipfs media deny a
+  500ms quiet window) and the readonly harness's global route
+  interception disables the HTTP cache under pack load. The historical
+  "ReMemes 60s/empty-title" only reproduced under full-pack load; in
+  isolation it was the title-value bug fixed in #3082. Full measurement
+  table, classification, and recommendations in
+  `slow-collection-routes.md`. No frontend rewrite is justified; slowest
+  backend endpoints (all sub-second) handed off as observability data.
+- App-wide follow-up flagged (out of scope, evidence attached): every
+  `useSetTitle` suffix app-wide is silently lost to streamed metadata
+  since the Next 16 upgrade — spawned as a separate task for scoping.
+- Environment notes for other threads: `quality.js --changed` fails on
+  Windows Node 24 (spawnSync of .cmd without shell) — run
+  `format:changed`/`lint:changed`/`typecheck:changed` directly; in fresh
+  worktrees use `./bin/6529 env prod` (then verify with `env status` —
+  the switcher comments out non-matching managed keys but only appends
+  missing ones, so a local-target `.env` can end up with no active
+  API/WS endpoint) instead of relying on shell-var overrides reaching
+  the client env bake; dev servers watched by piped `head`/`tail` die on
+  SIGPIPE once the pipe closes — redirect to a file instead.
+
 ## 2026-07-05 (Thread D — one layout)
 
 - Phase 0 (inventory) merged as PR #3041 (`layout-unification-plan.md`). Key
@@ -267,6 +326,7 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   "remove after codemod" re-export shims, 1 secure-logging work item,
   1 stale API-shape comment). Triage PR follows: shims completed+deleted,
   work items become consolidated GitHub issues, stale comment deleted.
+
 ## 2026-07-05 (orchestrator — Redux verification + production deploy train)
 
 - User mandate: full E2E verification of the Redux removal (#3047), bot-iterated
@@ -305,3 +365,44 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   (clipboard/copy-text feature); orchestrator records moved to disposable
   worktrees — do not branch-switch the primary checkout while that work is
   live.
+
+## 2026-07-05 (Thread E — TODO triage complete)
+
+- Ratchet `todo_comments` 6 -> 0. Disposition: 4 "remove after codemod"
+  re-export shims completed (importers migrated to the real modules;
+  shims deleted: nft-picker NftPicker/NftPicker.types/NftPicker.utils,
+  xtdh granted-list UserPageXtdhGrantedListContent); 2 real work items
+  consolidated into issue #3053 (error-sanitizer secure-logging
+  integration, tailwindcss/no-custom-classname enablement) with the
+  in-code comments now referencing the issue; 1 stale API-shape comment
+  deleted (create-wave max_winners placement is fixed by the generated
+  API contract, not frontend-actionable).
+- Non-source TODO mentions that remain are intentional: skill docs that
+  document TODO conventions, the campaign docs, and the ratchet's own
+  detection patterns/fixtures.
+
+## 2026-07-05 (Thread G — any burn-down tail, wave 2a)
+
+- Delegation any-tail slice 1 of 3: the write-config path. DELEGATION_ABI
+  annotated `: Abi` at the source (NextGen-ABI precedent from #3052), new
+  `DelegationWriteParams` in delegation-shared typed into
+  `DelegationSubmitGroups.writeParams` (with a functionName narrowing
+  guard on the already-validate()-gated submit), `getGasError` takes
+  `Error`, `DelegationToastState` exported and used by NewDelegation +
+  NewAssignPrimaryAddress props; legacy inert `onSettled(data, error)`
+  annotations typed `unknown`/`Error | null`. `any_casts` 64 -> 45.
+- Rode along per ratchet protocol: `oversized_files` 90 -> 89
+  (useWaveDropsClipboard.ts healed by #3072; --update shrank the list).
+- Pre-existing latent bug found while typing (NOT fixed here, behavior
+  preserved): the CollectionDelegation use-case lock UI reads wagmi
+  multicall envelopes as booleans instead of `.result` — issue #3078.
+
+## 2026-07-05 (Thread G — any burn-down tail, wave 2b)
+
+- Delegation any-tail slice 2 of 3: NewConsolidation, NewSubDelegation,
+  RevokeDelegationWithSub, UpdateDelegation receive the identical
+  mechanical treatment slice 1 gave their siblings (onHide/onSetToast
+  props -> void/DelegationToastState, inert onSettled annotations ->
+  unknown/Error | null). Clone edits produced by a Sonnet work packet
+  under a strict per-line spec, reviewed hunk-by-hunk before commit.
+  `any_casts` 45 -> 21.

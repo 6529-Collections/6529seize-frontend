@@ -287,8 +287,9 @@ export const logErrorSecurely = (context: string, error: unknown): void => {
   // Instead, log a sanitized version
   const sanitizedMessage = sanitizeErrorForUser(error);
 
-  // TODO: Integrate with secure logging service (e.g., Sentry, DataDog, CloudWatch)
-  // For now, we'll use console.error with sanitized data only
+  // Forwarding the sanitized payload to a monitoring service is tracked in
+  // https://github.com/6529-Collections/6529seize-frontend/issues/3053
+  // For now, we use console.error with sanitized data only
   if (publicEnv.NODE_ENV !== "test") {
     // Avoid console spam in tests
     console.error(`[${timestamp}] [${context}] Error:`, sanitizedMessage);

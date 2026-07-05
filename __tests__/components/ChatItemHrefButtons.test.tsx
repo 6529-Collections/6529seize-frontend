@@ -2,20 +2,20 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 
-jest.mock("@/hooks/useHasTouchInput");
+jest.mock("@/hooks/useIsTouchDevice");
 jest.mock("@/hooks/isMobileDevice");
 
 const writeText = jest.fn().mockResolvedValue(undefined);
 
-const useHasTouchInputMock = useHasTouchInput as jest.Mock;
+const useIsTouchDeviceMock = useIsTouchDevice as jest.Mock;
 const useIsMobileDeviceMock = useIsMobileDevice as jest.Mock;
 
 describe("ChatItemHrefButtons", () => {
   beforeEach(() => {
-    useHasTouchInputMock.mockReturnValue(false);
+    useIsTouchDeviceMock.mockReturnValue(false);
     useIsMobileDeviceMock.mockReturnValue(false);
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -452,7 +452,7 @@ describe("ChatItemHrefButtons", () => {
   });
 
   it("keeps the overlay trigger visible on touch devices", () => {
-    useHasTouchInputMock.mockReturnValue(true);
+    useIsTouchDeviceMock.mockReturnValue(true);
 
     render(
       <div className="tw-group/link-card tw-relative">

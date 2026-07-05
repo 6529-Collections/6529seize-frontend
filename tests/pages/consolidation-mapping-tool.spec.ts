@@ -6,7 +6,7 @@ test.describe("Consolidation Mapping Tool Page", () => {
   });
 
   test("should load with correct title and heading", async ({ page }) => {
-    await expect(page).toHaveTitle("Consolidation Mapping Tool | 6529.io");
+    await expect(page).toHaveTitle("Consolidation Mapping Tool | Tools");
 
     const heading = page.locator("h1");
     await expect(heading).toContainText("Consolidation Mapping Tool");

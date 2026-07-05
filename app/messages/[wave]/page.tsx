@@ -17,7 +17,7 @@ import {
 import MessagesPageClient from "../page.client";
 
 export const metadata = getAppMetadata({
-  title: "Messages",
+  title: "Messages | Brain",
   description: "Direct Messages",
 });
 
