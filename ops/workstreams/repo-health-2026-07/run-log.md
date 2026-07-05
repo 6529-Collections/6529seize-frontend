@@ -267,3 +267,48 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
   "remove after codemod" re-export shims, 1 secure-logging work item,
   1 stale API-shape comment). Triage PR follows: shims completed+deleted,
   work items become consolidated GitHub issues, stale comment deleted.
+
+## 2026-07-05 (orchestrator — Wave 1 closed; Thread D W2 complete)
+
+- Wave 1 CLOSED. Thread A complete: main is machine-gated (required checks
+  DCO, `security/snyk (6529)`, Plan risk and security checks, Installed app
+  checks, Debt ratchet); coverage floor + push secret scan live; E2E harness
+  verified (1050 tests enumerable). Thread B complete: media-hardening WIP
+  rescued to `origin/codex/harden-media-url-sinks-for-desktop-sync`
+  (secrets-scanned clean), debris worktrees removed, branch janitor live-fire
+  verified (0 deletions, guards held) and ARMED for nightly runs
+  (`BRANCH_JANITOR_ENABLED=true`), repo `allow_auto_merge` enabled. Thread C
+  complete: Bootstrap exit verified-zero on main, residue purged, 3
+  reintroduction guards, 23-route visual sweep clean.
+- Authoritative ratchet baselines superseded several stale 07-04 audit
+  figures (TODO 2,841 and pages ~134 were stale-branch noise). Thread D/E
+  rescoped on ratchet truth (D: no `pages/` dir, so the any/oversized split
+  burn-down is the core; E: TODO collapses to 6 real items, any burn-down is
+  the long pole). Delegation ownership transferred C -> D.
+- Thread D W2 batch 2 merged as PR #3055 (35 pages; 29 healed, 6 at 814-859
+  pending a body extraction; `oversized_files` 119 -> 90). Migration pipeline
+  (fail-closed codemod + hydrated-DOM parity capture) committed under
+  `ops/workstreams/repo-health-2026-07/scripts/`. (Batch 1 / PR #3054,
+  139 -> 119, is recorded in the "Thread D — one layout" entry above.)
+  Batch 1's merge required two documented deferrals: SonarCloud's new-code
+  duplication gate (12.5% vs 3%) fired on the 20 parameterized chrome
+  invocations while the PR deletes ~4,200 truly duplicated lines — fixed
+  forward by adding the scrape trees to `sonar.exclusions` (automatic
+  analysis honors this only from the default branch, so it could not apply
+  to the introducing PR); and a responsiveness-lane "blank web-desktop shell
+  on /, /waves, /messages, /network" that did not reproduce locally (all four
+  render full shell at the PR head; diff touches only static content).
+- Thread D scoreboard: grandfather list 139 -> 90. Remaining: ~21 scrape
+  pages needing chrome swap + one body extraction (om/*, about/press,
+  museum/page, biggest genesis pages, tweetstorms body); W1 data movers
+  (~8 files, sentry-client-filters split designed); W3 interactive giants
+  (~37 components incl. delegation, DropForge clients, CreateDropContent).
+- PENDING USER DECISIONS — candidate new workstreams surfaced by the
+  orchestrator, awaiting scope: (1) slow collection routes — `/rememes`
+  exceeds the 60s harness timeout, and `/the-memes`, `/meme-lab`, `/network`,
+  `/meme-calendar` repeatedly blow the 20s full-page screenshot budget;
+  (2) 33 open dependabot vulnerabilities (7 high).
+- Bookkeeping: supersedes closed doc-only PRs #3039, #3051, #3057 — all
+  conflicted on run-log.md; the work they describe is already merged and the
+  ratchet baseline reflects it (`oversized_files` 90, `redux_imports` 0,
+  `any_casts` 64).
