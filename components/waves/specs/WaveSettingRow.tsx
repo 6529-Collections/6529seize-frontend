@@ -3,6 +3,7 @@
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
+import { isTouchFirstEnvironment } from "@/helpers/touch-first.helpers";
 import type { ReactNode } from "react";
 import {
   useCallback,
@@ -34,7 +35,12 @@ const shouldUseBottomSheet = () => {
     return false;
   }
 
-  return globalThis.matchMedia("(max-width: 767px), (pointer: coarse)").matches;
+  // Small viewports or touch-first devices get the sheet; hybrid touch
+  // laptops (fine pointer/hover available) keep the desktop popover.
+  return (
+    globalThis.matchMedia("(max-width: 767px)").matches ||
+    isTouchFirstEnvironment()
+  );
 };
 
 const isInsideElement = (

@@ -14,6 +14,7 @@ import {
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import type { DelegationToastState } from "./DelegationToast";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
@@ -34,8 +35,8 @@ interface Props {
   collection: DelegationCollection;
   showCancel: boolean;
   showAddMore: boolean;
-  onHide(): any;
-  onSetToast(toast: any): any;
+  onHide(): void;
+  onSetToast(toast: DelegationToastState): void;
 }
 
 export default function UpdateDelegationComponent(props: Readonly<Props>) {
@@ -84,7 +85,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     ],
     functionName:
       validate().length === 0 ? "updateDelegationAddress" : undefined,
-    onSettled(data: any, error: any) {
+    onSettled(data: unknown, error: Error | null) {
       if (data) {
         setGasError(undefined);
       }

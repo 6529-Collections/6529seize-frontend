@@ -5,7 +5,8 @@ import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimation
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { useEffect, useState } from "react";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { useState } from "react";
 import { Tooltip } from "react-tooltip";
 import UserPageIdentityDeleteStatementModal from "./UserPageIdentityDeleteStatementModal";
 export default function UserPageIdentityDeleteStatementButton({
@@ -17,10 +18,7 @@ export default function UserPageIdentityDeleteStatementButton({
 }) {
   const [isDeleteStatementOpen, setIsDeleteStatementOpen] =
     useState<boolean>(false);
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
-  useEffect(() => {
-    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
+  const isTouchScreen = useIsTouchDevice();
   const tooltipId = `delete-statement-${statement.statement_group}-${statement.statement_type}`;
   const showTooltip = !isTouchScreen && !isDeleteStatementOpen;
 

@@ -10,6 +10,7 @@ import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimation
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useIdentity } from "../../../hooks/useIdentity";
 import { useAuth } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
@@ -56,7 +57,7 @@ function WebSidebar({
     return null;
   }, [connectedProfile?.handle, address]);
 
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
+  const isTouchScreen = useIsTouchDevice();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const showDesktopSearch = !isMobile;
@@ -76,43 +77,6 @@ function WebSidebar({
     },
     { event: "keydown" }
   );
-
-  useEffect(() => {
-    const { window: browserWindow } = globalThis as typeof globalThis & {
-      window?: Window | undefined;
-    };
-    if (
-      browserWindow === undefined ||
-      typeof browserWindow.matchMedia !== "function"
-    ) {
-      setIsTouchScreen(false);
-      return;
-    }
-
-    const coarsePointerQuery = browserWindow.matchMedia("(pointer: coarse)");
-    const handlePointerChange = (event: MediaQueryListEvent) => {
-      setIsTouchScreen(event.matches);
-    };
-
-    setIsTouchScreen(coarsePointerQuery.matches);
-
-    if (typeof coarsePointerQuery.addEventListener === "function") {
-      coarsePointerQuery.addEventListener("change", handlePointerChange);
-      return () =>
-        coarsePointerQuery.removeEventListener("change", handlePointerChange);
-    }
-
-    if ("onchange" in coarsePointerQuery) {
-      const originalHandler = coarsePointerQuery.onchange;
-      coarsePointerQuery.onchange = handlePointerChange;
-      return () => {
-        if (coarsePointerQuery.onchange === handlePointerChange) {
-          coarsePointerQuery.onchange = originalHandler ?? null;
-        }
-      };
-    }
-    return;
-  }, []);
 
   // Close sidebar on route change when on mobile
   const prevPathnameRef = useRef(pathname);
