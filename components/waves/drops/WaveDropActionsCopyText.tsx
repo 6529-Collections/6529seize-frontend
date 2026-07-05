@@ -22,7 +22,9 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
   const locale = useBrowserLocale();
   const isDisabled = drop.id.startsWith("temp-");
 
-  const copyToClipboard = () => {
+  const copyToClipboard = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+
     if (isDisabled) {
       return;
     }
@@ -50,6 +52,7 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
 
   return (
     <button
+      type="button"
       onClick={copyToClipboard}
       disabled={isDisabled}
       className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-transition-colors tw-duration-200 ${

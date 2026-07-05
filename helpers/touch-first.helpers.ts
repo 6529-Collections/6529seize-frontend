@@ -64,10 +64,16 @@ const someQueryMatches = (queries: readonly string[]): boolean =>
 // variant selectors.
 const FINE_POINTER_BODY_ATTRIBUTE = "data-fine-pointer";
 
+// A single event is not proof: some tools emit stray synthetic mouse events
+// on genuine touch devices, and jsdom/test events must never latch. Require
+// a short stream of TRUSTED mouse moves — a real cursor glide.
+const FINE_POINTER_EVIDENCE_THRESHOLD = 3;
+
 const capabilityChangeListeners = new Set<() => void>();
 
 let finePointerObserved = false;
 let pointerSentinelInstalled = false;
+let trustedMouseMoveCount = 0;
 
 const notifyCapabilityChange = () => {
   for (const listener of capabilityChangeListeners) {
@@ -76,9 +82,15 @@ const notifyCapabilityChange = () => {
 };
 
 const handleSentinelPointerEvent = (event: Event) => {
-  if ((event as PointerEvent).pointerType !== "mouse") {
+  if (!event.isTrusted || (event as PointerEvent).pointerType !== "mouse") {
     return;
   }
+
+  trustedMouseMoveCount += 1;
+  if (trustedMouseMoveCount < FINE_POINTER_EVIDENCE_THRESHOLD) {
+    return;
+  }
+
   uninstallPointerSentinel();
   finePointerObserved = true;
   (
@@ -100,10 +112,6 @@ const installPointerSentinel = () => {
     passive: true,
     capture: true,
   });
-  globalThis.addEventListener("pointerdown", handleSentinelPointerEvent, {
-    passive: true,
-    capture: true,
-  });
 };
 
 const uninstallPointerSentinel = () => {
@@ -112,9 +120,6 @@ const uninstallPointerSentinel = () => {
   }
   pointerSentinelInstalled = false;
   globalThis.removeEventListener("pointermove", handleSentinelPointerEvent, {
-    capture: true,
-  });
-  globalThis.removeEventListener("pointerdown", handleSentinelPointerEvent, {
     capture: true,
   });
 };
@@ -217,6 +222,11 @@ export const subscribeToTouchFirstChanges = (
 
   return () => {
     capabilityChangeListeners.delete(onChange);
+    if (capabilityChangeListeners.size === 0) {
+      // No subscribers left — drop the global capture listener so genuine
+      // touch devices don't pay a page-lifetime hot-path cost.
+      uninstallPointerSentinel();
+    }
     for (const unsubscribe of unsubscribers) {
       unsubscribe();
     }

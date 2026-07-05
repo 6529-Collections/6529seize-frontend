@@ -1,13 +1,19 @@
 /**
- * Behavioral fine-pointer latch tests. Kept in their own file so the
- * module-level latch state cannot leak into the main helper suite.
+ * Behavioral fine-pointer latch tests. Each case loads a fresh module via
+ * jest.isolateModules so the module-level latch cannot leak between tests.
+ *
+ * jsdom cannot dispatch trusted events (isTrusted is spec-unforgeable), so
+ * the sentinel handler is captured through an addEventListener spy and
+ * invoked directly with duck-typed pointer events — exercising the real
+ * handler, latch, notification, and <body> tagging paths.
  */
-import {
-  hasFinePointerCapability,
-  hasHoverCapability,
-  isTouchFirstEnvironment,
-  subscribeToTouchFirstChanges,
-} from "@/helpers/touch-first.helpers";
+
+type Helpers = typeof import("@/helpers/touch-first.helpers");
+
+type SentinelHandler = (event: {
+  readonly isTrusted: boolean;
+  readonly pointerType: string;
+}) => void;
 
 function defineMatchMedia(queryMatches: Record<string, boolean>) {
   Object.defineProperty(globalThis, "matchMedia", {
@@ -29,10 +35,27 @@ function defineMaxTouchPoints(value: number) {
   });
 }
 
-function dispatchPointerEvent(type: string, pointerType: string) {
-  const event = new Event(type, { bubbles: true });
-  Object.defineProperty(event, "pointerType", { value: pointerType });
-  globalThis.dispatchEvent(event);
+function loadHelpersWithSentinel(): {
+  helpers: Helpers;
+  getSentinel: () => SentinelHandler | undefined;
+  restore: () => void;
+} {
+  const addSpy = jest.spyOn(globalThis, "addEventListener");
+
+  let helpers: Helpers | undefined;
+  jest.isolateModules(() => {
+    helpers = require("@/helpers/touch-first.helpers") as Helpers;
+  });
+  if (!helpers) {
+    throw new Error("failed to load touch-first helpers");
+  }
+
+  const getSentinel = () =>
+    addSpy.mock.calls.find(([type]) => type === "pointermove")?.[1] as
+      | SentinelHandler
+      | undefined;
+
+  return { helpers, getSentinel, restore: () => addSpy.mockRestore() };
 }
 
 describe("behavioral fine-pointer latch", () => {
@@ -49,45 +72,92 @@ describe("behavioral fine-pointer latch", () => {
     document.body.removeAttribute("data-fine-pointer");
   });
 
-  it("treats the device as touch-first until mouse evidence arrives, then flips", () => {
+  it("flips to desktop after a stream of trusted mouse moves", () => {
+    const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
     const onChange = jest.fn();
-    const unsubscribe = subscribeToTouchFirstChanges(onChange);
+    const unsubscribe = helpers.subscribeToTouchFirstChanges(onChange);
+    const sentinel = getSentinel();
+    expect(sentinel).toBeDefined();
 
-    expect(isTouchFirstEnvironment()).toBe(true);
-    expect(hasHoverCapability()).toBe(false);
+    expect(helpers.isTouchFirstEnvironment()).toBe(true);
+    expect(helpers.hasHoverCapability()).toBe(false);
 
-    // Touch events must not latch.
-    dispatchPointerEvent("pointermove", "touch");
-    expect(isTouchFirstEnvironment()).toBe(true);
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+    expect(helpers.isTouchFirstEnvironment()).toBe(true);
 
-    // The first mouse/trackpad event is ground truth.
-    dispatchPointerEvent("pointermove", "mouse");
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
 
-    expect(isTouchFirstEnvironment()).toBe(false);
-    expect(hasFinePointerCapability()).toBe(true);
-    expect(hasHoverCapability()).toBe(true);
+    expect(helpers.isTouchFirstEnvironment()).toBe(false);
+    expect(helpers.hasFinePointerCapability()).toBe(true);
+    expect(helpers.hasHoverCapability()).toBe(true);
     expect(onChange).toHaveBeenCalled();
     expect(document.body.getAttribute("data-fine-pointer")).toBe("true");
 
     unsubscribe();
+    restore();
   });
 
-  it("keeps phones touch-first even after mouse evidence (UA override wins)", () => {
+  it("ignores untrusted and touch pointer events", () => {
+    const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+    const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+    const sentinel = getSentinel();
+    expect(sentinel).toBeDefined();
+
+    for (let i = 0; i < 5; i++) {
+      sentinel!({ isTrusted: false, pointerType: "mouse" });
+      sentinel!({ isTrusted: true, pointerType: "touch" });
+      sentinel!({ isTrusted: true, pointerType: "pen" });
+    }
+
+    expect(helpers.isTouchFirstEnvironment()).toBe(true);
+    expect(document.body.hasAttribute("data-fine-pointer")).toBe(false);
+
+    unsubscribe();
+    restore();
+  });
+
+  it("keeps phones touch-first even after trusted mouse evidence", () => {
     Object.defineProperty(globalThis.navigator, "userAgentData", {
       configurable: true,
       value: { mobile: true },
     });
 
     try {
-      // Latch is already set by the previous test's module state or set it now.
-      dispatchPointerEvent("pointerdown", "mouse");
-      const unsubscribe = subscribeToTouchFirstChanges(jest.fn());
-      dispatchPointerEvent("pointerdown", "mouse");
+      const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+      const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+      const sentinel = getSentinel();
 
-      expect(isTouchFirstEnvironment()).toBe(true);
+      sentinel!({ isTrusted: true, pointerType: "mouse" });
+      sentinel!({ isTrusted: true, pointerType: "mouse" });
+      sentinel!({ isTrusted: true, pointerType: "mouse" });
+
+      expect(helpers.hasFinePointerCapability()).toBe(true);
+      expect(helpers.isTouchFirstEnvironment()).toBe(true);
+
       unsubscribe();
+      restore();
     } finally {
       Reflect.deleteProperty(globalThis.navigator, "userAgentData");
     }
+  });
+
+  it("uninstalls the sentinel when the last subscriber leaves", () => {
+    const removeSpy = jest.spyOn(globalThis, "removeEventListener");
+    const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+
+    const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+    const sentinel = getSentinel();
+    expect(sentinel).toBeDefined();
+
+    unsubscribe();
+
+    const sentinelRemoved = removeSpy.mock.calls.some(
+      ([type, handler]) => type === "pointermove" && handler === sentinel
+    );
+    expect(sentinelRemoved).toBe(true);
+
+    restore();
+    removeSpy.mockRestore();
   });
 });
