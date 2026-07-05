@@ -45,9 +45,9 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
       .getByRole("textbox", { name: "Write a chat message" })
       .last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
-    // Enter submits the chat composer; the floating quick-DM button overlays
-    // the Post button at this viewport, so the keyboard path is the stable one.
-    await composer.press("Enter");
+    // Real pointer click on purpose: regression coverage for the quick-DM
+    // launcher overlaying the Post button (WaveComposerDockVisibility).
+    await page.getByRole("button", { name: "Post" }).last().click();
 
     const submittedDrop = page.locator('[data-serial-no="2"]');
     await expect(submittedDrop).toBeVisible({
