@@ -88,6 +88,27 @@ describe("behavioral fine-pointer latch", () => {
     restore();
   });
 
+  it("ignores a stored latch on mobile user agents (synced/inherited flags)", () => {
+    localStorage.setItem("6529-fine-pointer", "1");
+    Object.defineProperty(globalThis.navigator, "userAgentData", {
+      configurable: true,
+      value: { mobile: true },
+    });
+
+    try {
+      const { helpers, restore } = loadHelpersWithSentinel();
+
+      expect(helpers.isTouchFirstEnvironment()).toBe(true);
+      expect(helpers.hasFinePointerCapability()).toBe(false);
+      expect(helpers.hasHoverCapability()).toBe(false);
+      expect(document.body.hasAttribute("data-fine-pointer")).toBe(false);
+
+      restore();
+    } finally {
+      Reflect.deleteProperty(globalThis.navigator, "userAgentData");
+    }
+  });
+
   it("persists the latch for future sessions", () => {
     const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
     const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());

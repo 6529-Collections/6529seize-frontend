@@ -138,15 +138,6 @@ const persistFinePointer = () => {
   }
 };
 
-// Hydrate the latch from a previous session at module load so the very first
-// client render is already in desktop mode on machines with mouse history.
-// Only guarded evidence is ever persisted (see the guards below), so a
-// stored flag always represents a genuine cursor glide.
-if (readPersistedFinePointer()) {
-  finePointerObserved = true;
-  tagBodyWithFinePointer();
-}
-
 const discountTouchDerivedEvidence = () => {
   lastTrustedTouchAt = Date.now();
   trustedMouseEvidenceCount = 0;
@@ -275,6 +266,17 @@ const isMobileUserAgent = (): boolean => {
   }
   return MOBILE_USER_AGENT_REGEX.test(nav.userAgent);
 };
+
+// Hydrate the latch from a previous session at module load so the very first
+// client render is already in desktop mode on machines with mouse history.
+// The write path only ever stores guarded evidence, but a stored flag can
+// travel (profile import/sync, older builds, tampering) — so hydration also
+// defers to the phone override: a mobile UA never boots into desktop mode
+// from storage.
+if (!isMobileUserAgent() && readPersistedFinePointer()) {
+  finePointerObserved = true;
+  tagBodyWithFinePointer();
+}
 
 /**
  * True only for devices whose primary interaction is touch (phones/tablets).
