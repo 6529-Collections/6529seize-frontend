@@ -7,7 +7,7 @@ DeepSec prompt context for this repo. Keep this short; built-in matchers handle 
 - Next.js App Router frontend for 6529.io: waves, drops, profiles, groups,
   notifications, NFT collection pages, Drop Forge, and public content pages.
 - Client stack is React 19, React Query, Reown AppKit/wagmi/viem wallet auth,
-  Bootstrap/Tailwind styles, Capacitor mobile helpers, and generated API models.
+  Tailwind (`tw-` prefix) styles, Capacitor mobile helpers, and generated API models.
 - Most product data comes from `publicEnv.API_ENDPOINT` through `commonApi*`
   helpers, `fetchUrl`, or server-side fetch wrappers.
 - App Router API routes act as small public proxies for Open Graph previews,

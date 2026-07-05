@@ -157,12 +157,11 @@ is available, use it; otherwise read the relevant files in
 - Check `next.config.ts`, `config/nextConfig.ts`, `config/env.schema.ts`,
   `config/env.ts`, and `config/runtimeConfig.ts` before changing env, runtime,
   build, image, asset prefix, Sentry, or security-header behavior.
-- Bootstrap Sass must be imported as `@use "bootstrap/scss/bootstrap"` through
-  `sassOptions.loadPaths` with `quietDeps: true`. Do not change it to a relative
-  `../node_modules/bootstrap/...` import; that makes Sass treat Bootstrap as
-  first-party source and re-enables Bootstrap's Dart Sass deprecation warnings.
-  If Bootstrap partial resolution conflicts with another package, fix that
-  resolver ambiguity without bypassing dependency classification.
+- Bootstrap, React Bootstrap, and Sass are fully removed from this repo
+  (2026-07). Do not reintroduce them. Build UI with Tailwind (`tw-` prefix)
+  and the repo patterns in `ops/standards/frontend-design-ui-ux.md`; scoped
+  plain-CSS modules are the fallback where Tailwind cannot express a selector
+  cleanly.
 
 ## Architecture Boundaries
 

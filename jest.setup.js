@@ -82,23 +82,6 @@ globalThis.CSS = {
   escape: (str) => str,
 };
 
-// Mock CSS functions that dom-helpers/css might use
-globalThis.css = (element, property, value) => {
-  if (arguments.length === 3) {
-    return element;
-  }
-  if (typeof property === "string") {
-    if (property.includes("duration") || property.includes("delay")) {
-      return "0s";
-    }
-    if (property.includes("margin") || property.includes("padding")) {
-      return "0px";
-    }
-    return "";
-  }
-  return "";
-};
-
 // Only set up window mocks in jsdom environment
 if (globalThis.window !== undefined) {
   globalThis.window.MessageChannel = TestMessageChannel;
@@ -118,7 +101,7 @@ if (globalThis.window !== undefined) {
     }),
   });
 
-  // Mock DOM methods that Bootstrap modals might use
+  // Mock scroll methods jsdom does not implement
   Object.defineProperty(window, "scrollTo", {
     value: () => {},
     writable: true,

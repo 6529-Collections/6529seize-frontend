@@ -282,6 +282,35 @@ export const baseRules = deepFreezeRuleConfig({
   "import/first": "off",
   "import/no-useless-path-segments": ["off", { noUselessIndex: true }],
 
+  // Removed styling systems - Bootstrap was fully migrated to Tailwind
+  // (2026-07, repo-health campaign). The debt-ratchet bootstrap_imports
+  // metric is the CI backstop; this rule is the fast in-editor feedback.
+  // See ops/workstreams/repo-health-2026-07/styling-migration-plan.md.
+  "no-restricted-imports": [
+    "error",
+    {
+      paths: [
+        {
+          name: "bootstrap",
+          message:
+            "Bootstrap was removed from this repo (2026-07). Style with Tailwind (tw-*) per ops/standards/frontend-design-ui-ux.md.",
+        },
+        {
+          name: "react-bootstrap",
+          message:
+            "react-bootstrap was removed from this repo (2026-07). Use @headlessui/react, native <dialog>, and Tailwind (tw-*) patterns instead.",
+        },
+      ],
+      patterns: [
+        {
+          group: ["bootstrap/*", "react-bootstrap/*"],
+          message:
+            "Bootstrap is banned; style with Tailwind (tw-*). See ops/workstreams/repo-health-2026-07/styling-migration-plan.md.",
+        },
+      ],
+    },
+  ],
+
   // -------------------------------------------------------------------------
   // Accessibility (jsx-a11y) - handled by eslint-config-next
   // Next.js includes jsx-a11y with sensible defaults
