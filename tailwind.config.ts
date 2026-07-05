@@ -232,10 +232,16 @@ const tailwindConfig: Config = {
     scrollbar({ nocompatible: true }),
     containerQueries,
     plugin(({ addVariant }) => {
-      addVariant("desktop-hover", "@media (any-hover: hover)");
+      // body[data-fine-pointer] is behavioral evidence of a mouse/trackpad
+      // set by helpers/touch-first.helpers.ts — it overrides browsers that
+      // mis-report hover/pointer capabilities.
+      addVariant("desktop-hover", [
+        "@media (any-hover: hover)",
+        "body[data-fine-pointer] &",
+      ]);
       addVariant(
         "touch-only",
-        "@media (any-hover: none) and (any-pointer: coarse)"
+        "@media (any-hover: none) and (any-pointer: coarse) { body:not([data-fine-pointer]) & }"
       );
     }),
   ],

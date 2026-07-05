@@ -109,9 +109,11 @@
     scrollbar-width: none;
     /* Firefox */
   }
-  /* Prevent text selection on touch devices only */
+  /* Prevent text selection on touch devices only. body:not([data-fine-pointer])
+     keeps selection alive on browsers that mis-report capabilities while a
+     mouse/trackpad is demonstrably in use (see touch-first.helpers.ts). */
   @media (any-hover: none) and (any-pointer: coarse) {
-    .touch-select-none {
+    body:not([data-fine-pointer]) .touch-select-none {
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -704,8 +706,14 @@ h5:not(.tailwind-scope h5) {
     color: #ffffff;
   }
 }
+/* Behavioral fine-pointer evidence (see touch-first.helpers.ts): honor icon
+   hover and hide touch-only affordances once a mouse/trackpad is observed,
+   even when the browser mis-reports its pointer capabilities. */
+body[data-fine-pointer] .icon:hover {
+  color: #ffffff;
+}
 @media (any-hover: none) and (any-pointer: coarse) {
-  .touch-visible {
+  body:not([data-fine-pointer]) .touch-visible {
     display: block !important;
   }
 }
