@@ -127,7 +127,9 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
         url.searchParams.get("page") === "1"
     );
 
-    await expect(page).toHaveTitle("Network Metrics | Open Data");
+    // Client title wins since the title-reassert fix (#3077); the page's
+    // client title carries the historical "Consolidated" qualifier (#3081).
+    await expect(page).toHaveTitle("Consolidated Network Metrics | Open Data");
     await expect(
       page.getByRole("heading", {
         level: 1,

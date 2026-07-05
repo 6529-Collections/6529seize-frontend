@@ -155,9 +155,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("heading", { level: 1, name: "Collections" })
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Status: ALL" })
-    ).toBeVisible();
+    await expect(page.getByLabel("Status:")).toBeVisible();
     await expectCardsOrEmpty(
       page,
       page.locator('main a[href*="/nextgen/collection/"]'),
@@ -225,7 +223,8 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/the-memes");
 
-    await expect(page).toHaveTitle("The Memes");
+    // Client titles win since the title-reassert fix (#3077): suffixed form.
+    await expect(page).toHaveTitle("The Memes | Collections");
     await expectCollectionTitle(page, testInfo.project.name, "The Memes");
     await expect(
       page.getByRole("region", { name: "Meme sorting" })
@@ -242,7 +241,8 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   }, testInfo) => {
     await gotoReady(page, "/meme-lab");
 
-    await expect(page).toHaveTitle("Meme Lab");
+    // Client titles win since the title-reassert fix (#3077): suffixed form.
+    await expect(page).toHaveTitle("Meme Lab | Collections");
     await expectCollectionTitle(page, testInfo.project.name, "Meme Lab");
     await expect(
       page.getByRole("region", { name: "Meme Lab sorting" })
