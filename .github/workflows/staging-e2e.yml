@@ -1,0 +1,99 @@
+name: Staging E2E
+
+on:
+  workflow_run:
+    workflows: ["Web Deploy - STAGING"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-e2e
+  cancel-in-progress: true
+
+jobs:
+  staging-packs:
+    name: Staging E2E packs
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
+    steps:
+      - name: Check out the deployed ref
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Install Playwright browser
+        run: ./bin/6529 exec playwright install --with-deps chromium
+
+      - name: Run staging packs against staging.6529.io
+        run: |
+          set -uo pipefail
+          packs=(
+            test:e2e:staging:smoke
+            test:e2e:staging
+            test:e2e:staging:social-readonly
+            test:e2e:staging:public-groups-tools-readonly
+            test:e2e:staging:delegation-readonly
+            test:e2e:staging:collections-readonly
+            test:e2e:staging:admin-guards-readonly
+            test:e2e:staging:public-content-readonly
+            test:e2e:staging:profile-deep-links-readonly
+            test:e2e:staging:search-waves-readonly
+            test:e2e:staging:media-readonly
+            test:e2e:staging:network-open-data-readonly
+          )
+          failed=0
+          echo "## Staging E2E packs" >> "$GITHUB_STEP_SUMMARY"
+          for pack in "${packs[@]}"; do
+            if ./bin/6529 run "$pack"; then
+              echo "- :white_check_mark: \`$pack\`" >> "$GITHUB_STEP_SUMMARY"
+            else
+              failed=1
+              echo "- :x: \`$pack\`" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          exit "$failed"
+
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: staging-e2e-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
