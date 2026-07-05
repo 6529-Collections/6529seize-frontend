@@ -128,7 +128,8 @@ describe("WaveDropMobileMenuCopyLink", () => {
     expect(parentClick).not.toHaveBeenCalled();
   });
 
-  it("closes the menu once when clipboard write fails", async () => {
+  it("keeps the menu open and shows failure feedback when clipboard write fails", async () => {
+    jest.useFakeTimers();
     const clipboardWrite = createDeferredClipboardWrite();
     writeText.mockReturnValueOnce(clipboardWrite.promise);
     const onCopy = jest.fn();
@@ -139,20 +140,34 @@ describe("WaveDropMobileMenuCopyLink", () => {
       drop_type: ApiDropType.Chat,
     };
 
-    render(<WaveDropMobileMenuCopyLink drop={drop} onCopy={onCopy} />);
+    try {
+      render(<WaveDropMobileMenuCopyLink drop={drop} onCopy={onCopy} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Copy link" }));
+      fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
 
-    expect(writeText).toHaveBeenCalledWith("https://base/waves/w1?serialNo=5");
-    expect(onCopy).not.toHaveBeenCalled();
+      expect(writeText).toHaveBeenCalledWith(
+        "https://base/waves/w1?serialNo=5"
+      );
 
-    await act(async () => {
-      clipboardWrite.reject(new Error("Clipboard write failed"));
-      await clipboardWrite.promise.catch(() => undefined);
-    });
+      await act(async () => {
+        clipboardWrite.reject(new Error("Clipboard write failed"));
+        await clipboardWrite.promise.catch(() => undefined);
+      });
 
-    await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
-    expect(screen.getByText("Copy link")).toBeInTheDocument();
+      expect(onCopy).not.toHaveBeenCalled();
+      expect(screen.getAllByText("Copy failed").length).toBeGreaterThan(0);
+      expect(screen.getByRole("status")).toHaveTextContent("Copy failed");
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(screen.getByText("Copy link")).toBeInTheDocument();
+      expect(screen.getByRole("status")).toBeEmptyDOMElement();
+      expect(onCopy).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("disables copy for temporary drops", async () => {
