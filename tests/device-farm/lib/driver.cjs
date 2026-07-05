@@ -127,6 +127,42 @@ async function waitForDocumentReady(driver, timeout) {
   );
 }
 
+/**
+ * Navigate and wait until the browser is really on the requested page with
+ * rendered content. Safari's WebDriver `url()` can return before navigation
+ * starts (observed on Device Farm iPhones: the previous page's readyState
+ * satisfies a naive readiness check), so this waits for the expected pathname
+ * and a non-empty body rather than trusting the first readyState=complete.
+ */
+async function openPage(driver, pageUrl, timeout) {
+  const expectedPath = new URL(pageUrl).pathname.replace(/\/$/, "") || "/";
+  await driver.url(pageUrl);
+  await driver.waitUntil(
+    async () => {
+      const pathname = await driver.execute(() =>
+        window.location.pathname.replace(/\/$/, "")
+      );
+      return (pathname || "/") === expectedPath;
+    },
+    {
+      timeout,
+      interval: 2000,
+      timeoutMsg: `browser never navigated to ${expectedPath}`,
+    }
+  );
+  await waitForDocumentReady(driver, timeout);
+  await driver.waitUntil(
+    async () =>
+      (await driver.execute(() => (document.body.innerText || "").trim()))
+        .length > 0,
+    {
+      timeout,
+      interval: 2000,
+      timeoutMsg: `${expectedPath} never rendered visible body content`,
+    }
+  );
+}
+
 async function waitForWebviewContext(driver, timeout) {
   let webviewContext;
   await driver.waitUntil(
@@ -169,6 +205,7 @@ module.exports = {
   DEEP_LINK_SCHEME,
   assertNoCrashMarkers,
   isIos,
+  openPage,
   saveScreenshot,
   startNativeAndroidSession,
   startWebSession,
