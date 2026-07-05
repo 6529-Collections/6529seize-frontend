@@ -17,6 +17,8 @@ import {
 import {
   buildWalletGalleryCmsPackage,
   createDefaultWalletGalleryBuilderState,
+  isWalletGalleryGeneratedPackage,
+  restoreWalletGalleryStateFromPackage,
   type WalletGalleryBuilderState,
 } from "./gallery";
 
@@ -132,6 +134,7 @@ export function buildCmsPackageCandidate(
         state.siteDescription.trim() ||
         "Generated gallery from reviewed wallet snapshot.",
       themeAccent: state.themeAccent,
+      walletInput: state.gallery.walletInput,
       snapshot: state.gallery.snapshot,
       hiddenAssetIds: state.gallery.hiddenAssetIds,
       featuredAssetIds: state.gallery.featuredAssetIds,
@@ -300,8 +303,13 @@ export function parseCmsPackageCandidateJson(input: string): CmsPackageV1 {
 export function createBuilderStateFromPackage(
   cmsPackage: CmsPackageV1
 ): CmsBuilderState {
-  const page = cmsPackage.payload.pages[0];
   const handle = normalizeHandle(cmsPackage.profile.handle);
+
+  if (isWalletGalleryGeneratedPackage(cmsPackage)) {
+    return createGalleryBuilderStateFromPackage(cmsPackage, handle);
+  }
+
+  const page = cmsPackage.payload.pages[0];
   return {
     template: "homepage",
     handle,
@@ -319,6 +327,32 @@ export function createBuilderStateFromPackage(
       createBuilderBlockFromCmsBlock(block, cmsPackage, index)
     ),
     gallery: createDefaultWalletGalleryBuilderState(handle),
+  };
+}
+
+// A saved wallet-gallery draft is a generated package (home page, collection
+// pages, per-NFT detail pages) rather than the author-editable block list the
+// homepage template produces. Loading it must restore the gallery tab and its
+// curation state instead of re-importing the generated pages as homepage
+// blocks (the known WS-B round-trip gap).
+function createGalleryBuilderStateFromPackage(
+  cmsPackage: CmsPackageV1,
+  handle: string
+): CmsBuilderState {
+  return {
+    template: "wallet_gallery",
+    handle,
+    siteTitle: cmsPackage.site.title,
+    siteDescription: cmsPackage.site.description ?? "",
+    pageTitle: cmsPackage.site.title,
+    pageDescription: cmsPackage.site.description ?? "",
+    navigationLabel:
+      cmsPackage.payload.navigation[0]?.items[0]?.label ?? "Gallery",
+    themeAccent: cmsPackage.site.theme.accent,
+    socialImageAssetId:
+      cmsPackage.payload.pages[0]?.metadata.social_image_asset_id ?? "",
+    blocks: [],
+    gallery: restoreWalletGalleryStateFromPackage(cmsPackage),
   };
 }
 
