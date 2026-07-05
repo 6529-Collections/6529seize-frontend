@@ -14,14 +14,24 @@ function getOpenModule() {
   return openModulePromise;
 }
 
-const repoCommand =
-  process.platform === "win32"
-    ? path.join(process.cwd(), "bin", "6529.cmd")
-    : "./bin/6529";
+const isWindows = process.platform === "win32";
+const repoCommand = isWindows
+  ? path.join(process.cwd(), "bin", "6529.cmd")
+  : "./bin/6529";
 
-const proc = spawn(repoCommand, ["dev"], {
-  stdio: ["inherit", "pipe", "inherit"],
-});
+// Node refuses to spawn .cmd files without a shell (CVE-2024-27980), and
+// combining shell:true with an args array is deprecated (DEP0190), so the
+// Windows invocation is one static command line with the shim path quoted.
+// bin/6529 only accepts package.json scripts through `run`, so this must
+// spawn `run dev`, not bare `dev`.
+const proc = spawn(
+  isWindows ? `"${repoCommand}" run dev` : repoCommand,
+  isWindows ? [] : ["run", "dev"],
+  {
+    stdio: ["inherit", "pipe", "inherit"],
+    shell: isWindows,
+  }
+);
 
 proc.on("error", (error) => {
   console.error("Failed to start dev server:", error);
