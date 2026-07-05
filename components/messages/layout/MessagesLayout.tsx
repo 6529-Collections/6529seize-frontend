@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import Head from "next/head";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import MessagesDesktop from "../MessagesDesktop";
 import MessagesMobile from "../MessagesMobile";
@@ -78,14 +77,9 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
   }, [contentState, connectPrompt, containerClassName, children, isApp]);
 
   return (
-    <>
-      <Head>
-        <style>{`body { overflow: hidden !important; }`}</style>
-      </Head>
-      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
-        {content}
-      </div>
-    </>
+    <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
+      {content}
+    </div>
   );
 }
 
