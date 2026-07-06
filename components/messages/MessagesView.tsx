@@ -7,19 +7,16 @@ import BrainContent from "../brain/content/BrainContent";
 import PrimaryButton from "../utils/button/PrimaryButton";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import CreateDirectMessageModal from "../waves/create-dm/CreateDirectMessageModal";
-import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
 const MessagesView: React.FC = () => {
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by app/messages page Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
-  const { isDirectMessageModalOpen, openDirectMessage, close } =
-    useCreateModalState();
+  const { openDirectMessage } = useCreateModalState();
 
   const serialisedWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
 
@@ -64,14 +61,6 @@ const MessagesView: React.FC = () => {
       <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
         {content}
       </BrainContent>
-
-      {connectedProfile && (
-        <CreateDirectMessageModal
-          isOpen={isDirectMessageModalOpen}
-          onClose={close}
-          profile={connectedProfile}
-        />
-      )}
     </>
   );
 };
