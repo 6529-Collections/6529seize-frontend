@@ -14,7 +14,7 @@ export default function CodeExample({ code }: CodeExampleProps) {
   const [copied, setCopied] = useState(false);
   const codeRef = useRef<HTMLElement>(null);
   const reactId = useId();
-  const tooltipId = `copy-code-tooltip-${reactId.replace(/:/g, "")}`;
+  const tooltipId = `copy-code-tooltip-${reactId.replaceAll(":", "")}`;
 
   useEffect(() => {
     hljs.registerLanguage("javascript", javascript);
