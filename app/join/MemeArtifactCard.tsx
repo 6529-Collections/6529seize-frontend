@@ -58,7 +58,7 @@ export function MemeArtifactCard({
         )}
       </div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-[#070708] tw-px-2 tw-py-1.5">
-        <span className="tw-min-w-0 tw-truncate tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-white/70">
+        <span className="tw-min-w-0 tw-truncate tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-300">
           {card.label}
         </span>
         <span className="tw-shrink-0 tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300/70">

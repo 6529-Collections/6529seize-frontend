@@ -129,17 +129,17 @@ export function JoinHeader({
         className="tw-pointer-events-none tw-absolute tw-inset-x-8 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/10 tw-to-transparent"
       />
       <div className="tw-relative tw-z-10 tw-mx-auto tw-mt-4 tw-flex tw-max-w-3xl tw-flex-col tw-items-center tw-text-center">
-        <div className="tw-mb-8 tw-inline-flex tw-items-center tw-gap-3 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-uppercase tw-tracking-widest tw-text-white/50">
+        <div className="tw-mb-8 tw-inline-flex tw-items-center tw-gap-3 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-uppercase tw-tracking-widest tw-text-iron-500">
           <span
             aria-hidden="true"
-            className="tw-h-1.5 tw-w-1.5 tw-animate-pulse tw-rounded-full tw-bg-white/40"
+            className="tw-h-1.5 tw-w-1.5 tw-animate-pulse tw-rounded-full tw-bg-iron-400"
           />
           {m(locale, eyebrowKey)}
         </div>
-        <h1 className="tw-m-0 tw-text-5xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-6xl lg:tw-text-7xl">
+        <h1 className="tw-m-0 tw-text-5xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-6xl lg:tw-text-7xl">
           {m(locale, "join6529.title")}
         </h1>
-        <p className="tw-mb-0 tw-mt-5 tw-max-w-xl tw-text-pretty tw-text-lg tw-font-light tw-leading-relaxed tw-text-white/[0.56] lg:tw-text-xl">
+        <p className="tw-mb-0 tw-mt-5 tw-max-w-2xl tw-text-pretty tw-text-lg tw-font-light tw-leading-relaxed tw-text-iron-400 lg:tw-text-2xl">
           {m(locale, "join6529.subtitle")}
         </p>
         <div className="tw-mt-12 tw-flex tw-w-full tw-flex-col tw-items-stretch tw-justify-center tw-gap-4 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center">
@@ -267,7 +267,7 @@ function HeroSecondaryLink({
 }) {
   return (
     <a
-      className="tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-8 tw-py-4 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition-colors hover:tw-bg-white/5 hover:tw-text-white hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/30 sm:tw-w-auto"
+      className="tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-8 tw-py-4 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-50 hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/30 sm:tw-w-auto"
       href={href}
     >
       {label}

@@ -12,7 +12,7 @@ export function FaqSection({ locale }: { readonly locale: SupportedLocale }) {
         <h2 className={cx("tw-mb-4", SECTION_HEADING_CLASS)}>
           {m(locale, "join6529.faq.heading")}
         </h2>
-        <p className="tw-text-[15px] tw-font-light tw-leading-6 tw-text-white/40">
+        <p className="tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
           {m(locale, "join6529.faq.subheading")}
         </p>
       </div>
@@ -22,14 +22,14 @@ export function FaqSection({ locale }: { readonly locale: SupportedLocale }) {
             className={cx(GLASS_PANEL_CLASS, "tw-group tw-cursor-pointer")}
             key={item.id}
           >
-            <summary className="tw-flex tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-px-6 tw-py-5 tw-text-base tw-font-medium tw-text-white/70 tw-transition-colors group-hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 [&::-webkit-details-marker]:tw-hidden">
+            <summary className="tw-flex tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-px-6 tw-py-5 tw-text-base tw-font-medium tw-text-iron-300 tw-transition-colors group-hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 [&::-webkit-details-marker]:tw-hidden">
               <span>{m(locale, item.questionKey)}</span>
               <PlusIcon
                 aria-hidden="true"
-                className="tw-h-3 tw-w-3 tw-shrink-0 tw-text-white/30 tw-transition-transform group-open:tw-rotate-45"
+                className="tw-h-3 tw-w-3 tw-shrink-0 tw-text-iron-600 tw-transition-transform group-open:tw-rotate-45"
               />
             </summary>
-            <div className="tw-px-6 tw-pb-6 tw-text-sm tw-leading-relaxed tw-text-white/40">
+            <div className="tw-px-6 tw-pb-6 tw-text-sm tw-leading-relaxed tw-text-iron-500">
               {m(locale, item.answerKey)}
             </div>
           </details>

@@ -19,7 +19,7 @@ export default function Join6529PageClient() {
   const links = { profileHref, subscriptionsHref };
 
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-overflow-x-clip tw-bg-[#030303] tw-text-white">
+    <main className="tailwind-scope tw-min-h-screen tw-overflow-x-clip tw-bg-[#030303] tw-text-iron-100">
       <JoinHeader
         currentPanel={currentPanel}
         isReturningVisitor={

@@ -29,7 +29,7 @@ const STATUS_LABEL_KEYS = {
 const STATUS_BADGE_CLASS: Readonly<Record<StepStatus, string>> = {
   complete: "tw-border-[#34d399]/35 tw-bg-[#34d399]/[0.14] tw-text-[#34d399]",
   current: "tw-border-[#60a5fa]/40 tw-bg-[#60a5fa]/[0.16] tw-text-[#60a5fa]",
-  pending: "tw-border-white/[0.12] tw-bg-white/[0.06] tw-text-white/[0.45]",
+  pending: "tw-border-white/[0.12] tw-bg-white/[0.06] tw-text-iron-500",
 };
 
 const STATUS_MARKER_CLASS: Readonly<Record<StepStatus, string>> = {
@@ -38,7 +38,7 @@ const STATUS_MARKER_CLASS: Readonly<Record<StepStatus, string>> = {
 };
 
 const NEUTRAL_MARKER_CLASS =
-  "tw-border-white/10 tw-text-white/50 group-hover:tw-border-white/30 group-hover:tw-text-white";
+  "tw-border-white/10 tw-text-iron-500 group-hover:tw-border-white/30 group-hover:tw-text-iron-100";
 
 const DEFAULT_MARKER_CLASS: Readonly<Record<TimelineStepId, string>> = {
   wallet: NEUTRAL_MARKER_CLASS,
@@ -118,13 +118,13 @@ function TimelineProgressStrip({
   return (
     <div
       aria-label={m(locale, "join6529.progress.ariaLabel")}
-      className="tw-mx-auto tw-mb-6 tw-mt-4 tw-w-full tw-max-w-[520px]"
+      className="tw-mx-auto tw-mb-10 tw-mt-4 tw-w-full tw-max-w-[520px] md:tw-mb-12"
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-        <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-white/[0.55]">
+        <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
           {m(locale, "join6529.progress.label")}
         </p>
-        <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-white/[0.55]">
+        <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
           {m(locale, "join6529.progress.value", {
             completed: progress.completed,
             total: progress.total,
@@ -157,7 +157,7 @@ function TimelineProgressStrip({
 function TimelineGroupLabel({ label }: { readonly label: string }) {
   return (
     <div className="tw-relative tw-z-10 tw-mb-3 tw-flex tw-justify-start md:tw-justify-center">
-      <span className="tw-ml-16 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-[#030303] tw-px-3 tw-py-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-white/[0.42] md:tw-ml-0">
+      <span className="tw-ml-16 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-[#030303] tw-px-3 tw-py-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-500 md:tw-ml-0">
         {label}
       </span>
     </div>
@@ -195,7 +195,7 @@ function TimelineRow({
     >
       <div
         className={cx(
-          "tw-pl-16 md:tw-pl-0",
+          "tw-pl-16 tw-pt-3 md:tw-pl-0",
           isLeftAligned
             ? "md:tw-pr-10 md:tw-text-right"
             : "md:tw-order-2 md:tw-pl-10"
@@ -203,16 +203,16 @@ function TimelineRow({
       >
         <div
           className={cx(
-            "-tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2",
+            "tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2",
             isLeftAligned ? "md:tw-justify-end" : "md:tw-justify-start"
           )}
         >
-          <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-white/90">
+          <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
             {m(locale, item.titleKey)}
           </h3>
           {showStatusBadge && <StatusBadge locale={locale} status={status} />}
         </div>
-        <p className="tw-mt-1.5 tw-text-[15px] tw-font-light tw-leading-6 tw-text-white/40">
+        <p className="tw-mt-1.5 tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
           {m(locale, item.bodyKey)}
         </p>
         {actionHref && actionLabel && (
@@ -221,7 +221,7 @@ function TimelineRow({
               "tw-mt-3 tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-no-underline tw-transition-colors hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus:tw-ring-2",
               item.id === "subscribe"
                 ? "tw-rounded-lg tw-bg-white tw-px-5 tw-py-2.5 tw-font-medium tw-text-black hover:tw-bg-gray-200 hover:tw-text-black focus:tw-ring-white/70"
-                : "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/20 tw-pb-1 tw-text-white/70 hover:tw-border-white/40 hover:tw-text-white focus:tw-ring-white/20"
+                : "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/20 tw-pb-1 tw-text-iron-300 hover:tw-border-white/40 hover:tw-text-iron-50 focus:tw-ring-white/20"
             )}
             href={actionHref}
           >
@@ -264,7 +264,7 @@ function StatusBadge({
   return (
     <span
       className={cx(
-        "tw-inline-flex tw-h-6 tw-shrink-0 tw-items-center tw-gap-1.5 tw-self-center tw-rounded-full tw-border tw-border-solid tw-px-[10px] tw-align-middle tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.04em]",
+        "tw-inline-flex tw-h-6 tw-shrink-0 tw-items-center tw-gap-1.5 tw-self-center tw-rounded-full tw-border tw-border-solid tw-px-[10px] tw-align-middle tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-6 tw-tracking-[0.04em]",
         STATUS_BADGE_CLASS[status]
       )}
     >

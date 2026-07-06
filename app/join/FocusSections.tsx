@@ -19,10 +19,10 @@ const BENTO_PANEL_CLASS =
   "tw-transform tw-rounded-3xl tw-border tw-border-solid tw-border-white/5 tw-border-t-white/10 tw-bg-[linear-gradient(145deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.01)_100%)] tw-shadow-[0_30px_60px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)] tw-backdrop-blur-[20px] tw-transition-all tw-duration-500 tw-ease-[cubic-bezier(0.16,1,0.3,1)] desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_40px_80px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)] motion-reduce:tw-transition-none";
 
 const BENTO_HEADING_CLASS =
-  "tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-white sm:tw-text-[26px]";
+  "tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]";
 
 const OUTLINE_ACTION_CLASS =
-  "tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-6 tw-py-3 tw-text-sm tw-font-medium tw-text-white hover:tw-bg-white/5 focus:tw-ring-white/25";
+  "tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-6 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 hover:tw-bg-white/5 hover:tw-text-iron-50 focus:tw-ring-white/25";
 
 export function FocusSections({
   links,
@@ -131,7 +131,7 @@ function SubscriptionAccent({ locale }: { readonly locale: SupportedLocale }) {
         />
       </div>
       <div className="tw-relative tw-z-10 tw-mt-6 tw-flex tw-flex-wrap tw-gap-3">
-        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-px-3 tw-py-1 tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-widest tw-text-white/60">
+        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-px-3 tw-py-1 tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-400">
           {m(locale, "join6529.focus.subscriptions.badge")}
         </span>
       </div>
@@ -179,7 +179,7 @@ function FeatureCopy({
       <h2 className={BENTO_HEADING_CLASS}>{m(locale, feature.titleKey)}</h2>
       <p
         className={cx(
-          "tw-leading-relaxed tw-text-white/[0.45]",
+          "tw-leading-relaxed tw-text-iron-500",
           size === "compact"
             ? "tw-mt-4 tw-text-[15px] tw-font-light"
             : "tw-mt-4 tw-max-w-md tw-text-[15px] tw-font-light",

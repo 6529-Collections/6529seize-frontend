@@ -9,10 +9,10 @@ export const GLASS_PANEL_CLASS =
   "tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.03] tw-bg-[#0a0a0c]/40 tw-transition hover:tw-border-white/[0.08] hover:tw-bg-[#0f0f12]/60";
 
 export const SECTION_EYEBROW_CLASS =
-  "tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-white/40";
+  "tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-500";
 
 export const SECTION_HEADING_CLASS =
-  "tw-text-[30px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white sm:tw-text-[34px]";
+  "tw-text-[30px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[34px]";
 
 export const m = (
   locale: SupportedLocale,
