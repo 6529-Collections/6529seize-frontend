@@ -13,13 +13,12 @@ import {
 } from "@/components/about/AboutLayout";
 
 const API_REFERENCE_URL = "https://api.6529.io/docs/";
-const FLOW_CODE_PLACEHOLDER = "__API_AUTH_FLOW_CODE__";
 
 const inlineCodeClass =
   "tw-rounded tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-sm tw-text-iron-100";
-const sectionClass = "tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-50";
+const sectionClass = "tw-w-full tw-text-base tw-leading-7 tw-text-iron-50";
 const exampleSectionClass =
-  "tw-max-w-5xl tw-text-base tw-leading-7 tw-text-iron-50";
+  "tw-w-full tw-text-base tw-leading-7 tw-text-iron-50";
 const sectionHeadingClass =
   "tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50";
 
@@ -53,23 +52,8 @@ function ApiAuthSection({
   );
 }
 
-function AuthFlowStep({
-  code,
-  message,
-}: Readonly<{
-  code: string;
-  message: string;
-}>) {
-  const [beforeCode = "", afterCode = ""] =
-    message.split(FLOW_CODE_PLACEHOLDER);
-
-  return (
-    <li>
-      {beforeCode}
-      <code className={inlineCodeClass}>{code}</code>
-      {afterCode}
-    </li>
-  );
+function InlineCode({ children }: Readonly<{ children: ReactNode }>) {
+  return <code className={inlineCodeClass}>{children}</code>;
 }
 
 const apiAuthGuideCopy = {
@@ -79,31 +63,16 @@ const apiAuthGuideCopy = {
   backToApi: "Back to API",
   eyebrow: "API Authentication",
   title: "External Client Authentication",
-  lead:
-    "Use session-v2 wallet authentication when building scripts, services, and other external clients against the 6529 API.",
+  lead: "Use session-v2 wallet authentication when building scripts, services, and other external clients against the 6529 API.",
   overviewTitle: "What to use",
-  overviewPreferred:
-    "New external clients should authenticate through session-v2 endpoints. The standard external-client mode is client_type=native, even when the client is a command-line script or backend service controlled by the wallet owner.",
   overviewLegacy:
     "The older nonce, login, and redeem-refresh-token endpoints remain compatibility endpoints for older clients. New integrations should not start on those legacy endpoints.",
   flowTitle: "Login flow",
-  flowNonce: `Request a signable message with signer_address, client_type=native, and chain_id=1 from ${FLOW_CODE_PLACEHOLDER}.`,
-  flowSign: `Sign the returned message exactly as returned in ${FLOW_CODE_PLACEHOLDER}.`,
-  flowLogin: `Send client_type, client_address, client_signature, server_signature, and optional role to ${FLOW_CODE_PLACEHOLDER}.`,
-  flowBearer: `Use the returned access token on protected API calls as ${FLOW_CODE_PLACEHOLDER}.`,
   refreshTitle: "Refresh and logout",
-  refreshLogin:
-    "Native/script login returns an access_token for bearer auth plus a native_refresh_token and refresh_token_expires_at for long-running clients.",
-  refreshRotate:
-    "Refresh through POST /api/auth/session-refresh with client_type=native, client_address, and the current native_refresh_token. A successful refresh rotates the native refresh token, so replace the stored token with the new one immediately.",
-  refreshLogout:
-    "Logout through POST /api/auth/session-logout with client_type=native, client_address, the current native_refresh_token, and all_sessions=false unless you intend to revoke every session for that wallet.",
   browserTitle: "Browser clients",
   browserNote:
     "This guide is for external clients. First-party browser sessions also use session-v2, but browser refresh state is handled with backend-owned HttpOnly cookies, credentials-included requests, and origin checks. Follow the app implementation rather than adapting the native/script examples directly for browser sessions.",
   securityTitle: "Security rules",
-  securitySignable:
-    "Sign only signable_message exactly as returned. Do not trim, normalize, rebuild, JSON-stringify, or sign a nonce field.",
   securitySecrets:
     "Do not log private keys, access tokens, refresh tokens, signatures, or raw authentication responses. Store refresh tokens in a secret store appropriate for the client environment.",
   securityStatus:
@@ -213,7 +182,7 @@ export async function logoutNativeSession({ address, nativeRefreshToken }) {
 export default function ApiAuthenticationPage() {
   return (
     <main className={clsx(styles["main"], "tailwind-scope")}>
-      <Container className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
+      <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
             <Link
@@ -222,7 +191,7 @@ export default function ApiAuthenticationPage() {
             >
               {apiAuthGuideCopy.backToApi}
             </Link>
-            <header className="tw-max-w-4xl">
+            <header className="tw-w-full">
               <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
                 {apiAuthGuideCopy.eyebrow}
               </p>
@@ -240,7 +209,13 @@ export default function ApiAuthenticationPage() {
           headingId="api-auth-overview-heading"
           title={apiAuthGuideCopy.overviewTitle}
         >
-          <p className="tw-mb-3">{apiAuthGuideCopy.overviewPreferred}</p>
+          <p className="tw-mb-3">
+            New external clients should authenticate through session-v2
+            endpoints. The standard external-client mode is{" "}
+            <InlineCode>client_type=native</InlineCode>, even when the client is
+            a command-line script or backend service controlled by the wallet
+            owner.
+          </p>
           <p className="tw-mb-0">{apiAuthGuideCopy.overviewLegacy}</p>
         </ApiAuthSection>
 
@@ -249,22 +224,30 @@ export default function ApiAuthenticationPage() {
           title={apiAuthGuideCopy.flowTitle}
         >
           <ol className="tw-grid tw-gap-3 tw-pl-5">
-            <AuthFlowStep
-              message={apiAuthGuideCopy.flowNonce}
-              code="GET /api/auth/session-nonce"
-            />
-            <AuthFlowStep
-              message={apiAuthGuideCopy.flowSign}
-              code="signable_message"
-            />
-            <AuthFlowStep
-              message={apiAuthGuideCopy.flowLogin}
-              code="POST /api/auth/session-login"
-            />
-            <AuthFlowStep
-              message={apiAuthGuideCopy.flowBearer}
-              code="Authorization: Bearer <access_token>"
-            />
+            <li>
+              Request a signable message with{" "}
+              <InlineCode>signer_address</InlineCode>,{" "}
+              <InlineCode>client_type=native</InlineCode>, and{" "}
+              <InlineCode>chain_id=1</InlineCode> from{" "}
+              <InlineCode>GET /api/auth/session-nonce</InlineCode>.
+            </li>
+            <li>
+              Sign the returned message exactly as returned in{" "}
+              <InlineCode>signable_message</InlineCode>.
+            </li>
+            <li>
+              Send <InlineCode>client_type</InlineCode>,{" "}
+              <InlineCode>client_address</InlineCode>,{" "}
+              <InlineCode>client_signature</InlineCode>,{" "}
+              <InlineCode>server_signature</InlineCode>, and optional{" "}
+              <InlineCode>role</InlineCode> to{" "}
+              <InlineCode>POST /api/auth/session-login</InlineCode>.
+            </li>
+            <li>
+              Use the returned <InlineCode>access_token</InlineCode> on
+              protected API calls as{" "}
+              <InlineCode>Authorization: Bearer {"<access_token>"}</InlineCode>.
+            </li>
           </ol>
         </ApiAuthSection>
 
@@ -272,9 +255,30 @@ export default function ApiAuthenticationPage() {
           headingId="api-auth-refresh-heading"
           title={apiAuthGuideCopy.refreshTitle}
         >
-          <p className="tw-mb-3">{apiAuthGuideCopy.refreshLogin}</p>
-          <p className="tw-mb-3">{apiAuthGuideCopy.refreshRotate}</p>
-          <p className="tw-mb-0">{apiAuthGuideCopy.refreshLogout}</p>
+          <p className="tw-mb-3">
+            Native/script login returns an <InlineCode>access_token</InlineCode>{" "}
+            for bearer auth plus a <InlineCode>native_refresh_token</InlineCode>{" "}
+            and <InlineCode>refresh_token_expires_at</InlineCode> for
+            long-running clients.
+          </p>
+          <p className="tw-mb-3">
+            Refresh through{" "}
+            <InlineCode>POST /api/auth/session-refresh</InlineCode> with{" "}
+            <InlineCode>client_type=native</InlineCode>,{" "}
+            <InlineCode>client_address</InlineCode>, and the current{" "}
+            <InlineCode>native_refresh_token</InlineCode>. A successful refresh
+            rotates the native refresh token, so replace the stored token with
+            the new one immediately.
+          </p>
+          <p className="tw-mb-0">
+            Logout through{" "}
+            <InlineCode>POST /api/auth/session-logout</InlineCode> with{" "}
+            <InlineCode>client_type=native</InlineCode>,{" "}
+            <InlineCode>client_address</InlineCode>, the current{" "}
+            <InlineCode>native_refresh_token</InlineCode>, and{" "}
+            <InlineCode>all_sessions=false</InlineCode> unless you intend to
+            revoke every session for that wallet.
+          </p>
         </ApiAuthSection>
 
         <ApiAuthSection
@@ -289,7 +293,11 @@ export default function ApiAuthenticationPage() {
           title={apiAuthGuideCopy.securityTitle}
         >
           <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
-            <li>{apiAuthGuideCopy.securitySignable}</li>
+            <li>
+              Sign only <InlineCode>signable_message</InlineCode> exactly as
+              returned. Do not trim, normalize, rebuild, JSON-stringify, or sign
+              a <InlineCode>nonce</InlineCode> field.
+            </li>
             <li>{apiAuthGuideCopy.securitySecrets}</li>
             <li>{apiAuthGuideCopy.securityStatus}</li>
           </ul>
@@ -308,7 +316,7 @@ export default function ApiAuthenticationPage() {
           <Col>
             <nav
               aria-label={apiAuthGuideCopy.relatedAriaLabel}
-              className="tw-flex tw-max-w-4xl tw-flex-wrap tw-gap-4 tw-text-sm"
+              className="tw-flex tw-w-full tw-flex-wrap tw-gap-4 tw-text-sm"
             >
               <Link
                 href="/tools/api"

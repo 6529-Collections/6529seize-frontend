@@ -35,11 +35,11 @@ export default function WalletAuthenticationPage() {
       <Container fluid className="tw-pt-4">
         <Row>
           <Col>
-            <Container className="tw-pt-2">
+            <Container fluid className="tw-pt-2">
               <Row>
                 <Col>
                   <AboutContentsDropdown currentSection={AboutSection.TECH} />
-                  <article className="tw-w-full tw-text-iron-200">
+                  <article className="tw-w-full tw-text-iron-50">
                     <Link
                       href="/about/tech"
                       className="hover:tw-text-primary-200 tw-mb-5 tw-inline-flex tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline"
@@ -50,19 +50,19 @@ export default function WalletAuthenticationPage() {
                       )}
                     </Link>
 
-                    <header className="tw-max-w-4xl tw-pb-4">
-                      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+                    <header className="tw-w-full tw-pb-4">
+                      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
                         {t(WALLET_AUTH_LOCALE, "about.tech.walletAuth.eyebrow")}
                       </p>
                       <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
                         {t(WALLET_AUTH_LOCALE, "about.tech.walletAuth.title")}
                       </h1>
-                      <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
+                      <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-50">
                         {t(WALLET_AUTH_LOCALE, "about.tech.walletAuth.lead")}
                       </p>
                     </header>
 
-                    <div className="tw-flex tw-max-w-4xl tw-flex-col tw-gap-8 tw-text-base tw-leading-7 tw-text-iron-300">
+                    <div className="tw-flex tw-w-full tw-flex-col tw-gap-8 tw-text-base tw-leading-7 tw-text-iron-50">
                       <section aria-labelledby="what-is-changing-heading">
                         <h2
                           id="what-is-changing-heading"

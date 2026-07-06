@@ -193,7 +193,7 @@ run().catch((err) => {
 export default function AboutApi() {
   return (
     <main className={clsx(styles["main"], "tailwind-scope")}>
-      <Container className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
+      <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
             <h1>6529.io API</h1>

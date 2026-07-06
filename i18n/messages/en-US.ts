@@ -873,7 +873,7 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
-  "tools.api.authCallout.title": "V2 API authentication",
+  "tools.api.authCallout.title": "v2 API authentication",
   "tools.api.authCallout.description":
     "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
   "tools.api.authCallout.link": "Read the full external-client auth guide",
