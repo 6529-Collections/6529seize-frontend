@@ -1,7 +1,5 @@
 import CodeExample from "@/components/code-example/CodeExample";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
 import styles from "@/styles/Home.module.css";
 import clsx from "clsx";
 import type { Metadata } from "next";
@@ -14,7 +12,6 @@ import {
   AboutRow as Row,
 } from "@/components/about/AboutLayout";
 
-const API_AUTH_LOCALE = DEFAULT_LOCALE;
 const API_REFERENCE_URL = "https://api.6529.io/docs/";
 const FLOW_CODE_PLACEHOLDER = "__API_AUTH_FLOW_CODE__";
 
@@ -29,14 +26,14 @@ const sectionHeadingClass =
 type ApiAuthSectionProps = Readonly<{
   children: ReactNode;
   headingId: string;
-  titleKey: MessageKey;
+  title: string;
   wide?: boolean;
 }>;
 
 function ApiAuthSection({
   children,
   headingId,
-  titleKey,
+  title,
   wide = false,
 }: ApiAuthSectionProps) {
   return (
@@ -47,7 +44,7 @@ function ApiAuthSection({
           aria-labelledby={headingId}
         >
           <h2 id={headingId} className={sectionHeadingClass}>
-            {t(API_AUTH_LOCALE, titleKey)}
+            {title}
           </h2>
           {children}
         </section>
@@ -58,14 +55,11 @@ function ApiAuthSection({
 
 function AuthFlowStep({
   code,
-  messageKey,
+  message,
 }: Readonly<{
   code: string;
-  messageKey: MessageKey;
+  message: string;
 }>) {
-  const message = t(API_AUTH_LOCALE, messageKey, {
-    code: FLOW_CODE_PLACEHOLDER,
-  });
   const [beforeCode = "", afterCode = ""] =
     message.split(FLOW_CODE_PLACEHOLDER);
 
@@ -77,6 +71,50 @@ function AuthFlowStep({
     </li>
   );
 }
+
+const apiAuthGuideCopy = {
+  metadataTitle: "API Authentication",
+  metadataDescription:
+    "External-client session-v2 wallet authentication for the 6529 API.",
+  backToApi: "Back to API",
+  eyebrow: "API Authentication",
+  title: "External Client Authentication",
+  lead:
+    "Use session-v2 wallet authentication when building scripts, services, and other external clients against the 6529 API.",
+  overviewTitle: "What to use",
+  overviewPreferred:
+    "New external clients should authenticate through session-v2 endpoints. The standard external-client mode is client_type=native, even when the client is a command-line script or backend service controlled by the wallet owner.",
+  overviewLegacy:
+    "The older nonce, login, and redeem-refresh-token endpoints remain compatibility endpoints for older clients. New integrations should not start on those legacy endpoints.",
+  flowTitle: "Login flow",
+  flowNonce: `Request a signable message with signer_address, client_type=native, and chain_id=1 from ${FLOW_CODE_PLACEHOLDER}.`,
+  flowSign: `Sign the returned message exactly as returned in ${FLOW_CODE_PLACEHOLDER}.`,
+  flowLogin: `Send client_type, client_address, client_signature, server_signature, and optional role to ${FLOW_CODE_PLACEHOLDER}.`,
+  flowBearer: `Use the returned access token on protected API calls as ${FLOW_CODE_PLACEHOLDER}.`,
+  refreshTitle: "Refresh and logout",
+  refreshLogin:
+    "Native/script login returns an access_token for bearer auth plus a native_refresh_token and refresh_token_expires_at for long-running clients.",
+  refreshRotate:
+    "Refresh through POST /api/auth/session-refresh with client_type=native, client_address, and the current native_refresh_token. A successful refresh rotates the native refresh token, so replace the stored token with the new one immediately.",
+  refreshLogout:
+    "Logout through POST /api/auth/session-logout with client_type=native, client_address, the current native_refresh_token, and all_sessions=false unless you intend to revoke every session for that wallet.",
+  browserTitle: "Browser clients",
+  browserNote:
+    "This guide is for external clients. First-party browser sessions also use session-v2, but browser refresh state is handled with backend-owned HttpOnly cookies, credentials-included requests, and origin checks. Follow the app implementation rather than adapting the native/script examples directly for browser sessions.",
+  securityTitle: "Security rules",
+  securitySignable:
+    "Sign only signable_message exactly as returned. Do not trim, normalize, rebuild, JSON-stringify, or sign a nonce field.",
+  securitySecrets:
+    "Do not log private keys, access tokens, refresh tokens, signatures, or raw authentication responses. Store refresh tokens in a secret store appropriate for the client environment.",
+  securityStatus:
+    "Check response status codes before trusting JSON payloads, and treat authentication errors as requiring a fresh wallet signature or a clean re-login.",
+  examplesTitle: "Node.js examples",
+  examplesLogin:
+    "This example requests a native session-v2 challenge, signs it, calls a protected endpoint with bearer auth, refreshes the session, and logs out.",
+  relatedAriaLabel: "Related API authentication links",
+  relatedApi: "API overview",
+  relatedReference: "Full API reference",
+} as const;
 
 const nodeJsSessionExample = `import { Wallet } from "ethers";
 import fetch from "node-fetch";
@@ -182,17 +220,17 @@ export default function ApiAuthenticationPage() {
               href="/tools/api"
               className="hover:tw-text-primary-200 tw-mb-5 tw-inline-flex tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline"
             >
-              {t(API_AUTH_LOCALE, "tools.api.authGuide.backToApi")}
+              {apiAuthGuideCopy.backToApi}
             </Link>
             <header className="tw-max-w-4xl">
               <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.eyebrow")}
+                {apiAuthGuideCopy.eyebrow}
               </p>
               <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.title")}
+                {apiAuthGuideCopy.title}
               </h1>
               <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-50">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.lead")}
+                {apiAuthGuideCopy.lead}
               </p>
             </header>
           </Col>
@@ -200,35 +238,31 @@ export default function ApiAuthenticationPage() {
 
         <ApiAuthSection
           headingId="api-auth-overview-heading"
-          titleKey="tools.api.authGuide.overview.title"
+          title={apiAuthGuideCopy.overviewTitle}
         >
-          <p className="tw-mb-3">
-            {t(API_AUTH_LOCALE, "tools.api.authGuide.overview.preferred")}
-          </p>
-          <p className="tw-mb-0">
-            {t(API_AUTH_LOCALE, "tools.api.authGuide.overview.legacy")}
-          </p>
+          <p className="tw-mb-3">{apiAuthGuideCopy.overviewPreferred}</p>
+          <p className="tw-mb-0">{apiAuthGuideCopy.overviewLegacy}</p>
         </ApiAuthSection>
 
         <ApiAuthSection
           headingId="api-auth-flow-heading"
-          titleKey="tools.api.authGuide.flow.title"
+          title={apiAuthGuideCopy.flowTitle}
         >
           <ol className="tw-grid tw-gap-3 tw-pl-5">
             <AuthFlowStep
-              messageKey="tools.api.authGuide.flow.nonce"
+              message={apiAuthGuideCopy.flowNonce}
               code="GET /api/auth/session-nonce"
             />
             <AuthFlowStep
-              messageKey="tools.api.authGuide.flow.sign"
+              message={apiAuthGuideCopy.flowSign}
               code="signable_message"
             />
             <AuthFlowStep
-              messageKey="tools.api.authGuide.flow.login"
+              message={apiAuthGuideCopy.flowLogin}
               code="POST /api/auth/session-login"
             />
             <AuthFlowStep
-              messageKey="tools.api.authGuide.flow.bearer"
+              message={apiAuthGuideCopy.flowBearer}
               code="Authorization: Bearer <access_token>"
             />
           </ol>
@@ -236,70 +270,51 @@ export default function ApiAuthenticationPage() {
 
         <ApiAuthSection
           headingId="api-auth-refresh-heading"
-          titleKey="tools.api.authGuide.refresh.title"
+          title={apiAuthGuideCopy.refreshTitle}
         >
-          <p className="tw-mb-3">
-            {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.login")}
-          </p>
-          <p className="tw-mb-3">
-            {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.rotate")}
-          </p>
-          <p className="tw-mb-0">
-            {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.logout")}
-          </p>
+          <p className="tw-mb-3">{apiAuthGuideCopy.refreshLogin}</p>
+          <p className="tw-mb-3">{apiAuthGuideCopy.refreshRotate}</p>
+          <p className="tw-mb-0">{apiAuthGuideCopy.refreshLogout}</p>
         </ApiAuthSection>
 
         <ApiAuthSection
           headingId="api-auth-browser-heading"
-          titleKey="tools.api.authGuide.browser.title"
+          title={apiAuthGuideCopy.browserTitle}
         >
-          <p className="tw-mb-0">
-            {t(API_AUTH_LOCALE, "tools.api.authGuide.browser.note")}
-          </p>
+          <p className="tw-mb-0">{apiAuthGuideCopy.browserNote}</p>
         </ApiAuthSection>
 
         <ApiAuthSection
           headingId="api-auth-security-heading"
-          titleKey="tools.api.authGuide.security.title"
+          title={apiAuthGuideCopy.securityTitle}
         >
           <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
-            <li>
-              {t(API_AUTH_LOCALE, "tools.api.authGuide.security.signable")}
-            </li>
-            <li>
-              {t(API_AUTH_LOCALE, "tools.api.authGuide.security.secrets")}
-            </li>
-            <li>
-              {t(API_AUTH_LOCALE, "tools.api.authGuide.security.status")}
-            </li>
+            <li>{apiAuthGuideCopy.securitySignable}</li>
+            <li>{apiAuthGuideCopy.securitySecrets}</li>
+            <li>{apiAuthGuideCopy.securityStatus}</li>
           </ul>
         </ApiAuthSection>
 
         <ApiAuthSection
           headingId="api-auth-examples-heading"
-          titleKey="tools.api.authGuide.examples.title"
+          title={apiAuthGuideCopy.examplesTitle}
           wide
         >
-          <p className="tw-mb-3">
-            {t(API_AUTH_LOCALE, "tools.api.authGuide.examples.login")}
-          </p>
+          <p className="tw-mb-3">{apiAuthGuideCopy.examplesLogin}</p>
           <CodeExample code={nodeJsSessionExample} />
         </ApiAuthSection>
 
         <Row className="tw-pt-6">
           <Col>
             <nav
-              aria-label={t(
-                API_AUTH_LOCALE,
-                "tools.api.authGuide.related.ariaLabel"
-              )}
+              aria-label={apiAuthGuideCopy.relatedAriaLabel}
               className="tw-flex tw-max-w-4xl tw-flex-wrap tw-gap-4 tw-text-sm"
             >
               <Link
                 href="/tools/api"
                 className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline"
               >
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.related.api")}
+                {apiAuthGuideCopy.relatedApi}
               </Link>
               <a
                 href={API_REFERENCE_URL}
@@ -307,7 +322,7 @@ export default function ApiAuthenticationPage() {
                 rel="noopener noreferrer"
                 className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline"
               >
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.related.reference")}
+                {apiAuthGuideCopy.relatedReference}
               </a>
             </nav>
           </Col>
@@ -319,10 +334,7 @@ export default function ApiAuthenticationPage() {
 
 export function generateMetadata(): Metadata {
   return getAppMetadata({
-    title: t(API_AUTH_LOCALE, "tools.api.authGuide.metadata.title"),
-    description: t(
-      API_AUTH_LOCALE,
-      "tools.api.authGuide.metadata.description"
-    ),
+    title: apiAuthGuideCopy.metadataTitle,
+    description: apiAuthGuideCopy.metadataDescription,
   });
 }
