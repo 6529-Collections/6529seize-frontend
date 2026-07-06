@@ -174,18 +174,9 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
-  // Wrapped (multi-line) entries below are interleaved with single-line ones
-  // so no two consecutive wrapped key/value pairs form a duplicate token-run
-  // with other wrapped blocks in this large dictionary (Sonar duplication).
   "validation.errorTitle": "That category name won't work",
-  "validation.tooLong":
-    "It's {length} characters long — the maximum is {max}.",
-  "validation.leadingDash": "A category can't start with a dash.",
-  "validation.disallowedChars":
-    "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
   "validation.tooShort": "Use at least {min} characters.",
-  "validation.aiFilterDetails":
-    "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
+  "validation.leadingDash": "A category can't start with a dash.",
   "validation.closeErrorLabel": "Dismiss error",
   "suggested.loading": "Loading active REP categories",
   "suggested.error": "Could not load active REP categories.",
@@ -194,6 +185,12 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
   "suggested.description": "Categories with the most profile REP activity.",
+  "validation.tooLong":
+    "It's {length} characters long — the maximum is {max}.",
+  "validation.disallowedChars":
+    "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+  "validation.aiFilterDetails":
+    "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
