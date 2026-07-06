@@ -893,8 +893,6 @@ export const EN_US_MESSAGES = {
     "Send the signature back to the server.",
   "tools.api.authentication.receiveToken":
     "Receive a JWT bearer token, which you can include in headers of subsequent requests.",
-  "tools.api.authentication.nodeExample":
-    "Here's a full example in Node.js using ethers and node-fetch:",
   "tools.api.authGuide.metadata.title": "API Authentication",
   "tools.api.authGuide.metadata.description":
     "External-client session-v2 wallet authentication for the 6529 API.",
@@ -910,13 +908,13 @@ export const EN_US_MESSAGES = {
     "The older nonce, login, and redeem-refresh-token endpoints remain compatibility endpoints for older clients. New integrations should not start on those legacy endpoints.",
   "tools.api.authGuide.flow.title": "Login flow",
   "tools.api.authGuide.flow.nonce":
-    "Request a signable message with signer_address, client_type=native, and chain_id=1 from",
+    "Request a signable message with signer_address, client_type=native, and chain_id=1 from {code}.",
   "tools.api.authGuide.flow.sign":
-    "Sign the returned message exactly as returned in",
+    "Sign the returned message exactly as returned in {code}.",
   "tools.api.authGuide.flow.login":
-    "Send client_type, client_address, client_signature, server_signature, and optional role to",
+    "Send client_type, client_address, client_signature, server_signature, and optional role to {code}.",
   "tools.api.authGuide.flow.bearer":
-    "Use the returned access token on protected API calls as",
+    "Use the returned access token on protected API calls as {code}.",
   "tools.api.authGuide.refresh.title": "Refresh and logout",
   "tools.api.authGuide.refresh.login":
     "Native/script login returns an access_token for bearer auth plus a native_refresh_token and refresh_token_expires_at for long-running clients.",
@@ -937,8 +935,6 @@ export const EN_US_MESSAGES = {
   "tools.api.authGuide.examples.title": "Node.js examples",
   "tools.api.authGuide.examples.login":
     "This example requests a native session-v2 challenge, signs it, calls a protected endpoint with bearer auth, refreshes the session, and logs out.",
-  "tools.api.authGuide.examples.refresh":
-    "This example refreshes and logs out a native/script session. Persist the rotated native_refresh_token after every successful refresh.",
   "tools.api.authGuide.related.ariaLabel": "Related API authentication links",
   "tools.api.authGuide.related.api": "API overview",
   "tools.api.authGuide.related.reference": "Full API reference",

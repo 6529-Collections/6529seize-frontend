@@ -16,6 +16,7 @@ import {
 
 const API_AUTH_LOCALE = DEFAULT_LOCALE;
 const API_REFERENCE_URL = "https://api.6529.io/docs/";
+const FLOW_CODE_PLACEHOLDER = "__API_AUTH_FLOW_CODE__";
 
 const inlineCodeClass =
   "tw-rounded tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-sm tw-text-iron-100";
@@ -62,11 +63,17 @@ function AuthFlowStep({
   code: string;
   messageKey: MessageKey;
 }>) {
+  const message = t(API_AUTH_LOCALE, messageKey, {
+    code: FLOW_CODE_PLACEHOLDER,
+  });
+  const [beforeCode = "", afterCode = ""] =
+    message.split(FLOW_CODE_PLACEHOLDER);
+
   return (
-    <li className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1">
-      <span>{t(API_AUTH_LOCALE, messageKey)}</span>
+    <li>
+      {beforeCode}
       <code className={inlineCodeClass}>{code}</code>
-      <span>.</span>
+      {afterCode}
     </li>
   );
 }

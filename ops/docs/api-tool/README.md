@@ -46,6 +46,18 @@ private `/tools/6529bot/admin` operator page.
 - `/tools/app-wallets/{appWalletAddress}`
 - `/tools/6529bot/admin`
 
+## Localization Notes
+
+- `/tools/api/authentication` and the new authentication quickstart copy on
+  `/tools/api` use `en-US` source messages with non-source locales falling back
+  through the shared `t()` helper.
+- `/tools/api` still has legacy hardcoded en-US copy in the Introduction, Key
+  terminology, and Creating drops with embedded media sections. Current
+  fallback behavior is direct hardcoded en-US rendering. Owner: frontend docs
+  and i18n migration. Remediation path: move the remaining `/tools/api` section
+  headings, body copy, list items, and metadata into `i18n/messages/en-US.ts`
+  during the broader API page localization pass.
+
 ## Navigation and Visibility
 
 - Web sidebar paths:
