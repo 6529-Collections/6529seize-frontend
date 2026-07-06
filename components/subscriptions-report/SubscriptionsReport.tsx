@@ -374,7 +374,7 @@ export default function SubscriptionsReportComponent() {
                 Active meme card subscribed and airdropped subscription counts
               </span>
               <div
-                className={`${ACTIVE_REPORT_GRID_CLASS_NAME} tw-grid tw-gap-4 tw-bg-primary-500/10 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300`}
+                className={`${ACTIVE_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-primary-500/10 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300 sm:tw-grid`}
                 aria-hidden="true"
               >
                 <span>Meme Card</span>
@@ -411,7 +411,7 @@ export default function SubscriptionsReportComponent() {
                   Upcoming meme card subscription counts
                 </span>
                 <div
-                  className={`${STANDARD_REPORT_GRID_CLASS_NAME} tw-grid tw-gap-4 tw-bg-iron-900 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300`}
+                  className={`${STANDARD_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-iron-900 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300 sm:tw-grid`}
                   aria-hidden="true"
                 >
                   <span>Meme Card</span>
@@ -496,7 +496,7 @@ export default function SubscriptionsReportComponent() {
                 Past meme card subscription redemptions
               </span>
               <div
-                className={`${STANDARD_REPORT_GRID_CLASS_NAME} tw-grid tw-gap-4 tw-bg-iron-900 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300`}
+                className={`${STANDARD_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-iron-900 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300 sm:tw-grid`}
                 aria-hidden="true"
               >
                 <span>Meme Card</span>
