@@ -303,6 +303,13 @@ describe("Subscriptions report page", () => {
     const activeLink = await screen.findByRole("link", {
       name: "View The Memes card #700 - Active Meme",
     });
+    const activeDrop = screen.getByTestId("subscriptions-report-active-drop");
+    expect(
+      within(activeDrop).getByRole("columnheader", { name: "Meme Card" })
+    ).toHaveClass("tw-w-1/2");
+    expect(
+      within(activeDrop).getByRole("columnheader", { name: "Subscribed" })
+    ).toHaveClass("tw-w-1/4");
     expect(activeLink).toHaveAttribute("href", "/the-memes/700");
     expect(activeLink.className).toContain("before:tw-inset-y-0");
     expect(activeLink.className).toContain("before:tw-left-0");
@@ -319,6 +326,17 @@ describe("Subscriptions report page", () => {
     const upcomingLink = screen.getByRole("link", {
       name: "View The Memes card #701",
     });
+    const upcomingDrops = screen.getByTestId(
+      "subscriptions-report-upcoming-drops"
+    );
+    expect(
+      within(upcomingDrops).getByRole("columnheader", { name: "Meme Card" })
+    ).toHaveClass("tw-w-3/4");
+    expect(
+      within(upcomingDrops).getByRole("columnheader", {
+        name: "Subscriptions",
+      })
+    ).toHaveClass("tw-w-1/4");
     expect(upcomingLink).toHaveAttribute("href", "/the-memes/701");
     expect(upcomingLink.className).toContain("before:tw-inset-y-0");
     expect(upcomingLink.className).toContain("before:tw-left-0");
@@ -332,6 +350,13 @@ describe("Subscriptions report page", () => {
     const pastLink = screen.getByRole("link", {
       name: "View The Memes card #699 - Past Meme",
     });
+    const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
+    expect(
+      within(pastDrops).getByRole("columnheader", { name: "Meme Card" })
+    ).toHaveClass("tw-w-3/4");
+    expect(
+      within(pastDrops).getByRole("columnheader", { name: "Subscriptions" })
+    ).toHaveClass("tw-w-1/4");
     expect(pastLink).toHaveAttribute("href", "/the-memes/699");
     expect(pastLink.className).toContain("before:tw-inset-y-0");
     expect(pastLink.className).toContain("before:tw-left-0");
