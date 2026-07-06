@@ -304,22 +304,13 @@ describe("Subscriptions report page", () => {
       name: "View The Memes card #700 - Active Meme",
     });
     const activeDrop = screen.getByTestId("subscriptions-report-active-drop");
-    expect(
-      within(activeDrop).getByRole("columnheader", { name: "Meme Card" })
-    ).toHaveClass("tw-w-1/2");
-    expect(
-      within(activeDrop).getByRole("columnheader", { name: "Subscribed" })
-    ).toHaveClass("tw-w-1/4");
+    expect(within(activeDrop).getByText("Subscribed")).toBeInTheDocument();
+    expect(within(activeDrop).getByText("Airdropped")).toBeInTheDocument();
     expect(activeLink).toHaveAttribute("href", "/the-memes/700");
-    expect(activeLink.className).toContain("before:tw-inset-y-0");
-    expect(activeLink.className).toContain("before:tw-left-0");
-    expect(activeLink.className).toContain("before:tw-w-[200%]");
-    const activeRow = activeLink.closest("tr");
-    expect(activeRow).not.toBeNull();
-    expect(activeRow).not.toHaveAttribute("role");
-    expect(activeRow).toHaveClass("tw-cursor-pointer");
-    expect(activeRow).not.toHaveClass("tw-relative");
-    expect(activeLink.closest("td")).toHaveClass("tw-relative");
+    expect(activeLink).toHaveClass("tw-grid", "tw-no-underline");
+    expect(activeLink.className).not.toContain("before:");
+    expect(within(activeLink).getByText("11")).toBeInTheDocument();
+    expect(within(activeLink).getByText("4")).toBeInTheDocument();
     activeLink.focus();
     expect(activeLink).toHaveFocus();
 
@@ -330,42 +321,22 @@ describe("Subscriptions report page", () => {
       "subscriptions-report-upcoming-drops"
     );
     expect(
-      within(upcomingDrops).getByRole("columnheader", { name: "Meme Card" })
-    ).toHaveClass("tw-w-3/4");
-    expect(
-      within(upcomingDrops).getByRole("columnheader", {
-        name: "Subscriptions",
-      })
-    ).toHaveClass("tw-w-1/4");
+      within(upcomingDrops).getByText("Subscriptions")
+    ).toBeInTheDocument();
     expect(upcomingLink).toHaveAttribute("href", "/the-memes/701");
-    expect(upcomingLink.className).toContain("before:tw-inset-y-0");
-    expect(upcomingLink.className).toContain("before:tw-left-0");
-    expect(upcomingLink.className).toContain("before:tw-w-[133.333333%]");
-    const upcomingRow = upcomingLink.closest("tr");
-    expect(upcomingRow).not.toBeNull();
-    expect(upcomingRow).not.toHaveAttribute("role");
-    expect(upcomingRow).not.toHaveClass("tw-relative");
-    expect(upcomingLink.closest("td")).toHaveClass("tw-relative");
+    expect(upcomingLink).toHaveClass("tw-grid", "tw-no-underline");
+    expect(upcomingLink.className).not.toContain("before:");
+    expect(within(upcomingLink).getByText("8")).toBeInTheDocument();
 
     const pastLink = screen.getByRole("link", {
       name: "View The Memes card #699 - Past Meme",
     });
     const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
-    expect(
-      within(pastDrops).getByRole("columnheader", { name: "Meme Card" })
-    ).toHaveClass("tw-w-3/4");
-    expect(
-      within(pastDrops).getByRole("columnheader", { name: "Subscriptions" })
-    ).toHaveClass("tw-w-1/4");
+    expect(within(pastDrops).getByText("Subscriptions")).toBeInTheDocument();
     expect(pastLink).toHaveAttribute("href", "/the-memes/699");
-    expect(pastLink.className).toContain("before:tw-inset-y-0");
-    expect(pastLink.className).toContain("before:tw-left-0");
-    expect(pastLink.className).toContain("before:tw-w-[133.333333%]");
-    const pastRow = pastLink.closest("tr");
-    expect(pastRow).not.toBeNull();
-    expect(pastRow).not.toHaveAttribute("role");
-    expect(pastRow).not.toHaveClass("tw-relative");
-    expect(pastLink.closest("td")).toHaveClass("tw-relative");
+    expect(pastLink).toHaveClass("tw-grid", "tw-no-underline");
+    expect(pastLink.className).not.toContain("before:");
+    expect(within(pastLink).getByText("9")).toBeInTheDocument();
   });
 
   it("formats active, upcoming, and past counts with locale separators", async () => {
