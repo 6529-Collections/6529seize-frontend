@@ -24,7 +24,7 @@ const REPORT_ROW_TITLE_CLASS_NAME =
 const REPORT_ROW_META_CLASS_NAME = "tw-text-sm tw-leading-5 tw-text-gray-400";
 
 function formatSubscriptionCount(count: number): string {
-  return count > 0 ? count.toLocaleString() : "0";
+  return `x${count > 0 ? count.toLocaleString() : "0"}`;
 }
 
 function MemeCardSummary(

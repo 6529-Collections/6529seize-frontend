@@ -217,8 +217,8 @@ describe("Subscriptions report page", () => {
     expect(
       within(activeDrop).getAllByText("Airdropped").length
     ).toBeGreaterThan(0);
-    expect(activeDrop).toHaveTextContent("11");
-    expect(activeDrop).toHaveTextContent("4");
+    expect(activeDrop).toHaveTextContent("x11");
+    expect(activeDrop).toHaveTextContent("x4");
 
     const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
     expect(within(pastDrops).queryByText("#700 - Active Meme")).toBeNull();
@@ -318,8 +318,8 @@ describe("Subscriptions report page", () => {
     expect(activeLink).toHaveClass("tw-grid", "tw-no-underline");
     expect(activeLink).toHaveClass("tw-grid-cols-2");
     expect(activeLink.className).not.toContain("before:");
-    expect(within(activeLink).getByText("11")).toBeInTheDocument();
-    expect(within(activeLink).getByText("4")).toBeInTheDocument();
+    expect(within(activeLink).getByText("x11")).toBeInTheDocument();
+    expect(within(activeLink).getByText("x4")).toBeInTheDocument();
     expect(within(activeLink).getByText("Subscribed")).toHaveClass(
       "sm:tw-hidden"
     );
@@ -342,7 +342,7 @@ describe("Subscriptions report page", () => {
     expect(upcomingLink).toHaveClass("tw-grid", "tw-no-underline");
     expect(upcomingLink).toHaveClass("tw-grid-cols-[minmax(0,1fr)_auto]");
     expect(upcomingLink.className).not.toContain("before:");
-    expect(within(upcomingLink).getByText("8")).toBeInTheDocument();
+    expect(within(upcomingLink).getByText("x8")).toBeInTheDocument();
     expect(within(upcomingLink).getByText("Subscriptions:")).toHaveClass(
       "tw-sr-only"
     );
@@ -358,7 +358,7 @@ describe("Subscriptions report page", () => {
     expect(pastLink).toHaveClass("tw-grid", "tw-no-underline");
     expect(pastLink).toHaveClass("tw-grid-cols-[minmax(0,1fr)_auto]");
     expect(pastLink.className).not.toContain("before:");
-    expect(within(pastLink).getByText("9")).toBeInTheDocument();
+    expect(within(pastLink).getByText("x9")).toBeInTheDocument();
     expect(within(pastLink).getByText("Subscriptions:")).toHaveClass(
       "tw-sr-only"
     );
@@ -439,16 +439,16 @@ describe("Subscriptions report page", () => {
     const activeDrop = await screen.findByTestId(
       "subscriptions-report-active-drop"
     );
-    expect(activeDrop).toHaveTextContent("1,234");
-    expect(activeDrop).toHaveTextContent("1,000");
+    expect(activeDrop).toHaveTextContent("x1,234");
+    expect(activeDrop).toHaveTextContent("x1,000");
 
     const upcomingDrops = screen.getByTestId(
       "subscriptions-report-upcoming-drops"
     );
-    expect(within(upcomingDrops).getByText("4,567")).toBeInTheDocument();
+    expect(within(upcomingDrops).getByText("x4,567")).toBeInTheDocument();
 
     const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
-    expect(within(pastDrops).getByText("9,876")).toBeInTheDocument();
+    expect(within(pastDrops).getByText("x9,876")).toBeInTheDocument();
   });
 
   it("keeps active and past drops when upcoming counts fail", async () => {
@@ -518,7 +518,7 @@ describe("Subscriptions report page", () => {
       "subscriptions-report-active-drop"
     );
     expect(activeDrop).toHaveTextContent("#700 - Active Meme");
-    expect(activeDrop).toHaveTextContent("11");
+    expect(activeDrop).toHaveTextContent("x11");
 
     const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
     expect(within(pastDrops).getByText("#699 - Past Meme")).toBeInTheDocument();
