@@ -3,7 +3,9 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.css";
+import clsx from "clsx";
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -11,9 +13,9 @@ import {
 } from "@/components/about/AboutLayout";
 
 const API_PAGE_LOCALE = DEFAULT_LOCALE;
+const API_AUTHENTICATION_PATH = "/tools/api/authentication";
 
-export default function AboutApi() {
-  const nodeJsAuthExample = `import { Wallet } from 'ethers';
+const nodeJsAuthExample = `import { Wallet } from 'ethers';
 import fetch from 'node-fetch';
 
 export async function loginAndFetchFeed() {
@@ -23,7 +25,7 @@ export async function loginAndFetchFeed() {
   // Rebuild wallet from private key
   const wallet = new Wallet(clientPrivateKey);
 
-  // 1. Get the session-v2 signable message from the server
+  // 1. Get the native/script session-v2 signable message from the server
   const nonceResp = await fetch(
     \`https://api.6529.io/api/auth/session-nonce?signer_address=\${clientAddress}&client_type=native&chain_id=1\`,
     {
@@ -70,7 +72,7 @@ export async function loginAndFetchFeed() {
   console.log('Feed:', feed);
 }`;
 
-  const nodeJsMediaDropExample = `import fetch from "node-fetch";
+const nodeJsMediaDropExample = `import fetch from "node-fetch";
 import {readFile} from "fs/promises";
 import {extname} from "path";
 import mime from "mime-types";
@@ -243,8 +245,10 @@ run().catch((err) => {
     console.error("Error:", err);
     process.exit(1);
 });`;
+
+export default function AboutApi() {
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className={clsx(styles["main"], "tailwind-scope")}>
       <Container className="tw-pb-4 tw-pt-4">
         <Row>
           <Col>
@@ -288,6 +292,31 @@ run().catch((err) => {
               ℹ️ Some routes are still undocumented. We plan to expand the
               documentation over time.
             </div>
+          </Col>
+        </Row>
+
+        <Row className="tw-pt-2">
+          <Col>
+            <section
+              aria-labelledby="api-authentication-guide-heading"
+              className="tw-mb-4 tw-rounded tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-4"
+            >
+              <h2
+                id="api-authentication-guide-heading"
+                className="tw-mb-2 tw-text-lg tw-font-bold tw-text-iron-50"
+              >
+                {t(API_PAGE_LOCALE, "tools.api.authCallout.title")}
+              </h2>
+              <p className="tw-mb-3">
+                {t(API_PAGE_LOCALE, "tools.api.authCallout.description")}
+              </p>
+              <Link
+                href={API_AUTHENTICATION_PATH}
+                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline"
+              >
+                {t(API_PAGE_LOCALE, "tools.api.authCallout.link")}
+              </Link>
+            </section>
           </Col>
         </Row>
 
@@ -359,6 +388,15 @@ run().catch((err) => {
             <p>
               {t(API_PAGE_LOCALE, "tools.api.authentication.basedOnSignatures")}
             </p>
+            <p>
+              {t(API_PAGE_LOCALE, "tools.api.authentication.externalNote")}{" "}
+              <Link
+                href={API_AUTHENTICATION_PATH}
+                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline"
+              >
+                {t(API_PAGE_LOCALE, "tools.api.authentication.fullGuideLink")}
+              </Link>
+            </p>
 
             <p>{t(API_PAGE_LOCALE, "tools.api.authentication.flowIntro")}</p>
 
@@ -408,7 +446,7 @@ run().catch((err) => {
                 previous steps and keep the ETags from responses
               </li>
               <li>
-                When all parts have finished uploading, complete the upload bt
+                When all parts have finished uploading, complete the upload by
                 supplying the ETags to our API
               </li>
               <li>
@@ -426,6 +464,6 @@ run().catch((err) => {
   );
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
   return getAppMetadata({ title: "API", description: "API" });
 }

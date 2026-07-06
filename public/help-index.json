@@ -546,7 +546,11 @@
         "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
       ],
       "canonical_path": "/about/tech",
-      "related_paths": ["/about/tech/wallet-authentication", "/about/faq"],
+      "related_paths": [
+        "/about/tech/wallet-authentication",
+        "/tools/api/authentication",
+        "/about/faq"
+      ],
       "tags": ["about", "tech", "reports"],
       "source_refs": ["components/about/tech/AboutTech.tsx"]
     },
@@ -5385,6 +5389,43 @@
       "source_refs": ["app/emma/page.tsx", "app/emma/plans/page.tsx"]
     },
     {
+      "id": "tools.api-authentication",
+      "kind": "workflow",
+      "title": "API authentication for external clients",
+      "aliases": [
+        "api authentication",
+        "external api auth",
+        "session v2 auth",
+        "wallet api auth",
+        "bearer token api"
+      ],
+      "keywords": [
+        "api",
+        "authentication",
+        "session",
+        "v2",
+        "wallet",
+        "nonce",
+        "bearer",
+        "refresh"
+      ],
+      "facts": [
+        "The external-client API authentication guide lives at /tools/api/authentication.",
+        "New external clients should use session-v2 wallet authentication with client_type=native.",
+        "The flow is session-nonce, sign signable_message exactly, session-login, then Authorization: Bearer <access_token>.",
+        "Long-running external clients can use session-refresh and session-logout with the current native_refresh_token."
+      ],
+      "canonical_path": "/tools/api/authentication",
+      "related_paths": ["/tools/api", "/about/tech/wallet-authentication"],
+      "tags": ["tools", "api", "authentication"],
+      "source_refs": [
+        "app/tools/api/authentication/page.tsx",
+        "app/tools/api/page.tsx",
+        "app/about/tech/wallet-authentication/page.tsx",
+        "ops/docs/api-tool/feature-api-authentication.md"
+      ]
+    },
+    {
       "id": "tools.api-auth-media-drop",
       "kind": "workflow",
       "title": "API authentication and media drop flow",
@@ -5404,14 +5445,17 @@
       ],
       "facts": [
         "The API tool page lives at /tools/api.",
-        "API authentication and media-drop example flows are documented in the API tool docs.",
+        "The full external-client API authentication guide lives at /tools/api/authentication.",
+        "The API tool page includes a native/script authentication quickstart and media-drop example flow.",
         "This is separate from regular wave composer posting."
       ],
       "canonical_path": "/tools/api",
-      "related_paths": ["/tools/6529bot/admin"],
+      "related_paths": ["/tools/api/authentication", "/tools/6529bot/admin"],
       "tags": ["tools", "api"],
       "source_refs": [
         "app/tools/api/page.tsx",
+        "app/tools/api/authentication/page.tsx",
+        "ops/docs/api-tool/feature-api-authentication.md",
         "ops/docs/api-tool/feature-api-authentication-and-media-drop-flow.md"
       ]
     },

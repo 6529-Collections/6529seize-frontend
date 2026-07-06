@@ -4,7 +4,9 @@
 
 `/tools/api` is a read-only guide for the 6529 REST API.
 
-- It explains wallet-signature authentication (`session-nonce -> sign -> session-login -> access_token`).
+- It links to the full external-client API authentication guide.
+- It explains the short native/script wallet-signature authentication
+  quickstart (`session-nonce -> sign -> session-login -> access_token`).
 - It shows a multipart media upload flow and drop creation flow.
 - It defines key API terms used in routes and payloads.
 - It links to the full external API reference: `https://api.6529.io/docs/`.
@@ -20,6 +22,8 @@
 
 - Open `API` from Tools navigation.
 - Open `/tools/api` directly.
+- Open `/tools/api/authentication` from the authentication callout or
+  quickstart link when you need refresh, logout, and security notes.
 - Open `API` from the site footer.
 
 ## User Journey
@@ -27,27 +31,31 @@
 1. Open `/tools/api`.
 2. Review the introduction and terminology to confirm the page covers the
    intended auth or media-upload task.
-3. Read the wallet-signature authentication example and copy the snippet when
-   needed.
-4. Read the multipart media-upload and drop-creation example and copy the
+3. Open the full API authentication guide if you need more than the quickstart.
+4. Read the wallet-signature authentication example and copy the snippet when
    snippet when needed.
-5. Use the current contract highlights to spot recent payload/schema additions.
-6. Follow the external API docs for endpoint-level details beyond the examples
+5. Read the multipart media-upload and drop-creation example and copy the
+   snippet when needed.
+6. Use the current contract highlights to spot recent payload/schema additions.
+7. Follow the external API docs for endpoint-level details beyond the examples
    shown on this page.
 
 ## Page Structure and Behavior
 
 - The page is static content. It does not execute API calls.
-- It has four sections: `Introduction`, `Key terminology`, `Authentication`,
-  and `Creating drops with embedded media`.
+- It has a v2 auth callout plus sections for `Introduction`, `Key terminology`,
+  `Authentication quickstart`, and `Creating drops with embedded media`.
 - It includes two Node.js snippets:
-  - auth and bearer-token usage
+  - native/script session-v2 auth and bearer-token usage
   - multipart upload and drop creation
 - Each snippet has a `Copy` button with temporary `Copied!` feedback.
 - The introduction includes an inline note that some routes are still
   undocumented.
 
-## Authentication Example Flow
+## Authentication Quickstart Flow
+
+The `/tools/api` example is intentionally short and external-client oriented.
+The fuller guide lives at `/tools/api/authentication`.
 
 1. Request a native session nonce:
    - `GET https://api.6529.io/api/auth/session-nonce?signer_address=<address>&client_type=native&chain_id=1`
@@ -130,7 +138,9 @@
 
 ## Common Scenarios
 
-- Review the auth snippet before building a wallet-signature login flow.
+- Open the API authentication guide before building or maintaining an external
+  wallet-signature login flow.
+- Review the quickstart snippet when you only need the basic bearer-token flow.
 - Copy the multipart example while wiring media upload and drop creation in a
   Node.js script.
 - Check the current contract highlights when generated clients or API payloads
@@ -162,6 +172,8 @@
 
 - Examples are Node.js-oriented and include placeholders (`0x...`, private key,
   `TARGET_WAVE_ID_GOES_HERE`).
+- The auth example is for external native/script clients. First-party browser
+  session internals are not covered by the quickstart.
 - The media snippet uses `node-fetch`, `fs/promises`, `path`, and
   `mime-types`.
 - Some API routes are still undocumented; use the external API docs for broader
@@ -170,6 +182,7 @@
 ## Related Pages
 
 - [API Tool Index](README.md)
+- [API Authentication](feature-api-authentication.md)
 - [Block Finder](feature-block-finder.md)
 - [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)

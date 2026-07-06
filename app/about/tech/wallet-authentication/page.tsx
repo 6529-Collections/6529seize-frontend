@@ -12,6 +12,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.css";
 import { AboutSection } from "@/types/enums";
+import clsx from "clsx";
 
 const WALLET_AUTH_LOCALE = DEFAULT_LOCALE;
 const WALLET_AUTH_TITLE = t(
@@ -30,7 +31,7 @@ export const metadata: Metadata = getAppMetadata({
 
 export default function WalletAuthenticationPage() {
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className={clsx(styles["main"], "tailwind-scope")}>
       <Container fluid className="tw-pt-4">
         <Row>
           <Col>
@@ -184,6 +185,33 @@ export default function WalletAuthenticationPage() {
                             )}
                           </li>
                         </ul>
+                      </section>
+
+                      <section aria-labelledby="api-builders-heading">
+                        <h2
+                          id="api-builders-heading"
+                          className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
+                        >
+                          {t(
+                            WALLET_AUTH_LOCALE,
+                            "about.tech.walletAuth.builders.title"
+                          )}
+                        </h2>
+                        <p className="tw-mb-3">
+                          {t(
+                            WALLET_AUTH_LOCALE,
+                            "about.tech.walletAuth.builders.body"
+                          )}
+                        </p>
+                        <Link
+                          href="/tools/api/authentication"
+                          className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline"
+                        >
+                          {t(
+                            WALLET_AUTH_LOCALE,
+                            "about.tech.walletAuth.builders.link"
+                          )}
+                        </Link>
                       </section>
                     </div>
                   </article>

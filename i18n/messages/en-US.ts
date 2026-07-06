@@ -733,6 +733,10 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "walletAuth.same.assets": "You do not need to move tokens or assets.",
   "walletAuth.same.desktop":
     "The 6529 Desktop app continues using the existing connection flow during this rollout.",
+  "walletAuth.builders.title": "Building with the API",
+  "walletAuth.builders.body":
+    "External clients should use the session-v2 API authentication guide instead of the user upgrade notes on this page.",
+  "walletAuth.builders.link": "Open API authentication guide",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -869,9 +873,17 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
-  "tools.api.authentication.title": "Authentication",
+  "tools.api.authCallout.title": "V2 API authentication",
+  "tools.api.authCallout.description":
+    "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
+  "tools.api.authCallout.link": "Read the full external-client auth guide",
+  "tools.api.authentication.title": "Authentication quickstart",
   "tools.api.authentication.basedOnSignatures":
-    "Authentication is based on Ethereum signatures.",
+    "Authentication is based on Ethereum signatures. For scripts and other external clients, request a native session-v2 challenge.",
+  "tools.api.authentication.externalNote":
+    "This example shows the short native/script flow for external API clients.",
+  "tools.api.authentication.fullGuideLink":
+    "Use the full guide for refresh, logout, and security notes.",
   "tools.api.authentication.flowIntro": "The flow works as follows:",
   "tools.api.authentication.requestSessionMessage":
     "Request a session-v2 signable message for the wallet you want to authenticate.",
@@ -883,6 +895,53 @@ export const EN_US_MESSAGES = {
     "Receive a JWT bearer token, which you can include in headers of subsequent requests.",
   "tools.api.authentication.nodeExample":
     "Here's a full example in Node.js using ethers and node-fetch:",
+  "tools.api.authGuide.metadata.title": "API Authentication",
+  "tools.api.authGuide.metadata.description":
+    "External-client session-v2 wallet authentication for the 6529 API.",
+  "tools.api.authGuide.backToApi": "Back to API",
+  "tools.api.authGuide.eyebrow": "API Authentication",
+  "tools.api.authGuide.title": "External Client Authentication",
+  "tools.api.authGuide.lead":
+    "Use session-v2 wallet authentication when building scripts, services, and other external clients against the 6529 API.",
+  "tools.api.authGuide.overview.title": "What to use",
+  "tools.api.authGuide.overview.preferred":
+    "New external clients should authenticate through session-v2 endpoints. The standard external-client mode is client_type=native, even when the client is a command-line script or backend service controlled by the wallet owner.",
+  "tools.api.authGuide.overview.legacy":
+    "The older nonce, login, and redeem-refresh-token endpoints remain compatibility endpoints for older clients. New integrations should not start on those legacy endpoints.",
+  "tools.api.authGuide.flow.title": "Login flow",
+  "tools.api.authGuide.flow.nonce":
+    "Request a signable message with signer_address, client_type=native, and chain_id=1 from",
+  "tools.api.authGuide.flow.sign":
+    "Sign the returned message exactly as returned in",
+  "tools.api.authGuide.flow.login":
+    "Send client_type, client_address, client_signature, server_signature, and optional role to",
+  "tools.api.authGuide.flow.bearer":
+    "Use the returned access token on protected API calls as",
+  "tools.api.authGuide.refresh.title": "Refresh and logout",
+  "tools.api.authGuide.refresh.login":
+    "Native/script login returns an access_token for bearer auth plus a native_refresh_token and refresh_token_expires_at for long-running clients.",
+  "tools.api.authGuide.refresh.rotate":
+    "Refresh through POST /api/auth/session-refresh with client_type=native, client_address, and the current native_refresh_token. A successful refresh rotates the native refresh token, so replace the stored token with the new one immediately.",
+  "tools.api.authGuide.refresh.logout":
+    "Logout through POST /api/auth/session-logout with client_type=native, client_address, the current native_refresh_token, and all_sessions=false unless you intend to revoke every session for that wallet.",
+  "tools.api.authGuide.browser.title": "Browser clients",
+  "tools.api.authGuide.browser.note":
+    "This guide is for external clients. First-party browser sessions also use session-v2, but browser refresh state is handled with backend-owned HttpOnly cookies, credentials-included requests, and origin checks. Follow the app implementation rather than adapting the native/script examples directly for browser sessions.",
+  "tools.api.authGuide.security.title": "Security rules",
+  "tools.api.authGuide.security.signable":
+    "Sign only signable_message exactly as returned. Do not trim, normalize, rebuild, JSON-stringify, or sign a nonce field.",
+  "tools.api.authGuide.security.secrets":
+    "Do not log private keys, access tokens, refresh tokens, signatures, or raw authentication responses. Store refresh tokens in a secret store appropriate for the client environment.",
+  "tools.api.authGuide.security.status":
+    "Check response status codes before trusting JSON payloads, and treat authentication errors as requiring a fresh wallet signature or a clean re-login.",
+  "tools.api.authGuide.examples.title": "Node.js examples",
+  "tools.api.authGuide.examples.login":
+    "This example requests a native session-v2 challenge, signs it, logs in, and calls a protected endpoint with bearer auth.",
+  "tools.api.authGuide.examples.refresh":
+    "This example refreshes and logs out a native/script session. Persist the rotated native_refresh_token after every successful refresh.",
+  "tools.api.authGuide.related.ariaLabel": "Related API authentication links",
+  "tools.api.authGuide.related.api": "API overview",
+  "tools.api.authGuide.related.reference": "Full API reference",
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted drop",
   "home.boostedDrop.boost": "Boost",
