@@ -18,7 +18,7 @@ import {
 } from "./journeyProgress";
 import type { TimelineProgress } from "./page.types";
 
-const JOIN_PROFILE_SUBSCRIPTIONS_QUERY_KEY = "PROFILE_SUBSCRIPTIONS";
+const JOIN_PROFILE_SUBSCRIPTIONS_QUERY_KEY = "JOIN_PROFILE_SUBSCRIPTIONS";
 
 export function useJoin6529Progress({
   connectedProfile,

@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 export default function JoinPageRedirect() {
-  redirect("/join-6529");
+  permanentRedirect("/join-6529");
 }

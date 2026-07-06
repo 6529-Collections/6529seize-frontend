@@ -66,3 +66,6 @@ The compact focus area links users to:
 ## Notes
 
 The route is available at `/join-6529`; `/join` redirects there for compatibility.
+
+Join 6529 copy is source-complete in `en-US`. Other supported locales currently
+fall back to `en-US` for this surface until full translations are added.

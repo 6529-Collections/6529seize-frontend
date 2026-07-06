@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 
 import {
+  OPTIONAL_TIMELINE_START_ID,
   TIMELINE_ITEM_SPECS,
   type JoinLinks,
   type TimelineItemSpec,
@@ -87,7 +88,7 @@ export function JourneyTimelineSection({
         />
         {TIMELINE_ITEM_SPECS.map((item, index) => (
           <Fragment key={item.id}>
-            {index === 3 && (
+            {item.id === OPTIONAL_TIMELINE_START_ID && (
               <TimelineGroupLabel
                 label={m(locale, "join6529.joining.optional")}
               />
@@ -131,6 +132,7 @@ function TimelineProgressStrip({
         </p>
       </div>
       <div
+        aria-label={m(locale, "join6529.progress.ariaLabel")}
         aria-valuemax={progress.total}
         aria-valuemin={0}
         aria-valuenow={progress.completed}
@@ -233,6 +235,7 @@ function TimelineRow({
         )}
       />
       <div
+        aria-hidden="true"
         className={cx(
           "tw-absolute tw-left-0 tw-top-0 tw-z-10 tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-[#030303] tw-text-sm tw-font-medium tw-transition md:tw-left-1/2 md:-tw-translate-x-1/2",
           getMarkerClass(item.id, status, showStatusBadge)

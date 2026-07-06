@@ -27,9 +27,13 @@ export const getJoinStatsPath = (
 export const getJoinSubscriptionProfileKey = (
   profile: ApiIdentity | null
 ): string | null => {
-  const consolidationKey = profile?.consolidation_key.trim();
-  if (consolidationKey !== undefined && consolidationKey.length > 0) {
-    return consolidationKey;
+  const consolidationKey = profile?.consolidation_key;
+  const trimmedConsolidationKey = consolidationKey?.trim();
+  if (
+    trimmedConsolidationKey !== undefined &&
+    trimmedConsolidationKey.length > 0
+  ) {
+    return trimmedConsolidationKey;
   }
 
   const wallets = profile?.wallets

@@ -22,7 +22,7 @@ export function FaqSection({ locale }: { readonly locale: SupportedLocale }) {
             className={cx(GLASS_PANEL_CLASS, "tw-group tw-cursor-pointer")}
             key={item.id}
           >
-            <summary className="tw-flex tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-px-6 tw-py-5 tw-text-base tw-font-medium tw-text-white/70 tw-transition-colors group-hover:tw-text-white [&::-webkit-details-marker]:tw-hidden">
+            <summary className="tw-flex tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-px-6 tw-py-5 tw-text-base tw-font-medium tw-text-white/70 tw-transition-colors group-hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 [&::-webkit-details-marker]:tw-hidden">
               <span>{m(locale, item.questionKey)}</span>
               <PlusIcon
                 aria-hidden="true"

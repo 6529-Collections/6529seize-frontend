@@ -58,6 +58,7 @@
   "join6529.focus.subscriptions.eyebrow": "Subscriptions",
   "join6529.focus.subscriptions.title": "Be ready for future Meme Card drops.",
   "join6529.focus.subscriptions.body": "A subscription is remote minting: you choose eligible Meme Cards, add non-refundable funds, and 6529 can mint those chosen cards for you during future drops.",
+  "join6529.focus.subscriptions.badge": "Remote minting",
   "join6529.focus.subscriptions.action": "Set up subscription",
   "join6529.focus.waves.eyebrow": "Waves",
   "join6529.focus.waves.title": "Where the network coordinates.",
@@ -78,5 +79,9 @@
   "join6529.faq.subscriptions.question": "How do subscriptions work, and are they refundable?",
   "join6529.faq.subscriptions.answer": "Subscriptions are remote minting for Meme Cards. Add a non-refundable balance, choose which eligible cards to mint, and skip drops you do not want.",
   "join6529.faq.artUse.question": "Can I use the art?",
-  "join6529.faq.artUse.answer": "Yes. The Memes are CC0, meaning public domain art anyone can use. Holding the cards is what earns TDH over time."
+  "join6529.faq.artUse.answer": "Yes. The Memes are CC0, meaning public domain art anyone can use. Holding the cards is what earns TDH over time.",
+  "join6529.visual.wave": "Wave",
+  "join6529.visual.memeFallback": "Meme",
+  "join6529.visual.memeCardAria": "{label} Meme Card #{number}",
+  "join6529.visual.memeCardFallbackAria": "{label} Meme Card"
 }

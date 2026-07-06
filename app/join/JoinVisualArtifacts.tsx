@@ -1,9 +1,11 @@
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import type { CSSProperties } from "react";
 
+import type { SupportedLocale } from "@/i18n/locales";
+
 import { MemeArtifactCard } from "./MemeArtifactCard";
 import type { MemeCard } from "./page.content";
-import { cx } from "./page.utils";
+import { cx, m } from "./page.utils";
 
 const artifactFloatStyle = (
   rotate: string
@@ -35,10 +37,25 @@ const getFanHoverClass = (index: number, total: number) =>
     ? "desktop-hover:group-hover/fan:tw-scale-105"
     : "desktop-hover:group-hover/fan:-tw-translate-y-4";
 
+export const getMemeCardAriaLabel = (
+  card: Pick<MemeCard, "label" | "number">,
+  locale: SupportedLocale
+) =>
+  card.number !== undefined
+    ? m(locale, "join6529.visual.memeCardAria", {
+        label: card.label,
+        number: card.number,
+      })
+    : m(locale, "join6529.visual.memeCardFallbackAria", {
+        label: card.label,
+      });
+
 export function AmbientArtifacts({
   className,
+  locale,
 }: {
   readonly className?: string;
+  readonly locale: SupportedLocale;
 }) {
   return (
     <div
@@ -52,7 +69,7 @@ export function AmbientArtifacts({
         className="tw-absolute -tw-left-12 tw-top-10 tw-w-48 tw-opacity-[0.16] motion-safe:tw-animate-hero-float"
         style={artifactFloatStyle("-8deg")}
       >
-        <WaveVisual />
+        <WaveVisual label={m(locale, "join6529.visual.wave")} />
       </div>
     </div>
   );
@@ -61,11 +78,14 @@ export function AmbientArtifacts({
 export function MemeFan({
   cards,
   compact = false,
+  locale,
 }: {
   readonly cards: readonly MemeCard[];
   readonly compact?: boolean;
+  readonly locale: SupportedLocale;
 }) {
   const sizeClasses = compact ? COMPACT_FAN_SIZE_CLASSES : FAN_SIZE_CLASSES;
+  const fallbackLabel = m(locale, "join6529.visual.memeFallback");
 
   return (
     <div
@@ -76,6 +96,7 @@ export function MemeFan({
     >
       {cards.map((card, index) => (
         <MemeArtifactCard
+          ariaLabel={getMemeCardAriaLabel(card, locale)}
           card={card}
           className={cx(
             "tw-shrink-0 tw-transform tw-transition-transform tw-duration-500 tw-ease-out desktop-hover:hover:tw-scale-105 motion-reduce:tw-transition-none",
@@ -87,6 +108,7 @@ export function MemeFan({
               "tw-translate-y-5",
             !compact && (index === 1 || index === 3) && "tw-translate-y-2"
           )}
+          fallbackLabel={fallbackLabel}
           imageAspectClass="tw-aspect-[3/4]"
           key={card.image}
         />
@@ -95,13 +117,13 @@ export function MemeFan({
   );
 }
 
-function WaveVisual() {
+function WaveVisual({ label }: { readonly label: string }) {
   return (
     <div className="tw-relative tw-w-44 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-[#121218]/90 tw-p-3 tw-shadow-[0_18px_45px_rgba(0,0,0,0.45)]">
       <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2 tw-text-primary-300/80">
         <ChatBubbleLeftRightIcon className="tw-h-3.5 tw-w-3.5" />
         <span className="tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-wide">
-          Wave
+          {label}
         </span>
       </div>
       <div className="tw-space-y-2">

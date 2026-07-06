@@ -37,7 +37,7 @@ export function FocusSections({
 
   return (
     <section className="tw-relative tw-isolate tw-mx-auto tw-w-full tw-max-w-7xl tw-overflow-hidden tw-px-6 tw-py-32">
-      <AmbientArtifacts className="tw-opacity-40" />
+      <AmbientArtifacts className="tw-opacity-40" locale={locale} />
       <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-auto-rows-fr md:tw-grid-cols-3">
         <FeatureCard
           className="md:tw-col-span-2"
@@ -46,7 +46,7 @@ export function FocusSections({
           locale={locale}
           size="large"
         >
-          <SubscriptionAccent />
+          <SubscriptionAccent locale={locale} />
         </FeatureCard>
         <FeatureCard feature={waves} links={links} locale={locale}>
           <WavesAccent />
@@ -58,7 +58,7 @@ export function FocusSections({
           locale={locale}
           size="wide"
         >
-          <NftCardFan />
+          <NftCardFan locale={locale} />
         </FeatureCard>
       </div>
     </section>
@@ -121,7 +121,7 @@ function FeatureCard({
   );
 }
 
-function SubscriptionAccent() {
+function SubscriptionAccent({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <>
       <div className="tw-pointer-events-none tw-absolute -tw-bottom-20 -tw-right-40 tw-transform tw-opacity-[0.08] tw-transition-opacity tw-duration-700 tw-ease-out desktop-hover:group-hover:tw-opacity-[0.18] motion-reduce:tw-transition-none">
@@ -132,7 +132,7 @@ function SubscriptionAccent() {
       </div>
       <div className="tw-relative tw-z-10 tw-mt-6 tw-flex tw-flex-wrap tw-gap-3">
         <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-px-3 tw-py-1 tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-widest tw-text-white/60">
-          Remote minting
+          {m(locale, "join6529.focus.subscriptions.badge")}
         </span>
       </div>
     </>
@@ -148,15 +148,15 @@ function WavesAccent() {
   );
 }
 
-function NftCardFan() {
+function NftCardFan({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <div className="tw-group/fan tw-[perspective:1000px] tw-relative tw-z-10 tw-flex tw-h-[300px] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden md:tw-w-1/2">
       <div className="tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_50%_40%,rgba(132,173,255,0.18),transparent_60%)]" />
       <div className="tw-relative tw-z-10 sm:tw-hidden">
-        <MemeFan cards={MEME_CARDS.slice(0, 5)} compact />
+        <MemeFan cards={MEME_CARDS.slice(0, 5)} compact locale={locale} />
       </div>
       <div className="tw-relative tw-z-10 tw-hidden sm:tw-block">
-        <MemeFan cards={MEME_CARDS.slice(0, 5)} />
+        <MemeFan cards={MEME_CARDS.slice(0, 5)} locale={locale} />
       </div>
     </div>
   );

@@ -57,15 +57,6 @@ const MEME_CARD_IMAGE_BASE =
 const memeCardImage = (number: number, extension: "GIF" | "PNG" | "WEBP") =>
   `${MEME_CARD_IMAGE_BASE}/${number}.${extension}`;
 
-export const TIMELINE_ORDER: readonly TimelineStepId[] = [
-  "wallet",
-  "profile",
-  "waves",
-  "message",
-  "collect",
-  "subscribe",
-];
-
 export const TIMELINE_ITEM_SPECS: readonly TimelineItemSpec[] = [
   {
     id: "wallet",
@@ -106,6 +97,10 @@ export const TIMELINE_ITEM_SPECS: readonly TimelineItemSpec[] = [
     href: ({ subscriptionsHref }) => subscriptionsHref,
   },
 ];
+
+export const OPTIONAL_TIMELINE_START_ID: TimelineStepId = "message";
+export const TIMELINE_ORDER: readonly TimelineStepId[] =
+  TIMELINE_ITEM_SPECS.map((item) => item.id);
 
 export const FOCUS_FEATURE_SPECS: readonly FocusFeatureSpec[] = [
   {

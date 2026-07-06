@@ -1,23 +1,31 @@
+import Image from "next/image";
+
 import type { MemeCard } from "./page.content";
 import { cx } from "./page.utils";
 
 export function MemeArtifactCard({
+  ariaLabel,
   card,
   className,
+  fallbackLabel,
   heroMuted = false,
   imageAspectClass = "tw-aspect-[3/4]",
 }: {
+  readonly ariaLabel: string;
   readonly card: Pick<MemeCard, "image" | "label" | "imageClass" | "number">;
   readonly className?: string;
+  readonly fallbackLabel: string;
   readonly heroMuted?: boolean;
   readonly imageAspectClass?: string;
 }) {
   return (
     <div
+      aria-label={ariaLabel}
       className={cx(
         "tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-[#08080a] tw-p-1.5 tw-shadow-[0_18px_45px_rgba(0,0,0,0.62),0_0_30px_rgba(255,255,255,0.05)] tw-ring-1 tw-ring-white/[0.03]",
         className
       )}
+      role="img"
     >
       <div
         className={cx(
@@ -25,13 +33,19 @@ export function MemeArtifactCard({
           imageAspectClass
         )}
       >
-        <div
+        <Image
+          alt=""
           className={cx(
-            "tw-h-full tw-w-full tw-bg-cover tw-bg-center",
+            "tw-h-full tw-w-full tw-object-cover",
             heroMuted && "tw-opacity-90 tw-contrast-[1.05] tw-saturate-[0.95]",
             card.imageClass
           )}
-          style={{ backgroundImage: `url('${card.image}')` }}
+          decoding="async"
+          fill
+          loading="lazy"
+          sizes="(max-width: 640px) 120px, 220px"
+          src={card.image}
+          unoptimized
         />
         {heroMuted && (
           <>
@@ -45,7 +59,7 @@ export function MemeArtifactCard({
           {card.label}
         </span>
         <span className="tw-shrink-0 tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300/70">
-          {card.number !== undefined ? `#${card.number}` : "Meme"}
+          {card.number !== undefined ? `#${card.number}` : fallbackLabel}
         </span>
       </div>
     </div>

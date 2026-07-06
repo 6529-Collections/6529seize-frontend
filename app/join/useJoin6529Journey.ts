@@ -55,13 +55,17 @@ const getProfileQueryIdentity = (profile: ApiIdentity | null): string | null =>
 const getProfileStorageKey = (
   profile: ApiIdentity | null,
   address: string | undefined
-): string | null =>
-  profile?.id ??
-  profile?.normalised_handle ??
-  profile?.handle ??
-  profile?.primary_wallet.toLowerCase() ??
-  address?.toLowerCase() ??
-  null;
+): string | null => {
+  const primaryWallet = profile?.primary_wallet;
+  return (
+    profile?.id ??
+    profile?.normalised_handle ??
+    profile?.handle ??
+    primaryWallet?.toLowerCase() ??
+    address?.toLowerCase() ??
+    null
+  );
+};
 
 const readWavesEntry = (storageKey: string | null): boolean =>
   storageKey !== null && safeLocalStorage.getItem(storageKey) === "1";
@@ -119,7 +123,7 @@ export function useJoin6529Journey(locale: SupportedLocale) {
     hasEnteredWaves,
     hasFirstPublicMessage,
     hasProfile,
-    isProfileStateReady: !fetchingProfile || !hasValidWalletAuth,
+    isProfileStateReady: hasValidWalletAuth && !fetchingProfile,
   });
 
   const handleConnectWallet = useCallback(() => {

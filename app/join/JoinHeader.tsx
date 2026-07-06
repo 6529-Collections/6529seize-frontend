@@ -7,6 +7,7 @@ import { MemeArtifactCard } from "./MemeArtifactCard";
 import { HERO_MEME_CARDS } from "./page.content";
 import type { CurrentPanelAction, CurrentPanelContent } from "./page.types";
 import { cx, m } from "./page.utils";
+import { getMemeCardAriaLabel } from "./JoinVisualArtifacts";
 
 const heroFloatStyle = (
   rotate: string,
@@ -122,7 +123,7 @@ export function JoinHeader({
       onPointerMove={handleHeroPointerMove}
       style={HERO_MAGNETIC_REST_STYLE}
     >
-      <HeroFloatPanels />
+      <HeroFloatPanels locale={locale} />
       <div
         aria-hidden="true"
         className="tw-pointer-events-none tw-absolute tw-inset-x-8 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/10 tw-to-transparent"
@@ -155,9 +156,10 @@ export function JoinHeader({
   );
 }
 
-function HeroFloatPanels() {
+function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
   const magneticClass =
     "tw-transform-gpu tw-transition-transform tw-duration-200 tw-ease-out motion-reduce:tw-translate-x-0 motion-reduce:tw-translate-y-0 motion-reduce:tw-transition-none";
+  const fallbackLabel = m(locale, "join6529.visual.memeFallback");
 
   return (
     <div
@@ -174,7 +176,12 @@ function HeroFloatPanels() {
             "tw-translate-x-[var(--hero-magnetic-top-x)] tw-translate-y-[var(--hero-magnetic-top-y)]"
           )}
         >
-          <MemeArtifactCard card={HERO_MEME_CARDS.topLeft} heroMuted />
+          <MemeArtifactCard
+            ariaLabel={getMemeCardAriaLabel(HERO_MEME_CARDS.topLeft, locale)}
+            card={HERO_MEME_CARDS.topLeft}
+            fallbackLabel={fallbackLabel}
+            heroMuted
+          />
         </div>
       </div>
       <div
@@ -187,7 +194,12 @@ function HeroFloatPanels() {
             "tw-translate-x-[var(--hero-magnetic-left-x)] tw-translate-y-[var(--hero-magnetic-left-y)]"
           )}
         >
-          <MemeArtifactCard card={HERO_MEME_CARDS.left} heroMuted />
+          <MemeArtifactCard
+            ariaLabel={getMemeCardAriaLabel(HERO_MEME_CARDS.left, locale)}
+            card={HERO_MEME_CARDS.left}
+            fallbackLabel={fallbackLabel}
+            heroMuted
+          />
         </div>
       </div>
       <div
@@ -201,7 +213,9 @@ function HeroFloatPanels() {
           )}
         >
           <MemeArtifactCard
+            ariaLabel={getMemeCardAriaLabel(HERO_MEME_CARDS.right, locale)}
             card={HERO_MEME_CARDS.right}
+            fallbackLabel={fallbackLabel}
             heroMuted
             imageAspectClass="tw-aspect-[4/3]"
           />
