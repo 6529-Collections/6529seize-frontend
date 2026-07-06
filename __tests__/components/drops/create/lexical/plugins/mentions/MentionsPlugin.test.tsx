@@ -86,6 +86,32 @@ describe("MentionsPlugin", () => {
     expect(close).toHaveBeenCalled();
   });
 
+  it("renders the menu wrapper on the raised typeahead layer", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
+    });
+
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    const portal = capturedProps.menuRenderFn(
+      { current: document.createElement("div") },
+      {
+        selectedIndex: null,
+        selectOptionAndCleanUp: jest.fn(),
+        setHighlightedIndex: jest.fn(),
+      }
+    ) as React.ReactPortal | null;
+    const wrapper = portal?.children;
+
+    expect(React.isValidElement<{ className: string }>(wrapper)).toBe(true);
+    if (!React.isValidElement<{ className: string }>(wrapper)) {
+      throw new Error("Expected mention typeahead menu wrapper element");
+    }
+    expect(wrapper.props.className).toContain("tw-z-[1020]");
+  });
+
   it("adds @all option for admins and emits group mention", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
       identities: [],
