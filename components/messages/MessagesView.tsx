@@ -57,11 +57,9 @@ const MessagesView: React.FC = () => {
   }
 
   return (
-    <>
-      <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
-        {content}
-      </BrainContent>
-    </>
+    <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
+      {content}
+    </BrainContent>
   );
 };
 
