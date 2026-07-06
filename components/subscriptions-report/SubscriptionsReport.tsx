@@ -37,6 +37,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
+// The link's pseudo-element stretches across the positioned table row,
+// preserving row semantics while making the whole row a native link target.
+const TABLE_ROW_LINK_CLASS_NAME =
+  "tw-static tw-block tw-min-w-0 tw-text-white tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[1] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-300";
+const TABLE_ROW_LINK_TEXT_CLASS_NAME = "tw-relative tw-z-[2]";
 
 function isRedeemedDropFromToday(drop: RedeemedSubscriptionCounts): boolean {
   return (
@@ -389,10 +394,7 @@ export default function SubscriptionsReportComponent() {
                 </tr>
               </thead>
               <tbody>
-                <SubscriptionsReportRow
-                  tokenId={activeDrop.token_id}
-                  className="tw-bg-iron-800 hover:tw-bg-iron-700"
-                >
+                <SubscriptionsReportRow className="tw-bg-iron-800 hover:tw-bg-iron-700">
                   <ActiveSubscriptionDetails
                     count={activeDrop}
                     subscribedCount={activeSubscribedCount}
@@ -442,7 +444,6 @@ export default function SubscriptionsReportComponent() {
                       return (
                         <SubscriptionsReportRow
                           key={count.token_id}
-                          tokenId={count.token_id}
                           ref={
                             index === animateFromIndex ? firstNewRowRef : null
                           }
@@ -529,7 +530,6 @@ export default function SubscriptionsReportComponent() {
                 {redeemedCounts.map((count, index) => (
                   <SubscriptionsReportRow
                     key={count.token_id}
-                    tokenId={count.token_id}
                     className={
                       index % 2 === 0
                         ? "tw-bg-iron-800 hover:tw-bg-iron-700"
@@ -679,10 +679,12 @@ function MemeCardDetails(
         <div className="tw-flex tw-flex-col">
           <Link
             href={`/the-memes/${props.count.token_id}`}
-            className="decoration-hover-underline tw-text-white"
+            className={TABLE_ROW_LINK_CLASS_NAME}
             aria-label={`View The Memes card #${props.count.token_id} - ${props.count.name}`}
           >
-            #{props.count.token_id} - {props.count.name}
+            <span className={TABLE_ROW_LINK_TEXT_CLASS_NAME}>
+              #{props.count.token_id} - {props.count.name}
+            </span>
           </Link>
           <span className="tw-text-sm tw-text-gray-400">
             SZN {props.count.szn}
@@ -741,10 +743,12 @@ function SubscriptionDayDetails(
         <div className="tw-flex tw-flex-col">
           <Link
             href={`/the-memes/${props.count.token_id}`}
-            className="decoration-hover-underline tw-text-white"
+            className={TABLE_ROW_LINK_CLASS_NAME}
             aria-label={`View The Memes card #${props.count.token_id}`}
           >
-            The Memes #{props.count.token_id}
+            <span className={TABLE_ROW_LINK_TEXT_CLASS_NAME}>
+              The Memes #{props.count.token_id}
+            </span>
           </Link>
           <span className="tw-text-sm tw-text-gray-400">
             SZN {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
