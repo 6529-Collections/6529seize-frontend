@@ -125,7 +125,9 @@ describe("Playwright read-only mutation guard", () => {
   it("allows first-party read-only alchemy proxy POST lookups", () => {
     for (const url of [
       "https://api.6529.io/alchemy-proxy/contracts",
+      "https://api.6529.io/alchemy-proxy/token-metadata",
       "https://api.staging.6529.io/alchemy-proxy/contracts",
+      "https://api.staging.6529.io/alchemy-proxy/token-metadata",
     ]) {
       expect(
         decideReadonlyRequest({
@@ -171,6 +173,7 @@ describe("Playwright read-only mutation guard", () => {
       "https://6529.io/api/open-graph",
       "https://6529.io/api/twitter/preview",
       "https://6529.io/api/alchemy/contracts",
+      "https://6529.io/api/alchemy/token-metadata",
     ]) {
       expect(
         decideReadonlyRequest({

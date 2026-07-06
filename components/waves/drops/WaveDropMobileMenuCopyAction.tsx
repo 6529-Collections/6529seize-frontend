@@ -1,9 +1,10 @@
 "use client";
 
+import type { DropClipboardCopyStatus } from "@/hooks/drops/useDropClipboardCopyFeedback";
+import { useDropClipboardCopyFeedback } from "@/hooks/drops/useDropClipboardCopyFeedback";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { MessageKey } from "@/i18n/messages";
 import { t } from "@/i18n/messages";
-import { useEffect, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 
 interface WaveDropMobileMenuCopyActionProps {
@@ -14,9 +15,7 @@ interface WaveDropMobileMenuCopyActionProps {
   readonly onCopy: () => void;
 }
 
-type CopyStatus = "idle" | "copied" | "failed";
-
-const STATUS_LABEL_CLASSES: Record<CopyStatus, string> = {
+const STATUS_LABEL_CLASSES: Record<DropClipboardCopyStatus, string> = {
   idle: "tw-text-iron-300",
   copied: "tw-text-primary-400",
   failed: "tw-text-red",
@@ -29,78 +28,21 @@ export default function WaveDropMobileMenuCopyAction({
   getText,
   onCopy,
 }: WaveDropMobileMenuCopyActionProps) {
-  const [status, setStatus] = useState<CopyStatus>("idle");
-  const statusResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
-  const isMountedRef = useRef(true);
   const locale = useBrowserLocale();
+  const { status, statusMessage, copyToClipboard } =
+    useDropClipboardCopyFeedback();
 
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-      if (statusResetTimeoutRef.current !== null) {
-        globalThis.clearTimeout(statusResetTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const showTransientStatus = (nextStatus: CopyStatus) => {
-    setStatus(nextStatus);
-    if (statusResetTimeoutRef.current !== null) {
-      globalThis.clearTimeout(statusResetTimeoutRef.current);
-    }
-    statusResetTimeoutRef.current = globalThis.setTimeout(() => {
-      if (isMountedRef.current) {
-        setStatus("idle");
-        statusResetTimeoutRef.current = null;
-      }
-    }, 2000);
-  };
-
-  const copyToClipboard = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleCopyClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
 
     if (disabled) {
       return;
     }
 
-    const clipboard = globalThis.navigator?.clipboard as
-      | { writeText?: (text: string) => Promise<void> }
-      | undefined;
-
-    if (typeof clipboard?.writeText !== "function") {
-      // Keep the menu open so the user sees the failure instead of a
-      // silent close that looks like success.
-      showTransientStatus("failed");
-      return;
-    }
-
-    void clipboard
-      .writeText(getText())
-      .then(() => {
-        if (!isMountedRef.current) {
-          return;
-        }
-
-        showTransientStatus("copied");
-        onCopy();
-      })
-      .catch(() => {
-        if (isMountedRef.current) {
-          showTransientStatus("failed");
-        }
-      });
+    // On failure the action sheet stays open (onCopy is not invoked) so the
+    // user sees the failure instead of a silent close that looks like success.
+    copyToClipboard(getText, onCopy);
   };
-
-  let statusMessage = "";
-  if (status === "copied") {
-    statusMessage = t(locale, "waves.drop.actions.copied");
-  } else if (status === "failed") {
-    statusMessage = t(locale, "waves.drop.actions.copyFailed");
-  }
 
   return (
     <button
@@ -108,7 +50,7 @@ export default function WaveDropMobileMenuCopyAction({
       className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
         disabled ? "tw-cursor-default tw-opacity-50" : "active:tw-bg-iron-800"
       } tw-transition-colors tw-duration-200`}
-      onClick={copyToClipboard}
+      onClick={handleCopyClick}
       disabled={disabled}
     >
       {icon}
