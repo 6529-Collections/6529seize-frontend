@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "./SubscriptionsReport.module.css";
+import SubscriptionsReportRow from "./SubscriptionsReportRow";
 import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptionsProfileButton";
 import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
@@ -27,27 +28,15 @@ import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import useDownloader from "@/hooks/useDownloader";
 import {
   ArrowDownTrayIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import {
-  forwardRef,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
-const INTERACTIVE_ROW_TARGET_SELECTOR =
-  "a,button,input,select,textarea,[role='button'],[role='link']";
 
 function isRedeemedDropFromToday(drop: RedeemedSubscriptionCounts): boolean {
   return (
@@ -80,18 +69,6 @@ function withoutTokenId<T extends { token_id: number }>(
 
 function formatSubscriptionCount(count: number): string {
   return count > 0 ? count.toLocaleString() : "0";
-}
-
-function isInteractiveRowTarget(
-  target: EventTarget | null,
-  row: HTMLTableRowElement
-): boolean {
-  if (!(target instanceof Element)) {
-    return false;
-  }
-
-  const interactiveTarget = target.closest(INTERACTIVE_ROW_TARGET_SELECTOR);
-  return interactiveTarget !== null && interactiveTarget !== row;
 }
 
 function getDisplayedRedeemedTotal(
@@ -412,7 +389,7 @@ export default function SubscriptionsReportComponent() {
                 </tr>
               </thead>
               <tbody>
-                <SubscriptionReportRow
+                <SubscriptionsReportRow
                   tokenId={activeDrop.token_id}
                   label={`Open The Memes card #${activeDrop.token_id} - ${activeDrop.name}`}
                   className="tw-bg-iron-800 hover:tw-bg-iron-700"
@@ -421,7 +398,7 @@ export default function SubscriptionsReportComponent() {
                     count={activeDrop}
                     subscribedCount={activeSubscribedCount}
                   />
-                </SubscriptionReportRow>
+                </SubscriptionsReportRow>
               </tbody>
             </table>
           </div>
@@ -464,7 +441,7 @@ export default function SubscriptionsReportComponent() {
                       const isNew =
                         animateFromIndex !== null && index >= animateFromIndex;
                       return (
-                        <SubscriptionReportRow
+                        <SubscriptionsReportRow
                           key={count.token_id}
                           tokenId={count.token_id}
                           label={`Open The Memes card #${count.token_id}`}
@@ -482,7 +459,7 @@ export default function SubscriptionsReportComponent() {
                             date={rows[index]!}
                             count={count}
                           />
-                        </SubscriptionReportRow>
+                        </SubscriptionsReportRow>
                       );
                     })}
                 </tbody>
@@ -552,7 +529,7 @@ export default function SubscriptionsReportComponent() {
               </thead>
               <tbody>
                 {redeemedCounts.map((count, index) => (
-                  <SubscriptionReportRow
+                  <SubscriptionsReportRow
                     key={count.token_id}
                     tokenId={count.token_id}
                     label={`Open The Memes card #${count.token_id} - ${count.name}`}
@@ -563,7 +540,7 @@ export default function SubscriptionsReportComponent() {
                     }
                   >
                     <RedeemedSubscriptionDetails count={count} />
-                  </SubscriptionReportRow>
+                  </SubscriptionsReportRow>
                 ))}
               </tbody>
             </table>
@@ -732,56 +709,6 @@ function SubscriptionCountCell(
     </td>
   );
 }
-
-const SubscriptionReportRow = forwardRef<
-  HTMLTableRowElement,
-  Readonly<{
-    children: ReactNode;
-    className: string;
-    label: string;
-    tokenId: number;
-  }>
->(function SubscriptionReportRow({ children, className, label, tokenId }, ref) {
-  const router = useRouter();
-  const href = `/the-memes/${tokenId}`;
-  const openCard = () => {
-    router.push(href);
-  };
-
-  const onClick = (event: MouseEvent<HTMLTableRowElement>) => {
-    if (isInteractiveRowTarget(event.target, event.currentTarget)) {
-      return;
-    }
-    openCard();
-  };
-
-  const onKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
-    if (
-      event.defaultPrevented ||
-      isInteractiveRowTarget(event.target, event.currentTarget) ||
-      (event.key !== "Enter" && event.key !== " ")
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-    openCard();
-  };
-
-  return (
-    <tr
-      ref={ref}
-      role="link"
-      tabIndex={0}
-      aria-label={label}
-      onClick={onClick}
-      onKeyDown={onKeyDown}
-      className={`${className} tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300`}
-    >
-      {children}
-    </tr>
-  );
-});
 
 function ActiveSubscriptionDetails(
   props: Readonly<{
