@@ -936,7 +936,7 @@ export const EN_US_MESSAGES = {
     "Check response status codes before trusting JSON payloads, and treat authentication errors as requiring a fresh wallet signature or a clean re-login.",
   "tools.api.authGuide.examples.title": "Node.js examples",
   "tools.api.authGuide.examples.login":
-    "This example requests a native session-v2 challenge, signs it, logs in, and calls a protected endpoint with bearer auth.",
+    "This example requests a native session-v2 challenge, signs it, calls a protected endpoint with bearer auth, refreshes the session, and logs out.",
   "tools.api.authGuide.examples.refresh":
     "This example refreshes and logs out a native/script session. Persist the rotated native_refresh_token after every successful refresh.",
   "tools.api.authGuide.related.ariaLabel": "Related API authentication links",

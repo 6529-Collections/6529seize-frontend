@@ -56,11 +56,10 @@
   - refresh and logout
   - browser-client caveat
   - security rules
-  - Node.js login, refresh, and logout examples
+  - Node.js login, refresh, and logout example
   - related links
-- It includes two copyable Node.js snippets:
-  - login and bearer-token usage
-  - native/script refresh and logout
+- It includes one copyable Node.js session snippet covering login,
+  bearer-token usage, refresh, and logout.
 
 ## External Client Login Flow
 

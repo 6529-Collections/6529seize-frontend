@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
+  ABOUT_TEXT_PAGE_CONTAINER_CLASS,
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
@@ -18,13 +19,11 @@ const API_REFERENCE_URL = "https://api.6529.io/docs/";
 
 const inlineCodeClass =
   "tw-rounded tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-sm tw-text-iron-100";
-const pageContainerClass =
-  "tw-px-5 tw-pb-4 tw-pt-4 tw-text-white sm:tw-px-6 lg:tw-px-8";
-const sectionClass = "tw-max-w-4xl tw-text-base tw-leading-7 tw-text-white";
+const sectionClass = "tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-50";
 const exampleSectionClass =
-  "tw-max-w-5xl tw-text-base tw-leading-7 tw-text-white";
+  "tw-max-w-5xl tw-text-base tw-leading-7 tw-text-iron-50";
 const sectionHeadingClass =
-  "tw-mb-3 tw-text-2xl tw-font-semibold tw-text-white";
+  "tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50";
 
 type ApiAuthSectionProps = Readonly<{
   children: ReactNode;
@@ -72,16 +71,14 @@ function AuthFlowStep({
   );
 }
 
-const nodeJsLoginExample = `import { Wallet } from "ethers";
+const nodeJsSessionExample = `import { Wallet } from "ethers";
 import fetch from "node-fetch";
 
 const API_BASE = "https://api.6529.io/api";
 
 async function assertOk(response, label) {
   if (!response.ok) {
-    throw new Error(
-      \`\${label} failed: \${response.status} \${response.statusText} - \${await response.text()}\`
-    );
+    throw new Error(\`\${label} failed with HTTP \${response.status}\`);
   }
 }
 
@@ -128,18 +125,6 @@ export async function loginAndFetchFeed() {
     session,
     feed: await feedResp.json(),
   };
-}`;
-
-const nodeJsRefreshExample = `import fetch from "node-fetch";
-
-const API_BASE = "https://api.6529.io/api";
-
-async function assertOk(response, label) {
-  if (!response.ok) {
-    throw new Error(
-      \`\${label} failed: \${response.status} \${response.statusText} - \${await response.text()}\`
-    );
-  }
 }
 
 export async function refreshNativeSession({ address, nativeRefreshToken }) {
@@ -183,7 +168,7 @@ export async function logoutNativeSession({ address, nativeRefreshToken }) {
 export default function ApiAuthenticationPage() {
   return (
     <main className={clsx(styles["main"], "tailwind-scope")}>
-      <Container className={pageContainerClass}>
+      <Container className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
             <Link
@@ -193,13 +178,13 @@ export default function ApiAuthenticationPage() {
               {t(API_AUTH_LOCALE, "tools.api.authGuide.backToApi")}
             </Link>
             <header className="tw-max-w-4xl">
-              <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-white">
+              <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
                 {t(API_AUTH_LOCALE, "tools.api.authGuide.eyebrow")}
               </p>
-              <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white md:tw-text-4xl">
+              <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
                 {t(API_AUTH_LOCALE, "tools.api.authGuide.title")}
               </h1>
-              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-white">
+              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-50">
                 {t(API_AUTH_LOCALE, "tools.api.authGuide.lead")}
               </p>
             </header>
@@ -291,11 +276,7 @@ export default function ApiAuthenticationPage() {
           <p className="tw-mb-3">
             {t(API_AUTH_LOCALE, "tools.api.authGuide.examples.login")}
           </p>
-          <CodeExample code={nodeJsLoginExample} />
-          <p className="tw-mb-3 tw-mt-6">
-            {t(API_AUTH_LOCALE, "tools.api.authGuide.examples.refresh")}
-          </p>
-          <CodeExample code={nodeJsRefreshExample} />
+          <CodeExample code={nodeJsSessionExample} />
         </ApiAuthSection>
 
         <Row className="tw-pt-6">

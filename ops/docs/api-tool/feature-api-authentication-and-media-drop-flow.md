@@ -32,8 +32,7 @@
 2. Review the introduction and terminology to confirm the page covers the
    intended auth or media-upload task.
 3. Open the full API authentication guide if you need more than the quickstart.
-4. Read the wallet-signature authentication example and copy the snippet when
-   snippet when needed.
+4. Review the wallet-signature authentication quickstart when needed.
 5. Read the multipart media-upload and drop-creation example and copy the
    snippet when needed.
 6. Use the current contract highlights to spot recent payload/schema additions.
@@ -45,10 +44,8 @@
 - The page is static content. It does not execute API calls.
 - It has a v2 auth callout plus sections for `Introduction`, `Key terminology`,
   `Authentication quickstart`, and `Creating drops with embedded media`.
-- It includes two Node.js snippets:
-  - native/script session-v2 auth and bearer-token usage
-  - multipart upload and drop creation
-- Each snippet has a `Copy` button with temporary `Copied!` feedback.
+- It includes a Node.js multipart upload and drop creation snippet.
+- The snippet has a `Copy` button with temporary `Copied!` feedback.
 - The introduction includes an inline note that some routes are still
   undocumented.
 
@@ -140,7 +137,7 @@ The fuller guide lives at `/tools/api/authentication`.
 
 - Open the API authentication guide before building or maintaining an external
   wallet-signature login flow.
-- Review the quickstart snippet when you only need the basic bearer-token flow.
+- Review the quickstart flow when you only need the basic bearer-token steps.
 - Copy the multipart example while wiring media upload and drop creation in a
   Node.js script.
 - Check the current contract highlights when generated clients or API payloads

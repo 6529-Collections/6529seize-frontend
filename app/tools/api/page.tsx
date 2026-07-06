@@ -7,6 +7,7 @@ import clsx from "clsx";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  ABOUT_TEXT_PAGE_CONTAINER_CLASS,
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
@@ -14,65 +15,6 @@ import {
 
 const API_PAGE_LOCALE = DEFAULT_LOCALE;
 const API_AUTHENTICATION_PATH = "/tools/api/authentication";
-const pageContainerClass =
-  "tw-px-5 tw-pb-4 tw-pt-4 tw-text-white sm:tw-px-6 lg:tw-px-8";
-
-const nodeJsAuthExample = `import { Wallet } from 'ethers';
-import fetch from 'node-fetch';
-
-export async function loginAndFetchFeed() {
-  const clientAddress = '0x...';
-  const clientPrivateKey = '0x...'; // ⚠️ Do not hardcode private keys in production!
-
-  // Rebuild wallet from private key
-  const wallet = new Wallet(clientPrivateKey);
-
-  // 1. Get the native/script session-v2 signable message from the server
-  const nonceResp = await fetch(
-    \`https://api.6529.io/api/auth/session-nonce?signer_address=\${clientAddress}&client_type=native&chain_id=1\`,
-    {
-      headers: { accept: 'application/json' },
-      method: 'GET'
-    }
-  );
-
-  const { signable_message, server_signature } = await nonceResp.json();
-
-  // 2. Sign signable_message exactly as returned
-  const clientSignature = await wallet.signMessage(signable_message);
-
-  // 3. Send the signed message back to the session-v2 login endpoint
-  const loginResp = await fetch(
-    'https://api.6529.io/api/auth/session-login',
-    {
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json'
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        client_type: 'native',
-        client_address: clientAddress,
-        client_signature: clientSignature,
-        server_signature
-      })
-    }
-  );
-
-  const { access_token } = await loginResp.json();
-
-  // 4. Fetch feed with the received authorization token
-  const feedResp = await fetch('https://api.6529.io/api/feed', {
-    headers: {
-      accept: 'application/json',
-      authorization: \`Bearer \${access_token}\`
-    },
-    method: 'GET'
-  });
-
-  const feed = await feedResp.json();
-  console.log('Feed:', feed);
-}`;
 
 const nodeJsMediaDropExample = `import fetch from "node-fetch";
 import {readFile} from "fs/promises";
@@ -251,7 +193,7 @@ run().catch((err) => {
 export default function AboutApi() {
   return (
     <main className={clsx(styles["main"], "tailwind-scope")}>
-      <Container className={pageContainerClass}>
+      <Container className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
             <h1>6529.io API</h1>
@@ -419,9 +361,6 @@ export default function AboutApi() {
                 {t(API_PAGE_LOCALE, "tools.api.authentication.receiveToken")}
               </li>
             </ol>
-            <p>{t(API_PAGE_LOCALE, "tools.api.authentication.nodeExample")}</p>
-
-            <CodeExample code={nodeJsAuthExample} />
           </Col>
         </Row>
         <Row className="tw-pt-2">
