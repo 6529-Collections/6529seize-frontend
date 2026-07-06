@@ -174,6 +174,15 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
+  "validation.errorTitle": "That category name won't work",
+  "validation.tooLong":
+    "It's {length} characters long — the maximum is {max}.",
+  "validation.leadingDash": "A category can't start with a dash.",
+  "validation.disallowedChars":
+    "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+  "validation.aiFilterDetails":
+    "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
+  "validation.closeErrorLabel": "Dismiss error",
   "suggested.loading": "Loading active REP categories",
   "suggested.error": "Could not load active REP categories.",
   "suggested.empty": "No active REP categories found yet.",

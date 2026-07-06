@@ -28,6 +28,7 @@ import {
   HELP_BOT_CREDIT_REP_CATEGORY,
   isHelpBotCreditRepCategory,
 } from "@/components/utils/input/rep-category/repCategoryConstants";
+import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -147,6 +148,14 @@ export default function UserPageRepNewRepSearch({
       return;
     if (isHelpBotCreditRepCategory(rep)) {
       showHelpBotCreditRepCategoryError();
+      return;
+    }
+    // Mirror the server's category rules locally so the user sees the exact
+    // broken rule, localized and instantly, instead of a server error blob.
+    const violation = getRepCategoryViolation(rep);
+    if (violation) {
+      setErrorMsg(t(locale, violation.key, { ...violation.params }));
+      setShowErrorDetails(false);
       return;
     }
     if (checkingAvailability) return;
