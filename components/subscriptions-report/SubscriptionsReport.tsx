@@ -37,12 +37,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
-// The link's pseudo-element stretches from the positioned first table cell,
-// preserving row semantics while making the whole row a native link target.
-const TABLE_ROW_LINK_CLASS_NAME =
-  "tw-static tw-block tw-min-w-0 tw-text-white tw-no-underline before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-z-[1] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-300";
+const ACTIVE_MEME_CARD_COLUMN_WIDTH_CLASS_NAME = "tw-w-1/2";
+const ACTIVE_COUNT_COLUMN_WIDTH_CLASS_NAME = "tw-w-1/4";
+const STANDARD_MEME_CARD_COLUMN_WIDTH_CLASS_NAME = "tw-w-3/4";
+const STANDARD_COUNT_COLUMN_WIDTH_CLASS_NAME = "tw-w-1/4";
 const ACTIVE_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME = "before:tw-w-[200%]";
 const STANDARD_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME = "before:tw-w-[133.333333%]";
+// The link's pseudo-element stretches from the positioned first table cell,
+// preserving row semantics while making the whole row a native link target.
+// Keep overlay widths in sync with the first-column width constants above.
+const TABLE_ROW_LINK_CLASS_NAME =
+  "tw-static tw-block tw-min-w-0 tw-text-white tw-no-underline before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-z-[1] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-300";
 const TABLE_ROW_LINK_TEXT_CLASS_NAME = "tw-relative tw-z-[2]";
 
 function isRedeemedDropFromToday(drop: RedeemedSubscriptionCounts): boolean {
@@ -384,13 +389,19 @@ export default function SubscriptionsReportComponent() {
               </caption>
               <thead>
                 <tr className="tw-bg-primary-500/10 tw-text-left tw-text-sm tw-uppercase tw-tracking-wider tw-text-gray-300">
-                  <th className="tw-w-1/2 tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-font-semibold">
+                  <th
+                    className={`${ACTIVE_MEME_CARD_COLUMN_WIDTH_CLASS_NAME} tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-font-semibold`}
+                  >
                     Meme Card
                   </th>
-                  <th className="tw-w-1/4 tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
+                  <th
+                    className={`${ACTIVE_COUNT_COLUMN_WIDTH_CLASS_NAME} tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-text-center tw-font-semibold`}
+                  >
                     Subscribed
                   </th>
-                  <th className="tw-w-1/4 tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
+                  <th
+                    className={`${ACTIVE_COUNT_COLUMN_WIDTH_CLASS_NAME} tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-text-center tw-font-semibold`}
+                  >
                     Airdropped
                   </th>
                 </tr>
@@ -429,10 +440,14 @@ export default function SubscriptionsReportComponent() {
                 </caption>
                 <thead>
                   <tr className="tw-bg-iron-900 tw-text-left tw-text-sm tw-uppercase tw-tracking-wider tw-text-gray-300">
-                    <th className="tw-w-3/4 tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-font-semibold">
+                    <th
+                      className={`${STANDARD_MEME_CARD_COLUMN_WIDTH_CLASS_NAME} tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-font-semibold`}
+                    >
                       Meme Card
                     </th>
-                    <th className="tw-w-1/4 tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
+                    <th
+                      className={`${STANDARD_COUNT_COLUMN_WIDTH_CLASS_NAME} tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-text-center tw-font-semibold`}
+                    >
                       Subscriptions
                     </th>
                   </tr>
@@ -459,6 +474,9 @@ export default function SubscriptionsReportComponent() {
                           <SubscriptionDayDetails
                             date={rows[index]!}
                             count={count}
+                            linkOverlayWidthClassName={
+                              STANDARD_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME
+                            }
                           />
                         </SubscriptionsReportRow>
                       );
@@ -520,10 +538,14 @@ export default function SubscriptionsReportComponent() {
               </caption>
               <thead>
                 <tr className="tw-bg-iron-900 tw-text-left tw-text-sm tw-uppercase tw-tracking-wider tw-text-gray-300">
-                  <th className="tw-w-3/4 tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-font-semibold">
+                  <th
+                    className={`${STANDARD_MEME_CARD_COLUMN_WIDTH_CLASS_NAME} tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-font-semibold`}
+                  >
                     Meme Card
                   </th>
-                  <th className="tw-w-1/4 tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
+                  <th
+                    className={`${STANDARD_COUNT_COLUMN_WIDTH_CLASS_NAME} tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-text-center tw-font-semibold`}
+                  >
                     Subscriptions
                   </th>
                 </tr>
@@ -741,6 +763,7 @@ function SubscriptionDayDetails(
   props: Readonly<{
     count: SubscriptionCounts;
     date: SeasonMintRow;
+    linkOverlayWidthClassName: string;
   }>
 ) {
   return (
@@ -749,7 +772,7 @@ function SubscriptionDayDetails(
         <div className="tw-flex tw-flex-col">
           <Link
             href={`/the-memes/${props.count.token_id}`}
-            className={`${TABLE_ROW_LINK_CLASS_NAME} ${STANDARD_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME}`}
+            className={`${TABLE_ROW_LINK_CLASS_NAME} ${props.linkOverlayWidthClassName}`}
             aria-label={`View The Memes card #${props.count.token_id}`}
           >
             <span className={TABLE_ROW_LINK_TEXT_CLASS_NAME}>
