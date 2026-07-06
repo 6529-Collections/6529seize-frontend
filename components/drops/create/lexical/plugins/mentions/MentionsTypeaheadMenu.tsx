@@ -10,29 +10,98 @@ export default function MentionsTypeaheadMenu({
   options,
   setHighlightedIndex,
   selectOptionAndCleanUp,
+  anchorElement,
 }: {
   readonly selectedIndex: number | null;
   readonly options: MentionTypeaheadOption[];
   readonly setHighlightedIndex: (index: number) => void;
   readonly selectOptionAndCleanUp: (option: MentionTypeaheadOption) => void;
+  readonly anchorElement: HTMLElement;
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<"top" | "bottom">("bottom");
 
   const updatePosition = useCallback(() => {
-    if (menuRef.current) {
-      const rect = menuRef.current.getBoundingClientRect();
-      const spaceAbove = rect.top;
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setPosition(spaceBelow >= spaceAbove ? "bottom" : "top");
+    if (typeof globalThis.window === "undefined") {
+      return;
     }
-  }, []);
+
+    const visualViewport = globalThis.visualViewport;
+    const viewportTop = visualViewport?.offsetTop ?? 0;
+    const viewportHeight =
+      visualViewport?.height ?? globalThis.window.innerHeight;
+    const anchorRect = anchorElement.getBoundingClientRect();
+    const spaceAbove = anchorRect.top - viewportTop;
+    const spaceBelow = viewportTop + viewportHeight - anchorRect.bottom;
+    const nextPosition: "top" | "bottom" =
+      spaceBelow >= spaceAbove ? "bottom" : "top";
+
+    setPosition((current) =>
+      current === nextPosition ? current : nextPosition
+    );
+  }, [anchorElement]);
 
   useEffect(() => {
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    return () => window.removeEventListener("resize", updatePosition);
-  }, [updatePosition]);
+    if (typeof globalThis.window === "undefined") {
+      return;
+    }
+
+    const win = globalThis.window;
+    const visualViewport = globalThis.visualViewport;
+    const cancelInitialUpdate =
+      typeof win.requestAnimationFrame === "function"
+        ? (() => {
+            const frame = win.requestAnimationFrame(() => {
+              updatePosition();
+            });
+            return () => {
+              win.cancelAnimationFrame(frame);
+            };
+          })()
+        : (() => {
+            const timeout = win.setTimeout(() => {
+              updatePosition();
+            }, 0);
+            return () => {
+              win.clearTimeout(timeout);
+            };
+          })();
+
+    win.addEventListener("resize", updatePosition);
+    win.addEventListener("scroll", updatePosition, { passive: true });
+    visualViewport?.addEventListener("resize", updatePosition);
+    visualViewport?.addEventListener("scroll", updatePosition, {
+      passive: true,
+    });
+
+    if (typeof ResizeObserver === "undefined") {
+      return () => {
+        cancelInitialUpdate();
+        win.removeEventListener("resize", updatePosition);
+        win.removeEventListener("scroll", updatePosition);
+        visualViewport?.removeEventListener("resize", updatePosition);
+        visualViewport?.removeEventListener("scroll", updatePosition);
+      };
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      updatePosition();
+    });
+    const menuElement = menuRef.current;
+    if (menuElement) {
+      resizeObserver.observe(menuElement);
+    }
+    resizeObserver.observe(anchorElement);
+
+    return () => {
+      cancelInitialUpdate();
+      win.removeEventListener("resize", updatePosition);
+      win.removeEventListener("scroll", updatePosition);
+      visualViewport?.removeEventListener("resize", updatePosition);
+      visualViewport?.removeEventListener("scroll", updatePosition);
+      resizeObserver.disconnect();
+    };
+  }, [anchorElement, updatePosition]);
 
   useKeyPressEvent(" ", () => {
     if (typeof selectedIndex === "number" && options.length > 0) {
