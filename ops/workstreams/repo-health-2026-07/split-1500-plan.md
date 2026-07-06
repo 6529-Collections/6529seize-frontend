@@ -17,13 +17,18 @@ Fresh scan at `origin/main` `e70de6a90`, aligned with
 `scripts/debt-ratchet.cjs` semantics (same `SCAN_DIRS`, `__tests__`/
 `__mocks__`/`*.test.*`/`*.spec.*` exclusions, same line counting). 27 files
 exceed 1,500 lines. `oversized_files` baseline at this commit: 89
-grandfathered (cap 800).
+grandfathered (cap 800). The scan records every oversized file for visibility;
+the active split sequence excludes WordPress-scraped/migrated legacy pages
+unless they are explicitly reclassified as source-owned static pages.
 
 Two expected entries from the kickoff brief are gone and verified gone:
 `components/tech/tech-content.ts` does not exist on main, and
 CollectionDelegation is owned by the open Thread H stack. Twelve files not in
 the kickoff brief are picked up by the fresh scan (sentry filters, profile-cms
-trio, waves/header/auth/meme-calendar files, github-preview service).
+trio, waves/header/auth/meme-calendar files, github-preview service). The nine
+oversized page routes in this scan all carry WordPress/Yoast/Avada/Fusion-style
+migration artifacts, so they stay visible here but are deferred from the split
+campaign.
 
 | # | File | Lines | Tier | Status |
 | --- | --- | ---: | --- | --- |
@@ -38,21 +43,21 @@ trio, waves/header/auth/meme-calendar files, github-preview service).
 | 9 | `components/profile-cms/CmsThreeDViewer.tsx` | 2,065 | C | in scope |
 | 10 | `components/delegation/CollectionDelegation.tsx` | 2,033 | — | EXCLUDED: Thread H stack (#3106) owns it |
 | 11 | `components/auth/Auth.tsx` | 2,008 | D | in scope |
-| 12 | `app/about/press/page.tsx` | 2,005 | S | in scope (first) |
+| 12 | `app/about/press/page.tsx` | 2,005 | deferred | WP-migrated legacy page; hold for CMS/legacy-content path |
 | 13 | `components/profile-cms-builder/ProfileCmsBuilder.tsx` | 1,887 | deferred | blocked by open PRs #3093/#3096 |
 | 14 | `components/waves/discovery/WaveScoreTransparencyPage.tsx` | 1,844 | C | in scope |
-| 15 | `app/om/6529-museum-district/page.tsx` | 1,830 | S | in scope |
-| 16 | `app/museum/page.tsx` | 1,800 | S | in scope |
+| 15 | `app/om/6529-museum-district/page.tsx` | 1,830 | deferred | WP-migrated legacy page; hold for CMS/legacy-content path |
+| 16 | `app/museum/page.tsx` | 1,800 | deferred | WP-migrated legacy page; hold for CMS migration path |
 | 17 | `app/api/github-preview/service.ts` | 1,722 | A | in scope |
-| 18 | `app/museum/6529-fund-szn1/capsule-house/page.tsx` | 1,716 | S | in scope |
+| 18 | `app/museum/6529-fund-szn1/capsule-house/page.tsx` | 1,716 | deferred | WP-migrated legacy page; hold for CMS migration path |
 | 19 | `components/meme-calendar/MemeCalendar.tsx` | 1,672 | C | in scope |
-| 20 | `app/museum/6529-fund-szn1/cod/page.tsx` | 1,636 | S | in scope |
+| 20 | `app/museum/6529-fund-szn1/cod/page.tsx` | 1,636 | deferred | WP-migrated legacy page; hold for CMS migration path |
 | 21 | `components/header/header-search/HeaderSearchModal.tsx` | 1,629 | C | in scope |
-| 22 | `app/museum/genesis/jiometory-no-compute/page.tsx` | 1,604 | S | in scope |
+| 22 | `app/museum/genesis/jiometory-no-compute/page.tsx` | 1,604 | deferred | WP-migrated legacy page; hold for CMS migration path |
 | 23 | `components/header/share/HeaderShare.tsx` | 1,597 | C | in scope |
-| 24 | `app/museum/genesis/fragments-of-an-infinite-field/page.tsx` | 1,579 | S | in scope |
-| 25 | `app/museum/genesis/gazers/page.tsx` | 1,568 | S | in scope |
-| 26 | `app/museum/genesis/kai-gen/page.tsx` | 1,544 | S | in scope |
+| 24 | `app/museum/genesis/fragments-of-an-infinite-field/page.tsx` | 1,579 | deferred | WP-migrated legacy page; hold for CMS migration path |
+| 25 | `app/museum/genesis/gazers/page.tsx` | 1,568 | deferred | WP-migrated legacy page; hold for CMS migration path |
+| 26 | `app/museum/genesis/kai-gen/page.tsx` | 1,544 | deferred | WP-migrated legacy page; hold for CMS migration path |
 | 27 | `components/auth/SeizeConnectContext.tsx` | 1,506 | D | in scope |
 
 Membership and sizes are re-verified before each split PR; the table above is
@@ -68,18 +73,17 @@ the baseline, not a frozen contract.
   It stays on the list and is picked up after those PRs land; if they are
   still open when the rest of the series is done, it goes back to the
   orchestrator as a handoff item.
-- **Museum CMS-migration flag (reviewer decision requested)**: PR #3094 lands
-  a static-page-to-CMS converter with `app/museum/**` named as the follow-on
-  target (143 pages, currently at feasibility-report stage). The eight
-  museum/om pages in Tier S are potential future CMS-migration deletions, and
-  the #3094 converter parses the current single-file TSX shape. Default plan:
-  split them anyway (they are live production routes today, the split is
-  cheap and parity-verified, and the converter can read pre-split shapes from
-  git history or be pointed at updated manifests). If the reviewer prefers to
-  hold `app/museum/**` for the migration decision, Tier S shrinks to
-  `app/about/press` + `app/om/6529-museum-district` and the rest are recorded
-  as deliberately-left-out. Flagging here so the call is made on this PR, not
-  after code moves.
+- **WP-migrated legacy page boundary (reviewer decision captured)**:
+  `app/museum/**` and any other Yoast/WordPress/Avada/Fusion-style migrated
+  page are not active split targets. Splitting those artifacts into numbered
+  section components would reduce line counts, but it creates churn around
+  content that should be handled by the CMS migration or legacy-content cleanup
+  path.
+  They stay in the inventory for ratchet visibility and final reporting, but
+  are deliberately deferred until the migration decision lands or a maintainer
+  explicitly reclassifies a page as source-owned static app code. Static
+  non-WP pages that are hand-owned source and expected to remain in the app do
+  stay eligible for Tier S splitting when they exceed the threshold.
 - **`components/waves/drops/**` adjacency**: another active session works in
   that directory. `CreateDropContent.tsx` imports only
   `normalizeDropMarkdown` from it; the split does not touch
@@ -132,38 +136,40 @@ open-PR collision re-check. Tier-specific bars below.
 | Seq | Scope | Tier |
 | --- | --- | --- |
 | 0 | this plan doc | — |
-| 1 | `app/about/press/page.tsx` (pattern-setter) | S |
-| 2 | om + museum root + capsule-house + cod (4 pages) | S |
-| 3 | genesis x4 (jiometory, fragments, gazers, kai-gen) | S |
-| 4 | `utils/sentry-client-filters.ts` | A |
-| 5 | `app/api/github-preview/service.ts` | A |
-| 6 | `app/api/og-metadata/drops/[id]/image.tsx` | B |
-| 7 | `components/waves/OpenGraphPreview.tsx` | C |
-| 8 | `components/waves/discovery/WaveScoreTransparencyPage.tsx` | C |
-| 9 | `components/meme-calendar/MemeCalendar.tsx` | C |
-| 10 | `components/header/header-search/HeaderSearchModal.tsx` | C |
-| 11 | `components/header/share/HeaderShare.tsx` | C |
-| 12 | `components/profile-cms/CmsSiteRenderer.tsx` | C |
-| 13 | `components/profile-cms/CmsThreeDViewer.tsx` | C |
-| 14 | `components/auth/SeizeConnectContext.tsx` | D |
-| 15 | `components/auth/Auth.tsx` | D |
-| 16 | `components/waves/CreateDropContent.tsx` | E |
-| 17 | `components/drop-forge/craft/DropForgeCraftClaimPageClient.tsx` | F |
-| 18 | `components/drop-forge/launch/DropForgeLaunchClaimPageClient.view.tsx` | F |
-| 19 | `components/drop-forge/launch/DropForgeLaunchClaimPageClient.tsx` (stacked on 18) | F |
-| 20 | `components/profile-cms-builder/ProfileCmsBuilder.tsx` | deferred |
+| 1 | `utils/sentry-client-filters.ts` | A |
+| 2 | `app/api/github-preview/service.ts` | A |
+| 3 | `app/api/og-metadata/drops/[id]/image.tsx` | B |
+| 4 | `components/waves/OpenGraphPreview.tsx` | C |
+| 5 | `components/waves/discovery/WaveScoreTransparencyPage.tsx` | C |
+| 6 | `components/meme-calendar/MemeCalendar.tsx` | C |
+| 7 | `components/header/header-search/HeaderSearchModal.tsx` | C |
+| 8 | `components/header/share/HeaderShare.tsx` | C |
+| 9 | `components/profile-cms/CmsSiteRenderer.tsx` | C |
+| 10 | `components/profile-cms/CmsThreeDViewer.tsx` | C |
+| 11 | `components/auth/SeizeConnectContext.tsx` | D |
+| 12 | `components/auth/Auth.tsx` | D |
+| 13 | `components/waves/CreateDropContent.tsx` | E |
+| 14 | `components/drop-forge/craft/DropForgeCraftClaimPageClient.tsx` | F |
+| 15 | `components/drop-forge/launch/DropForgeLaunchClaimPageClient.view.tsx` | F |
+| 16 | `components/drop-forge/launch/DropForgeLaunchClaimPageClient.tsx` (stacked on 15) | F |
+| deferred | WP-migrated legacy pages listed in the inventory | deferred |
+| deferred | `components/profile-cms-builder/ProfileCmsBuilder.tsx` | deferred |
 
 At most 2–3 split PRs open at a time; rebase + re-run `--update` after each
-merge. The drop-forge pair 18/19 is a stacked sequence (client imports view);
-17 is independent and warms the drop-forge review muscle on the no-writes
-file first.
+merge. The active sequence starts at pure logic because the current oversized
+page routes are WP-derived migration artifacts and deliberately deferred. If a
+source-owned non-WP static page crosses 1,500 lines in a later scan, insert it
+before Tier A as a Tier S split. The drop-forge pair 15/16 is a stacked
+sequence (client imports view); 14 is independent and warms the drop-forge
+review muscle on the no-writes file first.
 
 ## Validation bar per tier
 
-- **S — static WP-scrape pages.** Hydrated-DOM parity before/after per route
-  using the campaign harness
-  (`ops/workstreams/repo-health-2026-07/scripts/wp-scrape-dom-capture.mjs`);
-  the normalized DOM must be byte-identical. Production build (SSG) green.
+- **S — source-owned static non-WP pages.** Applies only to hand-owned static
+  app pages expected to remain in source. Hydrated-DOM parity before/after per
+  route, normalized DOM byte-identical where practical, and production build
+  (SSG) green. WP-scraped/migrated legacy routes are outside this tier unless
+  explicitly reclassified.
 - **A — pure logic.** Full focused suites (sentry filters: 164 tests /
   4,803-line suite must stay green while importing only the facade).
   github-preview has no unit suite: before/after JSON parity of the local
@@ -198,21 +204,28 @@ file first.
 Estimated sizes are targets from structural profiling; exact numbers land in
 each PR's module-map table. Every target is under the 800 cap.
 
-### Tier S — WP-scrape static pages (9 files)
+### Deferred WP-migrated legacy pages and Tier S policy
 
-All nine share one shape: a Yoast/WordPress meta block at the top, then a
-long static content body (Avada/Fusion-Builder markup), plus footer/chrome
-that Thread D's fail-closed codemod skipped on these page shapes. Pattern per
-page:
+The nine oversized page routes in the current inventory share a Yoast/WordPress
+meta block plus Avada/Fusion-Builder-style static content. They are migration
+artifacts, not source-owned app pages, so this campaign does **not** split them
+into numbered `sections/section-*.tsx` modules:
 
-- `page.tsx` keeps: metadata export(s), the meta/head block, top-level layout
-  wrapper, and ordered section composition. Target 200–400 lines.
-- `sections/section-*.tsx` (co-located per route): the content body moved
-  verbatim into 2–4 numbered section components rendered in the original
-  order. JSX subtree moves do not change emitted DOM; parity harness proves
-  it per route.
-- No conversion to `WordPressLegacyAssets` here (different transformation,
-  Thread D's lane); chrome moves verbatim into the first/last section.
+- `app/about/press/page.tsx`
+- `app/om/6529-museum-district/page.tsx`
+- `app/museum/page.tsx`
+- `app/museum/6529-fund-szn1/capsule-house/page.tsx`
+- `app/museum/6529-fund-szn1/cod/page.tsx`
+- `app/museum/genesis/jiometory-no-compute/page.tsx`
+- `app/museum/genesis/fragments-of-an-infinite-field/page.tsx`
+- `app/museum/genesis/gazers/page.tsx`
+- `app/museum/genesis/kai-gen/page.tsx`
+
+If a future scan finds a static page that is non-WP, hand-owned source, and
+expected to remain in the app, split it under Tier S: `page.tsx` keeps metadata,
+the top-level layout wrapper, and ordered section composition; named/co-located
+section components move JSX subtrees verbatim in original order; hydrated-DOM
+parity and SSG validation prove the no-behavior-change claim.
 
 ### Tier A — pure logic
 
@@ -376,15 +389,16 @@ read-only walk are all mandatory before ready-for-review.
 
 ## Expected ratchet effect
 
-Each PR heals its file(s) from `oversized_file_allowlist`. Sequence 1–19
-alone: `oversized_files` 89 -> 64 from this thread (26 files minus the
-deferred builder, minus delegation which Thread H heals). No new entries at
-any point.
+Each PR heals its file(s) from `oversized_file_allowlist`. Active sequence 1–16
+alone: `oversized_files` 89 -> 73 from this thread (16 active files; delegation
+owned by Thread H, `ProfileCmsBuilder.tsx` deferred, and the nine WP-migrated
+legacy pages deliberately deferred). No new entries at any point.
 
 ## Reporting
 
-Run-log entries ride along with milestone PRs (after Tier S, after Tier B,
-after Tier D, after Tier F). Final orchestrator report: before/after line
-counts per file, PR links with check status, validation evidence per tier,
-`oversized_files` trajectory, bot findings with fix/defer rationale, and
-anything deliberately left out.
+Run-log entries ride along with milestone PRs (after Tier B, after Tier D,
+after Tier F, plus Tier S only if a source-owned static non-WP page enters the
+active sequence). Final orchestrator report: before/after line counts per file,
+PR links with check status, validation evidence per tier, `oversized_files`
+trajectory, bot findings with fix/defer rationale, and anything deliberately
+left out, including the WP-migrated legacy page deferrals.
