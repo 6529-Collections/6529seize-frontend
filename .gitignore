@@ -108,7 +108,11 @@ eslint-rule-summary.csv
 .cursor
 .cursorignore
 CLAUDE.md
-.claude
+# Anchored on purpose: an unanchored `.claude` becomes a `**/.claude/**` ignore
+# inside knip, which silently drops every entry file knip resolves to an
+# absolute path when the checkout itself lives under .claude/worktrees/<wt>
+# (agent worktrees) — producing ~23 false unused-file/export findings.
+/.claude/
 .codex
 .gemini
 .windsurfrules
