@@ -1,7 +1,7 @@
 "use client";
 
 import { useKeyPressEvent } from "react-use";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { MentionTypeaheadOption } from "./MentionsPlugin";
 import MentionsTypeaheadMenuItem from "./MentionsTypeaheadMenuItem";
 
@@ -16,13 +16,12 @@ export default function MentionsTypeaheadMenu({
   readonly options: MentionTypeaheadOption[];
   readonly setHighlightedIndex: (index: number) => void;
   readonly selectOptionAndCleanUp: (option: MentionTypeaheadOption) => void;
-  readonly anchorElement: HTMLElement;
+  readonly anchorElement: HTMLElement | null;
 }) {
-  const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<"top" | "bottom">("bottom");
 
   const updatePosition = useCallback(() => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined || anchorElement === null) {
       return;
     }
 
@@ -42,12 +41,20 @@ export default function MentionsTypeaheadMenu({
   }, [anchorElement]);
 
   useEffect(() => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined || anchorElement === null) {
       return;
     }
 
     const win = globalThis.window;
+    const doc = globalThis.document;
     const visualViewport = globalThis.visualViewport;
+    const scrollListenerOptions = {
+      passive: true,
+    };
+    const documentScrollListenerOptions = {
+      passive: true,
+      capture: true,
+    };
     const cancelInitialUpdate =
       typeof win.requestAnimationFrame === "function"
         ? (() => {
@@ -68,35 +75,42 @@ export default function MentionsTypeaheadMenu({
           })();
 
     win.addEventListener("resize", updatePosition);
-    win.addEventListener("scroll", updatePosition, { passive: true });
+    win.addEventListener("scroll", updatePosition, scrollListenerOptions);
+    doc.addEventListener(
+      "scroll",
+      updatePosition,
+      documentScrollListenerOptions
+    );
     visualViewport?.addEventListener("resize", updatePosition);
     visualViewport?.addEventListener("scroll", updatePosition, {
       passive: true,
     });
 
-    if (typeof ResizeObserver === "undefined") {
+    if (globalThis.ResizeObserver === undefined) {
       return () => {
         cancelInitialUpdate();
         win.removeEventListener("resize", updatePosition);
         win.removeEventListener("scroll", updatePosition);
+        doc.removeEventListener("scroll", updatePosition, {
+          capture: true,
+        });
         visualViewport?.removeEventListener("resize", updatePosition);
         visualViewport?.removeEventListener("scroll", updatePosition);
       };
     }
 
-    const resizeObserver = new ResizeObserver(() => {
+    const resizeObserver = new globalThis.ResizeObserver(() => {
       updatePosition();
     });
-    const menuElement = menuRef.current;
-    if (menuElement) {
-      resizeObserver.observe(menuElement);
-    }
     resizeObserver.observe(anchorElement);
 
     return () => {
       cancelInitialUpdate();
       win.removeEventListener("resize", updatePosition);
       win.removeEventListener("scroll", updatePosition);
+      doc.removeEventListener("scroll", updatePosition, {
+        capture: true,
+      });
       visualViewport?.removeEventListener("resize", updatePosition);
       visualViewport?.removeEventListener("scroll", updatePosition);
       resizeObserver.disconnect();
@@ -112,7 +126,6 @@ export default function MentionsTypeaheadMenu({
 
   return (
     <div
-      ref={menuRef}
       className={`tailwind-scope tw-absolute tw-z-50 tw-w-[20rem] tw-rounded-lg tw-bg-iron-800 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 ${
         position === "top" ? "tw-bottom-full tw-mb-1" : "tw-top-full tw-mt-1"
       }`}
