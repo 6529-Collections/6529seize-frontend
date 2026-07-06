@@ -68,7 +68,7 @@ export default function AboutSubscriptions() {
               counts in the{" "}
               <Link
                 href="/tools/subscriptions-report"
-                className="tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-300/50 tw-underline-offset-4 tw-transition-colors hover:tw-text-primary-200 hover:tw-decoration-primary-200"
+                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-transition-colors"
               >
                 Subscriptions Report
               </Link>

@@ -70,6 +70,17 @@ function formatSubscriptionCount(count: number): string {
   return count > 0 ? count.toLocaleString() : "0";
 }
 
+function getDisplayedRedeemedTotal(
+  totalRedeemed: number,
+  activeTokenId: number | null
+): number {
+  if (activeTokenId === null) {
+    return totalRedeemed;
+  }
+
+  return Math.max(totalRedeemed - 1, 0);
+}
+
 export default function SubscriptionsReportComponent() {
   const { setToast } = useAuth();
   const pastDropsTarget = useRef<HTMLDivElement>(null);
@@ -146,21 +157,44 @@ export default function SubscriptionsReportComponent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        let remainingCountForSeason = getCardsRemainingUntilEndOf("szn");
-        const redeemed = await fetchRedeemedCounts(1);
-        const mintingToday = isMintingToday();
-        const activeRedeemedDrop = getActiveRedeemedDrop(
-          redeemed.data,
-          mintingToday
-        );
-        activeTokenIdRef.current = activeRedeemedDrop?.token_id ?? null;
+      const mintingToday = isMintingToday();
+      let remainingCountForSeason = getCardsRemainingUntilEndOf("szn");
+      let activeRedeemedDrop: RedeemedSubscriptionCounts | null = null;
 
-        if (mintingToday && !activeRedeemedDrop) {
-          remainingCountForSeason += 1;
-        }
+      try {
+        const redeemed = await fetchRedeemedCounts(1);
+        activeRedeemedDrop = getActiveRedeemedDrop(redeemed.data, mintingToday);
+        activeTokenIdRef.current = activeRedeemedDrop?.token_id ?? null;
+        setActiveDrop(activeRedeemedDrop);
+        setRedeemedCounts(
+          withoutTokenId(redeemed.data, activeRedeemedDrop?.token_id ?? null)
+        );
+        setTotalRedeemed(
+          getDisplayedRedeemedTotal(
+            redeemed.count,
+            activeRedeemedDrop?.token_id ?? null
+          )
+        );
+      } catch (error) {
+        console.error("Failed to fetch redeemed subscriptions:", error);
+        activeTokenIdRef.current = null;
+        setActiveDrop(null);
+        setRedeemedCounts([]);
+        setTotalRedeemed(0);
+      }
+
+      if (mintingToday && !activeRedeemedDrop) {
+        remainingCountForSeason += 1;
+      }
+
+      try {
         const [upcoming, projectedCount] = await Promise.all([
-          fetchUpcomingCounts(remainingCountForSeason),
+          fetchUpcomingCounts(remainingCountForSeason).catch(
+            (error: unknown) => {
+              console.error("Failed to fetch upcoming subscriptions:", error);
+              return [];
+            }
+          ),
           activeRedeemedDrop
             ? fetchProjectedCount(activeRedeemedDrop.token_id).catch(
                 (error: unknown) => {
@@ -174,15 +208,14 @@ export default function SubscriptionsReportComponent() {
             : Promise.resolve(null),
         ]);
 
-        setActiveDrop(activeRedeemedDrop);
         setActiveProjectedCount(projectedCount);
-        setRedeemedCounts(
-          withoutTokenId(redeemed.data, activeRedeemedDrop?.token_id ?? null)
-        );
-        setTotalRedeemed(redeemed.count);
         setUpcomingCounts(
           withoutTokenId(upcoming, activeRedeemedDrop?.token_id ?? null)
         );
+      } catch (error) {
+        console.error("Failed to fetch subscription counts:", error);
+        setActiveProjectedCount(null);
+        setUpcomingCounts([]);
       } finally {
         setRedeemedLoading(false);
         setUpcomingLoading(false);
@@ -218,7 +251,9 @@ export default function SubscriptionsReportComponent() {
         setRedeemedCounts(
           withoutTokenId(redeemed.data, activeTokenIdRef.current)
         );
-        setTotalRedeemed(redeemed.count);
+        setTotalRedeemed(
+          getDisplayedRedeemedTotal(redeemed.count, activeTokenIdRef.current)
+        );
       } finally {
         setRedeemedLoading(false);
       }
@@ -529,7 +564,7 @@ export default function SubscriptionsReportComponent() {
           <div>
             <div className="tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900/95 tw-p-4 tw-shadow-sm md:tw-p-5">
               <div className="tw-flex tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
-                <h2 className="tw-mb-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-white md:tw-text-lg">
+                <h2 className="tw-m-0 tw-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-leading-6 tw-text-white md:tw-text-lg">
                   Redeemed Subscriptions Report
                 </h2>
                 <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-stretch lg:tw-w-auto lg:tw-shrink-0">

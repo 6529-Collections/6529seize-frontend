@@ -226,6 +226,85 @@ describe("Subscriptions report page", () => {
     });
   });
 
+  it("keeps active and past drops when upcoming counts fail", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    isMintingToday.mockReturnValue(true);
+    commonApiFetch.mockImplementation((opts: any) => {
+      if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
+        return Promise.resolve({
+          count: 2,
+          page: 1,
+          next: null,
+          data: [
+            {
+              contract: "0xmemes",
+              token_id: 700,
+              count: 4,
+              name: "Active Meme",
+              image_url: "https://images.test/active.png",
+              mint_date: new Date().toISOString(),
+              szn: 15,
+            },
+            {
+              contract: "0xmemes",
+              token_id: 699,
+              count: 9,
+              name: "Past Meme",
+              image_url: "https://images.test/past.png",
+              mint_date: "2026-01-01T00:00:00.000Z",
+              szn: 14,
+            },
+          ],
+        });
+      }
+
+      if (opts?.endpoint === "subscriptions/memes/700/count") {
+        return Promise.resolve({
+          contract: "0xmemes",
+          token_id: 700,
+          count: 11,
+        });
+      }
+
+      if (
+        opts?.endpoint === "subscriptions/upcoming-memes-counts?card_count=2"
+      ) {
+        return Promise.reject(new Error("Upcoming unavailable"));
+      }
+
+      if (opts?.endpoint === "new_memes_seasons") {
+        return Promise.resolve([]);
+      }
+
+      return Promise.resolve([]);
+    });
+
+    render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <CookieConsentProvider>
+          <Page />
+        </CookieConsentProvider>
+      </AuthContext.Provider>
+    );
+
+    const activeDrop = await screen.findByTestId(
+      "subscriptions-report-active-drop"
+    );
+    expect(activeDrop).toHaveTextContent("#700 - Active Meme");
+    expect(activeDrop).toHaveTextContent("11");
+
+    const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
+    expect(within(pastDrops).getByText("#699 - Past Meme")).toBeInTheDocument();
+    expect(within(pastDrops).queryByText("#700 - Active Meme")).toBeNull();
+
+    expect(consoleError).toHaveBeenCalledWith(
+      "Failed to fetch upcoming subscriptions:",
+      expect.any(Error)
+    );
+  });
+
   it("downloads redeemed meme counts csv for all seasons by default", async () => {
     const user = userEvent.setup();
 
