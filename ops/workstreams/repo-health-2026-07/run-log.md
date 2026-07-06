@@ -1,5 +1,53 @@
 # Run Log
 
+## 2026-07-06 (Thread I-2 — 1,500+ splits, Tier S complete)
+
+- Thread resumed after a spend-limit stop. Salvage assessment: the
+  predecessor's final commit (capsule slider/carousel descriptors, pushed
+  to #3114) was sound and kept; genesis x4 had not actually started. Two
+  repairs to the existing stack: the unsigned `git revert` commits on
+  #3114 failed DCO (rebased with `--signoff`, tree byte-identical), and
+  the press/museum/fund stack was 15 commits behind main (cascade-rebased
+  with per-branch patch-parity verification; zero file overlap). The
+  near-simultaneous force-pushes made SonarCloud cancel #3114's head
+  analysis while its PR-level gate reported OK — re-triggered with an
+  empty commit; lesson: space out stacked-branch pushes.
+- PR #3126 genesis x4 (completes Tier S): gazers/jiometory-no-compute/
+  kai-gen/fragments-of-an-infinite-field 1,568/1,604/1,544/1,579 ->
+  551/551/493/558 + shared `GenesisTokenShowcase` (448) + four 26-line
+  descriptor data sections + 10-test pinning suite. All four pages are
+  five rows of two media+traits pairs (videos on three pages, lightbox
+  image tiles on fragments); each pair is one pipe-delimited descriptor
+  (the #3114 CPD-safe technique applied from the start — gate passed
+  first try). Fail-closed generator extraction: traits token-stream
+  round-trip, fragments asset-scheme byte-comparison, numbering-sequence
+  and separator-safety asserts. Hydrated-DOM parity byte-identical x4
+  (119,070/119,761/117,790/126,351 normalized bytes), double-capture
+  calibrated both sides, plus a live-serve marker probe proving captures
+  hit the new code. Scrape quirks preserved and pinned: two no-anchor
+  video columns, two rarity-<br/>-outside-<strong> entries, `Token:633`,
+  one fetchpriority image, one six-column traits text, two duplicated
+  rarity lines. Full jest 1,971 suites / 11,150 tests green; tsc, eslint
+  --max-warnings=0, react-doctor:diff exit 0, production build green.
+  `oversized_files` 84 -> 80.
+- Reviewer handle correction from the orchestrator: the collaborator is
+  `prxt6529` (formal `--add-reviewer` works now and was applied to
+  #3111-#3114); the bare `prxt` handle in earlier notes is an unrelated
+  account and must not be used.
+- Environment for the record: a stale `.next` dev cache in the splits
+  worktree made every multi-segment route 404 in dev (single-segment
+  routes fine) — purge `.next` before capture sessions; repo commands
+  need the `6529` wrapper (`SEIZE_6529_COMMAND=1`); one unrelated jest
+  suite (`open-graph.6529.service`) can fail to LOAD under full-suite
+  parallelism and passes standalone/on rerun — treat as flake, rerun
+  before reading anything into it.
+- Next in sequence: Tier A (`utils/sentry-client-filters.ts`,
+  `app/api/github-preview/service.ts`), then the OG-image route (Tier B)
+  with the render-parity harness, Tier C components, auth pair (D),
+  composer (E), drop-forge trio last (F). The museum-vs-CMS reviewer
+  question on #3111 remains open; Tier S proceeded per the plan's
+  default (split now, converter reads git history if migration lands).
+
 ## 2026-07-05 (Thread I — 1,500+ splits, Tier S first wave)
 
 - Roadmap PR #3111 (`split-1500-plan.md`): fresh ratchet-aligned scan found
