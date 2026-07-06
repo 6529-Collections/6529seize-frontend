@@ -2,6 +2,8 @@
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { buildDropClipboardText } from "@/helpers/waves/drop-clipboard.helpers";
+import type { DropClipboardCopyStatus } from "@/hooks/drops/useDropClipboardCopyFeedback";
+import { useDropClipboardCopyFeedback } from "@/hooks/drops/useDropClipboardCopyFeedback";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import React from "react";
@@ -10,6 +12,12 @@ interface WaveDropActionsCopyTextProps {
   readonly drop: ApiDrop;
   readonly onCopy?: (() => void) | undefined;
 }
+
+const STATUS_LABEL_CLASSES: Record<DropClipboardCopyStatus, string> = {
+  idle: "",
+  copied: "tw-text-primary-400",
+  failed: "tw-text-red",
+};
 
 /**
  * Desktop dropdown counterpart of the mobile long-press "Copy text" action —
@@ -21,40 +29,26 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
 }) => {
   const locale = useBrowserLocale();
   const isDisabled = drop.id.startsWith("temp-");
+  const { status, statusMessage, copyToClipboard } =
+    useDropClipboardCopyFeedback();
 
-  const copyToClipboard = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCopyClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
 
     if (isDisabled) {
       return;
     }
 
-    const clipboard = globalThis.navigator?.clipboard as
-      | { writeText?: (text: string) => Promise<void> }
-      | undefined;
-
-    // The desktop dropdown closes even when the clipboard API is unavailable
-    // or the write fails; unlike the mobile action sheet it has no inline
-    // failure affordance yet.
-    if (typeof clipboard?.writeText !== "function") {
-      onCopy?.();
-      return;
-    }
-
-    void clipboard
-      .writeText(buildDropClipboardText(drop, locale))
-      .then(() => {
-        onCopy?.();
-      })
-      .catch(() => {
-        onCopy?.();
-      });
+    // The dropdown closes (via onCopy) only after a confirmed clipboard
+    // write; on failure it stays open and shows transient "Copy failed"
+    // feedback instead of silently closing as if the copy succeeded.
+    copyToClipboard(() => buildDropClipboardText(drop, locale), onCopy);
   };
 
   return (
     <button
       type="button"
-      onClick={copyToClipboard}
+      onClick={handleCopyClick}
       disabled={isDisabled}
       className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-transition-colors tw-duration-200 ${
         isDisabled
@@ -77,8 +71,15 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
           d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z"
         />
       </svg>
-      <span className="tw-text-sm tw-font-medium">
-        {t(locale, "waves.drop.actions.copyText")}
+      <span
+        className={`tw-text-sm tw-font-medium ${STATUS_LABEL_CLASSES[status]}`}
+      >
+        {statusMessage || t(locale, "waves.drop.actions.copyText")}
+      </span>
+      {/* role="status" must live outside the label: Chromium drops live-region
+          content from the button's name-from-contents computation */}
+      <span role="status" className="tw-sr-only">
+        {statusMessage}
       </span>
     </button>
   );

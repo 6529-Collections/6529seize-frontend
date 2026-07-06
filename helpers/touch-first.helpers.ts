@@ -54,26 +54,55 @@ const someQueryMatches = (queries: readonly string[]): boolean =>
  *
  * Some Windows browsers mis-report pointer/hover capabilities — e.g. a
  * convertible whose media queries claim "no hover, coarse only" while the
- * user is actively driving a trackpad cursor. A real `pointerType: "mouse"`
- * event is ground truth that a fine, hover-capable pointer exists: latch it,
- * tag <body> with `has-fine-pointer` so CSS can participate (see
- * globals.css and the tailwind `desktop-hover`/`touch-only` variants), and
- * notify subscribers so hooks re-evaluate.
+ * user is actively driving a trackpad cursor. A genuine `pointerType:
+ * "mouse"` event stream is ground truth that a fine, hover-capable pointer
+ * exists: latch it, tag <body> with `data-fine-pointer` so CSS can
+ * participate (see globals.css and the tailwind `desktop-hover`/`touch-only`
+ * variants), and notify subscribers so hooks re-evaluate.
+ *
+ * "Genuine" is the hard part. Legacy Windows touch stacks (Windows 8 era)
+ * synthesize mouse events from taps at the OS level — those are `isTrusted`
+ * and typed "mouse", indistinguishable by trust alone. Latching on them
+ * flips a pure touch device to desktop-hover UI, where every action lives
+ * behind hover a finger cannot perform (shipped regression: wave reply /
+ * three-dots unreachable on Win 8 touch hardware). The three guards below
+ * exist to tell a real cursor glide apart from touch emulation.
  */
 // Attribute (not a class) so tailwind's `tw-` prefix cannot rewrite it in
 // variant selectors.
 const FINE_POINTER_BODY_ATTRIBUTE = "data-fine-pointer";
 
+// Once a machine has proven it has a mouse, remember it: without persistence
+// every page load on a capability-lying browser starts in touch mode and
+// visibly flips to desktop on the first cursor glide (mobile buttons flash
+// and disappear, and clicks land in a dead transitional window).
+const FINE_POINTER_STORAGE_KEY = "6529-fine-pointer";
+
 // A single event is not proof: some tools emit stray synthetic mouse events
 // on genuine touch devices, and jsdom/test events must never latch. Require
-// a short stream of TRUSTED mouse moves — a real cursor glide.
+// a short stream of TRUSTED mouse pointer events (moves, or the pointerdown
+// of a click) — a real cursor glide or interaction.
 const FINE_POINTER_EVIDENCE_THRESHOLD = 3;
+
+// Guard 1 of 3 (see handleSentinelPointerEvent for the other two): mouse
+// events arriving within this window after trusted touch input are treated
+// as touch-derived and never counted. Synthesized compatibility events fire
+// within milliseconds of the touch; 1.5s adds margin for slow legacy stacks
+// while costing a genuine hybrid user at most a moment before their first
+// post-touch trackpad glide can latch.
+const TOUCH_SUPPRESSION_WINDOW_MS = 1500;
+
+type SentinelPointerEvent = Event & {
+  readonly pointerType?: string;
+  readonly sourceCapabilities?: { readonly firesTouchEvents?: boolean } | null;
+};
 
 const capabilityChangeListeners = new Set<() => void>();
 
 let finePointerObserved = false;
 let pointerSentinelInstalled = false;
-let trustedMouseMoveCount = 0;
+let trustedMouseEvidenceCount = 0;
+let lastTrustedTouchAt = Number.NEGATIVE_INFINITY;
 
 const notifyCapabilityChange = () => {
   for (const listener of capabilityChangeListeners) {
@@ -81,21 +110,78 @@ const notifyCapabilityChange = () => {
   }
 };
 
+const tagBodyWithFinePointer = () => {
+  (
+    globalThis as typeof globalThis & { document?: Document }
+  ).document?.body?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
+};
+
+const readPersistedFinePointer = (): boolean => {
+  try {
+    return (
+      (
+        globalThis as typeof globalThis & { localStorage?: Storage }
+      ).localStorage?.getItem(FINE_POINTER_STORAGE_KEY) === "1"
+    );
+  } catch {
+    return false;
+  }
+};
+
+const persistFinePointer = () => {
+  try {
+    (
+      globalThis as typeof globalThis & { localStorage?: Storage }
+    ).localStorage?.setItem(FINE_POINTER_STORAGE_KEY, "1");
+  } catch {
+    // Storage may be unavailable (private mode, blocked) — session-only latch.
+  }
+};
+
+const discountTouchDerivedEvidence = () => {
+  lastTrustedTouchAt = Date.now();
+  trustedMouseEvidenceCount = 0;
+};
 const handleSentinelPointerEvent = (event: Event) => {
-  if (!event.isTrusted || (event as PointerEvent).pointerType !== "mouse") {
+  if (!event.isTrusted) {
     return;
   }
 
-  trustedMouseMoveCount += 1;
-  if (trustedMouseMoveCount < FINE_POINTER_EVIDENCE_THRESHOLD) {
+  const pointerEvent = event as SentinelPointerEvent;
+  if (pointerEvent.pointerType === "touch") {
+    // Guard 2 of 3: touch input arms the suppression window AND resets the
+    // evidence counter, so stray emulated mouse events from separate taps can
+    // never accumulate to the threshold across the page lifetime — only an
+    // uninterrupted cursor glide can.
+    discountTouchDerivedEvidence();
+    return;
+  }
+  if (pointerEvent.pointerType !== "mouse") {
+    return;
+  }
+  if (pointerEvent.sourceCapabilities?.firesTouchEvents) {
+    // Guard 3 of 3: Chromium flags compatibility mouse events synthesized
+    // from touch via sourceCapabilities.firesTouchEvents (Chromium-only,
+    // shipped in Chrome 47 — present on every Chromium old enough to run on
+    // Win 8). Firefox/Safari lack the API, so there this guard is a no-op
+    // and Guards 1–2 carry the load. Not a real cursor — treat exactly like
+    // touch input.
+    discountTouchDerivedEvidence();
+    return;
+  }
+  if (Date.now() - lastTrustedTouchAt < TOUCH_SUPPRESSION_WINDOW_MS) {
+    return;
+  }
+
+  trustedMouseEvidenceCount += 1;
+  if (trustedMouseEvidenceCount < FINE_POINTER_EVIDENCE_THRESHOLD) {
     return;
   }
 
   uninstallPointerSentinel();
   finePointerObserved = true;
-  (
-    globalThis as typeof globalThis & { document?: Document }
-  ).document?.body?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
+  tagBodyWithFinePointer();
+  persistFinePointer();
   notifyCapabilityChange();
 };
 
@@ -112,6 +198,12 @@ const installPointerSentinel = () => {
     passive: true,
     capture: true,
   });
+  // A plain tap produces no touch pointermove; watch pointerdown too so taps
+  // arm the touch-suppression window before their synthesized mouse events.
+  globalThis.addEventListener("pointerdown", handleSentinelPointerEvent, {
+    passive: true,
+    capture: true,
+  });
 };
 
 const uninstallPointerSentinel = () => {
@@ -120,6 +212,9 @@ const uninstallPointerSentinel = () => {
   }
   pointerSentinelInstalled = false;
   globalThis.removeEventListener("pointermove", handleSentinelPointerEvent, {
+    capture: true,
+  });
+  globalThis.removeEventListener("pointerdown", handleSentinelPointerEvent, {
     capture: true,
   });
 };
@@ -171,6 +266,17 @@ const isMobileUserAgent = (): boolean => {
   }
   return MOBILE_USER_AGENT_REGEX.test(nav.userAgent);
 };
+
+// Hydrate the latch from a previous session at module load so the very first
+// client render is already in desktop mode on machines with mouse history.
+// The write path only ever stores guarded evidence, but a stored flag can
+// travel (profile import/sync, older builds, tampering) — so hydration also
+// defers to the phone override: a mobile UA never boots into desktop mode
+// from storage.
+if (!isMobileUserAgent() && readPersistedFinePointer()) {
+  finePointerObserved = true;
+  tagBodyWithFinePointer();
+}
 
 /**
  * True only for devices whose primary interaction is touch (phones/tablets).
