@@ -45,6 +45,7 @@ const STAGING_HOSTNAME = "staging.6529.io";
 const PRODUCTION_HOSTNAMES = new Set(["6529.io", "www.6529.io"]);
 const FIRST_PARTY_READONLY_ROUTE_HANDLER_PATHS = new Set([
   "/api/alchemy/contracts",
+  "/api/alchemy/token-metadata",
   "/api/open-graph",
   "/api/twitter/preview",
 ]);
@@ -57,6 +58,7 @@ const FIRST_PARTY_READONLY_API_HOSTS = new Set([
 ]);
 const FIRST_PARTY_READONLY_API_POST_PATHS = new Set([
   "/alchemy-proxy/contracts",
+  "/alchemy-proxy/token-metadata",
 ]);
 
 const IGNORED_EXTERNAL_MUTATION_HOSTS = [
