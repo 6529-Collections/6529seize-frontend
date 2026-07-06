@@ -3,43 +3,32 @@
  * the new-version toast) can put them back, instead of dumping them at the
  * bottom of the feed.
  *
- * No new state is invented: drop rows already carry `id="drop-<serial_no>"`
- * (components/drops/view/DropsList.tsx) and `?serialNo=<n>` on a wave URL is
- * the long-standing deep-link contract — on load the app fetches around that
- * serial and scrolls it to viewport center (MyStreamWaveChat +
+ * No new state is invented: drop rows carry `data-drop-serial-no`
+ * (HighlightDropWrapper, set by DropsList) and `?serialNo=<n>` on a wave URL
+ * is the long-standing deep-link contract — on load the app fetches around
+ * that serial and scrolls it to viewport center (MyStreamWaveChat +
  * useWaveDropsSerialScroll), then cleans the param from the URL. This module
  * only bridges the two: read the centered row, write the param, reload.
  */
 
-/** Marks the wave chat's scroll container (WaveDropsReverseContainer). */
+/**
+ * Marks the wave chat's scroll container (WaveDropsReverseContainer). The
+ * attribute is a contract: the element that carries it is a column-reverse
+ * feed, so scrollTop is 0 at the bottom (newest message) and negative when
+ * the reader scrolls up into history.
+ */
 export const WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE =
   "data-wave-drops-scroll-container";
 
-export const WAVE_SERIAL_QUERY_PARAM = "serialNo";
+/** Set on each drop row by HighlightDropWrapper via DropsList. */
+export const DROP_SERIAL_ATTRIBUTE = "data-drop-serial-no";
 
-const DROP_ROW_ID_PREFIX = "drop-";
+export const WAVE_SERIAL_QUERY_PARAM = "serialNo";
 
 // Within this distance of the newest message the reader is in "live" mode:
 // the default post-reload behavior (bottom of the feed, following new drops)
 // is what they want, so no position is pinned.
 const AT_BOTTOM_EPSILON_PX = 48;
-
-const getDistanceFromBottom = (container: HTMLElement): number => {
-  const scrollRange = Math.max(
-    0,
-    container.scrollHeight - container.clientHeight
-  );
-  // The wave feed scrolls in column-reverse (scrollTop 0 = bottom, negative
-  // when scrolled up); read the inline style first like
-  // useWaveDropsSerialScroll does, then fall back to computed style.
-  const flexDirection =
-    container.style.flexDirection ||
-    globalThis.getComputedStyle?.(container).flexDirection;
-  if (flexDirection === "column-reverse") {
-    return Math.abs(container.scrollTop);
-  }
-  return scrollRange - container.scrollTop;
-};
 
 const getVisibleWaveScrollContainer = (): HTMLElement | null => {
   const doc = (globalThis as typeof globalThis & { document?: Document })
@@ -47,26 +36,25 @@ const getVisibleWaveScrollContainer = (): HTMLElement | null => {
   if (!doc) {
     return null;
   }
-  const containers = [
-    ...doc.querySelectorAll<HTMLElement>(
-      `[${WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE}]`
-    ),
-  ].filter((container) => container.clientHeight > 0);
-  if (containers.length === 0) {
-    return null;
-  }
   // A drop side-panel can mount a second chat; the reading position worth
-  // preserving is the dominant one on screen.
-  return containers.reduce((largest, candidate) =>
-    candidate.clientWidth * candidate.clientHeight >
-    largest.clientWidth * largest.clientHeight
-      ? candidate
-      : largest
-  );
+  // preserving is the dominant one on screen. Ties keep the first in
+  // document order.
+  let largest: HTMLElement | null = null;
+  let largestArea = 0;
+  for (const candidate of doc.querySelectorAll<HTMLElement>(
+    `[${WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE}]`
+  )) {
+    const area = candidate.clientWidth * candidate.clientHeight;
+    if (area > largestArea) {
+      largestArea = area;
+      largest = candidate;
+    }
+  }
+  return largest;
 };
 
 const parseRowSerial = (row: Element): number | null => {
-  const raw = row.id.slice(DROP_ROW_ID_PREFIX.length);
+  const raw = row.getAttribute(DROP_SERIAL_ATTRIBUTE) ?? "";
   if (!/^\d+$/.test(raw)) {
     return null;
   }
@@ -86,7 +74,9 @@ export const captureVisibleWaveDropSerial = (): number | null => {
   if (!container) {
     return null;
   }
-  if (getDistanceFromBottom(container) <= AT_BOTTOM_EPSILON_PX) {
+  // Column-reverse contract (see the container attribute doc): |scrollTop|
+  // is the distance scrolled up from the newest message.
+  if (Math.abs(container.scrollTop) <= AT_BOTTOM_EPSILON_PX) {
     return null;
   }
 
@@ -96,22 +86,21 @@ export const captureVisibleWaveDropSerial = (): number | null => {
   let bestSerial: number | null = null;
   let bestDistance = Number.POSITIVE_INFINITY;
   for (const row of container.querySelectorAll(
-    `[id^="${DROP_ROW_ID_PREFIX}"]`
+    `[${DROP_SERIAL_ATTRIBUTE}]`
   )) {
+    const serial = parseRowSerial(row);
+    if (serial === null) {
+      continue;
+    }
     const rect = row.getBoundingClientRect();
     if (rect.bottom <= containerRect.top || rect.top >= containerRect.bottom) {
       continue;
     }
     const distance = Math.abs((rect.top + rect.bottom) / 2 - containerCenterY);
-    if (distance >= bestDistance) {
-      continue;
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestSerial = serial;
     }
-    const serial = parseRowSerial(row);
-    if (serial === null) {
-      continue;
-    }
-    bestDistance = distance;
-    bestSerial = serial;
   }
   return bestSerial;
 };
@@ -119,14 +108,19 @@ export const captureVisibleWaveDropSerial = (): number | null => {
 /**
  * Before a full reload, pin the reader's current wave position into the URL
  * via history.replaceState so the deep-link restore path picks it up. A
- * no-op when there is no position worth preserving.
+ * no-op when there is no position worth preserving — and never throws, so
+ * the caller's reload always proceeds.
  */
 export const preserveWaveScrollPositionForReload = (): void => {
-  const serial = captureVisibleWaveDropSerial();
-  if (serial === null) {
-    return;
+  try {
+    const serial = captureVisibleWaveDropSerial();
+    if (serial === null) {
+      return;
+    }
+    const url = new URL(globalThis.location.href);
+    url.searchParams.set(WAVE_SERIAL_QUERY_PARAM, String(serial));
+    globalThis.history.replaceState(globalThis.history.state, "", url);
+  } catch {
+    // Position preservation is best-effort; the reload must never be blocked.
   }
-  const url = new URL(globalThis.location.href);
-  url.searchParams.set(WAVE_SERIAL_QUERY_PARAM, String(serial));
-  globalThis.history.replaceState(globalThis.history.state, "", url);
 };
