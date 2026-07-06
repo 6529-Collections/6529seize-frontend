@@ -571,10 +571,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
 
   // Persist an in-progress chat message across a full reload (e.g. the
-  // new-version toast). Only the primary composer — not a reply/quote or an
-  // edit of an existing drop — so a keyed-by-wave draft can't bleed across
-  // composers. Wave view remounts per wave (WavesView key), so reading the
-  // draft once at mount is correct per wave.
+  // new-version toast). Keyed by wave and scoped to the PRIMARY composer:
+  // this stream composer is a single instance whose `activeDrop` can flip to
+  // reply/quote (see MyStreamWaveChat), so `draftWaveId` is derived live.
+  // The autosave effect below early-returns whenever it is null, which is
+  // what guarantees reply/quote/edit content is never written under the
+  // primary wave key — no cross-mode bleed. Restoration happens only at
+  // editor-creation time (initialConfig), so `initialDraftJson` is captured
+  // once at mount; the wave view remounts per wave (WavesView key).
   const draftWaveId =
     activeDrop === null && !editingDropId ? wave.id : null;
   const [initialDraftJson] = useState<string | null>(() =>

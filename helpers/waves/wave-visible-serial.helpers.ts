@@ -55,11 +55,8 @@ const getVisibleWaveScrollContainer = (): HTMLElement | null => {
 
 const parseRowSerial = (row: Element): number | null => {
   const raw = row.getAttribute(DROP_SERIAL_ATTRIBUTE) ?? "";
-  if (!/^\d+$/.test(raw)) {
-    return null;
-  }
-  const serial = Number.parseInt(raw, 10);
-  return Number.isFinite(serial) ? serial : null;
+  // Digits-only guarantees a finite integer, so no further numeric check.
+  return /^\d+$/.test(raw) ? Number.parseInt(raw, 10) : null;
 };
 
 /**

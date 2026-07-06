@@ -10,7 +10,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import type { EditorState } from "lexical";
+import type { EditorState, LexicalEditor } from "lexical";
 import { COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -172,8 +172,23 @@ const CreateDropInput = forwardRef<
         EmojiNode,
       ],
       // A restored draft (JSON string) wins at creation; otherwise the live
-      // editorState object. Lexical parses either form.
-      editorState: initialEditorStateJson ?? editorState,
+      // editorState object. The draft is parsed inside a try/catch because a
+      // malformed or schema-incompatible draft (e.g. saved by an older app
+      // version whose node types have since changed) would otherwise throw
+      // through onError — which re-throws — and crash the composer mount. On
+      // failure we silently fall back to an empty editor.
+      editorState:
+        typeof initialEditorStateJson === "string"
+          ? (editor: LexicalEditor) => {
+              try {
+                editor.setEditorState(
+                  editor.parseEditorState(initialEditorStateJson)
+                );
+              } catch {
+                // Unrestorable draft — start empty rather than crash.
+              }
+            }
+          : editorState,
       editable: !submitting,
       onError(error: Error): void {
         throw error;
