@@ -3,6 +3,7 @@ import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
 } from "@/helpers/navigation.helpers";
+import { preserveWaveScrollPositionForReload } from "@/helpers/waves/wave-visible-serial.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -14,6 +15,11 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
+jest.mock("@/helpers/waves/wave-visible-serial.helpers", () => ({
+  preserveWaveScrollPositionForReload: jest.fn(),
+}));
+const mockedPreserveWaveScrollPosition =
+  preserveWaveScrollPositionForReload as jest.Mock;
 const mockedUseIsVersionStale = useIsVersionStale as jest.Mock;
 const mockedUseDeviceInfo = useDeviceInfo as jest.Mock;
 const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
@@ -278,6 +284,15 @@ describe("NewVersionToast", () => {
 
     expect(globalThis.location.pathname).toBe("/waves");
     expect(globalThis.location.search).toBe("?wave=abc");
+  });
+
+  it("pins the wave reading position before reloading", () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+
+    render(<NewVersionToast />);
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(mockedPreserveWaveScrollPosition).toHaveBeenCalledTimes(1);
   });
 
   it("tracks the measured mobile dock top while the dock compacts", async () => {
