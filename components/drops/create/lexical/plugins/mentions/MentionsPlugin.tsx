@@ -91,6 +91,10 @@ const AtSignMentionsRegexAliasRegex = new RegExp(
 
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
+// Keep mentions above single-drop mobile chat menus/dialogs while below global modal layers.
+const TYPEAHEAD_ANCHOR_CLASS_NAME = "tailwind-scope tw-z-[1020]";
+const TYPEAHEAD_MENU_WRAPPER_CLASS_NAME =
+  "tw-absolute -tw-top-12 tw-left-0 tw-z-[1020]";
 
 function checkForAtSignMentions(
   text: string,
@@ -282,13 +286,14 @@ const NewMentionsPlugin = forwardRef<
         options={options}
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
+        anchorClassName={TYPEAHEAD_ANCHOR_CLASS_NAME}
         menuRenderFn={(
           anchorElementRef,
           { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
         ) => {
           return anchorElementRef.current && options.length
             ? ReactDOM.createPortal(
-                <div className="tw-absolute -tw-top-12 tw-left-0 tw-z-[1000]">
+                <div className={TYPEAHEAD_MENU_WRAPPER_CLASS_NAME}>
                   <MentionsTypeaheadMenu
                     selectedIndex={selectedIndex}
                     options={options}
