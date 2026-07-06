@@ -10,10 +10,7 @@ const SubscriptionsReportRow = forwardRef<
   }>
 >(function SubscriptionsReportRow({ children, className }, ref) {
   return (
-    <tr
-      ref={ref}
-      className={`${className} tw-group tw-relative tw-cursor-pointer`}
-    >
+    <tr ref={ref} className={`${className} tw-group tw-cursor-pointer`}>
       {children}
     </tr>
   );

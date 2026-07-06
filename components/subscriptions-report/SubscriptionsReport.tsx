@@ -37,10 +37,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
-// The link's pseudo-element stretches across the positioned table row,
+// The link's pseudo-element stretches from the positioned first table cell,
 // preserving row semantics while making the whole row a native link target.
 const TABLE_ROW_LINK_CLASS_NAME =
-  "tw-static tw-block tw-min-w-0 tw-text-white tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[1] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-300";
+  "tw-static tw-block tw-min-w-0 tw-text-white tw-no-underline before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-z-[1] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-300";
+const ACTIVE_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME = "before:tw-w-[200%]";
+const STANDARD_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME = "before:tw-w-[133.333333%]";
 const TABLE_ROW_LINK_TEXT_CLASS_NAME = "tw-relative tw-z-[2]";
 
 function isRedeemedDropFromToday(drop: RedeemedSubscriptionCounts): boolean {
@@ -660,11 +662,12 @@ function getRedeemedCsvFilename(season: MemeSeason | null): string {
 function MemeCardDetails(
   props: Readonly<{
     count: RedeemedSubscriptionCounts;
+    linkOverlayWidthClassName: string;
   }>
 ) {
   const dateTime = Time.fromString(props.count.mint_date);
   return (
-    <td className="tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-align-middle tw-text-white">
+    <td className="tw-relative tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-align-middle tw-text-white">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         <div className="tw-flex tw-h-[50px] tw-w-[50px] tw-shrink-0 tw-items-center tw-justify-center">
           <Image
@@ -679,7 +682,7 @@ function MemeCardDetails(
         <div className="tw-flex tw-flex-col">
           <Link
             href={`/the-memes/${props.count.token_id}`}
-            className={TABLE_ROW_LINK_CLASS_NAME}
+            className={`${TABLE_ROW_LINK_CLASS_NAME} ${props.linkOverlayWidthClassName}`}
             aria-label={`View The Memes card #${props.count.token_id} - ${props.count.name}`}
           >
             <span className={TABLE_ROW_LINK_TEXT_CLASS_NAME}>
@@ -722,7 +725,10 @@ function ActiveSubscriptionDetails(
 
   return (
     <>
-      <MemeCardDetails count={props.count} />
+      <MemeCardDetails
+        count={props.count}
+        linkOverlayWidthClassName={ACTIVE_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME}
+      />
       <SubscriptionCountCell>{subscribed}</SubscriptionCountCell>
       <SubscriptionCountCell>
         {formatSubscriptionCount(props.count.count)}
@@ -739,11 +745,11 @@ function SubscriptionDayDetails(
 ) {
   return (
     <>
-      <td className="tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-align-middle tw-text-white">
+      <td className="tw-relative tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-align-middle tw-text-white">
         <div className="tw-flex tw-flex-col">
           <Link
             href={`/the-memes/${props.count.token_id}`}
-            className={TABLE_ROW_LINK_CLASS_NAME}
+            className={`${TABLE_ROW_LINK_CLASS_NAME} ${STANDARD_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME}`}
             aria-label={`View The Memes card #${props.count.token_id}`}
           >
             <span className={TABLE_ROW_LINK_TEXT_CLASS_NAME}>
@@ -771,7 +777,10 @@ function RedeemedSubscriptionDetails(
 ) {
   return (
     <>
-      <MemeCardDetails count={props.count} />
+      <MemeCardDetails
+        count={props.count}
+        linkOverlayWidthClassName={STANDARD_ROW_LINK_OVERLAY_WIDTH_CLASS_NAME}
+      />
       <SubscriptionCountCell>
         {formatSubscriptionCount(props.count.count)}
       </SubscriptionCountCell>

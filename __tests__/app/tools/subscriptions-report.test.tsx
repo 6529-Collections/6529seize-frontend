@@ -304,11 +304,15 @@ describe("Subscriptions report page", () => {
       name: "View The Memes card #700 - Active Meme",
     });
     expect(activeLink).toHaveAttribute("href", "/the-memes/700");
-    expect(activeLink.className).toContain("before:tw-inset-0");
+    expect(activeLink.className).toContain("before:tw-inset-y-0");
+    expect(activeLink.className).toContain("before:tw-left-0");
+    expect(activeLink.className).toContain("before:tw-w-[200%]");
     const activeRow = activeLink.closest("tr");
     expect(activeRow).not.toBeNull();
     expect(activeRow).not.toHaveAttribute("role");
-    expect(activeRow).toHaveClass("tw-relative", "tw-cursor-pointer");
+    expect(activeRow).toHaveClass("tw-cursor-pointer");
+    expect(activeRow).not.toHaveClass("tw-relative");
+    expect(activeLink.closest("td")).toHaveClass("tw-relative");
     activeLink.focus();
     expect(activeLink).toHaveFocus();
 
@@ -316,19 +320,27 @@ describe("Subscriptions report page", () => {
       name: "View The Memes card #701",
     });
     expect(upcomingLink).toHaveAttribute("href", "/the-memes/701");
-    expect(upcomingLink.className).toContain("before:tw-inset-0");
+    expect(upcomingLink.className).toContain("before:tw-inset-y-0");
+    expect(upcomingLink.className).toContain("before:tw-left-0");
+    expect(upcomingLink.className).toContain("before:tw-w-[133.333333%]");
     const upcomingRow = upcomingLink.closest("tr");
     expect(upcomingRow).not.toBeNull();
     expect(upcomingRow).not.toHaveAttribute("role");
+    expect(upcomingRow).not.toHaveClass("tw-relative");
+    expect(upcomingLink.closest("td")).toHaveClass("tw-relative");
 
     const pastLink = screen.getByRole("link", {
       name: "View The Memes card #699 - Past Meme",
     });
     expect(pastLink).toHaveAttribute("href", "/the-memes/699");
-    expect(pastLink.className).toContain("before:tw-inset-0");
+    expect(pastLink.className).toContain("before:tw-inset-y-0");
+    expect(pastLink.className).toContain("before:tw-left-0");
+    expect(pastLink.className).toContain("before:tw-w-[133.333333%]");
     const pastRow = pastLink.closest("tr");
     expect(pastRow).not.toBeNull();
     expect(pastRow).not.toHaveAttribute("role");
+    expect(pastRow).not.toHaveClass("tw-relative");
+    expect(pastLink.closest("td")).toHaveClass("tw-relative");
   });
 
   it("formats active, upcoming, and past counts with locale separators", async () => {
