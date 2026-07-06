@@ -523,12 +523,12 @@ function WaveDropReaction({
     if (native) {
       return {
         emojiNode: (
-          <span className="tw-flex tw-items-center tw-justify-center tw-text-[1rem]">
+          <span className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-text-base tw-leading-none">
             {native.skins[0]?.native}
           </span>
         ),
         emojiNodeTooltip: (
-          <span className="tw-flex tw-items-center tw-justify-center tw-text-2xl">
+          <span className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-text-2xl tw-leading-none">
             {native.skins[0]?.native}
           </span>
         ),
@@ -806,7 +806,7 @@ function WaveDropReaction({
           </div>
           <span
             className={clsx(
-              "tw-min-w-[2ch] tw-text-xs tw-font-normal",
+              "tw-min-w-[2ch] tw-text-xs tw-font-normal tw-leading-none",
               animationStyle
             )}
           >
