@@ -211,8 +211,12 @@ describe("Subscriptions report page", () => {
       "subscriptions-report-active-drop"
     );
     expect(activeDrop).toHaveTextContent("#700 - Active Meme");
-    expect(activeDrop).toHaveTextContent("Subscribed");
-    expect(activeDrop).toHaveTextContent("Airdropped");
+    expect(
+      within(activeDrop).getAllByText("Subscribed").length
+    ).toBeGreaterThan(0);
+    expect(
+      within(activeDrop).getAllByText("Airdropped").length
+    ).toBeGreaterThan(0);
     expect(activeDrop).toHaveTextContent("11");
     expect(activeDrop).toHaveTextContent("4");
 
@@ -304,13 +308,24 @@ describe("Subscriptions report page", () => {
       name: "View The Memes card #700 - Active Meme",
     });
     const activeDrop = screen.getByTestId("subscriptions-report-active-drop");
-    expect(within(activeDrop).getByText("Subscribed")).toBeInTheDocument();
-    expect(within(activeDrop).getByText("Airdropped")).toBeInTheDocument();
+    expect(
+      within(activeDrop).getAllByText("Subscribed").length
+    ).toBeGreaterThan(0);
+    expect(
+      within(activeDrop).getAllByText("Airdropped").length
+    ).toBeGreaterThan(0);
     expect(activeLink).toHaveAttribute("href", "/the-memes/700");
     expect(activeLink).toHaveClass("tw-grid", "tw-no-underline");
+    expect(activeLink).toHaveClass("tw-grid-cols-2");
     expect(activeLink.className).not.toContain("before:");
     expect(within(activeLink).getByText("11")).toBeInTheDocument();
     expect(within(activeLink).getByText("4")).toBeInTheDocument();
+    expect(within(activeLink).getByText("Subscribed")).toHaveClass(
+      "sm:tw-hidden"
+    );
+    expect(within(activeLink).getByText("Airdropped")).toHaveClass(
+      "sm:tw-hidden"
+    );
     activeLink.focus();
     expect(activeLink).toHaveFocus();
 
@@ -321,22 +336,32 @@ describe("Subscriptions report page", () => {
       "subscriptions-report-upcoming-drops"
     );
     expect(
-      within(upcomingDrops).getByText("Subscriptions")
-    ).toBeInTheDocument();
+      within(upcomingDrops).getAllByText("Subscriptions").length
+    ).toBeGreaterThan(0);
     expect(upcomingLink).toHaveAttribute("href", "/the-memes/701");
     expect(upcomingLink).toHaveClass("tw-grid", "tw-no-underline");
+    expect(upcomingLink).toHaveClass("tw-grid-cols-[minmax(0,1fr)_auto]");
     expect(upcomingLink.className).not.toContain("before:");
     expect(within(upcomingLink).getByText("8")).toBeInTheDocument();
+    expect(within(upcomingLink).getByText("Subscriptions")).toHaveClass(
+      "sm:tw-hidden"
+    );
 
     const pastLink = screen.getByRole("link", {
       name: "View The Memes card #699 - Past Meme",
     });
     const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
-    expect(within(pastDrops).getByText("Subscriptions")).toBeInTheDocument();
+    expect(
+      within(pastDrops).getAllByText("Subscriptions").length
+    ).toBeGreaterThan(0);
     expect(pastLink).toHaveAttribute("href", "/the-memes/699");
     expect(pastLink).toHaveClass("tw-grid", "tw-no-underline");
+    expect(pastLink).toHaveClass("tw-grid-cols-[minmax(0,1fr)_auto]");
     expect(pastLink.className).not.toContain("before:");
     expect(within(pastLink).getByText("9")).toBeInTheDocument();
+    expect(within(pastLink).getByText("Subscriptions")).toHaveClass(
+      "sm:tw-hidden"
+    );
   });
 
   it("formats active, upcoming, and past counts with locale separators", async () => {

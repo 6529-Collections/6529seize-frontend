@@ -299,6 +299,32 @@ describe("About contents dropdown", () => {
     ).toBeTruthy();
   });
 
+  it("keeps the subscriptions dropdown visually before the action on mobile", () => {
+    setCookieCountry("US");
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: null,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <AboutContentsDropdown
+          currentSection={AboutSection.SUBSCRIPTIONS}
+          leadingAction={<AboutSubscriptionsProfileButton />}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByTestId("about-contents-menu-trigger")).toHaveClass(
+      "tw-order-1"
+    );
+    expect(screen.getByTestId("about-contents-leading-action")).toHaveClass(
+      "tw-order-2"
+    );
+  });
+
   it("opens wallet connection from disconnected subscriptions action", () => {
     setCookieCountry("US");
     render(
