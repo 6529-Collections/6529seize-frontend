@@ -2,14 +2,16 @@
 
 ## Summary
 
-`/join` is a state-aware onboarding and acquisition route. It gives users
-a short journey through the minimum useful setup path instead of a static block
-of instructions.
+`/join-6529` is a product-native onboarding hub for new and returning users. It
+explains why someone would join 6529, gives a short path through wallet/profile
+setup and Waves, then keeps NFT collection and subscription actions as later
+optional steps.
 
 ## User State
 
 The page reads the active wallet, wallet authentication, connected profile,
-profile image, and recent profile drops.
+profile image, recent profile drops, Meme Card balances, and upcoming Meme Card
+subscription choices.
 
 - No active wallet: the current action connects a wallet.
 - Active wallet without valid auth: the current action requests wallet auth.
@@ -24,38 +26,46 @@ profile image, and recent profile drops.
   state, profile Wave state, or submission/winner history, are treated as
   having already entered Waves and sent a first public message so old users are
   not shown beginner-only pending steps.
-- Profiles that complete all five steps are directed back to public Waves at
+- Profiles with Meme Card balances are marked complete for the collection step.
+- Profiles with active upcoming Meme Card subscription choices are marked
+  complete for the subscription step.
+- Profiles that complete the basic setup are directed back to public Waves at
   `/waves` so the complete state keeps the journey focused on exploration.
 
 The first public message check queries recent drops for the connected profile
 identity and counts drops in public Waves only when the returned drop author
-matches the connected profile. If that check fails, the page keeps the message
-step open and leaves the rest of the guide available.
+matches the connected profile. The collection and subscription checks reuse the
+existing profile collection and subscription endpoints; there is no separate
+Join-progress API endpoint.
 
 ## Progress
 
-The journey shows five visible steps:
+The journey shows six visible steps:
 
-1. Connect wallet.
-2. Create profile.
-3. Enter public Waves.
-4. Send first public message.
-5. Add profile image.
+1. Connect a wallet.
+2. Set up your profile.
+3. Join a Wave.
+4. Participate.
+5. Collect.
+6. Subscribe.
 
-Progress is a simple completed count over those five steps. The profile-image
-step is not a gate, but it is still incomplete until the user uploads an image.
+Logged-out visitors see the marketing timeline without progress chrome. Once a
+wallet is connected, the timeline shows a progress bar and per-step badges for
+done, next step, and to-do states. The profile-image check remains part of the
+current-action panel, but it is not one of the six marketing timeline steps.
 
 ## Related Actions
 
-The "Things to do next" area links users to:
+The compact focus area links users to:
 
 - Public Waves at `/waves`.
-- Create Wave on web at `/waves?create=wave`.
-- Profile subscriptions when a profile is available, otherwise
-  `/open-data/meme-subscriptions`.
-- Delegation Center at `/delegation/delegation-center`.
+- The Memes collection at `/the-memes`.
+- Profile subscriptions when a profile is available, otherwise the public
+  subscription information route.
 
 ## Notes
 
-The route is intentionally not wired into the main side navigation yet. It can
-be visited directly while the navigation placement is decided separately.
+The route is available at `/join-6529`; `/join` redirects there for compatibility.
+
+Join 6529 copy is source-complete in `en-US`. Other supported locales currently
+fall back to `en-US` for this surface until full translations are added.

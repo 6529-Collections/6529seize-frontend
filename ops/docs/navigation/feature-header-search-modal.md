@@ -40,7 +40,7 @@ It supports:
 - Pages catalog:
   - Page results can include top-level navigation destinations such as
     `NFTs`, `Waves`, `DMs`, and `About`, secondary destinations such as
-    `Discover Waves` (`/discover`) and `Join 6529` (`/join`), and
+    `Discover Waves` (`/discover`) and `Join 6529` (`/join-6529`), and
     permission-gated operational routes such as `Drop Forge`, `Craft Claims`,
     or `Launch Claims`, subject to the current route catalog.
 - Category persistence:
