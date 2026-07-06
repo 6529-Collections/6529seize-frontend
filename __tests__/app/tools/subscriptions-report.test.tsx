@@ -343,8 +343,8 @@ describe("Subscriptions report page", () => {
     expect(upcomingLink).toHaveClass("tw-grid-cols-[minmax(0,1fr)_auto]");
     expect(upcomingLink.className).not.toContain("before:");
     expect(within(upcomingLink).getByText("8")).toBeInTheDocument();
-    expect(within(upcomingLink).getByText("Subscriptions")).toHaveClass(
-      "sm:tw-hidden"
+    expect(within(upcomingLink).getByText("Subscriptions:")).toHaveClass(
+      "tw-sr-only"
     );
 
     const pastLink = screen.getByRole("link", {
@@ -359,8 +359,8 @@ describe("Subscriptions report page", () => {
     expect(pastLink).toHaveClass("tw-grid-cols-[minmax(0,1fr)_auto]");
     expect(pastLink.className).not.toContain("before:");
     expect(within(pastLink).getByText("9")).toBeInTheDocument();
-    expect(within(pastLink).getByText("Subscriptions")).toHaveClass(
-      "sm:tw-hidden"
+    expect(within(pastLink).getByText("Subscriptions:")).toHaveClass(
+      "tw-sr-only"
     );
   });
 
