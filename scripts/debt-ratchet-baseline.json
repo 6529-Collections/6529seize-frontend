@@ -4,7 +4,7 @@
   "counts": {
     "any_casts": 4,
     "todo_comments": 0,
-    "oversized_files": 84,
+    "oversized_files": 80,
     "bootstrap_imports": 0,
     "redux_imports": 0,
     "pages_router_files": 0
@@ -36,11 +36,7 @@
     "app/museum/genesis/chromie-squiggle/page.tsx",
     "app/museum/genesis/cosmic-reef/page.tsx",
     "app/museum/genesis/entretiempos/page.tsx",
-    "app/museum/genesis/fragments-of-an-infinite-field/page.tsx",
-    "app/museum/genesis/gazers/page.tsx",
     "app/museum/genesis/hyperhash/page.tsx",
-    "app/museum/genesis/jiometory-no-compute/page.tsx",
-    "app/museum/genesis/kai-gen/page.tsx",
     "app/museum/genesis/meridian/page.tsx",
     "app/museum/genesis/nimbuds/page.tsx",
     "app/museum/genesis/page.tsx",
