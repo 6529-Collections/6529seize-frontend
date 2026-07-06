@@ -208,6 +208,9 @@ describe("sync-agent-files", () => {
         path.join(repoRoot, "public/help-index.json"),
         "utf8"
       );
+      // scripts/sync-help-index.cjs publishes the corpus as a byte-for-byte
+      // copy, normalizing only a missing trailing newline. If the publish
+      // step ever reserializes instead, update this assertion with it.
       expect(published).toBe(source.endsWith("\n") ? source : `${source}\n`);
     });
   });

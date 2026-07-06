@@ -392,10 +392,20 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.install.required).toBe(true);
   });
 
-  it("verifies agent files sync when a generator script changes", () => {
-    const plan = createCiPlan(["scripts/sync-help-index.cjs"]);
+  it.each([
+    "ops/help/llms.txt.template",
+    "public/glossary.json",
+    "public/help-index.json",
+    "public/robots.txt",
+    "scripts/sync-agent-files.cjs",
+    "scripts/sync-help-index.cjs",
+    "next-sitemap.config.ts",
+    "__tests__/scripts/sync-agent-files.test.ts",
+  ])("verifies agent files sync when %s changes", (file) => {
+    const plan = createCiPlan([file]);
 
     expect(plan.checks.agent_files_sync.required).toBe(true);
+    expect(plan.checks.install.required).toBe(true);
   });
 
   it("keeps corpus docs in the fast lane without agent files sync", () => {
