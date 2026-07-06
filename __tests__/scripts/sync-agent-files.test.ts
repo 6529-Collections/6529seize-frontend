@@ -198,6 +198,20 @@ describe("sync-agent-files", () => {
     });
   });
 
+  describe("published help-index.json", () => {
+    it("matches the corpus (run `6529 run help-index:sync` after editing it)", () => {
+      const source = fs.readFileSync(
+        path.join(repoRoot, "ops/help/help-index.json"),
+        "utf8"
+      );
+      const published = fs.readFileSync(
+        path.join(repoRoot, "public/help-index.json"),
+        "utf8"
+      );
+      expect(published).toBe(source.endsWith("\n") ? source : `${source}\n`);
+    });
+  });
+
   describe("robots.txt agent discovery block", () => {
     it("appends the block after the generated directives", () => {
       const generated =
