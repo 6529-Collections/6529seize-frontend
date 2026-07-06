@@ -2703,16 +2703,18 @@
         "minting",
         "airdrop",
         "balance",
+        "report",
         "top",
         "up"
       ],
       "facts": [
         "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
-        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab."
+        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "The About Subscriptions overview links to the Subscriptions Report for aggregate projected and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
-      "related_paths": ["/{user}/subscriptions"],
+      "related_paths": ["/{user}/subscriptions", "/tools/subscriptions-report"],
       "tags": ["subscriptions", "memes", "glossary"],
       "source_refs": [
         "ops/docs/open-data/feature-meme-subscriptions.md",
