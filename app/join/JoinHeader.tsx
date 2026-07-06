@@ -80,7 +80,7 @@ function handleHeroPointerMove(event: PointerEvent<HTMLElement>) {
     return;
   }
 
-  const frame = window.requestAnimationFrame(() => {
+  const frame = globalThis.requestAnimationFrame(() => {
     heroMagneticFrames.delete(target);
     const point = heroMagneticPoints.get(target);
     if (point) {
@@ -95,7 +95,7 @@ function handleHeroPointerLeave(event: PointerEvent<HTMLElement>) {
   const target = event.currentTarget;
   const frame = heroMagneticFrames.get(target);
   if (frame !== undefined) {
-    window.cancelAnimationFrame(frame);
+    globalThis.cancelAnimationFrame(frame);
     heroMagneticFrames.delete(target);
   }
 

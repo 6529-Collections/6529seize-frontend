@@ -94,16 +94,16 @@ export function useJoin6529Journey(locale: SupportedLocale) {
   );
   const profileHref = getProfileHref(connectedProfile, address);
   const subscriptionsHref =
-    profileRouteIdentity !== null
-      ? `/${profileRouteIdentity}/subscriptions`
-      : "/open-data/meme-subscriptions";
+    profileRouteIdentity === null
+      ? "/open-data/meme-subscriptions"
+      : `/${profileRouteIdentity}/subscriptions`;
   const profileQueryIdentity = getProfileQueryIdentity(connectedProfile);
   const profileStorageKey = getProfileStorageKey(connectedProfile, address);
   const wavesEntryStorageKey =
-    profileStorageKey !== null
-      ? `${WAVES_ENTRY_STORAGE_PREFIX}${profileStorageKey}`
-      : null;
-  const hasProfile = connectedProfile !== null;
+    profileStorageKey === null
+      ? null
+      : `${WAVES_ENTRY_STORAGE_PREFIX}${profileStorageKey}`;
+  const hasProfile = Boolean(connectedProfile);
   const hasProfileImage = Boolean(connectedProfile?.pfp);
   const hasEstablishedActivity =
     hasEstablishedProfileActivity(connectedProfile);
@@ -114,8 +114,9 @@ export function useJoin6529Journey(locale: SupportedLocale) {
   });
   const hasEnteredWavesFromGuide =
     readWavesEntry(wavesEntryStorageKey) ||
-    (wavesEntryStorageKey !== null &&
-      enteredWavesStorageKeys.has(wavesEntryStorageKey));
+    (wavesEntryStorageKey === null
+      ? false
+      : enteredWavesStorageKeys.has(wavesEntryStorageKey));
   const hasEnteredWaves = hasFirstPublicMessage || hasEnteredWavesFromGuide;
   const timelineProgress = useJoin6529Progress({
     connectedProfile,

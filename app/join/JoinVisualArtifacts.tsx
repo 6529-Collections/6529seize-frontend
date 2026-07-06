@@ -101,7 +101,7 @@ export function MemeFan({
           className={cx(
             "tw-shrink-0 tw-transform tw-transition-transform tw-duration-500 tw-ease-out desktop-hover:hover:tw-scale-105 motion-reduce:tw-transition-none",
             card.rotateClass,
-            sizeClasses[index] ?? sizeClasses[sizeClasses.length - 1],
+            sizeClasses[index] ?? sizeClasses.at(-1),
             getFanHoverClass(index, cards.length),
             !compact &&
               (index === 0 || index === cards.length - 1) &&

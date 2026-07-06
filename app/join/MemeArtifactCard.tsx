@@ -18,6 +18,9 @@ export function MemeArtifactCard({
   readonly heroMuted?: boolean;
   readonly imageAspectClass?: string;
 }) {
+  const cardNumberLabel =
+    card.number === undefined ? fallbackLabel : `#${card.number}`;
+
   return (
     <div
       aria-label={ariaLabel}
@@ -59,7 +62,7 @@ export function MemeArtifactCard({
           {card.label}
         </span>
         <span className="tw-shrink-0 tw-text-[8px] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300/70">
-          {card.number !== undefined ? `#${card.number}` : fallbackLabel}
+          {cardNumberLabel}
         </span>
       </div>
     </div>

@@ -131,17 +131,19 @@ function TimelineProgressStrip({
           })}
         </p>
       </div>
-      <div
+      <progress
         aria-label={m(locale, "join6529.progress.ariaLabel")}
-        aria-valuemax={progress.total}
-        aria-valuemin={0}
-        aria-valuenow={progress.completed}
         aria-valuetext={m(locale, "join6529.progress.ariaValue", {
           completed: progress.completed,
           total: progress.total,
         })}
+        className="tw-sr-only"
+        max={progress.total}
+        value={progress.completed}
+      />
+      <div
+        aria-hidden="true"
         className="tw-mt-3 tw-h-[6px] tw-overflow-hidden tw-rounded-full tw-bg-white/10"
-        role="progressbar"
       >
         <div
           className="tw-h-full tw-rounded-full tw-bg-gradient-to-r tw-from-[#34d399] tw-to-[#60a5fa]"
@@ -178,12 +180,13 @@ function TimelineRow({
   readonly status: StepStatus;
 }) {
   const isLeftAligned = index % 2 === 0;
+  const isRightAligned = index % 2 === 1;
   const actionHref =
-    item.href !== undefined ? resolveHref(item.href, links) : undefined;
+    item.href === undefined ? undefined : resolveHref(item.href, links);
   const actionLabel =
-    item.actionLabelKey !== undefined
-      ? m(locale, item.actionLabelKey)
-      : undefined;
+    item.actionLabelKey === undefined
+      ? undefined
+      : m(locale, item.actionLabelKey);
 
   return (
     <article
@@ -230,7 +233,7 @@ function TimelineRow({
       <div
         aria-hidden="true"
         className={cx(
-          !isLeftAligned && "md:tw-order-1",
+          isRightAligned && "md:tw-order-1",
           "tw-hidden md:tw-block"
         )}
       />
