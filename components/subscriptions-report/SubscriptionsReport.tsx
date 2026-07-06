@@ -27,15 +27,27 @@ import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useDownloader from "@/hooks/useDownloader";
 import {
   ArrowDownTrayIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
+const INTERACTIVE_ROW_TARGET_SELECTOR =
+  "a,button,input,select,textarea,[role='button'],[role='link']";
 
 function isRedeemedDropFromToday(drop: RedeemedSubscriptionCounts): boolean {
   return (
@@ -70,6 +82,18 @@ function formatSubscriptionCount(count: number): string {
   return count > 0 ? count.toLocaleString() : "0";
 }
 
+function isInteractiveRowTarget(
+  target: EventTarget | null,
+  row: HTMLTableRowElement
+): boolean {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  const interactiveTarget = target.closest(INTERACTIVE_ROW_TARGET_SELECTOR);
+  return interactiveTarget !== null && interactiveTarget !== row;
+}
+
 function getDisplayedRedeemedTotal(
   totalRedeemed: number,
   activeTokenId: number | null
@@ -99,7 +123,7 @@ export default function SubscriptionsReportComponent() {
   >([]);
   const [activeDrop, setActiveDrop] =
     useState<RedeemedSubscriptionCounts | null>(null);
-  const [activeProjectedCount, setActiveProjectedCount] =
+  const [activeSubscribedCount, setActiveSubscribedCount] =
     useState<SubscriptionCounts | null>(null);
   const [totalRedeemed, setTotalRedeemed] = useState(0);
   const [redeemedPage, setRedeemedPage] = useState<number>(1);
@@ -143,7 +167,7 @@ export default function SubscriptionsReportComponent() {
     });
   }
 
-  async function fetchProjectedCount(tokenId: number) {
+  async function fetchSubscribedCount(tokenId: number) {
     return await commonApiFetch<SubscriptionCounts>({
       endpoint: `subscriptions/memes/${tokenId}/count`,
     });
@@ -188,7 +212,7 @@ export default function SubscriptionsReportComponent() {
       }
 
       try {
-        const [upcoming, projectedCount] = await Promise.all([
+        const [upcoming, subscribedCount] = await Promise.all([
           fetchUpcomingCounts(remainingCountForSeason).catch(
             (error: unknown) => {
               console.error("Failed to fetch upcoming subscriptions:", error);
@@ -196,10 +220,10 @@ export default function SubscriptionsReportComponent() {
             }
           ),
           activeRedeemedDrop
-            ? fetchProjectedCount(activeRedeemedDrop.token_id).catch(
+            ? fetchSubscribedCount(activeRedeemedDrop.token_id).catch(
                 (error: unknown) => {
                   console.error(
-                    "Failed to fetch active drop projected subscriptions:",
+                    "Failed to fetch active drop subscribed count:",
                     error
                   );
                   return null;
@@ -208,13 +232,13 @@ export default function SubscriptionsReportComponent() {
             : Promise.resolve(null),
         ]);
 
-        setActiveProjectedCount(projectedCount);
+        setActiveSubscribedCount(subscribedCount);
         setUpcomingCounts(
           withoutTokenId(upcoming, activeRedeemedDrop?.token_id ?? null)
         );
       } catch (error) {
         console.error("Failed to fetch subscription counts:", error);
-        setActiveProjectedCount(null);
+        setActiveSubscribedCount(null);
         setUpcomingCounts([]);
       } finally {
         setRedeemedLoading(false);
@@ -371,7 +395,7 @@ export default function SubscriptionsReportComponent() {
           >
             <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-primary-400/40 tw-bg-iron-900">
               <caption className="tw-sr-only">
-                Table listing the active meme card projected and actual
+                Table listing the active meme card subscribed and airdropped
                 subscription counts
               </caption>
               <thead>
@@ -380,27 +404,31 @@ export default function SubscriptionsReportComponent() {
                     Meme Card
                   </th>
                   <th className="tw-w-1/4 tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
-                    Projected
+                    Subscribed
                   </th>
                   <th className="tw-w-1/4 tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
-                    Actual
+                    Airdropped
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="tw-bg-iron-800 hover:tw-bg-iron-700">
+                <SubscriptionReportRow
+                  tokenId={activeDrop.token_id}
+                  label={`Open The Memes card #${activeDrop.token_id} - ${activeDrop.name}`}
+                  className="tw-bg-iron-800 hover:tw-bg-iron-700"
+                >
                   <ActiveSubscriptionDetails
                     count={activeDrop}
-                    projectedCount={activeProjectedCount}
+                    subscribedCount={activeSubscribedCount}
                   />
-                </tr>
+                </SubscriptionReportRow>
               </tbody>
             </table>
           </div>
         </>
       )}
       <div ref={upcomingTableTopRef} />
-      <div className="tw-pt-3">
+      <div className={activeDrop ? "tw-pt-8" : "tw-pt-3"}>
         <div className="tw-flex tw-items-center tw-gap-3">
           <span className="tw-text-lg tw-font-bold tw-no-underline">
             Upcoming Drops
@@ -436,8 +464,10 @@ export default function SubscriptionsReportComponent() {
                       const isNew =
                         animateFromIndex !== null && index >= animateFromIndex;
                       return (
-                        <tr
+                        <SubscriptionReportRow
                           key={count.token_id}
+                          tokenId={count.token_id}
+                          label={`Open The Memes card #${count.token_id}`}
                           ref={
                             index === animateFromIndex ? firstNewRowRef : null
                           }
@@ -452,7 +482,7 @@ export default function SubscriptionsReportComponent() {
                             date={rows[index]!}
                             count={count}
                           />
-                        </tr>
+                        </SubscriptionReportRow>
                       );
                     })}
                 </tbody>
@@ -522,8 +552,10 @@ export default function SubscriptionsReportComponent() {
               </thead>
               <tbody>
                 {redeemedCounts.map((count, index) => (
-                  <tr
+                  <SubscriptionReportRow
                     key={count.token_id}
+                    tokenId={count.token_id}
+                    label={`Open The Memes card #${count.token_id} - ${count.name}`}
                     className={
                       index % 2 === 0
                         ? "tw-bg-iron-800 hover:tw-bg-iron-700"
@@ -531,7 +563,7 @@ export default function SubscriptionsReportComponent() {
                     }
                   >
                     <RedeemedSubscriptionDetails count={count} />
-                  </tr>
+                  </SubscriptionReportRow>
                 ))}
               </tbody>
             </table>
@@ -701,21 +733,71 @@ function SubscriptionCountCell(
   );
 }
 
+const SubscriptionReportRow = forwardRef<
+  HTMLTableRowElement,
+  Readonly<{
+    children: ReactNode;
+    className: string;
+    label: string;
+    tokenId: number;
+  }>
+>(function SubscriptionReportRow({ children, className, label, tokenId }, ref) {
+  const router = useRouter();
+  const href = `/the-memes/${tokenId}`;
+  const openCard = () => {
+    router.push(href);
+  };
+
+  const onClick = (event: MouseEvent<HTMLTableRowElement>) => {
+    if (isInteractiveRowTarget(event.target, event.currentTarget)) {
+      return;
+    }
+    openCard();
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
+    if (
+      event.defaultPrevented ||
+      isInteractiveRowTarget(event.target, event.currentTarget) ||
+      (event.key !== "Enter" && event.key !== " ")
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    openCard();
+  };
+
+  return (
+    <tr
+      ref={ref}
+      role="link"
+      tabIndex={0}
+      aria-label={label}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      className={`${className} tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300`}
+    >
+      {children}
+    </tr>
+  );
+});
+
 function ActiveSubscriptionDetails(
   props: Readonly<{
     count: RedeemedSubscriptionCounts;
-    projectedCount: SubscriptionCounts | null;
+    subscribedCount: SubscriptionCounts | null;
   }>
 ) {
-  const projected =
-    props.projectedCount?.token_id === props.count.token_id
-      ? formatSubscriptionCount(props.projectedCount.count)
+  const subscribed =
+    props.subscribedCount?.token_id === props.count.token_id
+      ? formatSubscriptionCount(props.subscribedCount.count)
       : "Unavailable";
 
   return (
     <>
       <MemeCardDetails count={props.count} />
-      <SubscriptionCountCell>{projected}</SubscriptionCountCell>
+      <SubscriptionCountCell>{subscribed}</SubscriptionCountCell>
       <SubscriptionCountCell>
         {formatSubscriptionCount(props.count.count)}
       </SubscriptionCountCell>
@@ -733,7 +815,13 @@ function SubscriptionDayDetails(
     <>
       <td className="tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-align-middle tw-text-white">
         <div className="tw-flex tw-flex-col">
-          <span>The Memes #{props.count.token_id}</span>
+          <Link
+            href={`/the-memes/${props.count.token_id}`}
+            className="decoration-hover-underline tw-text-white"
+            aria-label={`View The Memes card #${props.count.token_id}`}
+          >
+            The Memes #{props.count.token_id}
+          </Link>
           <span className="tw-text-sm tw-text-gray-400">
             SZN {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
             {" / "}
