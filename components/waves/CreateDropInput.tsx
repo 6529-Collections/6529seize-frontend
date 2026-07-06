@@ -96,6 +96,12 @@ const CreateDropInput = forwardRef<
   {
     readonly waveId: string;
     readonly editorState: EditorState | null;
+    /**
+     * Serialized editor state (JSON) to seed a fresh editor with — a restored
+     * draft. Lexical reads initialConfig.editorState once at creation, so this
+     * only takes effect on mount; live edits flow through `editorState`.
+     */
+    readonly initialEditorStateJson?: string | null | undefined;
     readonly type: ActiveDropAction | null;
     readonly canSubmit: boolean;
     readonly isStormMode: boolean;
@@ -121,6 +127,7 @@ const CreateDropInput = forwardRef<
     {
       waveId,
       editorState,
+      initialEditorStateJson,
       type,
       canSubmit,
       isStormMode,
@@ -164,7 +171,9 @@ const CreateDropInput = forwardRef<
         ImageNode,
         EmojiNode,
       ],
-      editorState,
+      // A restored draft (JSON string) wins at creation; otherwise the live
+      // editorState object. Lexical parses either form.
+      editorState: initialEditorStateJson ?? editorState,
       editable: !submitting,
       onError(error: Error): void {
         throw error;

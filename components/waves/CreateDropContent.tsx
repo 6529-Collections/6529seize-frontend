@@ -18,6 +18,11 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import {
+  clearWaveDraft,
+  readRestorableWaveDraft,
+  writeWaveDraft,
+} from "@/helpers/waves/wave-draft.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -564,6 +569,41 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
+
+  // Persist an in-progress chat message across a full reload (e.g. the
+  // new-version toast). Only the primary composer — not a reply/quote or an
+  // edit of an existing drop — so a keyed-by-wave draft can't bleed across
+  // composers. Wave view remounts per wave (WavesView key), so reading the
+  // draft once at mount is correct per wave.
+  const draftWaveId =
+    activeDrop === null && !editingDropId ? wave.id : null;
+  const [initialDraftJson] = useState<string | null>(() =>
+    draftWaveId ? readRestorableWaveDraft(draftWaveId) : null
+  );
+  useEffect(() => {
+    if (!draftWaveId) {
+      return;
+    }
+    const handle = setTimeout(() => {
+      if (!editorState) {
+        clearWaveDraft(draftWaveId);
+        return;
+      }
+      let serialized: string | null = null;
+      try {
+        serialized = JSON.stringify(editorState.toJSON());
+      } catch {
+        serialized = null;
+      }
+      if (serialized) {
+        writeWaveDraft(draftWaveId, serialized);
+      } else {
+        clearWaveDraft(draftWaveId);
+      }
+    }, 400);
+    return () => clearTimeout(handle);
+  }, [editorState, draftWaveId]);
+
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [metadataOpenState, setMetadataOpenState] =
@@ -1226,6 +1266,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const refreshState = () => {
     createDropInputRef.current?.clearEditorState();
     setEditorState(null);
+    if (draftWaveId) {
+      // Drop the saved draft immediately (don't wait for the debounced
+      // empty-state write) so a reload right after submit can't restore it.
+      clearWaveDraft(draftWaveId);
+    }
     setMetadata(initialMetadata);
     setPollDraftState(null);
     setMentionedUsers([]);
@@ -2151,6 +2196,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   key={dropEditorRefreshKey}
                   ref={createDropInputRef}
                   editorState={editorState}
+                  initialEditorStateJson={
+                    dropEditorRefreshKey === 0 ? initialDraftJson : null
+                  }
                   type={activeDrop?.action ?? null}
                   submitting={submitting}
                   isStormMode={isStormModeActive}
