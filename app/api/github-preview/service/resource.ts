@@ -1,6 +1,32 @@
 import type { GithubResource } from "./types";
 
 const GITHUB_NUMBER_PATTERN = /^\d+$/;
+const unsupportedGithubUrlError = (): Error =>
+  new Error("Only github.com repository URLs are supported.");
+
+interface GithubResourceBaseParts {
+  readonly href: string;
+  readonly owner: string;
+  readonly repo: string;
+}
+
+interface GithubResourceParseContext {
+  readonly base: GithubResourceBaseParts;
+  readonly rest: readonly string[];
+  readonly number: number | null;
+  readonly lineRange: {
+    readonly lineStart: number | null;
+    readonly lineEnd: number | null;
+  };
+}
+
+type GithubResourceParser = (
+  context: GithubResourceParseContext
+) => GithubResource;
+
+const throwUnsupportedGithubUrl = (): never => {
+  throw unsupportedGithubUrlError();
+};
 
 const safeDecode = (value: string): string => {
   try {
@@ -46,6 +72,114 @@ const parseGithubLineAnchor = (
   };
 };
 
+const parseRepositoryResource = (
+  context: GithubResourceParseContext
+): GithubResource => ({ ...context.base, kind: "repository" });
+
+const parseIssueResource = ({
+  base,
+  number,
+  rest,
+}: GithubResourceParseContext): GithubResource => {
+  if (!rest[0]) {
+    return { ...base, kind: "repository" };
+  }
+
+  return number
+    ? { ...base, kind: "issue", number }
+    : throwUnsupportedGithubUrl();
+};
+
+const parsePullResource = ({
+  base,
+  number,
+}: GithubResourceParseContext): GithubResource =>
+  number ? { ...base, kind: "pull", number } : throwUnsupportedGithubUrl();
+
+const parseBlobResource = ({
+  base,
+  lineRange,
+  rest,
+}: GithubResourceParseContext): GithubResource => {
+  if (rest.length < 2) {
+    throwUnsupportedGithubUrl();
+  }
+
+  return {
+    ...base,
+    kind: "content",
+    mode: "blob",
+    segments: rest,
+    ...lineRange,
+  };
+};
+
+const parseTreeResource = ({
+  base,
+  rest,
+}: GithubResourceParseContext): GithubResource => {
+  if (rest.length < 1) {
+    throwUnsupportedGithubUrl();
+  }
+
+  return {
+    ...base,
+    kind: "content",
+    mode: "tree",
+    segments: rest,
+    lineStart: null,
+    lineEnd: null,
+  };
+};
+
+const parseCommitResource = ({
+  base,
+  rest,
+}: GithubResourceParseContext): GithubResource => {
+  const [ref] = rest;
+  return ref ? { ...base, kind: "commit", ref } : throwUnsupportedGithubUrl();
+};
+
+const parseReleaseResource = ({
+  base,
+  rest,
+}: GithubResourceParseContext): GithubResource => ({
+  ...base,
+  kind: "release",
+  tag: rest[0] === "tag" && rest[1] ? rest.slice(1).join("/") : null,
+});
+
+const parseActionsResource = ({
+  base,
+  rest,
+}: GithubResourceParseContext): GithubResource => ({
+  ...base,
+  kind: "actions",
+  runId: rest[0] === "runs" ? toPositiveNumber(rest[1]) : null,
+  workflowId: rest[0] === "workflows" && rest[1] ? rest[1] : null,
+});
+
+const parseDiscussionResource = ({
+  base,
+  number,
+}: GithubResourceParseContext): GithubResource => ({
+  ...base,
+  kind: "discussion",
+  number,
+});
+
+const resourceParsers: Record<string, GithubResourceParser> = {
+  actions: parseActionsResource,
+  blob: parseBlobResource,
+  commit: parseCommitResource,
+  discussions: parseDiscussionResource,
+  issues: parseIssueResource,
+  pull: parsePullResource,
+  pulls: parseRepositoryResource,
+  releases: parseReleaseResource,
+  tree: parseTreeResource,
+};
+
 export const parseGithubResource = (rawUrl: string | null): GithubResource => {
   if (!rawUrl) {
     throw new Error("A url query parameter is required.");
@@ -64,7 +198,7 @@ export const parseGithubResource = (rawUrl: string | null): GithubResource => {
 
   const hostname = parsed.hostname.replace(/^www\./i, "").toLowerCase();
   if (hostname !== "github.com") {
-    throw new Error("Only github.com repository URLs are supported.");
+    throw unsupportedGithubUrlError();
   }
 
   const [owner, repo, kindSegment, ...rest] = parsed.pathname
@@ -73,76 +207,21 @@ export const parseGithubResource = (rawUrl: string | null): GithubResource => {
     .map(safeDecode);
 
   if (!owner || !repo) {
-    throw new Error("Only github.com repository URLs are supported.");
+    throw unsupportedGithubUrlError();
   }
 
   const base = { href: rawUrl.trim(), owner, repo };
-  const number = toPositiveNumber(rest[0]);
-  const lineRange = parseGithubLineAnchor(parsed.hash);
-
-  switch (kindSegment) {
-    case undefined:
-    case "pulls":
-      return { ...base, kind: "repository" };
-    case "issues":
-      if (!rest[0]) {
-        return { ...base, kind: "repository" };
-      }
-      if (number) {
-        return { ...base, kind: "issue", number };
-      }
-      throw new Error("Only github.com repository URLs are supported.");
-    case "pull":
-      if (number) {
-        return { ...base, kind: "pull", number };
-      }
-      throw new Error("Only github.com repository URLs are supported.");
-    case "blob":
-      if (rest.length < 2) {
-        throw new Error("Only github.com repository URLs are supported.");
-      }
-      return {
-        ...base,
-        kind: "content",
-        mode: kindSegment,
-        segments: rest,
-        ...lineRange,
-      };
-    case "tree":
-      if (rest.length < 1) {
-        throw new Error("Only github.com repository URLs are supported.");
-      }
-      return {
-        ...base,
-        kind: "content",
-        mode: kindSegment,
-        segments: rest,
-        lineStart: null,
-        lineEnd: null,
-      };
-    case "commit":
-      if (!rest[0]) {
-        throw new Error("Only github.com repository URLs are supported.");
-      }
-      return { ...base, kind: "commit", ref: rest[0] };
-    case "releases":
-      return {
-        ...base,
-        kind: "release",
-        tag: rest[0] === "tag" && rest[1] ? rest.slice(1).join("/") : null,
-      };
-    case "actions":
-      return {
-        ...base,
-        kind: "actions",
-        runId: rest[0] === "runs" ? toPositiveNumber(rest[1]) : null,
-        workflowId: rest[0] === "workflows" && rest[1] ? rest[1] : null,
-      };
-    case "discussions":
-      return { ...base, kind: "discussion", number };
-    default:
-      throw new Error("Only github.com repository URLs are supported.");
+  if (!kindSegment) {
+    return { ...base, kind: "repository" };
   }
+
+  const parser = resourceParsers[kindSegment] ?? throwUnsupportedGithubUrl;
+  return parser({
+    base,
+    rest,
+    number: toPositiveNumber(rest[0]),
+    lineRange: parseGithubLineAnchor(parsed.hash),
+  });
 };
 
 export const getResourceCacheKey = (resource: GithubResource): string => {

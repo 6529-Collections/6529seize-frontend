@@ -42,6 +42,10 @@ import type {
   GithubReviewApiState,
   GithubWorkflowApiResponse,
 } from "./types";
+import {
+  buildCheckSummaryFromCombinedStatus,
+  buildCheckSummaryFromRuns,
+} from "./checks";
 
 const getIssueState = (
   issue: GithubIssueApiResponse
@@ -223,115 +227,6 @@ const getPullRequestReviewState = (
     getLatestMeaningfulReviewsByUser(reviews);
   return getHighestPriorityReviewState(latestMeaningfulReviewByUser.values());
 };
-
-const FAILURE_CHECK_CONCLUSIONS = new Set([
-  "failure",
-  "timed_out",
-  "cancelled",
-  "action_required",
-]);
-
-const NEUTRAL_CHECK_CONCLUSIONS = new Set(["neutral", "skipped"]);
-
-const toCombinedStatusState = (
-  value: string | null | undefined
-): GithubPreviewChecks["state"] => {
-  switch (value) {
-    case "success":
-      return "success";
-    case "failure":
-    case "error":
-      return "failure";
-    case "pending":
-      return "pending";
-    default:
-      return "unknown";
-  }
-};
-
-const buildCheckSummaryFromRuns = (
-  response: GithubCheckRunsApiResponse
-): GithubPreviewChecks | null => {
-  const runs = response.check_runs ?? [];
-  if (runs.length === 0 && !response.total_count) {
-    return null;
-  }
-
-  if (
-    typeof response.total_count === "number" &&
-    response.total_count > runs.length
-  ) {
-    return null;
-  }
-
-  let successful = 0;
-  let failed = 0;
-  let pending = 0;
-  let neutral = 0;
-  let skipped = 0;
-  let firstUrl: string | null = null;
-
-  for (const run of runs) {
-    firstUrl ??= run.html_url ?? null;
-    if (run.status !== "completed") {
-      pending += 1;
-      continue;
-    }
-
-    if (run.conclusion === "success") {
-      successful += 1;
-      continue;
-    }
-
-    if (run.conclusion && FAILURE_CHECK_CONCLUSIONS.has(run.conclusion)) {
-      failed += 1;
-      continue;
-    }
-
-    if (run.conclusion === "skipped") {
-      skipped += 1;
-      continue;
-    }
-
-    if (run.conclusion && NEUTRAL_CHECK_CONCLUSIONS.has(run.conclusion)) {
-      neutral += 1;
-    }
-  }
-
-  const total = response.total_count ?? runs.length;
-  const state: GithubPreviewChecks["state"] =
-    failed > 0
-      ? "failure"
-      : pending > 0
-        ? "pending"
-        : total > 0 && successful === total
-          ? "success"
-          : skipped > 0
-            ? "skipped"
-            : neutral > 0
-              ? "neutral"
-              : "unknown";
-
-  return {
-    state,
-    total,
-    successful,
-    failed,
-    pending,
-    url: firstUrl,
-  };
-};
-
-const buildCheckSummaryFromCombinedStatus = (
-  status: GithubCombinedStatusApiResponse
-): GithubPreviewChecks => ({
-  state: toCombinedStatusState(status.state),
-  total: status.total_count ?? status.statuses?.length ?? null,
-  successful: null,
-  failed: null,
-  pending: null,
-  url: status.target_url ?? null,
-});
 
 const resolvePullChecks = async (
   resource: GithubPullResource,

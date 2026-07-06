@@ -20,7 +20,7 @@ import {
   talismanExtensionOnboardingMessage,
   walletCollisionPatterns,
   walletConnectStaleSessionFunctions,
-  walletConnectStaleSessionTopicPattern,
+  walletConnectStaleSessionTopicPrefix,
   walletWebSocketBreadcrumbAppKitTokens,
   walletWebSocketBreadcrumbConnectorTokens,
 } from "./constants";
@@ -282,9 +282,25 @@ function hasThirdPartyWalletLinkWebSocket1006Evidence(
 }
 
 function isWalletConnectStaleSessionTopicMessage(value: string): boolean {
-  return walletConnectStaleSessionTopicPattern.test(
-    normalizeErrorPrefix(value)
-  );
+  const normalized = normalizeErrorPrefix(value);
+  const prefix = walletConnectStaleSessionTopicPrefix.toLowerCase();
+  if (!normalized.toLowerCase().startsWith(prefix)) {
+    return false;
+  }
+
+  const topic = normalized.slice(walletConnectStaleSessionTopicPrefix.length);
+  return topic.length > 0 && isHexString(topic);
+}
+
+function isHexString(value: string): boolean {
+  return Array.from(value).every((character) => {
+    const normalizedCodePoint = character.toLowerCase().codePointAt(0);
+    return (
+      normalizedCodePoint !== undefined &&
+      ((normalizedCodePoint >= 48 && normalizedCodePoint <= 57) ||
+        (normalizedCodePoint >= 97 && normalizedCodePoint <= 102))
+    );
+  });
 }
 
 function hasWalletConnectStaleSessionFrame(

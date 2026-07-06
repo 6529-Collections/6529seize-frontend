@@ -191,8 +191,8 @@ export const injectedProviderProxyPath =
   "app:///js/injected/proxy-injected-providers.js";
 export const injectedProviderProxyStartsWithMessage =
   "t?.startsWith is not a function";
-export const walletConnectStaleSessionTopicPattern =
-  /^No matching key\. session topic doesn't exist: [a-f0-9]+$/i;
+export const walletConnectStaleSessionTopicPrefix =
+  "No matching key. session topic doesn't exist: ";
 export const walletConnectStaleSessionFunctions = new Set([
   "isValidSessionTopic",
   "onRelayMessage",

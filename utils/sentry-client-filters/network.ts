@@ -536,13 +536,13 @@ function normalizeSampleRate(sampleRate: number): number {
     return 0;
   }
 
-  return sampleRate >= 1 ? 1 : sampleRate;
+  return Math.min(sampleRate, 1);
 }
 
 function stableHashToUnitInterval(value: string): number {
   let hash = FNV_OFFSET_BASIS;
   for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
+    hash ^= value[index]?.codePointAt(0) ?? 0;
     hash = Math.imul(hash, FNV_PRIME);
   }
 

@@ -81,7 +81,7 @@ const getFileLanguage = (path: string | null | undefined): string | null => {
 };
 
 const truncateExcerptLine = (line: string): string => {
-  const normalized = line.replace(/\t/g, "  ").trimEnd();
+  const normalized = line.replaceAll("\t", "  ").trimEnd();
   if (normalized.length <= CONTENT_EXCERPT_MAX_LINE_LENGTH) {
     return normalized;
   }
@@ -167,7 +167,7 @@ const buildContentExcerpt = (
     };
   }
 
-  const lines = decoded.text.replace(/\r\n/g, "\n").split("\n");
+  const lines = decoded.text.replaceAll("\r\n", "\n").split("\n");
   const lineCount = lines.length;
   const requestedStart = resource.lineStart ?? 1;
   if (requestedStart > lineCount) {
