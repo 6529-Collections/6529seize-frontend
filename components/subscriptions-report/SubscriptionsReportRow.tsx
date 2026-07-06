@@ -1,12 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-  forwardRef,
-  type KeyboardEvent,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
+import { type MouseEvent, forwardRef, type ReactNode } from "react";
 
 const INTERACTIVE_ROW_TARGET_SELECTOR =
   "a,button,input,select,textarea,[role='button'],[role='link']";
@@ -28,16 +23,18 @@ const SubscriptionsReportRow = forwardRef<
   Readonly<{
     children: ReactNode;
     className: string;
-    label: string;
     tokenId: number;
   }>
->(function SubscriptionsReportRow(
-  { children, className, label, tokenId },
-  ref
-) {
+>(function SubscriptionsReportRow({ children, className, tokenId }, ref) {
   const router = useRouter();
   const href = `/the-memes/${tokenId}`;
-  const openCard = () => {
+
+  const openCard = (event: MouseEvent<HTMLTableRowElement>) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      window.open(href, "_blank", "noopener,noreferrer");
+      return;
+    }
+
     router.push(href);
   };
 
@@ -45,31 +42,27 @@ const SubscriptionsReportRow = forwardRef<
     if (isInteractiveRowTarget(event.target, event.currentTarget)) {
       return;
     }
-    openCard();
+
+    openCard(event);
   };
 
-  const onKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
+  const onAuxClick = (event: MouseEvent<HTMLTableRowElement>) => {
     if (
-      event.defaultPrevented ||
-      isInteractiveRowTarget(event.target, event.currentTarget) ||
-      (event.key !== "Enter" && event.key !== " ")
+      event.button !== 1 ||
+      isInteractiveRowTarget(event.target, event.currentTarget)
     ) {
       return;
     }
 
-    event.preventDefault();
-    openCard();
+    window.open(href, "_blank", "noopener,noreferrer");
   };
 
   return (
     <tr
       ref={ref}
-      role="link"
-      tabIndex={0}
-      aria-label={label}
       onClick={onClick}
-      onKeyDown={onKeyDown}
-      className={`${className} tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300`}
+      onAuxClick={onAuxClick}
+      className={`${className} tw-cursor-pointer`}
     >
       {children}
     </tr>

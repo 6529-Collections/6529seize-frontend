@@ -1,7 +1,13 @@
 import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -236,8 +242,11 @@ describe("Subscriptions report page", () => {
     });
   });
 
-  it("opens meme card routes from active, upcoming, and past rows", async () => {
+  it("opens meme card routes from report rows while keeping visible links native", async () => {
     const user = userEvent.setup();
+    const windowOpen = jest
+      .spyOn(window, "open")
+      .mockImplementation(() => null);
 
     isMintingToday.mockReturnValue(true);
     getUpcomingMintsAcrossSeasons.mockReturnValue([
@@ -310,29 +319,54 @@ describe("Subscriptions report page", () => {
       </AuthContext.Provider>
     );
 
-    const activeRow = await screen.findByRole("link", {
-      name: "Open The Memes card #700 - Active Meme",
+    const activeLink = await screen.findByRole("link", {
+      name: "View The Memes card #700 - Active Meme",
     });
-    await user.click(activeRow);
+    expect(activeLink).toHaveAttribute("href", "/the-memes/700");
+    const activeRow = activeLink.closest("tr");
+    expect(activeRow).not.toBeNull();
+
+    await user.click(activeRow!);
     expect(mockRouterPush).toHaveBeenLastCalledWith("/the-memes/700");
+
+    mockRouterPush.mockClear();
+    await user.click(activeLink);
+    expect(mockRouterPush).not.toHaveBeenCalled();
 
     const upcomingLink = screen.getByRole("link", {
       name: "View The Memes card #701",
     });
     expect(upcomingLink).toHaveAttribute("href", "/the-memes/701");
-
-    const upcomingRow = screen.getByRole("link", {
-      name: "Open The Memes card #701",
-    });
-    await user.click(upcomingRow);
+    const upcomingRow = upcomingLink.closest("tr");
+    expect(upcomingRow).not.toBeNull();
+    await user.click(upcomingRow!);
     expect(mockRouterPush).toHaveBeenLastCalledWith("/the-memes/701");
 
-    const pastRow = screen.getByRole("link", {
-      name: "Open The Memes card #699 - Past Meme",
+    mockRouterPush.mockClear();
+    fireEvent.click(upcomingRow!, { metaKey: true });
+    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(windowOpen).toHaveBeenLastCalledWith(
+      "/the-memes/701",
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+    const pastLink = screen.getByRole("link", {
+      name: "View The Memes card #699 - Past Meme",
     });
-    pastRow.focus();
-    await user.keyboard("{Enter}");
-    expect(mockRouterPush).toHaveBeenLastCalledWith("/the-memes/699");
+    expect(pastLink).toHaveAttribute("href", "/the-memes/699");
+    const pastRow = pastLink.closest("tr");
+    expect(pastRow).not.toBeNull();
+    fireEvent(
+      pastRow!,
+      new MouseEvent("auxclick", { bubbles: true, button: 1 })
+    );
+    expect(windowOpen).toHaveBeenLastCalledWith(
+      "/the-memes/699",
+      "_blank",
+      "noopener,noreferrer"
+    );
+    windowOpen.mockRestore();
   });
 
   it("formats active, upcoming, and past counts with locale separators", async () => {
