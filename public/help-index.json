@@ -2828,16 +2828,20 @@
       "keywords": [
         "subscriptions",
         "report",
+        "active",
         "upcoming",
         "redeemed",
+        "projected",
+        "actual",
         "download",
         "csv",
         "season"
       ],
       "facts": [
-        "The Subscriptions Report shows upcoming and redeemed Meme Card subscription counts.",
+        "The Subscriptions Report shows active, upcoming, and redeemed Meme Card subscription counts.",
+        "On a mint day, the Active Drop section compares projected subscriptions with actual redeemed subscriptions and keeps that card out of Upcoming Drops and Past Drops.",
         "It includes download actions for redeemed subscription count reports.",
-        "It links users to their own Subscriptions tab when a connected profile is available."
+        "Its Manage or Connect to Subscribe action uses the same profile-subscriptions navigation and authentication handoff as the About Subscriptions page."
       ],
       "canonical_path": "/tools/subscriptions-report",
       "related_paths": ["/about/subscriptions"],

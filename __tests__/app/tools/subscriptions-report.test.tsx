@@ -1,7 +1,7 @@
 import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -18,8 +18,15 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: () => "jwtToken",
 }));
 
+jest.mock("@/components/about/AboutSubscriptionsProfileButton", () => ({
+  __esModule: true,
+  default: () => <button type="button">Manage</button>,
+}));
+
 jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   __esModule: true,
+  displayedSeasonNumberFromIndex: jest.fn((index: number) => index + 1),
+  formatFullDate: jest.fn(() => "Jan 1, 2026"),
   getCardsRemainingUntilEndOf: jest.fn(() => 2),
   getUpcomingMintsAcrossSeasons: jest.fn(() => []),
   isMintingToday: jest.fn(() => false),
@@ -54,7 +61,32 @@ jest.mock("@/services/api/common-api", () => ({
 const { commonApiFetch } = require("@/services/api/common-api");
 const {
   getCardsRemainingUntilEndOf,
+  isMintingToday,
 } = require("@/components/meme-calendar/meme-calendar.helpers");
+
+const mockDefaultCommonApiFetch = (opts: any) => {
+  if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
+    return Promise.resolve({
+      count: 0,
+      page: 1,
+      next: null,
+      data: [],
+    });
+  }
+  if (opts?.endpoint === "new_memes_seasons") {
+    return Promise.resolve([
+      {
+        id: 14,
+        display: "SZN 14",
+      },
+      {
+        id: 15,
+        display: "SZN 15",
+      },
+    ]);
+  }
+  return Promise.resolve([]);
+};
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -77,6 +109,9 @@ describe("Subscriptions report page", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
+    commonApiFetch.mockImplementation(mockDefaultCommonApiFetch);
+    getCardsRemainingUntilEndOf.mockReturnValue(2);
+    isMintingToday.mockReturnValue(false);
     mockDownload.mockClear();
     mockUseDownloader.mockReturnValue({
       download: mockDownload,
@@ -113,6 +148,81 @@ describe("Subscriptions report page", () => {
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "new_memes_seasons",
       });
+    });
+  });
+
+  it("moves a mint-day redeemed card into the active drop section", async () => {
+    isMintingToday.mockReturnValue(true);
+    commonApiFetch.mockImplementation((opts: any) => {
+      if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
+        return Promise.resolve({
+          count: 2,
+          page: 1,
+          next: null,
+          data: [
+            {
+              contract: "0xmemes",
+              token_id: 700,
+              count: 4,
+              name: "Active Meme",
+              image_url: "https://images.test/active.png",
+              mint_date: new Date().toISOString(),
+              szn: 15,
+            },
+            {
+              contract: "0xmemes",
+              token_id: 699,
+              count: 9,
+              name: "Past Meme",
+              image_url: "https://images.test/past.png",
+              mint_date: "2026-01-01T00:00:00.000Z",
+              szn: 14,
+            },
+          ],
+        });
+      }
+
+      if (opts?.endpoint === "subscriptions/memes/700/count") {
+        return Promise.resolve({
+          contract: "0xmemes",
+          token_id: 700,
+          count: 11,
+        });
+      }
+
+      if (opts?.endpoint === "new_memes_seasons") {
+        return Promise.resolve([]);
+      }
+
+      return Promise.resolve([]);
+    });
+
+    render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <CookieConsentProvider>
+          <Page />
+        </CookieConsentProvider>
+      </AuthContext.Provider>
+    );
+
+    const activeDrop = await screen.findByTestId(
+      "subscriptions-report-active-drop"
+    );
+    expect(activeDrop).toHaveTextContent("#700 - Active Meme");
+    expect(activeDrop).toHaveTextContent("Projected");
+    expect(activeDrop).toHaveTextContent("Actual");
+    expect(activeDrop).toHaveTextContent("11");
+    expect(activeDrop).toHaveTextContent("4");
+
+    const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
+    expect(within(pastDrops).queryByText("#700 - Active Meme")).toBeNull();
+    expect(within(pastDrops).getByText("#699 - Past Meme")).toBeInTheDocument();
+
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "subscriptions/memes/700/count",
+    });
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "subscriptions/upcoming-memes-counts?card_count=2",
     });
   });
 
