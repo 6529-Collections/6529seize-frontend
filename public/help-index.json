@@ -2703,16 +2703,18 @@
         "minting",
         "airdrop",
         "balance",
+        "report",
         "top",
         "up"
       ],
       "facts": [
         "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
-        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab."
+        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "The About Subscriptions overview links to the Subscriptions Report for aggregate projected and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
-      "related_paths": ["/{user}/subscriptions"],
+      "related_paths": ["/{user}/subscriptions", "/tools/subscriptions-report"],
       "tags": ["subscriptions", "memes", "glossary"],
       "source_refs": [
         "ops/docs/open-data/feature-meme-subscriptions.md",
@@ -2828,16 +2830,20 @@
       "keywords": [
         "subscriptions",
         "report",
+        "active",
         "upcoming",
         "redeemed",
+        "projected",
+        "actual",
         "download",
         "csv",
         "season"
       ],
       "facts": [
-        "The Subscriptions Report shows upcoming and redeemed Meme Card subscription counts.",
+        "The Subscriptions Report shows active, upcoming, and redeemed Meme Card subscription counts.",
+        "On a mint day, the Active Drop section compares projected subscriptions with actual redeemed subscriptions and keeps that card out of Upcoming Drops and Past Drops.",
         "It includes download actions for redeemed subscription count reports.",
-        "It links users to their own Subscriptions tab when a connected profile is available."
+        "Its Manage or Connect to Subscribe action uses the same profile-subscriptions navigation and authentication handoff as the About Subscriptions page."
       ],
       "canonical_path": "/tools/subscriptions-report",
       "related_paths": ["/about/subscriptions"],
