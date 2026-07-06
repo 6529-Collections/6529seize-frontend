@@ -207,7 +207,7 @@ function TimelineRow({
             isLeftAligned ? "md:tw-justify-end" : "md:tw-justify-start"
           )}
         >
-          <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-tight tw-text-white/90">
+          <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-white/90">
             {m(locale, item.titleKey)}
           </h3>
           {showStatusBadge && <StatusBadge locale={locale} status={status} />}
