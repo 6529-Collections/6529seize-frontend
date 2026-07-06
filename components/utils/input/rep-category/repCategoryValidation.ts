@@ -42,7 +42,9 @@ const describeChar = (char: string): string => {
     const codePoint = char.codePointAt(0) ?? 0;
     return `U+${codePoint.toString(16).toUpperCase().padStart(4, "0")}`;
   }
-  return `"${char}"`;
+  // A double-quote wrapped in quotes reads as an ambiguous run of quotes;
+  // wrap in single quotes so the character stays legible.
+  return char === '"' ? `'${char}'` : `"${char}"`;
 };
 
 export function getRepCategoryViolation(

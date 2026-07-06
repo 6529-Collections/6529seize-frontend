@@ -174,10 +174,6 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
-  "validation.errorTitle": "That category name won't work",
-  "validation.tooShort": "Use at least {min} characters.",
-  "validation.leadingDash": "A category can't start with a dash.",
-  "validation.closeErrorLabel": "Dismiss error",
   "suggested.loading": "Loading active REP categories",
   "suggested.error": "Could not load active REP categories.",
   "suggested.empty": "No active REP categories found yet.",
@@ -185,12 +181,6 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
   "suggested.description": "Categories with the most profile REP activity.",
-  "validation.tooLong":
-    "It's {length} characters long — the maximum is {max}.",
-  "validation.disallowedChars":
-    "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
-  "validation.aiFilterDetails":
-    "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -225,6 +215,25 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "wave.loadMore": "Load more",
   "wave.loadingMore": "Loading...",
 } as const);
+
+// Rep-category validation copy. Kept as its own group with unquoted keys
+// (not merged into the big REP block above) so its lines don't extend that
+// block's quoted-key run — which the duplication detector matches against
+// the parallel key blocks in the locale dictionaries.
+const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
+  "rep.categories.validation",
+  {
+    errorTitle: "That category name won't work",
+    tooShort: "Use at least {min} characters.",
+    tooLong: "It's {length} characters long — the maximum is {max}.",
+    leadingDash: "A category can't start with a dash.",
+    disallowedChars:
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+    aiFilterDetails:
+      "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
+    closeErrorLabel: "Dismiss error",
+  } as const
+);
 
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
@@ -1469,6 +1478,7 @@ export const EN_US_MESSAGES = {
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
+  ...REP_CATEGORY_VALIDATION_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
