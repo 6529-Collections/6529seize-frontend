@@ -27,6 +27,7 @@ import {
   getRequestHeaderString,
   getRequestPathname,
   getRoutePathFromString,
+  getRuntimeUserAgentString,
   getStringValue,
   hasReactDomRemoveChildRoute,
   hasRouteParameterizationRoute,
@@ -175,15 +176,6 @@ function getRouteParameterizationContextValues(
   );
 }
 
-function getRuntimeUserAgent(): string | undefined {
-  try {
-    const userAgent = globalThis.navigator?.userAgent;
-    return typeof userAgent === "string" ? userAgent : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 function getRouteParameterizationUserAgentValues(
   event: SentryClientEvent
 ): string[] {
@@ -191,7 +183,7 @@ function getRouteParameterizationUserAgentValues(
     getRequestHeaderString(event, "user-agent"),
     getStringValue(event.tags?.["user_agent"]),
     getStringValue(event.tags?.["userAgent"]),
-    getRuntimeUserAgent(),
+    getRuntimeUserAgentString(),
   ];
 
   return candidates.filter(

@@ -137,12 +137,7 @@ export function hasRouteParameterizationRoute(
 }
 
 export function hasReactDomRemoveChildRoute(event: SentryClientEvent): boolean {
-  return hasMatchingRoute(
-    event,
-    (path) =>
-      isWavesRoutePath(path) ||
-      isExactRoutePath(path, THE_MEMES_MINT_ROUTE_PATH)
-  );
+  return hasMatchingRoute(event, isRouteParameterizationRoutePath);
 }
 
 export function getUrlCandidatesFromText(value: string): string[] {
@@ -392,8 +387,12 @@ export function getRequestHeaderString(
 }
 
 export function getRuntimeUserAgentString(): string | undefined {
-  const userAgent = globalThis.navigator?.userAgent;
-  return typeof userAgent === "string" ? userAgent : undefined;
+  try {
+    const userAgent = globalThis.navigator?.userAgent;
+    return typeof userAgent === "string" ? userAgent : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function isFirstPartyHost(hostname: string): boolean {

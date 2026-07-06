@@ -168,17 +168,17 @@ const parseDiscussionResource = ({
   number,
 });
 
-const resourceParsers: Record<string, GithubResourceParser> = {
-  actions: parseActionsResource,
-  blob: parseBlobResource,
-  commit: parseCommitResource,
-  discussions: parseDiscussionResource,
-  issues: parseIssueResource,
-  pull: parsePullResource,
-  pulls: parseRepositoryResource,
-  releases: parseReleaseResource,
-  tree: parseTreeResource,
-};
+const resourceParsers = new Map<string, GithubResourceParser>([
+  ["actions", parseActionsResource],
+  ["blob", parseBlobResource],
+  ["commit", parseCommitResource],
+  ["discussions", parseDiscussionResource],
+  ["issues", parseIssueResource],
+  ["pull", parsePullResource],
+  ["pulls", parseRepositoryResource],
+  ["releases", parseReleaseResource],
+  ["tree", parseTreeResource],
+]);
 
 export const parseGithubResource = (rawUrl: string | null): GithubResource => {
   if (!rawUrl) {
@@ -215,7 +215,7 @@ export const parseGithubResource = (rawUrl: string | null): GithubResource => {
     return { ...base, kind: "repository" };
   }
 
-  const parser = resourceParsers[kindSegment] ?? throwUnsupportedGithubUrl;
+  const parser = resourceParsers.get(kindSegment) ?? throwUnsupportedGithubUrl;
   return parser({
     base,
     rest,
@@ -284,4 +284,6 @@ export const getResourceCacheKey = (resource: GithubResource): string => {
         resource.number,
       ]);
   }
+
+  return throwUnsupportedGithubUrl();
 };

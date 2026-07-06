@@ -87,17 +87,13 @@ export const browserExtensionUrlPrefixes = [
   "moz-extension://",
   "safari-web-extension://",
 ];
-export const appOwnedFramePathTokens = [
+const appOwnedFrameBasePathTokens = [
   "webpack-internal:///(app-",
   "/_next/static/",
-  "app:///app/",
-  "app:///components/",
-  "app:///contexts/",
-  "app:///hooks/",
-  "app:///lib/",
-  "app:///services/",
-  "app:///store/",
-  "app:///utils/",
+];
+export const appOwnedFramePathTokens = [
+  ...appOwnedFrameBasePathTokens,
+  ...appOwnedFramePathPrefixes.map((prefix) => `app:///${prefix}`),
 ];
 export const rabbyMobileUserRejectedCode = 4001;
 export const rabbyMobileUserRejectedMessage = "Not Allowed";
