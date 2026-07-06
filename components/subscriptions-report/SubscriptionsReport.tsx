@@ -391,7 +391,6 @@ export default function SubscriptionsReportComponent() {
               <tbody>
                 <SubscriptionsReportRow
                   tokenId={activeDrop.token_id}
-                  label={`Open The Memes card #${activeDrop.token_id} - ${activeDrop.name}`}
                   className="tw-bg-iron-800 hover:tw-bg-iron-700"
                 >
                   <ActiveSubscriptionDetails
@@ -444,7 +443,6 @@ export default function SubscriptionsReportComponent() {
                         <SubscriptionsReportRow
                           key={count.token_id}
                           tokenId={count.token_id}
-                          label={`Open The Memes card #${count.token_id}`}
                           ref={
                             index === animateFromIndex ? firstNewRowRef : null
                           }
@@ -532,7 +530,6 @@ export default function SubscriptionsReportComponent() {
                   <SubscriptionsReportRow
                     key={count.token_id}
                     tokenId={count.token_id}
-                    label={`Open The Memes card #${count.token_id} - ${count.name}`}
                     className={
                       index % 2 === 0
                         ? "tw-bg-iron-800 hover:tw-bg-iron-700"
