@@ -43,7 +43,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
   );
 
   return (
-    <Container className="tw-pt-2">
+    <Container fluid={section === AboutSection.TECH} className="tw-pt-2">
       <Row>
         <Col>
           <AboutContentsDropdown

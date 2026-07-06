@@ -6,8 +6,10 @@ private `/tools/6529bot/admin` operator page.
 ## Overview
 
 - `/tools`: direct secondary landing page for grouped tool navigation.
-- `/tools/api`: static guide for API authentication and multipart media-drop
-  requests.
+- `/tools/api`: static guide for API terminology, authentication quickstart,
+  and multipart media-drop requests.
+- `/tools/api/authentication`: external-client session-v2 API authentication
+  guide.
 - `/tools/block-finder`: estimate the closest block for a timestamp, or find
   block numbers that include selected sequences across a configurable window
   (`1 minute` to `2 days`).
@@ -21,25 +23,40 @@ private `/tools/6529bot/admin` operator page.
 ## Read Order
 
 1. Start with `Tools Index` for the grouped direct `/tools` landing page.
-2. Read `API Authentication and Media Drop Flow` for API auth, multipart
-   upload, and drop creation examples.
-3. Read `Block Finder` for timestamp lookup, include-sequence windows, and
+2. Read `API Authentication` for the full external-client session-v2 auth
+   guide.
+3. Read `API Authentication and Media Drop Flow` for the `/tools/api`
+   quickstart, multipart upload, and drop creation examples.
+4. Read `Block Finder` for timestamp lookup, include-sequence windows, and
    result detail actions.
-4. Read `Memes Subscriptions Report` for aggregate subscription reporting.
-5. Read `App Wallets Management` for native app-wallet setup, recovery, and
+5. Read `Memes Subscriptions Report` for aggregate subscription reporting.
+6. Read `App Wallets Management` for native app-wallet setup, recovery, and
    unsupported-state behavior.
-6. Read `6529bot Admin` for the private bot operator route and auth boundary.
+7. Read `6529bot Admin` for the private bot operator route and auth boundary.
 
 ## Route Coverage
 
 - `/tools`
 - `/tools/api`
+- `/tools/api/authentication`
 - `/tools/block-finder`
 - `/tools/subscriptions-report`
 - `/tools/app-wallets`
 - `/tools/app-wallets/import-wallet`
 - `/tools/app-wallets/{appWalletAddress}`
 - `/tools/6529bot/admin`
+
+## Localization Notes
+
+- The new authentication quickstart copy on `/tools/api` uses `en-US` source
+  messages with non-source locales falling back through the shared `t()` helper.
+- `/tools/api/authentication` uses route-local static en-US copy, and
+  `/tools/api` still has legacy hardcoded en-US copy in the Introduction, Key
+  terminology, and Creating drops with embedded media sections. Current
+  fallback behavior is direct en-US rendering. Owner: frontend docs and i18n
+  migration. Remediation path: move the API guide and remaining `/tools/api`
+  section headings, body copy, list items, and metadata into the shared message
+  system during the broader API page localization pass.
 
 ## Navigation and Visibility
 
@@ -71,11 +88,12 @@ private `/tools/6529bot/admin` operator page.
 ## Features
 
 1. [Tools Index](feature-tools-index.md)
-2. [API Authentication and Media Drop Flow](feature-api-authentication-and-media-drop-flow.md)
-3. [Block Finder](feature-block-finder.md)
-4. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
-5. [App Wallets Management](feature-app-wallets.md)
-6. [6529bot Admin](feature-6529bot-admin.md)
+2. [API Authentication](feature-api-authentication.md)
+3. [API Authentication and Media Drop Flow](feature-api-authentication-and-media-drop-flow.md)
+4. [Block Finder](feature-block-finder.md)
+5. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
+6. [App Wallets Management](feature-app-wallets.md)
+7. [6529bot Admin](feature-6529bot-admin.md)
 
 ## Flows
 

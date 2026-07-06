@@ -12,6 +12,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.css";
 import { AboutSection } from "@/types/enums";
+import clsx from "clsx";
 
 const WALLET_AUTH_LOCALE = DEFAULT_LOCALE;
 const WALLET_AUTH_TITLE = t(
@@ -30,15 +31,15 @@ export const metadata: Metadata = getAppMetadata({
 
 export default function WalletAuthenticationPage() {
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className={clsx(styles["main"], "tailwind-scope")}>
       <Container fluid className="tw-pt-4">
         <Row>
           <Col>
-            <Container className="tw-pt-2">
+            <Container fluid className="tw-pt-2">
               <Row>
                 <Col>
                   <AboutContentsDropdown currentSection={AboutSection.TECH} />
-                  <article className="tw-w-full tw-text-iron-200">
+                  <article className="tw-w-full tw-text-iron-50">
                     <Link
                       href="/about/tech"
                       className="hover:tw-text-primary-200 tw-mb-5 tw-inline-flex tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline"
@@ -49,19 +50,19 @@ export default function WalletAuthenticationPage() {
                       )}
                     </Link>
 
-                    <header className="tw-max-w-4xl tw-pb-4">
-                      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+                    <header className="tw-w-full tw-pb-4">
+                      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
                         {t(WALLET_AUTH_LOCALE, "about.tech.walletAuth.eyebrow")}
                       </p>
                       <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
                         {t(WALLET_AUTH_LOCALE, "about.tech.walletAuth.title")}
                       </h1>
-                      <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
+                      <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-50">
                         {t(WALLET_AUTH_LOCALE, "about.tech.walletAuth.lead")}
                       </p>
                     </header>
 
-                    <div className="tw-flex tw-max-w-4xl tw-flex-col tw-gap-8 tw-text-base tw-leading-7 tw-text-iron-300">
+                    <div className="tw-flex tw-w-full tw-flex-col tw-gap-8 tw-text-base tw-leading-7 tw-text-iron-50">
                       <section aria-labelledby="what-is-changing-heading">
                         <h2
                           id="what-is-changing-heading"
@@ -184,6 +185,33 @@ export default function WalletAuthenticationPage() {
                             )}
                           </li>
                         </ul>
+                      </section>
+
+                      <section aria-labelledby="api-builders-heading">
+                        <h2
+                          id="api-builders-heading"
+                          className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
+                        >
+                          {t(
+                            WALLET_AUTH_LOCALE,
+                            "about.tech.walletAuth.builders.title"
+                          )}
+                        </h2>
+                        <p className="tw-mb-3">
+                          {t(
+                            WALLET_AUTH_LOCALE,
+                            "about.tech.walletAuth.builders.body"
+                          )}
+                        </p>
+                        <Link
+                          href="/tools/api/authentication"
+                          className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline"
+                        >
+                          {t(
+                            WALLET_AUTH_LOCALE,
+                            "about.tech.walletAuth.builders.link"
+                          )}
+                        </Link>
                       </section>
                     </div>
                   </article>
