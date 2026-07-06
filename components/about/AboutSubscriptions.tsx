@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -60,6 +62,16 @@ export default function AboutSubscriptions() {
                   who choose to use them
                 </li>
               </ul>
+            </li>
+            <li className="tw-mt-2">
+              You can monitor aggregate projected and redeemed subscription
+              counts in the{" "}
+              <Link
+                href="/tools/subscriptions-report"
+                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-transition-colors"
+              >
+                Subscriptions Report
+              </Link>
             </li>
           </ul>
         </Col>

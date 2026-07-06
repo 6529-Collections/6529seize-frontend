@@ -13,8 +13,8 @@ private `/tools/6529bot/admin` operator page.
 - `/tools/block-finder`: estimate the closest block for a timestamp, or find
   block numbers that include selected sequences across a configurable window
   (`1 minute` to `2 days`).
-- `/tools/subscriptions-report`: read-only aggregate counts for upcoming and
-  redeemed The Memes subscriptions.
+- `/tools/subscriptions-report`: read-only aggregate counts for active,
+  upcoming, and redeemed The Memes subscriptions.
 - `/tools/app-wallets*`: create, import, and manage app-local wallets when
   runtime app-wallet support is available (supported native app environments).
 - `/tools/6529bot/admin`: private operator dashboard for central

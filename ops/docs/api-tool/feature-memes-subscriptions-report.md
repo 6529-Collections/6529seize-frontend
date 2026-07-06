@@ -5,9 +5,13 @@
 `/tools/subscriptions-report` is a read-only report for aggregate The Memes
 subscription counts.
 
-- `Upcoming Drops`: aggregate counts for upcoming cards.
+- `Active Drop`: shown on mint days after the current card has redeemed data;
+  compares projected subscriptions with actual redeemed subscriptions and keeps
+  the card out of the other sections.
+- `Upcoming Drops`: aggregate projected counts for upcoming cards.
 - `Past Drops`: aggregate redeemed counts for minted cards.
-- Header actions: `My Subscriptions` (conditional) and `Learn More`.
+- Header actions: `Manage` / `Connect to Subscribe` (same profile-subscription
+  navigation as `/about/subscriptions`) and `Learn More`.
 
 ## Location in the Site
 
@@ -23,26 +27,36 @@ subscription counts.
 - Open from `About -> Data & Developer Tools` (when visible in current nav).
 - Open `/tools/subscriptions-report` directly (route always loads).
 - Use header actions:
-  - `My Subscriptions` -> `/{your-handle}/subscriptions` (when shown)
+  - `Manage` -> authenticates and opens `/{your-handle}/subscriptions`
+  - `Connect to Subscribe` -> starts wallet connection, then opens profile
+    subscriptions after authentication
   - `Learn More` -> `/about/subscriptions`
 
 ## User Journey
 
 1. Open `/tools/subscriptions-report`.
 2. Wait for initial load to finish.
-3. Review `Upcoming Drops` and optionally expand with `Show More`.
-4. Review `Past Drops` rows (thumbnail, token link, season/date, count).
-5. Use past pagination when total redeemed count is above 20.
-6. Use header actions (`My Subscriptions`, `Learn More`) as needed.
+3. When present, review `Active Drop` for the current card thumbnail, link,
+   season/date, projected subscriptions, and actual redeemed subscriptions.
+4. Review `Upcoming Drops` and optionally expand with `Show More`.
+5. Review `Past Drops` rows (thumbnail, token link, season/date, count).
+6. Use past pagination when total redeemed count is above 10.
+7. Use header actions (`Manage` / `Connect to Subscribe`, `Learn More`) as
+   needed.
 
 ## Data and Rendering Rules
 
 - Initial load fetches past page `1` first, then fetches upcoming counts.
 - Upcoming endpoint: `subscriptions/upcoming-memes-counts?card_count=<count>`.
-- Past endpoint: `subscriptions/redeemed-memes-counts?page_size=20&page=<page>`.
-- Past page size is fixed at `20`.
+- Active projected endpoint:
+  `subscriptions/memes/{token_id}/count`.
+- Past endpoint: `subscriptions/redeemed-memes-counts?page_size=10&page=<page>`.
+- Past page size is fixed at `10`.
 - Upcoming labels use mint-calendar ordering and `SZN <number> / <date>`.
-- Upcoming table shows first `10` rows until expanded.
+- Upcoming table shows first `5` rows until expanded.
+- When today's card appears in the redeemed response on a mint day, that token
+  is rendered only in `Active Drop`; it is filtered out of both upcoming and
+  past tables.
 - Past rows include image thumbnail and token link to `/the-memes/{token_id}`.
 
 ## Visibility and State Rules
@@ -50,10 +64,15 @@ subscription counts.
 - The route itself is not geo-blocked.
 - On iOS outside the US, this route is hidden from web sidebar and search.
 - Native app drawer uses the same `Subscriptions Report` label when visible.
-- `My Subscriptions` is hidden when no profile is connected.
-- On iOS, `My Subscriptions` is shown only when country is `US`.
-- `Show More` / `Show Less` appears only when upcoming rows are greater than 10.
-- Past pagination appears only when redeemed total count is greater than 20.
+- The profile-subscription action is hidden when subscription controls are
+  geo/platform hidden.
+- `Manage` appears when the connected authenticated profile can open profile
+  subscriptions directly.
+- `Connect to Subscribe` appears when a profile route is not available yet and
+  starts the same connection/authentication handoff used on
+  `/about/subscriptions`.
+- `Show More` / `Show Less` appears only when upcoming rows are greater than 5.
+- Past pagination appears only when redeemed total count is greater than 10.
 - Empty sections render `No Subscriptions Found`.
 
 ## Loading, Failure, and Recovery
@@ -73,7 +92,8 @@ subscription counts.
 
 - This page does not edit subscriptions.
 - Counts are aggregate totals, not wallet-specific allocations.
-- `My Subscriptions` is a shortcut into profile subscriptions routes.
+- `Manage` / `Connect to Subscribe` is a shortcut into profile subscriptions
+  routes and authentication.
 - `/open-data/meme-subscriptions` is a dataset-download list, not this live
   aggregate report.
 
