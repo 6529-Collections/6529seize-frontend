@@ -53,6 +53,7 @@ describe("MentionsPlugin", () => {
     render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
     expect(capturedProps.options).toHaveLength(1);
     expect(capturedProps.options[0]).toBeInstanceOf(MentionTypeaheadOption);
+    expect(capturedProps.anchorClassName).toBe("tailwind-scope tw-z-[1020]");
 
     act(() => {
       capturedProps.onOpen();
