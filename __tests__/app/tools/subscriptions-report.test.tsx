@@ -6,11 +6,18 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 
 const mockDownload = jest.fn();
+const mockRouterPush = jest.fn();
 const mockUseDownloader = jest.fn();
 
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
   default: (...args: any[]) => mockUseDownloader(...args),
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockRouterPush,
+  }),
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
@@ -61,6 +68,7 @@ jest.mock("@/services/api/common-api", () => ({
 const { commonApiFetch } = require("@/services/api/common-api");
 const {
   getCardsRemainingUntilEndOf,
+  getUpcomingMintsAcrossSeasons,
   isMintingToday,
 } = require("@/components/meme-calendar/meme-calendar.helpers");
 
@@ -111,8 +119,10 @@ describe("Subscriptions report page", () => {
     jest.clearAllMocks();
     commonApiFetch.mockImplementation(mockDefaultCommonApiFetch);
     getCardsRemainingUntilEndOf.mockReturnValue(2);
+    getUpcomingMintsAcrossSeasons.mockReturnValue([]);
     isMintingToday.mockReturnValue(false);
     mockDownload.mockClear();
+    mockRouterPush.mockClear();
     mockUseDownloader.mockReturnValue({
       download: mockDownload,
       error: null,
@@ -209,8 +219,8 @@ describe("Subscriptions report page", () => {
       "subscriptions-report-active-drop"
     );
     expect(activeDrop).toHaveTextContent("#700 - Active Meme");
-    expect(activeDrop).toHaveTextContent("Projected");
-    expect(activeDrop).toHaveTextContent("Actual");
+    expect(activeDrop).toHaveTextContent("Subscribed");
+    expect(activeDrop).toHaveTextContent("Airdropped");
     expect(activeDrop).toHaveTextContent("11");
     expect(activeDrop).toHaveTextContent("4");
 
@@ -224,6 +234,192 @@ describe("Subscriptions report page", () => {
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "subscriptions/upcoming-memes-counts?card_count=2",
     });
+  });
+
+  it("opens meme card routes from active, upcoming, and past rows", async () => {
+    const user = userEvent.setup();
+
+    isMintingToday.mockReturnValue(true);
+    getUpcomingMintsAcrossSeasons.mockReturnValue([
+      {
+        seasonIndex: 15,
+        utcDay: new Date("2026-01-03T00:00:00.000Z"),
+      },
+    ]);
+    commonApiFetch.mockImplementation((opts: any) => {
+      if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
+        return Promise.resolve({
+          count: 2,
+          page: 1,
+          next: null,
+          data: [
+            {
+              contract: "0xmemes",
+              token_id: 700,
+              count: 4,
+              name: "Active Meme",
+              image_url: "https://images.test/active.png",
+              mint_date: new Date().toISOString(),
+              szn: 15,
+            },
+            {
+              contract: "0xmemes",
+              token_id: 699,
+              count: 9,
+              name: "Past Meme",
+              image_url: "https://images.test/past.png",
+              mint_date: "2026-01-01T00:00:00.000Z",
+              szn: 14,
+            },
+          ],
+        });
+      }
+
+      if (opts?.endpoint === "subscriptions/memes/700/count") {
+        return Promise.resolve({
+          contract: "0xmemes",
+          token_id: 700,
+          count: 11,
+        });
+      }
+
+      if (
+        opts?.endpoint === "subscriptions/upcoming-memes-counts?card_count=2"
+      ) {
+        return Promise.resolve([
+          {
+            contract: "0xmemes",
+            token_id: 701,
+            count: 8,
+          },
+        ]);
+      }
+
+      if (opts?.endpoint === "new_memes_seasons") {
+        return Promise.resolve([]);
+      }
+
+      return Promise.resolve([]);
+    });
+
+    render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <CookieConsentProvider>
+          <Page />
+        </CookieConsentProvider>
+      </AuthContext.Provider>
+    );
+
+    const activeRow = await screen.findByRole("link", {
+      name: "Open The Memes card #700 - Active Meme",
+    });
+    await user.click(activeRow);
+    expect(mockRouterPush).toHaveBeenLastCalledWith("/the-memes/700");
+
+    const upcomingLink = screen.getByRole("link", {
+      name: "View The Memes card #701",
+    });
+    expect(upcomingLink).toHaveAttribute("href", "/the-memes/701");
+
+    const upcomingRow = screen.getByRole("link", {
+      name: "Open The Memes card #701",
+    });
+    await user.click(upcomingRow);
+    expect(mockRouterPush).toHaveBeenLastCalledWith("/the-memes/701");
+
+    const pastRow = screen.getByRole("link", {
+      name: "Open The Memes card #699 - Past Meme",
+    });
+    pastRow.focus();
+    await user.keyboard("{Enter}");
+    expect(mockRouterPush).toHaveBeenLastCalledWith("/the-memes/699");
+  });
+
+  it("formats active, upcoming, and past counts with locale separators", async () => {
+    isMintingToday.mockReturnValue(true);
+    getUpcomingMintsAcrossSeasons.mockReturnValue([
+      {
+        seasonIndex: 15,
+        utcDay: new Date("2026-01-03T00:00:00.000Z"),
+      },
+    ]);
+    commonApiFetch.mockImplementation((opts: any) => {
+      if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
+        return Promise.resolve({
+          count: 2,
+          page: 1,
+          next: null,
+          data: [
+            {
+              contract: "0xmemes",
+              token_id: 700,
+              count: 1000,
+              name: "Active Meme",
+              image_url: "https://images.test/active.png",
+              mint_date: new Date().toISOString(),
+              szn: 15,
+            },
+            {
+              contract: "0xmemes",
+              token_id: 699,
+              count: 9876,
+              name: "Past Meme",
+              image_url: "https://images.test/past.png",
+              mint_date: "2026-01-01T00:00:00.000Z",
+              szn: 14,
+            },
+          ],
+        });
+      }
+
+      if (opts?.endpoint === "subscriptions/memes/700/count") {
+        return Promise.resolve({
+          contract: "0xmemes",
+          token_id: 700,
+          count: 1234,
+        });
+      }
+
+      if (
+        opts?.endpoint === "subscriptions/upcoming-memes-counts?card_count=2"
+      ) {
+        return Promise.resolve([
+          {
+            contract: "0xmemes",
+            token_id: 701,
+            count: 4567,
+          },
+        ]);
+      }
+
+      if (opts?.endpoint === "new_memes_seasons") {
+        return Promise.resolve([]);
+      }
+
+      return Promise.resolve([]);
+    });
+
+    render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <CookieConsentProvider>
+          <Page />
+        </CookieConsentProvider>
+      </AuthContext.Provider>
+    );
+
+    const activeDrop = await screen.findByTestId(
+      "subscriptions-report-active-drop"
+    );
+    expect(activeDrop).toHaveTextContent("1,234");
+    expect(activeDrop).toHaveTextContent("1,000");
+
+    const upcomingDrops = screen.getByTestId(
+      "subscriptions-report-upcoming-drops"
+    );
+    expect(within(upcomingDrops).getByText("4,567")).toBeInTheDocument();
+
+    const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
+    expect(within(pastDrops).getByText("9,876")).toBeInTheDocument();
   });
 
   it("keeps active and past drops when upcoming counts fail", async () => {
