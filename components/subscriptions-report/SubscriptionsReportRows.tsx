@@ -68,8 +68,11 @@ function ReportCountStat(
     label: string;
     value: string;
     active?: boolean;
+    showMobileLabel?: boolean;
   }>
 ) {
+  const showMobileLabel = props.showMobileLabel ?? props.active ?? false;
+
   return (
     <span
       className={[
@@ -79,9 +82,13 @@ function ReportCountStat(
           : "tw-shrink-0 tw-items-end sm:tw-items-center",
       ].join(" ")}
     >
-      <span className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-gray-400 sm:tw-hidden">
-        {props.label}
-      </span>
+      {showMobileLabel ? (
+        <span className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-gray-400 sm:tw-hidden">
+          {props.label}
+        </span>
+      ) : (
+        <span className="tw-sr-only">{props.label}: </span>
+      )}
       <span className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white sm:tw-text-base sm:tw-font-normal">
         {props.value}
       </span>
