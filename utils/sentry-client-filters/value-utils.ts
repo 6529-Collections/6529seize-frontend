@@ -91,27 +91,21 @@ export function getRoutePathFromString(value: string): string | null {
   }
 }
 
-export function isRoutePathAtOrBelow(
-  path: string | null,
-  routePath: string
-): boolean {
+function isRoutePathAtOrBelow(path: string | null, routePath: string): boolean {
   return (
     path !== null && (path === routePath || path.startsWith(`${routePath}/`))
   );
 }
 
-export function isExactRoutePath(
-  path: string | null,
-  routePath: string
-): boolean {
+function isExactRoutePath(path: string | null, routePath: string): boolean {
   return path !== null && (path === routePath || path === `${routePath}/`);
 }
 
-export function isWavesRoutePath(path: string | null): boolean {
+function isWavesRoutePath(path: string | null): boolean {
   return isRoutePathAtOrBelow(path, WAVES_ROUTE_PATH);
 }
 
-export function hasMatchingRoute(
+function hasMatchingRoute(
   event: SentryClientEvent,
   predicate: (path: string | null) => boolean
 ): boolean {
@@ -163,7 +157,7 @@ export function getUrlCandidatesFromText(value: string): string[] {
   return urls;
 }
 
-export function isParenthesizedNetworkTargetUrl(value: string): boolean {
+function isParenthesizedNetworkTargetUrl(value: string): boolean {
   const candidate = value.trim();
   return candidate.startsWith("/") || /^https?:\/\//i.test(candidate);
 }
@@ -193,7 +187,7 @@ export function isFilteredUrl(value: string | undefined): boolean {
   }
 }
 
-export function isUnknownPlaceholderToken(value: string): boolean {
+function isUnknownPlaceholderToken(value: string): boolean {
   return value === "unknown" || value === "/unknown";
 }
 
@@ -287,7 +281,7 @@ export function getBreadcrumbValues(
   return [];
 }
 
-export function getHintException(hint?: SentryEventHint): unknown {
+function getHintException(hint?: SentryEventHint): unknown {
   return hint?.originalException ?? hint?.syntheticException;
 }
 
@@ -382,7 +376,7 @@ export function isFirstPartyHost(hostname: string): boolean {
   return normalized === "6529.io" || normalized.endsWith(".6529.io");
 }
 
-export function isFirstPartyApiHost(hostname: string): boolean {
+function isFirstPartyApiHost(hostname: string): boolean {
   const labels = hostname.toLowerCase().split(".");
   if (labels.length === 3) {
     return labels[0] === "api" && labels[1] === "6529" && labels[2] === "io";

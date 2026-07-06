@@ -26,7 +26,7 @@ import {
   isFirstPartyHost,
 } from "./value-utils";
 
-export function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
+function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
   const paths = getFramePaths(frame);
   if (
     paths.some((path) =>
@@ -49,7 +49,7 @@ export function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
   );
 }
 
-export function hasOnlyReactDomRuntimeFrames(
+function hasOnlyReactDomRuntimeFrames(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return (
@@ -75,19 +75,19 @@ export function hasReactDomNotFoundErrorSignature(
   return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
 }
 
-export function isAppUriFrame(frame: SentryStackFrame): boolean {
+function isAppUriFrame(frame: SentryStackFrame): boolean {
   return [frame.filename, frame.abs_path].some(
     (path) => typeof path === "string" && path.startsWith("app:///")
   );
 }
 
-export function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
+function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
   return [frame.filename, frame.abs_path].some(
     (path) => typeof path === "string" && path.includes(injectedAppUriPath)
   );
 }
 
-export function isInjectedProviderProxyFrame(frame: SentryStackFrame): boolean {
+function isInjectedProviderProxyFrame(frame: SentryStackFrame): boolean {
   return getFramePaths(frame).some((path) =>
     path.includes(injectedProviderProxyPath)
   );
@@ -103,7 +103,7 @@ export function hasOnlyInjectedProviderProxyFrames(
   );
 }
 
-export function isInjectedWasmCspFramePath(path: string): boolean {
+function isInjectedWasmCspFramePath(path: string): boolean {
   const normalizedPath = path.trim();
   return (
     normalizedPath.includes(injectedWasmCspAppUriPath) ||
@@ -112,11 +112,11 @@ export function isInjectedWasmCspFramePath(path: string): boolean {
   );
 }
 
-export function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
+function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
   return getFramePaths(frame).some(isInjectedWasmCspFramePath);
 }
 
-export function isFirstPartyFramePath(path: string): boolean {
+function isFirstPartyFramePath(path: string): boolean {
   const normalizedPath = path.trim();
   if (!normalizedPath) {
     return false;
@@ -140,7 +140,7 @@ export function isFirstPartyFramePath(path: string): boolean {
   }
 }
 
-export function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
+function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
   if (frame.in_app === true && !isInjectedWasmCspFrame(frame)) {
     return true;
   }
@@ -166,7 +166,7 @@ export function isInjectedOrThirdPartyWalletExtensionPath(
   );
 }
 
-export function isAppOwnedFramePath(value: string): boolean {
+function isAppOwnedFramePath(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   if (isInjectedOrThirdPartyWalletExtensionPath(normalizedValue)) {
     return false;
@@ -175,7 +175,7 @@ export function isAppOwnedFramePath(value: string): boolean {
   return hasAppOwnedFramePathSignature(normalizedValue);
 }
 
-export function hasAppOwnedFramePathSignature(value: string): boolean {
+function hasAppOwnedFramePathSignature(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return appOwnedFramePathTokens.some((token) =>
     normalizedValue.includes(token)
@@ -210,7 +210,7 @@ export function hasInjectedWasmCspFrameSignature(
   return frames.some(isInjectedWasmCspFrame);
 }
 
-export function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
+function isNativeJsonStringifyFrame(frame: SentryStackFrame): boolean {
   if (frame.function !== "stringify") {
     return false;
   }
@@ -229,7 +229,7 @@ export function hasAppOwnedFrame(
   );
 }
 
-export function hasAppOwnedNonExtensionFrame(
+function hasAppOwnedNonExtensionFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return (
@@ -267,7 +267,7 @@ export function hasNativeJsonStringifyFrame(
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
 }
 
-export function isSentryRouteParameterizationPath(path: string): boolean {
+function isSentryRouteParameterizationPath(path: string): boolean {
   return (
     path.includes(sentryRouteParameterizationPathToken) &&
     sentryPackagePathTokens.some((token) => path.includes(token))
@@ -285,7 +285,7 @@ export function hasSentryRouteParameterizationFrame(
   );
 }
 
-export function isGifPickerTenorManagerPath(path: string | undefined): boolean {
+function isGifPickerTenorManagerPath(path: string | undefined): boolean {
   return (
     typeof path === "string" &&
     path.includes(gifPickerReactPackageToken) &&
@@ -324,7 +324,7 @@ export function hasLikelyAppOwnedFrame(
   );
 }
 
-export function normalizeStackPath(value: string): string {
+function normalizeStackPath(value: string): string {
   const webpackPrefix = "webpack-internal:///";
   const webpackSourcePrefix = "webpack://_n_e/./";
   const appUriPrefix = "app:///";
@@ -356,7 +356,7 @@ export function normalizeStackPath(value: string): string {
   return normalized;
 }
 
-export function isAppOwnedStackPath(value: string | undefined): boolean {
+function isAppOwnedStackPath(value: string | undefined): boolean {
   if (typeof value !== "string" || value.length === 0) {
     return false;
   }
@@ -386,14 +386,14 @@ export function hasAppOwnedSourceStackValue(value: string): boolean {
   return getStackFramePathCandidates(value).some(isAppOwnedStackPath);
 }
 
-export function getStackFramePathCandidates(value: string): string[] {
+function getStackFramePathCandidates(value: string): string[] {
   return value
     .split("\n")
     .map(getStackFramePathCandidate)
     .filter((candidate): candidate is string => !!candidate);
 }
 
-export function getStackFramePathCandidate(line: string): string | null {
+function getStackFramePathCandidate(line: string): string | null {
   const trimmed = line.trim();
   if (!trimmed) {
     return null;

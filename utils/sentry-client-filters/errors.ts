@@ -53,7 +53,7 @@ import {
   hasSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
 
-export function shouldFilterFilenameExceptions(
+function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   if (!frames) {
@@ -68,7 +68,7 @@ export function shouldFilterFilenameExceptions(
   );
 }
 
-export function shouldFilterExceptionStack(hint?: SentryEventHint): boolean {
+function shouldFilterExceptionStack(hint?: SentryEventHint): boolean {
   const exception = hint?.originalException ?? hint?.syntheticException;
   if (!(exception instanceof Error)) {
     return false;
@@ -80,15 +80,13 @@ export function shouldFilterExceptionStack(hint?: SentryEventHint): boolean {
   return filenameExceptions.some((pattern) => stack.includes(pattern));
 }
 
-export function hasGifPickerTenorFailureBreadcrumb(
-  event: SentryClientEvent
-): boolean {
+function hasGifPickerTenorFailureBreadcrumb(event: SentryClientEvent): boolean {
   return getBreadcrumbMessages(event).some((message) =>
     message.includes(gifPickerTenorFailureMessage)
   );
 }
 
-export function isTenorCategoriesPath(value: string | undefined): boolean {
+function isTenorCategoriesPath(value: string | undefined): boolean {
   if (getRequestPathname(value) === tenorCategoriesPath) {
     return true;
   }
@@ -96,7 +94,7 @@ export function isTenorCategoriesPath(value: string | undefined): boolean {
   return typeof value === "string" && value.includes(tenorCategoriesPath);
 }
 
-export function hasTenorCategoriesRequestBreadcrumb(
+function hasTenorCategoriesRequestBreadcrumb(
   event: SentryClientEvent
 ): boolean {
   return getBreadcrumbValues(event).some((breadcrumb) => {
@@ -122,7 +120,7 @@ export function hasTenorCategoriesRequestBreadcrumb(
   });
 }
 
-export function hasGifPickerTenorBreadcrumbSignature(
+function hasGifPickerTenorBreadcrumbSignature(
   event: SentryClientEvent
 ): boolean {
   return (
@@ -131,7 +129,7 @@ export function hasGifPickerTenorBreadcrumbSignature(
   );
 }
 
-export function hasRouteParameterizationNavigationBreadcrumb(
+function hasRouteParameterizationNavigationBreadcrumb(
   event: SentryClientEvent
 ): boolean {
   return getBreadcrumbValues(event).some((breadcrumb) => {
@@ -159,7 +157,7 @@ export function hasRouteParameterizationRouteEvidence(
   );
 }
 
-export function getRouteParameterizationContextValues(
+function getRouteParameterizationContextValues(
   event: SentryClientEvent
 ): string[] {
   const contextValues = routeParameterizationContextKeys.flatMap((key) => {
@@ -177,7 +175,7 @@ export function getRouteParameterizationContextValues(
   );
 }
 
-export function getRuntimeUserAgent(): string | undefined {
+function getRuntimeUserAgent(): string | undefined {
   try {
     const userAgent = globalThis.navigator?.userAgent;
     return typeof userAgent === "string" ? userAgent : undefined;
@@ -186,7 +184,7 @@ export function getRuntimeUserAgent(): string | undefined {
   }
 }
 
-export function getRouteParameterizationUserAgentValues(
+function getRouteParameterizationUserAgentValues(
   event: SentryClientEvent
 ): string[] {
   const candidates = [
@@ -201,7 +199,7 @@ export function getRouteParameterizationUserAgentValues(
   );
 }
 
-export function matchesContextToken(value: string, tokens: string[]): boolean {
+function matchesContextToken(value: string, tokens: string[]): boolean {
   const normalized = value.toLowerCase();
   return tokens.some((token) => normalized.includes(token));
 }
@@ -228,7 +226,7 @@ export function hasMetaMaskMobileWebViewContext(
   );
 }
 
-export function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
+function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return (
     (normalizedValue.includes("webassembly.instantiate") ||
@@ -239,7 +237,7 @@ export function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
   );
 }
 
-export function hasWasmCspUnsafeEvalMessage(
+function hasWasmCspUnsafeEvalMessage(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {

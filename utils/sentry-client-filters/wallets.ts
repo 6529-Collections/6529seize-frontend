@@ -61,7 +61,7 @@ import {
   isInjectedOrThirdPartyWalletExtensionPath,
 } from "./app-frame-utils";
 
-export function matchesRabbyMobileUserRejectedStack(
+function matchesRabbyMobileUserRejectedStack(
   value: string | undefined
 ): boolean {
   const normalized = value?.toLowerCase();
@@ -71,7 +71,7 @@ export function matchesRabbyMobileUserRejectedStack(
   );
 }
 
-export function hasRabbyMobileUserRejectedStack(
+function hasRabbyMobileUserRejectedStack(
   serializedStack: string | undefined,
   hint?: SentryEventHint
 ): boolean {
@@ -80,7 +80,7 @@ export function hasRabbyMobileUserRejectedStack(
   );
 }
 
-export function hasAppOwnedStackEvidence(
+function hasAppOwnedStackEvidence(
   event: SentryClientEvent,
   serializedStack: string | undefined,
   hint?: SentryEventHint
@@ -133,9 +133,7 @@ export function hasCoinbaseWalletLinkWebSocketCloseFunction(
   );
 }
 
-export function hasCoinbaseWalletLinkWebSocketStack(
-  hint?: SentryEventHint
-): boolean {
+function hasCoinbaseWalletLinkWebSocketStack(hint?: SentryEventHint): boolean {
   const stack = getHintExceptionStack(hint);
   return (
     stack.includes(coinbaseWalletLinkWebSocketFile) &&
@@ -151,7 +149,7 @@ export function hasCoinbaseWalletLinkWebSocketCloseStack(
   );
 }
 
-export function hasCoinbaseWalletLinkWebSocketSerializedStack(
+function hasCoinbaseWalletLinkWebSocketSerializedStack(
   event: SentryClientEvent
 ): boolean {
   const stack = getSerializedExceptionStack(event);
@@ -161,7 +159,7 @@ export function hasCoinbaseWalletLinkWebSocketSerializedStack(
   );
 }
 
-export function hasCoinbaseWalletLinkWebSocketSerializedCloseStack(
+function hasCoinbaseWalletLinkWebSocketSerializedCloseStack(
   event: SentryClientEvent
 ): boolean {
   return getSerializedExceptionStack(event).includes(
@@ -169,7 +167,7 @@ export function hasCoinbaseWalletLinkWebSocketSerializedCloseStack(
   );
 }
 
-export function addBreadcrumbSignatureValues(
+function addBreadcrumbSignatureValues(
   value: unknown,
   values: string[],
   depth: number
@@ -202,7 +200,7 @@ export function addBreadcrumbSignatureValues(
   });
 }
 
-export function getBreadcrumbSignatureText(event: SentryClientEvent): string {
+function getBreadcrumbSignatureText(event: SentryClientEvent): string {
   const values: string[] = [];
   getBreadcrumbValues(event).forEach((breadcrumb) => {
     addBreadcrumbSignatureValues(
@@ -215,7 +213,7 @@ export function getBreadcrumbSignatureText(event: SentryClientEvent): string {
   return values.join("\n").toLowerCase();
 }
 
-export function hasThirdPartyWalletAppKitBreadcrumbSignature(
+function hasThirdPartyWalletAppKitBreadcrumbSignature(
   event: SentryClientEvent
 ): boolean {
   const text = getBreadcrumbSignatureText(event);
@@ -233,7 +231,7 @@ export function hasThirdPartyWalletAppKitBreadcrumbSignature(
   return hasAppKitToken && hasConnectorToken;
 }
 
-export function hasWalletLinkWebSocketUnhandledRejectionSignature(
+function hasWalletLinkWebSocketUnhandledRejectionSignature(
   value: SentryExceptionValue | undefined,
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -247,7 +245,7 @@ export function hasWalletLinkWebSocketUnhandledRejectionSignature(
   );
 }
 
-export function hasBrowserUnhandledRejectionMechanism(
+function hasBrowserUnhandledRejectionMechanism(
   value: SentryExceptionValue | undefined
 ): boolean {
   return (
@@ -256,7 +254,7 @@ export function hasBrowserUnhandledRejectionMechanism(
   );
 }
 
-export function hasAppOwnedWalletLinkWebSocket1006Evidence(
+function hasAppOwnedWalletLinkWebSocket1006Evidence(
   event: SentryClientEvent,
   value: SentryExceptionValue | undefined,
   hint?: SentryEventHint
@@ -270,7 +268,7 @@ export function hasAppOwnedWalletLinkWebSocket1006Evidence(
   );
 }
 
-export function hasThirdPartyWalletLinkWebSocket1006Evidence(
+function hasThirdPartyWalletLinkWebSocket1006Evidence(
   event: SentryClientEvent,
   value: SentryExceptionValue | undefined,
   hint?: SentryEventHint
@@ -283,15 +281,13 @@ export function hasThirdPartyWalletLinkWebSocket1006Evidence(
   );
 }
 
-export function isWalletConnectStaleSessionTopicMessage(
-  value: string
-): boolean {
+function isWalletConnectStaleSessionTopicMessage(value: string): boolean {
   return walletConnectStaleSessionTopicPattern.test(
     normalizeErrorPrefix(value)
   );
 }
 
-export function hasWalletConnectStaleSessionFrame(
+function hasWalletConnectStaleSessionFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return (
@@ -306,7 +302,7 @@ export function hasWalletConnectStaleSessionFrame(
   );
 }
 
-export function hasAppOwnedWalletConnectStaleSessionEvidence(
+function hasAppOwnedWalletConnectStaleSessionEvidence(
   event: SentryClientEvent,
   value: SentryExceptionValue | undefined,
   hint?: SentryEventHint
@@ -326,7 +322,7 @@ export function matchesWalletCollisionPattern(value: string): boolean {
   );
 }
 
-export function hasInjectedAppUriSignature(
+function hasInjectedAppUriSignature(
   frames: SentryStackFrame[] | undefined,
   hint?: SentryEventHint
 ): boolean {
@@ -348,7 +344,7 @@ export function hasInjectedAppUriSignature(
   return hasOnlyAppUriFrames(frames);
 }
 
-export function hasWalletCollisionSignature(
+function hasWalletCollisionSignature(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
@@ -366,7 +362,7 @@ export function hasWalletCollisionSignature(
   );
 }
 
-export function hasTalismanExtensionOnboardingMessage(
+function hasTalismanExtensionOnboardingMessage(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
@@ -384,7 +380,7 @@ export function hasTalismanExtensionOnboardingMessage(
   );
 }
 
-export function hasInjectedOrThirdPartyWalletExtensionSignature(
+function hasInjectedOrThirdPartyWalletExtensionSignature(
   frames: SentryStackFrame[] | undefined,
   hint?: SentryEventHint
 ): boolean {
@@ -393,7 +389,7 @@ export function hasInjectedOrThirdPartyWalletExtensionSignature(
   );
 }
 
-export function hasOnlyThirdPartyWalletExtensionFrames(
+function hasOnlyThirdPartyWalletExtensionFrames(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   if (!Array.isArray(frames) || frames.length === 0) {
@@ -407,9 +403,7 @@ export function hasOnlyThirdPartyWalletExtensionFrames(
   );
 }
 
-export function isThirdPartyWalletExtensionStack(
-  value: string | undefined
-): boolean {
+function isThirdPartyWalletExtensionStack(value: string | undefined): boolean {
   const stack = value?.toLowerCase();
   if (!stack) {
     return false;
@@ -431,7 +425,7 @@ export function isThirdPartyWalletExtensionStack(
   );
 }
 
-export function hasCircularReactMetaElementMessage(
+function hasCircularReactMetaElementMessage(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
@@ -451,7 +445,7 @@ export function hasCircularReactMetaElementMessage(
   );
 }
 
-export function hasMetaMaskUpdateUrlJsonStringifySignature(
+function hasMetaMaskUpdateUrlJsonStringifySignature(
   frames: SentryStackFrame[] | undefined,
   hint?: SentryEventHint
 ): boolean {
@@ -464,7 +458,7 @@ export function hasMetaMaskUpdateUrlJsonStringifySignature(
   );
 }
 
-export function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
+function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
@@ -483,7 +477,7 @@ export function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
   );
 }
 
-export function hasRabbyMobileContext(event: SentryClientEvent): boolean {
+function hasRabbyMobileContext(event: SentryClientEvent): boolean {
   const candidates = [
     getContextString(event, "browser", "name"),
     getRequestHeaderString(event, "user-agent"),

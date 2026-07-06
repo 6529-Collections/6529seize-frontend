@@ -4,10 +4,9 @@ export type {
   SentryEventHint,
   SentryStackFrame,
   SentryTransactionSpan,
-} from './sentry-client-filters/types';
-export { LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE } from './sentry-client-filters/constants';
+} from "./sentry-client-filters/types";
+export { LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE } from "./sentry-client-filters/constants";
 export {
-  getBreadcrumbTransportStatusCode,
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
   getNetworkErrorMessageTargetUrl,
@@ -15,7 +14,7 @@ export {
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
   tagSampledLowValueNetworkError,
-} from './sentry-client-filters/network';
+} from "./sentry-client-filters/network";
 export {
   shouldFilterByFilenameExceptions,
   shouldFilterGifPickerTenorCategoriesError,
@@ -24,7 +23,7 @@ export {
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTwitterConfigReferenceError,
-} from './sentry-client-filters/errors';
+} from "./sentry-client-filters/errors";
 export {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -34,5 +33,5 @@ export {
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterWalletConnectStaleSessionTopic,
-} from './sentry-client-filters/wallets';
-export { __testing } from './sentry-client-filters/testing';
+} from "./sentry-client-filters/wallets";
+export { __testing } from "./sentry-client-filters/testing";

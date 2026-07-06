@@ -40,9 +40,7 @@ import {
   uniqueStrings,
 } from "./value-utils";
 
-export function isFirstPartyApiTarget(
-  candidate: NetworkTargetCandidate
-): boolean {
+function isFirstPartyApiTarget(candidate: NetworkTargetCandidate): boolean {
   if (candidate.isFirstPartyApi === true) {
     return true;
   }
@@ -60,7 +58,7 @@ export function isFirstPartyApiTarget(
   );
 }
 
-export function canUseAsSanitizedRelativePath(
+function canUseAsSanitizedRelativePath(
   candidate: NetworkTargetCandidate
 ): boolean {
   return (
@@ -70,13 +68,13 @@ export function canUseAsSanitizedRelativePath(
   );
 }
 
-export function hasExplicitThirdPartyRelativeOrigin(
+function hasExplicitThirdPartyRelativeOrigin(
   candidate: NetworkTargetCandidate
 ): boolean {
   return isRelativePath(candidate.url) && candidate.isFirstParty === false;
 }
 
-export function isSameFirstPartyApiTarget(
+function isSameFirstPartyApiTarget(
   left: NetworkTargetCandidate,
   right: NetworkTargetCandidate
 ): boolean {
@@ -106,7 +104,7 @@ export function isSameFirstPartyApiTarget(
   );
 }
 
-export function isFilteredBreadcrumbFallbackApiTarget(
+function isFilteredBreadcrumbFallbackApiTarget(
   candidate: NetworkTargetCandidate
 ): boolean {
   if (candidate.isFirstParty === false || isFilteredUrl(candidate.url)) {
@@ -137,15 +135,11 @@ export function isHttpBreadcrumb(breadcrumb: SentryBreadcrumb): boolean {
   );
 }
 
-export function getHttpBreadcrumbs(
-  event: SentryClientEvent
-): SentryBreadcrumb[] {
+function getHttpBreadcrumbs(event: SentryClientEvent): SentryBreadcrumb[] {
   return getBreadcrumbValues(event).filter(isHttpBreadcrumb);
 }
 
-export function getBreadcrumbStatusCode(
-  breadcrumb: SentryBreadcrumb
-): number | null {
+function getBreadcrumbStatusCode(breadcrumb: SentryBreadcrumb): number | null {
   const data = breadcrumb.data;
   return (
     getNumericValue(data?.["status_code"]) ??
@@ -153,7 +147,7 @@ export function getBreadcrumbStatusCode(
   );
 }
 
-export function getBreadcrumbTransportStatusCode(
+function getBreadcrumbTransportStatusCode(
   breadcrumb: SentryBreadcrumb
 ): number | null {
   const statusCode = getBreadcrumbStatusCode(breadcrumb);
@@ -201,7 +195,7 @@ export function getBreadcrumbUrlIsFirstPartyApi(
   return getBooleanValue(breadcrumb.data?.[URL_IS_FIRST_PARTY_API_KEY]);
 }
 
-export function isUnknownBreadcrumbUrlPlaceholder(
+function isUnknownBreadcrumbUrlPlaceholder(
   breadcrumb: SentryBreadcrumb
 ): boolean {
   const url = getBreadcrumbUrl(breadcrumb);
@@ -216,7 +210,7 @@ export function isUnknownBreadcrumbUrlPlaceholder(
   );
 }
 
-export function getBreadcrumbTargetCandidate(
+function getBreadcrumbTargetCandidate(
   breadcrumb: SentryBreadcrumb
 ): NetworkTargetCandidate | null {
   const url = getBreadcrumbUrl(breadcrumb);
@@ -235,7 +229,7 @@ export function getBreadcrumbTargetCandidate(
   };
 }
 
-export function getFailedTransportBreadcrumbTarget(
+function getFailedTransportBreadcrumbTarget(
   breadcrumb: SentryBreadcrumb
 ): NetworkTargetCandidate {
   return {
@@ -246,13 +240,13 @@ export function getFailedTransportBreadcrumbTarget(
   };
 }
 
-export function isPlaceholderOrFilteredTarget(
+function isPlaceholderOrFilteredTarget(
   candidate: NetworkTargetCandidate
 ): boolean {
   return candidate.isPlaceholder === true || isFilteredUrl(candidate.url);
 }
 
-export function canUseFailedTransportForMessageTarget(
+function canUseFailedTransportForMessageTarget(
   failedTransportTarget: NetworkTargetCandidate,
   messageTargetCandidates: NetworkTargetCandidate[]
 ): boolean {
@@ -269,13 +263,13 @@ export function canUseFailedTransportForMessageTarget(
   );
 }
 
-export function hasMessageTargetCandidates(
+function hasMessageTargetCandidates(
   messageTargetCandidates: NetworkTargetCandidate[]
 ): boolean {
   return messageTargetCandidates.length > 0;
 }
 
-export function hasLaterSameRealFailureTarget(
+function hasLaterSameRealFailureTarget(
   failedTransportTarget: NetworkTargetCandidate,
   laterRealFailureTargetCandidates: NetworkTargetCandidate[]
 ): boolean {
@@ -284,7 +278,7 @@ export function hasLaterSameRealFailureTarget(
   );
 }
 
-export function getHttpFailureScanResult(
+function getHttpFailureScanResult(
   breadcrumb: SentryBreadcrumb,
   messageTargetCandidates: NetworkTargetCandidate[],
   laterRealFailureTargetCandidates: NetworkTargetCandidate[]
@@ -313,7 +307,7 @@ export function getHttpFailureScanResult(
   return { action: "continue" };
 }
 
-export function getTransportFailureScanResult(
+function getTransportFailureScanResult(
   breadcrumb: SentryBreadcrumb,
   messageTargetCandidates: NetworkTargetCandidate[],
   laterRealFailureTargetCandidates: NetworkTargetCandidate[]
@@ -351,7 +345,7 @@ export function getTransportFailureScanResult(
   return { action: "return", target: failedTransportTarget };
 }
 
-export function getFailedBreadcrumbScanResult(
+function getFailedBreadcrumbScanResult(
   breadcrumb: SentryBreadcrumb,
   messageTargetCandidates: NetworkTargetCandidate[],
   laterRealFailureTargetCandidates: NetworkTargetCandidate[]
@@ -376,7 +370,7 @@ export function getFailedBreadcrumbScanResult(
   return { action: "continue" };
 }
 
-export function getLatestFailedTransportBreadcrumb(
+function getLatestFailedTransportBreadcrumb(
   event: SentryClientEvent
 ): NetworkTargetCandidate | null {
   const breadcrumbs = getHttpBreadcrumbs(event);
@@ -431,7 +425,7 @@ export function getLowValueNetworkErrorTargetUrl(
   );
 }
 
-export function getUsableBreadcrumbMessageUrl(
+function getUsableBreadcrumbMessageUrl(
   breadcrumb: SentryBreadcrumb
 ): string | null {
   const url = getBreadcrumbUrl(breadcrumb)?.trim();
@@ -446,7 +440,7 @@ export function getUsableBreadcrumbMessageUrl(
   return url;
 }
 
-export function getLatestUsableBreadcrumbMessageUrl(
+function getLatestUsableBreadcrumbMessageUrl(
   event: SentryClientEvent,
   predicate: (breadcrumb: SentryBreadcrumb) => boolean
 ): string | null {
@@ -487,7 +481,7 @@ export function getNetworkErrorMessageTargetUrl(
   );
 }
 
-export function getMessageTargetCandidates(
+function getMessageTargetCandidates(
   event: SentryClientEvent
 ): NetworkTargetCandidate[] {
   return getUrlCandidatesFromText(getEventMessage(event)).map((url) => ({
@@ -495,7 +489,7 @@ export function getMessageTargetCandidates(
   }));
 }
 
-export function getBreadcrumbTargetCandidates(
+function getBreadcrumbTargetCandidates(
   event: SentryClientEvent
 ): NetworkTargetCandidate[] {
   return getHttpBreadcrumbs(event)
@@ -503,7 +497,7 @@ export function getBreadcrumbTargetCandidates(
     .filter((value): value is NetworkTargetCandidate => value !== null);
 }
 
-export function getNetworkTargetCandidates(
+function getNetworkTargetCandidates(
   event: SentryClientEvent
 ): NetworkTargetCandidate[] {
   return [
@@ -512,23 +506,19 @@ export function getNetworkTargetCandidates(
   ];
 }
 
-export function getNetworkTargetUrlCandidates(
-  event: SentryClientEvent
-): string[] {
+function getNetworkTargetUrlCandidates(event: SentryClientEvent): string[] {
   return uniqueStrings(
     getNetworkTargetCandidates(event).map((candidate) => candidate.url)
   );
 }
 
-export function hasMatchingFailedTransportBreadcrumb(
+function hasMatchingFailedTransportBreadcrumb(
   event: SentryClientEvent
 ): boolean {
   return getLowValueNetworkErrorTargetUrl(event) !== null;
 }
 
-export function isLowValueFirstPartyNetworkError(
-  event: SentryClientEvent
-): boolean {
+function isLowValueFirstPartyNetworkError(event: SentryClientEvent): boolean {
   if (event.tags?.["errorType"] !== "network") {
     return false;
   }
@@ -541,7 +531,7 @@ export function isLowValueFirstPartyNetworkError(
   return hasMatchingFailedTransportBreadcrumb(event);
 }
 
-export function normalizeSampleRate(sampleRate: number): number {
+function normalizeSampleRate(sampleRate: number): number {
   if (!Number.isFinite(sampleRate) || sampleRate <= 0) {
     return 0;
   }
@@ -549,7 +539,7 @@ export function normalizeSampleRate(sampleRate: number): number {
   return sampleRate >= 1 ? 1 : sampleRate;
 }
 
-export function stableHashToUnitInterval(value: string): number {
+function stableHashToUnitInterval(value: string): number {
   let hash = FNV_OFFSET_BASIS;
   for (let index = 0; index < value.length; index += 1) {
     hash ^= value.charCodeAt(index);
@@ -559,9 +549,7 @@ export function stableHashToUnitInterval(value: string): number {
   return (hash >>> 0) / UINT_32_SIZE;
 }
 
-export function getLowValueNetworkSamplingKey(
-  event: SentryClientEvent
-): string {
+function getLowValueNetworkSamplingKey(event: SentryClientEvent): string {
   const eventId = getStringValue(event.event_id);
   if (eventId) {
     return eventId;
@@ -603,9 +591,7 @@ export function tagSampledLowValueNetworkError(event: SentryClientEvent): void {
   };
 }
 
-export function getSpanUrlString(
-  span: SentryTransactionSpan
-): string | undefined {
+function getSpanUrlString(span: SentryTransactionSpan): string | undefined {
   const data = span.data;
   const urlCandidates = [
     getStringValue(data?.["http.url"]),
@@ -630,7 +616,7 @@ export function getSpanUrlString(
     : undefined;
 }
 
-export function getSpanUrl(span: SentryTransactionSpan): URL | null {
+function getSpanUrl(span: SentryTransactionSpan): URL | null {
   const urlString = getSpanUrlString(span);
   if (!urlString) {
     return null;
@@ -643,7 +629,7 @@ export function getSpanUrl(span: SentryTransactionSpan): URL | null {
   }
 }
 
-export function isCrossOriginSpan(
+function isCrossOriginSpan(
   span: SentryTransactionSpan,
   url: URL | null
 ): boolean {
@@ -659,7 +645,7 @@ export function isCrossOriginSpan(
   return !isFirstPartyHost(url.hostname);
 }
 
-export function getSpanStatusCode(span: SentryTransactionSpan): number | null {
+function getSpanStatusCode(span: SentryTransactionSpan): number | null {
   const data = span.data;
   return (
     getNumericValue(data?.["http.response.status_code"]) ??
@@ -667,9 +653,7 @@ export function getSpanStatusCode(span: SentryTransactionSpan): number | null {
   );
 }
 
-export function getSpanTransferSize(
-  span: SentryTransactionSpan
-): number | null {
+function getSpanTransferSize(span: SentryTransactionSpan): number | null {
   const data = span.data;
   return (
     getNumericValue(data?.["http.response_transfer_size"]) ??
@@ -688,9 +672,7 @@ export function getThirdPartyTelemetrySpanTargetKey(
   return `${url.hostname.toLowerCase()}${url.pathname}`;
 }
 
-export function isNoisyThirdPartyTelemetryNetworkTarget(
-  value: string
-): boolean {
+function isNoisyThirdPartyTelemetryNetworkTarget(value: string): boolean {
   const absoluteUrl = parseAbsoluteRequestUrl(value);
   if (absoluteUrl) {
     return noisyThirdPartyTelemetryTargets.has(
@@ -704,7 +686,7 @@ export function isNoisyThirdPartyTelemetryNetworkTarget(
   );
 }
 
-export function hasThirdPartyTelemetryNetworkMessageTarget(
+function hasThirdPartyTelemetryNetworkMessageTarget(
   event: SentryClientEvent
 ): boolean {
   return getMessageTargetCandidates(event).some((candidate) =>
@@ -712,9 +694,7 @@ export function hasThirdPartyTelemetryNetworkMessageTarget(
   );
 }
 
-export function hasAppOwnedNetworkErrorEvidence(
-  event: SentryClientEvent
-): boolean {
+function hasAppOwnedNetworkErrorEvidence(event: SentryClientEvent): boolean {
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
   return (
     hasLikelyAppOwnedFrame(frames) ||
