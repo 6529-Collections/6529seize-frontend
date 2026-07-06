@@ -2,7 +2,6 @@ import {
   FILTERED_URL_TOKENS,
   objectCapturedPromiseRejectionMessages,
   THE_MEMES_MINT_ROUTE_PATH,
-  URL_IN_PARENS_PATTERN,
   WAVES_ROUTE_PATH,
 } from "./constants";
 import type {
@@ -148,13 +147,39 @@ export function hasReactDomRemoveChildRoute(event: SentryClientEvent): boolean {
 
 export function getUrlCandidatesFromText(value: string): string[] {
   const urls: string[] = [];
-  for (const match of value.matchAll(URL_IN_PARENS_PATTERN)) {
-    const candidate = match[1]?.trim();
+
+  for (const candidate of getParenthesizedValues(value)) {
     if (candidate && isParenthesizedNetworkTargetUrl(candidate)) {
       urls.push(candidate);
     }
   }
   return urls;
+}
+
+function getParenthesizedValues(value: string): string[] {
+  const values: string[] = [];
+  let cursor = 0;
+
+  while (cursor < value.length) {
+    const openIndex = value.indexOf("(", cursor);
+    if (openIndex === -1) {
+      break;
+    }
+
+    const closeIndex = value.indexOf(")", openIndex + 1);
+    if (closeIndex === -1) {
+      break;
+    }
+
+    const candidate = value.slice(openIndex + 1, closeIndex).trim();
+    if (candidate) {
+      values.push(candidate);
+    }
+
+    cursor = closeIndex + 1;
+  }
+
+  return values;
 }
 
 function isParenthesizedNetworkTargetUrl(value: string): boolean {

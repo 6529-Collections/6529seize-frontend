@@ -541,8 +541,8 @@ function normalizeSampleRate(sampleRate: number): number {
 
 function stableHashToUnitInterval(value: string): number {
   let hash = FNV_OFFSET_BASIS;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value[index]?.codePointAt(0) ?? 0;
+  for (const character of value.split("")) {
+    hash ^= character.codePointAt(0) ?? 0;
     hash = Math.imul(hash, FNV_PRIME);
   }
 

@@ -197,7 +197,6 @@ export const walletConnectStaleSessionFunctions = new Set([
   "isValidSessionTopic",
   "onRelayMessage",
 ]);
-export const URL_IN_PARENS_PATTERN = /\(([^)]+)\)/g;
 export const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 export const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 export const FNV_OFFSET_BASIS = 2166136261;
