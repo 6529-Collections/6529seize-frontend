@@ -3,6 +3,9 @@ import type { HTMLAttributes, TableHTMLAttributes } from "react";
 
 import styles from "./AboutLayout.module.css";
 
+export const ABOUT_TEXT_PAGE_CONTAINER_CLASS =
+  "tw-px-5 tw-pb-4 tw-pt-4 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8";
+
 type AboutContainerProps = HTMLAttributes<HTMLDivElement> & {
   readonly fluid?: boolean;
 };

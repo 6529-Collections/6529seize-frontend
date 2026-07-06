@@ -733,6 +733,10 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "walletAuth.same.assets": "You do not need to move tokens or assets.",
   "walletAuth.same.desktop":
     "The 6529 Desktop app continues using the existing connection flow during this rollout.",
+  "walletAuth.builders.title": "Building with the API",
+  "walletAuth.builders.body":
+    "External clients should use the session-v2 API authentication guide instead of the user upgrade notes on this page.",
+  "walletAuth.builders.link": "Open API authentication guide",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -869,9 +873,17 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
-  "tools.api.authentication.title": "Authentication",
+  "tools.api.authCallout.title": "v2 API authentication",
+  "tools.api.authCallout.description":
+    "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
+  "tools.api.authCallout.link": "Read the full external-client auth guide",
+  "tools.api.authentication.title": "Authentication quickstart",
   "tools.api.authentication.basedOnSignatures":
-    "Authentication is based on Ethereum signatures.",
+    "Authentication is based on Ethereum signatures. For scripts and other external clients, request a native session-v2 challenge.",
+  "tools.api.authentication.externalNote":
+    "This example shows the short native/script flow for external API clients.",
+  "tools.api.authentication.fullGuideLink":
+    "Use the full guide for refresh, logout, and security notes.",
   "tools.api.authentication.flowIntro": "The flow works as follows:",
   "tools.api.authentication.requestSessionMessage":
     "Request a session-v2 signable message for the wallet you want to authenticate.",
@@ -881,8 +893,6 @@ export const EN_US_MESSAGES = {
     "Send the signature back to the server.",
   "tools.api.authentication.receiveToken":
     "Receive a JWT bearer token, which you can include in headers of subsequent requests.",
-  "tools.api.authentication.nodeExample":
-    "Here's a full example in Node.js using ethers and node-fetch:",
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted drop",
   "home.boostedDrop.boost": "Boost",
