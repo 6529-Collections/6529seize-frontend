@@ -16,7 +16,7 @@ jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
 
 describe("UpcomingMemePage", () => {
   it("shows mint timing and subscription awareness for unresolved meme ids", () => {
-    render(<UpcomingMemePage id="519" />);
+    const { container } = render(<UpcomingMemePage id="519" />);
 
     expect(screen.getByTestId("upcoming-mint-calendar")).toHaveAttribute(
       "data-token-id",
@@ -26,5 +26,10 @@ describe("UpcomingMemePage", () => {
       "data-token-id",
       "519"
     );
+    expect(
+      [...container.querySelectorAll("[data-testid]")].map((element) =>
+        element.getAttribute("data-testid")
+      )
+    ).toEqual(["upcoming-subscription-widget", "upcoming-mint-calendar"]);
   });
 });

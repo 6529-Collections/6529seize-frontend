@@ -7,8 +7,8 @@ export default function UpcomingMemePage({ id }: { readonly id: string }) {
   if (Number.isInteger(numId)) {
     return (
       <div className="tw-mt-6 tw-flex tw-w-full tw-flex-col tw-gap-4">
-        <MemeCalendarOverviewNextMint displayTz="local" id={numId} />
         <LatestDropNextMintSubscribe tokenId={numId} />
+        <MemeCalendarOverviewNextMint displayTz="local" id={numId} />
       </div>
     );
   }

@@ -1,29 +1,16 @@
 import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
 const mockDownload = jest.fn();
-const mockRouterPush = jest.fn();
 const mockUseDownloader = jest.fn();
 
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
   default: (...args: any[]) => mockUseDownloader(...args),
-}));
-
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
@@ -128,7 +115,6 @@ describe("Subscriptions report page", () => {
     getUpcomingMintsAcrossSeasons.mockReturnValue([]);
     isMintingToday.mockReturnValue(false);
     mockDownload.mockClear();
-    mockRouterPush.mockClear();
     mockUseDownloader.mockReturnValue({
       download: mockDownload,
       error: null,
@@ -242,12 +228,7 @@ describe("Subscriptions report page", () => {
     });
   });
 
-  it("opens meme card routes from report rows while keeping visible links native", async () => {
-    const user = userEvent.setup();
-    const windowOpen = jest
-      .spyOn(window, "open")
-      .mockImplementation(() => null);
-
+  it("exposes semantic row-wide meme card links", async () => {
     isMintingToday.mockReturnValue(true);
     getUpcomingMintsAcrossSeasons.mockReturnValue([
       {
@@ -323,50 +304,31 @@ describe("Subscriptions report page", () => {
       name: "View The Memes card #700 - Active Meme",
     });
     expect(activeLink).toHaveAttribute("href", "/the-memes/700");
+    expect(activeLink.className).toContain("before:tw-inset-0");
     const activeRow = activeLink.closest("tr");
     expect(activeRow).not.toBeNull();
-
-    await user.click(activeRow!);
-    expect(mockRouterPush).toHaveBeenLastCalledWith("/the-memes/700");
-
-    mockRouterPush.mockClear();
-    await user.click(activeLink);
-    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(activeRow).not.toHaveAttribute("role");
+    expect(activeRow).toHaveClass("tw-relative", "tw-cursor-pointer");
+    activeLink.focus();
+    expect(activeLink).toHaveFocus();
 
     const upcomingLink = screen.getByRole("link", {
       name: "View The Memes card #701",
     });
     expect(upcomingLink).toHaveAttribute("href", "/the-memes/701");
+    expect(upcomingLink.className).toContain("before:tw-inset-0");
     const upcomingRow = upcomingLink.closest("tr");
     expect(upcomingRow).not.toBeNull();
-    await user.click(upcomingRow!);
-    expect(mockRouterPush).toHaveBeenLastCalledWith("/the-memes/701");
-
-    mockRouterPush.mockClear();
-    fireEvent.click(upcomingRow!, { metaKey: true });
-    expect(mockRouterPush).not.toHaveBeenCalled();
-    expect(windowOpen).toHaveBeenLastCalledWith(
-      "/the-memes/701",
-      "_blank",
-      "noopener,noreferrer"
-    );
+    expect(upcomingRow).not.toHaveAttribute("role");
 
     const pastLink = screen.getByRole("link", {
       name: "View The Memes card #699 - Past Meme",
     });
     expect(pastLink).toHaveAttribute("href", "/the-memes/699");
+    expect(pastLink.className).toContain("before:tw-inset-0");
     const pastRow = pastLink.closest("tr");
     expect(pastRow).not.toBeNull();
-    fireEvent(
-      pastRow!,
-      new MouseEvent("auxclick", { bubbles: true, button: 1 })
-    );
-    expect(windowOpen).toHaveBeenLastCalledWith(
-      "/the-memes/699",
-      "_blank",
-      "noopener,noreferrer"
-    );
-    windowOpen.mockRestore();
+    expect(pastRow).not.toHaveAttribute("role");
   });
 
   it("formats active, upcoming, and past counts with locale separators", async () => {
