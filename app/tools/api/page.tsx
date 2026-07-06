@@ -14,6 +14,8 @@ import {
 
 const API_PAGE_LOCALE = DEFAULT_LOCALE;
 const API_AUTHENTICATION_PATH = "/tools/api/authentication";
+const pageContainerClass =
+  "tw-px-5 tw-pb-4 tw-pt-4 tw-text-white sm:tw-px-6 lg:tw-px-8";
 
 const nodeJsAuthExample = `import { Wallet } from 'ethers';
 import fetch from 'node-fetch';
@@ -249,7 +251,7 @@ run().catch((err) => {
 export default function AboutApi() {
   return (
     <main className={clsx(styles["main"], "tailwind-scope")}>
-      <Container className="tw-pb-4 tw-pt-4">
+      <Container className={pageContainerClass}>
         <Row>
           <Col>
             <h1>6529.io API</h1>

@@ -1,11 +1,12 @@
 import CodeExample from "@/components/code-example/CodeExample";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import styles from "@/styles/Home.module.css";
 import clsx from "clsx";
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -17,6 +18,59 @@ const API_REFERENCE_URL = "https://api.6529.io/docs/";
 
 const inlineCodeClass =
   "tw-rounded tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-sm tw-text-iron-100";
+const pageContainerClass =
+  "tw-px-5 tw-pb-4 tw-pt-4 tw-text-white sm:tw-px-6 lg:tw-px-8";
+const sectionClass = "tw-max-w-4xl tw-text-base tw-leading-7 tw-text-white";
+const exampleSectionClass =
+  "tw-max-w-5xl tw-text-base tw-leading-7 tw-text-white";
+const sectionHeadingClass =
+  "tw-mb-3 tw-text-2xl tw-font-semibold tw-text-white";
+
+type ApiAuthSectionProps = Readonly<{
+  children: ReactNode;
+  headingId: string;
+  titleKey: MessageKey;
+  wide?: boolean;
+}>;
+
+function ApiAuthSection({
+  children,
+  headingId,
+  titleKey,
+  wide = false,
+}: ApiAuthSectionProps) {
+  return (
+    <Row className="tw-pt-6">
+      <Col>
+        <section
+          className={wide ? exampleSectionClass : sectionClass}
+          aria-labelledby={headingId}
+        >
+          <h2 id={headingId} className={sectionHeadingClass}>
+            {t(API_AUTH_LOCALE, titleKey)}
+          </h2>
+          {children}
+        </section>
+      </Col>
+    </Row>
+  );
+}
+
+function AuthFlowStep({
+  code,
+  messageKey,
+}: Readonly<{
+  code: string;
+  messageKey: MessageKey;
+}>) {
+  return (
+    <li className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1">
+      <span>{t(API_AUTH_LOCALE, messageKey)}</span>
+      <code className={inlineCodeClass}>{code}</code>
+      <span>.</span>
+    </li>
+  );
+}
 
 const nodeJsLoginExample = `import { Wallet } from "ethers";
 import fetch from "node-fetch";
@@ -129,7 +183,7 @@ export async function logoutNativeSession({ address, nativeRefreshToken }) {
 export default function ApiAuthenticationPage() {
   return (
     <main className={clsx(styles["main"], "tailwind-scope")}>
-      <Container className="tw-pb-4 tw-pt-4">
+      <Container className={pageContainerClass}>
         <Row>
           <Col>
             <Link
@@ -139,178 +193,110 @@ export default function ApiAuthenticationPage() {
               {t(API_AUTH_LOCALE, "tools.api.authGuide.backToApi")}
             </Link>
             <header className="tw-max-w-4xl">
-              <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+              <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-white">
                 {t(API_AUTH_LOCALE, "tools.api.authGuide.eyebrow")}
               </p>
-              <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
+              <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white md:tw-text-4xl">
                 {t(API_AUTH_LOCALE, "tools.api.authGuide.title")}
               </h1>
-              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
+              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-white">
                 {t(API_AUTH_LOCALE, "tools.api.authGuide.lead")}
               </p>
             </header>
           </Col>
         </Row>
 
-        <Row className="tw-pt-6">
-          <Col>
-            <section
-              className="tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300"
-              aria-labelledby="api-auth-overview-heading"
-            >
-              <h2
-                id="api-auth-overview-heading"
-                className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
-              >
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.overview.title")}
-              </h2>
-              <p className="tw-mb-3">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.overview.preferred")}
-              </p>
-              <p className="tw-mb-0">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.overview.legacy")}
-              </p>
-            </section>
-          </Col>
-        </Row>
+        <ApiAuthSection
+          headingId="api-auth-overview-heading"
+          titleKey="tools.api.authGuide.overview.title"
+        >
+          <p className="tw-mb-3">
+            {t(API_AUTH_LOCALE, "tools.api.authGuide.overview.preferred")}
+          </p>
+          <p className="tw-mb-0">
+            {t(API_AUTH_LOCALE, "tools.api.authGuide.overview.legacy")}
+          </p>
+        </ApiAuthSection>
 
-        <Row className="tw-pt-6">
-          <Col>
-            <section
-              className="tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300"
-              aria-labelledby="api-auth-flow-heading"
-            >
-              <h2
-                id="api-auth-flow-heading"
-                className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
-              >
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.flow.title")}
-              </h2>
-              <ol className="tw-grid tw-gap-3 tw-pl-5">
-                <li>
-                  {t(API_AUTH_LOCALE, "tools.api.authGuide.flow.nonce")}{" "}
-                  <code className={inlineCodeClass}>
-                    GET /api/auth/session-nonce
-                  </code>
-                  .
-                </li>
-                <li>
-                  {t(API_AUTH_LOCALE, "tools.api.authGuide.flow.sign")}{" "}
-                  <code className={inlineCodeClass}>signable_message</code>.
-                </li>
-                <li>
-                  {t(API_AUTH_LOCALE, "tools.api.authGuide.flow.login")}{" "}
-                  <code className={inlineCodeClass}>
-                    POST /api/auth/session-login
-                  </code>
-                  .
-                </li>
-                <li>
-                  {t(API_AUTH_LOCALE, "tools.api.authGuide.flow.bearer")}{" "}
-                  <code className={inlineCodeClass}>
-                    Authorization: Bearer &lt;access_token&gt;
-                  </code>
-                  .
-                </li>
-              </ol>
-            </section>
-          </Col>
-        </Row>
+        <ApiAuthSection
+          headingId="api-auth-flow-heading"
+          titleKey="tools.api.authGuide.flow.title"
+        >
+          <ol className="tw-grid tw-gap-3 tw-pl-5">
+            <AuthFlowStep
+              messageKey="tools.api.authGuide.flow.nonce"
+              code="GET /api/auth/session-nonce"
+            />
+            <AuthFlowStep
+              messageKey="tools.api.authGuide.flow.sign"
+              code="signable_message"
+            />
+            <AuthFlowStep
+              messageKey="tools.api.authGuide.flow.login"
+              code="POST /api/auth/session-login"
+            />
+            <AuthFlowStep
+              messageKey="tools.api.authGuide.flow.bearer"
+              code="Authorization: Bearer <access_token>"
+            />
+          </ol>
+        </ApiAuthSection>
 
-        <Row className="tw-pt-6">
-          <Col>
-            <section
-              className="tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300"
-              aria-labelledby="api-auth-refresh-heading"
-            >
-              <h2
-                id="api-auth-refresh-heading"
-                className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
-              >
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.title")}
-              </h2>
-              <p className="tw-mb-3">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.login")}
-              </p>
-              <p className="tw-mb-3">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.rotate")}
-              </p>
-              <p className="tw-mb-0">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.logout")}
-              </p>
-            </section>
-          </Col>
-        </Row>
+        <ApiAuthSection
+          headingId="api-auth-refresh-heading"
+          titleKey="tools.api.authGuide.refresh.title"
+        >
+          <p className="tw-mb-3">
+            {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.login")}
+          </p>
+          <p className="tw-mb-3">
+            {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.rotate")}
+          </p>
+          <p className="tw-mb-0">
+            {t(API_AUTH_LOCALE, "tools.api.authGuide.refresh.logout")}
+          </p>
+        </ApiAuthSection>
 
-        <Row className="tw-pt-6">
-          <Col>
-            <section
-              className="tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300"
-              aria-labelledby="api-auth-browser-heading"
-            >
-              <h2
-                id="api-auth-browser-heading"
-                className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
-              >
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.browser.title")}
-              </h2>
-              <p className="tw-mb-0">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.browser.note")}
-              </p>
-            </section>
-          </Col>
-        </Row>
+        <ApiAuthSection
+          headingId="api-auth-browser-heading"
+          titleKey="tools.api.authGuide.browser.title"
+        >
+          <p className="tw-mb-0">
+            {t(API_AUTH_LOCALE, "tools.api.authGuide.browser.note")}
+          </p>
+        </ApiAuthSection>
 
-        <Row className="tw-pt-6">
-          <Col>
-            <section
-              className="tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300"
-              aria-labelledby="api-auth-security-heading"
-            >
-              <h2
-                id="api-auth-security-heading"
-                className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
-              >
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.security.title")}
-              </h2>
-              <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
-                <li>
-                  {t(API_AUTH_LOCALE, "tools.api.authGuide.security.signable")}
-                </li>
-                <li>
-                  {t(API_AUTH_LOCALE, "tools.api.authGuide.security.secrets")}
-                </li>
-                <li>
-                  {t(API_AUTH_LOCALE, "tools.api.authGuide.security.status")}
-                </li>
-              </ul>
-            </section>
-          </Col>
-        </Row>
+        <ApiAuthSection
+          headingId="api-auth-security-heading"
+          titleKey="tools.api.authGuide.security.title"
+        >
+          <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
+            <li>
+              {t(API_AUTH_LOCALE, "tools.api.authGuide.security.signable")}
+            </li>
+            <li>
+              {t(API_AUTH_LOCALE, "tools.api.authGuide.security.secrets")}
+            </li>
+            <li>
+              {t(API_AUTH_LOCALE, "tools.api.authGuide.security.status")}
+            </li>
+          </ul>
+        </ApiAuthSection>
 
-        <Row className="tw-pt-6">
-          <Col>
-            <section
-              className="tw-max-w-5xl tw-text-base tw-leading-7 tw-text-iron-300"
-              aria-labelledby="api-auth-examples-heading"
-            >
-              <h2
-                id="api-auth-examples-heading"
-                className="tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
-              >
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.examples.title")}
-              </h2>
-              <p className="tw-mb-3">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.examples.login")}
-              </p>
-              <CodeExample code={nodeJsLoginExample} />
-              <p className="tw-mb-3 tw-mt-6">
-                {t(API_AUTH_LOCALE, "tools.api.authGuide.examples.refresh")}
-              </p>
-              <CodeExample code={nodeJsRefreshExample} />
-            </section>
-          </Col>
-        </Row>
+        <ApiAuthSection
+          headingId="api-auth-examples-heading"
+          titleKey="tools.api.authGuide.examples.title"
+          wide
+        >
+          <p className="tw-mb-3">
+            {t(API_AUTH_LOCALE, "tools.api.authGuide.examples.login")}
+          </p>
+          <CodeExample code={nodeJsLoginExample} />
+          <p className="tw-mb-3 tw-mt-6">
+            {t(API_AUTH_LOCALE, "tools.api.authGuide.examples.refresh")}
+          </p>
+          <CodeExample code={nodeJsRefreshExample} />
+        </ApiAuthSection>
 
         <Row className="tw-pt-6">
           <Col>
