@@ -14,25 +14,35 @@ import type { MessageKey } from "@/i18n/messages/en-US";
  * trip, never acceptance of an invalid category.
  */
 
-export const REP_CATEGORY_MAX_LENGTH = 100;
+const MAX_LENGTH = 100;
 
 const ALLOWED_CHAR = /^[\p{L}\p{N}?!,.'() -]$/u;
 
-export interface RepCategoryViolation {
+interface RepCategoryViolation {
   readonly key: MessageKey;
   readonly params?: Readonly<Record<string, string | number>>;
 }
 
+/**
+ * A locale-neutral label for a disallowed character. Printable characters
+ * show as themselves in quotes; control/invisible characters (line breaks,
+ * tabs, zero-width spaces, direction overrides, …) render as nothing in a
+ * message, so name them by Unicode code point (e.g. U+200B) instead — which
+ * also avoids embedding English words like "tab" into an interpolated,
+ * otherwise-translated sentence.
+ */
+// A char renders invisibly if it is a control/format char (\p{C}) or a
+// separator other than a plain space (\p{Z} excluding " ") — e.g. tab,
+// newline, NBSP, zero-width space, direction overrides.
+const rendersInvisible = (char: string): boolean =>
+  /\p{C}/u.test(char) || (char !== " " && /\p{Z}/u.test(char));
+
 const describeChar = (char: string): string => {
-  switch (char) {
-    case "\n":
-    case "\r":
-      return "line break";
-    case "\t":
-      return "tab";
-    default:
-      return `"${char}"`;
+  if (rendersInvisible(char)) {
+    const codePoint = char.codePointAt(0) ?? 0;
+    return `U+${codePoint.toString(16).toUpperCase().padStart(4, "0")}`;
   }
+  return `"${char}"`;
 };
 
 export function getRepCategoryViolation(
@@ -40,10 +50,13 @@ export function getRepCategoryViolation(
 ): RepCategoryViolation | null {
   // Code points, not UTF-16 units — matching the server pattern's u-flag.
   const chars = Array.from(category);
-  if (chars.length > REP_CATEGORY_MAX_LENGTH) {
+  // Precedence is intentional and single-message: length → leading dash →
+  // disallowed characters. The error surface shows one reason at a time, so
+  // do not "fix" this into multi-error output.
+  if (chars.length > MAX_LENGTH) {
     return {
       key: "rep.categories.validation.tooLong",
-      params: { length: chars.length, max: REP_CATEGORY_MAX_LENGTH },
+      params: { length: chars.length, max: MAX_LENGTH },
     };
   }
   if (category.startsWith("-")) {

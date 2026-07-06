@@ -34,9 +34,15 @@ describe("getRepCategoryViolation", () => {
     });
   });
 
-  it("describes invisible characters by name", () => {
+  it("labels invisible characters by locale-neutral code point", () => {
     const violation = getRepCategoryViolation("line\nbreak\ttab");
-    expect(violation?.params?.["chars"]).toBe("line break, tab");
+    // \n -> U+000A, \t -> U+0009 (no English words baked into the message).
+    expect(violation?.params?.["chars"]).toBe("U+000A, U+0009");
+  });
+
+  it("labels a zero-width space by code point rather than empty quotes", () => {
+    const violation = getRepCategoryViolation("gm​gm");
+    expect(violation?.params?.["chars"]).toBe("U+200B");
   });
 
   it("every violation key resolves to a real en-US message", () => {
