@@ -40,15 +40,18 @@ const getFanHoverClass = (index: number, total: number) =>
 export const getMemeCardAriaLabel = (
   card: Pick<MemeCard, "label" | "number">,
   locale: SupportedLocale
-) =>
-  card.number !== undefined
-    ? m(locale, "join6529.visual.memeCardAria", {
-        label: card.label,
-        number: card.number,
-      })
-    : m(locale, "join6529.visual.memeCardFallbackAria", {
-        label: card.label,
-      });
+) => {
+  if (card.number === undefined) {
+    return m(locale, "join6529.visual.memeCardFallbackAria", {
+      label: card.label,
+    });
+  }
+
+  return m(locale, "join6529.visual.memeCardAria", {
+    label: card.label,
+    number: card.number,
+  });
+};
 
 export function AmbientArtifacts({
   className,
