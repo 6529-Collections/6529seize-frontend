@@ -796,6 +796,63 @@ describe("WaveDrop", () => {
     );
   });
 
+  it("reveals desktop actions from mouse pointer events without CSS :hover", () => {
+    // Capability-lying browsers never activate :hover although mouse pointer
+    // events flow — the row's pointerenter must force the action bar visible.
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(false);
+    setHoverSupport(true);
+    setViewportWidth(1440);
+
+    renderWithEditingDropProvider(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ forceVisible: false })
+    );
+
+    const dropRoot = screen.getByTestId("content").closest(
+      "[data-wave-drop-id]"
+    )!;
+    // React synthesizes onPointerEnter/Leave from pointerover/pointerout.
+    fireEvent.pointerOver(dropRoot, { pointerType: "mouse" });
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ forceVisible: true })
+    );
+
+    fireEvent.pointerOut(dropRoot, {
+      pointerType: "mouse",
+      relatedTarget: document.body,
+    });
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ forceVisible: false })
+    );
+
+    // Touch enter must not force the desktop reveal. jsdom drops pointerType
+    // from event init, so define it explicitly on a hand-built event.
+    const touchOver = new Event("pointerover", { bubbles: true });
+    Object.defineProperty(touchOver, "pointerType", { value: "touch" });
+    dropRoot.dispatchEvent(touchOver);
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ forceVisible: false })
+    );
+  });
+
   it("omits group mention metadata from edit update requests", () => {
     isMobileMock.mockReturnValue(false);
     mockEditMentionedGroups = [ApiDropGroupMention.All];
