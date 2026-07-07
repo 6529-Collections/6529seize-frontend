@@ -88,6 +88,7 @@
     "knip": "node scripts/require-6529-command.cjs && knip --fix --allow-remove-files",
     "lint:package-json": "node scripts/require-6529-command.cjs && node scripts/lint-package-json.cjs",
     "lint:quiet": "node scripts/require-6529-command.cjs && eslint . --quiet",
+    "lint:e2e-selectors": "node scripts/require-6529-command.cjs && eslint --config eslint.config.e2e-selectors.mjs --no-warn-ignored --max-warnings=0 tests",
     "lint": "node scripts/require-6529-command.cjs && eslint .",
     "typecheck": "node scripts/require-6529-command.cjs && pnpm run format:uncommitted && tsc --noEmit -p tsconfig.typecheck.json",
     "typecheck:ci": "node scripts/require-6529-command.cjs && tsc --noEmit -p tsconfig.typecheck.json",
