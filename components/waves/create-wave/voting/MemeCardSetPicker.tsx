@@ -19,7 +19,7 @@ const VALIDATION_MESSAGES: Partial<
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_REQUIRED]:
     "Choose at least one Meme card.",
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID]:
-    "Only Meme cards can be used for Meme Card TDH.",
+    "Only Meme cards can be used for Card Set TDH.",
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE]:
     "Meme card count is not loaded yet.",
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED]:
@@ -373,10 +373,10 @@ export default function MemeCardSetPicker({
     <section className="tw-col-span-full tw-mt-2 tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4">
       <div>
         <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
-          Meme Card TDH
+          Card Set TDH
         </p>
         <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-          Select specific Meme cards. Choosing every Meme card is normal TDH.
+          Only TDH from selected Meme cards counts.
         </p>
       </div>
 

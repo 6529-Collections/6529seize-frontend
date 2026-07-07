@@ -19,6 +19,8 @@
 - Open a direct tab deep link such as `/the-memes/123?focus=activity`.
 - Use the tab row on the card page.
 - Use previous/next arrows in the card header.
+- Use `Create card TDH wave` on a resolved card page to open `/waves/create`
+  with `Card Set TDH` selected for that Meme card.
 
 ## Focus Keys
 
@@ -70,7 +72,11 @@
 14. The Art additional-details rows use the active supported `locale` for
     section headings, metric labels, empty states, open/download labels, and
     TDH/rank number formatting.
-15. If a numeric card id is unresolved, the route removes `focus`, hides tab
+15. `Create card TDH wave` opens the full create-wave route as a `Rank` wave
+    with `Card Set TDH` selected and this Meme card prefilled as the selected
+    credit NFT. The standard create-wave validation still controls all
+    remaining setup fields.
+16. If a numeric card id is unresolved, the route removes `focus`, hides tab
     content, and shows the shared next-mint fallback panel.
 
 ## Route States
@@ -88,6 +94,8 @@
 - Open `Your Cards` to check personal ownership and transfer history.
 - Open `The Art` to review original media, Arweave links/downloads, and file
   details for the currently visible slide.
+- Open `Create card TDH wave` to start a wave where only TDH from the selected
+  Meme card counts.
 
 ## Edge Cases
 
@@ -146,6 +154,8 @@
   accessible names, locale-aware number formatting, locale-preserving season
   links, a labelled group for the secondary period cluster, and a 24px minimum
   target on the season link.
+- The card TDH create CTA label and accessible name are message-backed; the
+  destination currently relies on the create-wave route copy for later steps.
 - Timeline region labels, UTC date formatting, URI/TXN link labels, and shared
   change field labels are routed through the progressive i18n helpers.
 - Timeline image alt text, video accessible labels, and HTML iframe titles use

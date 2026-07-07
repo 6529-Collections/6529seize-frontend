@@ -84,6 +84,9 @@ describe("frontend i18n helpers", () => {
       })
     ).toBe("Voir Meme, carte n° 1");
     expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
+    expect(t("de-DE", "theMemes.detail.actions.createCardTdhWave")).toBe(
+      "Create card TDH wave"
+    );
     expect(t("en-US", "media.video.playPreview")).toBe("Play video preview");
     expect(t("en-US", "media.video.player")).toBe("Video player");
     expect(t("en-US", "media.video.seek")).toBe("Seek video");

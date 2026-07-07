@@ -3,6 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -22,6 +23,7 @@ import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { getCreateCardTdhWaveHref } from "@/helpers/waves/create-wave-config.helpers";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -646,6 +648,30 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                       {nft.name}
                     </span>
                   </h1>
+                </div>
+                <div className="tw-order-3 tw-flex tw-w-full tw-justify-start md:tw-ml-auto md:tw-w-auto md:tw-justify-end">
+                  <Link
+                    href={getCreateCardTdhWaveHref(nft.id)}
+                    aria-label={t(
+                      locale,
+                      "theMemes.detail.actions.createCardTdhWaveAriaLabel",
+                      {
+                        tokenId: formatInteger(locale, nft.id),
+                      }
+                    )}
+                    className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-200 tw-no-underline tw-transition tw-duration-200 hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15 hover:tw-text-primary-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                  >
+                    <PlusIcon
+                      aria-hidden="true"
+                      className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+                    />
+                    <span className="tw-whitespace-normal tw-text-left">
+                      {t(
+                        locale,
+                        "theMemes.detail.actions.createCardTdhWave"
+                      )}
+                    </span>
+                  </Link>
                 </div>
               </div>
             ) : (

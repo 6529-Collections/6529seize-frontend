@@ -981,6 +981,9 @@ export const EN_US_MESSAGES = {
   "theMemes.card.metric.volume": "Volume ({volumeType}): {value}",
   "theMemes.card.metric.ethValue": "{value} ETH",
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
+  "theMemes.detail.actions.createCardTdhWave": "Create card TDH wave",
+  "theMemes.detail.actions.createCardTdhWaveAriaLabel":
+    "Create card TDH wave for Card {tokenId}",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
   "theMemes.detail.sections.ariaLabel": "Meme page sections",

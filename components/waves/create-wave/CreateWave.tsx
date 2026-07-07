@@ -3,7 +3,7 @@
 /* istanbul ignore file */
 import { useRef } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { CreateWaveStep } from "@/types/waves.types";
+import type { CreateWaveConfig, CreateWaveStep } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
@@ -16,13 +16,15 @@ export default function CreateWave({
   onBack,
   onSuccess,
   parentWaveId,
+  initialConfig,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
   readonly parentWaveId?: string | null | undefined;
+  readonly initialConfig?: CreateWaveConfig | undefined;
 }) {
-  const waveConfig = useWaveConfig();
+  const waveConfig = useWaveConfig(initialConfig);
   const { config, step, selectedOutcomeType, onStep } = waveConfig;
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const {

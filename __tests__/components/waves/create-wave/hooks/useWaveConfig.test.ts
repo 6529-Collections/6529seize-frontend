@@ -11,6 +11,11 @@ import {
 } from "@/types/waves.types";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import * as createWaveValidation from "@/helpers/waves/create-wave.validation";
+import {
+  getCreateCardTdhInitialConfig,
+  getInitialCreateWaveConfig,
+} from "@/helpers/waves/create-wave-config.helpers";
+import { MEMES_CONTRACT } from "@/constants/constants";
 
 // Mock dependencies
 jest.mock("@/helpers/waves/create-wave.validation");
@@ -130,6 +135,31 @@ describe("useWaveConfig", () => {
 
       // Outcomes
       expect(result.current.config.outcomes).toEqual([]);
+    });
+
+    it("should initialize from a supplied Card Set TDH config", () => {
+      const { result } = renderHook(() =>
+        useWaveConfig(getCreateCardTdhInitialConfig(42))
+      );
+
+      expect(result.current.config.overview.type).toBe(ApiWaveType.Rank);
+      expect(result.current.config.voting.type).toBe(
+        ApiWaveCreditType.CardSetTdh
+      );
+      expect(result.current.config.voting.creditNfts).toEqual([
+        { contract: MEMES_CONTRACT, token_id: 42 },
+      ]);
+      expect(mockedUseMemeCardCount).toHaveBeenLastCalledWith({
+        enabled: true,
+      });
+    });
+
+    it("should use the shared default config builder", () => {
+      const config = getInitialCreateWaveConfig({ type: ApiWaveType.Rank });
+
+      expect(config.overview.type).toBe(ApiWaveType.Rank);
+      expect(config.dates.endDate).toBe(1000000);
+      expect(config.voting.type).toBe(ApiWaveCreditType.TdhPlusXtdh);
     });
 
     it("should initialize endDateConfig with null values", () => {

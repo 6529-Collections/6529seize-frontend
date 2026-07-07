@@ -339,6 +339,19 @@ describe("MemePage tab navigation", () => {
     }
   );
 
+  it("links to the card TDH create flow with the current Meme card prefill", async () => {
+    renderPage();
+
+    const link = await screen.findByRole("link", {
+      name: "Create card TDH wave for Card 1",
+    });
+
+    expect(link).toHaveAttribute(
+      "href",
+      "/waves/create?votingType=CARD_SET_TDH&cardSetTdhTokenId=1"
+    );
+  });
+
   it("selects the Timeline history subtab", async () => {
     const page = renderPage();
     await waitFor(() =>

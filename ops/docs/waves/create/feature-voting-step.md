@@ -37,7 +37,8 @@ approve-wave threshold behavior.
    - `TDH + XTDH` (default)
    - `TDH`
    - `Rep`
-   - `Memes TDH`
+   - `Card Set TDH`
+     - Helper copy: `Only TDH from selected Meme cards counts.`
 2. If `Rep` is selected, set at least one scope field:
    - `Rep Category`, or
    - `Profile` (identity search)
@@ -54,7 +55,7 @@ approve-wave threshold behavior.
 
 - `Rep` blocks forward navigation when both `Rep Category` and `Profile` are
   empty.
-- Switching from `Rep` to `TDH + XTDH`, `TDH`, or `Memes TDH` clears saved `Rep`
+- Switching from `Rep` to `TDH + XTDH`, `TDH`, or `Card Set TDH` clears saved `Rep`
   fields.
 - `XTDH` is not offered as a standalone selectable mode.
 - Time-weighted interval must stay between `5 minutes` and `24 hours`.
@@ -87,7 +88,7 @@ approve-wave threshold behavior.
 ## Limitations / Notes
 
 - Creator-facing voting options are only `TDH + XTDH`, `TDH`, `Rep`, and
-  `Memes TDH`.
+  `Card Set TDH`.
 - `Allow Negative Votes` is interactive for `Rank` and `Approve` waves.
 - Time-weighted voting is available for `Rank` and `Approve` waves.
 - Approval threshold and hold time are available for `Approve` waves.

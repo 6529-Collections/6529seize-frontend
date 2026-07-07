@@ -4829,10 +4829,11 @@
         "Meme Card preview/data surfaces expose fields such as edition size, TDH rate, season, mint date, and supply when available.",
         "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
         "Card tabs and focus links are documented for deep-linking into card page sections.",
+        "Resolved Meme Card pages include Create card TDH wave, which opens /waves/create with Card Set TDH selected for that Meme card.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."
       ],
       "canonical_path": "/the-memes/{id}",
-      "related_paths": ["/the-memes", "/the-memes/{id}/distribution"],
+      "related_paths": ["/the-memes", "/the-memes/{id}/distribution", "/waves/create"],
       "tags": ["memes", "card"],
       "source_refs": [
         "app/the-memes/[id]/page.tsx",

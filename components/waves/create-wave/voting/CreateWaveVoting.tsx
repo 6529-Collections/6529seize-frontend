@@ -59,14 +59,6 @@ const CREDIT_SCOPE_OPTIONS: readonly {
   },
 ];
 
-const getCreateWaveVotingLabel = (votingType: ApiWaveCreditType): string => {
-  if (votingType === ApiWaveCreditType.CardSetTdh) {
-    return "Memes TDH";
-  }
-
-  return WAVE_VOTING_LABELS[votingType];
-};
-
 const getApprovalThresholdTimeErrorMessage = (
   errors: CREATE_WAVE_VALIDATION_ERROR[]
 ): string | undefined => {
@@ -269,7 +261,7 @@ export default function CreateWaveVoting({
                     : "tw-text-iron-300 group-hover:tw-text-white"
                 }`}
               >
-                {getCreateWaveVotingLabel(votingType)}
+                {WAVE_VOTING_LABELS[votingType]}
               </span>
             </CommonBorderedRadioButton>
           ))}

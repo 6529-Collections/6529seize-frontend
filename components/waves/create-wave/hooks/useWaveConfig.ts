@@ -8,7 +8,6 @@ import type {
 } from "@/types/waves.types";
 import { CreateWaveGroupConfigType, CreateWaveStep } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { Time } from "@/helpers/time";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
@@ -18,94 +17,20 @@ import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.v
 import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.validation";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { useMemeCardCount } from "./useMemeCardCount";
+import { getInitialCreateWaveConfig } from "@/helpers/waves/create-wave-config.helpers";
 
 interface EndDateConfig {
   time: number | null;
   period: Period | null;
 }
 
-export function useWaveConfig() {
+export function useWaveConfig(initialConfig?: CreateWaveConfig | undefined) {
   const initialType = ApiWaveType.Chat;
   const initialStep = CreateWaveStep.OVERVIEW;
 
-  // Get initial config for a wave type
-  const getInitialConfig = ({
-    type,
-  }: {
-    readonly type: ApiWaveType;
-  }): CreateWaveConfig => {
-    const now = Time.currentMillis();
-    return {
-      overview: {
-        type,
-        name: "",
-        image: null,
-      },
-      groups: {
-        canView: null,
-        canDrop: null,
-        canVote: null,
-        canChat: null,
-        admin: null,
-      },
-      chat: {
-        enabled: true,
-      },
-      dates: {
-        submissionStartDate: now,
-        votingStartDate: now,
-        endDate: type === ApiWaveType.Rank ? now : null,
-        firstDecisionTime: now,
-        subsequentDecisions: [],
-        isRolling: false,
-      },
-      drops: {
-        noOfApplicationsAllowedPerParticipant: null,
-        requiredTypes: [],
-        requiredMetadata: [],
-        submissionStrategy: null,
-        terms: null,
-        signatureRequired: false,
-        adminCanDeleteDrops: true,
-      },
-      voting: {
-        type: ApiWaveCreditType.TdhPlusXtdh,
-        creditScope: ApiWaveCreditScope.Wave,
-        category: null,
-        profileId: null,
-        creditNfts: [],
-        creditNftMemeCount: null,
-        allowNegativeVotes: true,
-        maxVotesPerIdentityPerDrop: null,
-        winningThreshold: null,
-        timeWeighted: {
-          enabled: false,
-          averagingInterval: 24,
-          averagingIntervalUnit: "hours",
-        },
-      },
-      outcomes: [],
-      approval: {
-        threshold: null,
-        thresholdTimeMs: null,
-        maxWinners: null,
-      },
-      display: {
-        customRules: null,
-        outcomesVisible: true,
-        approve: {
-          approvalsTabLabel: "",
-          approvedTabLabel: "",
-        },
-      },
-    };
-  };
-
   // State management
-  const [config, setConfig] = useState<CreateWaveConfig>(
-    getInitialConfig({
-      type: initialType,
-    })
+  const [config, setConfig] = useState<CreateWaveConfig>(() =>
+    initialConfig ?? getInitialCreateWaveConfig({ type: initialType })
   );
 
   const [endDateConfig, setEndDateConfig] = useState<EndDateConfig>({
@@ -172,7 +97,7 @@ export function useWaveConfig() {
       }
 
       return {
-        ...getInitialConfig({ type: overview.type }),
+        ...getInitialCreateWaveConfig({ type: overview.type }),
         overview,
       };
     });

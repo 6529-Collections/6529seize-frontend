@@ -253,7 +253,7 @@ describe("CreateWaveVoting", () => {
     ).toHaveTextContent("Rep");
     expect(
       screen.getByTestId(`radio-${ApiWaveCreditType.CardSetTdh}`)
-    ).toHaveTextContent("Memes TDH");
+    ).toHaveTextContent("Card Set TDH");
     expect(screen.queryByText(/^By /)).toBeNull();
 
     rerender(
@@ -262,11 +262,11 @@ describe("CreateWaveVoting", () => {
 
     expect(
       screen.getByTestId(`radio-${ApiWaveCreditType.CardSetTdh}`)
-    ).toHaveTextContent("Memes TDH");
+    ).toHaveTextContent("Card Set TDH");
     expect(screen.queryByText(/^By /)).toBeNull();
   });
 
-  it("shows Meme card picker when Meme Card TDH is selected", () => {
+  it("shows Meme card picker when Card Set TDH is selected", () => {
     render(
       <CreateWaveVoting
         {...baseProps}
