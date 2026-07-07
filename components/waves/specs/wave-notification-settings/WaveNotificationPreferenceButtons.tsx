@@ -2,6 +2,7 @@ import { Spinner } from "@/components/dotLoader/DotLoader";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { AtSymbolIcon, BellIcon, CheckIcon } from "@heroicons/react/24/outline";
+import type { ComponentType, SVGProps } from "react";
 import { useRef, useState } from "react";
 import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
@@ -36,6 +37,84 @@ const getMenuItemStyle = ({
   return "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800";
 };
 
+interface NotificationMenuItemProps {
+  readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
+  readonly label: string;
+  readonly ariaLabel: string;
+  readonly active: boolean;
+  readonly actionDisabled?: boolean | undefined;
+  readonly buttonDisabled: boolean;
+  readonly loading: boolean;
+  readonly description?: string | undefined;
+  readonly descriptionId?: string | undefined;
+  readonly onSelect: () => void;
+}
+
+function NotificationMenuItem({
+  icon: Icon,
+  label,
+  ariaLabel,
+  active,
+  actionDisabled = false,
+  buttonDisabled,
+  loading,
+  description,
+  descriptionId,
+  onSelect,
+}: NotificationMenuItemProps) {
+  const itemDisabled = buttonDisabled || actionDisabled;
+
+  return (
+    <li role="none" className="tw-list-none">
+      <button
+        type="button"
+        disabled={buttonDisabled}
+        role="menuitemcheckbox"
+        aria-checked={active}
+        aria-disabled={actionDisabled || undefined}
+        aria-describedby={description ? descriptionId : undefined}
+        onClick={(event) => {
+          event.stopPropagation();
+          if (actionDisabled) {
+            return;
+          }
+          onSelect();
+        }}
+        className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
+          {
+            active,
+            disabled: itemDisabled,
+          }
+        )}`}
+        aria-label={ariaLabel}
+      >
+        <Icon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+        <span className="tw-min-w-0 tw-flex-1 tw-text-left">
+          <span className="tw-block tw-text-sm tw-font-medium">{label}</span>
+          {description && (
+            <span
+              id={descriptionId}
+              className="tw-mt-0.5 tw-block tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-[14px] tw-text-iron-400"
+            >
+              {description}
+            </span>
+          )}
+        </span>
+        {loading ? (
+          <Spinner dimension={12} />
+        ) : active ? (
+          <CheckIcon
+            className="tw-size-4 tw-flex-shrink-0"
+            aria-hidden="true"
+          />
+        ) : (
+          <span className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+        )}
+      </button>
+    </li>
+  );
+}
+
 export default function WaveNotificationPreferenceButtons({
   waveId,
   settings,
@@ -57,13 +136,6 @@ export default function WaveNotificationPreferenceButtons({
   const triggerLabel = waveNotificationSettingsMessage(
     "waves.notificationSettings.trigger.ariaLabel"
   );
-
-  const renderItemCheck = (active: boolean) =>
-    active ? (
-      <CheckIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
-    ) : (
-      <span className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
-    );
 
   const triggerContent = settings.loadingTarget ? (
     <Spinner dimension={12} />
@@ -108,99 +180,48 @@ export default function WaveNotificationPreferenceButtons({
         menuId={menuId}
         menuLabelledBy={triggerId}
       >
-        <li role="none" className="tw-list-none">
-          <button
-            type="button"
-            disabled={settings.loading}
-            role="menuitemcheckbox"
-            aria-checked={settings.allGroupNotificationsEnabled}
-            onClick={(event) => {
-              event.stopPropagation();
-              settings.onAllGroupNotificationsClick();
-              setIsOpen(false);
-            }}
-            className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
-              {
-                active: settings.allGroupNotificationsEnabled,
-                disabled: settings.loading,
-              }
-            )}`}
-            aria-label={waveNotificationSettingsMessage(
-              "waves.notificationSettings.allMentions.ariaLabel"
-            )}
-          >
-            <AtSymbolIcon
-              className="tw-size-4 tw-flex-shrink-0"
-              aria-hidden="true"
-            />
-            <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium">
-              {waveNotificationSettingsMessage(
-                "waves.notificationSettings.allMentions.label"
-              )}
-            </span>
-            {settings.loadingTarget === "all-group" ? (
-              <Spinner dimension={12} />
-            ) : (
-              renderItemCheck(settings.allGroupNotificationsEnabled)
-            )}
-          </button>
-        </li>
-        <li role="none" className="tw-list-none">
-          <button
-            type="button"
-            disabled={settings.loading}
-            role="menuitemcheckbox"
-            aria-checked={settings.allDropsEnabled}
-            aria-disabled={allDropsSelectionDisabled || undefined}
-            aria-describedby={
-              settings.disableAllDropsSelection
-                ? allDropsLimitDescriptionId
-                : undefined
+        <NotificationMenuItem
+          icon={AtSymbolIcon}
+          label={waveNotificationSettingsMessage(
+            "waves.notificationSettings.allMentions.label"
+          )}
+          ariaLabel={waveNotificationSettingsMessage(
+            "waves.notificationSettings.allMentions.ariaLabel"
+          )}
+          active={settings.allGroupNotificationsEnabled}
+          buttonDisabled={settings.loading}
+          loading={settings.loadingTarget === "all-group"}
+          onSelect={() => {
+            settings.onAllGroupNotificationsClick();
+            setIsOpen(false);
+          }}
+        />
+        <NotificationMenuItem
+          icon={BellIcon}
+          label={waveNotificationSettingsMessage(
+            "waves.notificationSettings.allMessages.label"
+          )}
+          ariaLabel={waveNotificationSettingsMessage(
+            "waves.notificationSettings.allMessages.ariaLabel"
+          )}
+          active={settings.allDropsEnabled}
+          actionDisabled={allDropsSelectionDisabled}
+          buttonDisabled={settings.loading}
+          loading={settings.loadingTarget === "all-drops"}
+          description={
+            settings.disableAllDropsSelection
+              ? settings.allDropsLimitDescription
+              : undefined
+          }
+          descriptionId={allDropsLimitDescriptionId}
+          onSelect={() => {
+            if (allDropsSelectionDisabled) {
+              return;
             }
-            onClick={(event) => {
-              event.stopPropagation();
-              if (allDropsSelectionDisabled) {
-                return;
-              }
-              settings.onAllDropsNotificationsClick();
-              setIsOpen(false);
-            }}
-            className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
-              {
-                active: settings.allDropsEnabled,
-                disabled: settings.loading || allDropsSelectionDisabled,
-              }
-            )}`}
-            aria-label={waveNotificationSettingsMessage(
-              "waves.notificationSettings.allMessages.ariaLabel"
-            )}
-          >
-            <BellIcon
-              className="tw-size-4 tw-flex-shrink-0"
-              aria-hidden="true"
-            />
-            <span className="tw-min-w-0 tw-flex-1 tw-text-left">
-              <span className="tw-block tw-text-sm tw-font-medium">
-                {waveNotificationSettingsMessage(
-                  "waves.notificationSettings.allMessages.label"
-                )}
-              </span>
-              {settings.disableAllDropsSelection && (
-                <span
-                  id={allDropsLimitDescriptionId}
-                  className="tw-mt-0.5 tw-block tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-[14px] tw-text-iron-400"
-                >
-                  {settings.allDropsLimitDescription}
-                </span>
-              )}
-            </span>
-            {settings.loadingTarget === "all-drops" ? (
-              <Spinner dimension={12} />
-            ) : (
-              renderItemCheck(settings.allDropsEnabled)
-            )}
-          </button>
-        </li>
+            settings.onAllDropsNotificationsClick();
+            setIsOpen(false);
+          }}
+        />
       </CommonDropdownItemsDefaultWrapper>
       <MyStreamActionTooltip id={tooltipId} />
     </div>
