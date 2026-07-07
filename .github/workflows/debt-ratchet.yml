@@ -1,10 +1,14 @@
 name: Debt Ratchet
 
-# Structural-debt gate: fails any PR that raises a debt counter above the
-# checked-in baseline (scripts/debt-ratchet-baseline.json). Runs on every PR
-# so it can serve as a required status check. See scripts/debt-ratchet.cjs for
-# the metrics and the one-command baseline update
-# (`node scripts/debt-ratchet.cjs --update`).
+# Structural-debt and generated-file consistency gate: fails any PR that
+# raises a debt counter above the checked-in baseline
+# (scripts/debt-ratchet-baseline.json) or lets a generated E2E artifact drift
+# from its manifest (tests/packs.manifest.ts). Runs on every PR so it can
+# serve as a required status check. See scripts/debt-ratchet.cjs for the
+# metrics and the one-command baseline update
+# (`node scripts/debt-ratchet.cjs --update`), and
+# scripts/sync-e2e-manifest.cjs for the E2E manifest sync
+# (`./bin/6529 run e2e-manifest:sync`).
 
 on:
   pull_request:
@@ -61,3 +65,6 @@ jobs:
 
       - name: Check debt counters against baseline
         run: node scripts/debt-ratchet.cjs
+
+      - name: Check e2e manifest drift
+        run: node scripts/sync-e2e-manifest.cjs --check

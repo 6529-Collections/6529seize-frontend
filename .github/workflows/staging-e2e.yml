@@ -71,9 +71,18 @@ jobs:
       - name: Install Playwright browser
         run: ./bin/6529 exec playwright install --with-deps chromium
 
+      # The pack list lives in tests/packs.manifest.ts on the checked-out
+      # (deployed) SHA, so pack changes ride the deploy they belong to. The
+      # legacy inline loop below covers 1a-staging checkouts that predate the
+      # runner (workflow_run executes this YAML from main against the deployed
+      # checkout); delete it once 1a-staging contains scripts/e2e-packs.cjs.
       - name: Run staging packs against staging.6529.io
         run: |
           set -uo pipefail
+          if [ -f scripts/e2e-packs.cjs ]; then
+            ./bin/6529 run e2e:packs -- --env staging --trigger post-deploy
+            exit "$?"
+          fi
           packs=(
             test:e2e:staging:smoke
             test:e2e:staging
