@@ -242,7 +242,7 @@ export function useWaveDataFetching({
                 waveId,
                 highestSerialNo,
                 new AbortController().signal
-              );
+              ); // NOSONAR: explicit fire-and-forget keeps no-floating-promises satisfied.
             }
           }
         }
@@ -306,7 +306,7 @@ export function useWaveDataFetching({
    */
   const registerWave = useCallback(
     (waveId: string, syncNewest = false) => {
-      void activateWave(waveId, syncNewest);
+      void activateWave(waveId, syncNewest); // NOSONAR: intentional fire-and-forget registration.
     },
     [activateWave]
   );

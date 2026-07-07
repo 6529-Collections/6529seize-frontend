@@ -214,18 +214,19 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       router.push(newUrl, { scroll: false });
     },
   });
+  const metadataWaveId = wave?.id;
 
   useEffect(() => {
     registerWave(waveId, true);
   }, [registerWave, waveId]);
 
   useEffect(() => {
-    if (!wave) {
+    if (!metadataWaveId) {
       return;
     }
 
     markMobileLaunchStep("wave_metadata_loaded");
-  }, [wave]);
+  }, [metadataWaveId]);
 
   useEffect(() => {
     if (!wave) {
