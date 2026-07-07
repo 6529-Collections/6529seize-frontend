@@ -3,9 +3,12 @@ import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.valida
 import {
   APPROVE_WAVE_TAB_LABEL_MAX_LENGTH,
   DEFAULT_APPROVE_WAVE_TAB_LABELS,
+  WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH,
   getEffectiveApproveWaveTabLabels,
+  getDefaultWaveSubmissionButtonLabel,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import type {
   CreateWaveApproveDisplayConfig,
   CreateWaveDisplayConfig,
@@ -33,14 +36,22 @@ export default function CreateWaveDisplaySettings({
   const hasReservedError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
   );
-  const errorMessage = hasLengthError
+  const hasSubmissionLabelError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
+  );
+  const approveErrorMessage = hasLengthError
     ? `Labels must be ${APPROVE_WAVE_TAB_LABEL_MAX_LENGTH} characters or fewer.`
     : hasDuplicateError
       ? "Use two different tab labels."
       : hasReservedError
         ? "Labels cannot match existing tabs."
         : null;
-  const errorId = "create-wave-display-settings-error";
+  const submissionLabelErrorMessage = hasSubmissionLabelError
+    ? `Label must be ${WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH} characters or fewer.`
+    : null;
+  const approveErrorId = "create-wave-display-settings-error";
+  const submissionLabelErrorId = "create-wave-submission-button-label-error";
+  const submissionButtonLabel = display.submissionButtonLabel ?? "";
   const labels = getEffectiveApproveWaveTabLabels(display.approve);
 
   const onLabelChange =
@@ -55,9 +66,25 @@ export default function CreateWaveDisplaySettings({
       });
     };
 
-  const inputClasses = (hasValue: boolean) =>
+  const onSubmissionButtonLabelChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const nextValue = event.target.value;
+    onChange({
+      ...display,
+      submissionButtonLabel: nextValue.length ? nextValue : null,
+    });
+  };
+
+  const inputClasses = ({
+    hasError,
+    hasValue,
+  }: {
+    readonly hasError: boolean;
+    readonly hasValue: boolean;
+  }) =>
     `${
-      errorMessage
+      hasError
         ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
         : "tw-border-white/5 tw-caret-primary-400 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-500/50 focus:tw-ring-primary-400"
     } ${
@@ -86,6 +113,59 @@ export default function CreateWaveDisplaySettings({
             className="tw-form-checkbox tw-size-5 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
           />
         </label>
+        <div className="tw-space-y-2">
+          <label
+            htmlFor="create-wave-submission-button-label"
+            className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
+          >
+            Submission button label
+          </label>
+          <input
+            id="create-wave-submission-button-label"
+            type="text"
+            autoComplete="off"
+            maxLength={WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH}
+            value={submissionButtonLabel}
+            onChange={onSubmissionButtonLabelChange}
+            placeholder={getDefaultWaveSubmissionButtonLabel(
+              WaveSubmissionExperience.DEFAULT
+            )}
+            aria-invalid={Boolean(submissionLabelErrorMessage)}
+            aria-describedby={
+              submissionLabelErrorMessage ? submissionLabelErrorId : undefined
+            }
+            className={inputClasses({
+              hasError: Boolean(submissionLabelErrorMessage),
+              hasValue: submissionButtonLabel.length > 0,
+            })}
+          />
+          <CommonAnimationHeight>
+            {submissionLabelErrorMessage ? (
+              <div
+                id={submissionLabelErrorId}
+                className="tw-relative tw-flex tw-items-center tw-gap-x-2 tw-pt-1"
+              >
+                <svg
+                  className="tw-size-4 tw-flex-shrink-0 tw-text-error"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="tw-relative tw-z-10 tw-text-xs tw-font-medium tw-text-error">
+                  {submissionLabelErrorMessage}
+                </div>
+              </div>
+            ) : null}
+          </CommonAnimationHeight>
+        </div>
         {showApproveTabLabels ? (
           <>
             <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
@@ -104,11 +184,14 @@ export default function CreateWaveDisplaySettings({
                   value={display.approve.approvalsTabLabel}
                   onChange={onLabelChange("approvalsTabLabel")}
                   placeholder={DEFAULT_APPROVE_WAVE_TAB_LABELS.approvals}
-                  aria-invalid={Boolean(errorMessage)}
-                  aria-describedby={errorMessage ? errorId : undefined}
-                  className={inputClasses(
-                    display.approve.approvalsTabLabel.length > 0
-                  )}
+                  aria-invalid={Boolean(approveErrorMessage)}
+                  aria-describedby={
+                    approveErrorMessage ? approveErrorId : undefined
+                  }
+                  className={inputClasses({
+                    hasError: Boolean(approveErrorMessage),
+                    hasValue: display.approve.approvalsTabLabel.length > 0,
+                  })}
                 />
               </div>
               <div className="tw-space-y-2">
@@ -126,11 +209,14 @@ export default function CreateWaveDisplaySettings({
                   value={display.approve.approvedTabLabel}
                   onChange={onLabelChange("approvedTabLabel")}
                   placeholder={DEFAULT_APPROVE_WAVE_TAB_LABELS.approved}
-                  aria-invalid={Boolean(errorMessage)}
-                  aria-describedby={errorMessage ? errorId : undefined}
-                  className={inputClasses(
-                    display.approve.approvedTabLabel.length > 0
-                  )}
+                  aria-invalid={Boolean(approveErrorMessage)}
+                  aria-describedby={
+                    approveErrorMessage ? approveErrorId : undefined
+                  }
+                  className={inputClasses({
+                    hasError: Boolean(approveErrorMessage),
+                    hasValue: display.approve.approvedTabLabel.length > 0,
+                  })}
                 />
               </div>
             </div>
@@ -146,9 +232,9 @@ export default function CreateWaveDisplaySettings({
               </span>
             </div>
             <CommonAnimationHeight>
-              {errorMessage ? (
+              {approveErrorMessage ? (
                 <div
-                  id={errorId}
+                  id={approveErrorId}
                   className="tw-relative tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5"
                 >
                   <svg
@@ -166,7 +252,7 @@ export default function CreateWaveDisplaySettings({
                     />
                   </svg>
                   <div className="tw-relative tw-z-10 tw-text-xs tw-font-medium tw-text-error">
-                    {errorMessage}
+                    {approveErrorMessage}
                   </div>
                 </div>
               ) : null}

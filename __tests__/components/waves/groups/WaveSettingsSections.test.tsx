@@ -239,6 +239,8 @@ describe("WaveSettingsSections", () => {
     expect(screen.getByText("Approved tab")).toBeInTheDocument();
     expect(screen.getByText("Outcomes")).toBeInTheDocument();
     expect(screen.getByText("Shown")).toBeInTheDocument();
+    expect(screen.getByText("Submission button")).toBeInTheDocument();
+    expect(screen.getByText("Drop")).toBeInTheDocument();
     expect(screen.getByText("Approve after")).toBeInTheDocument();
     expect(screen.getByText("12 approvals")).toBeInTheDocument();
     expect(screen.getByText("Hold time")).toBeInTheDocument();
@@ -331,6 +333,125 @@ describe("WaveSettingsSections", () => {
     await waitFor(() => {
       expect(invalidateSpy).toHaveBeenCalledWith({
         queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+      });
+    });
+  });
+
+  it("saves custom submission button label metadata", async () => {
+    const user = userEvent.setup();
+    const { queryClient } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Edit submission button label",
+      })
+    );
+    await user.type(screen.getByLabelText("Submission button label"), "Apply");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "Apply",
+        },
+      });
+    });
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+    });
+  });
+
+  it("deletes submission button label metadata when reset to default", async () => {
+    const user = userEvent.setup();
+    waveMetadata = [
+      {
+        id: 7,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    ];
+
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    expect(await screen.findByText("Apply")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit submission button label" })
+    );
+    await user.click(screen.getByRole("button", { name: "Use default" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        metadataId: 7,
+      });
+    });
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
+  });
+
+  it("deletes existing submission button label metadata before creating a replacement", async () => {
+    const user = userEvent.setup();
+    let resolveDelete: (() => void) | undefined;
+    const deletePromise = new Promise<void>((resolve) => {
+      resolveDelete = resolve;
+    });
+    deleteWaveMetadataMock.mockReturnValueOnce(deletePromise);
+    waveMetadata = [
+      {
+        id: 7,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    ];
+
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    expect(await screen.findByText("Apply")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit submission button label" })
+    );
+    await user.clear(screen.getByLabelText("Submission button label"));
+    await user.type(
+      screen.getByLabelText("Submission button label"),
+      "Submission"
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        metadataId: 7,
+      });
+    });
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
+
+    resolveDelete?.();
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "Submission",
+        },
       });
     });
   });
@@ -491,8 +612,7 @@ describe("WaveSettingsSections", () => {
     await waitFor(() => {
       expect(setToast).toHaveBeenCalledWith({
         type: "error",
-        message:
-          "Couldn't authenticate. Reconnect your wallet and try again.",
+        message: "Couldn't authenticate. Reconnect your wallet and try again.",
       });
     });
     expect(

@@ -5,6 +5,7 @@ interface WaveLeaderboardCurationEmptyStateProps {
   readonly onCreateDrop?: (() => void) | undefined;
   readonly canCreateDrop: boolean;
   readonly dropRestrictionMessage: string | null;
+  readonly createDropLabel?: string | undefined;
   readonly dropRestrictionLink: {
     readonly href: string;
     readonly label: string;
@@ -17,6 +18,7 @@ export const WaveLeaderboardCurationEmptyState: React.FC<
   onCreateDrop,
   canCreateDrop,
   dropRestrictionMessage,
+  createDropLabel = "Drop",
   dropRestrictionLink,
 }) => {
   const showEligibilityHelper =
@@ -88,7 +90,7 @@ export const WaveLeaderboardCurationEmptyState: React.FC<
                   clipRule="evenodd"
                 />
               </svg>
-              <span>Drop</span>
+              <span>{createDropLabel}</span>
             </PrimaryButton>
           )}
         </>

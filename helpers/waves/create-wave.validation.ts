@@ -20,8 +20,10 @@ import { CreateWaveStep } from "@/types/waves.types";
 import { Time } from "@/helpers/time";
 import {
   APPROVE_WAVE_TAB_LABEL_MAX_LENGTH,
+  WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH,
   areApproveWaveTabLabelsDuplicate,
   doApproveWaveTabLabelsUseReservedLabels,
+  normalizeWaveSubmissionButtonLabel,
   normalizeWaveTabLabel,
 } from "./wave-metadata.helpers";
 
@@ -63,6 +65,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   APPROVE_WAVE_TAB_LABEL_TOO_LONG = "APPROVE_WAVE_TAB_LABEL_TOO_LONG",
   APPROVE_WAVE_TAB_LABELS_DUPLICATE = "APPROVE_WAVE_TAB_LABELS_DUPLICATE",
   APPROVE_WAVE_TAB_LABEL_RESERVED = "APPROVE_WAVE_TAB_LABEL_RESERVED",
+  SUBMISSION_BUTTON_LABEL_TOO_LONG = "SUBMISSION_BUTTON_LABEL_TOO_LONG",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -81,6 +84,14 @@ const getOverviewValidationErrors = ({
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
   } else if (overview.name.length > MAX_NAME_LENGTH) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_TOO_LONG);
+  }
+
+  if (
+    overview.type !== ApiWaveType.Chat &&
+    normalizeWaveSubmissionButtonLabel(display?.submissionButtonLabel).length >
+      WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH
+  ) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG);
   }
 
   if (overview.type === ApiWaveType.Approve) {

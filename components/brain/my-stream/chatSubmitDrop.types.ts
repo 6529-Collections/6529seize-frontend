@@ -16,15 +16,23 @@ export interface ChatSubmitDropState {
 }
 
 export const getChatSubmitDropLabels = (
-  submissionExperience: WaveSubmissionExperience
+  submissionExperience: WaveSubmissionExperience,
+  customButtonLabel: string | null = null
 ): {
   readonly label: string;
   readonly compactLabel: string;
 } => {
+  if (customButtonLabel) {
+    return {
+      label: customButtonLabel,
+      compactLabel: customButtonLabel,
+    };
+  }
+
   if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
     return {
-      label: "Create proposal",
-      compactLabel: "Proposal",
+      label: "Create Proposal",
+      compactLabel: "Create Proposal",
     };
   }
 

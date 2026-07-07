@@ -5,8 +5,10 @@ import type {
   CreateWaveApproveDisplayConfig,
   CreateWaveDisplayConfig,
 } from "@/types/waves.types";
+import { WaveSubmissionExperience } from "./wave-submission-experience.helpers";
 
 export const APPROVE_WAVE_TAB_LABEL_MAX_LENGTH = 24;
+export const WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH = 24;
 export const WAVE_CUSTOM_RULES_MAX_LENGTH = 2000;
 
 export const DEFAULT_APPROVE_WAVE_TAB_LABELS = {
@@ -25,6 +27,7 @@ const RESERVED_APPROVE_WAVE_TAB_LABELS = [
 export const WAVE_DISPLAY_METADATA_KEYS = {
   approvalsTabLabel: "wave_display.approve.tabs.approvals_label",
   approvedTabLabel: "wave_display.approve.tabs.approved_label",
+  submissionButtonLabel: "wave_display.submission.button_label",
   customRules: "wave_display.rules.custom",
   outcomesVisible: "wave_display.outcomes.visible",
 } as const;
@@ -76,7 +79,16 @@ interface WaveCustomRulesMetadataUpdate {
   readonly deleteIds: number[];
 }
 
+interface WaveSubmissionButtonLabelMetadataUpdate {
+  readonly create: ApiCreateWaveMetadataRequest[];
+  readonly deleteIds: number[];
+}
+
 export const normalizeWaveTabLabel = (
+  value: string | null | undefined
+): string => value?.trim() ?? "";
+
+export const normalizeWaveSubmissionButtonLabel = (
   value: string | null | undefined
 ): string => value?.trim() ?? "";
 
@@ -90,6 +102,9 @@ const normalizeComparableWaveTabLabel = (
 
 const isValidCustomWaveTabLabel = (value: string): boolean =>
   value.length > 0 && value.length <= APPROVE_WAVE_TAB_LABEL_MAX_LENGTH;
+
+const isValidWaveSubmissionButtonLabel = (value: string): boolean =>
+  value.length > 0 && value.length <= WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH;
 
 const isReservedApproveWaveTabLabel = (
   value: string | null | undefined
@@ -185,6 +200,20 @@ const getCustomRulesMetadataRequest = (
   };
 };
 
+const getSubmissionButtonLabelMetadataRequest = (
+  buttonLabel: string | null | undefined
+): ApiCreateWaveMetadataRequest | null => {
+  const normalizedLabel = normalizeWaveSubmissionButtonLabel(buttonLabel);
+  if (!isValidWaveSubmissionButtonLabel(normalizedLabel)) {
+    return null;
+  }
+
+  return {
+    data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+    data_value: normalizedLabel,
+  };
+};
+
 export const getCreateWaveDisplayMetadataRequests = ({
   display,
   waveType,
@@ -200,10 +229,16 @@ export const getCreateWaveDisplayMetadataRequests = ({
     waveType === ApiWaveType.Chat
       ? null
       : getOutcomeVisibilityMetadataRequest(display.outcomesVisible);
-  const customRulesRequest = getCustomRulesMetadataRequest(
-    display.customRules
-  );
-  const requests = [outcomeVisibilityRequest, customRulesRequest].filter(
+  const customRulesRequest = getCustomRulesMetadataRequest(display.customRules);
+  const submissionButtonLabelRequest =
+    waveType === ApiWaveType.Chat
+      ? null
+      : getSubmissionButtonLabelMetadataRequest(display.submissionButtonLabel);
+  const requests = [
+    outcomeVisibilityRequest,
+    customRulesRequest,
+    submissionButtonLabelRequest,
+  ].filter(
     (request): request is ApiCreateWaveMetadataRequest => request !== null
   );
 
@@ -459,6 +494,82 @@ export const getWaveCustomRulesMetadataUpdate = ({
     })
   );
   const request = getCustomRulesMetadataRequest(customRules);
+
+  if (request === null) {
+    return {
+      create: [],
+      deleteIds: rows.map((row) => row.id),
+    };
+  }
+
+  if (latestValue === request.data_value) {
+    return { create: [], deleteIds: [] };
+  }
+
+  return { create: [request], deleteIds: rows.map((row) => row.id) };
+};
+
+export const getDefaultWaveSubmissionButtonLabel = (
+  submissionExperience: WaveSubmissionExperience
+): string => {
+  switch (submissionExperience) {
+    case WaveSubmissionExperience.QUORUM_PROPOSAL:
+      return "Create Proposal";
+    case WaveSubmissionExperience.CURATION_LEGACY:
+      return "Drop Art";
+    case WaveSubmissionExperience.MEMES_LEGACY:
+      return "Drop";
+    case WaveSubmissionExperience.DEFAULT:
+    case WaveSubmissionExperience.IDENTITY:
+      return "Drop";
+  }
+};
+
+export const getWaveSubmissionButtonLabelOverrideFromMetadata = (
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): string | null => {
+  const label = normalizeWaveSubmissionButtonLabel(
+    getLatestMetadataValue({
+      metadata,
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+    })
+  );
+
+  return isValidWaveSubmissionButtonLabel(label) ? label : null;
+};
+
+export const getWaveSubmissionButtonLabelFromMetadata = ({
+  metadata,
+  submissionExperience,
+}: {
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly submissionExperience: WaveSubmissionExperience;
+}): string =>
+  getWaveSubmissionButtonLabelOverrideFromMetadata(metadata) ??
+  getDefaultWaveSubmissionButtonLabel(submissionExperience);
+
+export const getWaveSubmissionButtonLabelMetadataDraft = (
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): string => getWaveSubmissionButtonLabelOverrideFromMetadata(metadata) ?? "";
+
+export const getWaveSubmissionButtonLabelMetadataUpdate = ({
+  metadata,
+  buttonLabel,
+}: {
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly buttonLabel: string | null | undefined;
+}): WaveSubmissionButtonLabelMetadataUpdate => {
+  const rows = getApproveWaveDisplayMetadataRows({
+    metadata,
+    dataKey: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+  });
+  const latestValue = normalizeWaveSubmissionButtonLabel(
+    getLatestMetadataValue({
+      metadata,
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+    })
+  );
+  const request = getSubmissionButtonLabelMetadataRequest(buttonLabel);
 
   if (request === null) {
     return {
