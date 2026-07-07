@@ -4,6 +4,7 @@ import {
   getLowValueNetworkErrorTargetUrl,
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
+  shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
@@ -104,6 +105,8 @@ describe("sentry-client-filters", () => {
     "t?.startsWith is not a function";
   const walletConnectStaleSessionTopicMessage =
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
+  const extensionMessagingConnectionFailureMessage =
+    "Could not establish connection. Receiving end does not exist.";
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
@@ -469,6 +472,52 @@ describe("sentry-client-filters", () => {
         },
       ],
     },
+    ...overrides,
+  });
+
+  const createBrowserExtensionMessagingConnectionEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves/:wave",
+    request: {
+      url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    tags: {
+      browser: "Edge 148",
+      os: "Windows",
+      transaction: "/waves/:wave",
+      url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: extensionMessagingConnectionFailureMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///injectedScript.bundle.js",
+                abs_path: "app:///injectedScript.bundle.js",
+                function: "n",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        type: "http",
+        category: "fetch",
+        level: "info",
+        message: "POST: https://region1.google-analytics.com/g/collect [200]",
+        data: {
+          url: "https://region1.google-analytics.com/g/collect",
+          "url.is_first_party": false,
+          "url.is_first_party_api": false,
+        },
+      },
+    ],
     ...overrides,
   });
 
@@ -4776,6 +4825,217 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters observed extension messaging failures from injected script frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent();
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters extension messaging failures from browser extension frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  abs_path:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  function: "sendMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter extension messaging failures with app-owned source frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injectedScript.bundle.js",
+                  abs_path: "app:///injectedScript.bundle.js",
+                  function: "n",
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  function: "sendBrowserExtensionMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures with app-owned original stacks", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent();
+    const error = new Error(extensionMessagingConnectionFailureMessage);
+    error.stack = [
+      `Error: ${extensionMessagingConnectionFailureMessage}`,
+      "    at n (app:///injectedScript.bundle.js:2:99787)",
+      "    at sendBrowserExtensionMessage (webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      extra: {
+        __serialized__: {
+          message: extensionMessagingConnectionFailureMessage,
+          stack: [
+            `Error: ${extensionMessagingConnectionFailureMessage}`,
+            "    at n (app:///injectedScript.bundle.js:2:99787)",
+            "    at sendBrowserExtensionMessage (webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts:10:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures without injected or extension frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  abs_path:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  function: "sendBrowserExtensionMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures from mixed frame paths", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  abs_path:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  function: "sendBrowserExtensionMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unrelated errors from injected script frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Extension message failed for a different reason.",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injectedScript.bundle.js",
+                  abs_path: "app:///injectedScript.bundle.js",
+                  function: "n",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("does not filter disconnected wallet-provider object rejections with app frames", () => {

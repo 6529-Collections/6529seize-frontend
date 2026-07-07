@@ -51,6 +51,7 @@ import {
   getStackSignatureValues,
   hasAppOwnedFrame,
   hasAppOwnedNonExtensionSignature,
+  hasAppOwnedSourceEvidence,
   hasAppOwnedSourceFrame,
   hasAppOwnedSourceStackValue,
   hasAppOwnedStackPath,
@@ -321,19 +322,6 @@ function hasWalletConnectStaleSessionFrame(
         walletConnectStaleSessionFunctions.has(functionName)
       );
     })
-  );
-}
-
-function hasAppOwnedWalletConnectStaleSessionEvidence(
-  event: SentryClientEvent,
-  value: SentryExceptionValue | undefined,
-  hint?: SentryEventHint
-): boolean {
-  const frames = value?.stacktrace?.frames;
-  return (
-    hasAppOwnedSourceFrame(frames) ||
-    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
-    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
   );
 }
 
@@ -730,7 +718,7 @@ export function shouldFilterWalletConnectStaleSessionTopic(
     return false;
   }
 
-  return !hasAppOwnedWalletConnectStaleSessionEvidence(event, value, hint);
+  return !hasAppOwnedSourceEvidence(event, value, hint);
 }
 
 export function shouldFilterInjectedProviderProxyStartsWithError(
