@@ -257,12 +257,9 @@ describe("debt-ratchet check mode", () => {
     expect(check.stdout).toMatch(
       /^oversized_files\s+baseline\s+2 actual\s+2\s+ok$/m
     );
-    expect(check.stdout).toMatch(
-      /^\s+app_source\s+baseline\s+1 actual\s+1\s+ok$/m
-    );
-    expect(check.stdout).toMatch(
-      /^\s+wp_migrated\s+baseline\s+1 actual\s+1\s+ok$/m
-    );
+    expect(check.stdout).toMatch(/^\s+breakdown:$/m);
+    expect(check.stdout).toMatch(/^\s+app_source\s+baseline\s+1 actual\s+1$/m);
+    expect(check.stdout).toMatch(/^\s+wp_migrated\s+baseline\s+1 actual\s+1$/m);
 
     const unfiltered = runRatchet(root, ["--details", "oversized_files"]);
     expect(unfiltered.status).toBe(0);

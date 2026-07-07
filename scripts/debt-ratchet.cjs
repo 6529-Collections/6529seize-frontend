@@ -458,7 +458,7 @@ function countOversizedGroups(files, wordpressMigratedFiles) {
   };
 }
 
-function buildOversizedGroupRows(baseline, actuals) {
+function buildOversizedBreakdownRows(baseline, actuals) {
   const baselineGroups = countOversizedGroups(
     baseline.oversized_file_allowlist ?? [],
     actuals.wordpressMigratedFiles
@@ -470,19 +470,34 @@ function buildOversizedGroupRows(baseline, actuals) {
 
   return [
     {
-      metric: "  app_source",
-      baseline: baselineGroups.app,
-      actual: actualGroups.app,
-      status: baselineGroups.app === actualGroups.app ? "ok" : "info",
+      metric: "  breakdown:",
+      kind: "label",
     },
     {
-      metric: "  wp_migrated",
+      metric: "    app_source",
+      baseline: baselineGroups.app,
+      actual: actualGroups.app,
+    },
+    {
+      metric: "    wp_migrated",
       baseline: baselineGroups.wordpress,
       actual: actualGroups.wordpress,
-      status:
-        baselineGroups.wordpress === actualGroups.wordpress ? "ok" : "info",
     },
   ];
+}
+
+function formatReportRow(row) {
+  if (row.kind === "label") return row.metric;
+
+  const countColumns =
+    `${row.metric.padEnd(20)} baseline ${String(row.baseline).padStart(5)} ` +
+    `actual ${String(row.actual).padStart(5)}`;
+  return row.status ? `${countColumns}  ${row.status}` : countColumns;
+}
+
+function formatSummaryRow(row) {
+  if (row.kind === "label") return `| ${row.metric.trim()} | | | |`;
+  return `| ${row.metric} | ${row.baseline} | ${row.actual} | ${row.status ?? ""} |`;
 }
 
 function runCheck() {
@@ -543,15 +558,12 @@ function runCheck() {
 
   console.log("Debt ratchet report");
   console.log("===================");
-  const oversizedGroupRows = buildOversizedGroupRows(baseline, actuals);
+  const oversizedBreakdownRows = buildOversizedBreakdownRows(baseline, actuals);
   const reportRows = rows.flatMap((row) =>
-    row.metric === "oversized_files" ? [row, ...oversizedGroupRows] : [row]
+    row.metric === "oversized_files" ? [row, ...oversizedBreakdownRows] : [row]
   );
   for (const row of reportRows) {
-    console.log(
-      `${row.metric.padEnd(20)} baseline ${String(row.baseline).padStart(5)} ` +
-        `actual ${String(row.actual).padStart(5)}  ${row.status}`
-    );
+    console.log(formatReportRow(row));
   }
 
   for (const warning of warnings) {
@@ -568,10 +580,7 @@ function runCheck() {
     "",
     "| Metric | Baseline | Actual | Status |",
     "| --- | ---: | ---: | --- |",
-    ...reportRows.map(
-      (row) =>
-        `| ${row.metric} | ${row.baseline} | ${row.actual} | ${row.status} |`
-    ),
+    ...reportRows.map(formatSummaryRow),
     ...(failures.length > 0
       ? ["", "**Failures**", ...failures.map((failure) => `- ${failure}`)]
       : []),
