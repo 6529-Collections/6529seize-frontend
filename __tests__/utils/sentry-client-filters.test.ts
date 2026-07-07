@@ -532,17 +532,15 @@ describe("sentry-client-filters", () => {
         url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
         transaction: "/waves/:wave",
       },
-      breadcrumbs: {
-        values: [
-          {
-            category: "navigation",
-            data: {
-              from: "/anon93",
-              to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
-            },
+      breadcrumbs: [
+        {
+          category: "navigation",
+          data: {
+            from: "/anon93",
+            to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
           },
-        ],
-      },
+        },
+      ],
       ...overrides,
     });
 
@@ -3077,6 +3075,48 @@ describe("sentry-client-filters", () => {
       },
       contexts: {},
       tags: {},
+      breadcrumbs: [],
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
+    // Arrange
+    const event =
+      createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent({
+        request: {
+          url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1",
+          },
+        },
+      });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter MetaMaskMobile route parameterization errors without route evidence", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: undefined,
+      request: {
+        headers: {
+          "User-Agent": metaMaskMobileWebViewUserAgent,
+        },
+      },
+      contexts: {},
+      tags: {},
+      breadcrumbs: [],
     });
 
     // Act
