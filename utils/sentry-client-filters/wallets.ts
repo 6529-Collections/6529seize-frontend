@@ -5,7 +5,6 @@ import {
   coinbaseWalletLinkWebSocketFile,
   coinbaseWalletLinkWebSocket1006MessagePrefix,
   coinbaseWalletSdkPathTokens,
-  injectedAppUriPath,
   injectedProviderProxyStartsWithMessage,
   jsonStringifyFunction,
   metaMaskMobileUpdateUrlFunction,
@@ -56,6 +55,7 @@ import {
   hasAppOwnedSourceStackValue,
   hasAppOwnedStackPath,
   hasInjectedAppUriFrame,
+  hasInjectedWalletCollisionAppUriStackValue,
   hasLikelyAppOwnedFrame,
   hasOnlyAppUriFrames,
   hasOnlyInjectedProviderProxyFrames,
@@ -358,7 +358,7 @@ function hasInjectedAppUriSignature(
   }
 
   const stack = getHintExceptionStack(hint);
-  if (!stack.includes(injectedAppUriPath)) {
+  if (!hasInjectedWalletCollisionAppUriStackValue(stack)) {
     return false;
   }
 
@@ -367,6 +367,18 @@ function hasInjectedAppUriSignature(
   }
 
   return hasOnlyAppUriFrames(frames);
+}
+
+function hasAppOwnedInjectedWalletCollisionEvidence(
+  event: SentryClientEvent,
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return (
+    hasAppOwnedSourceFrame(frames) ||
+    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+  );
 }
 
 function hasWalletCollisionSignature(
@@ -743,6 +755,10 @@ export function shouldFilterInjectedWalletCollision(
   }
 
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (hasAppOwnedInjectedWalletCollisionEvidence(event, frames, hint)) {
+    return false;
+  }
+
   if (!hasInjectedAppUriSignature(frames, hint)) {
     return false;
   }

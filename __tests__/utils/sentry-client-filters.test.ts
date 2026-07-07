@@ -4047,6 +4047,117 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed injected wallet collisions from requestProvider app URI frames", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      transaction: "/waves",
+      request: {
+        url: "https://6529.io/waves",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js:2:584019",
+                  abs_path: "app:///requestProvider.js:2:584019",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter wallet collisions when app-owned source frames are present", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js",
+                  abs_path: "app:///requestProvider.js",
+                },
+                {
+                  filename: "app:///services/auth/wallet-provider.ts",
+                  abs_path: "app:///services/auth/wallet-provider.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter wallet collisions when serialized stack is app-owned", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js",
+                  abs_path: "app:///requestProvider.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+      extra: {
+        __serialized__: {
+          stack:
+            "TypeError: Cannot set property ethereum of #<Window> which has only a getter\n    at installProvider (app:///services/auth/wallet-provider.ts:12:3)",
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters MetaMask mobile update-url circular React meta element errors", () => {
     // Arrange
     const event = createMetaMaskUpdateUrlCircularEvent();
