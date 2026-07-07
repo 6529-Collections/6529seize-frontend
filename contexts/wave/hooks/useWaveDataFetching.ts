@@ -18,7 +18,11 @@ import {
 } from "../utils/wave-messages-utils";
 import { useWaveAbortController } from "./useWaveAbortController";
 import { useWaveLoadingState } from "./useWaveLoadingState";
-import type { WaveDataStoreUpdater, WaveMessages } from "./types";
+import type {
+  WaveDataStoreUpdater,
+  WaveMessages,
+  WaveMessagesUpdate,
+} from "./types";
 
 const FETCH_NEWEST_LIMIT = 50;
 const NATIVE_INITIAL_BACKFILL_DELAY_MS = 250;
@@ -37,6 +41,17 @@ type UpdateEligibility = (
   waveId: string,
   eligibility: Partial<WaveEligibility>
 ) => void;
+
+const maxDefinedSerialNo = (
+  ...values: readonly (number | null | undefined)[]
+): number | null => {
+  const serialNumbers = values.filter(
+    (value): value is number =>
+      typeof value === "number" && Number.isFinite(value)
+  );
+
+  return serialNumbers.length === 0 ? null : Math.max(...serialNumbers);
+};
 
 const getOldestSerialNo = (
   drops: readonly DropWithSerialNo[]
@@ -60,6 +75,14 @@ const throwIfAborted = (signal: AbortSignal): void => {
   }
 };
 
+const logUnexpectedAsyncError = (message: string, error: unknown): void => {
+  if (isAbortError(error)) {
+    return;
+  }
+
+  console.error(message, error);
+};
+
 const getBackfillRequest = (
   currentData: WaveMessages | undefined,
   initialOldestSerialNo: number
@@ -80,6 +103,40 @@ const getBackfillRequest = (
   return {
     limit,
     serialNo: getOldestSerialNo(currentData.drops) ?? initialOldestSerialNo,
+  };
+};
+
+const formatNativeBackfillMessages = ({
+  backfillDrops,
+  currentData,
+  hasNextPage,
+  waveId,
+}: {
+  readonly backfillDrops: ApiDrop[];
+  readonly currentData: WaveMessages | undefined;
+  readonly hasNextPage: boolean;
+  readonly waveId: string;
+}): WaveMessagesUpdate => {
+  const backfillUpdate = formatWaveMessages(waveId, backfillDrops, {
+    hasNextPage,
+    isLoading: false,
+  });
+
+  if (
+    currentData === undefined ||
+    currentData.drops.length === 0 ||
+    backfillUpdate.drops === undefined
+  ) {
+    return backfillUpdate;
+  }
+
+  return {
+    ...backfillUpdate,
+    drops: [...currentData.drops, ...backfillUpdate.drops],
+    latestFetchedSerialNo: maxDefinedSerialNo(
+      currentData.latestFetchedSerialNo,
+      backfillUpdate.latestFetchedSerialNo
+    ),
   };
 };
 
@@ -125,9 +182,11 @@ async function runNativeInitialBackfill({
     }
 
     updateData(
-      formatWaveMessages(waveId, backfillDrops, {
+      formatNativeBackfillMessages({
+        backfillDrops,
+        currentData: getData(waveId),
         hasNextPage: backfillDrops.length >= request.limit,
-        isLoading: false,
+        waveId,
       })
     );
   } catch (error: unknown) {
@@ -145,6 +204,7 @@ async function runNativeInitialBackfill({
 }
 
 function useNativeInitialBackfill({
+  cancelFetch,
   cleanupController,
   createController,
   getData,
@@ -153,6 +213,7 @@ function useNativeInitialBackfill({
   updateData,
   updateEligibility,
 }: {
+  readonly cancelFetch: (waveId: string) => void;
   readonly cleanupController: (
     waveId: string,
     controller: AbortController
@@ -212,6 +273,7 @@ function useNativeInitialBackfill({
       }
 
       clearInitialBackfillTimeout(waveId);
+      cancelFetch(`${waveId}-initial-backfill`);
 
       initialBackfillTimeoutsRef.current[waveId] = setTimeout(() => {
         delete initialBackfillTimeoutsRef.current[waveId];
@@ -227,6 +289,7 @@ function useNativeInitialBackfill({
       }, NATIVE_INITIAL_BACKFILL_DELAY_MS);
     },
     [
+      cancelFetch,
       cleanupController,
       clearInitialBackfillTimeout,
       createController,
@@ -354,7 +417,7 @@ function useSyncExistingWaveNewestMessages({
   readonly syncNewestMessages: ReturnType<typeof useSyncNewestMessages>;
 }) {
   return useCallback(
-    (waveId: string) => {
+    async (waveId: string): Promise<void> => {
       const wave = getData(waveId);
       if (wave === undefined || wave.drops.length === 0) {
         return;
@@ -367,7 +430,7 @@ function useSyncExistingWaveNewestMessages({
         return;
       }
 
-      void syncNewestMessages(
+      await syncNewestMessages(
         waveId,
         highestSerialNo,
         new AbortController().signal
@@ -387,6 +450,7 @@ export function useWaveDataFetching({
   const { cancelFetch, createController, cleanupController } =
     useWaveAbortController();
   const { updateEligibility } = useWaveEligibility();
+  const latestActivationPromiseRef = useRef<Promise<unknown> | null>(null);
   const initialWaveDropsLimit = getWaveDropsInitialLimit(isCapacitor);
   const syncNewestMessages = useSyncNewestMessages({
     updateData,
@@ -398,6 +462,7 @@ export function useWaveDataFetching({
   });
   const { clearInitialBackfillTimeout, scheduleNativeInitialBackfill } =
     useNativeInitialBackfill({
+      cancelFetch,
       cleanupController,
       createController,
       getData,
@@ -406,11 +471,6 @@ export function useWaveDataFetching({
       updateData,
       updateEligibility,
     });
-
-  const hasWaveData = useCallback(
-    (waveId: string): boolean => (getData(waveId)?.drops.length ?? 0) > 0,
-    [getData]
-  );
 
   const handleFetchSuccess = useCallback(
     (waveId: string, drops: ApiDrop[] | null) => {
@@ -447,9 +507,16 @@ export function useWaveDataFetching({
       syncNewest = false,
       options?: RegisterWaveOptions
     ) => {
-      if (hasWaveData(waveId)) {
+      if ((getData(waveId)?.drops.length ?? 0) > 0) {
         if (syncNewest) {
-          syncExistingWaveNewestMessages(waveId);
+          try {
+            await syncExistingWaveNewestMessages(waveId);
+          } catch (error: unknown) {
+            logUnexpectedAsyncError(
+              `[WaveDataFetching] Error syncing newest messages for ${waveId}:`,
+              error
+            );
+          }
         }
         return;
       }
@@ -494,10 +561,10 @@ export function useWaveDataFetching({
     [
       cleanupController,
       createController,
+      getData,
       getLoadingState,
       handleFetchError,
       handleFetchSuccess,
-      hasWaveData,
       initialWaveDropsLimit,
       scheduleNativeInitialBackfill,
       setLoadingState,
@@ -510,7 +577,11 @@ export function useWaveDataFetching({
 
   const registerWave = useCallback(
     (waveId: string, syncNewest = false, options?: RegisterWaveOptions) => {
-      void activateWave(waveId, syncNewest, options);
+      latestActivationPromiseRef.current = activateWave(
+        waveId,
+        syncNewest,
+        options
+      );
     },
     [activateWave]
   );

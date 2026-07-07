@@ -203,7 +203,9 @@ describe("MyStreamProvider resume sync", () => {
       });
     });
 
-    expect(mockRegisterWave).toHaveBeenCalledWith("wave-2", true);
+    expect(mockRegisterWave).toHaveBeenCalledWith("wave-2", true, {
+      skipInitialBackfill: false,
+    });
     expect(mockSetActiveWave).toHaveBeenCalledWith("wave-2", {
       isDirectMessage: true,
       divider: 9,

@@ -188,7 +188,7 @@ describe("useWaveDataFetching", () => {
     }));
     createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
 
-    const { result } = setup(
+    const { result, store, updateData } = setup(
       {
         wave1: {
           drops: [],
@@ -225,6 +225,17 @@ describe("useWaveDataFetching", () => {
       expect.any(Function),
       { limit: backfillLimit }
     );
+
+    expect(updateData).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        key: "wave1",
+        drops: expect.arrayContaining([
+          expect.objectContaining({ id: "initial-0" }),
+          expect.objectContaining({ id: "backfill-0" }),
+        ]),
+      })
+    );
+    expect(store.wave1.drops).toHaveLength(WAVE_DROPS_PARAMS.limit);
 
     jest.useRealTimers();
   });

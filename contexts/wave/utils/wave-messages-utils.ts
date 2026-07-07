@@ -13,6 +13,45 @@ interface FetchWaveMessagesOptions {
   readonly limit?: number | undefined;
 }
 
+type WaveDropsFeedWave = Awaited<
+  ReturnType<typeof fetchWaveDropsFeedV2>
+>["wave"];
+
+const getWaveEligibilityUpdate = (
+  wave: WaveDropsFeedWave | undefined
+): Partial<WaveEligibility> | null => {
+  if (wave === undefined) {
+    return null;
+  }
+
+  return {
+    authenticated_user_eligible_to_chat:
+      wave.authenticated_user_eligible_to_chat,
+    authenticated_user_eligible_to_vote:
+      wave.authenticated_user_eligible_to_vote,
+    authenticated_user_eligible_to_participate:
+      wave.authenticated_user_eligible_to_participate,
+    authenticated_user_admin: wave.authenticated_user_admin,
+  };
+};
+
+const updateWaveEligibilityFromFeed = (
+  waveId: string,
+  wave: WaveDropsFeedWave | undefined,
+  updateEligibility:
+    | ((waveId: string, eligibility: Partial<WaveEligibility>) => void)
+    | undefined
+): void => {
+  if (updateEligibility === undefined) {
+    return;
+  }
+
+  const eligibility = getWaveEligibilityUpdate(wave);
+  if (eligibility !== null) {
+    updateEligibility(waveId, eligibility);
+  }
+};
+
 /**
  * Fetches wave messages (drops) for a specific wave
  * @param waveId The ID of the wave to fetch messages for
@@ -41,18 +80,7 @@ export async function fetchWaveMessages(
       signal,
     });
 
-    // Update centralized eligibility if callback provided
-    if (updateEligibility) {
-      updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat:
-          data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote:
-          data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate:
-          data.wave.authenticated_user_eligible_to_participate,
-        authenticated_user_admin: data.wave.authenticated_user_admin,
-      });
-    }
+    updateWaveEligibilityFromFeed(waveId, data.wave, updateEligibility);
 
     return data.drops as ApiDrop[];
   } catch (error) {
@@ -333,18 +361,7 @@ export async function fetchNewestWaveMessages(
       withRetry: true,
     });
 
-    // Update centralized eligibility if callback provided
-    if (updateEligibility) {
-      updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat:
-          data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote:
-          data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate:
-          data.wave.authenticated_user_eligible_to_participate,
-        authenticated_user_admin: data.wave.authenticated_user_admin,
-      });
-    }
+    updateWaveEligibilityFromFeed(waveId, data.wave, updateEligibility);
 
     const fetchedDrops = data.drops as ApiDrop[];
 
@@ -490,7 +507,7 @@ async function findDropIdsBySerialNoWithPagination(
   let targetFound = false;
 
   if (!Number.isFinite(apiParams.min_serial_no)) {
-    throw new Error("min_serial_no is required in apiParams");
+    throw new TypeError("min_serial_no is required in apiParams");
   }
 
   const itemsPerRequest = getDropIdsPageLimit(apiParams.limit);
