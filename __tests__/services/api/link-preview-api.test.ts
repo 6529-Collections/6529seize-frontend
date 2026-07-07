@@ -587,16 +587,14 @@ describe("fetchLinkPreview", () => {
       requestUrl: url,
       title: "Retry",
     };
-    fetchMock
-      .mockResolvedValueOnce(stalledResponse)
-      .mockResolvedValueOnce(
-        createResponse({
-          results: {
-            [url]: retryPreview,
-          },
-          errors: {},
-        })
-      );
+    fetchMock.mockResolvedValueOnce(stalledResponse).mockResolvedValueOnce(
+      createResponse({
+        results: {
+          [url]: retryPreview,
+        },
+        errors: {},
+      })
+    );
 
     const { fetchLinkPreview } = await loadApi();
     const request = fetchLinkPreview(url);

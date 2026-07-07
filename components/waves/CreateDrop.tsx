@@ -498,7 +498,9 @@ export default function CreateDrop({
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
       startLocalSlowModeCooldown(body);
-      processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
+      void Promise.resolve(
+        processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT)
+      ).catch(() => undefined);
       body.onSuccess?.();
 
       if (
