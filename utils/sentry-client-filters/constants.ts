@@ -23,8 +23,8 @@ export const coinbaseWalletLinkWebSocketFile = "WalletLinkWebSocket.js";
 export const coinbaseWalletLinkWebSocketCloseFunction = "webSocket.onclose";
 export const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
-export const coinbaseWalletLinkWebSocket1006Pattern =
-  /^websocket error 1006(?::.*)?$/i;
+export const coinbaseWalletLinkWebSocket1006MessagePrefix =
+  "websocket error 1006";
 export const walletWebSocketBreadcrumbAppKitTokens = [
   "appkit",
   "reown",
@@ -97,7 +97,8 @@ export const appOwnedFramePathTokens = [
 ];
 export const rabbyMobileUserRejectedCode = 4001;
 export const rabbyMobileUserRejectedMessage = "Not Allowed";
-export const rabbyMobileStackPatterns = ["rabbymobile", "userrejectedrequest"];
+export const rabbyMobileStackContextPattern = "rabbymobile";
+export const rabbyMobileUserRejectedStackPattern = "userrejectedrequest";
 export const appOwnedStackPatterns = [
   "webpack-internal:///(app-pages-browser)",
   "webpack://_n_e/./",
