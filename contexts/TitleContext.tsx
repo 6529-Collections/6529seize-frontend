@@ -34,6 +34,7 @@ type TitleContextType = {
 
 interface SearchParamsLike {
   get: (key: string) => string | null;
+  toString: () => string;
 }
 
 type WaveTitleData = {
@@ -183,10 +184,16 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   } = titleState;
   const routeRef = useRef(pathname);
   const currentPathRef = useRef(pathname);
+  const searchParamsKeyRef = useRef<string | null>(null);
   const queryRef = useRef<SearchParamsLike | null>(searchParams);
   currentPathRef.current = pathname;
   const handleSearchParamsChange = useCallback(
     (nextSearchParams: SearchParamsLike | null) => {
+      const nextSearchParamsKey = nextSearchParams?.toString() ?? null;
+      if (searchParamsKeyRef.current === nextSearchParamsKey) {
+        return;
+      }
+      searchParamsKeyRef.current = nextSearchParamsKey;
       setSearchParams(nextSearchParams);
     },
     []

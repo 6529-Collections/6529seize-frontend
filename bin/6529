@@ -145,9 +145,6 @@ case "$command_name" in
     exec "$REAL_PNPM" run "$@"
     ;;
   exec)
-    if [[ "${1:-}" == "jest" && "${NODE_OPTIONS:-}" != *"--max-old-space-size="* ]]; then
-      export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=6144"
-    fi
     exec "$REAL_PNPM" exec "$@"
     ;;
   *)
