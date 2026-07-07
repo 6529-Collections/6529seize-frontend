@@ -10,6 +10,7 @@ import {
 } from "./SubscriptionsReportRows";
 import {
   areMemeTokenIdsEqual,
+  getMemeTokenIdKey,
   normalizeMemeTokenId,
 } from "./SubscriptionsReport.utils";
 import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptionsProfileButton";
@@ -44,7 +45,7 @@ const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
 
 type MemeCalendarCurrentResponse = {
-  readonly status: "live" | "none";
+  readonly status: string;
   readonly current: {
     readonly mint_number: number;
   } | null;
@@ -98,6 +99,14 @@ function getDisplayedRedeemedTotal(
   }
 
   return Math.max(totalRedeemed - 1, 0);
+}
+
+async function fetchCurrentLiveMintNumber() {
+  const currentMint = await commonApiFetch<MemeCalendarCurrentResponse>({
+    endpoint: "meme-calendar/current",
+    includeWalletAuth: false,
+  });
+  return getCurrentLiveMintNumber(currentMint);
 }
 
 export default function SubscriptionsReportComponent() {
@@ -168,14 +177,6 @@ export default function SubscriptionsReportComponent() {
     });
   }
 
-  async function fetchCurrentLiveMintNumber() {
-    const currentMint = await commonApiFetch<MemeCalendarCurrentResponse>({
-      endpoint: "meme-calendar/current",
-      includeWalletAuth: false,
-    });
-    return getCurrentLiveMintNumber(currentMint);
-  }
-
   async function fetchSeasons() {
     return await commonApiFetch<MemeSeason[]>({
       endpoint: "new_memes_seasons",
@@ -186,6 +187,7 @@ export default function SubscriptionsReportComponent() {
     const fetchData = async () => {
       let remainingCountForSeason = getCardsRemainingUntilEndOf("szn");
       let activeRedeemedDrop: RedeemedSubscriptionCounts | null = null;
+      let activeTokenId: number | null = null;
       let currentLiveMintNumber: number | null = null;
       const currentLiveMintNumberPromise = fetchCurrentLiveMintNumber().catch(
         (error: unknown) => {
@@ -204,7 +206,7 @@ export default function SubscriptionsReportComponent() {
           redeemed.data,
           currentLiveMintNumber
         );
-        const activeTokenId = activeRedeemedDrop
+        activeTokenId = activeRedeemedDrop
           ? normalizeMemeTokenId(activeRedeemedDrop.token_id)
           : null;
         activeTokenIdRef.current = activeTokenId;
@@ -215,6 +217,7 @@ export default function SubscriptionsReportComponent() {
         );
       } catch (error) {
         console.error("Failed to fetch redeemed subscriptions:", error);
+        activeTokenId = null;
         activeTokenIdRef.current = null;
         setActiveDrop(null);
         setRedeemedCounts([]);
@@ -233,21 +236,19 @@ export default function SubscriptionsReportComponent() {
               return [];
             }
           ),
-          activeTokenIdRef.current !== null
-            ? fetchSubscribedCount(activeTokenIdRef.current).catch(
-                (error: unknown) => {
-                  console.error(
-                    "Failed to fetch active drop subscribed count:",
-                    error
-                  );
-                  return null;
-                }
-              )
+          activeTokenId !== null
+            ? fetchSubscribedCount(activeTokenId).catch((error: unknown) => {
+                console.error(
+                  "Failed to fetch active drop subscribed count:",
+                  error
+                );
+                return null;
+              })
             : Promise.resolve(null),
         ]);
 
         setActiveSubscribedCount(subscribedCount);
-        setUpcomingCounts(withoutTokenId(upcoming, activeTokenIdRef.current));
+        setUpcomingCounts(withoutTokenId(upcoming, activeTokenId));
       } catch (error) {
         console.error("Failed to fetch subscription counts:", error);
         setActiveSubscribedCount(null);
@@ -461,7 +462,7 @@ export default function SubscriptionsReportComponent() {
                         animateFromIndex !== null && index >= animateFromIndex;
                       return (
                         <SubscriptionDayRow
-                          key={count.token_id}
+                          key={getMemeTokenIdKey(count.token_id)}
                           ref={
                             index === animateFromIndex ? firstNewRowRef : null
                           }
@@ -541,7 +542,7 @@ export default function SubscriptionsReportComponent() {
               <div>
                 {redeemedCounts.map((count, index) => (
                   <RedeemedSubscriptionRow
-                    key={count.token_id}
+                    key={getMemeTokenIdKey(count.token_id)}
                     className={
                       index % 2 === 0 ? "tw-bg-iron-800" : "tw-bg-iron-900"
                     }

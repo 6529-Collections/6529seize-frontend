@@ -93,6 +93,95 @@ const mockDefaultCommonApiFetch = (opts: any) => {
   return Promise.resolve([]);
 };
 
+const buildReportCountsApiMock = ({
+  activeTokenId = 700,
+  activeAirdroppedCount = 4,
+  activeSubscribedCount = 11,
+  activeMintDate = new Date().toISOString(),
+  upcomingCount = 8,
+  pastAirdroppedCount = 9,
+  rejectUpcoming = false,
+}: {
+  activeTokenId?: number | string;
+  activeAirdroppedCount?: number;
+  activeSubscribedCount?: number;
+  activeMintDate?: string;
+  upcomingCount?: number | null;
+  pastAirdroppedCount?: number;
+  rejectUpcoming?: boolean;
+}) => {
+  return (opts: any) => {
+    if (opts?.endpoint === "meme-calendar/current") {
+      return Promise.resolve({
+        status: "live",
+        current: {
+          mint_number: 700,
+        },
+      });
+    }
+
+    if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
+      return Promise.resolve({
+        count: 2,
+        page: 1,
+        next: null,
+        data: [
+          {
+            contract: "0xmemes",
+            token_id: activeTokenId,
+            count: activeAirdroppedCount,
+            name: "Active Meme",
+            image_url: "https://images.test/active.png",
+            mint_date: activeMintDate,
+            szn: 15,
+          },
+          {
+            contract: "0xmemes",
+            token_id: 699,
+            count: pastAirdroppedCount,
+            name: "Past Meme",
+            image_url: "https://images.test/past.png",
+            mint_date: "2026-01-01T00:00:00.000Z",
+            szn: 14,
+          },
+        ],
+      });
+    }
+
+    if (opts?.endpoint === "subscriptions/memes/700/count") {
+      return Promise.resolve({
+        contract: "0xmemes",
+        token_id: 700,
+        count: activeSubscribedCount,
+      });
+    }
+
+    if (opts?.endpoint === "subscriptions/upcoming-memes-counts?card_count=2") {
+      if (rejectUpcoming) {
+        return Promise.reject(new Error("Upcoming unavailable"));
+      }
+
+      return Promise.resolve(
+        upcomingCount === null
+          ? []
+          : [
+              {
+                contract: "0xmemes",
+                token_id: 701,
+                count: upcomingCount,
+              },
+            ]
+      );
+    }
+
+    if (opts?.endpoint === "new_memes_seasons") {
+      return Promise.resolve([]);
+    }
+
+    return Promise.resolve([]);
+  };
+};
+
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
@@ -161,58 +250,13 @@ describe("Subscriptions report page", () => {
   });
 
   it("moves the live calendar mint into the active drop section", async () => {
-    commonApiFetch.mockImplementation((opts: any) => {
-      if (opts?.endpoint === "meme-calendar/current") {
-        return Promise.resolve({
-          status: "live",
-          current: {
-            mint_number: 700,
-          },
-        });
-      }
-
-      if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
-        return Promise.resolve({
-          count: 2,
-          page: 1,
-          next: null,
-          data: [
-            {
-              contract: "0xmemes",
-              token_id: "700",
-              count: 4,
-              name: "Active Meme",
-              image_url: "https://images.test/active.png",
-              mint_date: "2026-07-06T00:00:00.000Z",
-              szn: 15,
-            },
-            {
-              contract: "0xmemes",
-              token_id: 699,
-              count: 9,
-              name: "Past Meme",
-              image_url: "https://images.test/past.png",
-              mint_date: "2026-01-01T00:00:00.000Z",
-              szn: 14,
-            },
-          ],
-        });
-      }
-
-      if (opts?.endpoint === "subscriptions/memes/700/count") {
-        return Promise.resolve({
-          contract: "0xmemes",
-          token_id: 700,
-          count: 11,
-        });
-      }
-
-      if (opts?.endpoint === "new_memes_seasons") {
-        return Promise.resolve([]);
-      }
-
-      return Promise.resolve([]);
-    });
+    commonApiFetch.mockImplementation(
+      buildReportCountsApiMock({
+        activeMintDate: "2026-07-06T00:00:00.000Z",
+        activeTokenId: "700",
+        upcomingCount: null,
+      })
+    );
 
     render(
       <AuthContext.Provider value={{ setToast } as any}>
@@ -258,70 +302,7 @@ describe("Subscriptions report page", () => {
         utcDay: new Date("2026-01-03T00:00:00.000Z"),
       },
     ]);
-    commonApiFetch.mockImplementation((opts: any) => {
-      if (opts?.endpoint === "meme-calendar/current") {
-        return Promise.resolve({
-          status: "live",
-          current: {
-            mint_number: 700,
-          },
-        });
-      }
-
-      if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
-        return Promise.resolve({
-          count: 2,
-          page: 1,
-          next: null,
-          data: [
-            {
-              contract: "0xmemes",
-              token_id: 700,
-              count: 4,
-              name: "Active Meme",
-              image_url: "https://images.test/active.png",
-              mint_date: new Date().toISOString(),
-              szn: 15,
-            },
-            {
-              contract: "0xmemes",
-              token_id: 699,
-              count: 9,
-              name: "Past Meme",
-              image_url: "https://images.test/past.png",
-              mint_date: "2026-01-01T00:00:00.000Z",
-              szn: 14,
-            },
-          ],
-        });
-      }
-
-      if (opts?.endpoint === "subscriptions/memes/700/count") {
-        return Promise.resolve({
-          contract: "0xmemes",
-          token_id: 700,
-          count: 11,
-        });
-      }
-
-      if (
-        opts?.endpoint === "subscriptions/upcoming-memes-counts?card_count=2"
-      ) {
-        return Promise.resolve([
-          {
-            contract: "0xmemes",
-            token_id: 701,
-            count: 8,
-          },
-        ]);
-      }
-
-      if (opts?.endpoint === "new_memes_seasons") {
-        return Promise.resolve([]);
-      }
-
-      return Promise.resolve([]);
-    });
+    commonApiFetch.mockImplementation(buildReportCountsApiMock({}));
 
     render(
       <AuthContext.Provider value={{ setToast } as any}>
@@ -370,7 +351,7 @@ describe("Subscriptions report page", () => {
     expect(upcomingLink).toHaveClass("tw-grid-cols-[minmax(0,1fr)_auto]");
     expect(upcomingLink.className).not.toContain("before:");
     expect(within(upcomingLink).getByText("x8")).toBeInTheDocument();
-    expect(within(upcomingLink).getByText("Subscriptions:")).toHaveClass(
+    expect(within(upcomingLink).getByText("Subscriptions: 8")).toHaveClass(
       "tw-sr-only"
     );
 
@@ -386,7 +367,7 @@ describe("Subscriptions report page", () => {
     expect(pastLink).toHaveClass("tw-grid-cols-[minmax(0,1fr)_auto]");
     expect(pastLink.className).not.toContain("before:");
     expect(within(pastLink).getByText("x9")).toBeInTheDocument();
-    expect(within(pastLink).getByText("Subscriptions:")).toHaveClass(
+    expect(within(pastLink).getByText("Subscriptions: 9")).toHaveClass(
       "tw-sr-only"
     );
   });
@@ -398,70 +379,14 @@ describe("Subscriptions report page", () => {
         utcDay: new Date("2026-01-03T00:00:00.000Z"),
       },
     ]);
-    commonApiFetch.mockImplementation((opts: any) => {
-      if (opts?.endpoint === "meme-calendar/current") {
-        return Promise.resolve({
-          status: "live",
-          current: {
-            mint_number: 700,
-          },
-        });
-      }
-
-      if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
-        return Promise.resolve({
-          count: 2,
-          page: 1,
-          next: null,
-          data: [
-            {
-              contract: "0xmemes",
-              token_id: 700,
-              count: 1000,
-              name: "Active Meme",
-              image_url: "https://images.test/active.png",
-              mint_date: new Date().toISOString(),
-              szn: 15,
-            },
-            {
-              contract: "0xmemes",
-              token_id: 699,
-              count: 9876,
-              name: "Past Meme",
-              image_url: "https://images.test/past.png",
-              mint_date: "2026-01-01T00:00:00.000Z",
-              szn: 14,
-            },
-          ],
-        });
-      }
-
-      if (opts?.endpoint === "subscriptions/memes/700/count") {
-        return Promise.resolve({
-          contract: "0xmemes",
-          token_id: 700,
-          count: 1234,
-        });
-      }
-
-      if (
-        opts?.endpoint === "subscriptions/upcoming-memes-counts?card_count=2"
-      ) {
-        return Promise.resolve([
-          {
-            contract: "0xmemes",
-            token_id: 701,
-            count: 4567,
-          },
-        ]);
-      }
-
-      if (opts?.endpoint === "new_memes_seasons") {
-        return Promise.resolve([]);
-      }
-
-      return Promise.resolve([]);
-    });
+    commonApiFetch.mockImplementation(
+      buildReportCountsApiMock({
+        activeAirdroppedCount: 1000,
+        activeSubscribedCount: 1234,
+        pastAirdroppedCount: 9876,
+        upcomingCount: 4567,
+      })
+    );
 
     render(
       <AuthContext.Provider value={{ setToast } as any}>
@@ -490,64 +415,9 @@ describe("Subscriptions report page", () => {
     const consoleError = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    commonApiFetch.mockImplementation((opts: any) => {
-      if (opts?.endpoint === "meme-calendar/current") {
-        return Promise.resolve({
-          status: "live",
-          current: {
-            mint_number: 700,
-          },
-        });
-      }
-
-      if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
-        return Promise.resolve({
-          count: 2,
-          page: 1,
-          next: null,
-          data: [
-            {
-              contract: "0xmemes",
-              token_id: 700,
-              count: 4,
-              name: "Active Meme",
-              image_url: "https://images.test/active.png",
-              mint_date: new Date().toISOString(),
-              szn: 15,
-            },
-            {
-              contract: "0xmemes",
-              token_id: 699,
-              count: 9,
-              name: "Past Meme",
-              image_url: "https://images.test/past.png",
-              mint_date: "2026-01-01T00:00:00.000Z",
-              szn: 14,
-            },
-          ],
-        });
-      }
-
-      if (opts?.endpoint === "subscriptions/memes/700/count") {
-        return Promise.resolve({
-          contract: "0xmemes",
-          token_id: 700,
-          count: 11,
-        });
-      }
-
-      if (
-        opts?.endpoint === "subscriptions/upcoming-memes-counts?card_count=2"
-      ) {
-        return Promise.reject(new Error("Upcoming unavailable"));
-      }
-
-      if (opts?.endpoint === "new_memes_seasons") {
-        return Promise.resolve([]);
-      }
-
-      return Promise.resolve([]);
-    });
+    commonApiFetch.mockImplementation(
+      buildReportCountsApiMock({ rejectUpcoming: true })
+    );
 
     render(
       <AuthContext.Provider value={{ setToast } as any}>

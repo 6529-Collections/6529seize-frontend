@@ -10,8 +10,11 @@ import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { Time } from "@/helpers/time";
 import Image from "next/image";
 import Link from "next/link";
-import { forwardRef } from "react";
-import { areMemeTokenIdsEqual } from "./SubscriptionsReport.utils";
+import { forwardRef, type ReactNode } from "react";
+import {
+  areMemeTokenIdsEqual,
+  getMemeTokenIdLabel,
+} from "./SubscriptionsReport.utils";
 
 export const ACTIVE_REPORT_GRID_CLASS_NAME =
   "sm:tw-grid-cols-[minmax(0,2fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)]";
@@ -24,9 +27,47 @@ const REPORT_ROW_TITLE_CLASS_NAME =
   "tw-text-sm tw-leading-5 tw-text-white sm:tw-text-base";
 const REPORT_ROW_META_CLASS_NAME = "tw-text-sm tw-leading-5 tw-text-gray-400";
 
-function formatSubscriptionCount(count: number): string {
+function formatVisibleSubscriptionCount(count: number): string {
   return `x${count > 0 ? count.toLocaleString() : "0"}`;
 }
+
+function formatAccessibleSubscriptionCount(count: number): string {
+  return count > 0 ? count.toLocaleString() : "0";
+}
+
+function getMemeCardName(name: string): string {
+  return name || "Meme card";
+}
+
+function getMemeCardAriaLabel(count: RedeemedSubscriptionCounts): string {
+  const tokenId = getMemeTokenIdLabel(count.token_id);
+  return `View The Memes card #${tokenId} - ${getMemeCardName(count.name)}`;
+}
+
+const ReportRowLink = forwardRef<
+  HTMLAnchorElement,
+  Readonly<{
+    href: string;
+    gridClassName: string;
+    className: string;
+    ariaLabel: string;
+    children: ReactNode;
+  }>
+>(function ReportRowLink(
+  { href, gridClassName, className, ariaLabel, children },
+  ref
+) {
+  return (
+    <Link
+      ref={ref}
+      href={href}
+      className={`${REPORT_ROW_LINK_CLASS_NAME} ${gridClassName} ${className}`}
+      aria-label={ariaLabel}
+    >
+      {children}
+    </Link>
+  );
+});
 
 function MemeCardSummary(
   props: Readonly<{
@@ -35,24 +76,26 @@ function MemeCardSummary(
   }>
 ) {
   const dateTime = Time.fromString(props.count.mint_date);
+  const tokenId = getMemeTokenIdLabel(props.count.token_id);
+  const memeName = getMemeCardName(props.count.name);
 
   return (
     <div
       className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 ${props.className ?? ""}`}
     >
-      <div className="tw-flex tw-h-12 tw-w-12 tw-shrink-0 tw-items-center tw-justify-center sm:tw-h-[50px] sm:tw-w-[50px]">
+      <div className="tw-relative tw-flex tw-h-12 tw-w-12 tw-shrink-0 tw-items-center tw-justify-center sm:tw-h-[50px] sm:tw-w-[50px]">
         <Image
+          fill
           unoptimized
           src={props.count.image_url}
-          alt={props.count.name || "Meme card"}
-          width={0}
-          height={0}
-          className="tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-rounded-sm"
+          alt={memeName}
+          sizes="50px"
+          className="tw-rounded-sm tw-object-contain"
         />
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-col">
         <span className={REPORT_ROW_TITLE_CLASS_NAME}>
-          #{props.count.token_id} - {props.count.name}
+          #{tokenId} - {memeName}
         </span>
         <span className={REPORT_ROW_META_CLASS_NAME}>
           SZN {props.count.szn}
@@ -68,6 +111,7 @@ function ReportCountStat(
   props: Readonly<{
     label: string;
     value: string;
+    accessibleValue?: string;
     active?: boolean;
     showMobileLabel?: boolean;
   }>
@@ -83,14 +127,21 @@ function ReportCountStat(
           : "tw-shrink-0 tw-items-end sm:tw-items-center",
       ].join(" ")}
     >
+      <span className="tw-sr-only">
+        {props.label}: {props.accessibleValue ?? props.value}
+      </span>
       {showMobileLabel ? (
-        <span className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-gray-400 sm:tw-hidden">
+        <span
+          className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-gray-400 sm:tw-hidden"
+          aria-hidden="true"
+        >
           {props.label}
         </span>
-      ) : (
-        <span className="tw-sr-only">{props.label}: </span>
-      )}
-      <span className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white sm:tw-text-base sm:tw-font-normal">
+      ) : null}
+      <span
+        className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white sm:tw-text-base sm:tw-font-normal"
+        aria-hidden="true"
+      >
         {props.value}
       </span>
     </span>
@@ -104,29 +155,46 @@ export function ActiveSubscriptionRow(
     subscribedCount: SubscriptionCounts | null;
   }>
 ) {
+  const tokenId = getMemeTokenIdLabel(props.count.token_id);
   const subscribed =
     props.subscribedCount &&
     areMemeTokenIdsEqual(props.subscribedCount.token_id, props.count.token_id)
-      ? formatSubscriptionCount(props.subscribedCount.count)
+      ? {
+          accessibleValue: formatAccessibleSubscriptionCount(
+            props.subscribedCount.count
+          ),
+          value: formatVisibleSubscriptionCount(props.subscribedCount.count),
+        }
       : "Unavailable";
 
   return (
-    <Link
-      href={`/the-memes/${props.count.token_id}`}
-      className={`${REPORT_ROW_LINK_CLASS_NAME} tw-grid-cols-2 ${ACTIVE_REPORT_GRID_CLASS_NAME} ${props.className}`}
-      aria-label={`View The Memes card #${props.count.token_id} - ${props.count.name}`}
+    <ReportRowLink
+      href={`/the-memes/${tokenId}`}
+      gridClassName={`tw-grid-cols-2 ${ACTIVE_REPORT_GRID_CLASS_NAME}`}
+      className={props.className}
+      ariaLabel={getMemeCardAriaLabel(props.count)}
     >
       <MemeCardSummary
         count={props.count}
         className="tw-col-span-2 sm:tw-col-span-1"
       />
-      <ReportCountStat label="Subscribed" value={subscribed} active />
       <ReportCountStat
-        label="Airdropped"
-        value={formatSubscriptionCount(props.count.count)}
+        label="Subscribed"
+        value={typeof subscribed === "string" ? subscribed : subscribed.value}
+        accessibleValue={
+          typeof subscribed === "string"
+            ? subscribed
+            : subscribed.accessibleValue
+        }
         active
       />
-    </Link>
+      <ReportCountStat
+        label="Airdropped"
+        value={formatVisibleSubscriptionCount(props.count.count)}
+        accessibleValue={formatAccessibleSubscriptionCount(props.count.count)}
+        active
+      />
+    </ReportRowLink>
   );
 }
 
@@ -138,16 +206,19 @@ export const SubscriptionDayRow = forwardRef<
     date: SeasonMintRow;
   }>
 >(function SubscriptionDayRow({ className, count, date }, ref) {
+  const tokenId = getMemeTokenIdLabel(count.token_id);
+
   return (
-    <Link
+    <ReportRowLink
       ref={ref}
-      href={`/the-memes/${count.token_id}`}
-      className={`${REPORT_ROW_LINK_CLASS_NAME} tw-grid-cols-[minmax(0,1fr)_auto] ${STANDARD_REPORT_GRID_CLASS_NAME} ${className}`}
-      aria-label={`View The Memes card #${count.token_id}`}
+      href={`/the-memes/${tokenId}`}
+      gridClassName={`tw-grid-cols-[minmax(0,1fr)_auto] ${STANDARD_REPORT_GRID_CLASS_NAME}`}
+      className={className}
+      ariaLabel={`View The Memes card #${tokenId}`}
     >
       <div className="tw-flex tw-min-w-0 tw-flex-col">
         <span className={REPORT_ROW_TITLE_CLASS_NAME}>
-          The Memes #{count.token_id}
+          The Memes #{tokenId}
         </span>
         <span className={REPORT_ROW_META_CLASS_NAME}>
           SZN {displayedSeasonNumberFromIndex(date.seasonIndex)}
@@ -157,9 +228,10 @@ export const SubscriptionDayRow = forwardRef<
       </div>
       <ReportCountStat
         label="Subscriptions"
-        value={formatSubscriptionCount(count.count)}
+        value={formatVisibleSubscriptionCount(count.count)}
+        accessibleValue={formatAccessibleSubscriptionCount(count.count)}
       />
-    </Link>
+    </ReportRowLink>
   );
 });
 
@@ -169,17 +241,21 @@ export function RedeemedSubscriptionRow(
     count: RedeemedSubscriptionCounts;
   }>
 ) {
+  const tokenId = getMemeTokenIdLabel(props.count.token_id);
+
   return (
-    <Link
-      href={`/the-memes/${props.count.token_id}`}
-      className={`${REPORT_ROW_LINK_CLASS_NAME} tw-grid-cols-[minmax(0,1fr)_auto] ${STANDARD_REPORT_GRID_CLASS_NAME} ${props.className}`}
-      aria-label={`View The Memes card #${props.count.token_id} - ${props.count.name}`}
+    <ReportRowLink
+      href={`/the-memes/${tokenId}`}
+      gridClassName={`tw-grid-cols-[minmax(0,1fr)_auto] ${STANDARD_REPORT_GRID_CLASS_NAME}`}
+      className={props.className}
+      ariaLabel={getMemeCardAriaLabel(props.count)}
     >
       <MemeCardSummary count={props.count} />
       <ReportCountStat
         label="Subscriptions"
-        value={formatSubscriptionCount(props.count.count)}
+        value={formatVisibleSubscriptionCount(props.count.count)}
+        accessibleValue={formatAccessibleSubscriptionCount(props.count.count)}
       />
-    </Link>
+    </ReportRowLink>
   );
 }
