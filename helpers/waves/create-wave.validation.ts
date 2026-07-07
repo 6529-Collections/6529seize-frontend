@@ -394,6 +394,7 @@ const getVotingValidationErrors = ({
 
   if (voting.type === ApiWaveCreditType.CardSetTdh) {
     const { creditNfts } = voting;
+    const creditNftMemeCount = voting.creditNftMemeCount;
     if (!creditNfts.length) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_REQUIRED
@@ -421,22 +422,18 @@ const getVotingValidationErrors = ({
     }
 
     if (
-      voting.creditNftMemeCount === null ||
-      !Number.isInteger(voting.creditNftMemeCount) ||
-      voting.creditNftMemeCount <= 0
+      creditNftMemeCount === null ||
+      !Number.isInteger(creditNftMemeCount) ||
+      creditNftMemeCount <= 0
     ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE
       );
-    } else if (
-      creditNfts.some((nft) => nft.token_id > voting.creditNftMemeCount)
-    ) {
+    } else if (creditNfts.some((nft) => nft.token_id > creditNftMemeCount)) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_TOKEN_INVALID
       );
-    } else if (
-      getUniqueCreditNftIdsCount(voting) >= voting.creditNftMemeCount
-    ) {
+    } else if (getUniqueCreditNftIdsCount(voting) >= creditNftMemeCount) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED
       );
