@@ -24,10 +24,16 @@ export default function AwsRumProvider({
       try {
         // Check if required environment variables are set
         const APPLICATION_ID = publicEnv.AWS_RUM_APP_ID;
-        const APPLICATION_REGION = publicEnv.AWS_RUM_REGION ?? "us-east-1";
-        const APPLICATION_VERSION = publicEnv.VERSION ?? "1.0.0";
+        const APPLICATION_REGION = envValueOrFallback(
+          publicEnv.AWS_RUM_REGION,
+          "us-east-1"
+        );
+        const APPLICATION_VERSION = envValueOrFallback(
+          publicEnv.VERSION,
+          "1.0.0"
+        );
         const SAMPLE_RATE = Number.parseFloat(
-          publicEnv.AWS_RUM_SAMPLE_RATE ?? "0.2"
+          envValueOrFallback(publicEnv.AWS_RUM_SAMPLE_RATE, "0.2")
         );
 
         if (!APPLICATION_ID) {
@@ -83,3 +89,8 @@ export default function AwsRumProvider({
 
   return <>{children}</>;
 }
+
+const envValueOrFallback = (
+  value: string | undefined,
+  fallback: string
+): string => (value === undefined || value === "" ? fallback : value);

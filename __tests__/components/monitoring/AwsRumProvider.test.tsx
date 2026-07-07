@@ -95,4 +95,28 @@ describe("AwsRumProvider", () => {
     });
     expect(mockAwsRum).not.toHaveBeenCalled();
   });
+
+  it("uses default AWS RUM values when optional env values are empty strings", async () => {
+    publicEnv.AWS_RUM_REGION = "";
+    publicEnv.AWS_RUM_SAMPLE_RATE = "";
+    publicEnv.VERSION = "";
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+
+    expect(mockAwsRum).toHaveBeenCalledWith(
+      "test-app-id",
+      "1.0.0",
+      "us-east-1",
+      expect.objectContaining({
+        sessionSampleRate: 0.2,
+        releaseId: "1.0.0",
+      })
+    );
+  });
 });
