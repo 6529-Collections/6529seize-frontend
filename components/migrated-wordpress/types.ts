@@ -41,6 +41,13 @@ export type MigratedWordPressArticleBlock =
       readonly type: "quote";
       readonly content: ReactNode;
       readonly cite?: ReactNode;
+    }
+  | {
+      readonly type: "html";
+      readonly html: string;
+    }
+  | {
+      readonly type: "divider";
     };
 
 export type MigratedWordPressArticleContent = {
@@ -53,6 +60,16 @@ export type MigratedWordPressArticleContent = {
   readonly publishedAt: string;
   readonly modifiedAt: string;
   readonly readingTime?: string;
+  readonly heroImage?: MigratedWordPressArticleMedia;
+  readonly blocks: readonly MigratedWordPressArticleBlock[];
+};
+
+export type MigratedWordPressStaticPageContent = {
+  readonly source: "migrated-wordpress";
+  readonly path: string;
+  readonly title: string;
+  readonly description: string;
+  readonly section: string;
   readonly heroImage?: MigratedWordPressArticleMedia;
   readonly blocks: readonly MigratedWordPressArticleBlock[];
 };
