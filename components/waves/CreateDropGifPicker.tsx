@@ -83,6 +83,18 @@ function getGiphyGifUrl(gif: GiphyGif): string | null {
   return null;
 }
 
+function getGiphyGridColumns(width: number): number {
+  if (width < 240) {
+    return 1;
+  }
+
+  if (width < 360) {
+    return 2;
+  }
+
+  return 3;
+}
+
 function GifPickerUnavailable({
   title,
   hint,
@@ -196,7 +208,7 @@ function GiphyResults({
     onAvailable();
   }, [onAvailable, searchKey]);
 
-  const gridColumns = gridWidth < 240 ? 1 : gridWidth < 360 ? 2 : 3;
+  const gridColumns = getGiphyGridColumns(gridWidth);
 
   if (hasFetchError) {
     return (
