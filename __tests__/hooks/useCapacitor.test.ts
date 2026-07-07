@@ -1,6 +1,9 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import useCapacitor from "@/hooks/useCapacitor";
-import { __resetNativeDeviceStoresForTests } from "@/hooks/nativeDeviceStore";
+import {
+  __resetNativeDeviceStoresForTests,
+  getCapacitorSnapshot,
+} from "@/hooks/nativeDeviceStore";
 
 const listeners: Record<string, Function> = {};
 const mockRemoveListener = jest.fn();
@@ -47,6 +50,7 @@ beforeEach(() => {
 
 afterEach(() => {
   __resetNativeDeviceStoresForTests();
+  jest.restoreAllMocks();
 });
 
 describe("useCapacitor", () => {
@@ -95,6 +99,57 @@ describe("useCapacitor", () => {
 
     expect(result.current.orientation).toBe(0); // PORTRAIT
     expect(renderSpy).toHaveBeenCalledTimes(renderCountAfterInitialSync);
+  });
+
+  it("returns a stable cached snapshot between native notifications", async () => {
+    const { result } = renderHook(() => useCapacitor());
+
+    await waitFor(() => {
+      expect(App.addListener).toHaveBeenCalledTimes(1);
+      expect(result.current.isIos).toBe(true);
+    });
+
+    const snapshot = getCapacitorSnapshot();
+
+    (window.matchMedia as jest.Mock).mockReturnValue({
+      matches: false,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    });
+
+    expect(getCapacitorSnapshot()).toBe(snapshot);
+
+    act(() => {
+      window.dispatchEvent(new Event("orientationchange"));
+    });
+
+    expect(getCapacitorSnapshot()).not.toBe(snapshot);
+    expect(result.current.orientation).toBe(1); // LANDSCAPE
+  });
+
+  it("retries native app listener setup after a transient failure", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    (App.addListener as jest.Mock)
+      .mockRejectedValueOnce(new Error("temporary listener failure"))
+      .mockImplementationOnce((event: string, cb: any) => {
+        listeners[event] = cb;
+        return Promise.resolve({ remove: mockRemoveListener });
+      });
+
+    renderHook(() => useCapacitor());
+
+    await waitFor(
+      () => {
+        expect(App.addListener).toHaveBeenCalledTimes(2);
+      },
+      { timeout: 1500 }
+    );
+
+    expect(listeners["appStateChange"]).toEqual(expect.any(Function));
+    consoleErrorSpy.mockRestore();
   });
 
   it("shares native listeners across multiple hook callers", async () => {

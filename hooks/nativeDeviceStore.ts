@@ -39,6 +39,8 @@ export interface DeviceInfo {
 
 type StoreSubscriber = () => void;
 
+const CAPACITOR_LISTENER_RETRY_DELAY_MS = 250;
+
 const DEFAULT_CAPACITOR_SNAPSHOT: CapacitorSnapshot = {
   isCapacitor: false,
   platform: "web",
@@ -65,6 +67,7 @@ const deviceInfoSubscribers = new Set<StoreSubscriber>();
 let capacitorListenerHandles: PluginListenerHandle[] = [];
 let capacitorListenerSetupPromise: Promise<void> | null = null;
 let capacitorListenerSetupToken = 0;
+let capacitorListenerRetryTimer: ReturnType<typeof setTimeout> | null = null;
 let orientationListenerAttached = false;
 let deviceInfoListenerCleanup: (() => void) | null = null;
 
@@ -168,7 +171,7 @@ function handleOrientationChange(): void {
 
 function setCapacitorAppActive(isActive: boolean): void {
   emitCapacitorSnapshot({
-    ...getCapacitorSnapshot(),
+    ...capacitorSnapshot,
     isActive,
   });
 }
@@ -220,8 +223,44 @@ function detachOrientationListener(): void {
   );
 }
 
+function clearCapacitorListenerRetry(): void {
+  if (capacitorListenerRetryTimer === null) {
+    return;
+  }
+
+  clearTimeout(capacitorListenerRetryTimer);
+  capacitorListenerRetryTimer = null;
+}
+
+function shouldRetryCapacitorListenerSetup(setupToken: number): boolean {
+  return (
+    setupToken === capacitorListenerSetupToken &&
+    capacitorSubscribers.size > 0 &&
+    capacitorListenerHandles.length === 0 &&
+    capacitorSnapshot.isCapacitor
+  );
+}
+
+function scheduleCapacitorListenerRetry(setupToken: number): void {
+  if (
+    capacitorListenerRetryTimer !== null ||
+    !shouldRetryCapacitorListenerSetup(setupToken)
+  ) {
+    return;
+  }
+
+  capacitorListenerRetryTimer = setTimeout(() => {
+    capacitorListenerRetryTimer = null;
+
+    if (shouldRetryCapacitorListenerSetup(setupToken)) {
+      ensureCapacitorListeners();
+    }
+  }, CAPACITOR_LISTENER_RETRY_DELAY_MS);
+}
+
 function teardownCapacitorListeners(): void {
   capacitorListenerSetupToken += 1;
+  clearCapacitorListenerRetry();
   detachOrientationListener();
 
   if (capacitorListenerHandles.length === 0) {
@@ -236,10 +275,9 @@ function teardownCapacitorListeners(): void {
 function ensureCapacitorListeners(): void {
   refreshCapacitorSnapshot();
 
-  const currentSnapshot = getCapacitorSnapshot();
   if (
     getBrowserWindow() === undefined ||
-    !currentSnapshot.isCapacitor ||
+    !capacitorSnapshot.isCapacitor ||
     capacitorListenerHandles.length > 0 ||
     capacitorListenerSetupPromise
   ) {
@@ -269,16 +307,8 @@ function ensureCapacitorListeners(): void {
     } catch (error) {
       console.error("Capacitor app state listener setup error:", error);
     } finally {
-      const shouldRetrySetup =
-        setupToken !== capacitorListenerSetupToken &&
-        capacitorSubscribers.size > 0 &&
-        capacitorListenerHandles.length === 0;
-
       capacitorListenerSetupPromise = null;
-
-      if (shouldRetrySetup) {
-        ensureCapacitorListeners();
-      }
+      scheduleCapacitorListenerRetry(setupToken);
     }
   })();
 }
@@ -293,7 +323,9 @@ function readDeviceInfo(): DeviceInfo {
     userAgentData?: { mobile?: boolean | undefined } | undefined;
     standalone?: boolean | undefined;
   };
-  const isCapacitor = getCapacitorSnapshot().isCapacitor;
+  // Device info needs only Capacitor's static runtime platform, not app-state
+  // listeners owned by the Capacitor store.
+  const isCapacitor = readCapacitorRuntimeState().isCapacitor;
 
   // Raw capability — true when touch input exists at all. Only used for
   // UA disambiguation (iPads pretending to be Macs) — never for UI mode.
@@ -369,7 +401,6 @@ function ensureDeviceInfoListeners(): void {
   // Pointer/hover capabilities change when a mouse is (un)plugged or a
   // convertible flips posture — keep the classification in sync.
   cleanupCallbacks.push(subscribeToTouchFirstChanges(update));
-  cleanupCallbacks.push(subscribeToCapacitorStore(update));
 
   deviceInfoListenerCleanup = () => {
     for (const cleanup of cleanupCallbacks) {
@@ -382,12 +413,6 @@ function ensureDeviceInfoListeners(): void {
 }
 
 export function getCapacitorSnapshot(): CapacitorSnapshot {
-  const nextSnapshot = readCapacitorSnapshot();
-
-  if (!snapshotsAreEqual(capacitorSnapshot, nextSnapshot)) {
-    capacitorSnapshot = nextSnapshot;
-  }
-
   return capacitorSnapshot;
 }
 
@@ -411,12 +436,6 @@ export function subscribeToCapacitorStore(
 }
 
 export function getDeviceInfoSnapshot(): DeviceInfo {
-  const nextSnapshot = readDeviceInfo();
-
-  if (!deviceInfosAreEqual(deviceInfoSnapshot, nextSnapshot)) {
-    deviceInfoSnapshot = nextSnapshot;
-  }
-
   return deviceInfoSnapshot;
 }
 
@@ -450,6 +469,7 @@ export function __resetNativeDeviceStoresForTests(): void {
   capacitorListenerHandles = [];
   capacitorListenerSetupPromise = null;
   capacitorListenerSetupToken = 0;
+  clearCapacitorListenerRetry();
   orientationListenerAttached = false;
   deviceInfoListenerCleanup = null;
 }

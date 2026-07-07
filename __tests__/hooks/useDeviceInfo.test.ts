@@ -1,6 +1,12 @@
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { __resetNativeDeviceStoresForTests } from "@/hooks/nativeDeviceStore";
-import { act, renderHook } from "@testing-library/react";
+import useCapacitor from "@/hooks/useCapacitor";
+import {
+  __resetNativeDeviceStoresForTests,
+  getDeviceInfoSnapshot,
+} from "@/hooks/nativeDeviceStore";
+import { act, renderHook, waitFor } from "@testing-library/react";
+
+const mockRemoveAppListener = jest.fn();
 
 jest.mock("@capacitor/core", () => ({
   registerPlugin: jest.fn(),
@@ -14,7 +20,9 @@ jest.mock("@capacitor/core", () => ({
 jest.mock("@capacitor/app", () => ({
   App: {
     getState: jest.fn(),
-    addListener: jest.fn(() => Promise.resolve({ remove: jest.fn() })),
+    addListener: jest.fn(() =>
+      Promise.resolve({ remove: mockRemoveAppListener })
+    ),
     removeAllListeners: jest.fn(),
   },
 }));
@@ -77,6 +85,9 @@ describe("useDeviceInfo", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     (Capacitor.getPlatform as jest.Mock).mockReturnValue("web");
     (App.getState as jest.Mock).mockResolvedValue({ isActive: false });
+    (App.addListener as jest.Mock).mockResolvedValue({
+      remove: mockRemoveAppListener,
+    });
     jest
       .spyOn(globalThis, "addEventListener")
       .mockImplementation((event, handler) => {
@@ -115,6 +126,67 @@ describe("useDeviceInfo", () => {
     expect(result.current.isApp).toBe(true);
     expect(result.current.isAppleMobile).toBe(true);
     expect(result.current.hasTouchScreen).toBe(true);
+  });
+
+  it("returns a stable cached snapshot between device-info notifications", async () => {
+    defineUserAgent("iPhone");
+    defineMaxTouchPoints(5);
+    defineMatchMedia();
+
+    const { result } = renderHook(() => useDeviceInfo());
+
+    await waitFor(() => {
+      expect(result.current.isMobileDevice).toBe(true);
+    });
+
+    const snapshot = getDeviceInfoSnapshot();
+
+    defineUserAgent("Mozilla/5.0");
+    defineMaxTouchPoints(0);
+    defineMatchMedia({ finePointer: true, hover: true });
+
+    expect(getDeviceInfoSnapshot()).toBe(snapshot);
+  });
+
+  it("does not mount native app-state listeners for device-info-only consumers", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
+    defineUserAgent("Macintosh");
+    defineMaxTouchPoints(5);
+    defineMatchMedia({ narrowWidth: true });
+
+    const { result } = renderHook(() => useDeviceInfo());
+
+    await waitFor(() => {
+      expect(result.current.isApp).toBe(true);
+    });
+
+    expect(App.addListener).not.toHaveBeenCalled();
+  });
+
+  it("tears down native app-state listeners when capacitor consumers unmount while device-info stays mounted", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
+    defineUserAgent("Macintosh");
+    defineMaxTouchPoints(5);
+    defineMatchMedia({ narrowWidth: true });
+
+    const deviceInfoHook = renderHook(() => useDeviceInfo());
+    const capacitorHook = renderHook(() => useCapacitor());
+
+    await waitFor(() => {
+      expect(App.addListener).toHaveBeenCalledTimes(1);
+      expect(deviceInfoHook.result.current.isApp).toBe(true);
+    });
+
+    capacitorHook.unmount();
+
+    await waitFor(() => {
+      expect(mockRemoveAppListener).toHaveBeenCalledTimes(1);
+    });
+
+    expect(deviceInfoHook.result.current.isApp).toBe(true);
+    deviceInfoHook.unmount();
   });
 
   it("returns false for desktop without touch", () => {
