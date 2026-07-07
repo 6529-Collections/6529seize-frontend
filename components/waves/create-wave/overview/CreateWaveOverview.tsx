@@ -12,6 +12,7 @@ import CreateWaveType from "./type/CreateWaveType";
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
   customRules: null,
   outcomesVisible: true,
+  submissionButtonLabel: null,
   approve: {
     approvalsTabLabel: "",
     approvedTabLabel: "",

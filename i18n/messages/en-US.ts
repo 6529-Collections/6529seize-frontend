@@ -346,6 +346,26 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyFailed: "Copy failed",
 } as const);
 
+const WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES = objectMessages(
+  "waves.submissionButtonLabel",
+  {
+    counter: "{count}/{max}",
+    defaultCreateProposal: "Create Proposal",
+    defaultDrop: "Drop",
+    defaultDropArt: "Drop Art",
+    defaultSubmitDrop: "Submit drop",
+    editLabel: "Edit submission button label",
+    errorTooLong: "Label must be {max} characters or fewer.",
+    label: "Submission button label",
+    rowLabel: "Submission button",
+    toastAuthFailed:
+      "Couldn't authenticate. Reconnect your wallet and try again.",
+    toastRetry: "Please try again.",
+    toastSaveFailedTitle: "Couldn't save this submission button label.",
+    useDefault: "Use default",
+  } as const
+);
+
 const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.walletActivity",
   {
@@ -1590,6 +1610,7 @@ export const EN_US_MESSAGES = {
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;
