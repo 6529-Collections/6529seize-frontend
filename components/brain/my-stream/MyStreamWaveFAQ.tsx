@@ -74,7 +74,7 @@ const LINKS = {
 } as const;
 
 const CONTAINER_CLASS_NAME =
-  "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
+  "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto tw-no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
 
 const FAQ_PANEL_ANIMATION_SECONDS = 0.32;
 
