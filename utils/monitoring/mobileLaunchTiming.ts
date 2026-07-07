@@ -601,11 +601,7 @@ function buildMilestoneAttributes(
   const firstDropRenderedMs = getStepOffsetMs(state, "first_drop_rendered");
   const wavesContentMs = getStepOffsetMs(state, "waves_first_content_visible");
 
-  if (wagmiShellUnblockedMs !== undefined) {
-    attrs["provider_shell_gate_ms"] = wagmiShellUnblockedMs;
-    attrs["provider_shell_gate_bucket"] = bucketMs(wagmiShellUnblockedMs);
-  }
-
+  addFlatTimingAlias(attrs, "provider_shell_gate", wagmiShellUnblockedMs);
   addFlatTimingAlias(attrs, "layout_measure_complete", shellMs);
   addFlatTimingAlias(attrs, "wave_metadata_loaded", waveMetadataMs);
   addFlatTimingAlias(attrs, "wave_messages_loaded", waveMessagesMs);
@@ -621,8 +617,9 @@ function buildMilestoneAttributes(
       0,
       roundMs(wagmiUnblockedMs - wagmiShellUnblockedMs)
     );
-    attrs["wallet_provider_after_shell_ms"] = walletProviderAfterShellMs;
-    attrs["wallet_provider_after_shell_bucket"] = bucketMs(
+    addFlatTimingAlias(
+      attrs,
+      "wallet_provider_after_shell",
       walletProviderAfterShellMs
     );
   }

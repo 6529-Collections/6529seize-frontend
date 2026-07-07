@@ -217,8 +217,20 @@ describe("useMarkWaveNotificationsRead", () => {
     jest.restoreAllMocks();
   });
 
-  it("remounts read marker state before deferred cleanup fires", () => {
+  it("remounts read marker state before deferred cleanup fires", async () => {
     const invalidateNotifications = jest.fn();
+    const addressKey = "0xaaa";
+    const waveId = "wave-remount-cleanup";
+    const identityKey = getWaveReadIdentityKey({
+      addressKey,
+      activeProfileProxyId: null,
+    });
+    const requestKey = getWaveReadRequestKey({
+      addressKey,
+      activeProfileProxyId: null,
+      waveId,
+    });
+    const { addressEpoch, latestAddressEpochRef } = createAddressEpochState();
     jest.useFakeTimers();
 
     try {
@@ -229,6 +241,18 @@ describe("useMarkWaveNotificationsRead", () => {
           wrapper: createWrapper(invalidateNotifications),
         }
       );
+      const queuedRead = enqueuePendingWaveReadRequest({
+        addressKey,
+        activeProfileProxyId: null,
+        proxyCreatorId: null,
+        identityKey,
+        requestKey,
+        waveId,
+        addressEpoch,
+        latestAddressEpochRef,
+        shouldSend: undefined,
+        queueIfBlocked: true,
+      });
 
       firstMarker.unmount();
 
@@ -239,6 +263,8 @@ describe("useMarkWaveNotificationsRead", () => {
           wrapper: createWrapper(invalidateNotifications),
         }
       );
+
+      await expect(queuedRead).resolves.toBe("skipped");
 
       secondMarker.unmount();
 

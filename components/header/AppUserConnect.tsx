@@ -22,7 +22,8 @@ function AppUserConnectStartup({
 }: {
   readonly onNavigate: () => void;
 }) {
-  const { seizeConnectFresh } = useSeizeConnectContext();
+  const { hasInitializationError, seizeConnectFresh } =
+    useSeizeConnectContext();
   const { setToast } = useContext(AuthContext);
 
   const onConnect = async (): Promise<void> => {
@@ -31,7 +32,9 @@ function AppUserConnectStartup({
     } catch (error) {
       console.error("Failed to open wallet connection", error);
       setToast({
-        message: "Wallet services are still loading. Please try again.",
+        message: hasInitializationError
+          ? "Wallet services failed to load. Please refresh the page."
+          : "Wallet services are still loading. Please try again.",
         type: "error",
       });
     } finally {
