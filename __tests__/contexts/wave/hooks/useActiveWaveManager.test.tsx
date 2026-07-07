@@ -21,6 +21,19 @@ jest.mock("next/navigation", () => ({
 }));
 
 describe("useActiveWaveManager", () => {
+  const originalPushState = globalThis.history.pushState;
+  const originalReplaceState = globalThis.history.replaceState;
+
+  afterEach(() => {
+    globalThis.history.pushState = originalPushState;
+    globalThis.history.replaceState = originalReplaceState;
+    delete (
+      globalThis.window as Window & {
+        __locationStatePatch?: unknown;
+      }
+    ).__locationStatePatch;
+  });
+
   beforeEach(() => {
     jest.restoreAllMocks();
     globalThis.history.replaceState(null, "", "http://localhost/");
@@ -106,5 +119,39 @@ describe("useActiveWaveManager", () => {
       "",
       "/waves/wave-xyz?serialNo=99"
     );
+  });
+
+  it("preserves history patches installed after subscription cleanup", () => {
+    globalThis.history.replaceState(
+      null,
+      "",
+      "http://localhost/messages?wave=wave-1"
+    );
+    (usePathname as jest.Mock).mockReturnValue("/messages");
+
+    const { unmount } = renderHook(() => useActiveWaveManager());
+    const activeWaveManagerPushState = globalThis.history.pushState;
+    const activeWaveManagerReplaceState = globalThis.history.replaceState;
+
+    const laterPushState = function laterPushState(
+      this: History,
+      ...args: Parameters<History["pushState"]>
+    ) {
+      return activeWaveManagerPushState.apply(this, args);
+    } as History["pushState"];
+    const laterReplaceState = function laterReplaceState(
+      this: History,
+      ...args: Parameters<History["replaceState"]>
+    ) {
+      return activeWaveManagerReplaceState.apply(this, args);
+    } as History["replaceState"];
+
+    globalThis.history.pushState = laterPushState;
+    globalThis.history.replaceState = laterReplaceState;
+
+    unmount();
+
+    expect(globalThis.history.pushState).toBe(laterPushState);
+    expect(globalThis.history.replaceState).toBe(laterReplaceState);
   });
 });

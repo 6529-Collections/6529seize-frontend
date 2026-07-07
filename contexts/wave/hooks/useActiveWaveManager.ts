@@ -17,14 +17,16 @@ interface WaveNavigationOptions {
 }
 
 const LOCATION_STATE_CHANGE_EVENT = "6529-location-state-change";
+type LocationStatePatch = {
+  subscribers: number;
+  originalPushState: History["pushState"];
+  originalReplaceState: History["replaceState"];
+  patchedPushState: History["pushState"];
+  patchedReplaceState: History["replaceState"];
+};
+
 type LocationStatePatchedWindow = Window & {
-  __locationStatePatch?:
-    | {
-        subscribers: number;
-        originalPushState: History["pushState"];
-        originalReplaceState: History["replaceState"];
-      }
-    | undefined;
+  __locationStatePatch?: LocationStatePatch | undefined;
 };
 
 const getWaveFromWindow = (): string | null => {
@@ -43,34 +45,41 @@ const ensureLocationStateEvents = (
   browserWindow: Window
 ): (() => void) => {
   const patchedWindow = browserWindow as LocationStatePatchedWindow;
-  if (!patchedWindow.__locationStatePatch) {
-    const patch = {
-      subscribers: 0,
-      originalPushState: browserWindow.history.pushState,
-      originalReplaceState: browserWindow.history.replaceState,
-    };
-    patchedWindow.__locationStatePatch = patch;
-
-    browserWindow.history.pushState = function patchedPushState(
+  let patch = patchedWindow.__locationStatePatch;
+  if (!patch) {
+    const originalPushState = browserWindow.history.pushState;
+    const originalReplaceState = browserWindow.history.replaceState;
+    const patchedPushState = function patchedPushState(
       this: History,
       ...args: Parameters<History["pushState"]>
     ) {
-      const result = patch.originalPushState.apply(this, args);
+      const result = originalPushState.apply(this, args);
       browserWindow.dispatchEvent(new Event(LOCATION_STATE_CHANGE_EVENT));
       return result;
     } as History["pushState"];
-
-    browserWindow.history.replaceState = function patchedReplaceState(
+    const patchedReplaceState = function patchedReplaceState(
       this: History,
       ...args: Parameters<History["replaceState"]>
     ) {
-      const result = patch.originalReplaceState.apply(this, args);
+      const result = originalReplaceState.apply(this, args);
       browserWindow.dispatchEvent(new Event(LOCATION_STATE_CHANGE_EVENT));
       return result;
     } as History["replaceState"];
+
+    patch = {
+      subscribers: 0,
+      originalPushState,
+      originalReplaceState,
+      patchedPushState,
+      patchedReplaceState,
+    };
+    patchedWindow.__locationStatePatch = patch;
+
+    browserWindow.history.pushState = patchedPushState;
+    browserWindow.history.replaceState = patchedReplaceState;
   }
 
-  patchedWindow.__locationStatePatch.subscribers += 1;
+  patch.subscribers += 1;
 
   return () => {
     const patch = patchedWindow.__locationStatePatch;
@@ -83,8 +92,12 @@ const ensureLocationStateEvents = (
       return;
     }
 
-    browserWindow.history.pushState = patch.originalPushState;
-    browserWindow.history.replaceState = patch.originalReplaceState;
+    if (browserWindow.history.pushState === patch.patchedPushState) {
+      browserWindow.history.pushState = patch.originalPushState;
+    }
+    if (browserWindow.history.replaceState === patch.patchedReplaceState) {
+      browserWindow.history.replaceState = patch.originalReplaceState;
+    }
     delete patchedWindow.__locationStatePatch;
   };
 };
