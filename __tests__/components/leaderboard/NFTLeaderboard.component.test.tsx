@@ -109,38 +109,49 @@ describe("NFTLeaderboard component", () => {
       .spyOn(HTMLAnchorElement.prototype, "click")
       .mockImplementation();
 
-    renderLeaderboard();
-    await screen.findByText("alice");
-    commonApiFetch.mockClear();
-    commonApiFetch.mockResolvedValueOnce({ count: 1, data: [collector] });
+    try {
+      renderLeaderboard();
+      await screen.findByText("alice");
+      commonApiFetch.mockClear();
+      commonApiFetch.mockResolvedValueOnce({ count: 1, data: [collector] });
 
-    await userEvent.click(
-      screen.getByRole("button", {
-        name: "Download collectors leaderboard as CSV",
-      })
-    );
+      await userEvent.click(
+        screen.getByRole("button", {
+          name: "Download collectors leaderboard as CSV",
+        })
+      );
 
-    await waitFor(() =>
-      expect(commonApiFetch).toHaveBeenCalledWith(
+      await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
+      const exportRequest = commonApiFetch.mock.calls[0]?.[0] as {
+        endpoint: string;
+        signal: AbortSignal;
+      };
+      expect(exportRequest).toEqual(
         expect.objectContaining({
-          endpoint: `tdh/nft/0x1/1?&page_size=100&page=1&sort=balance&sort_direction=DESC`,
+          endpoint: expect.stringContaining("tdh/nft/0x1/1?"),
           signal: expect.any(AbortSignal),
         })
-      )
-    );
-    expect(createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
-    expect(clickSpy).toHaveBeenCalled();
-    expect(revokeObjectURL).toHaveBeenCalledWith("blob:collectors");
-
-    clickSpy.mockRestore();
-    Object.defineProperty(URL, "createObjectURL", {
-      configurable: true,
-      value: originalCreateObjectURL,
-    });
-    Object.defineProperty(URL, "revokeObjectURL", {
-      configurable: true,
-      value: originalRevokeObjectURL,
-    });
+      );
+      expect(exportRequest.endpoint).toContain("page_size=100");
+      expect(exportRequest.endpoint).toContain("page=1");
+      expect(exportRequest.endpoint).toContain("sort=balance");
+      expect(exportRequest.endpoint).toContain("sort_direction=DESC");
+      expect(createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+      const blob = createObjectURL.mock.calls[0]?.[0] as Blob;
+      expect(blob.size).toBeGreaterThan(0);
+      expect(clickSpy).toHaveBeenCalled();
+      expect(revokeObjectURL).toHaveBeenCalledWith("blob:collectors");
+    } finally {
+      clickSpy.mockRestore();
+      Object.defineProperty(URL, "createObjectURL", {
+        configurable: true,
+        value: originalCreateObjectURL,
+      });
+      Object.defineProperty(URL, "revokeObjectURL", {
+        configurable: true,
+        value: originalRevokeObjectURL,
+      });
+    }
   });
 
   it("shows an error when the collectors CSV download fails", async () => {
