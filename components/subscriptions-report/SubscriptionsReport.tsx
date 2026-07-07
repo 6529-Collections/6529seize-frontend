@@ -19,14 +19,12 @@ import type { SeasonMintRow } from "@/components/meme-calendar/meme-calendar.hel
 import {
   getCardsRemainingUntilEndOf,
   getUpcomingMintsAcrossSeasons,
-  isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Paginated } from "@/components/pagination/Pagination";
 import Pagination from "@/components/pagination/Pagination";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
 import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
-import { Time } from "@/helpers/time";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
@@ -41,22 +39,35 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
 
-function isRedeemedDropFromToday(drop: RedeemedSubscriptionCounts): boolean {
-  return (
-    Time.fromString(drop.mint_date).toIsoDateString() ===
-    Time.now().toIsoDateString()
-  );
+type MemeCalendarCurrentResponse = {
+  readonly status: "live" | "none";
+  readonly current: {
+    readonly mint_number: number;
+  } | null;
+};
+
+function getCurrentLiveMintNumber(
+  currentMint: MemeCalendarCurrentResponse
+): number | null {
+  if (currentMint.status !== "live") {
+    return null;
+  }
+
+  const mintNumber = currentMint.current?.mint_number;
+  return typeof mintNumber === "number" && Number.isSafeInteger(mintNumber)
+    ? mintNumber
+    : null;
 }
 
 function getActiveRedeemedDrop(
   drops: RedeemedSubscriptionCounts[],
-  mintingToday: boolean
+  currentLiveMintNumber: number | null
 ): RedeemedSubscriptionCounts | null {
-  if (!mintingToday) {
+  if (currentLiveMintNumber === null) {
     return null;
   }
 
-  return drops.find(isRedeemedDropFromToday) ?? null;
+  return drops.find((drop) => drop.token_id === currentLiveMintNumber) ?? null;
 }
 
 function withoutTokenId<T extends { token_id: number }>(
@@ -149,6 +160,14 @@ export default function SubscriptionsReportComponent() {
     });
   }
 
+  async function fetchCurrentLiveMintNumber() {
+    const currentMint = await commonApiFetch<MemeCalendarCurrentResponse>({
+      endpoint: "meme-calendar/current",
+      includeWalletAuth: false,
+    });
+    return getCurrentLiveMintNumber(currentMint);
+  }
+
   async function fetchSeasons() {
     return await commonApiFetch<MemeSeason[]>({
       endpoint: "new_memes_seasons",
@@ -157,13 +176,26 @@ export default function SubscriptionsReportComponent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const mintingToday = isMintingToday();
       let remainingCountForSeason = getCardsRemainingUntilEndOf("szn");
       let activeRedeemedDrop: RedeemedSubscriptionCounts | null = null;
+      let currentLiveMintNumber: number | null = null;
+      const currentLiveMintNumberPromise = fetchCurrentLiveMintNumber().catch(
+        (error: unknown) => {
+          console.error("Failed to fetch current meme calendar mint:", error);
+          return null;
+        }
+      );
 
       try {
-        const redeemed = await fetchRedeemedCounts(1);
-        activeRedeemedDrop = getActiveRedeemedDrop(redeemed.data, mintingToday);
+        const [redeemed, liveMintNumber] = await Promise.all([
+          fetchRedeemedCounts(1),
+          currentLiveMintNumberPromise,
+        ]);
+        currentLiveMintNumber = liveMintNumber;
+        activeRedeemedDrop = getActiveRedeemedDrop(
+          redeemed.data,
+          currentLiveMintNumber
+        );
         activeTokenIdRef.current = activeRedeemedDrop?.token_id ?? null;
         setActiveDrop(activeRedeemedDrop);
         setRedeemedCounts(
@@ -183,7 +215,7 @@ export default function SubscriptionsReportComponent() {
         setTotalRedeemed(0);
       }
 
-      if (mintingToday && !activeRedeemedDrop) {
+      if (currentLiveMintNumber !== null && !activeRedeemedDrop) {
         remainingCountForSeason += 1;
       }
 

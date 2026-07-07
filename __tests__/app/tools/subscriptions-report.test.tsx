@@ -29,7 +29,6 @@ jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   formatFullDate: jest.fn(() => "Jan 1, 2026"),
   getCardsRemainingUntilEndOf: jest.fn(() => 2),
   getUpcomingMintsAcrossSeasons: jest.fn(() => []),
-  isMintingToday: jest.fn(() => false),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -62,7 +61,6 @@ const { commonApiFetch } = require("@/services/api/common-api");
 const {
   getCardsRemainingUntilEndOf,
   getUpcomingMintsAcrossSeasons,
-  isMintingToday,
 } = require("@/components/meme-calendar/meme-calendar.helpers");
 
 const mockDefaultCommonApiFetch = (opts: any) => {
@@ -85,6 +83,12 @@ const mockDefaultCommonApiFetch = (opts: any) => {
         display: "SZN 15",
       },
     ]);
+  }
+  if (opts?.endpoint === "meme-calendar/current") {
+    return Promise.resolve({
+      status: "none",
+      current: null,
+    });
   }
   return Promise.resolve([]);
 };
@@ -113,7 +117,6 @@ describe("Subscriptions report page", () => {
     commonApiFetch.mockImplementation(mockDefaultCommonApiFetch);
     getCardsRemainingUntilEndOf.mockReturnValue(2);
     getUpcomingMintsAcrossSeasons.mockReturnValue([]);
-    isMintingToday.mockReturnValue(false);
     mockDownload.mockClear();
     mockUseDownloader.mockReturnValue({
       download: mockDownload,
@@ -133,9 +136,13 @@ describe("Subscriptions report page", () => {
     expect(container.querySelector("main")).toBeInTheDocument();
     await waitFor(() => {
       expect(getCardsRemainingUntilEndOf).toHaveBeenCalledWith("szn");
-      expect(commonApiFetch).toHaveBeenCalledTimes(4);
+      expect(commonApiFetch).toHaveBeenCalledTimes(5);
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "policies/country-check",
+      });
+      expect(commonApiFetch).toHaveBeenCalledWith({
+        endpoint: "meme-calendar/current",
+        includeWalletAuth: false,
       });
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "subscriptions/upcoming-memes-counts?card_count=2",
@@ -153,9 +160,17 @@ describe("Subscriptions report page", () => {
     });
   });
 
-  it("moves a mint-day redeemed card into the active drop section", async () => {
-    isMintingToday.mockReturnValue(true);
+  it("moves the live calendar mint into the active drop section", async () => {
     commonApiFetch.mockImplementation((opts: any) => {
+      if (opts?.endpoint === "meme-calendar/current") {
+        return Promise.resolve({
+          status: "live",
+          current: {
+            mint_number: 700,
+          },
+        });
+      }
+
       if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
         return Promise.resolve({
           count: 2,
@@ -168,7 +183,7 @@ describe("Subscriptions report page", () => {
               count: 4,
               name: "Active Meme",
               image_url: "https://images.test/active.png",
-              mint_date: new Date().toISOString(),
+              mint_date: "2026-07-06T00:00:00.000Z",
               szn: 15,
             },
             {
@@ -228,12 +243,15 @@ describe("Subscriptions report page", () => {
       endpoint: "subscriptions/memes/700/count",
     });
     expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "meme-calendar/current",
+      includeWalletAuth: false,
+    });
+    expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "subscriptions/upcoming-memes-counts?card_count=2",
     });
   });
 
   it("exposes semantic row-wide meme card links", async () => {
-    isMintingToday.mockReturnValue(true);
     getUpcomingMintsAcrossSeasons.mockReturnValue([
       {
         seasonIndex: 15,
@@ -241,6 +259,15 @@ describe("Subscriptions report page", () => {
       },
     ]);
     commonApiFetch.mockImplementation((opts: any) => {
+      if (opts?.endpoint === "meme-calendar/current") {
+        return Promise.resolve({
+          status: "live",
+          current: {
+            mint_number: 700,
+          },
+        });
+      }
+
       if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
         return Promise.resolve({
           count: 2,
@@ -365,7 +392,6 @@ describe("Subscriptions report page", () => {
   });
 
   it("formats active, upcoming, and past counts with locale separators", async () => {
-    isMintingToday.mockReturnValue(true);
     getUpcomingMintsAcrossSeasons.mockReturnValue([
       {
         seasonIndex: 15,
@@ -373,6 +399,15 @@ describe("Subscriptions report page", () => {
       },
     ]);
     commonApiFetch.mockImplementation((opts: any) => {
+      if (opts?.endpoint === "meme-calendar/current") {
+        return Promise.resolve({
+          status: "live",
+          current: {
+            mint_number: 700,
+          },
+        });
+      }
+
       if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
         return Promise.resolve({
           count: 2,
@@ -455,8 +490,16 @@ describe("Subscriptions report page", () => {
     const consoleError = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    isMintingToday.mockReturnValue(true);
     commonApiFetch.mockImplementation((opts: any) => {
+      if (opts?.endpoint === "meme-calendar/current") {
+        return Promise.resolve({
+          status: "live",
+          current: {
+            mint_number: 700,
+          },
+        });
+      }
+
       if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
         return Promise.resolve({
           count: 2,
