@@ -1,6 +1,7 @@
 import { DE_DE_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const DE_DE_MESSAGES = {
@@ -388,17 +389,7 @@ export const DE_DE_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
-  "theMemes.detail.collectors.leaderboardTitle": "Sammler-Bestenliste",
-  "theMemes.detail.collectors.downloadCsv": "CSV herunterladen",
-  "theMemes.detail.collectors.downloadingCsv": "CSV wird vorbereitet",
-  "theMemes.detail.collectors.downloadCsvAriaLabel":
-    "Sammler-Bestenliste als CSV herunterladen",
-  "theMemes.detail.collectors.downloadCsvError":
-    "CSV der Sammler konnte nicht heruntergeladen werden. Bitte erneut versuchen.",
-  "theMemes.detail.collectors.downloadCsvStatusPreparing":
-    "CSV der Sammler wird vorbereitet.",
-  "theMemes.detail.collectors.downloadCsvStatusReady":
-    "CSV-Download der Sammler ist bereit.",
+  ...DE_DE_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Meme-Sortierung",
   "theMemes.sorting.sortBy": "Sortieren nach",
   "theMemes.sorting.directionLegend": "Sortierrichtung",

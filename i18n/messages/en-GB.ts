@@ -1,5 +1,6 @@
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
@@ -374,17 +375,7 @@ export const EN_GB_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
-  "theMemes.detail.collectors.leaderboardTitle": "Collectors leaderboard",
-  "theMemes.detail.collectors.downloadCsv": "Download CSV",
-  "theMemes.detail.collectors.downloadingCsv": "Preparing CSV",
-  "theMemes.detail.collectors.downloadCsvAriaLabel":
-    "Download collectors leaderboard as CSV",
-  "theMemes.detail.collectors.downloadCsvError":
-    "Couldn't download collectors CSV. Please try again.",
-  "theMemes.detail.collectors.downloadCsvStatusPreparing":
-    "Preparing collectors CSV.",
-  "theMemes.detail.collectors.downloadCsvStatusReady":
-    "Collectors CSV download ready.",
+  ...EN_GB_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.filters.triggerAriaLabel": "{filter}: {value}",
   "theMemes.filters.year.label": "Year",
   "theMemes.filters.year.all": "All Years",
