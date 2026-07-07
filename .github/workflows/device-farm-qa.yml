@@ -11,6 +11,10 @@ name: Device Farm Mobile QA
 #            exercised with an Appium smoke suite plus Device Farm's built-in
 #            fuzz (monkey) test.
 #
+# Cadence: the web pack runs daily (production can break for users without a
+# frontend deploy — backend releases, data, third-party SDKs), while the
+# expensive native pack (APK build + smoke + fuzz) stays weekly.
+#
 # Every job no-ops with a notice until the Device Farm secrets are configured,
 # so the schedule stays green before provisioning.
 
@@ -33,7 +37,13 @@ on:
           - native
         default: all
   schedule:
-    # Weekly full pack against production (read-only smoke + native shell QA).
+    # The cron strings below are load-bearing: the plan job matches
+    # github.event.schedule against them to pick packs, so keep them unique
+    # and update the plan job's case branch whenever they change.
+    #
+    # Daily mobile web smoke against production (Tuesday through Sunday).
+    - cron: "0 4 * * 0,2-6"
+    # Weekly full pack against production (web smoke + native shell QA).
     - cron: "0 4 * * 1"
 
 # Permissions are declared per job; no workflow-level grants.
@@ -66,6 +76,8 @@ jobs:
       HAS_MOBILE_REPO_TOKEN: ${{ secrets.MOBILE_REPO_TOKEN != '' }}
       PACKS_INPUT: ${{ inputs.packs || 'all' }}
       TARGET_INPUT: ${{ inputs.target || 'production' }}
+      EVENT_NAME: ${{ github.event_name }}
+      SCHEDULE_CRON: ${{ github.event.schedule }}
     steps:
       - name: Decide packs and target
         id: decide
@@ -78,10 +90,22 @@ jobs:
             target_url="https://6529.io"
           fi
 
+          # Scheduled runs pick packs by which cron fired: the Monday cron
+          # ("0 4 * * 1") runs the full pack, the daily cron runs web-only.
+          # Manual dispatch keeps using the packs input.
+          requested="$PACKS_INPUT"
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            if [ "$SCHEDULE_CRON" = "0 4 * * 1" ]; then
+              requested="all"
+            else
+              requested="web"
+            fi
+          fi
+
           web=false
           native=false
           if [ "$HAS_DEVICEFARM_CREDENTIALS" = "true" ]; then
-            case "$PACKS_INPUT" in
+            case "$requested" in
               all) web=true; native=true ;;
               web) web=true ;;
               native) native=true ;;
@@ -110,6 +134,8 @@ jobs:
             echo "| native Android shell | $native |"
             echo ""
             echo "Mobile web target: \`$target_url\`"
+            echo ""
+            echo "Requested packs: \`$requested\` (event: \`$EVENT_NAME\`${SCHEDULE_CRON:+, cron: \`$SCHEDULE_CRON\`})"
           } >> "$GITHUB_STEP_SUMMARY"
 
   package-tests:
@@ -442,6 +468,6 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          title: "Device Farm Mobile QA: weekly real-device pack failed"
+          title: "Device Farm Mobile QA: scheduled real-device pack failed"
           description: "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           color: 0xff0000
