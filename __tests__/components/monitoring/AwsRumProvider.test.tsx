@@ -153,7 +153,7 @@ describe("AwsRumProvider", () => {
     });
 
     expect(mockAwsRum).not.toHaveBeenCalled();
-    expect(window.awsRum).toBe(undefined);
+    expect(window.awsRum).toBeUndefined();
   });
 
   it("disables AWS RUM and clears the global instance on unmount", async () => {
@@ -172,6 +172,6 @@ describe("AwsRumProvider", () => {
     unmount();
 
     expect(awsRumInstance.disable).toHaveBeenCalledTimes(1);
-    expect(window.awsRum).toBe(undefined);
+    expect(window.awsRum).toBeUndefined();
   });
 });
