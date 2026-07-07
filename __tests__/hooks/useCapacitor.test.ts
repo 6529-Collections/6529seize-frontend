@@ -111,6 +111,12 @@ describe("useCapacitor", () => {
 
     const snapshot = getCapacitorSnapshot();
 
+    act(() => {
+      listeners["appStateChange"]({ isActive: false });
+    });
+
+    expect(getCapacitorSnapshot()).toBe(snapshot);
+
     (window.matchMedia as jest.Mock).mockReturnValue({
       matches: false,
       addEventListener: jest.fn(),
