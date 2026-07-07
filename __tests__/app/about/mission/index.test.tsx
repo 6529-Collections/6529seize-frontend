@@ -40,8 +40,6 @@ describe("MissionPage (migrated WordPress static page)", () => {
 
   it("keeps the content module aligned with the page path", () => {
     expect(aboutMissionMigratedWordPressPage.path).toBe("/about/mission");
-    expect(aboutMissionMigratedWordPressPage.source).toBe(
-      "migrated-wordpress"
-    );
+    expect(aboutMissionMigratedWordPressPage.source).toBe("migrated-wordpress");
   });
 });

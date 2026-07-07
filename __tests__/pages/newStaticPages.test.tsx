@@ -18,7 +18,6 @@ jest.mock("next/dynamic", () => () => {
   return MockDynamicComponent;
 });
 
-
 describe("Static Pages Rendering", () => {
   it("should render 100M Project page with correct content and metadata", () => {
     render(<About100M />);

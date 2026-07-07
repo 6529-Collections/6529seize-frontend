@@ -1,3 +1,4 @@
+import { migratedWordPressTrustedHtml } from "@/components/migrated-wordpress/trusted-html";
 import type { MigratedWordPressStaticPageContent } from "@/components/migrated-wordpress/types";
 
 export const aboutRulesMigratedWordPressPage: MigratedWordPressStaticPageContent =
@@ -11,7 +12,9 @@ export const aboutRulesMigratedWordPressPage: MigratedWordPressStaticPageContent
     blocks: [
       {
         type: "html",
-        html: "<ol><li>WE SAY GM AND GN</li><li>WE BELIEVE IN MEMES</li><li>WE LOVE ALL JPG FRENS</li><li>WE USE A HARDWARE WALLET</li><li>WE SEIZE THE MEMES OF PRODUCTION</li><li>WE DON'T RUN OUT OF JPGS</li><li>WE DON'T LET THE INSTITUTIONS STEAL OUR JPGS</li><li>WE TAKE CARE OF IRL FAM</li><li>WAGMI</li><li>WE SAVE THE FUTURE</li></ol>",
+        html: migratedWordPressTrustedHtml(
+          "<ol><li>WE SAY GM AND GN</li><li>WE BELIEVE IN MEMES</li><li>WE LOVE ALL JPG FRENS</li><li>WE USE A HARDWARE WALLET</li><li>WE SEIZE THE MEMES OF PRODUCTION</li><li>WE DON'T RUN OUT OF JPGS</li><li>WE DON'T LET THE INSTITUTIONS STEAL OUR JPGS</li><li>WE TAKE CARE OF IRL FAM</li><li>WAGMI</li><li>WE SAVE THE FUTURE</li></ol>"
+        ),
       },
     ],
   };

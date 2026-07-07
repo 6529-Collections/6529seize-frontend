@@ -141,6 +141,10 @@ export function MigratedWordPressArticleBlockView({
   }
 
   if (block.type === "html") {
+    // block.html is MigratedWordPressTrustedHtml: constructible only from
+    // compile-time in-repo literals (see trusted-html.ts), never from
+    // runtime data — which is what makes this sink acceptable. Runtime
+    // HTML must go through a real sanitizer instead.
     return (
       <div
         className={richHtmlClassName}
