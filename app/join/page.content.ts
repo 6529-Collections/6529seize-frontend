@@ -6,9 +6,9 @@ export type TimelineStepId =
   | "profile"
   | "waves"
   | "message"
-  | "collect"
-  | "subscribe";
+  | "collect";
 export type FocusFeatureId = "subscriptions" | "waves" | "nfts";
+export type ThingsToDoId = "delegation" | "help";
 export type JoinHref = string | ((links: JoinLinks) => string);
 
 export interface JoinLinks {
@@ -37,9 +37,19 @@ interface FaqItemSpec {
   readonly id: string;
   readonly questionKey: Join6529MessageKey;
   readonly answerKey: Join6529MessageKey;
+  readonly learnMoreHref?: JoinHref;
+}
+
+export interface ThingsToDoSpec {
+  readonly id: ThingsToDoId;
+  readonly titleKey: Join6529MessageKey;
+  readonly bodyKey: Join6529MessageKey;
+  readonly href: JoinHref;
+  readonly actionLabelKey: Join6529MessageKey;
 }
 
 export interface MemeCard {
+  readonly alt: string;
   readonly image: string;
   readonly label: string;
   readonly number?: number;
@@ -47,15 +57,37 @@ export interface MemeCard {
   readonly imageClass?: string;
 }
 
+interface MemeCardSource {
+  readonly id: number;
+  readonly name: string;
+  readonly ext: "GIF" | "PNG" | "WEBP";
+  readonly rotateClass: string;
+  readonly imageClass?: string;
+}
+
 export const WAVES_HREF = "/waves";
-export const WAVES_ENTRY_STORAGE_PREFIX = "join-6529:entered-waves:";
 
+const ABOUT_SUBSCRIPTIONS_HREF = "/about/subscriptions";
 const COLLECTIONS_HREF = "/the-memes";
-const MEME_CARD_IMAGE_BASE =
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
+const DELEGATION_HREF = "/delegation/delegation-center";
+const JOIN_STEP_ID_PREFIX = "join-step";
+const LICENSE_HREF = "/about/license";
+const MEME_MINT_HREF = "/the-memes/mint";
+const OPEN_DATA_MEME_SUBSCRIPTIONS_HREF = "/open-data/meme-subscriptions";
+const TDH_HREF = "/network/tdh";
+const MEMES_CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
 
-const memeCardImage = (number: number, extension: "GIF" | "PNG" | "WEBP") =>
-  `${MEME_CARD_IMAGE_BASE}/${number}.${extension}`;
+const cardImage = (card: Pick<MemeCardSource, "id" | "ext">) =>
+  `https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/${MEMES_CONTRACT}/${card.id}.${card.ext}`;
+
+const toMemeCard = (card: MemeCardSource): MemeCard => ({
+  alt: `${card.name} Meme Card #${card.id}`,
+  image: cardImage(card),
+  label: card.name,
+  number: card.id,
+  rotateClass: card.rotateClass,
+  ...(card.imageClass ? { imageClass: card.imageClass } : {}),
+});
 
 export const TIMELINE_ITEM_SPECS: readonly TimelineItemSpec[] = [
   {
@@ -86,21 +118,34 @@ export const TIMELINE_ITEM_SPECS: readonly TimelineItemSpec[] = [
     id: "collect",
     titleKey: "join6529.joining.collect.title",
     bodyKey: "join6529.joining.collect.body",
-    actionLabelKey: "join6529.focus.nfts.action",
+    actionLabelKey: "join6529.action.viewCollections",
     href: COLLECTIONS_HREF,
   },
+];
+
+export const THINGS_TO_DO_SPECS: readonly ThingsToDoSpec[] = [
   {
-    id: "subscribe",
-    titleKey: "join6529.joining.subscribe.title",
-    bodyKey: "join6529.joining.subscribe.body",
-    actionLabelKey: "join6529.focus.subscriptions.action",
-    href: ({ subscriptionsHref }) => subscriptionsHref,
+    id: "delegation",
+    titleKey: "join6529.todo.delegation.title",
+    bodyKey: "join6529.todo.delegation.body",
+    href: DELEGATION_HREF,
+    actionLabelKey: "join6529.action.learnMore",
+  },
+  {
+    id: "help",
+    titleKey: "join6529.todo.help.title",
+    bodyKey: "join6529.todo.help.body",
+    href: WAVES_HREF,
+    actionLabelKey: "join6529.action.openWave",
   },
 ];
 
 export const OPTIONAL_TIMELINE_START_ID: TimelineStepId = "message";
 export const TIMELINE_ORDER: readonly TimelineStepId[] =
   TIMELINE_ITEM_SPECS.map((item) => item.id);
+
+export const getTimelineStepDomId = (stepId: TimelineStepId): string =>
+  `${JOIN_STEP_ID_PREFIX}-${stepId}`;
 
 export const FOCUS_FEATURE_SPECS: readonly FocusFeatureSpec[] = [
   {
@@ -109,7 +154,7 @@ export const FOCUS_FEATURE_SPECS: readonly FocusFeatureSpec[] = [
     titleKey: "join6529.focus.subscriptions.title",
     bodyKey: "join6529.focus.subscriptions.body",
     actionLabelKey: "join6529.focus.subscriptions.action",
-    href: ({ subscriptionsHref }) => subscriptionsHref,
+    href: OPEN_DATA_MEME_SUBSCRIPTIONS_HREF,
   },
   {
     id: "waves",
@@ -125,7 +170,7 @@ export const FOCUS_FEATURE_SPECS: readonly FocusFeatureSpec[] = [
     titleKey: "join6529.focus.nfts.title",
     bodyKey: "join6529.focus.nfts.body",
     actionLabelKey: "join6529.focus.nfts.action",
-    href: COLLECTIONS_HREF,
+    href: WAVES_HREF,
   },
 ];
 
@@ -134,81 +179,88 @@ export const FAQ_ITEM_SPECS: readonly FaqItemSpec[] = [
     id: "wallet-eth",
     questionKey: "join6529.faq.walletEth.question",
     answerKey: "join6529.faq.walletEth.answer",
+    learnMoreHref: "/about/faq",
   },
   {
     id: "tdh",
     questionKey: "join6529.faq.tdh.question",
     answerKey: "join6529.faq.tdh.answer",
+    learnMoreHref: TDH_HREF,
   },
   {
     id: "meme-cost",
     questionKey: "join6529.faq.memeCost.question",
     answerKey: "join6529.faq.memeCost.answer",
+    learnMoreHref: MEME_MINT_HREF,
   },
   {
     id: "subscriptions",
     questionKey: "join6529.faq.subscriptions.question",
     answerKey: "join6529.faq.subscriptions.answer",
+    learnMoreHref: ABOUT_SUBSCRIPTIONS_HREF,
   },
   {
     id: "art-use",
     questionKey: "join6529.faq.artUse.question",
     answerKey: "join6529.faq.artUse.answer",
+    learnMoreHref: LICENSE_HREF,
   },
 ];
 
-export const MEME_CARDS: readonly MemeCard[] = [
-  {
-    image: memeCardImage(516, "GIF"),
-    label: "PEBBLES",
-    number: 516,
-    rotateClass: "tw-rotate-[-8deg]",
-    imageClass: "tw-brightness-[1.35] tw-contrast-[1.1]",
-  },
-  {
-    image: memeCardImage(515, "GIF"),
-    label: "Cerebrum",
-    number: 515,
-    rotateClass: "tw-rotate-[-3deg]",
-  },
-  {
-    image: memeCardImage(514, "WEBP"),
-    label: "Freedom Craig",
-    number: 514,
-    rotateClass: "tw-rotate-[1deg]",
-  },
-  {
-    image: memeCardImage(513, "GIF"),
-    label: "SEIZE 24/7",
-    number: 513,
-    rotateClass: "tw-rotate-[5deg]",
-  },
-  {
-    image: memeCardImage(512, "WEBP"),
-    label: "6529 SVNDIAL",
-    number: 512,
-    rotateClass: "tw-rotate-[9deg]",
-    imageClass: "tw-brightness-[1.2]",
-  },
-];
+export const SUBMIT_MEME_CARDS: readonly MemeCard[] = (
+  [
+    {
+      id: 516,
+      name: "PEBBLES at Domínio PúbliCC0",
+      ext: "GIF",
+      rotateClass: "tw-rotate-[-8deg]",
+      imageClass: "tw-brightness-[1.35] tw-contrast-[1.1]",
+    },
+    {
+      id: 515,
+      name: "Cerebrum",
+      ext: "GIF",
+      rotateClass: "tw-rotate-[-3deg]",
+    },
+    {
+      id: 514,
+      name: "Freedom Craig",
+      ext: "WEBP",
+      rotateClass: "tw-rotate-[1deg]",
+    },
+    {
+      id: 513,
+      name: "SEIZE 24/7",
+      ext: "GIF",
+      rotateClass: "tw-rotate-[5deg]",
+    },
+    {
+      id: 512,
+      name: "6529 SVNDIAL",
+      ext: "WEBP",
+      rotateClass: "tw-rotate-[9deg]",
+      imageClass: "tw-brightness-[1.2]",
+    },
+  ] satisfies readonly MemeCardSource[]
+).map(toMemeCard);
 
 export const HERO_MEME_CARDS = {
-  topLeft: {
-    image: memeCardImage(515, "GIF"),
-    label: "Cerebrum",
-    number: 515,
+  topLeft: toMemeCard({
+    id: 17,
+    name: "Awakening OM",
+    ext: "WEBP",
     rotateClass: "tw-rotate-[-8deg]",
-  },
-  left: {
-    image: memeCardImage(514, "WEBP"),
-    label: "Freedom Craig",
-    number: 514,
+  }),
+  left: toMemeCard({
+    id: 9,
+    name: "The Institutions Are Coming",
+    ext: "WEBP",
     rotateClass: "tw-rotate-[-6deg]",
-  },
-  right: {
-    image: memeCardImage(513, "GIF"),
-    label: "SEIZE 24/7",
-    number: 513,
+  }),
+  right: toMemeCard({
+    id: 11,
+    name: "CyberMetaverse",
+    ext: "GIF",
     rotateClass: "tw-rotate-[5deg]",
-  },
+  }),
 } satisfies Record<string, MemeCard>;

@@ -3,10 +3,16 @@ import Link from "next/link";
 
 import type { SupportedLocale } from "@/i18n/locales";
 
+import { HERO_CONTENT, HERO_POINTS } from "./heroContent";
 import { MemeArtifactCard } from "./MemeArtifactCard";
 import { HERO_MEME_CARDS } from "./page.content";
-import type { CurrentPanelAction, CurrentPanelContent } from "./page.types";
-import { cx, m } from "./page.utils";
+import type { CurrentPanelAction, JoinPageState } from "./page.types";
+import {
+  cx,
+  m,
+  PRIMARY_ACTION_CLASS,
+  SECONDARY_ACTION_CLASS,
+} from "./page.utils";
 import { getMemeCardAriaLabel } from "./JoinVisualArtifacts";
 
 const heroFloatStyle = (
@@ -104,21 +110,22 @@ function handleHeroPointerLeave(event: PointerEvent<HTMLElement>) {
 }
 
 export function JoinHeader({
-  currentPanel,
-  isReturningVisitor,
   locale,
+  pageState,
+  primaryAction,
+  secondaryAction,
 }: {
-  readonly currentPanel: CurrentPanelContent;
-  readonly isReturningVisitor: boolean;
   readonly locale: SupportedLocale;
+  readonly pageState: JoinPageState;
+  readonly primaryAction: CurrentPanelAction;
+  readonly secondaryAction: CurrentPanelAction;
 }) {
-  const eyebrowKey = isReturningVisitor
-    ? "join6529.hero.eyebrowReturning"
-    : "join6529.hero.eyebrow";
+  const heroContent = HERO_CONTENT[pageState];
+  const { subtitleKey } = heroContent;
 
   return (
     <header
-      className="tw-relative tw-isolate tw-mx-auto tw-flex tw-min-h-[560px] tw-w-full tw-max-w-7xl tw-flex-col tw-items-center tw-justify-center tw-overflow-visible tw-px-0 tw-pb-20 tw-pt-20 md:tw-min-h-[620px] md:tw-pb-28 md:tw-pt-28"
+      className="tw-relative tw-isolate tw-mx-auto tw-flex tw-min-h-[620px] tw-w-full tw-max-w-7xl tw-flex-col tw-items-center tw-justify-center tw-overflow-visible tw-px-4 tw-py-20 sm:tw-px-6 md:tw-min-h-[700px] md:tw-py-24 lg:tw-px-8"
       onPointerLeave={handleHeroPointerLeave}
       onPointerMove={handleHeroPointerMove}
       style={HERO_MAGNETIC_REST_STYLE}
@@ -128,31 +135,55 @@ export function JoinHeader({
         aria-hidden="true"
         className="tw-pointer-events-none tw-absolute tw-inset-x-8 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/10 tw-to-transparent"
       />
-      <div className="tw-relative tw-z-10 tw-mx-auto tw-mt-4 tw-flex tw-max-w-3xl tw-flex-col tw-items-center tw-text-center">
-        <div className="tw-mb-8 tw-inline-flex tw-items-center tw-gap-3 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-uppercase tw-tracking-widest tw-text-iron-500">
+      <div className="tw-relative tw-z-10 tw-mx-auto tw-mt-4 tw-flex tw-w-full tw-max-w-5xl tw-flex-col tw-items-center tw-text-center">
+        <div className="tw-mb-6 tw-inline-flex tw-items-center tw-gap-3 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-uppercase tw-tracking-widest tw-text-iron-500">
           <span
             aria-hidden="true"
             className="tw-h-1.5 tw-w-1.5 tw-animate-pulse tw-rounded-full tw-bg-iron-400"
           />
-          {m(locale, eyebrowKey)}
+          {m(locale, heroContent.eyebrowKey)}
         </div>
-        <h1 className="tw-m-0 tw-text-5xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-6xl lg:tw-text-7xl">
-          {m(locale, "join6529.title")}
-        </h1>
-        <p className="tw-mb-0 tw-mt-5 tw-max-w-2xl tw-text-pretty tw-text-lg tw-font-light tw-leading-relaxed tw-text-iron-400 lg:tw-text-2xl">
-          {m(locale, "join6529.subtitle")}
-        </p>
-        <div className="tw-mt-12 tw-flex tw-w-full tw-flex-col tw-items-stretch tw-justify-center tw-gap-4 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center">
-          {currentPanel.action && (
-            <HeroPrimaryAction action={currentPanel.action} />
+        <div className="tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center">
+          <h1 className="tw-m-0 tw-mb-6 tw-text-5xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-6xl lg:tw-text-[40px]">
+            {m(locale, heroContent.titleKey)}
+          </h1>
+          {subtitleKey !== undefined && (
+            <p className="tw-mb-0 tw-text-pretty tw-text-lg tw-font-light tw-leading-relaxed tw-text-iron-400 lg:tw-text-xl">
+              {m(locale, subtitleKey)}
+            </p>
           )}
-          <HeroSecondaryLink
-            href="#journey"
-            label={m(locale, "join6529.action.explorePaths")}
-          />
         </div>
+        <div className="tw-mt-10 tw-flex tw-w-full tw-flex-col tw-items-stretch tw-justify-center tw-gap-4 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center">
+          <HeroAction action={primaryAction} variant="primary" />
+          <HeroAction action={secondaryAction} variant="secondary" />
+        </div>
+        {pageState === "loggedOut" && <HeroPoints locale={locale} />}
       </div>
     </header>
+  );
+}
+
+function HeroPoints({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <div className="tw-mt-16 tw-grid tw-w-full tw-max-w-4xl tw-grid-cols-1 tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-7 sm:tw-grid-cols-3 sm:tw-gap-0">
+      {HERO_POINTS.map((point, index) => (
+        <div
+          className={cx(
+            "tw-px-4",
+            index > 0 &&
+              "sm:tw-border-0 sm:tw-border-l sm:tw-border-solid sm:tw-border-white/10"
+          )}
+          key={point.titleKey}
+        >
+          <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-100">
+            {m(locale, point.titleKey)}
+          </p>
+          <p className="tw-mb-0 tw-text-xs tw-font-light tw-leading-5 tw-text-iron-500">
+            {m(locale, point.bodyKey)}
+          </p>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -167,7 +198,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
       className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-1/2 tw-z-0 tw-w-screen -tw-translate-x-1/2 tw-overflow-visible tw-opacity-45 sm:tw-opacity-55 lg:tw-opacity-70"
     >
       <div
-        className="tw-absolute tw-right-[calc(50%+160px)] tw-top-[10%] tw-w-16 tw-opacity-[0.24] tw-blur-[1px] tw-saturate-[0.7] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+220px)] sm:tw-w-20 md:tw-right-[calc(50%+300px)] md:tw-top-[8%] md:tw-w-28 lg:tw-right-[calc(50%+360px)] lg:tw-w-32 lg:tw-opacity-25 xl:tw-right-[calc(50%+400px)]"
+        className="tw-absolute tw-right-[calc(50%+180px)] tw-top-[7%] tw-w-16 tw-opacity-[0.24] tw-blur-[1px] tw-saturate-[0.7] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+240px)] sm:tw-w-20 md:tw-right-[calc(50%+320px)] md:tw-top-[6%] md:tw-w-28 lg:tw-right-[calc(50%+380px)] lg:tw-w-32 lg:tw-opacity-25 xl:tw-right-[calc(50%+420px)]"
         style={heroFloatStyle("8deg", "-2s")}
       >
         <div
@@ -185,7 +216,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       </div>
       <div
-        className="tw-absolute tw-right-[calc(50%+130px)] tw-top-[70%] tw-w-16 tw-opacity-40 tw-saturate-[0.78] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+190px)] sm:tw-w-24 md:tw-right-[calc(50%+260px)] md:tw-top-[54%] md:tw-w-32 lg:tw-right-[calc(50%+320px)] lg:tw-top-[51%] lg:tw-w-40 lg:tw-opacity-45 xl:tw-right-[calc(50%+350px)]"
+        className="tw-absolute tw-right-[calc(50%+160px)] tw-top-[62%] tw-w-16 tw-opacity-40 tw-saturate-[0.78] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+220px)] sm:tw-w-24 md:tw-right-[calc(50%+300px)] md:tw-top-[47%] md:tw-w-32 lg:tw-right-[calc(50%+360px)] lg:tw-top-[44%] lg:tw-w-40 lg:tw-opacity-45 xl:tw-right-[calc(50%+390px)]"
         style={heroFloatStyle("-6deg", "-4s")}
       >
         <div
@@ -203,7 +234,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       </div>
       <div
-        className="tw-absolute tw-left-[calc(50%+72px)] tw-top-[78%] tw-w-20 tw-opacity-50 tw-saturate-[0.85] motion-safe:tw-animate-hero-float sm:tw-left-[calc(50%+200px)] sm:tw-w-28 md:tw-left-[calc(50%+280px)] md:tw-top-[50%] md:tw-w-36 lg:tw-left-[calc(50%+330px)] lg:tw-top-[49%] lg:tw-w-48 lg:tw-opacity-55 xl:tw-left-[calc(50%+340px)] xl:tw-w-52"
+        className="tw-absolute tw-left-[calc(50%+102px)] tw-top-[70%] tw-w-20 tw-opacity-50 tw-saturate-[0.85] motion-safe:tw-animate-hero-float sm:tw-left-[calc(50%+230px)] sm:tw-w-28 md:tw-left-[calc(50%+320px)] md:tw-top-[43%] md:tw-w-36 lg:tw-left-[calc(50%+370px)] lg:tw-top-[42%] lg:tw-w-48 lg:tw-opacity-55 xl:tw-left-[calc(50%+380px)] xl:tw-w-52"
         style={heroFloatStyle("5deg", "-5s")}
       >
         <div
@@ -225,22 +256,27 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function HeroPrimaryAction({
+function HeroAction({
   action,
+  variant,
 }: {
   readonly action: CurrentPanelAction;
+  readonly variant: "primary" | "secondary";
 }) {
   const label = action.busy ? (action.busyLabel ?? action.label) : action.label;
-  const className =
-    "tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-8 tw-py-4 tw-text-sm tw-font-medium tw-text-black tw-no-underline tw-shadow-[0_0_30px_rgba(255,255,255,0.1)] tw-transition-colors hover:tw-border-gray-200 hover:tw-bg-gray-200 hover:tw-text-black hover:tw-no-underline focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/70 focus:tw-no-underline disabled:tw-cursor-not-allowed disabled:tw-opacity-70 sm:tw-w-auto";
+  const className = cx(
+    variant === "primary" ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS,
+    "tw-w-full sm:tw-w-auto"
+  );
 
-  if (action.kind === "link" && action.href) {
-    const linkProps = {
-      ...(action.onClick ? { onClick: action.onClick } : {}),
-      ...(action.onNavigate ? { onNavigate: action.onNavigate } : {}),
-    };
+  if (action.kind === "link") {
     return (
-      <Link className={className} href={action.href} {...linkProps}>
+      <Link
+        className={className}
+        href={action.href ?? "#journey"}
+        {...(action.onClick ? { onClick: action.onClick } : {})}
+        {...(action.onNavigate ? { onNavigate: action.onNavigate } : {})}
+      >
         {label}
       </Link>
     );
@@ -255,22 +291,5 @@ function HeroPrimaryAction({
     >
       {label}
     </button>
-  );
-}
-
-function HeroSecondaryLink({
-  href,
-  label,
-}: {
-  readonly href: string;
-  readonly label: string;
-}) {
-  return (
-    <a
-      className="tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-8 tw-py-4 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-50 hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/30 sm:tw-w-auto"
-      href={href}
-    >
-      {label}
-    </a>
   );
 }
