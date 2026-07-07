@@ -33,7 +33,7 @@ type OptionalClipboardNavigator = {
 export const getClipboardNavigator = ():
   | OptionalClipboardNavigator
   | undefined => {
-  if (typeof globalThis.window !== "undefined") {
+  if (globalThis.window !== undefined) {
     return globalThis.window.navigator as OptionalClipboardNavigator;
   }
   return globalThis.navigator as OptionalClipboardNavigator | undefined;
@@ -61,7 +61,7 @@ export function getWaveScoreScreenshotName(waveName: string): string {
   let lastWasSeparator = true;
 
   for (const character of waveName.toLowerCase()) {
-    const codePoint = character.charCodeAt(0);
+    const codePoint = character.codePointAt(0) ?? 0;
     const isDigit = codePoint >= 48 && codePoint <= 57;
     const isLowercaseLetter = codePoint >= 97 && codePoint <= 122;
 
@@ -78,7 +78,7 @@ export function getWaveScoreScreenshotName(waveName: string): string {
     }
   }
 
-  if (slugCharacters[slugCharacters.length - 1] === "-") {
+  if (slugCharacters.at(-1) === "-") {
     slugCharacters.pop();
   }
 

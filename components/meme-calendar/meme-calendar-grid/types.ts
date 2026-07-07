@@ -1,6 +1,6 @@
 import type { SupportedLocale } from "@/i18n/locales";
 
-import type { DisplayTz, ZoomLevel } from "../meme-calendar.helpers";
+import type { DisplayTz } from "../meme-calendar.helpers";
 import { getHistoricalMintsOnUtcDay } from "../meme-calendar.szn1";
 
 export interface MonthProps {
@@ -88,4 +88,4 @@ export interface MemeCalendarProps {
   readonly locale?: SupportedLocale | undefined;
 }
 
-export type { ZoomLevel };
+export type { ZoomLevel } from "../meme-calendar.helpers";

@@ -272,13 +272,9 @@ export function CalculatorPanel({
 
       <div className="tw-mt-4 tw-min-h-6">
         {status === "loading" && (
-          <p
-            role="status"
-            aria-live="polite"
-            className="tw-text-sm tw-text-iron-300"
-          >
+          <output aria-live="polite" className="tw-text-sm tw-text-iron-300">
             Looking up the wave and its score fields...
-          </p>
+          </output>
         )}
         {error && (
           <p

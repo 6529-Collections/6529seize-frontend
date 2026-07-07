@@ -188,7 +188,7 @@ export default function MemeCalendar({
   };
 
   const jumpToMintNumber = () => {
-    const n = parseInt(jumpMint, 10);
+    const n = Number.parseInt(jumpMint, 10);
     if (!n || n < 1) {
       return;
     }

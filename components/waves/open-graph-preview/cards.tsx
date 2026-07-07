@@ -39,7 +39,7 @@ import {
 } from "./core";
 import type { OpenGraphPreviewData } from "./types";
 
-const TRUSTED_YOUTUBE_EMBED_HOSTS = [
+const TRUSTED_YOUTUBE_EMBED_HOSTS: readonly string[] = [
   "youtube-nocookie.com",
   "youtube.com",
 ] as const;
@@ -506,9 +506,7 @@ export function getTrustedYoutubeEmbedUrl(value: string): string | undefined {
 }
 
 function isTrustedYoutubeEmbedHost(hostname: string): boolean {
-  return TRUSTED_YOUTUBE_EMBED_HOSTS.some(
-    (trustedHost) => hostname === trustedHost
-  );
+  return TRUSTED_YOUTUBE_EMBED_HOSTS.includes(hostname);
 }
 
 export function getHttpsHref(

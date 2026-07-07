@@ -169,7 +169,7 @@ export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
     try {
       const clipboard = getClipboardNavigator()?.clipboard;
       if (typeof clipboard?.writeText !== "function") {
-        throw new Error("Clipboard API unavailable");
+        throw new TypeError("Clipboard API unavailable");
       }
       await clipboard.writeText(markdownAnalysis);
       setTemporaryShareStatus(SHARE_STATUS.COPIED);
@@ -233,15 +233,12 @@ export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
               {formatTimestamp(score.calculated_at)}.
             </p>
             {scoreMismatches.length > 0 && (
-              <div
-                role="status"
-                className="tw-mt-4 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-sm tw-text-amber-100 tw-ring-1 tw-ring-inset tw-ring-amber-400/25"
-              >
+              <output className="tw-mt-4 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-sm tw-text-amber-100 tw-ring-1 tw-ring-inset tw-ring-amber-400/25">
                 <p className="tw-font-semibold">Formula drift detected</p>
                 <p className="tw-mt-1 tw-text-amber-100/85">
                   {scoreMismatchDetail}
                 </p>
-              </div>
+              </output>
             )}
             <WaveTrustSignals
               waveRep={wave.wave_rep ?? null}
@@ -281,14 +278,13 @@ export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
             </Link>
           </div>
         </div>
-        <p
+        <output
           data-wave-score-screenshot-exclude="true"
-          role="status"
           aria-live="polite"
           className="tw-mt-3 tw-min-h-5 tw-text-xs tw-font-medium tw-text-iron-300"
         >
           {getShareStatusMessage(shareStatus)}
-        </p>
+        </output>
 
         <div className="tw-mt-5 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
           <ScoreStat

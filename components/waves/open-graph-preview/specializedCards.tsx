@@ -442,6 +442,178 @@ export function FarcasterEmbedPreviewCard({
   );
 }
 
+function getYoutubeThumbnailAlt({
+  preview,
+  rawTitle,
+  locale,
+}: {
+  readonly preview: YoutubeVideoLinkPreview;
+  readonly rawTitle: string;
+  readonly locale: SupportedLocale;
+}): string {
+  const imageAlt = extractImageAlt(preview);
+  if (imageAlt) {
+    return imageAlt;
+  }
+
+  if (rawTitle) {
+    return t(locale, "linkPreview.youtube.thumbnailAlt", { title: rawTitle });
+  }
+
+  return t(locale, "linkPreview.youtube.thumbnailFallbackAlt");
+}
+
+function getYoutubeAuthor(
+  preview: YoutubeVideoLinkPreview
+): string | undefined {
+  const rawAuthor = preview.authorName ?? preview.author;
+  if (typeof rawAuthor !== "string") {
+    return undefined;
+  }
+
+  const author = rawAuthor.trim();
+  return author.length > 0 ? author : undefined;
+}
+
+function getYoutubeProviderLabel(
+  preview: YoutubeVideoLinkPreview,
+  locale: SupportedLocale
+): string {
+  if (typeof preview.provider === "string") {
+    const provider = preview.provider.trim();
+    if (provider.length > 0) {
+      return provider;
+    }
+  }
+
+  return t(locale, "linkPreview.youtube.providerFallback");
+}
+
+function YoutubeThumbnailBackdrop({
+  thumbnailUrl,
+  thumbnailAlt,
+  mediaSizes,
+  isInteractive,
+}: {
+  readonly thumbnailUrl: string | undefined;
+  readonly thumbnailAlt: string;
+  readonly mediaSizes: string;
+  readonly isInteractive: boolean;
+}) {
+  if (!thumbnailUrl) {
+    return (
+      <span
+        aria-hidden="true"
+        className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900 tw-via-black tw-to-iron-950"
+      />
+    );
+  }
+
+  return (
+    <Image
+      src={thumbnailUrl}
+      alt={thumbnailAlt}
+      fill
+      className={
+        isInteractive
+          ? "tw-object-cover tw-transition tw-duration-300 group-hover/youtube-play:tw-scale-[1.02]"
+          : "tw-object-cover"
+      }
+      loading="lazy"
+      sizes={mediaSizes}
+      unoptimized
+    />
+  );
+}
+
+function YoutubeVideoMedia({
+  isPlaying,
+  trustedEmbedUrl,
+  thumbnailUrl,
+  thumbnailAlt,
+  mediaSizes,
+  title,
+  locale,
+  onPlay,
+  watchHref,
+  linkTarget,
+  linkRel,
+}: {
+  readonly isPlaying: boolean;
+  readonly trustedEmbedUrl: string | undefined;
+  readonly thumbnailUrl: string | undefined;
+  readonly thumbnailAlt: string;
+  readonly mediaSizes: string;
+  readonly title: string;
+  readonly locale: SupportedLocale;
+  readonly onPlay: () => void;
+  readonly watchHref: string;
+  readonly linkTarget: "_blank" | undefined;
+  readonly linkRel: string | undefined;
+}) {
+  if (isPlaying && trustedEmbedUrl) {
+    return (
+      <iframe
+        className="tw-absolute tw-inset-0 tw-h-full tw-w-full"
+        src={trustedEmbedUrl}
+        title={title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
+        data-testid="youtube-video-embed"
+      />
+    );
+  }
+
+  if (trustedEmbedUrl) {
+    return (
+      <button
+        type="button"
+        aria-label={t(locale, "linkPreview.youtube.playVideo", {
+          title,
+        })}
+        className="tw-group/youtube-play tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-border-0 tw-bg-black tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        onClick={(event) => {
+          event.stopPropagation();
+          onPlay();
+        }}
+        data-testid="youtube-video-play"
+      >
+        <YoutubeThumbnailBackdrop
+          thumbnailUrl={thumbnailUrl}
+          thumbnailAlt={thumbnailAlt}
+          mediaSizes={mediaSizes}
+          isInteractive
+        />
+        <span className="tw-absolute tw-inset-0 tw-bg-black/20 tw-transition tw-duration-200 group-hover/youtube-play:tw-bg-black/10" />
+        <span
+          aria-hidden="true"
+          className="tw-bg-red-600 tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-h-12 tw-w-12 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-shadow-lg tw-shadow-black/30 tw-transition tw-duration-200 group-hover/youtube-play:tw-scale-105"
+        >
+          <span className="tw-ml-1 tw-block tw-h-0 tw-w-0 tw-border-y-[8px] tw-border-l-[13px] tw-border-y-transparent tw-border-l-white" />
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      href={watchHref}
+      target={linkTarget}
+      rel={linkRel}
+      onClick={(event) => event.stopPropagation()}
+      className="tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-no-underline"
+    >
+      <YoutubeThumbnailBackdrop
+        thumbnailUrl={thumbnailUrl}
+        thumbnailAlt={thumbnailAlt}
+        mediaSizes={mediaSizes}
+        isInteractive={false}
+      />
+    </Link>
+  );
+}
+
 export function YoutubeVideoPreviewCard({
   href,
   preview,
@@ -468,21 +640,15 @@ export function YoutubeVideoPreviewCard({
   const title = rawTitle || t(locale, "linkPreview.youtube.titleFallback");
   const thumbnailUrl = preview.thumbnailUrl ?? undefined;
   const trustedEmbedUrl = getTrustedYoutubeEmbedUrl(preview.embedUrl);
-  const thumbnailAlt =
-    extractImageAlt(preview) ??
-    (rawTitle
-      ? t(locale, "linkPreview.youtube.thumbnailAlt", { title: rawTitle })
-      : t(locale, "linkPreview.youtube.thumbnailFallbackAlt"));
-  const rawAuthor = preview.authorName ?? preview.author;
-  const author =
-    typeof rawAuthor === "string" && rawAuthor.trim().length > 0
-      ? rawAuthor.trim()
-      : undefined;
+  const thumbnailAlt = getYoutubeThumbnailAlt({
+    preview,
+    rawTitle,
+    locale,
+  });
+  const author = getYoutubeAuthor(preview);
   const watchLabel = t(locale, "linkPreview.youtube.watchOnYoutube");
-  const providerLabel =
-    typeof preview.provider === "string" && preview.provider.trim().length > 0
-      ? preview.provider.trim()
-      : t(locale, "linkPreview.youtube.providerFallback");
+  const providerLabel = getYoutubeProviderLabel(preview, locale);
+  const watchHref = preview.watchUrl || effectiveHref;
   const mediaSizes = isHome
     ? "(max-width: 768px) 100vw, 480px"
     : "(max-width: 640px) 100vw, (max-width: 1024px) 14rem, 16rem";
@@ -511,79 +677,19 @@ export function YoutubeVideoPreviewCard({
           ].join(" ")}
         >
           <div className="tw-relative tw-aspect-video tw-w-full tw-min-w-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-black tw-bg-black">
-            {isPlaying && trustedEmbedUrl ? (
-              <iframe
-                className="tw-absolute tw-inset-0 tw-h-full tw-w-full"
-                src={trustedEmbedUrl}
-                title={title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
-                data-testid="youtube-video-embed"
-              />
-            ) : trustedEmbedUrl ? (
-              <button
-                type="button"
-                aria-label={t(locale, "linkPreview.youtube.playVideo", {
-                  title,
-                })}
-                className="tw-group/youtube-play tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-border-0 tw-bg-black tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setIsPlaying(true);
-                }}
-                data-testid="youtube-video-play"
-              >
-                {thumbnailUrl ? (
-                  <Image
-                    src={thumbnailUrl}
-                    alt={thumbnailAlt}
-                    fill
-                    className="tw-object-cover tw-transition tw-duration-300 group-hover/youtube-play:tw-scale-[1.02]"
-                    loading="lazy"
-                    sizes={mediaSizes}
-                    unoptimized
-                  />
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900 tw-via-black tw-to-iron-950"
-                  />
-                )}
-                <span className="tw-absolute tw-inset-0 tw-bg-black/20 tw-transition tw-duration-200 group-hover/youtube-play:tw-bg-black/10" />
-                <span
-                  aria-hidden="true"
-                  className="tw-bg-red-600 tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-h-12 tw-w-12 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-shadow-lg tw-shadow-black/30 tw-transition tw-duration-200 group-hover/youtube-play:tw-scale-105"
-                >
-                  <span className="tw-ml-1 tw-block tw-h-0 tw-w-0 tw-border-y-[8px] tw-border-l-[13px] tw-border-y-transparent tw-border-l-white" />
-                </span>
-              </button>
-            ) : (
-              <Link
-                href={preview.watchUrl || effectiveHref}
-                target={linkTarget}
-                rel={linkRel}
-                onClick={(event) => event.stopPropagation()}
-                className="tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-no-underline"
-              >
-                {thumbnailUrl ? (
-                  <Image
-                    src={thumbnailUrl}
-                    alt={thumbnailAlt}
-                    fill
-                    className="tw-object-cover"
-                    loading="lazy"
-                    sizes={mediaSizes}
-                    unoptimized
-                  />
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900 tw-via-black tw-to-iron-950"
-                  />
-                )}
-              </Link>
-            )}
+            <YoutubeVideoMedia
+              isPlaying={isPlaying}
+              trustedEmbedUrl={trustedEmbedUrl}
+              thumbnailUrl={thumbnailUrl}
+              thumbnailAlt={thumbnailAlt}
+              mediaSizes={mediaSizes}
+              title={title}
+              locale={locale}
+              onPlay={() => setIsPlaying(true)}
+              watchHref={watchHref}
+              linkTarget={linkTarget}
+              linkRel={linkRel}
+            />
           </div>
 
           <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden">
@@ -607,7 +713,7 @@ export function YoutubeVideoPreviewCard({
               {wrapLongUnbrokenSegments(title)}
             </Link>
             <Link
-              href={preview.watchUrl || effectiveHref}
+              href={watchHref}
               target={linkTarget}
               rel={linkRel}
               onClick={(event) => event.stopPropagation()}

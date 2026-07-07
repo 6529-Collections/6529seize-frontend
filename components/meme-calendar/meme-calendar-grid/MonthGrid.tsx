@@ -47,7 +47,7 @@ function formatHistoricalMintLabel(
   locale: SupportedLocale
 ): string | undefined {
   const first = historical[0];
-  const last = historical[historical.length - 1];
+  const last = historical.at(-1);
 
   if (!first || !last) {
     return undefined;
@@ -345,7 +345,7 @@ export function Month({
       }, 60);
       return () => clearTimeout(t);
     }
-    return;
+    return undefined;
   }, [autoOpenYmd, year, month]);
 
   return (

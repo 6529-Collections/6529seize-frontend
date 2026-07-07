@@ -14,6 +14,7 @@ import {
   SEASONS_PER_PERIOD,
   SEASONS_PER_YEAR,
   SZN1_SEASON_INDEX,
+  getRangeLabel,
   toISO,
 } from "../meme-calendar.helpers";
 import {
@@ -31,7 +32,6 @@ import type {
   SeasonViewProps,
   YearViewProps,
 } from "./types";
-import { getRangeLabel } from "../meme-calendar.helpers";
 
 export function SeasonView({
   seasonIndex,

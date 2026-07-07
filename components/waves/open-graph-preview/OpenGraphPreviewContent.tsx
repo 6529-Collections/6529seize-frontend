@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import type { SupportedLocale } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { GithubPreviewResponse } from "@/services/api/github-preview-api";
 import type {
@@ -25,7 +25,6 @@ import {
   extractImageAlt,
   extractImageUrl,
   formatPublishedDate,
-  GENERIC_LINK_PREVIEW_LOCALE,
   getFirstPartyOgKindFromImageUrl,
   getPublishedDateTime,
   MEDIA_TYPE_KEYS,
@@ -395,7 +394,7 @@ export default function OpenGraphPreview({
   const isExternalLink = !relativeHref;
   const linkTarget = isExternalLink ? "_blank" : undefined;
   const linkRel = isExternalLink ? "noopener noreferrer" : undefined;
-  const locale = GENERIC_LINK_PREVIEW_LOCALE;
+  const locale = DEFAULT_LOCALE;
   const commonProps = {
     href,
     effectiveHref,
@@ -405,7 +404,7 @@ export default function OpenGraphPreview({
     hideActions,
   } satisfies RoutedPreviewCardProps;
 
-  if (typeof preview === "undefined") {
+  if (preview === undefined) {
     return (
       <OpenGraphPreviewSkeleton
         href={href}

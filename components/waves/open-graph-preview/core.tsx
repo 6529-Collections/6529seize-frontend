@@ -1,7 +1,7 @@
 import { Fragment, type ReactElement, type ReactNode } from "react";
 
 import { formatDate } from "@/i18n/format";
-import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 import type {
@@ -40,7 +40,6 @@ export const PUBLISHED_TIME_KEYS = [
 ];
 export const MEDIA_TYPE_KEYS = ["mediaType", "type"];
 const LONG_UNBROKEN_SEGMENT_THRESHOLD = 32;
-export const GENERIC_LINK_PREVIEW_LOCALE = DEFAULT_LOCALE;
 const PUBLISHED_DATE_FORMAT_OPTIONS = {
   day: "numeric",
   month: "short",
@@ -337,12 +336,13 @@ function extractDomainFromUrl(url: string | undefined): string | undefined {
     return undefined;
   }
 
-  const candidates = [trimmed];
-
-  if (!/^https?:\/\//i.test(trimmed)) {
-    candidates.push(`https://${trimmed.replace(/^\/+/, "")}`);
-    candidates.push(`http://${trimmed.replace(/^\/+/, "")}`);
-  }
+  const candidates = /^https?:\/\//i.test(trimmed)
+    ? [trimmed]
+    : [
+        trimmed,
+        `https://${trimmed.replace(/^\/+/, "")}`,
+        `http://${trimmed.replace(/^\/+/, "")}`,
+      ];
 
   for (const candidate of candidates) {
     try {
@@ -417,8 +417,8 @@ function parseUtcCalendarDate(
 }
 
 function parseNamedMonthDate(value: string): number | undefined {
-  const monthFirstMatch = value.match(
-    /^([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/
+  const monthFirstMatch = /^([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/.exec(
+    value
   );
   if (monthFirstMatch) {
     const monthIndex = MONTH_INDEX_BY_NAME[monthFirstMatch[1]!.toLowerCase()];
@@ -431,7 +431,7 @@ function parseNamedMonthDate(value: string): number | undefined {
       : undefined;
   }
 
-  const dayFirstMatch = value.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
+  const dayFirstMatch = /^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/.exec(value);
   if (dayFirstMatch) {
     const monthIndex = MONTH_INDEX_BY_NAME[dayFirstMatch[2]!.toLowerCase()];
     return typeof monthIndex === "number"
@@ -454,7 +454,7 @@ function parseSupportedPublishedTimestamp(
     return undefined;
   }
 
-  const dateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
   if (dateOnlyMatch) {
     return parseUtcCalendarDate(
       Number(dateOnlyMatch[1]),
@@ -463,7 +463,7 @@ function parseSupportedPublishedTimestamp(
     );
   }
 
-  if (/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:?\d{2})$/.test(trimmed)) {
+  if (/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:?\d{2})$/.exec(trimmed)) {
     const timestamp = Date.parse(trimmed);
     return Number.isNaN(timestamp) ? undefined : timestamp;
   }
