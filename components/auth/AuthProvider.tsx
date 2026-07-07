@@ -137,6 +137,7 @@ export default function Auth({
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestAddressRef = useRef<string | undefined>(address);
   const activeValidationOperationIdRef = useRef<string | null>(null);
+  const validationOperationCounterRef = useRef(0);
   const expiredSessionUpgradeAddressRef = useRef<string | null>(null);
   const [pendingProfileSwitch, setPendingProfileSwitch] = useState<{
     readonly targetAddress: string | null;
@@ -403,7 +404,8 @@ export default function Auth({
     setSessionUpgradeRequired(false);
 
     // Generate unique operation ID for this validation attempt
-    const operationId = `auth-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    validationOperationCounterRef.current += 1;
+    const operationId = `auth-${Date.now()}-${validationOperationCounterRef.current}`;
     activeValidationOperationIdRef.current = operationId;
 
     // IMMEDIATE validation - no setTimeout to prevent timing window vulnerability
