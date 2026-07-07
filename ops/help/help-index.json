@@ -1645,6 +1645,8 @@
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
+        "In the Groups step, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
+        "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
@@ -3419,6 +3421,8 @@
         "The notifications feed lives at /notifications.",
         "It supports feed filters, row actions, read state, paging, and navigation to related app content.",
         "Cause filters include Mentions, Replies, Identity, Reactions, and Invites.",
+        "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
+        "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
       ],
