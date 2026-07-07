@@ -52,6 +52,8 @@ jobs:
       - name: Assert npm lockfile is absent
         run: ./bin/6529 guard:no-package-lock
 
+      # The AST-based any_casts scanner uses the repo-pinned TypeScript parser,
+      # so this standalone required check installs dependencies before running.
       - name: Install dependencies
         env:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}

@@ -33,9 +33,11 @@ Current floor: `any_casts` = 0.
 
 ## Known scanner blind spot (for future calibration)
 
-The ratchet counts direct `: any`-style annotations and `as any`/`<any>`
-assertions only; generic type arguments like `useState<any>()` are invisible to
-it. A handful of such generics remain in
+The ratchet counts direct `: any`-style annotations, `as any` assertions, and
+valid TypeScript `<any>` assertions only; generic type arguments like
+`useState<any>()` are invisible to it. Invalid TSX angle-bracket assertion
+syntax fails parsing instead of silently undercounting. A handful of such
+generics remain in
 `components/delegation/CollectionDelegation.tsx`
 (`revokeDelegationParams`, `batchRevokeDelegationParams`, three
 `useState<any[]>` key arrays). They are outside the metric and were left

@@ -32,6 +32,9 @@ describe("debt-ratchet counting helpers", () => {
       "const a: any = 1;",
       "const b = value as any;",
       "const c: any[] = [];",
+      "const d: readonly any[] = [];",
+      "let parenthesized: (any);",
+      "let union: string | any;",
       "function f(input: any): any { return input; }",
       "type Shape = { field: any; generic: Record<string, any> };",
       "const inner: Record<string, any> = {}; // generic arg is not counted",
@@ -45,7 +48,17 @@ describe("debt-ratchet counting helpers", () => {
     ].join("\n");
     // Direct annotations and casts count. Strings, comments, JSX prose, type
     // aliases, and generic arguments stay outside this metric.
-    expect(countAnyCasts(content, "Sample.tsx")).toBe(6);
+    expect(countAnyCasts(content, "Sample.tsx")).toBe(9);
+  });
+
+  it("counts TypeScript angle-bracket any assertions", () => {
+    expect(countAnyCasts("const value = <any>input;\n", "Sample.ts")).toBe(1);
+  });
+
+  it("throws on invalid TSX syntax instead of undercounting", () => {
+    expect(() =>
+      countAnyCasts("const value = <any>input;\n", "Sample.tsx")
+    ).toThrow(/Unable to parse Sample\.tsx while counting any_casts/);
   });
 
   it("counts TODO markers without matching longer words", () => {

@@ -22,12 +22,13 @@
 //
 // Counting semantics (deliberate trade-offs):
 //   - The `any_casts` metric is syntax-aware and counts direct `: any`-style
-//     annotations plus `as any`/`<any>` assertions. Generic type arguments such
-//     as `Record<string, any>` remain outside this metric for continuity with
-//     the original ratchet scope.
-//   - TODO/FIXME/HACK regexes match inside strings, comments, and JSDoc. Counts
-//     are symmetric between baseline and actuals, so the ratchet still moves in
-//     the right direction; do not read them as exact.
+//     annotations plus `as any` and valid TypeScript `<any>` assertions. Invalid
+//     TSX angle-bracket syntax fails parsing instead of silently undercounting.
+//     Generic type arguments such as `Record<string, any>` remain outside this
+//     metric for continuity with the original ratchet scope.
+//   - Task-marker regexes match inside strings, comments, and JSDoc. Counts are
+//     symmetric between baseline and actuals, so the ratchet still moves in the
+//     right direction; do not read them as exact.
 //   - The oversized grandfather list keys on exact relative paths. Renaming
 //     or moving a grandfathered file makes it count as a NEW oversized file
 //     (fail-closed); run `--update` in the same PR to re-grandfather the new
@@ -199,8 +200,77 @@ function scriptKindForPath(filePath) {
   return ts.ScriptKind.TS;
 }
 
-function typeTextStartsWithAny(typeNode, sourceFile) {
-  return /^any\b/.test(typeNode.getText(sourceFile).trim());
+function formatParseDiagnostic(diagnostic, sourceFile, filePath) {
+  const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, " ");
+  const position = diagnostic.start ?? 0;
+  const { line, character } =
+    sourceFile.getLineAndCharacterOfPosition(position);
+  return `${filePath}:${line + 1}:${character + 1}: ${message}`;
+}
+
+function hasDirectAnyType(typeNode) {
+  if (typeNode.kind === ts.SyntaxKind.AnyKeyword) return true;
+
+  if (ts.isParenthesizedTypeNode(typeNode)) {
+    return hasDirectAnyType(typeNode.type);
+  }
+
+  if (ts.isArrayTypeNode(typeNode)) {
+    return hasDirectAnyType(typeNode.elementType);
+  }
+
+  if (ts.isTypeOperatorNode(typeNode)) {
+    return (
+      typeNode.operator === ts.SyntaxKind.ReadonlyKeyword &&
+      hasDirectAnyType(typeNode.type)
+    );
+  }
+
+  if (ts.isUnionTypeNode(typeNode) || ts.isIntersectionTypeNode(typeNode)) {
+    return typeNode.types.some(hasDirectAnyType);
+  }
+
+  if (ts.isTupleTypeNode(typeNode)) {
+    return typeNode.elements.some(hasDirectAnyType);
+  }
+
+  if (ts.isRestTypeNode(typeNode)) {
+    return hasDirectAnyType(typeNode.type);
+  }
+
+  if (ts.isNamedTupleMember(typeNode)) {
+    return hasDirectAnyType(typeNode.type);
+  }
+
+  return false;
+}
+
+function getCountedTypeNode(node) {
+  if (ts.isAsExpression(node) || ts.isTypeAssertionExpression(node)) {
+    return node.type;
+  }
+
+  if (
+    ts.isVariableDeclaration(node) ||
+    ts.isParameter(node) ||
+    ts.isPropertyDeclaration(node) ||
+    ts.isPropertySignature(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isMethodSignature(node) ||
+    ts.isFunctionDeclaration(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isGetAccessorDeclaration(node) ||
+    ts.isSetAccessorDeclaration(node) ||
+    ts.isCallSignatureDeclaration(node) ||
+    ts.isConstructSignatureDeclaration(node) ||
+    ts.isIndexSignatureDeclaration(node) ||
+    ts.isMappedTypeNode(node)
+  ) {
+    return node.type;
+  }
+
+  return undefined;
 }
 
 function countAnyCasts(content, filePath = "source.ts") {
@@ -212,36 +282,23 @@ function countAnyCasts(content, filePath = "source.ts") {
     scriptKindForPath(filePath)
   );
 
+  if (sourceFile.parseDiagnostics.length > 0) {
+    throw new Error(
+      `Unable to parse ${filePath} while counting any_casts: ` +
+        formatParseDiagnostic(
+          sourceFile.parseDiagnostics[0],
+          sourceFile,
+          filePath
+        )
+    );
+  }
+
   let count = 0;
 
-  const countDirectAnyType = (typeNode) => {
-    if (typeTextStartsWithAny(typeNode, sourceFile)) {
-      count += 1;
-    }
-  };
-
   const visit = (node) => {
-    if (ts.isAsExpression(node) || ts.isTypeAssertionExpression(node)) {
-      countDirectAnyType(node.type);
-    } else if (
-      (ts.isVariableDeclaration(node) ||
-        ts.isParameter(node) ||
-        ts.isPropertyDeclaration(node) ||
-        ts.isPropertySignature(node) ||
-        ts.isMethodDeclaration(node) ||
-        ts.isMethodSignature(node) ||
-        ts.isFunctionDeclaration(node) ||
-        ts.isFunctionExpression(node) ||
-        ts.isArrowFunction(node) ||
-        ts.isGetAccessorDeclaration(node) ||
-        ts.isSetAccessorDeclaration(node) ||
-        ts.isCallSignatureDeclaration(node) ||
-        ts.isConstructSignatureDeclaration(node) ||
-        ts.isIndexSignatureDeclaration(node) ||
-        ts.isMappedTypeNode(node)) &&
-      node.type
-    ) {
-      countDirectAnyType(node.type);
+    const typeNode = getCountedTypeNode(node);
+    if (typeNode && hasDirectAnyType(typeNode)) {
+      count += 1;
     }
 
     ts.forEachChild(node, visit);
@@ -416,13 +473,14 @@ function buildOversizedGroupRows(baseline, actuals) {
       metric: "  app_source",
       baseline: baselineGroups.app,
       actual: actualGroups.app,
-      status: getCountStatus(baselineGroups.app, actualGroups.app),
+      status: baselineGroups.app === actualGroups.app ? "ok" : "info",
     },
     {
       metric: "  wp_migrated",
       baseline: baselineGroups.wordpress,
       actual: actualGroups.wordpress,
-      status: getCountStatus(baselineGroups.wordpress, actualGroups.wordpress),
+      status:
+        baselineGroups.wordpress === actualGroups.wordpress ? "ok" : "info",
     },
   ];
 }
