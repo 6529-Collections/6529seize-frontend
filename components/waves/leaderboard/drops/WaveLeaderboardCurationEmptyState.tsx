@@ -1,10 +1,13 @@
 import React from "react";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface WaveLeaderboardCurationEmptyStateProps {
   readonly onCreateDrop?: (() => void) | undefined;
   readonly canCreateDrop: boolean;
   readonly dropRestrictionMessage: string | null;
+  readonly createDropLabel?: string | undefined;
   readonly dropRestrictionLink: {
     readonly href: string;
     readonly label: string;
@@ -17,6 +20,10 @@ export const WaveLeaderboardCurationEmptyState: React.FC<
   onCreateDrop,
   canCreateDrop,
   dropRestrictionMessage,
+  createDropLabel = t(
+    DEFAULT_LOCALE,
+    "waves.submissionButtonLabel.defaultDrop"
+  ),
   dropRestrictionLink,
 }) => {
   const showEligibilityHelper =
@@ -88,7 +95,7 @@ export const WaveLeaderboardCurationEmptyState: React.FC<
                   clipRule="evenodd"
                 />
               </svg>
-              <span>Drop</span>
+              <span>{createDropLabel}</span>
             </PrimaryButton>
           )}
         </>
