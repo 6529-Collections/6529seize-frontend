@@ -372,7 +372,7 @@ export const SeizeConnectStartupFallbackProvider: React.FC<{
     await waitForReady();
   }, [hasInitializationError, locale, waitForReady]);
   const requestWalletReady = useCallback((): void => {
-    void waitForWalletReady().catch(() => undefined);
+    waitForWalletReady().catch(() => undefined);
   }, [waitForWalletReady]);
 
   const contextValue = useMemo(
