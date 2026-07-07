@@ -82,6 +82,8 @@ describe("sentry-client-filters", () => {
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
   const metaMaskMobileWebViewUserAgent =
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebView MetaMaskMobile";
+  const metaMaskMobileUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1 MetaMaskMobile";
   const wasmCspUnsafeEvalMessage = [
     "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
     "WebAssembly module violates the following Content Security policy directive",
@@ -501,6 +503,42 @@ describe("sentry-client-filters", () => {
                   function: "n",
                 },
               ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    });
+
+  const createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    createSentryRouteParameterizationEvent({
+      transaction: "/waves/:wave",
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        headers: {
+          "User-Agent": metaMaskMobileUserAgent,
+        },
+      },
+      contexts: {
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+        url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        transaction: "/waves/:wave",
+      },
+      breadcrumbs: {
+        values: [
+          {
+            category: "navigation",
+            data: {
+              from: "/anon93",
+              to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
             },
           },
         ],
@@ -2765,6 +2803,18 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed MetaMaskMobile WKWebView wave route parameterization cyclic JSON errors", () => {
+    // Arrange
+    const event =
+      createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Sentry route parameterization errors with the Sentry parameterization frame outside route bounds", () => {
     // Arrange
     const event = createObservedSentryRouteParameterizationEvent();
@@ -3007,6 +3057,26 @@ describe("sentry-client-filters", () => {
         browser: "Mobile Safari",
         "browser.name": "Mobile Safari",
       },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter MetaMaskMobile route parameterization errors without WKWebView evidence", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        headers: {
+          "User-Agent": metaMaskMobileUserAgent,
+        },
+      },
+      contexts: {},
+      tags: {},
     });
 
     // Act
