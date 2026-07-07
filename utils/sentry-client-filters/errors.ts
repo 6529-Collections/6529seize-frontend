@@ -135,11 +135,11 @@ function hasRouteParameterizationNavigationBreadcrumb(
 ): boolean {
   return getBreadcrumbValues(event).some((breadcrumb) => {
     const data = breadcrumb.data;
-    if (
-      breadcrumb.category !== "navigation" ||
-      typeof data?.["from"] !== "string" ||
-      typeof data?.["to"] !== "string"
-    ) {
+    if (breadcrumb.category !== "navigation" || !data) {
+      return false;
+    }
+
+    if (typeof data["from"] !== "string" || typeof data["to"] !== "string") {
       return false;
     }
 
