@@ -55,6 +55,7 @@ describe("create-wave.validation", () => {
     display: {
       customRules: null,
       outcomesVisible: true,
+      submissionButtonLabel: null,
       approve: {
         approvalsTabLabel: "",
         approvedTabLabel: "",
@@ -127,6 +128,45 @@ describe("create-wave.validation", () => {
 
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
+    );
+  });
+
+  it("rejects submission button labels over the limit after trimming", () => {
+    const config = {
+      ...baseConfig,
+      display: {
+        ...baseConfig.display,
+        submissionButtonLabel: ` ${"A".repeat(25)} `,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
+    );
+  });
+
+  it("ignores submission button labels for chat waves", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Chat },
+      display: {
+        ...baseConfig.display,
+        submissionButtonLabel: "A".repeat(25),
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
     );
   });
 

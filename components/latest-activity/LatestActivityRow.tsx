@@ -67,7 +67,7 @@ export function printRoyalties(
         style={{ height: iconHeight, width: "auto" }}
         src={`/${imgSrc}`}
         alt={imgSrc}
-        className="cursor-pointer"
+        className="tw-cursor-pointer"
       />
       <Tooltip
         id={id}

@@ -14,7 +14,6 @@ import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
 import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
-import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
@@ -30,8 +29,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 }) => {
   const { hasValidWalletAuth } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
-  const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
-    useCreateModalState();
+  const { openDirectMessage, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
 
   const shouldRenderCreateDirectMessage = !isApp;
@@ -207,11 +205,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         />
       )}
 
-      <CreateDirectMessageModal
-        isOpen={isDirectMessageModalOpen}
-        onClose={close}
-        profile={connectedProfile}
-      />
     </div>
   );
 };

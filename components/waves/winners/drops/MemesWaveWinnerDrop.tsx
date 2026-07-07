@@ -242,7 +242,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                   dropId={winner.drop.id}
                   size="sm"
                 />
-                <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
+                <h3 className="tw-mb-0 tw-mt-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
                   {title}
                 </h3>
               </div>

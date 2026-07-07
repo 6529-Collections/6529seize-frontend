@@ -78,6 +78,7 @@ const mockApproveLabels = {
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useApproveWaveCustomTabLabels: () => mockApproveLabels,
   useWaveOutcomeVisibility: () => mockOutcomesVisible,
+  useWaveSubmissionButtonLabelOverride: () => null,
 }));
 
 jest.mock("@/hooks/useProfileWave", () => ({

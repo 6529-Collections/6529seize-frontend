@@ -272,6 +272,38 @@ describe("github-preview API route", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("rejects inherited GitHub resource parser keys before fetching", async () => {
+    const constructorResponse = await GET(
+      requestFor("https://github.com/o/r/constructor")
+    );
+    const protoResponse = await GET(requestFor("https://github.com/o/r/__proto__"));
+
+    expect(constructorResponse.status).toBe(400);
+    await expect(constructorResponse.json()).resolves.toMatchObject({
+      error: "Only github.com repository URLs are supported.",
+    });
+    expect(protoResponse.status).toBe(400);
+    await expect(protoResponse.json()).resolves.toMatchObject({
+      error: "Only github.com repository URLs are supported.",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects unsupported GitHub resource kinds when building cache keys", async () => {
+    const { getResourceCacheKey } = await import(
+      "../../../app/api/github-preview/service/resource"
+    );
+
+    expect(() =>
+      getResourceCacheKey({
+        href: "https://github.com/o/r/constructor",
+        owner: "o",
+        repo: "r",
+        kind: "constructor",
+      } as any)
+    ).toThrow("Only github.com repository URLs are supported.");
+  });
+
   it("rejects malformed GitHub content links before fetching", async () => {
     const bareBlob = await GET(requestFor("https://github.com/o/r/blob"));
     const blobWithoutPath = await GET(

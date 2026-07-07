@@ -1,38 +1,24 @@
 "use client";
 
 import { useKeyPressEvent } from "react-use";
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { MentionTypeaheadOption } from "./MentionsPlugin";
 import MentionsTypeaheadMenuItem from "./MentionsTypeaheadMenuItem";
+import { useTypeaheadMenuPosition } from "../useTypeaheadMenuPosition";
 
 export default function MentionsTypeaheadMenu({
   selectedIndex,
   options,
   setHighlightedIndex,
   selectOptionAndCleanUp,
+  anchorElement,
 }: {
   readonly selectedIndex: number | null;
   readonly options: MentionTypeaheadOption[];
   readonly setHighlightedIndex: (index: number) => void;
   readonly selectOptionAndCleanUp: (option: MentionTypeaheadOption) => void;
+  readonly anchorElement: HTMLElement | null;
 }) {
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<"top" | "bottom">("bottom");
-
-  const updatePosition = useCallback(() => {
-    if (menuRef.current) {
-      const rect = menuRef.current.getBoundingClientRect();
-      const spaceAbove = rect.top;
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setPosition(spaceBelow >= spaceAbove ? "bottom" : "top");
-    }
-  }, []);
-
-  useEffect(() => {
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    return () => window.removeEventListener("resize", updatePosition);
-  }, [updatePosition]);
+  const position = useTypeaheadMenuPosition(anchorElement);
 
   useKeyPressEvent(" ", () => {
     if (typeof selectedIndex === "number" && options.length > 0) {
@@ -43,7 +29,6 @@ export default function MentionsTypeaheadMenu({
 
   return (
     <div
-      ref={menuRef}
       className={`tailwind-scope tw-absolute tw-z-50 tw-w-[20rem] tw-rounded-lg tw-bg-iron-800 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 ${
         position === "top" ? "tw-bottom-full tw-mb-1" : "tw-top-full tw-mt-1"
       }`}

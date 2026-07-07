@@ -39,6 +39,7 @@ describe("NavigationHistoryContext", () => {
     hardBack.mockClear();
     mockPathname = "/";
     mockSearchParams = new URLSearchParams();
+    globalThis.history.replaceState(null, "", "http://localhost/");
   });
 
   it("pushes view and navigates back to previous route", () => {
@@ -87,5 +88,32 @@ describe("NavigationHistoryContext", () => {
     });
 
     expect(routerMock.push).toHaveBeenCalledWith("/messages/dm-wave");
+  });
+
+  it("does not add a back entry for the initial query-style message route", async () => {
+    mockPathname = "/messages";
+    mockSearchParams = new URLSearchParams("wave=dm-wave");
+    globalThis.history.replaceState(
+      null,
+      "",
+      "http://localhost/messages?wave=dm-wave"
+    );
+
+    const { result } = renderHook(() => useNavigationHistoryContext(), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.canGoBack).toBe(false);
+
+    act(() => {
+      result.current.goBack();
+    });
+
+    expect(routerMock.push).not.toHaveBeenCalled();
+    expect(hardBack).not.toHaveBeenCalled();
   });
 });

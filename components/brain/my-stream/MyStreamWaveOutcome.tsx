@@ -1,6 +1,6 @@
 "use client";
 
-import type { FC} from "react";
+import type { FC } from "react";
 import { useMemo, useRef } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
@@ -29,9 +29,8 @@ const MyStreamWaveOutcome: FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
     errorMessage,
   } = useWaveOutcomesQuery({ waveId: wave.id });
 
-
   const containerClassName = useMemo(() => {
-    return `tw-pt-4 tw-pb-4 tw-w-full tw-flex tw-flex-col tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-flex-grow lg:tw-pr-2`;
+    return `tw-pt-4 tw-pb-4 tw-w-full tw-flex tw-flex-col tw-overflow-y-auto tw-no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-flex-grow lg:tw-pr-2`;
   }, []);
 
   useInfiniteScroll(
@@ -53,9 +52,7 @@ const MyStreamWaveOutcome: FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
     >
       {isInitialLoading && <SpinnerLoader text="Loading outcomes..." />}
       {!isInitialLoading && errorMessage && (
-        <div className="tw-px-4 tw-text-sm tw-text-red-400">
-          {errorMessage}
-        </div>
+        <div className="tw-text-red-400 tw-px-4 tw-text-sm">{errorMessage}</div>
       )}
       {!isInitialLoading && !errorMessage && !hasOutcomes && !isFetching && (
         <div className="tw-px-4 tw-text-sm tw-text-iron-500">
@@ -63,7 +60,7 @@ const MyStreamWaveOutcome: FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
         </div>
       )}
       {hasOutcomes && (
-        <div className="tw-px-2 sm:tw-px-4 tw-space-y-4">
+        <div className="tw-space-y-4 tw-px-2 sm:tw-px-4">
           {outcomes.map((outcome, index) => (
             <WaveOutcome
               waveId={wave.id}

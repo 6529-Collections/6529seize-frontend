@@ -1,6 +1,8 @@
 import { DE_DE_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { DE_DE_WALLET_STARTUP_MESSAGES } from "@/i18n/messages/wallet-startup";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const DE_DE_MESSAGES = {
@@ -364,6 +366,10 @@ export const DE_DE_MESSAGES = {
     "Datei-Upload-Bereich für den Wave-Chat",
   "waves.loadingStatus": "Waves werden geladen",
   "waves.gifPicker.dialogTitle": "GIF-Suche",
+  "waves.gifPicker.searchPlaceholder": "GIFs suchen",
+  "waves.gifPicker.noResults": "Keine GIFs gefunden.",
+  "waves.gifPicker.poweredBy": "Bereitgestellt von {brandName}",
+  "waves.gifPicker.poweredByPrefix": "Bereitgestellt von",
   "waves.gifPicker.status.checking": "GIF-Suche wird geprueft...",
   "waves.gifPicker.status.ready": "GIF-Suche ist bereit.",
   "waves.gifPicker.unavailable.title":
@@ -388,6 +394,7 @@ export const DE_DE_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
+  ...DE_DE_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Meme-Sortierung",
   "theMemes.sorting.sortBy": "Sortieren nach",
   "theMemes.sorting.directionLegend": "Sortierrichtung",
@@ -419,6 +426,9 @@ export const DE_DE_MESSAGES = {
   "theMemes.card.metric.volume": "Volumen ({volumeType}): {value}",
   "theMemes.sort.age": "Alter",
   "theMemes.sort.editionSize": "Editionsgröße",
+  ...DE_DE_WALLET_STARTUP_MESSAGES,
+  "openMobile.openingStatus": "6529 Mobile wird geöffnet...",
+  "nextgen.admin.loadingStatus": "NextGen-Admin wird geladen",
   "theMemes.sort.collectors": "Sammler",
   "theMemes.sort.uniquePercent": "% einzigartig",
   "theMemes.sort.uniquePercentExMuseum": "% einzigartig ohne Museum",

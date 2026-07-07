@@ -18,6 +18,8 @@ import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
+import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { EN_US_WALLET_STARTUP_MESSAGES } from "@/i18n/messages/wallet-startup";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -344,6 +346,26 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyFailed: "Copy failed",
 } as const);
 
+const WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES = objectMessages(
+  "waves.submissionButtonLabel",
+  {
+    counter: "{count}/{max}",
+    defaultCreateProposal: "Create Proposal",
+    defaultDrop: "Drop",
+    defaultDropArt: "Drop Art",
+    defaultSubmitDrop: "Submit drop",
+    editLabel: "Edit submission button label",
+    errorTooLong: "Label must be {max} characters or fewer.",
+    label: "Submission button label",
+    rowLabel: "Submission button",
+    toastAuthFailed:
+      "Couldn't authenticate. Reconnect your wallet and try again.",
+    toastRetry: "Please try again.",
+    toastSaveFailedTitle: "Couldn't save this submission button label.",
+    useDefault: "Use default",
+  } as const
+);
+
 const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.walletActivity",
   {
@@ -532,10 +554,104 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   chatLoadError: "Unable to load this conversation.",
 } as const);
 
+const NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES = objectMessages(
+  "notifications.followButton",
+  {
+    follow: "Follow",
+    following: "Following",
+    "error.missingHandleTitle": "Couldn't follow this profile.",
+    "error.missingHandleDescription": "This profile is missing a handle.",
+  } as const
+);
+
+const NOTIFICATIONS_WAVE_CREATED_MESSAGES = objectMessages(
+  "notifications.waveCreated",
+  {
+    normalCopy: "created a wave you can access:",
+    dmCopy: "started a DM with you:",
+    openDm: "Open DM",
+    joinWave: "Join wave",
+    joinedWave: "Joined",
+    followCreator: "Follow creator",
+    followingCreator: "Following creator",
+  } as const
+);
+
+const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
+  "notifications.waveFollowButton",
+  {
+    join: "Join",
+    joined: "Joined",
+  } as const
+);
+
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
   "postsCount.one": "{count} Post",
   "postsCount.other": "{count} Posts",
+} as const);
+
+const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
+  "waves.notificationSettings",
+  [
+    ["trigger.tooltip", "Notification settings"],
+    ["trigger.ariaLabel", "Open notification settings"],
+    ["allMentions.label", "ALL mentions"],
+    ["allMentions.ariaLabel", "Receive ALL mention notifications"],
+    ["allMessages.label", "All messages"],
+    ["allMessages.ariaLabel", "Receive notifications for all messages"],
+    [
+      "allMessages.limit.unavailableDescription",
+      "Below {count} followers only.",
+    ],
+    [
+      "allMessages.limit.reenableDescription",
+      "Re-enable below {count} followers.",
+    ],
+    ["mute.label", "Mute"],
+    ["mute.activeLabel", "Muted"],
+    ["mute.ariaLabel", "Mute wave"],
+    ["mute.unmuteAriaLabel", "Unmute wave"],
+    ["mute.tooltip.enable", "Click to mute this wave"],
+    ["mute.tooltip.disable", "Click to unmute this wave"],
+    ["mute.error.muteTitle", "Couldn't mute this wave."],
+    ["mute.error.unmuteTitle", "Couldn't unmute this wave."],
+    ["mute.error.description", "Please try again."],
+    ["mute.error.fallbackMute", "Unable to mute wave"],
+    ["mute.error.fallbackUnmute", "Unable to unmute wave"],
+    ["preferences.error.updateTitle", "Couldn't update notification settings."],
+    ["preferences.error.description", "Please try again."],
+    [
+      "preferences.error.enableAllMentions",
+      "Unable to enable @ALL notifications",
+    ],
+    [
+      "preferences.error.disableAllMentions",
+      "Unable to disable @ALL notifications",
+    ],
+    [
+      "preferences.error.enableAllMessages",
+      "Unable to enable all-message notifications",
+    ],
+    [
+      "preferences.error.disableAllMessages",
+      "Unable to disable all-message notifications",
+    ],
+    ["retry.label", "Retry"],
+    ["retry.ariaLabel", "Retry notification settings"],
+  ] as const
+);
+
+const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
+  accessHelper:
+    "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
+  limitedAccessTitle: "Warning: Limited Access",
+  limitedAccessDescription:
+    'This wave is configured with restricted access. It can only be viewed by members of the "{viewGroupName}" group and managed by members of the "{adminGroupName}" group. If you are not in a group that can view it, you will not be able to access this wave.',
+  "inlineIdentities.emptyHelper":
+    "Add identities one by one to build this access group.",
+  "inlineIdentities.creatorExcludedWarning":
+    "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
 } as const);
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
@@ -548,6 +664,10 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
 
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
   dialogTitle: "GIF search",
+  searchPlaceholder: "Search GIFs",
+  noResults: "No GIFs found.",
+  poweredBy: "Powered by {brandName}",
+  poweredByPrefix: "Powered by",
   "status.checking": "Checking GIF search...",
   "status.ready": "GIF search is ready.",
   "unavailable.title": "GIF search is temporarily unavailable.",
@@ -733,6 +853,10 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "walletAuth.same.assets": "You do not need to move tokens or assets.",
   "walletAuth.same.desktop":
     "The 6529 Desktop app continues using the existing connection flow during this rollout.",
+  "walletAuth.builders.title": "Building with the API",
+  "walletAuth.builders.body":
+    "External clients should use the session-v2 API authentication guide instead of the user upgrade notes on this page.",
+  "walletAuth.builders.link": "Open API authentication guide",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -869,9 +993,17 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
-  "tools.api.authentication.title": "Authentication",
+  "tools.api.authCallout.title": "v2 API authentication",
+  "tools.api.authCallout.description":
+    "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
+  "tools.api.authCallout.link": "Read the full external-client auth guide",
+  "tools.api.authentication.title": "Authentication quickstart",
   "tools.api.authentication.basedOnSignatures":
-    "Authentication is based on Ethereum signatures.",
+    "Authentication is based on Ethereum signatures. For scripts and other external clients, request a native session-v2 challenge.",
+  "tools.api.authentication.externalNote":
+    "This example shows the short native/script flow for external API clients.",
+  "tools.api.authentication.fullGuideLink":
+    "Use the full guide for refresh, logout, and security notes.",
   "tools.api.authentication.flowIntro": "The flow works as follows:",
   "tools.api.authentication.requestSessionMessage":
     "Request a session-v2 signable message for the wallet you want to authenticate.",
@@ -881,8 +1013,6 @@ export const EN_US_MESSAGES = {
     "Send the signature back to the server.",
   "tools.api.authentication.receiveToken":
     "Receive a JWT bearer token, which you can include in headers of subsequent requests.",
-  "tools.api.authentication.nodeExample":
-    "Here's a full example in Node.js using ethers and node-fetch:",
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted drop",
   "home.boostedDrop.boost": "Boost",
@@ -985,6 +1115,7 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.cardActivity": "Card Activity",
   "theMemes.detail.tabs.timeline": "Timeline",
   "theMemes.detail.tabs.yourTransactions": "Your Transactions",
+  ...EN_US_THE_MEMES_COLLECTORS_MESSAGES,
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,
@@ -1433,6 +1564,9 @@ export const EN_US_MESSAGES = {
   "walletAddress.copy.walletAriaLabel": "Copy wallet address",
   "walletAddress.copy.tooltip": "Copy",
   "walletAddress.copy.copiedTooltip": "Copied",
+  ...EN_US_WALLET_STARTUP_MESSAGES,
+  "openMobile.openingStatus": "Opening 6529 Mobile...",
+  "nextgen.admin.loadingStatus": "Loading NextGen admin",
   ...QR_SCANNER_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
@@ -1442,10 +1576,15 @@ export const EN_US_MESSAGES = {
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...QUICK_DM_MESSAGES,
+  ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
+  ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
+  ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
+  ...WAVE_CREATE_GROUPS_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
@@ -1471,6 +1610,7 @@ export const EN_US_MESSAGES = {
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;
