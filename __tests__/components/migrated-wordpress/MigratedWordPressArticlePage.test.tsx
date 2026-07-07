@@ -1,7 +1,11 @@
 import { render, screen } from "@testing-library/react";
 
 import MigratedWordPressArticlePage from "@/components/migrated-wordpress/MigratedWordPressArticlePage";
-import type { MigratedWordPressArticleContent } from "@/components/migrated-wordpress/types";
+import MigratedWordPressStaticPage from "@/components/migrated-wordpress/MigratedWordPressStaticPage";
+import type {
+  MigratedWordPressArticleContent,
+  MigratedWordPressStaticPageContent,
+} from "@/components/migrated-wordpress/types";
 
 const content = {
   source: "migrated-wordpress",
@@ -54,8 +58,33 @@ const content = {
       content: "Quoted post.",
       cite: "Quote author",
     },
+    {
+      type: "html",
+      html: '<p>Sanitized <strong>rich</strong> copy with <a href="/about">a link</a>.</p>',
+    },
+    {
+      type: "divider",
+    },
   ],
 } satisfies MigratedWordPressArticleContent;
+
+const staticContent = {
+  source: "migrated-wordpress",
+  path: "/about/example",
+  title: "Migrated Static Page",
+  description: "A readable migrated static page.",
+  section: "About",
+  blocks: [
+    {
+      type: "heading",
+      content: "Static Heading",
+    },
+    {
+      type: "html",
+      html: '<p>Static page copy with <a href="/education">education</a>.</p>',
+    },
+  ],
+} satisfies MigratedWordPressStaticPageContent;
 
 describe("MigratedWordPressArticlePage", () => {
   it("renders migrated WordPress article content with an auditable source marker", () => {
@@ -92,11 +121,40 @@ describe("MigratedWordPressArticlePage", () => {
     expect(screen.getByText("Video caption")).toBeInTheDocument();
     expect(screen.getByText("Quoted post.")).toBeInTheDocument();
     expect(screen.getByText("Quote author")).toBeInTheDocument();
+    expect(screen.getByText(/Sanitized/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "a link" })).toHaveAttribute(
+      "href",
+      "/about"
+    );
 
     const videos = container.querySelectorAll("video");
     expect(videos).toHaveLength(1);
     expect(videos[0]).toHaveTextContent(
       "Sorry, your browser does not support embedded videos."
+    );
+    expect(container.querySelector("hr")).toBeInTheDocument();
+  });
+
+  it("renders migrated static WordPress pages without article metadata chrome", () => {
+    render(<MigratedWordPressStaticPage content={staticContent} />);
+
+    expect(screen.getByRole("main")).toHaveAttribute(
+      "data-content-source",
+      "migrated-wordpress"
+    );
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Migrated Static Page" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("A readable migrated static page.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Static Heading" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("By")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "education" })).toHaveAttribute(
+      "href",
+      "/education"
     );
   });
 });

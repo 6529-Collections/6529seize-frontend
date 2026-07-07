@@ -19,6 +19,20 @@ const contentTextClassName =
 const linkScopeClassName =
   "[&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 hover:[&_a]:tw-text-primary-200";
 
+const richHtmlClassName = [
+  contentTextClassName,
+  linkScopeClassName,
+  "[&_a]:tw-break-words",
+  "[&_blockquote]:tw-rounded-xl [&_blockquote]:tw-border [&_blockquote]:tw-border-solid [&_blockquote]:tw-border-primary-400/20 [&_blockquote]:tw-bg-primary-500/10 [&_blockquote]:tw-px-5 [&_blockquote]:tw-py-5",
+  "[&_h2]:tw-mb-4 [&_h2]:tw-mt-10 [&_h2]:tw-text-2xl [&_h2]:tw-font-semibold [&_h2]:tw-leading-8 [&_h2]:tw-text-white sm:[&_h2]:tw-mt-12 sm:[&_h2]:tw-text-3xl sm:[&_h2]:tw-leading-10",
+  "[&_h3]:tw-mb-3 [&_h3]:tw-mt-8 [&_h3]:tw-text-xl [&_h3]:tw-font-semibold [&_h3]:tw-leading-7 [&_h3]:tw-text-white sm:[&_h3]:tw-text-2xl sm:[&_h3]:tw-leading-8",
+  "[&_li]:tw-mb-2",
+  "[&_ol]:tw-mb-5 [&_ol]:tw-list-decimal [&_ol]:tw-pl-6",
+  "[&_p]:tw-mb-5",
+  "[&_b]:tw-font-semibold [&_b]:tw-text-white [&_strong]:tw-font-semibold [&_strong]:tw-text-white",
+  "[&_ul]:tw-mb-5 [&_ul]:tw-list-disc [&_ul]:tw-pl-6",
+].join(" ");
+
 function MigratedWordPressArticleImage({
   media,
   priority = false,
@@ -105,7 +119,7 @@ function MigratedWordPressArticleVideo({
   );
 }
 
-function MigratedWordPressArticleBlockView({
+export function MigratedWordPressArticleBlockView({
   block,
 }: {
   readonly block: MigratedWordPressArticleBlock;
@@ -132,6 +146,21 @@ function MigratedWordPressArticleBlockView({
 
   if (block.type === "video") {
     return <MigratedWordPressArticleVideo video={block.video} />;
+  }
+
+  if (block.type === "html") {
+    return (
+      <div
+        className={richHtmlClassName}
+        dangerouslySetInnerHTML={{ __html: block.html }}
+      />
+    );
+  }
+
+  if (block.type === "divider") {
+    return (
+      <hr className="tw-my-10 tw-border-0 tw-border-t tw-border-solid tw-border-white/10" />
+    );
   }
 
   return (
