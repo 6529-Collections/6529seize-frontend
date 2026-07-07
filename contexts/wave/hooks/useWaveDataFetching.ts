@@ -239,10 +239,11 @@ export function useWaveDataFetching({
             const highestSerialNo = getHighestLoadedSerialNo(wave.drops);
             if (highestSerialNo !== null) {
               void syncNewestMessagesSafely(
+                // NOSONAR: intentional fire-and-forget.
                 waveId,
                 highestSerialNo,
                 new AbortController().signal
-              ); // NOSONAR: explicit fire-and-forget keeps no-floating-promises satisfied.
+              );
             }
           }
         }
