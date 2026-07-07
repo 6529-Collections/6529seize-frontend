@@ -1,7 +1,6 @@
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
-import { EN_GB_WALLET_STARTUP_MESSAGES } from "@/i18n/messages/wallet-startup";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
@@ -378,7 +377,6 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.uncastPower.votesVisible": "votes",
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
-  ...EN_GB_WALLET_STARTUP_MESSAGES,
   "openMobile.openingStatus": "Opening 6529 Mobile...",
   "nextgen.admin.loadingStatus": "Loading NextGen admin",
   "theMemes.documentTitle": "The Memes | Collections",

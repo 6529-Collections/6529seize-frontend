@@ -37,9 +37,6 @@ export const EN_US_WALLET_STARTUP_MESSAGES = buildWalletStartupMessages([
   "Wallet services are still loading.",
 ]);
 
-export const EN_GB_WALLET_STARTUP_MESSAGES =
-  EN_US_WALLET_STARTUP_MESSAGES;
-
 export const FR_FR_WALLET_STARTUP_MESSAGES = buildWalletStartupMessages([
   "Chargement des services de portefeuille",
   "Les services de portefeuille n'ont pas pu se charger",
