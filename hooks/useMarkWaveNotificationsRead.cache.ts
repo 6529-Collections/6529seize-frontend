@@ -307,19 +307,15 @@ export const useClearWaveReadStateOnLastUnmount = (
 
   useLayoutEffect(() => {
     if (clearWaveNotificationsReadStateTimeout !== null) {
-      const deferredCleanupTimeout =
-        clearWaveNotificationsReadStateTimeout.timeout;
-      const deferredCleanupAddressKey =
-        clearWaveNotificationsReadStateTimeout.addressKey;
-
-      globalThis.clearTimeout(deferredCleanupTimeout);
+      const deferredCleanup = clearWaveNotificationsReadStateTimeout;
+      globalThis.clearTimeout(deferredCleanup.timeout);
       clearWaveNotificationsReadStateTimeout = null;
 
       if (
-        deferredCleanupAddressKey !== null &&
-        deferredCleanupAddressKey !== latestAddressKeyRef.current
+        deferredCleanup.addressKey !== null &&
+        deferredCleanup.addressKey !== latestAddressKeyRef.current
       ) {
-        clearPendingWaveReadsForAddress(deferredCleanupAddressKey);
+        clearPendingWaveReadsForAddress(deferredCleanup.addressKey);
       }
     }
 

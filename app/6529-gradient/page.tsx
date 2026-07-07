@@ -9,11 +9,6 @@ import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildCollectionPageJsonLd } from "@/lib/structured-data/nft";
 import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
-import { Suspense } from "react";
-
-function GradientsFallback() {
-  return <div className="tailwind-scope tw-min-h-dvh tw-bg-black" />;
-}
 
 export default function GradientsPage() {
   return (
@@ -26,9 +21,7 @@ export default function GradientsPage() {
           image: `${publicEnv.BASE_ENDPOINT}/gradients-preview.png`,
         })}
       />
-      <Suspense fallback={<GradientsFallback />}>
-        <GradientsComponent />
-      </Suspense>
+      <GradientsComponent />
     </main>
   );
 }
