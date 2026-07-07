@@ -99,15 +99,27 @@
 }
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
-  .no-scrollbar::-webkit-scrollbar {
+  .tw-no-scrollbar::-webkit-scrollbar {
     display: none;
   }
   /* Hide scrollbar for IE, Edge and Firefox */
-  .no-scrollbar {
+  .tw-no-scrollbar {
     -ms-overflow-style: none;
     /* IE and Edge */
     scrollbar-width: none;
     /* Firefox */
+  }
+  .tw-horizontal-menu-scrollable-x {
+    -webkit-overflow-scrolling: touch;
+  }
+  .tw-unselectable {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  .tw-unselectable:focus {
+    outline: none !important;
   }
   /* Prevent text selection on touch devices only. body:not([data-fine-pointer])
      keeps selection alive on browsers that mis-report capabilities while a
@@ -366,12 +378,9 @@ h5:not(.tailwind-scope h5) {
     font-weight: bold;
   }
 }
+
 .text-right {
   text-align: right;
-}
-
-.no-padding {
-  padding: 0;
 }
 
 #walletconnect-wrapper {
@@ -427,217 +436,8 @@ h5:not(.tailwind-scope h5) {
   background-color: #0c7abf !important;
 }
 
-.font-color {
-  color: white;
-}
-
-.font-color-h {
-  color: rgb(154, 154, 154);
-}
-
-.font-color-silver {
-  color: rgb(147, 147, 159);
-}
-
-.font-color-blue {
-  color: #0d6efd;
-}
-
-.font-color-green {
-  color: #28a745;
-}
-
-.font-color-red {
-  color: #dc3545;
-}
-
-.font-color-hover:hover {
-  color: white;
-}
-
-.indented {
-  margin-left: 5%;
-}
-
-.font-smaller {
-  font-size: smaller;
-}
-
-.font-larger {
-  font-size: larger;
-}
-
-.font-bolder {
-  font-weight: bold;
-}
-
-.font-lighter {
-  font-weight: 200;
-}
-
-.font-lightest {
-  font-weight: 100;
-}
-
-.no-wrap {
-  white-space: nowrap;
-  min-width: fit-content;
-}
-
-.icon-black {
-  background-color: rgb(34, 34, 34);
-  color: white;
-  display: block;
-  height: 30px;
-  width: 30px;
-  text-align: center;
-  border-radius: 15px;
-}
-
-.icon-white {
-  background-color: white;
-  color: rgb(34, 34, 34);
-  display: block;
-  height: 30px;
-  width: 30px;
-  text-align: center;
-  border-radius: 15px;
-}
-
-.decoration-none {
-  text-decoration: none;
-}
-
 .decoration-underline {
   text-decoration: underline;
-}
-
-.decoration-hover-underline {
-  text-decoration: none;
-}
-.decoration-hover-underline:hover {
-  text-decoration: underline;
-}
-
-.scale-hover img {
-  transition: transform 0.3s ease;
-}
-.scale-hover img:hover {
-  transform: scale(1.02);
-}
-
-.seize-btn {
-  border-radius: 0 !important;
-  border: 0 !important;
-  padding-left: 20px;
-  padding-right: 20px;
-  font-weight: bold;
-}
-
-.seize-btn-link {
-  border-radius: 0 !important;
-  padding-left: 20px;
-  padding-right: 20px;
-  background-color: transparent !important;
-  border: transparent !important;
-  text-decoration: underline;
-  color: white !important;
-}
-.seize-btn-link:hover {
-  color: rgb(154, 154, 154) !important;
-}
-
-.btn-white {
-  background-color: white !important;
-  color: black !important;
-}
-.btn-white:hover {
-  background-color: rgb(215, 215, 215) !important;
-}
-
-.btn-black {
-  background-color: black !important;
-  color: white !important;
-}
-.btn-black:hover {
-  background-color: rgb(51, 51, 51) !important;
-}
-
-.btn-green {
-  background-color: #208359;
-  color: white !important;
-}
-.btn-green:hover {
-  background-color: rgb(37, 151, 103);
-}
-
-.btn-block {
-  width: 100%;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.edit-profile {
-  opacity: 0;
-  transition:
-    visibility 0s,
-    opacity 0.3s ease-out;
-}
-
-.edit-profile:hover {
-  visibility: visible;
-  opacity: 1;
-}
-
-.unselectable {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-.unselectable:focus {
-  outline: none !important;
-}
-
-.btn-link {
-  background: none;
-  color: inherit;
-  border: none;
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-  outline: inherit;
-}
-.btn-link:hover,
-.btn-link:focus,
-.btn-link:active {
-  background-color: inherit !important;
-}
-.btn-link:hover {
-  color: rgb(154, 154, 154) !important;
-}
-
-.scrollbar-width {
-  scrollbar-width: thin;
-}
-
-.horizontal-menu-hide-scrollbar {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-.horizontal-menu-hide-scrollbar::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, Opera*/
-}
-
-.horizontal-menu-scrollable-x {
-  -webkit-overflow-scrolling: touch;
-  /* For momentum scroll on iOS */
 }
 
 .scroll-shadow {
@@ -670,18 +470,6 @@ h5:not(.tailwind-scope h5) {
     100% 10px;
   /* Make sure the shadows remain fixed during scrolling */
   background-attachment: local, local, scroll, scroll;
-}
-
-.table-scroll-container {
-  -ms-overflow-style: none;
-  /* Internet Explorer 10+ */
-  scrollbar-width: none;
-  /* Firefox */
-  overflow-x: auto;
-}
-.table-scroll-container::-webkit-scrollbar {
-  display: none;
-  /* Safari and Chrome */
 }
 
 .react-toggle--checked .react-toggle-thumb,
@@ -729,14 +517,6 @@ pre code {
 
 .react-toggle--disabled {
   opacity: 0.75;
-}
-
-.float-left {
-  float: left;
-}
-
-.inset-safe-area {
-  margin-top: env(safe-area-inset-top);
 }
 
 .seize-card {
