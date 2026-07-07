@@ -7,7 +7,7 @@ export const filenameExceptions = [
 ];
 export const injectedWasmCspAppUriPath = "app:///inject.js";
 export const injectedWasmCspCollapsedPath = "///inject.js";
-export const injectedAppUriPath = "app:///injected/injected.js";
+const injectedAppUriPath = "app:///injected/injected.js";
 export const injectedWalletCollisionAppUriPaths = [
   injectedAppUriPath,
   "app:///requestProvider.js",
