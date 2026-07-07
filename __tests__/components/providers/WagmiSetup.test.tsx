@@ -5,11 +5,18 @@
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
-import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
+import {
+  SeizeConnectStartupFallbackProvider,
+  useSeizeConnectContext,
+} from "@/components/auth/SeizeConnectContext";
+import {
+  AppKitBootstrapContext,
+  useAppKitBootstrap,
+} from "@/components/providers/AppKitBootstrapContext";
 import WagmiSetup from "@/components/providers/WagmiSetup";
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 // Mock capacitor-secure-storage-plugin first to prevent import errors
@@ -90,6 +97,8 @@ jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
   createAppWalletConnector: jest.fn(),
 }));
 jest.mock("wagmi", () => ({
+  createConfig: jest.fn((config) => config),
+  http: jest.fn(() => ({})),
   WagmiProvider: ({ children }: any) => (
     <div data-testid="wagmi-provider">{children}</div>
   ),
@@ -270,6 +279,21 @@ describe("WagmiSetup Security Tests", () => {
   const AppKitBootstrapProbe = () => {
     const bootstrap = useAppKitBootstrap();
     return <div data-testid="appkit-bootstrap-status">{bootstrap.status}</div>;
+  };
+
+  const WalletStartupContextProbe = () => {
+    const wallet = useSeizeConnectContext();
+    return (
+      <div>
+        <div data-testid="wallet-startup-state">{wallet.connectionState}</div>
+        <div data-testid="wallet-startup-address">
+          {wallet.address ?? "none"}
+        </div>
+        <button type="button" onClick={wallet.seizeConnect}>
+          Connect
+        </button>
+      </div>
+    );
   };
 
   afterEach(() => {
@@ -722,7 +746,9 @@ describe("WagmiSetup Security Tests", () => {
       expect(container.querySelector('[data-testid="children"]')).toBeNull();
       expect(
         container.querySelector('[data-testid="wagmi-provider"]')
-      ).toBeNull();
+      ).toContainElement(
+        container.querySelector('[data-testid="startup-shell"]')
+      );
 
       await waitFor(() => {
         expect(mockInitializeAppKit).toHaveBeenCalled();
@@ -799,6 +825,36 @@ describe("WagmiSetup Security Tests", () => {
           },
         });
       });
+    });
+
+    it("provides a disconnected wallet context to the startup app shell", () => {
+      const waitForReady = jest.fn().mockResolvedValue(undefined);
+
+      render(
+        <AppKitBootstrapContext.Provider
+          value={{
+            status: "initializing",
+            isReady: false,
+            isWaiting: true,
+            waitForReady,
+          }}
+        >
+          <SeizeConnectStartupFallbackProvider>
+            <WalletStartupContextProbe />
+          </SeizeConnectStartupFallbackProvider>
+        </AppKitBootstrapContext.Provider>
+      );
+
+      expect(screen.getByTestId("wallet-startup-state")).toHaveTextContent(
+        "initializing"
+      );
+      expect(screen.getByTestId("wallet-startup-address")).toHaveTextContent(
+        "none"
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Connect" }));
+
+      expect(waitForReady).toHaveBeenCalledTimes(1);
     });
 
     it("renders an accessible wallet startup recovery when adapter creation fails", async () => {

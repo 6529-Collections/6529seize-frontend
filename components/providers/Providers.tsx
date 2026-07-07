@@ -1,7 +1,10 @@
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
-import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
+import {
+  SeizeConnectProvider,
+  SeizeConnectStartupFallbackProvider,
+} from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { EULAConsentProvider } from "@/components/eula/EULAConsentContext";
 import { IpfsProvider } from "@/components/ipfs/IPFSContext";
@@ -30,6 +33,92 @@ import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
 
+function NavigationProviders({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <TitleProvider>
+      <HeaderProvider>
+        <ScrollPositionProvider>
+          <ViewProvider>
+            <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
+          </ViewProvider>
+        </ScrollPositionProvider>
+      </HeaderProvider>
+    </TitleProvider>
+  );
+}
+
+function AppRuntimeProviders({
+  children,
+  enableVersionCheck,
+  enableCookieConsent,
+  enableMyStream,
+}: {
+  readonly children: React.ReactNode;
+  readonly enableVersionCheck: boolean;
+  readonly enableCookieConsent: boolean;
+  readonly enableMyStream: boolean;
+}) {
+  return (
+    <WaveEligibilityProvider>
+      <NotificationsProvider>
+        <CookieConsentProvider disabled={!enableCookieConsent}>
+          <MixpanelSetup />
+          <EULAConsentProvider>
+            <AppWebSocketProvider>
+              <LayoutProvider>
+                {enableMyStream ? (
+                  <MyStreamProvider>
+                    {children}
+                    <QuickDirectMessagesGate />
+                  </MyStreamProvider>
+                ) : (
+                  children
+                )}
+              </LayoutProvider>
+              {enableVersionCheck && <NewVersionToast />}
+            </AppWebSocketProvider>
+          </EULAConsentProvider>
+        </CookieConsentProvider>
+      </NotificationsProvider>
+    </WaveEligibilityProvider>
+  );
+}
+
+function WalletReadyProviders({
+  children,
+  enableWalletAuthentication,
+}: {
+  readonly children: React.ReactNode;
+  readonly enableWalletAuthentication: boolean;
+}) {
+  return (
+    <SeizeConnectProvider>
+      <Auth enableWalletAuthentication={enableWalletAuthentication}>
+        <AuthLaunchTimingReporter
+          enableWalletAuthentication={enableWalletAuthentication}
+        />
+        {children}
+      </Auth>
+    </SeizeConnectProvider>
+  );
+}
+
+function WalletStartupProviders({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <SeizeConnectStartupFallbackProvider>
+      {children}
+    </SeizeConnectStartupFallbackProvider>
+  );
+}
+
 export default function Providers({
   children,
   enableVersionCheck = true,
@@ -45,16 +134,14 @@ export default function Providers({
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
 }) {
-  const sharedProviders = (
-    <TitleProvider>
-      <HeaderProvider>
-        <ScrollPositionProvider>
-          <ViewProvider>
-            <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
-          </ViewProvider>
-        </ScrollPositionProvider>
-      </HeaderProvider>
-    </TitleProvider>
+  const appSurface = (
+    <AppRuntimeProviders
+      enableVersionCheck={enableVersionCheck}
+      enableCookieConsent={enableCookieConsent}
+      enableMyStream={enableMyStream}
+    >
+      <NavigationProviders>{children}</NavigationProviders>
+    </AppRuntimeProviders>
   );
 
   const appProviders = (
@@ -62,53 +149,29 @@ export default function Providers({
       <CapacitorSetup />
       <IpfsImageSetup />
       <AppWalletsProvider>
-        <WagmiSetup>
-          <ReactQueryWrapper>
-            <RefreshProvider>
-              <SeizeSettingsProvider mode={settingsMode}>
-                <EmojiProvider>
-                  <IpfsProvider>
-                    <SeizeConnectProvider>
-                      <Auth
-                        enableWalletAuthentication={enableWalletAuthentication}
-                      >
-                        <AuthLaunchTimingReporter
-                          enableWalletAuthentication={
-                            enableWalletAuthentication
-                          }
-                        />
-                        <WaveEligibilityProvider>
-                          <NotificationsProvider>
-                            <CookieConsentProvider
-                              disabled={!enableCookieConsent}
-                            >
-                              <MixpanelSetup />
-                              <EULAConsentProvider>
-                                <AppWebSocketProvider>
-                                  <LayoutProvider>
-                                    {enableMyStream ? (
-                                      <MyStreamProvider>
-                                        {sharedProviders}
-                                        <QuickDirectMessagesGate />
-                                      </MyStreamProvider>
-                                    ) : (
-                                      sharedProviders
-                                    )}
-                                  </LayoutProvider>
-                                  {enableVersionCheck && <NewVersionToast />}
-                                </AppWebSocketProvider>
-                              </EULAConsentProvider>
-                            </CookieConsentProvider>
-                          </NotificationsProvider>
-                        </WaveEligibilityProvider>
-                      </Auth>
-                    </SeizeConnectProvider>
-                  </IpfsProvider>
-                </EmojiProvider>
-              </SeizeSettingsProvider>
-            </RefreshProvider>
-          </ReactQueryWrapper>
-        </WagmiSetup>
+        <ReactQueryWrapper>
+          <RefreshProvider>
+            <SeizeSettingsProvider mode={settingsMode}>
+              <EmojiProvider>
+                <IpfsProvider>
+                  <WagmiSetup
+                    fallback={
+                      <WalletStartupProviders>
+                        {appSurface}
+                      </WalletStartupProviders>
+                    }
+                  >
+                    <WalletReadyProviders
+                      enableWalletAuthentication={enableWalletAuthentication}
+                    >
+                      {appSurface}
+                    </WalletReadyProviders>
+                  </WagmiSetup>
+                </IpfsProvider>
+              </EmojiProvider>
+            </SeizeSettingsProvider>
+          </RefreshProvider>
+        </ReactQueryWrapper>
       </AppWalletsProvider>
     </QueryClientSetup>
   );

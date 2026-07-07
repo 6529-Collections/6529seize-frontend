@@ -3,7 +3,7 @@
 import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { mainnet, sepolia } from "viem/chains";
-import { WagmiProvider } from "wagmi";
+import { createConfig, http, WagmiProvider } from "wagmi";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
@@ -224,6 +224,25 @@ function markAdapterReadyForLaunchTiming(
   markMobileLaunchStep("wagmi_children_unblocked");
 }
 
+function createStartupWagmiConfig(enableTestnet: boolean) {
+  if (enableTestnet) {
+    return createConfig({
+      chains: [mainnet, sepolia],
+      transports: {
+        [mainnet.id]: http(),
+        [sepolia.id]: http(),
+      },
+    });
+  }
+
+  return createConfig({
+    chains: [mainnet],
+    transports: {
+      [mainnet.id]: http(),
+    },
+  });
+}
+
 function injectAppWalletConnectors({
   currentAdapter,
   appWallets,
@@ -309,6 +328,10 @@ export default function WagmiSetup({
   const { setToast } = useAuth();
   const { appWallets, migrateAppWallet } = useAppWallets();
   const appWalletPasswordModal = useAppWalletPasswordModal(migrateAppWallet);
+  const startupWagmiConfig = useMemo(
+    () => createStartupWagmiConfig(enableTestnet),
+    [enableTestnet]
+  );
 
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(
     null
@@ -509,7 +532,9 @@ export default function WagmiSetup({
   if (currentAdapter === null) {
     return (
       <AppKitBootstrapContext.Provider value={appKitBootstrapValue}>
-        {startupFallback}
+        <WagmiProvider config={startupWagmiConfig}>
+          {startupFallback}
+        </WagmiProvider>
       </AppKitBootstrapContext.Provider>
     );
   }

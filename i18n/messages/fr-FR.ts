@@ -29,12 +29,6 @@ export const FR_FR_MESSAGES = {
   "attachment.safety.sha256": "SHA-256",
   "attachment.safety.size": "Taille {size}",
   "attachment.safety.viewDetails": "Voir les détails de sécurité",
-  "wallet.startup.loadingStatus": "Chargement des services de portefeuille",
-  "wallet.startup.errorStatus":
-    "Les services de portefeuille n'ont pas pu se charger",
-  "wallet.startup.errorDescription":
-    "Actualisez pour essayer de charger les services de portefeuille à nouveau.",
-  "wallet.startup.refresh": "Actualiser",
   "linkPreview.file.externalSource": "Source externe",
   "linkPreview.file.fact.mime": "MIME",
   "linkPreview.file.fact.size": "Taille",

@@ -217,6 +217,40 @@ describe("useMarkWaveNotificationsRead", () => {
     jest.restoreAllMocks();
   });
 
+  it("remounts read marker state before deferred cleanup fires", () => {
+    const invalidateNotifications = jest.fn();
+    jest.useFakeTimers();
+
+    try {
+      setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+      const firstMarker = renderHook(
+        () => useWaveNotificationsReadMarkerState(),
+        {
+          wrapper: createWrapper(invalidateNotifications),
+        }
+      );
+
+      firstMarker.unmount();
+
+      setActiveIdentity({ address: "0xBBB", jwt: "jwt-b" });
+      const secondMarker = renderHook(
+        () => useWaveNotificationsReadMarkerState(),
+        {
+          wrapper: createWrapper(invalidateNotifications),
+        }
+      );
+
+      secondMarker.unmount();
+
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+    } finally {
+      clearAllWaveReadState();
+      jest.useRealTimers();
+    }
+  });
+
   it("treats a missing active profile proxy as no proxy", async () => {
     const invalidateNotifications = jest.fn();
 

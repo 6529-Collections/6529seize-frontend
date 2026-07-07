@@ -28,11 +28,6 @@ export const ES_ES_MESSAGES = {
   "attachment.safety.sha256": "SHA-256",
   "attachment.safety.size": "Tamaño {size}",
   "attachment.safety.viewDetails": "Ver detalles de seguridad",
-  "wallet.startup.loadingStatus": "Cargando servicios de cartera",
-  "wallet.startup.errorStatus": "No se pudieron cargar los servicios de cartera",
-  "wallet.startup.errorDescription":
-    "Actualiza para intentar cargar los servicios de cartera de nuevo.",
-  "wallet.startup.refresh": "Actualizar",
   "linkPreview.file.externalSource": "Fuente externa",
   "linkPreview.file.fact.mime": "MIME",
   "linkPreview.file.fact.size": "Tamaño",

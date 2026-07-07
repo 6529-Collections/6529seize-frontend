@@ -335,6 +335,83 @@ type WalletState =
   | { status: "connecting" }
   | { status: "connected"; address: string };
 
+const noopWalletAction = (): void => {};
+const noopWalletAsyncAction = (): Promise<void> => Promise.resolve();
+
+const createWalletStartupError = (): WalletInitializationError =>
+  new WalletInitializationError("Wallet services are still loading.");
+
+export const SeizeConnectStartupFallbackProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  const { status, waitForReady } = useAppKitBootstrap();
+  const hasInitializationError = status === "error";
+  const initializationError = useMemo(
+    () => (hasInitializationError ? createWalletStartupError() : undefined),
+    [hasInitializationError]
+  );
+  const walletState = useMemo<WalletState>(
+    () =>
+      initializationError
+        ? { status: "error", error: initializationError }
+        : { status: "initializing" },
+    [initializationError]
+  );
+  const waitForWalletReady = useCallback(async (): Promise<void> => {
+    if (hasInitializationError) {
+      throw createWalletStartupError();
+    }
+
+    await waitForReady();
+  }, [hasInitializationError, waitForReady]);
+  const requestWalletReady = useCallback((): void => {
+    void waitForWalletReady().catch(() => undefined);
+  }, [waitForWalletReady]);
+
+  const contextValue = useMemo(
+    (): SeizeConnectContextType => ({
+      address: undefined,
+      walletName: undefined,
+      walletIcon: undefined,
+      isSafeWallet: false,
+      seizeConnect: requestWalletReady,
+      seizeConnectFresh: waitForWalletReady,
+      seizeDisconnect: noopWalletAsyncAction,
+      seizeDisconnectAndLogout: noopWalletAsyncAction,
+      seizeDisconnectAndLogoutAll: noopWalletAsyncAction,
+      seizeAcceptConnection: noopWalletAction,
+      seizeConnectOpen: false,
+      isConnected: false,
+      canSignActiveWallet: false,
+      hasActiveWalletAddress: false,
+      hasValidWalletAuth: false,
+      isAuthenticated: false,
+      connectionState: walletState.status,
+      walletState,
+      hasInitializationError,
+      initializationError,
+      connectedAccounts: [],
+      seizeSwitchConnectedAccount: noopWalletAction,
+      seizeAddConnectedAccount: requestWalletReady,
+      canAddConnectedAccount: false,
+      connectedAccountUnreadNotifications: {},
+    }),
+    [
+      hasInitializationError,
+      initializationError,
+      requestWalletReady,
+      waitForWalletReady,
+      walletState,
+    ]
+  );
+
+  return (
+    <SeizeConnectContext.Provider value={contextValue}>
+      {children}
+    </SeizeConnectContext.Provider>
+  );
+};
+
 // Initialization error handling utility
 const handleInitializationError = (
   error: unknown,
