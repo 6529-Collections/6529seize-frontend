@@ -373,6 +373,19 @@ function hasInjectedOrThirdPartyWalletCollisionStack(
   return frames.every(hasInjectedOrThirdPartyWalletCollisionFrame);
 }
 
+function hasAppOwnedInjectedWalletCollisionEvidence(
+  event: SentryClientEvent,
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return (
+    hasAppOwnedNonExtensionSignature(frames, hint) ||
+    hasAppOwnedSourceFrame(frames) ||
+    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+  );
+}
+
 function hasWalletCollisionSignature(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -751,7 +764,7 @@ export function shouldFilterInjectedWalletCollision(
     return false;
   }
 
-  if (hasAppOwnedNonExtensionSignature(frames, hint)) {
+  if (hasAppOwnedInjectedWalletCollisionEvidence(event, frames, hint)) {
     return false;
   }
 
