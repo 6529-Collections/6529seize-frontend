@@ -323,7 +323,7 @@ export default function GroupCardConfigs({
           </button>
         )}
         <div
-          className="horizontal-menu-hide-scrollbar tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-overflow-x-auto tw-py-0.5"
+          className="tw-no-scrollbar tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-overflow-x-auto tw-py-0.5"
           ref={containerRef}
           onScroll={checkForHiddenContent}
         >
