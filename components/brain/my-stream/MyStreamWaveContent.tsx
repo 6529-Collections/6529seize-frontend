@@ -25,7 +25,10 @@ import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import MyStreamWaveSales from "./MyStreamWaveSales";
 import MyStreamWavePolls from "./MyStreamWavePolls";
-import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
+import {
+  useWaveOutcomeVisibility,
+  useWaveSubmissionButtonLabelOverride,
+} from "@/hooks/waves/useWaveMetadata";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
@@ -336,7 +339,14 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     !isChatWave &&
     !isMemesWave &&
     submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY;
-  const chatSubmitDropLabels = getChatSubmitDropLabels(submissionExperience);
+  const customSubmissionButtonLabel = useWaveSubmissionButtonLabelOverride({
+    enabled: showChatSubmitDropAction,
+    waveId: loadedWaveId,
+  });
+  const chatSubmitDropLabels = getChatSubmitDropLabels(
+    submissionExperience,
+    customSubmissionButtonLabel
+  );
   const isMemesLegacySubmission =
     submissionExperience === WaveSubmissionExperience.MEMES_LEGACY;
   const outcomesVisible = useWaveOutcomeVisibility(wave);

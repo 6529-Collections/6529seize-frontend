@@ -57,6 +57,7 @@ const createConfig = (): CreateWaveConfig => ({
   display: {
     customRules: "No AI-only submissions.",
     outcomesVisible: false,
+    submissionButtonLabel: null,
     approve: {
       approvalsTabLabel: "",
       approvedTabLabel: "",
@@ -100,6 +101,7 @@ describe("wave-rules.helpers", () => {
       display: {
         customRules: "Keep chat respectful.",
         outcomesVisible: false,
+        submissionButtonLabel: null,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",
@@ -183,9 +185,7 @@ describe("wave-rules.helpers", () => {
     });
 
     expect(rules.custom.display).toBe("Use current-season work.");
-    expect(
-      rules.automatic.flatMap((section) => section.rows)
-    ).toEqual(
+    expect(rules.automatic.flatMap((section) => section.rows)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           label: "Decision cadence",

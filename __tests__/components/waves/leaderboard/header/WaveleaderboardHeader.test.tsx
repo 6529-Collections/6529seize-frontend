@@ -12,6 +12,7 @@ import {
 import userEvent from "@testing-library/user-event";
 
 const useWave = jest.fn();
+let mockSubmissionButtonLabel = "Drop";
 const sortComponentMock = jest.fn((props: any) => (
   <button
     data-testid="sort"
@@ -47,6 +48,10 @@ jest.mock("@/hooks/useWave", () => ({
     ACTIVE: "ACTIVE",
     ENDED: "ENDED",
   },
+}));
+
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveSubmissionButtonLabel: () => mockSubmissionButtonLabel,
 }));
 
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
@@ -86,6 +91,7 @@ const getLatestSortLabels = (): string[] => {
 };
 
 beforeEach(() => {
+  mockSubmissionButtonLabel = "Drop";
   sortComponentMock.mockClear();
   resolveHeaderLayoutMock.mockReset();
   resolveHeaderLayoutMock.mockReturnValue({
@@ -367,6 +373,7 @@ it("renders curation price controls and commits range updates", async () => {
   const user = userEvent.setup();
   const onPriceRangeChange = jest.fn();
   const onCreateDrop = jest.fn();
+  mockSubmissionButtonLabel = "Drop Art";
 
   useWave.mockReturnValue({
     isMemesWave: false,
@@ -460,6 +467,41 @@ it("renders curation price controls and commits range updates", async () => {
     minPrice: undefined,
     maxPrice: undefined,
   });
+});
+
+it("uses custom create label for leaderboard create actions", async () => {
+  const onCreateDrop = jest.fn();
+  mockSubmissionButtonLabel = "Apply";
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: false,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={onCreateDrop}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  const createButton = screen.getByTestId("create");
+  expect(createButton).toHaveTextContent("Apply");
+  await userEvent.click(createButton);
+  expect(onCreateDrop).toHaveBeenCalledTimes(1);
 });
 
 it("uses long placeholders when the price filter container is wide", async () => {
