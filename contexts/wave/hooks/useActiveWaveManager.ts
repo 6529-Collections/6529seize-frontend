@@ -28,9 +28,9 @@ type LocationStatePatchedWindow = Window & {
 };
 
 const getWaveFromWindow = (): string | null => {
-  if (globalThis.window === undefined) return null;
+  if (typeof window === "undefined") return null;
 
-  const url = new URL(globalThis.window.location.href);
+  const url = new URL(window.location.href);
   return getActiveWaveIdFromUrl({
     pathname: url.pathname,
     searchParams: url.searchParams,
@@ -109,11 +109,11 @@ const subscribeLocationSearch = (onStoreChange: () => void): (() => void) => {
 };
 
 const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
-  if (globalThis.window === undefined) {
+  if (typeof window === "undefined") {
     return { isOnWaves: false, isOnMessages: false };
   }
 
-  const pathname = globalThis.window.location.pathname;
+  const pathname = window.location.pathname;
   return {
     isOnWaves: pathname === "/waves" || pathname.startsWith("/waves/"),
     isOnMessages: pathname === "/messages" || pathname.startsWith("/messages/"),
@@ -138,6 +138,11 @@ export function useActiveWaveManager() {
       }),
     [pathname, searchParams]
   );
+  const hasActiveWaveDropTarget = useMemo(() => {
+    const serialNo = searchParams.get("serialNo")?.trim() ?? "";
+    const drop = searchParams.get("drop")?.trim() ?? "";
+    return serialNo.length > 0 || drop.length > 0;
+  }, [searchParams]);
 
   const buildUrl = useCallback(
     (waveId: string | null, options?: WaveNavigationOptions) => {
@@ -185,6 +190,7 @@ export function useActiveWaveManager() {
 
   return {
     activeWaveId,
+    hasActiveWaveDropTarget,
     setActiveWave,
   };
 }

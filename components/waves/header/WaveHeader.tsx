@@ -73,17 +73,12 @@ export default function WaveHeader({
   const showOwnerOptions =
     canUseWaveActions &&
     normalizedConnectedHandle === normalizedWaveAuthorHandle;
-  const showCreateSubwaveOption =
-    canUseWaveActions &&
-    !isDirectMessage &&
-    !isSubwave &&
-    wave.wave.authenticated_user_eligible_for_admin === true;
   const showWaveRepAction =
     canUseWaveActions &&
     !isDirectMessage &&
     normalizedWaveAuthorHandle !== null &&
     normalizedConnectedHandle !== normalizedWaveAuthorHandle;
-  const showOptions = showOwnerOptions || showCreateSubwaveOption;
+  const showOptions = showOwnerOptions;
   const showPinAction = !isSubwave;
   const showTrustStats = !isDirectMessage;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
