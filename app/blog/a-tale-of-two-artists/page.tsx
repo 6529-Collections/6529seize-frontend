@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 
 import MigratedWordPressArticlePage from "@/components/migrated-wordpress/MigratedWordPressArticlePage";
-import {
-  getAppMetadata,
-  LARGE_IMAGE_TWITTER_CARD,
-} from "@/components/providers/metadata";
+import { getMigratedWordPressPageMetadata } from "@/components/migrated-wordpress/metadata";
 import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { blogATaleOfTwoArtistsMigratedWordPressArticle as article } from "./content";
@@ -29,14 +26,6 @@ export default function BlogATaleOfTwoArtistsPage() {
   );
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: `${article.title} - 6529.io`,
-    description: article.description,
-    ogImage: article.heroImage?.src,
-    ogImageAlt: article.heroImage?.alt,
-    ogImageHeight: article.heroImage?.height,
-    ogImageWidth: article.heroImage?.width,
-    twitterCard: LARGE_IMAGE_TWITTER_CARD,
-  });
+export function generateMetadata(): Metadata {
+  return getMigratedWordPressPageMetadata(article);
 }

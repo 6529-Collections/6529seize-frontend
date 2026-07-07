@@ -1,3 +1,4 @@
+import { migratedWordPressTrustedHtml } from "@/components/migrated-wordpress/trusted-html";
 import { render, screen } from "@testing-library/react";
 
 import MigratedWordPressArticlePage from "@/components/migrated-wordpress/MigratedWordPressArticlePage";
@@ -60,7 +61,10 @@ const content = {
     },
     {
       type: "html",
-      html: '<p>Sanitized <strong>rich</strong> copy with <a href="/about">a link</a>.</p>',
+      // Trusted in-repo literal; the renderer injects it unsanitized by contract.
+      html: migratedWordPressTrustedHtml(
+        '<p>Trusted <strong>rich</strong> copy with <a href="/about">a link</a>.</p>'
+      ),
     },
     {
       type: "divider",
@@ -81,7 +85,9 @@ const staticContent = {
     },
     {
       type: "html",
-      html: '<p>Static page copy with <a href="/education">education</a>.</p>',
+      html: migratedWordPressTrustedHtml(
+        '<p>Static page copy with <a href="/education">education</a>.</p>'
+      ),
     },
   ],
 } satisfies MigratedWordPressStaticPageContent;
@@ -121,7 +127,7 @@ describe("MigratedWordPressArticlePage", () => {
     expect(screen.getByText("Video caption")).toBeInTheDocument();
     expect(screen.getByText("Quoted post.")).toBeInTheDocument();
     expect(screen.getByText("Quote author")).toBeInTheDocument();
-    expect(screen.getByText(/Sanitized/)).toBeInTheDocument();
+    expect(screen.getByText(/Trusted/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "a link" })).toHaveAttribute(
       "href",
       "/about"
@@ -155,6 +161,16 @@ describe("MigratedWordPressArticlePage", () => {
     expect(screen.getByRole("link", { name: "education" })).toHaveAttribute(
       "href",
       "/education"
+    );
+  });
+
+  it("only accepts compile-time literals as trusted HTML", () => {
+    const runtimeHtml: string = "<p>pretend this came from a CMS</p>";
+    // @ts-expect-error runtime-typed strings must not reach the HTML sink
+    migratedWordPressTrustedHtml(runtimeHtml);
+
+    expect(migratedWordPressTrustedHtml("<p>in-repo literal</p>")).toBe(
+      "<p>in-repo literal</p>"
     );
   });
 });

@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { formatDate } from "@/i18n/format";
+import MigratedWordPressArticleVideoPlayer from "./MigratedWordPressArticleVideoPlayer";
 import type {
   MigratedWordPressArticleBlock,
   MigratedWordPressArticleContent,
@@ -46,9 +47,12 @@ function MigratedWordPressArticleImage({
     ...(media.width !== undefined ? { width: media.width } : {}),
   };
 
+  // When the image is wrapped in a link, the link's aria-label already
+  // announces the alt text; an empty inner alt avoids screen readers
+  // reading the same name twice (SC 1.1.1 / 4.1.2).
   const image = (
     <img
-      alt={media.alt}
+      alt={media.href ? "" : media.alt}
       className="tw-mx-auto tw-h-auto tw-max-h-[34rem] tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
       decoding="async"
       loading={priority ? "eager" : "lazy"}
@@ -94,19 +98,7 @@ function MigratedWordPressArticleVideo({
   return (
     <figure className="tw-my-9 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-my-11">
       <div className="tw-w-full tw-max-w-[28rem] tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black tw-shadow-[0_16px_50px_rgba(0,0,0,0.28)]">
-        <video
-          aria-label={video.title}
-          autoPlay
-          className="tw-aspect-square tw-w-full tw-bg-black tw-object-cover"
-          controls
-          loop
-          muted
-          playsInline
-          preload="metadata"
-        >
-          <source src={video.src} type="video/mp4" />
-          Sorry, your browser does not support embedded videos.
-        </video>
+        <MigratedWordPressArticleVideoPlayer video={video} />
       </div>
       {video.caption ? (
         <figcaption
@@ -149,6 +141,10 @@ export function MigratedWordPressArticleBlockView({
   }
 
   if (block.type === "html") {
+    // block.html is MigratedWordPressTrustedHtml: constructible only from
+    // compile-time in-repo literals (see trusted-html.ts), never from
+    // runtime data — which is what makes this sink acceptable. Runtime
+    // HTML must go through a real sanitizer instead.
     return (
       <div
         className={richHtmlClassName}

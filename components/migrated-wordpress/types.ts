@@ -1,5 +1,17 @@
 import type { ReactNode } from "react";
 
+declare const migratedWordPressTrustedHtmlBrand: unique symbol;
+
+/**
+ * Raw HTML that is allowed to reach the migrated-wordpress renderer's
+ * dangerouslySetInnerHTML sink. Values can only be produced by
+ * migratedWordPressTrustedHtml(), whose signature rejects runtime-typed
+ * strings — the content must be an in-repo compile-time literal.
+ */
+export type MigratedWordPressTrustedHtml = string & {
+  readonly [migratedWordPressTrustedHtmlBrand]: true;
+};
+
 export type MigratedWordPressArticleLink = {
   readonly href: string;
   readonly label: string;
@@ -44,7 +56,7 @@ export type MigratedWordPressArticleBlock =
     }
   | {
       readonly type: "html";
-      readonly html: string;
+      readonly html: MigratedWordPressTrustedHtml;
     }
   | {
       readonly type: "divider";
