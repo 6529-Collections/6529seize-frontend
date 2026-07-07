@@ -12,6 +12,8 @@ import {
 import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
@@ -26,9 +28,13 @@ import {
 export default function NotificationWaveFollowBtn({
   wave,
   size = UserFollowBtnSize.SMALL,
+  followLabel = t(DEFAULT_LOCALE, "notifications.waveFollowButton.join"),
+  followingLabel = t(DEFAULT_LOCALE, "notifications.waveFollowButton.joined"),
 }: {
   readonly wave: ApiWaveOverview;
   readonly size?: UserFollowBtnSize | undefined;
+  readonly followLabel?: string | undefined;
+  readonly followingLabel?: string | undefined;
 }) {
   const { setToast, requestAuth } = useAuth();
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
@@ -121,7 +127,7 @@ export default function NotificationWaveFollowBtn({
     await followMutation.mutateAsync();
   };
 
-  const label = following ? "Joined" : "Join";
+  const label = following ? followingLabel : followLabel;
   const icon = (() => {
     if (mutating) {
       return <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />;

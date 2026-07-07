@@ -5,7 +5,7 @@ import {
   browserExtensionUrlPrefixes,
   gifPickerReactPackageToken,
   gifPickerTenorManagerPathToken,
-  injectedAppUriPath,
+  injectedWalletCollisionAppUriPaths,
   injectedProviderProxyPath,
   injectedWasmCspAppUriPath,
   injectedWasmCspCollapsedPath,
@@ -82,9 +82,7 @@ function isAppUriFrame(frame: SentryStackFrame): boolean {
 }
 
 function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
-  return [frame.filename, frame.abs_path].some(
-    (path) => typeof path === "string" && path.includes(injectedAppUriPath)
-  );
+  return getFramePaths(frame).some(hasInjectedWalletCollisionAppUriStackValue);
 }
 
 function isInjectedProviderProxyFrame(frame: SentryStackFrame): boolean {
@@ -153,7 +151,7 @@ export function isInjectedOrThirdPartyWalletExtensionPath(
 ): boolean {
   const normalizedValue = value.toLowerCase();
   if (
-    normalizedValue.includes(injectedAppUriPath) ||
+    hasInjectedWalletCollisionAppUriStackValue(normalizedValue) ||
     normalizedValue.includes("app:///page.js")
   ) {
     return true;
@@ -163,6 +161,18 @@ export function isInjectedOrThirdPartyWalletExtensionPath(
     browserExtensionUrlPrefixes.some((prefix) =>
       normalizedValue.includes(prefix)
     ) && normalizedValue.includes("/page.js")
+  );
+}
+
+export function hasInjectedWalletCollisionAppUriStackValue(
+  value: string | undefined
+): boolean {
+  const normalizedValue = value?.toLowerCase();
+  return (
+    !!normalizedValue &&
+    injectedWalletCollisionAppUriPaths.some((path) =>
+      normalizedValue.includes(path.toLowerCase())
+    )
   );
 }
 

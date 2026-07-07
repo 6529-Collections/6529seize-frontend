@@ -9,7 +9,11 @@ jest.mock(
   "@/components/brain/notifications/wave-created/NotificationWaveFollowBtn",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="wave-follow" />,
+    default: (props: { followLabel?: string; followingLabel?: string }) => (
+      <div data-testid="wave-follow">
+        {props.followLabel}/{props.followingLabel}
+      </div>
+    ),
   })
 );
 jest.mock("@/hooks/useDeviceInfo", () => ({
@@ -18,7 +22,11 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 jest.mock("@/components/brain/notifications/NotificationsFollowBtn", () => ({
   __esModule: true,
-  default: () => <div data-testid="follow-btn" />,
+  default: (props: { followLabel?: string; followingLabel?: string }) => (
+    <div data-testid="follow-btn">
+      {props.followLabel}/{props.followingLabel}
+    </div>
+  ),
 }));
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: () => "/scaled.jpg",
@@ -51,10 +59,42 @@ it("renders wave data and links", () => {
     "href",
     "/waves/1"
   );
-  expect(screen.getByTestId("wave-follow")).toBeInTheDocument();
-  expect(screen.getByTestId("follow-btn")).toBeInTheDocument();
+  expect(
+    screen.getByText("created a wave you can access:")
+  ).toBeInTheDocument();
+  expect(screen.getByTestId("wave-follow")).toHaveTextContent(
+    "Join wave/Joined"
+  );
+  expect(screen.getByTestId("follow-btn")).toHaveTextContent(
+    "Follow creator/Following creator"
+  );
   const img = screen.getByRole("img");
   expect(img.getAttribute("src")).toContain("scaled.jpg");
+});
+
+it("renders direct message wave notifications with DM copy and action", () => {
+  render(
+    <NotificationWaveCreated
+      notification={{
+        ...notification,
+        related_wave: {
+          ...notification.related_wave,
+          is_dm_wave: true,
+        },
+      }}
+    />
+  );
+
+  expect(screen.getByText("started a DM with you:")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Wave 1" })).toHaveAttribute(
+    "href",
+    "/messages/1"
+  );
+  expect(screen.getByRole("link", { name: "Open DM" })).toHaveAttribute(
+    "href",
+    "/messages/1"
+  );
+  expect(screen.queryByTestId("wave-follow")).toBeNull();
 });
 
 it("renders fallback wave text without a link when wave id is missing", () => {
