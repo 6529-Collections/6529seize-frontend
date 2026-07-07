@@ -413,21 +413,6 @@ const fetchLinkPreviewMetadata = async <T>(
   }
 };
 
-const fetchSingleLinkPreview = async (
-  normalizedUrl: string
-): Promise<LinkPreviewResponse> => {
-  const params = new URLSearchParams({ url: normalizedUrl });
-
-  const preview = await fetchLinkPreviewMetadata<LinkPreviewResponse>(
-    `/api/open-graph?${params.toString()}`,
-    {
-      headers: { Accept: "application/json" },
-    }
-  );
-
-  return normalizeLinkPreviewResponse(preview);
-};
-
 const fetchLinkPreviewBatch = async (
   urls: readonly string[]
 ): Promise<OpenGraphBatchResponse> => {
@@ -470,22 +455,6 @@ const rejectPendingRequest = (
   request.reject(error);
 };
 
-const resolveWithSingleRequestFallback = async (
-  request: PendingLinkPreviewRequest
-): Promise<void> => {
-  try {
-    const data = await fetchSingleLinkPreview(request.url);
-    request.resolve(data);
-  } catch (error) {
-    rejectPendingRequest(
-      request,
-      error instanceof Error
-        ? error
-        : new Error(LINK_PREVIEW_METADATA_ERROR_MESSAGE)
-    );
-  }
-};
-
 const rejectBatchChunk = (
   requests: readonly PendingLinkPreviewRequest[],
   error: unknown
@@ -503,20 +472,9 @@ const rejectBatchChunk = (
 const resolveBatchChunk = async (
   requests: readonly PendingLinkPreviewRequest[]
 ): Promise<void> => {
-  let batchResponse: OpenGraphBatchResponse;
-
-  try {
-    batchResponse = await fetchLinkPreviewBatch(
-      requests.map((request) => request.url)
-    );
-  } catch {
-    await Promise.all(
-      requests.map(async (request) => {
-        await resolveWithSingleRequestFallback(request);
-      })
-    );
-    return;
-  }
+  const batchResponse = await fetchLinkPreviewBatch(
+    requests.map((request) => request.url)
+  );
 
   for (const request of requests) {
     const result = hasOwnRecordKey(batchResponse.results, request.url)
