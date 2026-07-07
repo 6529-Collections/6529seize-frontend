@@ -1,20 +1,20 @@
 import {
   browserUnhandledRejectionMechanism,
   circularReactMetaElementMessagePatterns,
-  coinbaseWalletLinkWebSocket1006Pattern,
   coinbaseWalletLinkWebSocketCloseFunction,
   coinbaseWalletLinkWebSocketFile,
+  coinbaseWalletLinkWebSocket1006MessagePrefix,
   coinbaseWalletSdkPathTokens,
-  injectedAppUriPath,
   injectedProviderProxyStartsWithMessage,
   jsonStringifyFunction,
   metaMaskMobileUpdateUrlFunction,
   objectCapturedPromiseRejectionMessage,
   providerDisconnectedCode,
   providerDisconnectedMessage,
-  rabbyMobileStackPatterns,
+  rabbyMobileStackContextPattern,
   rabbyMobileUserRejectedCode,
   rabbyMobileUserRejectedMessage,
+  rabbyMobileUserRejectedStackPattern,
   RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE,
   RABBY_MOBILE_USER_AGENT_TOKEN,
   talismanExtensionOnboardingMessage,
@@ -55,19 +55,26 @@ import {
   hasAppOwnedSourceStackValue,
   hasAppOwnedStackPath,
   hasInjectedAppUriFrame,
+  hasInjectedWalletCollisionAppUriStackValue,
   hasLikelyAppOwnedFrame,
   hasOnlyAppUriFrames,
   hasOnlyInjectedProviderProxyFrames,
   isInjectedOrThirdPartyWalletExtensionPath,
 } from "./app-frame-utils";
 
-function matchesRabbyMobileUserRejectedStack(
-  value: string | undefined
+function matchesStackPattern(
+  value: string | undefined,
+  pattern: string
 ): boolean {
-  const normalized = value?.toLowerCase();
-  return (
-    !!normalized &&
-    rabbyMobileStackPatterns.every((pattern) => normalized.includes(pattern))
+  return value?.toLowerCase().includes(pattern) ?? false;
+}
+
+function hasRabbyMobileStackContext(
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return [serializedStack, getHintExceptionStack(hint)].some((stack) =>
+    matchesStackPattern(stack, rabbyMobileStackContextPattern)
   );
 }
 
@@ -75,8 +82,8 @@ function hasRabbyMobileUserRejectedStack(
   serializedStack: string | undefined,
   hint?: SentryEventHint
 ): boolean {
-  return [serializedStack, getHintExceptionStack(hint)].some(
-    matchesRabbyMobileUserRejectedStack
+  return [serializedStack, getHintExceptionStack(hint)].some((stack) =>
+    matchesStackPattern(stack, rabbyMobileUserRejectedStackPattern)
   );
 }
 
@@ -96,8 +103,10 @@ function hasAppOwnedStackEvidence(
 export function isCoinbaseWalletLinkWebSocket1006Message(
   value: string
 ): boolean {
-  return coinbaseWalletLinkWebSocket1006Pattern.test(
-    normalizeErrorPrefix(value)
+  const normalized = normalizeErrorPrefix(value).toLowerCase();
+  return (
+    normalized === coinbaseWalletLinkWebSocket1006MessagePrefix ||
+    normalized.startsWith(`${coinbaseWalletLinkWebSocket1006MessagePrefix}:`)
   );
 }
 
@@ -349,7 +358,7 @@ function hasInjectedAppUriSignature(
   }
 
   const stack = getHintExceptionStack(hint);
-  if (!stack.includes(injectedAppUriPath)) {
+  if (!hasInjectedWalletCollisionAppUriStackValue(stack)) {
     return false;
   }
 
@@ -358,6 +367,18 @@ function hasInjectedAppUriSignature(
   }
 
   return hasOnlyAppUriFrames(frames);
+}
+
+function hasAppOwnedInjectedWalletCollisionEvidence(
+  event: SentryClientEvent,
+  frames: SentryStackFrame[] | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return (
+    hasAppOwnedSourceFrame(frames) ||
+    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+  );
 }
 
 function hasWalletCollisionSignature(
@@ -575,6 +596,13 @@ export function shouldFilterRabbyMobileUserRejectedRequest(
     return false;
   }
 
+  if (
+    !hasRabbyMobileContext(event) &&
+    !hasRabbyMobileStackContext(stack, hint)
+  ) {
+    return false;
+  }
+
   return !hasAppOwnedStackEvidence(event, stack, hint);
 }
 
@@ -643,16 +671,12 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     return true;
   }
 
-  if (
-    hasWalletLinkWebSocketUnhandledRejectionSignature(value, event, hint) &&
-    !hasAppOwnedEvidence
-  ) {
+  if (hasWalletLinkWebSocketUnhandledRejectionSignature(value, event, hint)) {
     return true;
   }
 
   return (
     hasBrowserUnhandledRejectionMechanism(value) &&
-    !hasAppOwnedEvidence &&
     hasThirdPartyWalletLinkWebSocket1006Evidence(event, value, hint)
   );
 }
@@ -731,6 +755,10 @@ export function shouldFilterInjectedWalletCollision(
   }
 
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  if (hasAppOwnedInjectedWalletCollisionEvidence(event, frames, hint)) {
+    return false;
+  }
+
   if (!hasInjectedAppUriSignature(frames, hint)) {
     return false;
   }
