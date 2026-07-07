@@ -33,9 +33,7 @@ export default function AwsRumProvider({
           publicEnv.VERSION,
           "1.0.0"
         );
-        const SAMPLE_RATE = Number.parseFloat(
-          envValueOrFallback(publicEnv.AWS_RUM_SAMPLE_RATE, "0.2")
-        );
+        const SAMPLE_RATE = parseSampleRate(publicEnv.AWS_RUM_SAMPLE_RATE);
 
         if (!APPLICATION_ID) {
           console.warn(
@@ -74,7 +72,7 @@ export default function AwsRumProvider({
           config
         );
         // Optional: Store the instance globally for manual tracking if needed
-        (window as typeof window & { awsRum?: AwsRumInstance }).awsRum = awsRum;
+        window.awsRum = awsRum;
       } catch (error) {
         // Silently handle errors to prevent breaking the application
         console.warn("AWS RUM: Failed to initialize", error);
@@ -87,11 +85,8 @@ export default function AwsRumProvider({
       cancelled = true;
       awsRum?.disable();
 
-      const awsRumWindow = window as typeof window & {
-        awsRum?: AwsRumInstance;
-      };
-      if (awsRumWindow.awsRum === awsRum) {
-        delete awsRumWindow.awsRum;
+      if (window.awsRum === awsRum) {
+        delete window.awsRum;
       }
     };
   }, []);
@@ -103,3 +98,15 @@ const envValueOrFallback = (
   value: string | undefined,
   fallback: string
 ): string => (value === undefined || value === "" ? fallback : value);
+
+const DEFAULT_SAMPLE_RATE = 0.2;
+
+const parseSampleRate = (sampleRate: string | undefined): number => {
+  const parsedSampleRate = Number.parseFloat(
+    envValueOrFallback(sampleRate, DEFAULT_SAMPLE_RATE.toString())
+  );
+
+  return Number.isFinite(parsedSampleRate)
+    ? parsedSampleRate
+    : DEFAULT_SAMPLE_RATE;
+};

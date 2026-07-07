@@ -23,7 +23,7 @@ describe("AwsRumProvider", () => {
       VERSION: "test-version",
     });
     mockAwsRum.mockClear();
-    delete (window as typeof window & { awsRum?: unknown }).awsRum;
+    delete window.awsRum;
     warnSpy = jest.spyOn(console, "warn").mockImplementation();
   });
 
@@ -53,9 +53,7 @@ describe("AwsRumProvider", () => {
         telemetries: ["performance", "errors", "http"],
       })
     );
-    expect((window as typeof window & { awsRum?: unknown }).awsRum).toBe(
-      mockAwsRum.mock.results[0]?.value
-    );
+    expect(window.awsRum).toBe(mockAwsRum.mock.results[0]?.value);
   });
 
   it("skips AWS RUM initialization in development", async () => {
@@ -120,6 +118,44 @@ describe("AwsRumProvider", () => {
     );
   });
 
+  it("uses the default AWS RUM sample rate when the env value is invalid", async () => {
+    publicEnv.AWS_RUM_SAMPLE_RATE = "not-a-number";
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+
+    expect(mockAwsRum).toHaveBeenCalledWith(
+      "test-app-id",
+      "test-version",
+      "eu-west-1",
+      expect.objectContaining({
+        sessionSampleRate: 0.2,
+      })
+    );
+  });
+
+  it("does not initialize AWS RUM after unmounting before the import resolves", async () => {
+    const { unmount } = render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    unmount();
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(mockAwsRum).not.toHaveBeenCalled();
+    expect(window.awsRum).toBe(undefined);
+  });
+
   it("disables AWS RUM and clears the global instance on unmount", async () => {
     const { unmount } = render(
       <AwsRumProvider>
@@ -136,8 +172,6 @@ describe("AwsRumProvider", () => {
     unmount();
 
     expect(awsRumInstance.disable).toHaveBeenCalledTimes(1);
-    expect((window as typeof window & { awsRum?: unknown }).awsRum).toBe(
-      undefined
-    );
+    expect(window.awsRum).toBe(undefined);
   });
 });
