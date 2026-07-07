@@ -21,20 +21,21 @@
 //     the baseline in the same PR with `--update` so the improvement sticks.
 //
 // Counting semantics (deliberate trade-offs):
-//   - Metrics are textual heuristics, not AST analysis: the `any` and
-//     TODO/FIXME/HACK regexes also match inside strings, comments, and JSDoc.
-//     Counts are symmetric between baseline and actuals, so the ratchet
-//     still moves in the right direction; do not read them as exact.
+//   - The `any_casts` metric is syntax-aware and counts direct `: any`-style
+//     annotations plus `as any`/`<any>` assertions. Generic type arguments such
+//     as `Record<string, any>` remain outside this metric for continuity with
+//     the original ratchet scope.
+//   - TODO/FIXME/HACK regexes match inside strings, comments, and JSDoc. Counts
+//     are symmetric between baseline and actuals, so the ratchet still moves in
+//     the right direction; do not read them as exact.
 //   - The oversized grandfather list keys on exact relative paths. Renaming
 //     or moving a grandfathered file makes it count as a NEW oversized file
 //     (fail-closed); run `--update` in the same PR to re-grandfather the new
 //     path, or use the move as the moment to split the file.
 //
-// The script is dependency-free on purpose so CI can run it on a bare
-// checkout without installing node_modules.
-
 const fs = require("node:fs");
 const path = require("node:path");
+const ts = require("typescript");
 
 // DEBT_RATCHET_ROOT is a test seam; production runs use the repo root.
 const REPO_ROOT = process.env["DEBT_RATCHET_ROOT"]
@@ -188,6 +189,68 @@ function countImportStatements(content, packageNames) {
   return count;
 }
 
+function scriptKindForPath(filePath) {
+  const extension = path.extname(filePath);
+  if (extension === ".tsx") return ts.ScriptKind.TSX;
+  if (extension === ".jsx") return ts.ScriptKind.JSX;
+  if (extension === ".js" || extension === ".cjs" || extension === ".mjs") {
+    return ts.ScriptKind.JS;
+  }
+  return ts.ScriptKind.TS;
+}
+
+function typeTextStartsWithAny(typeNode, sourceFile) {
+  return /^any\b/.test(typeNode.getText(sourceFile).trim());
+}
+
+function countAnyCasts(content, filePath = "source.ts") {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    scriptKindForPath(filePath)
+  );
+
+  let count = 0;
+
+  const countDirectAnyType = (typeNode) => {
+    if (typeTextStartsWithAny(typeNode, sourceFile)) {
+      count += 1;
+    }
+  };
+
+  const visit = (node) => {
+    if (ts.isAsExpression(node) || ts.isTypeAssertionExpression(node)) {
+      countDirectAnyType(node.type);
+    } else if (
+      (ts.isVariableDeclaration(node) ||
+        ts.isParameter(node) ||
+        ts.isPropertyDeclaration(node) ||
+        ts.isPropertySignature(node) ||
+        ts.isMethodDeclaration(node) ||
+        ts.isMethodSignature(node) ||
+        ts.isFunctionDeclaration(node) ||
+        ts.isFunctionExpression(node) ||
+        ts.isArrowFunction(node) ||
+        ts.isGetAccessorDeclaration(node) ||
+        ts.isSetAccessorDeclaration(node) ||
+        ts.isCallSignatureDeclaration(node) ||
+        ts.isConstructSignatureDeclaration(node) ||
+        ts.isIndexSignatureDeclaration(node) ||
+        ts.isMappedTypeNode(node)) &&
+      node.type
+    ) {
+      countDirectAnyType(node.type);
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return count;
+}
+
 function countLines(content) {
   if (content.length === 0) return 0;
   let newlines = 0;
@@ -248,7 +311,7 @@ function computeActuals() {
     if (!isCode) continue;
 
     if (TYPESCRIPT_EXTENSIONS.has(extension)) {
-      const anyCount = countMatches(content, /:\s*any\b|\bas\s+any\b/g);
+      const anyCount = countAnyCasts(content, relativePath);
       if (anyCount > 0) perFile.any_casts.set(relativePath, anyCount);
     }
 
@@ -321,6 +384,49 @@ function appendStepSummary(lines) {
   fs.appendFileSync(summaryPath, `${lines.join("\n")}\n`);
 }
 
+function getCountStatus(baselineCount, actualCount) {
+  if (actualCount > baselineCount) return "RISE";
+  if (actualCount < baselineCount) return "stale baseline";
+  return "ok";
+}
+
+function countOversizedGroups(files, wordpressMigratedFiles) {
+  let wordpress = 0;
+  for (const file of files) {
+    if (wordpressMigratedFiles.has(file)) wordpress += 1;
+  }
+  return {
+    app: files.length - wordpress,
+    wordpress,
+  };
+}
+
+function buildOversizedGroupRows(baseline, actuals) {
+  const baselineGroups = countOversizedGroups(
+    baseline.oversized_file_allowlist ?? [],
+    actuals.wordpressMigratedFiles
+  );
+  const actualGroups = countOversizedGroups(
+    actuals.oversizedFiles,
+    actuals.wordpressMigratedFiles
+  );
+
+  return [
+    {
+      metric: "  app_source",
+      baseline: baselineGroups.app,
+      actual: actualGroups.app,
+      status: getCountStatus(baselineGroups.app, actualGroups.app),
+    },
+    {
+      metric: "  wp_migrated",
+      baseline: baselineGroups.wordpress,
+      actual: actualGroups.wordpress,
+      status: getCountStatus(baselineGroups.wordpress, actualGroups.wordpress),
+    },
+  ];
+}
+
 function runCheck() {
   const baseline = readBaseline();
   const actuals = computeActuals();
@@ -338,15 +444,13 @@ function runCheck() {
       continue;
     }
 
-    let status = "ok";
-    if (actualCount > baselineCount) {
-      status = "RISE";
+    const status = getCountStatus(baselineCount, actualCount);
+    if (status === "RISE") {
       failures.push(
         `${metric} rose from ${baselineCount} to ${actualCount} ` +
           `(${definition.description}). ${definition.hint}`
       );
-    } else if (actualCount < baselineCount) {
-      status = "stale baseline";
+    } else if (status === "stale baseline") {
       warnings.push(
         `${metric} dropped from ${baselineCount} to ${actualCount}. ` +
           "Lock in the improvement: run `node scripts/debt-ratchet.cjs --update` " +
@@ -381,7 +485,11 @@ function runCheck() {
 
   console.log("Debt ratchet report");
   console.log("===================");
-  for (const row of rows) {
+  const oversizedGroupRows = buildOversizedGroupRows(baseline, actuals);
+  const reportRows = rows.flatMap((row) =>
+    row.metric === "oversized_files" ? [row, ...oversizedGroupRows] : [row]
+  );
+  for (const row of reportRows) {
     console.log(
       `${row.metric.padEnd(20)} baseline ${String(row.baseline).padStart(5)} ` +
         `actual ${String(row.actual).padStart(5)}  ${row.status}`
@@ -402,7 +510,7 @@ function runCheck() {
     "",
     "| Metric | Baseline | Actual | Status |",
     "| --- | ---: | ---: | --- |",
-    ...rows.map(
+    ...reportRows.map(
       (row) =>
         `| ${row.metric} | ${row.baseline} | ${row.actual} | ${row.status} |`
     ),
@@ -510,6 +618,7 @@ module.exports = {
   MAX_SOURCE_FILE_LINES,
   SCAN_DIRS,
   countImportStatements,
+  countAnyCasts,
   countLines,
   countMatches,
   isWordPressMigratedSource,

@@ -2,9 +2,9 @@ name: Debt Ratchet
 
 # Structural-debt gate: fails any PR that raises a debt counter above the
 # checked-in baseline (scripts/debt-ratchet-baseline.json). Runs on every PR
-# so it can serve as a required status check; it is dependency-free and does
-# not install node_modules. See scripts/debt-ratchet.cjs for the metrics and
-# the one-command baseline update (`node scripts/debt-ratchet.cjs --update`).
+# so it can serve as a required status check. See scripts/debt-ratchet.cjs for
+# the metrics and the one-command baseline update
+# (`node scripts/debt-ratchet.cjs --update`).
 
 on:
   pull_request:
@@ -22,7 +22,7 @@ jobs:
   debt-ratchet:
     name: Debt ratchet
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     permissions:
       contents: read
 
@@ -32,13 +32,30 @@ jobs:
         with:
           persist-credentials: false
 
-      # No dependency install and no package-manager cache by design: the
-      # ratchet script is dependency-free Node, which keeps this required
-      # check fast (<1 min) on a bare checkout. Do not add `cache: pnpm`.
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
 
       - name: Check debt counters against baseline
         run: node scripts/debt-ratchet.cjs
