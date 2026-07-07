@@ -408,6 +408,45 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createObservedSentryE7WasmCspUnsafeEvalEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves",
+    exception: {
+      values: [
+        {
+          type: "RuntimeError",
+          value: wasmCspUnsafeEvalMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///chunks/utils-DNoBWR8F.js",
+                abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                function: "k",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    contexts: {
+      browser: {
+        name: "Chrome",
+        version: "150",
+      },
+      os: {
+        name: "Windows",
+      },
+    },
+    tags: {
+      environment: "production",
+      transaction: "/waves",
+      url: "/waves",
+    },
+    ...overrides,
+  });
+
   const createInjectedProviderProxyStartsWithEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -4766,6 +4805,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed Sentry E7 WebAssembly CSP unsafe-eval errors from injected static chunks", () => {
+    // Arrange
+    const event = createObservedSentryE7WasmCspUnsafeEvalEvent();
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters injected provider proxy startsWith errors", () => {
     // Arrange
     const event = createInjectedProviderProxyStartsWithEvent();
@@ -5275,6 +5325,132 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "app:///components/providers/WagmiSetup.tsx",
                   abs_path: "app:///components/providers/WagmiSetup.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed Sentry E7 WebAssembly CSP errors when the function differs", () => {
+    // Arrange
+    const event = createObservedSentryE7WasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  function: "loadWasmModule",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter non-CSP errors with the observed Sentry E7 static chunk frame", () => {
+    // Arrange
+    const event = createObservedSentryE7WasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: "Aborted(RuntimeError: unreachable)",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  function: "k",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed Sentry E7 WebAssembly CSP errors with app source frames", () => {
+    // Arrange
+    const event = createObservedSentryE7WasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  function: "k",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///components/providers/WagmiSetup.tsx",
+                  abs_path: "app:///components/providers/WagmiSetup.tsx",
+                  function: "initializeAppKit",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WebAssembly CSP errors when one frame path is app-owned", () => {
+    // Arrange
+    const event = createInjectedWasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///components/providers/WagmiSetup.tsx",
+                  function: "k",
                   in_app: true,
                 },
               ],
