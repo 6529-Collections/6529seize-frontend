@@ -3,7 +3,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const SCRIPT_PATH = path.join(process.cwd(), "scripts", "lint-package-json.cjs");
+const SCRIPT_PATH = path.join(
+  process.cwd(),
+  "scripts",
+  "lint-package-json.cjs"
+);
 
 const BASE_PACKAGE_JSON = {
   name: "fixture",
@@ -18,7 +22,10 @@ const runLint = (packageJson?: object) => {
   const env = { ...process.env };
   delete env["LINT_PACKAGE_JSON_PATH"];
   if (!packageJson) {
-    return spawnSync(process.execPath, [SCRIPT_PATH], { encoding: "utf8", env });
+    return spawnSync(process.execPath, [SCRIPT_PATH], {
+      encoding: "utf8",
+      env,
+    });
   }
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lint-package-json-"));
   const packageJsonPath = path.join(dir, "package.json");
@@ -67,9 +74,9 @@ describe("lint-package-json trailing jest array options", () => {
   });
 
   it("fails dashed aliases and bare array flags", () => {
-    expect(runLint(withTestScript("jest --coverage-reporters=none")).status).toBe(
-      1
-    );
+    expect(
+      runLint(withTestScript("jest --coverage-reporters=none")).status
+    ).toBe(1);
     expect(runLint(withTestScript("jest --reporters")).status).toBe(1);
   });
 
@@ -82,9 +89,9 @@ describe("lint-package-json trailing jest array options", () => {
   });
 
   it("passes non-array trailing flags and positional endings", () => {
-    expect(runLint(withTestScript("jest --silent --coverage=false")).status).toBe(
-      0
-    );
+    expect(
+      runLint(withTestScript("jest --silent --coverage=false")).status
+    ).toBe(0);
     expect(runLint(withTestScript("jest __tests__/scripts")).status).toBe(0);
   });
 

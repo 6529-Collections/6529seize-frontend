@@ -4,14 +4,17 @@ const { readFileSync } = require("node:fs");
 const { resolve } = require("node:path");
 
 const packageJsonPath =
-  process.env["LINT_PACKAGE_JSON_PATH"] || resolve(__dirname, "..", "package.json");
+  process.env["LINT_PACKAGE_JSON_PATH"] ||
+  resolve(__dirname, "..", "package.json");
 let packageJson;
 
 try {
   packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
-  console.error(`Failed to read or parse package.json at ${packageJsonPath}: ${message}`);
+  console.error(
+    `Failed to read or parse package.json at ${packageJsonPath}: ${message}`
+  );
   process.exit(1);
 }
 const dependencyFields = ["dependencies", "devDependencies"];
@@ -66,7 +69,10 @@ const camelize = (flagName) =>
 // last shell command can receive them, and only jest invocations are at risk.
 const trailingJestArrayOption = (script) => {
   const segments = script.split(/&&|\|\||;/);
-  const tokens = segments[segments.length - 1].trim().split(/\s+/).filter(Boolean);
+  const tokens = segments[segments.length - 1]
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   const invokesJest = tokens.some(
     (token) => token === "jest" || /[\\/]jest(\.[cm]?js)?$/.test(token)
   );
