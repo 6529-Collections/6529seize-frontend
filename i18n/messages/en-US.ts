@@ -19,6 +19,7 @@ import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { EN_US_WALLET_STARTUP_MESSAGES } from "@/i18n/messages/wallet-startup";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -1543,16 +1544,7 @@ export const EN_US_MESSAGES = {
   "walletAddress.copy.walletAriaLabel": "Copy wallet address",
   "walletAddress.copy.tooltip": "Copy",
   "walletAddress.copy.copiedTooltip": "Copied",
-  "wallet.startup.loadingStatus": "Loading wallet services",
-  "wallet.startup.errorStatus": "Wallet services failed to load",
-  "wallet.startup.errorDescription":
-    "Refresh to try loading wallet services again.",
-  "wallet.startup.refresh": "Refresh",
-  "wallet.startup.loadFailedToast":
-    "Wallet services failed to load. Please refresh the page.",
-  "wallet.startup.loadingToast":
-    "Wallet services are still loading. Please try again.",
-  "wallet.startup.pendingError": "Wallet services are still loading.",
+  ...EN_US_WALLET_STARTUP_MESSAGES,
   "openMobile.openingStatus": "Opening 6529 Mobile...",
   "nextgen.admin.loadingStatus": "Loading NextGen admin",
   ...QR_SCANNER_MESSAGES,

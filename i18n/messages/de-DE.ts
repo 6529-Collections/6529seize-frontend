@@ -2,6 +2,7 @@ import { DE_DE_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { DE_DE_WALLET_STARTUP_MESSAGES } from "@/i18n/messages/wallet-startup";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const DE_DE_MESSAGES = {
@@ -425,17 +426,7 @@ export const DE_DE_MESSAGES = {
   "theMemes.card.metric.volume": "Volumen ({volumeType}): {value}",
   "theMemes.sort.age": "Alter",
   "theMemes.sort.editionSize": "Editionsgröße",
-  "wallet.startup.loadingStatus": "Wallet-Dienste werden geladen",
-  "wallet.startup.errorStatus":
-    "Wallet-Dienste konnten nicht geladen werden",
-  "wallet.startup.errorDescription":
-    "Aktualisiere die Seite, um die Wallet-Dienste erneut zu laden.",
-  "wallet.startup.refresh": "Aktualisieren",
-  "wallet.startup.loadFailedToast":
-    "Wallet-Dienste konnten nicht geladen werden. Bitte aktualisiere die Seite.",
-  "wallet.startup.loadingToast":
-    "Wallet-Dienste werden noch geladen. Bitte versuche es erneut.",
-  "wallet.startup.pendingError": "Wallet-Dienste werden noch geladen.",
+  ...DE_DE_WALLET_STARTUP_MESSAGES,
   "openMobile.openingStatus": "6529 Mobile wird geöffnet...",
   "nextgen.admin.loadingStatus": "NextGen-Admin wird geladen",
   "theMemes.sort.collectors": "Sammler",
