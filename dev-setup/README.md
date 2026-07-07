@@ -77,7 +77,7 @@ bash dev-setup/run-staging-ec2-setup.sh
 - **ALLOWLIST API ENDPOINT** → staging or production
 - **ALCHEMY_API_KEY** → required
 - **CW_PROJECT_ID** → required
-- **TENOR_API_KEY** → optional (can be empty)
+- **GIPHY_API_KEY** → optional (can be empty)
 - **NEXTGEN_CHAIN_ID** → `1` (mainnet) or `11155111` (sepolia)
 - **MOBILE_APP_SCHEME** → staging or production
 - Fixed values written automatically:

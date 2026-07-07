@@ -88,7 +88,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         IPFS_GATEWAY_ENDPOINT: publicEnv.IPFS_GATEWAY_ENDPOINT,
         MEDIA_RESOLVER_ENDPOINT: publicEnv.MEDIA_RESOLVER_ENDPOINT,
         IPFS_MFS_PATH: publicEnv.IPFS_MFS_PATH,
-        TENOR_API_KEY: publicEnv.TENOR_API_KEY,
+        GIPHY_API_KEY: publicEnv.GIPHY_API_KEY,
         WS_ENDPOINT: publicEnv.WS_ENDPOINT,
         DEV_MODE_MEMES_WAVE_ID: publicEnv.DEV_MODE_MEMES_WAVE_ID,
         DEV_MODE_CURATION_WAVE_ID: publicEnv.DEV_MODE_CURATION_WAVE_ID,
