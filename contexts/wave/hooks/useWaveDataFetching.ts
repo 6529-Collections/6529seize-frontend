@@ -231,7 +231,6 @@ function useNativeInitialBackfill({
   const initialBackfillTimeoutsRef = useRef<
     Record<string, ReturnType<typeof setTimeout>>
   >({});
-  const initialBackfillPromisesRef = useRef<Record<string, Promise<void>>>({});
 
   const clearInitialBackfillTimeout = useCallback((waveId: string) => {
     const timeoutId = initialBackfillTimeoutsRef.current[waveId];
@@ -281,7 +280,7 @@ function useNativeInitialBackfill({
 
       initialBackfillTimeoutsRef.current[waveId] = setTimeout(() => {
         delete initialBackfillTimeoutsRef.current[waveId];
-        initialBackfillPromisesRef.current[waveId] = runNativeInitialBackfill({
+        void runNativeInitialBackfill({
           cleanupController,
           createController,
           getData,
@@ -466,7 +465,6 @@ export function useWaveDataFetching({
   const { cancelFetch, createController, cleanupController } =
     useWaveAbortController();
   const { updateEligibility } = useWaveEligibility();
-  const latestActivationPromiseRef = useRef<Promise<unknown> | null>(null);
   const initialWaveDropsLimit = getWaveDropsInitialLimit(isCapacitor);
   const syncNewestMessages = useSyncNewestMessages({
     updateData,
@@ -595,11 +593,7 @@ export function useWaveDataFetching({
 
   const registerWave = useCallback(
     (waveId: string, syncNewest = false, options?: RegisterWaveOptions) => {
-      latestActivationPromiseRef.current = activateWave(
-        waveId,
-        syncNewest,
-        options
-      );
+      void activateWave(waveId, syncNewest, options);
     },
     [activateWave]
   );
