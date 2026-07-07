@@ -4,6 +4,7 @@ import {
   getLowValueNetworkErrorTargetUrl,
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
+  shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
@@ -45,8 +46,15 @@ describe("sentry-client-filters", () => {
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const rabbyMobileUserRejectedStack =
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
+  const rabbyMobileAndroidUserRejectedStack = [
+    "EthereumProviderError: Not Allowed",
+    "    at getEthProviderError (inpage.js:1:1)",
+    "    at userRejectedRequest (inpage.js:1:1)",
+  ].join("\n");
   const rabbyMobileUserAgent =
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 RabbyMobileIOS/1.0 Mobile/15E148";
+  const rabbyMobileAndroidUserAgent =
+    "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
   const reactDomInsertBeforeMessage =
@@ -97,6 +105,8 @@ describe("sentry-client-filters", () => {
     "t?.startsWith is not a function";
   const walletConnectStaleSessionTopicMessage =
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
+  const extensionMessagingConnectionFailureMessage =
+    "Could not establish connection. Receiving end does not exist.";
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
@@ -186,6 +196,30 @@ describe("sentry-client-filters", () => {
             arguments: [
               "[WagmiSetup] Failed to install safe ethereum proxy Error:",
               "Cannot set property ethereum of #<Window> which has only a getter",
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
+
+  const createInjectedKeplrWalletCollisionEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value:
+            "Cannot assign to read only property 'keplr' of object '#<Window>'",
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///inject-runtime.js",
+                abs_path: "app:///inject-runtime.js",
+              },
             ],
           },
         },
@@ -399,6 +433,52 @@ describe("sentry-client-filters", () => {
         },
       ],
     },
+    ...overrides,
+  });
+
+  const createBrowserExtensionMessagingConnectionEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves/:wave",
+    request: {
+      url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    tags: {
+      browser: "Edge 148",
+      os: "Windows",
+      transaction: "/waves/:wave",
+      url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: extensionMessagingConnectionFailureMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///injectedScript.bundle.js",
+                abs_path: "app:///injectedScript.bundle.js",
+                function: "n",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        type: "http",
+        category: "fetch",
+        level: "info",
+        message: "POST: https://region1.google-analytics.com/g/collect [200]",
+        data: {
+          url: "https://region1.google-analytics.com/g/collect",
+          "url.is_first_party": false,
+          "url.is_first_party_api": false,
+        },
+      },
+    ],
     ...overrides,
   });
 
@@ -3272,9 +3352,50 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters injected keplr read-only collisions from inject-runtime stacks", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent();
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Coinbase WalletLink websocket 1006 close errors", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent();
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Coinbase WalletLink websocket 1006 close errors without a detail suffix", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                  abs_path:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
 
     // Act
     const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
@@ -4040,6 +4161,117 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed injected wallet collisions from requestProvider app URI frames", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      transaction: "/waves",
+      request: {
+        url: "https://6529.io/waves",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js:2:584019",
+                  abs_path: "app:///requestProvider.js:2:584019",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter wallet collisions when app-owned source frames are present", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js",
+                  abs_path: "app:///requestProvider.js",
+                },
+                {
+                  filename: "app:///services/auth/wallet-provider.ts",
+                  abs_path: "app:///services/auth/wallet-provider.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter wallet collisions when serialized stack is app-owned", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js",
+                  abs_path: "app:///requestProvider.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+      extra: {
+        __serialized__: {
+          stack:
+            "TypeError: Cannot set property ethereum of #<Window> which has only a getter\n    at installProvider (app:///services/auth/wallet-provider.ts:12:3)",
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters MetaMask mobile update-url circular React meta element errors", () => {
     // Arrange
     const event = createMetaMaskUpdateUrlCircularEvent();
@@ -4163,6 +4395,68 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "https://example.com/app.js",
                   abs_path: "https://example.com/app.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter keplr read-only collisions with app-owned source frames", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot assign to read only property 'keplr' of object '#<Window>'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject-runtime.js",
+                  abs_path: "app:///inject-runtime.js",
+                },
+                {
+                  filename: "app:///utils/wallets/install-keplr.ts",
+                  abs_path: "app:///utils/wallets/install-keplr.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter keplr read-only collisions with mixed app-owned and injected frame paths", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot assign to read only property 'keplr' of object '#<Window>'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///utils/wallets/install-keplr.ts",
+                  abs_path: "app:///inject-runtime.js",
                 },
               ],
             },
@@ -4407,6 +4701,37 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters production RabbyMobile Android user-rejected object rejections from user-agent context", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      request: {
+        headers: {
+          "User-Agent": rabbyMobileAndroidUserAgent,
+        },
+      },
+      breadcrumbs: [
+        {
+          category: "console",
+          level: "error",
+          message: "Rabby - RPC Error: Not Allowed",
+        },
+      ],
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileAndroidUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters exact RabbyMobile RainbowKit lookup errors from the runtime user agent", () => {
     // Arrange
     setNavigatorUserAgent(rabbyMobileUserAgent);
@@ -4450,6 +4775,217 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters observed extension messaging failures from injected script frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent();
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters extension messaging failures from browser extension frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  abs_path:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  function: "sendMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter extension messaging failures with app-owned source frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injectedScript.bundle.js",
+                  abs_path: "app:///injectedScript.bundle.js",
+                  function: "n",
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  function: "sendBrowserExtensionMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures with app-owned original stacks", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent();
+    const error = new Error(extensionMessagingConnectionFailureMessage);
+    error.stack = [
+      `Error: ${extensionMessagingConnectionFailureMessage}`,
+      "    at n (app:///injectedScript.bundle.js:2:99787)",
+      "    at sendBrowserExtensionMessage (webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      extra: {
+        __serialized__: {
+          message: extensionMessagingConnectionFailureMessage,
+          stack: [
+            `Error: ${extensionMessagingConnectionFailureMessage}`,
+            "    at n (app:///injectedScript.bundle.js:2:99787)",
+            "    at sendBrowserExtensionMessage (webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts:10:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures without injected or extension frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  abs_path:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  function: "sendBrowserExtensionMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures from mixed frame paths", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  abs_path:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  function: "sendBrowserExtensionMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unrelated errors from injected script frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Extension message failed for a different reason.",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injectedScript.bundle.js",
+                  abs_path: "app:///injectedScript.bundle.js",
+                  function: "n",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("does not filter disconnected wallet-provider object rejections with app frames", () => {
@@ -4580,6 +5116,33 @@ describe("sentry-client-filters", () => {
             },
           },
         ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter RabbyMobile user-rejected object rejections with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      request: {
+        headers: {
+          "User-Agent": rabbyMobileAndroidUserAgent,
+        },
+      },
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: [
+            rabbyMobileAndroidUserRejectedStack,
+            "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+          ].join("\n"),
+        },
       },
     });
 
@@ -4763,6 +5326,25 @@ describe("sentry-client-filters", () => {
           code: 4100,
           message: "Not Allowed",
           stack: rabbyMobileUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter user-rejected object rejections without RabbyMobile context", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileAndroidUserRejectedStack,
         },
       },
     });
