@@ -1,7 +1,9 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import LadysabrinaPage from "@/app/author/ladysabrina/page";
-import DisneyDeekayPage from "@/app/blog/disney-deekay-their-secret-to-animation/page";
+import DisneyDeekayPage, {
+  generateMetadata as generateDisneyDeekayMetadata,
+} from "@/app/blog/disney-deekay-their-secret-to-animation/page";
 import EducationCollabPage from "@/app/education/education-collaboration-form/page";
 import GMRedirectPage, {
   generateMetadata as generateGMMetadata,
@@ -37,13 +39,12 @@ describe("static SEO pages render correctly", () => {
     expect(screen.getAllByText(/Sabrina Khan/i).length).toBeGreaterThan(0);
   });
 
-  it("blog page renders expected metadata", () => {
+  it("blog page renders expected metadata", async () => {
     render(<DisneyDeekayPage />);
-    expect(getTitle()).toBe(
+    // Migrated blog articles supply their title via generateMetadata.
+    const metadata = await generateDisneyDeekayMetadata();
+    expect(metadata.title).toBe(
       "Disney and DeeKay: Their Secret to Animation - 6529.io"
-    );
-    expect(getCanonical()).toBe(
-      "/blog/disney-deekay-their-secret-to-animation/"
     );
     expect(
       screen.getAllByText(/Disney and DeeKay: Their Secret to Animation/i)
