@@ -852,56 +852,37 @@ const COMMON_MESSAGES = objectMessages("common", {
   close: "Close",
 } as const);
 
-const WAVES_CREATE_VOTING_MESSAGES = namespaceMessages(
-  "waves.create.voting",
-  [
-    ["options.tdhPlusXtdh", "TDH + XTDH"],
-    ["options.tdh", "TDH"],
-    ["options.rep", "Rep"],
-    ["options.cardSetTdh", "Card Set TDH"],
-    ["options.xtdh", "XTDH"],
-    ["cardSetTdh.title", "Card Set TDH"],
-    [
-      "cardSetTdh.helper",
-      "Only TDH from selected Meme cards counts.",
-    ],
-    ["cardSetTdh.loadingCount", "Loading Meme card count..."],
-    [
-      "cardSetTdh.countError",
-      "Unable to load Meme card count. You cannot continue until it loads.",
-    ],
-    ["cardSetTdh.selectedCount.one", "{count} Meme card selected"],
-    ["cardSetTdh.selectedCount.other", "{count} Meme cards selected"],
-    ["cardSetTdh.search.label", "Add by search"],
-    ["cardSetTdh.search.placeholder", "Search Meme card name or ID"],
-    ["cardSetTdh.search.loading", "Loading..."],
-    ["cardSetTdh.search.noResults", "No Meme card results"],
-    ["cardSetTdh.search.selected", "Selected"],
-    ["cardSetTdh.search.addAriaLabel", "Add The Memes #{tokenId}"],
-    ["cardSetTdh.validation.required", "Choose at least one Meme card."],
-    [
-      "cardSetTdh.validation.contractInvalid",
-      "Only Meme cards can be used for Card Set TDH.",
-    ],
-    [
-      "cardSetTdh.validation.memeCountUnavailable",
-      "Meme card count is not loaded yet.",
-    ],
-    [
-      "cardSetTdh.validation.fullSet",
-      "Selecting all Meme cards is the same as normal TDH. Choose a smaller set.",
-    ],
-    [
-      "cardSetTdh.validation.maxSelected",
-      "Leave at least one Meme card unselected.",
-    ],
-    ["cardSetTdh.validation.nonMeme", "Only Meme cards can be added."],
-    [
-      "cardSetTdh.validation.invalidMemeId",
-      "Only existing Meme card IDs can be added.",
-    ],
-  ] as const
-);
+const WAVES_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
+  "options.tdhPlusXtdh": "TDH + XTDH",
+  "options.tdh": "TDH",
+  "options.rep": "Rep",
+  "options.cardSetTdh": "Card Set TDH",
+  "options.xtdh": "XTDH",
+  "cardSetTdh.title": "Card Set TDH",
+  "cardSetTdh.helper": "Only TDH from selected Meme cards counts.",
+  "cardSetTdh.loadingCount": "Loading Meme card count...",
+  "cardSetTdh.countError":
+    "Unable to load Meme card count. You cannot continue until it loads.",
+  "cardSetTdh.selectedCount.one": "{count} Meme card selected",
+  "cardSetTdh.selectedCount.other": "{count} Meme cards selected",
+  "cardSetTdh.search.label": "Add by search",
+  "cardSetTdh.search.placeholder": "Search Meme card name or ID",
+  "cardSetTdh.search.loading": "Loading...",
+  "cardSetTdh.search.noResults": "No Meme card results",
+  "cardSetTdh.search.selected": "Selected",
+  "cardSetTdh.search.addAriaLabel": "Add The Memes #{tokenId}",
+  "cardSetTdh.validation.required": "Choose at least one Meme card.",
+  "cardSetTdh.validation.contractInvalid":
+    "Only Meme cards can be used for Card Set TDH.",
+  "cardSetTdh.validation.memeCountUnavailable":
+    "Meme card count is not loaded yet.",
+  "cardSetTdh.validation.fullSet":
+    "Selecting all Meme cards is the same as normal TDH. Choose a smaller set.",
+  "cardSetTdh.validation.maxSelected": "Leave at least one Meme card unselected.",
+  "cardSetTdh.validation.nonMeme": "Only Meme cards can be added.",
+  "cardSetTdh.validation.invalidMemeId":
+    "Only existing Meme card IDs can be added.",
+} as const);
 
 export const EN_US_MESSAGES = {
   ...join6529Messages,
