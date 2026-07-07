@@ -7,6 +7,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 jest.mock("@/components/leaderboard/NFTLeaderboard", () => ({
   fetchNftTdhResults: jest.fn(),
+  NftLeaderboardCollectorRow: (p: any) => (
+    <tr>
+      <td>{p.lead.rank}</td>
+      <td>
+        <div data-testid="collector">{p.lead.handle}</div>
+      </td>
+      <td>{p.lead.balance}</td>
+    </tr>
+  ),
   PAGE_SIZE: 25,
   setScrollPosition: jest.fn(),
 }));

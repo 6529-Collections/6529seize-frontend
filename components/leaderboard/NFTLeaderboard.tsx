@@ -283,6 +283,35 @@ export interface NftTDHRanked extends NftTDH {
   rank: number;
 }
 
+export function NftLeaderboardCollectorRow({
+  children,
+  lead,
+}: Readonly<{
+  children?: ReactNode;
+  lead: NftTDHRanked;
+}>) {
+  return (
+    <tr className="odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70">
+      <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm">
+        {numberWithCommas(lead.rank)}
+      </td>
+      <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3">
+        <LeaderboardCollector
+          handle={lead.handle}
+          consolidationKey={lead.consolidation_key}
+          consolidationDisplay={lead.consolidation_display}
+          pfp={lead.pfp_url}
+          level={lead.level}
+        />
+      </td>
+      <td className={`${tableCellClassName} tw-border-l`}>
+        {numberWithCommas(lead.balance)}
+      </td>
+      {children}
+    </tr>
+  );
+}
+
 function getCsvStatusMessage(
   status: CsvDownloadStatus,
   locale: SupportedLocale
@@ -670,25 +699,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           <tbody>
             {leaderboard.map((lead) => {
               return (
-                <tr
+                <NftLeaderboardCollectorRow
                   key={lead.consolidation_key}
-                  className="odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70"
+                  lead={lead}
                 >
-                  <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm">
-                    {numberWithCommas(lead.rank)}
-                  </td>
-                  <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3">
-                    <LeaderboardCollector
-                      handle={lead.handle}
-                      consolidationKey={lead.consolidation_key}
-                      consolidationDisplay={lead.consolidation_display}
-                      pfp={lead.pfp_url}
-                      level={lead.level}
-                    />
-                  </td>
-                  <td className={`${tableCellClassName} tw-border-l`}>
-                    {numberWithCommas(lead.balance)}
-                  </td>
                   <td className={tableCellClassName}>
                     {numberWithCommas(Math.round(lead.boosted_tdh))}
                   </td>
@@ -704,7 +718,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                   <td className={tableCellClassName}>
                     {numberWithCommas(Math.round(lead.total_tdh__raw))}
                   </td>
-                </tr>
+                </NftLeaderboardCollectorRow>
               );
             })}
           </tbody>
