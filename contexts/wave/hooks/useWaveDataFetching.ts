@@ -280,15 +280,17 @@ function useNativeInitialBackfill({
 
       initialBackfillTimeoutsRef.current[waveId] = setTimeout(() => {
         delete initialBackfillTimeoutsRef.current[waveId];
-        void runNativeInitialBackfill({
-          cleanupController,
-          createController,
-          getData,
-          initialOldestSerialNo,
-          updateData,
-          updateEligibility,
-          waveId,
-        });
+        /* NOSONAR - intentional fire-and-forget */ void runNativeInitialBackfill(
+          {
+            cleanupController,
+            createController,
+            getData,
+            initialOldestSerialNo,
+            updateData,
+            updateEligibility,
+            waveId,
+          }
+        );
       }, NATIVE_INITIAL_BACKFILL_DELAY_MS);
     },
     [
@@ -593,7 +595,11 @@ export function useWaveDataFetching({
 
   const registerWave = useCallback(
     (waveId: string, syncNewest = false, options?: RegisterWaveOptions) => {
-      void activateWave(waveId, syncNewest, options);
+      /* NOSONAR - intentional fire-and-forget */ void activateWave(
+        waveId,
+        syncNewest,
+        options
+      );
     },
     [activateWave]
   );
