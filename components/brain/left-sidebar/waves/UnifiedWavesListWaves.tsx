@@ -28,6 +28,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
+import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
@@ -176,15 +177,21 @@ const UnifiedWavesListWaves = forwardRef<
     } = activeWave;
     const { isApp, hasTouchScreen } = useDeviceInfo();
     const prefetchWaveData = usePrefetchWaveData();
+    // Persisted-hint fallback so the active subwave expands/highlights
+    // immediately after a cold reload (see useActiveSubwaveParentHint).
+    const effectiveActiveParentWaveId = useActiveSubwaveParentHint(
+      activeWaveId,
+      activeParentWaveId
+    );
     const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
       waves,
       activeWaveId: activeWave.id,
-      activeParentWaveId: activeWave.parentWaveId,
+      activeParentWaveId: effectiveActiveParentWaveId,
       loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
       onParentExpand: streamWaves.loadSubwavesForParent,
     });
     useLoadActiveSidebarParentSubwaves({
-      activeParentWaveId,
+      activeParentWaveId: effectiveActiveParentWaveId,
       waves,
     });
 

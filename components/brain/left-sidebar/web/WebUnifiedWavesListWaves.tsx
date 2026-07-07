@@ -5,6 +5,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
+import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -265,16 +266,23 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     parentWaveId: activeParentWaveId,
     set: setActiveWave,
   } = activeWave;
+  // Falls back to the persisted hint while the live parent is still loading
+  // after a cold reload, so the active subwave expands/highlights without the
+  // fetch-waterfall flicker.
+  const effectiveActiveParentWaveId = useActiveSubwaveParentHint(
+    activeWaveId,
+    activeParentWaveId
+  );
   const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
     waves,
     activeWaveId: activeWave.id,
-    activeParentWaveId: activeWave.parentWaveId,
+    activeParentWaveId: effectiveActiveParentWaveId,
     loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
     onParentExpand: streamWaves.loadSubwavesForParent,
     showExpandedSubwaves: !isCollapsed,
   });
   useLoadActiveSidebarParentSubwaves({
-    activeParentWaveId,
+    activeParentWaveId: effectiveActiveParentWaveId,
     waves,
   });
 
