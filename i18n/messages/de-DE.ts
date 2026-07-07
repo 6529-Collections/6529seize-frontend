@@ -365,6 +365,10 @@ export const DE_DE_MESSAGES = {
     "Datei-Upload-Bereich für den Wave-Chat",
   "waves.loadingStatus": "Waves werden geladen",
   "waves.gifPicker.dialogTitle": "GIF-Suche",
+  "waves.gifPicker.searchPlaceholder": "GIFs suchen",
+  "waves.gifPicker.noResults": "Keine GIFs gefunden.",
+  "waves.gifPicker.poweredBy": "Bereitgestellt von {brandName}",
+  "waves.gifPicker.poweredByPrefix": "Bereitgestellt von",
   "waves.gifPicker.status.checking": "GIF-Suche wird geprueft...",
   "waves.gifPicker.status.ready": "GIF-Suche ist bereit.",
   "waves.gifPicker.unavailable.title":

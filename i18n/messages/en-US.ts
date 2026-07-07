@@ -592,6 +592,10 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
 
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
   dialogTitle: "GIF search",
+  searchPlaceholder: "Search GIFs",
+  noResults: "No GIFs found.",
+  poweredBy: "Powered by {brandName}",
+  poweredByPrefix: "Powered by",
   "status.checking": "Checking GIF search...",
   "status.ready": "GIF search is ready.",
   "unavailable.title": "GIF search is temporarily unavailable.",

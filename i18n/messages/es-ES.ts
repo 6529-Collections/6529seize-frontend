@@ -365,6 +365,10 @@ export const ES_ES_MESSAGES = {
     "Área de carga de archivos del chat de wave",
   "waves.loadingStatus": "Cargando waves",
   "waves.gifPicker.dialogTitle": "Busqueda de GIF",
+  "waves.gifPicker.searchPlaceholder": "Buscar GIF",
+  "waves.gifPicker.noResults": "No se encontraron GIFs.",
+  "waves.gifPicker.poweredBy": "Con tecnología de {brandName}",
+  "waves.gifPicker.poweredByPrefix": "Con tecnología de",
   "waves.gifPicker.status.checking": "Buscando GIF...",
   "waves.gifPicker.status.ready": "La busqueda de GIF esta lista.",
   "waves.gifPicker.unavailable.title":

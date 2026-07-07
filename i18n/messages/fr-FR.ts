@@ -372,6 +372,10 @@ export const FR_FR_MESSAGES = {
     "Zone d'envoi de fichiers du chat de wave",
   "waves.loadingStatus": "Chargement des waves",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
+  "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",
+  "waves.gifPicker.noResults": "Aucun GIF trouvé.",
+  "waves.gifPicker.poweredBy": "Propulsé par {brandName}",
+  "waves.gifPicker.poweredByPrefix": "Propulsé par",
   "waves.gifPicker.status.checking": "Recherche de GIF...",
   "waves.gifPicker.status.ready": "La recherche de GIF est prete.",
   "waves.gifPicker.unavailable.title":

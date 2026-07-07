@@ -4,6 +4,7 @@ import {
   getLowValueNetworkErrorTargetUrl,
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
+  shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
@@ -104,6 +105,8 @@ describe("sentry-client-filters", () => {
     "t?.startsWith is not a function";
   const walletConnectStaleSessionTopicMessage =
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
+  const extensionMessagingConnectionFailureMessage =
+    "Could not establish connection. Receiving end does not exist.";
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
@@ -193,6 +196,30 @@ describe("sentry-client-filters", () => {
             arguments: [
               "[WagmiSetup] Failed to install safe ethereum proxy Error:",
               "Cannot set property ethereum of #<Window> which has only a getter",
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
+
+  const createInjectedKeplrWalletCollisionEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value:
+            "Cannot assign to read only property 'keplr' of object '#<Window>'",
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///inject-runtime.js",
+                abs_path: "app:///inject-runtime.js",
+              },
             ],
           },
         },
@@ -381,6 +408,45 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createObservedSentryE7WasmCspUnsafeEvalEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves",
+    exception: {
+      values: [
+        {
+          type: "RuntimeError",
+          value: wasmCspUnsafeEvalMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///chunks/utils-DNoBWR8F.js",
+                abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                function: "k",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    contexts: {
+      browser: {
+        name: "Chrome",
+        version: "150",
+      },
+      os: {
+        name: "Windows",
+      },
+    },
+    tags: {
+      environment: "production",
+      transaction: "/waves",
+      url: "/waves",
+    },
+    ...overrides,
+  });
+
   const createInjectedProviderProxyStartsWithEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -406,6 +472,52 @@ describe("sentry-client-filters", () => {
         },
       ],
     },
+    ...overrides,
+  });
+
+  const createBrowserExtensionMessagingConnectionEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves/:wave",
+    request: {
+      url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    tags: {
+      browser: "Edge 148",
+      os: "Windows",
+      transaction: "/waves/:wave",
+      url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: extensionMessagingConnectionFailureMessage,
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///injectedScript.bundle.js",
+                abs_path: "app:///injectedScript.bundle.js",
+                function: "n",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        type: "http",
+        category: "fetch",
+        level: "info",
+        message: "POST: https://region1.google-analytics.com/g/collect [200]",
+        data: {
+          url: "https://region1.google-analytics.com/g/collect",
+          "url.is_first_party": false,
+          "url.is_first_party_api": false,
+        },
+      },
+    ],
     ...overrides,
   });
 
@@ -724,6 +836,31 @@ describe("sentry-client-filters", () => {
 
   afterEach(() => {
     setNavigatorUserAgent(originalNavigatorUserAgent);
+  });
+
+  describe("first-party static frame paths", () => {
+    it("keeps the Next static path token stable", () => {
+      expect(__testing.nextStaticFramePathToken).toBe("/_next/static/");
+    });
+
+    it("classifies hosted and app Next static paths as first-party", () => {
+      expect(
+        __testing.isFirstPartyFramePath(
+          "https://host.example/_next/static/chunk.js"
+        )
+      ).toBe(true);
+      expect(
+        __testing.isFirstPartyFramePath("app:///_next/static/chunks/app.js")
+      ).toBe(true);
+    });
+
+    it("does not classify partial third-party Next static tokens as first-party", () => {
+      expect(
+        __testing.isFirstPartyFramePath(
+          "https://cdn.example/assets_next/static/chunk.js"
+        )
+      ).toBe(false);
+    });
   });
 
   const createReactDomInsertBeforeEvent = (
@@ -3279,9 +3416,86 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters injected keplr read-only collisions from inject-runtime stacks", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent();
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Coinbase WalletLink websocket 1006 close errors", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent();
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Coinbase WalletLink websocket 1006 close errors without a detail suffix", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                  abs_path:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters production Coinbase WalletLink websocket 1006 frames marked in_app by Sentry", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack://_n_e/./node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                  abs_path:
+                    "webpack://_n_e/./node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                  function: "webSocket.onclose",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
 
     // Act
     const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
@@ -3342,6 +3556,41 @@ describe("sentry-client-filters", () => {
           },
         ],
       },
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters pre-symbolication Coinbase WalletLink websocket 1006 close errors marked in_app by Sentry when AppKit breadcrumbs tie it to Coinbase", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "webSocket.onclose",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
     });
 
     // Act
@@ -3451,6 +3700,41 @@ describe("sentry-client-filters", () => {
                   filename:
                     "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
                   function: "e",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters raw AppKit Coinbase websocket 1006 unhandled rejections marked in_app by Sentry", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "e",
+                  in_app: true,
                 },
               ],
             },
@@ -3629,6 +3913,40 @@ describe("sentry-client-filters", () => {
         ],
       },
       breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw Next static in_app websocket 1006 close errors without third-party wallet evidence", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/services-websocket-provider-123.js",
+                  function: "webSocket.onclose",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
     });
 
     // Act
@@ -4296,6 +4614,68 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter keplr read-only collisions with app-owned source frames", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot assign to read only property 'keplr' of object '#<Window>'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject-runtime.js",
+                  abs_path: "app:///inject-runtime.js",
+                },
+                {
+                  filename: "app:///utils/wallets/install-keplr.ts",
+                  abs_path: "app:///utils/wallets/install-keplr.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter keplr read-only collisions with mixed app-owned and injected frame paths", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot assign to read only property 'keplr' of object '#<Window>'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///utils/wallets/install-keplr.ts",
+                  abs_path: "app:///inject-runtime.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter unrelated app URI injected errors", () => {
     // Arrange
     const event = createInjectedWalletCollisionEvent({
@@ -4590,6 +4970,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed Sentry E7 WebAssembly CSP unsafe-eval errors from injected static chunks", () => {
+    // Arrange
+    const event = createObservedSentryE7WasmCspUnsafeEvalEvent();
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters injected provider proxy startsWith errors", () => {
     // Arrange
     const event = createInjectedProviderProxyStartsWithEvent();
@@ -4599,6 +4990,217 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters observed extension messaging failures from injected script frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent();
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters extension messaging failures from browser extension frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  abs_path:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  function: "sendMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter extension messaging failures with app-owned source frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injectedScript.bundle.js",
+                  abs_path: "app:///injectedScript.bundle.js",
+                  function: "n",
+                },
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  function: "sendBrowserExtensionMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures with app-owned original stacks", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent();
+    const error = new Error(extensionMessagingConnectionFailureMessage);
+    error.stack = [
+      `Error: ${extensionMessagingConnectionFailureMessage}`,
+      "    at n (app:///injectedScript.bundle.js:2:99787)",
+      "    at sendBrowserExtensionMessage (webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      extra: {
+        __serialized__: {
+          message: extensionMessagingConnectionFailureMessage,
+          stack: [
+            `Error: ${extensionMessagingConnectionFailureMessage}`,
+            "    at n (app:///injectedScript.bundle.js:2:99787)",
+            "    at sendBrowserExtensionMessage (webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts:10:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures without injected or extension frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  abs_path:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  function: "sendBrowserExtensionMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter extension messaging failures from mixed frame paths", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "chrome-extension://abcdefghijklmnop/contentScript.js",
+                  abs_path:
+                    "https://6529.io/_next/static/chunks/app/waves/page.js",
+                  function: "sendBrowserExtensionMessage",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unrelated errors from injected script frames", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Extension message failed for a different reason.",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injectedScript.bundle.js",
+                  abs_path: "app:///injectedScript.bundle.js",
+                  function: "n",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("does not filter disconnected wallet-provider object rejections with app frames", () => {
@@ -4888,6 +5490,132 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "app:///components/providers/WagmiSetup.tsx",
                   abs_path: "app:///components/providers/WagmiSetup.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed Sentry E7 WebAssembly CSP errors when the function differs", () => {
+    // Arrange
+    const event = createObservedSentryE7WasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  function: "loadWasmModule",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter non-CSP errors with the observed Sentry E7 static chunk frame", () => {
+    // Arrange
+    const event = createObservedSentryE7WasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: "Aborted(RuntimeError: unreachable)",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  function: "k",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed Sentry E7 WebAssembly CSP errors with app source frames", () => {
+    // Arrange
+    const event = createObservedSentryE7WasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  function: "k",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///components/providers/WagmiSetup.tsx",
+                  abs_path: "app:///components/providers/WagmiSetup.tsx",
+                  function: "initializeAppKit",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WebAssembly CSP errors when one frame path is app-owned", () => {
+    // Arrange
+    const event = createInjectedWasmCspUnsafeEvalEvent({
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject.js",
+                  abs_path: "app:///components/providers/WagmiSetup.tsx",
+                  function: "k",
                   in_app: true,
                 },
               ],
