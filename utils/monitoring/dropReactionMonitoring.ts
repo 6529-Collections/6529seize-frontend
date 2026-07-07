@@ -5,7 +5,8 @@ import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import * as Sentry from "@sentry/nextjs";
 
-const RECONCILIATION_WINDOW_MS = 15_000;
+const PENDING_RECONCILIATION_WINDOW_MS = 15_000;
+const SUCCESSFUL_RECONCILIATION_WINDOW_MS = 2 * 60_000;
 const DEDUPE_WINDOW_MS = 60_000;
 const MUTATION_RETENTION_MS = 5 * 60_000;
 const REACTION_FEATURE = "drop-reaction";
@@ -566,6 +567,52 @@ export function recordReactionRollbackApplied(
   addReactionBreadcrumb("reaction.rollback_applied", context);
 }
 
+function captureReactionOptimisticReverted(params: {
+  readonly context: ReactionMutationContext;
+  readonly serverReaction: string | null;
+  readonly websocketStatus: WebSocketStatus | undefined;
+  readonly timeSinceMutationMs: number;
+  readonly timeSinceApiSuccessMs: number | null;
+  readonly reconciliationWindowMs: number;
+}): void {
+  captureReactionEvent({
+    error: new Error(
+      "Reaction optimistic state disagreed with canonical state"
+    ),
+    level: "warning",
+    fingerprint: [REACTION_FEATURE, ANOMALY_OPTIMISTIC_REVERTED],
+    tags: {
+      feature: REACTION_FEATURE,
+      operation: REACTION_ANOMALY_OPERATION,
+      anomaly_kind: ANOMALY_OPTIMISTIC_REVERTED,
+      source: params.context.source,
+      action: params.context.action,
+    },
+    extra: {
+      mutation_id: params.context.mutationId,
+      drop_mutation_seq: params.context.dropMutationSeq,
+      drop_id: params.context.dropId,
+      wave_id: params.context.waveId,
+      previous_reaction: params.context.previousReaction,
+      intended_reaction: params.context.intendedReaction,
+      optimistic_reaction: params.context.optimisticReaction,
+      server_reaction: params.serverReaction ?? undefined,
+      profile_id: params.context.profileId ?? undefined,
+      pathname: params.context.pathname ?? undefined,
+      visibility_state: params.context.visibilityState ?? undefined,
+      online: params.context.online ?? undefined,
+      websocket_status: params.websocketStatus ?? undefined,
+      endpoint: params.context.endpoint ?? undefined,
+      method: params.context.method ?? undefined,
+      reconciled_from: "ws_refetch",
+      time_since_mutation_ms: params.timeSinceMutationMs,
+      time_since_api_success_ms: params.timeSinceApiSuccessMs ?? undefined,
+      reconciliation_window_ms: params.reconciliationWindowMs,
+      anomaly_kind: ANOMALY_OPTIMISTIC_REVERTED,
+    },
+  });
+}
+
 export function recordReactionRealtimeReconciliation(params: {
   drop: Pick<ApiDrop, "id"> & {
     readonly wave: Pick<ApiDrop["wave"], "id">;
@@ -599,6 +646,14 @@ export function recordReactionRealtimeReconciliation(params: {
 
   const expectedReaction = context.intendedReaction;
   const timeSinceMutationMs = now - context.startedAt;
+  const timeSinceApiSuccessMs =
+    context.apiSucceededAt === null ? null : now - context.apiSucceededAt;
+  const timeSinceReconciliationStartMs =
+    timeSinceApiSuccessMs ?? timeSinceMutationMs;
+  const reconciliationWindowMs =
+    context.apiSucceededAt === null
+      ? PENDING_RECONCILIATION_WINDOW_MS
+      : SUCCESSFUL_RECONCILIATION_WINDOW_MS;
   const websocketStatus =
     toWebsocketStatus(params.websocketStatus) ?? undefined;
   const resultBase = {
@@ -620,7 +675,7 @@ export function recordReactionRealtimeReconciliation(params: {
     };
   }
 
-  if (timeSinceMutationMs <= RECONCILIATION_WINDOW_MS) {
+  if (timeSinceReconciliationStartMs <= reconciliationWindowMs) {
     addReactionBreadcrumb(
       "reaction.realtime_superseded",
       context,
@@ -630,6 +685,8 @@ export function recordReactionRealtimeReconciliation(params: {
         server_reaction: serverReaction ?? undefined,
         superseded_by_mutation_id: context.mutationId,
         time_since_mutation_ms: timeSinceMutationMs,
+        time_since_api_success_ms: timeSinceApiSuccessMs ?? undefined,
+        reconciliation_window_ms: reconciliationWindowMs,
         websocket_status: websocketStatus,
       },
       "warning"
@@ -656,6 +713,8 @@ export function recordReactionRealtimeReconciliation(params: {
       reconciled_from: "ws_refetch",
       server_reaction: serverReaction ?? undefined,
       time_since_mutation_ms: timeSinceMutationMs,
+      time_since_api_success_ms: timeSinceApiSuccessMs ?? undefined,
+      reconciliation_window_ms: reconciliationWindowMs,
       websocket_status: websocketStatus,
     },
     "warning"
@@ -678,42 +737,13 @@ export function recordReactionRealtimeReconciliation(params: {
     };
   }
 
-  captureReactionEvent({
-    error: new Error(
-      "Reaction optimistic state disagreed with canonical state"
-    ),
-    level: "warning",
-    fingerprint: [REACTION_FEATURE, ANOMALY_OPTIMISTIC_REVERTED],
-    tags: {
-      feature: REACTION_FEATURE,
-      operation: REACTION_ANOMALY_OPERATION,
-      anomaly_kind: ANOMALY_OPTIMISTIC_REVERTED,
-      source: context.source,
-      action: context.action,
-    },
-    extra: {
-      mutation_id: context.mutationId,
-      drop_mutation_seq: context.dropMutationSeq,
-      drop_id: context.dropId,
-      wave_id: context.waveId,
-      previous_reaction: context.previousReaction,
-      intended_reaction: context.intendedReaction,
-      optimistic_reaction: context.optimisticReaction,
-      server_reaction: serverReaction ?? undefined,
-      profile_id: context.profileId ?? undefined,
-      pathname: context.pathname ?? undefined,
-      visibility_state: context.visibilityState ?? undefined,
-      online: context.online ?? undefined,
-      websocket_status:
-        toWebsocketStatus(params.websocketStatus) ??
-        context.websocketStatus ??
-        undefined,
-      endpoint: context.endpoint ?? undefined,
-      method: context.method ?? undefined,
-      reconciled_from: "ws_refetch",
-      time_since_mutation_ms: timeSinceMutationMs,
-      anomaly_kind: ANOMALY_OPTIMISTIC_REVERTED,
-    },
+  captureReactionOptimisticReverted({
+    context,
+    serverReaction,
+    websocketStatus: websocketStatus ?? context.websocketStatus ?? undefined,
+    timeSinceMutationMs,
+    timeSinceApiSuccessMs,
+    reconciliationWindowMs,
   });
 
   clearActiveIntentForContext(context);

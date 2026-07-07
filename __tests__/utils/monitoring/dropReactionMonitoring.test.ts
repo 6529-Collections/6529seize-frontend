@@ -419,15 +419,15 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
-  it("captures reconciliation mismatch after the guard window", () => {
+  it("suppresses stale canonical refetches inside the successful reaction window", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-4",
       waveId: "wave-1",
-      source: "chip",
-      action: "replace",
-      previousReaction: ":wave:",
-      intendedReaction: ":smile:",
-      optimisticReaction: ":smile:",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
       profileId: "profile-1",
       websocketStatus: WebSocketStatus.CONNECTED,
     });
@@ -441,10 +441,62 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestSucceeded(mutation);
     expect(mutation.apiFailedAt).toBeNull();
 
-    dateNowSpy.mockReturnValue(17_000);
+    dateNowSpy.mockReturnValue(57_000);
     const result = recordReactionRealtimeReconciliation({
       drop: {
         id: "drop-4",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: null,
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(result).toEqual({
+      shouldApplyCanonicalDrop: false,
+      expectedReaction: ":joy:",
+      serverReaction: null,
+      supersededByMutationId: mutation.mutationId,
+    });
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.realtime_superseded",
+        data: expect.objectContaining({
+          expected_reaction: ":joy:",
+          time_since_api_success_ms: 55_900,
+          reconciliation_window_ms: 120_000,
+        }),
+      })
+    );
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("captures reconciliation mismatch after the successful reaction window", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-4-expired",
+      waveId: "wave-1",
+      source: "chip",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-4-expired/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    dateNowSpy.mockReturnValue(130_000);
+    const result = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-4-expired",
         wave: { id: "wave-1" },
         context_profile_context: {
           reaction: ":wave:",
@@ -463,6 +515,8 @@ describe("dropReactionMonitoring", () => {
         message: "reaction.optimistic_reverted",
         data: expect.objectContaining({
           server_reaction: ":wave:",
+          time_since_api_success_ms: 128_900,
+          reconciliation_window_ms: 120_000,
         }),
       })
     );
