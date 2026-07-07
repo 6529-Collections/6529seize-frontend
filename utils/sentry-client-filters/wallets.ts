@@ -144,6 +144,12 @@ function isCoinbaseWalletLinkWebSocketCloseFrame(
   return frame.function === coinbaseWalletLinkWebSocketCloseFunction;
 }
 
+function isRawNextStaticFrame(frame: SentryStackFrame): boolean {
+  return [frame.filename, frame.abs_path].some(
+    (path) => typeof path === "string" && path.includes("/_next/static/")
+  );
+}
+
 function hasAppOwnedWalletLinkWebSocketInAppFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
@@ -153,7 +159,8 @@ function hasAppOwnedWalletLinkWebSocketInAppFrame(
       (frame) =>
         frame.in_app === true &&
         !isCoinbaseWalletLinkWebSocketFrame(frame) &&
-        !isCoinbaseWalletLinkWebSocketCloseFrame(frame)
+        !isCoinbaseWalletLinkWebSocketCloseFrame(frame) &&
+        !isRawNextStaticFrame(frame)
     )
   );
 }
