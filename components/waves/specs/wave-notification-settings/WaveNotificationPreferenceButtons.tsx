@@ -50,6 +50,26 @@ interface NotificationMenuItemProps {
   readonly onSelect: () => void;
 }
 
+function NotificationMenuItemIndicator({
+  loading,
+  active,
+}: {
+  readonly loading: boolean;
+  readonly active: boolean;
+}) {
+  if (loading) {
+    return <Spinner dimension={12} />;
+  }
+
+  if (active) {
+    return (
+      <CheckIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+    );
+  }
+
+  return <span className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />;
+}
+
 function NotificationMenuItem({
   icon: Icon,
   label,
@@ -100,16 +120,7 @@ function NotificationMenuItem({
             </span>
           )}
         </span>
-        {loading ? (
-          <Spinner dimension={12} />
-        ) : active ? (
-          <CheckIcon
-            className="tw-size-4 tw-flex-shrink-0"
-            aria-hidden="true"
-          />
-        ) : (
-          <span className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
-        )}
+        <NotificationMenuItemIndicator loading={loading} active={active} />
       </button>
     </li>
   );
