@@ -23,8 +23,8 @@ export const coinbaseWalletLinkWebSocketFile = "WalletLinkWebSocket.js";
 export const coinbaseWalletLinkWebSocketCloseFunction = "webSocket.onclose";
 export const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
-export const coinbaseWalletLinkWebSocket1006Pattern =
-  /^websocket error 1006(?::.*)?$/i;
+export const coinbaseWalletLinkWebSocket1006MessagePrefix =
+  "websocket error 1006";
 export const walletWebSocketBreadcrumbAppKitTokens = [
   "appkit",
   "reown",
@@ -193,6 +193,9 @@ export const walletConnectStaleSessionFunctions = new Set([
   "isValidSessionTopic",
   "onRelayMessage",
 ]);
+export const extensionMessagingConnectionFailureMessage =
+  "Could not establish connection. Receiving end does not exist.";
+export const injectedScriptBundlePathToken = "injectedscript.bundle.js";
 export const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 export const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 export const FNV_OFFSET_BASIS = 2166136261;

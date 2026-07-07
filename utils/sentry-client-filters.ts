@@ -25,6 +25,7 @@ export {
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
 export {
+  shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
