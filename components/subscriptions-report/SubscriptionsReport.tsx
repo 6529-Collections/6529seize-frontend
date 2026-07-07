@@ -378,13 +378,13 @@ export default function SubscriptionsReportComponent() {
   return (
     <div className="tw-container tw-mx-auto tw-px-2 tw-py-5 lg:tw-px-6 xl:tw-px-8">
       <div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between">
-          <h1>Subscriptions Report</h1>
-          <div className="tw-flex tw-items-center tw-gap-3">
+        <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <h1 className="tw-m-0">Subscriptions Report</h1>
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-4 tw-gap-y-3 sm:tw-w-auto sm:tw-justify-end">
             <AboutSubscriptionsProfileButton />
             <Link
               href="/about/subscriptions"
-              className="decoration-hover-underline"
+              className="decoration-hover-underline tw-whitespace-nowrap"
               aria-label="Learn more about The Memes subscriptions"
             >
               Learn More
