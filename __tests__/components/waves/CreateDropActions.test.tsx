@@ -9,15 +9,15 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
-let ORIGINAL_TENOR_KEY: string | undefined;
+let ORIGINAL_GIPHY_KEY: string | undefined;
 
 beforeAll(() => {
-  ORIGINAL_TENOR_KEY = require("@/config/env").publicEnv.TENOR_API_KEY;
+  ORIGINAL_GIPHY_KEY = require("@/config/env").publicEnv.GIPHY_API_KEY;
 });
 
 afterEach(() => {
-  // restore TENOR key to avoid cross-test leakage
-  require("@/config/env").publicEnv.TENOR_API_KEY = ORIGINAL_TENOR_KEY;
+  // restore GIPHY key to avoid cross-test leakage
+  require("@/config/env").publicEnv.GIPHY_API_KEY = ORIGINAL_GIPHY_KEY;
   jest.clearAllMocks();
 });
 
@@ -106,9 +106,14 @@ jest.mock("@/components/waves/StormButton", () => {
 });
 
 jest.mock("@/components/waves/CreateDropGifPicker", () => {
-  return function MockCreateDropGifPicker({ show, setShow, onSelect }: any) {
+  return function MockCreateDropGifPicker({
+    giphyApiKey,
+    show,
+    setShow,
+    onSelect,
+  }: any) {
     return show ? (
-      <div data-testid="gif-picker">
+      <div data-testid="gif-picker" data-api-key={giphyApiKey}>
         <button
           onClick={() => onSelect("test-gif.gif")}
           data-testid="select-gif"
@@ -351,6 +356,10 @@ describe("CreateDropActions", () => {
     await userEvent.click(gifButtons[0]);
 
     expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
+    expect(screen.getByTestId("gif-picker")).toHaveAttribute(
+      "data-api-key",
+      "test-giphy-api-key"
+    );
   });
 
   it("calls onGifDrop when GIF is selected", async () => {
@@ -396,12 +405,12 @@ describe("CreateDropActions", () => {
 
   it("does not show GIF button when API key is not available", () => {
     const { publicEnv } = require("@/config/env");
-    const prevKey = publicEnv.TENOR_API_KEY;
-    publicEnv.TENOR_API_KEY = undefined;
+    const prevKey = publicEnv.GIPHY_API_KEY;
+    publicEnv.GIPHY_API_KEY = undefined;
     render(<CreateDropActions {...defaultProps} />);
 
     expect(screen.queryByLabelText("Add GIF")).not.toBeInTheDocument();
-    publicEnv.TENOR_API_KEY = prevKey;
+    publicEnv.GIPHY_API_KEY = prevKey;
   });
 
   it("highlights metadata button when metadata is missing", () => {

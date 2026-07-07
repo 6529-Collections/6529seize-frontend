@@ -133,7 +133,7 @@ jobs:
           VERSION: ${{ env.COMMIT_SHA }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           NEXTGEN_CHAIN_ID: ${{ env.NEXTGEN_CHAIN_ID }}
-          TENOR_API_KEY: ${{ secrets.TENOR_API_KEY }}
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
           AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
           AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
           AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
