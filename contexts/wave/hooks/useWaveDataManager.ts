@@ -2,6 +2,10 @@ import { useWaveDataFetching } from "./useWaveDataFetching";
 import { useWavePagination } from "./useWavePagination";
 import type { WaveDataStoreUpdater } from "./types";
 
+interface WaveDataManagerProps extends WaveDataStoreUpdater {
+  readonly isCapacitor?: boolean | undefined;
+}
+
 /**
  * Main hook that manages wave data loading and caching
  * This is the primary hook that components will use
@@ -10,13 +14,15 @@ export function useWaveDataManager({
   updateData,
   getData,
   removeDrop,
-}: WaveDataStoreUpdater) {
+  isCapacitor = false,
+}: WaveDataManagerProps) {
   // Use composition to build the complete functionality
   const { registerWave, cancelWaveDataFetch, syncNewestMessages } =
     useWaveDataFetching({
       updateData,
       getData,
       removeDrop,
+      isCapacitor,
     });
 
   // Add pagination functionality

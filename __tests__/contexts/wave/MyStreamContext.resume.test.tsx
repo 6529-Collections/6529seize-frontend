@@ -203,10 +203,40 @@ describe("MyStreamProvider resume sync", () => {
       });
     });
 
-    expect(mockRegisterWave).toHaveBeenCalledWith("wave-2", true);
+    expect(mockRegisterWave).toHaveBeenCalledWith("wave-2", true, {
+      skipInitialBackfill: false,
+    });
     expect(mockSetActiveWave).toHaveBeenCalledWith("wave-2", {
       isDirectMessage: true,
       divider: 9,
+    });
+  });
+
+  it("does not skip native backfill for blank serial targets", () => {
+    let context: ReturnType<typeof useMyStream> | null = null;
+
+    render(
+      <MyStreamProvider>
+        <CaptureMyStream
+          onContext={(nextContext) => {
+            context = nextContext;
+          }}
+        />
+      </MyStreamProvider>
+    );
+
+    expect(context).not.toBeNull();
+    const capturedContext = context;
+    mockRegisterWave.mockClear();
+
+    act(() => {
+      capturedContext!.activeWave.set("wave-2", {
+        serialNo: "   ",
+      });
+    });
+
+    expect(mockRegisterWave).toHaveBeenCalledWith("wave-2", true, {
+      skipInitialBackfill: false,
     });
   });
 
