@@ -54,10 +54,7 @@ import {
   hasAppOwnedSourceFrame,
   hasAppOwnedSourceStackValue,
   hasAppOwnedStackPath,
-  hasInjectedAppUriFrame,
-  hasInjectedWalletCollisionAppUriStackValue,
   hasLikelyAppOwnedFrame,
-  hasOnlyAppUriFrames,
   hasOnlyInjectedProviderProxyFrames,
   isInjectedOrThirdPartyWalletExtensionPath,
 } from "./app-frame-utils";
@@ -347,18 +344,25 @@ export function matchesWalletCollisionPattern(value: string): boolean {
   );
 }
 
-function hasInjectedAppUriSignature(
+function hasInjectedOrThirdPartyWalletCollisionFrame(
+  frame: SentryStackFrame
+): boolean {
+  if (hasAppOwnedSourceFrame([frame])) {
+    return false;
+  }
+
+  return [frame.filename, frame.abs_path].some(
+    (value) =>
+      typeof value === "string" &&
+      isInjectedOrThirdPartyWalletExtensionPath(value)
+  );
+}
+
+function hasInjectedOrThirdPartyWalletCollisionStack(
   frames: SentryStackFrame[] | undefined,
   hint?: SentryEventHint
 ): boolean {
-  const hasOnlyInjectedFrames =
-    hasOnlyAppUriFrames(frames) && hasInjectedAppUriFrame(frames);
-  if (hasOnlyInjectedFrames) {
-    return true;
-  }
-
-  const stack = getHintExceptionStack(hint);
-  if (!hasInjectedWalletCollisionAppUriStackValue(stack)) {
+  if (!hasInjectedOrThirdPartyWalletExtensionSignature(frames, hint)) {
     return false;
   }
 
@@ -366,19 +370,7 @@ function hasInjectedAppUriSignature(
     return true;
   }
 
-  return hasOnlyAppUriFrames(frames);
-}
-
-function hasAppOwnedInjectedWalletCollisionEvidence(
-  event: SentryClientEvent,
-  frames: SentryStackFrame[] | undefined,
-  hint?: SentryEventHint
-): boolean {
-  return (
-    hasAppOwnedSourceFrame(frames) ||
-    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
-    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
-  );
+  return frames.every(hasInjectedOrThirdPartyWalletCollisionFrame);
 }
 
 function hasWalletCollisionSignature(
@@ -755,13 +747,13 @@ export function shouldFilterInjectedWalletCollision(
   }
 
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
-  if (hasAppOwnedInjectedWalletCollisionEvidence(event, frames, hint)) {
+  if (!hasWalletCollisionSignature(event, hint)) {
     return false;
   }
 
-  if (!hasInjectedAppUriSignature(frames, hint)) {
+  if (hasAppOwnedNonExtensionSignature(frames, hint)) {
     return false;
   }
 
-  return hasWalletCollisionSignature(event, hint);
+  return hasInjectedOrThirdPartyWalletCollisionStack(frames, hint);
 }
