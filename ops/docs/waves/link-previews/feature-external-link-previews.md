@@ -55,9 +55,9 @@ loading.
 - Multiple eligible links in one drop render as separate cards.
 - If previews are hidden for a drop, links stay plain until previews are shown
   again.
-- Provider-specific URLs (for example YouTube, Twitter/X, TikTok/Farcaster/Tenor,
-  Google/Wikimedia, and web3 handlers) are documented on sibling pages in this
-  folder.
+- Provider-specific URLs (for example YouTube, Twitter/X,
+  TikTok/Farcaster/Tenor/GIPHY, Google/Wikimedia, and web3 handlers) are
+  documented on sibling pages in this folder.
 
 ## Edge Cases
 

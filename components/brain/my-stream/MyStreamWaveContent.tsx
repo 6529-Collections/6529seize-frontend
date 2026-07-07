@@ -35,6 +35,7 @@ import { SubmissionStatus, useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getDropQueryKey } from "@/services/api/drop-api";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
@@ -213,10 +214,19 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       router.push(newUrl, { scroll: false });
     },
   });
+  const metadataWaveId = wave?.id;
 
   useEffect(() => {
     registerWave(waveId, true);
   }, [registerWave, waveId]);
+
+  useEffect(() => {
+    if (!metadataWaveId) {
+      return;
+    }
+
+    markMobileLaunchStep("wave_metadata_loaded");
+  }, [metadataWaveId]);
 
   useEffect(() => {
     if (!wave) {

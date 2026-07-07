@@ -2,16 +2,20 @@ import { publicEnv } from "@/config/env";
 import { Capacitor } from "@capacitor/core";
 import * as Sentry from "@sentry/nextjs";
 import {
-  sanitizeEndpointGroup,
-  sanitizeRouteFamily,
-} from "./mobileLaunchTimingSanitizers";
+  buildApiSummary,
+  buildCapturedApiTiming,
+  buildFlatApiAttributes,
+  MAX_API_CALLS,
+  type ApiRequestTimingInput,
+  type CapturedApiTiming,
+} from "./mobileLaunchApiTiming";
+import { bucketMs } from "./mobileLaunchTimingBuckets";
+import { sanitizeRouteFamily } from "./mobileLaunchTimingSanitizers";
 
 const SLOW_LAUNCH_MS = 3000;
 const NORMAL_SAMPLE_RATE = 0.05;
 const FOCUSED_ROUTE_SAMPLE_RATE = 1;
 const TIMEOUT_FLUSH_MS = 15000;
-const MAX_API_CALLS = 10;
-const SLOWEST_API_CALLS = 5;
 
 type FlushReason =
   | "shell_paint"
@@ -20,8 +24,6 @@ type FlushReason =
   | "pagehide"
   | "error"
   | "manual";
-
-type ApiStatus = number | "aborted" | "network_error" | "unknown";
 
 export type MobileLaunchAuthState =
   | "anonymous"
@@ -53,18 +55,6 @@ type StepTiming = {
   readonly status?: "ok" | "error";
 };
 
-type ApiTiming = {
-  readonly method: string;
-  readonly status: ApiStatus;
-  readonly duration_ms: number;
-  readonly start_offset_ms: number;
-  readonly endpoint_group: string;
-};
-
-type CapturedApiTiming = ApiTiming & {
-  readonly startedAtMs: number;
-};
-
 type DeviceInfoAttrs = {
   readonly platform?: string;
   readonly operating_system?: string;
@@ -89,20 +79,13 @@ type LaunchState = {
   readonly appVersion: string;
   readonly steps: Record<string, StepTiming>;
   readonly apiCalls: CapturedApiTiming[];
+  slowestApiCall?: CapturedApiTiming;
   context: MobileLaunchContext;
   apiTotalCount: number;
   deviceInfo?: DeviceInfoAttrs;
   scheduledFlushId?: ReturnType<typeof setTimeout>;
   timeoutId?: ReturnType<typeof setTimeout>;
   flushed: boolean;
-};
-
-type ApiRequestTimingInput = {
-  readonly endpoint: string;
-  readonly method: string;
-  readonly status: ApiStatus;
-  readonly startedAtMs: number;
-  readonly durationMs: number;
 };
 
 type BuildLaunchAttributesInput = {
@@ -203,6 +186,13 @@ export function recordMobileLaunchApiRequest(
 
   state.apiTotalCount += 1;
   const apiCall = buildCapturedApiTiming(state, input);
+  if (
+    state.slowestApiCall === undefined ||
+    apiCall.duration_ms > state.slowestApiCall.duration_ms
+  ) {
+    state.slowestApiCall = apiCall;
+  }
+
   const latestCapturedCall = state.apiCalls[state.apiCalls.length - 1];
 
   if (
@@ -546,6 +536,7 @@ function buildLaunchAttributes({
     slow,
     flush_reason: reason,
     ...buildMilestoneAttributes(state),
+    ...buildFlatApiAttributes(state),
     ...context,
     steps: state.steps,
     api: buildApiSummary(state),
@@ -587,6 +578,9 @@ function buildMilestoneAttributes(
   addStepOffsetAttr(attrs, state, "auth_ready");
   addStepOffsetAttr(attrs, state, "first_useful_app_shell");
   addStepOffsetAttr(attrs, state, "waves_layout_mounted");
+  addStepOffsetAttr(attrs, state, "wave_metadata_loaded");
+  addStepOffsetAttr(attrs, state, "wave_messages_loaded");
+  addStepOffsetAttr(attrs, state, "first_drop_rendered");
   addStepOffsetAttr(attrs, state, "waves_first_content_visible");
   addStepOffsetAttr(attrs, state, "waves_content_state_resolved");
   addStepDurationAttr(attrs, state, "wagmi_appkit_init");
@@ -602,12 +596,20 @@ function buildMilestoneAttributes(
   const wagmiUnblockedMs = getStepOffsetMs(state, "wagmi_children_unblocked");
   const wagmiReadyMs = getStepOffsetMs(state, "wagmi_ready");
   const shellMs = getStepOffsetMs(state, "first_useful_app_shell");
+  const waveMetadataMs = getStepOffsetMs(state, "wave_metadata_loaded");
+  const waveMessagesMs = getStepOffsetMs(state, "wave_messages_loaded");
+  const firstDropRenderedMs = getStepOffsetMs(state, "first_drop_rendered");
   const wavesContentMs = getStepOffsetMs(state, "waves_first_content_visible");
 
   if (wagmiShellUnblockedMs !== undefined) {
     attrs["provider_shell_gate_ms"] = wagmiShellUnblockedMs;
     attrs["provider_shell_gate_bucket"] = bucketMs(wagmiShellUnblockedMs);
   }
+
+  addFlatTimingAlias(attrs, "layout_measure_complete", shellMs);
+  addFlatTimingAlias(attrs, "wave_metadata_loaded", waveMetadataMs);
+  addFlatTimingAlias(attrs, "wave_messages_loaded", waveMessagesMs);
+  addFlatTimingAlias(attrs, "first_drop_rendered", firstDropRenderedMs);
 
   if (wagmiUnblockedMs !== undefined) {
     attrs["provider_gate_ms"] = wagmiUnblockedMs;
@@ -664,6 +666,19 @@ function addStepOffsetAttr(
   attrs[`step_${stepName}_ms`] = offsetMs;
 }
 
+function addFlatTimingAlias(
+  attrs: Record<string, number | string>,
+  name: string,
+  offsetMs: number | undefined
+): void {
+  if (offsetMs === undefined) {
+    return;
+  }
+
+  attrs[`${name}_ms`] = offsetMs;
+  attrs[`${name}_bucket`] = bucketMs(offsetMs);
+}
+
 function addStepDurationAttr(
   attrs: Record<string, number | string>,
   state: LaunchState,
@@ -685,79 +700,6 @@ function getStepOffsetMs(
   stepName: string
 ): number | undefined {
   return state.steps[stepName]?.offset_ms;
-}
-
-function bucketMs(value: number): string {
-  if (value < 500) {
-    return "0_500";
-  }
-  if (value < 1500) {
-    return "500_1500";
-  }
-  if (value < 3000) {
-    return "1500_3000";
-  }
-  if (value < 5000) {
-    return "3000_5000";
-  }
-  if (value < 10000) {
-    return "5000_10000";
-  }
-  return "10000_plus";
-}
-
-function buildApiSummary(state: LaunchState): Record<string, unknown> {
-  const firstCalls = state.apiCalls.map(toApiTiming);
-  const slowest = [...state.apiCalls]
-    .sort((left, right) => right.duration_ms - left.duration_ms)
-    .slice(0, SLOWEST_API_CALLS)
-    .map(toApiTiming);
-
-  return {
-    total_count: state.apiTotalCount,
-    captured_count: state.apiCalls.length,
-    dropped_count: Math.max(0, state.apiTotalCount - state.apiCalls.length),
-    first_calls: firstCalls,
-    slowest_calls: slowest,
-  };
-}
-
-function buildCapturedApiTiming(
-  state: LaunchState,
-  input: ApiRequestTimingInput
-): CapturedApiTiming {
-  return {
-    startedAtMs: input.startedAtMs,
-    method: sanitizeHttpMethod(input.method),
-    status: input.status,
-    duration_ms: roundMs(input.durationMs),
-    start_offset_ms: roundMs(input.startedAtMs - state.startedAtMs),
-    endpoint_group: sanitizeEndpointGroup(input.endpoint),
-  };
-}
-
-function toApiTiming({
-  method,
-  status,
-  duration_ms,
-  start_offset_ms,
-  endpoint_group,
-}: CapturedApiTiming): ApiTiming {
-  return {
-    method,
-    status,
-    duration_ms,
-    start_offset_ms,
-    endpoint_group,
-  };
-}
-
-function sanitizeHttpMethod(method: string): string {
-  const normalized = method.trim().toUpperCase();
-  if (/^[A-Z]{3,10}$/.test(normalized)) {
-    return normalized;
-  }
-  return "UNKNOWN";
 }
 
 function sanitizeAttributeKey(value: string): string {

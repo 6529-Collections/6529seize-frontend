@@ -2717,7 +2717,7 @@
         "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
-        "The About Subscriptions overview links to the Subscriptions Report for aggregate projected and redeemed subscription counts."
+        "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions", "/tools/subscriptions-report"],
@@ -2839,15 +2839,16 @@
         "active",
         "upcoming",
         "redeemed",
-        "projected",
-        "actual",
+        "subscribed",
+        "airdropped",
         "download",
         "csv",
         "season"
       ],
       "facts": [
         "The Subscriptions Report shows active, upcoming, and redeemed Meme Card subscription counts.",
-        "On a mint day, the Active Drop section compares projected subscriptions with actual redeemed subscriptions and keeps that card out of Upcoming Drops and Past Drops.",
+        "On a mint day, the Active Drop section compares subscribed counts with airdropped counts and keeps that card out of Upcoming Drops and Past Drops.",
+        "Active, Upcoming, and Past rows link to the matching /the-memes/{token_id} card route.",
         "It includes download actions for redeemed subscription count reports.",
         "Its Manage or Connect to Subscribe action uses the same profile-subscriptions navigation and authentication handoff as the About Subscriptions page."
       ],
@@ -2970,6 +2971,7 @@
       ],
       "facts": [
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
+        "Unresolved upcoming /the-memes/{id} pages show the next-mint calendar panel plus subscription awareness for that card.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
       ],
@@ -4831,6 +4833,7 @@
         "Individual Meme Card pages live at /the-memes/{id}.",
         "Use /the-memes/{id} for a specific Meme Card number such as Meme #1 or The Memes #1.",
         "Meme Card preview/data surfaces expose fields such as edition size, TDH rate, season, mint date, and supply when available.",
+        "Upcoming unresolved Meme Card pages show mint timing and subscription awareness for that card.",
         "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
         "Card tabs and focus links are documented for deep-linking into card page sections.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."
