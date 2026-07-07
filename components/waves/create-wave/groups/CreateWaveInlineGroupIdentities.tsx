@@ -139,9 +139,14 @@ export default function CreateWaveInlineGroupIdentities({
         />
       )}
       {showCurrentUserExcludedWarning && (
-        <p className="tw-mb-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#fef08a]/20 tw-bg-[#fef08a]/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-[#fef08a]">
-          You are not included in this group. If it controls who can view the
-          wave, you may not be able to access the wave after creating it.
+        <p
+          role="status"
+          aria-live="polite"
+          className="tw-mb-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#fef08a]/20 tw-bg-[#fef08a]/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-[#fef08a]"
+        >
+          Warning: You are not included in this group. If it controls who can
+          view the wave, you may not be able to access the wave after creating
+          it.
         </p>
       )}
     </div>

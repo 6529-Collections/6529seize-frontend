@@ -219,8 +219,8 @@ describe("CreateWaveInlineGroupIdentities", () => {
       ],
     });
 
-    expect(
-      screen.getByText(/You are not included in this group/)
-    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /You are not included in this group/
+    );
   });
 });
