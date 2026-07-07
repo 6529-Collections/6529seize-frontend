@@ -1486,6 +1486,11 @@ export const EN_US_MESSAGES = {
   "walletAddress.copy.walletAriaLabel": "Copy wallet address",
   "walletAddress.copy.tooltip": "Copy",
   "walletAddress.copy.copiedTooltip": "Copied",
+  "wallet.startup.loadingStatus": "Loading wallet services",
+  "wallet.startup.errorStatus": "Wallet services failed to load",
+  "wallet.startup.errorDescription":
+    "Refresh to try loading wallet services again.",
+  "wallet.startup.refresh": "Refresh",
   ...QR_SCANNER_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":

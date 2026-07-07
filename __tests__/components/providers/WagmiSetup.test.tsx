@@ -9,7 +9,7 @@ import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContex
 import WagmiSetup from "@/components/providers/WagmiSetup";
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
-import { act, render, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 // Mock capacitor-secure-storage-plugin first to prevent import errors
@@ -799,6 +799,34 @@ describe("WagmiSetup Security Tests", () => {
           },
         });
       });
+    });
+
+    it("renders an accessible wallet startup recovery when adapter creation fails", async () => {
+      jest.useRealTimers();
+      mockInitializeAppKit.mockRejectedValue(new Error("Adapter failed"));
+
+      render(
+        <WagmiSetup>
+          <div data-testid="children">Test</div>
+        </WagmiSetup>
+      );
+
+      await waitFor(() => {
+        expect(mockInitializeAppKit).toHaveBeenCalled();
+      });
+
+      const alert = await screen.findByRole("alert", {
+        name: "Wallet services failed to load",
+      });
+
+      expect(alert).toHaveTextContent("Wallet services failed to load");
+      expect(alert).toHaveTextContent(
+        "Refresh to try loading wallet services again."
+      );
+      expect(
+        screen.getByRole("button", { name: "Refresh" })
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId("children")).not.toBeInTheDocument();
     });
 
     it("prevents hydration mismatches by using client-side only mounting", async () => {

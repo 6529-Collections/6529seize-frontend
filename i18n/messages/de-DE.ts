@@ -28,6 +28,11 @@ export const DE_DE_MESSAGES = {
   "attachment.safety.sha256": "SHA-256",
   "attachment.safety.size": "Größe {size}",
   "attachment.safety.viewDetails": "Sicherheitsdetails anzeigen",
+  "wallet.startup.loadingStatus": "Wallet-Dienste werden geladen",
+  "wallet.startup.errorStatus": "Wallet-Dienste konnten nicht geladen werden",
+  "wallet.startup.errorDescription":
+    "Aktualisieren Sie, um die Wallet-Dienste erneut zu laden.",
+  "wallet.startup.refresh": "Aktualisieren",
   "linkPreview.file.externalSource": "Externe Quelle",
   "linkPreview.file.fact.mime": "MIME",
   "linkPreview.file.fact.size": "Größe",

@@ -23,6 +23,11 @@ export const EN_GB_MESSAGES = {
   "attachment.safety.sha256": "SHA-256",
   "attachment.safety.size": "Size {size}",
   "attachment.safety.viewDetails": "View safety details",
+  "wallet.startup.loadingStatus": "Loading wallet services",
+  "wallet.startup.errorStatus": "Wallet services failed to load",
+  "wallet.startup.errorDescription":
+    "Refresh to try loading wallet services again.",
+  "wallet.startup.refresh": "Refresh",
   "linkPreview.file.externalSource": "External source",
   "linkPreview.file.fact.mime": "MIME",
   "linkPreview.file.fact.size": "Size",
