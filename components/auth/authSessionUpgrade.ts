@@ -219,9 +219,7 @@ export const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
   if (wholeDays > 3) {
     return t(
       AUTH_MODAL_LOCALE,
-      wholeDays === 1
-        ? "auth.signModal.timeLeft.days.one"
-        : "auth.signModal.timeLeft.days.many",
+      "auth.signModal.timeLeft.days.many",
       { count: formatInteger(AUTH_MODAL_LOCALE, wholeDays) }
     );
   }
