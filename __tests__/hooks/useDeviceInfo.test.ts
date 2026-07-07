@@ -1,11 +1,34 @@
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { act, renderHook } from "@testing-library/react";
+import useCapacitor from "@/hooks/useCapacitor";
+import {
+  __resetNativeDeviceStoresForTests,
+  getDeviceInfoSnapshot,
+} from "@/hooks/nativeDeviceStore";
+import { act, renderHook, waitFor } from "@testing-library/react";
 
-jest.mock("@/hooks/useCapacitor", () => ({
-  __esModule: true,
-  default: jest.fn(() => ({ isCapacitor: false })),
+const mockRemoveAppListener = jest.fn();
+
+jest.mock("@capacitor/core", () => ({
+  registerPlugin: jest.fn(),
+  WebPlugin: class {},
+  Capacitor: {
+    isNativePlatform: jest.fn(),
+    getPlatform: jest.fn(),
+  },
 }));
-const capacitorMock = require("@/hooks/useCapacitor").default as jest.Mock;
+
+jest.mock("@capacitor/app", () => ({
+  App: {
+    getState: jest.fn(),
+    addListener: jest.fn(() =>
+      Promise.resolve({ remove: mockRemoveAppListener })
+    ),
+    removeAllListeners: jest.fn(),
+  },
+}));
+
+const { Capacitor } = require("@capacitor/core");
+const { App } = require("@capacitor/app");
 
 let touchStartHandler: EventListener | null = null;
 
@@ -57,6 +80,14 @@ function defineUserAgent(value: string) {
 
 describe("useDeviceInfo", () => {
   beforeEach(() => {
+    __resetNativeDeviceStoresForTests();
+    jest.clearAllMocks();
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue("web");
+    (App.getState as jest.Mock).mockResolvedValue({ isActive: false });
+    (App.addListener as jest.Mock).mockResolvedValue({
+      remove: mockRemoveAppListener,
+    });
     jest
       .spyOn(globalThis, "addEventListener")
       .mockImplementation((event, handler) => {
@@ -69,8 +100,8 @@ describe("useDeviceInfo", () => {
 
   afterEach(() => {
     touchStartHandler = null;
+    __resetNativeDeviceStoresForTests();
     jest.restoreAllMocks();
-    capacitorMock.mockReturnValue({ isCapacitor: false });
   });
 
   it("detects classic mobile user agent", () => {
@@ -85,7 +116,8 @@ describe("useDeviceInfo", () => {
   });
 
   it("detects capacitor mobile with desktop UA", () => {
-    capacitorMock.mockReturnValue({ isCapacitor: true });
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
     defineUserAgent("Macintosh");
     defineMaxTouchPoints(5);
     defineMatchMedia({ narrowWidth: true });
@@ -96,8 +128,68 @@ describe("useDeviceInfo", () => {
     expect(result.current.hasTouchScreen).toBe(true);
   });
 
+  it("returns a stable cached snapshot between device-info notifications", async () => {
+    defineUserAgent("iPhone");
+    defineMaxTouchPoints(5);
+    defineMatchMedia();
+
+    const { result } = renderHook(() => useDeviceInfo());
+
+    await waitFor(() => {
+      expect(result.current.isMobileDevice).toBe(true);
+    });
+
+    const snapshot = getDeviceInfoSnapshot();
+
+    defineUserAgent("Mozilla/5.0");
+    defineMaxTouchPoints(0);
+    defineMatchMedia({ finePointer: true, hover: true });
+
+    expect(getDeviceInfoSnapshot()).toBe(snapshot);
+  });
+
+  it("does not mount native app-state listeners for device-info-only consumers", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
+    defineUserAgent("Macintosh");
+    defineMaxTouchPoints(5);
+    defineMatchMedia({ narrowWidth: true });
+
+    const { result } = renderHook(() => useDeviceInfo());
+
+    await waitFor(() => {
+      expect(result.current.isApp).toBe(true);
+    });
+
+    expect(App.addListener).not.toHaveBeenCalled();
+  });
+
+  it("tears down native app-state listeners when capacitor consumers unmount while device-info stays mounted", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
+    defineUserAgent("Macintosh");
+    defineMaxTouchPoints(5);
+    defineMatchMedia({ narrowWidth: true });
+
+    const deviceInfoHook = renderHook(() => useDeviceInfo());
+    const capacitorHook = renderHook(() => useCapacitor());
+
+    await waitFor(() => {
+      expect(App.addListener).toHaveBeenCalledTimes(1);
+      expect(deviceInfoHook.result.current.isApp).toBe(true);
+    });
+
+    capacitorHook.unmount();
+
+    await waitFor(() => {
+      expect(mockRemoveAppListener).toHaveBeenCalledTimes(1);
+    });
+
+    expect(deviceInfoHook.result.current.isApp).toBe(true);
+    deviceInfoHook.unmount();
+  });
+
   it("returns false for desktop without touch", () => {
-    capacitorMock.mockReturnValue({ isCapacitor: false });
     defineUserAgent("Mozilla/5.0");
     defineMaxTouchPoints(0);
     defineMatchMedia({ finePointer: true, hover: true });
@@ -110,7 +202,6 @@ describe("useDeviceInfo", () => {
   it("treats a Windows touch laptop (touch + fine pointer + hover) as desktop", () => {
     // Regression: Surface-style hybrids advertise 10 touch points but have a
     // trackpad/mouse — they must NOT be classified as touch-first.
-    capacitorMock.mockReturnValue({ isCapacitor: false });
     defineUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36"
     );
@@ -123,7 +214,6 @@ describe("useDeviceInfo", () => {
   });
 
   it("keeps hasTouchScreen false on hybrid devices even after a touch event", () => {
-    capacitorMock.mockReturnValue({ isCapacitor: false });
     defineUserAgent("Mozilla/5.0");
     defineMaxTouchPoints(10);
     defineMatchMedia({ finePointer: true, hover: true });
@@ -141,7 +231,6 @@ describe("useDeviceInfo", () => {
   });
 
   it("hasTouchScreen becomes true after touch on devices without fine pointer or hover", () => {
-    capacitorMock.mockReturnValue({ isCapacitor: false });
     defineUserAgent("Mozilla/5.0");
     defineMaxTouchPoints(0);
     defineMatchMedia();
@@ -159,7 +248,6 @@ describe("useDeviceInfo", () => {
   });
 
   it("hasTouchScreen is true when maxTouchPoints > 0 and no fine pointer or hover", () => {
-    capacitorMock.mockReturnValue({ isCapacitor: false });
     defineUserAgent("Mozilla/5.0");
     defineMaxTouchPoints(5);
     defineMatchMedia();
@@ -170,12 +258,36 @@ describe("useDeviceInfo", () => {
   it("keeps hasTouchScreen true for phones that pair a mouse (hover + fine pointer)", () => {
     // A Bluetooth mouse on a phone adds hover and a fine pointer, but the
     // mobile UA keeps the device touch-first.
-    capacitorMock.mockReturnValue({ isCapacitor: false });
     defineUserAgent("iPhone");
     defineMaxTouchPoints(5);
     defineMatchMedia({ finePointer: true, hover: true });
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.hasTouchScreen).toBe(true);
     expect(result.current.isMobileDevice).toBe(true);
+  });
+
+  it("shares browser listeners across multiple hook callers", () => {
+    defineUserAgent("Mozilla/5.0");
+    defineMaxTouchPoints(0);
+    defineMatchMedia();
+
+    const { result } = renderHook(() => {
+      const first = useDeviceInfo();
+      const second = useDeviceInfo();
+
+      return { first, second };
+    });
+
+    expect(result.current.first).toEqual(result.current.second);
+    expect(
+      (globalThis.addEventListener as jest.Mock).mock.calls.filter(
+        ([event]) => event === "resize"
+      )
+    ).toHaveLength(1);
+    expect(
+      (globalThis.addEventListener as jest.Mock).mock.calls.filter(
+        ([event]) => event === "touchstart"
+      )
+    ).toHaveLength(1);
   });
 });
