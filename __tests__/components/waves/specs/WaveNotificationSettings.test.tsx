@@ -125,6 +125,8 @@ describe("WaveNotificationSettings", () => {
 
     expect(trigger).toBeInTheDocument();
     expect(muteButton).toBeInTheDocument();
+    expect(trigger).toHaveClass("tw-cursor-pointer");
+    expect(muteButton).toHaveClass("tw-cursor-pointer");
     expect(trigger.parentElement?.parentElement).toHaveClass(
       "tw-grid",
       "tw-grid-cols-2",
@@ -143,6 +145,7 @@ describe("WaveNotificationSettings", () => {
 
     const menu = screen.getByRole("menu");
     expect(menu).toHaveAttribute("aria-labelledby", trigger.id);
+    expect(menu.querySelector("ul")).toHaveClass("tw-m-0");
 
     const allMentionsButton = screen.getByLabelText(
       "Receive ALL mention notifications"
@@ -154,6 +157,8 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).toBeInTheDocument();
     expect(allMentionsButton).toHaveAttribute("role", "menuitemcheckbox");
     expect(allButton).toHaveAttribute("role", "menuitemcheckbox");
+    expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
+    expect(allButton).toHaveClass("tw-cursor-pointer");
     expect(allMentionsButton.parentElement).toHaveAttribute("role", "none");
     expect(allButton.parentElement).toHaveAttribute("role", "none");
     expect(
@@ -265,6 +270,7 @@ describe("WaveNotificationSettings", () => {
       "All-message notifications are unavailable for waves with 1,000+ followers."
     );
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
+    expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
   });
 
   it("keeps unavailable all-message option focusable without firing an update", async () => {
@@ -566,6 +572,7 @@ describe("WaveNotificationSettings", () => {
 
     const retryButton = screen.getByLabelText("Retry notification settings");
     expect(retryButton).toBeEnabled();
+    expect(retryButton).toHaveClass("tw-cursor-pointer");
     expect(screen.getByLabelText("Mute wave")).toBeInTheDocument();
     expect(
       screen.queryByLabelText("Open notification settings")
@@ -689,6 +696,7 @@ describe("WaveNotificationSettings", () => {
 
     const mutedButton = screen.getByLabelText("Unmute wave");
     expect(mutedButton).toBeInTheDocument();
+    expect(mutedButton).toHaveClass("tw-cursor-pointer");
     expect(mutedButton).toHaveClass(
       "tw-bg-error/10",
       "tw-border-error/40",

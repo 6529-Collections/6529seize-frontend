@@ -26,19 +26,23 @@ export const getErrorMessage = (error: unknown, defaultMessage: string) => {
 export function getAllDropsTooltip({
   disableAllDropsSelection,
   subscribedToAllDrops,
-  subscribersLimit,
+  labels,
 }: {
   readonly disableAllDropsSelection: boolean;
   readonly subscribedToAllDrops: boolean;
-  readonly subscribersLimit: number;
+  readonly labels: {
+    readonly unavailable: string;
+    readonly disable: string;
+    readonly enable: string;
+  };
 }) {
   if (disableAllDropsSelection && !subscribedToAllDrops) {
-    return `All-message notifications are unavailable for waves with ${subscribersLimit.toLocaleString()}+ followers.`;
+    return labels.unavailable;
   }
 
   if (subscribedToAllDrops) {
-    return "Click to disable notifications for all messages";
+    return labels.disable;
   }
 
-  return "Click to enable notifications for all messages";
+  return labels.enable;
 }

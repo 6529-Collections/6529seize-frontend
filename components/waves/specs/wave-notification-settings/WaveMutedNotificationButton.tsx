@@ -1,8 +1,12 @@
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { SpeakerXMarkIcon as SpeakerXMarkOutlineIcon } from "@heroicons/react/24/outline";
 import { SpeakerXMarkIcon as SpeakerXMarkSolidIcon } from "@heroicons/react/24/solid";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
+
+const WAVE_NOTIFICATION_SETTINGS_LOCALE = DEFAULT_LOCALE;
 
 interface WaveMutedNotificationButtonProps {
   readonly waveId: string;
@@ -16,8 +20,24 @@ export default function WaveMutedNotificationButton({
   compact = false,
 }: WaveMutedNotificationButtonProps) {
   const tooltipId = `wave-notification-muted-${waveId}`;
-  const ariaLabel = settings.isMuted ? "Unmute wave" : "Mute wave";
-  const textLabel = settings.isMuted ? "Muted" : "Mute";
+  const ariaLabel = settings.isMuted
+    ? t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.mute.unmuteAriaLabel"
+      )
+    : t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.mute.ariaLabel"
+      );
+  const textLabel = settings.isMuted
+    ? t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.mute.activeLabel"
+      )
+    : t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.mute.label"
+      );
   const Icon = settings.isMuted
     ? SpeakerXMarkSolidIcon
     : SpeakerXMarkOutlineIcon;
@@ -33,7 +53,7 @@ export default function WaveMutedNotificationButton({
         onClick={settings.onMuteClick}
         data-tooltip-id={tooltipId}
         data-tooltip-content={settings.muteTooltip}
-        className={`tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-transition tw-duration-300 tw-ease-out ${stateClasses} ${
+        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed ${stateClasses} ${
           compact
             ? "tw-size-9 tw-gap-0 tw-px-0"
             : "tw-h-10 tw-w-full tw-gap-2 tw-px-3 lg:tw-h-9"

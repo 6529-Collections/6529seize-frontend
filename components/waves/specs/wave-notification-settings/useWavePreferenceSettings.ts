@@ -4,6 +4,9 @@ import type { ApiUpdateWaveNotificationPreferencesRequest } from "@/generated/mo
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveNotificationPreferences } from "@/generated/models/ApiWaveNotificationPreferences";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
 import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useMemo, useState } from "react";
@@ -12,6 +15,8 @@ import {
   getAllDropsTooltip,
   type NotificationLoadingTarget,
 } from "./waveNotificationSettings.helpers";
+
+const WAVE_NOTIFICATION_SETTINGS_LOCALE = DEFAULT_LOCALE;
 
 export function useWavePreferenceSettings(wave: ApiWave) {
   const { seizeSettings } = useSeizeSettings();
@@ -67,8 +72,14 @@ export function useWavePreferenceSettings(wave: ApiWave) {
       } catch (error) {
         setToast({
           type: "error",
-          title: "Couldn't update notification settings.",
-          description: "Please try again.",
+          title: t(
+            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+            "waves.notificationSettings.preferences.error.updateTitle"
+          ),
+          description: t(
+            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+            "waves.notificationSettings.preferences.error.description"
+          ),
           details: getToastErrorDetails(error, errorMessage),
         });
       } finally {
@@ -88,8 +99,14 @@ export function useWavePreferenceSettings(wave: ApiWave) {
           : [ALL_GROUP_MENTION],
       },
       errorMessage: allGroupNotificationsEnabled
-        ? "Unable to disable @ALL notifications"
-        : "Unable to enable @ALL notifications",
+        ? t(
+            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+            "waves.notificationSettings.preferences.error.disableAllMentions"
+          )
+        : t(
+            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+            "waves.notificationSettings.preferences.error.enableAllMentions"
+          ),
     });
   }, [
     allGroupNotificationsEnabled,
@@ -109,8 +126,14 @@ export function useWavePreferenceSettings(wave: ApiWave) {
         enabled_group_notifications: enabledGroupNotifications,
       },
       errorMessage: subscribedToAllDrops
-        ? "Unable to disable all-message notifications"
-        : "Unable to enable all-message notifications",
+        ? t(
+            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+            "waves.notificationSettings.preferences.error.disableAllMessages"
+          )
+        : t(
+            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+            "waves.notificationSettings.preferences.error.enableAllMessages"
+          ),
     });
   }, [
     disableAllDropsSelection,
@@ -132,12 +155,37 @@ export function useWavePreferenceSettings(wave: ApiWave) {
   }, [refetch]);
 
   const allGroupTooltip = allGroupNotificationsEnabled
-    ? "Click to disable @ALL notifications"
-    : "Click to enable @ALL notifications";
+    ? t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.allMentions.tooltip.disable"
+      )
+    : t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.allMentions.tooltip.enable"
+      );
   const allDropsTooltip = getAllDropsTooltip({
     disableAllDropsSelection,
     subscribedToAllDrops,
-    subscribersLimit: allDropsNotificationsSubscribersLimit,
+    labels: {
+      unavailable: t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.allMessages.tooltip.unavailable",
+        {
+          count: formatInteger(
+            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+            allDropsNotificationsSubscribersLimit
+          ),
+        }
+      ),
+      disable: t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.allMessages.tooltip.disable"
+      ),
+      enable: t(
+        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        "waves.notificationSettings.allMessages.tooltip.enable"
+      ),
+    },
   });
 
   return {

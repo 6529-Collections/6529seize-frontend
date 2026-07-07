@@ -1,9 +1,13 @@
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { AtSymbolIcon, BellIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
+
+const WAVE_NOTIFICATION_SETTINGS_LOCALE = DEFAULT_LOCALE;
 
 interface WaveNotificationPreferenceButtonsProps {
   readonly waveId: string;
@@ -29,10 +33,10 @@ const getMenuItemStyle = ({
   }
 
   if (active) {
-    return "tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/10";
+    return "tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/10";
   }
 
-  return "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800";
+  return "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800";
 };
 
 export default function WaveNotificationPreferenceButtons({
@@ -53,6 +57,10 @@ export default function WaveNotificationPreferenceButtons({
   const triggerSizeClass = compact
     ? "tw-size-9 tw-p-0"
     : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
+  const triggerLabel = t(
+    WAVE_NOTIFICATION_SETTINGS_LOCALE,
+    "waves.notificationSettings.trigger.ariaLabel"
+  );
 
   const renderItemCheck = (active: boolean) =>
     active ? (
@@ -83,9 +91,12 @@ export default function WaveNotificationPreferenceButtons({
           setIsOpen((open) => !open);
         }}
         data-tooltip-id={tooltipId}
-        data-tooltip-content="Notification settings"
-        className={`tw-flex ${triggerSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getButtonStyle(triggerActive)}`}
-        aria-label="Open notification settings"
+        data-tooltip-content={t(
+          WAVE_NOTIFICATION_SETTINGS_LOCALE,
+          "waves.notificationSettings.trigger.tooltip"
+        )}
+        className={`tw-flex ${triggerSizeClass} tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getButtonStyle(triggerActive)}`}
+        aria-label={triggerLabel}
         aria-expanded={isOpen}
         aria-haspopup="menu"
         aria-controls={isOpen ? menuId : undefined}
@@ -121,14 +132,20 @@ export default function WaveNotificationPreferenceButtons({
                 disabled: settings.loading,
               }
             )}`}
-            aria-label="Receive ALL mention notifications"
+            aria-label={t(
+              WAVE_NOTIFICATION_SETTINGS_LOCALE,
+              "waves.notificationSettings.allMentions.ariaLabel"
+            )}
           >
             <AtSymbolIcon
               className="tw-size-4 tw-flex-shrink-0"
               aria-hidden="true"
             />
             <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium">
-              @ALL
+              {t(
+                WAVE_NOTIFICATION_SETTINGS_LOCALE,
+                "waves.notificationSettings.allMentions.label"
+              )}
             </span>
             {settings.loadingTarget === "all-group" ? (
               <Spinner dimension={12} />
@@ -165,14 +182,20 @@ export default function WaveNotificationPreferenceButtons({
                 disabled: settings.loading || allDropsSelectionDisabled,
               }
             )}`}
-            aria-label="Receive notifications for all messages"
+            aria-label={t(
+              WAVE_NOTIFICATION_SETTINGS_LOCALE,
+              "waves.notificationSettings.allMessages.ariaLabel"
+            )}
           >
             <BellIcon
               className="tw-size-4 tw-flex-shrink-0"
               aria-hidden="true"
             />
             <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium">
-              Notify for all messages
+              {t(
+                WAVE_NOTIFICATION_SETTINGS_LOCALE,
+                "waves.notificationSettings.allMessages.label"
+              )}
             </span>
             {settings.loadingTarget === "all-drops" ? (
               <Spinner dimension={12} />
