@@ -15,6 +15,8 @@ import {
   commonApiDeleteWithBody,
   commonApiPost,
 } from "@/services/api/common-api";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useMutation } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useContext, useState } from "react";
@@ -34,8 +36,8 @@ interface NotificationsFollowBtnProps {
 const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
   profile,
   size = UserFollowBtnSize.MEDIUM,
-  followLabel = "Follow",
-  followingLabel = "Following",
+  followLabel = t(DEFAULT_LOCALE, "notifications.followButton.follow"),
+  followingLabel = t(DEFAULT_LOCALE, "notifications.followButton.following"),
 }) => {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useAuth();
@@ -107,8 +109,14 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
     if (!handle) {
       setToast({
         type: "error",
-        title: "Couldn't follow this profile.",
-        description: "This profile is missing a handle.",
+        title: t(
+          DEFAULT_LOCALE,
+          "notifications.followButton.error.missingHandleTitle"
+        ),
+        description: t(
+          DEFAULT_LOCALE,
+          "notifications.followButton.error.missingHandleDescription"
+        ),
       });
       return;
     }

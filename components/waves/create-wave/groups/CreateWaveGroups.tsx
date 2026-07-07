@@ -2,6 +2,8 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { CREATE_WAVE_GROUPS } from "@/helpers/waves/waves.constants";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   CreateWaveGroupConfigType,
   WaveGroupsConfig,
@@ -42,8 +44,9 @@ export default function CreateWaveGroups({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400">
-        The Who can view group controls who can access this wave. Followers of
-        you who can view the wave may get a notification when it is created.
+        {t(DEFAULT_LOCALE, "waves.create.groups.accessHelper", {
+          viewGroupName: "Who can view",
+        })}
       </p>
       {CREATE_WAVE_GROUPS[waveType].map((groupType) => (
         <CreateWaveGroup
@@ -63,8 +66,15 @@ export default function CreateWaveGroups({
       ))}
       {isRestrictedGroup && (
         <CreateWaveWarning
-          title="Warning: Limited Access"
-          description='This wave is configured with restricted access. It can only be viewed by members of the "Who can view" group and managed by members of the "Admin" group. If you are not in a group that can view it, you will not be able to access this wave.'
+          title={t(DEFAULT_LOCALE, "waves.create.groups.limitedAccessTitle")}
+          description={t(
+            DEFAULT_LOCALE,
+            "waves.create.groups.limitedAccessDescription",
+            {
+              viewGroupName: "Who can view",
+              adminGroupName: "Admin",
+            }
+          )}
         />
       )}
     </div>

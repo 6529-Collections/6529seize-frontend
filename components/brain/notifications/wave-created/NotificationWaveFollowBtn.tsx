@@ -12,6 +12,8 @@ import {
 import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
@@ -26,8 +28,8 @@ import {
 export default function NotificationWaveFollowBtn({
   wave,
   size = UserFollowBtnSize.SMALL,
-  followLabel = "Join",
-  followingLabel = "Joined",
+  followLabel = t(DEFAULT_LOCALE, "notifications.waveFollowButton.join"),
+  followingLabel = t(DEFAULT_LOCALE, "notifications.waveFollowButton.joined"),
 }: {
   readonly wave: ApiWaveOverview;
   readonly size?: UserFollowBtnSize | undefined;

@@ -8,6 +8,8 @@ import {
 } from "@/components/user/utils/UserFollowBtn";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import NotificationHeader from "../subcomponents/NotificationHeader";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
 import NotificationWaveFollowBtn from "./NotificationWaveFollowBtn";
@@ -31,8 +33,8 @@ export default function NotificationWaveCreated({
     : null;
   const waveName = wave?.name ?? waveId ?? "Unknown wave";
   const notificationCopy = isDirectMessage
-    ? "started a DM with you:"
-    : "created a wave you can access:";
+    ? t(DEFAULT_LOCALE, "notifications.waveCreated.dmCopy")
+    : t(DEFAULT_LOCALE, "notifications.waveCreated.normalCopy");
   let waveAction: ReactNode = null;
   if (isDirectMessage && waveHref) {
     waveAction = (
@@ -40,7 +42,7 @@ export default function NotificationWaveCreated({
         href={waveHref}
         className={`${FOLLOW_BTN_BUTTON_CLASSES[UserFollowBtnSize.SMALL]} tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-font-semibold tw-text-white tw-no-underline tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-text-white hover:tw-ring-primary-600`}
       >
-        Open DM
+        {t(DEFAULT_LOCALE, "notifications.waveCreated.openDm")}
       </Link>
     );
   } else if (wave) {
@@ -48,8 +50,11 @@ export default function NotificationWaveCreated({
       <NotificationWaveFollowBtn
         wave={wave}
         size={UserFollowBtnSize.SMALL}
-        followLabel="Join wave"
-        followingLabel="Joined"
+        followLabel={t(DEFAULT_LOCALE, "notifications.waveCreated.joinWave")}
+        followingLabel={t(
+          DEFAULT_LOCALE,
+          "notifications.waveCreated.joinedWave"
+        )}
       />
     );
   }
@@ -64,8 +69,14 @@ export default function NotificationWaveCreated({
             <NotificationsFollowBtn
               profile={notification.related_identity}
               size={UserFollowBtnSize.SMALL}
-              followLabel="Follow creator"
-              followingLabel="Following creator"
+              followLabel={t(
+                DEFAULT_LOCALE,
+                "notifications.waveCreated.followCreator"
+              )}
+              followingLabel={t(
+                DEFAULT_LOCALE,
+                "notifications.waveCreated.followingCreator"
+              )}
             />
           </div>
         }
