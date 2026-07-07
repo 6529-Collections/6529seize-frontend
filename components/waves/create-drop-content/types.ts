@@ -1,4 +1,5 @@
 import type { DropMutationBody } from "@/components/waves/CreateDrop";
+import type { useAuth } from "@/components/auth/Auth";
 import type { CreateDropConfig } from "@/entities/IDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
@@ -33,6 +34,12 @@ export type CreateDropMetadataType =
 export type ScopedValueState<T> = {
   readonly scopeKey: string;
   readonly value: T;
+};
+
+export type ConnectedProfile = ReturnType<typeof useAuth>["connectedProfile"];
+
+export type MutableCurrentRef<T> = {
+  current: T;
 };
 
 export interface UploadingFile {

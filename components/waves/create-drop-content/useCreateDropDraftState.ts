@@ -23,11 +23,11 @@ import {
   getReplyTo,
   handleDropPart,
 } from "./content-helpers";
-import type { CreateDropMetadataType, ScopedValueState } from "./types";
-
-type MutableCurrentRef<T> = {
-  current: T;
-};
+import type {
+  CreateDropMetadataType,
+  MutableCurrentRef,
+  ScopedValueState,
+} from "./types";
 
 export const useCreateDropDraftState = ({
   metadata,
@@ -105,26 +105,29 @@ export const useCreateDropDraftState = ({
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
   const shouldRefocusAfterChatSubmitRef = useRef(false);
 
-  const onReferencedNft = (newNft: ReferencedNft) => {
-    setReferencedNfts([
-      ...referencedNfts.filter(
+  const onReferencedNft = useCallback((newNft: ReferencedNft) => {
+    setReferencedNfts((current) => [
+      ...current.filter(
         (i) => !(i.token === newNft.token && i.contract === newNft.contract)
       ),
       newNft,
     ]);
-  };
+  }, []);
 
-  const onMentionedUser = (newUser: Omit<MentionedUser, "current_handle">) => {
-    setMentionedUsers((curr) => {
-      return [...curr, newUser];
-    });
-  };
+  const onMentionedUser = useCallback(
+    (newUser: Omit<MentionedUser, "current_handle">) => {
+      setMentionedUsers((curr) => {
+        return [...curr, newUser];
+      });
+    },
+    []
+  );
 
-  const onMentionedWave = (newWave: MentionedWave) => {
+  const onMentionedWave = useCallback((newWave: MentionedWave) => {
     setMentionedWaves((curr) => {
       return [...curr, newWave];
     });
-  };
+  }, []);
 
   const getSubmissionMetadata = useCallback(() => {
     return buildDropSubmissionMetadata({

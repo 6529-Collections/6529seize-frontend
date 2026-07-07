@@ -1,4 +1,8 @@
 import { buildDropSubmissionMetadata } from "@/components/waves/utils/buildDropSubmissionMetadata";
+import {
+  canAddDropPart,
+  canSubmitDrop,
+} from "@/components/waves/create-drop-content/content-helpers";
 import { convertMetadataToDropMetadata } from "@/components/waves/utils/convertMetadataToDropMetadata";
 import { getIdentitySubmissionMetadataErrors } from "@/components/waves/utils/identitySubmissionMetadataValidation";
 import {
@@ -10,6 +14,7 @@ import type { SelectableIdentityOption } from "@/components/utils/input/profile-
 import { IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR } from "@/helpers/waves/identity-submission-metadata";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import type { CreateDropPart } from "@/entities/IDrop";
 
 describe("CreateDropContent utilities", () => {
   const viewerIdentity: SelectableIdentityOption = {
@@ -126,6 +131,59 @@ describe("CreateDropContent utilities", () => {
     });
 
     expect(errors).toEqual({});
+  });
+
+  describe("drop content gating", () => {
+    const existingPart: CreateDropPart = {
+      content: "existing part",
+      quoted_drop: null,
+      media: [],
+    };
+    const baseCanSubmitParams = {
+      files: [],
+      hasMetadata: false,
+      hasValidPoll: false,
+      hasPendingInlineImageUpload: false,
+      hasMetadataValidationErrors: false,
+      hasPollValidationError: false,
+    };
+
+    it("applies the storm cap to current editor markdown when parts exist", () => {
+      expect(
+        canSubmitDrop({
+          ...baseCanSubmitParams,
+          markdown: null,
+          parts: [existingPart],
+        })
+      ).toBe(true);
+
+      expect(
+        canSubmitDrop({
+          ...baseCanSubmitParams,
+          markdown: "x".repeat(241),
+          parts: [existingPart],
+        })
+      ).toBe(false);
+    });
+
+    it("preserves whitespace-only add-part behavior without making it submittable", () => {
+      expect(
+        canAddDropPart({
+          markdown: "   ",
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+
+      expect(
+        canSubmitDrop({
+          ...baseCanSubmitParams,
+          markdown: "   ",
+          parts: [],
+        })
+      ).toBe(false);
+    });
   });
 
   describe("identity submission state", () => {

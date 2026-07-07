@@ -5,11 +5,7 @@ import type { CreateDropConfig } from "@/entities/IDrop";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
 import { handleComposerFileChange } from "./content-helpers";
-import type { ScopedValueState } from "./types";
-
-type MutableCurrentRef<T> = {
-  current: T;
-};
+import type { MutableCurrentRef, ScopedValueState } from "./types";
 
 export const useCreateDropFileHandlers = ({
   drop,

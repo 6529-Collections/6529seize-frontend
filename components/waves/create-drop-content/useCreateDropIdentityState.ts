@@ -15,11 +15,9 @@ import {
 } from "../utils/identitySubmissionState";
 import type { IdentityPickerPlacement } from "../dropComposer.types";
 import { normalizeIdentityValue } from "./content-helpers";
-import type { ScopedValueState } from "./types";
+import type { ConnectedProfile, ScopedValueState } from "./types";
 
 const SELECT_OTHER_IDENTITY_ERROR = "Select someone else to nominate.";
-
-type ConnectedProfile = Parameters<typeof getSelectableIdentityOption>[0];
 
 export const useCreateDropIdentityState = ({
   wave,

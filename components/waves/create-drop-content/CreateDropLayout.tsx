@@ -28,7 +28,11 @@ import CreateDropReplyingWrapper from "../CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "../CreateDropSubmit";
 import SlowModeChatNotice from "../SlowModeChatNotice";
 import InlineIdentityPicker from "./InlineIdentityPicker";
-import type { CreateDropMetadataType, UploadingFile } from "./types";
+import type {
+  CreateDropMetadataType,
+  MutableCurrentRef,
+  UploadingFile,
+} from "./types";
 
 const TermsSignatureFlow = dynamic(
   () => import("../../terms/TermsSignatureFlow"),
@@ -78,7 +82,7 @@ interface CreateDropLayoutProps {
   readonly handleSetShowOptions: (next: boolean) => void;
   readonly onGifDrop: (gif: string) => Promise<void>;
   readonly dropEditorRefreshKey: number;
-  readonly createDropInputRef: React.RefObject<CreateDropInputHandles | null>;
+  readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly editorState: EditorState | null;
   readonly canMentionAll: boolean;
   readonly canSubmit: boolean;
@@ -212,9 +216,9 @@ export default function CreateDropLayout({
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
       />
-      {showIdentityField && identitySubmissionMode !== null && (
+      {showIdentityField && (
         <CreateDropIdentityField
-          mode={identitySubmissionMode}
+          mode={identitySubmissionMode!}
           selectedIdentity={selectedIdentitySelection}
           selfIdentity={viewerIdentity}
           disabled={submitting}
@@ -229,9 +233,9 @@ export default function CreateDropLayout({
           }
         />
       )}
-      {showInlineIdentityPicker && identitySubmissionMode !== null && (
+      {showInlineIdentityPicker && (
         <InlineIdentityPicker
-          mode={identitySubmissionMode}
+          mode={identitySubmissionMode!}
           selectedIdentity={selectedIdentitySelection}
           disabled={submitting}
           errorMessage={identityPickerErrorMessage}
@@ -240,10 +244,10 @@ export default function CreateDropLayout({
           onSelect={handleIdentitySelection}
         />
       )}
-      {showModalIdentityPicker && identitySubmissionMode !== null && (
+      {showModalIdentityPicker && (
         <CreateDropIdentityPickerModal
           isOpen={isIdentityPickerOpen}
-          mode={identitySubmissionMode}
+          mode={identitySubmissionMode!}
           selectedIdentity={selectedIdentitySelection}
           disabled={submitting}
           errorMessage={identityPickerErrorMessage}

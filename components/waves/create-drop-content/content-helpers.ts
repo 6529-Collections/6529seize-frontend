@@ -28,13 +28,13 @@ import {
   hasCurrentDropPartContent,
   shouldUseInitialDropConfig,
 } from "../utils/createDropContentSubmission";
-import type { CreateDropMetadataType, ScopedValueState } from "./types";
+import type {
+  CreateDropMetadataType,
+  MutableCurrentRef,
+  ScopedValueState,
+} from "./types";
 
-type MutableCurrentRef<T> = {
-  current: T;
-};
-
-export const getFileIdentity = (file: File): string =>
+const getFileIdentity = (file: File): string =>
   [file.name, file.size, file.type, file.lastModified].join(":");
 
 export const normalizeIdentityValue = (identity: string | null | undefined) =>
@@ -56,7 +56,7 @@ export const hasMetadataContent = (
   metadata: CreateDropMetadataType[]
 ): boolean => metadata.some((item) => isMetadataValuePresent(item.value));
 
-export const hasSubmissionContent = ({
+const hasSubmissionContent = ({
   markdown,
   files,
   parts,
@@ -146,7 +146,7 @@ export const canAddDropPart = ({
   !hasPendingInlineImageUpload &&
   !getIsDropLimit(drop, markdown);
 
-export const ensurePartsWithFallback = (
+const ensurePartsWithFallback = (
   parts: CreateDropPart[],
   shouldAddPlaceholder: boolean
 ): CreateDropPart[] => {

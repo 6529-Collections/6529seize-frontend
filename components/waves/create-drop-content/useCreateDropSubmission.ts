@@ -12,7 +12,6 @@ import type { CreateDropConfig } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { useDropSignature } from "@/hooks/drops/useDropSignature";
@@ -26,14 +25,12 @@ import {
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
 import type {
+  ConnectedProfile,
   CreateDropMetadataType,
+  MutableCurrentRef,
   ScopedValueState,
   UploadingFile,
 } from "./types";
-
-type MutableCurrentRef<T> = {
-  current: T;
-};
 
 export const useCreateDropSubmission = ({
   activeDrop,
@@ -89,7 +86,7 @@ export const useCreateDropSubmission = ({
   readonly isSlowModeSubmitBlocked: boolean;
   readonly isLinksSubmitBlocked: boolean;
   readonly canMentionAll: boolean;
-  readonly connectedProfile: ApiIdentity | null;
+  readonly connectedProfile: ConnectedProfile;
   readonly submitting: boolean;
   readonly getMarkdown: string | null;
   readonly files: File[];
