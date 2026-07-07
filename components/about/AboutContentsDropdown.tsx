@@ -112,14 +112,6 @@ export function AboutContentsDropdown({
         className
       )}
     >
-      {leadingAction && (
-        <div
-          className="tw-order-2 tw-flex tw-justify-start sm:tw-order-1"
-          data-testid="about-contents-leading-action"
-        >
-          {leadingAction}
-        </div>
-      )}
       <div
         className={clsx(
           "tw-order-1 tw-flex tw-justify-end",
@@ -147,6 +139,14 @@ export function AboutContentsDropdown({
           focusItemClassName="tw-bg-iron-900 tw-text-iron-50"
         />
       </div>
+      {leadingAction && (
+        <div
+          className="tw-order-2 tw-flex tw-justify-start sm:tw-order-1"
+          data-testid="about-contents-leading-action"
+        >
+          {leadingAction}
+        </div>
+      )}
     </div>
   );
 }
