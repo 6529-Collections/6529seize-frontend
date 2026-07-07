@@ -196,7 +196,7 @@ export function buildNftCollectorsCsv(
   return `${[CSV_HEADERS.join(","), ...rows].join("\n")}\n`;
 }
 
-export function downloadNftCollectorsCsv(nftId: number, csv: string) {
+function downloadNftCollectorsCsv(nftId: number, csv: string) {
   if (
     typeof document === "undefined" ||
     typeof globalThis.URL.createObjectURL !== "function"
