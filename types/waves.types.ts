@@ -115,6 +115,7 @@ export interface CreateWaveDisplayConfig {
   readonly approve: CreateWaveApproveDisplayConfig;
   readonly customRules: string | null;
   readonly outcomesVisible: boolean;
+  readonly submissionButtonLabel: string | null;
 }
 
 export enum CreateWaveOutcomeType {

@@ -241,6 +241,7 @@ describe("CreateWave", () => {
       display: {
         customRules: null,
         outcomesVisible: true,
+        submissionButtonLabel: null,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",
@@ -813,7 +814,9 @@ describe("CreateWave", () => {
             type: "RANK",
           },
           display: {
+            customRules: null,
             outcomesVisible: false,
+            submissionButtonLabel: null,
             approve: {
               approvalsTabLabel: "",
               approvedTabLabel: "",
@@ -881,6 +884,46 @@ describe("CreateWave", () => {
           body: {
             data_key: "wave_display.outcomes.visible",
             data_value: "false",
+          },
+        });
+      });
+    });
+
+    it("saves custom submission button label metadata for rank waves", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "RANK",
+          },
+          display: {
+            ...mockWaveConfig.config.display,
+            submissionButtonLabel: "  Apply  ",
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result, variables);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
+          waveId: "new-wave-id",
+          body: {
+            data_key: "wave_display.submission.button_label",
+            data_value: "Apply",
           },
         });
       });

@@ -67,6 +67,7 @@ jest.mock("@/hooks/useWaveTimers", () => ({
 let mockOutcomesVisible = true;
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useWaveOutcomeVisibility: () => mockOutcomesVisible,
+  useWaveSubmissionButtonLabelOverride: () => null,
 }));
 
 jest.mock("@/components/auth/Auth", () => ({

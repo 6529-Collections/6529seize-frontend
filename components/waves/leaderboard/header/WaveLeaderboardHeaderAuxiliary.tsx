@@ -176,6 +176,7 @@ export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
 );
 
 interface PriceActionsProps {
+  readonly createLabel: string;
   readonly isCompactActions: boolean;
   readonly isPriceFiltersOpen: boolean;
   readonly hasActivePriceFilters: boolean;
@@ -186,6 +187,7 @@ interface PriceActionsProps {
 }
 
 export const PriceActions: React.FC<PriceActionsProps> = ({
+  createLabel,
   isCompactActions,
   isPriceFiltersOpen,
   hasActivePriceFilters,
@@ -229,12 +231,12 @@ export const PriceActions: React.FC<PriceActionsProps> = ({
         {isCompactActions ? (
           <>
             <DropModeGlyphIcon />
-            <span className="tw-sr-only">Drop Art</span>
+            <span className="tw-sr-only">{createLabel}</span>
           </>
         ) : (
           <>
             <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-            <span>Drop Art</span>
+            <span>{createLabel}</span>
           </>
         )}
       </PrimaryButton>
@@ -247,6 +249,7 @@ interface MeasurementProbesProps {
   readonly activeSortLabel: string;
   readonly showPriceActions: boolean;
   readonly showCreateAction: boolean;
+  readonly createLabel: string;
   readonly sortTabsProbeRef: React.RefObject<HTMLDivElement | null>;
   readonly sortDropdownProbeRef: React.RefObject<HTMLDivElement | null>;
   readonly actionsFullProbeRef: React.RefObject<HTMLDivElement | null>;
@@ -258,6 +261,7 @@ export const MeasurementProbes: React.FC<MeasurementProbesProps> = ({
   activeSortLabel,
   showPriceActions,
   showCreateAction,
+  createLabel,
   sortTabsProbeRef,
   sortDropdownProbeRef,
   actionsFullProbeRef,
@@ -302,7 +306,7 @@ export const MeasurementProbes: React.FC<MeasurementProbesProps> = ({
           {showCreateAction && (
             <div className="tw-inline-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-ring-1 tw-ring-inset tw-ring-white">
               <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-              <span>Drop Art</span>
+              <span>{createLabel}</span>
             </div>
           )}
         </div>
