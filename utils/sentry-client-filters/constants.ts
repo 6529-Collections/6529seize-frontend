@@ -7,7 +7,11 @@ export const filenameExceptions = [
 ];
 export const injectedWasmCspAppUriPath = "app:///inject.js";
 export const injectedWasmCspCollapsedPath = "///inject.js";
-export const injectedAppUriPath = "app:///injected/injected.js";
+const injectedAppUriPath = "app:///injected/injected.js";
+export const injectedWalletCollisionAppUriPaths = [
+  injectedAppUriPath,
+  "app:///requestProvider.js",
+];
 export const walletCollisionPatterns = [
   "tronlinkparams",
   "cannot set property ethereum of #<window> which has only a getter",
@@ -97,7 +101,8 @@ export const appOwnedFramePathTokens = [
 ];
 export const rabbyMobileUserRejectedCode = 4001;
 export const rabbyMobileUserRejectedMessage = "Not Allowed";
-export const rabbyMobileStackPatterns = ["rabbymobile", "userrejectedrequest"];
+export const rabbyMobileStackContextPattern = "rabbymobile";
+export const rabbyMobileUserRejectedStackPattern = "userrejectedrequest";
 export const appOwnedStackPatterns = [
   "webpack-internal:///(app-pages-browser)",
   "webpack://_n_e/./",

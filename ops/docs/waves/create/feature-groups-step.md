@@ -28,6 +28,9 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## What You Configure
 
+- Helper copy clarifies that `Who can view` controls who can access the wave,
+  and that followers who can view the wave may get a notification when it is
+  created.
 - `Chat` rows: `Who can view`, `Who can chat`, `Admin`
 - `Rank` and `Approve` rows: `Who can view`, `Who can drop`, `Who can vote`,
   `Who can chat`, `Admin`
@@ -56,11 +59,15 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
   selected until the row is explicitly cleared or a new group is picked.
 - Clear control (`x`) resets the row to its default scope.
 - Helper text under each row shows `Current group: <group-or-scope>`.
+- Inline identity groups use access-group wording and warn when the connected
+  creator is excluded, because excluding yourself from a `Who can view` group
+  can prevent you from opening the created wave.
 
 ## Warnings and State Changes
 
 - If both `Who can view` and `Admin` are set to explicit groups, `Warning:
-  Limited Access` appears.
+  Limited Access` appears and clarifies that the view group controls access
+  while the admin group controls management.
 - On `Rank` and `Approve`, turning `Enable chat` off disables editing for
   `Who can chat`.
 - `Allow admins to delete posts` does not show extra helper text when enabled.

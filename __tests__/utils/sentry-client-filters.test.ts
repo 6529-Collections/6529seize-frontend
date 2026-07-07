@@ -46,8 +46,15 @@ describe("sentry-client-filters", () => {
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const rabbyMobileUserRejectedStack =
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
+  const rabbyMobileAndroidUserRejectedStack = [
+    "EthereumProviderError: Not Allowed",
+    "    at getEthProviderError (inpage.js:1:1)",
+    "    at userRejectedRequest (inpage.js:1:1)",
+  ].join("\n");
   const rabbyMobileUserAgent =
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 RabbyMobileIOS/1.0 Mobile/15E148";
+  const rabbyMobileAndroidUserAgent =
+    "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
   const reactDomInsertBeforeMessage =
@@ -83,6 +90,8 @@ describe("sentry-client-filters", () => {
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
   const metaMaskMobileWebViewUserAgent =
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebView MetaMaskMobile";
+  const metaMaskMobileUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1 MetaMaskMobile";
   const wasmCspUnsafeEvalMessage = [
     "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating",
     "WebAssembly module violates the following Content Security policy directive",
@@ -554,6 +563,40 @@ describe("sentry-client-filters", () => {
           },
         ],
       },
+      ...overrides,
+    });
+
+  const createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    createSentryRouteParameterizationEvent({
+      transaction: "/waves/:wave",
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        headers: {
+          "User-Agent": metaMaskMobileUserAgent,
+        },
+      },
+      contexts: {
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+        url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        transaction: "/waves/:wave",
+      },
+      breadcrumbs: [
+        {
+          category: "navigation",
+          data: {
+            from: "/anon93",
+            to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          },
+        },
+      ],
       ...overrides,
     });
 
@@ -2814,6 +2857,18 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed MetaMaskMobile WKWebView wave route parameterization cyclic JSON errors", () => {
+    // Arrange
+    const event =
+      createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Sentry route parameterization errors with the Sentry parameterization frame outside route bounds", () => {
     // Arrange
     const event = createObservedSentryRouteParameterizationEvent();
@@ -3056,6 +3111,68 @@ describe("sentry-client-filters", () => {
         browser: "Mobile Safari",
         "browser.name": "Mobile Safari",
       },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter MetaMaskMobile route parameterization errors without WKWebView evidence", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        headers: {
+          "User-Agent": metaMaskMobileUserAgent,
+        },
+      },
+      contexts: {},
+      tags: {},
+      breadcrumbs: [],
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
+    // Arrange
+    const event =
+      createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent({
+        request: {
+          url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1",
+          },
+        },
+      });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter MetaMaskMobile route parameterization errors without route evidence", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent({
+      transaction: undefined,
+      request: {
+        headers: {
+          "User-Agent": metaMaskMobileWebViewUserAgent,
+        },
+      },
+      contexts: {},
+      tags: {},
+      breadcrumbs: [],
     });
 
     // Act
@@ -3979,6 +4096,117 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed injected wallet collisions from requestProvider app URI frames", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      transaction: "/waves",
+      request: {
+        url: "https://6529.io/waves",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js:2:584019",
+                  abs_path: "app:///requestProvider.js:2:584019",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter wallet collisions when app-owned source frames are present", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js",
+                  abs_path: "app:///requestProvider.js",
+                },
+                {
+                  filename: "app:///services/auth/wallet-provider.ts",
+                  abs_path: "app:///services/auth/wallet-provider.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter wallet collisions when serialized stack is app-owned", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot set property ethereum of #<Window> which has only a getter",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///requestProvider.js",
+                  abs_path: "app:///requestProvider.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+      extra: {
+        __serialized__: {
+          stack:
+            "TypeError: Cannot set property ethereum of #<Window> which has only a getter\n    at installProvider (app:///services/auth/wallet-provider.ts:12:3)",
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters MetaMask mobile update-url circular React meta element errors", () => {
     // Arrange
     const event = createMetaMaskUpdateUrlCircularEvent();
@@ -4338,6 +4566,37 @@ describe("sentry-client-filters", () => {
   it("filters RabbyMobile 4001 user-rejected object rejections without app frames", () => {
     // Arrange
     const event = createRabbyMobileUserRejectedRequestEvent();
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters production RabbyMobile Android user-rejected object rejections from user-agent context", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      request: {
+        headers: {
+          "User-Agent": rabbyMobileAndroidUserAgent,
+        },
+      },
+      breadcrumbs: [
+        {
+          category: "console",
+          level: "error",
+          message: "Rabby - RPC Error: Not Allowed",
+        },
+      ],
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileAndroidUserRejectedStack,
+        },
+      },
+    });
 
     // Act
     const result = shouldFilterRabbyMobileUserRejectedRequest(event);
@@ -4740,6 +4999,33 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter RabbyMobile user-rejected object rejections with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      request: {
+        headers: {
+          "User-Agent": rabbyMobileAndroidUserAgent,
+        },
+      },
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: [
+            rabbyMobileAndroidUserRejectedStack,
+            "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter RabbyMobile RainbowKit lookup errors with app-owned frames", () => {
     // Arrange
     setNavigatorUserAgent(rabbyMobileUserAgent);
@@ -4913,6 +5199,25 @@ describe("sentry-client-filters", () => {
           code: 4100,
           message: "Not Allowed",
           stack: rabbyMobileUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter user-rejected object rejections without RabbyMobile context", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileAndroidUserRejectedStack,
         },
       },
     });
