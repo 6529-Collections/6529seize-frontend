@@ -9,10 +9,10 @@ import WaveProfileWaveAction from "./profile-wave/WaveProfileWaveAction";
 
 export default function WaveHeaderOptions({
   wave,
-  showOwnerActions = true,
+  showOwnerActions,
 }: {
   readonly wave: ApiWave;
-  readonly showOwnerActions?: boolean | undefined;
+  readonly showOwnerActions: boolean;
 }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);

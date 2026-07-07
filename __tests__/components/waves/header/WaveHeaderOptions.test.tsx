@@ -66,9 +66,12 @@ const createWrapper = (auth: any = {}) => {
 
 test("opens and closes options", async () => {
   const user = userEvent.setup();
-  const { rerender } = render(<WaveHeaderOptions wave={wave} />, {
-    wrapper: createWrapper(),
-  });
+  const { rerender } = render(
+    <WaveHeaderOptions wave={wave} showOwnerActions={true} />,
+    {
+      wrapper: createWrapper(),
+    }
+  );
   const btn = screen.getByRole("button");
   expect(btn).toHaveClass("tw-size-8", "desktop-hover:hover:tw-bg-iron-700");
   expect(btn).not.toHaveClass("tw-size-9");
@@ -77,11 +80,11 @@ test("opens and closes options", async () => {
   expect(screen.getByTestId("profile-wave")).toHaveAttribute("data-wave", "w1");
   expect(screen.queryByText("Mute")).not.toBeInTheDocument();
   clickAway({ target: document.body } as unknown as Event);
-  rerender(<WaveHeaderOptions wave={wave} />);
+  rerender(<WaveHeaderOptions wave={wave} showOwnerActions={true} />);
   expect(screen.queryByTestId("delete")).toBeNull();
   await user.click(btn);
   escCb();
-  rerender(<WaveHeaderOptions wave={wave} />);
+  rerender(<WaveHeaderOptions wave={wave} showOwnerActions={true} />);
   expect(screen.queryByTestId("delete")).toBeNull();
 });
 
