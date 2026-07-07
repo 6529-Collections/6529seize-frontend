@@ -206,7 +206,7 @@ export function isInjectedOrThirdPartyWalletExtensionPath(
   );
 }
 
-export function hasInjectedWalletCollisionAppUriStackValue(
+function hasInjectedWalletCollisionAppUriStackValue(
   value: string | undefined
 ): boolean {
   const normalizedValue = value?.toLowerCase();

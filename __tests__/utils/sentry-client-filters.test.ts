@@ -201,6 +201,30 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createInjectedKeplrWalletCollisionEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/waves",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value:
+            "Cannot assign to read only property 'keplr' of object '#<Window>'",
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///inject-runtime.js",
+                abs_path: "app:///inject-runtime.js",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    ...overrides,
+  });
+
   const createCoinbaseWalletLinkWebSocketEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -3318,9 +3342,50 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters injected keplr read-only collisions from inject-runtime stacks", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent();
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Coinbase WalletLink websocket 1006 close errors", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent();
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Coinbase WalletLink websocket 1006 close errors without a detail suffix", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                  abs_path:
+                    "node_modules/.pnpm/@coinbase+wallet-sdk@3.9.3/node_modules/@coinbase/wallet-sdk/dist/relay/walletlink/connection/WalletLinkWebSocket.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
 
     // Act
     const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
@@ -4320,6 +4385,68 @@ describe("sentry-client-filters", () => {
                 {
                   filename: "https://example.com/app.js",
                   abs_path: "https://example.com/app.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter keplr read-only collisions with app-owned source frames", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot assign to read only property 'keplr' of object '#<Window>'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///inject-runtime.js",
+                  abs_path: "app:///inject-runtime.js",
+                },
+                {
+                  filename: "app:///utils/wallets/install-keplr.ts",
+                  abs_path: "app:///utils/wallets/install-keplr.ts",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter keplr read-only collisions with mixed app-owned and injected frame paths", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot assign to read only property 'keplr' of object '#<Window>'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///utils/wallets/install-keplr.ts",
+                  abs_path: "app:///inject-runtime.js",
                 },
               ],
             },
