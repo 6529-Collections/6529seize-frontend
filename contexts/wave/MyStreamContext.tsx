@@ -159,7 +159,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 }) => {
   const { isCapacitor, isActive } = useCapacitor();
   const pathname = usePathname() as string | null;
-  const { activeWaveId, setActiveWave } = useActiveWaveManager();
+  const { activeWaveId, hasActiveWaveDropTarget, setActiveWave } =
+    useActiveWaveManager();
   const [
     directMessagesListActivationCount,
     setDirectMessagesListActivationCount,
@@ -215,6 +216,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     updateData: waveMessagesStore.updateData,
     getData: waveMessagesStore.getData,
     removeDrop: waveMessagesStore.removeDrop,
+    isCapacitor,
   });
   const {
     registerWave,
@@ -304,7 +306,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {
       if (waveId) {
-        registerWave(waveId, true);
+        registerWave(waveId, true, {
+          skipInitialBackfill:
+            options?.serialNo !== undefined && options.serialNo !== null,
+        });
       }
       setActiveWave(waveId, options);
     },
@@ -313,7 +318,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   const syncActiveWaveAndRefetch = useEffectEvent(() => {
     if (activeWaveId) {
-      registerWave(activeWaveId, true);
+      registerWave(activeWaveId, true, {
+        skipInitialBackfill: hasActiveWaveDropTarget,
+      });
     }
     refetchAllMainWaves();
     if (isDirectMessagesListEnabled) {
@@ -365,9 +372,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   useEffect(() => {
     if (activeWaveId) {
-      registerWave(activeWaveId, true);
+      registerWave(activeWaveId, true, {
+        skipInitialBackfill: hasActiveWaveDropTarget,
+      });
     }
-  }, [activeWaveId, registerWave]);
+  }, [activeWaveId, hasActiveWaveDropTarget, registerWave]);
 
   // Detect when app comes to foreground on mobile
   useEffect(() => {
