@@ -274,8 +274,8 @@ function HeroAction({
       <Link
         className={className}
         href={action.href ?? "#journey"}
-        onClick={action.onClick}
-        onNavigate={action.onNavigate}
+        {...(action.onClick ? { onClick: action.onClick } : {})}
+        {...(action.onNavigate ? { onNavigate: action.onNavigate } : {})}
       >
         {label}
       </Link>
