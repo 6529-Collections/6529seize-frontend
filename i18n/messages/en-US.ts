@@ -574,14 +574,15 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = objectMessages(
   {
     "trigger.tooltip": "Notification settings",
     "trigger.ariaLabel": "Open notification settings",
-    "allMentions.label": "ALL",
+    "allMentions.label": "ALL mentions",
     "allMentions.ariaLabel": "Receive ALL mention notifications",
-    "allMessages.label": "Notify for all messages",
+    "allMessages.label": "All messages",
     "allMessages.ariaLabel": "Receive notifications for all messages",
-    "allMessages.unavailableDescription":
-      "Unavailable for waves with {count}+ followers.",
+    "allMessages.limit.unavailableDescription": "Below {count} followers only.",
+    "allMessages.limit.reenableDescription":
+      "Re-enable below {count} followers.",
     "mute.label": "Mute",
-    "mute.unmuteLabel": "Unmute",
+    "mute.activeLabel": "Muted",
     "mute.ariaLabel": "Mute wave",
     "mute.unmuteAriaLabel": "Unmute wave",
     "mute.tooltip.enable": "Click to mute this wave",

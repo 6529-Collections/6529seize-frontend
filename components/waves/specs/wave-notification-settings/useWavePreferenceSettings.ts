@@ -146,8 +146,10 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     void refetch();
   }, [refetch]);
 
-  const allDropsUnavailableDescription = waveNotificationSettingsMessage(
-    "waves.notificationSettings.allMessages.unavailableDescription",
+  const allDropsLimitDescription = waveNotificationSettingsMessage(
+    subscribedToAllDrops
+      ? "waves.notificationSettings.allMessages.limit.reenableDescription"
+      : "waves.notificationSettings.allMessages.limit.unavailableDescription",
     {
       count: formatWaveNotificationSettingsInteger(
         allDropsNotificationsSubscribersLimit
@@ -158,7 +160,7 @@ export function useWavePreferenceSettings(wave: ApiWave) {
   return {
     allDropsEnabled,
     allGroupNotificationsEnabled,
-    allDropsUnavailableDescription,
+    allDropsLimitDescription,
     disableAllDropsSelection,
     loading,
     loadingTarget,

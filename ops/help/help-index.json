@@ -4284,7 +4284,6 @@
         "bell button",
         "speaker muted",
         "speaker mute button",
-        "speaker unmute button",
         "all message notifications"
       ],
       "keywords": [
@@ -4300,11 +4299,11 @@
       ],
       "facts": [
         "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "The notification menu has an ALL option with an @ icon for @ALL mention notifications.",
-        "The notification menu has a Notify for all messages option for every-message notifications.",
-        "When all-message notifications are unavailable and not already enabled, the notification menu keeps that option visible but disabled with an inline reason.",
+        "The notification menu has an ALL mentions option with an @ icon for @ALL mention notifications.",
+        "The notification menu has an All messages option for every-message notifications.",
+        "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
         "The speaker control mutes waves before or after joining.",
-        "When a wave is muted, the speaker-wave Unmute control unmutes it.",
+        "When a wave is muted, the red speaker-muted Muted control unmutes it.",
         "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually."
       ],
       "canonical_path": "/waves",

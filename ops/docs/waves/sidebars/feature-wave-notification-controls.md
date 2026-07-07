@@ -28,13 +28,14 @@ behavior across thread header controls and sidebar wave rows.
 ## Notification Modes
 
 - The bell button opens notification preferences.
-- The `ALL` row, shown with the `@` icon, turns on notifications for `@ALL`
-  mentions.
-- The `Notify for all messages` row turns on notifications for every message.
+- The `ALL mentions` row, shown with the `@` icon, turns on notifications for
+  `@ALL` mentions.
+- The `All messages` row turns on notifications for every message.
 - If all-message notifications are unavailable by follower limit and not already
   enabled, the all-message row stays visible but disabled with an inline reason.
 - If all-message notifications were already enabled before the limit applies,
-  the all-message row stays available so the user can disable it.
+  the all-message row stays available so the user can disable it and still shows
+  the follower-limit note.
 - While a mode toggle request runs, the clicked button shows a spinner and
   notification controls are temporarily disabled.
 
@@ -42,7 +43,7 @@ behavior across thread header controls and sidebar wave rows.
 
 - Before joining, the speaker control can mute the wave without joining it.
 - In joined + muted state, the bell notification menu is replaced by one
-  `Unmute` speaker-wave button.
+  red `Muted` speaker-muted button that unmutes.
 - In joined + unmuted state, the `Mute` speaker-muted button mutes the wave from
   the notification control row.
 - Mute is per-wave and does not block opening the wave manually.

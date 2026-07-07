@@ -163,7 +163,7 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).not.toHaveAttribute("data-tooltip-content");
     expect(allMentionsButton.parentElement).toHaveAttribute("role", "none");
     expect(allButton.parentElement).toHaveAttribute("role", "none");
-    expect(screen.getByText("ALL")).toBeInTheDocument();
+    expect(screen.getByText("ALL mentions")).toBeInTheDocument();
     expect(screen.queryByText("@ALL")).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText("Receive mentions-only notifications")
@@ -271,11 +271,9 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).not.toBeDisabled();
     expect(allButton).toHaveAttribute("aria-disabled", "true");
     expect(allButton).toHaveAccessibleDescription(
-      "Unavailable for waves with 1,000+ followers."
+      "Below 1,000 followers only."
     );
-    expect(
-      screen.getByText("Unavailable for waves with 1,000+ followers.")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Below 1,000 followers only.")).toBeInTheDocument();
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
     expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
     expect(allMentionsButton).not.toHaveAttribute("data-tooltip-content");
@@ -322,6 +320,12 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).toHaveClass("tw-text-primary-400");
     expect(allButton).not.toHaveClass("tw-cursor-not-allowed");
     expect(allButton.parentElement?.tagName).toBe("LI");
+    expect(allButton).toHaveAccessibleDescription(
+      "Re-enable below 1,000 followers."
+    );
+    expect(
+      screen.getByText("Re-enable below 1,000 followers.")
+    ).toBeInTheDocument();
 
     await userEvent.click(allButton);
 
@@ -711,8 +715,7 @@ describe("WaveNotificationSettings", () => {
       "tw-border-error/40",
       "tw-text-error"
     );
-    expect(screen.getByText("Unmute")).toBeInTheDocument();
-    expect(screen.queryByText("Muted")).not.toBeInTheDocument();
+    expect(screen.getByText("Muted")).toBeInTheDocument();
   });
 
   it("does not render notification settings when wave is muted", () => {

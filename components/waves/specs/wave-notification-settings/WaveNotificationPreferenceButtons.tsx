@@ -48,7 +48,7 @@ export default function WaveNotificationPreferenceButtons({
   const tooltipId = `wave-notification-actions-${waveId}`;
   const triggerId = `${tooltipId}-trigger`;
   const menuId = `${tooltipId}-menu`;
-  const allDropsDisabledDescriptionId = `${tooltipId}-all-drops-disabled-description`;
+  const allDropsLimitDescriptionId = `${tooltipId}-all-drops-limit-description`;
   const triggerActive =
     settings.allGroupNotificationsEnabled || settings.allDropsEnabled;
   const triggerSizeClass = compact
@@ -153,8 +153,8 @@ export default function WaveNotificationPreferenceButtons({
             aria-checked={settings.allDropsEnabled}
             aria-disabled={allDropsSelectionDisabled || undefined}
             aria-describedby={
-              allDropsSelectionDisabled
-                ? allDropsDisabledDescriptionId
+              settings.disableAllDropsSelection
+                ? allDropsLimitDescriptionId
                 : undefined
             }
             onClick={(event) => {
@@ -185,12 +185,12 @@ export default function WaveNotificationPreferenceButtons({
                   "waves.notificationSettings.allMessages.label"
                 )}
               </span>
-              {allDropsSelectionDisabled && (
+              {settings.disableAllDropsSelection && (
                 <span
-                  id={allDropsDisabledDescriptionId}
-                  className="tw-mt-0.5 tw-block tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500"
+                  id={allDropsLimitDescriptionId}
+                  className="tw-mt-0.5 tw-block tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-[14px] tw-text-iron-400"
                 >
-                  {settings.allDropsUnavailableDescription}
+                  {settings.allDropsLimitDescription}
                 </span>
               )}
             </span>
