@@ -33,7 +33,7 @@ export interface FocusFeatureSpec {
   readonly href: JoinHref;
 }
 
-export interface FaqItemSpec {
+interface FaqItemSpec {
   readonly id: string;
   readonly questionKey: Join6529MessageKey;
   readonly answerKey: Join6529MessageKey;
@@ -68,7 +68,7 @@ interface MemeCardSource {
 export const WAVES_HREF = "/waves";
 
 const ABOUT_SUBSCRIPTIONS_HREF = "/about/subscriptions";
-export const COLLECTIONS_HREF = "/the-memes";
+const COLLECTIONS_HREF = "/the-memes";
 const DELEGATION_HREF = "/delegation/delegation-center";
 const JOIN_STEP_ID_PREFIX = "join-step";
 const LICENSE_HREF = "/about/license";
