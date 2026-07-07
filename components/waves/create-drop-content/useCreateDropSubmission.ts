@@ -32,6 +32,176 @@ import type {
   UploadingFile,
 } from "./types";
 
+type GeneratedParts = Awaited<ReturnType<typeof generateParts>>;
+type ProcessIncomingDrop = (
+  drop: ApiDrop,
+  type: ProcessIncomingDropType
+) => Promise<void>;
+
+const isBlockedChatDropRequest = ({
+  dropRequest,
+  isChatBlockedBySlowMode,
+  isChatLinksRestrictionActive,
+}: {
+  readonly dropRequest: CreateDropConfig;
+  readonly isChatBlockedBySlowMode: boolean;
+  readonly isChatLinksRestrictionActive: boolean;
+}): boolean => {
+  if (dropRequest.drop_type !== ApiDropType.Chat) {
+    return false;
+  }
+
+  if (isChatBlockedBySlowMode) {
+    return true;
+  }
+
+  return (
+    isChatLinksRestrictionActive &&
+    dropRequest.parts.some((part) => containsDisallowedLink(part.content))
+  );
+};
+
+const buildCreateDropRequest = ({
+  dropRequest,
+  generatedParts,
+  canMentionAll,
+  waveId,
+}: {
+  readonly dropRequest: CreateDropConfig;
+  readonly generatedParts: GeneratedParts;
+  readonly canMentionAll: boolean;
+  readonly waveId: string;
+}): ApiCreateDropRequest => {
+  const parts = toApiCreateDropParts(generatedParts);
+
+  return {
+    ...dropRequest,
+    mentioned_users: filterMentionedUsers({
+      mentionedUsers: dropRequest.mentioned_users,
+      parts: dropRequest.parts,
+    }),
+    mentioned_waves: filterMentionedWaves({
+      mentionedWaves: dropRequest.mentioned_waves ?? [],
+      parts: dropRequest.parts,
+    }),
+    mentioned_groups: getMentionedGroupsForParts({
+      parts: dropRequest.parts,
+      canMentionAll,
+    }),
+    metadata: dropRequest.metadata,
+    wave_id: waveId,
+    parts,
+  };
+};
+
+const getOptimisticDropForSubmission = ({
+  updatedDropRequest,
+  generatedParts,
+  connectedProfile,
+  wave,
+  activeDrop,
+  isDropMode,
+}: {
+  readonly updatedDropRequest: ApiCreateDropRequest;
+  readonly generatedParts: GeneratedParts;
+  readonly connectedProfile: ConnectedProfile;
+  readonly wave: ApiWave;
+  readonly activeDrop: ActiveDropState | null;
+  readonly isDropMode: boolean;
+}): ApiDrop | null =>
+  getOptimisticDrop(
+    {
+      ...updatedDropRequest,
+      parts: updatedDropRequest.parts.map((part, index) => ({
+        ...part,
+        media: generatedParts[index]?.media ?? part.media,
+      })),
+    },
+    connectedProfile,
+    wave,
+    activeDrop,
+    isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
+  );
+
+const addOptimisticDropWithAttachments = ({
+  optimisticDrop,
+  generatedParts,
+  addOptimisticDrop,
+  processIncomingDrop,
+}: {
+  readonly optimisticDrop: ApiDrop | null;
+  readonly generatedParts: GeneratedParts;
+  readonly addOptimisticDrop: (params: {
+    readonly drop: ApiDrop;
+  }) => Promise<void>;
+  readonly processIncomingDrop: ProcessIncomingDrop;
+}) => {
+  if (!optimisticDrop) {
+    return;
+  }
+
+  const optimisticDropWithAttachments = {
+    ...optimisticDrop,
+    parts: optimisticDrop.parts.map((part, index) => ({
+      ...part,
+      attachments: generatedParts[index]?.uploaded_attachments ?? [],
+    })),
+  };
+  addOptimisticDrop({ drop: optimisticDropWithAttachments });
+  setTimeout(
+    () =>
+      processIncomingDrop(
+        optimisticDropWithAttachments,
+        ProcessIncomingDropType.DROP_INSERT
+      ),
+    0
+  );
+};
+
+const hideAndroidKeyboard = async () => {
+  const { Capacitor } = await import("@capacitor/core");
+  if (Capacitor.getPlatform() !== "android") {
+    return;
+  }
+
+  const { Keyboard } = await import("@capacitor/keyboard");
+  await Keyboard.hide().catch(() => {});
+};
+
+const updateFocusAfterAcceptedSubmit = ({
+  getMarkdown,
+  shouldKeepChatFocused,
+  isApp,
+  shouldCollapseOptionsAfterMarkdownSyncRef,
+  createDropInputRef,
+  shouldRefocusAfterChatSubmitRef,
+}: {
+  readonly getMarkdown: string | null;
+  readonly shouldKeepChatFocused: boolean;
+  readonly isApp: boolean;
+  readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
+  readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
+  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
+}) => {
+  if (getMarkdown?.length) {
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
+    createDropInputRef.current?.clearEditorState();
+  }
+
+  if (shouldKeepChatFocused) {
+    shouldRefocusAfterChatSubmitRef.current = true;
+    return;
+  }
+
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+
+  if (isApp) {
+    hideAndroidKeyboard().catch(() => {});
+  }
+};
+
 export const useCreateDropSubmission = ({
   activeDrop,
   wave,
@@ -106,10 +276,7 @@ export const useCreateDropSubmission = ({
   readonly addOptimisticDrop: (params: {
     readonly drop: ApiDrop;
   }) => Promise<void>;
-  readonly processIncomingDrop: (
-    drop: ApiDrop,
-    type: ProcessIncomingDropType
-  ) => Promise<void>;
+  readonly processIncomingDrop: ProcessIncomingDrop;
   readonly handleDropModeChange: (newIsDropMode: boolean) => void;
   readonly handleDuplicateIdentitySubmissionError: (error: unknown) => void;
   readonly markIdentitySubmitAttempted: () => void;
@@ -196,14 +363,12 @@ export const useCreateDropSubmission = ({
       return;
     }
 
-    if (dropRequest.drop_type === ApiDropType.Chat && isChatBlockedBySlowMode) {
-      return;
-    }
-
     if (
-      dropRequest.drop_type === ApiDropType.Chat &&
-      isChatLinksRestrictionActive &&
-      dropRequest.parts.some((part) => containsDisallowedLink(part.content))
+      isBlockedChatDropRequest({
+        dropRequest,
+        isChatBlockedBySlowMode,
+        isChatLinksRestrictionActive,
+      })
     ) {
       return;
     }
@@ -229,46 +394,26 @@ export const useCreateDropSubmission = ({
         setSubmitting(false);
         return;
       }
-      const parts = toApiCreateDropParts(generatedParts);
-
-      const requestBody: ApiCreateDropRequest = {
-        ...dropRequest,
-        mentioned_users: filterMentionedUsers({
-          mentionedUsers: dropRequest.mentioned_users,
-          parts: dropRequest.parts,
-        }),
-        mentioned_waves: filterMentionedWaves({
-          mentionedWaves: dropRequest.mentioned_waves ?? [],
-          parts: dropRequest.parts,
-        }),
-        mentioned_groups: getMentionedGroupsForParts({
-          parts: dropRequest.parts,
-          canMentionAll,
-        }),
-        metadata: dropRequest.metadata,
-        wave_id: wave.id,
-        parts,
-      };
-
+      const requestBody = buildCreateDropRequest({
+        dropRequest,
+        generatedParts,
+        canMentionAll,
+        waveId: wave.id,
+      });
       const updatedDropRequest = await getUpdatedDropRequest(requestBody);
       if (!updatedDropRequest) {
         setSubmitting(false);
         return;
       }
 
-      const optimisticDrop = getOptimisticDrop(
-        {
-          ...updatedDropRequest,
-          parts: updatedDropRequest.parts.map((part, index) => ({
-            ...part,
-            media: generatedParts[index]?.media ?? part.media,
-          })),
-        },
+      const optimisticDrop = getOptimisticDropForSubmission({
+        updatedDropRequest,
+        generatedParts,
         connectedProfile,
         wave,
         activeDrop,
-        isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
-      );
+        isDropMode,
+      });
 
       const submitAccepted = submitDrop({
         drop: updatedDropRequest,
@@ -289,42 +434,20 @@ export const useCreateDropSubmission = ({
       const shouldKeepChatFocused =
         updatedDropRequest.drop_type === ApiDropType.Chat;
 
-      if (optimisticDrop) {
-        const optimisticDropWithAttachments = {
-          ...optimisticDrop,
-          parts: optimisticDrop.parts.map((part, index) => ({
-            ...part,
-            attachments: generatedParts[index]?.uploaded_attachments ?? [],
-          })),
-        };
-        addOptimisticDrop({ drop: optimisticDropWithAttachments });
-        setTimeout(
-          () =>
-            processIncomingDrop(
-              optimisticDropWithAttachments,
-              ProcessIncomingDropType.DROP_INSERT
-            ),
-          0
-        );
-      }
-      if (getMarkdown?.length) {
-        shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
-        createDropInputRef.current?.clearEditorState();
-      }
-      if (shouldKeepChatFocused) {
-        shouldRefocusAfterChatSubmitRef.current = true;
-      } else if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur();
-      }
-      if (isApp && !shouldKeepChatFocused) {
-        void import("@capacitor/core").then(({ Capacitor }) => {
-          if (Capacitor.getPlatform() === "android") {
-            void import("@capacitor/keyboard").then(({ Keyboard }) => {
-              void Keyboard.hide().catch(() => {});
-            });
-          }
-        });
-      }
+      addOptimisticDropWithAttachments({
+        optimisticDrop,
+        generatedParts,
+        addOptimisticDrop,
+        processIncomingDrop,
+      });
+      updateFocusAfterAcceptedSubmit({
+        getMarkdown,
+        shouldKeepChatFocused,
+        isApp,
+        shouldCollapseOptionsAfterMarkdownSyncRef,
+        createDropInputRef,
+        shouldRefocusAfterChatSubmitRef,
+      });
       setFiles([]);
       if (isIdentityPickerAllowed) {
         disableIdentityPickerAutoOpen();
