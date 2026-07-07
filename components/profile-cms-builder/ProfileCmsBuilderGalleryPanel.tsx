@@ -131,9 +131,12 @@ export function WalletGalleryPanel({
             {t(locale, "profileCms.builder.gallery.wallets.help")}
           </p>
           {snapshotStatus === "loading" ? (
-            <p className="tw-text-primary-200 tw-text-sm" role="status">
+            <output
+              aria-live="polite"
+              className="tw-text-primary-200 tw-text-sm"
+            >
               {t(locale, "profileCms.builder.gallery.snapshot.loadingDetail")}
-            </p>
+            </output>
           ) : null}
           {snapshotError ? (
             <p
