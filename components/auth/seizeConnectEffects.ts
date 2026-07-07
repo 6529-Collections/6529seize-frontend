@@ -51,6 +51,267 @@ interface SeizeConnectProviderEffectsParams {
   readonly walletState: WalletState;
 }
 
+type AccountSnapshot = SeizeConnectProviderEffectsParams["account"];
+
+interface WalletStateSyncParams {
+  readonly account: AccountSnapshot;
+  readonly addFlowOriginAddressRef: MutableRefObject<string | null>;
+  readonly agentLoginImpersonatedAddress: string | undefined;
+  readonly impersonatedAddress: string | undefined;
+  readonly isAddingConnectedAccount: boolean;
+  readonly setConnected: (address: string) => void;
+  readonly setConnecting: () => void;
+  readonly setDisconnected: () => void;
+  readonly storedConnectedAccounts: readonly ConnectedWalletAccount[];
+  readonly walletState: WalletState;
+}
+
+function getChecksummedAddress(
+  address: string | null | undefined
+): string | null {
+  if (!address || !isAddress(address)) {
+    return null;
+  }
+  return getAddress(address);
+}
+
+function setConnectedIfNeeded(
+  address: string,
+  {
+    setConnected,
+    walletState,
+  }: Pick<WalletStateSyncParams, "setConnected" | "walletState">
+): void {
+  if (walletState.status === "connected" && walletState.address === address) {
+    return;
+  }
+  setConnected(address);
+}
+
+function setConnectingIfNeeded({
+  setConnecting,
+  walletState,
+}: Pick<WalletStateSyncParams, "setConnecting" | "walletState">): void {
+  if (walletState.status !== "connecting") {
+    setConnecting();
+  }
+}
+
+function setDisconnectedIfNeeded({
+  setDisconnected,
+  walletState,
+}: Pick<WalletStateSyncParams, "setDisconnected" | "walletState">): void {
+  if (walletState.status !== "disconnected") {
+    setDisconnected();
+  }
+}
+
+function isStoredConnectedAccount(
+  storedConnectedAccounts: readonly ConnectedWalletAccount[],
+  address: string
+): boolean {
+  return storedConnectedAccounts.some(
+    (storedAccount) =>
+      normalizeAddress(storedAccount.address) === normalizeAddress(address)
+  );
+}
+
+function handleAgentLoginConnection(params: WalletStateSyncParams): boolean {
+  const connectedAddress = getChecksummedAddress(params.account.address);
+  if (
+    !params.agentLoginImpersonatedAddress ||
+    !connectedAddress ||
+    !params.account.isConnected
+  ) {
+    return false;
+  }
+
+  clearAgentLoginActiveAddress();
+  setConnectedIfNeeded(connectedAddress, params);
+  return true;
+}
+
+function handleImpersonatedConnection(params: WalletStateSyncParams): boolean {
+  if (!params.impersonatedAddress) {
+    return false;
+  }
+
+  setConnectedIfNeeded(params.impersonatedAddress, params);
+  return true;
+}
+
+function handleAddingLiveConnection(params: WalletStateSyncParams): boolean {
+  const connectedAddress = getChecksummedAddress(params.account.address);
+  if (
+    !params.isAddingConnectedAccount ||
+    !connectedAddress ||
+    !params.account.isConnected
+  ) {
+    return false;
+  }
+
+  clearAgentLoginActiveAddress();
+  setConnectedIfNeeded(connectedAddress, params);
+  return true;
+}
+
+function selectStoredSwitchAddress(
+  params: WalletStateSyncParams,
+  connectedAddress: string,
+  activeStoredAddress: string | null | undefined
+): string | null {
+  if (
+    !activeStoredAddress ||
+    !isStoredConnectedAccount(params.storedConnectedAccounts, connectedAddress)
+  ) {
+    return null;
+  }
+
+  const storedActiveAddress = getChecksummedAddress(activeStoredAddress);
+  if (
+    !storedActiveAddress ||
+    !isStoredConnectedAccount(
+      params.storedConnectedAccounts,
+      storedActiveAddress
+    )
+  ) {
+    return null;
+  }
+
+  if (
+    normalizeAddress(connectedAddress) === normalizeAddress(storedActiveAddress)
+  ) {
+    return null;
+  }
+  return storedActiveAddress;
+}
+
+function handleLiveConnectedAccount(
+  params: WalletStateSyncParams,
+  activeStoredAddress: string | null | undefined
+): boolean {
+  const connectedAddress = getChecksummedAddress(params.account.address);
+  if (!connectedAddress || !params.account.isConnected) {
+    return false;
+  }
+
+  clearAgentLoginActiveAddress();
+  const storedSwitchAddress = selectStoredSwitchAddress(
+    params,
+    connectedAddress,
+    activeStoredAddress
+  );
+  if (storedSwitchAddress) {
+    setConnectedIfNeeded(storedSwitchAddress, params);
+    return true;
+  }
+
+  if (
+    !isStoredConnectedAccount(params.storedConnectedAccounts, connectedAddress)
+  ) {
+    setConnectedIfNeeded(connectedAddress, params);
+    return true;
+  }
+  return false;
+}
+
+function handleAddingPendingCandidate(params: WalletStateSyncParams): boolean {
+  if (!params.isAddingConnectedAccount) {
+    return false;
+  }
+
+  const candidateAddress = getChecksummedAddress(params.account.address);
+  const addFlowOriginAddress = params.addFlowOriginAddressRef.current;
+  const isCandidateDifferentFromOrigin =
+    !addFlowOriginAddress ||
+    (!!candidateAddress &&
+      normalizeAddress(candidateAddress) !==
+        normalizeAddress(addFlowOriginAddress));
+  if (
+    !candidateAddress ||
+    !isCandidateDifferentFromOrigin ||
+    params.account.isConnected
+  ) {
+    return false;
+  }
+
+  setConnectingIfNeeded(params);
+  return true;
+}
+
+function handleActiveStoredAddress(
+  params: WalletStateSyncParams,
+  activeStoredAddress: string | null | undefined
+): boolean {
+  const storedAddress = getChecksummedAddress(activeStoredAddress);
+  if (!storedAddress) {
+    return false;
+  }
+
+  setConnectedIfNeeded(storedAddress, params);
+  return true;
+}
+
+function logInvalidProviderAddress(address: string): void {
+  logSecurityEvent(
+    SecurityEventType.INVALID_ADDRESS_DETECTED,
+    createValidationEventContext(
+      "wallet_provider",
+      false,
+      address.length,
+      address.startsWith("0x") ? "hex_prefixed" : "other"
+    )
+  );
+}
+
+function handleProviderAccountFallback(params: WalletStateSyncParams): void {
+  if (params.account.address && params.account.isConnected) {
+    const checksummedAddress = getChecksummedAddress(params.account.address);
+    if (!checksummedAddress) {
+      logInvalidProviderAddress(params.account.address);
+      params.setDisconnected();
+      return;
+    }
+
+    clearAgentLoginActiveAddress();
+    setConnectedIfNeeded(checksummedAddress, params);
+    return;
+  }
+
+  if (params.account.isConnected === false) {
+    setDisconnectedIfNeeded(params);
+    return;
+  }
+
+  if (params.account.status === "connecting") {
+    setConnectingIfNeeded(params);
+    return;
+  }
+
+  setDisconnectedIfNeeded(params);
+}
+
+function syncWalletConnectionState(params: WalletStateSyncParams): void {
+  if (
+    handleAgentLoginConnection(params) ||
+    handleImpersonatedConnection(params) ||
+    handleAddingLiveConnection(params)
+  ) {
+    return;
+  }
+
+  const activeStoredAddress = getWalletAddress();
+  if (
+    handleLiveConnectedAccount(params, activeStoredAddress) ||
+    handleAddingPendingCandidate(params) ||
+    handleActiveStoredAddress(params, activeStoredAddress)
+  ) {
+    return;
+  }
+
+  handleProviderAccountFallback(params);
+}
+
 export function useSeizeConnectProviderEffects({
   account,
   addFlowOriginAddressRef,
@@ -119,169 +380,22 @@ export function useSeizeConnectProviderEffects({
     }
 
     debounceTimeoutRef.current = setTimeout(() => {
-      if (
-        agentLoginImpersonatedAddress &&
-        account.address &&
-        account.isConnected &&
-        isAddress(account.address)
-      ) {
-        const checksummedConnectedAddress = getAddress(account.address);
-        clearAgentLoginActiveAddress();
-        const isAlreadyConnected =
-          walletState.status === "connected" &&
-          walletState.address === checksummedConnectedAddress;
-        if (!isAlreadyConnected) {
-          setConnected(checksummedConnectedAddress);
-        }
-        return;
-      }
-
-      if (impersonatedAddress) {
-        const isAlreadyConnected =
-          walletState.status === "connected" &&
-          walletState.address === impersonatedAddress;
-        if (!isAlreadyConnected) {
-          setConnected(impersonatedAddress);
-        }
-        return;
-      }
-
-      if (
-        isAddingConnectedAccount &&
-        account.address &&
-        account.isConnected &&
-        isAddress(account.address)
-      ) {
-        const checksummedConnectedAddress = getAddress(account.address);
-        clearAgentLoginActiveAddress();
-        const isAlreadyConnected =
-          walletState.status === "connected" &&
-          walletState.address === checksummedConnectedAddress;
-        if (!isAlreadyConnected) {
-          setConnected(checksummedConnectedAddress);
-        }
-        return;
-      }
-
-      const activeStoredAddress = getWalletAddress();
-
-      if (
-        account.address &&
-        account.isConnected &&
-        isAddress(account.address)
-      ) {
-        const checksummedConnectedAddress = getAddress(account.address);
-        clearAgentLoginActiveAddress();
-        const isKnownStoredAccount = storedConnectedAccounts.some(
-          (storedAccount) =>
-            normalizeAddress(storedAccount.address) ===
-            normalizeAddress(checksummedConnectedAddress)
-        );
-
-        if (isKnownStoredAccount && activeStoredAddress) {
-          const isActiveStoredAddressValid = isAddress(activeStoredAddress);
-          if (isActiveStoredAddressValid) {
-            const checksummedStoredActiveAddress =
-              getAddress(activeStoredAddress);
-            const isStoredActiveKnownAccount = storedConnectedAccounts.some(
-              (storedAccount) =>
-                normalizeAddress(storedAccount.address) ===
-                normalizeAddress(checksummedStoredActiveAddress)
-            );
-            const isSwitchTransition =
-              normalizeAddress(checksummedConnectedAddress) !==
-              normalizeAddress(checksummedStoredActiveAddress);
-
-            if (isStoredActiveKnownAccount && isSwitchTransition) {
-              const isAlreadyConnected =
-                walletState.status === "connected" &&
-                walletState.address === checksummedStoredActiveAddress;
-              if (!isAlreadyConnected) {
-                setConnected(checksummedStoredActiveAddress);
-              }
-              return;
-            }
-          }
-        }
-
-        if (!isKnownStoredAccount) {
-          const isAlreadyConnected =
-            walletState.status === "connected" &&
-            walletState.address === checksummedConnectedAddress;
-          if (!isAlreadyConnected) {
-            setConnected(checksummedConnectedAddress);
-          }
-          return;
-        }
-      }
-
-      if (
-        isAddingConnectedAccount &&
-        account.address &&
-        isAddress(account.address)
-      ) {
-        const checksummedCandidateAddress = getAddress(account.address);
-        const addFlowOriginAddress = addFlowOriginAddressRef.current;
-        const isCandidateDifferentFromOrigin =
-          !addFlowOriginAddress ||
-          normalizeAddress(checksummedCandidateAddress) !==
-            normalizeAddress(addFlowOriginAddress);
-
-        if (isCandidateDifferentFromOrigin && !account.isConnected) {
-          if (walletState.status !== "connecting") {
-            setConnecting();
-          }
-          return;
-        }
-      }
-
-      if (activeStoredAddress && isAddress(activeStoredAddress)) {
-        const checksummedStoredAddress = getAddress(activeStoredAddress);
-        const isAlreadyConnected =
-          walletState.status === "connected" &&
-          walletState.address === checksummedStoredAddress;
-        if (!isAlreadyConnected) {
-          setConnected(checksummedStoredAddress);
-        }
-        return;
-      }
-
-      if (account.address && account.isConnected) {
-        if (!isAddress(account.address)) {
-          const addressStr = account.address as string | undefined;
-          logSecurityEvent(
-            SecurityEventType.INVALID_ADDRESS_DETECTED,
-            createValidationEventContext(
-              "wallet_provider",
-              false,
-              addressStr?.length || 0,
-              addressStr?.startsWith("0x") ? "hex_prefixed" : "other"
-            )
-          );
-
-          setDisconnected();
-          return;
-        }
-
-        const checksummedAddress = getAddress(account.address);
-        clearAgentLoginActiveAddress();
-        const isAlreadyConnected =
-          walletState.status === "connected" &&
-          walletState.address === checksummedAddress;
-        if (!isAlreadyConnected) {
-          setConnected(checksummedAddress);
-        }
-      } else if (account.isConnected === false) {
-        if (walletState.status !== "disconnected") {
-          setDisconnected();
-        }
-      } else if (account.status === "connecting") {
-        if (walletState.status !== "connecting") {
-          setConnecting();
-        }
-      } else if (walletState.status !== "disconnected") {
-        setDisconnected();
-      }
+      syncWalletConnectionState({
+        account: {
+          address: account.address,
+          isConnected: account.isConnected,
+          status: account.status,
+        },
+        addFlowOriginAddressRef,
+        agentLoginImpersonatedAddress,
+        impersonatedAddress,
+        isAddingConnectedAccount,
+        setConnected,
+        setConnecting,
+        setDisconnected,
+        storedConnectedAccounts,
+        walletState,
+      });
     }, 50);
 
     return () => {

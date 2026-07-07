@@ -60,6 +60,7 @@ import {
   normalizeSessionV2MigrationDeadline,
 } from "./authSessionUpgrade";
 import type {
+  AuthContextType,
   AuthLoadingState,
   AuthRolloutSettings,
   SessionUpgradePromptStatus,
@@ -451,9 +452,9 @@ export default function Auth({
     authStorageRevision,
   ]);
 
-  const setToast = (toast: AppToastInput) => {
+  const setToast = useCallback((toast: AppToastInput) => {
     showAppToast(toast);
-  };
+  }, []);
 
   const showSessionUpgradePrompt = useCallback(
     (
@@ -730,31 +731,44 @@ export default function Auth({
     onCancelSignRequest();
     router.push("/about/tech/wallet-authentication");
   };
+  const authContextValue = useMemo<AuthContextType>(
+    () => ({
+      requestAuth,
+      setToast,
+      connectedProfile: connectedProfile ?? null,
+      isAuthenticated: Boolean(connectedProfile?.handle && isAddressAuthorized),
+      fetchingProfile: isFetchingConnectedProfile,
+      receivedProfileProxies,
+      activeProfileProxy,
+      showWaves,
+      sessionUpgradeRequired,
+      connectionStatus: getProfileConnectedStatus({
+        profile: connectedProfile ?? null,
+        isProxy: !!activeProfileProxy,
+      }),
+      requestSessionUpgrade,
+      ensureActiveSessionV2WebSession:
+        ensureActiveSessionV2WebSessionForActiveWallet,
+      setActiveProfileProxy: onActiveProfileProxy,
+    }),
+    [
+      activeProfileProxy,
+      connectedProfile,
+      ensureActiveSessionV2WebSessionForActiveWallet,
+      isAddressAuthorized,
+      isFetchingConnectedProfile,
+      onActiveProfileProxy,
+      receivedProfileProxies,
+      requestAuth,
+      requestSessionUpgrade,
+      sessionUpgradeRequired,
+      setToast,
+      showWaves,
+    ]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        requestAuth,
-        setToast,
-        connectedProfile: connectedProfile ?? null,
-        isAuthenticated: Boolean(
-          connectedProfile?.handle && isAddressAuthorized
-        ),
-        fetchingProfile: isFetchingConnectedProfile,
-        receivedProfileProxies,
-        activeProfileProxy,
-        showWaves,
-        sessionUpgradeRequired,
-        connectionStatus: getProfileConnectedStatus({
-          profile: connectedProfile ?? null,
-          isProxy: !!activeProfileProxy,
-        }),
-        requestSessionUpgrade,
-        ensureActiveSessionV2WebSession:
-          ensureActiveSessionV2WebSessionForActiveWallet,
-        setActiveProfileProxy: onActiveProfileProxy,
-      }}
-    >
+    <AuthContext.Provider value={authContextValue}>
       {children}
       <AppToastContainer />
       <AuthSignModal

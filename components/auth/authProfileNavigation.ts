@@ -14,7 +14,7 @@ export function navigateAfterProfileSwitch({
   readonly queryClient: QueryClient;
   readonly router: AppRouterInstance;
 }) {
-  if (typeof globalThis.location === "undefined") {
+  if (globalThis.location === undefined) {
     return;
   }
 
