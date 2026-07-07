@@ -45,8 +45,15 @@ describe("sentry-client-filters", () => {
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const rabbyMobileUserRejectedStack =
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
+  const rabbyMobileAndroidUserRejectedStack = [
+    "EthereumProviderError: Not Allowed",
+    "    at getEthProviderError (inpage.js:1:1)",
+    "    at userRejectedRequest (inpage.js:1:1)",
+  ].join("\n");
   const rabbyMobileUserAgent =
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 RabbyMobileIOS/1.0 Mobile/15E148";
+  const rabbyMobileAndroidUserAgent =
+    "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
   const reactDomInsertBeforeMessage =
@@ -4297,6 +4304,37 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters production RabbyMobile Android user-rejected object rejections from user-agent context", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      request: {
+        headers: {
+          "User-Agent": rabbyMobileAndroidUserAgent,
+        },
+      },
+      breadcrumbs: [
+        {
+          category: "console",
+          level: "error",
+          message: "Rabby - RPC Error: Not Allowed",
+        },
+      ],
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileAndroidUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters exact RabbyMobile RainbowKit lookup errors from the runtime user agent", () => {
     // Arrange
     setNavigatorUserAgent(rabbyMobileUserAgent);
@@ -4480,6 +4518,33 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter RabbyMobile user-rejected object rejections with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      request: {
+        headers: {
+          "User-Agent": rabbyMobileAndroidUserAgent,
+        },
+      },
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: [
+            rabbyMobileAndroidUserRejectedStack,
+            "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter RabbyMobile RainbowKit lookup errors with app-owned frames", () => {
     // Arrange
     setNavigatorUserAgent(rabbyMobileUserAgent);
@@ -4653,6 +4718,25 @@ describe("sentry-client-filters", () => {
           code: 4100,
           message: "Not Allowed",
           stack: rabbyMobileUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter user-rejected object rejections without RabbyMobile context", () => {
+    // Arrange
+    const event = createRabbyMobileUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileAndroidUserRejectedStack,
         },
       },
     });
