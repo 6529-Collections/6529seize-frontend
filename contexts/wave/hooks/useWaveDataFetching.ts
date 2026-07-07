@@ -34,7 +34,9 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-function getHighestLoadedSerialNo(drops: ApiDrop[]): number | null {
+function getHighestLoadedSerialNo(
+  drops: readonly { readonly serial_no: number }[]
+): number | null {
   if (drops.length === 0) {
     return null;
   }

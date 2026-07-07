@@ -2,16 +2,20 @@ import { publicEnv } from "@/config/env";
 import { Capacitor } from "@capacitor/core";
 import * as Sentry from "@sentry/nextjs";
 import {
-  sanitizeEndpointGroup,
-  sanitizeRouteFamily,
-} from "./mobileLaunchTimingSanitizers";
+  buildApiSummary,
+  buildCapturedApiTiming,
+  buildFlatApiAttributes,
+  MAX_API_CALLS,
+  type ApiRequestTimingInput,
+  type CapturedApiTiming,
+} from "./mobileLaunchApiTiming";
+import { bucketMs } from "./mobileLaunchTimingBuckets";
+import { sanitizeRouteFamily } from "./mobileLaunchTimingSanitizers";
 
 const SLOW_LAUNCH_MS = 3000;
 const NORMAL_SAMPLE_RATE = 0.05;
 const FOCUSED_ROUTE_SAMPLE_RATE = 1;
 const TIMEOUT_FLUSH_MS = 15000;
-const MAX_API_CALLS = 10;
-const SLOWEST_API_CALLS = 5;
 
 type FlushReason =
   | "shell_paint"
@@ -20,8 +24,6 @@ type FlushReason =
   | "pagehide"
   | "error"
   | "manual";
-
-type ApiStatus = number | "aborted" | "network_error" | "unknown";
 
 export type MobileLaunchAuthState =
   | "anonymous"
@@ -51,18 +53,6 @@ type StepTiming = {
   readonly offset_ms: number;
   readonly duration_ms?: number;
   readonly status?: "ok" | "error";
-};
-
-type ApiTiming = {
-  readonly method: string;
-  readonly status: ApiStatus;
-  readonly duration_ms: number;
-  readonly start_offset_ms: number;
-  readonly endpoint_group: string;
-};
-
-type CapturedApiTiming = ApiTiming & {
-  readonly startedAtMs: number;
 };
 
 type DeviceInfoAttrs = {
@@ -96,14 +86,6 @@ type LaunchState = {
   scheduledFlushId?: ReturnType<typeof setTimeout>;
   timeoutId?: ReturnType<typeof setTimeout>;
   flushed: boolean;
-};
-
-type ApiRequestTimingInput = {
-  readonly endpoint: string;
-  readonly method: string;
-  readonly status: ApiStatus;
-  readonly startedAtMs: number;
-  readonly durationMs: number;
 };
 
 type BuildLaunchAttributesInput = {
@@ -697,103 +679,6 @@ function getStepOffsetMs(
   stepName: string
 ): number | undefined {
   return state.steps[stepName]?.offset_ms;
-}
-
-function bucketMs(value: number): string {
-  if (value < 500) {
-    return "0_500";
-  }
-  if (value < 1500) {
-    return "500_1500";
-  }
-  if (value < 3000) {
-    return "1500_3000";
-  }
-  if (value < 5000) {
-    return "3000_5000";
-  }
-  if (value < 10000) {
-    return "5000_10000";
-  }
-  return "10000_plus";
-}
-
-function buildApiSummary(state: LaunchState): Record<string, unknown> {
-  const firstCalls = state.apiCalls.map(toApiTiming);
-  const slowest = [...state.apiCalls]
-    .sort((left, right) => right.duration_ms - left.duration_ms)
-    .slice(0, SLOWEST_API_CALLS)
-    .map(toApiTiming);
-
-  return {
-    total_count: state.apiTotalCount,
-    captured_count: state.apiCalls.length,
-    dropped_count: Math.max(0, state.apiTotalCount - state.apiCalls.length),
-    first_calls: firstCalls,
-    slowest_calls: slowest,
-  };
-}
-
-function buildFlatApiAttributes(
-  state: LaunchState
-): Record<string, number | string> {
-  const attrs: Record<string, number | string> = {
-    api_total_count: state.apiTotalCount,
-    api_captured_count: state.apiCalls.length,
-    api_dropped_count: Math.max(0, state.apiTotalCount - state.apiCalls.length),
-  };
-
-  const slowestApiCall = state.slowestApiCall;
-  if (slowestApiCall === undefined) {
-    return attrs;
-  }
-
-  attrs["api_slowest_endpoint"] = slowestApiCall.endpoint_group;
-  attrs["api_slowest_ms"] = slowestApiCall.duration_ms;
-  attrs["api_slowest_bucket"] = bucketMs(slowestApiCall.duration_ms);
-  attrs["api_slowest_method"] = slowestApiCall.method;
-  attrs["api_slowest_status"] = String(slowestApiCall.status);
-  attrs["api_slowest_start_offset_ms"] = slowestApiCall.start_offset_ms;
-
-  return attrs;
-}
-
-function buildCapturedApiTiming(
-  state: LaunchState,
-  input: ApiRequestTimingInput
-): CapturedApiTiming {
-  return {
-    startedAtMs: input.startedAtMs,
-    method: sanitizeHttpMethod(input.method),
-    status: input.status,
-    duration_ms: roundMs(input.durationMs),
-    start_offset_ms: roundMs(input.startedAtMs - state.startedAtMs),
-    endpoint_group: sanitizeEndpointGroup(input.endpoint),
-  };
-}
-
-function toApiTiming({
-  method,
-  status,
-  duration_ms,
-  start_offset_ms,
-  endpoint_group,
-}: CapturedApiTiming): ApiTiming {
-  return {
-    method,
-    status,
-    duration_ms,
-    start_offset_ms,
-    endpoint_group,
-  };
-}
-
-function sanitizeHttpMethod(method: string): string {
-  const normalized = method.trim().toUpperCase();
-  if (/^[A-Z]{3,10}$/.test(normalized)) {
-    return normalized;
-  }
-  return "UNKNOWN";
 }
 
 function sanitizeAttributeKey(value: string): string {
