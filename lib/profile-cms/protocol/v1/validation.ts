@@ -4,7 +4,6 @@ import {
   validationResultSchema,
   type CmsAssetV1,
   type CmsBlockV1,
-  type CmsNavigationItemV1,
   type CmsPackageV1,
   type CmsValidationIssueV1,
   type CmsValidationResultV1,
