@@ -5,7 +5,7 @@ import {
   browserExtensionUrlPrefixes,
   gifPickerReactPackageToken,
   gifPickerTenorManagerPathToken,
-  injectedAppUriPath,
+  injectedWalletCollisionAppUriPaths,
   injectedProviderProxyPath,
   injectedWasmCspAppUriPath,
   injectedWasmCspCollapsedPath,
@@ -18,11 +18,13 @@ import {
 import type {
   SentryClientEvent,
   SentryEventHint,
+  SentryExceptionValue,
   SentryStackFrame,
 } from "./types";
 import {
   getFramePaths,
   getHintExceptionStack,
+  getSerializedExceptionStack,
   isFirstPartyHost,
 } from "./value-utils";
 
@@ -82,9 +84,7 @@ function isAppUriFrame(frame: SentryStackFrame): boolean {
 }
 
 function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
-  return [frame.filename, frame.abs_path].some(
-    (path) => typeof path === "string" && path.includes(injectedAppUriPath)
-  );
+  return getFramePaths(frame).some(hasInjectedWalletCollisionAppUriStackValue);
 }
 
 function isInjectedProviderProxyFrame(frame: SentryStackFrame): boolean {
@@ -153,7 +153,7 @@ export function isInjectedOrThirdPartyWalletExtensionPath(
 ): boolean {
   const normalizedValue = value.toLowerCase();
   if (
-    normalizedValue.includes(injectedAppUriPath) ||
+    hasInjectedWalletCollisionAppUriStackValue(normalizedValue) ||
     normalizedValue.includes("app:///page.js")
   ) {
     return true;
@@ -163,6 +163,18 @@ export function isInjectedOrThirdPartyWalletExtensionPath(
     browserExtensionUrlPrefixes.some((prefix) =>
       normalizedValue.includes(prefix)
     ) && normalizedValue.includes("/page.js")
+  );
+}
+
+function hasInjectedWalletCollisionAppUriStackValue(
+  value: string | undefined
+): boolean {
+  const normalizedValue = value?.toLowerCase();
+  return (
+    !!normalizedValue &&
+    injectedWalletCollisionAppUriPaths.some((path) =>
+      normalizedValue.includes(path.toLowerCase())
+    )
   );
 }
 
@@ -384,6 +396,19 @@ export function hasAppOwnedSourceStackValue(value: string): boolean {
   }
 
   return getStackFramePathCandidates(value).some(isAppOwnedStackPath);
+}
+
+export function hasAppOwnedSourceEvidence(
+  event: SentryClientEvent,
+  value: SentryExceptionValue | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = value?.stacktrace?.frames;
+  return (
+    hasAppOwnedSourceFrame(frames) ||
+    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+  );
 }
 
 function getStackFramePathCandidates(value: string): string[] {
