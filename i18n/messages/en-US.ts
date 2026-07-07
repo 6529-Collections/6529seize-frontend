@@ -569,42 +569,55 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   "postsCount.other": "{count} Posts",
 } as const);
 
-const WAVE_NOTIFICATION_SETTINGS_MESSAGES = objectMessages(
+const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
   "waves.notificationSettings",
-  {
-    "trigger.tooltip": "Notification settings",
-    "trigger.ariaLabel": "Open notification settings",
-    "allMentions.label": "ALL mentions",
-    "allMentions.ariaLabel": "Receive ALL mention notifications",
-    "allMessages.label": "All messages",
-    "allMessages.ariaLabel": "Receive notifications for all messages",
-    "allMessages.limit.unavailableDescription": "Below {count} followers only.",
-    "allMessages.limit.reenableDescription":
+  [
+    ["trigger.tooltip", "Notification settings"],
+    ["trigger.ariaLabel", "Open notification settings"],
+    ["allMentions.label", "ALL mentions"],
+    ["allMentions.ariaLabel", "Receive ALL mention notifications"],
+    ["allMessages.label", "All messages"],
+    ["allMessages.ariaLabel", "Receive notifications for all messages"],
+    [
+      "allMessages.limit.unavailableDescription",
+      "Below {count} followers only.",
+    ],
+    [
+      "allMessages.limit.reenableDescription",
       "Re-enable below {count} followers.",
-    "mute.label": "Mute",
-    "mute.activeLabel": "Muted",
-    "mute.ariaLabel": "Mute wave",
-    "mute.unmuteAriaLabel": "Unmute wave",
-    "mute.tooltip.enable": "Click to mute this wave",
-    "mute.tooltip.disable": "Click to unmute this wave",
-    "mute.error.muteTitle": "Couldn't mute this wave.",
-    "mute.error.unmuteTitle": "Couldn't unmute this wave.",
-    "mute.error.description": "Please try again.",
-    "mute.error.fallbackMute": "Unable to mute wave",
-    "mute.error.fallbackUnmute": "Unable to unmute wave",
-    "preferences.error.updateTitle": "Couldn't update notification settings.",
-    "preferences.error.description": "Please try again.",
-    "preferences.error.enableAllMentions":
+    ],
+    ["mute.label", "Mute"],
+    ["mute.activeLabel", "Muted"],
+    ["mute.ariaLabel", "Mute wave"],
+    ["mute.unmuteAriaLabel", "Unmute wave"],
+    ["mute.tooltip.enable", "Click to mute this wave"],
+    ["mute.tooltip.disable", "Click to unmute this wave"],
+    ["mute.error.muteTitle", "Couldn't mute this wave."],
+    ["mute.error.unmuteTitle", "Couldn't unmute this wave."],
+    ["mute.error.description", "Please try again."],
+    ["mute.error.fallbackMute", "Unable to mute wave"],
+    ["mute.error.fallbackUnmute", "Unable to unmute wave"],
+    ["preferences.error.updateTitle", "Couldn't update notification settings."],
+    ["preferences.error.description", "Please try again."],
+    [
+      "preferences.error.enableAllMentions",
       "Unable to enable @ALL notifications",
-    "preferences.error.disableAllMentions":
+    ],
+    [
+      "preferences.error.disableAllMentions",
       "Unable to disable @ALL notifications",
-    "preferences.error.enableAllMessages":
+    ],
+    [
+      "preferences.error.enableAllMessages",
       "Unable to enable all-message notifications",
-    "preferences.error.disableAllMessages":
+    ],
+    [
+      "preferences.error.disableAllMessages",
       "Unable to disable all-message notifications",
-    "retry.label": "Retry",
-    "retry.ariaLabel": "Retry notification settings",
-  } as const
+    ],
+    ["retry.label", "Retry"],
+    ["retry.ariaLabel", "Retry notification settings"],
+  ] as const
 );
 
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
