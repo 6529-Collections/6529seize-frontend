@@ -25,6 +25,7 @@ import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
 import { SeizeSettingsMode } from "@/types/enums";
+import { Suspense } from "react";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
@@ -66,7 +67,9 @@ function AppRuntimeProviders({
     <WaveEligibilityProvider>
       <NotificationsProvider>
         <CookieConsentProvider disabled={!enableCookieConsent}>
-          <MixpanelSetup />
+          <Suspense fallback={null}>
+            <MixpanelSetup />
+          </Suspense>
           <EULAConsentProvider>
             <AppWebSocketProvider>
               <LayoutProvider>

@@ -9,6 +9,7 @@ import {
   useState,
   useRef,
   useMemo,
+  Suspense,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ViewKey } from "@/components/navigation/navTypes";
@@ -31,6 +32,7 @@ interface StackView {
 }
 
 type StackEntry = StackRoute | StackView;
+type MutableRef<T> = { current: T };
 
 interface NavigationHistoryContextValue {
   canGoBack: boolean;
@@ -43,49 +45,20 @@ const Context = createContext<NavigationHistoryContextValue | undefined>(
 );
 const MAX_STACK = 50;
 
-export const NavigationHistoryProvider: React.FC<{
-  readonly children: ReactNode;
-}> = ({ children }) => {
-  const { hardBack } = useViewContext();
+function NavigationHistoryRouteTracker({
+  pushStack,
+  skipNext,
+  prevPathRef,
+}: {
+  readonly pushStack: (entry: StackRoute) => void;
+  readonly skipNext: MutableRef<boolean>;
+  readonly prevPathRef: MutableRef<string>;
+}) {
   const pathname = usePathname();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by NavigationHistoryProvider Suspense wrapper
   const searchParams = useSearchParams();
-  const router = useRouter();
-
   const fullPath =
     pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
-  const historyRef = useRef<StackEntry[]>([
-    { type: "route", path: mainSegment(fullPath) },
-  ]);
-  const [index, setIndex] = useState(0);
-  const skipNext = useRef(false);
-  const prevPathRef = useRef<string>("");
-
-  const canGoBack = useMemo(() => {
-    if (index === 0) return false;
-    const current = historyRef.current[index];
-    const currentPath = current?.type === "route" ? current.path : null;
-
-    for (let i = index - 1; i >= 0; i--) {
-      const entry = historyRef.current[i];
-      if (entry?.type === "view") return true;
-      if (entry?.type === "route") {
-        if (!currentPath) return true;
-        if (!sameMainPath(entry.path, currentPath)) return true;
-      }
-    }
-    return false;
-  }, [index]);
-
-  const pushStack = useCallback((entry: StackEntry) => {
-    setIndex((prev) => {
-      const newHistory = [
-        ...historyRef.current.slice(0, prev + 1),
-        entry,
-      ].slice(-MAX_STACK);
-      historyRef.current = newHistory;
-      return Math.min(prev + 1, MAX_STACK - 1);
-    });
-  }, []);
 
   useEffect(() => {
     const url = fullPath;
@@ -122,15 +95,66 @@ export const NavigationHistoryProvider: React.FC<{
       pathKey = url.split(/[?#]/)[0]!;
     }
 
-    let i = historyRef.current.length - 1;
-    while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
-    const lastRoute = i >= 0 ? historyRef.current[i] : null;
-    const isDuplicate =
-      lastRoute?.type === "route" && lastRoute.path === pathKey;
-    if (!isDuplicate) {
-      pushStack({ type: "route", path: pathKey });
+    pushStack({ type: "route", path: pathKey });
+  }, [fullPath, pathname, searchParams, pushStack, skipNext, prevPathRef]);
+
+  return null;
+}
+
+export const NavigationHistoryProvider: React.FC<{
+  readonly children: ReactNode;
+}> = ({ children }) => {
+  const { hardBack } = useViewContext();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const historyRef = useRef<StackEntry[]>([
+    { type: "route", path: mainSegment(pathname ?? "/") },
+  ]);
+  const [index, setIndex] = useState(0);
+  const skipNext = useRef(false);
+  const prevPathRef = useRef<string>("");
+
+  const canGoBack = useMemo(() => {
+    if (index === 0) return false;
+    const current = historyRef.current[index];
+    const currentPath = current?.type === "route" ? current.path : null;
+
+    for (let i = index - 1; i >= 0; i--) {
+      const entry = historyRef.current[i];
+      if (entry?.type === "view") return true;
+      if (entry?.type === "route") {
+        if (!currentPath) return true;
+        if (!sameMainPath(entry.path, currentPath)) return true;
+      }
     }
-  }, [fullPath, pathname, searchParams, pushStack]);
+    return false;
+  }, [index]);
+
+  const pushStack = useCallback((entry: StackEntry) => {
+    setIndex((prev) => {
+      const newHistory = [
+        ...historyRef.current.slice(0, prev + 1),
+        entry,
+      ].slice(-MAX_STACK);
+      historyRef.current = newHistory;
+      return Math.min(prev + 1, MAX_STACK - 1);
+    });
+  }, []);
+
+  const pushRouteEntry = useCallback(
+    (entry: StackRoute) => {
+      let i = historyRef.current.length - 1;
+      while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
+      const lastRoute = i >= 0 ? historyRef.current[i] : null;
+      const isDuplicate =
+        lastRoute?.type === "route" && lastRoute.path === entry.path;
+      if (!isDuplicate) {
+        pushStack(entry);
+      }
+    },
+    [pushStack]
+  );
 
   const pushView = useCallback(
     (view: ViewKey) => {
@@ -179,7 +203,18 @@ export const NavigationHistoryProvider: React.FC<{
     [canGoBack, goBack, pushView]
   );
 
-  return <Context.Provider value={value}>{children}</Context.Provider>;
+  return (
+    <Context.Provider value={value}>
+      <Suspense fallback={null}>
+        <NavigationHistoryRouteTracker
+          pushStack={pushRouteEntry}
+          skipNext={skipNext}
+          prevPathRef={prevPathRef}
+        />
+      </Suspense>
+      {children}
+    </Context.Provider>
+  );
 };
 
 export const useNavigationHistoryContext =

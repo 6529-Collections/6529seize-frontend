@@ -7,8 +7,8 @@ import {
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { usePathname } from "next/navigation";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 interface WaveNavigationOptions {
   isDirectMessage?: boolean | undefined;
@@ -26,6 +26,20 @@ const getWaveFromWindow = (): string | null => {
   });
 };
 
+const getLocationSearch = (): string => globalThis.window?.location.search ?? "";
+
+const subscribeLocationSearch = (onStoreChange: () => void): (() => void) => {
+  const browserWindow = globalThis.window;
+  if (browserWindow === undefined) {
+    return () => undefined;
+  }
+
+  browserWindow.addEventListener("popstate", onStoreChange);
+  return () => {
+    browserWindow.removeEventListener("popstate", onStoreChange);
+  };
+};
+
 const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
   if (globalThis.window === undefined) {
     return { isOnWaves: false, isOnMessages: false };
@@ -40,7 +54,12 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
 
 export function useActiveWaveManager() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const search = useSyncExternalStore(
+    subscribeLocationSearch,
+    getLocationSearch,
+    () => ""
+  );
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const { isApp } = useDeviceInfo();
 
   const waveFromLocation = useMemo(

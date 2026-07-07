@@ -2,7 +2,14 @@
 
 import { MagnifyingGlassIcon, UserIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
@@ -30,7 +37,34 @@ interface WebSidebarProps {
   readonly sidebarWidth: string;
 }
 
-function WebSidebar({
+function WebSidebarFallback({
+  isMobile,
+  isOffcanvasOpen,
+  sidebarWidth,
+}: Pick<WebSidebarProps, "isMobile" | "isOffcanvasOpen" | "sidebarWidth">) {
+  if (isMobile && !isOffcanvasOpen) {
+    return null;
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      className={
+        isMobile
+          ? "tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80]"
+          : "tw-fixed tw-inset-y-0 tw-left-0 tw-z-40"
+      }
+      style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
+    >
+      <div
+        className="tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black"
+        style={{ width: sidebarWidth }}
+      />
+    </div>
+  );
+}
+
+function WebSidebarContent({
   isCollapsed,
   onToggle,
   isMobile,
@@ -258,6 +292,22 @@ function WebSidebar({
         />
       )}
     </>
+  );
+}
+
+function WebSidebar(props: WebSidebarProps) {
+  return (
+    <Suspense
+      fallback={
+        <WebSidebarFallback
+          isMobile={props.isMobile}
+          isOffcanvasOpen={props.isOffcanvasOpen}
+          sidebarWidth={props.sidebarWidth}
+        />
+      }
+    >
+      <WebSidebarContent {...props} />
+    </Suspense>
   );
 }
 
