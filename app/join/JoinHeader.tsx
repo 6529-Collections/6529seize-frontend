@@ -154,8 +154,8 @@ export function JoinHeader({
           )}
         </div>
         <div className="tw-mt-10 tw-flex tw-w-full tw-flex-col tw-items-stretch tw-justify-center tw-gap-4 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center">
-          <HeroPrimaryAction action={primaryAction} />
-          <HeroSecondaryAction action={secondaryAction} />
+          <HeroAction action={primaryAction} variant="primary" />
+          <HeroAction action={secondaryAction} variant="secondary" />
         </div>
         {pageState === "loggedOut" && <HeroPoints locale={locale} />}
       </div>
@@ -256,21 +256,27 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function HeroPrimaryAction({
+function HeroAction({
   action,
+  variant,
 }: {
   readonly action: CurrentPanelAction;
+  readonly variant: "primary" | "secondary";
 }) {
   const label = action.busy ? (action.busyLabel ?? action.label) : action.label;
-  const className = cx(PRIMARY_ACTION_CLASS, "tw-w-full sm:tw-w-auto");
+  const className = cx(
+    variant === "primary" ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS,
+    "tw-w-full sm:tw-w-auto"
+  );
 
-  if (action.kind === "link" && action.href) {
-    const linkProps = {
-      ...(action.onClick ? { onClick: action.onClick } : {}),
-      ...(action.onNavigate ? { onNavigate: action.onNavigate } : {}),
-    };
+  if (action.kind === "link") {
     return (
-      <Link className={className} href={action.href} {...linkProps}>
+      <Link
+        className={className}
+        href={action.href ?? "#journey"}
+        onClick={action.onClick}
+        onNavigate={action.onNavigate}
+      >
         {label}
       </Link>
     );
@@ -285,20 +291,5 @@ function HeroPrimaryAction({
     >
       {label}
     </button>
-  );
-}
-
-function HeroSecondaryAction({
-  action,
-}: {
-  readonly action: CurrentPanelAction;
-}) {
-  return (
-    <Link
-      className={cx(SECONDARY_ACTION_CLASS, "tw-w-full sm:tw-w-auto")}
-      href={action.href ?? "#journey"}
-    >
-      {action.label}
-    </Link>
   );
 }

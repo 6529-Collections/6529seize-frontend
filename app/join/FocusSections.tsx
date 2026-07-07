@@ -39,18 +39,13 @@ export function FocusSections({
   readonly links: JoinLinks;
   readonly locale: SupportedLocale;
 }) {
-  const subscriptions = getFocusFeature("subscriptions");
-  const waves = getFocusFeature("waves");
-  const nfts = getFocusFeature("nfts");
-  const thingTiles = BENTO_THING_IDS.map(getThingToDo);
-
   return (
     <section className="tw-relative tw-isolate tw-mx-auto tw-w-full tw-max-w-[1088px] tw-overflow-hidden tw-py-12 md:tw-py-16">
       <AmbientArtifacts className="tw-opacity-40" locale={locale} />
       <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-2 lg:tw-grid-cols-12">
         <FeatureCard
           className="lg:tw-col-span-8 lg:tw-h-[328px]"
-          feature={nfts}
+          feature={getFocusFeature("nfts")}
           links={links}
           locale={locale}
           size="feature"
@@ -59,7 +54,7 @@ export function FocusSections({
         </FeatureCard>
         <FeatureCard
           className="tw-pb-12 sm:tw-pb-14 lg:tw-col-span-4 lg:tw-h-[328px]"
-          feature={waves}
+          feature={getFocusFeature("waves")}
           links={links}
           locale={locale}
         >
@@ -67,14 +62,14 @@ export function FocusSections({
         </FeatureCard>
         <FeatureCard
           className="lg:tw-col-span-6 lg:tw-h-[300px]"
-          feature={subscriptions}
+          feature={getFocusFeature("subscriptions")}
           links={links}
           locale={locale}
           size="showcase"
         >
           <BentoWatermark variant="subscriptions" />
         </FeatureCard>
-        {thingTiles.map((item) => (
+        {BENTO_THING_IDS.map(getThingToDo).map((item) => (
           <ThingCard
             className="lg:tw-col-span-3 lg:tw-h-[300px]"
             item={item}
