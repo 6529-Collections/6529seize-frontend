@@ -1,4 +1,7 @@
-import { shouldUseOpenGraphPreview } from "@/components/drops/view/part/dropPartMarkdown/linkUtils";
+import {
+  isDirectImageUrl,
+  shouldUseOpenGraphPreview,
+} from "@/components/drops/view/part/dropPartMarkdown/linkUtils";
 
 jest.mock("@/lib/ens/detect", () => ({
   isLikelyEnsTarget: jest.fn(() => false),
@@ -53,5 +56,23 @@ describe("shouldUseOpenGraphPreview", () => {
     expect(
       shouldUseOpenGraphPreview("https://www.youtube.com/channel/UC123456789")
     ).toBe(false);
+  });
+});
+
+describe("isDirectImageUrl", () => {
+  it("does not treat GitHub blob image pages as direct image files", () => {
+    expect(
+      isDirectImageUrl(
+        "https://github.com/david-6529/self-custody-education/blob/main/output/craig-self-custody-comic/pages/page-01.png"
+      )
+    ).toBe(false);
+  });
+
+  it("still treats raw GitHub image URLs as direct image files", () => {
+    expect(
+      isDirectImageUrl(
+        "https://raw.githubusercontent.com/david-6529/self-custody-education/main/output/craig-self-custody-comic/pages/page-01.png"
+      )
+    ).toBe(true);
   });
 });
