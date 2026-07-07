@@ -376,6 +376,44 @@ describe("testing strategy CI plan", () => {
 
     expect(plan.checks.reviewbot_contract.required).toBe(true);
   });
+
+  it("verifies agent files sync when the help corpus changes", () => {
+    const plan = createCiPlan(["ops/help/help-index.json"]);
+
+    expect(plan.checks.agent_files_sync.required).toBe(true);
+    expect(plan.checks.install.required).toBe(true);
+  });
+
+  it("verifies agent files sync when only committed artifacts change", () => {
+    const plan = createCiPlan(["public/llms.txt"]);
+
+    expect(plan.risk.computed_floor).toBe(1);
+    expect(plan.checks.agent_files_sync.required).toBe(true);
+    expect(plan.checks.install.required).toBe(true);
+  });
+
+  it.each([
+    "ops/help/llms.txt.template",
+    "public/glossary.json",
+    "public/help-index.json",
+    "public/robots.txt",
+    "scripts/sync-agent-files.cjs",
+    "scripts/sync-help-index.cjs",
+    "next-sitemap.config.ts",
+    "__tests__/scripts/sync-agent-files.test.ts",
+  ])("verifies agent files sync when %s changes", (file) => {
+    const plan = createCiPlan([file]);
+
+    expect(plan.checks.agent_files_sync.required).toBe(true);
+    expect(plan.checks.install.required).toBe(true);
+  });
+
+  it("keeps corpus docs in the fast lane without agent files sync", () => {
+    const plan = createCiPlan(["ops/help/README.md"]);
+
+    expect(plan.checks.agent_files_sync.required).toBe(false);
+    expect(plan.checks.install.required).toBe(false);
+  });
 });
 
 describe("testing strategy CI security checks", () => {
