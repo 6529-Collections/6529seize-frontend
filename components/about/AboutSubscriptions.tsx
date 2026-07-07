@@ -5,6 +5,7 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
+import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 
 export default function AboutSubscriptions() {
   return (
@@ -12,6 +13,9 @@ export default function AboutSubscriptions() {
       <Row>
         <Col>
           <h1>Subscription Minting</h1>
+          <div className="tw-mt-3 tw-flex tw-justify-start empty:tw-hidden">
+            <AboutSubscriptionsProfileButton />
+          </div>
         </Col>
       </Row>
       <Row className="tw-pt-2">
