@@ -179,7 +179,7 @@ describe("Subscriptions report page", () => {
           data: [
             {
               contract: "0xmemes",
-              token_id: 700,
+              token_id: "700",
               count: 4,
               name: "Active Meme",
               image_url: "https://images.test/active.png",

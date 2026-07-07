@@ -11,6 +11,7 @@ import { Time } from "@/helpers/time";
 import Image from "next/image";
 import Link from "next/link";
 import { forwardRef } from "react";
+import { areMemeTokenIdsEqual } from "./SubscriptionsReport.utils";
 
 export const ACTIVE_REPORT_GRID_CLASS_NAME =
   "sm:tw-grid-cols-[minmax(0,2fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)]";
@@ -104,7 +105,8 @@ export function ActiveSubscriptionRow(
   }>
 ) {
   const subscribed =
-    props.subscribedCount?.token_id === props.count.token_id
+    props.subscribedCount &&
+    areMemeTokenIdsEqual(props.subscribedCount.token_id, props.count.token_id)
       ? formatSubscriptionCount(props.subscribedCount.count)
       : "Unavailable";
 

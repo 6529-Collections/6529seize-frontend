@@ -8,6 +8,10 @@ import {
   STANDARD_REPORT_GRID_CLASS_NAME,
   SubscriptionDayRow,
 } from "./SubscriptionsReportRows";
+import {
+  areMemeTokenIdsEqual,
+  normalizeMemeTokenId,
+} from "./SubscriptionsReport.utils";
 import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptionsProfileButton";
 import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
@@ -67,10 +71,14 @@ function getActiveRedeemedDrop(
     return null;
   }
 
-  return drops.find((drop) => drop.token_id === currentLiveMintNumber) ?? null;
+  return (
+    drops.find((drop) =>
+      areMemeTokenIdsEqual(drop.token_id, currentLiveMintNumber)
+    ) ?? null
+  );
 }
 
-function withoutTokenId<T extends { token_id: number }>(
+function withoutTokenId<T extends { token_id: number | string }>(
   drops: T[],
   tokenId: number | null
 ): T[] {
@@ -78,7 +86,7 @@ function withoutTokenId<T extends { token_id: number }>(
     return drops;
   }
 
-  return drops.filter((drop) => drop.token_id !== tokenId);
+  return drops.filter((drop) => !areMemeTokenIdsEqual(drop.token_id, tokenId));
 }
 
 function getDisplayedRedeemedTotal(
@@ -196,16 +204,14 @@ export default function SubscriptionsReportComponent() {
           redeemed.data,
           currentLiveMintNumber
         );
-        activeTokenIdRef.current = activeRedeemedDrop?.token_id ?? null;
+        const activeTokenId = activeRedeemedDrop
+          ? normalizeMemeTokenId(activeRedeemedDrop.token_id)
+          : null;
+        activeTokenIdRef.current = activeTokenId;
         setActiveDrop(activeRedeemedDrop);
-        setRedeemedCounts(
-          withoutTokenId(redeemed.data, activeRedeemedDrop?.token_id ?? null)
-        );
+        setRedeemedCounts(withoutTokenId(redeemed.data, activeTokenId));
         setTotalRedeemed(
-          getDisplayedRedeemedTotal(
-            redeemed.count,
-            activeRedeemedDrop?.token_id ?? null
-          )
+          getDisplayedRedeemedTotal(redeemed.count, activeTokenId)
         );
       } catch (error) {
         console.error("Failed to fetch redeemed subscriptions:", error);
@@ -227,8 +233,8 @@ export default function SubscriptionsReportComponent() {
               return [];
             }
           ),
-          activeRedeemedDrop
-            ? fetchSubscribedCount(activeRedeemedDrop.token_id).catch(
+          activeTokenIdRef.current !== null
+            ? fetchSubscribedCount(activeTokenIdRef.current).catch(
                 (error: unknown) => {
                   console.error(
                     "Failed to fetch active drop subscribed count:",
@@ -241,9 +247,7 @@ export default function SubscriptionsReportComponent() {
         ]);
 
         setActiveSubscribedCount(subscribedCount);
-        setUpcomingCounts(
-          withoutTokenId(upcoming, activeRedeemedDrop?.token_id ?? null)
-        );
+        setUpcomingCounts(withoutTokenId(upcoming, activeTokenIdRef.current));
       } catch (error) {
         console.error("Failed to fetch subscription counts:", error);
         setActiveSubscribedCount(null);
