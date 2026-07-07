@@ -5,7 +5,6 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import WaveDelete from "./delete/WaveDelete";
-import WaveMute from "./mute/WaveMute";
 import WaveProfileWaveAction from "./profile-wave/WaveProfileWaveAction";
 
 export default function WaveHeaderOptions({
@@ -17,6 +16,10 @@ export default function WaveHeaderOptions({
 }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  if (!showOwnerActions) {
+    return null;
+  }
 
   return (
     <div className="tw-relative tw-z-20">
@@ -45,14 +48,11 @@ export default function WaveHeaderOptions({
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-0.5 tw-py-1">
-            {showOwnerActions && (
-              <WaveProfileWaveAction
-                wave={wave}
-                onSuccess={() => setIsOptionsOpen(false)}
-              />
-            )}
-            <WaveMute wave={wave} onSuccess={() => setIsOptionsOpen(false)} />
-            {showOwnerActions && <WaveDelete wave={wave} />}
+            <WaveProfileWaveAction
+              wave={wave}
+              onSuccess={() => setIsOptionsOpen(false)}
+            />
+            <WaveDelete wave={wave} />
           </div>
         </li>
       </CommonDropdownItemsDefaultWrapper>

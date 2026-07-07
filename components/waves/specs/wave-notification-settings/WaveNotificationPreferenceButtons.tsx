@@ -1,11 +1,7 @@
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
-import {
-  AtSymbolIcon,
-  CheckIcon,
-  SpeakerWaveIcon,
-} from "@heroicons/react/24/outline";
+import { AtSymbolIcon, BellIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
 
@@ -68,10 +64,7 @@ export default function WaveNotificationPreferenceButtons({
   const triggerContent = settings.loadingTarget ? (
     <Spinner dimension={12} />
   ) : (
-    <SpeakerWaveIcon
-      className="tw-size-4 tw-flex-shrink-0"
-      aria-hidden="true"
-    />
+    <BellIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
   );
 
   return (
@@ -174,7 +167,7 @@ export default function WaveNotificationPreferenceButtons({
             )}`}
             aria-label="Receive notifications for all messages"
           >
-            <SpeakerWaveIcon
+            <BellIcon
               className="tw-size-4 tw-flex-shrink-0"
               aria-hidden="true"
             />

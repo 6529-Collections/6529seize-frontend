@@ -17,16 +17,17 @@ behavior across thread header controls and sidebar wave rows.
 ## Control Availability
 
 - Header controls require a connected profile handle and no proxy session.
-- The speaker notification menu shows only after `Join` changes to `Joined`.
-- If you are not joined, the speaker notification menu is hidden but the
-  bell-slash mute button can still be shown.
+- The bell notification menu shows only after `Join` changes to `Joined`.
+- If you are not joined, the bell notification menu is hidden but the
+  speaker-muted button can still be shown.
 - All-message notifications are unavailable when the wave reaches the configured
   follower limit unless the user already has them enabled.
-- Author-only options menu (`⋮`) includes `Mute` / `Unmute`.
+- The `Mute` / `Unmute` action lives in the dedicated speaker-muted control,
+  not in the overflow menu.
 
 ## Notification Modes
 
-- The speaker button opens notification preferences.
+- The bell button opens notification preferences.
 - The `@ALL` row turns on notifications for `@ALL` mentions.
 - The `Notify for all messages` row turns on notifications for every message.
 - If all-message notifications are unavailable by follower limit and not already
@@ -38,12 +39,11 @@ behavior across thread header controls and sidebar wave rows.
 
 ## Mute Behavior
 
-- Before joining, the bell-slash button can mute the wave without joining it.
-- In joined + muted state, the speaker notification menu is replaced by one
-  `Muted` bell-slash button that unmutes.
-- In joined + unmuted state, the bell-slash button mutes the wave from the
+- Before joining, the speaker-muted button can mute the wave without joining it.
+- In joined + muted state, the bell notification menu is replaced by one
+  `Muted` speaker-muted button that unmutes.
+- In joined + unmuted state, the speaker-muted button mutes the wave from the
   notification control row.
-- Author menu still exposes `Mute` / `Unmute`.
 - Mute is per-wave and does not block opening the wave manually.
 
 ## Sidebar and Realtime Effects
@@ -62,7 +62,7 @@ behavior across thread header controls and sidebar wave rows.
 - If mode or mute requests fail, the prior state stays and an error toast is
   shown.
 - If all-message notifications are unavailable due follower limit, use `@ALL`
-  mention notifications or mute the wave from the bell-slash control.
+  mention notifications or mute the wave from the speaker-muted control.
 - If header/list state looks stale after a toggle, reopen the wave thread or
   refresh.
 

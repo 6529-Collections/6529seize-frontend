@@ -117,7 +117,7 @@ describe("WaveNotificationSettings", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders a speaker notification menu and mute button when following wave", async () => {
+  it("renders a notification menu and mute button when following wave", async () => {
     renderComponent();
 
     const trigger = screen.getByLabelText("Open notification settings");
@@ -469,7 +469,7 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("mutes the wave from the bell-slash button when all-message notifications are unavailable", async () => {
+  it("mutes the wave from the mute button when all-message notifications are unavailable", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({});
 
@@ -486,7 +486,7 @@ describe("WaveNotificationSettings", () => {
     });
   });
 
-  it("mutes the wave from the bell-slash button before joining", async () => {
+  it("mutes the wave from the mute button before joining", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({});
 
@@ -503,7 +503,7 @@ describe("WaveNotificationSettings", () => {
     });
   });
 
-  it("mutes the wave from the bell-slash button when all-message notifications are available", async () => {
+  it("mutes the wave from the mute button when all-message notifications are available", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({});
 

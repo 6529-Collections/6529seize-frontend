@@ -1,7 +1,7 @@
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import { BellSlashIcon as BellSlashOutlineIcon } from "@heroicons/react/24/outline";
-import { BellSlashIcon as BellSlashSolidIcon } from "@heroicons/react/24/solid";
+import { SpeakerXMarkIcon as SpeakerXMarkOutlineIcon } from "@heroicons/react/24/outline";
+import { SpeakerXMarkIcon as SpeakerXMarkSolidIcon } from "@heroicons/react/24/solid";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
 
 interface WaveMutedNotificationButtonProps {
@@ -18,7 +18,9 @@ export default function WaveMutedNotificationButton({
   const tooltipId = `wave-notification-muted-${waveId}`;
   const ariaLabel = settings.isMuted ? "Unmute wave" : "Mute wave";
   const textLabel = settings.isMuted ? "Muted" : "Mute";
-  const Icon = settings.isMuted ? BellSlashSolidIcon : BellSlashOutlineIcon;
+  const Icon = settings.isMuted
+    ? SpeakerXMarkSolidIcon
+    : SpeakerXMarkOutlineIcon;
   const stateClasses = settings.isMuted
     ? "tw-border-error/40 tw-bg-error/10 tw-text-error desktop-hover:hover:tw-bg-error/15 desktop-hover:hover:tw-text-error"
     : "tw-border-iron-700 tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";

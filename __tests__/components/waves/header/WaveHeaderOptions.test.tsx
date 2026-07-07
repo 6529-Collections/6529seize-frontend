@@ -30,8 +30,10 @@ jest.mock(
 );
 
 jest.mock(
-  "@/components/waves/header/options/mute/WaveMute",
-  () => (props: any) => <div data-testid="mute" data-wave={props.wave.id} />
+  "@/components/waves/header/options/profile-wave/WaveProfileWaveAction",
+  () => (props: any) => (
+    <div data-testid="profile-wave" data-wave={props.wave.id} />
+  )
 );
 
 const wave = {
@@ -54,9 +56,7 @@ const createWrapper = (auth: any = {}) => {
 
   return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={authValue}>
-        {children}
-      </AuthContext.Provider>
+      <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
     </QueryClientProvider>
   );
 };
@@ -71,7 +71,8 @@ test("opens and closes options", async () => {
   expect(btn).not.toHaveClass("tw-size-9");
   await user.click(btn);
   expect(screen.getByTestId("delete")).toHaveAttribute("data-wave", "w1");
-  expect(screen.getByTestId("mute")).toHaveAttribute("data-wave", "w1");
+  expect(screen.getByTestId("profile-wave")).toHaveAttribute("data-wave", "w1");
+  expect(screen.queryByText("Mute")).not.toBeInTheDocument();
   clickAway({ target: document.body } as unknown as Event);
   rerender(<WaveHeaderOptions wave={wave} />);
   expect(screen.queryByTestId("delete")).toBeNull();
@@ -81,14 +82,13 @@ test("opens and closes options", async () => {
   expect(screen.queryByTestId("delete")).toBeNull();
 });
 
-test("only shows mute when owner actions are hidden", async () => {
-  const user = userEvent.setup();
-  render(
+test("renders nothing when owner actions are hidden", () => {
+  const { container } = render(
     <WaveHeaderOptions wave={wave} showOwnerActions={false} />,
     { wrapper: createWrapper({ connectedProfile: { handle: "alice" } }) }
   );
 
-  await user.click(screen.getByRole("button", { name: /open options/i }));
-  expect(screen.getByTestId("mute")).toHaveAttribute("data-wave", "w1");
+  expect(container).toBeEmptyDOMElement();
+  expect(screen.queryByRole("button", { name: /open options/i })).toBeNull();
   expect(screen.queryByTestId("delete")).toBeNull();
 });
