@@ -753,6 +753,57 @@ const COMMON_MESSAGES = objectMessages("common", {
   close: "Close",
 } as const);
 
+const WAVES_CREATE_VOTING_MESSAGES = namespaceMessages(
+  "waves.create.voting",
+  [
+    ["options.tdhPlusXtdh", "TDH + XTDH"],
+    ["options.tdh", "TDH"],
+    ["options.rep", "Rep"],
+    ["options.cardSetTdh", "Card Set TDH"],
+    ["options.xtdh", "XTDH"],
+    ["cardSetTdh.title", "Card Set TDH"],
+    [
+      "cardSetTdh.helper",
+      "Only TDH from selected Meme cards counts.",
+    ],
+    ["cardSetTdh.loadingCount", "Loading Meme card count..."],
+    [
+      "cardSetTdh.countError",
+      "Unable to load Meme card count. You cannot continue until it loads.",
+    ],
+    ["cardSetTdh.selectedCount.one", "{count} Meme card selected"],
+    ["cardSetTdh.selectedCount.other", "{count} Meme cards selected"],
+    ["cardSetTdh.search.label", "Add by search"],
+    ["cardSetTdh.search.placeholder", "Search Meme card name or ID"],
+    ["cardSetTdh.search.loading", "Loading..."],
+    ["cardSetTdh.search.noResults", "No Meme card results"],
+    ["cardSetTdh.search.selected", "Selected"],
+    ["cardSetTdh.search.addAriaLabel", "Add The Memes #{tokenId}"],
+    ["cardSetTdh.validation.required", "Choose at least one Meme card."],
+    [
+      "cardSetTdh.validation.contractInvalid",
+      "Only Meme cards can be used for Card Set TDH.",
+    ],
+    [
+      "cardSetTdh.validation.memeCountUnavailable",
+      "Meme card count is not loaded yet.",
+    ],
+    [
+      "cardSetTdh.validation.fullSet",
+      "Selecting all Meme cards is the same as normal TDH. Choose a smaller set.",
+    ],
+    [
+      "cardSetTdh.validation.maxSelected",
+      "Leave at least one Meme card unselected.",
+    ],
+    ["cardSetTdh.validation.nonMeme", "Only Meme cards can be added."],
+    [
+      "cardSetTdh.validation.invalidMemeId",
+      "Only existing Meme card IDs can be added.",
+    ],
+  ] as const
+);
+
 export const EN_US_MESSAGES = {
   ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
@@ -946,43 +997,7 @@ export const EN_US_MESSAGES = {
   "waveChat.boostedDrops.display.label": "Boosted drops",
   "waveChat.boostedDrops.display.menuCurrent": "Boosted drops: {mode}",
   "waveChat.boostedDrops.display.sectionTitle": "Your display",
-  "waves.create.voting.options.tdhPlusXtdh": "TDH + XTDH",
-  "waves.create.voting.options.tdh": "TDH",
-  "waves.create.voting.options.rep": "Rep",
-  "waves.create.voting.options.cardSetTdh": "Card Set TDH",
-  "waves.create.voting.options.xtdh": "XTDH",
-  "waves.create.voting.cardSetTdh.title": "Card Set TDH",
-  "waves.create.voting.cardSetTdh.helper":
-    "Only TDH from selected Meme cards counts.",
-  "waves.create.voting.cardSetTdh.loadingCount": "Loading Meme card count...",
-  "waves.create.voting.cardSetTdh.countError":
-    "Unable to load Meme card count. You cannot continue until it loads.",
-  "waves.create.voting.cardSetTdh.selectedCount.one":
-    "{count} Meme card selected",
-  "waves.create.voting.cardSetTdh.selectedCount.other":
-    "{count} Meme cards selected",
-  "waves.create.voting.cardSetTdh.search.label": "Add by search",
-  "waves.create.voting.cardSetTdh.search.placeholder":
-    "Search Meme card name or ID",
-  "waves.create.voting.cardSetTdh.search.loading": "Loading...",
-  "waves.create.voting.cardSetTdh.search.noResults": "No Meme card results",
-  "waves.create.voting.cardSetTdh.search.selected": "Selected",
-  "waves.create.voting.cardSetTdh.search.addAriaLabel":
-    "Add The Memes #{tokenId}",
-  "waves.create.voting.cardSetTdh.validation.required":
-    "Choose at least one Meme card.",
-  "waves.create.voting.cardSetTdh.validation.contractInvalid":
-    "Only Meme cards can be used for Card Set TDH.",
-  "waves.create.voting.cardSetTdh.validation.memeCountUnavailable":
-    "Meme card count is not loaded yet.",
-  "waves.create.voting.cardSetTdh.validation.fullSet":
-    "Selecting all Meme cards is the same as normal TDH. Choose a smaller set.",
-  "waves.create.voting.cardSetTdh.validation.maxSelected":
-    "Leave at least one Meme card unselected.",
-  "waves.create.voting.cardSetTdh.validation.nonMeme":
-    "Only Meme cards can be added.",
-  "waves.create.voting.cardSetTdh.validation.invalidMemeId":
-    "Only existing Meme card IDs can be added.",
+  ...WAVES_CREATE_VOTING_MESSAGES,
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.title": "The Memes",
