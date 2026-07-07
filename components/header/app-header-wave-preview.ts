@@ -100,6 +100,8 @@ export const useHeaderActiveWave = (
     [streamDirectMessages, streamWaves, waveId]
   );
   const headerWavePreview = fullWaveHeaderPreview ?? listWaveHeaderPreview;
+  // A list preview is enough to avoid the title spinner; full-wave-only
+  // controls still stay gated on activeWave.
   const isWaveResolving = getIsWaveResolving({
     waveId,
     wave,

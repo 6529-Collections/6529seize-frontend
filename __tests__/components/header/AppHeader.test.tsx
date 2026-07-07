@@ -21,7 +21,9 @@ jest.mock("@/components/header/AppSidebar", () => ({
 }));
 jest.mock("@/components/header/header-search/HeaderSearchButton", () => ({
   __esModule: true,
-  default: () => <div data-testid="search" />,
+  default: ({ wave }: { wave: { id: string } | null }) => (
+    <div data-testid="search" data-wave-id={wave?.id ?? ""} />
+  ),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
@@ -156,17 +158,19 @@ function setup(opts: any) {
   });
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
   (useMyStreamOptional as jest.Mock).mockReturnValue(
-    activeWaveId
-      ? {
-          activeWave: { id: activeWaveId },
-          waves: { list: opts.wavesList ?? [] },
-          directMessages: { list: opts.directMessagesList ?? [] },
-        }
-      : {
-          activeWave: { id: null },
-          waves: { list: opts.wavesList ?? [] },
-          directMessages: { list: opts.directMessagesList ?? [] },
-        }
+    Object.prototype.hasOwnProperty.call(opts, "myStream")
+      ? opts.myStream
+      : activeWaveId
+        ? {
+            activeWave: { id: activeWaveId },
+            waves: { list: opts.wavesList ?? [] },
+            directMessages: { list: opts.directMessagesList ?? [] },
+          }
+        : {
+            activeWave: { id: null },
+            waves: { list: opts.wavesList ?? [] },
+            directMessages: { list: opts.directMessagesList ?? [] },
+          }
   );
   (useWaveById as jest.Mock).mockReturnValue({
     wave,
@@ -290,6 +294,25 @@ describe("AppHeader", () => {
     });
     const img = screen.getByRole("img", { name: "pfp" });
     expect(img).toBeInTheDocument();
+  });
+
+  it("uses the fallback avatar when an active proxy has no creator pfp", () => {
+    setup({
+      address: "0xabc",
+      profile: { pfp: "/connected-wallet.png" },
+      proxy: { created_by: { pfp: null } },
+      asPath: "/waves",
+    });
+
+    const img = screen.getByRole("img", { name: "pfp" });
+    expect(img).toHaveAttribute(
+      "src",
+      expect.stringContaining("intern-no-bg.png")
+    );
+    expect(img).not.toHaveAttribute(
+      "src",
+      expect.stringContaining("connected-wallet.png")
+    );
   });
 
   it("formats meme titles from path", () => {
@@ -519,6 +542,20 @@ describe("AppHeader", () => {
     expect(
       screen.queryByRole("button", { name: "More header actions" })
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId("search")).toHaveAttribute("data-wave-id", "");
+  });
+
+  it("handles a missing stream context without throwing", () => {
+    setup({
+      myStream: undefined,
+      wave: undefined,
+      isLoading: true,
+      isFetching: true,
+      asPath: "/waves/missing-stream",
+    });
+
+    expect(screen.getByText("Waves")).toBeInTheDocument();
+    expect(screen.getByTestId("search")).toHaveAttribute("data-wave-id", "");
   });
 
   it("shows active wave title and avatar from the waves list while the full wave loads", () => {
@@ -558,6 +595,7 @@ describe("AppHeader", () => {
     expect(
       screen.queryByRole("button", { name: "More header actions" })
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId("search")).toHaveAttribute("data-wave-id", "");
   });
 
   it("shows active DM title and avatar from the direct messages list while the full wave loads", () => {
@@ -618,6 +656,10 @@ describe("AppHeader", () => {
     expect(screen.getByTestId("wave-picture")).toHaveAttribute(
       "data-picture",
       "/loaded-wave.png"
+    );
+    expect(screen.getByTestId("search")).toHaveAttribute(
+      "data-wave-id",
+      "w-loaded"
     );
   });
 

@@ -203,7 +203,13 @@ const getHeaderProfilePfp = ({
     | null
     | undefined;
   readonly profile: HeaderConnectedProfileSource | null | undefined;
-}): string | null => activeProfileProxy?.created_by.pfp ?? profile?.pfp ?? null;
+}): string | null => {
+  if (activeProfileProxy) {
+    return activeProfileProxy.created_by.pfp ?? null;
+  }
+
+  return profile?.pfp ?? null;
+};
 
 const getHasUnreadOnOtherConnectedProfiles = ({
   connectedAccounts,
