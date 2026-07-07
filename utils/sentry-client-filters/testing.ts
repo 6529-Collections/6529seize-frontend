@@ -20,8 +20,8 @@ import {
   hasCoinbaseWalletLinkWebSocketFrame,
   isCoinbaseWalletLinkWebSocket1006Message,
   isCoinbaseWalletLinkWebSocketPath,
-  matchesWalletCollisionPattern,
-} from "./wallets";
+} from "./walletlink-websocket";
+import { matchesWalletCollisionPattern } from "./wallets";
 
 export const __testing = {
   filenameExceptions,
