@@ -102,10 +102,21 @@ function getDisplayedRedeemedTotal(
 }
 
 async function fetchCurrentLiveMintNumber() {
-  const currentMint = await commonApiFetch<MemeCalendarCurrentResponse>({
-    endpoint: "meme-calendar/current",
-    includeWalletAuth: false,
-  });
+  const apiAuth = getStagingAuth();
+  const requestInit: RequestInit = {};
+  if (apiAuth) {
+    requestInit.headers = { "x-6529-auth": apiAuth };
+  }
+
+  const response = await fetch("/api/meme-calendar/current", requestInit);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch current meme calendar: ${response.status}`
+    );
+  }
+
+  const currentMint = (await response.json()) as MemeCalendarCurrentResponse;
   return getCurrentLiveMintNumber(currentMint);
 }
 

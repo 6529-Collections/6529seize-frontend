@@ -17,7 +17,7 @@ import React, {
   useRef,
 } from "react";
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
-import { type ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiPost } from "@/services/api/common-api";
@@ -33,7 +33,7 @@ import { getStableDeviceId } from "./stable-device-id";
 import type { DevicePushData, PushRedirect } from "./device-push.types";
 
 function parseDevicePushData(raw: unknown): DevicePushData | null {
-  if (!raw || typeof raw !== "object") return null;
+  if (raw === null || raw === undefined || typeof raw !== "object") return null;
   const o = raw as Record<string, unknown>;
   const notification_id = o["notification_id"];
   const redirect = o["redirect"];
@@ -94,9 +94,13 @@ const TRANSIENT_ERROR_PATTERNS = [
 ];
 const LOW_VALUE_PUSH_REGISTRATION_ERROR_PATTERNS = [
   "com.google.iid error -25291",
+  "com.google.iid error -25299",
 ];
 const LOW_VALUE_PUSH_REGISTRATION_ERROR_DOMAIN = "com.google.iid";
-const LOW_VALUE_PUSH_REGISTRATION_ERROR_CODE_STRINGS = new Set(["-25291"]);
+const LOW_VALUE_PUSH_REGISTRATION_ERROR_CODE_STRINGS = new Set([
+  "-25291",
+  "-25299",
+]);
 
 type PushRegistrationFingerprint = {
   deviceId: string;
@@ -188,7 +192,7 @@ const parseStatusCode = (status: unknown): number | null => {
 };
 
 const extractErrorStatusCode = (error: unknown): number | null => {
-  if (!error || typeof error !== "object") {
+  if (error === null || error === undefined || typeof error !== "object") {
     return null;
   }
   const typedError = error as {
@@ -231,7 +235,7 @@ const parseRetryAfterHeaderValue = (value: string): number | null => {
 };
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
-  if (!value || typeof value !== "object") {
+  if (value === null || value === undefined || typeof value !== "object") {
     return null;
   }
   return value as Record<string, unknown>;
@@ -244,7 +248,7 @@ const extractRetryAfterFromHeaders = (headers: unknown): number | null => {
   }
 
   const typedHeaders = toRecord(headers);
-  if (!typedHeaders) {
+  if (typedHeaders === null) {
     return null;
   }
 
@@ -258,7 +262,7 @@ const extractRetryAfterFromHeaders = (headers: unknown): number | null => {
 };
 
 const extractRetryAfterMs = (error: unknown): number | null => {
-  if (error && typeof error === "object") {
+  if (error !== null && error !== undefined && typeof error === "object") {
     const typedError = error as {
       headers?: unknown;
       response?: {
@@ -673,7 +677,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       try {
-        await Promise.resolve(seizeSwitchConnectedAccount(matchedAddress));
+        seizeSwitchConnectedAccount(matchedAddress);
         const didSettle = await waitForProfileSwitchSettlement();
         if (!didSettle) {
           console.warn(
@@ -698,7 +702,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       routerInstance: ReturnType<typeof useRouter>,
       notification: PushNotificationSchema
     ) => {
-      const raw = notification.data ?? {};
+      const raw: unknown = notification.data ?? {};
       const notificationData = parseDevicePushData(raw);
       if (!notificationData) {
         await removeDeliveredNotifications([notification]);
@@ -1041,14 +1045,33 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const deviceInfo = await Device.getInfo();
 
-        await PushNotifications.addListener("registration", async (token) => {
+        await PushNotifications.addListener("registration", (token) => {
           isRegisteredRef.current = true;
-          await handlePushRegistration(
-            stableDeviceId,
-            deviceInfo,
-            token.value,
-            profile
-          );
+          void (async () => {
+            try {
+              await handlePushRegistration(
+                stableDeviceId,
+                deviceInfo,
+                token.value,
+                profile
+              );
+            } catch (error: unknown) {
+              console.error("Push registration listener error", error);
+              Sentry.captureException(
+                toCaptureExceptionInput(
+                  error,
+                  "Push notification registration listener failed"
+                ),
+                {
+                  tags: {
+                    component: "NotificationsProvider",
+                    operation: "pushRegistrationListener",
+                  },
+                  extra: createErrorTelemetryExtra(error),
+                }
+              );
+            }
+          })();
         });
 
         await PushNotifications.addListener("registrationError", (error) => {
@@ -1123,8 +1146,27 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         await PushNotifications.addListener(
           "pushNotificationActionPerformed",
-          async (action) => {
-            await handlePushNotificationAction(router, action.notification);
+          (action) => {
+            void (async () => {
+              try {
+                await handlePushNotificationAction(router, action.notification);
+              } catch (error: unknown) {
+                console.error("Push notification action error", error);
+                Sentry.captureException(
+                  toCaptureExceptionInput(
+                    error,
+                    "Push notification action failed"
+                  ),
+                  {
+                    tags: {
+                      component: "NotificationsProvider",
+                      operation: "pushNotificationActionPerformed",
+                    },
+                    extra: createErrorTelemetryExtra(error),
+                  }
+                );
+              }
+            })();
           }
         );
 
@@ -1168,25 +1210,29 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       initializationRef.current !== initializationKey
     ) {
       initializationRef.current = initializationKey;
-      initializeNotifications(connectedProfile ?? undefined).catch((error) => {
-        console.error("Failed to initialize push notifications", error);
-        Sentry.captureException(
-          toCaptureExceptionInput(
-            error,
-            "Failed to initialize push notifications"
-          ),
-          {
-            tags: {
-              component: "NotificationsProvider",
-              operation: "initializeNotifications",
-            },
-            extra: createErrorTelemetryExtra(error),
+      void (async () => {
+        try {
+          await initializeNotifications(connectedProfile ?? undefined);
+        } catch (error: unknown) {
+          console.error("Failed to initialize push notifications", error);
+          Sentry.captureException(
+            toCaptureExceptionInput(
+              error,
+              "Failed to initialize push notifications"
+            ),
+            {
+              tags: {
+                component: "NotificationsProvider",
+                operation: "initializeNotifications",
+              },
+              extra: createErrorTelemetryExtra(error),
+            }
+          );
+          if (initializationRef.current === initializationKey) {
+            initializationRef.current = null;
           }
-        );
-        if (initializationRef.current === initializationKey) {
-          initializationRef.current = null;
         }
-      });
+      })();
     }
   }, [
     connectedProfile,
@@ -1203,7 +1249,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           const deliveredNotifications =
             await PushNotifications.getDeliveredNotifications();
           const waveNotifications = deliveredNotifications.notifications.filter(
-            (notification) => notification.data?.wave_id === waveId
+            (notification) =>
+              toRecord(notification.data)?.["wave_id"] === waveId
           );
           await removeDeliveredNotifications(waveNotifications);
         } catch (error) {
@@ -1268,20 +1315,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 const resolveRedirectUrl = (notificationData: DevicePushData) => {
   const { redirect, ...params } = notificationData;
 
-  if (!redirect) {
-    console.warn(
-      "No redirect type found in notification data",
-      notificationData
-    );
-    return null;
-  }
-
   const resolveFn = redirectConfig[redirect];
-
-  if (!resolveFn) {
-    console.error("Unknown redirect type", redirect);
-    return null;
-  }
 
   try {
     return (resolveFn as (params: Record<string, unknown>) => string)(params);

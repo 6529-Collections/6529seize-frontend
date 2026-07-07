@@ -18,11 +18,13 @@ import {
 import type {
   SentryClientEvent,
   SentryEventHint,
+  SentryExceptionValue,
   SentryStackFrame,
 } from "./types";
 import {
   getFramePaths,
   getHintExceptionStack,
+  getSerializedExceptionStack,
   isFirstPartyHost,
 } from "./value-utils";
 
@@ -164,7 +166,7 @@ export function isInjectedOrThirdPartyWalletExtensionPath(
   );
 }
 
-export function hasInjectedWalletCollisionAppUriStackValue(
+function hasInjectedWalletCollisionAppUriStackValue(
   value: string | undefined
 ): boolean {
   const normalizedValue = value?.toLowerCase();
@@ -394,6 +396,19 @@ export function hasAppOwnedSourceStackValue(value: string): boolean {
   }
 
   return getStackFramePathCandidates(value).some(isAppOwnedStackPath);
+}
+
+export function hasAppOwnedSourceEvidence(
+  event: SentryClientEvent,
+  value: SentryExceptionValue | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = value?.stacktrace?.frames;
+  return (
+    hasAppOwnedSourceFrame(frames) ||
+    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+  );
 }
 
 function getStackFramePathCandidates(value: string): string[] {
