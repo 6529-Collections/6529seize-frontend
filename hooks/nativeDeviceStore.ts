@@ -9,12 +9,12 @@ import {
   subscribeToTouchFirstChanges,
 } from "@/helpers/touch-first.helpers";
 
-export enum CapacitorOrientationType {
+enum CapacitorOrientationType {
   PORTRAIT,
   LANDSCAPE,
 }
 
-export interface CapacitorSnapshot {
+interface CapacitorSnapshot {
   readonly isCapacitor: boolean;
   readonly platform: string;
   readonly isIos: boolean;
