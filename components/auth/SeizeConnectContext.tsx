@@ -34,8 +34,11 @@ import {
 } from "@/services/auth/auth.utils";
 import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import { WalletInitializationError } from "@/errors/wallet";
 import { SecurityEventType } from "@/types/security";
 import {
@@ -338,17 +341,21 @@ type WalletState =
 const noopWalletAction = (): void => {};
 const noopWalletAsyncAction = (): Promise<void> => Promise.resolve();
 
-const createWalletStartupError = (): WalletInitializationError =>
-  new WalletInitializationError("Wallet services are still loading.");
+const createWalletStartupError = (
+  locale: SupportedLocale
+): WalletInitializationError =>
+  new WalletInitializationError(t(locale, "wallet.startup.pendingError"));
 
 export const SeizeConnectStartupFallbackProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const { status, waitForReady } = useAppKitBootstrap();
+  const locale = useBrowserLocale();
   const hasInitializationError = status === "error";
   const initializationError = useMemo(
-    () => (hasInitializationError ? createWalletStartupError() : undefined),
-    [hasInitializationError]
+    () =>
+      hasInitializationError ? createWalletStartupError(locale) : undefined,
+    [hasInitializationError, locale]
   );
   const walletState = useMemo<WalletState>(
     () =>
@@ -359,11 +366,11 @@ export const SeizeConnectStartupFallbackProvider: React.FC<{
   );
   const waitForWalletReady = useCallback(async (): Promise<void> => {
     if (hasInitializationError) {
-      throw createWalletStartupError();
+      throw createWalletStartupError(locale);
     }
 
     await waitForReady();
-  }, [hasInitializationError, waitForReady]);
+  }, [hasInitializationError, locale, waitForReady]);
   const requestWalletReady = useCallback((): void => {
     void waitForWalletReady().catch(() => undefined);
   }, [waitForWalletReady]);

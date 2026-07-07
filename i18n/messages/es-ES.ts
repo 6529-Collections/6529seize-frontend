@@ -425,6 +425,21 @@ export const ES_ES_MESSAGES = {
   "theMemes.card.metric.volume": "Volumen ({volumeType}): {value}",
   "theMemes.sort.age": "Edad",
   "theMemes.sort.editionSize": "Tamaño de edición",
+  "wallet.startup.loadingStatus":
+    "Cargando servicios de monedero",
+  "wallet.startup.errorStatus":
+    "No se pudieron cargar los servicios de monedero",
+  "wallet.startup.errorDescription":
+    "Actualiza para intentar cargar de nuevo los servicios de monedero.",
+  "wallet.startup.refresh": "Actualizar",
+  "wallet.startup.loadFailedToast":
+    "No se pudieron cargar los servicios de monedero. Actualiza la pagina.",
+  "wallet.startup.loadingToast":
+    "Los servicios de monedero aun se estan cargando. Intentalo de nuevo.",
+  "wallet.startup.pendingError":
+    "Los servicios de monedero aun se estan cargando.",
+  "openMobile.openingStatus": "Abriendo 6529 Mobile...",
+  "nextgen.admin.loadingStatus": "Cargando administracion de NextGen",
   "theMemes.sort.collectors": "Coleccionistas",
   "theMemes.sort.uniquePercent": "% único",
   "theMemes.sort.uniquePercentExMuseum": "% único sin museo",

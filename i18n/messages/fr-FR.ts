@@ -433,6 +433,21 @@ export const FR_FR_MESSAGES = {
   "theMemes.card.metric.volume": "Volume ({volumeType}) : {value}",
   "theMemes.sort.age": "Age",
   "theMemes.sort.editionSize": "Taille d’édition",
+  "wallet.startup.loadingStatus":
+    "Chargement des services de portefeuille",
+  "wallet.startup.errorStatus":
+    "Les services de portefeuille n'ont pas pu se charger",
+  "wallet.startup.errorDescription":
+    "Actualisez la page pour relancer les services de portefeuille.",
+  "wallet.startup.refresh": "Actualiser",
+  "wallet.startup.loadFailedToast":
+    "Les services de portefeuille n'ont pas pu se charger. Actualisez la page.",
+  "wallet.startup.loadingToast":
+    "Les services de portefeuille sont encore en cours de chargement. Reessayez.",
+  "wallet.startup.pendingError":
+    "Les services de portefeuille sont encore en cours de chargement.",
+  "openMobile.openingStatus": "Ouverture de 6529 Mobile...",
+  "nextgen.admin.loadingStatus": "Chargement de l'administration NextGen",
   "theMemes.sort.collectors": "Collectionneurs",
   "theMemes.sort.uniquePercent": "% unique",
   "theMemes.sort.uniquePercentExMuseum": "% unique hors musée",

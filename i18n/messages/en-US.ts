@@ -1497,6 +1497,13 @@ export const EN_US_MESSAGES = {
   "wallet.startup.errorDescription":
     "Refresh to try loading wallet services again.",
   "wallet.startup.refresh": "Refresh",
+  "wallet.startup.loadFailedToast":
+    "Wallet services failed to load. Please refresh the page.",
+  "wallet.startup.loadingToast":
+    "Wallet services are still loading. Please try again.",
+  "wallet.startup.pendingError": "Wallet services are still loading.",
+  "openMobile.openingStatus": "Opening 6529 Mobile...",
+  "nextgen.admin.loadingStatus": "Loading NextGen admin",
   ...QR_SCANNER_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":

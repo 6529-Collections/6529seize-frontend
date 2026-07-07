@@ -377,6 +377,18 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.uncastPower.votesVisible": "votes",
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
+  "wallet.startup.loadingStatus": "Loading wallet services",
+  "wallet.startup.errorStatus": "Wallet services failed to load",
+  "wallet.startup.errorDescription":
+    "Refresh to try loading wallet services again.",
+  "wallet.startup.refresh": "Refresh",
+  "wallet.startup.loadFailedToast":
+    "Wallet services failed to load. Please refresh the page.",
+  "wallet.startup.loadingToast":
+    "Wallet services are still loading. Please try again.",
+  "wallet.startup.pendingError": "Wallet services are still loading.",
+  "openMobile.openingStatus": "Opening 6529 Mobile...",
+  "nextgen.admin.loadingStatus": "Loading NextGen admin",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   ...EN_GB_THE_MEMES_COLLECTORS_MESSAGES,

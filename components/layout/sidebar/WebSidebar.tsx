@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type MouseEvent,
 } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
@@ -37,6 +38,27 @@ interface WebSidebarProps {
   readonly sidebarWidth: string;
 }
 
+const SIDEBAR_PANEL_CLASS =
+  "tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black";
+
+const getSidebarFrameClassName = (
+  isMobile: boolean,
+  extraClassName = ""
+): string =>
+  [
+    isMobile
+      ? "tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80]"
+      : "tw-fixed tw-inset-y-0 tw-left-0 tw-z-40",
+    extraClassName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+const getSidebarFrameStyle = (
+  isMobile: boolean
+): CSSProperties | undefined =>
+  isMobile ? undefined : { left: "var(--layout-margin, 0px)" };
+
 function WebSidebarFallback({
   isMobile,
   isOffcanvasOpen,
@@ -49,17 +71,10 @@ function WebSidebarFallback({
   return (
     <div
       aria-hidden="true"
-      className={
-        isMobile
-          ? "tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80]"
-          : "tw-fixed tw-inset-y-0 tw-left-0 tw-z-40"
-      }
-      style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
+      className={getSidebarFrameClassName(isMobile)}
+      style={getSidebarFrameStyle(isMobile)}
     >
-      <div
-        className="tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black"
-        style={{ width: sidebarWidth }}
-      />
+      <div className={SIDEBAR_PANEL_CLASS} style={{ width: sidebarWidth }} />
     </div>
   );
 }
@@ -176,15 +191,14 @@ function WebSidebarContent({
         />
       )}
       <div
-        className={
-          isMobile
-            ? "tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80] focus:tw-outline-none"
-            : "tw-fixed tw-inset-y-0 tw-left-0 tw-z-40 focus:tw-outline-none"
-        }
-        style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
+        className={getSidebarFrameClassName(
+          isMobile,
+          "focus:tw-outline-none"
+        )}
+        style={getSidebarFrameStyle(isMobile)}
       >
         <div
-          className="tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+          className={`tw-group tw-relative tw-z-50 ${SIDEBAR_PANEL_CLASS} tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none`}
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
           ref={scrollContainerRef}

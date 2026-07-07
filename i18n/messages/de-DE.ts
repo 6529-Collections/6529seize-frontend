@@ -425,6 +425,19 @@ export const DE_DE_MESSAGES = {
   "theMemes.card.metric.volume": "Volumen ({volumeType}): {value}",
   "theMemes.sort.age": "Alter",
   "theMemes.sort.editionSize": "Editionsgröße",
+  "wallet.startup.loadingStatus": "Wallet-Dienste werden geladen",
+  "wallet.startup.errorStatus":
+    "Wallet-Dienste konnten nicht geladen werden",
+  "wallet.startup.errorDescription":
+    "Aktualisiere die Seite, um die Wallet-Dienste erneut zu laden.",
+  "wallet.startup.refresh": "Aktualisieren",
+  "wallet.startup.loadFailedToast":
+    "Wallet-Dienste konnten nicht geladen werden. Bitte aktualisiere die Seite.",
+  "wallet.startup.loadingToast":
+    "Wallet-Dienste werden noch geladen. Bitte versuche es erneut.",
+  "wallet.startup.pendingError": "Wallet-Dienste werden noch geladen.",
+  "openMobile.openingStatus": "6529 Mobile wird geöffnet...",
+  "nextgen.admin.loadingStatus": "NextGen-Admin wird geladen",
   "theMemes.sort.collectors": "Sammler",
   "theMemes.sort.uniquePercent": "% einzigartig",
   "theMemes.sort.uniquePercentExMuseum": "% einzigartig ohne Museum",

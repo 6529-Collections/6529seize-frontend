@@ -10,6 +10,8 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useAppKitBootstrap } from "../providers/AppKitBootstrapContext";
@@ -25,6 +27,7 @@ function AppUserConnectStartup({
   const { hasInitializationError, seizeConnectFresh } =
     useSeizeConnectContext();
   const { setToast } = useContext(AuthContext);
+  const locale = useBrowserLocale();
 
   const onConnect = async (): Promise<void> => {
     try {
@@ -33,8 +36,8 @@ function AppUserConnectStartup({
       console.error("Failed to open wallet connection", error);
       setToast({
         message: hasInitializationError
-          ? "Wallet services failed to load. Please refresh the page."
-          : "Wallet services are still loading. Please try again.",
+          ? t(locale, "wallet.startup.loadFailedToast")
+          : t(locale, "wallet.startup.loadingToast"),
         type: "error",
       });
     } finally {

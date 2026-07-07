@@ -16,6 +16,17 @@ interface WaveNavigationOptions {
   divider?: number | null | undefined;
 }
 
+const LOCATION_STATE_CHANGE_EVENT = "6529-location-state-change";
+type LocationStatePatchedWindow = Window & {
+  __locationStatePatch?:
+    | {
+        subscribers: number;
+        originalPushState: History["pushState"];
+        originalReplaceState: History["replaceState"];
+      }
+    | undefined;
+};
+
 const getWaveFromWindow = (): string | null => {
   if (globalThis.window === undefined) return null;
 
@@ -28,15 +39,72 @@ const getWaveFromWindow = (): string | null => {
 
 const getLocationSearch = (): string => globalThis.window?.location.search ?? "";
 
+const ensureLocationStateEvents = (
+  browserWindow: Window
+): (() => void) => {
+  const patchedWindow = browserWindow as LocationStatePatchedWindow;
+  if (!patchedWindow.__locationStatePatch) {
+    const patch = {
+      subscribers: 0,
+      originalPushState: browserWindow.history.pushState,
+      originalReplaceState: browserWindow.history.replaceState,
+    };
+    patchedWindow.__locationStatePatch = patch;
+
+    browserWindow.history.pushState = function patchedPushState(
+      this: History,
+      ...args: Parameters<History["pushState"]>
+    ) {
+      const result = patch.originalPushState.apply(this, args);
+      browserWindow.dispatchEvent(new Event(LOCATION_STATE_CHANGE_EVENT));
+      return result;
+    } as History["pushState"];
+
+    browserWindow.history.replaceState = function patchedReplaceState(
+      this: History,
+      ...args: Parameters<History["replaceState"]>
+    ) {
+      const result = patch.originalReplaceState.apply(this, args);
+      browserWindow.dispatchEvent(new Event(LOCATION_STATE_CHANGE_EVENT));
+      return result;
+    } as History["replaceState"];
+  }
+
+  patchedWindow.__locationStatePatch.subscribers += 1;
+
+  return () => {
+    const patch = patchedWindow.__locationStatePatch;
+    if (!patch) {
+      return;
+    }
+
+    patch.subscribers -= 1;
+    if (patch.subscribers > 0) {
+      return;
+    }
+
+    browserWindow.history.pushState = patch.originalPushState;
+    browserWindow.history.replaceState = patch.originalReplaceState;
+    delete patchedWindow.__locationStatePatch;
+  };
+};
+
 const subscribeLocationSearch = (onStoreChange: () => void): (() => void) => {
   const browserWindow = globalThis.window;
   if (browserWindow === undefined) {
     return () => undefined;
   }
 
+  const cleanupLocationStateEvents = ensureLocationStateEvents(browserWindow);
   browserWindow.addEventListener("popstate", onStoreChange);
+  browserWindow.addEventListener(LOCATION_STATE_CHANGE_EVENT, onStoreChange);
   return () => {
     browserWindow.removeEventListener("popstate", onStoreChange);
+    browserWindow.removeEventListener(
+      LOCATION_STATE_CHANGE_EVENT,
+      onStoreChange
+    );
+    cleanupLocationStateEvents();
   };
 };
 
