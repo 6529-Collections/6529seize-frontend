@@ -669,6 +669,7 @@ export function recordReactionRealtimeReconciliation(params: {
       time_since_mutation_ms: timeSinceMutationMs,
       websocket_status: websocketStatus,
     });
+    clearActiveIntentForContext(context);
     return {
       ...resultBase,
       shouldApplyCanonicalDrop: true,

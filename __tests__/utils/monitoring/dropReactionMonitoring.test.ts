@@ -573,6 +573,64 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
+  it("clears the realtime guard after canonical state matches intent", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-5b",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-5b/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    dateNowSpy.mockReturnValue(1_300);
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5b",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":smile:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_500);
+    const result = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5b",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":wave:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(result).toEqual({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: null,
+      serverReaction: ":wave:",
+    });
+    expect(addBreadcrumbMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.realtime_superseded",
+      })
+    );
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
   it("resets the per-drop sequence when the last tracked mutation ages out", () => {
     const firstMutation = beginReactionMutation({
       dropId: "drop-6",
