@@ -190,22 +190,88 @@ function countImportStatements(content, packageNames) {
   return count;
 }
 
-function scriptKindForPath(filePath) {
-  const extension = path.extname(filePath);
-  if (extension === ".tsx") return ts.ScriptKind.TSX;
-  if (extension === ".jsx") return ts.ScriptKind.JSX;
-  if (extension === ".js" || extension === ".cjs" || extension === ".mjs") {
-    return ts.ScriptKind.JS;
-  }
-  return ts.ScriptKind.TS;
-}
-
 function formatParseDiagnostic(diagnostic, sourceFile, filePath) {
   const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, " ");
   const position = diagnostic.start ?? 0;
   const { line, character } =
     sourceFile.getLineAndCharacterOfPosition(position);
   return `${filePath}:${line + 1}:${character + 1}: ${message}`;
+}
+
+function normalizeProgramFilePath(filePath) {
+  return path.normalize(filePath);
+}
+
+function createAnyCastProgram(files) {
+  const compilerOptions = {
+    allowJs: true,
+    checkJs: false,
+    jsx: ts.JsxEmit.Preserve,
+    noLib: true,
+    noResolve: true,
+    target: ts.ScriptTarget.Latest,
+  };
+  const fileContents = new Map(
+    files.map(({ filePath, content }) => [
+      normalizeProgramFilePath(filePath),
+      content,
+    ])
+  );
+  const compilerHost = ts.createCompilerHost(compilerOptions, true);
+  const sourceFiles = new Map();
+  const isTargetFile = (requestedFilePath) =>
+    fileContents.has(normalizeProgramFilePath(requestedFilePath));
+  const defaultFileExists = compilerHost.fileExists.bind(compilerHost);
+  const defaultReadFile = compilerHost.readFile.bind(compilerHost);
+
+  compilerHost.fileExists = (requestedFilePath) =>
+    isTargetFile(requestedFilePath) || defaultFileExists(requestedFilePath);
+  compilerHost.readFile = (requestedFilePath) =>
+    isTargetFile(requestedFilePath)
+      ? fileContents.get(normalizeProgramFilePath(requestedFilePath))
+      : defaultReadFile(requestedFilePath);
+
+  const program = ts.createProgram(
+    files.map(({ filePath }) => filePath),
+    compilerOptions,
+    compilerHost
+  );
+  const programSourceFiles = program.getSourceFiles();
+
+  for (const { filePath } of files) {
+    const normalizedFilePath = normalizeProgramFilePath(filePath);
+    const sourceFile =
+      program.getSourceFile(filePath) ??
+      programSourceFiles.find(
+        (candidate) =>
+          normalizeProgramFilePath(candidate.fileName) === normalizedFilePath
+      );
+
+    if (!sourceFile) {
+      throw new Error(
+        `Unable to parse ${filePath} while counting any_casts: source file was not created`
+      );
+    }
+
+    sourceFiles.set(normalizedFilePath, sourceFile);
+  }
+
+  return { program, sourceFiles };
+}
+
+function getAnyCastSourceFile(sourceFiles, filePath) {
+  return sourceFiles.get(normalizeProgramFilePath(filePath));
+}
+
+function throwOnSyntacticDiagnostics(program, sourceFile, filePath) {
+  const syntacticDiagnostics = program.getSyntacticDiagnostics(sourceFile);
+
+  if (syntacticDiagnostics.length > 0) {
+    throw new Error(
+      `Unable to parse ${filePath} while counting any_casts: ` +
+        formatParseDiagnostic(syntacticDiagnostics[0], sourceFile, filePath)
+    );
+  }
 }
 
 function hasDirectAnyType(typeNode) {
@@ -273,26 +339,7 @@ function getCountedTypeNode(node) {
   return undefined;
 }
 
-function countAnyCasts(content, filePath = "source.ts") {
-  const sourceFile = ts.createSourceFile(
-    filePath,
-    content,
-    ts.ScriptTarget.Latest,
-    true,
-    scriptKindForPath(filePath)
-  );
-
-  if (sourceFile.parseDiagnostics.length > 0) {
-    throw new Error(
-      `Unable to parse ${filePath} while counting any_casts: ` +
-        formatParseDiagnostic(
-          sourceFile.parseDiagnostics[0],
-          sourceFile,
-          filePath
-        )
-    );
-  }
-
+function countAnyCastsInSourceFile(sourceFile) {
   let count = 0;
 
   const visit = (node) => {
@@ -306,6 +353,15 @@ function countAnyCasts(content, filePath = "source.ts") {
 
   visit(sourceFile);
   return count;
+}
+
+function countAnyCasts(content, filePath = "source.ts") {
+  const { program, sourceFiles } = createAnyCastProgram([
+    { filePath, content },
+  ]);
+  const sourceFile = getAnyCastSourceFile(sourceFiles, filePath);
+  throwOnSyntacticDiagnostics(program, sourceFile, filePath);
+  return countAnyCastsInSourceFile(sourceFile);
 }
 
 function countLines(content) {
@@ -340,6 +396,7 @@ function computeActuals() {
   };
   const oversizedFiles = [];
   const wordpressMigratedFiles = new Set();
+  const anyCastInputs = [];
 
   for (const relativePath of listSourceFiles()) {
     const extension = path.extname(relativePath);
@@ -368,8 +425,7 @@ function computeActuals() {
     if (!isCode) continue;
 
     if (TYPESCRIPT_EXTENSIONS.has(extension)) {
-      const anyCount = countAnyCasts(content, relativePath);
-      if (anyCount > 0) perFile.any_casts.set(relativePath, anyCount);
+      anyCastInputs.push({ filePath: relativePath, content });
     }
 
     const reduxCount = countImportStatements(content, [
@@ -382,6 +438,21 @@ function computeActuals() {
     if (countLines(content) > MAX_SOURCE_FILE_LINES) {
       oversizedFiles.push(relativePath);
     }
+  }
+
+  const anyCastProgram = createAnyCastProgram(anyCastInputs);
+  for (const { filePath: relativePath } of anyCastInputs) {
+    const sourceFile = getAnyCastSourceFile(
+      anyCastProgram.sourceFiles,
+      relativePath
+    );
+    throwOnSyntacticDiagnostics(
+      anyCastProgram.program,
+      sourceFile,
+      relativePath
+    );
+    const anyCount = countAnyCastsInSourceFile(sourceFile);
+    if (anyCount > 0) perFile.any_casts.set(relativePath, anyCount);
   }
 
   const sum = (map) => [...map.values()].reduce((total, n) => total + n, 0);
