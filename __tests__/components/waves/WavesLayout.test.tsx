@@ -113,6 +113,23 @@ describe("WavesLayout", () => {
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 
+  it("renders Waves content while layout measurement is settling", () => {
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState: "measuring",
+    });
+
+    render(
+      <WavesLayout>
+        <div data-testid="wave-content">Real wave content</div>
+      </WavesLayout>
+    );
+
+    expect(screen.getByTestId("waves-desktop")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-content")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
+  });
+
   it("renders Waves content read-only when profile setup is needed", () => {
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "needs-profile",

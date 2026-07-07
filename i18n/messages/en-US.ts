@@ -18,6 +18,7 @@ import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
+import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -1093,6 +1094,7 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.cardActivity": "Card Activity",
   "theMemes.detail.tabs.timeline": "Timeline",
   "theMemes.detail.tabs.yourTransactions": "Your Transactions",
+  ...EN_US_THE_MEMES_COLLECTORS_MESSAGES,
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,
