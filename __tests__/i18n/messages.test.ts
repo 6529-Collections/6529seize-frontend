@@ -87,6 +87,17 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "theMemes.detail.actions.createCardTdhWave")).toBe(
       "Create card TDH wave"
     );
+    expect(t("fr-FR", "waves.create.voting.options.cardSetTdh")).toBe(
+      "Card Set TDH"
+    );
+    expect(t("es-ES", "waves.create.voting.cardSetTdh.helper")).toBe(
+      "Only TDH from selected Meme cards counts."
+    );
+    expect(
+      t("de-DE", "waves.create.voting.cardSetTdh.selectedCount.other", {
+        count: "2",
+      })
+    ).toBe("2 Meme cards selected");
     expect(t("en-US", "media.video.playPreview")).toBe("Play video preview");
     expect(t("en-US", "media.video.player")).toBe("Video player");
     expect(t("en-US", "media.video.seek")).toBe("Seek video");

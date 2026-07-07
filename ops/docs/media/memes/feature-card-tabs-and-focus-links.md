@@ -154,8 +154,9 @@
   accessible names, locale-aware number formatting, locale-preserving season
   links, a labelled group for the secondary period cluster, and a 24px minimum
   target on the season link.
-- The card TDH create CTA label and accessible name are message-backed; the
-  destination currently relies on the create-wave route copy for later steps.
+- The card TDH create CTA label, accessible name, and Card Set TDH picker copy
+  are message-backed; broader create-wave route copy remains progressive i18n
+  fallback debt.
 - Timeline region labels, UTC date formatting, URI/TXN link labels, and shared
   change field labels are routed through the progressive i18n helpers.
 - Timeline image alt text, video accessible labels, and HTML iframe titles use

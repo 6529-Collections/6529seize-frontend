@@ -10,27 +10,24 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
 import { commonApiFetch } from "@/services/api/common-api";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 
 const MEMES_CONTRACT_LOWER = MEMES_CONTRACT.toLowerCase();
 
-const VALIDATION_MESSAGES: Partial<
-  Record<CREATE_WAVE_VALIDATION_ERROR, string>
+const VALIDATION_MESSAGE_KEYS: Partial<
+  Record<CREATE_WAVE_VALIDATION_ERROR, MessageKey>
 > = {
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_REQUIRED]:
-    "Choose at least one Meme card.",
+    "waves.create.voting.cardSetTdh.validation.required",
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID]:
-    "Only Meme cards can be used for Card Set TDH.",
+    "waves.create.voting.cardSetTdh.validation.contractInvalid",
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE]:
-    "Meme card count is not loaded yet.",
+    "waves.create.voting.cardSetTdh.validation.memeCountUnavailable",
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED]:
-    "Selecting all Meme cards is the same as normal TDH. Choose a smaller set.",
+    "waves.create.voting.cardSetTdh.validation.fullSet",
 };
-
-const FULL_SET_MESSAGE =
-  "Selecting all Meme cards is the same as normal TDH. Choose a smaller set.";
-const MAX_SELECTED_MESSAGE = "Leave at least one Meme card unselected.";
-const NON_MEME_MESSAGE = "Only Meme cards can be added.";
-const INVALID_MEME_ID_MESSAGE = "Only existing Meme card IDs can be added.";
 
 const isMemeContract = (contract: string): boolean =>
   contract.toLowerCase() === MEMES_CONTRACT_LOWER;
@@ -95,11 +92,13 @@ const useMemeCardSearch = (searchCriteria: string) => {
 };
 
 function MemeCardSearch({
+  locale,
   selectedIds,
   memeCount,
   onAdd,
   onReject,
 }: {
+  readonly locale: SupportedLocale;
   readonly selectedIds: ReadonlySet<number>;
   readonly memeCount: number | null;
   readonly onAdd: (tokenId: number) => void;
@@ -116,7 +115,7 @@ function MemeCardSearch({
 
   const handleSelect = (item: NFTSearchResult) => {
     if (!isMemeContract(item.contract)) {
-      onReject(NON_MEME_MESSAGE);
+      onReject(t(locale, "waves.create.voting.cardSetTdh.validation.nonMeme"));
       return;
     }
     if (
@@ -127,7 +126,7 @@ function MemeCardSearch({
         memeCount,
       })
     ) {
-      onReject(FULL_SET_MESSAGE);
+      onReject(t(locale, "waves.create.voting.cardSetTdh.validation.fullSet"));
       return;
     }
     onAdd(item.id);
@@ -139,26 +138,31 @@ function MemeCardSearch({
   if (isFetching) {
     searchResultItems = (
       <li className="tw-px-3 tw-py-2 tw-text-sm tw-text-iron-300">
-        Loading...
+        {t(locale, "waves.create.voting.cardSetTdh.search.loading")}
       </li>
     );
   } else if (memeResults.length > 0) {
     searchResultItems = memeResults.map((item) => {
       const isSelected = selectedIds.has(item.id);
+      const tokenId = formatInteger(locale, item.id);
       return (
         <li key={`${item.contract}-${item.id}`}>
           <button
             type="button"
             onClick={() => handleSelect(item)}
             className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-            aria-label={`Add The Memes #${item.id}`}
+            aria-label={t(
+              locale,
+              "waves.create.voting.cardSetTdh.search.addAriaLabel",
+              { tokenId }
+            )}
           >
             <span className="tw-truncate">
-              #{item.id} - {item.name}
+              #{tokenId} - {item.name}
             </span>
             {isSelected && (
               <span className="tw-shrink-0 tw-text-xs tw-font-semibold tw-text-primary-300">
-                Selected
+                {t(locale, "waves.create.voting.cardSetTdh.search.selected")}
               </span>
             )}
           </button>
@@ -168,7 +172,7 @@ function MemeCardSearch({
   } else {
     searchResultItems = (
       <li className="tw-px-3 tw-py-2 tw-text-sm tw-text-iron-300">
-        No Meme card results
+        {t(locale, "waves.create.voting.cardSetTdh.search.noResults")}
       </li>
     );
   }
@@ -179,7 +183,7 @@ function MemeCardSearch({
         htmlFor="meme-card-set-search"
         className="tw-text-sm tw-font-semibold tw-text-iron-100"
       >
-        Add by search
+        {t(locale, "waves.create.voting.cardSetTdh.search.label")}
       </label>
       <input
         id="meme-card-set-search"
@@ -190,7 +194,10 @@ function MemeCardSearch({
           setIsOpen(true);
         }}
         onFocus={() => setIsOpen(true)}
-        placeholder="Search Meme card name or ID"
+        placeholder={t(
+          locale,
+          "waves.create.voting.cardSetTdh.search.placeholder"
+        )}
         className="tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-200 placeholder:tw-text-iron-600 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
       />
       {isOpen && searchCriteria.trim().length > 0 && (
@@ -205,6 +212,7 @@ function MemeCardSearch({
 }
 
 export default function MemeCardSetPicker({
+  locale = DEFAULT_LOCALE,
   creditNfts,
   memeCount,
   isMemeCountLoading,
@@ -212,6 +220,7 @@ export default function MemeCardSetPicker({
   errors,
   onCreditNftsChange,
 }: {
+  readonly locale?: SupportedLocale | undefined;
   readonly creditNfts: ApiWaveCreditNft[];
   readonly memeCount: number | null;
   readonly isMemeCountLoading: boolean;
@@ -282,8 +291,9 @@ export default function MemeCardSetPicker({
           CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE ||
         !hasValidMemeCount
     )
-    .map((error) => VALIDATION_MESSAGES[error])
-    .filter((message): message is string => !!message);
+    .map((error) => VALIDATION_MESSAGE_KEYS[error])
+    .filter((messageKey): messageKey is MessageKey => !!messageKey)
+    .map((messageKey) => t(locale, messageKey));
   const displayedMessages = Array.from(
     new Set(
       [localError, ...validationMessages].filter(
@@ -305,7 +315,9 @@ export default function MemeCardSetPicker({
         memeCount,
       })
     ) {
-      rejectPickerChange(FULL_SET_MESSAGE);
+      rejectPickerChange(
+        t(locale, "waves.create.voting.cardSetTdh.validation.fullSet")
+      );
       return;
     }
     setLocalError(null);
@@ -317,7 +329,9 @@ export default function MemeCardSetPicker({
       (tokenId) => !Number.isInteger(tokenId) || tokenId <= 0
     );
     if (hasInvalidTokenId) {
-      rejectPickerChange(INVALID_MEME_ID_MESSAGE);
+      rejectPickerChange(
+        t(locale, "waves.create.voting.cardSetTdh.validation.invalidMemeId")
+      );
       return false;
     }
     const normalizedTokenIds = getNormalizedMemeTokenIds(tokenIds);
@@ -326,13 +340,17 @@ export default function MemeCardSetPicker({
     }
     const highestExistingMemeCardId = hasValidMemeCount ? memeCount : null;
     if (highestExistingMemeCardId === null) {
-      rejectPickerChange(INVALID_MEME_ID_MESSAGE);
+      rejectPickerChange(
+        t(locale, "waves.create.voting.cardSetTdh.validation.invalidMemeId")
+      );
       return false;
     }
     if (
       normalizedTokenIds.some((tokenId) => tokenId > highestExistingMemeCardId)
     ) {
-      rejectPickerChange(INVALID_MEME_ID_MESSAGE);
+      rejectPickerChange(
+        t(locale, "waves.create.voting.cardSetTdh.validation.invalidMemeId")
+      );
       return false;
     }
     return true;
@@ -348,11 +366,15 @@ export default function MemeCardSetPicker({
       return;
     }
     if (!isMemeContract(change.contractAddress)) {
-      rejectPickerChange(NON_MEME_MESSAGE);
+      rejectPickerChange(
+        t(locale, "waves.create.voting.cardSetTdh.validation.nonMeme")
+      );
       return;
     }
     if (change.allSelected === true) {
-      rejectPickerChange(FULL_SET_MESSAGE);
+      rejectPickerChange(
+        t(locale, "waves.create.voting.cardSetTdh.validation.fullSet")
+      );
       return;
     }
     const tokenIds: readonly number[] =
@@ -373,26 +395,27 @@ export default function MemeCardSetPicker({
     <section className="tw-col-span-full tw-mt-2 tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4">
       <div>
         <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
-          Card Set TDH
+          {t(locale, "waves.create.voting.cardSetTdh.title")}
         </p>
         <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-          Only TDH from selected Meme cards counts.
+          {t(locale, "waves.create.voting.cardSetTdh.helper")}
         </p>
       </div>
 
       {isMemeCountLoading && (
         <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-3 tw-text-sm tw-text-iron-300">
-          Loading Meme card count...
+          {t(locale, "waves.create.voting.cardSetTdh.loadingCount")}
         </div>
       )}
 
       {isMemeCountError && (
         <div className="tw-rounded-lg tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-p-3 tw-text-sm tw-text-error">
-          Unable to load Meme card count. You cannot continue until it loads.
+          {t(locale, "waves.create.voting.cardSetTdh.countError")}
         </div>
       )}
 
       <MemeCardSearch
+        locale={locale}
         selectedIds={selectedIdSet}
         memeCount={memeCount}
         onAdd={addTokenId}
@@ -406,14 +429,22 @@ export default function MemeCardSetPicker({
         allowAll={false}
         allowRanges={true}
         maxSelectedCount={maxSelectedCount}
-        maxSelectedCountMessage={MAX_SELECTED_MESSAGE}
+        maxSelectedCountMessage={t(
+          locale,
+          "waves.create.voting.cardSetTdh.validation.maxSelected"
+        )}
         placeholder="The Memes"
         variant="flat"
       />
 
       <div className="tw-text-sm tw-text-iron-300">
-        {selectedTokenIds.length.toLocaleString()} Meme card
-        {selectedTokenIds.length === 1 ? "" : "s"} selected
+        {t(
+          locale,
+          selectedTokenIds.length === 1
+            ? "waves.create.voting.cardSetTdh.selectedCount.one"
+            : "waves.create.voting.cardSetTdh.selectedCount.other",
+          { count: formatInteger(locale, selectedTokenIds.length) }
+        )}
       </div>
 
       {displayedMessages.map((message) => (

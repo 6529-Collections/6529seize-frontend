@@ -3,6 +3,7 @@
 /* istanbul ignore file */
 import { useRef } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import type { CreateWaveConfig, CreateWaveStep } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
@@ -12,12 +13,14 @@ import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
 import { useWaveConfig } from "./hooks/useWaveConfig";
 
 export default function CreateWave({
+  locale = DEFAULT_LOCALE,
   profile,
   onBack,
   onSuccess,
   parentWaveId,
   initialConfig,
 }: {
+  readonly locale?: SupportedLocale | undefined;
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
@@ -63,6 +66,7 @@ export default function CreateWave({
         onComplete={onComplete}
       >
         <CreateWaveStepContent
+          locale={locale}
           controller={waveConfig}
           profile={profile}
           descriptionRef={descriptionRef}

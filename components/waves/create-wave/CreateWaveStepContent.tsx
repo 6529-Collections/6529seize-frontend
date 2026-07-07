@@ -2,6 +2,7 @@ import type { RefObject } from "react";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { SupportedLocale } from "@/i18n/locales";
 import { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
@@ -17,6 +18,7 @@ import CreateWaveVoting from "./voting/CreateWaveVoting";
 type WaveConfigController = ReturnType<typeof useWaveConfig>;
 
 export default function CreateWaveStepContent({
+  locale,
   controller,
   profile,
   descriptionRef,
@@ -25,6 +27,7 @@ export default function CreateWaveStepContent({
   onHaveDropToSubmitChange,
   onInlineGroupCreate,
 }: {
+  readonly locale: SupportedLocale;
   readonly controller: WaveConfigController;
   readonly profile: ApiIdentity;
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
@@ -121,6 +124,7 @@ export default function CreateWaveStepContent({
     case CreateWaveStep.VOTING:
       return (
         <CreateWaveVoting
+          locale={locale}
           waveType={config.overview.type}
           selectedType={config.voting.type}
           category={config.voting.category}

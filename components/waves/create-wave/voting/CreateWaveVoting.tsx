@@ -6,7 +6,8 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
-import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import CreateWaveApprovalHold, {
   CreateWaveApprovalHoldMode,
@@ -58,6 +59,24 @@ const CREDIT_SCOPE_OPTIONS: readonly {
     description: "Voting power applies separately to every drop.",
   },
 ];
+
+const getCreateWaveVotingLabel = (
+  locale: SupportedLocale,
+  votingType: ApiWaveCreditType
+): string => {
+  switch (votingType) {
+    case ApiWaveCreditType.TdhPlusXtdh:
+      return t(locale, "waves.create.voting.options.tdhPlusXtdh");
+    case ApiWaveCreditType.Tdh:
+      return t(locale, "waves.create.voting.options.tdh");
+    case ApiWaveCreditType.Rep:
+      return t(locale, "waves.create.voting.options.rep");
+    case ApiWaveCreditType.CardSetTdh:
+      return t(locale, "waves.create.voting.options.cardSetTdh");
+    case ApiWaveCreditType.Xtdh:
+      return t(locale, "waves.create.voting.options.xtdh");
+  }
+};
 
 const getApprovalThresholdTimeErrorMessage = (
   errors: CREATE_WAVE_VALIDATION_ERROR[]
@@ -132,6 +151,7 @@ function CreateWaveCreditScopeSelect({
 }
 
 export default function CreateWaveVoting({
+  locale = DEFAULT_LOCALE,
   waveType,
   selectedType,
   category,
@@ -158,6 +178,7 @@ export default function CreateWaveVoting({
   timeWeighted,
   onTimeWeightedChange,
 }: {
+  readonly locale?: SupportedLocale | undefined;
   readonly waveType: ApiWaveType;
   readonly selectedType: ApiWaveCreditType | null;
   readonly category: string | null;
@@ -261,7 +282,7 @@ export default function CreateWaveVoting({
                     : "tw-text-iron-300 group-hover:tw-text-white"
                 }`}
               >
-                {WAVE_VOTING_LABELS[votingType]}
+                {getCreateWaveVotingLabel(locale, votingType)}
               </span>
             </CommonBorderedRadioButton>
           ))}
@@ -278,6 +299,7 @@ export default function CreateWaveVoting({
         )}
         {selectedType === ApiWaveCreditType.CardSetTdh && (
           <MemeCardSetPicker
+            locale={locale}
             creditNfts={creditNfts}
             memeCount={memeCount}
             isMemeCountLoading={isMemeCountLoading}
