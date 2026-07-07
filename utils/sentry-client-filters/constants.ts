@@ -7,6 +7,11 @@ export const filenameExceptions = [
 ];
 export const injectedWasmCspAppUriPath = "app:///inject.js";
 export const injectedWasmCspCollapsedPath = "///inject.js";
+// Observed Sentry E7 pre-symbolication shape. This is intentionally narrow and
+// can fail open when minification changes, keeping app-owned CSP errors visible.
+export const injectedWasmCspStaticChunkFunction = "k";
+export const injectedWasmCspStaticChunkPathPattern =
+  /^app:\/\/\/chunks\/utils-[A-Za-z0-9_-]+\.js(?::\d+(?::\d+)?)?$/;
 const injectedAppUriPath = "app:///injected/injected.js";
 export const injectedWalletCollisionAppUriPaths = [
   injectedAppUriPath,
@@ -94,9 +99,10 @@ export const browserExtensionUrlPrefixes = [
   "moz-extension://",
   "safari-web-extension://",
 ];
+export const nextStaticFramePathToken = "/_next/static/";
 const appOwnedFrameBasePathTokens = [
   "webpack-internal:///(app-",
-  "/_next/static/",
+  nextStaticFramePathToken,
 ];
 export const appOwnedFramePathTokens = [
   ...appOwnedFrameBasePathTokens,
@@ -109,7 +115,7 @@ export const rabbyMobileUserRejectedStackPattern = "userrejectedrequest";
 export const appOwnedStackPatterns = [
   "webpack-internal:///(app-pages-browser)",
   "webpack://_n_e/./",
-  "/_next/static/",
+  nextStaticFramePathToken,
   "https://6529.io/",
   "https://www.6529.io/",
   "https://staging.6529.io/",
@@ -140,8 +146,8 @@ export const REACT_DOM_RUNTIME_FRAME_PATTERNS = [
   "react-dom-client.production.js",
 ];
 export const NEXT_STATIC_CHUNK_FRAME_PATTERNS = [
-  "/_next/static/chunks/",
-  "/_next/static/webpack/",
+  `${nextStaticFramePathToken}chunks/`,
+  `${nextStaticFramePathToken}webpack/`,
 ];
 export const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
   "insertOrAppendPlacementNode",
@@ -201,6 +207,9 @@ export const walletConnectStaleSessionFunctions = new Set([
   "isValidSessionTopic",
   "onRelayMessage",
 ]);
+export const extensionMessagingConnectionFailureMessage =
+  "Could not establish connection. Receiving end does not exist.";
+export const injectedScriptBundlePathToken = "injectedscript.bundle.js";
 export const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 export const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 export const FNV_OFFSET_BASIS = 2166136261;

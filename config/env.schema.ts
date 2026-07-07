@@ -45,7 +45,7 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   STAGING_API_KEY: z.string().optional(),
-  TENOR_API_KEY: z.string().optional(),
+  GIPHY_API_KEY: z.string().optional(),
 
   /**
    * ────────────────

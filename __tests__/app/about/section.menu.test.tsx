@@ -262,7 +262,7 @@ describe("About contents dropdown", () => {
     ).toHaveAttribute("href", "/about/subscriptions");
   });
 
-  it("shows connected subscriptions action before the subscriptions dropdown", () => {
+  it("keeps mobile focus order aligned with the subscriptions dropdown layout", () => {
     setCookieCountry("US");
     render(
       <AuthContext.Provider
@@ -291,12 +291,16 @@ describe("About contents dropdown", () => {
     const trigger = screen.getByRole("button", {
       name: /open about contents navigation/i,
     });
+    const menuTrigger = screen.getByTestId("about-contents-menu-trigger");
+    const leadingAction = screen.getByTestId("about-contents-leading-action");
 
     expect(profileLink).toHaveAttribute("href", "/test-handle/subscriptions");
     expect(
-      profileLink.compareDocumentPosition(trigger) &
+      trigger.compareDocumentPosition(profileLink) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
+    expect(menuTrigger).toHaveClass("tw-order-1", "sm:tw-order-2");
+    expect(leadingAction).toHaveClass("tw-order-2", "sm:tw-order-1");
   });
 
   it("opens wallet connection from disconnected subscriptions action", () => {
