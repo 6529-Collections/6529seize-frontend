@@ -89,6 +89,7 @@ type LaunchState = {
   readonly appVersion: string;
   readonly steps: Record<string, StepTiming>;
   readonly apiCalls: CapturedApiTiming[];
+  slowestApiCall?: CapturedApiTiming;
   context: MobileLaunchContext;
   apiTotalCount: number;
   deviceInfo?: DeviceInfoAttrs;
@@ -203,6 +204,13 @@ export function recordMobileLaunchApiRequest(
 
   state.apiTotalCount += 1;
   const apiCall = buildCapturedApiTiming(state, input);
+  if (
+    state.slowestApiCall === undefined ||
+    apiCall.duration_ms > state.slowestApiCall.duration_ms
+  ) {
+    state.slowestApiCall = apiCall;
+  }
+
   const latestCapturedCall = state.apiCalls[state.apiCalls.length - 1];
 
   if (
@@ -546,6 +554,7 @@ function buildLaunchAttributes({
     slow,
     flush_reason: reason,
     ...buildMilestoneAttributes(state),
+    ...buildFlatApiAttributes(state),
     ...context,
     steps: state.steps,
     api: buildApiSummary(state),
@@ -586,6 +595,9 @@ function buildMilestoneAttributes(
   addStepOffsetAttr(attrs, state, "auth_ready");
   addStepOffsetAttr(attrs, state, "first_useful_app_shell");
   addStepOffsetAttr(attrs, state, "waves_layout_mounted");
+  addStepOffsetAttr(attrs, state, "wave_metadata_loaded");
+  addStepOffsetAttr(attrs, state, "wave_messages_loaded");
+  addStepOffsetAttr(attrs, state, "first_drop_rendered");
   addStepOffsetAttr(attrs, state, "waves_first_content_visible");
   addStepOffsetAttr(attrs, state, "waves_content_state_resolved");
   addStepDurationAttr(attrs, state, "wagmi_appkit_init");
@@ -597,7 +609,15 @@ function buildMilestoneAttributes(
   const wagmiUnblockedMs = getStepOffsetMs(state, "wagmi_children_unblocked");
   const wagmiReadyMs = getStepOffsetMs(state, "wagmi_ready");
   const shellMs = getStepOffsetMs(state, "first_useful_app_shell");
+  const waveMetadataMs = getStepOffsetMs(state, "wave_metadata_loaded");
+  const waveMessagesMs = getStepOffsetMs(state, "wave_messages_loaded");
+  const firstDropRenderedMs = getStepOffsetMs(state, "first_drop_rendered");
   const wavesContentMs = getStepOffsetMs(state, "waves_first_content_visible");
+
+  addFlatTimingAlias(attrs, "layout_measure_complete", shellMs);
+  addFlatTimingAlias(attrs, "wave_metadata_loaded", waveMetadataMs);
+  addFlatTimingAlias(attrs, "wave_messages_loaded", waveMessagesMs);
+  addFlatTimingAlias(attrs, "first_drop_rendered", firstDropRenderedMs);
 
   if (wagmiUnblockedMs !== undefined) {
     attrs["provider_gate_ms"] = wagmiUnblockedMs;
@@ -641,6 +661,19 @@ function addStepOffsetAttr(
   }
 
   attrs[`step_${stepName}_ms`] = offsetMs;
+}
+
+function addFlatTimingAlias(
+  attrs: Record<string, number | string>,
+  name: string,
+  offsetMs: number | undefined
+): void {
+  if (offsetMs === undefined) {
+    return;
+  }
+
+  attrs[`${name}_ms`] = offsetMs;
+  attrs[`${name}_bucket`] = bucketMs(offsetMs);
 }
 
 function addStepDurationAttr(
@@ -699,6 +732,30 @@ function buildApiSummary(state: LaunchState): Record<string, unknown> {
     first_calls: firstCalls,
     slowest_calls: slowest,
   };
+}
+
+function buildFlatApiAttributes(
+  state: LaunchState
+): Record<string, number | string> {
+  const attrs: Record<string, number | string> = {
+    api_total_count: state.apiTotalCount,
+    api_captured_count: state.apiCalls.length,
+    api_dropped_count: Math.max(0, state.apiTotalCount - state.apiCalls.length),
+  };
+
+  const slowestApiCall = state.slowestApiCall;
+  if (slowestApiCall === undefined) {
+    return attrs;
+  }
+
+  attrs["api_slowest_endpoint"] = slowestApiCall.endpoint_group;
+  attrs["api_slowest_ms"] = slowestApiCall.duration_ms;
+  attrs["api_slowest_bucket"] = bucketMs(slowestApiCall.duration_ms);
+  attrs["api_slowest_method"] = slowestApiCall.method;
+  attrs["api_slowest_status"] = String(slowestApiCall.status);
+  attrs["api_slowest_start_offset_ms"] = slowestApiCall.start_offset_ms;
+
+  return attrs;
 }
 
 function buildCapturedApiTiming(

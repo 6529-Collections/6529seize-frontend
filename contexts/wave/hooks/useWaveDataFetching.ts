@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
 import { useCallback } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useWaveLoadingState } from "./useWaveLoadingState";
 import { useWaveAbortController } from "./useWaveAbortController";
 import type { WaveDataStoreUpdater } from "./types";
@@ -11,10 +12,108 @@ import {
   createEmptyWaveMessages,
   fetchNewestWaveMessages,
 } from "../utils/wave-messages-utils";
-import { useWaveEligibility } from "../WaveEligibilityContext";
+import {
+  useWaveEligibility,
+  type WaveEligibility,
+} from "../WaveEligibilityContext";
 
 // Define the limit constant used by the fetch utility
 const FETCH_NEWEST_LIMIT = 50;
+
+type UpdateWaveEligibility = (
+  waveId: string,
+  eligibility: Partial<WaveEligibility>
+) => void;
+
+type SyncNewestMessagesResult = {
+  drops: ApiDrop[] | null;
+  highestSerialNo: number | null;
+};
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
+function getHighestLoadedSerialNo(drops: ApiDrop[]): number | null {
+  if (drops.length === 0) {
+    return null;
+  }
+
+  return Math.max(...drops.map((drop) => drop.serial_no));
+}
+
+function reportSyncNewestError(waveId: string, error: unknown): void {
+  if (isAbortError(error)) {
+    return;
+  }
+
+  console.error(
+    `[WaveDataFetching] Error syncing newest messages for ${waveId}:`,
+    error
+  );
+}
+
+async function fetchAllNewestWaveMessages(
+  waveId: string,
+  initialSinceSerialNo: number,
+  signal: AbortSignal,
+  updateEligibility: UpdateWaveEligibility
+): Promise<SyncNewestMessagesResult> {
+  const allFetchedDrops: ApiDrop[] = [];
+  let currentSinceSerialNo = initialSinceSerialNo;
+  let overallHighestSerialNo = initialSinceSerialNo;
+
+  try {
+    while (!signal.aborted) {
+      const { drops: fetchedChunk, highestSerialNo: chunkHighestSerial } =
+        await fetchNewestWaveMessages(
+          waveId,
+          currentSinceSerialNo,
+          FETCH_NEWEST_LIMIT,
+          signal,
+          updateEligibility
+        );
+
+      if (fetchedChunk === null) {
+        return { drops: null, highestSerialNo: null };
+      }
+
+      if (fetchedChunk.length === 0 || chunkHighestSerial === null) {
+        break;
+      }
+
+      allFetchedDrops.push(...fetchedChunk);
+      overallHighestSerialNo = Math.max(
+        overallHighestSerialNo,
+        chunkHighestSerial
+      );
+      currentSinceSerialNo = chunkHighestSerial;
+
+      if (fetchedChunk.length < FETCH_NEWEST_LIMIT) {
+        break;
+      }
+    }
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+
+    console.error(
+      `[WaveDataFetching] Error during fetchNewest loop for ${waveId}:`,
+      error
+    );
+    return { drops: null, highestSerialNo: null };
+  }
+
+  if (signal.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+
+  return {
+    drops: allFetchedDrops,
+    highestSerialNo: overallHighestSerialNo,
+  };
+}
 
 export function useWaveDataFetching({
   updateData,
@@ -35,7 +134,7 @@ export function useWaveDataFetching({
   const hasWaveData = useCallback(
     (waveId: string): boolean => {
       const existingData = getData(waveId);
-      return !!existingData?.drops.length;
+      return (existingData?.drops.length ?? 0) > 0;
     },
     [getData]
   );
@@ -49,6 +148,7 @@ export function useWaveDataFetching({
       clearLoadingState(waveId);
       // Update data in store if we got results
       if (drops) {
+        markMobileLaunchStep("wave_messages_loaded");
         const update = formatWaveMessages(waveId, drops, { isLoading: false });
         updateData(update);
       }
@@ -83,6 +183,48 @@ export function useWaveDataFetching({
   );
 
   /**
+   * Fetches ALL messages newer than a given serial number by potentially
+   * looping internal API calls until caught up.
+   * This is intended for background reconciliation after WebSocket updates.
+   */
+  const syncNewestMessages = useCallback(
+    async (
+      waveId: string,
+      initialSinceSerialNo: number,
+      signal: AbortSignal
+    ): Promise<SyncNewestMessagesResult> => {
+      const result = await fetchAllNewestWaveMessages(
+        waveId,
+        initialSinceSerialNo,
+        signal,
+        updateEligibility
+      );
+
+      if (result.drops !== null) {
+        updateData(formatWaveMessages(waveId, result.drops));
+      }
+
+      return result;
+    },
+    [updateData, updateEligibility]
+  );
+
+  const syncNewestMessagesSafely = useCallback(
+    async (
+      waveId: string,
+      initialSinceSerialNo: number,
+      signal: AbortSignal
+    ) => {
+      try {
+        await syncNewestMessages(waveId, initialSinceSerialNo, signal);
+      } catch (error) {
+        reportSyncNewestError(waveId, error);
+      }
+    },
+    [syncNewestMessages]
+  );
+
+  /**
    * Main function to fetch and activate wave data
    */
   const activateWave = useCallback(
@@ -92,11 +234,9 @@ export function useWaveDataFetching({
         if (syncNewest) {
           const wave = getData(waveId);
           if (wave) {
-            const highestSerialNo = Math.max(
-              ...wave.drops.map((drop) => drop.serial_no)
-            );
-            if (highestSerialNo) {
-              syncNewestMessages(
+            const highestSerialNo = getHighestLoadedSerialNo(wave.drops);
+            if (highestSerialNo !== null) {
+              void syncNewestMessagesSafely(
                 waveId,
                 highestSerialNo,
                 new AbortController().signal
@@ -121,13 +261,22 @@ export function useWaveDataFetching({
       const controller = createController(waveId);
 
       // Create a new promise with the abort signal
-      const fetchPromise = fetchWaveMessages(waveId, null, controller.signal, updateEligibility)
-        .then((drops) => handleFetchSuccess(waveId, drops))
-        .catch((error) => {
+      const fetchPromise = (async (): Promise<ApiDrop[] | null> => {
+        try {
+          const drops = await fetchWaveMessages(
+            waveId,
+            null,
+            controller.signal,
+            updateEligibility
+          );
+          return handleFetchSuccess(waveId, drops);
+        } catch (error) {
           handleFetchError(waveId, error);
           return null;
-        })
-        .finally(() => cleanupController(waveId, controller));
+        } finally {
+          cleanupController(waveId, controller);
+        }
+      })();
 
       // Store the promise
       setPromise(waveId, fetchPromise);
@@ -144,98 +293,10 @@ export function useWaveDataFetching({
       handleFetchError,
       cleanupController,
       setPromise,
+      getData,
+      syncNewestMessagesSafely,
+      updateEligibility,
     ]
-  );
-
-  /**
-   * Fetches ALL messages newer than a given serial number by potentially
-   * looping internal API calls until caught up.
-   * This is intended for background reconciliation after WebSocket updates.
-   */
-  const syncNewestMessages = useCallback(
-    async (
-      waveId: string,
-      initialSinceSerialNo: number,
-      signal: AbortSignal
-    ): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> => {
-      let allFetchedDrops: ApiDrop[] = [];
-      let currentSinceSerialNo = initialSinceSerialNo;
-      let keepFetching = true;
-      let overallHighestSerialNo: number | null = initialSinceSerialNo; // Track highest overall
-
-      while (keepFetching && !signal.aborted) {
-        try {
-          const { drops: fetchedChunk, highestSerialNo: chunkHighestSerial } =
-            await fetchNewestWaveMessages(
-              // Call the utility function
-              waveId,
-              currentSinceSerialNo,
-              FETCH_NEWEST_LIMIT,
-              signal,
-              updateEligibility
-            );
-
-          // Check if aborted during the fetch utility call
-          if (signal.aborted) {
-            throw new DOMException("Aborted", "AbortError");
-          }
-
-          if (fetchedChunk && fetchedChunk.length > 0) {
-            allFetchedDrops = allFetchedDrops.concat(fetchedChunk);
-            // Update highest serial number seen so far
-            if (chunkHighestSerial !== null) {
-              overallHighestSerialNo = Math.max(
-                overallHighestSerialNo ?? -1,
-                chunkHighestSerial
-              );
-            }
-
-            if (chunkHighestSerial !== null) {
-              currentSinceSerialNo = chunkHighestSerial; // Use the highest from this chunk for the next iteration
-            } else {
-              keepFetching = false;
-            }
-
-            // Stop loop if fetch returned fewer drops than the limit, or if highestSerial is null
-            if (
-              fetchedChunk.length < FETCH_NEWEST_LIMIT ||
-              currentSinceSerialNo === null
-            ) {
-              keepFetching = false;
-            }
-          } else if (fetchedChunk) {
-            keepFetching = false; // No more drops found
-          } else {
-            // fetchNewestWaveMessages utility returned null drops (error occurred)
-            // Error details already logged in utility function
-            return { drops: null, highestSerialNo: null };
-          }
-        } catch (error) {
-          // Handle errors specifically from the fetchNewestWaveMessages call or aborts
-          if (error instanceof DOMException && error.name === "AbortError") {
-            throw error; // Re-throw abort to be handled by caller
-          }
-          // Log other errors from within the loop/utility call
-          console.error(
-            `[WaveDataFetching] Error during fetchNewest loop for ${waveId}:`,
-            error
-          );
-          return { drops: null, highestSerialNo: null }; // Indicate failure
-        }
-      } // end while loop
-
-      if (signal.aborted) {
-        throw new DOMException("Aborted", "AbortError");
-      }
-      const update = formatWaveMessages(waveId, allFetchedDrops);
-      updateData(update);
-      // Return all accumulated drops and the overall highest serial number found
-      return {
-        drops: allFetchedDrops,
-        highestSerialNo: overallHighestSerialNo,
-      };
-    },
-    [] // No dependencies needed, it uses the imported utility
   );
 
   /**
@@ -243,7 +304,7 @@ export function useWaveDataFetching({
    */
   const registerWave = useCallback(
     (waveId: string, syncNewest = false) => {
-      activateWave(waveId, syncNewest);
+      void activateWave(waveId, syncNewest);
     },
     [activateWave]
   );
