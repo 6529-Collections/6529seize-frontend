@@ -1045,6 +1045,10 @@ export const EN_US_MESSAGES = {
     "Download collectors leaderboard as CSV",
   "theMemes.detail.collectors.downloadCsvError":
     "Couldn't download collectors CSV. Please try again.",
+  "theMemes.detail.collectors.downloadCsvStatusPreparing":
+    "Preparing collectors CSV.",
+  "theMemes.detail.collectors.downloadCsvStatusReady":
+    "Collectors CSV download ready.",
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,

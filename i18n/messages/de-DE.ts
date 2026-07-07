@@ -388,6 +388,17 @@ export const DE_DE_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
+  "theMemes.detail.collectors.leaderboardTitle": "Sammler-Bestenliste",
+  "theMemes.detail.collectors.downloadCsv": "CSV herunterladen",
+  "theMemes.detail.collectors.downloadingCsv": "CSV wird vorbereitet",
+  "theMemes.detail.collectors.downloadCsvAriaLabel":
+    "Sammler-Bestenliste als CSV herunterladen",
+  "theMemes.detail.collectors.downloadCsvError":
+    "CSV der Sammler konnte nicht heruntergeladen werden. Bitte erneut versuchen.",
+  "theMemes.detail.collectors.downloadCsvStatusPreparing":
+    "CSV der Sammler wird vorbereitet.",
+  "theMemes.detail.collectors.downloadCsvStatusReady":
+    "CSV-Download der Sammler ist bereit.",
   "theMemes.sorting.regionLabel": "Meme-Sortierung",
   "theMemes.sorting.sortBy": "Sortieren nach",
   "theMemes.sorting.directionLegend": "Sortierrichtung",

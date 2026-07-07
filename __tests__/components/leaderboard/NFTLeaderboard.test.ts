@@ -152,13 +152,13 @@ describe("fetchAllNftTdhResults", () => {
   it("fetches every page with the same filters and sort", async () => {
     (commonApiFetch as jest.Mock)
       .mockResolvedValueOnce({
-        count: PAGE_SIZE + 1,
+        count: PAGE_SIZE * 4 + 1,
         page: 1,
         next: null,
         data: [{ ...baseCollector, id: 1 }],
       })
       .mockResolvedValueOnce({
-        count: PAGE_SIZE + 1,
+        count: PAGE_SIZE * 4 + 1,
         page: 2,
         next: null,
         data: [{ ...baseCollector, id: 2, handle: "bob" }],
@@ -174,10 +174,10 @@ describe("fetchAllNftTdhResults", () => {
 
     expect(results).toHaveLength(2);
     expect(commonApiFetch).toHaveBeenNthCalledWith(1, {
-      endpoint: `tdh/nft/0xabc/7?&search=0x1&page_size=${PAGE_SIZE}&page=1&sort=balance&sort_direction=DESC`,
+      endpoint: `tdh/nft/0xabc/7?&search=0x1&page_size=100&page=1&sort=balance&sort_direction=DESC`,
     });
     expect(commonApiFetch).toHaveBeenNthCalledWith(2, {
-      endpoint: `tdh/nft/0xabc/7?&search=0x1&page_size=${PAGE_SIZE}&page=2&sort=balance&sort_direction=DESC`,
+      endpoint: `tdh/nft/0xabc/7?&search=0x1&page_size=100&page=2&sort=balance&sort_direction=DESC`,
     });
   });
 });
@@ -208,5 +208,22 @@ describe("buildNftCollectorsCsv", () => {
     );
 
     expect(csv.split("\n")[1]?.startsWith("42,")).toBe(true);
+  });
+
+  it("falls back for missing collector names and neutralizes spreadsheet formulas", () => {
+    const csv = buildNftCollectorsCsv(
+      [
+        {
+          ...baseCollector,
+          handle: null as unknown as string,
+          consolidation_display: undefined as unknown as string,
+          consolidation_key: "=SUM(1,1)",
+          primary_wallet: "+0xwallet",
+        },
+      ],
+      false
+    );
+
+    expect(csv).toContain("1,\"'=SUM(1,1)\",'+0xwallet,");
   });
 });

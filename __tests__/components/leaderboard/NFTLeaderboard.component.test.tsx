@@ -123,7 +123,7 @@ describe("NFTLeaderboard component", () => {
     await waitFor(() =>
       expect(commonApiFetch).toHaveBeenCalledWith(
         expect.objectContaining({
-          endpoint: `tdh/nft/0x1/1?&page_size=25&page=1&sort=balance&sort_direction=DESC`,
+          endpoint: `tdh/nft/0x1/1?&page_size=100&page=1&sort=balance&sort_direction=DESC`,
           signal: expect.any(AbortSignal),
         })
       )
@@ -141,5 +141,23 @@ describe("NFTLeaderboard component", () => {
       configurable: true,
       value: originalRevokeObjectURL,
     });
+  });
+
+  it("shows an error when the collectors CSV download fails", async () => {
+    commonApiFetch.mockResolvedValue({ count: 1, data: [collector] });
+    renderLeaderboard();
+    await screen.findByText("alice");
+    commonApiFetch.mockClear();
+    commonApiFetch.mockRejectedValueOnce(new Error("download failed"));
+
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "Download collectors leaderboard as CSV",
+      })
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn't download collectors CSV. Please try again."
+    );
   });
 });

@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
@@ -44,6 +45,7 @@ interface Props {
 }
 
 export const PAGE_SIZE = 25;
+const EXPORT_PAGE_SIZE = 100;
 
 const CSV_HEADERS = [
   "rank",
@@ -62,6 +64,7 @@ interface FetchNftTdhResultsParams {
   readonly nftId: number;
   readonly walletFilter: string;
   readonly page: number;
+  readonly pageSize?: number;
   readonly sort: string;
   readonly sortDirection: string;
   readonly signal?: AbortSignal;
@@ -74,10 +77,13 @@ function getNftTdhEndpoint({
   nftId,
   walletFilter,
   page,
+  pageSize,
   sort,
   sortDirection,
-}: Readonly<Omit<FetchNftTdhResultsParams, "signal">>) {
-  return `tdh/nft/${contract}/${nftId}?${walletFilter}&page_size=${PAGE_SIZE}&page=${page}&sort=${sort}&sort_direction=${sortDirection}`;
+}: Readonly<
+  Omit<FetchNftTdhResultsParams, "signal"> & { readonly pageSize: number }
+>) {
+  return `tdh/nft/${contract}/${nftId}?${walletFilter}&page_size=${pageSize}&page=${page}&sort=${sort}&sort_direction=${sortDirection}`;
 }
 
 function getWalletFilter(searchWallets: readonly string[]) {
@@ -93,6 +99,7 @@ export async function fetchNftTdhResults({
   nftId,
   walletFilter,
   page,
+  pageSize = PAGE_SIZE,
   sort,
   sortDirection,
   signal,
@@ -102,6 +109,7 @@ export async function fetchNftTdhResults({
     nftId,
     walletFilter,
     page,
+    pageSize,
     sort,
     sortDirection,
   });
@@ -128,11 +136,12 @@ export async function fetchAllNftTdhResults({
     nftId,
     walletFilter,
     page: 1,
+    pageSize: EXPORT_PAGE_SIZE,
     sort,
     sortDirection,
     ...(signal !== undefined ? { signal } : {}),
   });
-  const totalPages = Math.ceil(firstPage.count / PAGE_SIZE);
+  const totalPages = Math.ceil(firstPage.count / EXPORT_PAGE_SIZE);
   const allResults = [...firstPage.data];
 
   for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
@@ -141,6 +150,7 @@ export async function fetchAllNftTdhResults({
       nftId,
       walletFilter,
       page: currentPage,
+      pageSize: EXPORT_PAGE_SIZE,
       sort,
       sortDirection,
       ...(signal !== undefined ? { signal } : {}),
@@ -152,17 +162,22 @@ export async function fetchAllNftTdhResults({
 }
 
 function getCollectorCsvName(collector: NftTDH) {
-  const populatedName = [
+  const nameCandidates: ReadonlyArray<string | null | undefined> = [
     collector.handle,
     collector.consolidation_display,
     collector.consolidation_key,
-  ].find((value) => value.trim().length > 0);
+  ];
+  const populatedName = nameCandidates.find(
+    (value): value is string =>
+      typeof value === "string" && value.trim().length > 0
+  );
 
   return populatedName ?? "";
 }
 
 function escapeCsvValue(value: number | string | null | undefined) {
-  const stringValue = value === null || value === undefined ? "" : `${value}`;
+  const rawValue = value === null || value === undefined ? "" : `${value}`;
+  const stringValue = /^[=+\-@\t]/.test(rawValue) ? `'${rawValue}` : rawValue;
 
   if (!/[",\n\r]/.test(stringValue)) {
     return stringValue;
@@ -238,6 +253,8 @@ enum Sort {
   total_boosted_tdh = "total_boosted_tdh",
 }
 
+type CsvDownloadStatus = "idle" | "downloading" | "success" | "error";
+
 interface NftTDH {
   id: number;
   contract: string;
@@ -264,6 +281,21 @@ interface NftTDH {
 
 export interface NftTDHRanked extends NftTDH {
   rank: number;
+}
+
+function getCsvStatusMessage(
+  status: CsvDownloadStatus,
+  locale: SupportedLocale
+) {
+  if (status === "downloading") {
+    return t(locale, "theMemes.detail.collectors.downloadCsvStatusPreparing");
+  }
+
+  if (status === "success") {
+    return t(locale, "theMemes.detail.collectors.downloadCsvStatusReady");
+  }
+
+  return "";
 }
 
 interface LeaderboardViewState {
@@ -296,7 +328,7 @@ function CollectorsCsvDownloadControls({
   const csvAbortControllerRef = useRef<AbortController | null>(null);
   const [csvDownloadState, setCsvDownloadState] = useState<
     Readonly<{
-      status: "idle" | "downloading" | "error";
+      status: CsvDownloadStatus;
       requestKey: string | null;
     }>
   >({ status: "idle", requestKey: null });
@@ -305,11 +337,12 @@ function CollectorsCsvDownloadControls({
     csvDownloadState.requestKey === csvRequestKey
       ? csvDownloadState.status
       : "idle";
+  const csvStatusMessage = getCsvStatusMessage(csvStatus, locale);
 
   useEffect(() => {
     csvAbortControllerRef.current?.abort();
     csvAbortControllerRef.current = null;
-  }, [contract, nftId, searchWallets, sort, sortDirection]);
+  }, [csvRequestKey]);
 
   useEffect(() => {
     return () => {
@@ -344,7 +377,7 @@ function CollectorsCsvDownloadControls({
         downloadNftCollectorsCsv(nftId, csv);
         if (!abortController.signal.aborted) {
           setCsvDownloadState({
-            status: "idle",
+            status: "success",
             requestKey: csvRequestKey,
           });
         }
@@ -394,12 +427,15 @@ function CollectorsCsvDownloadControls({
           </span>
           <FontAwesomeIcon
             icon={isCsvDownloading ? faSpinner : faDownload}
-            className={`tw-size-3.5 ${isCsvDownloading ? "tw-animate-spin" : ""}`}
+            className={`tw-size-3.5 ${isCsvDownloading ? "motion-safe:tw-animate-spin" : ""}`}
             aria-hidden="true"
           />
         </button>
         {children}
       </div>
+      <span className="tw-sr-only" role="status" aria-live="polite">
+        {csvStatusMessage}
+      </span>
       {csvStatus === "error" && (
         <p
           className="tw-mb-0 tw-mt-0 tw-text-right tw-text-sm tw-font-medium tw-text-error"
@@ -470,11 +506,12 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   });
 
   const leaderboard = useMemo<NftTDHRanked[]>(() => {
+    const responsePage = leaderboardQuery.data?.page ?? page;
     return (leaderboardQuery.data?.data ?? []).map((lead, index) => {
       const rank =
         searchWallets.length > 0
           ? lead.tdh_rank
-          : index + 1 + (page - 1) * PAGE_SIZE;
+          : index + 1 + (responsePage - 1) * PAGE_SIZE;
       return { ...lead, rank };
     });
   }, [leaderboardQuery.data, page, searchWallets.length]);
@@ -616,7 +653,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                 className="tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400 md:tw-min-w-[18rem] md:tw-px-4 md:tw-py-3"
               >
                 Collector{" "}
-                {totalResults > 0 && `x${totalResults.toLocaleString()}`}
+                {totalResults > 0 && `x${formatInteger(locale, totalResults)}`}
               </th>
               {printSortableHeader("Balance", Sort.balance, "tw-border-l")}
               {printSortableHeader("TDH", Sort.boosted_tdh)}

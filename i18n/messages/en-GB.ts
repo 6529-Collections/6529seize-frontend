@@ -374,6 +374,17 @@ export const EN_GB_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  "theMemes.detail.collectors.leaderboardTitle": "Collectors leaderboard",
+  "theMemes.detail.collectors.downloadCsv": "Download CSV",
+  "theMemes.detail.collectors.downloadingCsv": "Preparing CSV",
+  "theMemes.detail.collectors.downloadCsvAriaLabel":
+    "Download collectors leaderboard as CSV",
+  "theMemes.detail.collectors.downloadCsvError":
+    "Couldn't download collectors CSV. Please try again.",
+  "theMemes.detail.collectors.downloadCsvStatusPreparing":
+    "Preparing collectors CSV.",
+  "theMemes.detail.collectors.downloadCsvStatusReady":
+    "Collectors CSV download ready.",
   "theMemes.filters.triggerAriaLabel": "{filter}: {value}",
   "theMemes.filters.year.label": "Year",
   "theMemes.filters.year.all": "All Years",

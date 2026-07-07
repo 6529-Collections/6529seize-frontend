@@ -396,6 +396,18 @@ export const FR_FR_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  "theMemes.detail.collectors.leaderboardTitle":
+    "Classement des collectionneurs",
+  "theMemes.detail.collectors.downloadCsv": "Télécharger le CSV",
+  "theMemes.detail.collectors.downloadingCsv": "Préparation du CSV",
+  "theMemes.detail.collectors.downloadCsvAriaLabel":
+    "Télécharger le classement des collectionneurs au format CSV",
+  "theMemes.detail.collectors.downloadCsvError":
+    "Impossible de télécharger le CSV des collectionneurs. Réessayez.",
+  "theMemes.detail.collectors.downloadCsvStatusPreparing":
+    "Préparation du CSV des collectionneurs.",
+  "theMemes.detail.collectors.downloadCsvStatusReady":
+    "Téléchargement du CSV des collectionneurs prêt.",
   "theMemes.sorting.regionLabel": "Tri des memes",
   "theMemes.sorting.sortBy": "Trier par",
   "theMemes.sorting.directionLegend": "Sens du tri",
