@@ -378,6 +378,11 @@ h5:not(.tailwind-scope h5) {
     font-weight: bold;
   }
 }
+
+.text-right {
+  text-align: right;
+}
+
 #walletconnect-wrapper {
   color: black !important;
 }
