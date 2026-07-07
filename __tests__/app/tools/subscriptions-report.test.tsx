@@ -242,9 +242,7 @@ describe("Subscriptions report page", () => {
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "policies/country-check",
       });
-      expect(mockFetch).toHaveBeenCalledWith("/api/meme-calendar/current", {
-        headers: { "x-6529-auth": "stag" },
-      });
+      expect(mockFetch).toHaveBeenCalledWith("/api/meme-calendar/current");
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "subscriptions/upcoming-memes-counts?card_count=2",
       });
@@ -317,9 +315,7 @@ describe("Subscriptions report page", () => {
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "subscriptions/memes/700/count",
     });
-    expect(mockFetch).toHaveBeenCalledWith("/api/meme-calendar/current", {
-      headers: { "x-6529-auth": "stag" },
-    });
+    expect(mockFetch).toHaveBeenCalledWith("/api/meme-calendar/current");
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "subscriptions/upcoming-memes-counts?card_count=2",
     });
