@@ -10,6 +10,8 @@
 //   node scripts/debt-ratchet.cjs --json     -> print actual counts as JSON
 //   node scripts/debt-ratchet.cjs --details <metric>
 //                                            -> per-file counts for one metric
+//      --ignore-wordpress-migrated           -> hide WP-migrated files from
+//                                                details output only
 //
 // Rules enforced by the check:
 //   - A count above its baseline fails the check.
@@ -82,6 +84,18 @@ const CODE_EXTENSIONS = new Set([
 ]);
 const TYPESCRIPT_EXTENSIONS = new Set([".ts", ".tsx", ".cts", ".mts"]);
 const STYLE_EXTENSIONS = new Set([".css", ".scss"]);
+const WORDPRESS_MIGRATED_DETAILS_FLAGS = new Set([
+  "--ignore-wordpress-migrated",
+  "--ignore-wp-migrated",
+]);
+const WORDPRESS_MIGRATED_SOURCE_PATTERNS = [
+  /WordPressLegacyAssets/,
+  /Yoast SEO plugin/i,
+  /wp-content\/uploads/i,
+  /\/wp-json\/wp\/v2\//i,
+  /\bfusion[-_](?:builder|wrapper|row|column|text|title|image|fullwidth)/i,
+  /\bwp-image-\d+\b/i,
+];
 
 const METRIC_DEFINITIONS = {
   any_casts: {
@@ -183,6 +197,12 @@ function countLines(content) {
   return content.endsWith("\n") ? newlines : newlines + 1;
 }
 
+function isWordPressMigratedSource(content) {
+  return WORDPRESS_MIGRATED_SOURCE_PATTERNS.some((pattern) =>
+    pattern.test(content)
+  );
+}
+
 function countPagesRouterFiles() {
   const pagesDir = path.join(REPO_ROOT, "pages");
   if (!fs.existsSync(pagesDir)) return 0;
@@ -199,6 +219,7 @@ function computeActuals() {
     redux_imports: new Map(),
   };
   const oversizedFiles = [];
+  const wordpressMigratedFiles = new Set();
 
   for (const relativePath of listSourceFiles()) {
     const extension = path.extname(relativePath);
@@ -207,6 +228,9 @@ function computeActuals() {
     if (!isCode && !isStyle) continue;
 
     const content = fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
+    if (isWordPressMigratedSource(content)) {
+      wordpressMigratedFiles.add(relativePath);
+    }
 
     const todoCount = countMatches(content, /\b(?:TODO|FIXME|HACK)\b/g);
     if (todoCount > 0) perFile.todo_comments.set(relativePath, todoCount);
@@ -253,6 +277,7 @@ function computeActuals() {
     },
     oversizedFiles,
     perFile,
+    wordpressMigratedFiles,
   };
 }
 
@@ -414,10 +439,27 @@ function runUpdate() {
   }
 }
 
-function runDetails(metric) {
+function getDetailsOptions(args) {
+  return {
+    ignoreWordPressMigrated: args.some((arg) =>
+      WORDPRESS_MIGRATED_DETAILS_FLAGS.has(arg)
+    ),
+  };
+}
+
+function shouldPrintDetailsFile(file, actuals, options) {
+  return (
+    !options.ignoreWordPressMigrated ||
+    !actuals.wordpressMigratedFiles.has(file)
+  );
+}
+
+function runDetails(metric, options = {}) {
   const actuals = computeActuals();
   if (metric === "oversized_files") {
-    for (const file of actuals.oversizedFiles) console.log(file);
+    for (const file of actuals.oversizedFiles) {
+      if (shouldPrintDetailsFile(file, actuals, options)) console.log(file);
+    }
     return;
   }
   const perFile = actuals.perFile[metric];
@@ -428,9 +470,9 @@ function runDetails(metric) {
     );
     process.exit(1);
   }
-  const sorted = [...perFile.entries()].sort(
-    (a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)
-  );
+  const sorted = [...perFile.entries()]
+    .filter(([file]) => shouldPrintDetailsFile(file, actuals, options))
+    .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
   for (const [file, count] of sorted) {
     console.log(`${String(count).padStart(5)}  ${file}`);
   }
@@ -454,7 +496,7 @@ function main() {
       console.error("Usage: node scripts/debt-ratchet.cjs --details <metric>");
       process.exit(1);
     }
-    runDetails(metric);
+    runDetails(metric, getDetailsOptions(args));
     return;
   }
   runCheck();
@@ -470,4 +512,5 @@ module.exports = {
   countImportStatements,
   countLines,
   countMatches,
+  isWordPressMigratedSource,
 };
