@@ -526,8 +526,7 @@ export default function CreateDrop({
       });
       body.onError?.(error);
     },
-    retry: (failureCount) => failureCount < 3,
-    retryDelay: (failureCount) => failureCount * 1000,
+    retry: false,
   });
 
   // Use refs to avoid stale closures - fixes the stream unmounting issue
