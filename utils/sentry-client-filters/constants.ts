@@ -7,6 +7,9 @@ export const filenameExceptions = [
 ];
 export const injectedWasmCspAppUriPath = "app:///inject.js";
 export const injectedWasmCspCollapsedPath = "///inject.js";
+export const injectedWasmCspStaticChunkFunction = "k";
+export const injectedWasmCspStaticChunkPathPattern =
+  /^app:\/\/\/chunks\/utils-[A-Za-z0-9_-]+\.js(?::\d+(?::\d+)?)?$/;
 export const injectedAppUriPath = "app:///injected/injected.js";
 export const walletCollisionPatterns = [
   "tronlinkparams",

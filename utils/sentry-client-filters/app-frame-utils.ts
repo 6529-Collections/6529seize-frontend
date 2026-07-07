@@ -9,6 +9,8 @@ import {
   injectedProviderProxyPath,
   injectedWasmCspAppUriPath,
   injectedWasmCspCollapsedPath,
+  injectedWasmCspStaticChunkFunction,
+  injectedWasmCspStaticChunkPathPattern,
   NEXT_STATIC_CHUNK_FRAME_PATTERNS,
   REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS,
   REACT_DOM_RUNTIME_FRAME_PATTERNS,
@@ -112,8 +114,21 @@ function isInjectedWasmCspFramePath(path: string): boolean {
   );
 }
 
+function isInjectedWasmCspStaticChunkFrame(frame: SentryStackFrame): boolean {
+  if (frame.function?.trim() !== injectedWasmCspStaticChunkFunction) {
+    return false;
+  }
+
+  return getFramePaths(frame).some((path) =>
+    injectedWasmCspStaticChunkPathPattern.test(path.trim())
+  );
+}
+
 function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
-  return getFramePaths(frame).some(isInjectedWasmCspFramePath);
+  return (
+    getFramePaths(frame).some(isInjectedWasmCspFramePath) ||
+    isInjectedWasmCspStaticChunkFrame(frame)
+  );
 }
 
 function isFirstPartyFramePath(path: string): boolean {
@@ -141,7 +156,11 @@ function isFirstPartyFramePath(path: string): boolean {
 }
 
 function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
-  if (frame.in_app === true && !isInjectedWasmCspFrame(frame)) {
+  if (isInjectedWasmCspFrame(frame)) {
+    return false;
+  }
+
+  if (frame.in_app === true) {
     return true;
   }
 
