@@ -400,7 +400,7 @@ export function MemePageReferencesSubMenu(props: {
                       name: getRememeName(rememe),
                       tokenId: rememe.id,
                     })}
-                    className="scale-hover tw-no-underline"
+                    className="tw-no-underline [&_img:hover]:tw-scale-[1.02] [&_img]:tw-transition-transform [&_img]:tw-duration-300 [&_img]:tw-ease-[ease]"
                   >
                     <div className="tw-w-full">
                       <div>

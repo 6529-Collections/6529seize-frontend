@@ -61,7 +61,7 @@ export const TOOLTIP_STYLE = {
   pointerEvents: "none",
 } as const;
 export const HEATMAP_VIEWPORT_CLASS_NAME =
-  "horizontal-menu-scrollable-x tw-[scrollbar-gutter:stable] tw-flex-1 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-pb-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 [touch-action:pan-x] desktop-hover:hover:tw-scrollbar-thumb-iron-600/80";
+  "tw-horizontal-menu-scrollable-x tw-[scrollbar-gutter:stable] tw-flex-1 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-pb-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 [touch-action:pan-x] desktop-hover:hover:tw-scrollbar-thumb-iron-600/80";
 export const HEATMAP_CONTENT_CLASS_NAME = "tw-inline-flex tw-flex-col tw-pr-2";
 export const HEATMAP_GRID_STYLE = {
   gridTemplateRows: `repeat(7, ${CELL_SIZE_PX}px)`,

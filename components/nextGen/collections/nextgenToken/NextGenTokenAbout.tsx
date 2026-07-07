@@ -138,7 +138,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 className="tw-flex tw-items-center tw-gap-2 tw-no-underline hover:tw-underline"
               >
                 <UserCICAndLevel level={profile.level} />
-                <span className="decoration-underline">
+                <span className="tw-underline">
                   {profile?.handle ??
                     profile?.display ??
                     formatAddress(props.token.owner)}

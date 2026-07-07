@@ -390,7 +390,7 @@ export default function SubscriptionsReportComponent() {
             <AboutSubscriptionsProfileButton />
             <Link
               href="/about/subscriptions"
-              className="decoration-hover-underline tw-whitespace-nowrap"
+              className="tw-whitespace-nowrap tw-no-underline hover:tw-underline"
               aria-label="Learn more about The Memes subscriptions"
             >
               Learn More

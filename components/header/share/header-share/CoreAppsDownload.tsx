@@ -66,7 +66,7 @@ function CoreAppDownload({
           alt={title}
           width={40}
           height={40}
-          className="unselectable"
+          className="tw-unselectable"
         />
       </div>
       <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
