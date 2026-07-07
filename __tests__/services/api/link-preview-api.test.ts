@@ -500,93 +500,87 @@ describe("fetchLinkPreview", () => {
     );
   });
 
-  it("falls back to single GET requests when the batch request fails", async () => {
-    const firstPreview: LinkPreviewResponse = {
-      requestUrl: "https://one.example/article",
-      title: "One",
-    };
-    const secondPreview: LinkPreviewResponse = {
-      requestUrl: "https://two.example/article",
-      title: "Two",
-    };
-    fetchMock
-      .mockRejectedValueOnce(new Error("batch unavailable"))
-      .mockResolvedValueOnce(createResponse(firstPreview))
-      .mockResolvedValueOnce(createResponse(secondPreview));
+  it("rejects queued requests without single GET fan-out when the batch request fails", async () => {
+    fetchMock.mockRejectedValueOnce(new Error("batch unavailable"));
 
     const { fetchLinkPreview } = await loadApi();
     const first = fetchLinkPreview("https://one.example/article");
     const second = fetchLinkPreview("https://two.example/article");
+    const firstFailure = expect(first).rejects.toThrow("batch unavailable");
+    const secondFailure = expect(second).rejects.toThrow("batch unavailable");
 
     jest.runOnlyPendingTimers();
 
-    await expect(first).resolves.toEqual(firstPreview);
-    await expect(second).resolves.toEqual(secondPreview);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    await firstFailure;
+    await secondFailure;
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/open-graph");
-    expect(fetchMock.mock.calls[1]?.[0]).toBe(
-      "/api/open-graph?url=https%3A%2F%2Fone.example%2Farticle"
-    );
-    expect(fetchMock.mock.calls[2]?.[0]).toBe(
-      "/api/open-graph?url=https%3A%2F%2Ftwo.example%2Farticle"
-    );
-    expect(getFetchSignal(1).aborted).toBe(false);
-    expect(getFetchSignal(2).aborted).toBe(false);
   });
 
-  it("normalizes Manifold original images in single GET fallback responses", async () => {
-    const preview: LinkPreviewResponse = {
-      requestUrl: "https://manifold.xyz/@artist/id/123",
-      title: "Manifold listing",
-      image: {
-        url: "https://assets.manifold.xyz/original/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184.png",
-      },
+  it("clears cache after a failed batch so the url can retry in a later batch", async () => {
+    const url = "https://one.example/article";
+    const retryPreview: LinkPreviewResponse = {
+      requestUrl: url,
+      title: "Retry",
     };
     fetchMock
       .mockRejectedValueOnce(new Error("batch unavailable"))
-      .mockResolvedValueOnce(createResponse(preview));
+      .mockResolvedValueOnce(
+        createResponse({
+          results: {
+            [url]: retryPreview,
+          },
+          errors: {},
+        })
+      );
 
     const { fetchLinkPreview } = await loadApi();
-    const request = fetchLinkPreview("https://manifold.xyz/@artist/id/123");
+    const request = fetchLinkPreview(url);
+    const firstFailure = expect(request).rejects.toThrow("batch unavailable");
 
     jest.runOnlyPendingTimers();
+    await firstFailure;
 
-    await expect(request).resolves.toEqual(
+    const retry = fetchLinkPreview(url);
+    jest.runOnlyPendingTimers();
+
+    await expect(retry).resolves.toEqual(retryPreview);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("/api/open-graph");
+    expect(fetchMock.mock.calls[1]?.[1]).toEqual(
       expect.objectContaining({
-        image: {
-          url: "https://assets.manifold.xyz/optimized/f7858d47e672a94c82e37cfe602f5bd8ed3a722167f8321f85ebab276b88b184/w_800.png",
-        },
+        body: JSON.stringify({ urls: [url] }),
       })
     );
   });
 
-  it("aborts timed-out single GET fallback requests", async () => {
-    fetchMock
-      .mockRejectedValueOnce(new Error("batch unavailable"))
-      .mockImplementationOnce((_input: unknown, init?: RequestInit) =>
-        createAbortableFetchResponse(init)
-      );
+  it("aborts timed-out batch requests without single GET fan-out", async () => {
+    fetchMock.mockImplementationOnce((_input: unknown, init?: RequestInit) =>
+      createAbortableFetchResponse(init)
+    );
 
     const { fetchLinkPreview } = await loadApi();
     const request = fetchLinkPreview("https://slow.example/article");
+    const failure = expect(request).rejects.toThrow(
+      "Failed to fetch link preview metadata. Request timed out."
+    );
 
     jest.runOnlyPendingTimers();
     await flushMicrotasks();
     await flushMicrotasks();
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    const singleRequestSignal = getFetchSignal(1);
-    expect(singleRequestSignal.aborted).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const batchSignal = getFetchSignal(0);
+    expect(batchSignal.aborted).toBe(false);
 
     jest.advanceTimersByTime(10_000);
 
-    await expect(request).rejects.toThrow(
-      "Failed to fetch link preview metadata. Request timed out."
-    );
-    expect(singleRequestSignal.aborted).toBe(true);
+    await failure;
+    expect(batchSignal.aborted).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("times out when single GET fallback json stalls and clears the failed cache entry", async () => {
+  it("times out when batch response json stalls and clears the failed cache entry", async () => {
     const url = "https://slow.example/article";
     const { response: stalledResponse, json } = createPendingJsonResponse();
     const retryPreview: LinkPreviewResponse = {
@@ -594,7 +588,6 @@ describe("fetchLinkPreview", () => {
       title: "Retry",
     };
     fetchMock
-      .mockRejectedValueOnce(new Error("batch unavailable"))
       .mockResolvedValueOnce(stalledResponse)
       .mockResolvedValueOnce(
         createResponse({
@@ -607,51 +600,9 @@ describe("fetchLinkPreview", () => {
 
     const { fetchLinkPreview } = await loadApi();
     const request = fetchLinkPreview(url);
-
-    jest.runOnlyPendingTimers();
-    await flushMicrotasks();
-    await flushMicrotasks();
-
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(json).toHaveBeenCalledTimes(1);
-    const singleRequestSignal = getFetchSignal(1);
-    expect(singleRequestSignal.aborted).toBe(false);
-
-    jest.advanceTimersByTime(10_000);
-
-    await expect(request).rejects.toThrow(
+    const failure = expect(request).rejects.toThrow(
       "Failed to fetch link preview metadata. Request timed out."
     );
-    expect(singleRequestSignal.aborted).toBe(true);
-
-    const retry = fetchLinkPreview(url);
-    jest.runOnlyPendingTimers();
-
-    await expect(retry).resolves.toEqual(retryPreview);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
-  });
-
-  it("falls back to single GET requests when batch response json times out", async () => {
-    const firstUrl = "https://one.example/article";
-    const secondUrl = "https://two.example/article";
-    const firstPreview: LinkPreviewResponse = {
-      requestUrl: firstUrl,
-      title: "One",
-    };
-    const secondPreview: LinkPreviewResponse = {
-      requestUrl: secondUrl,
-      title: "Two",
-    };
-    const { response: stalledBatchResponse, json } =
-      createPendingJsonResponse();
-    fetchMock
-      .mockResolvedValueOnce(stalledBatchResponse)
-      .mockResolvedValueOnce(createResponse(firstPreview))
-      .mockResolvedValueOnce(createResponse(secondPreview));
-
-    const { fetchLinkPreview } = await loadApi();
-    const first = fetchLinkPreview(firstUrl);
-    const second = fetchLinkPreview(secondUrl);
 
     jest.runOnlyPendingTimers();
     await flushMicrotasks();
@@ -664,29 +615,29 @@ describe("fetchLinkPreview", () => {
 
     jest.advanceTimersByTime(10_000);
 
-    await expect(Promise.all([first, second])).resolves.toEqual([
-      firstPreview,
-      secondPreview,
-    ]);
+    await failure;
     expect(batchSignal.aborted).toBe(true);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(fetchMock.mock.calls[1]?.[0]).toBe(
-      "/api/open-graph?url=https%3A%2F%2Fone.example%2Farticle"
-    );
-    expect(fetchMock.mock.calls[2]?.[0]).toBe(
-      "/api/open-graph?url=https%3A%2F%2Ftwo.example%2Farticle"
+
+    const retry = fetchLinkPreview(url);
+    jest.runOnlyPendingTimers();
+
+    await expect(retry).resolves.toEqual(retryPreview);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("/api/open-graph");
+    expect(fetchMock.mock.calls[1]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: [url] }),
+      })
     );
   });
 
-  it("uses OpenGraph error body from non-ok single GET fallback responses", async () => {
-    fetchMock
-      .mockRejectedValueOnce(new Error("batch unavailable"))
-      .mockResolvedValueOnce(
-        createResponse(
-          { error: "Preview metadata is unavailable for this URL." },
-          { ok: false }
-        )
-      );
+  it("uses OpenGraph error body from non-ok batch responses", async () => {
+    fetchMock.mockResolvedValueOnce(
+      createResponse(
+        { error: "Preview metadata is unavailable for this URL." },
+        { ok: false }
+      )
+    );
 
     const { fetchLinkPreview } = await loadApi();
     const request = fetchLinkPreview("https://blocked.example/article");
@@ -696,5 +647,7 @@ describe("fetchLinkPreview", () => {
     await expect(request).rejects.toThrow(
       "Preview metadata is unavailable for this URL."
     );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/open-graph");
   });
 });
