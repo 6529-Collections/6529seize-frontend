@@ -2,7 +2,6 @@ import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
-import { FR_FR_WALLET_STARTUP_MESSAGES } from "@/i18n/messages/wallet-startup";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
@@ -434,9 +433,6 @@ export const FR_FR_MESSAGES = {
   "theMemes.card.metric.volume": "Volume ({volumeType}) : {value}",
   "theMemes.sort.age": "Age",
   "theMemes.sort.editionSize": "Taille d’édition",
-  ...FR_FR_WALLET_STARTUP_MESSAGES,
-  "openMobile.openingStatus": "Ouverture de 6529 Mobile...",
-  "nextgen.admin.loadingStatus": "Chargement de l'administration NextGen",
   "theMemes.sort.collectors": "Collectionneurs",
   "theMemes.sort.uniquePercent": "% unique",
   "theMemes.sort.uniquePercentExMuseum": "% unique hors musée",

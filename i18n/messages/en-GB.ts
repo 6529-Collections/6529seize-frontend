@@ -377,8 +377,6 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.uncastPower.votesVisible": "votes",
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
-  "openMobile.openingStatus": "Opening 6529 Mobile...",
-  "nextgen.admin.loadingStatus": "Loading NextGen admin",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   ...EN_GB_THE_MEMES_COLLECTORS_MESSAGES,

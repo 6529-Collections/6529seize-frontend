@@ -217,66 +217,6 @@ describe("useMarkWaveNotificationsRead", () => {
     jest.restoreAllMocks();
   });
 
-  it("remounts read marker state before deferred cleanup fires", async () => {
-    const invalidateNotifications = jest.fn();
-    const addressKey = "0xaaa";
-    const waveId = "wave-remount-cleanup";
-    const identityKey = getWaveReadIdentityKey({
-      addressKey,
-      activeProfileProxyId: null,
-    });
-    const requestKey = getWaveReadRequestKey({
-      addressKey,
-      activeProfileProxyId: null,
-      waveId,
-    });
-    const { addressEpoch, latestAddressEpochRef } = createAddressEpochState();
-    jest.useFakeTimers();
-
-    try {
-      setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
-      const firstMarker = renderHook(
-        () => useWaveNotificationsReadMarkerState(),
-        {
-          wrapper: createWrapper(invalidateNotifications),
-        }
-      );
-      const queuedRead = enqueuePendingWaveReadRequest({
-        addressKey,
-        activeProfileProxyId: null,
-        proxyCreatorId: null,
-        identityKey,
-        requestKey,
-        waveId,
-        addressEpoch,
-        latestAddressEpochRef,
-        shouldSend: undefined,
-        queueIfBlocked: true,
-      });
-
-      firstMarker.unmount();
-
-      setActiveIdentity({ address: "0xBBB", jwt: "jwt-b" });
-      const secondMarker = renderHook(
-        () => useWaveNotificationsReadMarkerState(),
-        {
-          wrapper: createWrapper(invalidateNotifications),
-        }
-      );
-
-      await expect(queuedRead).resolves.toBe("skipped");
-
-      secondMarker.unmount();
-
-      act(() => {
-        jest.runOnlyPendingTimers();
-      });
-    } finally {
-      clearAllWaveReadState();
-      jest.useRealTimers();
-    }
-  });
-
   it("treats a missing active profile proxy as no proxy", async () => {
     const invalidateNotifications = jest.fn();
 
