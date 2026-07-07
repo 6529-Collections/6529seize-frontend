@@ -41,6 +41,10 @@ export default function CreateWaveGroups({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
+      <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400">
+        The Who can view group controls who can access this wave. Followers of
+        you who can view the wave may get a notification when it is created.
+      </p>
       {CREATE_WAVE_GROUPS[waveType].map((groupType) => (
         <CreateWaveGroup
           key={groupType}
@@ -60,10 +64,7 @@ export default function CreateWaveGroups({
       {isRestrictedGroup && (
         <CreateWaveWarning
           title="Warning: Limited Access"
-          description=' This wave is configured with restricted access. It can only be viewed
-        and managed by the members of the "Who can view" and
-        "Admin" groups. If you are not a member of either of these
-        groups, you will not be able to access this wave.'
+          description='This wave is configured with restricted access. It can only be viewed by members of the "Who can view" group and managed by members of the "Admin" group. If you are not in a group that can view it, you will not be able to access this wave.'
         />
       )}
     </div>

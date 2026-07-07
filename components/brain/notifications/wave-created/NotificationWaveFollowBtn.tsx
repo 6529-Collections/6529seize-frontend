@@ -26,9 +26,13 @@ import {
 export default function NotificationWaveFollowBtn({
   wave,
   size = UserFollowBtnSize.SMALL,
+  followLabel = "Join",
+  followingLabel = "Joined",
 }: {
   readonly wave: ApiWaveOverview;
   readonly size?: UserFollowBtnSize | undefined;
+  readonly followLabel?: string | undefined;
+  readonly followingLabel?: string | undefined;
 }) {
   const { setToast, requestAuth } = useAuth();
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
@@ -121,7 +125,7 @@ export default function NotificationWaveFollowBtn({
     await followMutation.mutateAsync();
   };
 
-  const label = following ? "Joined" : "Join";
+  const label = following ? followingLabel : followLabel;
   const icon = (() => {
     if (mutating) {
       return <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />;

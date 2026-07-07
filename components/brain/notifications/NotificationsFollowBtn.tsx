@@ -27,26 +27,34 @@ import {
 interface NotificationsFollowBtnProps {
   readonly profile: ApiProfileMin;
   readonly size?: UserFollowBtnSize | undefined;
+  readonly followLabel?: string | undefined;
+  readonly followingLabel?: string | undefined;
 }
 
 const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
   profile,
   size = UserFollowBtnSize.MEDIUM,
+  followLabel = "Follow",
+  followingLabel = "Following",
 }) => {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useAuth();
   const [mutating, setMutating] = useState<boolean>(false);
 
+  const handle = profile.handle?.trim();
   const following = profile.subscribed_actions.length > 0;
-  const label = following ? "Following" : "Follow";
+  const label = following ? followingLabel : followLabel;
 
   const followMutation = useMutation({
     mutationFn: async () => {
+      if (!handle) {
+        throw new Error("Missing profile handle.");
+      }
       await commonApiPost<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
-        endpoint: `identities/${profile.handle}/subscriptions`,
+        endpoint: `identities/${handle}/subscriptions`,
         body: DEFAULT_SUBSCRIPTION_BODY,
       });
     },
@@ -68,11 +76,14 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
 
   const unFollowMutation = useMutation({
     mutationFn: async () => {
+      if (!handle) {
+        throw new Error("Missing profile handle.");
+      }
       await commonApiDeleteWithBody<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
-        endpoint: `identities/${profile.handle}/subscriptions`,
+        endpoint: `identities/${handle}/subscriptions`,
         body: DEFAULT_SUBSCRIPTION_BODY,
       });
     },
@@ -93,6 +104,14 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
   });
 
   const onFollow = async (): Promise<void> => {
+    if (!handle) {
+      setToast({
+        type: "error",
+        title: "Couldn't follow this profile.",
+        description: "This profile is missing a handle.",
+      });
+      return;
+    }
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -118,13 +137,12 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
             : "tw-bg-primary-500 tw-text-white tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600"
         } tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
       >
-        {mutating ? (
-          <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
-        ) : following ? (
-          <FollowBtnCheckIcon />
-        ) : (
-          <FollowBtnPlusIcon size={size} />
-        )}
+        {(() => {
+          if (mutating)
+            return <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />;
+          if (following) return <FollowBtnCheckIcon />;
+          return <FollowBtnPlusIcon size={size} />;
+        })()}
         <span>{label}</span>
       </button>
     </div>

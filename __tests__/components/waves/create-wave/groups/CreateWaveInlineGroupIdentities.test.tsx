@@ -200,4 +200,27 @@ describe("CreateWaveInlineGroupIdentities", () => {
       screen.queryByRole("switch", { name: "Include me" })
     ).not.toBeInTheDocument();
   });
+
+  it("warns when the connected creator is excluded from an identity group", () => {
+    renderWithProfile({
+      identities: [
+        {
+          profile_id: "profile-1",
+          handle: "alpha",
+          normalised_handle: "alpha",
+          primary_wallet: "0xPRIMARY",
+          display: "Alpha",
+          tdh: 0,
+          level: 0,
+          cic_rating: 0,
+          wallet: "0xAAA1",
+          pfp: null,
+        },
+      ],
+    });
+
+    expect(
+      screen.getByText(/You are not included in this group/)
+    ).toBeInTheDocument();
+  });
 });

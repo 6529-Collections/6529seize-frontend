@@ -43,9 +43,15 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await expect(page.getByText("mentioned you")).toHaveCount(0);
 
     await page.getByRole("button", { name: "Invites", exact: true }).click();
-    await expect(page.getByText("invited you to a wave:")).toBeVisible({
+    await expect(page.getByText("created a wave you can access:")).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    await expect(
+      page.getByRole("button", { name: "Join wave", exact: true }).first()
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Follow creator", exact: true }).first()
+    ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Sandbox Notifications Wave" }).first()
     ).toHaveAttribute("href", "/waves/00000000-0000-4000-8000-000000000533");
