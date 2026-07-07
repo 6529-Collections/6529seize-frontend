@@ -115,12 +115,8 @@ function isInjectedWasmCspFramePath(path: string): boolean {
 }
 
 function isInjectedWasmCspStaticChunkFrame(frame: SentryStackFrame): boolean {
-  if (frame.function?.trim() !== injectedWasmCspStaticChunkFunction) {
-    return false;
-  }
-
   return getFramePaths(frame).some((path) =>
-    injectedWasmCspStaticChunkPathPattern.test(path.trim())
+    isInjectedWasmCspStaticChunkFramePath(frame, path)
   );
 }
 
