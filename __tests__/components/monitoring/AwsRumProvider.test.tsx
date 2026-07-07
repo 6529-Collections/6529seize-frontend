@@ -5,7 +5,7 @@ import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import { AwsRum } from "aws-rum-web";
 
 jest.mock("aws-rum-web", () => ({
-  AwsRum: jest.fn(() => ({ recordEvent: jest.fn() })),
+  AwsRum: jest.fn(() => ({ disable: jest.fn(), recordEvent: jest.fn() })),
 }));
 
 const mockAwsRum = AwsRum as jest.Mock;
@@ -117,6 +117,27 @@ describe("AwsRumProvider", () => {
         sessionSampleRate: 0.2,
         releaseId: "1.0.0",
       })
+    );
+  });
+
+  it("disables AWS RUM and clears the global instance on unmount", async () => {
+    const { unmount } = render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+
+    const awsRumInstance = mockAwsRum.mock.results[0]?.value as {
+      disable: jest.Mock;
+    };
+
+    unmount();
+
+    expect(awsRumInstance.disable).toHaveBeenCalledTimes(1);
+    expect((window as typeof window & { awsRum?: unknown }).awsRum).toBe(
+      undefined
     );
   });
 });

@@ -19,6 +19,7 @@ export default function AwsRumProvider({
     }
 
     let cancelled = false;
+    let awsRum: AwsRumInstance | undefined;
 
     const initializeAwsRum = async () => {
       try {
@@ -66,7 +67,7 @@ export default function AwsRumProvider({
         };
 
         // Initialize AWS RUM
-        const awsRum = new AwsRum(
+        awsRum = new AwsRum(
           APPLICATION_ID,
           APPLICATION_VERSION,
           APPLICATION_REGION,
@@ -84,6 +85,14 @@ export default function AwsRumProvider({
 
     return () => {
       cancelled = true;
+      awsRum?.disable();
+
+      const awsRumWindow = window as typeof window & {
+        awsRum?: AwsRumInstance;
+      };
+      if (awsRumWindow.awsRum === awsRum) {
+        delete awsRumWindow.awsRum;
+      }
     };
   }, []);
 
