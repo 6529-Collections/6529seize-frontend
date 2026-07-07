@@ -34,11 +34,8 @@ import {
 } from "@/services/auth/auth.utils";
 import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
-import { t } from "@/i18n/messages";
-import type { SupportedLocale } from "@/i18n/locales";
 import { WalletInitializationError } from "@/errors/wallet";
 import { SecurityEventType } from "@/types/security";
 import {
@@ -337,87 +334,6 @@ type WalletState =
   | { status: "disconnected" }
   | { status: "connecting" }
   | { status: "connected"; address: string };
-
-const noopWalletAction = (): void => {};
-const noopWalletAsyncAction = (): Promise<void> => Promise.resolve();
-
-const createWalletStartupError = (
-  locale: SupportedLocale
-): WalletInitializationError =>
-  new WalletInitializationError(t(locale, "wallet.startup.pendingError"));
-
-export const SeizeConnectStartupFallbackProvider: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
-  const { status, waitForReady } = useAppKitBootstrap();
-  const locale = useBrowserLocale();
-  const hasInitializationError = status === "error";
-  const initializationError = useMemo(
-    () =>
-      hasInitializationError ? createWalletStartupError(locale) : undefined,
-    [hasInitializationError, locale]
-  );
-  const walletState = useMemo<WalletState>(
-    () =>
-      initializationError
-        ? { status: "error", error: initializationError }
-        : { status: "initializing" },
-    [initializationError]
-  );
-  const waitForWalletReady = useCallback(async (): Promise<void> => {
-    if (hasInitializationError) {
-      throw createWalletStartupError(locale);
-    }
-
-    await waitForReady();
-  }, [hasInitializationError, locale, waitForReady]);
-  const requestWalletReady = useCallback((): void => {
-    waitForWalletReady().catch(() => undefined);
-  }, [waitForWalletReady]);
-
-  const contextValue = useMemo(
-    (): SeizeConnectContextType => ({
-      address: undefined,
-      walletName: undefined,
-      walletIcon: undefined,
-      isSafeWallet: false,
-      seizeConnect: requestWalletReady,
-      seizeConnectFresh: waitForWalletReady,
-      seizeDisconnect: noopWalletAsyncAction,
-      seizeDisconnectAndLogout: noopWalletAsyncAction,
-      seizeDisconnectAndLogoutAll: noopWalletAsyncAction,
-      seizeAcceptConnection: noopWalletAction,
-      seizeConnectOpen: false,
-      isConnected: false,
-      canSignActiveWallet: false,
-      hasActiveWalletAddress: false,
-      hasValidWalletAuth: false,
-      isAuthenticated: false,
-      connectionState: walletState.status,
-      walletState,
-      hasInitializationError,
-      initializationError,
-      connectedAccounts: [],
-      seizeSwitchConnectedAccount: noopWalletAction,
-      seizeAddConnectedAccount: requestWalletReady,
-      canAddConnectedAccount: false,
-      connectedAccountUnreadNotifications: {},
-    }),
-    [
-      hasInitializationError,
-      initializationError,
-      requestWalletReady,
-      waitForWalletReady,
-      walletState,
-    ]
-  );
-
-  return (
-    <SeizeConnectContext.Provider value={contextValue}>
-      {children}
-    </SeizeConnectContext.Provider>
-  );
-};
 
 // Initialization error handling utility
 const handleInitializationError = (
