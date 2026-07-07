@@ -15,6 +15,10 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
 const MEMES_CONTRACT_LOWER = MEMES_CONTRACT.toLowerCase();
+const CARD_SET_TDH_FULL_SET_MESSAGE_KEY: MessageKey =
+  "waves.create.voting.cardSetTdh.validation.fullSet";
+const CARD_SET_TDH_INVALID_MEME_ID_MESSAGE_KEY: MessageKey =
+  "waves.create.voting.cardSetTdh.validation.invalidMemeId";
 
 const VALIDATION_MESSAGE_KEYS: Partial<
   Record<CREATE_WAVE_VALIDATION_ERROR, MessageKey>
@@ -26,7 +30,9 @@ const VALIDATION_MESSAGE_KEYS: Partial<
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE]:
     "waves.create.voting.cardSetTdh.validation.memeCountUnavailable",
   [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED]:
-    "waves.create.voting.cardSetTdh.validation.fullSet",
+    CARD_SET_TDH_FULL_SET_MESSAGE_KEY,
+  [CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_TOKEN_INVALID]:
+    CARD_SET_TDH_INVALID_MEME_ID_MESSAGE_KEY,
 };
 
 const isMemeContract = (contract: string): boolean =>
@@ -126,7 +132,7 @@ function MemeCardSearch({
         memeCount,
       })
     ) {
-      onReject(t(locale, "waves.create.voting.cardSetTdh.validation.fullSet"));
+      onReject(t(locale, CARD_SET_TDH_FULL_SET_MESSAGE_KEY));
       return;
     }
     onAdd(item.id);
@@ -316,7 +322,7 @@ export default function MemeCardSetPicker({
       })
     ) {
       rejectPickerChange(
-        t(locale, "waves.create.voting.cardSetTdh.validation.fullSet")
+        t(locale, CARD_SET_TDH_FULL_SET_MESSAGE_KEY)
       );
       return;
     }
@@ -330,7 +336,7 @@ export default function MemeCardSetPicker({
     );
     if (hasInvalidTokenId) {
       rejectPickerChange(
-        t(locale, "waves.create.voting.cardSetTdh.validation.invalidMemeId")
+        t(locale, CARD_SET_TDH_INVALID_MEME_ID_MESSAGE_KEY)
       );
       return false;
     }
@@ -341,7 +347,7 @@ export default function MemeCardSetPicker({
     const highestExistingMemeCardId = hasValidMemeCount ? memeCount : null;
     if (highestExistingMemeCardId === null) {
       rejectPickerChange(
-        t(locale, "waves.create.voting.cardSetTdh.validation.invalidMemeId")
+        t(locale, CARD_SET_TDH_INVALID_MEME_ID_MESSAGE_KEY)
       );
       return false;
     }
@@ -349,7 +355,7 @@ export default function MemeCardSetPicker({
       normalizedTokenIds.some((tokenId) => tokenId > highestExistingMemeCardId)
     ) {
       rejectPickerChange(
-        t(locale, "waves.create.voting.cardSetTdh.validation.invalidMemeId")
+        t(locale, CARD_SET_TDH_INVALID_MEME_ID_MESSAGE_KEY)
       );
       return false;
     }
@@ -373,7 +379,7 @@ export default function MemeCardSetPicker({
     }
     if (change.allSelected === true) {
       rejectPickerChange(
-        t(locale, "waves.create.voting.cardSetTdh.validation.fullSet")
+        t(locale, CARD_SET_TDH_FULL_SET_MESSAGE_KEY)
       );
       return;
     }

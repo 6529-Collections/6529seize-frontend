@@ -1218,6 +1218,38 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("card set TDH rejects prefilled Meme card IDs above the loaded count", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        type: ApiWaveCreditType.CardSetTdh,
+        category: null,
+        profileId: null,
+        creditNfts: [{ contract: MEMES_CONTRACT, token_id: 999999 }],
+        creditNftMemeCount: 100,
+        maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_TOKEN_INVALID
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED
+    );
+  });
+
   it("approve wave requires equal submission and voting dates", () => {
     const cfg = {
       ...baseConfig,

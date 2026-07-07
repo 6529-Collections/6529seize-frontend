@@ -388,6 +388,19 @@ describe("MemeCardSetPicker", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows invalid Meme card ID validation from the shared validator", () => {
+    renderPicker({
+      memeCount: 100,
+      errors: [
+        CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_TOKEN_INVALID,
+      ],
+    });
+
+    expect(
+      screen.getByText("Only existing Meme card IDs can be added.")
+    ).toBeInTheDocument();
+  });
+
   it("normalizes picker selections", async () => {
     const user = userEvent.setup();
     const { onCreditNftsChange } = renderPicker({ memeCount: 100 });

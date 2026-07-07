@@ -58,6 +58,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID = "CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID",
   CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE = "CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE",
   CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED = "CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED",
+  CARD_SET_TDH_VOTING_NFTS_TOKEN_INVALID = "CARD_SET_TDH_VOTING_NFTS_TOKEN_INVALID",
   RANK_DECISION_TIME_MUST_BE_IN_FUTURE = "RANK_DECISION_TIME_MUST_BE_IN_FUTURE",
   RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE = "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE",
   APPROVE_WAVE_TAB_LABEL_TOO_LONG = "APPROVE_WAVE_TAB_LABEL_TOO_LONG",
@@ -410,12 +411,28 @@ const getVotingValidationErrors = ({
     }
 
     if (
+      creditNfts.some(
+        (nft) => !Number.isInteger(nft.token_id) || nft.token_id <= 0
+      )
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_TOKEN_INVALID
+      );
+    }
+
+    if (
       voting.creditNftMemeCount === null ||
       !Number.isInteger(voting.creditNftMemeCount) ||
       voting.creditNftMemeCount <= 0
     ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE
+      );
+    } else if (
+      creditNfts.some((nft) => nft.token_id > voting.creditNftMemeCount)
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_TOKEN_INVALID
       );
     } else if (
       getUniqueCreditNftIdsCount(voting) >= voting.creditNftMemeCount
