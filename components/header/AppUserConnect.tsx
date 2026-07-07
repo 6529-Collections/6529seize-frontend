@@ -10,13 +10,58 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useAppKitBootstrap } from "../providers/AppKitBootstrapContext";
 import PushNotificationSettings from "./PushNotificationSettings";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import { useChainSwitcher } from "./useChainSwitcher";
 
-export default function AppUserConnect({
+function AppUserConnectStartup({
+  onNavigate,
+}: {
+  readonly onNavigate: () => void;
+}) {
+  const { hasInitializationError, seizeConnectFresh } =
+    useSeizeConnectContext();
+  const { setToast } = useContext(AuthContext);
+  const locale = useBrowserLocale();
+
+  const onConnect = async (): Promise<void> => {
+    try {
+      await seizeConnectFresh();
+    } catch (error) {
+      console.error("Failed to open wallet connection", error);
+      setToast({
+        message: hasInitializationError
+          ? t(locale, "wallet.startup.loadFailedToast")
+          : t(locale, "wallet.startup.loadingToast"),
+        type: "error",
+      });
+    } finally {
+      onNavigate();
+    }
+  };
+
+  return (
+    <div className="tailwind-scope tw-flex tw-flex-col tw-space-y-2">
+      <HeaderQRScanner onScanSuccess={onNavigate} appSidebar />
+      <button
+        onClick={() => {
+          void onConnect();
+        }}
+        type="button"
+        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-leading-6 tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-300 hover:tw-bg-primary-600 hover:tw-ring-primary-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset"
+      >
+        <span>Connect</span>
+      </button>
+    </div>
+  );
+}
+
+function AppUserConnectReady({
   onNavigate,
 }: {
   readonly onNavigate: () => void;
@@ -191,4 +236,18 @@ export default function AppUserConnect({
       {address ? authorizedButtons : connectButton}
     </div>
   );
+}
+
+export default function AppUserConnect({
+  onNavigate,
+}: {
+  readonly onNavigate: () => void;
+}) {
+  const { isReady } = useAppKitBootstrap();
+
+  if (!isReady) {
+    return <AppUserConnectStartup onNavigate={onNavigate} />;
+  }
+
+  return <AppUserConnectReady onNavigate={onNavigate} />;
 }

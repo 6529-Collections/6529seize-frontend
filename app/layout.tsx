@@ -20,6 +20,7 @@ import Providers from "@/components/providers/Providers";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import type { Viewport } from "next";
+import { Suspense } from "react";
 
 export const fetchCache = "force-no-store";
 
@@ -55,7 +56,9 @@ export default function RootLayout({
         <AwsRumProvider>
           <Providers>
             <DynamicHeadTitle />
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <LayoutWrapper>
+              <Suspense fallback={null}>{children}</Suspense>
+            </LayoutWrapper>
           </Providers>
         </AwsRumProvider>
       </body>

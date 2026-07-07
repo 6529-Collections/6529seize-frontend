@@ -2,6 +2,7 @@ import { DE_DE_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { DE_DE_WALLET_STARTUP_MESSAGES } from "@/i18n/messages/wallet-startup";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const DE_DE_MESSAGES = {
@@ -425,6 +426,9 @@ export const DE_DE_MESSAGES = {
   "theMemes.card.metric.volume": "Volumen ({volumeType}): {value}",
   "theMemes.sort.age": "Alter",
   "theMemes.sort.editionSize": "Editionsgröße",
+  ...DE_DE_WALLET_STARTUP_MESSAGES,
+  "openMobile.openingStatus": "6529 Mobile wird geöffnet...",
+  "nextgen.admin.loadingStatus": "NextGen-Admin wird geladen",
   "theMemes.sort.collectors": "Sammler",
   "theMemes.sort.uniquePercent": "% einzigartig",
   "theMemes.sort.uniquePercentExMuseum": "% einzigartig ohne Museum",
