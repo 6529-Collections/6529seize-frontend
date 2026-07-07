@@ -2,14 +2,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { getErrorMessage } from "./waveNotificationSettings.helpers";
-
-const WAVE_NOTIFICATION_SETTINGS_LOCALE = DEFAULT_LOCALE;
+import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
 
 export function useWaveMuteSettings(wave: ApiWave) {
   const queryClient = useQueryClient();
@@ -41,27 +38,22 @@ export function useWaveMuteSettings(wave: ApiWave) {
       ]);
     } catch (error) {
       const defaultMessage = isMuted
-        ? t(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        ? waveNotificationSettingsMessage(
             "waves.notificationSettings.mute.error.fallbackUnmute"
           )
-        : t(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        : waveNotificationSettingsMessage(
             "waves.notificationSettings.mute.error.fallbackMute"
           );
       setToast({
         type: "error",
         title: isMuted
-          ? t(
-              WAVE_NOTIFICATION_SETTINGS_LOCALE,
+          ? waveNotificationSettingsMessage(
               "waves.notificationSettings.mute.error.unmuteTitle"
             )
-          : t(
-              WAVE_NOTIFICATION_SETTINGS_LOCALE,
+          : waveNotificationSettingsMessage(
               "waves.notificationSettings.mute.error.muteTitle"
             ),
-        description: t(
-          WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        description: waveNotificationSettingsMessage(
           "waves.notificationSettings.mute.error.description"
         ),
         details: getToastErrorDetails(
@@ -79,12 +71,10 @@ export function useWaveMuteSettings(wave: ApiWave) {
   }, [toggleMute]);
 
   const muteTooltip = isMuted
-    ? t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+    ? waveNotificationSettingsMessage(
         "waves.notificationSettings.mute.tooltip.disable"
       )
-    : t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+    : waveNotificationSettingsMessage(
         "waves.notificationSettings.mute.tooltip.enable"
       );
 

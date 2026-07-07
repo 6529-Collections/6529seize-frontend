@@ -1,12 +1,9 @@
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 import { SpeakerXMarkIcon as SpeakerXMarkOutlineIcon } from "@heroicons/react/24/outline";
 import { SpeakerXMarkIcon as SpeakerXMarkSolidIcon } from "@heroicons/react/24/solid";
+import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
-
-const WAVE_NOTIFICATION_SETTINGS_LOCALE = DEFAULT_LOCALE;
 
 interface WaveMutedNotificationButtonProps {
   readonly waveId: string;
@@ -21,23 +18,17 @@ export default function WaveMutedNotificationButton({
 }: WaveMutedNotificationButtonProps) {
   const tooltipId = `wave-notification-muted-${waveId}`;
   const ariaLabel = settings.isMuted
-    ? t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+    ? waveNotificationSettingsMessage(
         "waves.notificationSettings.mute.unmuteAriaLabel"
       )
-    : t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+    : waveNotificationSettingsMessage(
         "waves.notificationSettings.mute.ariaLabel"
       );
   const textLabel = settings.isMuted
-    ? t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+    ? waveNotificationSettingsMessage(
         "waves.notificationSettings.mute.activeLabel"
       )
-    : t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
-        "waves.notificationSettings.mute.label"
-      );
+    : waveNotificationSettingsMessage("waves.notificationSettings.mute.label");
   const Icon = settings.isMuted
     ? SpeakerXMarkSolidIcon
     : SpeakerXMarkOutlineIcon;

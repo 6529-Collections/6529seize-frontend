@@ -4,9 +4,6 @@ import type { ApiUpdateWaveNotificationPreferencesRequest } from "@/generated/mo
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveNotificationPreferences } from "@/generated/models/ApiWaveNotificationPreferences";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
 import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useMemo, useState } from "react";
@@ -15,8 +12,10 @@ import {
   getAllDropsTooltip,
   type NotificationLoadingTarget,
 } from "./waveNotificationSettings.helpers";
-
-const WAVE_NOTIFICATION_SETTINGS_LOCALE = DEFAULT_LOCALE;
+import {
+  formatWaveNotificationSettingsInteger,
+  waveNotificationSettingsMessage,
+} from "./waveNotificationSettings.messages";
 
 export function useWavePreferenceSettings(wave: ApiWave) {
   const { seizeSettings } = useSeizeSettings();
@@ -72,12 +71,10 @@ export function useWavePreferenceSettings(wave: ApiWave) {
       } catch (error) {
         setToast({
           type: "error",
-          title: t(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+          title: waveNotificationSettingsMessage(
             "waves.notificationSettings.preferences.error.updateTitle"
           ),
-          description: t(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+          description: waveNotificationSettingsMessage(
             "waves.notificationSettings.preferences.error.description"
           ),
           details: getToastErrorDetails(error, errorMessage),
@@ -99,12 +96,10 @@ export function useWavePreferenceSettings(wave: ApiWave) {
           : [ALL_GROUP_MENTION],
       },
       errorMessage: allGroupNotificationsEnabled
-        ? t(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        ? waveNotificationSettingsMessage(
             "waves.notificationSettings.preferences.error.disableAllMentions"
           )
-        : t(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        : waveNotificationSettingsMessage(
             "waves.notificationSettings.preferences.error.enableAllMentions"
           ),
     });
@@ -126,12 +121,10 @@ export function useWavePreferenceSettings(wave: ApiWave) {
         enabled_group_notifications: enabledGroupNotifications,
       },
       errorMessage: subscribedToAllDrops
-        ? t(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        ? waveNotificationSettingsMessage(
             "waves.notificationSettings.preferences.error.disableAllMessages"
           )
-        : t(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+        : waveNotificationSettingsMessage(
             "waves.notificationSettings.preferences.error.enableAllMessages"
           ),
     });
@@ -155,34 +148,28 @@ export function useWavePreferenceSettings(wave: ApiWave) {
   }, [refetch]);
 
   const allGroupTooltip = allGroupNotificationsEnabled
-    ? t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+    ? waveNotificationSettingsMessage(
         "waves.notificationSettings.allMentions.tooltip.disable"
       )
-    : t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+    : waveNotificationSettingsMessage(
         "waves.notificationSettings.allMentions.tooltip.enable"
       );
   const allDropsTooltip = getAllDropsTooltip({
     disableAllDropsSelection,
     subscribedToAllDrops,
     labels: {
-      unavailable: t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+      unavailable: waveNotificationSettingsMessage(
         "waves.notificationSettings.allMessages.tooltip.unavailable",
         {
-          count: formatInteger(
-            WAVE_NOTIFICATION_SETTINGS_LOCALE,
+          count: formatWaveNotificationSettingsInteger(
             allDropsNotificationsSubscribersLimit
           ),
         }
       ),
-      disable: t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+      disable: waveNotificationSettingsMessage(
         "waves.notificationSettings.allMessages.tooltip.disable"
       ),
-      enable: t(
-        WAVE_NOTIFICATION_SETTINGS_LOCALE,
+      enable: waveNotificationSettingsMessage(
         "waves.notificationSettings.allMessages.tooltip.enable"
       ),
     },
