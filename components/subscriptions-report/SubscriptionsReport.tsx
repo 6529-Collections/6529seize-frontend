@@ -102,13 +102,7 @@ function getDisplayedRedeemedTotal(
 }
 
 async function fetchCurrentLiveMintNumber() {
-  const apiAuth = getStagingAuth();
-  const requestInit: RequestInit = {};
-  if (apiAuth) {
-    requestInit.headers = { "x-6529-auth": apiAuth };
-  }
-
-  const response = await fetch("/api/meme-calendar/current", requestInit);
+  const response = await fetch("/api/meme-calendar/current");
 
   if (!response.ok) {
     throw new Error(
