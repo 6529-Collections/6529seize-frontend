@@ -93,6 +93,7 @@ export function useWaveConfig() {
       display: {
         customRules: null,
         outcomesVisible: true,
+        submissionButtonLabel: null,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",

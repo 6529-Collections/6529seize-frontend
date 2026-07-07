@@ -579,7 +579,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           <WaveChatSubmitDropModal
             isOpen
             wave={wave}
-            title="Submit drop"
+            title={chatSubmitDropAction?.label ?? "Submit drop"}
             initialCurationUrl={chatSubmitDrop?.initialCurationUrl ?? null}
             onClose={closeChatSubmitDrop}
           />

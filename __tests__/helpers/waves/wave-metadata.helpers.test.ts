@@ -5,17 +5,24 @@ import {
   getApproveWaveDisplayMetadataUpdate,
   getApproveWaveTabLabelsFromMetadata,
   getCreateWaveDisplayMetadataRequests,
+  getDefaultWaveSubmissionButtonLabel,
   getWaveCustomRulesFromMetadata,
   getWaveCustomRulesMetadataUpdate,
   getWaveOutcomeVisibilityFromMetadata,
   getWaveOutcomeVisibilityMetadataUpdate,
+  getWaveSubmissionButtonLabelFromMetadata,
+  getWaveSubmissionButtonLabelMetadataDraft,
+  getWaveSubmissionButtonLabelMetadataUpdate,
+  getWaveSubmissionButtonLabelOverrideFromMetadata,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 
 describe("wave-metadata.helpers", () => {
   const defaultDisplay = {
     customRules: null,
     outcomesVisible: true,
+    submissionButtonLabel: null,
     approve: {
       approvalsTabLabel: "",
       approvedTabLabel: "",
@@ -95,6 +102,23 @@ describe("wave-metadata.helpers", () => {
     ]);
   });
 
+  it("creates submission button label metadata for non-chat waves and trims values", () => {
+    expect(
+      getCreateWaveDisplayMetadataRequests({
+        waveType: ApiWaveType.Rank,
+        display: {
+          ...defaultDisplay,
+          submissionButtonLabel: "  Apply  ",
+        },
+      })
+    ).toEqual([
+      {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    ]);
+  });
+
   it("creates custom rules metadata for chat waves without outcome or approve metadata", () => {
     expect(
       getCreateWaveDisplayMetadataRequests({
@@ -103,6 +127,7 @@ describe("wave-metadata.helpers", () => {
           ...defaultDisplay,
           customRules: "  Keep chat respectful.  ",
           outcomesVisible: false,
+          submissionButtonLabel: "Apply",
           approve: {
             approvalsTabLabel: "Candidates",
             approvedTabLabel: "Selected",
@@ -115,6 +140,152 @@ describe("wave-metadata.helpers", () => {
         data_value: "Keep chat respectful.",
       },
     ]);
+  });
+
+  it("returns default submission button labels by submission experience", () => {
+    expect(
+      getDefaultWaveSubmissionButtonLabel(WaveSubmissionExperience.DEFAULT)
+    ).toBe("Drop");
+    expect(
+      getDefaultWaveSubmissionButtonLabel(WaveSubmissionExperience.IDENTITY)
+    ).toBe("Drop");
+    expect(
+      getDefaultWaveSubmissionButtonLabel(
+        WaveSubmissionExperience.QUORUM_PROPOSAL
+      )
+    ).toBe("Create Proposal");
+    expect(
+      getDefaultWaveSubmissionButtonLabel(
+        WaveSubmissionExperience.CURATION_LEGACY
+      )
+    ).toBe("Drop Art");
+  });
+
+  it("extracts submission button label metadata with fallback defaults", () => {
+    expect(
+      getWaveSubmissionButtonLabelFromMetadata({
+        metadata: [],
+        submissionExperience: WaveSubmissionExperience.DEFAULT,
+      })
+    ).toBe("Drop");
+    expect(
+      getWaveSubmissionButtonLabelFromMetadata({
+        metadata: [],
+        submissionExperience: WaveSubmissionExperience.QUORUM_PROPOSAL,
+      })
+    ).toBe("Create Proposal");
+    expect(
+      getWaveSubmissionButtonLabelFromMetadata({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+            data_value: "  Apply  ",
+          },
+        ],
+        submissionExperience: WaveSubmissionExperience.QUORUM_PROPOSAL,
+      })
+    ).toBe("Apply");
+  });
+
+  it("ignores empty or invalid submission button label metadata", () => {
+    expect(
+      getWaveSubmissionButtonLabelOverrideFromMetadata([
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "   ",
+        },
+      ])
+    ).toBeNull();
+    expect(
+      getWaveSubmissionButtonLabelFromMetadata({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+            data_value: "A".repeat(25),
+          },
+        ],
+        submissionExperience: WaveSubmissionExperience.DEFAULT,
+      })
+    ).toBe("Drop");
+  });
+
+  it("uses the latest submission button label metadata as the editable draft", () => {
+    const metadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Old",
+      },
+      {
+        id: 2,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: " Current ",
+      },
+    ];
+
+    expect(getWaveSubmissionButtonLabelMetadataDraft(metadata)).toBe("Current");
+  });
+
+  it("creates, replaces, and deletes submission button label metadata updates", () => {
+    expect(
+      getWaveSubmissionButtonLabelMetadataUpdate({
+        metadata: [],
+        buttonLabel: "  Apply  ",
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "Apply",
+        },
+      ],
+      deleteIds: [],
+    });
+
+    expect(
+      getWaveSubmissionButtonLabelMetadataUpdate({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+            data_value: "Old",
+          },
+          {
+            id: 2,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+            data_value: "Apply",
+          },
+        ],
+        buttonLabel: "Submit",
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "Submit",
+        },
+      ],
+      deleteIds: [1, 2],
+    });
+
+    expect(
+      getWaveSubmissionButtonLabelMetadataUpdate({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+            data_value: "Apply",
+          },
+        ],
+        buttonLabel: "",
+      })
+    ).toEqual({
+      create: [],
+      deleteIds: [1],
+    });
   });
 
   it("extracts the latest custom rules metadata value", () => {
