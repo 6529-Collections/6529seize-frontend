@@ -126,6 +126,11 @@ type WaveMuteState = {
 const getWaveMuted = (wave: WaveMuteState | null | undefined): boolean =>
   wave?.metrics?.muted ?? false;
 
+const hasSerialNoTarget = (
+  serialNo: ActiveWaveSetOptions["serialNo"]
+): boolean =>
+  serialNo !== undefined && serialNo !== null && String(serialNo).trim() !== "";
+
 const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
   let idleHandle: number | null = null;
   const timeoutHandle = globalThis.setTimeout(() => {
@@ -307,8 +312,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     (waveId, options) => {
       if (waveId) {
         registerWave(waveId, true, {
-          skipInitialBackfill:
-            options?.serialNo !== undefined && options.serialNo !== null,
+          skipInitialBackfill: hasSerialNoTarget(options?.serialNo),
         });
       }
       setActiveWave(waveId, options);

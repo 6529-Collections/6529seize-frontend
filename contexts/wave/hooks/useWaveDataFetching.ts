@@ -25,7 +25,10 @@ import type {
 } from "./types";
 
 const FETCH_NEWEST_LIMIT = 50;
+const MAX_FETCH_NEWEST_ITERATIONS = 20;
 const NATIVE_INITIAL_BACKFILL_DELAY_MS = 250;
+const getNewestSyncAbortKey = (waveId: string): string =>
+  `${waveId}-newest-sync`;
 
 interface RegisterWaveOptions {
   readonly skipInitialBackfill?: boolean | undefined;
@@ -228,6 +231,7 @@ function useNativeInitialBackfill({
   const initialBackfillTimeoutsRef = useRef<
     Record<string, ReturnType<typeof setTimeout>>
   >({});
+  const initialBackfillPromisesRef = useRef<Record<string, Promise<void>>>({});
 
   const clearInitialBackfillTimeout = useCallback((waveId: string) => {
     const timeoutId = initialBackfillTimeoutsRef.current[waveId];
@@ -277,7 +281,7 @@ function useNativeInitialBackfill({
 
       initialBackfillTimeoutsRef.current[waveId] = setTimeout(() => {
         delete initialBackfillTimeoutsRef.current[waveId];
-        void runNativeInitialBackfill({
+        initialBackfillPromisesRef.current[waveId] = runNativeInitialBackfill({
           cleanupController,
           createController,
           getData,
@@ -321,9 +325,11 @@ async function fetchNewestMessagesUntilCaughtUp({
   let allFetchedDrops: ApiDrop[] = [];
   let currentSinceSerialNo = initialSinceSerialNo;
   let overallHighestSerialNo = initialSinceSerialNo;
+  let iterations = 0;
 
   try {
-    while (!signal.aborted) {
+    while (!signal.aborted && iterations < MAX_FETCH_NEWEST_ITERATIONS) {
+      iterations++;
       const { drops: fetchedChunk, highestSerialNo: chunkHighestSerial } =
         await fetchNewestWaveMessages(
           waveId,
@@ -410,9 +416,16 @@ function useSyncNewestMessages({
 }
 
 function useSyncExistingWaveNewestMessages({
+  cleanupController,
+  createController,
   getData,
   syncNewestMessages,
 }: {
+  readonly cleanupController: (
+    waveId: string,
+    controller: AbortController
+  ) => void;
+  readonly createController: (waveId: string) => AbortController;
   readonly getData: WaveDataStoreUpdater["getData"];
   readonly syncNewestMessages: ReturnType<typeof useSyncNewestMessages>;
 }) {
@@ -430,13 +443,16 @@ function useSyncExistingWaveNewestMessages({
         return;
       }
 
-      await syncNewestMessages(
-        waveId,
-        highestSerialNo,
-        new AbortController().signal
-      );
+      const abortKey = getNewestSyncAbortKey(waveId);
+      const controller = createController(abortKey);
+
+      try {
+        await syncNewestMessages(waveId, highestSerialNo, controller.signal);
+      } finally {
+        cleanupController(abortKey, controller);
+      }
     },
-    [getData, syncNewestMessages]
+    [cleanupController, createController, getData, syncNewestMessages]
   );
 }
 
@@ -457,6 +473,8 @@ export function useWaveDataFetching({
     updateEligibility,
   });
   const syncExistingWaveNewestMessages = useSyncExistingWaveNewestMessages({
+    cleanupController,
+    createController,
     getData,
     syncNewestMessages,
   });
@@ -591,6 +609,7 @@ export function useWaveDataFetching({
       clearInitialBackfillTimeout(waveId);
       cancelFetch(waveId);
       cancelFetch(`${waveId}-initial-backfill`);
+      cancelFetch(getNewestSyncAbortKey(waveId));
     },
     [cancelFetch, clearInitialBackfillTimeout]
   );

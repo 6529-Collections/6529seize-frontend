@@ -163,6 +163,70 @@ describe("useWaveDataFetching", () => {
     expect(res).toEqual({ drops: null, highestSerialNo: null });
   });
 
+  it("caps newest sync when every page is full", async () => {
+    fetchNewestWaveMessages.mockImplementation(
+      async (_waveId, sinceSerialNo: number, limit: number) => {
+        const drops = Array.from({ length: limit }, (_, index) => ({
+          id: `new-${sinceSerialNo}-${index}`,
+          serial_no: sinceSerialNo + index + 1,
+        }));
+
+        return {
+          drops,
+          highestSerialNo: sinceSerialNo + limit,
+        };
+      }
+    );
+    formatWaveMessages.mockImplementation((waveId, drops) => ({
+      key: waveId,
+      drops,
+    }));
+    const { result } = setup({ wave1: { drops: [] } });
+
+    const res = await result.current.syncNewestMessages(
+      "wave1",
+      10,
+      new AbortController().signal
+    );
+
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(20);
+    expect(res.highestSerialNo).toBe(10 + 20 * 50);
+  });
+
+  it("uses a tracked controller for existing wave newest sync", async () => {
+    fetchNewestWaveMessages.mockResolvedValue({
+      drops: [],
+      highestSerialNo: 5,
+    });
+    formatWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const newestSyncController = { signal: {} } as AbortController;
+    createController.mockReturnValueOnce(newestSyncController);
+    const { result } = setup({
+      wave1: {
+        drops: [{ id: "existing", serial_no: 5 }],
+      },
+    });
+
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(createController).toHaveBeenCalledWith("wave1-newest-sync");
+    expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
+      "wave1",
+      5,
+      50,
+      newestSyncController.signal,
+      expect.any(Function)
+    );
+    expect(cleanupController).toHaveBeenCalledWith(
+      "wave1-newest-sync",
+      newestSyncController
+    );
+  });
+
   it("uses a smaller native initial limit and backfills the remaining first page later", async () => {
     jest.useFakeTimers();
     const initialDrops = Array.from(
@@ -236,8 +300,24 @@ describe("useWaveDataFetching", () => {
       })
     );
     expect(store.wave1.drops).toHaveLength(WAVE_DROPS_PARAMS.limit);
+    expect(store.wave1.drops.map((drop: { id: string }) => drop.id)).toEqual([
+      ...initialDrops.map((drop) => drop.id),
+      ...backfillDrops.map((drop) => drop.id),
+    ]);
 
     jest.useRealTimers();
+  });
+
+  it("cancels newest sync when canceling a wave fetch", () => {
+    const { result } = setup({ wave1: { drops: [] } });
+
+    act(() => {
+      result.current.cancelWaveDataFetch("wave1");
+    });
+
+    expect(cancelFetch).toHaveBeenCalledWith("wave1");
+    expect(cancelFetch).toHaveBeenCalledWith("wave1-initial-backfill");
+    expect(cancelFetch).toHaveBeenCalledWith("wave1-newest-sync");
   });
 
   it("does not schedule native initial backfill for targeted serial restores", async () => {
