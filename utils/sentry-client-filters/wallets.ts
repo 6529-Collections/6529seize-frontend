@@ -20,7 +20,6 @@ import {
 import type {
   SentryClientEvent,
   SentryEventHint,
-  SentryExceptionValue,
   SentryStackFrame,
 } from "./types";
 import {
