@@ -108,6 +108,31 @@ describe("sentry-client-filters", () => {
   const extensionMessagingConnectionFailureMessage =
     "Could not establish connection. Receiving end does not exist.";
 
+  describe("first-party static frame paths", () => {
+    it("keeps the Next static path token stable", () => {
+      expect(__testing.nextStaticFramePathToken).toBe("/_next/static/");
+    });
+
+    it("classifies hosted and app Next static paths as first-party", () => {
+      expect(
+        __testing.isFirstPartyFramePath(
+          "https://host.example/_next/static/chunk.js"
+        )
+      ).toBe(true);
+      expect(
+        __testing.isFirstPartyFramePath("app:///_next/static/chunks/app.js")
+      ).toBe(true);
+    });
+
+    it("does not classify partial third-party Next static tokens as first-party", () => {
+      expect(
+        __testing.isFirstPartyFramePath(
+          "https://cdn.example/assets_next/static/chunk.js"
+        )
+      ).toBe(false);
+    });
+  });
+
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
   ): SentryTransactionSpan => ({

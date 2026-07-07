@@ -2,12 +2,17 @@ import {
   filenameExceptions,
   gifPickerTenorUndefinedTagsMessage,
   noisyThirdPartyTelemetryTargets,
+  nextStaticFramePathToken,
   REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
   REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE,
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,
 } from "./constants";
-import { hasInjectedAppUriFrame, hasOnlyAppUriFrames } from "./app-frame-utils";
+import {
+  hasInjectedAppUriFrame,
+  hasOnlyAppUriFrames,
+  isFirstPartyFramePath,
+} from "./app-frame-utils";
 import {
   hasMetaMaskMobileWebViewContext,
   hasRouteParameterizationRouteEvidence,
@@ -30,6 +35,8 @@ export const __testing = {
   isTwitterBrowser,
   matchesWalletCollisionPattern,
   noisyThirdPartyTelemetryTargets,
+  nextStaticFramePathToken,
+  isFirstPartyFramePath,
   REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
   gifPickerTenorUndefinedTagsMessage,
   REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE,

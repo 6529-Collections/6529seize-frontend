@@ -117,7 +117,7 @@ function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
   return getFramePaths(frame).some(isInjectedWasmCspFramePath);
 }
 
-function isFirstPartyFramePath(path: string): boolean {
+export function isFirstPartyFramePath(path: string): boolean {
   const normalizedPath = path.trim();
   if (!normalizedPath) {
     return false;
