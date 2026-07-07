@@ -532,10 +532,53 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   chatLoadError: "Unable to load this conversation.",
 } as const);
 
+const NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES = objectMessages(
+  "notifications.followButton",
+  {
+    follow: "Follow",
+    following: "Following",
+    "error.missingHandleTitle": "Couldn't follow this profile.",
+    "error.missingHandleDescription": "This profile is missing a handle.",
+  } as const
+);
+
+const NOTIFICATIONS_WAVE_CREATED_MESSAGES = objectMessages(
+  "notifications.waveCreated",
+  {
+    normalCopy: "created a wave you can access:",
+    dmCopy: "started a DM with you:",
+    openDm: "Open DM",
+    joinWave: "Join wave",
+    joinedWave: "Joined",
+    followCreator: "Follow creator",
+    followingCreator: "Following creator",
+  } as const
+);
+
+const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
+  "notifications.waveFollowButton",
+  {
+    join: "Join",
+    joined: "Joined",
+  } as const
+);
+
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
   "postsCount.one": "{count} Post",
   "postsCount.other": "{count} Posts",
+} as const);
+
+const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
+  accessHelper:
+    "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
+  limitedAccessTitle: "Warning: Limited Access",
+  limitedAccessDescription:
+    'This wave is configured with restricted access. It can only be viewed by members of the "{viewGroupName}" group and managed by members of the "{adminGroupName}" group. If you are not in a group that can view it, you will not be able to access this wave.',
+  "inlineIdentities.emptyHelper":
+    "Add identities one by one to build this access group.",
+  "inlineIdentities.creatorExcludedWarning":
+    "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
 } as const);
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
@@ -1452,10 +1495,14 @@ export const EN_US_MESSAGES = {
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...QUICK_DM_MESSAGES,
+  ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
+  ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
+  ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_CREATE_GROUPS_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
