@@ -52,7 +52,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
   }) => {
     const isMobile = useIsMobileScreen();
     const gifPickerKey = publicEnv.GIPHY_API_KEY;
-    const gifPickerEnabled = !!gifPickerKey;
     const [showGifPicker, setShowGifPicker] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [isUploadPickerOpen, setIsUploadPickerOpen] = useState(false);
@@ -81,7 +80,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     };
 
     useEffect(() => {
-      if (!showGifPicker || !gifPickerEnabled) return;
+      if (!showGifPicker || !gifPickerKey) return;
 
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
@@ -91,7 +90,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
 
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [showGifPicker, gifPickerEnabled]);
+    }, [showGifPicker, gifPickerKey]);
 
     useEffect(() => {
       if (!isUploadPickerOpen) {
@@ -287,7 +286,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         </Tooltip>
                       )}
                     </>
-                    {gifPickerEnabled && (
+                    {gifPickerKey && (
                       <>
                         <button
                           onClick={() => setShowGifPicker(true)}
@@ -385,7 +384,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             </AnimatePresence>
           </motion.div>
         </div>
-        {gifPickerEnabled && (
+        {gifPickerKey && (
           <CreateDropGifPicker
             giphyApiKey={gifPickerKey}
             show={showGifPicker}

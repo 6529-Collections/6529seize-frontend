@@ -19,16 +19,13 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 
-const GIPHY_GRID_MIN_WIDTH = 280;
 const GIPHY_GRID_FALLBACK_WIDTH = 360;
 const GIPHY_GRID_GUTTER = 8;
 const GIPHY_RATING = "r";
+const GIPHY_BRAND_NAME = "GIPHY";
 
 type GridOnGifClick = NonNullable<ComponentProps<typeof Grid>["onGifClick"]>;
 type GiphyGif = Parameters<GridOnGifClick>[0];
-type GiphyImageRenditions = Partial<
-  Record<string, { readonly url?: string | null }>
->;
 
 function useMeasuredWidth<TElement extends HTMLElement>(
   fallbackWidth: number
@@ -47,7 +44,7 @@ function useMeasuredWidth<TElement extends HTMLElement>(
         return;
       }
 
-      setWidth(Math.max(GIPHY_GRID_MIN_WIDTH, Math.floor(nextWidth)));
+      setWidth(Math.floor(nextWidth));
     };
 
     setElementWidth(element.clientWidth);
@@ -69,7 +66,6 @@ function useMeasuredWidth<TElement extends HTMLElement>(
 }
 
 function getGiphyGifUrl(gif: GiphyGif): string | null {
-  const images = gif.images as unknown as GiphyImageRenditions;
   const preferredRenditions = [
     "original",
     "downsized_medium",
@@ -78,7 +74,7 @@ function getGiphyGifUrl(gif: GiphyGif): string | null {
   ] as const;
 
   for (const rendition of preferredRenditions) {
-    const url = images[rendition]?.url;
+    const url = gif.images[rendition]?.url;
     if (url) {
       return url;
     }
@@ -127,15 +123,21 @@ function GifPickerUnavailable({
   );
 }
 
-function GiphyAttributionMark() {
+function GiphyAttributionMark({
+  ariaLabel,
+  prefixLabel,
+}: {
+  readonly ariaLabel: string;
+  readonly prefixLabel: string;
+}) {
   return (
     <div
-      aria-label="Powered by GIPHY"
+      aria-label={ariaLabel}
       className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-normal tw-text-iron-400"
     >
-      <span>Powered by</span>
+      <span>{prefixLabel}</span>
       <span className="tw-rounded-sm tw-bg-white tw-px-1.5 tw-py-1 tw-text-[11px] tw-font-black tw-leading-none tw-tracking-normal tw-text-black">
-        GIPHY
+        {GIPHY_BRAND_NAME}
       </span>
     </div>
   );
@@ -148,6 +150,7 @@ function GiphyResults({
   unavailableTitle,
   unavailableHint,
   closeLabel,
+  noResultsLabel,
   onClose,
 }: {
   readonly onSelect: (gif: string) => void;
@@ -156,6 +159,7 @@ function GiphyResults({
   readonly unavailableTitle: string;
   readonly unavailableHint: string;
   readonly closeLabel: string;
+  readonly noResultsLabel: string;
   readonly onClose: () => void;
 }) {
   const { fetchGifs, searchKey } = useContext(SearchContext);
@@ -187,6 +191,13 @@ function GiphyResults({
     onAvailable();
   }, [onAvailable]);
 
+  useEffect(() => {
+    setHasFetchError(false);
+    onAvailable();
+  }, [onAvailable, searchKey]);
+
+  const gridColumns = gridWidth < 240 ? 1 : gridWidth < 360 ? 2 : 3;
+
   if (hasFetchError) {
     return (
       <GifPickerUnavailable
@@ -201,12 +212,12 @@ function GiphyResults({
   return (
     <div
       ref={containerRef}
-      className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-3"
+      className="tw-min-h-0 tw-flex-1 tw-overflow-x-hidden tw-overflow-y-auto tw-p-3"
     >
       <Grid
         key={searchKey}
         width={gridWidth}
-        columns={gridWidth < 360 ? 2 : 3}
+        columns={gridColumns}
         gutter={GIPHY_GRID_GUTTER}
         fetchGifs={fetchGifs}
         onGifClick={handleGifClick}
@@ -217,7 +228,7 @@ function GiphyResults({
         backgroundColor="#121318"
         noResultsMessage={
           <div className="tw-px-4 tw-py-12 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400">
-            No GIFs found.
+            {noResultsLabel}
           </div>
         }
       />
@@ -236,7 +247,10 @@ function GifPickerDialog({
 }) {
   const locale = useBrowserLocale();
   const dialogTitle = t(locale, "waves.gifPicker.dialogTitle");
-  const [statusMessage, setStatusMessage] = useState(
+  const poweredByLabel = t(locale, "waves.gifPicker.poweredBy", {
+    brandName: GIPHY_BRAND_NAME,
+  });
+  const [statusMessage, setStatusMessage] = useState(() =>
     t(locale, "waves.gifPicker.status.ready")
   );
 
@@ -286,10 +300,13 @@ function GifPickerDialog({
               <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
                 {dialogTitle}
               </p>
-              <GiphyAttributionMark />
+              <GiphyAttributionMark
+                ariaLabel={poweredByLabel}
+                prefixLabel={t(locale, "waves.gifPicker.poweredByPrefix")}
+              />
             </div>
             <SearchBar
-              placeholder="Search GIFs"
+              placeholder={t(locale, "waves.gifPicker.searchPlaceholder")}
               clear={true}
               autoFocus={true}
             />
@@ -301,6 +318,7 @@ function GifPickerDialog({
             unavailableTitle={t(locale, "waves.gifPicker.unavailable.title")}
             unavailableHint={t(locale, "waves.gifPicker.unavailable.hint")}
             closeLabel={t(locale, "common.close")}
+            noResultsLabel={t(locale, "waves.gifPicker.noResults")}
             onClose={onClose}
           />
         </div>

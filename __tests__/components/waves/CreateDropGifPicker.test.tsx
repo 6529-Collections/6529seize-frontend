@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import CreateDropGifPicker from "@/components/waves/CreateDropGifPicker";
 
 jest.mock("@giphy/react-components", () => {
@@ -11,16 +11,29 @@ jest.mock("@giphy/react-components", () => {
   return {
     __esModule: true,
     SearchContext,
-    SearchContextManager: ({ apiKey, options, children }: any) => (
-      <div
-        data-testid="giphy-search-context"
-        data-api-key={apiKey}
-        data-rating={options?.rating}
-        data-type={options?.type}
-      >
-        {children}
-      </div>
-    ),
+    SearchContextManager: ({ apiKey, options, children }: any) => {
+      const [searchKey, setSearchKey] = React.useState("test-search-key");
+
+      return (
+        <SearchContext.Provider value={{ fetchGifs: jest.fn(), searchKey }}>
+          <div
+            data-testid="giphy-search-context"
+            data-api-key={apiKey}
+            data-rating={options?.rating}
+            data-type={options?.type}
+          >
+            <button
+              type="button"
+              data-testid="change-giphy-search"
+              onClick={() => setSearchKey("next-search-key")}
+            >
+              Change search
+            </button>
+            {children}
+          </div>
+        </SearchContext.Provider>
+      );
+    },
     SearchBar: ({ placeholder }: any) => (
       <input aria-label={placeholder} placeholder={placeholder} />
     ),
@@ -30,8 +43,10 @@ jest.mock("@giphy/react-components", () => {
       onGifClick,
       onGifsFetchError,
       onGifsFetched,
+      noResultsMessage,
     }: any) => (
       <div data-testid="giphy-grid" data-columns={columns} data-width={width}>
+        <div data-testid="giphy-no-results">{noResultsMessage}</div>
         <button
           data-testid="select-giphy-gif"
           onClick={(event) =>
@@ -132,6 +147,11 @@ describe("CreateDropGifPicker", () => {
     );
     expect(screen.getByText("Powered by")).toBeVisible();
     expect(screen.getByText("GIPHY")).toBeVisible();
+    expect(
+      screen.getByRole("textbox", { name: "Search GIFs" })
+    ).toBeVisible();
+    expect(screen.getByLabelText("Powered by GIPHY")).toBeVisible();
+    expect(screen.getByText("No GIFs found.")).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent(
       "GIF search is ready."
     );
@@ -186,6 +206,26 @@ describe("CreateDropGifPicker", () => {
 
     fireEvent.click(closeButton);
     expect(setShow).toHaveBeenCalledWith(false);
+  });
+
+  it("recovers from a GIPHY fetch error after the search changes", async () => {
+    render(<CreateDropGifPicker {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId("trigger-giphy-error"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "GIF search is temporarily unavailable."
+    );
+
+    fireEvent.click(screen.getByTestId("change-giphy-search"));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId("giphy-grid")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "GIF search is ready."
+    );
   });
 
   it("closes the dialog through the wrapper", () => {

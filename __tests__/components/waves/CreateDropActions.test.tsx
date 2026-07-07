@@ -106,9 +106,14 @@ jest.mock("@/components/waves/StormButton", () => {
 });
 
 jest.mock("@/components/waves/CreateDropGifPicker", () => {
-  return function MockCreateDropGifPicker({ show, setShow, onSelect }: any) {
+  return function MockCreateDropGifPicker({
+    giphyApiKey,
+    show,
+    setShow,
+    onSelect,
+  }: any) {
     return show ? (
-      <div data-testid="gif-picker">
+      <div data-testid="gif-picker" data-api-key={giphyApiKey}>
         <button
           onClick={() => onSelect("test-gif.gif")}
           data-testid="select-gif"
@@ -351,6 +356,10 @@ describe("CreateDropActions", () => {
     await userEvent.click(gifButtons[0]);
 
     expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
+    expect(screen.getByTestId("gif-picker")).toHaveAttribute(
+      "data-api-key",
+      "test-giphy-api-key"
+    );
   });
 
   it("calls onGifDrop when GIF is selected", async () => {
