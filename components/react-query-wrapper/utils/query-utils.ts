@@ -19,6 +19,13 @@ export const WAVE_DROPS_PARAMS = {
   limit: 50,
 };
 
+export const WAVE_DROPS_NATIVE_INITIAL_PARAMS = {
+  limit: 20,
+};
+
+export const getWaveDropsInitialLimit = (isNative: boolean): number =>
+  isNative ? WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit : WAVE_DROPS_PARAMS.limit;
+
 export const WAVE_DEFAULT_SUBSCRIPTION_ACTIONS = Object.values(
   ApiWaveSubscriptionTargetAction
 );

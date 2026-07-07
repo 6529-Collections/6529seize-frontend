@@ -79,7 +79,7 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
       >
         <div
           ref={scrollContainerRef}
-          className="no-scrollbar tw-z-40 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
+          className="tw-no-scrollbar tw-z-40 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
         >
           {isCollapsed && (
             <div className="tw-sticky tw-top-2 tw-z-20 tw-flex tw-justify-center tw-py-2">

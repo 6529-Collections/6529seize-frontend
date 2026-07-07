@@ -1396,7 +1396,7 @@ export default function HeaderSearchModal({
               ref={modalRef}
               aria-modal="true"
               aria-labelledby="header-search-input"
-              className="inset-safe-area tw-relative tw-flex tw-h-[520px] tw-max-h-[70vh] tw-min-h-0 tw-w-full tw-max-w-[min(100vw-3rem,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl"
+              className="tw-relative tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-[520px] tw-max-h-[70vh] tw-min-h-0 tw-w-full tw-max-w-[min(100vw-3rem,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl"
             >
               <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-4">
                 <button

@@ -1062,7 +1062,7 @@ export function HeaderQRModal({
             alt={alt}
             fill
             sizes="(max-width: 768px) 92vw, 28rem"
-            className="unselectable tw-object-contain"
+            className="tw-unselectable tw-object-contain"
           />
         ) : (
           <div className="tw-h-full tw-w-full tw-animate-pulse tw-rounded-md tw-bg-iron-900/40" />
@@ -1086,7 +1086,7 @@ export function HeaderQRModal({
             alt={t(HEADER_SHARE_LOCALE, "headerShare.core.alt")}
             width={150}
             height={150}
-            className="unselectable"
+            className="tw-unselectable"
           />
           <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-200 tw-px-4 tw-py-3 tw-text-iron-900">
             <FontAwesomeIcon icon={faExternalLink} />
@@ -1584,7 +1584,7 @@ function CoreAppDownload({
           alt={title}
           width={40}
           height={40}
-          className="unselectable"
+          className="tw-unselectable"
         />
       </div>
       <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
