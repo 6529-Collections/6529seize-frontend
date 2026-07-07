@@ -56,6 +56,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (arg.startsWith("--shard=")) {
       options.forward.push(arg);
+    } else if (arg === "--") {
+      // Package-manager arg forwarding can leave a bare "--" in argv;
+      // tolerating it keeps the staging gate from hard-failing on a
+      // wrapper-forwarding quirk.
+      continue;
     } else {
       throw new Error(`unknown argument "${arg}"`);
     }
@@ -93,14 +98,20 @@ function defaultSpawn(scriptKey, forwardArgs) {
       ? ["run", scriptKey, "--", ...forwardArgs]
       : ["run", scriptKey];
   if (execPath) {
+    // Child env inherits SEIZE_6529_COMMAND=1 from the wrapper that launched
+    // this runner, so the require-6529-command guard inside each pack script
+    // passes.
     return spawnSync(process.execPath, [execPath, ...runArgs], {
       cwd: ROOT,
       encoding: "utf8",
       maxBuffer: 64 * 1024 * 1024,
     });
   }
-  // Fallback for direct `node scripts/e2e-packs.cjs` invocations.
-  return spawnSync("./bin/6529", runArgs, {
+  // Fallback for direct `node scripts/e2e-packs.cjs` invocations. The wrapper
+  // path must be absolute: spawnSync resolves the command against the parent
+  // process CWD/PATH, not the `cwd` option, so a relative "./bin/6529" only
+  // works by accident.
+  return spawnSync(path.join(ROOT, "bin", "6529"), runArgs, {
     cwd: ROOT,
     encoding: "utf8",
     shell: process.platform === "win32",
@@ -122,8 +133,14 @@ function runPacks(resolved, { spawn = defaultSpawn, forward = [] } = {}) {
     if (failed) {
       failedCount += 1;
       const tail = output.split(/\r?\n/).slice(-SUMMARY_TAIL_LINES).join("\n");
+      // "failed to spawn" (ENOENT, missing script) and "ran and failed" are
+      // different triage paths; label the summary row so an environment
+      // misconfiguration is not mistaken for real test failures.
+      const label = result.error
+        ? `- :x: \`${pack.scriptKey}\` (failed to spawn: ${result.error.message})`
+        : `- :x: \`${pack.scriptKey}\``;
       appendSummary([
-        `- :x: \`${pack.scriptKey}\``,
+        label,
         "",
         `<details><summary>Last ${SUMMARY_TAIL_LINES} log lines for \`${pack.scriptKey}\`</summary>`,
         "",

@@ -45,6 +45,11 @@ describe("e2e-packs parseArgs", () => {
     ]);
   });
 
+  it("tolerates a bare -- left over from package-manager forwarding", () => {
+    expect(parseArgs(["--", "--env", "staging"]).env).toBe("staging");
+    expect(parseArgs(["--env", "staging", "--"]).env).toBe("staging");
+  });
+
   it("throws on unknown or valueless arguments", () => {
     expect(() => parseArgs(["--bogus"])).toThrow('unknown argument "--bogus"');
     expect(() => parseArgs(["--env"])).toThrow("--env requires a value");
