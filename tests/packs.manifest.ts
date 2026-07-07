@@ -5,8 +5,8 @@
 // check scripts (`scripts/sync-e2e-manifest.cjs`, `scripts/e2e-packs.cjs`)
 // can `require()` it on a bare CI checkout via Node's built-in TypeScript
 // type stripping (Node >= 22.18). Keep it import-free and erasable-syntax
-// only: interfaces and typed const literals are fine; enums, namespaces and
-// decorators are not.
+// only: interfaces, typed const literals and plain functions are fine;
+// enums, namespaces and decorators are not.
 //
 // The `test:e2e*` script block in package.json, the pack tables in
 // tests/README.md, and the workflow pack execution are all derived from this
@@ -65,6 +65,16 @@ interface PackDefinition {
 
 const DESKTOP = "web-desktop-chromium";
 const MOBILE = "web-mobile-chromium";
+const SIM_PROJECTS = [
+  "capacitor-ios-sim",
+  "capacitor-android-sim",
+  "electron-shell-sim",
+] as const;
+const SMOKE_SPECS = [
+  "tests/home/home.spec.ts",
+  "tests/pages/about.spec.ts",
+  "tests/pages/the-memes.spec.ts",
+] as const;
 
 const STAGING_ENV: Readonly<Record<string, string>> = {
   PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
@@ -72,8 +82,7 @@ const STAGING_ENV: Readonly<Record<string, string>> = {
 };
 
 const STAGING_READONLY_ENV: Readonly<Record<string, string>> = {
-  PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
-  PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+  ...STAGING_ENV,
   PLAYWRIGHT_ENV: "staging",
   PLAYWRIGHT_READONLY: "1",
 };
@@ -84,8 +93,7 @@ const PRODUCTION_ENV: Readonly<Record<string, string>> = {
 };
 
 const PRODUCTION_READONLY_ENV: Readonly<Record<string, string>> = {
-  PLAYWRIGHT_BASE_URL: "https://6529.io",
-  PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+  ...PRODUCTION_ENV,
   PLAYWRIGHT_ENV: "production",
   PLAYWRIGHT_READONLY: "1",
 };
@@ -103,13 +111,129 @@ const COMPOSER_SANDBOX_ENV: Readonly<Record<string, string>> = {
 const AUTH_SANDBOX_ENV: Readonly<Record<string, string>> = {
   PLAYWRIGHT_ENV: "local",
   PLAYWRIGHT_AUTH_SANDBOX: "1",
-  PLAYWRIGHT_COMPOSER_SANDBOX: "1",
-  PLAYWRIGHT_FORCE_WEB_SERVER: "1",
-  USE_DEV_AUTH: "true",
-  DEV_MODE_WALLET_ADDRESS: "0x0000000000000000000000000000000000000529",
-  PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE: "playwright",
-  PLAYWRIGHT_WEB_SERVER_COMMAND: "node tests/support/composerSandboxServer.cjs",
+  ...COMPOSER_SANDBOX_ENV,
 };
+
+// Factories for the recurring pack shapes. Every pack is still a plain
+// PackDefinition — these only remove literal repetition (which also trips
+// Sonar's token-based duplication gate by construction).
+
+interface PackTweaks {
+  readonly env?: Readonly<Record<string, string>>;
+  readonly grep?: string;
+  readonly projects?: readonly string[];
+  readonly traceOff?: boolean;
+}
+
+function localPack(
+  scriptKey: string,
+  description: string,
+  specs: readonly string[] | undefined,
+  tweaks: PackTweaks = {}
+): PackDefinition {
+  return {
+    scriptKey,
+    description,
+    safety: "local",
+    environments: ["local"],
+    triggers: ["manual"],
+    ...(specs ? { specs } : {}),
+    ...tweaks,
+    projects: tweaks.projects ?? [DESKTOP, MOBILE],
+    workers: 1,
+  };
+}
+
+function localReadonlyPack(
+  scriptKey: string,
+  description: string,
+  specs: readonly string[],
+  tweaks: PackTweaks = {}
+): PackDefinition {
+  return {
+    ...localPack(scriptKey, description, specs, tweaks),
+    safety: "readonly",
+  };
+}
+
+function sandboxPack(
+  scriptKey: string,
+  description: string,
+  specs: readonly string[],
+  env: Readonly<Record<string, string>>,
+  projects: readonly string[] = [DESKTOP]
+): PackDefinition {
+  return {
+    scriptKey,
+    description,
+    safety: "sandbox",
+    environments: ["local"],
+    triggers: ["manual"],
+    env,
+    specs,
+    projects,
+    workers: 1,
+    traceOff: true,
+  };
+}
+
+function stagingPack(
+  suffix: string,
+  description: string,
+  specs: readonly string[],
+  tweaks: PackTweaks = {}
+): PackDefinition {
+  return {
+    scriptKey: `test:e2e:staging${suffix ? `:${suffix}` : ""}`,
+    description,
+    safety: "readonly",
+    environments: ["staging"],
+    triggers: ["post-deploy", "manual"],
+    env: STAGING_ENV,
+    specs,
+    ...tweaks,
+    projects: [DESKTOP, MOBILE],
+    workers: 1,
+  };
+}
+
+function productionPack(
+  suffix: string,
+  description: string,
+  specs: readonly string[],
+  tweaks: PackTweaks & { readonly cron?: boolean } = {}
+): PackDefinition {
+  const { cron = true, ...rest } = tweaks;
+  return {
+    scriptKey: `test:e2e:production:${suffix}`,
+    description,
+    safety: "readonly",
+    environments: ["production"],
+    triggers: cron ? ["cron", "manual"] : ["manual"],
+    env: PRODUCTION_ENV,
+    specs,
+    ...rest,
+    projects: [DESKTOP],
+    workers: 1,
+  };
+}
+
+const READONLY_SPECS = {
+  social: ["tests/social/waves-profile-readonly.spec.ts"],
+  media: ["tests/media/media-mint-detail-readonly.spec.ts"],
+  delegation: ["tests/delegation/delegation-readonly.spec.ts"],
+  networkOpenData: [
+    "tests/network-open-data/network-open-data-api-readonly.spec.ts",
+  ],
+  collections: ["tests/collections/nextgen-collections-readonly.spec.ts"],
+  publicGroupsTools: [
+    "tests/public-groups-tools/public-groups-tools-readonly.spec.ts",
+  ],
+  adminGuards: ["tests/admin/admin-destructive-guards-readonly.spec.ts"],
+  publicContent: ["tests/content/public-content-readonly.spec.ts"],
+  profileDeepLinks: ["tests/social/profile-deep-links-readonly.spec.ts"],
+  searchWaves: ["tests/social/search-waves-readonly.spec.ts"],
+} as const;
 
 const PACKS: readonly PackDefinition[] = [
   // --- Local development entry points -----------------------------------
@@ -139,218 +263,127 @@ const PACKS: readonly PackDefinition[] = [
 
   // --- PR CI packs -------------------------------------------------------
   {
-    scriptKey: "test:e2e:smoke",
-    description: "Fast @smoke subset of home, about and The Memes.",
-    safety: "local",
-    environments: ["local"],
+    ...localPack(
+      "test:e2e:smoke",
+      "Fast @smoke subset of home, about and The Memes.",
+      SMOKE_SPECS,
+      {
+        grep: "@smoke",
+        projects: [DESKTOP],
+      }
+    ),
     triggers: ["pr-ci", "manual"],
-    specs: [
-      "tests/home/home.spec.ts",
-      "tests/pages/about.spec.ts",
-      "tests/pages/the-memes.spec.ts",
-    ],
-    grep: "@smoke",
-    projects: [DESKTOP],
-    workers: 1,
   },
   {
-    scriptKey: "test:e2e:critical-shell",
-    description: "Boot/shell resilience pack.",
-    safety: "local",
-    environments: ["local"],
+    ...localPack(
+      "test:e2e:critical-shell",
+      "Boot/shell resilience pack.",
+      ["tests/critical-shell"],
+      {
+        projects: [DESKTOP],
+      }
+    ),
     triggers: ["pr-ci", "manual"],
-    specs: ["tests/critical-shell"],
-    projects: [DESKTOP],
-    workers: 1,
   },
 
   // --- Local readonly packs (local mirrors of the deployed packs) --------
-  {
-    scriptKey: "test:e2e:social-readonly",
-    description: "Waves and profile read-only journeys.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: ["tests/social/waves-profile-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:media-readonly",
-    description: "Media and mint detail read-only coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: ["tests/media/media-mint-detail-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:delegation-readonly",
-    description: "Delegation surfaces read-only coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: ["tests/delegation/delegation-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:network-open-data-readonly",
-    description: "Network open data API read-only coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: ["tests/network-open-data/network-open-data-api-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:collections-readonly",
-    description: "NextGen collections read-only coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: ["tests/collections/nextgen-collections-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:public-groups-tools-readonly",
-    description: "Public groups and tools read-only coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: ["tests/public-groups-tools/public-groups-tools-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:admin-guards-readonly",
-    description: "Admin destructive-action fail-closed guards.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: { PLAYWRIGHT_READONLY: "1" },
-    specs: ["tests/admin/admin-destructive-guards-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:public-content-readonly",
-    description: "Public content pages read-only coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: { PLAYWRIGHT_READONLY: "1" },
-    specs: ["tests/content/public-content-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:authenticated-shells-readonly",
-    description: "Authenticated shells, read-only, dev-auth only.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: { PLAYWRIGHT_READONLY: "1" },
-    specs: ["tests/auth/authenticated-shells-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-    traceOff: true,
-  },
-  {
-    scriptKey: "test:e2e:notifications-mutation-guard",
-    description: "Negative contract: /notifications must not mutate.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: { PLAYWRIGHT_READONLY: "1" },
-    specs: ["tests/auth/notifications-mutation-guard.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-    traceOff: true,
-  },
-  {
-    scriptKey: "test:e2e:profile-deep-links-readonly",
-    description: "Profile deep links read-only coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: { PLAYWRIGHT_READONLY: "1" },
-    specs: ["tests/social/profile-deep-links-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:search-waves-readonly",
-    description: "Wave search read-only coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: { PLAYWRIGHT_READONLY: "1" },
-    specs: ["tests/social/search-waves-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
+  localReadonlyPack(
+    "test:e2e:social-readonly",
+    "Waves and profile read-only journeys.",
+    READONLY_SPECS.social
+  ),
+  localReadonlyPack(
+    "test:e2e:media-readonly",
+    "Media and mint detail read-only coverage.",
+    READONLY_SPECS.media
+  ),
+  localReadonlyPack(
+    "test:e2e:delegation-readonly",
+    "Delegation surfaces read-only coverage.",
+    READONLY_SPECS.delegation
+  ),
+  localReadonlyPack(
+    "test:e2e:network-open-data-readonly",
+    "Network open data API read-only coverage.",
+    READONLY_SPECS.networkOpenData
+  ),
+  localReadonlyPack(
+    "test:e2e:collections-readonly",
+    "NextGen collections read-only coverage.",
+    READONLY_SPECS.collections
+  ),
+  localReadonlyPack(
+    "test:e2e:public-groups-tools-readonly",
+    "Public groups and tools read-only coverage.",
+    READONLY_SPECS.publicGroupsTools
+  ),
+  localReadonlyPack(
+    "test:e2e:admin-guards-readonly",
+    "Admin destructive-action fail-closed guards.",
+    READONLY_SPECS.adminGuards,
+    { env: { PLAYWRIGHT_READONLY: "1" } }
+  ),
+  localReadonlyPack(
+    "test:e2e:public-content-readonly",
+    "Public content pages read-only coverage.",
+    READONLY_SPECS.publicContent,
+    { env: { PLAYWRIGHT_READONLY: "1" } }
+  ),
+  localReadonlyPack(
+    "test:e2e:authenticated-shells-readonly",
+    "Authenticated shells, read-only, dev-auth only.",
+    ["tests/auth/authenticated-shells-readonly.spec.ts"],
+    { env: { PLAYWRIGHT_READONLY: "1" }, traceOff: true }
+  ),
+  localReadonlyPack(
+    "test:e2e:notifications-mutation-guard",
+    "Negative contract: /notifications must not mutate.",
+    ["tests/auth/notifications-mutation-guard.spec.ts"],
+    { env: { PLAYWRIGHT_READONLY: "1" }, traceOff: true, projects: [DESKTOP] }
+  ),
+  localReadonlyPack(
+    "test:e2e:profile-deep-links-readonly",
+    "Profile deep links read-only coverage.",
+    READONLY_SPECS.profileDeepLinks,
+    { env: { PLAYWRIGHT_READONLY: "1" } }
+  ),
+  localReadonlyPack(
+    "test:e2e:search-waves-readonly",
+    "Wave search read-only coverage.",
+    READONLY_SPECS.searchWaves,
+    { env: { PLAYWRIGHT_READONLY: "1" } }
+  ),
 
   // --- Local authenticated sandboxes (mock API, never a real backend) ----
-  {
-    scriptKey: "test:e2e:composer-sandbox",
-    description: "Waves composer sandbox against the local mock API.",
-    safety: "sandbox",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: COMPOSER_SANDBOX_ENV,
-    specs: ["tests/social/waves-composer-sandbox.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-    traceOff: true,
-  },
-  {
-    scriptKey: "test:e2e:reaction-sandbox",
-    description: "Drop reaction sandbox against the local mock API.",
-    safety: "sandbox",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: AUTH_SANDBOX_ENV,
-    specs: ["tests/social/wave-reaction-sandbox.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-    traceOff: true,
-  },
-  {
-    scriptKey: "test:e2e:edit-drop-sandbox",
-    description: "Drop edit sandbox against the local mock API.",
-    safety: "sandbox",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: COMPOSER_SANDBOX_ENV,
-    specs: ["tests/social/wave-edit-drop-sandbox.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-    traceOff: true,
-  },
-  {
-    scriptKey: "test:e2e:signature-sandbox",
-    description: "Signed participation sandbox; fails closed unsigned.",
-    safety: "sandbox",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: AUTH_SANDBOX_ENV,
-    specs: ["tests/social/wave-signature-sandbox.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-    traceOff: true,
-  },
-  {
-    scriptKey: "test:e2e:auth-sandbox",
-    description: "Aggregate authenticated sandbox pack.",
-    safety: "sandbox",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: AUTH_SANDBOX_ENV,
-    specs: [
+  sandboxPack(
+    "test:e2e:composer-sandbox",
+    "Waves composer sandbox against the local mock API.",
+    ["tests/social/waves-composer-sandbox.spec.ts"],
+    COMPOSER_SANDBOX_ENV,
+    [DESKTOP, MOBILE]
+  ),
+  sandboxPack(
+    "test:e2e:reaction-sandbox",
+    "Drop reaction sandbox against the local mock API.",
+    ["tests/social/wave-reaction-sandbox.spec.ts"],
+    AUTH_SANDBOX_ENV
+  ),
+  sandboxPack(
+    "test:e2e:edit-drop-sandbox",
+    "Drop edit sandbox against the local mock API.",
+    ["tests/social/wave-edit-drop-sandbox.spec.ts"],
+    COMPOSER_SANDBOX_ENV
+  ),
+  sandboxPack(
+    "test:e2e:signature-sandbox",
+    "Signed participation sandbox; fails closed unsigned.",
+    ["tests/social/wave-signature-sandbox.spec.ts"],
+    AUTH_SANDBOX_ENV
+  ),
+  sandboxPack(
+    "test:e2e:auth-sandbox",
+    "Aggregate authenticated sandbox pack.",
+    [
       "tests/social/waves-composer-sandbox.spec.ts",
       "tests/social/wave-edit-drop-sandbox.spec.ts",
       "tests/social/wave-reaction-sandbox.spec.ts",
@@ -359,386 +392,198 @@ const PACKS: readonly PackDefinition[] = [
       "tests/social/create-wave-sandbox.spec.ts",
       "tests/social/wave-signature-sandbox.spec.ts",
     ],
-    projects: [DESKTOP],
-    workers: 1,
-    traceOff: true,
-  },
+    AUTH_SANDBOX_ENV
+  ),
 
   // --- Local surface-matrix / engine-diversity packs ---------------------
-  {
-    scriptKey: "test:e2e:smoke:surface-matrix",
-    description: "@smoke subset on desktop and mobile web shells.",
-    safety: "local",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: [
-      "tests/home/home.spec.ts",
-      "tests/pages/about.spec.ts",
-      "tests/pages/the-memes.spec.ts",
-    ],
-    grep: "@smoke",
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:surface-matrix",
-    description: "Core surfaces on desktop and mobile web shells.",
-    safety: "local",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: [
-      "tests/surfaces",
-      "tests/home/home.spec.ts",
-      "tests/pages/about.spec.ts",
-      "tests/pages/the-memes.spec.ts",
-    ],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:browser-diversity",
-    description: "Engine diversity pass on Firefox and WebKit.",
-    safety: "local",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: [
+  localPack(
+    "test:e2e:smoke:surface-matrix",
+    "@smoke subset on desktop and mobile web shells.",
+    SMOKE_SPECS,
+    { grep: "@smoke" }
+  ),
+  localPack(
+    "test:e2e:surface-matrix",
+    "Core surfaces on desktop and mobile web shells.",
+    ["tests/surfaces", ...SMOKE_SPECS]
+  ),
+  localPack(
+    "test:e2e:browser-diversity",
+    "Engine diversity pass on Firefox and WebKit.",
+    [
       "tests/surfaces",
       "tests/home/home.spec.ts",
       "tests/pages/the-memes.spec.ts",
     ],
-    projects: ["web-desktop-firefox", "web-desktop-webkit"],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:native-sim",
-    description: "Capacitor/Electron simulation surface pass.",
-    safety: "local",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: [
+    { projects: ["web-desktop-firefox", "web-desktop-webkit"] }
+  ),
+  localPack(
+    "test:e2e:native-sim",
+    "Capacitor/Electron simulation surface pass.",
+    [
       "tests/surfaces/core-surfaces.spec.ts",
       "tests/surfaces/native-shell-readonly.spec.ts",
     ],
-    projects: [
-      "capacitor-ios-sim",
-      "capacitor-android-sim",
-      "electron-shell-sim",
-    ],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:native-shell-readonly",
-    description: "Native shell read-only simulation coverage.",
-    safety: "readonly",
-    environments: ["local"],
-    triggers: ["manual"],
-    env: { PLAYWRIGHT_READONLY: "1" },
-    specs: ["tests/surfaces/native-shell-readonly.spec.ts"],
-    projects: [
-      "capacitor-ios-sim",
-      "capacitor-android-sim",
-      "electron-shell-sim",
-    ],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:wcag-i18n",
-    description: "WCAG and i18n public-route evidence pack.",
-    safety: "local",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: ["tests/wcag-i18n"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:wcag-i18n:surface-matrix",
-    description: "WCAG/i18n pack on desktop and mobile web shells.",
-    safety: "local",
-    environments: ["local"],
-    triggers: ["manual"],
-    specs: ["tests/wcag-i18n"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
+    { projects: SIM_PROJECTS }
+  ),
+  localReadonlyPack(
+    "test:e2e:native-shell-readonly",
+    "Native shell read-only simulation coverage.",
+    ["tests/surfaces/native-shell-readonly.spec.ts"],
+    { env: { PLAYWRIGHT_READONLY: "1" }, projects: SIM_PROJECTS }
+  ),
+  localPack(
+    "test:e2e:wcag-i18n",
+    "WCAG and i18n public-route evidence pack.",
+    ["tests/wcag-i18n"],
+    { projects: [DESKTOP] }
+  ),
+  localPack(
+    "test:e2e:wcag-i18n:surface-matrix",
+    "WCAG/i18n pack on desktop and mobile web shells.",
+    ["tests/wcag-i18n"]
+  ),
 
   // --- Staging post-deploy gate (execution order preserved) --------------
-  {
-    scriptKey: "test:e2e:staging:smoke",
-    description: "Staging @smoke subset on both web shells.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_ENV,
-    specs: [
-      "tests/home/home.spec.ts",
-      "tests/pages/about.spec.ts",
-      "tests/pages/the-memes.spec.ts",
-    ],
-    grep: "@smoke",
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging",
-    description: "Staging core surfaces on both web shells.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_ENV,
-    specs: [
-      "tests/surfaces",
-      "tests/home/home.spec.ts",
-      "tests/pages/about.spec.ts",
-      "tests/pages/the-memes.spec.ts",
-    ],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:social-readonly",
-    description: "Staging waves/profile read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_ENV,
-    specs: ["tests/social/waves-profile-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:public-groups-tools-readonly",
-    description: "Staging public groups/tools read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_ENV,
-    specs: ["tests/public-groups-tools/public-groups-tools-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:delegation-readonly",
-    description: "Staging delegation read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_ENV,
-    specs: ["tests/delegation/delegation-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:collections-readonly",
-    description: "Staging NextGen collections read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_ENV,
-    specs: ["tests/collections/nextgen-collections-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:admin-guards-readonly",
-    description: "Staging admin fail-closed guard pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_READONLY_ENV,
-    specs: ["tests/admin/admin-destructive-guards-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:public-content-readonly",
-    description: "Staging public content read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_READONLY_ENV,
-    specs: ["tests/content/public-content-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:profile-deep-links-readonly",
-    description: "Staging profile deep links read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_READONLY_ENV,
-    specs: ["tests/social/profile-deep-links-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:search-waves-readonly",
-    description: "Staging wave search read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_READONLY_ENV,
-    specs: ["tests/social/search-waves-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:media-readonly",
-    description: "Staging media/mint detail read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_ENV,
-    specs: ["tests/media/media-mint-detail-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:staging:network-open-data-readonly",
-    description: "Staging network open data read-only pack.",
-    safety: "readonly",
-    environments: ["staging"],
-    triggers: ["post-deploy", "manual"],
-    env: STAGING_ENV,
-    specs: ["tests/network-open-data/network-open-data-api-readonly.spec.ts"],
-    projects: [DESKTOP, MOBILE],
-    workers: 1,
-  },
+  stagingPack(
+    "smoke",
+    "Staging @smoke subset on both web shells.",
+    SMOKE_SPECS,
+    {
+      grep: "@smoke",
+    }
+  ),
+  stagingPack("", "Staging core surfaces on both web shells.", [
+    "tests/surfaces",
+    ...SMOKE_SPECS,
+  ]),
+  stagingPack(
+    "social-readonly",
+    "Staging waves/profile read-only pack.",
+    READONLY_SPECS.social
+  ),
+  stagingPack(
+    "public-groups-tools-readonly",
+    "Staging public groups/tools read-only pack.",
+    READONLY_SPECS.publicGroupsTools
+  ),
+  stagingPack(
+    "delegation-readonly",
+    "Staging delegation read-only pack.",
+    READONLY_SPECS.delegation
+  ),
+  stagingPack(
+    "collections-readonly",
+    "Staging NextGen collections read-only pack.",
+    READONLY_SPECS.collections
+  ),
+  stagingPack(
+    "admin-guards-readonly",
+    "Staging admin fail-closed guard pack.",
+    READONLY_SPECS.adminGuards,
+    { env: STAGING_READONLY_ENV }
+  ),
+  stagingPack(
+    "public-content-readonly",
+    "Staging public content read-only pack.",
+    READONLY_SPECS.publicContent,
+    { env: STAGING_READONLY_ENV }
+  ),
+  stagingPack(
+    "profile-deep-links-readonly",
+    "Staging profile deep links read-only pack.",
+    READONLY_SPECS.profileDeepLinks,
+    { env: STAGING_READONLY_ENV }
+  ),
+  stagingPack(
+    "search-waves-readonly",
+    "Staging wave search read-only pack.",
+    READONLY_SPECS.searchWaves,
+    { env: STAGING_READONLY_ENV }
+  ),
+  stagingPack(
+    "media-readonly",
+    "Staging media/mint detail read-only pack.",
+    READONLY_SPECS.media
+  ),
+  stagingPack(
+    "network-open-data-readonly",
+    "Staging network open data read-only pack.",
+    READONLY_SPECS.networkOpenData
+  ),
 
   // --- Production canary (daily cron; desktop-only, read-only) -----------
-  {
-    scriptKey: "test:e2e:production:social-readonly",
-    description: "Production waves/profile read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_ENV,
-    specs: ["tests/social/waves-profile-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:public-groups-tools-readonly",
-    description: "Production public groups/tools read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_ENV,
-    specs: ["tests/public-groups-tools/public-groups-tools-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:delegation-readonly",
-    description: "Production delegation read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_ENV,
-    specs: ["tests/delegation/delegation-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:collections-readonly",
-    description: "Production NextGen collections read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_ENV,
-    specs: ["tests/collections/nextgen-collections-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:admin-guards-readonly",
-    description: "Production admin fail-closed guard canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_READONLY_ENV,
-    specs: ["tests/admin/admin-destructive-guards-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:public-content-readonly",
-    description: "Production public content read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_READONLY_ENV,
-    specs: ["tests/content/public-content-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:profile-deep-links-readonly",
-    description: "Production profile deep links read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_READONLY_ENV,
-    specs: ["tests/social/profile-deep-links-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:search-waves-readonly",
-    description: "Production wave search read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_READONLY_ENV,
-    specs: ["tests/social/search-waves-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:media-readonly",
-    description: "Production media/mint detail read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_ENV,
-    specs: ["tests/media/media-mint-detail-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:network-open-data-readonly",
-    description: "Production network open data read-only canary.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["cron", "manual"],
-    env: PRODUCTION_ENV,
-    specs: ["tests/network-open-data/network-open-data-api-readonly.spec.ts"],
-    projects: [DESKTOP],
-    workers: 1,
-  },
-  {
-    scriptKey: "test:e2e:production:readonly",
-    description: "Combined production read-only pass in one invocation.",
-    safety: "readonly",
-    environments: ["production"],
-    triggers: ["manual"],
-    env: PRODUCTION_READONLY_ENV,
-    specs: [
-      "tests/social/waves-profile-readonly.spec.ts",
-      "tests/media/media-mint-detail-readonly.spec.ts",
-      "tests/delegation/delegation-readonly.spec.ts",
-      "tests/network-open-data/network-open-data-api-readonly.spec.ts",
-      "tests/collections/nextgen-collections-readonly.spec.ts",
-      "tests/public-groups-tools/public-groups-tools-readonly.spec.ts",
-      "tests/admin/admin-destructive-guards-readonly.spec.ts",
-      "tests/content/public-content-readonly.spec.ts",
-      "tests/social/profile-deep-links-readonly.spec.ts",
-      "tests/social/search-waves-readonly.spec.ts",
+  productionPack(
+    "social-readonly",
+    "Production waves/profile read-only canary.",
+    READONLY_SPECS.social
+  ),
+  productionPack(
+    "public-groups-tools-readonly",
+    "Production public groups/tools read-only canary.",
+    READONLY_SPECS.publicGroupsTools
+  ),
+  productionPack(
+    "delegation-readonly",
+    "Production delegation read-only canary.",
+    READONLY_SPECS.delegation
+  ),
+  productionPack(
+    "collections-readonly",
+    "Production NextGen collections read-only canary.",
+    READONLY_SPECS.collections
+  ),
+  productionPack(
+    "admin-guards-readonly",
+    "Production admin fail-closed guard canary.",
+    READONLY_SPECS.adminGuards,
+    { env: PRODUCTION_READONLY_ENV }
+  ),
+  productionPack(
+    "public-content-readonly",
+    "Production public content read-only canary.",
+    READONLY_SPECS.publicContent,
+    { env: PRODUCTION_READONLY_ENV }
+  ),
+  productionPack(
+    "profile-deep-links-readonly",
+    "Production profile deep links read-only canary.",
+    READONLY_SPECS.profileDeepLinks,
+    { env: PRODUCTION_READONLY_ENV }
+  ),
+  productionPack(
+    "search-waves-readonly",
+    "Production wave search read-only canary.",
+    READONLY_SPECS.searchWaves,
+    { env: PRODUCTION_READONLY_ENV }
+  ),
+  productionPack(
+    "media-readonly",
+    "Production media/mint detail read-only canary.",
+    READONLY_SPECS.media
+  ),
+  productionPack(
+    "network-open-data-readonly",
+    "Production network open data read-only canary.",
+    READONLY_SPECS.networkOpenData
+  ),
+  productionPack(
+    "readonly",
+    "Combined production read-only pass in one invocation.",
+    [
+      ...READONLY_SPECS.social,
+      ...READONLY_SPECS.media,
+      ...READONLY_SPECS.delegation,
+      ...READONLY_SPECS.networkOpenData,
+      ...READONLY_SPECS.collections,
+      ...READONLY_SPECS.publicGroupsTools,
+      ...READONLY_SPECS.adminGuards,
+      ...READONLY_SPECS.publicContent,
+      ...READONLY_SPECS.profileDeepLinks,
+      ...READONLY_SPECS.searchWaves,
     ],
-    projects: [DESKTOP],
-    workers: 1,
-  },
+    { env: PRODUCTION_READONLY_ENV, cron: false }
+  ),
 ];
 
 module.exports = { PACKS };
