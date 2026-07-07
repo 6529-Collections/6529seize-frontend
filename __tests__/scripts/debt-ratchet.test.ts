@@ -9,9 +9,7 @@ const {
   countLines,
   countMatches,
   isWordPressMigratedSource,
-} = require(
-  path.join(process.cwd(), "scripts", "debt-ratchet.cjs")
-) as {
+} = require(path.join(process.cwd(), "scripts", "debt-ratchet.cjs")) as {
   countImportStatements: (content: string, packages: string[]) => number;
   countLines: (content: string) => number;
   countMatches: (content: string, pattern: RegExp) => number;
@@ -79,7 +77,7 @@ describe("debt-ratchet counting helpers", () => {
       isWordPressMigratedSource(
         [
           'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
-          "<WordPressLegacyAssets postJsonHref=\"/wp-json/wp/v2/pages/810\" />",
+          '<WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/810" />',
           '<div className="fusion-wrapper" />',
         ].join("\n")
       )
@@ -223,7 +221,10 @@ describe("debt-ratchet check mode", () => {
         ...Array.from({ length: 810 }, (_, index) => `// migrated ${index}`),
       ].join("\n")
     );
-    writeFixture("components/Large.tsx", "export const line = 1;\n".repeat(810));
+    writeFixture(
+      "components/Large.tsx",
+      "export const line = 1;\n".repeat(810)
+    );
 
     const unfiltered = runRatchet(root, ["--details", "oversized_files"]);
     expect(unfiltered.status).toBe(0);
