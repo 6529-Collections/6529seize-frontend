@@ -6,6 +6,11 @@ import userEvent from "@testing-library/user-event";
 jest.mock("framer-motion", () => ({
   useAnimate: () => [{ current: null }, jest.fn()],
   AnimatePresence: ({ children }: any) => <>{children}</>,
+  LazyMotion: ({ children }: any) => <>{children}</>,
+  domAnimation: {},
+  m: {
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  },
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   },
