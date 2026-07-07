@@ -257,7 +257,7 @@ function TimelineRow({
         aria-hidden="true"
         className={cx(
           "tw-absolute tw-left-0 tw-top-0 tw-z-20 tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-[#030303] tw-text-sm tw-font-medium tw-shadow-[0_0_0_6px_#030303] tw-transition md:tw-left-1/2 md:-tw-translate-x-1/2",
-          getMarkerClass(status)
+          getMarkerClass(status, showStatusBadge)
         )}
       >
         {showStatusBadge && status === "complete" ? (
@@ -292,8 +292,8 @@ function StatusBadge({
   );
 }
 
-function getMarkerClass(status: StepStatus) {
-  return status === "pending"
+function getMarkerClass(status: StepStatus, showStatusBadge: boolean) {
+  return !showStatusBadge || status === "pending"
     ? NEUTRAL_MARKER_CLASS
     : STATUS_MARKER_CLASS[status];
 }
