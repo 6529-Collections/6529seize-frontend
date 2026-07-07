@@ -1,15 +1,12 @@
 import {
-  browserExtensionUrlPrefixes,
   browserUnhandledRejectionMechanism,
   circularReactMetaElementMessagePatterns,
   coinbaseWalletLinkWebSocketCloseFunction,
   coinbaseWalletLinkWebSocketFile,
   coinbaseWalletLinkWebSocket1006MessagePrefix,
   coinbaseWalletSdkPathTokens,
-  extensionMessagingConnectionFailureMessage,
   injectedAppUriPath,
   injectedProviderProxyStartsWithMessage,
-  injectedScriptBundlePathToken,
   jsonStringifyFunction,
   metaMaskMobileUpdateUrlFunction,
   objectCapturedPromiseRejectionMessage,
@@ -38,7 +35,6 @@ import {
   getBreadcrumbValues,
   getContextString,
   getEventMessage,
-  getFramePaths,
   getHintExceptionMessage,
   getHintExceptionStack,
   getNumericValue,
@@ -55,6 +51,7 @@ import {
   getStackSignatureValues,
   hasAppOwnedFrame,
   hasAppOwnedNonExtensionSignature,
+  hasAppOwnedSourceEvidence,
   hasAppOwnedSourceFrame,
   hasAppOwnedSourceStackValue,
   hasAppOwnedStackPath,
@@ -262,33 +259,6 @@ function hasBrowserUnhandledRejectionMechanism(
   );
 }
 
-function isExtensionMessagingInjectedPath(value: string): boolean {
-  const normalizedValue = value.toLowerCase();
-  return (
-    normalizedValue.includes(injectedScriptBundlePathToken) ||
-    browserExtensionUrlPrefixes.some((prefix) =>
-      normalizedValue.startsWith(prefix)
-    )
-  );
-}
-
-function isExtensionMessagingFrame(frame: SentryStackFrame): boolean {
-  const framePaths = getFramePaths(frame);
-  return (
-    framePaths.length > 0 && framePaths.every(isExtensionMessagingInjectedPath)
-  );
-}
-
-function hasOnlyExtensionMessagingFrames(
-  frames: SentryStackFrame[] | undefined
-): boolean {
-  return (
-    Array.isArray(frames) &&
-    frames.length > 0 &&
-    frames.every(isExtensionMessagingFrame)
-  );
-}
-
 function hasAppOwnedWalletLinkWebSocket1006Evidence(
   event: SentryClientEvent,
   value: SentryExceptionValue | undefined,
@@ -350,19 +320,6 @@ function hasWalletConnectStaleSessionFrame(
         walletConnectStaleSessionFunctions.has(functionName)
       );
     })
-  );
-}
-
-function hasAppOwnedSourceEvidence(
-  event: SentryClientEvent,
-  value: SentryExceptionValue | undefined,
-  hint?: SentryEventHint
-): boolean {
-  const frames = value?.stacktrace?.frames;
-  return (
-    hasAppOwnedSourceFrame(frames) ||
-    hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
-    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
   );
 }
 
@@ -638,41 +595,6 @@ export function shouldFilterRabbyMobileRainbowKitNotFoundError(
   }
 
   return !hasLikelyAppOwnedFrame(value?.stacktrace?.frames);
-}
-
-function hasExtensionMessagingConnectionFailureMessage(
-  event: SentryClientEvent,
-  hint?: SentryEventHint
-): boolean {
-  const value = event.exception?.values?.[0];
-  const messageCandidates = [
-    value?.value,
-    event.message,
-    getHintExceptionMessage(hint),
-  ];
-
-  return messageCandidates.some(
-    (candidate) =>
-      typeof candidate === "string" &&
-      normalizeErrorPrefix(candidate) ===
-        extensionMessagingConnectionFailureMessage
-  );
-}
-
-export function shouldFilterBrowserExtensionMessagingConnectionError(
-  event: SentryClientEvent,
-  hint?: SentryEventHint
-): boolean {
-  const value = event.exception?.values?.[0];
-  if (!hasExtensionMessagingConnectionFailureMessage(event, hint)) {
-    return false;
-  }
-
-  if (hasAppOwnedSourceEvidence(event, value, hint)) {
-    return false;
-  }
-
-  return hasOnlyExtensionMessagingFrames(value?.stacktrace?.frames);
 }
 
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(
