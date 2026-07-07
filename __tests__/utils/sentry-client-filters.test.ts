@@ -4364,6 +4364,35 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter keplr read-only collisions with mixed app-owned and injected frame paths", () => {
+    // Arrange
+    const event = createInjectedKeplrWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Cannot assign to read only property 'keplr' of object '#<Window>'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///utils/wallets/install-keplr.ts",
+                  abs_path: "app:///inject-runtime.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter unrelated app URI injected errors", () => {
     // Arrange
     const event = createInjectedWalletCollisionEvent({
