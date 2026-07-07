@@ -6,6 +6,8 @@ import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/co
 import GroupCreateIdentitiesSearch from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch";
 import type { GroupCreateIdentitiesSearchResultsLayout } from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export default function CreateWaveInlineGroupIdentities({
   identities,
@@ -42,9 +44,11 @@ export default function CreateWaveInlineGroupIdentities({
     );
   const identitiesHelperText =
     identities.length === 0
-      ? "Add identities one by one to create a group."
+      ? t(DEFAULT_LOCALE, "waves.create.groups.inlineIdentities.emptyHelper")
       : null;
   const showHelperRow = !!identitiesHelperText || !!currentUserIdentity;
+  const showCurrentUserExcludedWarning =
+    identities.length > 0 && !!currentUserIdentity && !isCurrentUserSelected;
 
   const onCurrentUserToggle = (checked: boolean) => {
     if (!currentUserIdentity) {
@@ -135,6 +139,18 @@ export default function CreateWaveInlineGroupIdentities({
           onRemove={onRemove}
           variant="inline"
         />
+      )}
+      {showCurrentUserExcludedWarning && (
+        <p
+          role="status"
+          aria-live="polite"
+          className="tw-mb-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#fef08a]/20 tw-bg-[#fef08a]/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-[#fef08a]"
+        >
+          {t(
+            DEFAULT_LOCALE,
+            "waves.create.groups.inlineIdentities.creatorExcludedWarning"
+          )}
+        </p>
       )}
     </div>
   );
