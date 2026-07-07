@@ -1,22 +1,13 @@
 "use client";
 
-import {
-  Bars3Icon,
-  ChatBubbleLeftIcon,
-  EllipsisHorizontalIcon,
-  Squares2X2Icon,
-  LinkIcon,
-  CheckIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { faShare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import { CompactMenu } from "@/components/compact-menu";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
@@ -29,7 +20,6 @@ import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useWave } from "@/hooks/useWave";
-import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useAuth } from "../auth/Auth";
 import { getConnectionProfileIndicator } from "../auth/connection-state-indicator";
@@ -50,6 +40,14 @@ import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPr
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  getAppHeaderMoreMenuItems,
+  type HeaderMoreMenuItem,
+} from "./app-header-more-menu-items";
+import {
+  type HeaderWavePreview,
+  useHeaderActiveWave,
+} from "./app-header-wave-preview";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -68,11 +66,17 @@ interface HeaderTimeoutRef {
   current: ReturnType<typeof setTimeout> | null;
 }
 
-type HeaderMoreMenuItem = CompactMenuItem & {
-  readonly renderAsDirectButton?: boolean | undefined;
-  readonly directIcon?: ReactNode | undefined;
-  readonly directActionActive?: boolean | undefined;
-};
+interface HeaderProfileSource {
+  readonly pfp?: string | null;
+}
+
+interface HeaderActiveProfileProxySource {
+  readonly created_by: HeaderProfileSource;
+}
+
+interface HeaderConnectedProfileSource {
+  readonly pfp?: string | null;
+}
 
 const sliceString = (str: string, length: number): string => {
   if (str.length <= length) return str;
@@ -190,56 +194,81 @@ const getHeaderTitle = ({
   return sliceString(capitalizeEveryWord(pageTitle), 20);
 };
 
+const getHeaderProfilePfp = ({
+  activeProfileProxy,
+  profile,
+}: {
+  readonly activeProfileProxy:
+    | HeaderActiveProfileProxySource
+    | null
+    | undefined;
+  readonly profile: HeaderConnectedProfileSource | null | undefined;
+}): string | null => activeProfileProxy?.created_by.pfp ?? profile?.pfp ?? null;
+
+const getHasUnreadOnOtherConnectedProfiles = ({
+  connectedAccounts,
+  connectedAccountUnreadNotifications,
+}: {
+  readonly connectedAccounts: readonly HeaderConnectedAccount[];
+  readonly connectedAccountUnreadNotifications: Readonly<
+    Record<string, number>
+  >;
+}): boolean =>
+  connectedAccounts.some(
+    (account) =>
+      !account.isActive &&
+      (connectedAccountUnreadNotifications[account.address.toLowerCase()] ??
+        0) > 0
+  );
+
 const HeaderTitleContent = ({
+  displayWave,
   activeWave,
-  isWaveResolving,
   isDm,
   directMessageProfileHref,
   previewText,
   finalTitle,
 }: {
+  readonly displayWave: HeaderWavePreview | null;
   readonly activeWave: ApiWave | null;
-  readonly isWaveResolving: boolean;
   readonly isDm: boolean;
   readonly directMessageProfileHref: string | null;
   readonly previewText: string | null;
   readonly finalTitle: ReactNode;
 }) => {
-  if (activeWave === null || isWaveResolving) {
+  if (displayWave === null) {
     return <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>;
   }
 
-  const wavePictureContributors = activeWave.contributors_overview.map((c) => ({
-    pfp: c.contributor_pfp,
-    identity: c.contributor_identity,
-  }));
   const wavePicture = (
     <div className="tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
       <WavePicture
-        name={activeWave.name}
-        picture={activeWave.picture ?? null}
-        contributors={wavePictureContributors}
+        name={displayWave.name}
+        picture={displayWave.picture}
+        contributors={displayWave.contributors}
       />
     </div>
   );
+  const directMessageProfileLink =
+    activeWave !== null && isDm ? directMessageProfileHref : null;
 
   return (
     <div className="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-items-center tw-gap-2">
-      {isDm && directMessageProfileHref !== null ? (
+      {directMessageProfileLink !== null ? (
         <Link
-          href={directMessageProfileHref}
-          aria-label={`View ${activeWave.name}'s profile`}
+          href={directMessageProfileLink}
+          aria-label={`View ${displayWave.name}'s profile`}
           className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-iron-50 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
         >
           {wavePicture}
           <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-            {activeWave.name}
+            {displayWave.name}
           </span>
         </Link>
       ) : (
         <>
           {wavePicture}
-          {!isDm && previewText !== null ? (
+          {activeWave !== null && !isDm && previewText !== null ? (
             <WaveDescriptionPopover
               wave={activeWave}
               align="center"
@@ -247,7 +276,7 @@ const HeaderTitleContent = ({
               triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
             >
               <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
-                {activeWave.name}
+                {displayWave.name}
               </span>
               <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
                 {previewText}
@@ -255,7 +284,7 @@ const HeaderTitleContent = ({
             </WaveDescriptionPopover>
           ) : (
             <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-              {activeWave.name}
+              {displayWave.name}
             </span>
           )}
         </>
@@ -450,7 +479,7 @@ export default function AppHeader() {
   const searchParams = useSearchParams();
   const {
     address,
-    hasValidWalletAuth: isAuthenticated,
+    hasValidWalletAuth,
     isConnected,
     connectedAccounts,
     connectedAccountUnreadNotifications,
@@ -477,23 +506,19 @@ export default function AppHeader() {
     []
   );
 
-  const pfp = (() => {
-    if (activeProfileProxy) return activeProfileProxy.created_by.pfp;
-    return profile?.pfp ?? null;
-  })();
+  const pfp = getHeaderProfilePfp({ activeProfileProxy, profile });
   const resolvedPfp = pfp ? resolveIpfsUrlSync(pfp) : null;
   const menuAvatarSrc = resolvedPfp ?? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP;
 
   const connectionIndicator = getConnectionProfileIndicator({
-    isAuthenticated,
+    isAuthenticated: hasValidWalletAuth,
     isConnected,
   });
-  const hasUnreadOnOtherConnectedProfiles = connectedAccounts.some(
-    (account) =>
-      !account.isActive &&
-      (connectedAccountUnreadNotifications[account.address.toLowerCase()] ??
-        0) > 0
-  );
+  const hasUnreadOnOtherConnectedProfiles =
+    getHasUnreadOnOtherConnectedProfiles({
+      connectedAccounts,
+      connectedAccountUnreadNotifications,
+    });
 
   const pathSegments = pathname.split("/").filter(Boolean);
   const basePath = pathSegments[0] ?? "";
@@ -503,9 +528,8 @@ export default function AppHeader() {
       ?.replaceAll(/[-_]/g, " ")
       .replace(/^./, (c) => c.toUpperCase()) ?? "Home";
 
-  const waveId = myStream?.activeWave.id ?? null;
-  const { wave, isLoading, isFetching } = useWaveById(waveId);
-  const activeWave = waveId && wave?.id === waveId ? wave : null;
+  const { activeWave, headerWavePreview, isWaveResolving, waveId } =
+    useHeaderActiveWave(myStream);
   const headerDropAction = getHeaderDropAction({ activeWave, waveDropAction });
 
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");
@@ -516,8 +540,9 @@ export default function AppHeader() {
     connectedProfile,
     activeProfileProxyCreatedBy: activeProfileProxy?.created_by,
   });
-  const showGalleryToggle =
-    !!waveId && !isRankWave && !isApproveWave && !isMemesWave && !isDm;
+  const showGalleryToggle = Boolean(
+    activeWave && !isRankWave && !isApproveWave && !isMemesWave && !isDm
+  );
   const showWaveLinkAction = Boolean(activeWave && !isDm);
   const previewText = getWaveDescriptionPreviewText(activeWave);
   const {
@@ -532,31 +557,6 @@ export default function AppHeader() {
     isDirectMessage: activeWave ? isDm : false,
     showShareFeedback: !isCapacitor,
   });
-  const renderWaveLinkActionIcon = ({
-    direct = false,
-  }: {
-    readonly direct?: boolean | undefined;
-  } = {}) => {
-    let waveLinkActionIconColor = "tw-text-emerald-300";
-    if (direct && isWaveLinkSharing) {
-      waveLinkActionIconColor = "tw-text-iron-50";
-    } else if (waveLinkActionFeedbackState === "idle") {
-      waveLinkActionIconColor = "tw-text-iron-300";
-    }
-    const iconSizeClassName = direct ? "tw-h-6 tw-w-6" : "tw-h-4 tw-w-4";
-    const iconClassName = `${iconSizeClassName} ${waveLinkActionIconColor}`;
-
-    if (waveLinkActionFeedbackState !== "idle") {
-      return <CheckIcon className={iconClassName} />;
-    }
-
-    if (waveLinkActionMode === "share") {
-      return <FontAwesomeIcon icon={faShare} className={iconClassName} />;
-    }
-
-    return <LinkIcon className={iconClassName} />;
-  };
-
   const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
   const isMessagesRoute =
     pathname === "/messages" || pathname.startsWith("/messages/");
@@ -580,9 +580,6 @@ export default function AppHeader() {
 
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
-  const isWaveResolving =
-    !!waveId && (isLoading || isFetching || wave?.id !== waveId);
-
   const pfpImage = (
     <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
       <div
@@ -641,7 +638,7 @@ export default function AppHeader() {
   const finalTitle = getHeaderTitle({
     pathname,
     waveId,
-    wave,
+    wave: headerWavePreview,
     isWaveResolving,
     isWavesRoute,
     isMessagesRoute,
@@ -649,36 +646,17 @@ export default function AppHeader() {
     pageTitle,
     pathSegments,
   });
-  const galleryToggleLabel =
-    viewMode === "chat" ? "Switch to gallery view" : "Switch to chat view";
-  const appHeaderMoreMenuItems: HeaderMoreMenuItem[] = [];
-
-  if (showGalleryToggle) {
-    appHeaderMoreMenuItems.push({
-      id: "toggle-view-mode",
-      label: galleryToggleLabel,
-      icon:
-        viewMode === "chat" ? (
-          <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        ) : (
-          <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        ),
-      onSelect: toggleViewMode,
-    });
-  }
-
-  if (showWaveLinkAction) {
-    appHeaderMoreMenuItems.push({
-      id: "wave-link",
-      label: waveLinkActionLabel,
-      ariaLabel: waveLinkActionLabel,
-      icon: renderWaveLinkActionIcon(),
-      directIcon: renderWaveLinkActionIcon({ direct: true }),
-      onSelect: handleWaveLinkActionClick,
-      renderAsDirectButton: true,
-      directActionActive: isWaveLinkSharing,
-    });
-  }
+  const appHeaderMoreMenuItems = getAppHeaderMoreMenuItems({
+    handleWaveLinkActionClick,
+    isWaveLinkSharing,
+    showGalleryToggle,
+    showWaveLinkAction,
+    toggleViewMode,
+    viewMode,
+    waveLinkActionFeedbackState,
+    waveLinkActionLabel,
+    waveLinkActionMode,
+  });
 
   return (
     <div className="tw-w-full tw-bg-black tw-pt-[env(safe-area-inset-top,0px)] tw-text-iron-50">
@@ -703,8 +681,8 @@ export default function AppHeader() {
         </div>
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
           <HeaderTitleContent
+            displayWave={headerWavePreview}
             activeWave={activeWave}
-            isWaveResolving={isWaveResolving}
             isDm={isDm}
             directMessageProfileHref={directMessageProfileHref}
             previewText={previewText}
@@ -726,7 +704,7 @@ export default function AppHeader() {
             <HeaderSearchButton
               wave={
                 isInsideWave && (isWavesRoute || isMessagesRoute)
-                  ? (wave ?? null)
+                  ? activeWave
                   : null
               }
             />

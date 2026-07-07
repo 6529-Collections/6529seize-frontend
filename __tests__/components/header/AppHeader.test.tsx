@@ -82,8 +82,12 @@ jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
 }));
 jest.mock("@/components/waves/WavePicture", () => ({
   __esModule: true,
-  default: ({ name }: { name: string }) => (
-    <div data-testid="wave-picture" data-name={name} />
+  default: ({ name, picture }: { name: string; picture: string | null }) => (
+    <div
+      data-testid="wave-picture"
+      data-name={name}
+      data-picture={picture ?? ""}
+    />
   ),
 }));
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
@@ -153,8 +157,16 @@ function setup(opts: any) {
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
   (useMyStreamOptional as jest.Mock).mockReturnValue(
     activeWaveId
-      ? { activeWave: { id: activeWaveId } }
-      : { activeWave: { id: null } }
+      ? {
+          activeWave: { id: activeWaveId },
+          waves: { list: opts.wavesList ?? [] },
+          directMessages: { list: opts.directMessagesList ?? [] },
+        }
+      : {
+          activeWave: { id: null },
+          waves: { list: opts.wavesList ?? [] },
+          directMessages: { list: opts.directMessagesList ?? [] },
+        }
   );
   (useWaveById as jest.Mock).mockReturnValue({
     wave,
@@ -504,6 +516,109 @@ describe("AppHeader", () => {
     expect(
       screen.queryByRole("button", { name: /copy wave link|share wave/i })
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "More header actions" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows active wave title and avatar from the waves list while the full wave loads", () => {
+    setup({
+      activeWaveId: "w-preview",
+      wave: undefined,
+      isLoading: true,
+      isFetching: true,
+      asPath: "/waves/w-preview",
+      wavesList: [
+        {
+          id: "w-preview",
+          name: "Preview Wave",
+          picture: "/preview-wave.png",
+          contributors: [{ pfp: "/c1.png", identity: "alice" }],
+        },
+      ],
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
+    expect(screen.getByText("Preview Wave")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-name",
+      "Preview Wave"
+    );
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-picture",
+      "/preview-wave.png"
+    );
+    expect(
+      screen.queryByRole("button", { name: "Show wave description" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /copy wave link|share wave/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "More header actions" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows active DM title and avatar from the direct messages list while the full wave loads", () => {
+    setup({
+      activeWaveId: "dm-preview",
+      wave: undefined,
+      isLoading: true,
+      isFetching: true,
+      asPath: "/messages/dm-preview",
+      directMessagesList: [
+        {
+          id: "dm-preview",
+          name: "Preview DM",
+          picture: "/preview-dm.png",
+          contributors: [{ pfp: "/dm-c1.png", identity: "bob" }],
+        },
+      ],
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
+    expect(screen.getByText("Preview DM")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-name",
+      "Preview DM"
+    );
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-picture",
+      "/preview-dm.png"
+    );
+    expect(
+      screen.queryByRole("link", { name: "View Preview DM's profile" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps full active wave title and avatar visible during background refetch", () => {
+    const wave = {
+      id: "w-loaded",
+      name: "Loaded Wave",
+      picture: "/loaded-wave.png",
+      contributors_overview: [{ contributor_pfp: "/c1.png" }],
+      chat: { scope: { group: { is_direct_message: false } } },
+    };
+
+    setup({
+      wave,
+      isFetching: true,
+      asPath: "/waves/w-loaded",
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
+    expect(screen.getByText("Loaded Wave")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-name",
+      "Loaded Wave"
+    );
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-picture",
+      "/loaded-wave.png"
+    );
   });
 
   it("copies wave link in app header when copy mode is active", () => {
