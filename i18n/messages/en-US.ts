@@ -1038,6 +1038,13 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.cardActivity": "Card Activity",
   "theMemes.detail.tabs.timeline": "Timeline",
   "theMemes.detail.tabs.yourTransactions": "Your Transactions",
+  "theMemes.detail.collectors.leaderboardTitle": "Collectors leaderboard",
+  "theMemes.detail.collectors.downloadCsv": "Download CSV",
+  "theMemes.detail.collectors.downloadingCsv": "Preparing CSV",
+  "theMemes.detail.collectors.downloadCsvAriaLabel":
+    "Download collectors leaderboard as CSV",
+  "theMemes.detail.collectors.downloadCsvError":
+    "Couldn't download collectors CSV. Please try again.",
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,

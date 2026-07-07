@@ -1,8 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import type { CICType } from "@/entities/IProfile";
@@ -14,6 +25,8 @@ import {
 } from "../searchModal/SearchModal";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
+  faDownload,
+  faSpinner,
   faSquareCaretUp,
   faSquareCaretDown,
 } from "@fortawesome/free-solid-svg-icons";
@@ -27,21 +40,74 @@ const tableCellClassName =
 interface Props {
   contract: string;
   nftId: number;
+  locale?: SupportedLocale | undefined;
 }
 
 export const PAGE_SIZE = 25;
 
-export async function fetchNftTdhResults(
-  contract: string,
-  nftId: number,
-  walletFilter: string,
-  page: number,
-  sort: string,
-  sort_direction: string
-) {
-  const url = `tdh/nft`;
+const CSV_HEADERS = [
+  "rank",
+  "collector",
+  "primary_wallet",
+  "balance",
+  "card_tdh",
+  "card_unweighted_tdh",
+  "total_balance",
+  "total_tdh",
+  "total_unweighted_tdh",
+] as const;
+
+interface FetchNftTdhResultsParams {
+  readonly contract: string;
+  readonly nftId: number;
+  readonly walletFilter: string;
+  readonly page: number;
+  readonly sort: string;
+  readonly sortDirection: string;
+  readonly signal?: AbortSignal;
+}
+
+type FetchAllNftTdhResultsParams = Omit<FetchNftTdhResultsParams, "page">;
+
+function getNftTdhEndpoint({
+  contract,
+  nftId,
+  walletFilter,
+  page,
+  sort,
+  sortDirection,
+}: Readonly<Omit<FetchNftTdhResultsParams, "signal">>) {
+  return `tdh/nft/${contract}/${nftId}?${walletFilter}&page_size=${PAGE_SIZE}&page=${page}&sort=${sort}&sort_direction=${sortDirection}`;
+}
+
+function getWalletFilter(searchWallets: readonly string[]) {
+  if (searchWallets.length === 0) {
+    return "";
+  }
+
+  return `&search=${searchWallets.join(",")}`;
+}
+
+export async function fetchNftTdhResults({
+  contract,
+  nftId,
+  walletFilter,
+  page,
+  sort,
+  sortDirection,
+  signal,
+}: Readonly<FetchNftTdhResultsParams>) {
+  const endpoint = getNftTdhEndpoint({
+    contract,
+    nftId,
+    walletFilter,
+    page,
+    sort,
+    sortDirection,
+  });
   const results = await commonApiFetch<DBResponse<NftTDH>>({
-    endpoint: `${url}/${contract}/${nftId}?${walletFilter}&page_size=${PAGE_SIZE}&page=${page}&sort=${sort}&sort_direction=${sort_direction}`,
+    endpoint,
+    ...(signal ? { signal } : {}),
   });
   results.data.forEach((lead: NftTDH) => {
     lead.cic_type = cicToType(lead.cic_score);
@@ -49,9 +115,113 @@ export async function fetchNftTdhResults(
   return results;
 }
 
+export async function fetchAllNftTdhResults({
+  contract,
+  nftId,
+  walletFilter,
+  sort,
+  sortDirection,
+  signal,
+}: Readonly<FetchAllNftTdhResultsParams>) {
+  const firstPage = await fetchNftTdhResults({
+    contract,
+    nftId,
+    walletFilter,
+    page: 1,
+    sort,
+    sortDirection,
+    ...(signal !== undefined ? { signal } : {}),
+  });
+  const totalPages = Math.ceil(firstPage.count / PAGE_SIZE);
+  const allResults = [...firstPage.data];
+
+  for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+    const response = await fetchNftTdhResults({
+      contract,
+      nftId,
+      walletFilter,
+      page: currentPage,
+      sort,
+      sortDirection,
+      ...(signal !== undefined ? { signal } : {}),
+    });
+    allResults.push(...response.data);
+  }
+
+  return allResults;
+}
+
+function getCollectorCsvName(collector: NftTDH) {
+  const populatedName = [
+    collector.handle,
+    collector.consolidation_display,
+    collector.consolidation_key,
+  ].find((value) => value.trim().length > 0);
+
+  return populatedName ?? "";
+}
+
+function escapeCsvValue(value: number | string | null | undefined) {
+  const stringValue = value === null || value === undefined ? "" : `${value}`;
+
+  if (!/[",\n\r]/.test(stringValue)) {
+    return stringValue;
+  }
+
+  return `"${stringValue.replaceAll('"', '""')}"`;
+}
+
+export function buildNftCollectorsCsv(
+  collectors: readonly NftTDH[],
+  isSearchFiltered: boolean
+) {
+  const rows = collectors.map((collector, index) => {
+    const rank = isSearchFiltered ? collector.tdh_rank : index + 1;
+
+    return [
+      rank,
+      getCollectorCsvName(collector),
+      collector.primary_wallet,
+      collector.balance,
+      collector.boosted_tdh,
+      collector.tdh__raw,
+      collector.total_balance,
+      collector.total_boosted_tdh,
+      collector.total_tdh__raw,
+    ]
+      .map(escapeCsvValue)
+      .join(",");
+  });
+
+  return `${[CSV_HEADERS.join(","), ...rows].join("\n")}\n`;
+}
+
+export function downloadNftCollectorsCsv(nftId: number, csv: string) {
+  if (
+    typeof document === "undefined" ||
+    typeof globalThis.URL.createObjectURL !== "function"
+  ) {
+    throw new Error("CSV downloads are unavailable in this browser.");
+  }
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = globalThis.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  try {
+    link.href = url;
+    link.download = `the-memes-${nftId}-collectors.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } finally {
+    globalThis.URL.revokeObjectURL(url);
+  }
+}
+
 export function setScrollPosition() {
   const top = document.getElementById("nft-leaderboard")?.offsetTop;
-  if (top && window.scrollY > 0) {
+  if (top !== undefined && top > 0 && window.scrollY > 0) {
     window.scrollTo({
       top: top,
       behavior: "smooth",
@@ -96,57 +266,221 @@ export interface NftTDHRanked extends NftTDH {
   rank: number;
 }
 
-export default function NFTLeaderboard(props: Readonly<Props>) {
-  const leaderboardSectionRef = useRef<HTMLElement | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<NftTDHRanked[]>([]);
-  const [fetchingLeaderboard, setFetchingLeaderboard] = useState(true);
-  const [sort, setSort] = useState<{
+interface LeaderboardViewState {
+  page: number;
+  sort: {
     sort: Sort;
     sort_direction: SortDirection;
-  }>({ sort: Sort.balance, sort_direction: SortDirection.DESC });
+  };
+  showSearchModal: boolean;
+  searchWallets: string[];
+}
 
-  const [showSearchModal, setShowSearchModal] = useState(false);
-  const [searchWallets, setSearchWallets] = useState<string[]>([]);
+function CollectorsCsvDownloadControls({
+  children,
+  contract,
+  nftId,
+  locale,
+  searchWallets,
+  sort,
+  sortDirection,
+}: Readonly<{
+  children: ReactNode;
+  contract: string;
+  nftId: number;
+  locale: SupportedLocale;
+  searchWallets: readonly string[];
+  sort: Sort;
+  sortDirection: SortDirection;
+}>) {
+  const csvAbortControllerRef = useRef<AbortController | null>(null);
+  const [csvDownloadState, setCsvDownloadState] = useState<
+    Readonly<{
+      status: "idle" | "downloading" | "error";
+      requestKey: string | null;
+    }>
+  >({ status: "idle", requestKey: null });
+  const csvRequestKey = `${contract}:${nftId}:${searchWallets.join(",")}:${sort}:${sortDirection}`;
+  const csvStatus =
+    csvDownloadState.requestKey === csvRequestKey
+      ? csvDownloadState.status
+      : "idle";
 
-  async function fetchResults() {
-    setFetchingLeaderboard(true);
-    let walletFilter = "";
-    if (searchWallets && searchWallets.length > 0) {
-      walletFilter = `&search=${searchWallets.join(",")}`;
+  useEffect(() => {
+    csvAbortControllerRef.current?.abort();
+    csvAbortControllerRef.current = null;
+  }, [contract, nftId, searchWallets, sort, sortDirection]);
+
+  useEffect(() => {
+    return () => {
+      csvAbortControllerRef.current?.abort();
+    };
+  }, []);
+
+  const handleCsvDownload = useCallback(() => {
+    if (csvStatus === "downloading") {
+      return;
     }
-    const response = await fetchNftTdhResults(
+
+    const abortController = new AbortController();
+    csvAbortControllerRef.current?.abort();
+    csvAbortControllerRef.current = abortController;
+    setCsvDownloadState({
+      status: "downloading",
+      requestKey: csvRequestKey,
+    });
+
+    void (async () => {
+      try {
+        const collectors = await fetchAllNftTdhResults({
+          contract,
+          nftId,
+          walletFilter: getWalletFilter(searchWallets),
+          sort,
+          sortDirection,
+          signal: abortController.signal,
+        });
+        const csv = buildNftCollectorsCsv(collectors, searchWallets.length > 0);
+        downloadNftCollectorsCsv(nftId, csv);
+        if (!abortController.signal.aborted) {
+          setCsvDownloadState({
+            status: "idle",
+            requestKey: csvRequestKey,
+          });
+        }
+      } catch {
+        if (!abortController.signal.aborted) {
+          setCsvDownloadState({
+            status: "error",
+            requestKey: csvRequestKey,
+          });
+        }
+      } finally {
+        if (csvAbortControllerRef.current === abortController) {
+          csvAbortControllerRef.current = null;
+        }
+      }
+    })();
+  }, [
+    contract,
+    csvRequestKey,
+    csvStatus,
+    nftId,
+    searchWallets,
+    sort,
+    sortDirection,
+  ]);
+
+  const isCsvDownloading = csvStatus === "downloading";
+
+  return (
+    <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
+        <button
+          type="button"
+          onClick={handleCsvDownload}
+          disabled={isCsvDownloading}
+          aria-busy={isCsvDownloading}
+          aria-label={t(
+            locale,
+            "theMemes.detail.collectors.downloadCsvAriaLabel"
+          )}
+          className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-200 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+        >
+          <span className="tw-whitespace-nowrap">
+            {isCsvDownloading
+              ? t(locale, "theMemes.detail.collectors.downloadingCsv")
+              : t(locale, "theMemes.detail.collectors.downloadCsv")}
+          </span>
+          <FontAwesomeIcon
+            icon={isCsvDownloading ? faSpinner : faDownload}
+            className={`tw-size-3.5 ${isCsvDownloading ? "tw-animate-spin" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
+        {children}
+      </div>
+      {csvStatus === "error" && (
+        <p
+          className="tw-mb-0 tw-mt-0 tw-text-right tw-text-sm tw-font-medium tw-text-error"
+          role="alert"
+        >
+          {t(locale, "theMemes.detail.collectors.downloadCsvError")}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export default function NFTLeaderboard(props: Readonly<Props>) {
+  const locale = props.locale ?? DEFAULT_LOCALE;
+  const leaderboardSectionRef = useRef<HTMLElement | null>(null);
+  const [viewState, setViewState] = useState<LeaderboardViewState>({
+    page: 1,
+    sort: { sort: Sort.balance, sort_direction: SortDirection.DESC },
+    showSearchModal: false,
+    searchWallets: [],
+  });
+  const { page, searchWallets, showSearchModal, sort } = viewState;
+
+  const setPage = useCallback((newPage: number) => {
+    setViewState((current) => ({ ...current, page: newPage }));
+  }, []);
+
+  const setSearchWallets = useCallback((wallets: string[]) => {
+    setViewState((current) => ({
+      ...current,
+      page: 1,
+      searchWallets: wallets,
+    }));
+  }, []);
+
+  const setShowSearchModal = useCallback((show: boolean) => {
+    setViewState((current) => ({ ...current, showSearchModal: show }));
+  }, []);
+
+  const setSort = useCallback((nextSort: LeaderboardViewState["sort"]) => {
+    setViewState((current) => ({ ...current, page: 1, sort: nextSort }));
+  }, []);
+
+  const leaderboardQueryParams = useMemo(
+    () => ({
+      contract: props.contract,
+      nftId: props.nftId,
+      walletFilter: getWalletFilter(searchWallets),
+      page,
+      sort: sort.sort,
+      sortDirection: sort.sort_direction,
+    }),
+    [
+      page,
       props.contract,
       props.nftId,
-      walletFilter,
-      page,
+      searchWallets,
       sort.sort,
-      sort.sort_direction
-    );
-    setTotalResults(response.count);
-    const data: NftTDHRanked[] = response.data.map((lead, index) => {
+      sort.sort_direction,
+    ]
+  );
+
+  const leaderboardQuery = useQuery({
+    queryKey: [QueryKey.NFTS, "tdh", leaderboardQueryParams],
+    queryFn: async ({ signal }) =>
+      await fetchNftTdhResults({ ...leaderboardQueryParams, signal }),
+    placeholderData: keepPreviousData,
+  });
+
+  const leaderboard = useMemo<NftTDHRanked[]>(() => {
+    return (leaderboardQuery.data?.data ?? []).map((lead, index) => {
       const rank =
         searchWallets.length > 0
           ? lead.tdh_rank
           : index + 1 + (page - 1) * PAGE_SIZE;
       return { ...lead, rank };
     });
-    setLeaderboard(data);
-    setFetchingLeaderboard(false);
-  }
+  }, [leaderboardQuery.data, page, searchWallets.length]);
 
-  useEffect(() => {
-    if (page === 1) {
-      fetchResults();
-    } else {
-      setPage(1);
-    }
-  }, [sort, searchWallets]);
-
-  useEffect(() => {
-    fetchResults();
-  }, [page]);
+  const totalResults = leaderboardQuery.data?.count ?? 0;
+  const fetchingLeaderboard = leaderboardQuery.isFetching;
 
   function getCaretClassName(sortOption: Sort, sortDirection: SortDirection) {
     const active =
@@ -210,13 +544,16 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
     );
   }
 
-  const handleLeaderboardPageChange = useCallback((newPage: number) => {
-    setPage(newPage);
-    leaderboardSectionRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, []);
+  const handleLeaderboardPageChange = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+      leaderboardSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    },
+    [setPage]
+  );
 
   return (
     <section
@@ -226,13 +563,22 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
     >
       <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          Collectors leaderboard
+          {t(locale, "theMemes.detail.collectors.leaderboardTitle")}
         </h3>
-        <SearchWalletsDisplay
+        <CollectorsCsvDownloadControls
+          contract={props.contract}
+          nftId={props.nftId}
+          locale={locale}
           searchWallets={searchWallets}
-          setSearchWallets={setSearchWallets}
-          setShowSearchModal={setShowSearchModal}
-        />
+          sort={sort.sort}
+          sortDirection={sort.sort_direction}
+        >
+          <SearchWalletsDisplay
+            searchWallets={searchWallets}
+            setSearchWallets={setSearchWallets}
+            setShowSearchModal={setShowSearchModal}
+          />
+        </CollectorsCsvDownloadControls>
       </div>
       <div className="tw-overflow-x-auto">
         <table className="tw-w-full tw-min-w-[23rem] tw-border-collapse md:tw-min-w-[1040px]">
