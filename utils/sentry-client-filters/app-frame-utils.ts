@@ -9,6 +9,8 @@ import {
   injectedProviderProxyPath,
   injectedWasmCspAppUriPath,
   injectedWasmCspCollapsedPath,
+  injectedWasmCspStaticChunkFunction,
+  injectedWasmCspStaticChunkPathPattern,
   nextStaticFramePathToken,
   NEXT_STATIC_CHUNK_FRAME_PATTERNS,
   REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS,
@@ -113,8 +115,40 @@ function isInjectedWasmCspFramePath(path: string): boolean {
   );
 }
 
+function isInjectedWasmCspStaticChunkFrame(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some((path) =>
+    isInjectedWasmCspStaticChunkFramePath(frame, path)
+  );
+}
+
+function isInjectedWasmCspStaticChunkFramePath(
+  frame: SentryStackFrame,
+  path: string
+): boolean {
+  return (
+    frame.function?.trim() === injectedWasmCspStaticChunkFunction &&
+    injectedWasmCspStaticChunkPathPattern.test(path.trim())
+  );
+}
+
+function hasAppOwnedWasmCspFramePath(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some(
+    (path) =>
+      !isInjectedWasmCspFramePath(path) &&
+      !isInjectedWasmCspStaticChunkFramePath(frame, path) &&
+      isFirstPartyFramePath(path)
+  );
+}
+
 function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
-  return getFramePaths(frame).some(isInjectedWasmCspFramePath);
+  if (hasAppOwnedWasmCspFramePath(frame)) {
+    return false;
+  }
+
+  return (
+    getFramePaths(frame).some(isInjectedWasmCspFramePath) ||
+    isInjectedWasmCspStaticChunkFrame(frame)
+  );
 }
 
 export function isFirstPartyFramePath(path: string): boolean {
@@ -142,11 +176,15 @@ export function isFirstPartyFramePath(path: string): boolean {
 }
 
 function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
-  if (frame.in_app === true && !isInjectedWasmCspFrame(frame)) {
+  if (isInjectedWasmCspFrame(frame)) {
+    return false;
+  }
+
+  if (frame.in_app === true) {
     return true;
   }
 
-  return getFramePaths(frame).some(isFirstPartyFramePath);
+  return hasAppOwnedWasmCspFramePath(frame);
 }
 
 export function isInjectedOrThirdPartyWalletExtensionPath(

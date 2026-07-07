@@ -326,6 +326,40 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops observed Sentry E7 WebAssembly CSP unsafe-eval errors from injected static chunks", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      transaction: "/waves",
+      exception: {
+        values: [
+          {
+            type: "RuntimeError",
+            value: wasmCspUnsafeEvalMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  function: "k",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tags: {
+        environment: "production",
+        transaction: "/waves",
+        url: "/waves",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops gif-picker Tenor category errors with no app frames", () => {
     const beforeSend = loadBeforeSend();
     const event = {
