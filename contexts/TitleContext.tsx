@@ -2,10 +2,13 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
+  Suspense,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -28,6 +31,31 @@ type TitleContextType = {
   setNotificationCount: (count: number) => void;
   setWaveData: (data: { name: string; newItemsCount: number } | null) => void;
 };
+
+interface SearchParamsLike {
+  get: (key: string) => string | null;
+  toString: () => string;
+}
+
+type WaveTitleData = {
+  name: string;
+  newItemsCount: number;
+};
+
+type TitleState = {
+  title: string;
+  titlePathname: string | null;
+  explicitTitlePathname: string | null;
+  notificationCount: number;
+  waveData: WaveTitleData | null;
+};
+
+type TitleAction =
+  | { type: "reset-route-title"; pathname: string | null }
+  | { type: "clear-wave-data" }
+  | { type: "set-title"; title: string; pathname: string | null }
+  | { type: "set-notification-count"; count: number }
+  | { type: "set-wave-data"; data: WaveTitleData | null };
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
 
@@ -80,29 +108,96 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
   return DEFAULT_TITLE;
 };
 
+const createInitialTitleState = (pathname: string | null): TitleState => ({
+  title: getDefaultTitleForRoute(pathname),
+  titlePathname: pathname,
+  explicitTitlePathname: null,
+  notificationCount: 0,
+  waveData: null,
+});
+
+const titleReducer = (state: TitleState, action: TitleAction): TitleState => {
+  switch (action.type) {
+    case "reset-route-title":
+      if (state.explicitTitlePathname === action.pathname) {
+        return state.waveData ? { ...state, waveData: null } : state;
+      }
+      return {
+        ...state,
+        title: getDefaultTitleForRoute(action.pathname),
+        titlePathname: action.pathname,
+        explicitTitlePathname: null,
+        waveData: null,
+      };
+    case "clear-wave-data":
+      return state.waveData ? { ...state, waveData: null } : state;
+    case "set-title":
+      return {
+        ...state,
+        title: action.title,
+        titlePathname: action.pathname,
+        explicitTitlePathname: action.pathname,
+      };
+    case "set-notification-count":
+      return state.notificationCount === action.count
+        ? state
+        : { ...state, notificationCount: action.count };
+    case "set-wave-data":
+      return { ...state, waveData: action.data };
+  }
+};
+
+function TitleSearchParamsTracker({
+  onChange,
+}: {
+  readonly onChange: (searchParams: SearchParamsLike | null) => void;
+}) {
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by TitleProvider Suspense wrapper
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    onChange(searchParams ?? null);
+  }, [onChange, searchParams]);
+
+  return null;
+}
+
 export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const myStream = useMyStreamOptional();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [title, setTitle] = useState<string>(() =>
-    getDefaultTitleForRoute(pathname)
+  const [searchParams, setSearchParams] = useState<SearchParamsLike | null>(
+    null
   );
-  // Pathname the current title text was computed for.
-  const [titlePathname, setTitlePathname] = useState<string | null>(pathname);
-  // Pathname the explicit title was claimed for: ownership evaporates in the
-  // same render as a navigation, before any effect-based reset runs.
-  const [explicitTitlePathname, setExplicitTitlePathname] = useState<
-    string | null
-  >(null);
-  const [notificationCount, setNotificationCount] = useState<number>(0);
-  const [waveData, setWaveData] = useState<{
-    name: string;
-    newItemsCount: number;
-  } | null>(null);
+  const [titleState, dispatchTitle] = useReducer(
+    titleReducer,
+    pathname,
+    createInitialTitleState
+  );
+  const {
+    title,
+    titlePathname,
+    explicitTitlePathname,
+    notificationCount,
+    waveData,
+  } = titleState;
   const routeRef = useRef(pathname);
-  const queryRef = useRef(searchParams);
+  const currentPathRef = useRef(pathname);
+  const searchParamsKeyRef = useRef<string | null>(null);
+  const queryRef = useRef<SearchParamsLike | null>(searchParams);
+  currentPathRef.current = pathname;
+  const handleSearchParamsChange = useCallback(
+    (nextSearchParams: SearchParamsLike | null) => {
+      const nextSearchParamsKey = nextSearchParams?.toString() ?? null;
+      if (searchParamsKeyRef.current === nextSearchParamsKey) {
+        return;
+      }
+      searchParamsKeyRef.current = nextSearchParamsKey;
+      setSearchParams(nextSearchParams);
+    },
+    []
+  );
   const isWaveRoute =
     pathname?.startsWith("/waves") ||
     pathname?.startsWith("/messages") ||
@@ -127,15 +222,12 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     queryRef.current = searchParams;
 
     if (pathnameChanged) {
-      setTitle(getDefaultTitleForRoute(pathname));
-      setTitlePathname(pathname);
-      setExplicitTitlePathname(null);
-      setWaveData(null);
+      dispatchTitle({ type: "reset-route-title", pathname });
       return;
     }
 
     if (!isWaveRoute) {
-      setWaveData(null);
+      dispatchTitle({ type: "clear-wave-data" });
       return;
     }
 
@@ -143,20 +235,23 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       previousWaveInUrl &&
       (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
     ) {
-      setTitle(getDefaultTitleForRoute(pathname));
-      setTitlePathname(pathname);
-      setExplicitTitlePathname(null);
-      setWaveData(null);
+      dispatchTitle({ type: "reset-route-title", pathname });
     }
-  }, [pathname, searchParams]);
+  }, [isWaveRoute, pathname, searchParams]);
 
-  const updateTitle = (newTitle: string) => {
-    if (routeRef.current === pathname) {
-      setTitle(newTitle);
-      setTitlePathname(pathname);
-      setExplicitTitlePathname(pathname);
+  const updateTitle = useCallback((newTitle: string) => {
+    if (currentPathRef.current === pathname) {
+      dispatchTitle({ type: "set-title", title: newTitle, pathname });
     }
-  };
+  }, [pathname]);
+
+  const setNotificationCount = useCallback((count: number) => {
+    dispatchTitle({ type: "set-notification-count", count });
+  }, []);
+
+  const setWaveData = useCallback((data: WaveTitleData | null) => {
+    dispatchTitle({ type: "set-wave-data", data });
+  }, []);
 
   // Compute the title based on current state
   const computedTitle = useMemo(() => {
@@ -202,10 +297,21 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       setNotificationCount,
       setWaveData,
     };
-  }, [computedTitle, isTitleOwned, notificationCount, titlePathname]);
+  }, [
+    computedTitle,
+    isTitleOwned,
+    notificationCount,
+    setNotificationCount,
+    setWaveData,
+    titlePathname,
+    updateTitle,
+  ]);
 
   return (
     <TitleContext.Provider value={contextValue}>
+      <Suspense fallback={null}>
+        <TitleSearchParamsTracker onChange={handleSearchParamsChange} />
+      </Suspense>
       {children}
     </TitleContext.Provider>
   );
@@ -225,6 +331,7 @@ export const useSetTitle = (pageTitle: string) => {
   const pathname = usePathname();
 
   // Set title immediately on mount and when title changes
+  // react-doctor-disable-next-line react-doctor/no-derived-state-effect page title ownership is synchronized into TitleProvider context
   useEffect(() => {
     setTitle(pageTitle);
   }, [pageTitle, setTitle, pathname]);
@@ -236,6 +343,7 @@ export const useSetWaveData = (
 ) => {
   const { setWaveData } = useTitle();
 
+  // react-doctor-disable-next-line react-doctor/no-derived-state-effect wave metadata is synchronized into TitleProvider context
   useEffect(() => {
     setWaveData(data);
   }, [data, setWaveData]);

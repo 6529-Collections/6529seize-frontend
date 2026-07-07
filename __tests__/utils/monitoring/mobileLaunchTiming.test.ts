@@ -139,6 +139,8 @@ describe("mobileLaunchTiming", () => {
     const { timing, sentry } = await loadMobileLaunchTiming();
 
     timing.startMobileLaunchTiming();
+    currentNow = 40;
+    timing.markMobileLaunchStep("wagmi_shell_unblocked");
     currentNow = 120;
     timing.markMobileLaunchStep("wagmi_children_unblocked");
     currentNow = 180;
@@ -179,14 +181,19 @@ describe("mobileLaunchTiming", () => {
         layout_measure_complete_bucket: "0_500",
         provider_gate_ms: 120,
         provider_gate_bucket: "0_500",
+        provider_shell_gate_ms: 40,
+        provider_shell_gate_bucket: "0_500",
         shell_after_wagmi_ms: 80,
         shell_after_wagmi_bucket: "0_500",
         step_first_drop_rendered_ms: 340,
         step_first_useful_app_shell_ms: 200,
         step_wagmi_children_unblocked_ms: 120,
+        step_wagmi_shell_unblocked_ms: 40,
         step_wave_messages_loaded_ms: 240,
         step_wave_metadata_loaded_ms: 180,
         total_launch_bucket: "0_500",
+        wallet_provider_after_shell_ms: 80,
+        wallet_provider_after_shell_bucket: "0_500",
         wave_messages_loaded_ms: 240,
         wave_messages_loaded_bucket: "0_500",
         wave_metadata_loaded_ms: 180,
