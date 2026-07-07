@@ -135,11 +135,11 @@ function hasRouteParameterizationNavigationBreadcrumb(
 ): boolean {
   return getBreadcrumbValues(event).some((breadcrumb) => {
     const data = breadcrumb.data;
-    if (
-      breadcrumb.category !== "navigation" ||
-      typeof data?.["from"] !== "string" ||
-      typeof data?.["to"] !== "string"
-    ) {
+    if (breadcrumb.category !== "navigation" || !data) {
+      return false;
+    }
+
+    if (typeof data["from"] !== "string" || typeof data["to"] !== "string") {
       return false;
     }
 
@@ -200,21 +200,18 @@ export function hasMetaMaskMobileWebViewContext(
   event: SentryClientEvent
 ): boolean {
   const contextValues = getRouteParameterizationContextValues(event);
-  if (
-    contextValues.some((value) =>
+  const userAgentValues = getRouteParameterizationUserAgentValues(event);
+  const values = [...contextValues, ...userAgentValues];
+
+  return (
+    values.some((value) =>
       matchesContextToken(value, metaMaskMobileContextTokens)
     ) &&
-    contextValues.some((value) =>
-      matchesContextToken(value, mobileSafariWebViewContextTokens)
+    values.some(
+      (value) =>
+        matchesContextToken(value, mobileSafariWebViewContextTokens) ||
+        matchesContextToken(value, webViewUserAgentTokens)
     )
-  ) {
-    return true;
-  }
-
-  return getRouteParameterizationUserAgentValues(event).some(
-    (value) =>
-      matchesContextToken(value, metaMaskMobileContextTokens) &&
-      matchesContextToken(value, webViewUserAgentTokens)
   );
 }
 

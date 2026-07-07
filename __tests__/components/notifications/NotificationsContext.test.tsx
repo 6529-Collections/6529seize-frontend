@@ -84,6 +84,10 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <NotificationsProvider>{children}</NotificationsProvider>
 );
 
+const flushMicrotasks = async () => {
+  await Promise.resolve();
+};
+
 beforeEach(() => {
   const { getAuthJwt, isAuthJwtUsable } = require("@/services/auth/auth.utils");
 
@@ -441,7 +445,9 @@ describe("push registration behavior", () => {
       await registrationCallback({ value: "test-token" });
     });
 
-    expect(commonApiPost).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(commonApiPost).toHaveBeenCalledTimes(2);
+    });
     expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Push registration attempt failed. Retrying.",
@@ -477,7 +483,12 @@ describe("push registration behavior", () => {
       await registrationCallback({ value: "test-token" });
     });
 
-    expect(commonApiPost).toHaveBeenCalledTimes(2);
+    await waitFor(
+      () => {
+        expect(commonApiPost).toHaveBeenCalledTimes(2);
+      },
+      { timeout: 3000 }
+    );
     expect(commonApiPost).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ errorMode: "structured" })
@@ -542,6 +553,14 @@ describe("push registration behavior", () => {
 
     await act(async () => {
       await registrationCallback({ value: "test-token" });
+    });
+
+    await waitFor(() => {
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+    });
+    await act(flushMicrotasks);
+
+    await act(async () => {
       await registrationCallback({ value: "test-token" });
     });
 
@@ -577,62 +596,66 @@ describe("push registration behavior", () => {
     );
   });
 
-  it("records known low-value native registration errors as info breadcrumbs", async () => {
-    const sentry = require("@sentry/nextjs");
-    const nativeError = new Error(
-      "The operation couldn't be completed. (com.google.iid error -25291.)"
-    );
-    const { registrationErrorCallback } = await setupRegistrationCallback();
+  it.each(["-25291", "-25299"])(
+    "records known low-value native registration error %s as an info breadcrumb",
+    async (errorCode) => {
+      const sentry = require("@sentry/nextjs");
+      const errorMessage = `The operation couldn't be completed. (com.google.iid error ${errorCode}.)`;
+      const nativeError = new Error(errorMessage);
+      const { registrationErrorCallback } = await setupRegistrationCallback();
 
-    act(() => {
-      registrationErrorCallback(nativeError);
-    });
+      act(() => {
+        registrationErrorCallback(nativeError);
+      });
 
-    expect(sentry.captureException).not.toHaveBeenCalled();
-    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
-      expect.objectContaining({
-        level: "info",
-        message: "Push registration low-value native error.",
-        data: expect.objectContaining({
-          component: "NotificationsProvider",
-          operation: "pushRegistrationError",
-          retryable: false,
-          known_low_value: true,
-          error_message:
-            "The operation couldn't be completed. (com.google.iid error -25291.)",
-        }),
-      })
-    );
-  });
+      expect(sentry.captureException).not.toHaveBeenCalled();
+      expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: "info",
+          message: "Push registration low-value native error.",
+          data: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "pushRegistrationError",
+            retryable: false,
+            known_low_value: true,
+            error_message: errorMessage,
+          }),
+        })
+      );
+    }
+  );
 
-  it("records low-value native registration errors by domain and code", async () => {
-    const sentry = require("@sentry/nextjs");
-    const nativeError = {
-      domain: "com.google.iid",
-      code: -25291,
-    };
-    const { registrationErrorCallback } = await setupRegistrationCallback();
+  it.each([-25291, -25299])(
+    "records low-value native registration errors by domain and code %i",
+    async (code) => {
+      const sentry = require("@sentry/nextjs");
+      const nativeError = {
+        domain: "com.google.iid",
+        code,
+      };
+      const { registrationErrorCallback } = await setupRegistrationCallback();
 
-    act(() => {
-      registrationErrorCallback(nativeError);
-    });
+      act(() => {
+        registrationErrorCallback(nativeError);
+      });
 
-    expect(sentry.captureException).not.toHaveBeenCalled();
-    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
-      expect.objectContaining({
-        level: "info",
-        message: "Push registration low-value native error.",
-        data: expect.objectContaining({
-          component: "NotificationsProvider",
-          operation: "pushRegistrationError",
-          retryable: false,
-          known_low_value: true,
-          error_code: -25291,
-          error_message: "Unknown notification error",
-        }),
-      })
-    );
-  });
+      expect(sentry.captureException).not.toHaveBeenCalled();
+      expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: "info",
+          message: "Push registration low-value native error.",
+          data: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "pushRegistrationError",
+            retryable: false,
+            known_low_value: true,
+            error_code: code,
+            error_message: "Unknown notification error",
+          }),
+        })
+      );
+    }
+  );
 
   it("captures non-transient native registration objects as Error instances", async () => {
     const sentry = require("@sentry/nextjs");
