@@ -62,10 +62,14 @@ const useCapacitor = () => {
       window.matchMedia("(orientation: portrait)").matches;
 
     const handleOrientationChange = () => {
-      setOrientation(
-        isPortrait()
-          ? CapacitorOrientationType.PORTRAIT
-          : CapacitorOrientationType.LANDSCAPE
+      const nextOrientation = isPortrait()
+        ? CapacitorOrientationType.PORTRAIT
+        : CapacitorOrientationType.LANDSCAPE;
+
+      setOrientation((currentOrientation) =>
+        currentOrientation === nextOrientation
+          ? currentOrientation
+          : nextOrientation
       );
     };
 

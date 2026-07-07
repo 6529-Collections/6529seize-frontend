@@ -11,6 +11,7 @@ const injectedAppUriPath = "app:///injected/injected.js";
 export const injectedWalletCollisionAppUriPaths = [
   injectedAppUriPath,
   "app:///requestProvider.js",
+  "app:///inject-runtime.js",
 ];
 export const walletCollisionPatterns = [
   "tronlinkparams",
@@ -18,6 +19,8 @@ export const walletCollisionPatterns = [
   "cannot assign to read only property 'ethereum'",
   'cannot assign to read only property "ethereum"',
   "cannot redefine property: ethereum",
+  "cannot assign to read only property 'keplr'",
+  'cannot assign to read only property "keplr"',
 ];
 export const coinbaseWalletSdkPathTokens = [
   "@coinbase/wallet-sdk",

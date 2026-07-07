@@ -65,4 +65,26 @@ describe("useCapacitor", () => {
     });
     expect(result.current.isActive).toBe(true);
   });
+
+  it("ignores repeated orientationchange events with the same orientation", async () => {
+    const renderSpy = jest.fn();
+    const { result } = renderHook(() => {
+      renderSpy();
+      return useCapacitor();
+    });
+
+    await waitFor(() => {
+      expect(result.current.orientation).toBe(0); // PORTRAIT
+    });
+
+    const renderCountAfterInitialSync = renderSpy.mock.calls.length;
+
+    act(() => {
+      window.dispatchEvent(new Event("orientationchange"));
+      window.dispatchEvent(new Event("orientationchange"));
+    });
+
+    expect(result.current.orientation).toBe(0); // PORTRAIT
+    expect(renderSpy).toHaveBeenCalledTimes(renderCountAfterInitialSync);
+  });
 });
