@@ -581,6 +581,7 @@ function buildMilestoneAttributes(
   addStepOffsetAttr(attrs, state, "wagmi_init_start");
   addStepOffsetAttr(attrs, state, "wagmi_adapter_created");
   addStepOffsetAttr(attrs, state, "wagmi_ready");
+  addStepOffsetAttr(attrs, state, "wagmi_shell_unblocked");
   addStepOffsetAttr(attrs, state, "wagmi_children_unblocked");
   addStepOffsetAttr(attrs, state, "auth_provider_mounted");
   addStepOffsetAttr(attrs, state, "auth_ready");
@@ -594,14 +595,34 @@ function buildMilestoneAttributes(
   addStepDurationAttr(attrs, state, "app_wallets_secure_storage_support_check");
   addStepDurationAttr(attrs, state, "app_wallets_load");
 
+  const wagmiShellUnblockedMs = getStepOffsetMs(
+    state,
+    "wagmi_shell_unblocked"
+  );
   const wagmiUnblockedMs = getStepOffsetMs(state, "wagmi_children_unblocked");
   const wagmiReadyMs = getStepOffsetMs(state, "wagmi_ready");
   const shellMs = getStepOffsetMs(state, "first_useful_app_shell");
   const wavesContentMs = getStepOffsetMs(state, "waves_first_content_visible");
 
+  if (wagmiShellUnblockedMs !== undefined) {
+    attrs["provider_shell_gate_ms"] = wagmiShellUnblockedMs;
+    attrs["provider_shell_gate_bucket"] = bucketMs(wagmiShellUnblockedMs);
+  }
+
   if (wagmiUnblockedMs !== undefined) {
     attrs["provider_gate_ms"] = wagmiUnblockedMs;
     attrs["provider_gate_bucket"] = bucketMs(wagmiUnblockedMs);
+  }
+
+  if (wagmiShellUnblockedMs !== undefined && wagmiUnblockedMs !== undefined) {
+    const walletProviderAfterShellMs = Math.max(
+      0,
+      roundMs(wagmiUnblockedMs - wagmiShellUnblockedMs)
+    );
+    attrs["wallet_provider_after_shell_ms"] = walletProviderAfterShellMs;
+    attrs["wallet_provider_after_shell_bucket"] = bucketMs(
+      walletProviderAfterShellMs
+    );
   }
 
   if (wagmiReadyMs !== undefined && wagmiUnblockedMs !== undefined) {

@@ -34,6 +34,7 @@ import {
 } from "@/wagmiConfig/wagmiAppWalletConnector";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { Chain } from "viem";
+import WalletStartupFallback from "./WalletStartupFallback";
 
 type MutableRef<T> = {
   current: T;
@@ -298,8 +299,10 @@ function injectAppWalletConnectors({
 
 export default function WagmiSetup({
   children,
+  fallback,
 }: {
   readonly children: React.ReactNode;
+  readonly fallback?: React.ReactNode;
 }) {
   const enableTestnet = publicEnv.DROP_FORGE_TESTNET === true;
 
@@ -478,6 +481,19 @@ export default function WagmiSetup({
     markAdapterReadyForLaunchTiming(currentAdapter);
   }, [currentAdapter]);
 
+  const startupFallback =
+    fallback === undefined ? <WalletStartupFallback /> : fallback;
+  const hasStartupFallback =
+    startupFallback !== null && startupFallback !== false;
+
+  useEffect(() => {
+    if (currentAdapter !== null || !hasStartupFallback) {
+      return;
+    }
+
+    markMobileLaunchStep("wagmi_shell_unblocked");
+  }, [currentAdapter, hasStartupFallback]);
+
   // Inject wallet connectors dynamically using hooks (simplified approach)
   useEffect(() => {
     injectAppWalletConnectors({
@@ -489,9 +505,13 @@ export default function WagmiSetup({
     });
   }, [currentAdapter, appWallets, appWalletPasswordModal, setToast]);
 
-  // Show loading state until the wagmi adapter exists.
+  // Keep a provider-safe shell visible until wagmi hooks can run.
   if (currentAdapter === null) {
-    return null;
+    return (
+      <AppKitBootstrapContext.Provider value={appKitBootstrapValue}>
+        {startupFallback}
+      </AppKitBootstrapContext.Provider>
+    );
   }
 
   return (

@@ -59,10 +59,10 @@ export default function Providers({
 
   const appProviders = (
     <QueryClientSetup>
+      <CapacitorSetup />
+      <IpfsImageSetup />
       <AppWalletsProvider>
         <WagmiSetup>
-          <CapacitorSetup />
-          <IpfsImageSetup />
           <ReactQueryWrapper>
             <RefreshProvider>
               <SeizeSettingsProvider mode={settingsMode}>

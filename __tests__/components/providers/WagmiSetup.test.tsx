@@ -701,6 +701,106 @@ describe("WagmiSetup Security Tests", () => {
   });
 
   describe("State Management Security", () => {
+    it("renders a provider-safe fallback before adapter creation", async () => {
+      let resolveInitialization!: (value: unknown) => void;
+      mockInitializeAppKit.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveInitialization = resolve;
+          })
+      );
+
+      const { container } = render(
+        <WagmiSetup fallback={<div data-testid="startup-shell">Shell</div>}>
+          <div data-testid="children">Test</div>
+        </WagmiSetup>
+      );
+
+      expect(
+        container.querySelector('[data-testid="startup-shell"]')
+      ).toBeTruthy();
+      expect(container.querySelector('[data-testid="children"]')).toBeNull();
+      expect(
+        container.querySelector('[data-testid="wagmi-provider"]')
+      ).toBeNull();
+
+      await waitFor(() => {
+        expect(mockInitializeAppKit).toHaveBeenCalled();
+      });
+
+      await act(async () => {
+        resolveInitialization({
+          adapter: {
+            wagmiConfig: {
+              chains: [],
+              client: {},
+              connectors: [],
+              _internal: {
+                connectors: {
+                  setup: mockConnectorSetup,
+                  setState: mockConnectorSetState,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="startup-shell"]')
+        ).toBeNull();
+        expect(
+          container.querySelector('[data-testid="wagmi-provider"]')
+        ).toBeTruthy();
+        expect(
+          container.querySelector('[data-testid="children"]')
+        ).toBeTruthy();
+      });
+    });
+
+    it("provides bootstrap status to the startup fallback", async () => {
+      let resolveInitialization!: (value: unknown) => void;
+      mockInitializeAppKit.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveInitialization = resolve;
+          })
+      );
+
+      const { container } = render(
+        <WagmiSetup fallback={<AppKitBootstrapProbe />}>
+          <div data-testid="children">Test</div>
+        </WagmiSetup>
+      );
+
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("initializing");
+
+      await waitFor(() => {
+        expect(mockInitializeAppKit).toHaveBeenCalled();
+      });
+
+      await act(async () => {
+        resolveInitialization({
+          adapter: {
+            wagmiConfig: {
+              chains: [],
+              client: {},
+              connectors: [],
+              _internal: {
+                connectors: {
+                  setup: mockConnectorSetup,
+                  setState: mockConnectorSetState,
+                },
+              },
+            },
+          },
+        });
+      });
+    });
+
     it("prevents hydration mismatches by using client-side only mounting", async () => {
       // This test verifies the security pattern of preventing SSR hydration mismatches
       // by ensuring the component handles mounting state properly
