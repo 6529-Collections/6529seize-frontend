@@ -8,6 +8,7 @@ const {
   createReleaseReport,
   evaluateReleaseReadiness,
   heartbeatManifest,
+  parseArgs,
   productionPreflight,
   recordPostDeployWatch,
   recordValidationCheck,
@@ -176,6 +177,23 @@ describe("deployment bus manifest", () => {
     expect(manifest.canary_readiness).toMatchObject({
       current_capability: "not-applicable",
       traffic_splitting_supported: false,
+    });
+  });
+
+  it("keeps empty cli option values as values", () => {
+    expect(
+      parseArgs([
+        "--staging-deploy-sha",
+        STAGING_SHA,
+        "--production-candidate-sha",
+        "",
+        "--production-eligible",
+        "false",
+      ])
+    ).toMatchObject({
+      "staging-deploy-sha": STAGING_SHA,
+      "production-candidate-sha": "",
+      "production-eligible": "false",
     });
   });
 
