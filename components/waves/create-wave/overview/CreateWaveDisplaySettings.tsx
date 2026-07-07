@@ -9,11 +9,43 @@ import {
 } from "@/helpers/waves/wave-metadata.helpers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   CreateWaveApproveDisplayConfig,
   CreateWaveDisplayConfig,
 } from "@/types/waves.types";
 import type { ChangeEvent } from "react";
+
+const getApproveErrorMessage = (
+  errors: readonly CREATE_WAVE_VALIDATION_ERROR[]
+): string | null => {
+  if (
+    errors.includes(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
+    )
+  ) {
+    return `Labels must be ${APPROVE_WAVE_TAB_LABEL_MAX_LENGTH} characters or fewer.`;
+  }
+
+  if (
+    errors.includes(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
+    )
+  ) {
+    return "Use two different tab labels.";
+  }
+
+  if (
+    errors.includes(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
+    )
+  ) {
+    return "Labels cannot match existing tabs.";
+  }
+
+  return null;
+};
 
 export default function CreateWaveDisplaySettings({
   display,
@@ -27,27 +59,14 @@ export default function CreateWaveDisplaySettings({
   readonly waveType: ApiWaveType;
 }) {
   const showApproveTabLabels = waveType === ApiWaveType.Approve;
-  const hasLengthError = errors.includes(
-    CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
-  );
-  const hasDuplicateError = errors.includes(
-    CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
-  );
-  const hasReservedError = errors.includes(
-    CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
-  );
   const hasSubmissionLabelError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
   );
-  const approveErrorMessage = hasLengthError
-    ? `Labels must be ${APPROVE_WAVE_TAB_LABEL_MAX_LENGTH} characters or fewer.`
-    : hasDuplicateError
-      ? "Use two different tab labels."
-      : hasReservedError
-        ? "Labels cannot match existing tabs."
-        : null;
+  const approveErrorMessage = getApproveErrorMessage(errors);
   const submissionLabelErrorMessage = hasSubmissionLabelError
-    ? `Label must be ${WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH} characters or fewer.`
+    ? t(DEFAULT_LOCALE, "waves.submissionButtonLabel.errorTooLong", {
+        max: WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH,
+      })
     : null;
   const approveErrorId = "create-wave-display-settings-error";
   const submissionLabelErrorId = "create-wave-submission-button-label-error";
@@ -118,7 +137,7 @@ export default function CreateWaveDisplaySettings({
             htmlFor="create-wave-submission-button-label"
             className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
           >
-            Submission button label
+            {t(DEFAULT_LOCALE, "waves.submissionButtonLabel.label")}
           </label>
           <input
             id="create-wave-submission-button-label"

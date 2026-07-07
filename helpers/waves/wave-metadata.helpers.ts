@@ -1,6 +1,8 @@
 import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   CreateWaveApproveDisplayConfig,
   CreateWaveDisplayConfig,
@@ -408,11 +410,7 @@ const parseOutcomeVisibilityMetadataValue = (
   value: string | null | undefined
 ): boolean => {
   const normalized = value?.trim().toLowerCase();
-  if (normalized === HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE) {
-    return false;
-  }
-
-  return true;
+  return normalized !== HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE;
 };
 
 export const getWaveOutcomeVisibilityFromMetadata = (
@@ -514,14 +512,19 @@ export const getDefaultWaveSubmissionButtonLabel = (
 ): string => {
   switch (submissionExperience) {
     case WaveSubmissionExperience.QUORUM_PROPOSAL:
-      return "Create Proposal";
+      return t(
+        DEFAULT_LOCALE,
+        "waves.submissionButtonLabel.defaultCreateProposal"
+      );
     case WaveSubmissionExperience.CURATION_LEGACY:
-      return "Drop Art";
+      return t(DEFAULT_LOCALE, "waves.submissionButtonLabel.defaultDropArt");
     case WaveSubmissionExperience.MEMES_LEGACY:
-      return "Drop";
+      return t(DEFAULT_LOCALE, "waves.submissionButtonLabel.defaultDrop");
     case WaveSubmissionExperience.DEFAULT:
     case WaveSubmissionExperience.IDENTITY:
-      return "Drop";
+      return t(DEFAULT_LOCALE, "waves.submissionButtonLabel.defaultDrop");
+    default:
+      return t(DEFAULT_LOCALE, "waves.submissionButtonLabel.defaultDrop");
   }
 };
 

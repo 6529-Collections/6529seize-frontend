@@ -456,6 +456,77 @@ describe("WaveSettingsSections", () => {
     });
   });
 
+  it("restores the previous submission button label when replacement creation fails", async () => {
+    const user = userEvent.setup();
+    const createError = new Error("metadata failed");
+    createWaveMetadataMock
+      .mockRejectedValueOnce(createError)
+      .mockResolvedValueOnce({
+        id: 8,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      });
+    waveMetadata = [
+      {
+        id: 7,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    ];
+    const { setToast, queryClient } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    expect(await screen.findByText("Apply")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit submission button label" })
+    );
+    await user.clear(screen.getByLabelText("Submission button label"));
+    await user.type(
+      screen.getByLabelText("Submission button label"),
+      "Submission"
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledTimes(2);
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 7,
+    });
+    expect(createWaveMetadataMock).toHaveBeenNthCalledWith(1, {
+      waveId: "wave-1",
+      body: {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Submission",
+      },
+    });
+    expect(createWaveMetadataMock).toHaveBeenNthCalledWith(2, {
+      waveId: "wave-1",
+      body: {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    });
+    await waitFor(() => {
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: "Couldn't save this submission button label.",
+          description: "Please try again.",
+        })
+      );
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+    });
+  });
+
   it("saves custom rules metadata", async () => {
     const user = userEvent.setup();
     const { queryClient } = renderSettings({

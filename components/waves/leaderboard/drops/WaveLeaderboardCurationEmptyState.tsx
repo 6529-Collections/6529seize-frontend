@@ -1,5 +1,7 @@
 import React from "react";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface WaveLeaderboardCurationEmptyStateProps {
   readonly onCreateDrop?: (() => void) | undefined;
@@ -18,7 +20,10 @@ export const WaveLeaderboardCurationEmptyState: React.FC<
   onCreateDrop,
   canCreateDrop,
   dropRestrictionMessage,
-  createDropLabel = "Drop",
+  createDropLabel = t(
+    DEFAULT_LOCALE,
+    "waves.submissionButtonLabel.defaultDrop"
+  ),
   dropRestrictionLink,
 }) => {
   const showEligibilityHelper =
