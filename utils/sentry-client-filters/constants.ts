@@ -7,6 +7,8 @@ export const filenameExceptions = [
 ];
 export const injectedWasmCspAppUriPath = "app:///inject.js";
 export const injectedWasmCspCollapsedPath = "///inject.js";
+// Observed Sentry E7 pre-symbolication shape. This is intentionally narrow and
+// can fail open when minification changes, keeping app-owned CSP errors visible.
 export const injectedWasmCspStaticChunkFunction = "k";
 export const injectedWasmCspStaticChunkPathPattern =
   /^app:\/\/\/chunks\/utils-[A-Za-z0-9_-]+\.js(?::\d+(?::\d+)?)?$/;

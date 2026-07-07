@@ -124,7 +124,30 @@ function isInjectedWasmCspStaticChunkFrame(frame: SentryStackFrame): boolean {
   );
 }
 
+function isInjectedWasmCspStaticChunkFramePath(
+  frame: SentryStackFrame,
+  path: string
+): boolean {
+  return (
+    frame.function?.trim() === injectedWasmCspStaticChunkFunction &&
+    injectedWasmCspStaticChunkPathPattern.test(path.trim())
+  );
+}
+
+function hasAppOwnedWasmCspFramePath(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some(
+    (path) =>
+      !isInjectedWasmCspFramePath(path) &&
+      !isInjectedWasmCspStaticChunkFramePath(frame, path) &&
+      isFirstPartyFramePath(path)
+  );
+}
+
 function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
+  if (hasAppOwnedWasmCspFramePath(frame)) {
+    return false;
+  }
+
   return (
     getFramePaths(frame).some(isInjectedWasmCspFramePath) ||
     isInjectedWasmCspStaticChunkFrame(frame)
@@ -164,7 +187,7 @@ function isAppOwnedWasmCspFrame(frame: SentryStackFrame): boolean {
     return true;
   }
 
-  return getFramePaths(frame).some(isFirstPartyFramePath);
+  return hasAppOwnedWasmCspFramePath(frame);
 }
 
 export function isInjectedOrThirdPartyWalletExtensionPath(
