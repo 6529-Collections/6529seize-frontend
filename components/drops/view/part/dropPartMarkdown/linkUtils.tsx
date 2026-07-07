@@ -68,6 +68,16 @@ const isSafeMarkdownImageSrc = (href: string): boolean => {
   return protocol === "http:" || protocol === "https:";
 };
 
+const isGithubBlobUrl = (url: URL): boolean => {
+  const hostname = url.hostname.replace(/^www\./i, "").toLowerCase();
+  if (hostname !== "github.com") {
+    return false;
+  }
+
+  const [, , kindSegment] = url.pathname.split("/").filter(Boolean);
+  return kindSegment === "blob";
+};
+
 const isDirectImageUrl = (href: string, parsedUrl?: URL | null): boolean => {
   const url = parsedUrl ?? parseUrl(href);
   if (!url) {
@@ -76,6 +86,10 @@ const isDirectImageUrl = (href: string, parsedUrl?: URL | null): boolean => {
 
   const protocol = url.protocol.toLowerCase();
   if (protocol !== "http:" && protocol !== "https:") {
+    return false;
+  }
+
+  if (isGithubBlobUrl(url)) {
     return false;
   }
 
@@ -141,7 +155,8 @@ const renderExternalOrInternalLink = (
   props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
 ) => {
   const baseEndpoint = publicEnv.BASE_ENDPOINT || "";
-  const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
+  const hasBaseEndpoint = baseEndpoint.length > 0;
+  const isExternalLink = hasBaseEndpoint && !href.startsWith(baseEndpoint);
   const { onClick, ...restProps } = props;
   const anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps = {
     ...restProps,
@@ -151,7 +166,7 @@ const renderExternalOrInternalLink = (
   if (isExternalLink) {
     anchorProps.rel = "noopener noreferrer nofollow";
     anchorProps.target = "_blank";
-  } else if (baseEndpoint) {
+  } else if (hasBaseEndpoint) {
     anchorProps.href = href.replace(baseEndpoint, "");
   }
 
