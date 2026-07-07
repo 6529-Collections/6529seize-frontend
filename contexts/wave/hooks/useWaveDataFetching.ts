@@ -239,11 +239,12 @@ export function useWaveDataFetching({
             const highestSerialNo = getHighestLoadedSerialNo(wave.drops);
             if (highestSerialNo !== null) {
               const syncSignal = new AbortController().signal;
-              void syncNewestMessagesSafely(
+              const syncPromise = syncNewestMessagesSafely(
                 waveId,
                 highestSerialNo,
                 syncSignal
-              ); // NOSONAR
+              );
+              void syncPromise; // NOSONAR
             }
           }
         }
