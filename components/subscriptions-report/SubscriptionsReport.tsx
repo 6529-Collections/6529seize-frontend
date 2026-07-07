@@ -1,6 +1,18 @@
 "use client";
 
 import styles from "./SubscriptionsReport.module.css";
+import {
+  ACTIVE_REPORT_GRID_CLASS_NAME,
+  ActiveSubscriptionRow,
+  RedeemedSubscriptionRow,
+  STANDARD_REPORT_GRID_CLASS_NAME,
+  SubscriptionDayRow,
+} from "./SubscriptionsReportRows";
+import {
+  areMemeTokenIdsEqual,
+  getMemeTokenIdKey,
+  normalizeMemeTokenId,
+} from "./SubscriptionsReport.utils";
 import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptionsProfileButton";
 import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
@@ -10,22 +22,17 @@ import { publicEnv } from "@/config/env";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { SeasonMintRow } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
-  displayedSeasonNumberFromIndex,
-  formatFullDate,
   getCardsRemainingUntilEndOf,
   getUpcomingMintsAcrossSeasons,
-  isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Paginated } from "@/components/pagination/Pagination";
 import Pagination from "@/components/pagination/Pagination";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
 import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
-import { Time } from "@/helpers/time";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
-import Image from "next/image";
 import Link from "next/link";
 import useDownloader from "@/hooks/useDownloader";
 import {
@@ -37,25 +44,42 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
 
-function isRedeemedDropFromToday(drop: RedeemedSubscriptionCounts): boolean {
-  return (
-    Time.fromString(drop.mint_date).toIsoDateString() ===
-    Time.now().toIsoDateString()
-  );
+type MemeCalendarCurrentResponse = {
+  readonly status: string;
+  readonly current: {
+    readonly mint_number: number;
+  } | null;
+};
+
+function getCurrentLiveMintNumber(
+  currentMint: MemeCalendarCurrentResponse
+): number | null {
+  if (currentMint.status !== "live") {
+    return null;
+  }
+
+  const mintNumber = currentMint.current?.mint_number;
+  return typeof mintNumber === "number" && Number.isSafeInteger(mintNumber)
+    ? mintNumber
+    : null;
 }
 
 function getActiveRedeemedDrop(
   drops: RedeemedSubscriptionCounts[],
-  mintingToday: boolean
+  currentLiveMintNumber: number | null
 ): RedeemedSubscriptionCounts | null {
-  if (!mintingToday) {
+  if (currentLiveMintNumber === null) {
     return null;
   }
 
-  return drops.find(isRedeemedDropFromToday) ?? null;
+  return (
+    drops.find((drop) =>
+      areMemeTokenIdsEqual(drop.token_id, currentLiveMintNumber)
+    ) ?? null
+  );
 }
 
-function withoutTokenId<T extends { token_id: number }>(
+function withoutTokenId<T extends { token_id: number | string }>(
   drops: T[],
   tokenId: number | null
 ): T[] {
@@ -63,11 +87,7 @@ function withoutTokenId<T extends { token_id: number }>(
     return drops;
   }
 
-  return drops.filter((drop) => drop.token_id !== tokenId);
-}
-
-function formatSubscriptionCount(count: number): string {
-  return count > 0 ? count.toLocaleString() : "0";
+  return drops.filter((drop) => !areMemeTokenIdsEqual(drop.token_id, tokenId));
 }
 
 function getDisplayedRedeemedTotal(
@@ -79,6 +99,19 @@ function getDisplayedRedeemedTotal(
   }
 
   return Math.max(totalRedeemed - 1, 0);
+}
+
+async function fetchCurrentLiveMintNumber() {
+  const response = await fetch("/api/meme-calendar/current");
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch current meme calendar: ${response.status}`
+    );
+  }
+
+  const currentMint = (await response.json()) as MemeCalendarCurrentResponse;
+  return getCurrentLiveMintNumber(currentMint);
 }
 
 export default function SubscriptionsReportComponent() {
@@ -99,13 +132,13 @@ export default function SubscriptionsReportComponent() {
   >([]);
   const [activeDrop, setActiveDrop] =
     useState<RedeemedSubscriptionCounts | null>(null);
-  const [activeProjectedCount, setActiveProjectedCount] =
+  const [activeSubscribedCount, setActiveSubscribedCount] =
     useState<SubscriptionCounts | null>(null);
   const [totalRedeemed, setTotalRedeemed] = useState(0);
   const [redeemedPage, setRedeemedPage] = useState<number>(1);
   const [upcomingVisible, setUpcomingVisible] = useState(UPCOMING_PAGE_SIZE);
   const [animateFromIndex, setAnimateFromIndex] = useState<number | null>(null);
-  const firstNewRowRef = useRef<HTMLTableRowElement>(null);
+  const firstNewRowRef = useRef<HTMLAnchorElement>(null);
   const [availableSeasons, setAvailableSeasons] = useState<MemeSeason[]>([]);
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>("");
   const [seasonOptionsLoaded, setSeasonOptionsLoaded] = useState(false);
@@ -143,7 +176,7 @@ export default function SubscriptionsReportComponent() {
     });
   }
 
-  async function fetchProjectedCount(tokenId: number) {
+  async function fetchSubscribedCount(tokenId: number) {
     return await commonApiFetch<SubscriptionCounts>({
       endpoint: `subscriptions/memes/${tokenId}/count`,
     });
@@ -157,64 +190,73 @@ export default function SubscriptionsReportComponent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const mintingToday = isMintingToday();
       let remainingCountForSeason = getCardsRemainingUntilEndOf("szn");
       let activeRedeemedDrop: RedeemedSubscriptionCounts | null = null;
+      let activeTokenId: number | null = null;
+      let currentLiveMintNumber: number | null = null;
+      const currentLiveMintNumberPromise = fetchCurrentLiveMintNumber().catch(
+        (error: unknown) => {
+          console.error("Failed to fetch current meme calendar mint:", error);
+          return null;
+        }
+      );
 
       try {
-        const redeemed = await fetchRedeemedCounts(1);
-        activeRedeemedDrop = getActiveRedeemedDrop(redeemed.data, mintingToday);
-        activeTokenIdRef.current = activeRedeemedDrop?.token_id ?? null;
-        setActiveDrop(activeRedeemedDrop);
-        setRedeemedCounts(
-          withoutTokenId(redeemed.data, activeRedeemedDrop?.token_id ?? null)
+        const [redeemed, liveMintNumber] = await Promise.all([
+          fetchRedeemedCounts(1),
+          currentLiveMintNumberPromise,
+        ]);
+        currentLiveMintNumber = liveMintNumber;
+        activeRedeemedDrop = getActiveRedeemedDrop(
+          redeemed.data,
+          currentLiveMintNumber
         );
+        activeTokenId = activeRedeemedDrop
+          ? normalizeMemeTokenId(activeRedeemedDrop.token_id)
+          : null;
+        activeTokenIdRef.current = activeTokenId;
+        setActiveDrop(activeRedeemedDrop);
+        setRedeemedCounts(withoutTokenId(redeemed.data, activeTokenId));
         setTotalRedeemed(
-          getDisplayedRedeemedTotal(
-            redeemed.count,
-            activeRedeemedDrop?.token_id ?? null
-          )
+          getDisplayedRedeemedTotal(redeemed.count, activeTokenId)
         );
       } catch (error) {
         console.error("Failed to fetch redeemed subscriptions:", error);
+        activeTokenId = null;
         activeTokenIdRef.current = null;
         setActiveDrop(null);
         setRedeemedCounts([]);
         setTotalRedeemed(0);
       }
 
-      if (mintingToday && !activeRedeemedDrop) {
+      if (currentLiveMintNumber !== null && !activeRedeemedDrop) {
         remainingCountForSeason += 1;
       }
 
       try {
-        const [upcoming, projectedCount] = await Promise.all([
+        const [upcoming, subscribedCount] = await Promise.all([
           fetchUpcomingCounts(remainingCountForSeason).catch(
             (error: unknown) => {
               console.error("Failed to fetch upcoming subscriptions:", error);
               return [];
             }
           ),
-          activeRedeemedDrop
-            ? fetchProjectedCount(activeRedeemedDrop.token_id).catch(
-                (error: unknown) => {
-                  console.error(
-                    "Failed to fetch active drop projected subscriptions:",
-                    error
-                  );
-                  return null;
-                }
-              )
+          activeTokenId !== null
+            ? fetchSubscribedCount(activeTokenId).catch((error: unknown) => {
+                console.error(
+                  "Failed to fetch active drop subscribed count:",
+                  error
+                );
+                return null;
+              })
             : Promise.resolve(null),
         ]);
 
-        setActiveProjectedCount(projectedCount);
-        setUpcomingCounts(
-          withoutTokenId(upcoming, activeRedeemedDrop?.token_id ?? null)
-        );
+        setActiveSubscribedCount(subscribedCount);
+        setUpcomingCounts(withoutTokenId(upcoming, activeTokenId));
       } catch (error) {
         console.error("Failed to fetch subscription counts:", error);
-        setActiveProjectedCount(null);
+        setActiveSubscribedCount(null);
         setUpcomingCounts([]);
       } finally {
         setRedeemedLoading(false);
@@ -342,13 +384,13 @@ export default function SubscriptionsReportComponent() {
   return (
     <div className="tw-container tw-mx-auto tw-px-2 tw-py-5 lg:tw-px-6 xl:tw-px-8">
       <div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between">
-          <h1>Subscriptions Report</h1>
-          <div className="tw-flex tw-items-center tw-gap-3">
+        <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <h1 className="tw-m-0">Subscriptions Report</h1>
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-4 tw-gap-y-3 sm:tw-w-auto sm:tw-justify-end">
             <AboutSubscriptionsProfileButton />
             <Link
               href="/about/subscriptions"
-              className="decoration-hover-underline"
+              className="decoration-hover-underline tw-whitespace-nowrap"
               aria-label="Learn more about The Memes subscriptions"
             >
               Learn More
@@ -369,38 +411,29 @@ export default function SubscriptionsReportComponent() {
             className="tw-pt-3"
             data-testid="subscriptions-report-active-drop"
           >
-            <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-primary-400/40 tw-bg-iron-900">
-              <caption className="tw-sr-only">
-                Table listing the active meme card projected and actual
-                subscription counts
-              </caption>
-              <thead>
-                <tr className="tw-bg-primary-500/10 tw-text-left tw-text-sm tw-uppercase tw-tracking-wider tw-text-gray-300">
-                  <th className="tw-w-1/2 tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-font-semibold">
-                    Meme Card
-                  </th>
-                  <th className="tw-w-1/4 tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
-                    Projected
-                  </th>
-                  <th className="tw-w-1/4 tw-border-b tw-border-primary-400/30 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
-                    Actual
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="tw-bg-iron-800 hover:tw-bg-iron-700">
-                  <ActiveSubscriptionDetails
-                    count={activeDrop}
-                    projectedCount={activeProjectedCount}
-                  />
-                </tr>
-              </tbody>
-            </table>
+            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-primary-400/40 tw-bg-iron-900">
+              <span className="tw-sr-only">
+                Active meme card subscribed and airdropped subscription counts
+              </span>
+              <div
+                className={`${ACTIVE_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-primary-500/10 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300 sm:tw-grid`}
+                aria-hidden="true"
+              >
+                <span>Meme Card</span>
+                <span className="tw-text-center">Subscribed</span>
+                <span className="tw-text-center">Airdropped</span>
+              </div>
+              <ActiveSubscriptionRow
+                className="tw-bg-iron-800"
+                count={activeDrop}
+                subscribedCount={activeSubscribedCount}
+              />
+            </div>
           </div>
         </>
       )}
       <div ref={upcomingTableTopRef} />
-      <div className="tw-pt-3">
+      <div className={activeDrop ? "tw-pt-8" : "tw-pt-3"}>
         <div className="tw-flex tw-items-center tw-gap-3">
           <span className="tw-text-lg tw-font-bold tw-no-underline">
             Upcoming Drops
@@ -415,48 +448,42 @@ export default function SubscriptionsReportComponent() {
         <div>
           {upcomingCounts?.length > 0 ? (
             <>
-              <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
-                <caption className="tw-sr-only">
-                  Table listing upcoming meme card subscriptions
-                </caption>
-                <thead>
-                  <tr className="tw-bg-iron-900 tw-text-left tw-text-sm tw-uppercase tw-tracking-wider tw-text-gray-300">
-                    <th className="tw-w-3/4 tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-font-semibold">
-                      Meme Card
-                    </th>
-                    <th className="tw-w-1/4 tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
-                      Subscriptions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+              <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
+                <span className="tw-sr-only">
+                  Upcoming meme card subscription counts
+                </span>
+                <div
+                  className={`${STANDARD_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-iron-900 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300 sm:tw-grid`}
+                  aria-hidden="true"
+                >
+                  <span>Meme Card</span>
+                  <span className="tw-text-center">Subscriptions</span>
+                </div>
+                <div>
                   {upcomingCounts
                     .slice(0, upcomingVisible)
                     .map((count, index) => {
                       const isNew =
                         animateFromIndex !== null && index >= animateFromIndex;
                       return (
-                        <tr
-                          key={count.token_id}
+                        <SubscriptionDayRow
+                          key={getMemeTokenIdKey(count.token_id)}
                           ref={
                             index === animateFromIndex ? firstNewRowRef : null
                           }
                           className={[
                             index % 2 === 0
-                              ? "tw-bg-iron-800 hover:tw-bg-iron-700"
-                              : "tw-bg-iron-900 hover:tw-bg-iron-700",
+                              ? "tw-bg-iron-800"
+                              : "tw-bg-iron-900",
                             isNew ? styles["upcomingRowNew"] : "",
                           ].join(" ")}
-                        >
-                          <SubscriptionDayDetails
-                            date={rows[index]!}
-                            count={count}
-                          />
-                        </tr>
+                          date={rows[index]!}
+                          count={count}
+                        />
                       );
                     })}
-                </tbody>
-              </table>
+                </div>
+              </div>
               {upcomingCounts.length > UPCOMING_PAGE_SIZE && (
                 <div ref={upcomingToggleRef} className="tw-pt-3 tw-text-center">
                   {upcomingVisible < upcomingCounts.length ? (
@@ -506,35 +533,29 @@ export default function SubscriptionsReportComponent() {
       <div className="tw-pt-3" data-testid="subscriptions-report-past-drops">
         <div>
           {redeemedCounts?.length > 0 ? (
-            <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
-              <caption className="tw-sr-only">
-                Table listing past meme card subscription redemptions
-              </caption>
-              <thead>
-                <tr className="tw-bg-iron-900 tw-text-left tw-text-sm tw-uppercase tw-tracking-wider tw-text-gray-300">
-                  <th className="tw-w-3/4 tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-font-semibold">
-                    Meme Card
-                  </th>
-                  <th className="tw-w-1/4 tw-border-b tw-border-iron-700 tw-px-6 tw-py-3 tw-text-center tw-font-semibold">
-                    Subscriptions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
+              <span className="tw-sr-only">
+                Past meme card subscription redemptions
+              </span>
+              <div
+                className={`${STANDARD_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-iron-900 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-300 sm:tw-grid`}
+                aria-hidden="true"
+              >
+                <span>Meme Card</span>
+                <span className="tw-text-center">Subscriptions</span>
+              </div>
+              <div>
                 {redeemedCounts.map((count, index) => (
-                  <tr
-                    key={count.token_id}
+                  <RedeemedSubscriptionRow
+                    key={getMemeTokenIdKey(count.token_id)}
                     className={
-                      index % 2 === 0
-                        ? "tw-bg-iron-800 hover:tw-bg-iron-700"
-                        : "tw-bg-iron-900 hover:tw-bg-iron-700"
+                      index % 2 === 0 ? "tw-bg-iron-800" : "tw-bg-iron-900"
                     }
-                  >
-                    <RedeemedSubscriptionDetails count={count} />
-                  </tr>
+                    count={count}
+                  />
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           ) : (
             renderEmptyState(redeemedLoading, "past")
           )}
@@ -649,116 +670,4 @@ function getRedeemedCsvFilename(season: MemeSeason | null): string {
   }
 
   return "redeemed-meme-subscription-counts-all-seasons.csv";
-}
-
-function MemeCardDetails(
-  props: Readonly<{
-    count: RedeemedSubscriptionCounts;
-  }>
-) {
-  const dateTime = Time.fromString(props.count.mint_date);
-  return (
-    <td className="tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-align-middle tw-text-white">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        <div className="tw-flex tw-h-[50px] tw-w-[50px] tw-shrink-0 tw-items-center tw-justify-center">
-          <Image
-            unoptimized
-            src={props.count.image_url}
-            alt={props.count.name || "Meme card"}
-            width={0}
-            height={0}
-            className="tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-rounded-sm"
-          />
-        </div>
-        <div className="tw-flex tw-flex-col">
-          <Link
-            href={`/the-memes/${props.count.token_id}`}
-            className="decoration-hover-underline tw-text-white"
-            aria-label={`View The Memes card #${props.count.token_id} - ${props.count.name}`}
-          >
-            #{props.count.token_id} - {props.count.name}
-          </Link>
-          <span className="tw-text-sm tw-text-gray-400">
-            SZN {props.count.szn}
-            {" / "}
-            {formatFullDate(dateTime.toDate())}
-          </span>
-        </div>
-      </div>
-    </td>
-  );
-}
-
-function SubscriptionCountCell(
-  props: Readonly<{
-    children: string;
-  }>
-) {
-  return (
-    <td className="tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-text-center tw-align-middle tw-text-white">
-      {props.children}
-    </td>
-  );
-}
-
-function ActiveSubscriptionDetails(
-  props: Readonly<{
-    count: RedeemedSubscriptionCounts;
-    projectedCount: SubscriptionCounts | null;
-  }>
-) {
-  const projected =
-    props.projectedCount?.token_id === props.count.token_id
-      ? formatSubscriptionCount(props.projectedCount.count)
-      : "Unavailable";
-
-  return (
-    <>
-      <MemeCardDetails count={props.count} />
-      <SubscriptionCountCell>{projected}</SubscriptionCountCell>
-      <SubscriptionCountCell>
-        {formatSubscriptionCount(props.count.count)}
-      </SubscriptionCountCell>
-    </>
-  );
-}
-
-function SubscriptionDayDetails(
-  props: Readonly<{
-    count: SubscriptionCounts;
-    date: SeasonMintRow;
-  }>
-) {
-  return (
-    <>
-      <td className="tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-align-middle tw-text-white">
-        <div className="tw-flex tw-flex-col">
-          <span>The Memes #{props.count.token_id}</span>
-          <span className="tw-text-sm tw-text-gray-400">
-            SZN {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
-            {" / "}
-            {formatFullDate(props.date.utcDay, "utc")}
-          </span>
-        </div>
-      </td>
-      <td className="tw-border-t tw-border-iron-700 tw-px-6 tw-py-4 tw-text-center tw-align-middle tw-text-white">
-        {formatSubscriptionCount(props.count.count)}
-      </td>
-    </>
-  );
-}
-
-function RedeemedSubscriptionDetails(
-  props: Readonly<{
-    count: RedeemedSubscriptionCounts;
-  }>
-) {
-  return (
-    <>
-      <MemeCardDetails count={props.count} />
-      <SubscriptionCountCell>
-        {formatSubscriptionCount(props.count.count)}
-      </SubscriptionCountCell>
-    </>
-  );
 }

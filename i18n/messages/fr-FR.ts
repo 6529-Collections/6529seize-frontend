@@ -1,6 +1,7 @@
 import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
@@ -371,6 +372,10 @@ export const FR_FR_MESSAGES = {
     "Zone d'envoi de fichiers du chat de wave",
   "waves.loadingStatus": "Chargement des waves",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
+  "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",
+  "waves.gifPicker.noResults": "Aucun GIF trouvé.",
+  "waves.gifPicker.poweredBy": "Propulsé par {brandName}",
+  "waves.gifPicker.poweredByPrefix": "Propulsé par",
   "waves.gifPicker.status.checking": "Recherche de GIF...",
   "waves.gifPicker.status.ready": "La recherche de GIF est prete.",
   "waves.gifPicker.unavailable.title":
@@ -396,6 +401,7 @@ export const FR_FR_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  ...FR_FR_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Tri des memes",
   "theMemes.sorting.sortBy": "Trier par",
   "theMemes.sorting.directionLegend": "Sens du tri",
