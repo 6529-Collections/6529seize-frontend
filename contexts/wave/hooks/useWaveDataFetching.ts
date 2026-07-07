@@ -5,6 +5,7 @@ import {
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useCallback, useEffect, useRef } from "react";
 import {
   type WaveEligibility,
@@ -494,6 +495,7 @@ export function useWaveDataFetching({
     (waveId: string, drops: ApiDrop[] | null) => {
       clearLoadingState(waveId);
       if (drops !== null) {
+        markMobileLaunchStep("wave_messages_loaded");
         updateData(formatWaveMessages(waveId, drops, { isLoading: false }));
       }
 

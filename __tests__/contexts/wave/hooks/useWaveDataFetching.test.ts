@@ -4,6 +4,13 @@ import {
   WAVE_DROPS_NATIVE_INITIAL_PARAMS,
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
+
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  markMobileLaunchStep: jest.fn(),
+}));
+
+const markMobileLaunchStepMock = markMobileLaunchStep as jest.Mock;
 
 const getLoadingState = jest.fn(() => ({
   state: { isLoading: false, promise: null },
@@ -91,6 +98,9 @@ describe("useWaveDataFetching", () => {
       expect.any(Object),
       expect.any(Function),
       undefined
+    );
+    expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
+      "wave_messages_loaded"
     );
     expect(updateData).toHaveBeenNthCalledWith(1, { key: "wave1", drops: [] });
     expect(updateData).toHaveBeenLastCalledWith({

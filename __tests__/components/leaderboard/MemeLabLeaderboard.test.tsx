@@ -7,6 +7,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 jest.mock("@/components/leaderboard/NFTLeaderboard", () => ({
   fetchNftTdhResults: jest.fn(),
+  NftLeaderboardCollectorRow: (p: any) => (
+    <tr>
+      <td>{p.lead.rank}</td>
+      <td>
+        <div data-testid="collector">{p.lead.handle}</div>
+      </td>
+      <td>{p.lead.balance}</td>
+    </tr>
+  ),
   PAGE_SIZE: 25,
   setScrollPosition: jest.fn(),
 }));
@@ -97,7 +106,9 @@ test("renders leaderboard and sorts when caret clicked", async () => {
   );
 
   await waitFor(() => expect(fetchNftTdhResults).toHaveBeenCalledTimes(2));
-  expect(fetchNftTdhResults.mock.calls[1][5]).toBe(SortDirection.ASC);
+  expect(fetchNftTdhResults.mock.calls[1][0]).toEqual(
+    expect.objectContaining({ sortDirection: SortDirection.ASC })
+  );
   expect(setScrollPosition).not.toHaveBeenCalled();
 });
 

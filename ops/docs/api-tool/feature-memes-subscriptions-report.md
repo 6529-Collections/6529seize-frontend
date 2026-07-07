@@ -6,8 +6,8 @@
 subscription counts.
 
 - `Active Drop`: shown on mint days after the current card has redeemed data;
-  compares projected subscriptions with actual redeemed subscriptions and keeps
-  the card out of the other sections.
+  compares subscribed counts with airdropped counts and keeps the card out of
+  the other sections.
 - `Upcoming Drops`: aggregate projected counts for upcoming cards.
 - `Past Drops`: aggregate redeemed counts for minted cards.
 - Header actions: `Manage` / `Connect to Subscribe` (same profile-subscription
@@ -37,18 +37,19 @@ subscription counts.
 1. Open `/tools/subscriptions-report`.
 2. Wait for initial load to finish.
 3. When present, review `Active Drop` for the current card thumbnail, link,
-   season/date, projected subscriptions, and actual redeemed subscriptions.
+   season/date, subscribed count, and airdropped count.
 4. Review `Upcoming Drops` and optionally expand with `Show More`.
 5. Review `Past Drops` rows (thumbnail, token link, season/date, count).
-6. Use past pagination when total redeemed count is above 10.
-7. Use header actions (`Manage` / `Connect to Subscribe`, `Learn More`) as
+6. Open any Active, Upcoming, or Past row to navigate to `/the-memes/{token_id}`.
+7. Use past pagination when total redeemed count is above 10.
+8. Use header actions (`Manage` / `Connect to Subscribe`, `Learn More`) as
    needed.
 
 ## Data and Rendering Rules
 
 - Initial load fetches past page `1` first, then fetches upcoming counts.
 - Upcoming endpoint: `subscriptions/upcoming-memes-counts?card_count=<count>`.
-- Active projected endpoint:
+- Active subscribed endpoint:
   `subscriptions/memes/{token_id}/count`.
 - Past endpoint: `subscriptions/redeemed-memes-counts?page_size=10&page=<page>`.
 - Past page size is fixed at `10`.
@@ -57,6 +58,10 @@ subscription counts.
 - When today's card appears in the redeemed response on a mint day, that token
   is rendered only in `Active Drop`; it is filtered out of both upcoming and
   past tables.
+- Active, upcoming, and past count cells render with locale-aware thousands
+  separators.
+- Active, Upcoming, and Past rows are whole-row links to the matching
+  `/the-memes/{token_id}` card route; visible card text is also a link.
 - Past rows include image thumbnail and token link to `/the-memes/{token_id}`.
 
 ## Visibility and State Rules
@@ -81,9 +86,12 @@ subscription counts.
   `Loading upcoming drops...` and `Loading past drops...`.
 - Section headers also show a spinner while loading.
 - No dedicated API-failure banner/toast is shown.
-- Initial data is committed only after both first-load requests succeed.
-- If either first-load request fails before render, both sections can fall back
-  to `No Subscriptions Found`.
+- If the redeemed request fails before render, Active Drop is hidden and Past
+  Drops falls back to `No Subscriptions Found`.
+- If the upcoming request fails, Active Drop and Past Drops can still render
+  from redeemed data while Upcoming Drops falls back to `No Subscriptions Found`.
+- If the active subscribed-count request fails, Active Drop shows
+  `Unavailable` in the `Subscribed` column and still shows the airdropped count.
 - If a later pagination fetch fails, previously rendered past rows remain.
 - Retry by reopening or refreshing the route.
 - For pagination errors, switch page and retry.
