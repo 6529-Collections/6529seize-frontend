@@ -159,8 +159,12 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).toHaveAttribute("role", "menuitemcheckbox");
     expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
     expect(allButton).toHaveClass("tw-cursor-pointer");
+    expect(allMentionsButton).not.toHaveAttribute("data-tooltip-content");
+    expect(allButton).not.toHaveAttribute("data-tooltip-content");
     expect(allMentionsButton.parentElement).toHaveAttribute("role", "none");
     expect(allButton.parentElement).toHaveAttribute("role", "none");
+    expect(screen.getByText("ALL")).toBeInTheDocument();
+    expect(screen.queryByText("@ALL")).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText("Receive mentions-only notifications")
     ).not.toBeInTheDocument();
@@ -267,10 +271,15 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).not.toBeDisabled();
     expect(allButton).toHaveAttribute("aria-disabled", "true");
     expect(allButton).toHaveAccessibleDescription(
-      "All-message notifications are unavailable for waves with 1,000+ followers."
+      "Unavailable for waves with 1,000+ followers."
     );
+    expect(
+      screen.getByText("Unavailable for waves with 1,000+ followers.")
+    ).toBeInTheDocument();
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
     expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
+    expect(allMentionsButton).not.toHaveAttribute("data-tooltip-content");
+    expect(allButton).not.toHaveAttribute("data-tooltip-content");
   });
 
   it("keeps unavailable all-message option focusable without firing an update", async () => {
@@ -702,7 +711,8 @@ describe("WaveNotificationSettings", () => {
       "tw-border-error/40",
       "tw-text-error"
     );
-    expect(screen.getByText("Muted")).toBeInTheDocument();
+    expect(screen.getByText("Unmute")).toBeInTheDocument();
+    expect(screen.queryByText("Muted")).not.toBeInTheDocument();
   });
 
   it("does not render notification settings when wave is muted", () => {

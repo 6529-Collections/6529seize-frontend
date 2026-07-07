@@ -9,7 +9,6 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useMemo, useState } from "react";
 import {
   ALL_GROUP_MENTION,
-  getAllDropsTooltip,
   type NotificationLoadingTarget,
 } from "./waveNotificationSettings.helpers";
 import {
@@ -147,39 +146,19 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     void refetch();
   }, [refetch]);
 
-  const allGroupTooltip = allGroupNotificationsEnabled
-    ? waveNotificationSettingsMessage(
-        "waves.notificationSettings.allMentions.tooltip.disable"
-      )
-    : waveNotificationSettingsMessage(
-        "waves.notificationSettings.allMentions.tooltip.enable"
-      );
-  const allDropsTooltip = getAllDropsTooltip({
-    disableAllDropsSelection,
-    subscribedToAllDrops,
-    labels: {
-      unavailable: waveNotificationSettingsMessage(
-        "waves.notificationSettings.allMessages.tooltip.unavailable",
-        {
-          count: formatWaveNotificationSettingsInteger(
-            allDropsNotificationsSubscribersLimit
-          ),
-        }
+  const allDropsUnavailableDescription = waveNotificationSettingsMessage(
+    "waves.notificationSettings.allMessages.unavailableDescription",
+    {
+      count: formatWaveNotificationSettingsInteger(
+        allDropsNotificationsSubscribersLimit
       ),
-      disable: waveNotificationSettingsMessage(
-        "waves.notificationSettings.allMessages.tooltip.disable"
-      ),
-      enable: waveNotificationSettingsMessage(
-        "waves.notificationSettings.allMessages.tooltip.enable"
-      ),
-    },
-  });
+    }
+  );
 
   return {
     allDropsEnabled,
     allGroupNotificationsEnabled,
-    allDropsTooltip,
-    allGroupTooltip,
+    allDropsUnavailableDescription,
     disableAllDropsSelection,
     loading,
     loadingTarget,

@@ -114,8 +114,6 @@ export default function WaveNotificationPreferenceButtons({
             disabled={settings.loading}
             role="menuitemcheckbox"
             aria-checked={settings.allGroupNotificationsEnabled}
-            data-tooltip-id={tooltipId}
-            data-tooltip-content={settings.allGroupTooltip}
             onClick={(event) => {
               event.stopPropagation();
               settings.onAllGroupNotificationsClick();
@@ -159,8 +157,6 @@ export default function WaveNotificationPreferenceButtons({
                 ? allDropsDisabledDescriptionId
                 : undefined
             }
-            data-tooltip-id={tooltipId}
-            data-tooltip-content={settings.allDropsTooltip}
             onClick={(event) => {
               event.stopPropagation();
               if (allDropsSelectionDisabled) {
@@ -183,20 +179,25 @@ export default function WaveNotificationPreferenceButtons({
               className="tw-size-4 tw-flex-shrink-0"
               aria-hidden="true"
             />
-            <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium">
-              {waveNotificationSettingsMessage(
-                "waves.notificationSettings.allMessages.label"
+            <span className="tw-min-w-0 tw-flex-1 tw-text-left">
+              <span className="tw-block tw-text-sm tw-font-medium">
+                {waveNotificationSettingsMessage(
+                  "waves.notificationSettings.allMessages.label"
+                )}
+              </span>
+              {allDropsSelectionDisabled && (
+                <span
+                  id={allDropsDisabledDescriptionId}
+                  className="tw-mt-0.5 tw-block tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500"
+                >
+                  {settings.allDropsUnavailableDescription}
+                </span>
               )}
             </span>
             {settings.loadingTarget === "all-drops" ? (
               <Spinner dimension={12} />
             ) : (
               renderItemCheck(settings.allDropsEnabled)
-            )}
-            {allDropsSelectionDisabled && (
-              <span id={allDropsDisabledDescriptionId} className="tw-sr-only">
-                {settings.allDropsTooltip}
-              </span>
             )}
           </button>
         </li>

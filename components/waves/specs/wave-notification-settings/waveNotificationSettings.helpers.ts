@@ -22,27 +22,3 @@ export const getErrorMessage = (error: unknown, defaultMessage: string) => {
 
   return defaultMessage;
 };
-
-export function getAllDropsTooltip({
-  disableAllDropsSelection,
-  subscribedToAllDrops,
-  labels,
-}: {
-  readonly disableAllDropsSelection: boolean;
-  readonly subscribedToAllDrops: boolean;
-  readonly labels: {
-    readonly unavailable: string;
-    readonly disable: string;
-    readonly enable: string;
-  };
-}) {
-  if (disableAllDropsSelection && !subscribedToAllDrops) {
-    return labels.unavailable;
-  }
-
-  if (subscribedToAllDrops) {
-    return labels.disable;
-  }
-
-  return labels.enable;
-}
