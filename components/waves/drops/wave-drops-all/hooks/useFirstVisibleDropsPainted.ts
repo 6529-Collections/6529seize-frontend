@@ -3,6 +3,7 @@
 /* eslint promise/prefer-await-to-callbacks: "off" -- Browser paint scheduling APIs are callback-based. */
 
 import { useEffect, useState } from "react";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 
 export function useFirstVisibleDropsPainted(hasVisibleDrops: boolean): boolean {
   const [painted, setPainted] = useState(false);
@@ -15,6 +16,7 @@ export function useFirstVisibleDropsPainted(hasVisibleDrops: boolean): boolean {
     let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
     const markPainted = () => {
       timeoutId = globalThis.setTimeout(() => {
+        markMobileLaunchStep("first_drop_rendered");
         setPainted(true);
       }, 0);
     };
