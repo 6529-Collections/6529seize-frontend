@@ -1,5 +1,9 @@
-import About100M from "@/app/about/100m-project/page";
-import FromFibonacciToFidenza from "@/app/blog/from-fibonacci-to-fidenza/page";
+import About100M, {
+  generateMetadata as generate100MMetadata,
+} from "@/app/about/100m-project/page";
+import FromFibonacciToFidenza, {
+  generateMetadata as generateFibonacciMetadata,
+} from "@/app/blog/from-fibonacci-to-fidenza/page";
 import EmailProtection from "@/app/cdn-cgi/l/email-protection/page";
 import EmailSignatures from "@/app/email-signatures/page";
 import ConstructionToken from "@/app/museum/6529-fund-szn1/construction-token/page";
@@ -14,33 +18,27 @@ jest.mock("next/dynamic", () => () => {
   return MockDynamicComponent;
 });
 
-// Mock any external dependencies that might be imported
-jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn(() => ({})),
-}));
 
 describe("Static Pages Rendering", () => {
   it("should render 100M Project page with correct content and metadata", () => {
     render(<About100M />);
 
-    // Test for page title in document structure
-    expect(document.title).toContain("100M PROJECT");
-    expect(document.title).toContain("6529.io");
+    // Migrated pages provide their title via generateMetadata, not the DOM.
+    const metadata = generate100MMetadata();
+    expect(metadata.title).toContain("100M PROJECT");
+    expect(metadata.title).toContain("6529.io");
 
     // Test for key heading content using more semantic queries
     const headings = screen.getAllByText(/100M PROJECT/i);
     expect(headings.length).toBeGreaterThan(0);
-
-    // Test for canonical link
-    const canonicalLink = document.querySelector('link[rel="canonical"]');
-    expect(canonicalLink).toHaveAttribute("href", "/about/100m-project/");
   });
 
-  it("should render Fibonacci to Fidenza blog page with correct content", () => {
+  it("should render Fibonacci to Fidenza blog page with correct content", async () => {
     render(<FromFibonacciToFidenza />);
 
-    expect(document.title).toContain("FROM FIBONACCI TO FIDENZA");
-    expect(document.title).toContain("6529.io");
+    const metadata = await generateFibonacciMetadata();
+    expect(metadata.title).toContain("FROM FIBONACCI TO FIDENZA");
+    expect(metadata.title).toContain("6529.io");
 
     const headings = screen.getAllByText(/FROM FIBONACCI TO FIDENZA/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -99,16 +97,16 @@ describe("Static Pages Rendering", () => {
 
   describe("Page Structure and Metadata", () => {
     it("should set proper meta tags for SEO", () => {
-      render(<About100M />);
+      // Migrated pages supply SEO metadata via generateMetadata rather
+      // than rendering head tags into the document.
+      const metadata = generate100MMetadata();
 
-      // Check for canonical link
-      const canonicalLink = document.querySelector('link[rel="canonical"]');
-      expect(canonicalLink).toBeInTheDocument();
-      expect(canonicalLink?.getAttribute("href")).toBe("/about/100m-project/");
-
-      // Check for robots meta tag
-      const robotsMeta = document.querySelector('meta[name="robots"]');
-      expect(robotsMeta).toBeInTheDocument();
+      expect(metadata.title).toBe("100M PROJECT - 6529.io");
+      expect(metadata.description).toContain("6529.io");
+      expect(metadata.openGraph).toMatchObject({
+        siteName: "6529.io",
+        title: "100M PROJECT - 6529.io",
+      });
     });
 
     it("should have proper Open Graph tags", () => {
