@@ -49,7 +49,6 @@ import {
 } from "./value-utils";
 import {
   getStackSignatureValues,
-  hasAppOwnedFrame,
   hasAppOwnedNonExtensionSignature,
   hasAppOwnedSourceFrame,
   hasAppOwnedSourceStackValue,
@@ -129,6 +128,32 @@ export function hasCoinbaseWalletLinkWebSocketCloseFunction(
     Array.isArray(frames) &&
     frames.some(
       (frame) => frame.function === coinbaseWalletLinkWebSocketCloseFunction
+    )
+  );
+}
+
+function isCoinbaseWalletLinkWebSocketFrame(frame: SentryStackFrame): boolean {
+  return [frame.filename, frame.abs_path].some(
+    isCoinbaseWalletLinkWebSocketPath
+  );
+}
+
+function isCoinbaseWalletLinkWebSocketCloseFrame(
+  frame: SentryStackFrame
+): boolean {
+  return frame.function === coinbaseWalletLinkWebSocketCloseFunction;
+}
+
+function hasAppOwnedWalletLinkWebSocketInAppFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some(
+      (frame) =>
+        frame.in_app === true &&
+        !isCoinbaseWalletLinkWebSocketFrame(frame) &&
+        !isCoinbaseWalletLinkWebSocketCloseFrame(frame)
     )
   );
 }
@@ -261,8 +286,8 @@ function hasAppOwnedWalletLinkWebSocket1006Evidence(
 ): boolean {
   const frames = value?.stacktrace?.frames;
   return (
-    hasAppOwnedFrame(frames) ||
     hasAppOwnedSourceFrame(frames) ||
+    hasAppOwnedWalletLinkWebSocketInAppFrame(frames) ||
     hasAppOwnedSourceStackValue(getHintExceptionStack(hint)) ||
     hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
   );
@@ -643,16 +668,12 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     return true;
   }
 
-  if (
-    hasWalletLinkWebSocketUnhandledRejectionSignature(value, event, hint) &&
-    !hasAppOwnedEvidence
-  ) {
+  if (hasWalletLinkWebSocketUnhandledRejectionSignature(value, event, hint)) {
     return true;
   }
 
   return (
     hasBrowserUnhandledRejectionMechanism(value) &&
-    !hasAppOwnedEvidence &&
     hasThirdPartyWalletLinkWebSocket1006Evidence(event, value, hint)
   );
 }
