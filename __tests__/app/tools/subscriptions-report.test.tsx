@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 
 const mockDownload = jest.fn();
+const mockFetch = jest.fn();
 const mockUseDownloader = jest.fn();
 
 jest.mock("react-use-downloader", () => ({
@@ -84,13 +85,18 @@ const mockDefaultCommonApiFetch = (opts: any) => {
       },
     ]);
   }
-  if (opts?.endpoint === "meme-calendar/current") {
-    return Promise.resolve({
-      status: "none",
-      current: null,
-    });
-  }
   return Promise.resolve([]);
+};
+
+const mockCurrentMemeCalendar = (
+  body: { status: string; current: { mint_number: number } | null },
+  ok = true
+) => {
+  mockFetch.mockResolvedValue({
+    ok,
+    status: ok ? 200 : 500,
+    json: jest.fn().mockResolvedValue(body),
+  });
 };
 
 const buildReportCountsApiMock = ({
@@ -99,6 +105,7 @@ const buildReportCountsApiMock = ({
   activeSubscribedCount = 11,
   activeMintDate = new Date().toISOString(),
   upcomingCount = 8,
+  includeActiveInUpcoming = false,
   pastAirdroppedCount = 9,
   rejectUpcoming = false,
 }: {
@@ -107,19 +114,11 @@ const buildReportCountsApiMock = ({
   activeSubscribedCount?: number;
   activeMintDate?: string;
   upcomingCount?: number | null;
+  includeActiveInUpcoming?: boolean;
   pastAirdroppedCount?: number;
   rejectUpcoming?: boolean;
 }) => {
   return (opts: any) => {
-    if (opts?.endpoint === "meme-calendar/current") {
-      return Promise.resolve({
-        status: "live",
-        current: {
-          mint_number: 700,
-        },
-      });
-    }
-
     if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
       return Promise.resolve({
         count: 2,
@@ -165,6 +164,15 @@ const buildReportCountsApiMock = ({
         upcomingCount === null
           ? []
           : [
+              ...(includeActiveInUpcoming
+                ? [
+                    {
+                      contract: "0xmemes",
+                      token_id: activeTokenId,
+                      count: activeSubscribedCount,
+                    },
+                  ]
+                : []),
               {
                 contract: "0xmemes",
                 token_id: 701,
@@ -203,6 +211,11 @@ describe("Subscriptions report page", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
+    global.fetch = mockFetch as unknown as typeof fetch;
+    mockCurrentMemeCalendar({
+      status: "none",
+      current: null,
+    });
     commonApiFetch.mockImplementation(mockDefaultCommonApiFetch);
     getCardsRemainingUntilEndOf.mockReturnValue(2);
     getUpcomingMintsAcrossSeasons.mockReturnValue([]);
@@ -225,13 +238,12 @@ describe("Subscriptions report page", () => {
     expect(container.querySelector("main")).toBeInTheDocument();
     await waitFor(() => {
       expect(getCardsRemainingUntilEndOf).toHaveBeenCalledWith("szn");
-      expect(commonApiFetch).toHaveBeenCalledTimes(5);
+      expect(commonApiFetch).toHaveBeenCalledTimes(4);
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "policies/country-check",
       });
-      expect(commonApiFetch).toHaveBeenCalledWith({
-        endpoint: "meme-calendar/current",
-        includeWalletAuth: false,
+      expect(mockFetch).toHaveBeenCalledWith("/api/meme-calendar/current", {
+        headers: { "x-6529-auth": "stag" },
       });
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "subscriptions/upcoming-memes-counts?card_count=2",
@@ -250,11 +262,23 @@ describe("Subscriptions report page", () => {
   });
 
   it("moves the live calendar mint into the active drop section", async () => {
+    getUpcomingMintsAcrossSeasons.mockReturnValue([
+      {
+        seasonIndex: 15,
+        utcDay: new Date("2026-01-03T00:00:00.000Z"),
+      },
+    ]);
+    mockCurrentMemeCalendar({
+      status: "live",
+      current: {
+        mint_number: 700,
+      },
+    });
     commonApiFetch.mockImplementation(
       buildReportCountsApiMock({
         activeMintDate: "2026-07-06T00:00:00.000Z",
         activeTokenId: "700",
-        upcomingCount: null,
+        includeActiveInUpcoming: true,
       })
     );
 
@@ -282,13 +306,19 @@ describe("Subscriptions report page", () => {
     const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
     expect(within(pastDrops).queryByText("#700 - Active Meme")).toBeNull();
     expect(within(pastDrops).getByText("#699 - Past Meme")).toBeInTheDocument();
+    const upcomingDrops = screen.getByTestId(
+      "subscriptions-report-upcoming-drops"
+    );
+    expect(within(upcomingDrops).queryByText("The Memes #700")).toBeNull();
+    expect(
+      within(upcomingDrops).getByText("The Memes #701")
+    ).toBeInTheDocument();
 
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "subscriptions/memes/700/count",
     });
-    expect(commonApiFetch).toHaveBeenCalledWith({
-      endpoint: "meme-calendar/current",
-      includeWalletAuth: false,
+    expect(mockFetch).toHaveBeenCalledWith("/api/meme-calendar/current", {
+      headers: { "x-6529-auth": "stag" },
     });
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "subscriptions/upcoming-memes-counts?card_count=2",
@@ -302,6 +332,12 @@ describe("Subscriptions report page", () => {
         utcDay: new Date("2026-01-03T00:00:00.000Z"),
       },
     ]);
+    mockCurrentMemeCalendar({
+      status: "live",
+      current: {
+        mint_number: 700,
+      },
+    });
     commonApiFetch.mockImplementation(buildReportCountsApiMock({}));
 
     render(
@@ -379,6 +415,12 @@ describe("Subscriptions report page", () => {
         utcDay: new Date("2026-01-03T00:00:00.000Z"),
       },
     ]);
+    mockCurrentMemeCalendar({
+      status: "live",
+      current: {
+        mint_number: 700,
+      },
+    });
     commonApiFetch.mockImplementation(
       buildReportCountsApiMock({
         activeAirdroppedCount: 1000,
@@ -415,6 +457,12 @@ describe("Subscriptions report page", () => {
     const consoleError = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
+    mockCurrentMemeCalendar({
+      status: "live",
+      current: {
+        mint_number: 700,
+      },
+    });
     commonApiFetch.mockImplementation(
       buildReportCountsApiMock({ rejectUpcoming: true })
     );
