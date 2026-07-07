@@ -186,6 +186,9 @@ const defaultSpaces: LayoutSpaces = {
   measurementsComplete: false,
 };
 
+const getStyleSpaces = (spaces: LayoutSpaces): LayoutSpaces =>
+  spaces.measurementsComplete ? spaces : defaultSpaces;
+
 // Create context
 const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
@@ -330,26 +333,24 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   // Calculate the content container style based on header space
   const contentContainerStyle = useMemo(() => {
-    if (!spaces.measurementsComplete) {
-      return {};
-    }
+    const styleSpaces = getStyleSpaces(spaces);
 
     return {
-      height: `calc(100dvh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px)`,
+      height: `calc(100dvh - ${styleSpaces.headerSpace}px - ${styleSpaces.spacerSpace}px)`,
       display: "flex",
     };
-  }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
+  }, [spaces]);
 
   const isNavHiddenForKeyboard = isKeyboardVisible;
 
-  const navAdjustedSpaces = useMemo(
-    () => (isNavHiddenForKeyboard ? { ...spaces, mobileNavSpace: 0 } : spaces),
-    [spaces, isNavHiddenForKeyboard]
-  );
+  const navAdjustedSpaces = useMemo(() => {
+    const styleSpaces = getStyleSpaces(spaces);
+    return isNavHiddenForKeyboard
+      ? { ...styleSpaces, mobileNavSpace: 0 }
+      : styleSpaces;
+  }, [spaces, isNavHiddenForKeyboard]);
 
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
-
     const style = calculateHeightStyle(navAdjustedSpaces, 0);
 
     if (isAndroid) {
@@ -362,48 +363,39 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [navAdjustedSpaces, isAndroid]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle(navAdjustedSpaces, 0);
   }, [navAdjustedSpaces]);
 
   const winnersViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle(navAdjustedSpaces, 0);
   }, [navAdjustedSpaces]);
 
   const salesViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle(navAdjustedSpaces, 0);
   }, [navAdjustedSpaces]);
 
   const myVotesViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle(navAdjustedSpaces, 0);
   }, [navAdjustedSpaces]);
 
   const outcomeViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle(navAdjustedSpaces, 0);
   }, [navAdjustedSpaces]);
 
   const faqViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle(navAdjustedSpaces, 0);
   }, [navAdjustedSpaces]);
 
   const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle({ ...navAdjustedSpaces, mobileNavSpace: 0 }, 0);
   }, [navAdjustedSpaces]);
 
   const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle(navAdjustedSpaces, 0);
   }, [navAdjustedSpaces]);
 
   // Homepage-specific feed style that excludes header/breadcrumb space
   const homepageFeedStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     // For homepage: exclude header and breadcrumb spacer, but include tabs height
     const homepageSpaces = {
       ...navAdjustedSpaces,
@@ -415,7 +407,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   // Small screen layout feed style (properly accounts for header)
   const smallScreenFeedStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     const totalOffset =
       navAdjustedSpaces.headerSpace +
       navAdjustedSpaces.pinnedSpace +
@@ -431,12 +422,10 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [navAdjustedSpaces]);
 
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle({ ...navAdjustedSpaces, mobileNavSpace: 0 }, 0);
   }, [navAdjustedSpaces]);
 
   const mobileAboutViewStyle = useMemo<React.CSSProperties>(() => {
-    if (!navAdjustedSpaces.measurementsComplete) return {};
     return calculateHeightStyle(navAdjustedSpaces, 0);
   }, [navAdjustedSpaces]);
 
