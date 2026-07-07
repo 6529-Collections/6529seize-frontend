@@ -16,9 +16,9 @@ and mobile app layouts.
 ## Route Coverage
 
 - Web/sidebar primary section switching: `NFTs` (`/the-memes`), `Waves`
-  (`/waves`), `DMs` (`/messages`), and `About` (`/about`), plus gated
-  `Drop Forge` (`/drop-forge`) when the connected wallet can access it. Home
-  remains available through the 6529 logo link to `/`.
+  (`/waves`), `DMs` (`/messages`), `Join 6529` (`/join-6529`), and `About`
+  (`/about`), plus gated `Drop Forge` (`/drop-forge`) when the connected wallet
+  can access it. Home remains available through the 6529 logo link to `/`.
 - App bottom section switching: `/discover`, `/waves`, `/messages`, `/`,
   `/network`, `/the-memes`, and `/notifications`.
 - Secondary jumps: `Discover Waves` (`/discover`), `/network/*`,

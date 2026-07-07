@@ -5,19 +5,21 @@ import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 
 import {
+  getTimelineStepDomId,
   OPTIONAL_TIMELINE_START_ID,
   TIMELINE_ITEM_SPECS,
   type JoinLinks,
+  type Join6529MessageKey,
   type TimelineItemSpec,
-  type TimelineStepId,
 } from "./page.content";
-import type { StepStatus, TimelineProgress } from "./page.types";
+import type { JoinPageState, StepStatus, TimelineProgress } from "./page.types";
 import {
   cx,
   m,
   resolveHref,
   SECTION_EYEBROW_CLASS,
   SECTION_HEADING_CLASS,
+  TERTIARY_ACTION_CLASS,
 } from "./page.utils";
 
 const STATUS_LABEL_KEYS = {
@@ -28,41 +30,59 @@ const STATUS_LABEL_KEYS = {
 
 const STATUS_BADGE_CLASS: Readonly<Record<StepStatus, string>> = {
   complete: "tw-border-[#34d399]/35 tw-bg-[#34d399]/[0.14] tw-text-[#34d399]",
-  current: "tw-border-[#60a5fa]/40 tw-bg-[#60a5fa]/[0.16] tw-text-[#60a5fa]",
+  current: "tw-border-white/25 tw-bg-white/[0.08] tw-text-iron-100",
   pending: "tw-border-white/[0.12] tw-bg-white/[0.06] tw-text-iron-500",
 };
 
 const STATUS_MARKER_CLASS: Readonly<Record<StepStatus, string>> = {
-  ...STATUS_BADGE_CLASS,
-  current: `${STATUS_BADGE_CLASS.current} tw-shadow-[0_0_20px_rgba(96,165,250,0.16)]`,
+  complete: "tw-border-[#34d399]/55 tw-bg-[#03140d] tw-text-[#34d399]",
+  current:
+    "tw-border-white/35 tw-bg-[#101012] tw-text-iron-50 tw-shadow-[0_0_0_6px_#030303,0_0_24px_rgba(255,255,255,0.1)]",
+  pending: "tw-border-white/10 tw-bg-[#030303] tw-text-iron-500",
 };
 
 const NEUTRAL_MARKER_CLASS =
   "tw-border-white/10 tw-text-iron-500 group-hover:tw-border-white/30 group-hover:tw-text-iron-100";
 
-const DEFAULT_MARKER_CLASS: Readonly<Record<TimelineStepId, string>> = {
-  wallet: NEUTRAL_MARKER_CLASS,
-  profile: NEUTRAL_MARKER_CLASS,
-  waves:
-    "tw-border-white/10 tw-text-[#7000ff] group-hover:tw-border-[#7000ff]/50",
-  message: NEUTRAL_MARKER_CLASS,
-  collect: NEUTRAL_MARKER_CLASS,
-  subscribe:
-    "tw-border-[#00f0ff]/30 tw-bg-[#00f0ff]/10 tw-text-[#00f0ff] tw-shadow-[0_0_20px_rgba(0,240,255,0.15)]",
+const JOURNEY_HEADER_KEYS: Readonly<
+  Record<
+    JoinPageState,
+    {
+      readonly eyebrowKey: Join6529MessageKey;
+      readonly headingKey: Join6529MessageKey;
+    }
+  >
+> = {
+  loggedOut: {
+    eyebrowKey: "join6529.joining.loggedOut.eyebrow",
+    headingKey: "join6529.joining.loggedOut.heading",
+  },
+  inProgress: {
+    eyebrowKey: "join6529.joining.inProgress.eyebrow",
+    headingKey: "join6529.joining.inProgress.heading",
+  },
+  loggedIn: {
+    eyebrowKey: "join6529.joining.loggedIn.eyebrow",
+    headingKey: "join6529.joining.loggedIn.heading",
+  },
 };
 
 export function JourneyTimelineSection({
   links,
   locale,
+  pageState,
   timelineProgress,
 }: {
   readonly links: JoinLinks;
   readonly locale: SupportedLocale;
+  readonly pageState: JoinPageState;
   readonly timelineProgress: TimelineProgress;
 }) {
+  const headerKeys = JOURNEY_HEADER_KEYS[pageState];
+
   return (
     <section
-      className="tw-mx-auto tw-w-full tw-max-w-4xl tw-py-8 md:tw-py-10"
+      className="tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-py-12 sm:tw-px-6 md:tw-py-16 lg:tw-px-8"
       id="journey"
     >
       <div
@@ -72,10 +92,10 @@ export function JourneyTimelineSection({
         )}
       >
         <span className={cx("tw-mb-4 tw-block", SECTION_EYEBROW_CLASS)}>
-          {m(locale, "join6529.joining.eyebrow")}
+          {m(locale, headerKeys.eyebrowKey)}
         </span>
         <h2 className={SECTION_HEADING_CLASS}>
-          {m(locale, "join6529.joining.heading")}
+          {m(locale, headerKeys.headingKey)}
         </h2>
       </div>
       {timelineProgress.visible && (
@@ -84,13 +104,13 @@ export function JourneyTimelineSection({
       <div className="tw-relative">
         <div
           aria-hidden="true"
-          className="tw-absolute tw-bottom-0 tw-left-6 tw-top-6 tw-w-px tw-bg-gradient-to-b tw-from-white/20 tw-to-white/[0.02] md:tw-left-1/2 md:-tw-translate-x-1/2"
+          className="tw-absolute tw-bottom-0 tw-left-6 tw-top-6 tw-z-0 tw-w-px tw-bg-gradient-to-b tw-from-white/20 tw-to-white/[0.02] md:tw-left-1/2 md:-tw-translate-x-1/2"
         />
         {TIMELINE_ITEM_SPECS.map((item, index) => (
           <Fragment key={item.id}>
             {item.id === OPTIONAL_TIMELINE_START_ID && (
               <TimelineGroupLabel
-                label={m(locale, "join6529.joining.optional")}
+                label={m(locale, "join6529.joining.afterStart")}
               />
             )}
             <TimelineRow
@@ -118,7 +138,7 @@ function TimelineProgressStrip({
   return (
     <div
       aria-label={m(locale, "join6529.progress.ariaLabel")}
-      className="tw-mx-auto tw-mb-10 tw-mt-4 tw-w-full tw-max-w-[520px] md:tw-mb-12"
+      className="tw-mx-auto tw-mb-12 tw-mt-5 tw-w-full tw-max-w-[520px] md:tw-mb-14"
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
         <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
@@ -146,7 +166,7 @@ function TimelineProgressStrip({
         className="tw-mt-3 tw-h-[6px] tw-overflow-hidden tw-rounded-full tw-bg-white/10"
       >
         <div
-          className="tw-h-full tw-rounded-full tw-bg-gradient-to-r tw-from-[#34d399] tw-to-[#60a5fa]"
+          className="tw-h-full tw-rounded-full tw-bg-gradient-to-r tw-from-[#34d399] tw-to-[#86efac]"
           style={{ width: `${progress.percent}%` }}
         />
       </div>
@@ -192,6 +212,7 @@ function TimelineRow({
     <article
       aria-current={status === "current" ? "step" : undefined}
       className="tw-group tw-relative tw-mb-6 tw-grid tw-gap-3 last:tw-mb-0 md:tw-mb-8 md:tw-grid-cols-2 md:tw-items-center"
+      id={getTimelineStepDomId(item.id)}
     >
       <div
         className={cx(
@@ -207,7 +228,7 @@ function TimelineRow({
             isLeftAligned ? "md:tw-justify-end" : "md:tw-justify-start"
           )}
         >
-          <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
+          <h3 className="tw-m-0 tw-flex tw-min-h-6 tw-items-center tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
             {m(locale, item.titleKey)}
           </h3>
           {showStatusBadge && <StatusBadge locale={locale} status={status} />}
@@ -217,12 +238,7 @@ function TimelineRow({
         </p>
         {actionHref && actionLabel && (
           <Link
-            className={cx(
-              "tw-mt-3 tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-no-underline tw-transition-colors hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus:tw-ring-2",
-              item.id === "subscribe"
-                ? "tw-rounded-lg tw-bg-white tw-px-5 tw-py-2.5 tw-font-medium tw-text-black hover:tw-bg-gray-200 hover:tw-text-black focus:tw-ring-white/70"
-                : "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/20 tw-pb-1 tw-text-iron-300 hover:tw-border-white/40 hover:tw-text-iron-50 focus:tw-ring-white/20"
-            )}
+            className={cx("tw-mt-3", TERTIARY_ACTION_CLASS)}
             href={actionHref}
           >
             <span>{actionLabel}</span>
@@ -240,8 +256,8 @@ function TimelineRow({
       <div
         aria-hidden="true"
         className={cx(
-          "tw-absolute tw-left-0 tw-top-0 tw-z-10 tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-[#030303] tw-text-sm tw-font-medium tw-transition md:tw-left-1/2 md:-tw-translate-x-1/2",
-          getMarkerClass(item.id, status, showStatusBadge)
+          "tw-absolute tw-left-0 tw-top-0 tw-z-20 tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-[#030303] tw-text-sm tw-font-medium tw-shadow-[0_0_0_6px_#030303] tw-transition md:tw-left-1/2 md:-tw-translate-x-1/2",
+          getMarkerClass(status)
         )}
       >
         {showStatusBadge && status === "complete" ? (
@@ -276,14 +292,8 @@ function StatusBadge({
   );
 }
 
-function getMarkerClass(
-  id: TimelineStepId,
-  status: StepStatus,
-  showStatusBadge: boolean
-) {
-  if (showStatusBadge) {
-    return STATUS_MARKER_CLASS[status];
-  }
-
-  return DEFAULT_MARKER_CLASS[id];
+function getMarkerClass(status: StepStatus) {
+  return status === "pending"
+    ? NEUTRAL_MARKER_CLASS
+    : STATUS_MARKER_CLASS[status];
 }

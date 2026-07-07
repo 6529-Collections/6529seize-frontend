@@ -20,6 +20,7 @@ import { t } from "@/i18n/messages";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
+import Join6529Icon from "../common/icons/Join6529Icon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
@@ -90,6 +91,11 @@ export default function AppSidebar({
         label: t(DEFAULT_LOCALE, "navigation.primary.dms"),
         path: "/messages",
         icon: ChatBubbleIcon,
+      },
+      {
+        label: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
+        path: "/join-6529",
+        icon: Join6529Icon,
       },
       sectionMap.get("about"),
       ...(showDropForge ? [dropForgeItem] : []),

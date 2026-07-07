@@ -1,77 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import type { SupportedLocale } from "@/i18n/locales";
-import { commonApiFetch } from "@/services/api/common-api";
 
-import {
-  getProfileHref,
-  getProfileRouteIdentity,
-  hasEstablishedProfileActivity,
-  isPublicWaveDropByProfile,
-} from "./journeyIdentity";
-import {
-  completePanel,
-  profileImagePanel,
-  profilePanel,
-  wavesPanel,
-} from "./journeyPanels";
-import { WAVES_ENTRY_STORAGE_PREFIX } from "./page.content";
-import type { CurrentPanelContent } from "./page.types";
+import { getProfileHref, getProfileRouteIdentity } from "./journeyIdentity";
+import { WAVES_HREF } from "./page.content";
+import type { CurrentPanelAction, JoinPageState } from "./page.types";
 import { m } from "./page.utils";
 import { useJoin6529Progress } from "./useJoin6529Progress";
 
-interface CurrentPanelArgs {
-  readonly authActionError: string | null;
-  readonly authActionPending: boolean;
-  readonly fetchingProfile: boolean;
-  readonly hasActiveWalletAddress: boolean;
-  readonly hasEnteredWaves: boolean;
-  readonly hasFirstPublicMessage: boolean;
-  readonly hasProfile: boolean;
-  readonly hasProfileImage: boolean;
-  readonly hasValidWalletAuth: boolean;
-  readonly locale: SupportedLocale;
-  readonly onConnectWallet: () => void;
-  readonly onMarkWavesEntered: () => void;
-  readonly onRequestAuth: () => void;
-  readonly profileHref: string;
-  readonly walletActionError: string | null;
-  readonly walletActionPending: boolean;
-}
-
-const getProfileQueryIdentity = (profile: ApiIdentity | null): string | null =>
-  profile?.handle ??
-  profile?.normalised_handle ??
-  profile?.primary_wallet ??
-  null;
-
-const getProfileStorageKey = (
-  profile: ApiIdentity | null,
-  address: string | undefined
-): string | null => {
-  const primaryWallet = profile?.primary_wallet;
-  return (
-    profile?.id ??
-    profile?.normalised_handle ??
-    profile?.handle ??
-    primaryWallet?.toLowerCase() ??
-    address?.toLowerCase() ??
-    null
-  );
-};
-
-const readWavesEntry = (storageKey: string | null): boolean =>
-  storageKey !== null && safeLocalStorage.getItem(storageKey) === "1";
-
 export function useJoin6529Journey(locale: SupportedLocale) {
-  const { connectedProfile, fetchingProfile, requestAuth } = useAuth();
+  const { connectedProfile, requestAuth } = useAuth();
   const {
     address,
     hasActiveWalletAddress,
@@ -80,13 +20,6 @@ export function useJoin6529Journey(locale: SupportedLocale) {
   } = useSeizeConnectContext();
   const [walletActionPending, setWalletActionPending] = useState(false);
   const [authActionPending, setAuthActionPending] = useState(false);
-  const [walletActionError, setWalletActionError] = useState<string | null>(
-    null
-  );
-  const [authActionError, setAuthActionError] = useState<string | null>(null);
-  const [enteredWavesStorageKeys, setEnteredWavesStorageKeys] = useState<
-    ReadonlySet<string>
-  >(() => new Set());
 
   const profileRouteIdentity = getProfileRouteIdentity(
     connectedProfile,
@@ -97,201 +30,157 @@ export function useJoin6529Journey(locale: SupportedLocale) {
     profileRouteIdentity === null
       ? "/open-data/meme-subscriptions"
       : `/${profileRouteIdentity}/subscriptions`;
-  const profileQueryIdentity = getProfileQueryIdentity(connectedProfile);
-  const profileStorageKey = getProfileStorageKey(connectedProfile, address);
-  const wavesEntryStorageKey =
-    profileStorageKey === null
-      ? null
-      : `${WAVES_ENTRY_STORAGE_PREFIX}${profileStorageKey}`;
-  const hasProfile = Boolean(connectedProfile);
-  const hasProfileImage = Boolean(connectedProfile?.pfp);
-  const hasEstablishedActivity =
-    hasEstablishedProfileActivity(connectedProfile);
-  const hasFirstPublicMessage = useFirstPublicMessage({
-    connectedProfile,
-    hasEstablishedActivity,
-    profileQueryIdentity,
-  });
-  const hasEnteredWavesFromGuide =
-    readWavesEntry(wavesEntryStorageKey) ||
-    (wavesEntryStorageKey === null
-      ? false
-      : enteredWavesStorageKeys.has(wavesEntryStorageKey));
-  const hasEnteredWaves = hasFirstPublicMessage || hasEnteredWavesFromGuide;
-  const timelineProgress = useJoin6529Progress({
-    connectedProfile,
+  const pageState = getJoinPageState({
     hasActiveWalletAddress,
-    hasEnteredWaves,
-    hasFirstPublicMessage,
-    hasProfile,
-    isProfileStateReady: hasValidWalletAuth && !fetchingProfile,
+    hasProfile: Boolean(connectedProfile),
   });
+  const timelineProgress = useJoin6529Progress({ pageState });
 
   const handleConnectWallet = useCallback(() => {
     setWalletActionPending(true);
-    setWalletActionError(null);
     void (async () => {
       try {
         await seizeConnectFresh();
       } catch {
-        setWalletActionError(m(locale, "join6529.current.wallet.error"));
+        // The wallet modal can be dismissed; the user can retry the CTA.
       } finally {
         setWalletActionPending(false);
       }
     })();
-  }, [locale, seizeConnectFresh]);
+  }, [seizeConnectFresh]);
 
   const handleRequestAuth = useCallback(() => {
     setAuthActionPending(true);
-    setAuthActionError(null);
     void (async () => {
       try {
-        const { success } = await requestAuth();
-        if (!success) {
-          setAuthActionError(m(locale, "join6529.current.auth.error"));
-        }
+        await requestAuth();
       } catch {
-        setAuthActionError(m(locale, "join6529.current.auth.error"));
+        // Signing can be cancelled; the setup CTA remains available.
       } finally {
         setAuthActionPending(false);
       }
     })();
-  }, [locale, requestAuth]);
+  }, [requestAuth]);
 
-  const markWavesEntered = useCallback(() => {
-    if (wavesEntryStorageKey === null) {
-      return;
-    }
-
-    safeLocalStorage.setItem(wavesEntryStorageKey, "1");
-    setEnteredWavesStorageKeys((storageKeys) => {
-      if (storageKeys.has(wavesEntryStorageKey)) {
-        return storageKeys;
-      }
-      const nextStorageKeys = new Set(storageKeys);
-      nextStorageKeys.add(wavesEntryStorageKey);
-      return nextStorageKeys;
-    });
-  }, [wavesEntryStorageKey]);
-
-  const currentPanel = getCurrentPanel({
-    authActionError,
+  const primaryAction = getHeroPrimaryAction({
     authActionPending,
-    fetchingProfile,
-    hasActiveWalletAddress,
-    hasEnteredWaves,
-    hasFirstPublicMessage,
-    hasProfile,
-    hasProfileImage,
     hasValidWalletAuth,
     locale,
     onConnectWallet: handleConnectWallet,
-    onMarkWavesEntered: markWavesEntered,
     onRequestAuth: handleRequestAuth,
+    pageState,
     profileHref,
-    walletActionError,
     walletActionPending,
+  });
+  const secondaryAction = getHeroSecondaryAction({
+    locale,
+    pageState,
+    subscriptionsHref,
   });
 
   return {
-    currentPanel,
+    pageState,
+    primaryAction,
     profileHref,
+    secondaryAction,
     subscriptionsHref,
     timelineProgress,
   };
 }
 
-function useFirstPublicMessage({
-  connectedProfile,
-  hasEstablishedActivity,
-  profileQueryIdentity,
+function getJoinPageState({
+  hasActiveWalletAddress,
+  hasProfile,
 }: {
-  readonly connectedProfile: ApiIdentity | null;
-  readonly hasEstablishedActivity: boolean;
-  readonly profileQueryIdentity: string | null;
-}) {
-  const { data: recentProfileDrops } = useQuery({
-    queryKey: [
-      QueryKey.PROFILE_DROPS,
-      "join-6529-first-public-message",
-      profileQueryIdentity,
-    ],
-    enabled: profileQueryIdentity !== null && !hasEstablishedActivity,
-    staleTime: 60_000,
-    queryFn: async () => {
-      if (profileQueryIdentity === null) {
-        return [];
-      }
-      return await commonApiFetch<ApiDrop[]>({
-        endpoint: "/drops",
-        params: {
-          limit: "10",
-          author: profileQueryIdentity,
-          include_replies: "true",
-          context_profile: profileQueryIdentity,
-        },
-      });
-    },
-  });
+  readonly hasActiveWalletAddress: boolean;
+  readonly hasProfile: boolean;
+}): JoinPageState {
+  if (!hasActiveWalletAddress) {
+    return "loggedOut";
+  }
 
-  const hasRecentPublicMessage = Boolean(
-    recentProfileDrops?.some((drop) =>
-      isPublicWaveDropByProfile(drop, connectedProfile)
-    )
-  );
-  return hasEstablishedActivity || hasRecentPublicMessage;
+  return hasProfile ? "loggedIn" : "inProgress";
 }
 
-function getCurrentPanel(args: CurrentPanelArgs): CurrentPanelContent {
-  if (!args.hasActiveWalletAddress) {
+function getHeroPrimaryAction({
+  authActionPending,
+  hasValidWalletAuth,
+  locale,
+  onConnectWallet,
+  onRequestAuth,
+  pageState,
+  profileHref,
+  walletActionPending,
+}: {
+  readonly authActionPending: boolean;
+  readonly hasValidWalletAuth: boolean;
+  readonly locale: SupportedLocale;
+  readonly onConnectWallet: () => void;
+  readonly onRequestAuth: () => void;
+  readonly pageState: JoinPageState;
+  readonly profileHref: string;
+  readonly walletActionPending: boolean;
+}): CurrentPanelAction {
+  if (pageState === "loggedOut") {
     return {
-      title: m(args.locale, "join6529.current.wallet.title"),
-      body: m(args.locale, "join6529.current.wallet.body"),
-      error: args.walletActionError,
-      action: {
-        kind: "button",
-        label: m(args.locale, "join6529.action.connect"),
-        busyLabel: m(args.locale, "join6529.action.connecting"),
-        busy: args.walletActionPending,
-        onClick: args.onConnectWallet,
-      },
+      kind: "button",
+      label: m(locale, "join6529.action.connect"),
+      busyLabel: m(locale, "join6529.action.connecting"),
+      busy: walletActionPending,
+      onClick: onConnectWallet,
     };
   }
 
-  if (!args.hasValidWalletAuth) {
+  if (pageState === "inProgress" && !hasValidWalletAuth) {
     return {
-      title: m(args.locale, "join6529.current.auth.title"),
-      body: m(args.locale, "join6529.current.auth.body"),
-      error: args.authActionError,
-      action: {
-        kind: "button",
-        label: m(args.locale, "join6529.action.sign"),
-        busyLabel: m(args.locale, "join6529.action.signing"),
-        busy: args.authActionPending,
-        onClick: args.onRequestAuth,
-      },
+      kind: "button",
+      label: m(locale, "join6529.action.setupProfile"),
+      busyLabel: m(locale, "join6529.action.signing"),
+      busy: authActionPending,
+      onClick: onRequestAuth,
     };
   }
 
-  if (args.fetchingProfile) {
+  if (pageState === "inProgress") {
     return {
-      title: m(args.locale, "join6529.current.profile.loadingTitle"),
-      body: m(args.locale, "join6529.current.profile.loadingBody"),
+      kind: "link",
+      label: m(locale, "join6529.action.setupProfile"),
+      href: profileHref,
     };
   }
 
-  if (!args.hasProfile) {
-    return profilePanel(args.locale, args.profileHref);
+  return {
+    kind: "link",
+    label: m(locale, "join6529.action.goToWaves"),
+    href: WAVES_HREF,
+  };
+}
+
+function getHeroSecondaryAction({
+  locale,
+  pageState,
+  subscriptionsHref,
+}: {
+  readonly locale: SupportedLocale;
+  readonly pageState: JoinPageState;
+  readonly subscriptionsHref: string;
+}): CurrentPanelAction {
+  if (pageState === "loggedIn") {
+    return {
+      kind: "link",
+      label: m(locale, "join6529.action.subscribeToDrops"),
+      href: subscriptionsHref,
+    };
   }
-  if (!args.hasEnteredWaves || !args.hasFirstPublicMessage) {
-    return wavesPanel(
-      args.locale,
-      args.onMarkWavesEntered,
-      !args.hasEnteredWaves
-    );
-  }
-  if (!args.hasProfileImage) {
-    return profileImagePanel(args.locale, args.profileHref);
-  }
-  return completePanel(args.locale);
+
+  return {
+    kind: "link",
+    label: m(
+      locale,
+      pageState === "loggedOut"
+        ? "join6529.action.explorePaths"
+        : "join6529.action.skipForNow"
+    ),
+    href: "#journey",
+  };
 }

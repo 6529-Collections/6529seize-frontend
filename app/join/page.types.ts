@@ -10,18 +10,13 @@ export interface CurrentPanelAction {
   readonly onNavigate?: () => void;
 }
 
-export interface CurrentPanelContent {
-  readonly title: string;
-  readonly body: string;
-  readonly action?: CurrentPanelAction;
-  readonly error?: string | null;
-}
-
+export type JoinPageState = "loggedOut" | "inProgress" | "loggedIn";
 export type StepStatus = "complete" | "current" | "pending";
 
 export interface TimelineProgress {
   readonly visible: boolean;
   readonly completed: number;
+  readonly currentStepId: TimelineStepId | null;
   readonly total: number;
   readonly percent: number;
   readonly statuses: Readonly<Record<TimelineStepId, StepStatus>>;

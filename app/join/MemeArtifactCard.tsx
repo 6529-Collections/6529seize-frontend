@@ -12,7 +12,10 @@ export function MemeArtifactCard({
   imageAspectClass = "tw-aspect-[3/4]",
 }: {
   readonly ariaLabel: string;
-  readonly card: Pick<MemeCard, "image" | "label" | "imageClass" | "number">;
+  readonly card: Pick<
+    MemeCard,
+    "alt" | "image" | "label" | "imageClass" | "number"
+  >;
   readonly className?: string;
   readonly fallbackLabel: string;
   readonly heroMuted?: boolean;
@@ -37,7 +40,7 @@ export function MemeArtifactCard({
         )}
       >
         <Image
-          alt=""
+          alt={card.alt}
           className={cx(
             "tw-h-full tw-w-full tw-object-cover",
             heroMuted && "tw-opacity-90 tw-contrast-[1.05] tw-saturate-[0.95]",
