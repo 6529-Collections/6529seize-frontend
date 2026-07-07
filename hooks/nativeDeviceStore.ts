@@ -289,8 +289,6 @@ function ensureCapacitorListeners(): void {
   const setupToken = capacitorListenerSetupToken;
   capacitorListenerSetupPromise = (async () => {
     try {
-      await syncCapacitorAppState();
-
       const handle = await App.addListener("appStateChange", (state) => {
         setCapacitorAppActive(state.isActive);
       });
@@ -304,6 +302,7 @@ function ensureCapacitorListeners(): void {
       }
 
       capacitorListenerHandles = [handle];
+      await syncCapacitorAppState();
     } catch (error) {
       console.error("Capacitor app state listener setup error:", error);
     } finally {
