@@ -54,7 +54,7 @@ describe("linkPreviewDetection", () => {
     ).toBe(false);
   });
 
-  it("ignores allowed Tenor media links", () => {
+  it("ignores allowed GIF provider media links", () => {
     expect(
       containsDisallowedLink("https://media.tenor.com/abc/tenor.gif")
     ).toBe(false);
@@ -73,9 +73,18 @@ describe("linkPreviewDetection", () => {
     expect(
       containsDisallowedLink("![gif](https://media.tenor.com/abc/tenor.gif)")
     ).toBe(false);
+    expect(
+      containsDisallowedLink("https://media.giphy.com/media/abc/giphy.gif")
+    ).toBe(false);
+    expect(
+      containsDisallowedLink("https://media1.giphy.com/media/abc/giphy.gif")
+    ).toBe(false);
+    expect(
+      containsDisallowedLink("https://media2.giphy.com/media/abc/giphy.mp4")
+    ).toBe(false);
   });
 
-  it("blocks Tenor urls without allowed media extensions", () => {
+  it("blocks GIF provider urls without allowed media extensions", () => {
     expect(containsDisallowedLink("https://c.tenor.com/abc/tenor.webm")).toBe(
       true
     );
@@ -85,9 +94,13 @@ describe("linkPreviewDetection", () => {
     expect(
       containsDisallowedLink("https://www.tenor.com/view/funny-cat-123")
     ).toBe(true);
+    expect(
+      containsDisallowedLink("https://media.giphy.com/media/abc/giphy.webm")
+    ).toBe(true);
+    expect(containsDisallowedLink("https://giphy.com/gifs/abc")).toBe(true);
   });
 
-  it("does not ignore CloudFront or Tenor lookalike hosts", () => {
+  it("does not ignore CloudFront or GIF provider lookalike hosts", () => {
     expect(
       containsDisallowedLink(
         "https://d3lqz0a4bldqgf.cloudfront.net.evil/drops/asset.mp4"
@@ -95,6 +108,9 @@ describe("linkPreviewDetection", () => {
     ).toBe(true);
     expect(
       containsDisallowedLink("https://media.tenor.com.evil/abc/tenor.gif")
+    ).toBe(true);
+    expect(
+      containsDisallowedLink("https://media.giphy.com.evil/abc/giphy.gif")
     ).toBe(true);
   });
 

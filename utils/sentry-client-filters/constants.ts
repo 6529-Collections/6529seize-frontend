@@ -7,13 +7,25 @@ export const filenameExceptions = [
 ];
 export const injectedWasmCspAppUriPath = "app:///inject.js";
 export const injectedWasmCspCollapsedPath = "///inject.js";
-export const injectedAppUriPath = "app:///injected/injected.js";
+// Observed Sentry E7 pre-symbolication shape. This is intentionally narrow and
+// can fail open when minification changes, keeping app-owned CSP errors visible.
+export const injectedWasmCspStaticChunkFunction = "k";
+export const injectedWasmCspStaticChunkPathPattern =
+  /^app:\/\/\/chunks\/utils-[A-Za-z0-9_-]+\.js(?::\d+(?::\d+)?)?$/;
+const injectedAppUriPath = "app:///injected/injected.js";
+export const injectedWalletCollisionAppUriPaths = [
+  injectedAppUriPath,
+  "app:///requestProvider.js",
+  "app:///inject-runtime.js",
+];
 export const walletCollisionPatterns = [
   "tronlinkparams",
   "cannot set property ethereum of #<window> which has only a getter",
   "cannot assign to read only property 'ethereum'",
   'cannot assign to read only property "ethereum"',
   "cannot redefine property: ethereum",
+  "cannot assign to read only property 'keplr'",
+  'cannot assign to read only property "keplr"',
 ];
 export const coinbaseWalletSdkPathTokens = [
   "@coinbase/wallet-sdk",
@@ -23,8 +35,8 @@ export const coinbaseWalletLinkWebSocketFile = "WalletLinkWebSocket.js";
 export const coinbaseWalletLinkWebSocketCloseFunction = "webSocket.onclose";
 export const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
-export const coinbaseWalletLinkWebSocket1006Pattern =
-  /^websocket error 1006(?::.*)?$/i;
+export const coinbaseWalletLinkWebSocket1006MessagePrefix =
+  "websocket error 1006";
 export const walletWebSocketBreadcrumbAppKitTokens = [
   "appkit",
   "reown",
@@ -87,9 +99,10 @@ export const browserExtensionUrlPrefixes = [
   "moz-extension://",
   "safari-web-extension://",
 ];
+export const nextStaticFramePathToken = "/_next/static/";
 const appOwnedFrameBasePathTokens = [
   "webpack-internal:///(app-",
-  "/_next/static/",
+  nextStaticFramePathToken,
 ];
 export const appOwnedFramePathTokens = [
   ...appOwnedFrameBasePathTokens,
@@ -97,11 +110,12 @@ export const appOwnedFramePathTokens = [
 ];
 export const rabbyMobileUserRejectedCode = 4001;
 export const rabbyMobileUserRejectedMessage = "Not Allowed";
-export const rabbyMobileStackPatterns = ["rabbymobile", "userrejectedrequest"];
+export const rabbyMobileStackContextPattern = "rabbymobile";
+export const rabbyMobileUserRejectedStackPattern = "userrejectedrequest";
 export const appOwnedStackPatterns = [
   "webpack-internal:///(app-pages-browser)",
   "webpack://_n_e/./",
-  "/_next/static/",
+  nextStaticFramePathToken,
   "https://6529.io/",
   "https://www.6529.io/",
   "https://staging.6529.io/",
@@ -132,8 +146,8 @@ export const REACT_DOM_RUNTIME_FRAME_PATTERNS = [
   "react-dom-client.production.js",
 ];
 export const NEXT_STATIC_CHUNK_FRAME_PATTERNS = [
-  "/_next/static/chunks/",
-  "/_next/static/webpack/",
+  `${nextStaticFramePathToken}chunks/`,
+  `${nextStaticFramePathToken}webpack/`,
 ];
 export const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
   "insertOrAppendPlacementNode",
@@ -193,6 +207,9 @@ export const walletConnectStaleSessionFunctions = new Set([
   "isValidSessionTopic",
   "onRelayMessage",
 ]);
+export const extensionMessagingConnectionFailureMessage =
+  "Could not establish connection. Receiving end does not exist.";
+export const injectedScriptBundlePathToken = "injectedscript.bundle.js";
 export const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 export const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 export const FNV_OFFSET_BASIS = 2166136261;

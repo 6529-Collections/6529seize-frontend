@@ -152,7 +152,7 @@ describe("WaveHeader", () => {
     expect(screen.queryByTestId("wave-header-pin")).toBeNull();
   });
 
-  it("only mounts create-subwave options for eligible top-level waves", () => {
+  it("does not mount owner options for admin-eligible non-owner waves", () => {
     wrapper(
       {
         ...baseWave,
@@ -165,13 +165,10 @@ describe("WaveHeader", () => {
       { connectedProfile: { handle: "alice" } }
     );
 
-    expect(screen.getByTestId("wave-header-options")).toHaveAttribute(
-      "data-show-owner",
-      "false"
-    );
+    expect(screen.queryByTestId("wave-header-options")).toBeNull();
   });
 
-  it("does not mount create-subwave options for eligible subwaves", () => {
+  it("does not mount owner options for admin-eligible subwaves when not owner", () => {
     wrapper(
       {
         ...baseWave,

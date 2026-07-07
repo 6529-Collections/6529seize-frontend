@@ -96,7 +96,43 @@ function MobileWavesTestComponent() {
   );
 }
 
+function FallbackStyleComponent() {
+  const { contentContainerStyle, waveViewStyle } = useLayout();
+
+  return (
+    <>
+      <div data-testid="content-container" style={contentContainerStyle} />
+      <div data-testid="wave-view" style={waveViewStyle} />
+    </>
+  );
+}
+
 describe("LayoutProvider", () => {
+  it("provides viewport-sized fallback styles before measurement completes", () => {
+    const originalRequestAnimationFrame = global.requestAnimationFrame;
+    global.requestAnimationFrame = jest.fn(
+      (_callback: FrameRequestCallback) => 1
+    );
+
+    try {
+      render(
+        <LayoutProvider>
+          <FallbackStyleComponent />
+        </LayoutProvider>
+      );
+
+      const contentContainer = screen.getByTestId("content-container");
+      const waveView = screen.getByTestId("wave-view");
+
+      expect(contentContainer.style.display).toBe("flex");
+      expect(contentContainer.style.height).toContain("100dvh");
+      expect(waveView.style.height).toContain("100dvh");
+      expect(waveView.style.maxHeight).toContain("100dvh");
+    } finally {
+      global.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
   it("calculates spaces and styles", () => {
     Object.defineProperty(globalThis, "innerHeight", {
       value: 1000,

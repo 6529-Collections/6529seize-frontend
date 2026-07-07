@@ -5,7 +5,9 @@
 - `/the-memes/{id}` uses `focus` to open a specific card tab.
 - Missing or invalid `focus` opens the default Overview tab.
 - Tab changes and card arrows keep URL query state and update in place.
-- If a numeric `{id}` does not resolve to a published card, the route shows the shared next-mint fallback panel.
+- If a numeric `{id}` does not resolve to a published card, the route shows
+  the shared next-mint fallback panel plus subscription awareness for that
+  upcoming card.
 
 ## Location in the Site
 
@@ -77,13 +79,15 @@
     credit NFT. The standard create-wave validation still controls all
     remaining setup fields.
 16. If a numeric card id is unresolved, the route removes `focus`, hides tab
-    content, and shows the shared next-mint fallback panel.
+    content, and shows the shared next-mint fallback panel with subscription
+    awareness for that card.
 
 ## Route States
 
 - Loading state: heading is visible while card data is still resolving; tab row is not rendered yet.
 - Resolved card state: tab row and tab content render.
-- Unresolved numeric id state: route shows the shared next-mint fallback panel for that numeric id.
+- Unresolved numeric id state: route shows the shared next-mint fallback panel
+  and subscription awareness widget for that numeric id.
 - Non-integer id state: route shows the `MEME` not-found screen.
 
 ## Common Scenarios
@@ -170,6 +174,8 @@
   shared tablist pattern with `aria-selected` and arrow-key navigation.
 - Deferred loading applies to `The Art`, `Activity`, and `Timeline`; first open can be slower than later switches.
 - Fallback panel is the compact card-route view and is fixed to local timezone.
+- Fallback panel includes the same subscription awareness widget used on home
+  for the selected upcoming card.
 - Fallback panel does not expose full `/meme-calendar` controls: no timezone toggle, no `Next Mint` jump button, no `Meme #` input, and no upcoming-mints table.
 
 ## Related Pages

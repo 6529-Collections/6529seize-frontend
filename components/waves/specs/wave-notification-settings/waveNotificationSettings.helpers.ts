@@ -22,23 +22,3 @@ export const getErrorMessage = (error: unknown, defaultMessage: string) => {
 
   return defaultMessage;
 };
-
-export function getAllDropsTooltip({
-  disableAllDropsSelection,
-  subscribedToAllDrops,
-  subscribersLimit,
-}: {
-  readonly disableAllDropsSelection: boolean;
-  readonly subscribedToAllDrops: boolean;
-  readonly subscribersLimit: number;
-}) {
-  if (disableAllDropsSelection && !subscribedToAllDrops) {
-    return `All-message notifications are unavailable for waves with ${subscribersLimit.toLocaleString()}+ followers.`;
-  }
-
-  if (subscribedToAllDrops) {
-    return "Click to disable notifications for all messages";
-  }
-
-  return "Click to enable notifications for all messages";
-}

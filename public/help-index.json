@@ -1645,6 +1645,8 @@
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
+        "In the Groups step, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
+        "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
@@ -2715,7 +2717,7 @@
         "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
-        "The About Subscriptions overview links to the Subscriptions Report for aggregate projected and redeemed subscription counts."
+        "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions", "/tools/subscriptions-report"],
@@ -2837,15 +2839,16 @@
         "active",
         "upcoming",
         "redeemed",
-        "projected",
-        "actual",
+        "subscribed",
+        "airdropped",
         "download",
         "csv",
         "season"
       ],
       "facts": [
         "The Subscriptions Report shows active, upcoming, and redeemed Meme Card subscription counts.",
-        "On a mint day, the Active Drop section compares projected subscriptions with actual redeemed subscriptions and keeps that card out of Upcoming Drops and Past Drops.",
+        "On a mint day, the Active Drop section compares subscribed counts with airdropped counts and keeps that card out of Upcoming Drops and Past Drops.",
+        "Active, Upcoming, and Past rows link to the matching /the-memes/{token_id} card route.",
         "It includes download actions for redeemed subscription count reports.",
         "Its Manage or Connect to Subscribe action uses the same profile-subscriptions navigation and authentication handoff as the About Subscriptions page."
       ],
@@ -2968,6 +2971,7 @@
       ],
       "facts": [
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
+        "Unresolved upcoming /the-memes/{id} pages show the next-mint calendar panel plus subscription awareness for that card.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
       ],
@@ -3419,6 +3423,8 @@
         "The notifications feed lives at /notifications.",
         "It supports feed filters, row actions, read state, paging, and navigation to related app content.",
         "Cause filters include Mentions, Replies, Identity, Reactions, and Invites.",
+        "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
+        "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
       ],
@@ -4277,9 +4283,9 @@
         "wave mute",
         "mute wave",
         "unmute wave",
-        "bell slash",
-        "crossed out bell",
-        "speaker button",
+        "bell button",
+        "speaker muted",
+        "speaker mute button",
         "all message notifications"
       ],
       "keywords": [
@@ -4294,12 +4300,12 @@
         "ALL"
       ],
       "facts": [
-        "The speaker button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "The speaker menu has an @ALL option for @ALL mention notifications.",
-        "The speaker menu has a Notify for all messages option for every-message notifications.",
-        "When all-message notifications are unavailable and not already enabled, the speaker menu keeps that option visible but disabled.",
-        "The bell-slash button mutes waves before or after joining.",
-        "When a wave is muted, the bell-slash Muted control unmutes it.",
+        "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
+        "The notification menu has an ALL mentions option with an @ icon for @ALL mention notifications.",
+        "The notification menu has an All messages option for every-message notifications.",
+        "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
+        "The speaker control mutes waves before or after joining.",
+        "When a wave is muted, the red speaker-muted Muted control unmutes it.",
         "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually."
       ],
       "canonical_path": "/waves",
@@ -4827,6 +4833,7 @@
         "Individual Meme Card pages live at /the-memes/{id}.",
         "Use /the-memes/{id} for a specific Meme Card number such as Meme #1 or The Memes #1.",
         "Meme Card preview/data surfaces expose fields such as edition size, TDH rate, season, mint date, and supply when available.",
+        "Upcoming unresolved Meme Card pages show mint timing and subscription awareness for that card.",
         "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
         "Card tabs and focus links are documented for deep-linking into card page sections.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."

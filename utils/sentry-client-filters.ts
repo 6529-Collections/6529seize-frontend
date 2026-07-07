@@ -24,6 +24,7 @@ export {
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
+export { shouldFilterBrowserExtensionMessagingConnectionError } from "./sentry-client-filters/extension-messaging";
 export {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,

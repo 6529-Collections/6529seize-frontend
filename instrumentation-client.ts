@@ -18,6 +18,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
+  shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
@@ -140,6 +141,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterInjectedProviderProxyStartsWithError(event)) {
+    return true;
+  }
+
+  if (shouldFilterBrowserExtensionMessagingConnectionError(event, hint)) {
     return true;
   }
 
