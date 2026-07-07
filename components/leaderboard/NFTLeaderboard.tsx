@@ -216,7 +216,7 @@ function downloadNftCollectorsCsv(nftId: number, csv: string) {
     typeof document === "undefined" ||
     typeof globalThis.URL.createObjectURL !== "function"
   ) {
-    throw new Error("CSV downloads are unavailable in this browser.");
+    throw new TypeError("CSV downloads are unavailable in this browser.");
   }
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });

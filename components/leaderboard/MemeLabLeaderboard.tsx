@@ -51,15 +51,16 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
       MEME_LAB_BALANCE_SORT,
       request.sortDirection,
     ],
-    queryFn: async (): Promise<MemeLabLeaderboardData> => {
-      const response = await fetchNftTdhResults(
-        props.contract,
-        props.nftId,
-        "",
-        request.page,
-        MEME_LAB_BALANCE_SORT,
-        request.sortDirection
-      );
+    queryFn: async ({ signal }): Promise<MemeLabLeaderboardData> => {
+      const response = await fetchNftTdhResults({
+        contract: props.contract,
+        nftId: props.nftId,
+        walletFilter: "",
+        page: request.page,
+        sort: MEME_LAB_BALANCE_SORT,
+        sortDirection: request.sortDirection,
+        signal,
+      });
       const data: NftTDHRanked[] = response.data.map((lead, index) => {
         const rank = index + 1 + (request.page - 1) * PAGE_SIZE;
         return { ...lead, rank };

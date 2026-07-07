@@ -97,7 +97,9 @@ test("renders leaderboard and sorts when caret clicked", async () => {
   );
 
   await waitFor(() => expect(fetchNftTdhResults).toHaveBeenCalledTimes(2));
-  expect(fetchNftTdhResults.mock.calls[1][5]).toBe(SortDirection.ASC);
+  expect(fetchNftTdhResults.mock.calls[1][0]).toEqual(
+    expect.objectContaining({ sortDirection: SortDirection.ASC })
+  );
   expect(setScrollPosition).not.toHaveBeenCalled();
 });
 
