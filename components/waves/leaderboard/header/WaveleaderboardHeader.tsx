@@ -428,7 +428,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             controlsRowBasisClass
           } ${
             layout.enableControlsScroll
-              ? "horizontal-menu-hide-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
+              ? "tw-no-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
               : "tw-overflow-x-hidden"
           }`}
         >

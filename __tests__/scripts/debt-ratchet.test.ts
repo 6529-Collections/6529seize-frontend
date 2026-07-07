@@ -4,12 +4,16 @@ import os from "node:os";
 import path from "node:path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { countImportStatements, countLines, countMatches } = require(
-  path.join(process.cwd(), "scripts", "debt-ratchet.cjs")
-) as {
+const {
+  countImportStatements,
+  countLines,
+  countMatches,
+  isWordPressMigratedSource,
+} = require(path.join(process.cwd(), "scripts", "debt-ratchet.cjs")) as {
   countImportStatements: (content: string, packages: string[]) => number;
   countLines: (content: string) => number;
   countMatches: (content: string, pattern: RegExp) => number;
+  isWordPressMigratedSource: (content: string) => boolean;
 };
 
 const SCRIPT_PATH = path.join(process.cwd(), "scripts", "debt-ratchet.cjs");
@@ -66,6 +70,21 @@ describe("debt-ratchet counting helpers", () => {
     expect(countLines("")).toBe(0);
     expect(countLines("one\ntwo\n")).toBe(2);
     expect(countLines("one\ntwo")).toBe(2);
+  });
+
+  it("detects WordPress migrated source markers", () => {
+    expect(
+      isWordPressMigratedSource(
+        [
+          'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
+          '<WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/810" />',
+          '<div className="fusion-wrapper" />',
+        ].join("\n")
+      )
+    ).toBe(true);
+    expect(isWordPressMigratedSource("export const normal = true;\n")).toBe(
+      false
+    );
   });
 });
 
@@ -189,5 +208,45 @@ describe("debt-ratchet check mode", () => {
     const unknown = runRatchet(root, ["--details", "nope"]);
     expect(unknown.status).toBe(1);
     expect(unknown.stderr).toContain('Unknown metric "nope"');
+  });
+
+  it("can hide WordPress migrated files from details output", () => {
+    writeFixture(
+      "app/migrated/page.tsx",
+      [
+        'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
+        "export default function MigratedPage() {",
+        '  return <WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/1" />;',
+        "}",
+        ...Array.from({ length: 810 }, (_, index) => `// migrated ${index}`),
+      ].join("\n")
+    );
+    writeFixture(
+      "components/Large.tsx",
+      "export const line = 1;\n".repeat(810)
+    );
+
+    const unfiltered = runRatchet(root, ["--details", "oversized_files"]);
+    expect(unfiltered.status).toBe(0);
+    expect(unfiltered.stdout).toContain("app/migrated/page.tsx");
+    expect(unfiltered.stdout).toContain("components/Large.tsx");
+
+    const filtered = runRatchet(root, [
+      "--details",
+      "oversized_files",
+      "--ignore-wordpress-migrated",
+    ]);
+    expect(filtered.status).toBe(0);
+    expect(filtered.stdout).not.toContain("app/migrated/page.tsx");
+    expect(filtered.stdout).toContain("components/Large.tsx");
+
+    const alias = runRatchet(root, [
+      "--details",
+      "oversized_files",
+      "--ignore-wp-migrated",
+    ]);
+    expect(alias.status).toBe(0);
+    expect(alias.stdout).not.toContain("app/migrated/page.tsx");
+    expect(alias.stdout).toContain("components/Large.tsx");
   });
 });

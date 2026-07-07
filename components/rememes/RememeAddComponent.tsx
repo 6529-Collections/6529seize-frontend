@@ -380,7 +380,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                             #{nftR.tokenId}
                             {nftR.name && ` - ${nftR.name}`}&nbsp;&nbsp;
                             <Link
-                              className="decoration-hover-underline"
+                              className="tw-no-underline hover:tw-underline"
                               href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
                               target="_blank"
                               rel="noopener noreferrer"
