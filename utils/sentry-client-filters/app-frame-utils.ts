@@ -11,6 +11,7 @@ import {
   injectedWasmCspCollapsedPath,
   injectedWasmCspStaticChunkFunction,
   injectedWasmCspStaticChunkPathPattern,
+  nextStaticFramePathToken,
   NEXT_STATIC_CHUNK_FRAME_PATTERNS,
   REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS,
   REACT_DOM_RUNTIME_FRAME_PATTERNS,
@@ -150,7 +151,7 @@ function isInjectedWasmCspFrame(frame: SentryStackFrame): boolean {
   );
 }
 
-function isFirstPartyFramePath(path: string): boolean {
+export function isFirstPartyFramePath(path: string): boolean {
   const normalizedPath = path.trim();
   if (!normalizedPath) {
     return false;
@@ -163,7 +164,7 @@ function isFirstPartyFramePath(path: string): boolean {
     return true;
   }
 
-  if (normalizedPath.includes("/_next/static/")) {
+  if (normalizedPath.includes(nextStaticFramePathToken)) {
     return true;
   }
 
