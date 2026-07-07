@@ -51,7 +51,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     onGifDrop,
   }) => {
     const isMobile = useIsMobileScreen();
-    const gifPickerKey = publicEnv.TENOR_API_KEY;
+    const gifPickerKey = publicEnv.GIPHY_API_KEY;
     const gifPickerEnabled = !!gifPickerKey;
     const [showGifPicker, setShowGifPicker] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -387,7 +387,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
         </div>
         {gifPickerEnabled && (
           <CreateDropGifPicker
-            tenorApiKey={gifPickerKey}
+            giphyApiKey={gifPickerKey}
             show={showGifPicker}
             setShow={setShowGifPicker}
             onSelect={(gif) => {

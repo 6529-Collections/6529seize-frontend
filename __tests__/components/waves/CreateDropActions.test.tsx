@@ -9,15 +9,15 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
-let ORIGINAL_TENOR_KEY: string | undefined;
+let ORIGINAL_GIPHY_KEY: string | undefined;
 
 beforeAll(() => {
-  ORIGINAL_TENOR_KEY = require("@/config/env").publicEnv.TENOR_API_KEY;
+  ORIGINAL_GIPHY_KEY = require("@/config/env").publicEnv.GIPHY_API_KEY;
 });
 
 afterEach(() => {
-  // restore TENOR key to avoid cross-test leakage
-  require("@/config/env").publicEnv.TENOR_API_KEY = ORIGINAL_TENOR_KEY;
+  // restore GIPHY key to avoid cross-test leakage
+  require("@/config/env").publicEnv.GIPHY_API_KEY = ORIGINAL_GIPHY_KEY;
   jest.clearAllMocks();
 });
 
@@ -396,12 +396,12 @@ describe("CreateDropActions", () => {
 
   it("does not show GIF button when API key is not available", () => {
     const { publicEnv } = require("@/config/env");
-    const prevKey = publicEnv.TENOR_API_KEY;
-    publicEnv.TENOR_API_KEY = undefined;
+    const prevKey = publicEnv.GIPHY_API_KEY;
+    publicEnv.GIPHY_API_KEY = undefined;
     render(<CreateDropActions {...defaultProps} />);
 
     expect(screen.queryByLabelText("Add GIF")).not.toBeInTheDocument();
-    publicEnv.TENOR_API_KEY = prevKey;
+    publicEnv.GIPHY_API_KEY = prevKey;
   });
 
   it("highlights metadata button when metadata is missing", () => {
