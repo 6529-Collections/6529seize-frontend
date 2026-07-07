@@ -97,7 +97,10 @@ jobs:
           if [ "$EVENT_NAME" = "schedule" ]; then
             if [ "$SCHEDULE_CRON" = "0 4 * * 1" ]; then
               requested="all"
+            elif [ "$SCHEDULE_CRON" = "0 4 * * 0,2-6" ]; then
+              requested="web"
             else
+              echo "::warning::Unrecognized schedule cron '$SCHEDULE_CRON'; defaulting to the web pack. Update the plan job's cron match to restore the intended cadence."
               requested="web"
             fi
           fi
