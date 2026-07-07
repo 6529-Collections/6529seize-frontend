@@ -9,6 +9,7 @@ import {
   injectedProviderProxyPath,
   injectedWasmCspAppUriPath,
   injectedWasmCspCollapsedPath,
+  nextStaticFramePathToken,
   NEXT_STATIC_CHUNK_FRAME_PATTERNS,
   REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS,
   REACT_DOM_RUNTIME_FRAME_PATTERNS,
@@ -129,7 +130,7 @@ function isFirstPartyFramePath(path: string): boolean {
     return true;
   }
 
-  if (normalizedPath.includes("/_next/static/")) {
+  if (normalizedPath.includes(nextStaticFramePathToken)) {
     return true;
   }
 

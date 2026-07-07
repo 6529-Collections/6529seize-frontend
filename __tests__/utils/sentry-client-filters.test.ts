@@ -3270,7 +3270,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it("filters pre-symbolication Coinbase WalletLink websocket 1006 close errors marked in_app by Sentry", () => {
+  it("filters pre-symbolication Coinbase WalletLink websocket 1006 close errors marked in_app by Sentry when AppKit breadcrumbs tie it to Coinbase", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
       exception: {
@@ -3295,6 +3295,7 @@ describe("sentry-client-filters", () => {
           },
         ],
       },
+      breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
     });
 
     // Act
@@ -3617,6 +3618,40 @@ describe("sentry-client-filters", () => {
         ],
       },
       breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw Next static in_app websocket 1006 close errors without third-party wallet evidence", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/services-websocket-provider-123.js",
+                  function: "webSocket.onclose",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
     });
 
     // Act

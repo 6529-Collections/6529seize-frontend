@@ -23,8 +23,7 @@ export const coinbaseWalletLinkWebSocketFile = "WalletLinkWebSocket.js";
 export const coinbaseWalletLinkWebSocketCloseFunction = "webSocket.onclose";
 export const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
-export const coinbaseWalletLinkWebSocket1006Pattern =
-  /^websocket error 1006(?::.*)?$/i;
+export const coinbaseWalletLinkWebSocket1006Message = "websocket error 1006";
 export const walletWebSocketBreadcrumbAppKitTokens = [
   "appkit",
   "reown",
@@ -87,9 +86,10 @@ export const browserExtensionUrlPrefixes = [
   "moz-extension://",
   "safari-web-extension://",
 ];
+export const nextStaticFramePathToken = "/_next/static/";
 const appOwnedFrameBasePathTokens = [
   "webpack-internal:///(app-",
-  "/_next/static/",
+  nextStaticFramePathToken,
 ];
 export const appOwnedFramePathTokens = [
   ...appOwnedFrameBasePathTokens,
@@ -101,7 +101,7 @@ export const rabbyMobileStackPatterns = ["rabbymobile", "userrejectedrequest"];
 export const appOwnedStackPatterns = [
   "webpack-internal:///(app-pages-browser)",
   "webpack://_n_e/./",
-  "/_next/static/",
+  nextStaticFramePathToken,
   "https://6529.io/",
   "https://www.6529.io/",
   "https://staging.6529.io/",
@@ -132,8 +132,8 @@ export const REACT_DOM_RUNTIME_FRAME_PATTERNS = [
   "react-dom-client.production.js",
 ];
 export const NEXT_STATIC_CHUNK_FRAME_PATTERNS = [
-  "/_next/static/chunks/",
-  "/_next/static/webpack/",
+  `${nextStaticFramePathToken}chunks/`,
+  `${nextStaticFramePathToken}webpack/`,
 ];
 export const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
   "insertOrAppendPlacementNode",
