@@ -1,178 +1,90 @@
-import GifPicker, { Theme } from "gif-picker-react";
-import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+"use client";
+
+import {
+  Grid,
+  SearchBar,
+  SearchContext,
+  SearchContextManager,
+} from "@giphy/react-components";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type RefObject,
+} from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 
-const TENOR_API_BASE_URL = "https://tenor.googleapis.com/v2/";
-const GIF_PICKER_REACT_PACKAGE_TOKEN = "gif-picker-react";
-const GIF_PICKER_TENOR_MANAGER_PATH_TOKEN = "TenorManager.ts";
+const GIPHY_GRID_MIN_WIDTH = 280;
+const GIPHY_GRID_FALLBACK_WIDTH = 360;
+const GIPHY_GRID_GUTTER = 8;
+const GIPHY_RATING = "r";
 
-// Keep these in sync with gif-picker-react@1.5.0 TenorManager defaults.
-const TENOR_CLIENT_KEY = "gif-picker-react";
-const TENOR_CONTENT_FILTER = "off";
-const TENOR_COUNTRY = "US";
-const TENOR_LOCALE = "en_US";
-const TENOR_MEDIA_FILTER = "gif,tinygif";
-const GIF_PICKER_TENOR_ERROR_MESSAGES = new Set([
-  "undefined is not an object (evaluating 'e.tags')",
-  "undefined is not an object (evaluating 'e.tags.map')",
-  "undefined is not an object (evaluating 'e.results.map')",
-]);
+type GridOnGifClick = NonNullable<ComponentProps<typeof Grid>["onGifClick"]>;
+type GiphyGif = Parameters<GridOnGifClick>[0];
+type GiphyImageRenditions = Partial<
+  Record<string, { readonly url?: string | null }>
+>;
 
-type TenorAvailability = "checking" | "available" | "unavailable";
-type TenorEndpoint = "categories" | "featured" | "search";
+function useMeasuredWidth<TElement extends HTMLElement>(
+  fallbackWidth: number
+): readonly [RefObject<TElement | null>, number] {
+  const ref = useRef<TElement | null>(null);
+  const [width, setWidth] = useState(fallbackWidth);
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+
+    const setElementWidth = (nextWidth: number) => {
+      if (nextWidth <= 0) {
+        return;
+      }
+
+      setWidth(Math.max(GIPHY_GRID_MIN_WIDTH, Math.floor(nextWidth)));
+    };
+
+    setElementWidth(element.clientWidth);
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+
+      setElementWidth(entry.contentRect.width);
+    });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, width] as const;
 }
 
-function isAbortError(error: unknown): boolean {
-  return isRecord(error) && error["name"] === "AbortError";
-}
+function getGiphyGifUrl(gif: GiphyGif): string | null {
+  const images = gif.images as unknown as GiphyImageRenditions;
+  const preferredRenditions = [
+    "original",
+    "downsized_medium",
+    "fixed_height",
+    "fixed_width",
+  ] as const;
 
-function getErrorMessage(error: unknown): string {
-  if (typeof error === "string") {
-    return error;
-  }
-
-  const message = isRecord(error) ? error["message"] : undefined;
-  if (typeof message === "string") {
-    return message;
-  }
-
-  return "";
-}
-
-function getErrorStack(error: unknown): string {
-  const stack = isRecord(error) ? error["stack"] : undefined;
-  return typeof stack === "string" ? stack : "";
-}
-
-function hasGifPickerTenorStack(error: unknown): boolean {
-  const stack = getErrorStack(error);
-  return (
-    stack.includes(GIF_PICKER_REACT_PACKAGE_TOKEN) &&
-    stack.includes(GIF_PICKER_TENOR_MANAGER_PATH_TOKEN)
-  );
-}
-
-function isKnownGifPickerTenorError(error: unknown): boolean {
-  return (
-    GIF_PICKER_TENOR_ERROR_MESSAGES.has(getErrorMessage(error)) &&
-    hasGifPickerTenorStack(error)
-  );
-}
-
-function getAvailabilityStatusMessage(
-  locale: SupportedLocale,
-  availability: TenorAvailability
-): string {
-  if (availability === "available") {
-    return t(locale, "waves.gifPicker.status.ready");
-  }
-
-  if (availability === "unavailable") {
-    return t(locale, "waves.gifPicker.unavailable.title");
-  }
-
-  return t(locale, "waves.gifPicker.status.checking");
-}
-
-function buildTenorUrl(
-  endpoint: TenorEndpoint,
-  tenorApiKey: string,
-  params: Record<string, string>
-): string {
-  const url = new URL(endpoint, TENOR_API_BASE_URL);
-  url.search = new URLSearchParams({
-    key: tenorApiKey,
-    client_key: TENOR_CLIENT_KEY,
-    contentfilter: TENOR_CONTENT_FILTER,
-    media_filter: TENOR_MEDIA_FILTER,
-    locale: TENOR_LOCALE,
-    country: TENOR_COUNTRY,
-    ...params,
-  }).toString();
-
-  return url.toString();
-}
-
-function hasExpectedTenorPayload(
-  endpoint: TenorEndpoint,
-  payload: unknown
-): boolean {
-  if (!isRecord(payload)) {
-    return false;
-  }
-
-  if (endpoint === "categories") {
-    return Array.isArray(payload["tags"]);
-  }
-
-  return Array.isArray(payload["results"]);
-}
-
-async function hasAvailableTenorEndpoint(
-  endpoint: TenorEndpoint,
-  tenorApiKey: string,
-  params: Record<string, string>,
-  signal: AbortSignal
-): Promise<boolean> {
-  const response = await fetch(buildTenorUrl(endpoint, tenorApiKey, params), {
-    signal,
-  });
-
-  if (!response.ok) {
-    return false;
-  }
-
-  const payload: unknown = await response.json();
-  return hasExpectedTenorPayload(endpoint, payload);
-}
-
-async function isTenorAvailable(
-  tenorApiKey: string,
-  signal: AbortSignal
-): Promise<boolean> {
-  const endpoints: Array<{
-    readonly endpoint: TenorEndpoint;
-    readonly params: Record<string, string>;
-  }> = [
-    { endpoint: "categories", params: { type: "featured" } },
-    { endpoint: "featured", params: { ar_range: "all", limit: "1" } },
-    { endpoint: "search", params: { q: "gif", ar_range: "all", limit: "1" } },
-  ];
-
-  for (const { endpoint, params } of endpoints) {
-    const available = await hasAvailableTenorEndpoint(
-      endpoint,
-      tenorApiKey,
-      params,
-      signal
-    );
-    if (!available) {
-      return false;
+  for (const rendition of preferredRenditions) {
+    const url = images[rendition]?.url;
+    if (url) {
+      return url;
     }
   }
 
-  return true;
-}
-
-function GifPickerChecking({ label }: { readonly label: string }) {
-  return (
-    <div className="tw-flex tw-min-h-56 tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-6 tw-py-10 tw-text-center">
-      <div
-        aria-hidden="true"
-        className="tw-size-8 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-700 tw-border-t-primary-400"
-      />
-      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-200">
-        {label}
-      </p>
-    </div>
-  );
+  return null;
 }
 
 function GifPickerUnavailable({
@@ -193,7 +105,7 @@ function GifPickerUnavailable({
   }, []);
 
   return (
-    <div className="tw-flex tw-min-h-56 tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-px-6 tw-py-10 tw-text-center">
+    <div className="tw-flex tw-min-h-72 tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-px-6 tw-py-10 tw-text-center">
       <div className="tw-space-y-2">
         <p
           role="alert"
@@ -215,102 +127,137 @@ function GifPickerUnavailable({
   );
 }
 
-function GifPickerDialog({
-  tenorApiKey,
+function GiphyAttributionMark() {
+  return (
+    <div
+      aria-label="Powered by GIPHY"
+      className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-normal tw-text-iron-400"
+    >
+      <span>Powered by</span>
+      <span className="tw-rounded-sm tw-bg-white tw-px-1.5 tw-py-1 tw-text-[11px] tw-font-black tw-leading-none tw-tracking-normal tw-text-black">
+        GIPHY
+      </span>
+    </div>
+  );
+}
+
+function GiphyResults({
   onSelect,
+  onUnavailable,
+  onAvailable,
+  unavailableTitle,
+  unavailableHint,
+  closeLabel,
   onClose,
 }: {
-  readonly tenorApiKey: string;
   readonly onSelect: (gif: string) => void;
+  readonly onUnavailable: () => void;
+  readonly onAvailable: () => void;
+  readonly unavailableTitle: string;
+  readonly unavailableHint: string;
+  readonly closeLabel: string;
   readonly onClose: () => void;
 }) {
-  const [availability, setAvailability] =
-    useState<TenorAvailability>("checking");
-  const locale = useBrowserLocale();
-  const dialogTitle = t(locale, "waves.gifPicker.dialogTitle");
-  const statusMessage = getAvailabilityStatusMessage(locale, availability);
+  const { fetchGifs, searchKey } = useContext(SearchContext);
+  const [containerRef, gridWidth] = useMeasuredWidth<HTMLDivElement>(
+    GIPHY_GRID_FALLBACK_WIDTH
+  );
+  const [hasFetchError, setHasFetchError] = useState(false);
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    let isActive = true;
-
-    async function checkTenorAvailability() {
-      try {
-        const available = await isTenorAvailable(
-          tenorApiKey,
-          abortController.signal
-        );
-        if (!isActive) {
-          return;
-        }
-
-        setAvailability(available ? "available" : "unavailable");
-      } catch (error: unknown) {
-        if (!isActive || isAbortError(error)) {
-          return;
-        }
-
-        setAvailability("unavailable");
-      }
-    }
-
-    void checkTenorAvailability();
-
-    return () => {
-      isActive = false;
-      abortController.abort();
-    };
-  }, [tenorApiKey]);
-
-  useEffect(() => {
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (!isKnownGifPickerTenorError(event.reason)) {
+  const handleGifClick = useCallback<GridOnGifClick>(
+    (gif, event) => {
+      event.preventDefault();
+      const gifUrl = getGiphyGifUrl(gif);
+      if (!gifUrl) {
         return;
       }
 
-      event.preventDefault();
-      setAvailability("unavailable");
-    };
+      onSelect(gifUrl);
+    },
+    [onSelect]
+  );
 
-    globalThis.addEventListener("unhandledrejection", handleUnhandledRejection);
-    return () =>
-      globalThis.removeEventListener(
-        "unhandledrejection",
-        handleUnhandledRejection
-      );
-  }, []);
+  const handleGifsFetchError = useCallback(() => {
+    setHasFetchError(true);
+    onUnavailable();
+  }, [onUnavailable]);
 
-  let content: ReactNode;
-  if (availability === "available") {
-    content = (
-      <GifPicker
-        width="100%"
-        tenorApiKey={tenorApiKey}
-        theme={Theme.DARK}
-        onGifClick={(gif) => onSelect(gif.url)}
-      />
-    );
-  } else if (availability === "unavailable") {
-    content = (
+  const handleGifsFetched = useCallback(() => {
+    setHasFetchError(false);
+    onAvailable();
+  }, [onAvailable]);
+
+  if (hasFetchError) {
+    return (
       <GifPickerUnavailable
-        title={t(locale, "waves.gifPicker.unavailable.title")}
-        hint={t(locale, "waves.gifPicker.unavailable.hint")}
-        closeLabel={t(locale, "common.close")}
+        title={unavailableTitle}
+        hint={unavailableHint}
+        closeLabel={closeLabel}
         onClose={onClose}
       />
     );
-  } else {
-    content = (
-      <GifPickerChecking label={t(locale, "waves.gifPicker.status.checking")} />
-    );
   }
+
+  return (
+    <div
+      ref={containerRef}
+      className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-3"
+    >
+      <Grid
+        key={searchKey}
+        width={gridWidth}
+        columns={gridWidth < 360 ? 2 : 3}
+        gutter={GIPHY_GRID_GUTTER}
+        fetchGifs={fetchGifs}
+        onGifClick={handleGifClick}
+        onGifsFetchError={handleGifsFetchError}
+        onGifsFetched={handleGifsFetched}
+        noLink={true}
+        borderRadius={8}
+        backgroundColor="#121318"
+        noResultsMessage={
+          <div className="tw-px-4 tw-py-12 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400">
+            No GIFs found.
+          </div>
+        }
+      />
+    </div>
+  );
+}
+
+function GifPickerDialog({
+  giphyApiKey,
+  onSelect,
+  onClose,
+}: {
+  readonly giphyApiKey: string;
+  readonly onSelect: (gif: string) => void;
+  readonly onClose: () => void;
+}) {
+  const locale = useBrowserLocale();
+  const dialogTitle = t(locale, "waves.gifPicker.dialogTitle");
+  const [statusMessage, setStatusMessage] = useState(
+    t(locale, "waves.gifPicker.status.ready")
+  );
+
+  useEffect(() => {
+    setStatusMessage(t(locale, "waves.gifPicker.status.ready"));
+  }, [locale]);
+
+  const markUnavailable = useCallback(() => {
+    setStatusMessage(t(locale, "waves.gifPicker.unavailable.title"));
+  }, [locale]);
+
+  const markAvailable = useCallback(() => {
+    setStatusMessage(t(locale, "waves.gifPicker.status.ready"));
+  }, [locale]);
 
   return (
     <MobileWrapperDialog
       title={dialogTitle}
       isOpen={true}
       onClose={onClose}
-      noPadding={availability === "available"}
+      noPadding={true}
       headerClassName="tw-sr-only"
     >
       <div
@@ -321,18 +268,54 @@ function GifPickerDialog({
       >
         {statusMessage}
       </div>
-      {content}
+      <SearchContextManager
+        apiKey={giphyApiKey}
+        shouldDefaultToTrending={true}
+        shouldFetchChannels={false}
+        options={{ rating: GIPHY_RATING, type: "gifs" }}
+        theme={{
+          darkMode: true,
+          searchbarHeight: 44,
+          mobileSearchbarHeight: 44,
+          hideCancelButton: true,
+        }}
+      >
+        <div className="tw-flex tw-h-[min(78vh,720px)] tw-min-h-[420px] tw-flex-col tw-overflow-hidden tw-bg-iron-950">
+          <div className="tw-flex tw-flex-col tw-gap-3 tw-border-b tw-border-white/10 tw-bg-iron-950 tw-p-4">
+            <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+              <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+                {dialogTitle}
+              </p>
+              <GiphyAttributionMark />
+            </div>
+            <SearchBar
+              placeholder="Search GIFs"
+              clear={true}
+              autoFocus={true}
+            />
+          </div>
+          <GiphyResults
+            onSelect={onSelect}
+            onUnavailable={markUnavailable}
+            onAvailable={markAvailable}
+            unavailableTitle={t(locale, "waves.gifPicker.unavailable.title")}
+            unavailableHint={t(locale, "waves.gifPicker.unavailable.hint")}
+            closeLabel={t(locale, "common.close")}
+            onClose={onClose}
+          />
+        </div>
+      </SearchContextManager>
     </MobileWrapperDialog>
   );
 }
 
 export default function CreateDropGifPicker({
-  tenorApiKey,
+  giphyApiKey,
   show,
   setShow,
   onSelect,
 }: {
-  readonly tenorApiKey: string;
+  readonly giphyApiKey: string;
   readonly show: boolean;
   readonly setShow: (show: boolean) => void;
   readonly onSelect: (gif: string) => void;
@@ -345,7 +328,7 @@ export default function CreateDropGifPicker({
 
   return (
     <GifPickerDialog
-      tenorApiKey={tenorApiKey}
+      giphyApiKey={giphyApiKey}
       onSelect={onSelect}
       onClose={handleClose}
     />

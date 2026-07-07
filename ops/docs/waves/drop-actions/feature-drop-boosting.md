@@ -74,8 +74,8 @@ primary content type of the original drop.
   provider-specific preview when boosted when that provider has a specialized
   card. Current shared preview handlers include GitHub, TikTok, Google
   Workspace, NFT marketplace links, ENS, Compound, Twitter/X, Wikimedia, Tenor
-  GIFs, Art Blocks, `pepe.wtf`, Farcaster/Warpcast, first-party 6529 links, and
-  generic Open Graph previews.
+  and GIPHY GIFs, Art Blocks, `pepe.wtf`, Farcaster/Warpcast, first-party 6529
+  links, and generic Open Graph previews.
 - If a boosted surface intentionally uses a smaller variant than the full thread
   card, the compact variant still needs to preserve the recognizable card type:
   image as image, video as video, tweet as tweet, collection preview as
