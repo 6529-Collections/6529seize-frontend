@@ -2108,10 +2108,15 @@
         "membership",
         "filters",
         "network",
-        "profile"
+        "profile",
+        "xtdh",
+        "grant"
       ],
       "facts": [
         "Group create/edit flows define group details and membership rules.",
+        "xTDH grant beneficiary group rules can use typed grant IDs or the grant picker.",
+        "For token-specific xTDH grants, group creators can require members to own any specified token or all specified tokens.",
+        "For full-collection xTDH grants, group membership requires ownership of at least one collection token.",
         "Group creation requires the relevant connected profile permissions.",
         "Groups can be used later in workflows such as wave access or participation settings."
       ],

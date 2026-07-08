@@ -4,6 +4,7 @@ import GroupCreateRep from "@/components/groups/page/create/config/GroupCreateRe
 import GroupCreateTDH from "@/components/groups/page/create/config/GroupCreateTDH";
 import GroupCreateCollections from "@/components/groups/page/create/config/nfts/GroupCreateCollections";
 import GroupCreateNfts from "@/components/groups/page/create/config/nfts/GroupCreateNfts";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { CreateWaveInlineGroupRuleType } from "./createWaveInlineGroupBuilder";
@@ -99,12 +100,32 @@ export default function CreateWaveInlineGroupRuleEditor({
       return (
         <CreateWaveInlineGroupXtdhGrant
           beneficiaryGrantId={draft.group.is_beneficiary_of_grant_id}
+          beneficiaryGrantMatchMode={
+            draft.group.is_beneficiary_of_grant_match_mode
+          }
           setBeneficiaryGrantId={(is_beneficiary_of_grant_id) =>
             onDraftChange({
               ...draft,
               group: {
                 ...draft.group,
                 is_beneficiary_of_grant_id: is_beneficiary_of_grant_id ?? null,
+                ...(is_beneficiary_of_grant_id
+                  ? {}
+                  : {
+                      is_beneficiary_of_grant_match_mode:
+                        ApiGroupBeneficiaryGrantMatchMode.AnyToken,
+                    }),
+              },
+            })
+          }
+          setBeneficiaryGrantMatchMode={(is_beneficiary_of_grant_match_mode) =>
+            onDraftChange({
+              ...draft,
+              group: {
+                ...draft.group,
+                is_beneficiary_of_grant_match_mode:
+                  is_beneficiary_of_grant_match_mode ??
+                  ApiGroupBeneficiaryGrantMatchMode.AnyToken,
               },
             })
           }
