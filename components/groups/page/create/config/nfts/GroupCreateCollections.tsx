@@ -1,6 +1,7 @@
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import { DEFAULT_GROUP_NFT_OWNERSHIP_MATCH_MODE } from "@/helpers/groups/group-nft-ownership";
 import { CheckIcon } from "@heroicons/react/24/outline";
 
 const COLLECTIONS = [
@@ -26,6 +27,7 @@ export default function GroupCreateCollections({
       const newCollection: ApiGroupOwnsNft = {
         name: collection,
         tokens: [],
+        match_mode: DEFAULT_GROUP_NFT_OWNERSHIP_MATCH_MODE,
       };
       const filteredNfts = nfts.filter((n) => n.name !== collection);
       setNfts([...filteredNfts, newCollection]);
@@ -52,6 +54,7 @@ export default function GroupCreateCollections({
             return (
               <button
                 key={collection.enum}
+                type="button"
                 onClick={() => toggleCollection(collection.enum)}
                 className={`tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-left tw-transition-colors ${
                   isSelected

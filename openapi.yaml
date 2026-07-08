@@ -14263,6 +14263,11 @@ components:
       enum:
         - ANY_TOKEN
         - ALL_TOKENS
+    ApiGroupNftOwnershipMatchMode:
+      type: string
+      enum:
+        - ANY_TOKEN
+        - ALL_TOKENS
     ApiGroupCicFilter:
       type: object
       required:
@@ -14404,6 +14409,8 @@ components:
           type: array
           items:
             type: string
+        match_mode:
+          $ref: "#/components/schemas/ApiGroupNftOwnershipMatchMode"
     ApiGroupRepFilter:
       type: object
       required:
