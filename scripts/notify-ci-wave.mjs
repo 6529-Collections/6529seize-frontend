@@ -36,17 +36,20 @@ function resolveWebhookConfig() {
     .toLowerCase();
   if (targetEnv === 'prod' || targetEnv === 'production') {
     return {
+      targetEnv,
       url: CI_PIPELINES_WAVE_WEBHOOK_URL_PROD,
       secret: CI_PIPELINES_WAVE_WEBHOOK_SECRET_PROD
     };
   }
   if (targetEnv === 'staging') {
     return {
+      targetEnv,
       url: CI_PIPELINES_WAVE_WEBHOOK_URL_STAGING,
       secret: CI_PIPELINES_WAVE_WEBHOOK_SECRET_STAGING
     };
   }
   return {
+    targetEnv: targetEnv || 'default',
     url: CI_PIPELINES_WAVE_WEBHOOK_URL,
     secret: CI_PIPELINES_WAVE_WEBHOOK_SECRET
   };
@@ -55,7 +58,9 @@ function resolveWebhookConfig() {
 const webhookConfig = resolveWebhookConfig();
 
 if (!webhookConfig.url || !webhookConfig.secret) {
-  console.log('CI pipeline wave webhook is not configured; skipping.');
+  console.log(
+    `CI pipeline wave webhook is not configured for ${webhookConfig.targetEnv}; skipping.`
+  );
   process.exit(0);
 }
 
@@ -97,10 +102,10 @@ const response = await fetch(webhookConfig.url, {
 });
 
 if (!response.ok) {
-  const errorText = await response.text();
-  throw new Error(
-    `CI pipeline wave notification failed: ${response.status} ${response.statusText} ${errorText}`
+  console.error(
+    `CI pipeline wave notification failed: ${response.status} ${response.statusText}`
   );
+  process.exit(1);
 }
 
 console.log('CI pipeline wave notification sent.');
