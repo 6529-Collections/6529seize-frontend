@@ -57,6 +57,9 @@
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
+      // Public auth facades preserve pre-split type exports for stable imports.
+      "components/auth/Auth.tsx": ["types"],
+      "components/auth/SeizeConnectContext.tsx": ["types"],
       "components/brain/left-sidebar/waves/HighlyRatedWavesToggle.tsx": [
         "exports",
         "types"
