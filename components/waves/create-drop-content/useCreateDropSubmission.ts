@@ -37,6 +37,7 @@ type ProcessIncomingDrop = (
   drop: ApiDrop,
   type: ProcessIncomingDropType
 ) => Promise<void>;
+type DropModeSubmitCallbacks = Pick<DropMutationBody, "onSuccess" | "onError">;
 
 const isBlockedChatDropRequest = ({
   dropRequest,
@@ -200,6 +201,30 @@ const updateFocusAfterAcceptedSubmit = ({
   if (isApp) {
     hideAndroidKeyboard().catch(() => {});
   }
+};
+
+const getDropModeSubmitCallbacks = ({
+  isDropMode,
+  canExitDropMode,
+  handleDropModeChange,
+  handleDuplicateIdentitySubmissionError,
+}: {
+  readonly isDropMode: boolean;
+  readonly canExitDropMode: boolean;
+  readonly handleDropModeChange: (newIsDropMode: boolean) => void;
+  readonly handleDuplicateIdentitySubmissionError: (error: unknown) => void;
+}): DropModeSubmitCallbacks => {
+  if (!isDropMode || !canExitDropMode) {
+    return {
+      onSuccess: undefined,
+      onError: undefined,
+    };
+  }
+
+  return {
+    onSuccess: () => handleDropModeChange(false),
+    onError: handleDuplicateIdentitySubmissionError,
+  };
 };
 
 export const useCreateDropSubmission = ({
@@ -418,14 +443,12 @@ export const useCreateDropSubmission = ({
       const submitAccepted = submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
-        onSuccess:
-          isDropMode && canExitDropMode
-            ? () => handleDropModeChange(false)
-            : undefined,
-        onError:
-          isDropMode && canExitDropMode
-            ? handleDuplicateIdentitySubmissionError
-            : undefined,
+        ...getDropModeSubmitCallbacks({
+          isDropMode,
+          canExitDropMode,
+          handleDropModeChange,
+          handleDuplicateIdentitySubmissionError,
+        }),
       });
       if (!submitAccepted) {
         return;
