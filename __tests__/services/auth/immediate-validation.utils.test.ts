@@ -57,9 +57,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: true,
         shouldShowModal: false,
+        authRefreshOutcome: "cancelled",
       });
 
       // Should not call JWT validation if address changed
@@ -83,9 +85,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: true,
         shouldShowModal: false,
+        authRefreshOutcome: "cancelled",
       });
 
       expect(mockValidateJwt).not.toHaveBeenCalled();
@@ -105,9 +109,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: true,
         validationCompleted: true,
         wasCancelled: false,
         shouldShowModal: false,
+        authRefreshOutcome: "not_attempted",
       });
 
       expect(mockValidateJwt).toHaveBeenCalledWith({
@@ -171,9 +177,12 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: true,
         wasCancelled: false,
         shouldShowModal: true,
+        authRefreshOutcome: "not_attempted",
+        requiresSessionUpgrade: true,
       });
 
       expect(mockCallbacks.onRemoveJwt).not.toHaveBeenCalled();
@@ -198,9 +207,12 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: true,
         wasCancelled: false,
         shouldShowModal: true,
+        authRefreshOutcome: "not_attempted",
+        requiresSessionUpgrade: true,
       });
 
       expect(mockCallbacks.onReset).not.toHaveBeenCalled();
@@ -227,9 +239,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: true,
         wasCancelled: false,
         shouldShowModal: false,
+        authRefreshOutcome: "not_attempted",
       });
 
       expect(mockCallbacks.onReset).toHaveBeenCalled();
@@ -248,9 +262,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: true,
         wasCancelled: false,
         shouldShowModal: true,
+        authRefreshOutcome: "not_attempted",
       });
 
       expect(mockCallbacks.onRemoveJwt).toHaveBeenCalled();
@@ -280,9 +296,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: true,
         shouldShowModal: false,
+        authRefreshOutcome: "cancelled",
       });
       expect(callbacks.onRemoveJwt).toHaveBeenCalled();
       expect(callbacks.onInvalidateCache).not.toHaveBeenCalled();
@@ -301,9 +319,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: true,
         wasCancelled: true,
         shouldShowModal: false,
+        authRefreshOutcome: "not_attempted",
       });
 
       // No callbacks should be called when cancelled
@@ -323,9 +343,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: false,
         shouldShowModal: true,
+        authRefreshOutcome: "failed",
       });
 
       expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
@@ -347,9 +369,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: false,
         shouldShowModal: true,
+        authRefreshOutcome: "failed",
       });
 
       expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
@@ -407,9 +431,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: false,
         shouldShowModal: true,
+        authRefreshOutcome: "failed",
       });
 
       expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
@@ -439,9 +465,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: true,
         shouldShowModal: false,
+        authRefreshOutcome: "cancelled",
       });
 
       // Should not call any callbacks when aborted
@@ -465,9 +493,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: true,
         shouldShowModal: false,
+        authRefreshOutcome: "cancelled",
       });
 
       // Should not process error when address changed
@@ -489,9 +519,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: false,
         shouldShowModal: false,
+        authRefreshOutcome: "failed",
       });
 
       expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
@@ -527,9 +559,11 @@ describe("validateAuthImmediate", () => {
       });
 
       expect(result).toEqual({
+        isValid: false,
         validationCompleted: false,
         wasCancelled: true,
         shouldShowModal: false,
+        authRefreshOutcome: "cancelled",
       });
 
       // Should not process result when address changed

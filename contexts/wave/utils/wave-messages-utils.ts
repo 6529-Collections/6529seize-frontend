@@ -11,6 +11,7 @@ import type { WaveMessagesUpdate } from "../hooks/types";
 
 interface FetchWaveMessagesOptions {
   readonly limit?: number | undefined;
+  readonly onFailure?: ((error: unknown) => void) | undefined;
 }
 
 type WaveDropsFeedWave = Awaited<
@@ -93,6 +94,14 @@ export async function fetchWaveMessages(
       `[WaveDataManager] Failed to fetch messages for ${waveId}:`,
       error
     );
+    try {
+      options.onFailure?.(error);
+    } catch (callbackError) {
+      console.error(
+        `[WaveDataManager] Failed to report fetch failure for ${waveId}:`,
+        callbackError
+      );
+    }
     return null;
   }
 }
