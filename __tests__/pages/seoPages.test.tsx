@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import LadysabrinaPage, {
   generateMetadata as generateLadysabrinaMetadata,
@@ -12,13 +11,26 @@ import EducationCollabPage, {
 import GMRedirectPage, {
   generateMetadata as generateGMMetadata,
 } from "@/app/gm-or-die-small-mp4/page";
-import CryptoAdzPage from "@/app/museum/6529-fund-szn1/cryptoadz/page";
-import EntretiemposPage from "@/app/museum/6529-fund-szn1/entretiempos/page";
-import JiometoryPage from "@/app/museum/6529-fund-szn1/jiometory-no-compute/page";
-import ProtoglyphPage from "@/app/museum/6529-fund-szn1/proof-grails-protoglyph/page";
-import WallPage from "@/app/museum/6529-fund-szn1/proof-grails-wall/page";
-import KeyTrialPage from "@/app/museum/6529-fund-szn1/the-key-the-trial/page";
+import CryptoAdzPage, {
+  generateMetadata as generateCryptoAdzMetadata,
+} from "@/app/museum/6529-fund-szn1/cryptoadz/page";
+import EntretiemposPage, {
+  generateMetadata as generateEntretiemposMetadata,
+} from "@/app/museum/6529-fund-szn1/entretiempos/page";
+import JiometoryPage, {
+  generateMetadata as generateJiometoryMetadata,
+} from "@/app/museum/6529-fund-szn1/jiometory-no-compute/page";
+import ProtoglyphPage, {
+  generateMetadata as generateProtoglyphMetadata,
+} from "@/app/museum/6529-fund-szn1/proof-grails-protoglyph/page";
+import WallPage, {
+  generateMetadata as generateWallMetadata,
+} from "@/app/museum/6529-fund-szn1/proof-grails-wall/page";
+import KeyTrialPage, {
+  generateMetadata as generateKeyTrialMetadata,
+} from "@/app/museum/6529-fund-szn1/the-key-the-trial/page";
 import { redirect } from "next/navigation";
+import { expectMigratedWordPressPageRenders } from "./migratedWordPressPageTestUtils";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("next/navigation", () => ({
@@ -26,10 +38,6 @@ jest.mock("next/navigation", () => ({
 }));
 
 const redirectMock = redirect as jest.MockedFunction<typeof redirect>;
-
-const getTitle = () => document.querySelector("title")?.textContent;
-const getCanonical = () =>
-  document.querySelector('link[rel="canonical"]')?.getAttribute("href");
 
 describe("static SEO pages render correctly", () => {
   beforeEach(() => {
@@ -90,49 +98,51 @@ describe("static SEO pages render correctly", () => {
     expect(metadata.title).toBe("Redirecting...");
   });
 
-  it("cryptoadz museum page renders", () => {
-    render(<CryptoAdzPage />);
-    expect(getTitle()).toBe("CRYPTOADZ - 6529.io");
-    expect(getCanonical()).toBe("/museum/6529-fund-szn1/cryptoadz/");
-    expect(screen.getAllByText(/CRYPTOADZ/i).length).toBeGreaterThan(0);
-  });
-
-  it("entretiempos museum page renders", () => {
-    render(<EntretiemposPage />);
-    expect(getTitle()).toBe("ENTRETIEMPOS - 6529.io");
-    expect(getCanonical()).toBe("/museum/6529-fund-szn1/entretiempos/");
-    expect(screen.getAllByText(/ENTRETIEMPOS/i).length).toBeGreaterThan(0);
-  });
-
-  it("jiometory no compute museum page renders", () => {
-    render(<JiometoryPage />);
-    expect(getTitle()).toBe("JIOMETORY NO COMPUTE - 6529.io");
-    expect(getCanonical()).toBe("/museum/6529-fund-szn1/jiometory-no-compute/");
-    expect(screen.getAllByText(/JIOMETORY NO COMPUTE/i).length).toBeGreaterThan(
-      0
-    );
-  });
-
-  it("proof grails protoglyph page renders", () => {
-    render(<ProtoglyphPage />);
-    expect(getTitle()).toBe("PROOF GRAILS - PROTOGLYPH - 6529.io");
-    expect(getCanonical()).toBe(
-      "/museum/6529-fund-szn1/proof-grails-protoglyph/"
-    );
-    expect(screen.getAllByText(/PROTOGLYPH/i).length).toBeGreaterThan(0);
-  });
-
-  it("proof grails wall page renders", () => {
-    render(<WallPage />);
-    expect(getTitle()).toBe("PROOF GRAILS - WALL - 6529.io");
-    expect(getCanonical()).toBe("/museum/6529-fund-szn1/proof-grails-wall/");
-    expect(screen.getAllByText(/WALL/i).length).toBeGreaterThan(0);
-  });
-
-  it("the key the trial page renders", () => {
-    render(<KeyTrialPage />);
-    expect(getTitle()).toBe("THE KEY - THE TRIAL - 6529.io");
-    expect(getCanonical()).toBe("/museum/6529-fund-szn1/the-key-the-trial/");
-    expect(screen.getAllByText(/THE KEY/i).length).toBeGreaterThan(0);
+  [
+    {
+      Component: CryptoAdzPage,
+      generateMetadata: generateCryptoAdzMetadata,
+      heading: /CRYPTOADZ/i,
+      title: "CRYPTOADZ - 6529.io",
+    },
+    {
+      Component: EntretiemposPage,
+      generateMetadata: generateEntretiemposMetadata,
+      heading: /ENTRETIEMPOS/i,
+      title: "ENTRETIEMPOS - 6529.io",
+    },
+    {
+      Component: JiometoryPage,
+      generateMetadata: generateJiometoryMetadata,
+      heading: /JIOMETORY NO COMPUTE/i,
+      title: "JIOMETORY NO COMPUTE - 6529.io",
+    },
+    {
+      Component: ProtoglyphPage,
+      generateMetadata: generateProtoglyphMetadata,
+      heading: /PROTOGLYPH/i,
+      title: "PROOF GRAILS - PROTOGLYPH - 6529.io",
+    },
+    {
+      Component: WallPage,
+      generateMetadata: generateWallMetadata,
+      heading: /WALL/i,
+      title: "PROOF GRAILS - WALL - 6529.io",
+    },
+    {
+      Component: KeyTrialPage,
+      generateMetadata: generateKeyTrialMetadata,
+      heading: /THE KEY/i,
+      title: "THE KEY - THE TRIAL - 6529.io",
+    },
+  ].forEach(({ Component, generateMetadata, heading, title }) => {
+    it(`renders migrated ${title}`, async () => {
+      await expectMigratedWordPressPageRenders({
+        Component,
+        generateMetadata,
+        heading,
+        title,
+      });
+    });
   });
 });
