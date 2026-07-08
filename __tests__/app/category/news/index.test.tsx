@@ -1,48 +1,41 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import NewsPage from '@/app/category/news/page';
+import NewsPage, { generateMetadata } from "@/app/category/news/page";
+import { categoryNewsMigratedWordPressPage } from "@/app/category/news/content";
+import { render, screen } from "@testing-library/react";
 
-jest.mock('@/components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);
+describe("NewsPage (migrated WordPress static page)", () => {
+  it("renders the news archive title and announcement content", () => {
+    render(<NewsPage />);
 
-describe('NewsPage', () => {
-  const renderComponent = () => render(<NewsPage />);
-
-  it('renders the page title', () => {
-    renderComponent();
-    const title = document.querySelector('title');
-    expect(title?.textContent).toBe('NEWS Archives - 6529.io');
+    expect(
+      screen.getByRole("heading", { level: 1, name: "NEWS" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("6529 News and Announcements")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "INTRODUCING OM" })
+    ).toBeInTheDocument();
   });
 
-  it('includes canonical link', () => {
-    renderComponent();
-    const canonical = document.querySelector('link[rel="canonical"]');
-    expect(canonical).toBeInTheDocument();
-    expect(canonical?.getAttribute('href')).toBe('/category/news/');
+  it("marks the page with its auditable migration source", () => {
+    render(<NewsPage />);
+
+    expect(document.querySelector("main")).toHaveAttribute(
+      "data-content-source",
+      "migrated-wordpress"
+    );
   });
 
-  it('includes robots meta tag', () => {
-    renderComponent();
-    const robots = document.querySelector('meta[name="robots"]');
-    expect(robots?.getAttribute('content')).toBe('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  it("exposes title and Open Graph metadata via generateMetadata", () => {
+    const metadata = generateMetadata();
+
+    expect(metadata.title).toBe("NEWS - 6529.io");
+    expect(metadata.openGraph).toMatchObject({
+      siteName: "6529.io",
+      title: "NEWS - 6529.io",
+    });
   });
 
-  it('includes Open Graph title', () => {
-    renderComponent();
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    expect(ogTitle?.getAttribute('content')).toBe('NEWS Archives - 6529.io');
-  });
-
-  it('has skip to content link', () => {
-    renderComponent();
-    const skip = screen.getByText('Skip to content');
-    expect(skip).toBeInTheDocument();
-    expect(skip).toHaveAttribute('href', '#content');
-  });
-
-  it('has go to top link', () => {
-    renderComponent();
-    const link = document.querySelector('#toTop');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveClass('fusion-top-top-link');
+  it("keeps the content module aligned with the page path", () => {
+    expect(categoryNewsMigratedWordPressPage.path).toBe("/category/news");
+    expect(categoryNewsMigratedWordPressPage.source).toBe("migrated-wordpress");
   });
 });
