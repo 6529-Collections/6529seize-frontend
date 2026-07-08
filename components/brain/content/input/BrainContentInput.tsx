@@ -41,6 +41,7 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
         key={wave.id}
         dropId={null}
         fixedDropMode={DropMode.CHAT}
+        focusOnInitialActiveDrop
       />
     </div>
   );

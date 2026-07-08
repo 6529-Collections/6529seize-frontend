@@ -47,6 +47,7 @@ interface PrivilegedDropCreatorProps {
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
   readonly forceStandardDropComposer?: boolean | undefined;
+  readonly focusOnInitialActiveDrop?: boolean | undefined;
 }
 
 export default function PrivilegedDropCreator({
@@ -69,6 +70,7 @@ export default function PrivilegedDropCreator({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
+  focusOnInitialActiveDrop = false,
 }: PrivilegedDropCreatorProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
@@ -187,6 +189,7 @@ export default function PrivilegedDropCreator({
       termsSignatureFlowEnabled={termsSignatureFlowEnabled}
       identityPickerPlacement={identityPickerPlacement}
       forceStandardDropComposer={forceStandardDropComposer}
+      focusOnInitialActiveDrop={focusOnInitialActiveDrop}
     />
   );
 }
