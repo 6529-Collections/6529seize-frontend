@@ -34,7 +34,7 @@ let listenerSetupPromise: Promise<void> | null = null;
 let listenerSetupToken = 0;
 let browserFallbackTeardown: (() => void) | null = null;
 let hiddenFallbackTimeout: ReturnType<typeof setTimeout> | null = null;
-let largestObservedViewportHeight = 0;
+let keyboardClosedViewportHeight = 0;
 
 const VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX = 24;
 const FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS = 180;
@@ -138,10 +138,10 @@ function getViewportHeight(): number {
     : 0;
 }
 
-function rememberLargestViewportHeight(): number {
+function rememberKeyboardClosedViewportHeight(): number {
   const viewportHeight = getViewportHeight();
-  if (viewportHeight > largestObservedViewportHeight) {
-    largestObservedViewportHeight = viewportHeight;
+  if (viewportHeight > 0) {
+    keyboardClosedViewportHeight = viewportHeight;
   }
 
   return viewportHeight;
@@ -172,7 +172,7 @@ function markKeyboardHiddenFromFallback(): void {
   clearHiddenFallbackTimeout();
 
   if (!currentState.isVisible) {
-    rememberLargestViewportHeight();
+    rememberKeyboardClosedViewportHeight();
     return;
   }
 
@@ -181,7 +181,7 @@ function markKeyboardHiddenFromFallback(): void {
     keyboardHeight: 0,
     phase: "hidden",
   });
-  rememberLargestViewportHeight();
+  rememberKeyboardClosedViewportHeight();
 }
 
 function syncKeyboardVisibilityFromViewport(): void {
@@ -191,18 +191,18 @@ function syncKeyboardVisibilityFromViewport(): void {
   }
 
   if (!currentState.isVisible) {
-    rememberLargestViewportHeight();
+    rememberKeyboardClosedViewportHeight();
     return;
   }
 
-  if (largestObservedViewportHeight <= 0) {
-    largestObservedViewportHeight = viewportHeight;
+  if (keyboardClosedViewportHeight <= 0) {
+    keyboardClosedViewportHeight = viewportHeight;
     return;
   }
 
   if (
     viewportHeight >=
-    largestObservedViewportHeight - VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX
+    keyboardClosedViewportHeight - VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX
   ) {
     markKeyboardHiddenFromFallback();
   }
@@ -230,7 +230,7 @@ function setupBrowserKeyboardFallbackListeners(): void {
     return;
   }
 
-  rememberLargestViewportHeight();
+  rememberKeyboardClosedViewportHeight();
 
   const handleFocusIn = () => {
     clearHiddenFallbackTimeout();
@@ -451,5 +451,5 @@ export function __resetNativeKeyboardForTests(): void {
   listenerHandles = [];
   listenerSetupPromise = null;
   listenerSetupToken = 0;
-  largestObservedViewportHeight = 0;
+  keyboardClosedViewportHeight = 0;
 }

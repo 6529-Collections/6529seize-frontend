@@ -1607,6 +1607,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   useLayoutEffect(() => {
+    const isInitialMount = isInitialMountRef.current;
+    isInitialMountRef.current = false;
+
     if (!activeDrop) {
       wasNativeKeyboardVisibleRef.current = false;
       return;
@@ -1614,11 +1617,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     // Most app composers should not open the keyboard on page load. Surfaces
     // that mount only after a user reply action can opt into initial focus.
-    if (isApp && isInitialMountRef.current && !focusOnInitialActiveDrop) {
-      isInitialMountRef.current = false;
+    if (isApp && isInitialMount && !focusOnInitialActiveDrop) {
       return;
     }
-    isInitialMountRef.current = false;
 
     if (isApp) {
       if (focusOnInitialActiveDrop) {
