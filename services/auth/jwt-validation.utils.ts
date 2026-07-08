@@ -15,6 +15,7 @@ import {
   InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { trackAuthImpactEvent } from "@/services/analytics/mixpanel";
 
 interface JwtPayload {
   id: string;
@@ -229,6 +230,12 @@ const handleTokenRefresh = async ({
       refreshedSession,
       role,
       activeProfileProxy,
+    });
+    trackAuthImpactEvent("Auth Session Refresh Recovered", {
+      auth_state_after: "authenticated",
+      auth_state_before: "refresh_needed",
+      client_type: refreshedSession.client_type,
+      reason: "session_refresh",
     });
 
     return VALID_JWT_RESULT;

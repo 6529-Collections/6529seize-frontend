@@ -10,6 +10,7 @@ import {
   persistSessionResponse,
   refreshSessionV2,
 } from "@/services/auth/session-v2.utils";
+import { trackAuthImpactEvent } from "@/services/analytics/mixpanel";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
@@ -23,6 +24,9 @@ jest.mock("@/services/auth/auth.utils");
 jest.mock("@/services/auth/session-v2.utils", () => ({
   persistSessionResponse: jest.fn(),
   refreshSessionV2: jest.fn(),
+}));
+jest.mock("@/services/analytics/mixpanel", () => ({
+  trackAuthImpactEvent: jest.fn(),
 }));
 jest.mock("@/helpers/Helpers");
 jest.mock("@/utils/error-sanitizer");
@@ -41,6 +45,8 @@ const mockedRefreshSessionV2 = refreshSessionV2 as jest.MockedFunction<
 >;
 const mockedPersistSessionResponse =
   persistSessionResponse as jest.MockedFunction<typeof persistSessionResponse>;
+const mockedTrackAuthImpactEvent =
+  trackAuthImpactEvent as jest.MockedFunction<typeof trackAuthImpactEvent>;
 const mockedAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
   typeof areEqualAddresses
 >;
@@ -111,6 +117,7 @@ describe("jwt-validation.utils", () => {
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
+    expect(mockedTrackAuthImpactEvent).not.toHaveBeenCalled();
   });
 
   it("accepts a current session-v2 JWT without refreshing another connected account cookie", async () => {
@@ -192,6 +199,15 @@ describe("jwt-validation.utils", () => {
     });
     expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
     expect(syncWalletRoleWithServer).toHaveBeenCalledWith(null, "0x123");
+    expect(mockedTrackAuthImpactEvent).toHaveBeenCalledWith(
+      "Auth Session Refresh Recovered",
+      {
+        auth_state_after: "authenticated",
+        auth_state_before: "refresh_needed",
+        client_type: "web",
+        reason: "session_refresh",
+      }
+    );
   });
 
   it("refreshes the wallet being validated instead of another active stored account", async () => {
