@@ -10,7 +10,7 @@ import type {
   GroupedReactionsItem,
   INotificationDropReacted,
 } from "@/types/feed.types";
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, memo, useEffect, useRef } from "react";
 import NotificationsFollowAllBtn from "../NotificationsFollowAllBtn";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
@@ -35,9 +35,9 @@ function getNonEmptyIdentityValue(
 
 function getIdentityKey(profile: ApiProfileMin): string {
   return (
-    getNonEmptyIdentityValue(profile.id) ||
-    getNonEmptyIdentityValue(profile.handle) ||
-    getNonEmptyIdentityValue(profile.primary_address) ||
+    getNonEmptyIdentityValue(profile.id) ??
+    getNonEmptyIdentityValue(profile.handle) ??
+    getNonEmptyIdentityValue(profile.primary_address) ??
     "unknown-profile"
   );
 }
@@ -62,8 +62,10 @@ function mergeProfiles(
     handle:
       getNonEmptyIdentityValue(preferred.handle) ??
       getNonEmptyIdentityValue(fallback.handle),
-    pfp: preferred.pfp || fallback.pfp,
-    primary_address: preferred.primary_address || fallback.primary_address,
+    pfp: preferred.pfp ?? fallback.pfp,
+    primary_address:
+      getNonEmptyIdentityValue(preferred.primary_address) ??
+      fallback.primary_address,
   };
 }
 
@@ -215,13 +217,12 @@ function notificationsLatestPerUser(
     }
   }
 
-  const list = Array.from(byUser.values())
+  return Array.from(byUser.values())
     .map(({ latest, identity }) => ({
       ...latest,
       related_identity: identity,
     }))
     .sort((a, b) => a.created_at - b.created_at || a.id - b.id);
-  return list;
 }
 
 type ReactionGroup = {
@@ -261,7 +262,7 @@ interface NotificationDropReactedGroupProps {
   readonly onMarkAsRead?: ((notificationIds: number[]) => void) | undefined;
 }
 
-export default function NotificationDropReactedGroup({
+function NotificationDropReactedGroupComponent({
   group,
   activeDrop,
   onReply,
@@ -404,3 +405,11 @@ export default function NotificationDropReactedGroup({
     </div>
   );
 }
+
+const NotificationDropReactedGroup = memo(
+  NotificationDropReactedGroupComponent
+);
+
+NotificationDropReactedGroup.displayName = "NotificationDropReactedGroup";
+
+export default NotificationDropReactedGroup;

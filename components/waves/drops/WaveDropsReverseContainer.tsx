@@ -76,7 +76,7 @@ export const WaveDropsReverseContainer = forwardRef<
         data-mobile-bottom-nav-scroll-target="true"
         className={`tw-min-h-0 tw-flex-1 ${
           bottomPaddingClassName ?? "tw-pb-6"
-        } tw-no-scrollbar tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
+        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
         style={bottomPaddingStyle}
       >
         <div className="tw-flex tw-flex-col">
