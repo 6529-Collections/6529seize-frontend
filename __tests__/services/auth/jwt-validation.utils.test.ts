@@ -45,8 +45,9 @@ const mockedRefreshSessionV2 = refreshSessionV2 as jest.MockedFunction<
 >;
 const mockedPersistSessionResponse =
   persistSessionResponse as jest.MockedFunction<typeof persistSessionResponse>;
-const mockedTrackAuthImpactEvent =
-  trackAuthImpactEvent as jest.MockedFunction<typeof trackAuthImpactEvent>;
+const mockedTrackAuthImpactEvent = trackAuthImpactEvent as jest.MockedFunction<
+  typeof trackAuthImpactEvent
+>;
 const mockedAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
   typeof areEqualAddresses
 >;

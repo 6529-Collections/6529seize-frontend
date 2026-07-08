@@ -763,8 +763,9 @@ export default function Auth({
   const [sessionUpgradeRequired, setSessionUpgradeRequired] = useState(false);
   const [authStorageRevision, setAuthStorageRevision] = useState(0);
   const signModalReasonRef = useRef<SignModalReason>(signModalReason);
-  const authPromptTrackingReasonRef =
-    useRef<AuthImpactReason>("auth_validation_failed");
+  const authPromptTrackingReasonRef = useRef<AuthImpactReason>(
+    "auth_validation_failed"
+  );
   const visibleAuthPromptEventRef = useRef<SignModalReason | null>(null);
   const lastTrackedForcedLogoutKeyRef = useRef<string | null>(null);
   const lastTrackedValidationFailureKeyRef = useRef<string | null>(null);
@@ -2013,9 +2014,7 @@ export default function Auth({
 
     const reason = authPromptTrackingReasonRef.current;
     const authStateBefore: AuthImpactAuthState =
-      reason === "wallet_not_authorized"
-        ? "wallet_connected"
-        : "authenticated";
+      reason === "wallet_not_authorized" ? "wallet_connected" : "authenticated";
     trackAuthImpact("Auth Reauth Prompt Shown", {
       auth_state_after: "reauth_prompt",
       auth_state_before: authStateBefore,
