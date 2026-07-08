@@ -42,7 +42,8 @@ then run `Test` or `Create`.
   - `NIC at least`, with optional identity and direction
   - `Rep at least`, with optional identity, direction, and category
 - NFT cards:
-  - `Required NFTs`: user must own all selected tokens.
+  - `Required NFTs`: creator chooses whether members must own any selected
+    token or all selected tokens.
   - `Collection Access`: user must own any token from selected collections.
   - Supported collections are `Gradients`, `Memes`, `Memelab`, and `Nextgen`.
 - Grant card:

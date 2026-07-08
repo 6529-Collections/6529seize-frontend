@@ -2114,6 +2114,7 @@
       ],
       "facts": [
         "Group create/edit flows define group details and membership rules.",
+        "For selected internal NFTs such as Memes, Meme Lab, Gradients, and NextGen, group creators can require members to own any selected token or all selected tokens.",
         "xTDH grant beneficiary group rules can use typed grant IDs or the grant picker.",
         "For token-specific xTDH grants, group creators can require members to own any specified token or all specified tokens.",
         "For full-collection xTDH grants, group membership requires ownership of at least one collection token.",
