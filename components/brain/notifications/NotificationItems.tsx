@@ -39,6 +39,17 @@ const getActiveDropForItem = (
     : null;
 };
 
+const getNonGroupedKeySuffix = (
+  itemId: unknown,
+  index: number
+): string | number => {
+  if (typeof itemId === "string" || typeof itemId === "number") {
+    return itemId;
+  }
+
+  return `fallback-${index}`;
+};
+
 function NotificationItemsComponent({
   items,
   activeDrop,
@@ -48,10 +59,10 @@ function NotificationItemsComponent({
 }: NotificationItemsProps) {
   const keyedItems = useMemo(
     () =>
-      items.map((item) => {
+      items.map((item, index) => {
         const keySuffix = isGroupedReactionsItem(item)
           ? `group-${item.drop.id}`
-          : item.id;
+          : getNonGroupedKeySuffix(item.id, index);
         return {
           item,
           key: `notification-${keySuffix}`,

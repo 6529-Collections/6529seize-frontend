@@ -49,6 +49,10 @@ const getVisibleNotificationWaveIds = (
     } else if ("related_drops" in item) {
       for (const drop of item.related_drops) {
         waveIds.add(drop.wave.id);
+
+        if (waveIds.size >= MAX_PREFETCHED_NOTIFICATION_WAVES) {
+          break;
+        }
       }
     }
 

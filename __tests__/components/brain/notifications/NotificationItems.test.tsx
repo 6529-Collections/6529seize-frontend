@@ -25,11 +25,15 @@ describe("NotificationItems", () => {
         cause: "DROP_VOTED",
         related_drops: [{ id: "other" }],
       },
+      {
+        cause: "DROP_QUOTED",
+        related_drops: [],
+      },
     ] as unknown[];
     const onReply = jest.fn();
     const onClick = jest.fn();
 
-    render(
+    const { container } = render(
       <NotificationItems
         items={items as never[]}
         activeDrop={active as never}
@@ -38,7 +42,8 @@ describe("NotificationItems", () => {
       />
     );
 
-    expect(NotificationItem).toHaveBeenCalledTimes(2);
+    expect(NotificationItem).toHaveBeenCalledTimes(3);
+    expect(container.querySelector("#feed-item-fallback-2")).not.toBeNull();
     const firstCall = NotificationItem.mock.calls.at(0);
     const secondCall = NotificationItem.mock.calls.at(1);
     expect(firstCall?.[0]).toEqual(

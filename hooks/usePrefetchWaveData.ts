@@ -9,14 +9,20 @@ export const usePrefetchWaveData = () => {
 
   const prefetchWaveData = useCallback(
     (waveId: string) => {
-      void queryClient.prefetchQuery({
-        queryKey: [QueryKey.WAVE, { wave_id: waveId }],
-        queryFn: async () =>
-          await commonApiFetch<ApiWave>({
-            endpoint: `waves/${waveId}`,
-          }),
-        staleTime: 60000,
-      });
+      void (async () => {
+        try {
+          await queryClient.prefetchQuery({
+            queryKey: [QueryKey.WAVE, { wave_id: waveId }],
+            queryFn: async () =>
+              await commonApiFetch<ApiWave>({
+                endpoint: `waves/${waveId}`,
+              }),
+            staleTime: 60000,
+          });
+        } catch {
+          // Notification prefetching is best effort; reply can still fetch on demand.
+        }
+      })();
     },
     [queryClient]
   );
