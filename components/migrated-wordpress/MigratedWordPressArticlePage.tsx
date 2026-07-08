@@ -55,7 +55,7 @@ function MigratedWordPressArticleImage({
   const image = (
     <img
       alt={media.href ? "" : media.alt}
-      className="tw-mx-auto tw-h-auto tw-max-h-[34rem] tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
+      className="tw-mx-auto tw-block tw-h-auto tw-max-h-[34rem] tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
       decoding="async"
       loading={priority ? "eager" : "lazy"}
       src={media.src}
@@ -66,7 +66,7 @@ function MigratedWordPressArticleImage({
 
   return (
     <figure className="tw-my-9 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-my-11">
-      <div className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-p-3 tw-shadow-[0_16px_50px_rgba(0,0,0,0.28)]">
+      <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-p-3 tw-shadow-[0_16px_50px_rgba(0,0,0,0.28)]">
         {media.href ? (
           <a
             aria-label={media.alt}
