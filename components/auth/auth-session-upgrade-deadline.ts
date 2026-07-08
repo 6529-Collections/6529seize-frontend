@@ -40,8 +40,7 @@ export function useSessionUpgradeExpiry({
   const resetSessionUpgradeExpiryDedupe = useCallback(
     (walletAddress: string) => {
       if (
-        expiredSessionUpgradeAddressRef.current ===
-        walletAddress.toLowerCase()
+        expiredSessionUpgradeAddressRef.current === walletAddress.toLowerCase()
       ) {
         expiredSessionUpgradeAddressRef.current = null;
       }
