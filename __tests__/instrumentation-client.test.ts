@@ -786,6 +786,55 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops iOS WKWebView route parameterization cyclic JSON errors without app context", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent(
+      [
+        {
+          filename:
+            "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+          function: "n",
+        },
+        nativeJsonStringifyFrame,
+      ],
+      {
+        transaction: "/waves",
+        request: {
+          url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        },
+        contexts: {
+          browser: {
+            name: "Mobile Safari UI/WKWebView",
+          },
+          os: {
+            name: "iOS",
+            version: "18.7",
+          },
+        },
+        tags: {
+          browser: "Mobile Safari UI/WKWebView",
+          "browser.name": "Mobile Safari UI/WKWebView",
+          "os.name": "iOS",
+          url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          transaction: "/waves",
+        },
+        breadcrumbs: [
+          {
+            category: "navigation",
+            data: {
+              from: "/waves",
+              to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+            },
+          },
+        ],
+      }
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("keeps route parameterization cyclic JSON errors without MetaMaskMobile WKWebView context", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent(
