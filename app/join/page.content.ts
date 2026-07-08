@@ -73,6 +73,8 @@ const DELEGATION_HREF = "/delegation/delegation-center";
 const JOIN_STEP_ID_PREFIX = "join-step";
 const LICENSE_HREF = "/about/license";
 const MEME_MINT_HREF = "/the-memes/mint";
+const MEMES_MAIN_STAGE_WAVE_HREF =
+  "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077?divider=1167698";
 const OPEN_DATA_MEME_SUBSCRIPTIONS_HREF = "/open-data/meme-subscriptions";
 const TDH_HREF = "/network/tdh";
 const MEMES_CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
@@ -170,7 +172,7 @@ export const FOCUS_FEATURE_SPECS: readonly FocusFeatureSpec[] = [
     titleKey: "join6529.focus.nfts.title",
     bodyKey: "join6529.focus.nfts.body",
     actionLabelKey: "join6529.focus.nfts.action",
-    href: WAVES_HREF,
+    href: MEMES_MAIN_STAGE_WAVE_HREF,
   },
 ];
 

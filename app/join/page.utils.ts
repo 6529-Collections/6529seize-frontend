@@ -21,7 +21,10 @@ export const SECONDARY_ACTION_CLASS =
   "tw-inline-flex tw-min-h-12 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-[10px] tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-8 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-50 hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30";
 
 export const TERTIARY_ACTION_CLASS =
-  "tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/20 tw-pb-0.5 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-white/40 hover:tw-text-iron-50 hover:tw-no-underline focus:tw-rounded-sm focus:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20";
+  "tw-group/tertiary tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-whitespace-nowrap tw-border-0 tw-pb-2 tw-pt-2 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-50 hover:tw-no-underline focus:tw-rounded-sm focus:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20";
+
+export const TERTIARY_ACTION_LABEL_CLASS =
+  "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/20 tw-pb-0.5 tw-transition-colors group-hover/tertiary:tw-border-white/60";
 
 export const m = (
   locale: SupportedLocale,

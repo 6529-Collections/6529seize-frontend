@@ -125,7 +125,7 @@ export function JoinHeader({
 
   return (
     <header
-      className="tw-relative tw-isolate tw-mx-auto tw-flex tw-min-h-[620px] tw-w-full tw-max-w-7xl tw-flex-col tw-items-center tw-justify-center tw-overflow-visible tw-px-4 tw-py-20 sm:tw-px-6 md:tw-min-h-[700px] md:tw-py-24 lg:tw-px-8"
+      className="tw-relative tw-isolate tw-mx-auto tw-flex tw-min-h-[620px] tw-w-full tw-max-w-7xl tw-flex-col tw-items-center tw-justify-center tw-overflow-visible tw-px-4 tw-py-20 md:tw-min-h-[700px] md:tw-py-24 lg:tw-px-6 xl:tw-px-0"
       onPointerLeave={handleHeroPointerLeave}
       onPointerMove={handleHeroPointerMove}
       style={HERO_MAGNETIC_REST_STYLE}
@@ -136,7 +136,7 @@ export function JoinHeader({
         className="tw-pointer-events-none tw-absolute tw-inset-x-8 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/10 tw-to-transparent"
       />
       <div className="tw-relative tw-z-10 tw-mx-auto tw-mt-4 tw-flex tw-w-full tw-max-w-5xl tw-flex-col tw-items-center tw-text-center">
-        <div className="tw-mb-6 tw-inline-flex tw-items-center tw-gap-3 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-uppercase tw-tracking-widest tw-text-iron-500">
+        <div className="tw-mb-6 tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3.5 tw-py-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600 sm:tw-gap-3 sm:tw-px-4">
           <span
             aria-hidden="true"
             className="tw-h-1.5 tw-w-1.5 tw-animate-pulse tw-rounded-full tw-bg-iron-400"
@@ -144,11 +144,11 @@ export function JoinHeader({
           {m(locale, heroContent.eyebrowKey)}
         </div>
         <div className="tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center">
-          <h1 className="tw-m-0 tw-mb-4 tw-text-[40px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+          <h1 className="tw-m-0 tw-mb-4 tw-text-[2.25rem] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-[2.5rem]">
             {m(locale, heroContent.titleKey)}
           </h1>
           {subtitleKey !== undefined && (
-            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-light tw-leading-relaxed tw-text-iron-400 lg:tw-text-xl">
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-light tw-leading-7 tw-text-iron-400 lg:tw-text-xl">
               {m(locale, subtitleKey)}
             </p>
           )}
@@ -175,10 +175,10 @@ function HeroPoints({ locale }: { readonly locale: SupportedLocale }) {
           )}
           key={point.titleKey}
         >
-          <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-100">
+          <p className="tw-mb-1 tw-text-[15px] tw-font-medium tw-leading-6 tw-text-iron-100">
             {m(locale, point.titleKey)}
           </p>
-          <p className="tw-mb-0 tw-text-xs tw-font-light tw-leading-5 tw-text-iron-500">
+          <p className="tw-mb-0 tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
             {m(locale, point.bodyKey)}
           </p>
         </div>
@@ -216,7 +216,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       </div>
       <div
-        className="tw-absolute tw-right-[calc(50%+160px)] tw-top-[62%] tw-w-16 tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+220px)] sm:tw-w-24 md:tw-right-[calc(50%+300px)] md:tw-top-[47%] md:tw-w-32 lg:tw-right-[calc(50%+360px)] lg:tw-top-[44%] lg:tw-w-40 lg:tw-opacity-35 xl:tw-right-[calc(50%+390px)]"
+        className="tw-absolute tw-right-[calc(50%+160px)] tw-top-[62%] tw-hidden tw-w-16 tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+220px)] sm:tw-top-[44%] sm:tw-block sm:tw-w-24 md:tw-right-[calc(50%+300px)] md:tw-top-[39%] md:tw-w-32 lg:tw-right-[calc(50%+360px)] lg:tw-top-[44%] lg:tw-w-40 lg:tw-opacity-35 xl:tw-right-[calc(50%+390px)]"
         style={heroFloatStyle("-6deg", "-4s")}
       >
         <div
@@ -234,7 +234,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       </div>
       <div
-        className="tw-absolute tw-left-[calc(50%+102px)] tw-top-[58%] tw-w-20 tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float sm:tw-left-[calc(50%+230px)] sm:tw-w-28 md:tw-left-[calc(50%+320px)] md:tw-top-[32%] md:tw-w-36 lg:tw-left-[calc(50%+370px)] lg:tw-top-[30%] lg:tw-w-48 lg:tw-opacity-35 xl:tw-left-[calc(50%+380px)] xl:tw-w-52"
+        className="tw-absolute tw-left-[calc(50%+102px)] tw-top-[58%] tw-hidden tw-w-20 tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float sm:tw-left-[calc(50%+230px)] sm:tw-top-[40%] sm:tw-block sm:tw-w-28 md:tw-left-[calc(50%+320px)] md:tw-top-[24%] md:tw-w-36 lg:tw-left-[calc(50%+370px)] lg:tw-top-[30%] lg:tw-w-48 lg:tw-opacity-35 xl:tw-left-[calc(50%+380px)] xl:tw-w-52"
         style={heroFloatStyle("5deg", "-5s")}
       >
         <div
