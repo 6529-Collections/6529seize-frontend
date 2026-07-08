@@ -73,6 +73,9 @@ describe("static SEO pages render correctly", () => {
     expect(
       screen.getAllByText(/EDUCATION COLLABORATION FORM/i).length
     ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "support@6529.io" })
+    ).toHaveAttribute("href", "mailto:support@6529.io");
   });
 
   it("gm or die redirect page triggers a video redirect", () => {

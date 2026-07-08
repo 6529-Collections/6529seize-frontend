@@ -18,12 +18,6 @@ export const omOmGroupsMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        "<p>Over the next few weeks, we are going to build working groups for different core areas, as shown below.</p>"
-      ),
-    },
-    {
-      type: "html",
-      html: migratedWordPressTrustedHtml(
         '<p>If you are interested in participating in the design of OM, please join the <a href="https://discord.gg/join-om" rel="noopener noreferrer" target="_blank">OM Discord channel</a>.</p>'
       ),
     },

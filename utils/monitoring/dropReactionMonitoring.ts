@@ -301,6 +301,24 @@ function classifyReactionError(error: unknown): {
   return { statusCode, errorKind: "server" };
 }
 
+function isExpectedStaleDropNotFoundError({
+  context,
+  errorMessage,
+  statusCode,
+}: {
+  readonly context: ReactionMutationContext;
+  readonly errorMessage: string;
+  readonly statusCode: number | null;
+}): boolean {
+  // Intentionally exact: if the backend changes this stale-drop 404 shape,
+  // capture resumes so we can re-evaluate the contract.
+  return (
+    statusCode === 404 &&
+    context.endpoint === `drops/${context.dropId}/reaction` &&
+    errorMessage === `Drop ${context.dropId} not found`
+  );
+}
+
 function captureReactionEvent({
   error,
   level,
@@ -502,6 +520,29 @@ export function recordReactionRequestFailed(
   }
 
   if (errorKind === "rate-limit") {
+    clearActiveIntentForContext(context);
+    return result;
+  }
+
+  if (
+    isExpectedStaleDropNotFoundError({
+      context,
+      errorMessage,
+      statusCode,
+    })
+  ) {
+    addReactionBreadcrumb(
+      "reaction.stale_drop_not_found",
+      context,
+      {
+        status_code: statusCode ?? undefined,
+        latency_ms: latencyMs,
+        error_kind: errorKind,
+        error_message: errorMessage,
+        captured: false,
+      },
+      "warning"
+    );
     clearActiveIntentForContext(context);
     return result;
   }

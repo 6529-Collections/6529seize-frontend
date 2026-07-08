@@ -17,12 +17,6 @@ export const capitalMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        "<p>Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values.&nbsp;&nbsp; While the current funds are currently traditional fund structure, we hope, in time, to reach a decentralized, tokenized end-state.</p>"
-      ),
-    },
-    {
-      type: "html",
-      html: migratedWordPressTrustedHtml(
         "<p>NFT investing is difficult specifically due to its non-fungibility, with the market value fragmented across and within collections.&nbsp; We believe there is no substitute for individual expertise in order to succeed in this field.</p>"
       ),
     },

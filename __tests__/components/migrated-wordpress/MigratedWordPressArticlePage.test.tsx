@@ -115,6 +115,7 @@ describe("MigratedWordPressArticlePage", () => {
     expect(screen.getByText("February 23, 2023")).toBeInTheDocument();
     expect(screen.getByText("4 minutes")).toBeInTheDocument();
     expect(container.querySelector(".tw-max-w-5xl")).not.toBeInTheDocument();
+    expect(container.querySelector(".tw-max-w-6xl")).not.toBeInTheDocument();
     expect(screen.getByAltText("Hero artwork")).toHaveAttribute(
       "src",
       "https://example.com/hero.jpg"

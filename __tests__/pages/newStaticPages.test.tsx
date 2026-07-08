@@ -63,6 +63,12 @@ describe("Static Pages Rendering", () => {
 
     const headings = screen.getAllByText(/EMAIL SIGNATURES/i);
     expect(headings.length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "6529er@6529.io" })
+    ).toHaveAttribute("href", "mailto:6529er@6529.io");
+    expect(
+      screen.queryByRole("link", { name: /\[email\s+protected\]/i })
+    ).not.toBeInTheDocument();
   });
 
   it("should render museum fund szn1 page with correct content", () => {

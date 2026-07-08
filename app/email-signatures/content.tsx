@@ -56,7 +56,7 @@ export const emailSignaturesMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<p><strong>6529er</strong><br><strong>e</strong><a href="/cdn-cgi/l/email-protection">[email&nbsp;protected]</a><br><strong>t</strong> @6529er<br><strong>p </strong>+1 (234) 567 8910<br><strong>w</strong> www.6529.io</p>'
+        '<p><strong>6529er</strong><br><strong>e</strong> <a href="mailto:6529er@6529.io">6529er@6529.io</a><br><strong>t</strong> @6529er<br><strong>p </strong>+1 (234) 567 8910<br><strong>w</strong> www.6529.io</p>'
       ),
     },
   ],
