@@ -15,6 +15,7 @@ import {
   InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { trackAuthImpactEvent } from "@/services/analytics/mixpanel";
 
 interface JwtPayload {
   id: string;
@@ -112,7 +113,7 @@ const validateProxyRole = ({
   }
 
   // Validate proxy structure
-  const proxyCreatorId = activeProfileProxy.created_by?.id;
+  const proxyCreatorId = activeProfileProxy.created_by.id;
   if (
     !proxyCreatorId ||
     typeof proxyCreatorId !== "string" ||
@@ -141,6 +142,9 @@ const isAbortError = (error: unknown): boolean =>
   error !== null &&
   "name" in error &&
   error.name === "AbortError";
+
+const isAbortSignalAborted = (abortSignal: AbortSignal): boolean =>
+  abortSignal.aborted;
 
 const assertRefreshedSessionMatchesWallet = (
   refreshedSession: RefreshedSession,
@@ -174,8 +178,10 @@ const persistValidatedRefreshedSession = async ({
   }
 
   if (walletRole !== freshTokenRole) {
+    const previousRole = walletRole ?? "none";
+    const nextRole = freshTokenRole ?? "none";
     logErrorSecurely("JWT_ROLE_UPDATE", {
-      message: `Updating local wallet role from ${walletRole} to ${freshTokenRole}`,
+      message: `Updating local wallet role from ${previousRole} to ${nextRole}`,
       oldRole: walletRole,
       newRole: freshTokenRole,
       address: refreshedSession.address,
@@ -195,11 +201,13 @@ const handleTokenRefresh = async ({
   role,
   abortSignal,
   activeProfileProxy,
+  trackRecovery,
 }: {
   wallet: string;
   role: string | null;
   abortSignal: AbortSignal;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
+  trackRecovery: boolean;
 }): Promise<ValidateJwtResult> => {
   // Check for cancellation before proceeding
   if (abortSignal.aborted) {
@@ -220,7 +228,7 @@ const handleTokenRefresh = async ({
       return INVALID_JWT_RESULT;
     }
 
-    if (abortSignal.aborted) {
+    if (isAbortSignalAborted(abortSignal)) {
       return CANCELLED_JWT_RESULT;
     }
 
@@ -230,6 +238,14 @@ const handleTokenRefresh = async ({
       role,
       activeProfileProxy,
     });
+    if (trackRecovery) {
+      trackAuthImpactEvent("Auth Session Refresh Recovered", {
+        auth_state_after: "authenticated",
+        auth_state_before: "refresh_needed",
+        client_type: refreshedSession.client_type,
+        reason: "session_refresh",
+      });
+    }
 
     return VALID_JWT_RESULT;
   } catch (error: unknown) {
@@ -271,6 +287,7 @@ export const validateJwt = async ({
       role,
       abortSignal,
       activeProfileProxy,
+      trackRecovery: !hasValidLocalJwt,
     });
   } catch (error: unknown) {
     if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {

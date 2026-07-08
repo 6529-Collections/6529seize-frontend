@@ -25,7 +25,7 @@ export default function Join6529PageClient() {
   const links = { profileHref, subscriptionsHref };
 
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-overflow-x-clip tw-bg-[#030303] tw-text-iron-100">
+    <main className="tailwind-scope tw-min-h-screen tw-overflow-x-clip tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-[#030303] tw-text-iron-100">
       <JoinHeader
         locale={locale}
         pageState={pageState}

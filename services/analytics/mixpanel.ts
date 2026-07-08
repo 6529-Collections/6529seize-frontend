@@ -6,6 +6,43 @@ type AnalyticsProperties = Record<
   boolean | number | string | null | undefined
 >;
 
+export type AuthImpactEventName =
+  | "Auth Forced Logout"
+  | "Auth Reauth Prompt Shown"
+  | "Auth Session Refresh Recovered"
+  | "Auth Session Upgrade Prompt Shown"
+  | "Auth Validation Failed While Connected";
+
+export type AuthImpactReason =
+  | "auth_validation_failed"
+  | "session_refresh"
+  | "session_upgrade_deadline_expired"
+  | "session_upgrade_required"
+  | "stored_auth_invalid"
+  | "wallet_not_authorized";
+
+export type AuthImpactAuthState =
+  | "authenticated"
+  | "auth_validation_failed"
+  | "logged_out"
+  | "reauth_prompt"
+  | "refresh_needed"
+  | "session_upgrade_prompt"
+  | "session_upgrade_required"
+  | "wallet_connected";
+
+type AuthImpactClientType = "desktop" | "native" | "web";
+
+export type AuthImpactProperties = {
+  readonly auth_state_after?: AuthImpactAuthState | undefined;
+  readonly auth_state_before?: AuthImpactAuthState | undefined;
+  readonly client_type?: AuthImpactClientType | undefined;
+  readonly page_group?: string | undefined;
+  readonly reason?: AuthImpactReason | undefined;
+  readonly route_pattern?: string | undefined;
+  readonly was_connected_wallet?: boolean | undefined;
+};
+
 const MIXPANEL_TOKEN = publicEnv.NEXT_PUBLIC_MIXPANEL_TOKEN;
 
 let hasInitialized = false;
@@ -120,4 +157,11 @@ export const trackPageView = (
     ...pageViewProperties,
     path,
   });
+};
+
+export const trackAuthImpactEvent = (
+  eventName: AuthImpactEventName,
+  properties?: AuthImpactProperties
+): void => {
+  track(eventName, properties);
 };

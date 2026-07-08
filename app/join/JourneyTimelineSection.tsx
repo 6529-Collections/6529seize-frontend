@@ -20,6 +20,7 @@ import {
   SECTION_EYEBROW_CLASS,
   SECTION_HEADING_CLASS,
   TERTIARY_ACTION_CLASS,
+  TERTIARY_ACTION_LABEL_CLASS,
 } from "./page.utils";
 
 const STATUS_LABEL_KEYS = {
@@ -82,7 +83,7 @@ export function JourneyTimelineSection({
 
   return (
     <section
-      className="tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-py-12 sm:tw-px-6 md:tw-py-16 lg:tw-px-8"
+      className="tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-py-12 md:tw-py-16 lg:tw-px-6 xl:tw-px-0"
       id="journey"
     >
       <div
@@ -241,7 +242,7 @@ function TimelineRow({
             className={cx("tw-mt-3", TERTIARY_ACTION_CLASS)}
             href={actionHref}
           >
-            <span>{actionLabel}</span>
+            <span className={TERTIARY_ACTION_LABEL_CLASS}>{actionLabel}</span>
             <ArrowRightIcon aria-hidden="true" className="tw-h-2.5 tw-w-2.5" />
           </Link>
         )}
