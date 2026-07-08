@@ -109,6 +109,8 @@ function getCurrentRouteFamily(): string {
   }
 
   const pathname = window.location.pathname;
+  // Page classification treats messages as a fallback route, so normalize here
+  // to avoid raw direct-message wave ids in telemetry.
   if (pathname === "/messages") {
     return "/messages";
   }
@@ -239,25 +241,6 @@ function getStatusBucketFromStatus(
   return "unknown";
 }
 
-function getProductImpactStatusBucket(
-  error: unknown
-): ProductImpactStatusBucket {
-  if (isProductImpactAbortError(error)) {
-    return "aborted";
-  }
-
-  const statusBucket = getStatusBucketFromStatus(getErrorStatus(error));
-  if (statusBucket !== null) {
-    return statusBucket;
-  }
-
-  if (getProductImpactErrorKind(error) === "network") {
-    return "network_error";
-  }
-
-  return "unknown";
-}
-
 function getProductImpactErrorKind(error: unknown): ProductImpactErrorKind {
   if (isProductImpactAbortError(error)) {
     return "abort";
@@ -287,6 +270,25 @@ function getProductImpactErrorKind(error: unknown): ProductImpactErrorKind {
     )
   ) {
     return "network";
+  }
+
+  return "unknown";
+}
+
+function getProductImpactStatusBucket(
+  error: unknown
+): ProductImpactStatusBucket {
+  if (isProductImpactAbortError(error)) {
+    return "aborted";
+  }
+
+  const statusBucket = getStatusBucketFromStatus(getErrorStatus(error));
+  if (statusBucket !== null) {
+    return statusBucket;
+  }
+
+  if (getProductImpactErrorKind(error) === "network") {
+    return "network_error";
   }
 
   return "unknown";

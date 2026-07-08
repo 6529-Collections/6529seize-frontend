@@ -195,7 +195,7 @@ describe("useWaveDataFetching", () => {
       await Promise.resolve();
     });
 
-    expect(updateData).toHaveBeenCalledTimes(2);
+    expect(updateData).toHaveBeenCalledTimes(1);
     expect(mockTrackWaveFeedLoadFailed).toHaveBeenCalledWith({
       durationMs: 0,
       error: failureError,
@@ -204,6 +204,40 @@ describe("useWaveDataFetching", () => {
       loadSource: "initial_visible",
       remainedUnavailable: true,
     });
+  });
+
+  it("tracks abort-like null feed results as cancellations", async () => {
+    const abortError = new DOMException("Fetch is aborted", "AbortError");
+    fetchWaveMessages.mockImplementation(
+      async (
+        _waveId: unknown,
+        _serialNo: unknown,
+        _signal: unknown,
+        _updateEligibility: unknown,
+        options: { readonly onFailure?: (error: unknown) => void }
+      ) => {
+        options.onFailure?.(abortError);
+        return null;
+      }
+    );
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const { result, updateData } = setup({ wave1: { drops: [] } });
+
+    await act(async () => {
+      result.current.registerWave("wave1");
+      await Promise.resolve();
+    });
+
+    expect(updateData).toHaveBeenCalledTimes(1);
+    expect(mockTrackWaveFeedLoadCancelled).toHaveBeenCalledWith({
+      durationMs: 0,
+      error: abortError,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+      remainedUnavailable: false,
+    });
+    expect(mockTrackWaveFeedLoadFailed).not.toHaveBeenCalled();
   });
 
   it("syncNewestMessages updates data and returns result", async () => {

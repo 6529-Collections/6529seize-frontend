@@ -510,7 +510,6 @@ export function useWaveDataFetching({
     (waveId: string, drops: ApiDrop[] | null) => {
       clearLoadingState(waveId);
       if (drops === null) {
-        updateData(createEmptyWaveMessages(waveId, { isLoading: false }));
         return null;
       }
 
@@ -604,14 +603,27 @@ export function useWaveDataFetching({
           );
           const fetchedDrops = handleFetchSuccess(waveId, drops);
           if (fetchedDrops === null) {
-            trackWaveFeedLoadFailed({
-              durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
-              error: fetchFailureError ?? createWaveFeedUnavailableError(),
-              hadCachedDrops: false,
-              isNative: isCapacitor,
-              loadSource: "initial_visible",
-              remainedUnavailable: true,
-            });
+            const failureError =
+              fetchFailureError ?? createWaveFeedUnavailableError();
+            if (isAbortError(failureError)) {
+              trackWaveFeedLoadCancelled({
+                durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+                error: failureError,
+                hadCachedDrops: false,
+                isNative: isCapacitor,
+                loadSource: "initial_visible",
+                remainedUnavailable: false,
+              });
+            } else {
+              trackWaveFeedLoadFailed({
+                durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+                error: failureError,
+                hadCachedDrops: false,
+                isNative: isCapacitor,
+                loadSource: "initial_visible",
+                remainedUnavailable: true,
+              });
+            }
             return null;
           }
 
