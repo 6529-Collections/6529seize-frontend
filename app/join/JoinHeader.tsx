@@ -144,11 +144,11 @@ export function JoinHeader({
           {m(locale, heroContent.eyebrowKey)}
         </div>
         <div className="tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center">
-          <h1 className="tw-m-0 tw-mb-6 tw-text-5xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-6xl lg:tw-text-[40px]">
+          <h1 className="tw-m-0 tw-mb-4 tw-text-[40px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
             {m(locale, heroContent.titleKey)}
           </h1>
           {subtitleKey !== undefined && (
-            <p className="tw-mb-0 tw-text-pretty tw-text-lg tw-font-light tw-leading-relaxed tw-text-iron-400 lg:tw-text-xl">
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-light tw-leading-relaxed tw-text-iron-400 lg:tw-text-xl">
               {m(locale, subtitleKey)}
             </p>
           )}
@@ -157,7 +157,7 @@ export function JoinHeader({
           <HeroAction action={primaryAction} variant="primary" />
           <HeroAction action={secondaryAction} variant="secondary" />
         </div>
-        {pageState === "loggedOut" && <HeroPoints locale={locale} />}
+        <HeroPoints locale={locale} />
       </div>
     </header>
   );
@@ -216,7 +216,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       </div>
       <div
-        className="tw-absolute tw-right-[calc(50%+160px)] tw-top-[62%] tw-w-16 tw-opacity-40 tw-saturate-[0.78] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+220px)] sm:tw-w-24 md:tw-right-[calc(50%+300px)] md:tw-top-[47%] md:tw-w-32 lg:tw-right-[calc(50%+360px)] lg:tw-top-[44%] lg:tw-w-40 lg:tw-opacity-45 xl:tw-right-[calc(50%+390px)]"
+        className="tw-absolute tw-right-[calc(50%+160px)] tw-top-[62%] tw-w-16 tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+220px)] sm:tw-w-24 md:tw-right-[calc(50%+300px)] md:tw-top-[47%] md:tw-w-32 lg:tw-right-[calc(50%+360px)] lg:tw-top-[44%] lg:tw-w-40 lg:tw-opacity-35 xl:tw-right-[calc(50%+390px)]"
         style={heroFloatStyle("-6deg", "-4s")}
       >
         <div
@@ -234,7 +234,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       </div>
       <div
-        className="tw-absolute tw-left-[calc(50%+102px)] tw-top-[70%] tw-w-20 tw-opacity-50 tw-saturate-[0.85] motion-safe:tw-animate-hero-float sm:tw-left-[calc(50%+230px)] sm:tw-w-28 md:tw-left-[calc(50%+320px)] md:tw-top-[43%] md:tw-w-36 lg:tw-left-[calc(50%+370px)] lg:tw-top-[42%] lg:tw-w-48 lg:tw-opacity-55 xl:tw-left-[calc(50%+380px)] xl:tw-w-52"
+        className="tw-absolute tw-left-[calc(50%+102px)] tw-top-[58%] tw-w-20 tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float sm:tw-left-[calc(50%+230px)] sm:tw-w-28 md:tw-left-[calc(50%+320px)] md:tw-top-[32%] md:tw-w-36 lg:tw-left-[calc(50%+370px)] lg:tw-top-[30%] lg:tw-w-48 lg:tw-opacity-35 xl:tw-left-[calc(50%+380px)] xl:tw-w-52"
         style={heroFloatStyle("5deg", "-5s")}
       >
         <div

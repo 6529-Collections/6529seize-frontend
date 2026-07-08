@@ -40,7 +40,7 @@ export function FocusSections({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <section className="tw-relative tw-isolate tw-mx-auto tw-w-full tw-max-w-[1088px] tw-overflow-hidden tw-py-12 md:tw-py-16">
+    <section className="tw-relative tw-isolate tw-mx-auto tw-w-full tw-max-w-[1088px] tw-overflow-hidden tw-px-4 tw-py-12 md:tw-py-16 lg:tw-px-6 xl:tw-px-0">
       <AmbientArtifacts className="tw-opacity-40" locale={locale} />
       <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-2 lg:tw-grid-cols-12">
         <FeatureCard
