@@ -1,0 +1,1770 @@
+{
+  "schema_version": 1,
+  "routes": {
+    "/": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/[user]": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529",
+        "production": "/punk6529"
+      }
+    },
+    "/[user]/[...cmsPath]": {
+      "classification": "fixture",
+      "family": "profile"
+    },
+    "/[user]/brain": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/brain",
+        "production": "/punk6529/brain"
+      }
+    },
+    "/[user]/cms/builder": {
+      "classification": "auth"
+    },
+    "/[user]/collected": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/collected",
+        "production": "/punk6529/collected"
+      }
+    },
+    "/[user]/curations": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/curations",
+        "production": "/punk6529/curations"
+      }
+    },
+    "/[user]/followers": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/followers",
+        "production": "/punk6529/followers"
+      }
+    },
+    "/[user]/groups": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/groups",
+        "production": "/punk6529/groups"
+      }
+    },
+    "/[user]/identity": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/identity",
+        "production": "/punk6529/identity"
+      }
+    },
+    "/[user]/proxy": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/proxy",
+        "production": "/punk6529/proxy"
+      }
+    },
+    "/[user]/subscriptions": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/subscriptions",
+        "production": "/punk6529/subscriptions"
+      }
+    },
+    "/[user]/waves": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/waves",
+        "production": "/punk6529/waves"
+      }
+    },
+    "/[user]/xtdh": {
+      "classification": "fixture",
+      "family": "profile",
+      "fixture": {
+        "staging": "/punk6529/xtdh",
+        "production": "/punk6529/xtdh"
+      }
+    },
+    "/6529-gradient": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/6529-gradient/[id]": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/6529-gradient/1",
+        "production": "/6529-gradient/1"
+      }
+    },
+    "/about": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/about/[section]": {
+      "classification": "fixture",
+      "family": "info",
+      "fixture": {
+        "staging": "/about/the-memes",
+        "production": "/about/the-memes"
+      }
+    },
+    "/about/100m-project": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/about/media": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/about/mission": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/about/open-metaverse": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/about/press": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/about/rules": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/about/tech/[reportSlug]": {
+      "classification": "fixture",
+      "family": "info"
+    },
+    "/about/tech/wallet-authentication": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/accept-connection-sharing": {
+      "classification": "auth"
+    },
+    "/access": {
+      "classification": "crawlable",
+      "family": "system"
+    },
+    "/author/6529er6529-io": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/author/ladysabrina": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/author/nft6529": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/author/teexels": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/blog/a-tale-of-two-artists": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/blog/disney-deekay-their-secret-to-animation": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/blog/from-fibonacci-to-fidenza": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/buidl": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/capital": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/capital/company-portfolio": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/capital/fund": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/casabatllo": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/category/blog": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/category/news": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/cdn-cgi/l/email-protection": {
+      "classification": "exempt",
+      "exemptReason": "Cloudflare scrape artifact from the WP import, not a real page."
+    },
+    "/city/6529-museum-district": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/consolidation-mapping-tool": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/delegation-mapping-tool": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/delegation/[...section]": {
+      "classification": "fixture",
+      "family": "tools",
+      "fixture": {
+        "staging": "/delegation/delegation-center",
+        "production": "/delegation/delegation-center"
+      }
+    },
+    "/discover": {
+      "classification": "crawlable",
+      "family": "social"
+    },
+    "/dispute-resolution": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/drop-forge": {
+      "classification": "auth"
+    },
+    "/drop-forge/craft": {
+      "classification": "auth"
+    },
+    "/drop-forge/craft/[id]": {
+      "classification": "auth"
+    },
+    "/drop-forge/launch": {
+      "classification": "auth"
+    },
+    "/drop-forge/launch/[id]": {
+      "classification": "auth"
+    },
+    "/education": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/education/education-collaboration-form": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/education/podcasts": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/education/tweetstorms": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/element_category/columns": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/element_category/sections": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/email-signatures": {
+      "classification": "exempt",
+      "exemptReason": "Internal email-signature asset sheet, not a user surface."
+    },
+    "/emma": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/emma/plans": {
+      "classification": "auth"
+    },
+    "/emma/plans/[id]": {
+      "classification": "auth"
+    },
+    "/error": {
+      "classification": "exempt",
+      "exemptReason": "Error-boundary demonstration page; crawling it asserts a crash by design."
+    },
+    "/feed": {
+      "classification": "auth"
+    },
+    "/gm-or-die-small-mp4": {
+      "classification": "exempt",
+      "exemptReason": "Bare media-asset wrapper page, not a user surface."
+    },
+    "/join": {
+      "classification": "crawlable",
+      "family": "info"
+    },
+    "/meme-accounting": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/meme-calendar": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/meme-gas": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/meme-lab": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/meme-lab/[id]": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/meme-lab/1",
+        "production": "/meme-lab/1"
+      }
+    },
+    "/meme-lab/[id]/distribution": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/meme-lab/1/distribution",
+        "production": "/meme-lab/1/distribution"
+      }
+    },
+    "/meme-lab/collection/[collection]": {
+      "classification": "fixture",
+      "family": "collections"
+    },
+    "/messages": {
+      "classification": "auth"
+    },
+    "/messages/[wave]": {
+      "classification": "auth"
+    },
+    "/messages/create": {
+      "classification": "auth"
+    },
+    "/museum": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/1-of-1-art": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fam": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fam-2021": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/act-of-kindness": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/an-incomparable-love": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/archeology-of-the-future": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/azuki": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/ballad-of-ghosts": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/bored-ape-yacht-club": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/capsule-house": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/chromie-squiggle": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/clonex": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/cod": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/conflicting-metaphysics": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/construction-token": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/cryptoad-punks": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/cryptoadz": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/cryptocubes": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/cryptopunks": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/dead-ringers": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/entretiempos": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/fakerares": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/faraway": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/fidenza": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/gazers": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/genesis": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/grifters": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/image-with-arrow": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/incomplete-control": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/intensify-modeling": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/invisible-friends": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/jiometory-no-compute": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/madhouse": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/meridian": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/mfers": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/non-either": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/nouns": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/nuclear-nerds": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/primary-colors-of-neural-bricolage": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/proof-grails-protoglyph": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/proof-grails-wall": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/queens-kings": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/rarepepe": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/ringers": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/screens": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/subscapes": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/the-key-the-trial": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/twin-flames": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/videodrome": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/where-my-vans-go": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/wild-child-2022": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn1/xcopy": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-fund-szn2": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-general-assembly": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-gradient-collector-curated": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-photo-a": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-photo-b": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/6529-public-domain": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/ac-museum": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/ack-bar": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/batsoupyum-museum-1": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/batsoupyum-museum-2": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/bharat-krymo-museum-1": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/bharat-krymo-museum-2": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/bharat-krymo-museum-3": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/bonafidehan-museum": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/early-nft-art": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/general-assembly": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/generative-art": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/27-bit-digital": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/720-minutes": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/aerial-view": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/algobots": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/algorhythms": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/apparitions": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/archetype": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/asemica": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/autoglyphs": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/autology": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/bent": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/bubble-bobbly": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/century": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/chimera": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/chromie-squiggle": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/construction-token": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/cosmic-reef": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/cryptoarte": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/cryptoblots": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/cryptocube": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/dreams": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/dynamic-slices": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/edifice": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/elementals": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/elevated-deconstructions": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/endless-nameless": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/entretiempos": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/fidenza": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/fragments-of-an-infinite-field": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/frammenti": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/gazers": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/genesis-dca": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/geometry-runners": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/glitch-crystal-monsters": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/great-hall-of-generative-art": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/hyperhash": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/ignition": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/incomplete-control": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/inspirals": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/jiometory-no-compute": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/kai-gen": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/labios": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/lost-robbies": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/meridian": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/nimbuds": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/para-bellum": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/phase": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/pigments": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/ringers": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/screens": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/scribbled-boundaries": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/secret-surprise": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/singularity": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/skulptuur": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/spectron": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/squiggly-wtf": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/subscapes": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/synapses": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/the-blocks-of-art": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/trossets": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/unigrids": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/vortex": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/watercolor-dreams": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/genesis/willow-shield": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/imagined-worlds": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/nft-photography": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/sozet-lounge": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/sunshine-square": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/temple-of-gm": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/the-institutions": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/museum/yongoh-kim": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/network": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/activity": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/definitions": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/groups": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/health": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/health/network-tdh": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/levels": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/nerd/[[...focus]]": {
+      "classification": "fixture",
+      "family": "network",
+      "fixture": {
+        "staging": "/network/nerd",
+        "production": "/network/nerd"
+      }
+    },
+    "/network/prenodes": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/tdh": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/tdh/historic-boosts": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/wave-score": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/xtdh": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/news/introducing-om": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/nextgen/[[...view]]": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/nextgen",
+        "production": "/nextgen"
+      }
+    },
+    "/nextgen/collection/[collection]/[[...view]]": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/nextgen/collection/pebbles",
+        "production": "/nextgen/collection/pebbles"
+      }
+    },
+    "/nextgen/collection/[collection]/art": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/nextgen/collection/pebbles/art",
+        "production": "/nextgen/collection/pebbles/art"
+      }
+    },
+    "/nextgen/collection/[collection]/distribution-plan": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/nextgen/collection/pebbles/distribution-plan",
+        "production": "/nextgen/collection/pebbles/distribution-plan"
+      }
+    },
+    "/nextgen/collection/[collection]/mint": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/nextgen/collection/pebbles/mint",
+        "production": "/nextgen/collection/pebbles/mint"
+      }
+    },
+    "/nextgen/collection/[collection]/trait-sets": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/nextgen/collection/pebbles/trait-sets",
+        "production": "/nextgen/collection/pebbles/trait-sets"
+      }
+    },
+    "/nextgen/manager": {
+      "classification": "auth"
+    },
+    "/nextgen/token/[token]/[[...view]]": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/nextgen/token/10000000315",
+        "production": "/nextgen/token/10000000315"
+      }
+    },
+    "/nft-activity": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/notifications": {
+      "classification": "auth"
+    },
+    "/om": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/om/6529-museum-district": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/om/community-galleries": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/om/instruction-manual": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/om/join-om": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/om/OM": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/om/om-groups": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/om/partnership-request": {
+      "classification": "crawlable",
+      "family": "content-archive",
+      "projects": [
+        "web-desktop-chromium"
+      ]
+    },
+    "/open-data": {
+      "classification": "crawlable",
+      "family": "open-data"
+    },
+    "/open-data/6529bot": {
+      "classification": "crawlable",
+      "family": "open-data"
+    },
+    "/open-data/meme-subscriptions": {
+      "classification": "crawlable",
+      "family": "open-data"
+    },
+    "/open-data/network-metrics": {
+      "classification": "crawlable",
+      "family": "open-data"
+    },
+    "/open-data/rememes": {
+      "classification": "crawlable",
+      "family": "open-data"
+    },
+    "/open-data/royalties": {
+      "classification": "crawlable",
+      "family": "open-data"
+    },
+    "/open-data/team": {
+      "classification": "crawlable",
+      "family": "open-data"
+    },
+    "/open-mobile": {
+      "classification": "exempt",
+      "exemptReason": "Native deep-link bridge; meaningless without app query params."
+    },
+    "/rememes": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/rememes/[contract]/[id]": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "production": "/rememes/0xfb7dc9be63e53e24b217c02c16f3952ac3546e5f/7"
+      }
+    },
+    "/rememes/add": {
+      "classification": "auth"
+    },
+    "/rep/categories": {
+      "classification": "crawlable",
+      "family": "social"
+    },
+    "/rep/categories/[category]": {
+      "classification": "fixture",
+      "family": "social"
+    },
+    "/restricted": {
+      "classification": "crawlable",
+      "family": "system"
+    },
+    "/sentry-example-page": {
+      "classification": "exempt",
+      "exemptReason": "Sentry integration test page; intentionally throws."
+    },
+    "/slide-page/6529-initiatives": {
+      "classification": "exempt",
+      "exemptReason": "Slide fragment embedded by other surfaces; not standalone."
+    },
+    "/slide-page/homepage-slider": {
+      "classification": "exempt",
+      "exemptReason": "Slide fragment embedded by other surfaces; not standalone."
+    },
+    "/the-memes": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/the-memes/[id]": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/the-memes/1",
+        "production": "/the-memes/1"
+      }
+    },
+    "/the-memes/[id]/distribution": {
+      "classification": "fixture",
+      "family": "collections",
+      "fixture": {
+        "staging": "/the-memes/1/distribution",
+        "production": "/the-memes/1/distribution"
+      }
+    },
+    "/the-memes/mint": {
+      "classification": "crawlable",
+      "family": "collections"
+    },
+    "/tools": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/tools/6529bot/admin": {
+      "classification": "auth"
+    },
+    "/tools/agent-login": {
+      "classification": "auth"
+    },
+    "/tools/api": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/tools/api/authentication": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/tools/app-wallets": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/tools/app-wallets/[app-wallet-address]": {
+      "classification": "exempt",
+      "exemptReason": "Device-local app-wallet detail; no stable fixture exists off-device."
+    },
+    "/tools/app-wallets/import-wallet": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/tools/block-finder": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/tools/subscriptions-report": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/waves": {
+      "classification": "crawlable",
+      "family": "social"
+    },
+    "/waves/[wave]": {
+      "classification": "fixture",
+      "family": "social",
+      "fixture": {
+        "production": "/waves/05b14183-e153-4e47-bc66-42a0f49102d4"
+      }
+    },
+    "/waves/create": {
+      "classification": "auth"
+    },
+    "/xtdh": {
+      "classification": "crawlable",
+      "family": "info"
+    }
+  }
+}
