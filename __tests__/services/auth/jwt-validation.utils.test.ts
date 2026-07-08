@@ -45,8 +45,9 @@ const mockedRefreshSessionV2 = refreshSessionV2 as jest.MockedFunction<
 >;
 const mockedPersistSessionResponse =
   persistSessionResponse as jest.MockedFunction<typeof persistSessionResponse>;
-const mockedTrackAuthImpactEvent =
-  trackAuthImpactEvent as jest.MockedFunction<typeof trackAuthImpactEvent>;
+const mockedTrackAuthImpactEvent = trackAuthImpactEvent as jest.MockedFunction<
+  typeof trackAuthImpactEvent
+>;
 const mockedAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
   typeof areEqualAddresses
 >;
@@ -99,6 +100,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "empty",
       wasCancelled: false,
       requiresSessionUpgrade: true,
     });
@@ -114,6 +116,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "not_attempted",
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
@@ -134,10 +137,43 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "not_attempted",
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
     expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
+  });
+
+  it("keeps a locally valid JWT when session-v2 appears after an empty refresh", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    mockedRefreshSessionV2.mockResolvedValue(null);
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: true,
+      refreshOutcome: "local_valid_after_failure",
+      wasCancelled: false,
+    });
+    expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
+      address: "0x123",
+      abortSignal: validParams.abortSignal,
+    });
+  });
+
+  it("keeps a locally valid JWT when session-v2 appears after a thrown refresh failure", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: true,
+      refreshOutcome: "local_valid_after_failure",
+      wasCancelled: false,
+    });
   });
 
   it("requires session-v2 upgrade when refresh transport fails but current JWT is valid", async () => {
@@ -146,6 +182,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "failed",
       wasCancelled: false,
       requiresSessionUpgrade: true,
     });
@@ -171,6 +208,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "success",
       wasCancelled: false,
     });
     expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
@@ -192,6 +230,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "success",
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
@@ -229,6 +268,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "success",
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
@@ -253,6 +293,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "success",
       wasCancelled: false,
     });
 
@@ -296,6 +337,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "empty",
       wasCancelled: false,
     });
   });
@@ -339,7 +381,11 @@ describe("jwt-validation.utils", () => {
         role: "role-1",
         activeProfileProxy: proxy,
       })
-    ).resolves.toEqual({ isValid: true, wasCancelled: false });
+    ).resolves.toEqual({
+      isValid: true,
+      refreshOutcome: "success",
+      wasCancelled: false,
+    });
   });
 
   it("throws when a proxy role is requested without an active proxy", async () => {
@@ -396,6 +442,7 @@ describe("jwt-validation.utils", () => {
       })
     ).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "cancelled",
       wasCancelled: true,
     });
 
@@ -422,6 +469,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "cancelled",
       wasCancelled: true,
     });
   });
