@@ -5,6 +5,7 @@ import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.t
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -314,6 +315,8 @@ describe("WaveGroupEditButtons", () => {
           excluded_identity_group_id: null,
           excluded_identity_group_identities_count: 0,
           is_beneficiary_of_grant_id: null,
+          is_beneficiary_of_grant_match_mode:
+            ApiGroupBeneficiaryGrantMatchMode.AnyToken,
           is_beneficiary_of_grant: null,
         }),
       })

@@ -1,9 +1,15 @@
+import { publicEnv } from "@/config/env";
 import {
   PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT,
   requestProfileCmsGallerySnapshot,
 } from "@/lib/profile-cms/builder/api";
 import { parseWalletGallerySources } from "@/lib/profile-cms/builder/gallery";
 import { commonApiPost } from "@/services/api/common-api";
+
+jest.mock("@/config/env", () => {
+  const actual = jest.requireActual("@/config/env");
+  return { ...actual, publicEnv: { ...actual.publicEnv } };
+});
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
@@ -14,8 +20,8 @@ const commonApiPostMock = commonApiPost as jest.Mock;
 describe("profile CMS builder API adapter", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    delete process.env["PROFILE_CMS_BUILDER_API_ENABLED"];
-    delete process.env["NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED"];
+    delete publicEnv.PROFILE_CMS_BUILDER_API_ENABLED;
+    delete publicEnv.NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED;
   });
 
   it("uses the fixture snapshot fallback while backend gallery API is disabled", async () => {
@@ -35,7 +41,7 @@ describe("profile CMS builder API adapter", () => {
   });
 
   it("posts the expected backend snapshot contract when the API is enabled", async () => {
-    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
     const sources = parseWalletGallerySources("punk6529.eth").sources;
     commonApiPostMock.mockResolvedValue({
       snapshot_id: "snapshot-1",

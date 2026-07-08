@@ -1,4 +1,5 @@
 import minimalPackage from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/minimal-profile-homepage.package.json";
+import { publicEnv } from "@/config/env";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 import { withComputedCmsHashes } from "@/lib/profile-cms/protocol/v1";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -8,6 +9,11 @@ import {
   fetchProfileCmsPrimarySite,
   normalizePrimarySiteResponse,
 } from "@/lib/profile-cms/runtime/fetcher";
+
+jest.mock("@/config/env", () => {
+  const actual = jest.requireActual("@/config/env");
+  return { ...actual, publicEnv: { ...actual.publicEnv } };
+});
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -61,8 +67,8 @@ describe("profile CMS primary-site fetcher", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     clearProfileCmsRuntimeCacheForTests();
-    delete process.env["PROFILE_CMS_RUNTIME_FIXTURE_PRIMARY"];
-    delete process.env["PROFILE_CMS_RUNTIME_ENABLED"];
+    delete publicEnv.PROFILE_CMS_RUNTIME_FIXTURE_PRIMARY;
+    delete publicEnv.PROFILE_CMS_RUNTIME_ENABLED;
   });
 
   it("documents the canonical primary endpoint", () => {
@@ -164,7 +170,7 @@ describe("profile CMS primary-site fetcher", () => {
   });
 
   it("uses the dev fixture only when explicitly enabled and the API is unavailable", async () => {
-    process.env["PROFILE_CMS_RUNTIME_FIXTURE_PRIMARY"] = "true";
+    publicEnv.PROFILE_CMS_RUNTIME_FIXTURE_PRIMARY = "true";
     commonApiFetchMock.mockRejectedValueOnce(new Error("ECONNREFUSED"));
 
     const site = await fetchProfileCmsPrimarySite({
