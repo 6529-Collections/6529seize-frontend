@@ -4,6 +4,7 @@ import {
   getLowValueNetworkErrorTargetUrl,
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
+  shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -101,6 +102,8 @@ describe("sentry-client-filters", () => {
   ].join(" ");
   const observedWasmModuleCspUnsafeEvalMessage =
     "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
+  const anonymousUnsafeEvalCspMessage =
+    "Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com https://dataplane.rum.us-east-1.amazonaws.com\".";
   const injectedProviderProxyStartsWithMessage =
     "t?.startsWith is not a function";
   const walletConnectStaleSessionTopicMessage =
@@ -404,6 +407,55 @@ describe("sentry-client-filters", () => {
           },
         },
       ],
+    },
+    ...overrides,
+  });
+
+  const createObservedAnonymousUnsafeEvalCspEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/",
+    exception: {
+      values: [
+        {
+          type: "EvalError",
+          value: anonymousUnsafeEvalCspMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                abs_path:
+                  "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                function: "n",
+              },
+              {
+                filename: "<anonymous>:234:30",
+                abs_path: "<anonymous>:234:30",
+                function: "next",
+              },
+              {
+                filename: "<anonymous>:234:30",
+                abs_path: "<anonymous>:234:30",
+                function: "predicate",
+              },
+              {
+                filename: "<anonymous>",
+                abs_path: "<anonymous>",
+                function: "eval",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    tags: {
+      transaction: "/",
+      url: "/",
     },
     ...overrides,
   });
@@ -4970,6 +5022,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed anonymous EvalError CSP unsafe-eval errors", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent();
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters observed Sentry E7 WebAssembly CSP unsafe-eval errors from injected static chunks", () => {
     // Arrange
     const event = createObservedSentryE7WasmCspUnsafeEvalEvent();
@@ -5627,6 +5690,131 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter anonymous EvalError CSP unsafe-eval errors with app frames", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent({
+      exception: {
+        values: [
+          {
+            type: "EvalError",
+            value: anonymousUnsafeEvalCspMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://6529.io/_next/static/chunks/app/page-1234567890abcdef.js",
+                  abs_path:
+                    "https://6529.io/_next/static/chunks/app/page-1234567890abcdef.js",
+                  function: "runTemplate",
+                },
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "eval",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter anonymous EvalError CSP unsafe-eval errors with app source stacks", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent();
+    const error = new EvalError(anonymousUnsafeEvalCspMessage);
+    error.stack = [
+      `EvalError: ${anonymousUnsafeEvalCspMessage}`,
+      "    at runTemplate (webpack-internal:///(app-pages-browser)/./utils/eval-template.ts:10:1)",
+      "    at eval (<anonymous>)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter anonymous EvalError CSP errors without eval frames", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent({
+      exception: {
+        values: [
+          {
+            type: "EvalError",
+            value: anonymousUnsafeEvalCspMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "<anonymous>:234:30",
+                  abs_path: "<anonymous>:234:30",
+                  function: "predicate",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unrelated anonymous EvalError unsafe-eval errors", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent({
+      exception: {
+        values: [
+          {
+            type: "EvalError",
+            value: "Refused to evaluate a string as JavaScript.",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "eval",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
 
     // Assert
     expect(result).toBe(false);
