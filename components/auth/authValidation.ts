@@ -1,5 +1,11 @@
 import { getAuthJwt, removeAuthJwt } from "@/services/auth/auth.utils";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
+import {
+  trackAuthSessionRefreshProductImpact,
+  trackAuthSessionRefreshSucceeded,
+  trackAuthValidationCancelled,
+} from "@/services/analytics/productImpactTelemetry";
+import { getSessionClientType } from "@/services/auth/session-v2.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
 import {
@@ -8,6 +14,10 @@ import {
   hasSessionUpgradeRollout,
 } from "./authSessionUpgrade";
 import type { RunImmediateAuthValidationParams } from "./authTypes";
+
+type ImmediateAuthValidationResult = Awaited<
+  ReturnType<typeof validateAuthImmediate>
+>;
 
 const isCurrentValidationOperation = ({
   latestAddressRef,
@@ -22,6 +32,93 @@ const isCurrentValidationOperation = ({
 }): boolean =>
   latestAddressRef.current === currentAddress &&
   activeValidationOperationIdRef.current === operationId;
+
+const trackImmediateAuthValidationTelemetry = ({
+  result,
+  hadLocalJwt,
+  hasActiveWalletAddress,
+}: {
+  readonly result: ImmediateAuthValidationResult;
+  readonly hadLocalJwt: boolean;
+  readonly hasActiveWalletAddress: boolean;
+}): void => {
+  const refreshOutcome = result.authRefreshOutcome;
+  const clientType = getSessionClientType();
+
+  if (result.wasCancelled) {
+    trackAuthValidationCancelled({
+      clientType,
+      hadLocalJwt,
+      refreshOutcome,
+    });
+    return;
+  }
+
+  if (result.isValid) {
+    if (refreshOutcome === "success") {
+      trackAuthSessionRefreshSucceeded({
+        clientType,
+        hadLocalJwt,
+        refreshOutcome,
+      });
+      return;
+    }
+
+    if (refreshOutcome === "local_valid_after_failure") {
+      trackAuthSessionRefreshProductImpact({
+        clientType,
+        hadLocalJwt,
+        outcome: "failed_without_prompt",
+        refreshOutcome,
+        requiresReauth: false,
+      });
+    }
+    return;
+  }
+
+  if (result.requiresSessionUpgrade) {
+    trackAuthSessionRefreshProductImpact({
+      clientType,
+      hadLocalJwt,
+      outcome: "session_upgrade_required",
+      refreshOutcome,
+      requiresReauth: true,
+    });
+    return;
+  }
+
+  if (result.shouldShowModal) {
+    trackAuthSessionRefreshProductImpact({
+      clientType,
+      hadLocalJwt,
+      outcome: "reauth_required",
+      refreshOutcome,
+      requiresReauth: true,
+    });
+    return;
+  }
+
+  if (!hasActiveWalletAddress) {
+    trackAuthSessionRefreshProductImpact({
+      clientType,
+      hadLocalJwt,
+      outcome: "logout_required",
+      refreshOutcome,
+      requiresReauth: true,
+    });
+    return;
+  }
+
+  if (refreshOutcome !== "not_attempted") {
+    trackAuthSessionRefreshProductImpact({
+      clientType,
+      hadLocalJwt,
+      outcome: "failed_without_prompt",
+      refreshOutcome,
+      requiresReauth: false,
+    });
+  }
+};
 
 export const runImmediateAuthValidation = async ({
   currentAddress,
@@ -59,6 +156,7 @@ export const runImmediateAuthValidation = async ({
   const abortController = new AbortController();
   abortControllerRef.current = abortController;
   setAuthLoadingState("validating");
+  const authJwt = getAuthJwt();
 
   const markSessionUpgradeRequired = () => {
     resetSessionUpgradeExpiryDedupe(currentAddress);
@@ -90,7 +188,7 @@ export const runImmediateAuthValidation = async ({
           params: {
             currentAddress,
             connectionAddress: currentAddress,
-            jwt: getAuthJwt(),
+            jwt: authJwt,
             activeProfileProxy,
             isConnected: hasActiveWalletAddress,
             operationId,
@@ -107,8 +205,16 @@ export const runImmediateAuthValidation = async ({
         })
     );
 
+    if (result.wasCancelled) {
+      trackImmediateAuthValidationTelemetry({
+        result,
+        hadLocalJwt: authJwt !== null,
+        hasActiveWalletAddress,
+      });
+      return;
+    }
+
     if (
-      result.wasCancelled ||
       isCurrentValidationOperation({
         latestAddressRef,
         activeValidationOperationIdRef,
@@ -118,6 +224,12 @@ export const runImmediateAuthValidation = async ({
     ) {
       return;
     }
+
+    trackImmediateAuthValidationTelemetry({
+      result,
+      hadLocalJwt: authJwt !== null,
+      hasActiveWalletAddress,
+    });
   } finally {
     if (
       abortControllerRef.current === abortController &&
