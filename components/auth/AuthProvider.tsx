@@ -23,6 +23,14 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
+  trackAuthImpactEvent,
+  type AuthImpactAuthState,
+  type AuthImpactEventName,
+  type AuthImpactProperties,
+  type AuthImpactReason,
+} from "@/services/analytics/mixpanel";
+import { classifyPageView } from "@/services/analytics/pageClassification";
+import {
   getAuthJwt,
   getWalletAddress,
   hasActiveSessionV2Auth,
@@ -82,6 +90,10 @@ export default function Auth({
   );
   const queryClient = useQueryClient();
   const pathname = usePathname();
+  const authImpactPage = useMemo(
+    () => classifyPageView({ pathname }),
+    [pathname]
+  );
   const router = useRouter();
   const seizeSettingsContext = useSeizeSettingsOptional();
 
@@ -118,6 +130,11 @@ export default function Auth({
   const [sessionUpgradeRequired, setSessionUpgradeRequired] = useState(false);
   const [authStorageRevision, setAuthStorageRevision] = useState(0);
   const signModalReasonRef = useRef<SignModalReason>(signModalReason);
+  const authPromptTrackingReasonRef =
+    useRef<AuthImpactReason>("auth_validation_failed");
+  const visibleAuthPromptEventRef = useRef<SignModalReason | null>(null);
+  const lastTrackedForcedLogoutKeyRef = useRef<string | null>(null);
+  const lastTrackedValidationFailureKeyRef = useRef<string | null>(null);
 
   const { profile: loadedProfile, isLoading: fetchingProfile } = useIdentity({
     handleOrWallet: address,
@@ -159,6 +176,72 @@ export default function Auth({
       ),
     };
   }, [settingsAuth]);
+
+  const trackAuthImpact = useCallback(
+    (
+      eventName: AuthImpactEventName,
+      properties: AuthImpactProperties
+    ): void => {
+      trackAuthImpactEvent(eventName, {
+        client_type: getSessionClientType(),
+        page_group: authImpactPage.pageGroup,
+        route_pattern: authImpactPage.routePattern,
+        was_connected_wallet: hasActiveWalletAddress,
+        ...properties,
+      });
+    },
+    [
+      authImpactPage.pageGroup,
+      authImpactPage.routePattern,
+      hasActiveWalletAddress,
+    ]
+  );
+
+  const trackForcedLogout = useCallback(
+    ({
+      reason,
+      wasConnectedWallet,
+    }: {
+      readonly reason: AuthImpactReason;
+      readonly wasConnectedWallet: boolean;
+    }): void => {
+      const trackingKey = `${reason}:${wasConnectedWallet ? "connected" : "disconnected"}`;
+      if (lastTrackedForcedLogoutKeyRef.current === trackingKey) {
+        return;
+      }
+
+      lastTrackedForcedLogoutKeyRef.current = trackingKey;
+      trackAuthImpact("Auth Forced Logout", {
+        auth_state_after: "logged_out",
+        auth_state_before: "authenticated",
+        reason,
+        was_connected_wallet: wasConnectedWallet,
+      });
+    },
+    [trackAuthImpact]
+  );
+
+  const trackValidationFailedWhileConnected = useCallback(
+    (reason: AuthImpactReason): void => {
+      if (!hasActiveWalletAddress || !isAddressAuthorized) {
+        return;
+      }
+
+      const trackingKey = `${address ?? "unknown"}:${reason}`;
+      if (lastTrackedValidationFailureKeyRef.current === trackingKey) {
+        return;
+      }
+
+      lastTrackedValidationFailureKeyRef.current = trackingKey;
+      trackAuthImpact("Auth Validation Failed While Connected", {
+        auth_state_after: "auth_validation_failed",
+        auth_state_before: "authenticated",
+        reason,
+        was_connected_wallet: true,
+      });
+    },
+    [address, hasActiveWalletAddress, isAddressAuthorized, trackAuthImpact]
+  );
 
   // Centralized abort mechanism for cancelling in-flight operations
   const abortCurrentAuthOperation = useCallback(() => {
@@ -253,10 +336,14 @@ export default function Auth({
   }, [address, authRole, receivedProfileProxies]);
 
   const reset = useCallback(() => {
+    trackForcedLogout({
+      reason: "stored_auth_invalid",
+      wasConnectedWallet: false,
+    });
     invalidateAll();
     setActiveProfileProxy(null);
     seizeDisconnectAndLogout();
-  }, [invalidateAll, seizeDisconnectAndLogout]);
+  }, [invalidateAll, seizeDisconnectAndLogout, trackForcedLogout]);
 
   // Comprehensive cleanup effect for unmount and address changes
   useEffect(() => {
@@ -277,6 +364,11 @@ export default function Auth({
 
   useEffect(() => {
     latestAddressRef.current = address;
+  }, [address]);
+
+  useEffect(() => {
+    lastTrackedForcedLogoutKeyRef.current = null;
+    lastTrackedValidationFailureKeyRef.current = null;
   }, [address]);
 
   useEffect(() => {
@@ -375,6 +467,7 @@ export default function Auth({
     if (!isAddressAuthorized) {
       setSessionUpgradeRequired(false);
       if (isConnected) {
+        authPromptTrackingReasonRef.current = "wallet_not_authorized";
         setSignModalReason("auth");
         setShowSignModal(true);
       }
@@ -398,6 +491,7 @@ export default function Auth({
 
     // Capture current address at validation time to prevent race conditions
     const currentAddress = address;
+    authPromptTrackingReasonRef.current = "auth_validation_failed";
     setSessionUpgradeRequired(false);
 
     // Generate unique operation ID for this validation attempt
@@ -497,10 +591,14 @@ export default function Auth({
       setSignModalReason("auth");
       setSessionUpgradeHasDeadline(false);
       setSessionUpgradeRequired(false);
+      trackForcedLogout({
+        reason: "session_upgrade_deadline_expired",
+        wasConnectedWallet: hasActiveWalletAddress,
+      });
       await removeAuthJwt();
       invalidateAll();
     },
-    [invalidateAll]
+    [hasActiveWalletAddress, invalidateAll, trackForcedLogout]
   );
 
   useEffect(() => {
@@ -703,6 +801,47 @@ export default function Auth({
     isDisconnectedWebSessionUpgradePrompt,
     showSignModal,
     signModalReason,
+  ]);
+
+  useEffect(() => {
+    if (!shouldShowSignModal) {
+      visibleAuthPromptEventRef.current = null;
+      return;
+    }
+
+    if (visibleAuthPromptEventRef.current === signModalReason) {
+      return;
+    }
+
+    visibleAuthPromptEventRef.current = signModalReason;
+    if (signModalReason === "session-upgrade") {
+      trackAuthImpact("Auth Session Upgrade Prompt Shown", {
+        auth_state_after: "session_upgrade_prompt",
+        auth_state_before: "session_upgrade_required",
+        reason: "session_upgrade_required",
+      });
+      return;
+    }
+
+    const reason = authPromptTrackingReasonRef.current;
+    const authStateBefore: AuthImpactAuthState =
+      reason === "wallet_not_authorized"
+        ? "wallet_connected"
+        : "authenticated";
+    trackAuthImpact("Auth Reauth Prompt Shown", {
+      auth_state_after: "reauth_prompt",
+      auth_state_before: authStateBefore,
+      reason,
+    });
+
+    if (reason !== "wallet_not_authorized") {
+      trackValidationFailedWhileConnected(reason);
+    }
+  }, [
+    shouldShowSignModal,
+    signModalReason,
+    trackAuthImpact,
+    trackValidationFailedWhileConnected,
   ]);
 
   const reconnectActiveWalletForSessionUpgrade = async (): Promise<void> => {
