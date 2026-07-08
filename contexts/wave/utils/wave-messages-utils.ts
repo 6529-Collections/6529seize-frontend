@@ -326,7 +326,7 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
 }
 
 function getDropCreatedAtMillis(drop: Drop): number {
-  if (drop.created_at === undefined) {
+  if (drop.created_at === undefined || drop.created_at === null) {
     return drop.serial_no;
   }
 
