@@ -48,7 +48,7 @@
         "expand"
       ],
       "facts": [
-        "The primary navigation concepts are NFTs, Waves, DMs, and About.",
+        "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
@@ -60,6 +60,7 @@
         "/the-memes",
         "/waves",
         "/messages",
+        "/join-6529",
         "/about",
         "/drop-forge",
         "/discover",
@@ -103,7 +104,7 @@
         "/join redirects to /join-6529 for compatibility.",
         "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
         "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
-        "The focus area links to The Memes Main Stage Wave, Waves, subscription minting, delegation, and @help6529."
+        "The focus area links to The Memes Main Stage Wave, Waves, the current user's subscriptions route when available, delegation, and @help6529."
       ],
       "canonical_path": "/join-6529",
       "related_paths": [
@@ -111,6 +112,7 @@
         "/waves",
         "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077?divider=1167698",
         "/the-memes",
+        "/{user}/subscriptions",
         "/open-data/meme-subscriptions",
         "/delegation/delegation-center"
       ],

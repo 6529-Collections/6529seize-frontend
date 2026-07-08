@@ -5,7 +5,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { SupportedLocale } from "@/i18n/locales";
 
 import { getProfileHref, getProfileRouteIdentity } from "./journeyIdentity";
-import { WAVES_HREF } from "./page.content";
+import { SUBSCRIPTIONS_INFO_HREF, WAVES_HREF } from "./page.content";
 import type { CurrentPanelAction, JoinPageState } from "./page.types";
 import { m } from "./page.utils";
 import { useJoin6529Progress } from "./useJoin6529Progress";
@@ -21,15 +21,15 @@ export function useJoin6529Journey(locale: SupportedLocale) {
   const [walletActionPending, setWalletActionPending] = useState(false);
   const [authActionPending, setAuthActionPending] = useState(false);
 
-  const profileRouteIdentity = getProfileRouteIdentity(
-    connectedProfile,
-    address
-  );
   const profileHref = getProfileHref(connectedProfile, address);
+  const subscriptionProfileIdentity = getProfileRouteIdentity(
+    connectedProfile,
+    undefined
+  );
   const subscriptionsHref =
-    profileRouteIdentity === null
-      ? "/open-data/meme-subscriptions"
-      : `/${profileRouteIdentity}/subscriptions`;
+    subscriptionProfileIdentity === null
+      ? SUBSCRIPTIONS_INFO_HREF
+      : `/${subscriptionProfileIdentity}/subscriptions`;
   const pageState = getJoinPageState({
     hasActiveWalletAddress,
     hasProfile: Boolean(connectedProfile),
