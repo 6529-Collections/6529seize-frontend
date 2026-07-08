@@ -3,7 +3,6 @@
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { EditorState } from "lexical";
 import React, {
@@ -65,6 +64,7 @@ import {
 } from "./create-drop-content/content-helpers";
 import { useCreateDropDraftState } from "./create-drop-content/useCreateDropDraftState";
 import { useCreateDropFileHandlers } from "./create-drop-content/useCreateDropFileHandlers";
+import { useCreateDropFocusBehavior } from "./create-drop-content/useCreateDropFocusBehavior";
 import { useCreateDropIdentityState } from "./create-drop-content/useCreateDropIdentityState";
 import { useCreateDropSubmission } from "./create-drop-content/useCreateDropSubmission";
 import type {
@@ -108,7 +108,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
-  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const actionsContainerRef = useRef<HTMLDivElement>(null);
   const [actionsContainerElement, setActionsContainerElement] =
     useState<HTMLDivElement | null>(null);
@@ -439,8 +438,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isCurationSubmissionExperience &&
     (canSubmitCurationUrl || !!curationUrlSubmitRestrictionMessage);
 
-  const isInitialMountRef = useRef(true);
-  const wasNativeKeyboardVisibleRef = useRef(false);
   const {
     createDropInputRef,
     shouldRefocusAfterChatSubmitRef,
@@ -482,6 +479,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldAnimateOptionsRef,
     closeOnNextInputRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,
+  });
+
+  useCreateDropFocusBehavior({
+    activeDrop,
+    isApp,
+    focusOnInitialActiveDrop,
+    createDropInputRef,
   });
 
   const handleDuplicateIdentitySubmissionError = useCallback(
@@ -549,87 +553,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
     onSwitchToDropModeWithUrl(normalizedCurationDropUrl);
   }, [normalizedCurationDropUrl, onSwitchToDropModeWithUrl]);
-
-  const scheduleMobileInputFocus = useCallback((delayMs: number) => {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    const frameId = requestAnimationFrame(() => {
-      if (delayMs <= 0) {
-        createDropInputRef.current?.focus();
-        return;
-      }
-
-      timeoutId = setTimeout(() => {
-        createDropInputRef.current?.focus();
-      }, delayMs);
-    });
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      if (timeoutId !== undefined) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, []);
-
-  const focusDesktopInput = () => {
-    createDropInputRef.current?.focus();
-  };
-
-  useLayoutEffect(() => {
-    const isInitialMount = isInitialMountRef.current;
-    isInitialMountRef.current = false;
-
-    if (!activeDrop) {
-      wasNativeKeyboardVisibleRef.current = false;
-      return;
-    }
-
-    // Most app composers should not open the keyboard on page load. Surfaces
-    // that mount only after a user reply action can opt into initial focus.
-    if (isApp && isInitialMount && !focusOnInitialActiveDrop) {
-      return;
-    }
-
-    if (isApp) {
-      if (focusOnInitialActiveDrop) {
-        createDropInputRef.current?.focus();
-        return;
-      }
-
-      let cancelScheduledFocus: (() => void) | undefined;
-      const timer = setTimeout(() => {
-        cancelScheduledFocus = scheduleMobileInputFocus(300);
-      }, 200);
-
-      return () => {
-        clearTimeout(timer);
-        cancelScheduledFocus?.();
-      };
-    }
-    const timer = setTimeout(() => {
-      focusDesktopInput();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [activeDrop, isApp, scheduleMobileInputFocus, focusOnInitialActiveDrop]);
-
-  useEffect(() => {
-    if (!isApp || !activeDrop) {
-      wasNativeKeyboardVisibleRef.current = false;
-      return;
-    }
-
-    if (isKeyboardVisible) {
-      wasNativeKeyboardVisibleRef.current = true;
-      return;
-    }
-
-    if (!wasNativeKeyboardVisibleRef.current) {
-      return;
-    }
-
-    wasNativeKeyboardVisibleRef.current = false;
-    createDropInputRef.current?.blur();
-  }, [activeDrop, isApp, isKeyboardVisible]);
 
   const { handleFileChange, removeFile } = useCreateDropFileHandlers({
     drop,
