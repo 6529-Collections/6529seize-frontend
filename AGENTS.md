@@ -237,7 +237,10 @@ Prefer focused checks first. Escalate based on blast radius.
 - Broader changed-file validation: `6529 run check:changed`.
 - React, Next.js, JSX, TSX, hooks, routing, or UI state: also run
   `6529 run react-doctor:diff` when available.
-- Unit/integration behavior: targeted `6529 run test -- <pattern>`.
+- Unit/integration behavior: targeted `6529 run test <pattern>` (append flags
+  like `--testPathPatterns=<regex>` or `--cacheDirectory=<dir>` directly; do
+  not insert a `--` separator — jest reads everything after `--` as a
+  test-path pattern, so flags placed there are misread).
 - Playwright/user flows: `6529 run test:e2e` or a targeted Playwright run. The
   Playwright config starts `./bin/6529 run dev` on port `3001`.
 - Build-time, generated models, Next config, env/runtime config, proxy, routing,

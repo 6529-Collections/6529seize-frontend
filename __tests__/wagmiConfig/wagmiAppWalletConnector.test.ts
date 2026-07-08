@@ -263,6 +263,39 @@ describe("wagmiAppWalletConnector", () => {
   });
 
   describe("connect", () => {
+    it("returns address accounts by default", async () => {
+      mockRequestPasswordModal.mockResolvedValue("validpass123");
+      mockDecryptData
+        .mockResolvedValueOnce(mockAppWallet.address)
+        .mockResolvedValueOnce("valid_private_key");
+      mockAreEqualAddresses.mockReturnValue(true);
+
+      await expect(connectorInstance.connect({ chainId: 1 })).resolves.toEqual({
+        accounts: [mockAppWallet.address],
+        chainId: 1,
+      });
+    });
+
+    it("returns capability account objects when requested", async () => {
+      mockRequestPasswordModal.mockResolvedValue("validpass123");
+      mockDecryptData
+        .mockResolvedValueOnce(mockAppWallet.address)
+        .mockResolvedValueOnce("valid_private_key");
+      mockAreEqualAddresses.mockReturnValue(true);
+
+      await expect(
+        connectorInstance.connect({ chainId: 1, withCapabilities: true })
+      ).resolves.toEqual({
+        accounts: [
+          {
+            address: mockAppWallet.address,
+            capabilities: {},
+          },
+        ],
+        chainId: 1,
+      });
+    });
+
     it("throws error for unsupported chainId", async () => {
       const unsupportedChainId = 999;
 

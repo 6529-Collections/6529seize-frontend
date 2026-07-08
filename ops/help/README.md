@@ -29,11 +29,19 @@ Each record should be short, factual, and linkable:
   whose canonical or related paths resolve to WordPress-migrated `page.tsx`
   files, or whose `source_refs` point at those files.
 
-Run this after editing:
+Run both sync steps after editing:
 
 ```bash
 ./bin/6529 run help-index:sync
+./bin/6529 run agent-files:sync
 ```
 
-The sync step validates record shape, required V1 records, source refs, and
-internal route paths, then writes `public/help-index.json`.
+`help-index:sync` validates record shape, required V1 records, source refs, and
+internal route paths, then writes `public/help-index.json`. `agent-files:sync`
+regenerates `public/glossary.json` and `public/llms.txt` from the corpus and
+`ops/help/llms.txt.template`.
+
+Commit the regenerated `public/` artifacts with the corpus change. PR CI runs
+`__tests__/scripts/sync-agent-files.test.ts` (the "Verify agent files sync"
+step) whenever these files change and fails if the committed artifacts drift
+from the corpus.
