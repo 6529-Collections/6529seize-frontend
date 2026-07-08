@@ -44,6 +44,9 @@ import {
   isHttpBreadcrumb,
 } from "./network";
 import {
+  getStackSignatureValues,
+  hasAppOwnedNonExtensionSignature,
+  hasAppOwnedSourceEvidence,
   hasAppOwnedFrame,
   hasGifPickerTenorManagerFrame,
   hasInjectedWasmCspFrameSignature,
@@ -53,6 +56,8 @@ import {
   hasReactDomNotFoundErrorSignature,
   hasSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
+
+const sentryBrowserPathTokens = ["@sentry/browser", "@sentry+browser"];
 
 function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined
@@ -215,6 +220,16 @@ export function hasMetaMaskMobileWebViewContext(
   );
 }
 
+function hasMobileSafariWebViewContext(event: SentryClientEvent): boolean {
+  const contextValues = getRouteParameterizationContextValues(event);
+  const userAgentValues = getRouteParameterizationUserAgentValues(event);
+  const values = [...contextValues, ...userAgentValues];
+
+  return values.some((value) =>
+    matchesContextToken(value, mobileSafariWebViewContextTokens)
+  );
+}
+
 function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return (
@@ -242,6 +257,85 @@ function hasWasmCspUnsafeEvalMessage(
       typeof candidate === "string" &&
       matchesWasmCspUnsafeEvalMessage(candidate)
   );
+}
+
+function matchesAnonymousUnsafeEvalCspMessage(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  return (
+    normalizedValue.includes("refused to evaluate a string as javascript") &&
+    normalizedValue.includes("unsafe-eval") &&
+    normalizedValue.includes("content security policy") &&
+    normalizedValue.includes("script-src")
+  );
+}
+
+function hasAnonymousUnsafeEvalCspMessage(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const candidates = [
+    value?.value,
+    event.message,
+    getHintExceptionMessage(hint),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      matchesAnonymousUnsafeEvalCspMessage(candidate)
+  );
+}
+
+function isAnonymousUnsafeEvalCspFrame(frame: SentryStackFrame): boolean {
+  const paths = [frame.filename, frame.abs_path].filter(
+    (value): value is string => typeof value === "string" && value.length > 0
+  );
+
+  if (paths.length === 0) {
+    return frame.function?.trim() === "eval";
+  }
+
+  return paths.every((path) => {
+    const normalizedPath = path.toLowerCase().trim();
+    return (
+      normalizedPath.startsWith("<anonymous>") ||
+      sentryBrowserPathTokens.some((token) => normalizedPath.includes(token))
+    );
+  });
+}
+
+function hasAnonymousUnsafeEvalCspFrameSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some((frame) => frame.function?.trim() === "eval") &&
+    frames.every(isAnonymousUnsafeEvalCspFrame)
+  );
+}
+
+function hasAnonymousUnsafeEvalCspAppEvidence(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  const frames = value?.stacktrace?.frames;
+
+  if (
+    hasAppOwnedNonExtensionSignature(frames, hint) ||
+    hasAppOwnedSourceEvidence(event, value, hint)
+  ) {
+    return true;
+  }
+
+  return getStackSignatureValues(frames, hint).some((candidate) => {
+    const normalizedCandidate = candidate.toLowerCase();
+    return (
+      normalizedCandidate.includes("/_next/static/") ||
+      normalizedCandidate.includes("webpack-internal:///(app-")
+    );
+  });
 }
 
 export function isTwitterBrowser(event: SentryClientEvent): boolean {
@@ -349,7 +443,7 @@ export function shouldFilterGifPickerTenorCategoriesError(
 export function shouldFilterSentryRouteParameterizationError(
   event: SentryClientEvent
 ): boolean {
-  // Sentry SDK route parameterization noise observed in MetaMaskMobile WKWebView;
+  // Sentry SDK route parameterization noise observed in iOS WKWebView;
   // keep app-owned and generic browser cyclic JSON errors.
   const value = event.exception?.values?.[0];
   if (
@@ -375,7 +469,8 @@ export function shouldFilterSentryRouteParameterizationError(
   return (
     (hasRouteParameterizationRouteEvidence(event) ||
       hasSentryRouteParameterizationFrame(frames)) &&
-    hasMetaMaskMobileWebViewContext(event)
+    (hasMetaMaskMobileWebViewContext(event) ||
+      hasMobileSafariWebViewContext(event))
   );
 }
 
@@ -389,4 +484,32 @@ export function shouldFilterInjectedWasmCspUnsafeEval(
   }
 
   return hasWasmCspUnsafeEvalMessage(event, hint);
+}
+
+export function shouldFilterAnonymousUnsafeEvalCspError(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (value?.type !== "EvalError") {
+    return false;
+  }
+
+  const mechanism = value.mechanism;
+  if (
+    mechanism?.type !== browserUnhandledRejectionMechanism ||
+    mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  if (!hasAnonymousUnsafeEvalCspMessage(event, hint)) {
+    return false;
+  }
+
+  if (!hasAnonymousUnsafeEvalCspFrameSignature(value.stacktrace?.frames)) {
+    return false;
+  }
+
+  return !hasAnonymousUnsafeEvalCspAppEvidence(event, hint);
 }

@@ -48,6 +48,10 @@ then run `Test` or `Create`.
 - Grant card:
   - `xTDH Grant Beneficiary` accepts a typed grant ID or `Find grant` picker.
   - Picker filters by grantor, collection name, and status.
+  - Token-specific xTDH grants can require members to own any specified token
+    or all specified tokens.
+  - Full-collection xTDH grants require members to own at least one collection
+    token.
 - Identity lists:
   - `Include Identities`
   - `Exclude Identities`
@@ -86,7 +90,8 @@ then run `Test` or `Create`.
 - Cloning another user’s group publishes a new copy and keeps the original
   group unchanged.
 - In edit mode, the selected group values are prefilled (name, privacy,
-  thresholds, NFTs, grant ID, include/exclude wallets).
+  thresholds, NFTs, grant ID, xTDH grant token requirement,
+  include/exclude wallets).
 - Save success toast is always `Group created.` (create, edit, and clone).
 
 ## Grant Lookup and Import Behavior

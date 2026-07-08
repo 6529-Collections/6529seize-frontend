@@ -16,6 +16,7 @@ export {
   tagSampledLowValueNetworkError,
 } from "./sentry-client-filters/network";
 export {
+  shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterByFilenameExceptions,
   shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWasmCspUnsafeEval,

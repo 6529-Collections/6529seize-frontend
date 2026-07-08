@@ -1,49 +1,38 @@
-import React from 'react';
-/* eslint-disable react/display-name */
-import { render, screen } from '@testing-library/react';
-import PressPage from '@/app/about/press/page';
+import PressPage, { generateMetadata } from "@/app/about/press/page";
+import { aboutPressMigratedWordPressPage } from "@/app/about/press/content";
+import { render, screen } from "@testing-library/react";
 
-jest.mock('@/components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);
+describe("PressPage (migrated WordPress static page)", () => {
+  it("renders the press title and first press item heading", () => {
+    render(<PressPage />);
 
-describe('PressPage', () => {
-  const renderComponent = () => render(<PressPage />);
-
-  it('renders the page title', () => {
-    renderComponent();
-    const title = document.querySelector('title');
-    expect(title?.textContent).toBe('PRESS - 6529.io');
+    expect(
+      screen.getByRole("heading", { level: 1, name: "PRESS" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("NFT100 LIST 2022")).toBeInTheDocument();
   });
 
-  it('includes canonical link', () => {
-    renderComponent();
-    const canonical = document.querySelector('link[rel="canonical"]');
-    expect(canonical).toBeInTheDocument();
-    expect(canonical?.getAttribute('href')).toBe('/about/press/');
+  it("marks the page with its auditable migration source", () => {
+    render(<PressPage />);
+
+    expect(document.querySelector("main")).toHaveAttribute(
+      "data-content-source",
+      "migrated-wordpress"
+    );
   });
 
-  it('includes robots meta tag', () => {
-    renderComponent();
-    const robots = document.querySelector('meta[name="robots"]');
-    expect(robots?.getAttribute('content')).toBe('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  it("exposes title and Open Graph metadata via generateMetadata", () => {
+    const metadata = generateMetadata();
+
+    expect(metadata.title).toBe("PRESS - 6529.io");
+    expect(metadata.openGraph).toMatchObject({
+      siteName: "6529.io",
+      title: "PRESS - 6529.io",
+    });
   });
 
-  it('includes Open Graph title', () => {
-    renderComponent();
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    expect(ogTitle?.getAttribute('content')).toBe('PRESS - 6529.io');
-  });
-
-  it('has skip to content link', () => {
-    renderComponent();
-    const skip = screen.getByText('Skip to content');
-    expect(skip).toBeInTheDocument();
-    expect(skip).toHaveAttribute('href', '#content');
-  });
-
-  it('has go to top link', () => {
-    renderComponent();
-    const link = document.querySelector('#toTop');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveClass('fusion-top-top-link');
+  it("keeps the content module aligned with the page path", () => {
+    expect(aboutPressMigratedWordPressPage.path).toBe("/about/press");
+    expect(aboutPressMigratedWordPressPage.source).toBe("migrated-wordpress");
   });
 });

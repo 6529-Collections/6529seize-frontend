@@ -31,6 +31,7 @@ jobs:
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
+      agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
 
     steps:
       - name: Checkout code
@@ -226,6 +227,13 @@ jobs:
       - name: Verify reviewbot contract
         if: needs.plan.outputs.reviewbot_contract_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts
+
+      # jest --findRelatedTests follows the module import graph, so it cannot
+      # see this suite's fs reads of the help corpus and committed artifacts.
+      # The plan requests it by path whenever those files change.
+      - name: Verify agent files sync
+        if: needs.plan.outputs.agent_files_sync_required == 'true'
+        run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
       - name: Lint changed source
         if: needs.plan.outputs.lint_changed_required == 'true'
