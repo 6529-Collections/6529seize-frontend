@@ -68,6 +68,11 @@ performance-tracking behavior tied to that choice.
 - If that same user disconnects without revoking performance consent, later
   page views can still be tracked for the browser session without the prior
   profile identity attached.
+- Consented production sessions can also send product-health events for Waves
+  feed loading and auth session refresh outcomes. These events use route
+  families, status buckets, endpoint families, booleans, and counts; they do
+  not include wallet addresses, profile handles, raw wave or drop IDs, tokens,
+  or full request URLs.
 
 ## Edge Cases
 
@@ -89,6 +94,8 @@ performance-tracking behavior tied to that choice.
   and the previous preference remains in effect.
 - If analytics scripts are blocked by browser privacy settings or network
   policy, the site still works; only performance tracking fails.
+- If Waves feed or auth refresh telemetry is blocked, product behavior is
+  unchanged; the app simply loses that diagnostic signal.
 - Users can recover by reloading the page and retrying the banner action or the
   `/about/cookie-policy` toggle.
 
