@@ -144,4 +144,32 @@ describe("mixpanel analytics wrapper", () => {
       path: "/waves",
     });
   });
+
+  it("tracks auth impact events with sanitized low-cardinality properties", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+
+    analytics.initAnalytics();
+    analytics.trackAuthImpactEvent("Auth Reauth Prompt Shown", {
+      auth_state_after: "reauth_prompt",
+      auth_state_before: "authenticated",
+      client_type: "web",
+      page_group: "waves",
+      reason: "auth_validation_failed",
+      route_pattern: "/waves/:waveId",
+      was_connected_wallet: true,
+    });
+
+    expect(trackMock).toHaveBeenCalledWith("Auth Reauth Prompt Shown", {
+      auth_state_after: "reauth_prompt",
+      auth_state_before: "authenticated",
+      client_type: "web",
+      page_group: "waves",
+      reason: "auth_validation_failed",
+      route_pattern: "/waves/:waveId",
+      was_connected_wallet: true,
+    });
+  });
 });
