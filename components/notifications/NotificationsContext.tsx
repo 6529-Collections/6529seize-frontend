@@ -427,6 +427,16 @@ const toCaptureExceptionInput = (
   return new Error(toErrorMessage(error, fallbackMessage));
 };
 
+const getUsableProfileId = (profile?: ApiIdentity): string | null => {
+  const profileId = profile?.id;
+  if (typeof profileId !== "string") {
+    return null;
+  }
+
+  const trimmedProfileId = profileId.trim();
+  return trimmedProfileId.length > 0 ? trimmedProfileId : null;
+};
+
 const createPushRegistrationFingerprint = ({
   deviceId,
   token,
@@ -438,7 +448,7 @@ const createPushRegistrationFingerprint = ({
 }): PushRegistrationFingerprint => ({
   deviceId,
   token,
-  profileId: profile?.id ?? null,
+  profileId: getUsableProfileId(profile),
 });
 
 const isSamePushRegistrationFingerprint = (
@@ -773,10 +783,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       deviceId: string,
       deviceInfo: DeviceInfo,
       token: string,
-      profile?: ApiIdentity
+      profileId: string
     ): Promise<boolean> => {
-      const profileId = profile?.id ?? null;
-
       for (
         let attempt = 0;
         attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
@@ -802,7 +810,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
               operation: "registerPushNotification",
               attempt: attempt + 1,
               max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-              profile_id: profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
             },
           });
@@ -816,7 +824,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
               device_id: deviceId,
               token,
               platform: deviceInfo.platform,
-              profile_id: profile?.id,
+              profile_id: profileId,
             },
             errorMode: "structured",
           });
@@ -863,7 +871,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 delay_ms: delayMs,
                 rate_limited: rateLimited,
                 ...errorExtra,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -892,7 +900,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 attempt: attemptNumber,
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
                 status_code: statusCode ?? undefined,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -918,7 +926,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
                 delay_ms: retryAfterMs ?? undefined,
                 ...errorExtra,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -934,7 +942,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             extra: {
               attempt: attemptNumber,
               max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-              profile_id: profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
               ...errorExtra,
             },
@@ -968,6 +976,24 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const fingerprint = createPushRegistrationFingerprint(fingerprintInput);
+      const profileId = fingerprint.profileId;
+      if (profileId === null) {
+        console.warn("Skipping push registration: profile id is unavailable", {
+          platform: deviceInfo.platform,
+        });
+        Sentry.addBreadcrumb({
+          category: "notifications",
+          level: "warning",
+          message: "Push registration skipped (profile id unavailable).",
+          data: {
+            component: "NotificationsProvider",
+            operation: "registerPushNotification",
+            platform: deviceInfo.platform,
+          },
+        });
+        return;
+      }
+
       const previousSuccess = lastSuccessfulRegistrationRef.current;
 
       if (
@@ -981,7 +1007,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           data: {
             component: "NotificationsProvider",
             operation: "registerPushNotification",
-            profile_id: fingerprint.profileId ?? undefined,
+            profile_id: profileId,
             platform: deviceInfo.platform,
           },
         });
@@ -1003,7 +1029,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             data: {
               component: "NotificationsProvider",
               operation: "registerPushNotification",
-              profile_id: fingerprint.profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
             },
           });
@@ -1016,7 +1042,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           deviceId,
           deviceInfo,
           token,
-          profile
+          profileId
         );
         if (didRegister) {
           lastSuccessfulRegistrationRef.current = fingerprint;
