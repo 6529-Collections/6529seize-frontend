@@ -39,8 +39,8 @@ It supports:
   - `View all <Category>` opens the full list for that category.
 - Pages catalog:
   - Page results can include top-level navigation destinations such as
-    `NFTs`, `Waves`, `DMs`, and `About`, secondary destinations such as
-    `Discover Waves` (`/discover`) and `Join 6529` (`/join`), and
+    `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`, secondary destinations
+    such as `Discover Waves` (`/discover`), plus
     permission-gated operational routes such as `Drop Forge`, `Craft Claims`,
     or `Launch Claims`, subject to the current route catalog.
 - Category persistence:

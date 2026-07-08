@@ -42,6 +42,7 @@ export const runImmediateAuthValidation = async ({
   setShowSignModal,
   invalidateAll,
   reset,
+  resetSessionUpgradeExpiryDedupe,
   authRolloutSettings,
 }: RunImmediateAuthValidationParams): Promise<void> => {
   if (
@@ -60,6 +61,7 @@ export const runImmediateAuthValidation = async ({
   setAuthLoadingState("validating");
 
   const markSessionUpgradeRequired = () => {
+    resetSessionUpgradeExpiryDedupe(currentAddress);
     setSessionUpgradeRequired(true);
     if (!hasSessionUpgradeRollout(authRolloutSettings)) {
       setSessionUpgradeHasDeadline(false);

@@ -19,7 +19,6 @@
     "app/api/open-graph/utils.ts",
     "app/api/pepe/resolve/route.ts",
     "app/api/wikimedia-card/route.ts",
-    "app/join/page.client.tsx",
     "app/museum/6529-fund-szn1/capsule-house/page.tsx",
     "app/museum/6529-fund-szn1/cod/page.tsx",
     "app/museum/6529-fund-szn1/entretiempos/page.tsx",

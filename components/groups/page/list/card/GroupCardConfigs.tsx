@@ -10,6 +10,9 @@ import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhIncl
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
 import { toShortGrantId } from "@/components/groups/page/create/config/xtdh-grant/utils";
+import { getGroupNftOwnershipCardSummary } from "@/helpers/groups/group-nft-ownership";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {
@@ -173,6 +176,24 @@ export default function GroupCardConfigs({
     };
   };
 
+  const getNftsConfig = (
+    owns_nfts: ApiGroupDescription["owns_nfts"]
+  ): GroupCardConfigProps | null => {
+    if (!owns_nfts.length) {
+      return null;
+    }
+
+    const value = owns_nfts
+      .map((nft) => getGroupNftOwnershipCardSummary(nft))
+      .join(", ");
+
+    return {
+      key: GroupDescriptionType.OWNS_NFTS,
+      value,
+      tooltip: t(DEFAULT_LOCALE, "groups.nftOwnership.card.tooltip"),
+    };
+  };
+
   const getWalletsConfig = (
     wallet_group_wallets_count: ApiGroupDescription["identity_group_identities_count"]
   ): GroupCardConfigProps => {
@@ -251,18 +272,20 @@ export default function GroupCardConfigs({
       ];
     }
     const configs: GroupCardConfigProps[] = [];
-    const { tdh, rep, cic, level, identity_group_identities_count } =
+    const { tdh, rep, cic, level, owns_nfts, identity_group_identities_count } =
       group.group;
     const tdhConfig = getTdhConfig(tdh);
     const repConfig = getRepConfig(rep);
     const cicConfig = getCicConfig(cic);
     const levelConfig = getLevelConfig(level);
+    const nftsConfig = getNftsConfig(owns_nfts);
     const grantConfig = getGrantConfig(group.group);
     const walletsConfig = getWalletsConfig(identity_group_identities_count);
     if (tdhConfig) configs.push(tdhConfig);
     if (repConfig) configs.push(repConfig);
     if (cicConfig) configs.push(cicConfig);
     if (levelConfig) configs.push(levelConfig);
+    if (nftsConfig) configs.push(nftsConfig);
     if (grantConfig) configs.push(grantConfig);
     configs.push(walletsConfig);
 

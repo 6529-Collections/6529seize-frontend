@@ -719,7 +719,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       address: activeAddress,
       walletName: isActiveWalletConnected ? walletInfo?.name : undefined,
       walletIcon: isActiveWalletConnected ? walletInfo?.icon : undefined,
-      isSafeWallet: isSafeWalletInfo(walletInfo),
+      isSafeWallet: isActiveWalletConnected
+        ? isSafeWalletInfo(walletInfo)
+        : false,
       seizeConnect,
       seizeConnectFresh,
       seizeDisconnect,
@@ -750,6 +752,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       connectedAccounts,
       walletInfo?.name,
       walletInfo?.icon,
+      walletInfo?.type,
       seizeConnect,
       seizeConnectFresh,
       seizeDisconnect,
