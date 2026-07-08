@@ -214,6 +214,113 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
+  it("breadcrumbs stale drop-not-found reaction failures without capturing an exception", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-stale",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-stale/reaction",
+      method: "POST",
+    });
+
+    const error = Object.assign(new Error("Drop drop-stale not found"), {
+      status: 404,
+      response: {
+        status: 404,
+      },
+    });
+
+    dateNowSpy.mockReturnValue(1_200);
+    const result = recordReactionRequestFailed(mutation, error);
+
+    expect(result).toEqual({
+      isLatestMutation: true,
+      supersededByMutationId: null,
+    });
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.request_failed",
+        data: expect.objectContaining({
+          status_code: 404,
+          error_kind: "endpoint-contract",
+          error_message: "Drop drop-stale not found",
+        }),
+      })
+    );
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.stale_drop_not_found",
+        data: expect.objectContaining({
+          status_code: 404,
+          error_kind: "endpoint-contract",
+          error_message: "Drop drop-stale not found",
+          captured: false,
+        }),
+      })
+    );
+    expect(withScopeMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+
+    dateNowSpy.mockReturnValue(20_000);
+    expect(
+      recordReactionRealtimeReconciliation({
+        drop: {
+          id: "drop-stale",
+          wave: { id: "wave-1" },
+          context_profile_context: {
+            reaction: null,
+          } as any,
+        },
+        websocketStatus: WebSocketStatus.CONNECTED,
+      })
+    ).toEqual({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: null,
+      serverReaction: null,
+    });
+  });
+
+  it("captures non-matching endpoint-contract reaction failures", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-contract",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-contract/reaction",
+      method: "POST",
+    });
+
+    const error = Object.assign(new Error("Reaction endpoint not found"), {
+      status: 404,
+      response: {
+        status: 404,
+      },
+    });
+
+    dateNowSpy.mockReturnValue(1_200);
+    recordReactionRequestFailed(mutation, error);
+
+    expect(withScopeMock).toHaveBeenCalled();
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+  });
+
   it("breadcrumbs an older success as superseded without capturing an issue", () => {
     const olderMutation = beginReactionMutation({
       dropId: "drop-3",
