@@ -26,7 +26,7 @@
     "postbuild": "node scripts/require-6529-command.cjs && next-sitemap --config next-sitemap.build.cjs",
     "start": "node scripts/require-6529-command.cjs && node scripts/start-next.cjs",
     "start:standalone": "node scripts/require-6529-command.cjs && node scripts/start-standalone.cjs",
-    "test": "node scripts/require-6529-command.cjs && cross-env NODE_ENV=test jest --silent --verbose=false --coverageReporters=none",
+    "test": "node scripts/require-6529-command.cjs && cross-env NODE_ENV=test jest --coverageReporters=none --silent --verbose=false",
     "test:no-coverage": "node scripts/require-6529-command.cjs && cross-env NODE_ENV=test jest --silent --verbose=false --coverage=false",
     "test-json": "node scripts/require-6529-command.cjs && cross-env NODE_ENV=test jest --silent --json --outputFile=test-results/jest-results.json --coverage=false --forceExit ; pnpm run test-extract-failed-names",
     "test-json-changed": "node scripts/require-6529-command.cjs && cross-env NODE_ENV=test jest --silent --json --outputFile=test-results/jest-results.json --changedSince=main --coverage=false --forceExit ; pnpm run test-extract-failed-names",

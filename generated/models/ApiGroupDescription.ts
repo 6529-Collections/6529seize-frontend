@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiGroupBeneficiaryGrantMatchMode } from '../models/ApiGroupBeneficiaryGrantMatchMode';
 import { ApiGroupCicFilter } from '../models/ApiGroupCicFilter';
 import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
 import { ApiGroupOwnsNft } from '../models/ApiGroupOwnsNft';
@@ -30,6 +31,7 @@ export class ApiGroupDescription {
     'excluded_identity_group_id': string | null;
     'excluded_identity_group_identities_count': number;
     'is_beneficiary_of_grant_id': string | null;
+    'is_beneficiary_of_grant_match_mode': ApiGroupBeneficiaryGrantMatchMode;
     'is_beneficiary_of_grant': ApiXTdhGrant | null;
 
     static readonly discriminator: string | undefined = undefined;
@@ -98,6 +100,12 @@ export class ApiGroupDescription {
             "format": ""
         },
         {
+            "name": "is_beneficiary_of_grant_match_mode",
+            "baseName": "is_beneficiary_of_grant_match_mode",
+            "type": "ApiGroupBeneficiaryGrantMatchMode",
+            "format": ""
+        },
+        {
             "name": "is_beneficiary_of_grant",
             "baseName": "is_beneficiary_of_grant",
             "type": "ApiXTdhGrant",
@@ -111,3 +119,5 @@ export class ApiGroupDescription {
     public constructor() {
     }
 }
+
+
