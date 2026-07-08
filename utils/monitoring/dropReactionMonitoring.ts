@@ -310,6 +310,8 @@ function isExpectedStaleDropNotFoundError({
   readonly errorMessage: string;
   readonly statusCode: number | null;
 }): boolean {
+  // Intentionally exact: if the backend changes this stale-drop 404 shape,
+  // capture resumes so we can re-evaluate the contract.
   return (
     statusCode === 404 &&
     context.endpoint === `drops/${context.dropId}/reaction` &&
@@ -533,7 +535,7 @@ export function recordReactionRequestFailed(
       "reaction.stale_drop_not_found",
       context,
       {
-        status_code: statusCode,
+        status_code: statusCode ?? undefined,
         latency_ms: latencyMs,
         error_kind: errorKind,
         error_message: errorMessage,
