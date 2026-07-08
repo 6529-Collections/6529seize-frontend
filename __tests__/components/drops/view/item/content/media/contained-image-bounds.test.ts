@@ -2,8 +2,40 @@ import {
   getContainedImageBounds,
   useContainedImageBoundsStyle,
 } from "@/components/drops/view/item/content/media/containedImageBounds";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { createElement, useLayoutEffect, useRef } from "react";
+
+type ResizeObserverHarness = {
+  readonly restore: () => void;
+  readonly trigger: () => void;
+};
+
+const installResizeObserverMock = (): ResizeObserverHarness => {
+  const originalResizeObserver = globalThis.ResizeObserver;
+  const callbacks: ResizeObserverCallback[] = [];
+
+  globalThis.ResizeObserver = jest
+    .fn()
+    .mockImplementation((callback: ResizeObserverCallback) => {
+      callbacks.push(callback);
+      return {
+        disconnect: jest.fn(),
+        observe: jest.fn(),
+        unobserve: jest.fn(),
+      };
+    }) as unknown as typeof ResizeObserver;
+
+  return {
+    restore: () => {
+      globalThis.ResizeObserver = originalResizeObserver;
+    },
+    trigger: () => {
+      for (const callback of callbacks) {
+        callback([], {} as ResizeObserver);
+      }
+    },
+  };
+};
 
 function BoundsProbe({
   getNaturalHeight,
@@ -20,6 +52,8 @@ function BoundsProbe({
     loaded: true,
     objectPosition: "center",
   });
+  const renderCount = useRef(0);
+  renderCount.current += 1;
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -53,6 +87,11 @@ function BoundsProbe({
     "div",
     { ref: containerRef },
     createElement("img", { ref: imageRef, alt: "" }),
+    createElement(
+      "output",
+      { "data-testid": "render-count" },
+      String(renderCount.current)
+    ),
     createElement(
       "output",
       { "data-testid": "bounds-style" },
@@ -116,5 +155,38 @@ describe("getContainedImageBounds", () => {
       );
     });
     expect(getNaturalWidth).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the current style when resize observation reports unchanged bounds", async () => {
+    const resizeObserver = installResizeObserverMock();
+
+    try {
+      render(
+        createElement(BoundsProbe, {
+          getNaturalHeight: () => 400,
+          getNaturalWidth: () => 500,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("bounds-style")).toHaveTextContent(
+          '"width":"500px"'
+        );
+      });
+
+      const measuredRenderCount =
+        screen.getByTestId("render-count").textContent ?? "";
+
+      await act(async () => {
+        resizeObserver.trigger();
+        await new Promise((resolve) => globalThis.setTimeout(resolve, 50));
+      });
+
+      expect(screen.getByTestId("render-count")).toHaveTextContent(
+        measuredRenderCount
+      );
+    } finally {
+      resizeObserver.restore();
+    }
   });
 });
