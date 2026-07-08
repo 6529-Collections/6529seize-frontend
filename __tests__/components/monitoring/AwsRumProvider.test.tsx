@@ -1,9 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { publicEnv } from "@/config/env";
-import AwsRumProvider, {
-  AWS_RUM_HTTP_URLS_TO_EXCLUDE,
-} from "@/components/monitoring/AwsRumProvider";
+import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import { AwsRum } from "aws-rum-web";
 
 jest.mock("aws-rum-web", () => ({
@@ -12,6 +10,13 @@ jest.mock("aws-rum-web", () => ({
 
 const mockAwsRum = AwsRum as jest.Mock;
 const originalPublicEnv = { ...publicEnv };
+
+type AwsRumHttpTelemetry = [
+  "http",
+  {
+    urlsToExclude: RegExp[];
+  },
+];
 
 describe("AwsRumProvider", () => {
   let warnSpy: jest.SpyInstance;
@@ -58,7 +63,7 @@ describe("AwsRumProvider", () => {
           [
             "http",
             {
-              urlsToExclude: [...AWS_RUM_HTTP_URLS_TO_EXCLUDE],
+              urlsToExclude: expect.arrayContaining([expect.any(RegExp)]),
             },
           ],
         ],
@@ -67,17 +72,24 @@ describe("AwsRumProvider", () => {
     expect(window.awsRum).toBe(mockAwsRum.mock.results[0]?.value);
   });
 
-  it("excludes third-party analytics noise without excluding app-owned APIs", () => {
+  it("excludes third-party analytics noise without excluding app-owned APIs", async () => {
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+
+    const urlsToExclude = getHttpUrlsToExclude();
     const isExcluded = (url: string): boolean =>
-      AWS_RUM_HTTP_URLS_TO_EXCLUDE.some((urlPattern) =>
-        urlPattern.test(url)
-      );
+      urlsToExclude.some((urlPattern) => urlPattern.test(url));
 
     expect(
       isExcluded("https://www.google-analytics.com/g/collect?v=2")
     ).toBe(true);
     expect(
-      isExcluded("https://region1.google-analytics.com/g/collect?v=2")
+      isExcluded("https://region7.google-analytics.com/g/collect?v=2")
     ).toBe(true);
     expect(
       isExcluded("https://cca-lite.coinbase.com/metrics?event=load")
@@ -86,6 +98,9 @@ describe("AwsRumProvider", () => {
     expect(isExcluded("https://cognito-identity.us-east-1.amazonaws.com/")).toBe(
       true
     );
+    expect(
+      isExcluded("https://dataplane.rum.us-east-1.amazonaws.com/appmonitors")
+    ).toBe(true);
 
     expect(
       isExcluded("https://api.6529.io/api/auth/session-refresh")
@@ -214,3 +229,19 @@ describe("AwsRumProvider", () => {
     expect(window.awsRum).toBeUndefined();
   });
 });
+
+const getHttpUrlsToExclude = (): RegExp[] => {
+  const config = mockAwsRum.mock.calls[0]?.[3] as
+    | {
+        telemetries?: Array<string | AwsRumHttpTelemetry>;
+      }
+    | undefined;
+  const httpTelemetry = config?.telemetries?.find(
+    (telemetry): telemetry is AwsRumHttpTelemetry =>
+      Array.isArray(telemetry) && telemetry[0] === "http"
+  );
+
+  expect(httpTelemetry).toBeDefined();
+
+  return httpTelemetry?.[1].urlsToExclude ?? [];
+};
