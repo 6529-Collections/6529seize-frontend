@@ -96,7 +96,7 @@ const getCanRespondToPoll = ({
   poll,
 }: {
   readonly isViewerChatEligible: boolean;
-  readonly poll: ApiDropPoll | null;
+  readonly poll: ApiDropPoll | null | undefined;
 }): boolean =>
   poll?.only_droppers_can_respond === true ? isViewerChatEligible : true;
 
