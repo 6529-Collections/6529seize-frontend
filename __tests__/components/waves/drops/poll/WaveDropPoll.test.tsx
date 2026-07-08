@@ -139,12 +139,41 @@ describe("WaveDropPoll", () => {
     });
   });
 
-  it("defaults to voting view when the user has not voted", () => {
+  it("defaults to voting view and offers results when the user has not voted", () => {
     renderPoll(createPoll());
 
     expect(screen.getByLabelText("First")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Results" })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "View results" })
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Submit vote" })).toBeNull();
+  });
+
+  it("shows results without submitting a vote when the user has not voted", async () => {
+    renderPoll(createPoll());
+
+    await userEvent.click(screen.getByRole("button", { name: "View results" }));
+
+    expect(screen.queryByRole("radio", { name: "First" })).toBeNull();
+    expect(screen.getByText("2 votes")).toBeInTheDocument();
+    expect(screen.getByText("67%")).toBeInTheDocument();
+    expect(screen.getByText("1 vote")).toBeInTheDocument();
+    expect(screen.getByText("33%")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Vote" })).toBeInTheDocument();
+    expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+  });
+
+  it("returns to voting from results when an open poll is unanswered", async () => {
+    renderPoll(createPoll());
+
+    await userEvent.click(screen.getByRole("button", { name: "View results" }));
+    await userEvent.click(screen.getByRole("button", { name: "Vote" }));
+
+    expect(screen.getByRole("radio", { name: "First" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "View results" })
+    ).toBeInTheDocument();
+    expect(voteDropPollV2Mock).not.toHaveBeenCalled();
   });
 
   it("keeps unrestricted polls voteable when the viewer cannot chat", () => {

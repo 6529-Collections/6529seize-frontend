@@ -77,25 +77,28 @@ const getScopedPollInteractionState = (
 
 const getEffectivePollView = ({
   canRespond,
-  canShowResults,
   isOpen,
   scopedView,
 }: {
   readonly canRespond: boolean;
-  readonly canShowResults: boolean;
   readonly isOpen: boolean;
   readonly scopedView: PollView;
 }): PollView => {
-  if (!canRespond) {
-    return "results";
-  }
-
-  if (canShowResults && (!isOpen || scopedView === "results")) {
+  if (!canRespond || !isOpen || scopedView === "results") {
     return "results";
   }
 
   return "vote";
 };
+
+const getCanRespondToPoll = ({
+  isViewerChatEligible,
+  poll,
+}: {
+  readonly isViewerChatEligible: boolean;
+  readonly poll: ApiDropPoll | null;
+}): boolean =>
+  poll?.only_droppers_can_respond === true ? isViewerChatEligible : true;
 
 const stopPollEventPropagation = (event: SyntheticEvent) => {
   event.stopPropagation();
@@ -183,8 +186,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const isViewerChatEligible =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  const canRespondToPoll =
-    poll?.only_droppers_can_respond === true ? isViewerChatEligible : true;
+  const canRespondToPoll = getCanRespondToPoll({
+    isViewerChatEligible,
+    poll,
+  });
 
   const voteMutation = useMutation({
     mutationFn: async (options: readonly number[]) =>
@@ -204,7 +209,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         });
       }
       updateDropInCachedDrops(queryClient, updatedDrop);
-      myStream?.processIncomingDrop(
+      void myStream?.processIncomingDrop(
         updatedDrop,
         ProcessIncomingDropType.DROP_INSERT
       );
@@ -373,11 +378,29 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       return {
         ...scopedState,
         view: "vote",
-        selectedOptionNos: [...poll.voted],
+        selectedOptionNos:
+          poll.voted.length > 0
+            ? [...poll.voted]
+            : scopedState.selectedOptionNos,
         expandedOptionNo: null,
       };
     });
   }, [canRespondToPoll, poll]);
+
+  const showResultsView = useCallback(() => {
+    if (!poll) {
+      return;
+    }
+
+    setInteractionState((current) => {
+      const scopedState = getScopedPollInteractionState(current, poll);
+      return {
+        ...scopedState,
+        view: "results",
+        expandedOptionNo: null,
+      };
+    });
+  }, [poll]);
 
   const cancelVoteChange = useCallback(() => {
     if (!poll) {
@@ -407,10 +430,8 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   }, 0);
   const votedOptionNos = new Set(poll.voted);
   const showSelectionIndicator = votedOptionNos.size > 0;
-  const canShowResults = !poll.is_open || hasVoted || !canRespondToPoll;
   const effectiveView = getEffectivePollView({
     canRespond: canRespondToPoll,
-    canShowResults,
     isOpen: poll.is_open,
     scopedView: scopedState.view,
   });
@@ -420,9 +441,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     isPending: voteMutation.isPending,
     hasVoted,
   });
-  const showResultsFooterActions =
-    effectiveView === "results" && hasVoted && canRespondToPoll;
-  const showFooterAction = poll.is_open && showResultsFooterActions;
+  const showResultsFooterAction =
+    effectiveView === "results" && poll.is_open && canRespondToPoll;
+  const showVoteResultsFooterAction =
+    effectiveView === "vote" && poll.is_open && canRespondToPoll && !hasVoted;
   const isChangingVote = effectiveView === "vote" && hasVoted;
   const showVoteEditFooterAction =
     effectiveView === "vote" && poll.is_open && isChangingVote;
@@ -556,6 +578,24 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         </div>
       )}
 
+      {showVoteResultsFooterAction && (
+        <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
+          <div className="tw-flex tw-justify-start">
+            <button
+              type="button"
+              disabled={voteMutation.isPending}
+              onClick={(event) => {
+                event.stopPropagation();
+                showResultsView();
+              }}
+              className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+            >
+              View results
+            </button>
+          </div>
+        </div>
+      )}
+
       {showVoteEditFooterAction && (
         <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
           {poll.multichoice ? (
@@ -601,7 +641,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         </div>
       )}
 
-      {showFooterAction && (
+      {showResultsFooterAction && (
         <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
             <button
@@ -611,28 +651,30 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                 event.stopPropagation();
                 showVoteView();
               }}
-              className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+              className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
             >
-              Change vote
+              {hasVoted ? "Change vote" : "Vote"}
             </button>
-            <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
-              <span
-                className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-500/15"
-                aria-hidden="true"
-              >
-                <CheckIcon
-                  className="tw-size-2.5 tw-text-emerald-400"
-                  strokeWidth={3}
-                />
+            {hasVoted && (
+              <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
+                <span
+                  className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-500/15"
+                  aria-hidden="true"
+                >
+                  <CheckIcon
+                    className="tw-size-2.5 tw-text-emerald-400"
+                    strokeWidth={3}
+                  />
+                </span>
+                <span
+                  className={`tw-text-[12px] tw-font-medium tw-transition-colors tw-duration-300 ${
+                    showUpdated ? "tw-text-emerald-400" : "tw-text-iron-300"
+                  }`}
+                >
+                  {showUpdated ? "Updated" : "Voted"}
+                </span>
               </span>
-              <span
-                className={`tw-text-[12px] tw-font-medium tw-transition-colors tw-duration-300 ${
-                  showUpdated ? "tw-text-emerald-400" : "tw-text-iron-300"
-                }`}
-              >
-                {showUpdated ? "Updated" : "Voted"}
-              </span>
-            </span>
+            )}
           </div>
         </div>
       )}
