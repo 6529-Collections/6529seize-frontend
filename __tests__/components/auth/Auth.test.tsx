@@ -1714,6 +1714,52 @@ describe("Auth component", () => {
       expect(verifiedAddresses).not.toContain(liveProviderAddress);
     });
 
+    it("repairs stale local v2 metadata during explicit web-session verification", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils = require("@/services/auth/auth.utils");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const mockHasActiveSessionV2Auth =
+        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("v2-jwt");
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      mockHasActiveSessionV2Auth.mockReturnValue(false);
+      sessionV2.verifyActiveSessionV2WebSession.mockResolvedValue(true);
+      mockValidateAuthImmediate.mockResolvedValue({
+        validationCompleted: true,
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("verify-session"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-verify-result")).toHaveTextContent(
+          "true"
+        );
+      });
+      expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledWith({
+        address: validAddress,
+        abortSignal: undefined,
+      });
+    });
+
     it("does not change session upgrade state when context web-session verification errors", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
@@ -2133,13 +2179,21 @@ describe("Auth component", () => {
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
       expect(screen.queryByText("Sign")).not.toBeInTheDocument();
 
+      mockSeizeConnect.mockImplementationOnce(() => {
+        expect(
+          screen.queryByText("Upgrade Authentication")
+        ).not.toBeInTheDocument();
+      });
+
       const user = userEvent.setup();
       await user.click(screen.getByText("Connect"));
 
       await waitFor(() => {
         expect(mockSeizeDisconnect).toHaveBeenCalled();
       });
-      expect(mockSeizeConnect).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockSeizeConnect).toHaveBeenCalled();
+      });
       expect(mockSeizeDisconnect.mock.invocationCallOrder[0]).toBeLessThan(
         mockSeizeConnect.mock.invocationCallOrder[0]
       );

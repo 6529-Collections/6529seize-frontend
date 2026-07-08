@@ -300,10 +300,6 @@ export default function Auth({
       walletAddress: string,
       abortSignal?: AbortSignal
     ): Promise<boolean> => {
-      if (!hasActiveSessionV2Auth({ address: walletAddress })) {
-        return false;
-      }
-
       try {
         return await verifyActiveSessionV2WebSession({
           address: walletAddress,
@@ -721,7 +717,10 @@ export default function Auth({
   };
   const onConfirmSignRequest = () => {
     if (isDisconnectedWebSessionUpgradePrompt) {
-      void reconnectActiveWalletForSessionUpgrade();
+      setShowSignModal(false);
+      globalThis.setTimeout(() => {
+        void reconnectActiveWalletForSessionUpgrade();
+      }, 0);
       return;
     }
     void requestAuth();
