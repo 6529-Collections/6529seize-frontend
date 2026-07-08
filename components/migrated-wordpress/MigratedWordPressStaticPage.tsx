@@ -41,6 +41,12 @@ type MuseumDetailGroup = {
   readonly blocks: readonly MigratedWordPressArticleBlock[];
 };
 
+type MuseumDirectoryBlocks = {
+  readonly galleryBlocks: readonly MigratedWordPressArticleBlock[];
+  readonly introBlocks: readonly MigratedWordPressArticleBlock[];
+  readonly mapBlocks: readonly MigratedWordPressArticleBlock[];
+};
+
 const compactLinkClassName =
   "tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 hover:tw-text-primary-200";
 
@@ -48,7 +54,7 @@ function isMuseumPath(path: string) {
   return path === "/museum" || path.startsWith("/museum/");
 }
 
-function textFromContent(content: MigratedWordPressArticleBlock["content"]) {
+function textFromContent(content: ReactNode) {
   return typeof content === "string" ? content : "";
 }
 
@@ -87,18 +93,81 @@ function htmlLines(value: string) {
     .filter(Boolean);
 }
 
+function isAttributeNameCharacter(char: string | undefined) {
+  if (!char) return false;
+
+  return (
+    (char >= "a" && char <= "z") ||
+    (char >= "A" && char <= "Z") ||
+    (char >= "0" && char <= "9") ||
+    char === "-" ||
+    char === "_" ||
+    char === ":"
+  );
+}
+
+function getHtmlAttribute(tag: string, attributeName: string) {
+  const lowerTag = tag.toLowerCase();
+  const attributePrefix = `${attributeName.toLowerCase()}=`;
+  let searchIndex = 0;
+
+  while (searchIndex < tag.length) {
+    const attributeIndex = lowerTag.indexOf(attributePrefix, searchIndex);
+    if (attributeIndex === -1) return undefined;
+
+    if (isAttributeNameCharacter(lowerTag[attributeIndex - 1])) {
+      searchIndex = attributeIndex + attributePrefix.length;
+      continue;
+    }
+
+    const quoteStartIndex = attributeIndex + attributePrefix.length;
+    const quote = tag[quoteStartIndex];
+    if (quote !== '"' && quote !== "'") {
+      searchIndex = quoteStartIndex + 1;
+      continue;
+    }
+
+    const valueStartIndex = quoteStartIndex + 1;
+    const valueEndIndex = tag.indexOf(quote, valueStartIndex);
+    if (valueEndIndex === -1) return undefined;
+
+    return tag.slice(valueStartIndex, valueEndIndex);
+  }
+
+  return undefined;
+}
+
 function extractLinks(value: string): MuseumCollectionLink[] {
   const links: MuseumCollectionLink[] = [];
-  const anchorPattern =
-    /<a\b[^>]*\bhref=(?:"([^"]+)"|'([^']+)')[^>]*>([\s\S]*?)<\/a>/gi;
-  let match: RegExpExecArray | null;
-  while ((match = anchorPattern.exec(value)) !== null) {
-    const href = match[1] ?? match[2];
-    const label = normalizeText(stripHtml(match[3] ?? ""));
+  const lowerValue = value.toLowerCase();
+  let searchIndex = 0;
+
+  while (searchIndex < value.length) {
+    const anchorStartIndex = lowerValue.indexOf("<a", searchIndex);
+    if (anchorStartIndex === -1) break;
+
+    const openTagEndIndex = lowerValue.indexOf(">", anchorStartIndex);
+    if (openTagEndIndex === -1) break;
+
+    const anchorEndIndex = lowerValue.indexOf("</a>", openTagEndIndex + 1);
+    if (anchorEndIndex === -1) {
+      searchIndex = openTagEndIndex + 1;
+      continue;
+    }
+
+    const openTag = value.slice(anchorStartIndex, openTagEndIndex + 1);
+    const href = getHtmlAttribute(openTag, "href");
+    const label = normalizeText(
+      stripHtml(value.slice(openTagEndIndex + 1, anchorEndIndex))
+    );
+
     if (href && label) {
       links.push({ href, label });
     }
+
+    searchIndex = anchorEndIndex + "</a>".length;
   }
+
   return links;
 }
 
@@ -119,7 +188,7 @@ function getCollectionItem(
   return {
     href: primaryLink.href,
     title,
-    subtitle: subtitle || undefined,
+    ...(subtitle ? { subtitle } : {}),
   };
 }
 
@@ -257,8 +326,8 @@ function parseMuseumGalleryEntries(
     entries.push({
       type: "card",
       title: pendingTitle,
-      media: pendingImage,
       links: pendingLinks,
+      ...(pendingImage ? { media: pendingImage } : {}),
     });
     pendingImage = undefined;
     pendingTitle = "";
@@ -297,30 +366,44 @@ function parseMuseumGalleryEntries(
   return entries;
 }
 
+function getMuseumDirectoryBlocks(
+  blocks: readonly MigratedWordPressArticleBlock[]
+): MuseumDirectoryBlocks {
+  const galleriesIndex = blocks.findIndex(
+    (block) =>
+      block.type === "heading" &&
+      textFromContent(block.content).includes("GALLERIES")
+  );
+  const mapIndex = blocks.findIndex(
+    (block) =>
+      block.type === "heading" && textFromContent(block.content).includes("MAP")
+  );
+
+  if (galleriesIndex === -1) {
+    return {
+      galleryBlocks: [],
+      introBlocks: blocks,
+      mapBlocks: mapIndex === -1 ? [] : blocks.slice(mapIndex),
+    };
+  }
+
+  const galleryEndIndex = mapIndex === -1 ? blocks.length : mapIndex;
+
+  return {
+    galleryBlocks: blocks.slice(galleriesIndex + 1, galleryEndIndex),
+    introBlocks: blocks.slice(0, galleriesIndex),
+    mapBlocks: mapIndex === -1 ? [] : blocks.slice(mapIndex),
+  };
+}
+
 function MuseumDirectoryPage({
   content,
 }: {
   readonly content: MigratedWordPressStaticPageContent;
 }) {
-  const galleriesIndex = content.blocks.findIndex(
-    (block) =>
-      block.type === "heading" &&
-      textFromContent(block.content).includes("GALLERIES")
+  const { galleryBlocks, introBlocks, mapBlocks } = getMuseumDirectoryBlocks(
+    content.blocks
   );
-  const mapIndex = content.blocks.findIndex(
-    (block) =>
-      block.type === "heading" && textFromContent(block.content).includes("MAP")
-  );
-  const introBlocks =
-    galleriesIndex === -1 ? content.blocks : content.blocks.slice(0, galleriesIndex);
-  const galleryBlocks =
-    galleriesIndex === -1
-      ? []
-      : content.blocks.slice(
-          galleriesIndex + 1,
-          mapIndex === -1 ? undefined : mapIndex
-        );
-  const mapBlocks = mapIndex === -1 ? [] : content.blocks.slice(mapIndex);
   const galleryEntries = parseMuseumGalleryEntries(galleryBlocks);
 
   return (
