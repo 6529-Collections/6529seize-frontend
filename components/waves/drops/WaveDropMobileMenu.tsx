@@ -8,7 +8,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import type { FC } from "react";
+import type { FC, PointerEvent } from "react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
@@ -110,6 +110,26 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly closeMenu: () => void;
   readonly showVoting: boolean;
 }) {
+  const handledTouchReplyRef = useRef(false);
+
+  const handleReplyPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType !== "touch" && event.pointerType !== "pen") {
+      return;
+    }
+
+    handledTouchReplyRef.current = true;
+    onReply();
+  };
+
+  const handleReplyClick = () => {
+    if (handledTouchReplyRef.current) {
+      handledTouchReplyRef.current = false;
+      return;
+    }
+
+    onReply();
+  };
+
   return (
     <>
       <WaveDropActionsQuickReact
@@ -130,10 +150,8 @@ function WaveDropMobileMenuAuthenticatedActions({
               ? "tw-cursor-default tw-opacity-50"
               : "active:tw-bg-iron-800"
           } tw-transition-colors tw-duration-200`}
-          onClick={() => {
-            closeMenu();
-            globalThis.setTimeout(() => onReply(), 250);
-          }}
+          onPointerDown={handleReplyPointerDown}
+          onClick={handleReplyClick}
           disabled={isTemporaryDrop}
         >
           <svg
