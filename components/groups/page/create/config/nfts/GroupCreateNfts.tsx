@@ -8,6 +8,14 @@ import {
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import type { ApiGroupNftOwnershipMatchMode } from "@/generated/models/ApiGroupNftOwnershipMatchMode";
+import {
+  DEFAULT_GROUP_NFT_OWNERSHIP_MATCH_MODE,
+  normalizeGroupNftOwnerships,
+  withDefaultGroupNftOwnershipMatchMode,
+} from "@/helpers/groups/group-nft-ownership";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import GroupCreateNftsSelect from "./GroupCreateNftsSelect";
 import GroupCreateNftsSelected from "./GroupCreateNftsSelected";
 
@@ -30,21 +38,25 @@ export default function GroupCreateNfts({
     if (!nameEnum) {
       return;
     }
-    const group: ApiGroupOwnsNft = nfts.find((g) => g.name === nameEnum) ?? {
-      name: nameEnum,
-      tokens: [],
-    };
+    const existingGroup = nfts.find((g) => g.name === nameEnum);
+    const group: ApiGroupOwnsNft = existingGroup
+      ? withDefaultGroupNftOwnershipMatchMode(existingGroup)
+      : {
+          name: nameEnum,
+          tokens: [],
+          match_mode: DEFAULT_GROUP_NFT_OWNERSHIP_MATCH_MODE,
+        };
 
     const isPresent = group.tokens.find((t) => t === `${item.id}`);
-    if (isPresent) {
-      group.tokens = group.tokens.filter((t) => t !== `${item.id}`);
-    } else {
-      group.tokens.push(`${item.id}`);
-    }
+    const tokens = isPresent
+      ? group.tokens.filter((t) => t !== `${item.id}`)
+      : [...group.tokens, `${item.id}`];
 
     const newSelected = nfts.filter((g) => g.name !== nameEnum);
-    newSelected.push(group);
-    setNfts(newSelected);
+    if (tokens.length > 0) {
+      newSelected.push({ ...group, tokens });
+    }
+    setNfts(normalizeGroupNftOwnerships(newSelected));
   };
 
   const onRemove = ({
@@ -57,16 +69,35 @@ export default function GroupCreateNfts({
     const updatedNfts = nfts
       .map((group) => {
         if (group.name === name) {
-          return {
+          return withDefaultGroupNftOwnershipMatchMode({
             ...group,
             tokens: group.tokens.filter((t) => t !== token),
-          };
+          });
         }
-        return group;
+        return withDefaultGroupNftOwnershipMatchMode(group);
       })
-      .filter((group) => group.tokens.length > 0);
+      .filter((group) => group.tokens.length > 0 || group.name !== name);
 
     setNfts(updatedNfts);
+  };
+
+  const onMatchModeChange = ({
+    name,
+    matchMode,
+  }: {
+    name: ApiGroupOwnsNftNameEnum;
+    matchMode: ApiGroupNftOwnershipMatchMode;
+  }) => {
+    setNfts(
+      nfts.map((group) =>
+        group.name === name
+          ? withDefaultGroupNftOwnershipMatchMode({
+              ...group,
+              match_mode: matchMode,
+            })
+          : withDefaultGroupNftOwnershipMatchMode(group)
+      )
+    );
   };
 
   return (
@@ -76,13 +107,17 @@ export default function GroupCreateNfts({
           Required NFTs
         </p>
         <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
-          Identity must own all of these specific tokens.
+          {t(DEFAULT_LOCALE, "groups.nftOwnership.description")}
         </p>
       </div>
       <div className="tw-mt-2 sm:tw-mt-4">
         <GroupCreateNftsSelect onSelect={onSelect} selected={nfts} />
       </div>
-      <GroupCreateNftsSelected selected={nfts} onRemove={onRemove} />
+      <GroupCreateNftsSelected
+        selected={nfts}
+        onRemove={onRemove}
+        onMatchModeChange={onMatchModeChange}
+      />
     </div>
   );
 }

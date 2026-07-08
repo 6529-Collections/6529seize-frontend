@@ -16,6 +16,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import GroupCreateIncludeMeAndPrivate from "./config/include-me-and-private/GroupCreateIncludeMeAndPrivate";
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { normalizeGroupNftOwnerships } from "@/helpers/groups/group-nft-ownership";
 
 export default function GroupCreate({
   edit,
@@ -145,7 +146,7 @@ export default function GroupCreate({
           min: originalGroup.group.level?.min,
           max: originalGroup.group.level?.max,
         },
-        owns_nfts: originalGroup.group.owns_nfts,
+        owns_nfts: normalizeGroupNftOwnerships(originalGroup.group.owns_nfts),
         identity_addresses: originalGroupWallets ?? [],
         excluded_identity_addresses: originalGroupExcludedWallets ?? [],
         is_beneficiary_of_grant_id:
