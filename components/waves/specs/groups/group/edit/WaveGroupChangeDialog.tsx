@@ -9,6 +9,7 @@ import {
 } from "@/helpers/waves/waves.constants";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
@@ -52,6 +53,8 @@ const createEmptyGroupDescription = (): ApiGroupFull["group"] => ({
   excluded_identity_group_id: null,
   excluded_identity_group_identities_count: 0,
   is_beneficiary_of_grant_id: null,
+  is_beneficiary_of_grant_match_mode:
+    ApiGroupBeneficiaryGrantMatchMode.AnyToken,
   is_beneficiary_of_grant: null,
 });
 

@@ -1,9 +1,15 @@
 // @ts-nocheck
 import React from "react";
 import { render } from "@testing-library/react";
-import AuthorPage from "@/app/author/6529er6529-io/page";
-import CompanyPortfolio from "@/app/capital/company-portfolio/page";
-import EducationPage from "@/app/education/page";
+import AuthorPage, {
+  generateMetadata as generateAuthorMetadata,
+} from "@/app/author/6529er6529-io/page";
+import CompanyPortfolio, {
+  generateMetadata as generateCompanyPortfolioMetadata,
+} from "@/app/capital/company-portfolio/page";
+import EducationPage, {
+  generateMetadata as generateEducationMetadata,
+} from "@/app/education/page";
 import FakeRares from "@/app/museum/6529-fund-szn1/fakerares/page";
 import Gazers from "@/app/museum/6529-fund-szn1/gazers/page";
 import RarePepe from "@/app/museum/6529-fund-szn1/rarepepe/page";
@@ -32,24 +38,22 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 describe("static content pages render meta tags and headings", () => {
-  const pages = [
+  const migratedPages = [
     {
       Component: AuthorPage,
-      title: "6529er, Author at 6529.io",
-      canonical: "/author/6529er6529-io/",
+      generateMetadata: generateAuthorMetadata,
+      title: "6529er - 6529.io",
+      heading: /6529er/i,
     },
     {
       Component: CompanyPortfolio,
+      generateMetadata: generateCompanyPortfolioMetadata,
       title: "COMPANY PORTFOLIO - 6529.io",
-      canonical: "/capital/company-portfolio/",
       heading: /COMPANY PORTFOLIO/i,
     },
-    {
-      Component: EducationPage,
-      title: "EDUCATION",
-      canonical: "/education/",
-      heading: /EDUCATION/i,
-    },
+  ];
+
+  const pages = [
     {
       Component: FakeRares,
       title: "FAKERARES - 6529.io",
@@ -88,6 +92,25 @@ describe("static content pages render meta tags and headings", () => {
     },
   ];
 
+  migratedPages.forEach(({ Component, generateMetadata, title, heading }) => {
+    it(`renders migrated ${title}`, () => {
+      render(<Component />);
+
+      const metadata = generateMetadata();
+      expect(metadata.title).toBe(title);
+      expect(metadata.openGraph).toMatchObject({
+        siteName: "6529.io",
+        title,
+      });
+
+      const main = document.querySelector("main");
+      expect(main).toHaveAttribute("data-content-source", "migrated-wordpress");
+
+      const h1 = document.querySelector("h1");
+      expect(h1?.textContent).toMatch(heading);
+    });
+  });
+
   pages.forEach(({ Component, title, canonical, heading }) => {
     it(`renders ${title}`, () => {
       render(<Component />);
@@ -106,5 +129,15 @@ describe("static content pages render meta tags and headings", () => {
         expect(h1?.textContent).toMatch(heading);
       }
     });
+  });
+
+  it("renders the migrated EDUCATION page via generateMetadata", () => {
+    render(<EducationPage />);
+
+    const metadata = generateEducationMetadata();
+    expect(metadata.title).toBe("EDUCATION - 6529.io");
+
+    const h1 = document.querySelector("h1");
+    expect(h1?.textContent).toMatch(/EDUCATION/i);
   });
 });

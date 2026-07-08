@@ -4,6 +4,20 @@ import { publicEnv } from "@/config/env";
 import type { AwsRum as AwsRumInstance, AwsRumConfig } from "aws-rum-web";
 import { useEffect } from "react";
 
+const AWS_RUM_HTTP_URLS_TO_EXCLUDE: readonly RegExp[] = [
+  // Per-telemetry config replaces aws-rum-web defaults, so keep AWS service noise explicit.
+  /^https:\/\/cognito-identity\.[a-z0-9-]+\.amazonaws\.com(?:[/:?#]|$)/i,
+  /^https:\/\/sts\.amazonaws\.com(?:[/:?#]|$)/i,
+  /^https:\/\/sts\.[a-z0-9-]+\.amazonaws\.com(?:[/:?#]|$)/i,
+  /^https:\/\/dataplane\.rum\.[a-z0-9-]+\.amazonaws\.com(?:[/:?#]|$)/i,
+  /^https:\/\/analytics\.google\.com\/g\/collect(?:[?#]|$)/i,
+  /^https:\/\/www\.google\.com\/g\/collect(?:[?#]|$)/i,
+  /^https:\/\/google-analytics\.com\/g\/collect(?:[?#]|$)/i,
+  /^https:\/\/[a-z0-9-]+\.google-analytics\.com\/g\/collect(?:[?#]|$)/i,
+  /^https:\/\/cca-lite\.coinbase\.com\/amp(?:[/?#]|$)/,
+  /^https:\/\/cca-lite\.coinbase\.com\/metrics(?:[/?#]|$)/,
+];
+
 interface AwsRumProviderProps {
   readonly children: React.ReactNode;
 }
@@ -50,7 +64,16 @@ export default function AwsRumProvider({
 
         const config: AwsRumConfig = {
           sessionSampleRate: SAMPLE_RATE,
-          telemetries: ["performance", "errors", "http"],
+          telemetries: [
+            "performance",
+            "errors",
+            [
+              "http",
+              {
+                urlsToExclude: [...AWS_RUM_HTTP_URLS_TO_EXCLUDE],
+              },
+            ],
+          ],
           allowCookies: true,
           enableXRay: false,
           signing: false,

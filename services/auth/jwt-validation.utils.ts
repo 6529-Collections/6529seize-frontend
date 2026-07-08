@@ -15,6 +15,7 @@ import {
   InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { trackAuthImpactEvent } from "@/services/analytics/mixpanel";
 
 interface JwtPayload {
   id: string;
@@ -230,11 +231,13 @@ const handleTokenRefresh = async ({
   role,
   abortSignal,
   activeProfileProxy,
+  trackRecovery,
 }: {
   wallet: string;
   role: string | null;
   abortSignal: AbortSignal;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
+  trackRecovery: boolean;
 }): Promise<ValidateJwtResult> => {
   // Check for cancellation before proceeding
   if (abortSignal.aborted) {
@@ -265,6 +268,14 @@ const handleTokenRefresh = async ({
       role,
       activeProfileProxy,
     });
+    if (trackRecovery) {
+      trackAuthImpactEvent("Auth Session Refresh Recovered", {
+        auth_state_after: "authenticated",
+        auth_state_before: "refresh_needed",
+        client_type: refreshedSession.client_type,
+        reason: "session_refresh",
+      });
+    }
 
     return createValidJwtResult("success");
   } catch (error: unknown) {
@@ -306,6 +317,7 @@ export const validateJwt = async ({
       role,
       abortSignal,
       activeProfileProxy,
+      trackRecovery: !hasValidLocalJwt,
     });
   } catch (error: unknown) {
     if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {

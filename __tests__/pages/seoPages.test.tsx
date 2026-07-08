@@ -1,8 +1,14 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import LadysabrinaPage from "@/app/author/ladysabrina/page";
-import DisneyDeekayPage from "@/app/blog/disney-deekay-their-secret-to-animation/page";
-import EducationCollabPage from "@/app/education/education-collaboration-form/page";
+import LadysabrinaPage, {
+  generateMetadata as generateLadysabrinaMetadata,
+} from "@/app/author/ladysabrina/page";
+import DisneyDeekayPage, {
+  generateMetadata as generateDisneyDeekayMetadata,
+} from "@/app/blog/disney-deekay-their-secret-to-animation/page";
+import EducationCollabPage, {
+  generateMetadata as generateEducationCollabMetadata,
+} from "@/app/education/education-collaboration-form/page";
 import GMRedirectPage, {
   generateMetadata as generateGMMetadata,
 } from "@/app/gm-or-die-small-mp4/page";
@@ -30,20 +36,24 @@ describe("static SEO pages render correctly", () => {
     redirectMock.mockClear();
   });
 
-  it("author page renders with canonical link", () => {
+  it("author page renders migrated metadata", () => {
     render(<LadysabrinaPage />);
-    expect(getTitle()).toBe("Sabrina Khan, Author at 6529.io");
-    expect(getCanonical()).toBe("/author/ladysabrina/");
+
+    const metadata = generateLadysabrinaMetadata();
+    expect(metadata.title).toBe("Sabrina Khan - 6529.io");
+    expect(document.querySelector("main")).toHaveAttribute(
+      "data-content-source",
+      "migrated-wordpress"
+    );
     expect(screen.getAllByText(/Sabrina Khan/i).length).toBeGreaterThan(0);
   });
 
-  it("blog page renders expected metadata", () => {
+  it("blog page renders expected metadata", async () => {
     render(<DisneyDeekayPage />);
-    expect(getTitle()).toBe(
+    // Migrated blog articles supply their title via generateMetadata.
+    const metadata = await generateDisneyDeekayMetadata();
+    expect(metadata.title).toBe(
       "Disney and DeeKay: Their Secret to Animation - 6529.io"
-    );
-    expect(getCanonical()).toBe(
-      "/blog/disney-deekay-their-secret-to-animation/"
     );
     expect(
       screen.getAllByText(/Disney and DeeKay: Their Secret to Animation/i)
@@ -53,11 +63,19 @@ describe("static SEO pages render correctly", () => {
 
   it("education collaboration form page renders", () => {
     render(<EducationCollabPage />);
-    expect(getTitle()).toBe("EDUCATION COLLABORATION FORM");
-    expect(getCanonical()).toBe("/education/education-collaboration-form/");
+
+    const metadata = generateEducationCollabMetadata();
+    expect(metadata.title).toBe("EDUCATION COLLABORATION FORM - 6529.io");
+    expect(document.querySelector("main")).toHaveAttribute(
+      "data-content-source",
+      "migrated-wordpress"
+    );
     expect(
       screen.getAllByText(/EDUCATION COLLABORATION FORM/i).length
     ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "support@6529.io" })
+    ).toHaveAttribute("href", "mailto:support@6529.io");
   });
 
   it("gm or die redirect page triggers a video redirect", () => {

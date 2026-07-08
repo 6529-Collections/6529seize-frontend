@@ -1,7 +1,13 @@
-import About100M from "@/app/about/100m-project/page";
-import FromFibonacciToFidenza from "@/app/blog/from-fibonacci-to-fidenza/page";
+import About100M, {
+  generateMetadata as generate100MMetadata,
+} from "@/app/about/100m-project/page";
+import FromFibonacciToFidenza, {
+  generateMetadata as generateFibonacciMetadata,
+} from "@/app/blog/from-fibonacci-to-fidenza/page";
 import EmailProtection from "@/app/cdn-cgi/l/email-protection/page";
-import EmailSignatures from "@/app/email-signatures/page";
+import EmailSignatures, {
+  generateMetadata as generateEmailSignaturesMetadata,
+} from "@/app/email-signatures/page";
 import ConstructionToken from "@/app/museum/6529-fund-szn1/construction-token/page";
 import ImageWithArrow from "@/app/museum/6529-fund-szn1/image-with-arrow/page";
 import MuseumFund from "@/app/museum/6529-fund-szn1/page";
@@ -14,33 +20,26 @@ jest.mock("next/dynamic", () => () => {
   return MockDynamicComponent;
 });
 
-// Mock any external dependencies that might be imported
-jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn(() => ({})),
-}));
-
 describe("Static Pages Rendering", () => {
   it("should render 100M Project page with correct content and metadata", () => {
     render(<About100M />);
 
-    // Test for page title in document structure
-    expect(document.title).toContain("100M PROJECT");
-    expect(document.title).toContain("6529.io");
+    // Migrated pages provide their title via generateMetadata, not the DOM.
+    const metadata = generate100MMetadata();
+    expect(metadata.title).toContain("100M PROJECT");
+    expect(metadata.title).toContain("6529.io");
 
     // Test for key heading content using more semantic queries
     const headings = screen.getAllByText(/100M PROJECT/i);
     expect(headings.length).toBeGreaterThan(0);
-
-    // Test for canonical link
-    const canonicalLink = document.querySelector('link[rel="canonical"]');
-    expect(canonicalLink).toHaveAttribute("href", "/about/100m-project/");
   });
 
-  it("should render Fibonacci to Fidenza blog page with correct content", () => {
+  it("should render Fibonacci to Fidenza blog page with correct content", async () => {
     render(<FromFibonacciToFidenza />);
 
-    expect(document.title).toContain("FROM FIBONACCI TO FIDENZA");
-    expect(document.title).toContain("6529.io");
+    const metadata = await generateFibonacciMetadata();
+    expect(metadata.title).toContain("FROM FIBONACCI TO FIDENZA");
+    expect(metadata.title).toContain("6529.io");
 
     const headings = screen.getAllByText(/FROM FIBONACCI TO FIDENZA/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -59,11 +58,17 @@ describe("Static Pages Rendering", () => {
   it("should render email signatures page with correct content", () => {
     render(<EmailSignatures />);
 
-    expect(document.title).toContain("EMAIL SIGNATURES");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateEmailSignaturesMetadata();
+    expect(metadata.title).toBe("EMAIL SIGNATURES - 6529.io");
 
     const headings = screen.getAllByText(/EMAIL SIGNATURES/i);
     expect(headings.length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "6529er@6529.io" })
+    ).toHaveAttribute("href", "mailto:6529er@6529.io");
+    expect(
+      screen.queryByRole("link", { name: /\[email\s+protected\]/i })
+    ).not.toBeInTheDocument();
   });
 
   it("should render museum fund szn1 page with correct content", () => {
@@ -99,34 +104,26 @@ describe("Static Pages Rendering", () => {
 
   describe("Page Structure and Metadata", () => {
     it("should set proper meta tags for SEO", () => {
-      render(<About100M />);
+      // Migrated pages supply SEO metadata via generateMetadata rather
+      // than rendering head tags into the document.
+      const metadata = generate100MMetadata();
 
-      // Check for canonical link
-      const canonicalLink = document.querySelector('link[rel="canonical"]');
-      expect(canonicalLink).toBeInTheDocument();
-      expect(canonicalLink?.getAttribute("href")).toBe("/about/100m-project/");
-
-      // Check for robots meta tag
-      const robotsMeta = document.querySelector('meta[name="robots"]');
-      expect(robotsMeta).toBeInTheDocument();
+      expect(metadata.title).toBe("100M PROJECT - 6529.io");
+      expect(metadata.description).toContain("6529.io");
+      expect(metadata.openGraph).toMatchObject({
+        siteName: "6529.io",
+        title: "100M PROJECT - 6529.io",
+      });
     });
 
     it("should have proper Open Graph tags", () => {
-      render(<EmailSignatures />);
+      const metadata = generateEmailSignaturesMetadata();
 
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      expect(ogTitle).toBeInTheDocument();
-      expect(ogTitle?.getAttribute("content")).toContain("EMAIL SIGNATURES");
-
-      const ogType = document.querySelector('meta[property="og:type"]');
-      expect(ogType).toBeInTheDocument();
-      expect(ogType?.getAttribute("content")).toBe("article");
-
-      const ogSiteName = document.querySelector(
-        'meta[property="og:site_name"]'
-      );
-      expect(ogSiteName).toBeInTheDocument();
-      expect(ogSiteName?.getAttribute("content")).toBe("6529.io");
+      expect(metadata.openGraph).toMatchObject({
+        siteName: "6529.io",
+        title: "EMAIL SIGNATURES - 6529.io",
+        type: "website",
+      });
     });
 
     it("should have proper Twitter Card tags", () => {
@@ -170,17 +167,18 @@ describe("Static Pages Rendering", () => {
     it("should maintain consistent document structure across renders", () => {
       const { rerender } = render(<EmailSignatures />);
 
-      const initialTitle = document.title;
-      const initialCanonical = document
-        .querySelector('link[rel="canonical"]')
-        ?.getAttribute("href");
+      const initialMain = document.querySelector("main");
+      expect(initialMain).toHaveAttribute(
+        "data-content-source",
+        "migrated-wordpress"
+      );
 
       rerender(<EmailSignatures />);
 
-      expect(document.title).toBe(initialTitle);
-      expect(
-        document.querySelector('link[rel="canonical"]')?.getAttribute("href")
-      ).toBe(initialCanonical);
+      expect(document.querySelector("main")).toHaveAttribute(
+        "data-content-source",
+        "migrated-wordpress"
+      );
     });
   });
 });
