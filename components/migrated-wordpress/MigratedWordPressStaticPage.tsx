@@ -73,23 +73,79 @@ function decodeHtmlEntities(value: string) {
     .replaceAll("&apos;", "'");
 }
 
-function stripHtml(value: string) {
-  return decodeHtmlEntities(
-    value
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/(div|h[1-6]|li|p)>/gi, "\n")
-      .replace(/<(div|h[1-6]|li|p)\b[^>]*>/gi, "\n")
-      .replace(/<\/?(ol|ul)\b[^>]*>/gi, "\n")
-      .replace(/<[^>]*>/g, "")
+function isTagNameCharacter(char: string | undefined) {
+  if (!char) return false;
+
+  return (
+    (char >= "a" && char <= "z") ||
+    (char >= "A" && char <= "Z") ||
+    (char >= "0" && char <= "9")
   );
 }
 
+function getHtmlTagName(value: string, startIndex: number) {
+  let nameStartIndex = startIndex + 1;
+  if (value[nameStartIndex] === "/") {
+    nameStartIndex += 1;
+  }
+
+  while (value[nameStartIndex] === " ") {
+    nameStartIndex += 1;
+  }
+
+  let nameEndIndex = nameStartIndex;
+  while (isTagNameCharacter(value[nameEndIndex])) {
+    nameEndIndex += 1;
+  }
+
+  return value.slice(nameStartIndex, nameEndIndex).toLowerCase();
+}
+
+function shouldInsertLineBreakForTag(tagName: string) {
+  return (
+    tagName === "br" ||
+    tagName === "div" ||
+    tagName === "li" ||
+    tagName === "ol" ||
+    tagName === "p" ||
+    tagName === "ul" ||
+    (tagName.length === 2 && tagName[0] === "h" && tagName >= "h1" && tagName <= "h6")
+  );
+}
+
+function stripHtml(value: string) {
+  let text = "";
+  let index = 0;
+
+  while (index < value.length) {
+    if (value[index] !== "<") {
+      text += value[index];
+      index += 1;
+      continue;
+    }
+
+    const tagEndIndex = value.indexOf(">", index + 1);
+    if (tagEndIndex === -1) {
+      text += value[index];
+      index += 1;
+      continue;
+    }
+
+    const tagName = getHtmlTagName(value, index);
+    if (shouldInsertLineBreakForTag(tagName)) {
+      text += "\n";
+    }
+
+    index = tagEndIndex + 1;
+  }
+
+  return decodeHtmlEntities(text);
+}
+
 function htmlLines(value: string) {
-  return value
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(div|h[1-6]|li|p)>/gi, "\n")
+  return stripHtml(value)
     .split("\n")
-    .map((line) => normalizeText(stripHtml(line)))
+    .map((line) => normalizeText(line))
     .filter(Boolean);
 }
 
