@@ -1,7 +1,9 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { publicEnv } from "@/config/env";
-import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
+import AwsRumProvider, {
+  AWS_RUM_HTTP_URLS_TO_EXCLUDE,
+} from "@/components/monitoring/AwsRumProvider";
 import { AwsRum } from "aws-rum-web";
 
 jest.mock("aws-rum-web", () => ({
@@ -50,10 +52,47 @@ describe("AwsRumProvider", () => {
       expect.objectContaining({
         sessionSampleRate: 0.5,
         releaseId: "test-version",
-        telemetries: ["performance", "errors", "http"],
+        telemetries: [
+          "performance",
+          "errors",
+          [
+            "http",
+            {
+              urlsToExclude: [...AWS_RUM_HTTP_URLS_TO_EXCLUDE],
+            },
+          ],
+        ],
       })
     );
     expect(window.awsRum).toBe(mockAwsRum.mock.results[0]?.value);
+  });
+
+  it("excludes third-party analytics noise without excluding app-owned APIs", () => {
+    const isExcluded = (url: string): boolean =>
+      AWS_RUM_HTTP_URLS_TO_EXCLUDE.some((urlPattern) =>
+        urlPattern.test(url)
+      );
+
+    expect(
+      isExcluded("https://www.google-analytics.com/g/collect?v=2")
+    ).toBe(true);
+    expect(
+      isExcluded("https://region1.google-analytics.com/g/collect?v=2")
+    ).toBe(true);
+    expect(
+      isExcluded("https://cca-lite.coinbase.com/metrics?event=load")
+    ).toBe(true);
+    expect(isExcluded("https://sts.amazonaws.com/")).toBe(true);
+    expect(isExcluded("https://cognito-identity.us-east-1.amazonaws.com/")).toBe(
+      true
+    );
+
+    expect(
+      isExcluded("https://api.6529.io/api/auth/session-refresh")
+    ).toBe(false);
+    expect(
+      isExcluded("https://api.6529.io/api/v2/waves/123/drops?limit=50")
+    ).toBe(false);
   });
 
   it("skips AWS RUM initialization in development", async () => {

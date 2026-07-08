@@ -4,6 +4,15 @@ import { publicEnv } from "@/config/env";
 import type { AwsRum as AwsRumInstance, AwsRumConfig } from "aws-rum-web";
 import { useEffect } from "react";
 
+export const AWS_RUM_HTTP_URLS_TO_EXCLUDE: readonly RegExp[] = [
+  // aws-rum-web replaces urlsToExclude when HTTP telemetry is configured.
+  /^https:\/\/cognito-identity\.[a-z0-9-]+\.amazonaws\.com(?:[/:?#]|$)/i,
+  /^https:\/\/sts\.amazonaws\.com(?:[/:?#]|$)/i,
+  /^https:\/\/sts\.[a-z0-9-]+\.amazonaws\.com(?:[/:?#]|$)/i,
+  /^https:\/\/(?:www|region1)\.google-analytics\.com\/g\/collect(?:[?#]|$)/,
+  /^https:\/\/cca-lite\.coinbase\.com\/metrics(?:[/?#]|$)/,
+];
+
 interface AwsRumProviderProps {
   readonly children: React.ReactNode;
 }
@@ -50,7 +59,16 @@ export default function AwsRumProvider({
 
         const config: AwsRumConfig = {
           sessionSampleRate: SAMPLE_RATE,
-          telemetries: ["performance", "errors", "http"],
+          telemetries: [
+            "performance",
+            "errors",
+            [
+              "http",
+              {
+                urlsToExclude: [...AWS_RUM_HTTP_URLS_TO_EXCLUDE],
+              },
+            ],
+          ],
           allowCookies: true,
           enableXRay: false,
           signing: false,
