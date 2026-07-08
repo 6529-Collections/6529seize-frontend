@@ -65,12 +65,12 @@ function normalizeText(value: string) {
 function decodeHtmlEntities(value: string) {
   return value
     .replaceAll("&nbsp;", " ")
-    .replaceAll("&amp;", "&")
     .replaceAll("&lt;", "<")
     .replaceAll("&gt;", ">")
     .replaceAll("&quot;", '"')
     .replaceAll("&#039;", "'")
-    .replaceAll("&apos;", "'");
+    .replaceAll("&apos;", "'")
+    .replaceAll("&amp;", "&");
 }
 
 function isTagNameCharacter(char: string | undefined) {
@@ -109,7 +109,10 @@ function shouldInsertLineBreakForTag(tagName: string) {
     tagName === "ol" ||
     tagName === "p" ||
     tagName === "ul" ||
-    (tagName.length === 2 && tagName[0] === "h" && tagName >= "h1" && tagName <= "h6")
+    (tagName.length === 2 &&
+      tagName.startsWith("h") &&
+      tagName >= "h1" &&
+      tagName <= "h6")
   );
 }
 
