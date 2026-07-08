@@ -104,7 +104,7 @@ export default function WaveDropsSearchModal({
               ref={modalRef}
               aria-modal="true"
               aria-labelledby="wave-drops-search-input"
-              className="inset-safe-area tw-flex tw-h-full tw-min-h-0 tw-w-full tw-max-w-[min(100vw,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all sm:tw-h-[70vh] sm:tw-rounded-xl"
+              className="tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-full tw-min-h-0 tw-w-full tw-max-w-[min(100vw,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all sm:tw-h-[70vh] sm:tw-rounded-xl"
             >
               <div className="tw-flex tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-py-4">
                 <button

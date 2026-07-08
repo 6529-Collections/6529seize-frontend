@@ -1,8 +1,11 @@
+import Link from "next/link";
+
 import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
+import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 
 export default function AboutSubscriptions() {
   return (
@@ -10,6 +13,9 @@ export default function AboutSubscriptions() {
       <Row>
         <Col>
           <h1>Subscription Minting</h1>
+          <div className="tw-mt-3 tw-flex tw-justify-start empty:tw-hidden">
+            <AboutSubscriptionsProfileButton />
+          </div>
         </Col>
       </Row>
       <Row className="tw-pt-2">
@@ -60,6 +66,16 @@ export default function AboutSubscriptions() {
                   who choose to use them
                 </li>
               </ul>
+            </li>
+            <li className="tw-mt-2">
+              You can monitor aggregate projected and redeemed subscription
+              counts in the{" "}
+              <Link
+                href="/tools/subscriptions-report"
+                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-transition-colors"
+              >
+                Subscriptions Report
+              </Link>
             </li>
           </ul>
         </Col>

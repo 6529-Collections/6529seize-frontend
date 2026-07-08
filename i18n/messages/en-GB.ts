@@ -1,5 +1,6 @@
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
@@ -353,6 +354,10 @@ export const EN_GB_MESSAGES = {
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
   "waves.loadingStatus": "Loading waves",
   "waves.gifPicker.dialogTitle": "GIF search",
+  "waves.gifPicker.searchPlaceholder": "Search GIFs",
+  "waves.gifPicker.noResults": "No GIFs found.",
+  "waves.gifPicker.poweredBy": "Powered by {brandName}",
+  "waves.gifPicker.poweredByPrefix": "Powered by",
   "waves.gifPicker.status.checking": "Checking GIF search...",
   "waves.gifPicker.status.ready": "GIF search is ready.",
   "waves.gifPicker.unavailable.title": "GIF search is temporarily unavailable.",
@@ -374,6 +379,7 @@ export const EN_GB_MESSAGES = {
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  ...EN_GB_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.filters.triggerAriaLabel": "{filter}: {value}",
   "theMemes.filters.year.label": "Year",
   "theMemes.filters.year.all": "All Years",

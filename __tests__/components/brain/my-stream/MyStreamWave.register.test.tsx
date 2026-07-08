@@ -1,6 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
+
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  markMobileLaunchStep: jest.fn(),
+}));
+
+const markMobileLaunchStepMock = markMobileLaunchStep as jest.Mock;
 
 const mockEditingDropState: {
   editingDropId: string | null;
@@ -152,6 +159,7 @@ jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
 
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useWaveOutcomeVisibility: () => true,
+  useWaveSubmissionButtonLabelOverride: () => null,
 }));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
@@ -258,6 +266,16 @@ describe("MyStreamWave registration", () => {
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
+    });
+  });
+
+  it("marks wave metadata as loaded for launch timing", async () => {
+    renderWave();
+
+    await waitFor(() => {
+      expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
+        "wave_metadata_loaded"
+      );
     });
   });
 

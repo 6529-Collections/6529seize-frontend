@@ -94,6 +94,7 @@ describe("useWaveConfig", () => {
       });
       expect(result.current.config.display).toEqual({
         customRules: null,
+        submissionButtonLabel: null,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",

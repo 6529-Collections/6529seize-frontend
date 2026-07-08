@@ -20,6 +20,7 @@ export default function GroupCreateConfig({
   excludeWallets,
   nfts,
   beneficiaryGrantId,
+  beneficiaryGrantMatchMode,
   iAmIncluded,
   setLevel,
   setTDH,
@@ -29,6 +30,7 @@ export default function GroupCreateConfig({
   setExcludeWallets,
   setNfts,
   setBeneficiaryGrantId,
+  setBeneficiaryGrantMatchMode,
 }: {
   readonly level: ApiCreateGroupDescription["level"];
   readonly tdh: ApiCreateGroupDescription["tdh"];
@@ -38,6 +40,7 @@ export default function GroupCreateConfig({
   readonly excludeWallets: ApiCreateGroupDescription["excluded_identity_addresses"];
   readonly nfts: ApiCreateGroupDescription["owns_nfts"];
   readonly beneficiaryGrantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"];
+  readonly beneficiaryGrantMatchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"];
   readonly iAmIncluded: boolean;
   readonly setLevel: (level: ApiCreateGroupDescription["level"]) => void;
   readonly setTDH: (tdh: ApiCreateGroupDescription["tdh"]) => void;
@@ -53,6 +56,9 @@ export default function GroupCreateConfig({
   readonly setBeneficiaryGrantId: (
     grantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"]
   ) => void;
+  readonly setBeneficiaryGrantMatchMode: (
+    matchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"]
+  ) => void;
 }) {
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6 sm:tw-gap-y-8">
@@ -67,7 +73,9 @@ export default function GroupCreateConfig({
           <GroupCreateCollections nfts={nfts} setNfts={setNfts} />
           <GroupCreateXtdhGrant
             beneficiaryGrantId={beneficiaryGrantId}
+            beneficiaryGrantMatchMode={beneficiaryGrantMatchMode}
             setBeneficiaryGrantId={setBeneficiaryGrantId}
+            setBeneficiaryGrantMatchMode={setBeneficiaryGrantMatchMode}
           />
         </div>
       </div>

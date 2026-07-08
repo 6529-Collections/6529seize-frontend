@@ -29,7 +29,6 @@ import AboutNFTDelegation from "./AboutNFTDelegation";
 import AboutPrimaryAddress from "./AboutPrimaryAddress";
 import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutSubscriptions from "./AboutSubscriptions";
-import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutTech from "./tech/AboutTech";
 import AboutTermsOfService from "./AboutTermsOfService";
 import { AboutContentsDropdown } from "./AboutContentsDropdown";
@@ -43,17 +42,10 @@ export default function About({ section }: { readonly section: AboutSection }) {
   );
 
   return (
-    <Container className="tw-pt-2">
+    <Container fluid={section === AboutSection.TECH} className="tw-pt-2">
       <Row>
         <Col>
-          <AboutContentsDropdown
-            currentSection={section}
-            leadingAction={
-              section === AboutSection.SUBSCRIPTIONS ? (
-                <AboutSubscriptionsProfileButton />
-              ) : undefined
-            }
-          />
+          <AboutContentsDropdown currentSection={section} />
           <div className="tw-w-full">
             <AboutSectionContent section={section} />
           </div>

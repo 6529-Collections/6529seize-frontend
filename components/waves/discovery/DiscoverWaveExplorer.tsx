@@ -253,7 +253,7 @@ function DiscoverWaveControls({
           className="tw-hidden tw-h-6 tw-w-px tw-flex-shrink-0 tw-bg-white/10 xl:tw-block"
           aria-hidden="true"
         />
-        <div className="horizontal-menu-hide-scrollbar tw-flex tw-min-w-0 tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60">
+        <div className="tw-no-scrollbar tw-flex tw-min-w-0 tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60">
           <div
             role="radiogroup"
             className={`tw-flex tw-flex-shrink-0 tw-flex-nowrap tw-gap-1.5 tw-transition-opacity ${

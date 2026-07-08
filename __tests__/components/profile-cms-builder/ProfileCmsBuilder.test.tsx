@@ -11,7 +11,13 @@ import type { ReactNode } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import ProfileCmsBuilder from "@/components/profile-cms-builder/ProfileCmsBuilder";
+import { publicEnv } from "@/config/env";
 import { commonApiPost } from "@/services/api/common-api";
+
+jest.mock("@/config/env", () => {
+  const actual = jest.requireActual("@/config/env");
+  return { ...actual, publicEnv: { ...actual.publicEnv } };
+});
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -74,8 +80,8 @@ describe("ProfileCmsBuilder", () => {
       configurable: true,
       value: revokeObjectUrlMock,
     });
-    delete process.env["PROFILE_CMS_BUILDER_API_ENABLED"];
-    delete process.env["NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED"];
+    delete publicEnv.PROFILE_CMS_BUILDER_API_ENABLED;
+    delete publicEnv.NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED;
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: null,
@@ -277,7 +283,7 @@ describe("ProfileCmsBuilder", () => {
 
   it("does not turn agent patch import into backend authority", async () => {
     const user = userEvent.setup();
-    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: { id: "profile-other" },
@@ -353,7 +359,7 @@ describe("ProfileCmsBuilder", () => {
 
   it("blocks draft saves unless the connected profile owns the target", async () => {
     const user = userEvent.setup();
-    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: { id: "profile-other" },
@@ -379,7 +385,7 @@ describe("ProfileCmsBuilder", () => {
 
   it("blocks server validation unless the connected profile owns the target", async () => {
     const user = userEvent.setup();
-    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: { id: "profile-other" },
@@ -482,7 +488,7 @@ describe("ProfileCmsBuilder", () => {
 
   it("does not show a stale save result after edits during the request", async () => {
     const user = userEvent.setup();
-    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: { id: "profile-punk6529" },

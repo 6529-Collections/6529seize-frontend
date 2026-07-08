@@ -25,7 +25,7 @@ Use this page for visibility rules, state switches, and route targets.
   - Artist link: `/{handle}` (only when handle exists)
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
-- Current The Memes detail page:
+- Current and upcoming The Memes detail pages:
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Coming up` actions:
@@ -93,6 +93,8 @@ Use this page for visibility rules, state switches, and route targets.
   for the current or already-dropped card.
 - The current/latest `/the-memes/{id}` detail page uses the same awareness-only
   subscription row beside the mint countdown.
+- Unresolved upcoming `/the-memes/{id}` pages show the next-mint calendar panel
+  plus the same subscription awareness widget for that card.
 - Awareness-only rows do not embed the profile subscription editor. They show a
   blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
   optional `xN` user subscribed count when already subscribed, an

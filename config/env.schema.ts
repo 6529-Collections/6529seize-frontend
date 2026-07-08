@@ -45,7 +45,7 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   STAGING_API_KEY: z.string().optional(),
-  TENOR_API_KEY: z.string().optional(),
+  GIPHY_API_KEY: z.string().optional(),
 
   /**
    * ────────────────
@@ -118,6 +118,8 @@ export const publicEnvSchema = z.object({
   NEXT_PUBLIC_FEATURE_AB_CARD: z.string().optional(),
   PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
   PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
+  PROFILE_CMS_RUNTIME_ENABLED: z.string().optional(),
+  PROFILE_CMS_RUNTIME_FIXTURE_PRIMARY: z.string().optional(),
   NEXT_PUBLIC_VITE_FEATURE_AB_CARD: z.string().optional(),
   VITE_FEATURE_AB_CARD: z.string().optional(),
 

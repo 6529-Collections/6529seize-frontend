@@ -8,7 +8,7 @@ const MemesLeaderboardDropHeader: React.FC<
   MemesLeaderboardDropHeaderProps
 > = ({ title }) => {
   return (
-    <h3 className="tw-text-lg tw-font-bold tw-text-white tw-mb-0 tw-leading-tight">
+    <h3 className="tw-mb-0 tw-mt-0 tw-text-lg tw-font-bold tw-leading-tight tw-text-white">
       {title}
     </h3>
   );

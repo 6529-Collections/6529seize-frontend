@@ -11,6 +11,7 @@ import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveGroup from "@/components/waves/specs/groups/group/WaveGroup";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import WaveOutcomesVisibility from "@/components/waves/specs/WaveOutcomesVisibility";
+import WaveSubmissionButtonLabel from "@/components/waves/specs/WaveSubmissionButtonLabel";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
 import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
 import BoostedDropsDisplayPreference from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
@@ -72,6 +73,7 @@ export default function WaveSettingsSections({
 
       {isDisplaySettingsWave && (
         <SettingsSection title="Display">
+          <WaveSubmissionButtonLabel wave={wave} />
           <WaveOutcomesVisibility wave={wave} />
         </SettingsSection>
       )}

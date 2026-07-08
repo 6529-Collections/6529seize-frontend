@@ -7,6 +7,7 @@ describe("CreateWaveDisplaySettings", () => {
   const baseDisplay = {
     customRules: null,
     outcomesVisible: true,
+    submissionButtonLabel: null,
     approve: {
       approvalsTabLabel: "",
       approvedTabLabel: "",
@@ -27,6 +28,7 @@ describe("CreateWaveDisplaySettings", () => {
     expect(screen.getByText("Approved")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Proposals")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Approved")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Drop")).toBeInTheDocument();
   });
 
   it("updates custom label fields", () => {
@@ -51,6 +53,69 @@ describe("CreateWaveDisplaySettings", () => {
         approvedTabLabel: "",
       },
     });
+  });
+
+  it("updates the submission button label field", () => {
+    const onChange = jest.fn();
+    render(
+      <CreateWaveDisplaySettings
+        display={baseDisplay}
+        errors={[]}
+        onChange={onChange}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Submission button label"), {
+      target: { value: "Apply" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...baseDisplay,
+      submissionButtonLabel: "Apply",
+    });
+  });
+
+  it("stores an empty submission button label as null", () => {
+    const onChange = jest.fn();
+    render(
+      <CreateWaveDisplaySettings
+        display={{
+          ...baseDisplay,
+          submissionButtonLabel: "Apply",
+        }}
+        errors={[]}
+        onChange={onChange}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Submission button label"), {
+      target: { value: "" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...baseDisplay,
+      submissionButtonLabel: null,
+    });
+  });
+
+  it("shows submission label length validation", () => {
+    render(
+      <CreateWaveDisplaySettings
+        display={{
+          ...baseDisplay,
+          submissionButtonLabel: "A".repeat(25),
+        }}
+        errors={[CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG]}
+        onChange={jest.fn()}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    expect(
+      screen.getByText("Label must be 24 characters or fewer.")
+    ).toBeInTheDocument();
   });
 
   it("shows outcome toggle for rank waves without approve labels", () => {

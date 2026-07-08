@@ -140,10 +140,26 @@ const mockTwitterPreviewCard = jest.fn(({ href, tweetId }: any) => (
   />
 ));
 
+const mockGithubLinkPreview = jest.fn(({ href }: any) => (
+  <div data-testid="github-link-preview" data-href={href} />
+));
+
 jest.mock("@/components/waves/LinkPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockLinkPreviewCard(props),
 }));
+
+jest.mock("@/components/waves/github/GithubLinkPreview", () => {
+  const actual = jest.requireActual(
+    "@/components/waves/github/GithubLinkPreview"
+  );
+
+  return {
+    __esModule: true,
+    ...actual,
+    default: (props: any) => mockGithubLinkPreview(props),
+  };
+});
 
 jest.mock("@/components/waves/ArtBlocksTokenCard", () => ({
   __esModule: true,
@@ -182,6 +198,7 @@ beforeEach(() => {
   mockArtBlocksTokenCard.mockClear();
   mockFarcasterCard.mockClear();
   mockTwitterPreviewCard.mockClear();
+  mockGithubLinkPreview.mockClear();
 });
 
 describe("DropPartMarkdown", () => {
@@ -487,6 +504,30 @@ describe("DropPartMarkdown", () => {
     expect(group).not.toBeNull();
     expect(group?.querySelectorAll("img")).toHaveLength(2);
     expect(group?.querySelector(".tw-mt-2")).toBeNull();
+  });
+
+  it("routes GitHub blob image URLs through GitHub preview instead of direct image rendering", () => {
+    const href =
+      "https://github.com/david-6529/self-custody-education/blob/main/output/craig-self-custody-comic/pages/page-01.png";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={href}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mockGithubLinkPreview).toHaveBeenCalledWith(
+      expect.objectContaining({ href })
+    );
+    expect(screen.getByTestId("github-link-preview")).toHaveAttribute(
+      "data-href",
+      href
+    );
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
   });
 
   it("opens duplicate body markdown image URLs at the clicked item", () => {
