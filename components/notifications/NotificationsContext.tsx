@@ -427,6 +427,16 @@ const toCaptureExceptionInput = (
   return new Error(toErrorMessage(error, fallbackMessage));
 };
 
+const getUsableProfileId = (profile?: ApiIdentity): string | null => {
+  const profileId = profile?.id;
+  if (typeof profileId !== "string") {
+    return null;
+  }
+
+  const trimmedProfileId = profileId.trim();
+  return trimmedProfileId.length > 0 ? trimmedProfileId : null;
+};
+
 const createPushRegistrationFingerprint = ({
   deviceId,
   token,
@@ -438,7 +448,7 @@ const createPushRegistrationFingerprint = ({
 }): PushRegistrationFingerprint => ({
   deviceId,
   token,
-  profileId: profile?.id ?? null,
+  profileId: getUsableProfileId(profile),
 });
 
 const isSamePushRegistrationFingerprint = (
@@ -775,7 +785,24 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       token: string,
       profile?: ApiIdentity
     ): Promise<boolean> => {
-      const profileId = profile?.id ?? null;
+      const profileId = getUsableProfileId(profile);
+
+      if (profileId === null) {
+        console.warn("Skipping push registration: profile id is unavailable", {
+          platform: deviceInfo.platform,
+        });
+        Sentry.addBreadcrumb({
+          category: "notifications",
+          level: "warning",
+          message: "Push registration skipped (profile id unavailable).",
+          data: {
+            component: "NotificationsProvider",
+            operation: "registerPushNotification",
+            platform: deviceInfo.platform,
+          },
+        });
+        return false;
+      }
 
       for (
         let attempt = 0;
@@ -816,7 +843,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
               device_id: deviceId,
               token,
               platform: deviceInfo.platform,
-              profile_id: profile?.id,
+              profile_id: profileId,
             },
             errorMode: "structured",
           });
