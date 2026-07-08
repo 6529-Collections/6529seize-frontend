@@ -17,9 +17,9 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `Join 6529`, `About`)
-  plus gated `Drop Forge` when available and connected utility rows such as
-  `Notifications`.
+- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `About`) plus
+  gated `Drop Forge` when available and connected utility rows
+  such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
 - App bottom navigation tabs (`Discovery`, `Waves`, `Messages`, `Home`,
   `Network`, `Collections`, `Notifications`).
@@ -63,7 +63,6 @@ context-aware `Back`).
   connected wallet has landing access.
 - Small-screen web: open overlay menu, pick a route, and continue after
   auto-close on navigation.
-- Join 6529 jump: use the primary `Join 6529` row to open `/join-6529`.
 - Desktop web share: while disconnected use the standalone lower `Share` row;
   while connected open the user menu and choose `Share`.
 - App secondary route jump: open app drawer and choose grouped `About` routes

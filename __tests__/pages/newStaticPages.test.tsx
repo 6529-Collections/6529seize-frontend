@@ -8,9 +8,15 @@ import EmailProtection from "@/app/cdn-cgi/l/email-protection/page";
 import EmailSignatures, {
   generateMetadata as generateEmailSignaturesMetadata,
 } from "@/app/email-signatures/page";
-import ConstructionToken from "@/app/museum/6529-fund-szn1/construction-token/page";
-import ImageWithArrow from "@/app/museum/6529-fund-szn1/image-with-arrow/page";
-import MuseumFund from "@/app/museum/6529-fund-szn1/page";
+import ConstructionToken, {
+  generateMetadata as generateConstructionTokenMetadata,
+} from "@/app/museum/6529-fund-szn1/construction-token/page";
+import ImageWithArrow, {
+  generateMetadata as generateImageWithArrowMetadata,
+} from "@/app/museum/6529-fund-szn1/image-with-arrow/page";
+import MuseumFund, {
+  generateMetadata as generateMuseumFundMetadata,
+} from "@/app/museum/6529-fund-szn1/page";
 import { render, screen } from "@testing-library/react";
 
 // Mock next/dynamic for any dynamic imports
@@ -74,8 +80,8 @@ describe("Static Pages Rendering", () => {
   it("should render museum fund szn1 page with correct content", () => {
     render(<MuseumFund />);
 
-    expect(document.title).toContain("6529 FUND SZN1");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateMuseumFundMetadata();
+    expect(metadata.title).toBe("6529 FUND SZN1 - 6529.io");
 
     const headings = screen.getAllByText(/6529 FUND SZN1/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -84,8 +90,8 @@ describe("Static Pages Rendering", () => {
   it("should render construction token page with correct content", () => {
     render(<ConstructionToken />);
 
-    expect(document.title).toContain("CONSTRUCTION TOKEN");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateConstructionTokenMetadata();
+    expect(metadata.title).toBe("CONSTRUCTION TOKEN - 6529.io");
 
     const headings = screen.getAllByText(/CONSTRUCTION TOKEN/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -94,9 +100,8 @@ describe("Static Pages Rendering", () => {
   it("should render image with arrow page with correct content", () => {
     render(<ImageWithArrow />);
 
-    // Be flexible with title - it might have additional prefixes like artist name
-    expect(document.title).toContain("IMAGE WITH ARROW");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateImageWithArrowMetadata();
+    expect(metadata.title).toBe("GANDINSKY - IMAGE WITH ARROW - 6529.io");
 
     const headings = screen.getAllByText(/IMAGE WITH ARROW/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -127,11 +132,11 @@ describe("Static Pages Rendering", () => {
     });
 
     it("should have proper Twitter Card tags", () => {
-      render(<MuseumFund />);
+      const metadata = generateMuseumFundMetadata();
 
-      const twitterCard = document.querySelector('meta[name="twitter:card"]');
-      expect(twitterCard).toBeInTheDocument();
-      expect(twitterCard?.getAttribute("content")).toBe("summary_large_image");
+      expect(metadata.twitter).toMatchObject({
+        card: "summary_large_image",
+      });
     });
   });
 

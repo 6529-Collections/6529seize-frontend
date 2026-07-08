@@ -70,6 +70,7 @@ interface CreateDropProps {
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
   readonly forceStandardDropComposer?: boolean | undefined;
+  readonly focusOnInitialActiveDrop?: boolean | undefined;
 }
 
 export interface DropMutationBody {
@@ -118,6 +119,7 @@ export default function CreateDrop({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
+  focusOnInitialActiveDrop = false,
 }: CreateDropProps) {
   const { setToast, connectedProfile } = useAuth();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -743,6 +745,7 @@ export default function CreateDrop({
         {...createDropContentProps}
         wave={wave}
         submissionExperience={submissionExperience}
+        focusOnInitialActiveDrop={focusOnInitialActiveDrop}
       />
     );
   }

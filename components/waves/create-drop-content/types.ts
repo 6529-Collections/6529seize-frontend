@@ -80,4 +80,5 @@ export interface CreateDropContentProps {
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
+  readonly focusOnInitialActiveDrop?: boolean | undefined;
 }
