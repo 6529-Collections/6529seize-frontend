@@ -161,11 +161,13 @@ function isEditableElement(element: Element | null): boolean {
 }
 
 function hasEditableFocus(): boolean {
-  if (typeof globalThis.document === "undefined") {
+  const documentRef = globalThis.document as Document | undefined;
+
+  if (documentRef === undefined) {
     return false;
   }
 
-  return isEditableElement(globalThis.document.activeElement);
+  return isEditableElement(documentRef.activeElement);
 }
 
 function markKeyboardHiddenFromFallback(): void {
@@ -222,10 +224,13 @@ function scheduleFocusoutKeyboardHideFallback(): void {
 }
 
 function setupBrowserKeyboardFallbackListeners(): void {
+  const windowRef = globalThis.window as Window | undefined;
+  const documentRef = globalThis.document as Document | undefined;
+
   if (
     browserFallbackTeardown !== null ||
-    typeof globalThis.window === "undefined" ||
-    typeof globalThis.document === "undefined"
+    windowRef === undefined ||
+    documentRef === undefined
   ) {
     return;
   }
@@ -242,18 +247,18 @@ function setupBrowserKeyboardFallbackListeners(): void {
     syncKeyboardVisibilityFromViewport();
   };
   const handleVisibilityChange = () => {
-    if (globalThis.document.visibilityState === "hidden") {
+    if (documentRef.visibilityState === "hidden") {
       markKeyboardHiddenFromFallback();
     }
   };
 
-  globalThis.document.addEventListener("focusin", handleFocusIn, true);
-  globalThis.document.addEventListener("focusout", handleFocusOut, true);
-  globalThis.document.addEventListener(
+  documentRef.addEventListener("focusin", handleFocusIn, true);
+  documentRef.addEventListener("focusout", handleFocusOut, true);
+  documentRef.addEventListener(
     "visibilitychange",
     handleVisibilityChange
   );
-  globalThis.window.addEventListener("resize", handleViewportChange, {
+  windowRef.addEventListener("resize", handleViewportChange, {
     passive: true,
   });
   globalThis.visualViewport?.addEventListener("resize", handleViewportChange, {
@@ -265,13 +270,10 @@ function setupBrowserKeyboardFallbackListeners(): void {
 
   browserFallbackTeardown = () => {
     clearHiddenFallbackTimeout();
-    globalThis.document.removeEventListener("focusin", handleFocusIn, true);
-    globalThis.document.removeEventListener("focusout", handleFocusOut, true);
-    globalThis.document.removeEventListener(
-      "visibilitychange",
-      handleVisibilityChange
-    );
-    globalThis.window.removeEventListener("resize", handleViewportChange);
+    documentRef.removeEventListener("focusin", handleFocusIn, true);
+    documentRef.removeEventListener("focusout", handleFocusOut, true);
+    documentRef.removeEventListener("visibilitychange", handleVisibilityChange);
+    windowRef.removeEventListener("resize", handleViewportChange);
     globalThis.visualViewport?.removeEventListener(
       "resize",
       handleViewportChange

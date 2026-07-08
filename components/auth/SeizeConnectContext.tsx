@@ -288,7 +288,7 @@ const isPrivateIpv4Host = (hostname: string): boolean => {
     return false;
   }
 
-  const octets = parts.map((part) => Number(part));
+  const octets = parts.map(Number);
   if (
     octets.some(
       (octet, index) =>
