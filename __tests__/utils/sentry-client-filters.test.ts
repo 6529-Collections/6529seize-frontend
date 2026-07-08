@@ -685,6 +685,68 @@ describe("sentry-client-filters", () => {
       ...overrides,
     });
 
+  const createObservedIosWkWebViewWaveRouteParameterizationEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    createSentryRouteParameterizationEvent({
+      transaction: "/waves",
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+      },
+      contexts: {
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+        os: {
+          name: "iOS",
+          version: "18.7",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+        "os.name": "iOS",
+        url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        transaction: "/waves",
+      },
+      breadcrumbs: [
+        {
+          category: "navigation",
+          data: {
+            from: "/waves",
+            to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          },
+        },
+      ],
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                },
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    });
+
   const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
@@ -2979,6 +3041,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed iOS WKWebView wave route parameterization cyclic JSON errors without app context", () => {
+    // Arrange
+    const event = createObservedIosWkWebViewWaveRouteParameterizationEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Sentry route parameterization errors with the Sentry parameterization frame outside route bounds", () => {
     // Arrange
     const event = createObservedSentryRouteParameterizationEvent();
@@ -3251,7 +3324,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("does not filter WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
+  it("filters WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
     // Arrange
     const event =
       createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent({
@@ -3268,7 +3341,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
   it("does not filter MetaMaskMobile route parameterization errors without route evidence", () => {
