@@ -11,7 +11,7 @@ import { m } from "./page.utils";
 import { useJoin6529Progress } from "./useJoin6529Progress";
 
 export function useJoin6529Journey(locale: SupportedLocale) {
-  const { connectedProfile, requestAuth } = useAuth();
+  const { connectedProfile, fetchingProfile, requestAuth } = useAuth();
   const {
     address,
     hasActiveWalletAddress,
@@ -64,6 +64,7 @@ export function useJoin6529Journey(locale: SupportedLocale) {
 
   const primaryAction = getHeroPrimaryAction({
     authActionPending,
+    fetchingProfile,
     hasValidWalletAuth,
     locale,
     onConnectWallet: handleConnectWallet,
@@ -104,6 +105,7 @@ function getJoinPageState({
 
 function getHeroPrimaryAction({
   authActionPending,
+  fetchingProfile,
   hasValidWalletAuth,
   locale,
   onConnectWallet,
@@ -113,6 +115,7 @@ function getHeroPrimaryAction({
   walletActionPending,
 }: {
   readonly authActionPending: boolean;
+  readonly fetchingProfile: boolean;
   readonly hasValidWalletAuth: boolean;
   readonly locale: SupportedLocale;
   readonly onConnectWallet: () => void;
@@ -138,6 +141,15 @@ function getHeroPrimaryAction({
       busyLabel: m(locale, "join6529.action.signing"),
       busy: authActionPending,
       onClick: onRequestAuth,
+    };
+  }
+
+  if (pageState === "inProgress" && fetchingProfile) {
+    return {
+      kind: "button",
+      label: m(locale, "join6529.action.setupProfile"),
+      busyLabel: m(locale, "join6529.action.setupProfile"),
+      busy: true,
     };
   }
 

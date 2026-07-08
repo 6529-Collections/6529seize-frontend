@@ -190,7 +190,10 @@ function ThingCard({
 
 function NftCardFan({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <div className="tw-group/fan tw-[perspective:1000px] tw-pointer-events-none tw-relative tw-z-0 tw-flex tw-h-[126px] tw-w-full tw-items-center tw-justify-center tw-overflow-visible sm:tw-absolute sm:tw-bottom-4 sm:tw-right-4 sm:tw-mt-0 sm:tw-h-[124px] sm:tw-w-[250px] md:-tw-right-4 md:tw-h-[118px] md:tw-w-[235px] lg:tw-relative lg:tw-bottom-auto lg:tw-right-auto lg:tw-z-10 lg:tw-h-[190px] lg:tw-w-1/2">
+    <div
+      aria-hidden="true"
+      className="tw-group/fan tw-[perspective:1000px] tw-pointer-events-none tw-relative tw-z-0 tw-flex tw-h-[126px] tw-w-full tw-items-center tw-justify-center tw-overflow-visible sm:tw-absolute sm:tw-bottom-4 sm:tw-right-4 sm:tw-mt-0 sm:tw-h-[124px] sm:tw-w-[250px] md:-tw-right-4 md:tw-h-[118px] md:tw-w-[235px] lg:tw-relative lg:tw-bottom-auto lg:tw-right-auto lg:tw-z-10 lg:tw-h-[190px] lg:tw-w-1/2"
+    >
       <div className="tw-absolute -tw-inset-x-12 -tw-inset-y-10 tw-bg-[radial-gradient(ellipse_at_50%_48%,rgba(132,173,255,0.18)_0%,rgba(132,173,255,0.08)_34%,transparent_72%)]" />
       <div className="tw-relative tw-z-10 tw-scale-[0.98] sm:tw-hidden">
         <MemeFan cards={SUBMIT_MEME_CARDS} compact locale={locale} />
