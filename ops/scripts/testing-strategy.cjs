@@ -214,6 +214,21 @@ const REVIEWBOT_CONTRACT_FILES = new Set([
   "ops/scripts/testing-strategy.cjs",
   "__tests__/scripts/testing-strategy.test.ts",
 ]);
+// Corpus, committed artifacts, and generators verified by
+// __tests__/scripts/sync-agent-files.test.ts. That suite reads these files
+// with fs, so jest --findRelatedTests cannot trace them through the module
+// graph; the plan must request the suite explicitly whenever they change.
+const AGENT_FILES_SYNC_FILES = new Set([
+  "public/glossary.json",
+  "public/help-index.json",
+  "public/llms.txt",
+  "public/robots.txt",
+  "scripts/sync-agent-files.cjs",
+  "scripts/sync-help-index.cjs",
+  "next-sitemap.config.ts",
+  "__tests__/scripts/sync-agent-files.test.ts",
+]);
+const AGENT_FILES_CORPUS_PREFIX = "ops/help/";
 const SOURCE_CODE_EXTENSIONS = new Set([
   ".js",
   ".jsx",
@@ -546,6 +561,19 @@ function isReviewbotContractFile(filePath) {
   return REVIEWBOT_CONTRACT_FILES.has(normalizePath(filePath));
 }
 
+function isAgentFilesSyncFile(filePath) {
+  const normalized = normalizePath(filePath);
+  if (AGENT_FILES_SYNC_FILES.has(normalized)) {
+    return true;
+  }
+  // Any corpus file except its docs; new templates or data files under
+  // ops/help/ must keep the committed artifacts in sync too.
+  return (
+    normalized.startsWith(AGENT_FILES_CORPUS_PREFIX) &&
+    !normalized.endsWith(".md")
+  );
+}
+
 function isBuildSensitiveFile(filePath) {
   const normalized = normalizePath(filePath);
   return (
@@ -592,6 +620,7 @@ function createCiPlan(files, options = {}) {
     isPlaywrightOrTestSupportFile
   );
   const hasReviewbotContract = normalizedFiles.some(isReviewbotContractFile);
+  const hasAgentFilesSync = normalizedFiles.some(isAgentFilesSyncFile);
   const hasBuildSensitive = normalizedFiles.some(isBuildSensitiveFile);
   const hasDeletedRuntimeSource = normalizedFiles.some(
     (file) =>
@@ -608,7 +637,8 @@ function createCiPlan(files, options = {}) {
     hasPackageGovernance ||
     hasPlaywrightOrTests ||
     hasRuntimeEvidenceNeed ||
-    hasBuildSensitive;
+    hasBuildSensitive ||
+    hasAgentFilesSync;
 
   return {
     schema_version: CI_PLAN_SCHEMA_VERSION,
@@ -642,6 +672,12 @@ function createCiPlan(files, options = {}) {
         hasReviewbotContract
           ? "Reviewbot config, manifest schema, or strategy tooling changed and must preserve existing lanes."
           : "No reviewbot contract files changed."
+      ),
+      agent_files_sync: check(
+        hasAgentFilesSync,
+        hasAgentFilesSync
+          ? "Help corpus, committed agent artifacts, or their generators changed; committed artifacts must match `6529 run help-index:sync` and `6529 run agent-files:sync` output."
+          : "No help corpus or agent artifact files changed."
       ),
       install: check(
         needsInstall,

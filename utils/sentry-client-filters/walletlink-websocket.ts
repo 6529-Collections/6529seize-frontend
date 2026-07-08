@@ -5,6 +5,7 @@ import {
   coinbaseWalletLinkWebSocket1006MessagePrefix,
   coinbaseWalletSdkPathTokens,
   nextStaticFramePathToken,
+  walletWebSocketAppKitBootstrapBreadcrumbTokens,
   walletWebSocketBreadcrumbAppKitTokens,
   walletWebSocketBreadcrumbConnectorTokens,
 } from "./constants";
@@ -203,7 +204,12 @@ export function hasThirdPartyWalletAppKitBreadcrumbSignature(
     (token) => text.includes(token)
   );
 
-  return hasAppKitToken && hasConnectorToken;
+  const hasObservedAppKitBootstrap =
+    walletWebSocketAppKitBootstrapBreadcrumbTokens.every((token) =>
+      text.includes(token)
+    );
+
+  return (hasAppKitToken && hasConnectorToken) || hasObservedAppKitBootstrap;
 }
 
 export function hasWalletLinkWebSocketUnhandledRejectionSignature(

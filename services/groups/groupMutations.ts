@@ -1,4 +1,5 @@
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiPost } from "@/services/api/common-api";
 
@@ -36,6 +37,9 @@ const sanitiseGroupPayload = (
   const identityAddresses = payload.group.identity_addresses;
   const excludedIdentityAddresses = payload.group.excluded_identity_addresses;
   const rawBeneficiaryGrantId = payload.group.is_beneficiary_of_grant_id;
+  const beneficiaryGrantMatchMode =
+    payload.group.is_beneficiary_of_grant_match_mode ??
+    ApiGroupBeneficiaryGrantMatchMode.AnyToken;
   const trimmedBeneficiaryGrantId =
     typeof rawBeneficiaryGrantId === "string"
       ? rawBeneficiaryGrantId.trim()
@@ -45,6 +49,7 @@ const sanitiseGroupPayload = (
     trimmedBeneficiaryGrantId.length > 0;
   const groupWithoutGrantId = { ...payload.group };
   delete groupWithoutGrantId.is_beneficiary_of_grant_id;
+  delete groupWithoutGrantId.is_beneficiary_of_grant_match_mode;
 
   return {
     ...payload,
@@ -63,6 +68,7 @@ const sanitiseGroupPayload = (
       ...(hasBeneficiaryGrantId
         ? {
             is_beneficiary_of_grant_id: trimmedBeneficiaryGrantId,
+            is_beneficiary_of_grant_match_mode: beneficiaryGrantMatchMode,
           }
         : {}),
     },

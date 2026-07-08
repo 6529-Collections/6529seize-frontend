@@ -5,11 +5,13 @@ import path from "node:path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
+  countAnyCasts,
   countImportStatements,
   countLines,
   countMatches,
   isWordPressMigratedSource,
 } = require(path.join(process.cwd(), "scripts", "debt-ratchet.cjs")) as {
+  countAnyCasts: (content: string, filePath?: string) => number;
   countImportStatements: (content: string, packages: string[]) => number;
   countLines: (content: string) => number;
   countMatches: (content: string, pattern: RegExp) => number;
@@ -30,14 +32,33 @@ describe("debt-ratchet counting helpers", () => {
       "const a: any = 1;",
       "const b = value as any;",
       "const c: any[] = [];",
+      "const d: readonly any[] = [];",
+      "let parenthesized: (any);",
+      "let union: string | any;",
+      "function f(input: any): any { return input; }",
+      "type Shape = { field: any; generic: Record<string, any> };",
       "const inner: Record<string, any> = {}; // generic arg is not counted",
+      "type Alias = any; // type aliases are outside this metric",
+      'const text = "value as any";',
+      "// value as any",
+      "<span>connect deeply to an audience as powerfully as",
+      "any great art can.</span>",
       "const many = anything; // not a match",
       "function f(x: number): number { return x; }",
     ].join("\n");
-    // ": any" direct annotations and "as any" casts count; an "any" buried in
-    // a generic argument list (Record<string, any>) does not carry a ": any"
-    // or "as any" token, so it is intentionally outside this metric.
-    expect(countMatches(content, /:\s*any\b|\bas\s+any\b/g)).toBe(3);
+    // Direct annotations and casts count. Strings, comments, JSX prose, type
+    // aliases, and generic arguments stay outside this metric.
+    expect(countAnyCasts(content, "Sample.tsx")).toBe(9);
+  });
+
+  it("counts TypeScript angle-bracket any assertions", () => {
+    expect(countAnyCasts("const value = <any>input;\n", "Sample.ts")).toBe(1);
+  });
+
+  it("throws on invalid TSX syntax instead of undercounting", () => {
+    expect(() =>
+      countAnyCasts("const value = <any>input;\n", "Sample.tsx")
+    ).toThrow(/Unable to parse Sample\.tsx while counting any_casts/);
   });
 
   it("counts TODO markers without matching longer words", () => {
@@ -102,6 +123,10 @@ describe("debt-ratchet check mode", () => {
     writeFixture(
       "components/Sample.tsx",
       'const a: any = 1;\n// TODO tidy\nimport { useSelector } from "react-redux";\n'
+    );
+    writeFixture(
+      "components/Article.tsx",
+      "<span>connect deeply to an audience as powerfully as\nany great art can.</span>\n"
     );
     writeFixture(
       "components/__tests__/Ignored.test.tsx",
@@ -225,6 +250,16 @@ describe("debt-ratchet check mode", () => {
       "components/Large.tsx",
       "export const line = 1;\n".repeat(810)
     );
+
+    expect(runRatchet(root, ["--update"]).status).toBe(0);
+    const check = runRatchet(root);
+    expect(check.status).toBe(0);
+    expect(check.stdout).toMatch(
+      /^oversized_files\s+baseline\s+2 actual\s+2\s+ok$/m
+    );
+    expect(check.stdout).toMatch(/^\s+breakdown:$/m);
+    expect(check.stdout).toMatch(/^\s+app_source\s+baseline\s+1 actual\s+1$/m);
+    expect(check.stdout).toMatch(/^\s+wp_migrated\s+baseline\s+1 actual\s+1$/m);
 
     const unfiltered = runRatchet(root, ["--details", "oversized_files"]);
     expect(unfiltered.status).toBe(0);
