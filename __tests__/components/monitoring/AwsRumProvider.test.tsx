@@ -91,6 +91,13 @@ describe("AwsRumProvider", () => {
     expect(
       isExcluded("https://region7.google-analytics.com/g/collect?v=2")
     ).toBe(true);
+    expect(isExcluded("https://analytics.google.com/g/collect?v=2")).toBe(
+      true
+    );
+    expect(isExcluded("https://www.google.com/g/collect?v=2")).toBe(true);
+    expect(isExcluded("https://cca-lite.coinbase.com/amp?event=load")).toBe(
+      true
+    );
     expect(
       isExcluded("https://cca-lite.coinbase.com/metrics?event=load")
     ).toBe(true);
