@@ -1,7 +1,7 @@
 import { publicEnv } from "@/config/env";
 import mixpanel from "mixpanel-browser";
 
-type AnalyticsProperties = Record<
+export type AnalyticsProperties = Record<
   string,
   boolean | number | string | null | undefined
 >;
@@ -66,6 +66,13 @@ const track = (eventName: string, properties?: AnalyticsProperties): void => {
   }
 
   mixpanel.track(eventName, sanitizeProperties(properties));
+};
+
+export const trackAnalyticsEvent = (
+  eventName: string,
+  properties?: AnalyticsProperties
+): void => {
+  track(eventName, properties);
 };
 
 export const identify = (

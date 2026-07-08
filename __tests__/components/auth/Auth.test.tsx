@@ -14,6 +14,9 @@ const mockQueryClient = {
 const mockRouterReplace = jest.fn();
 const mockRouterPush = jest.fn();
 const mockUsePathname = jest.fn(() => "/");
+const mockTrackAuthSessionRefreshProductImpact = jest.fn();
+const mockTrackAuthSessionRefreshSucceeded = jest.fn();
+const mockTrackAuthValidationCancelled = jest.fn();
 
 type ReactQueryWrapperContextValue = React.ContextType<
   typeof ReactQueryWrapperContext
@@ -151,6 +154,18 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/services/auth/immediate-validation.utils", () => ({
   validateAuthImmediate: jest.fn(async () => ({ wasCancelled: false })),
+}));
+
+jest.mock("@/services/analytics/productImpactTelemetry", () => ({
+  trackAuthSessionRefreshProductImpact: (
+    ...args: Parameters<typeof mockTrackAuthSessionRefreshProductImpact>
+  ) => mockTrackAuthSessionRefreshProductImpact(...args),
+  trackAuthSessionRefreshSucceeded: (
+    ...args: Parameters<typeof mockTrackAuthSessionRefreshSucceeded>
+  ) => mockTrackAuthSessionRefreshSucceeded(...args),
+  trackAuthValidationCancelled: (
+    ...args: Parameters<typeof mockTrackAuthValidationCancelled>
+  ) => mockTrackAuthValidationCancelled(...args),
 }));
 
 jest.mock("@/utils/error-sanitizer", () => ({
@@ -1064,7 +1079,9 @@ describe("Auth component", () => {
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onShowSignModal(true);
         return {
+          isValid: false,
           validationCompleted: true,
+          authRefreshOutcome: "empty",
           wasCancelled: false,
           shouldShowModal: true,
         };
@@ -1085,6 +1102,100 @@ describe("Auth component", () => {
           screen.getByText("Sign Authentication Request")
         ).toBeInTheDocument();
       });
+    });
+
+    it("tracks successful auth session refresh without product failure", async () => {
+      mockGetAuthJwt.mockReturnValue("stale-jwt-token");
+      mockValidateAuthImmediate.mockResolvedValue({
+        isValid: true,
+        validationCompleted: true,
+        authRefreshOutcome: "success",
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthSessionRefreshSucceeded).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: true,
+          refreshOutcome: "success",
+        });
+      });
+      expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
+    });
+
+    it("tracks re-auth product impact after refresh returns no session", async () => {
+      mockGetAuthJwt.mockReturnValue("expired-jwt-token");
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onShowSignModal(true);
+        return {
+          isValid: false,
+          validationCompleted: true,
+          authRefreshOutcome: "empty",
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: true,
+          outcome: "reauth_required",
+          refreshOutcome: "empty",
+          requiresReauth: true,
+        });
+      });
+    });
+
+    it("tracks cancelled auth validation as non-failure", async () => {
+      mockGetAuthJwt.mockReturnValue("stale-jwt-token");
+      mockValidateAuthImmediate.mockResolvedValue({
+        isValid: false,
+        validationCompleted: true,
+        authRefreshOutcome: "cancelled",
+        wasCancelled: true,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthValidationCancelled).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: true,
+          refreshOutcome: "cancelled",
+        });
+      });
+      expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
     });
 
     it("should not trigger validation during connecting state", async () => {

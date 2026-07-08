@@ -118,9 +118,15 @@ describe("mixpanel analytics wrapper", () => {
     analytics.disableAnalytics();
     analytics.trackPageView("/blocked");
     analytics.initAnalytics();
+    analytics.trackAnalyticsEvent("Product Event", {
+      product_failure: false,
+    });
     analytics.trackPageView("/allowed");
 
-    expect(trackMock).toHaveBeenCalledTimes(1);
+    expect(trackMock).toHaveBeenCalledTimes(2);
+    expect(trackMock).toHaveBeenCalledWith("Product Event", {
+      product_failure: false,
+    });
     expect(trackMock).toHaveBeenCalledWith("Page Viewed", {
       path: "/allowed",
     });

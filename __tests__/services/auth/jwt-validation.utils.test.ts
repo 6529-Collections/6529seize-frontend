@@ -93,6 +93,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "empty",
       wasCancelled: false,
       requiresSessionUpgrade: true,
     });
@@ -108,6 +109,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "not_attempted",
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
@@ -127,6 +129,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "not_attempted",
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).not.toHaveBeenCalled();
@@ -139,6 +142,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "failed",
       wasCancelled: false,
       requiresSessionUpgrade: true,
     });
@@ -164,6 +168,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "success",
       wasCancelled: false,
     });
     expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
@@ -184,6 +189,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "success",
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
@@ -212,6 +218,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "success",
       wasCancelled: false,
     });
     expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
@@ -236,6 +243,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: true,
+      refreshOutcome: "success",
       wasCancelled: false,
     });
 
@@ -279,6 +287,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "empty",
       wasCancelled: false,
     });
   });
@@ -322,7 +331,11 @@ describe("jwt-validation.utils", () => {
         role: "role-1",
         activeProfileProxy: proxy,
       })
-    ).resolves.toEqual({ isValid: true, wasCancelled: false });
+    ).resolves.toEqual({
+      isValid: true,
+      refreshOutcome: "success",
+      wasCancelled: false,
+    });
   });
 
   it("throws when a proxy role is requested without an active proxy", async () => {
@@ -379,6 +392,7 @@ describe("jwt-validation.utils", () => {
       })
     ).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "cancelled",
       wasCancelled: true,
     });
 
@@ -405,6 +419,7 @@ describe("jwt-validation.utils", () => {
 
     await expect(validateJwt(validParams)).resolves.toEqual({
       isValid: false,
+      refreshOutcome: "cancelled",
       wasCancelled: true,
     });
   });
