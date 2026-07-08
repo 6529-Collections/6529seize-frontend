@@ -65,7 +65,7 @@ describe("museum genesis pages", () => {
 
   it("renders Archetype with NFT images", () => {
     render(<Archetype />);
-    expect(screen.getAllByRole("link", { name: /6529\.io/i }).length).toBeGreaterThan(
+    expect(screen.getAllByRole("link", { name: "6529.io" }).length).toBeGreaterThan(
       0
     );
   });
