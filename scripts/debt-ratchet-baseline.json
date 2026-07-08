@@ -4,7 +4,7 @@
   "counts": {
     "any_casts": 0,
     "todo_comments": 0,
-    "oversized_files": 69,
+    "oversized_files": 68,
     "bootstrap_imports": 0,
     "redux_imports": 0,
     "pages_router_files": 0
@@ -67,7 +67,6 @@
     "components/react-query-wrapper/ReactQueryWrapper.tsx",
     "components/rememes/RememePage.tsx",
     "components/user/collected/UserPageCollected.tsx",
-    "components/waves/CreateDropContent.tsx",
     "components/waves/TwitterPreviewCard.tsx",
     "components/waves/WaveTrustSignals.tsx",
     "components/waves/drops/WaveDrop.tsx",
