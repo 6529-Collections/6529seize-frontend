@@ -24,9 +24,11 @@ const richHtmlClassName = [
   contentTextClassName,
   linkScopeClassName,
   "[&_a]:tw-break-words",
+  "[&_a[data-migrated-wordpress-button]]:tw-inline-flex [&_a[data-migrated-wordpress-button]]:tw-max-w-full [&_a[data-migrated-wordpress-button]]:tw-items-center [&_a[data-migrated-wordpress-button]]:tw-justify-center [&_a[data-migrated-wordpress-button]]:tw-rounded-lg [&_a[data-migrated-wordpress-button]]:tw-border [&_a[data-migrated-wordpress-button]]:tw-border-solid [&_a[data-migrated-wordpress-button]]:tw-border-primary-400/40 [&_a[data-migrated-wordpress-button]]:tw-bg-primary-500/15 [&_a[data-migrated-wordpress-button]]:tw-px-4 [&_a[data-migrated-wordpress-button]]:tw-py-3 [&_a[data-migrated-wordpress-button]]:tw-text-center [&_a[data-migrated-wordpress-button]]:tw-text-sm [&_a[data-migrated-wordpress-button]]:tw-font-semibold [&_a[data-migrated-wordpress-button]]:tw-uppercase [&_a[data-migrated-wordpress-button]]:tw-leading-6 [&_a[data-migrated-wordpress-button]]:tw-no-underline [&_a[data-migrated-wordpress-button]]:tw-whitespace-normal hover:[&_a[data-migrated-wordpress-button]]:tw-border-primary-300/70 hover:[&_a[data-migrated-wordpress-button]]:tw-bg-primary-500/25 hover:[&_a[data-migrated-wordpress-button]]:tw-text-primary-100",
   "[&_blockquote]:tw-rounded-xl [&_blockquote]:tw-border [&_blockquote]:tw-border-solid [&_blockquote]:tw-border-primary-400/20 [&_blockquote]:tw-bg-primary-500/10 [&_blockquote]:tw-px-5 [&_blockquote]:tw-py-5",
   "[&_h2]:tw-mb-4 [&_h2]:tw-mt-10 [&_h2]:tw-text-2xl [&_h2]:tw-font-semibold [&_h2]:tw-leading-8 [&_h2]:tw-text-white sm:[&_h2]:tw-mt-12 sm:[&_h2]:tw-text-3xl sm:[&_h2]:tw-leading-10",
   "[&_h3]:tw-mb-3 [&_h3]:tw-mt-8 [&_h3]:tw-text-xl [&_h3]:tw-font-semibold [&_h3]:tw-leading-7 [&_h3]:tw-text-white sm:[&_h3]:tw-text-2xl sm:[&_h3]:tw-leading-8",
+  "[&_iframe]:tw-mx-auto [&_iframe]:tw-aspect-square [&_iframe]:tw-h-auto [&_iframe]:tw-min-h-[20rem] [&_iframe]:tw-w-full [&_iframe]:tw-max-w-[34rem] [&_iframe]:tw-rounded-xl [&_iframe]:tw-border [&_iframe]:tw-border-solid [&_iframe]:tw-border-white/10 [&_iframe]:tw-bg-black [&_iframe]:tw-shadow-[0_16px_50px_rgba(0,0,0,0.28)]",
   "[&_li]:tw-mb-2",
   "[&_ol]:tw-mb-5 [&_ol]:tw-list-decimal [&_ol]:tw-pl-6",
   "[&_p]:tw-mb-5",
@@ -53,7 +55,7 @@ function MigratedWordPressArticleImage({
   const image = (
     <img
       alt={media.href ? "" : media.alt}
-      className="tw-mx-auto tw-h-auto tw-max-h-[34rem] tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
+      className="tw-mx-auto tw-block tw-h-auto tw-max-h-[34rem] tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
       decoding="async"
       loading={priority ? "eager" : "lazy"}
       src={media.src}
@@ -64,7 +66,7 @@ function MigratedWordPressArticleImage({
 
   return (
     <figure className="tw-my-9 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-my-11">
-      <div className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-p-3 tw-shadow-[0_16px_50px_rgba(0,0,0,0.28)]">
+      <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-p-3 tw-shadow-[0_16px_50px_rgba(0,0,0,0.28)]">
         {media.href ? (
           <a
             aria-label={media.alt}
@@ -194,7 +196,7 @@ export default function MigratedWordPressArticlePage({
       data-content-source={content.source}
     >
       <article className="tw-flex tw-w-full tw-flex-col tw-px-4 tw-pb-16 tw-pt-10 sm:tw-px-6 sm:tw-pb-20 lg:tw-px-10 lg:tw-pt-14 xl:tw-px-14">
-        <header className="tw-w-full tw-max-w-5xl">
+        <header className="tw-w-full">
           <p className="tw-mb-4 tw-text-sm tw-font-semibold tw-uppercase tw-leading-5 tw-text-primary-300">
             {content.section}
           </p>
@@ -229,12 +231,12 @@ export default function MigratedWordPressArticlePage({
         </header>
 
         {content.heroImage ? (
-          <div className="tw-mt-10 tw-w-full tw-max-w-6xl">
+          <div className="tw-mt-10 tw-w-full">
             <MigratedWordPressArticleImage media={content.heroImage} priority />
           </div>
         ) : null}
 
-        <div className="tw-mt-10 tw-w-full tw-max-w-5xl tw-space-y-6">
+        <div className="tw-mt-10 tw-w-full tw-space-y-6">
           {content.blocks.map((block, index) => (
             <MigratedWordPressArticleBlockView
               block={block}

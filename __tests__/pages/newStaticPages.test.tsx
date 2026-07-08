@@ -5,10 +5,18 @@ import FromFibonacciToFidenza, {
   generateMetadata as generateFibonacciMetadata,
 } from "@/app/blog/from-fibonacci-to-fidenza/page";
 import EmailProtection from "@/app/cdn-cgi/l/email-protection/page";
-import EmailSignatures from "@/app/email-signatures/page";
-import ConstructionToken from "@/app/museum/6529-fund-szn1/construction-token/page";
-import ImageWithArrow from "@/app/museum/6529-fund-szn1/image-with-arrow/page";
-import MuseumFund from "@/app/museum/6529-fund-szn1/page";
+import EmailSignatures, {
+  generateMetadata as generateEmailSignaturesMetadata,
+} from "@/app/email-signatures/page";
+import ConstructionToken, {
+  generateMetadata as generateConstructionTokenMetadata,
+} from "@/app/museum/6529-fund-szn1/construction-token/page";
+import ImageWithArrow, {
+  generateMetadata as generateImageWithArrowMetadata,
+} from "@/app/museum/6529-fund-szn1/image-with-arrow/page";
+import MuseumFund, {
+  generateMetadata as generateMuseumFundMetadata,
+} from "@/app/museum/6529-fund-szn1/page";
 import { render, screen } from "@testing-library/react";
 
 // Mock next/dynamic for any dynamic imports
@@ -56,18 +64,24 @@ describe("Static Pages Rendering", () => {
   it("should render email signatures page with correct content", () => {
     render(<EmailSignatures />);
 
-    expect(document.title).toContain("EMAIL SIGNATURES");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateEmailSignaturesMetadata();
+    expect(metadata.title).toBe("EMAIL SIGNATURES - 6529.io");
 
     const headings = screen.getAllByText(/EMAIL SIGNATURES/i);
     expect(headings.length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "6529er@6529.io" })
+    ).toHaveAttribute("href", "mailto:6529er@6529.io");
+    expect(
+      screen.queryByRole("link", { name: /\[email\s+protected\]/i })
+    ).not.toBeInTheDocument();
   });
 
   it("should render museum fund szn1 page with correct content", () => {
     render(<MuseumFund />);
 
-    expect(document.title).toContain("6529 FUND SZN1");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateMuseumFundMetadata();
+    expect(metadata.title).toBe("6529 FUND SZN1 - 6529.io");
 
     const headings = screen.getAllByText(/6529 FUND SZN1/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -76,8 +90,8 @@ describe("Static Pages Rendering", () => {
   it("should render construction token page with correct content", () => {
     render(<ConstructionToken />);
 
-    expect(document.title).toContain("CONSTRUCTION TOKEN");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateConstructionTokenMetadata();
+    expect(metadata.title).toBe("CONSTRUCTION TOKEN - 6529.io");
 
     const headings = screen.getAllByText(/CONSTRUCTION TOKEN/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -86,9 +100,8 @@ describe("Static Pages Rendering", () => {
   it("should render image with arrow page with correct content", () => {
     render(<ImageWithArrow />);
 
-    // Be flexible with title - it might have additional prefixes like artist name
-    expect(document.title).toContain("IMAGE WITH ARROW");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateImageWithArrowMetadata();
+    expect(metadata.title).toBe("GANDINSKY - IMAGE WITH ARROW - 6529.io");
 
     const headings = screen.getAllByText(/IMAGE WITH ARROW/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -109,29 +122,21 @@ describe("Static Pages Rendering", () => {
     });
 
     it("should have proper Open Graph tags", () => {
-      render(<EmailSignatures />);
+      const metadata = generateEmailSignaturesMetadata();
 
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      expect(ogTitle).toBeInTheDocument();
-      expect(ogTitle?.getAttribute("content")).toContain("EMAIL SIGNATURES");
-
-      const ogType = document.querySelector('meta[property="og:type"]');
-      expect(ogType).toBeInTheDocument();
-      expect(ogType?.getAttribute("content")).toBe("article");
-
-      const ogSiteName = document.querySelector(
-        'meta[property="og:site_name"]'
-      );
-      expect(ogSiteName).toBeInTheDocument();
-      expect(ogSiteName?.getAttribute("content")).toBe("6529.io");
+      expect(metadata.openGraph).toMatchObject({
+        siteName: "6529.io",
+        title: "EMAIL SIGNATURES - 6529.io",
+        type: "website",
+      });
     });
 
     it("should have proper Twitter Card tags", () => {
-      render(<MuseumFund />);
+      const metadata = generateMuseumFundMetadata();
 
-      const twitterCard = document.querySelector('meta[name="twitter:card"]');
-      expect(twitterCard).toBeInTheDocument();
-      expect(twitterCard?.getAttribute("content")).toBe("summary_large_image");
+      expect(metadata.twitter).toMatchObject({
+        card: "summary_large_image",
+      });
     });
   });
 
@@ -167,17 +172,18 @@ describe("Static Pages Rendering", () => {
     it("should maintain consistent document structure across renders", () => {
       const { rerender } = render(<EmailSignatures />);
 
-      const initialTitle = document.title;
-      const initialCanonical = document
-        .querySelector('link[rel="canonical"]')
-        ?.getAttribute("href");
+      const initialMain = document.querySelector("main");
+      expect(initialMain).toHaveAttribute(
+        "data-content-source",
+        "migrated-wordpress"
+      );
 
       rerender(<EmailSignatures />);
 
-      expect(document.title).toBe(initialTitle);
-      expect(
-        document.querySelector('link[rel="canonical"]')?.getAttribute("href")
-      ).toBe(initialCanonical);
+      expect(document.querySelector("main")).toHaveAttribute(
+        "data-content-source",
+        "migrated-wordpress"
+      );
     });
   });
 });

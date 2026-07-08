@@ -92,6 +92,155 @@ const staticContent = {
   ],
 } satisfies MigratedWordPressStaticPageContent;
 
+const museumDirectoryContent = {
+  source: "migrated-wordpress",
+  path: "/museum",
+  title: "6529 MUSEUM OF ART",
+  description: "Museum generated excerpt should stay out of the page body.",
+  section: "Museum",
+  blocks: [
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml("<p>Museum intro copy.</p>"),
+    },
+    {
+      type: "heading",
+      content: "6529 MUSEUM OF ART GALLERIES",
+    },
+    {
+      type: "image",
+      media: {
+        src: "https://example.com/one-of-one.png",
+        alt: "1 of 1 gallery icon",
+        width: 165,
+        height: 166,
+      },
+    },
+    {
+      type: "heading",
+      content: "1 OF 1 ART",
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        '<ul><li><a href="/museum/yongoh-kim">Y<u>ONGOH KIM</u></a></li><li><a href="/museum/sozet-lounge">SOZET LOUNGE</a></li></ul>'
+      ),
+    },
+  ],
+} satisfies MigratedWordPressStaticPageContent;
+
+const museumCollectionIndexContent = {
+  source: "migrated-wordpress",
+  path: "/museum/genesis",
+  title: "GENESIS",
+  description: "Genesis generated excerpt should stay out of the page body.",
+  section: "Museum / Genesis",
+  blocks: [
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml("<p>Visit the gallery.</p>"),
+    },
+    {
+      type: "image",
+      media: {
+        src: "https://example.com/genesis.jpg",
+        alt: "Genesis gallery",
+        width: 1300,
+        height: 644,
+      },
+    },
+    {
+      type: "heading",
+      content: "EARLY ON-CHAIN GENERATIVE ART",
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        '<p><a href="/museum/genesis/autoglyphs"><strong>Autoglyphs</strong></a><br>Larva Labs</p>'
+      ),
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        '<p><a href="/museum/genesis/squiggly-wtf"><strong>Squiggly.wtf</strong></a><br>natealex</p>'
+      ),
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        '<p><a href="/museum/genesis/labios"><strong>Labios</strong></a><br>Manoloide</p>'
+      ),
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        '<p><a href="/museum/genesis/cryptocube"><strong>Cryptocube</strong></a><br>Han</p>'
+      ),
+    },
+  ],
+} satisfies MigratedWordPressStaticPageContent;
+
+const museumDetailContent = {
+  source: "migrated-wordpress",
+  path: "/museum/genesis/fidenza",
+  title: "FIDENZA",
+  description:
+    "Fidenza Tyler Hobbs Mint Date: 06/11/2021 Artist Narrative duplicated excerpt.",
+  section: "Museum / Genesis",
+  blocks: [
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        "<p><strong>Fidenza</strong><br>Tyler Hobbs<br>Mint Date: 06/11/2021</p>"
+      ),
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        "<p><strong>Artist Narrative</strong></p>"
+      ),
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        "<p>Fidenza is by far my most versatile algorithm to date.</p>"
+      ),
+    },
+    {
+      type: "image",
+      media: {
+        src: "https://example.com/fidenza-119.png",
+        alt: "Fidenza 119",
+        width: 250,
+        height: 300,
+      },
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml("<p>Token: 119</p>"),
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        "<p><strong>Key Traits:</strong><br>Collision Check: Relaxed</p>"
+      ),
+    },
+    {
+      type: "image",
+      media: {
+        src: "https://example.com/fidenza-313.png",
+        alt: "Fidenza 313",
+        width: 250,
+        height: 300,
+      },
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml("<p>Token: 313</p>"),
+    },
+  ],
+} satisfies MigratedWordPressStaticPageContent;
+
 describe("MigratedWordPressArticlePage", () => {
   it("renders migrated WordPress article content with an auditable source marker", () => {
     const { container } = render(
@@ -114,6 +263,8 @@ describe("MigratedWordPressArticlePage", () => {
     );
     expect(screen.getByText("February 23, 2023")).toBeInTheDocument();
     expect(screen.getByText("4 minutes")).toBeInTheDocument();
+    expect(container.querySelector(".tw-max-w-5xl")).not.toBeInTheDocument();
+    expect(container.querySelector(".tw-max-w-6xl")).not.toBeInTheDocument();
     expect(screen.getByAltText("Hero artwork")).toHaveAttribute(
       "src",
       "https://example.com/hero.jpg"
@@ -142,12 +293,15 @@ describe("MigratedWordPressArticlePage", () => {
   });
 
   it("renders migrated static WordPress pages without article metadata chrome", () => {
-    render(<MigratedWordPressStaticPage content={staticContent} />);
+    const { container } = render(
+      <MigratedWordPressStaticPage content={staticContent} />
+    );
 
     expect(screen.getByRole("main")).toHaveAttribute(
       "data-content-source",
       "migrated-wordpress"
     );
+    expect(container.querySelector(".tw-max-w-5xl")).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 1, name: "Migrated Static Page" })
     ).toBeInTheDocument();
@@ -162,6 +316,58 @@ describe("MigratedWordPressArticlePage", () => {
       "href",
       "/education"
     );
+  });
+
+  it("renders the museum directory as visible gallery cards", () => {
+    const { container } = render(
+      <MigratedWordPressStaticPage content={museumDirectoryContent} />
+    );
+
+    expect(
+      screen.queryByText(museumDirectoryContent.description)
+    ).not.toBeInTheDocument();
+    expect(container.querySelector("[data-museum-directory-grid]")).toBeInTheDocument();
+    expect(screen.getByAltText("1 of 1 gallery icon")).toHaveClass(
+      "tw-object-contain"
+    );
+    expect(screen.getByRole("link", { name: "YONGOH KIM" })).toHaveAttribute(
+      "href",
+      "/museum/yongoh-kim"
+    );
+  });
+
+  it("renders museum collection indexes as responsive item grids", () => {
+    const { container } = render(
+      <MigratedWordPressStaticPage content={museumCollectionIndexContent} />
+    );
+
+    expect(
+      screen.queryByText(museumCollectionIndexContent.description)
+    ).not.toBeInTheDocument();
+    expect(
+      container.querySelector("[data-museum-collection-index]")
+    ).toBeInTheDocument();
+    expect(
+      container.querySelectorAll(
+        "[data-museum-collection-index] a[href^='/museum/genesis/']"
+      )
+    ).toHaveLength(4);
+  });
+
+  it("renders museum detail media beside item text without the generated excerpt", () => {
+    const { container } = render(
+      <MigratedWordPressStaticPage content={museumDetailContent} />
+    );
+
+    expect(
+      screen.queryByText(museumDetailContent.description)
+    ).not.toBeInTheDocument();
+    expect(container.querySelector("[data-museum-detail-grid]")).toBeInTheDocument();
+    expect(container.querySelectorAll("[data-museum-detail-card]")).toHaveLength(
+      2
+    );
+    expect(screen.getByAltText("Fidenza 119")).toHaveClass("tw-mx-auto");
+    expect(screen.getByText("Token: 119")).toBeInTheDocument();
   });
 
   it("only accepts compile-time literals as trusted HTML", () => {

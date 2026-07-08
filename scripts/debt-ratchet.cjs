@@ -98,6 +98,12 @@ const WORDPRESS_MIGRATED_SOURCE_PATTERNS = [
   /\bfusion[-_](?:builder|wrapper|row|column|text|title|image|fullwidth)/i,
   /\bwp-image-\d+\b/i,
 ];
+const LEGACY_WORDPRESS_RUNTIME_PATTERNS = [
+  /WordPressLegacyAssets/,
+  /\bpostJsonHref\b/,
+  /\/wp-json\/wp\/v2\//i,
+  /legacy-wordpress\/WordPressLegacyAssets/,
+];
 
 const METRIC_DEFINITIONS = {
   any_casts: {
@@ -112,6 +118,11 @@ const METRIC_DEFINITIONS = {
   oversized_files: {
     description: `source files over ${MAX_SOURCE_FILE_LINES} lines`,
     hint: "Split the file into smaller, single-concern modules.",
+  },
+  legacy_wordpress_runtime: {
+    description: "old live WordPress runtime markers in app source",
+    hint:
+      "Use extracted migrated WordPress content instead of WordPressLegacyAssets/postJsonHref.",
   },
   bootstrap_imports: {
     description: "bootstrap / react-bootstrap import statements",
@@ -379,6 +390,12 @@ function isWordPressMigratedSource(content) {
   );
 }
 
+function isLegacyWordPressRuntimeSource(content) {
+  return LEGACY_WORDPRESS_RUNTIME_PATTERNS.some((pattern) =>
+    pattern.test(content)
+  );
+}
+
 function countPagesRouterFiles() {
   const pagesDir = path.join(REPO_ROOT, "pages");
   if (!fs.existsSync(pagesDir)) return 0;
@@ -391,6 +408,7 @@ function computeActuals() {
   const perFile = {
     any_casts: new Map(),
     todo_comments: new Map(),
+    legacy_wordpress_runtime: new Map(),
     bootstrap_imports: new Map(),
     redux_imports: new Map(),
   };
@@ -407,6 +425,9 @@ function computeActuals() {
     const content = fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
     if (isWordPressMigratedSource(content)) {
       wordpressMigratedFiles.add(relativePath);
+    }
+    if (isLegacyWordPressRuntimeSource(content)) {
+      perFile.legacy_wordpress_runtime.set(relativePath, 1);
     }
 
     const todoCount = countMatches(content, /\b(?:TODO|FIXME|HACK)\b/g);
@@ -462,6 +483,7 @@ function computeActuals() {
       any_casts: sum(perFile.any_casts),
       todo_comments: sum(perFile.todo_comments),
       oversized_files: oversizedFiles.length,
+      legacy_wordpress_runtime: sum(perFile.legacy_wordpress_runtime),
       bootstrap_imports: sum(perFile.bootstrap_imports),
       redux_imports: sum(perFile.redux_imports),
       pages_router_files: countPagesRouterFiles(),
@@ -759,5 +781,6 @@ module.exports = {
   countAnyCasts,
   countLines,
   countMatches,
+  isLegacyWordPressRuntimeSource,
   isWordPressMigratedSource,
 };
