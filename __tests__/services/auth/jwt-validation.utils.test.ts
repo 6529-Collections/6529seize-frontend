@@ -174,6 +174,7 @@ describe("jwt-validation.utils", () => {
       wasCancelled: false,
     });
     expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedTrackAuthImpactEvent).not.toHaveBeenCalled();
   });
 
   it("refreshes expired JWTs through session-v2 and persists the rotated session", async () => {
