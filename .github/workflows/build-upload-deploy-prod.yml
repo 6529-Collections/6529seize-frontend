@@ -478,6 +478,20 @@ jobs:
           content: "<@&1162355330798325861>"
           color: 0xff0000
 
+      - name: Notify CI wave about failure
+        if: failure()
+        continue-on-error: true
+        env:
+          CI_PIPELINES_WAVE_WEBHOOK_URL_PROD: ${{ secrets.CI_PIPELINES_WAVE_WEBHOOK_URL_PROD }}
+          CI_PIPELINES_WAVE_WEBHOOK_SECRET_PROD: ${{ secrets.CI_PIPELINES_WAVE_WEBHOOK_SECRET_PROD }}
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+          CI_PIPELINES_DESCRIPTION: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+          CI_PIPELINES_ENVIRONMENT: production
+          CI_PIPELINES_SERVICE: web
+        run: node scripts/notify-ci-wave.mjs
+
       - name: Notify about success
         uses: sarisia/actions-status-discord@v1
         if: success()
@@ -487,3 +501,17 @@ jobs:
           title: "Seize PROD WEB DEPLOY: CI pipeline complete"
           description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
           color: 0x00ff00
+
+      - name: Notify CI wave about success
+        if: success()
+        continue-on-error: true
+        env:
+          CI_PIPELINES_WAVE_WEBHOOK_URL_PROD: ${{ secrets.CI_PIPELINES_WAVE_WEBHOOK_URL_PROD }}
+          CI_PIPELINES_WAVE_WEBHOOK_SECRET_PROD: ${{ secrets.CI_PIPELINES_WAVE_WEBHOOK_SECRET_PROD }}
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: success
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline complete"
+          CI_PIPELINES_DESCRIPTION: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+          CI_PIPELINES_ENVIRONMENT: production
+          CI_PIPELINES_SERVICE: web
+        run: node scripts/notify-ci-wave.mjs
