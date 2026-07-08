@@ -215,6 +215,16 @@ export function hasMetaMaskMobileWebViewContext(
   );
 }
 
+function hasMobileSafariWebViewContext(event: SentryClientEvent): boolean {
+  const contextValues = getRouteParameterizationContextValues(event);
+  const userAgentValues = getRouteParameterizationUserAgentValues(event);
+  const values = [...contextValues, ...userAgentValues];
+
+  return values.some((value) =>
+    matchesContextToken(value, mobileSafariWebViewContextTokens)
+  );
+}
+
 function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return (
@@ -349,7 +359,7 @@ export function shouldFilterGifPickerTenorCategoriesError(
 export function shouldFilterSentryRouteParameterizationError(
   event: SentryClientEvent
 ): boolean {
-  // Sentry SDK route parameterization noise observed in MetaMaskMobile WKWebView;
+  // Sentry SDK route parameterization noise observed in iOS WKWebView;
   // keep app-owned and generic browser cyclic JSON errors.
   const value = event.exception?.values?.[0];
   if (
@@ -375,7 +385,8 @@ export function shouldFilterSentryRouteParameterizationError(
   return (
     (hasRouteParameterizationRouteEvidence(event) ||
       hasSentryRouteParameterizationFrame(frames)) &&
-    hasMetaMaskMobileWebViewContext(event)
+    (hasMetaMaskMobileWebViewContext(event) ||
+      hasMobileSafariWebViewContext(event))
   );
 }
 

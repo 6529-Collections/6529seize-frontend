@@ -180,6 +180,26 @@ describe("instrumentation-client", () => {
       },
     },
   ];
+  const createObservedAppKitBootstrapBreadcrumbs = () => [
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_appkit_init_start",
+      data: { offset_ms: 181 },
+    },
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_appkit_init_ok",
+      data: { offset_ms: 181 },
+    },
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_adapter_created",
+      data: { offset_ms: 187 },
+    },
+  ];
 
   const createRabbyMobileRainbowKitNotFoundEvent = (
     overrides: Record<string, unknown> = {}
@@ -683,6 +703,39 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops observed AppKit bootstrap websocket 1006 unhandled rejections", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "e",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createObservedAppKitBootstrapBreadcrumbs(),
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("keeps exact Talisman onboarding errors with app-owned frames", () => {
     const beforeSend = loadBeforeSend();
     const event = {
@@ -780,6 +833,55 @@ describe("instrumentation-client", () => {
   it("drops Sentry route parameterization cyclic JSON errors", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops iOS WKWebView route parameterization cyclic JSON errors without app context", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent(
+      [
+        {
+          filename:
+            "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+          function: "n",
+        },
+        nativeJsonStringifyFrame,
+      ],
+      {
+        transaction: "/waves",
+        request: {
+          url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        },
+        contexts: {
+          browser: {
+            name: "Mobile Safari UI/WKWebView",
+          },
+          os: {
+            name: "iOS",
+            version: "18.7",
+          },
+        },
+        tags: {
+          browser: "Mobile Safari UI/WKWebView",
+          "browser.name": "Mobile Safari UI/WKWebView",
+          "os.name": "iOS",
+          url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          transaction: "/waves",
+        },
+        breadcrumbs: [
+          {
+            category: "navigation",
+            data: {
+              from: "/waves",
+              to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+            },
+          },
+        ],
+      }
+    );
 
     const result = beforeSend(event);
 
