@@ -300,7 +300,6 @@ function hasAnonymousUnsafeEvalCspFrameSignature(
 ): boolean {
   return (
     Array.isArray(frames) &&
-    frames.length > 0 &&
     frames.some((frame) => frame.function?.trim() === "eval") &&
     frames.every(isAnonymousUnsafeEvalCspFrame)
   );
