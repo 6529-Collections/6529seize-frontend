@@ -5,7 +5,9 @@ import FromFibonacciToFidenza, {
   generateMetadata as generateFibonacciMetadata,
 } from "@/app/blog/from-fibonacci-to-fidenza/page";
 import EmailProtection from "@/app/cdn-cgi/l/email-protection/page";
-import EmailSignatures from "@/app/email-signatures/page";
+import EmailSignatures, {
+  generateMetadata as generateEmailSignaturesMetadata,
+} from "@/app/email-signatures/page";
 import ConstructionToken from "@/app/museum/6529-fund-szn1/construction-token/page";
 import ImageWithArrow from "@/app/museum/6529-fund-szn1/image-with-arrow/page";
 import MuseumFund from "@/app/museum/6529-fund-szn1/page";
@@ -56,8 +58,8 @@ describe("Static Pages Rendering", () => {
   it("should render email signatures page with correct content", () => {
     render(<EmailSignatures />);
 
-    expect(document.title).toContain("EMAIL SIGNATURES");
-    expect(document.title).toContain("6529.io");
+    const metadata = generateEmailSignaturesMetadata();
+    expect(metadata.title).toBe("EMAIL SIGNATURES - 6529.io");
 
     const headings = screen.getAllByText(/EMAIL SIGNATURES/i);
     expect(headings.length).toBeGreaterThan(0);
@@ -109,21 +111,13 @@ describe("Static Pages Rendering", () => {
     });
 
     it("should have proper Open Graph tags", () => {
-      render(<EmailSignatures />);
+      const metadata = generateEmailSignaturesMetadata();
 
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      expect(ogTitle).toBeInTheDocument();
-      expect(ogTitle?.getAttribute("content")).toContain("EMAIL SIGNATURES");
-
-      const ogType = document.querySelector('meta[property="og:type"]');
-      expect(ogType).toBeInTheDocument();
-      expect(ogType?.getAttribute("content")).toBe("article");
-
-      const ogSiteName = document.querySelector(
-        'meta[property="og:site_name"]'
-      );
-      expect(ogSiteName).toBeInTheDocument();
-      expect(ogSiteName?.getAttribute("content")).toBe("6529.io");
+      expect(metadata.openGraph).toMatchObject({
+        siteName: "6529.io",
+        title: "EMAIL SIGNATURES - 6529.io",
+        type: "website",
+      });
     });
 
     it("should have proper Twitter Card tags", () => {
@@ -167,17 +161,18 @@ describe("Static Pages Rendering", () => {
     it("should maintain consistent document structure across renders", () => {
       const { rerender } = render(<EmailSignatures />);
 
-      const initialTitle = document.title;
-      const initialCanonical = document
-        .querySelector('link[rel="canonical"]')
-        ?.getAttribute("href");
+      const initialMain = document.querySelector("main");
+      expect(initialMain).toHaveAttribute(
+        "data-content-source",
+        "migrated-wordpress"
+      );
 
       rerender(<EmailSignatures />);
 
-      expect(document.title).toBe(initialTitle);
-      expect(
-        document.querySelector('link[rel="canonical"]')?.getAttribute("href")
-      ).toBe(initialCanonical);
+      expect(document.querySelector("main")).toHaveAttribute(
+        "data-content-source",
+        "migrated-wordpress"
+      );
     });
   });
 });
