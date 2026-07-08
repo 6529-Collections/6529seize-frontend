@@ -37,7 +37,7 @@ function areBoundsStylesEqual(
     return false;
   }
 
-  // This hook owns only the measured interaction-layer bounds.
+  // Compare the style fields created from measured interaction-layer bounds.
   return (
     current.height === next.height &&
     current.left === next.left &&
