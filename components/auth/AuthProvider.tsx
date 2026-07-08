@@ -695,11 +695,7 @@ export default function Auth({
       shouldShowSignModal,
       signModalReason,
     });
-  }, [
-    shouldShowSignModal,
-    signModalReason,
-    syncVisibleAuthPromptTracking,
-  ]);
+  }, [shouldShowSignModal, signModalReason, syncVisibleAuthPromptTracking]);
 
   const reconnectActiveWalletForSessionUpgrade = async (): Promise<void> => {
     try {

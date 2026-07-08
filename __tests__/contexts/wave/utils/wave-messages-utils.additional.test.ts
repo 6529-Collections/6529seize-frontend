@@ -110,6 +110,21 @@ describe("wave-messages-utils additional", () => {
     await expect(fetchWaveMessages("w", null)).rejects.toBe(err);
   });
 
+  it("fetchWaveMessages reports non-abort failures before returning null", async () => {
+    const err = Object.assign(new Error("Service unavailable"), {
+      status: 503,
+    });
+    const onFailure = jest.fn();
+    mockFetch.mockRejectedValue(err);
+
+    const result = await fetchWaveMessages("w", null, undefined, undefined, {
+      onFailure,
+    });
+
+    expect(result).toBeNull();
+    expect(onFailure).toHaveBeenCalledWith(err);
+  });
+
   it("fetchAroundSerialNoWaveMessages uses retry fetch", async () => {
     mockFetchRetry.mockResolvedValue({ drops: [drop], wave });
     const res = await fetchAroundSerialNoWaveMessages("w", 5);
@@ -158,8 +173,7 @@ describe("wave-messages-utils additional", () => {
     expect(mockFetchRetry).toHaveBeenCalledWith(
       expect.objectContaining({ endpoint: "drop-ids" })
     );
-    expect(result).not.toBeNull();
-    expect(result!.length).toBe(9996);
+    expect(result).toHaveLength(9996);
     expect(result![0]?.serial_no).toBe(10000);
     expect(result![result!.length - 1]?.serial_no).toBe(5);
     expect(result!.find((d) => d.serial_no === 5)).toMatchObject({

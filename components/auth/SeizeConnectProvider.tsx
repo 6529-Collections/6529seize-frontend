@@ -54,6 +54,46 @@ import {
   useConsolidatedWalletState,
 } from "./seizeConnectWalletState";
 
+const isPrivateIpv4Host = (hostname: string): boolean => {
+  const parts = hostname.split(".");
+  if (parts.length !== 4) {
+    return false;
+  }
+
+  const octets = parts.map(Number);
+  if (
+    octets.some(
+      (octet, index) =>
+        !Number.isInteger(octet) ||
+        octet < 0 ||
+        octet > 255 ||
+        String(octet) !== parts[index]
+    )
+  ) {
+    return false;
+  }
+
+  const first = octets[0];
+  const second = octets[1];
+
+  if (first === undefined || second === undefined) {
+    return false;
+  }
+
+  return (
+    first === 10 ||
+    (first === 172 && second >= 16 && second <= 31) ||
+    (first === 192 && second === 168)
+  );
+};
+
+const isLocalDevelopmentHost = (hostname: string): boolean =>
+  hostname === "localhost" ||
+  hostname === "127.0.0.1" ||
+  hostname === "::1" ||
+  hostname.endsWith(".local") ||
+  isPrivateIpv4Host(hostname);
+
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -95,10 +135,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     nodeEnv === "development" || nodeEnv === "test" || nodeEnv === "local";
   const isLocalHost =
     globalThis.window !== undefined &&
-    (globalThis.window.location.hostname === "localhost" ||
-      globalThis.window.location.hostname === "127.0.0.1" ||
-      globalThis.window.location.hostname === "::1" ||
-      globalThis.window.location.hostname.endsWith(".local"));
+    isLocalDevelopmentHost(globalThis.window.location.hostname);
   const devAuthImpersonatedAddress =
     isDevLikeEnv &&
     isLocalHost &&

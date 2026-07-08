@@ -2,6 +2,8 @@ import { buildDropSubmissionMetadata } from "@/components/waves/utils/buildDropS
 import {
   canAddDropPart,
   canSubmitDrop,
+  createMetadataHandlers,
+  handleComposerFileChange,
 } from "@/components/waves/create-drop-content/content-helpers";
 import { convertMetadataToDropMetadata } from "@/components/waves/utils/convertMetadataToDropMetadata";
 import { getIdentitySubmissionMetadataErrors } from "@/components/waves/utils/identitySubmissionMetadataValidation";
@@ -15,8 +17,15 @@ import { IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR } from "@/helpers/waves/ide
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import type { CreateDropPart } from "@/entities/IDrop";
+import type { CreateDropMetadataType } from "@/components/waves/create-drop-content/types";
 
 describe("CreateDropContent utilities", () => {
+  const createFile = (name: string, lastModified: number): File =>
+    new File(["file"], name, {
+      lastModified,
+      type: "text/plain",
+    });
+
   const viewerIdentity: SelectableIdentityOption = {
     value: "0xabc",
     label: "alice",
@@ -108,6 +117,75 @@ describe("CreateDropContent utilities", () => {
     });
 
     expect(out).toEqual([{ data_key: "identity", data_value: "manual-value" }]);
+  });
+
+  describe("composer file changes", () => {
+    it("enforces the upload budget after existing drop part attachments", () => {
+      const setFiles = jest.fn();
+      const setToast = jest.fn();
+      const setShowOptionsState = jest.fn();
+      const currentFile = createFile("current.txt", 100);
+      const newFile = createFile("new.txt", 200);
+
+      handleComposerFileChange({
+        newFiles: [newFile],
+        drop: {
+          parts: [
+            {
+              content: "existing",
+              quoted_drop: null,
+              media: Array.from({ length: 7 }, (_, index) =>
+                createFile(`existing-${index}.txt`, index)
+              ),
+            },
+          ],
+        } as any,
+        files: [currentFile],
+        isWideContainer: true,
+        waveId: "wave-1",
+        setToast,
+        setFiles,
+        setShowOptionsState,
+        shouldAnimateOptionsRef: { current: false },
+        closeOnNextInputRef: { current: false },
+      });
+
+      expect(setFiles).toHaveBeenCalledWith([newFile]);
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "warning",
+          message: expect.stringContaining("1 oldest file was removed"),
+        })
+      );
+      expect(setShowOptionsState).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("metadata handlers", () => {
+    it("clears string metadata values without storing literal null", () => {
+      let metadata: CreateDropMetadataType[] = [
+        {
+          id: "title",
+          key: "title",
+          type: ApiWaveMetadataType.String,
+          value: "Existing title",
+          required: false,
+        },
+      ];
+      const setMetadata = jest.fn((updater: any) => {
+        metadata = typeof updater === "function" ? updater(metadata) : updater;
+      });
+
+      const { onChangeValue } = createMetadataHandlers({
+        metadata,
+        setMetadata,
+        generateMetadataId: () => "metadata-id",
+      });
+
+      onChangeValue({ index: 0, newValue: null });
+
+      expect(metadata[0]?.value).toBeNull();
+    });
   });
 
   it("flags reserved metadata keys during identity submissions", () => {

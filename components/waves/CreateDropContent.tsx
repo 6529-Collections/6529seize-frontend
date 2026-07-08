@@ -64,6 +64,7 @@ import {
 } from "./create-drop-content/content-helpers";
 import { useCreateDropDraftState } from "./create-drop-content/useCreateDropDraftState";
 import { useCreateDropFileHandlers } from "./create-drop-content/useCreateDropFileHandlers";
+import { useCreateDropFocusBehavior } from "./create-drop-content/useCreateDropFocusBehavior";
 import { useCreateDropIdentityState } from "./create-drop-content/useCreateDropIdentityState";
 import { useCreateDropSubmission } from "./create-drop-content/useCreateDropSubmission";
 import type {
@@ -102,6 +103,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   onExternalAttachmentDropConsumed,
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
+  focusOnInitialActiveDrop = false,
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
@@ -436,7 +438,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isCurationSubmissionExperience &&
     (canSubmitCurationUrl || !!curationUrlSubmitRestrictionMessage);
 
-  const isInitialMountRef = useRef(true);
   const {
     createDropInputRef,
     shouldRefocusAfterChatSubmitRef,
@@ -478,6 +479,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldAnimateOptionsRef,
     closeOnNextInputRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,
+  });
+
+  useCreateDropFocusBehavior({
+    activeDrop,
+    isApp,
+    focusOnInitialActiveDrop,
+    createDropInputRef,
   });
 
   const handleDuplicateIdentitySubmissionError = useCallback(
@@ -545,45 +553,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
     onSwitchToDropModeWithUrl(normalizedCurationDropUrl);
   }, [normalizedCurationDropUrl, onSwitchToDropModeWithUrl]);
-
-  const focusInputWithDelay = (delay: number) => {
-    setTimeout(() => {
-      createDropInputRef.current?.focus();
-    }, delay);
-  };
-
-  const focusMobileInput = useCallback(() => {
-    if (!createDropInputRef.current) return;
-    requestAnimationFrame(() => {
-      focusInputWithDelay(300);
-    });
-  }, []);
-
-  const focusDesktopInput = () => {
-    createDropInputRef.current?.focus();
-  };
-
-  useEffect(() => {
-    if (!activeDrop) {
-      return;
-    }
-
-    // Skip auto-focus on initial mount in app to prevent keyboard from opening
-    if (isApp && isInitialMountRef.current) {
-      isInitialMountRef.current = false;
-      return;
-    }
-    isInitialMountRef.current = false;
-
-    if (isApp) {
-      const timer = setTimeout(focusMobileInput, 200);
-      return () => clearTimeout(timer);
-    }
-    const timer = setTimeout(() => {
-      focusDesktopInput();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [activeDrop, isApp, focusMobileInput]);
 
   const { handleFileChange, removeFile } = useCreateDropFileHandlers({
     drop,

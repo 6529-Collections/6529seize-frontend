@@ -40,8 +40,7 @@ export function useSessionUpgradeExpiry({
   const resetSessionUpgradeExpiryDedupe = useCallback(
     (walletAddress: string) => {
       if (
-        expiredSessionUpgradeAddressRef.current ===
-        walletAddress.toLowerCase()
+        expiredSessionUpgradeAddressRef.current === walletAddress.toLowerCase()
       ) {
         expiredSessionUpgradeAddressRef.current = null;
       }
@@ -66,8 +65,13 @@ export function useSessionUpgradeExpiry({
         reason: "session_upgrade_deadline_expired",
         wasConnectedWallet: hasActiveWalletAddress,
       });
-      await removeAuthJwt();
-      invalidateAll();
+      try {
+        await removeAuthJwt();
+        invalidateAll();
+      } catch (error) {
+        expiredSessionUpgradeAddressRef.current = null;
+        throw error;
+      }
     },
     [
       hasActiveWalletAddress,

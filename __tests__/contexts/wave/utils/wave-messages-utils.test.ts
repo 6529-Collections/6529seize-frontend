@@ -173,6 +173,36 @@ describe("mergeDrops", () => {
       "older-file",
     ]);
   });
+
+  it("falls back to serial number when created_at is null", () => {
+    const current = [
+      {
+        ...sampleDrop,
+        id: "null-created-at",
+        serial_no: 20,
+        created_at: null,
+        stableKey: "null-created-at",
+        stableHash: "null-created-at",
+        type: DropSize.FULL,
+      },
+    ] as any[];
+    const incoming = [
+      {
+        ...sampleDrop,
+        id: "low-created-at",
+        serial_no: 10,
+        created_at: 5,
+        type: DropSize.FULL,
+      },
+    ] as any[];
+
+    const merged = mergeDrops(current, incoming);
+
+    expect(merged.map((drop) => drop.id)).toEqual([
+      "null-created-at",
+      "low-created-at",
+    ]);
+  });
 });
 
 describe("fetchNewestWaveMessages", () => {

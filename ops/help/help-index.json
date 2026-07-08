@@ -3995,12 +3995,28 @@
       "id": "waves.content-tabs",
       "kind": "ui_affordance",
       "title": "Wave content tabs",
-      "aliases": ["wave tabs", "content tabs", "chat tabs", "gallery tab"],
-      "keywords": ["waves", "tabs", "content", "chat", "gallery"],
+      "aliases": [
+        "wave tabs",
+        "content tabs",
+        "chat tabs",
+        "gallery tab",
+        "polls tab",
+        "poll results"
+      ],
+      "keywords": [
+        "waves",
+        "tabs",
+        "content",
+        "chat",
+        "gallery",
+        "polls",
+        "results"
+      ],
       "facts": [
         "Wave content tabs organize the visible wave content area.",
         "Some waves can switch between chat and gallery-style views.",
-        "Available tabs depend on wave type, state, and content."
+        "Available tabs depend on wave type, state, and content.",
+        "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

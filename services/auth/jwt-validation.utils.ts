@@ -34,9 +34,19 @@ interface ValidateJwtParams {
   activeProfileProxy?: ApiProfileProxy | null | undefined;
 }
 
+export type SessionRefreshValidationOutcome =
+  | "cancelled"
+  | "empty"
+  | "failed"
+  | "local_valid_after_failure"
+  | "missing_wallet"
+  | "not_attempted"
+  | "success";
+
 interface ValidateJwtResult {
   isValid: boolean;
   wasCancelled: boolean;
+  refreshOutcome?: SessionRefreshValidationOutcome;
   requiresSessionUpgrade?: boolean;
 }
 
@@ -47,23 +57,48 @@ type RefreshedSession = NonNullable<
 const INVALID_JWT_RESULT: ValidateJwtResult = {
   isValid: false,
   wasCancelled: false,
+  refreshOutcome: "not_attempted",
 };
 
 const CANCELLED_JWT_RESULT: ValidateJwtResult = {
   isValid: false,
   wasCancelled: true,
+  refreshOutcome: "cancelled",
 };
 
 const VALID_JWT_RESULT: ValidateJwtResult = {
   isValid: true,
   wasCancelled: false,
+  refreshOutcome: "not_attempted",
 };
 
 const SESSION_UPGRADE_REQUIRED_RESULT: ValidateJwtResult = {
   isValid: false,
   wasCancelled: false,
+  refreshOutcome: "failed",
   requiresSessionUpgrade: true,
 };
+
+const createInvalidJwtResult = (
+  refreshOutcome: SessionRefreshValidationOutcome
+): ValidateJwtResult => ({
+  ...INVALID_JWT_RESULT,
+  refreshOutcome,
+});
+
+const createValidJwtResult = (
+  refreshOutcome: SessionRefreshValidationOutcome
+): ValidateJwtResult => ({
+  ...VALID_JWT_RESULT,
+  refreshOutcome,
+});
+
+const createSessionUpgradeRequiredResult = (
+  refreshOutcome: SessionRefreshValidationOutcome
+): ValidateJwtResult => ({
+  ...SESSION_UPGRADE_REQUIRED_RESULT,
+  refreshOutcome,
+});
 
 export const getRole = (jwt: string | null): string | null => {
   if (!jwt) return null;
@@ -216,7 +251,7 @@ const handleTokenRefresh = async ({
 
   try {
     if (!wallet) {
-      return INVALID_JWT_RESULT;
+      return createInvalidJwtResult("missing_wallet");
     }
 
     const refreshedSession = await refreshSessionV2({
@@ -225,7 +260,7 @@ const handleTokenRefresh = async ({
     });
 
     if (!refreshedSession) {
-      return INVALID_JWT_RESULT;
+      return createInvalidJwtResult("empty");
     }
 
     if (isAbortSignalAborted(abortSignal)) {
@@ -247,7 +282,7 @@ const handleTokenRefresh = async ({
       });
     }
 
-    return VALID_JWT_RESULT;
+    return createValidJwtResult("success");
   } catch (error: unknown) {
     // Handle cancellation errors
     if (error instanceof TokenRefreshCancelledError || isAbortError(error)) {
@@ -291,10 +326,10 @@ export const validateJwt = async ({
     });
   } catch (error: unknown) {
     if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
-      return VALID_JWT_RESULT;
+      return createValidJwtResult("local_valid_after_failure");
     }
     if (hasValidLocalJwt) {
-      return SESSION_UPGRADE_REQUIRED_RESULT;
+      return createSessionUpgradeRequiredResult("failed");
     }
     throw error;
   }
@@ -303,13 +338,15 @@ export const validateJwt = async ({
     return refreshedResult;
   }
 
+  const refreshOutcome = refreshedResult.refreshOutcome ?? "not_attempted";
+
   if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
-    return VALID_JWT_RESULT;
+    return createValidJwtResult("local_valid_after_failure");
   }
 
   if (hasValidLocalJwt) {
-    return SESSION_UPGRADE_REQUIRED_RESULT;
+    return createSessionUpgradeRequiredResult(refreshOutcome);
   }
 
-  return INVALID_JWT_RESULT;
+  return createInvalidJwtResult(refreshOutcome);
 };

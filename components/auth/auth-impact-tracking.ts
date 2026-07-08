@@ -34,8 +34,9 @@ export function useAuthImpactTracking({
     () => classifyPageView({ pathname }),
     [pathname]
   );
-  const authPromptTrackingReasonRef =
-    useRef<AuthImpactReason>("auth_validation_failed");
+  const authPromptTrackingReasonRef = useRef<AuthImpactReason>(
+    "auth_validation_failed"
+  );
   const visibleAuthPromptEventRef = useRef<SignModalReason | null>(null);
   const lastTrackedForcedLogoutKeyRef = useRef<string | null>(null);
   const lastTrackedValidationFailureKeyRef = useRef<string | null>(null);
@@ -112,10 +113,7 @@ export function useAuthImpactTracking({
   }, []);
 
   const syncVisibleAuthPromptTracking = useCallback(
-    ({
-      shouldShowSignModal,
-      signModalReason,
-    }: VisiblePromptParams): void => {
+    ({ shouldShowSignModal, signModalReason }: VisiblePromptParams): void => {
       if (!shouldShowSignModal) {
         visibleAuthPromptEventRef.current = null;
         return;

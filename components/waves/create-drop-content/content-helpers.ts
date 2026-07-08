@@ -563,8 +563,12 @@ export const handleComposerFileChange = ({
   const total = existingCount + files.length + uniqueNewFiles.length;
   const overflow = Math.max(0, total - MAX_DROP_UPLOAD_FILES);
   const mergedFiles = [...files, ...uniqueNewFiles];
+  const allowedNewFileBudget = Math.max(
+    0,
+    MAX_DROP_UPLOAD_FILES - existingCount
+  );
   const updatedFiles = overflow
-    ? mergedFiles.slice(-MAX_DROP_UPLOAD_FILES)
+    ? mergedFiles.slice(mergedFiles.length - allowedNewFileBudget)
     : mergedFiles;
 
   setFiles(updatedFiles);
@@ -632,6 +636,9 @@ export const createMetadataHandlers = ({
         }
 
         if (item.type === ApiWaveMetadataType.String) {
+          if (params.newValue === null) {
+            return { ...item, value: null };
+          }
           if (typeof params.newValue === "string") {
             return { ...item, value: params.newValue };
           }
