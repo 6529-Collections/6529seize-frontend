@@ -82,10 +82,23 @@ const getTelemetryOutcomes = (
   attrs: SessionRefreshTelemetryAttrs[]
 ): unknown[] => attrs.map((attr) => attr.auth_refresh_outcome);
 
+const allowedRefreshTelemetryAttrNames = new Set([
+  "source",
+  "client_type",
+  "auth_refresh_outcome",
+  "outcome",
+  "status_code",
+  "duration_bucket_ms",
+]);
+
 const expectNoSensitiveRefreshTelemetry = (
   attrs: SessionRefreshTelemetryAttrs[]
 ): void => {
   for (const attr of attrs) {
+    const unexpectedAttrNames = Object.keys(attr).filter(
+      (key) => !allowedRefreshTelemetryAttrNames.has(key)
+    );
+    expect(unexpectedAttrNames).toEqual([]);
     expect(attr).toHaveProperty("auth_refresh_outcome", attr.outcome);
     expect(attr).not.toHaveProperty("address");
     expect(attr).not.toHaveProperty("client_address");
@@ -448,6 +461,7 @@ describe("session-v2.utils", () => {
       "deduped_in_flight",
       "success",
     ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("keeps a shared refresh alive when one consumer aborts", async () => {
@@ -497,6 +511,7 @@ describe("session-v2.utils", () => {
       "aborted",
       "success",
     ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("cooldowns failed web refreshes for the same session context", async () => {
@@ -515,6 +530,7 @@ describe("session-v2.utils", () => {
       "unauthorized",
       "cooldown_used_empty",
     ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("clears a failed refresh cooldown after successful auth persistence", async () => {
@@ -540,6 +556,7 @@ describe("session-v2.utils", () => {
     );
 
     expect(commonApiPost).toHaveBeenCalledTimes(2);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("delays transport failure retries without replaying a stale error", async () => {
@@ -573,6 +590,7 @@ describe("session-v2.utils", () => {
         "started",
         "success",
       ]);
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
       expect(getSessionRefreshWarnTelemetry()).toEqual([
         expect.objectContaining({
           client_type: "web",
@@ -613,10 +631,13 @@ describe("session-v2.utils", () => {
   });
 
   it("logs non-401 backend refresh errors with status only", async () => {
-    const backendError = Object.assign(new Error("server leaked secret-token"), {
-      status: 500,
-      response: { status: 500 },
-    });
+    const backendError = Object.assign(
+      new Error("server leaked secret-token"),
+      {
+        status: 500,
+        response: { status: 500 },
+      }
+    );
     (commonApiPost as jest.Mock).mockRejectedValueOnce(backendError);
 
     await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
@@ -677,6 +698,13 @@ describe("session-v2.utils", () => {
     );
 
     expect(commonApiPost).toHaveBeenCalledTimes(2);
+    expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+      "started",
+      "aborted",
+      "started",
+      "success",
+    ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("verifies an active web session and persists the refreshed auth", async () => {
