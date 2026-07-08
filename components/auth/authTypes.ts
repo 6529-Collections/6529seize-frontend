@@ -49,6 +49,7 @@ export interface AuthRolloutSettings {
 
 export interface AuthorizedWalletValidationResult {
   readonly isValid: boolean;
+  readonly wasCancelled?: boolean;
   readonly requiresSessionUpgrade?: boolean;
 }
 
@@ -73,5 +74,6 @@ export interface RunImmediateAuthValidationParams {
   readonly setShowSignModal: (show: boolean) => void;
   readonly invalidateAll: () => void;
   readonly reset: () => void;
+  readonly resetSessionUpgradeExpiryDedupe: (walletAddress: string) => void;
   readonly authRolloutSettings: AuthRolloutSettings;
 }

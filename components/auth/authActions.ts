@@ -64,6 +64,7 @@ interface CreateAuthRequestActionsParams {
   readonly invalidateAll: () => void;
   readonly isAddressAuthorized: boolean;
   readonly seizeDisconnect: () => Promise<void>;
+  readonly resetSessionUpgradeExpiryDedupe: (walletAddress: string) => void;
   readonly setActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
   ) => void;
@@ -91,6 +92,8 @@ interface AuthRequestActions {
   readonly requestSessionUpgrade: () => Promise<{ success: boolean }>;
 }
 
+const MANUAL_AUTH_VALIDATION_TIMEOUT_MS = 30_000;
+
 const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
   if (globalThis.window === undefined) {
     return;
@@ -103,6 +106,27 @@ const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
   );
 };
 
+const createTimedAbortSignal = ({
+  timeoutMs,
+}: {
+  readonly timeoutMs: number;
+}): {
+  readonly signal: AbortSignal;
+  readonly cleanup: () => void;
+} => {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      globalThis.clearTimeout(timeoutId);
+    },
+  };
+};
+
 export function createAuthRequestActions({
   activeProfileProxy,
   address,
@@ -113,6 +137,7 @@ export function createAuthRequestActions({
   invalidateAll,
   isAddressAuthorized,
   seizeDisconnect,
+  resetSessionUpgradeExpiryDedupe,
   setActiveProfileProxy,
   setAuthLoadingState,
   setSessionUpgradeRequired,
@@ -190,9 +215,11 @@ export function createAuthRequestActions({
   }): Promise<{
     signature: string | null;
     userRejected: boolean;
+    failureToastShown: boolean;
   }> => {
     try {
       const result = await signMessage(message);
+      let failureToastShown = false;
 
       if (result.error) {
         if (result.error instanceof ConnectionMismatchError) {
@@ -201,12 +228,14 @@ export function createAuthRequestActions({
               "Wallet address mismatch. Disconnect and reconnect the correct wallet.",
             type: "error",
           });
+          failureToastShown = true;
         } else if (result.error instanceof SigningProviderError) {
           setToast({
             message:
               "Wallet provider error. Reconnect your wallet and try again.",
             type: "error",
           });
+          failureToastShown = true;
         } else if (result.error instanceof MobileSigningError) {
           setToast({
             type: "error",
@@ -214,12 +243,14 @@ export function createAuthRequestActions({
             description: "Check your wallet and try again.",
             details: getToastErrorDetails(result.error),
           });
+          failureToastShown = true;
         }
       }
 
       return {
         signature: result.signature,
         userRejected: result.userRejected,
+        failureToastShown,
       };
     } catch (error) {
       logErrorSecurely("getSignature", error);
@@ -232,6 +263,7 @@ export function createAuthRequestActions({
       return {
         signature: null,
         userRejected: false,
+        failureToastShown: true,
       };
     }
   };
@@ -265,10 +297,12 @@ export function createAuthRequestActions({
       }
 
       if (!clientSignature.signature) {
-        setToast({
-          message: AUTH_SIGNATURE_FAILED_MESSAGE,
-          type: "error",
-        });
+        if (!clientSignature.failureToastShown) {
+          setToast({
+            message: AUTH_SIGNATURE_FAILED_MESSAGE,
+            type: "error",
+          });
+        }
         return { success: false };
       }
 
@@ -372,14 +406,17 @@ export function createAuthRequestActions({
       return { isValid: false, requiresSessionUpgrade: true };
     }
 
+    const validationAbort = createTimedAbortSignal({
+      timeoutMs: MANUAL_AUTH_VALIDATION_TIMEOUT_MS,
+    });
     const validationResult = await validateJwt({
       jwt: getAuthJwt(),
       wallet: walletAddress,
       role,
       operationId: `manual-auth-${Date.now()}`,
-      abortSignal: new AbortController().signal,
+      abortSignal: validationAbort.signal,
       activeProfileProxy,
-    });
+    }).finally(validationAbort.cleanup);
 
     if (
       validationResult.requiresSessionUpgrade &&
@@ -406,6 +443,7 @@ export function createAuthRequestActions({
     }
 
     setSessionUpgradeRequired(true);
+    resetSessionUpgradeExpiryDedupe(walletAddress);
     const promptStatus = showSessionUpgradePrompt(walletAddress, {
       forceShow: true,
       allowWithoutDeadline: true,
@@ -450,6 +488,13 @@ export function createAuthRequestActions({
       walletAddress,
       role,
     });
+    if (validationResult.wasCancelled) {
+      setToast({
+        message: "Couldn't verify your session. Please try again.",
+        type: "error",
+      });
+      return false;
+    }
     if (!validationResult.requiresSessionUpgrade) {
       setSessionUpgradeRequired(false);
     }
@@ -459,6 +504,7 @@ export function createAuthRequestActions({
       signModalReason !== "session-upgrade"
     ) {
       setSessionUpgradeRequired(true);
+      resetSessionUpgradeExpiryDedupe(walletAddress);
       const promptStatus = getOrCreateSessionUpgradePromptStatus(
         walletAddress,
         authRolloutSettings
@@ -538,6 +584,7 @@ export function createAuthRequestActions({
 
     setAuthLoadingState("signing");
     setSignModalReason("session-upgrade");
+    resetSessionUpgradeExpiryDedupe(upgradeAddress);
 
     try {
       const promptStatus = showSessionUpgradePrompt(upgradeAddress, {

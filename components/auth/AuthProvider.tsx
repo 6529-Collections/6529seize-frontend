@@ -27,7 +27,6 @@ import {
   getWalletAddress,
   hasActiveSessionV2Auth,
   PROFILE_SWITCHED_EVENT,
-  removeAuthJwt,
   setActiveWalletAccount,
   syncConnectedWalletProfile,
   WALLET_ACCOUNTS_UPDATED_EVENT,
@@ -45,11 +44,15 @@ import {
 import { AuthSignModal } from "./AuthSignModal";
 import { createAuthRequestActions } from "./authActions";
 import { AuthContext } from "./authContext";
+import { useAuthImpactTracking } from "./auth-impact-tracking";
 import { navigateAfterProfileSwitch } from "./authProfileNavigation";
 import { isProfileForAddress } from "./authProfileUtils";
 import {
+  useSessionUpgradeDeadlineRefresh,
+  useSessionUpgradeExpiry,
+} from "./auth-session-upgrade-deadline";
+import {
   AUTH_TOKEN_CHANGED_EVENT_NAME,
-  clearSessionUpgradeReminder,
   DEFAULT_AUTH_ROLLOUT_SETTINGS,
   dismissSessionUpgradePrompt,
   getManualSessionUpgradePromptStatus,
@@ -134,12 +137,10 @@ export default function Auth({
   const isFetchingConnectedProfile =
     fetchingProfile || isConnectedProfileSettling;
 
-  // Race condition prevention: AbortController and operation tracking
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestAddressRef = useRef<string | undefined>(address);
   const activeValidationOperationIdRef = useRef<string | null>(null);
   const validationOperationCounterRef = useRef(0);
-  const expiredSessionUpgradeAddressRef = useRef<string | null>(null);
   const [pendingProfileSwitch, setPendingProfileSwitch] = useState<{
     readonly targetAddress: string | null;
   } | null>(null);
@@ -160,7 +161,17 @@ export default function Auth({
     };
   }, [settingsAuth]);
 
-  // Centralized abort mechanism for cancelling in-flight operations
+  const {
+    authPromptTrackingReasonRef,
+    resetTrackedAuthImpactKeys,
+    syncVisibleAuthPromptTracking,
+    trackForcedLogout,
+  } = useAuthImpactTracking({
+    address,
+    hasActiveWalletAddress,
+    isAddressAuthorized,
+  });
+
   const abortCurrentAuthOperation = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -253,17 +264,29 @@ export default function Auth({
   }, [address, authRole, receivedProfileProxies]);
 
   const reset = useCallback(() => {
+    trackForcedLogout({
+      reason: "stored_auth_invalid",
+      wasConnectedWallet: false,
+    });
     invalidateAll();
     setActiveProfileProxy(null);
     seizeDisconnectAndLogout();
-  }, [invalidateAll, seizeDisconnectAndLogout]);
+  }, [invalidateAll, seizeDisconnectAndLogout, trackForcedLogout]);
 
-  // Comprehensive cleanup effect for unmount and address changes
+  const { expireSessionUpgradeAuth, resetSessionUpgradeExpiryDedupe } =
+    useSessionUpgradeExpiry({
+      hasActiveWalletAddress,
+      invalidateAll,
+      setSessionUpgradeHasDeadline,
+      setSessionUpgradeRequired,
+      setShowSignModal,
+      setSignModalReason,
+      trackForcedLogout,
+    });
+
   useEffect(() => {
     return () => {
-      // Cancel any pending auth operations
       abortCurrentAuthOperation();
-      // Reset signing state
       resetSigning();
     };
   }, [resetSigning, abortCurrentAuthOperation]);
@@ -278,6 +301,10 @@ export default function Auth({
   useEffect(() => {
     latestAddressRef.current = address;
   }, [address]);
+
+  useEffect(() => {
+    resetTrackedAuthImpactKeys();
+  }, [address, resetTrackedAuthImpactKeys]);
 
   useEffect(() => {
     signModalReasonRef.current = signModalReason;
@@ -300,10 +327,6 @@ export default function Auth({
       walletAddress: string,
       abortSignal?: AbortSignal
     ): Promise<boolean> => {
-      if (!hasActiveSessionV2Auth({ address: walletAddress })) {
-        return false;
-      }
-
       try {
         return await verifyActiveSessionV2WebSession({
           address: walletAddress,
@@ -379,6 +402,7 @@ export default function Auth({
     if (!isAddressAuthorized) {
       setSessionUpgradeRequired(false);
       if (isConnected) {
+        authPromptTrackingReasonRef.current = "wallet_not_authorized";
         setSignModalReason("auth");
         setShowSignModal(true);
       }
@@ -402,6 +426,7 @@ export default function Auth({
 
     // Capture current address at validation time to prevent race conditions
     const currentAddress = address;
+    authPromptTrackingReasonRef.current = "auth_validation_failed";
     setSessionUpgradeRequired(false);
 
     // Generate unique operation ID for this validation attempt
@@ -429,6 +454,7 @@ export default function Auth({
       setShowSignModal,
       invalidateAll,
       reset,
+      resetSessionUpgradeExpiryDedupe,
       authRolloutSettings,
     }).catch((error) => {
       logErrorSecurely("auth_immediate_validation_unhandled", error);
@@ -448,6 +474,7 @@ export default function Auth({
     abortCurrentAuthOperation,
     invalidateAll,
     reset,
+    resetSessionUpgradeExpiryDedupe,
     authRolloutSettings,
     authStorageRevision,
   ]);
@@ -488,62 +515,15 @@ export default function Auth({
     [address, authRolloutSettings, canSignActiveWallet]
   );
 
-  const expireSessionUpgradeAuth = useCallback(
-    async (walletAddress: string): Promise<void> => {
-      const normalizedAddress = walletAddress.toLowerCase();
-      if (expiredSessionUpgradeAddressRef.current === normalizedAddress) {
-        return;
-      }
-      expiredSessionUpgradeAddressRef.current = normalizedAddress;
-
-      clearSessionUpgradeReminder(walletAddress);
-      setShowSignModal(false);
-      setSignModalReason("auth");
-      setSessionUpgradeHasDeadline(false);
-      setSessionUpgradeRequired(false);
-      await removeAuthJwt();
-      invalidateAll();
-    },
-    [invalidateAll]
-  );
-
-  useEffect(() => {
-    if (
-      !address ||
-      signModalReason !== "session-upgrade" ||
-      !hasSessionUpgradeRollout(authRolloutSettings)
-    ) {
-      return;
-    }
-
-    const refreshSessionUpgradePrompt = () => {
-      const status = getOrCreateSessionUpgradePromptStatus(
-        address,
-        authRolloutSettings
-      );
-      setSessionUpgradeTimeLeftMs(status.timeLeftMs);
-      setSessionUpgradeCanDismiss(status.canDismiss);
-      if (status.timeLeftMs <= 0) {
-        expireSessionUpgradeAuth(address).catch((error) => {
-          logErrorSecurely("session_upgrade_deadline_expired_logout", error);
-        });
-        return;
-      }
-      if (status.shouldShow) {
-        setShowSignModal(true);
-      }
-    };
-
-    refreshSessionUpgradePrompt();
-    const interval = globalThis.setInterval(
-      refreshSessionUpgradePrompt,
-      60 * 1000
-    );
-
-    return () => {
-      globalThis.clearInterval(interval);
-    };
-  }, [address, authRolloutSettings, expireSessionUpgradeAuth, signModalReason]);
+  useSessionUpgradeDeadlineRefresh({
+    address,
+    authRolloutSettings,
+    expireSessionUpgradeAuth,
+    signModalReason,
+    setSessionUpgradeCanDismiss,
+    setSessionUpgradeTimeLeftMs,
+    setShowSignModal,
+  });
 
   const { onActiveProfileProxy, requestAuth, requestSessionUpgrade } =
     createAuthRequestActions({
@@ -556,6 +536,7 @@ export default function Auth({
       invalidateAll,
       isAddressAuthorized,
       seizeDisconnect,
+      resetSessionUpgradeExpiryDedupe,
       setActiveProfileProxy,
       setAuthLoadingState,
       setSessionUpgradeRequired,
@@ -709,6 +690,17 @@ export default function Auth({
     signModalReason,
   ]);
 
+  useEffect(() => {
+    syncVisibleAuthPromptTracking({
+      shouldShowSignModal,
+      signModalReason,
+    });
+  }, [
+    shouldShowSignModal,
+    signModalReason,
+    syncVisibleAuthPromptTracking,
+  ]);
+
   const reconnectActiveWalletForSessionUpgrade = async (): Promise<void> => {
     try {
       await seizeDisconnect();
@@ -721,7 +713,10 @@ export default function Auth({
   };
   const onConfirmSignRequest = () => {
     if (isDisconnectedWebSessionUpgradePrompt) {
-      void reconnectActiveWalletForSessionUpgrade();
+      setShowSignModal(false);
+      globalThis.setTimeout(() => {
+        void reconnectActiveWalletForSessionUpgrade();
+      }, 0);
       return;
     }
     void requestAuth();
