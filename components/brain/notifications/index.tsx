@@ -6,6 +6,7 @@ import {
   DROP_POLL_VOTED_NOTIFICATION_CAUSE,
   type NotificationCause,
 } from "@/types/feed.types";
+import type { CSSProperties } from "react";
 import { useMemo } from "react";
 import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import { useNotificationsController } from "./hooks/useNotificationsController";
@@ -81,6 +82,17 @@ export default function Notifications({
     showErrorState: contentState.showErrorState,
     activeFilterKey,
   });
+  let bottomPaddingClassName: string | undefined;
+  let bottomPaddingStyle: CSSProperties | undefined;
+  if (activeDrop) {
+    bottomPaddingClassName = "tw-pb-0";
+    bottomPaddingStyle = {
+      paddingBottom:
+        "calc(var(--brain-content-composer-reserve, 0px) + 0.5rem)",
+    };
+  } else if (isApp) {
+    bottomPaddingClassName = floatingDockClearanceClassName;
+  }
 
   return (
     <div
@@ -99,9 +111,8 @@ export default function Notifications({
           onTopIntersection={handleTopIntersection}
           isFetchingNextPage={isFetchingNextPage}
           hasNextPage={pagination.hasNextPage}
-          bottomPaddingClassName={
-            isApp ? floatingDockClearanceClassName : undefined
-          }
+          bottomPaddingClassName={bottomPaddingClassName}
+          bottomPaddingStyle={bottomPaddingStyle}
           containerClassName="tw-bg-transparent"
         >
           <NotificationsContent

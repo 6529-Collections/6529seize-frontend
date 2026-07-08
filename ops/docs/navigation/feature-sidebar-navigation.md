@@ -12,9 +12,8 @@ On web layouts, route switching is sidebar-first.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
   nested route grouping shown in the expanded rail.
 - The 6529 logo links to `/`; there is no labeled `Home` product row.
-- Primary menu concepts are `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
-- `NFTs` and `About` are expandable groups; `Waves`, `DMs`, and `Join 6529`
-  are direct rows.
+- Primary menu concepts are `NFTs`, `Waves`, `DMs`, and `About`.
+- `NFTs` and `About` are expandable groups; `Waves` and `DMs` are direct rows.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary Waves experience link and searchable destination.
 - When the connected wallet can access Drop Forge, the sidebar adds `Drop
@@ -28,7 +27,7 @@ On web layouts, route switching is sidebar-first.
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
-- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, `About`.
+- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Utility rows: desktop `Search`, connected-only `Notifications`,
@@ -42,7 +41,6 @@ On web layouts, route switching is sidebar-first.
 - Touch small-screen web: use header menu button.
 - Select direct rows or expand groups for nested routes.
 - Open `Waves` directly from the primary sidebar row.
-- Open `Join 6529` directly from the primary sidebar row.
 - Open `Discover Waves` from the expanded Waves panel header or search.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
@@ -59,7 +57,7 @@ On web layouts, route switching is sidebar-first.
 3. Use lower utility rows for connected `Notifications`, connected `Profile`,
    or disconnected `Share`.
 4. Open `NFTs` or `About` for nested routes; use the `Waves` row for direct
-   `/waves` navigation and the `Join 6529` row for `/join-6529`.
+   `/waves` navigation.
 5. In collapsed mode, group rows open anchored flyout submenus that preserve
    subsection labels such as `Network & Reputation`, `Delegation & Wallets`, or
    `Data & Developer Tools`.
@@ -74,9 +72,6 @@ On web layouts, route switching is sidebar-first.
 - Open `Waves` routes:
   use the primary `Waves` row for `/waves`; use `Discover Waves` in the Waves
   panel header or search for `/discover`.
-- Open `Join 6529`:
-  use the primary `Join 6529` row for the shareable onboarding guide at
-  `/join-6529`.
 - Open `About > Network & Reputation` routes:
   `/network`, `/network/activity`, `/network/groups`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
@@ -98,7 +93,7 @@ On web layouts, route switching is sidebar-first.
   `NFTs` keeps collection and NFT activity links, and `About` keeps subsection
   labels such as `Network & Reputation`, `Delegation & Wallets`, and
   `Data & Developer Tools` instead of flattening every route into one list.
-  `Waves` and `Join 6529` remain direct rows in collapsed mode.
+  `Waves` remains a direct row in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
 - Open connected `Notifications` from the lower row above `Profile`.
 - Open `Share` to generate QR/deep links for the current route:

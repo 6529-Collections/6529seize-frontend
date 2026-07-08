@@ -66,6 +66,7 @@ import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/Root
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
   focus: () => void;
+  blur: () => void;
 }
 
 // Create a custom command
@@ -213,16 +214,15 @@ const CreateDropInput = forwardRef<
     const clearEditorState = () => {
       clearEditorRef.current?.clearEditorState();
     };
+    const getEditorElement = () =>
+      editorRef.current?.querySelector<HTMLElement>(
+        '[contenteditable="true"]'
+      ) ?? null;
 
     useImperativeHandle(ref, () => ({
       clearEditorState,
-      focus: () => {
-        (
-          editorRef.current?.querySelector(
-            '[contenteditable="true"]'
-          ) as HTMLElement
-        ).focus();
-      },
+      focus: () => getEditorElement()?.focus(),
+      blur: () => getEditorElement()?.blur(),
     }));
 
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
