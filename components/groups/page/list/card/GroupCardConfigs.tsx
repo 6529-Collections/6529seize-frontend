@@ -6,10 +6,13 @@ import type { ApiGroupDescription } from "@/generated/models/ApiGroupDescription
 import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiGroupNftOwnershipMatchMode } from "@/generated/models/ApiGroupNftOwnershipMatchMode";
+import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
 import { toShortGrantId } from "@/components/groups/page/create/config/xtdh-grant/utils";
+import { getGroupNftOwnershipMatchMode } from "@/helpers/groups/group-nft-ownership";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {
@@ -25,6 +28,15 @@ const MANUAL_LIST_TOOLTIP =
 
 const GRANT_TOOLTIP =
   "Identity must be a beneficiary of the selected xTDH grant.";
+
+const NFT_TOOLTIP = "Internal NFT ownership requirements for this group.";
+
+const NFT_COLLECTION_LABELS: Record<ApiGroupOwnsNftNameEnum, string> = {
+  [ApiGroupOwnsNftNameEnum.Gradients]: "Gradients",
+  [ApiGroupOwnsNftNameEnum.Memelab]: "Meme Lab",
+  [ApiGroupOwnsNftNameEnum.Memes]: "Memes",
+  [ApiGroupOwnsNftNameEnum.Nextgen]: "NextGen",
+};
 
 const GRANT_STATUS_LABELS: Record<ApiXTdhGrantStatus, string> = {
   [ApiXTdhGrantStatus.Pending]: "PENDING",
@@ -173,6 +185,36 @@ export default function GroupCardConfigs({
     };
   };
 
+  const getNftsConfig = (
+    owns_nfts: ApiGroupDescription["owns_nfts"]
+  ): GroupCardConfigProps | null => {
+    if (!owns_nfts.length) {
+      return null;
+    }
+
+    const value = owns_nfts
+      .map((nft) => {
+        const collectionLabel = NFT_COLLECTION_LABELS[nft.name];
+        if (nft.tokens.length === 0) {
+          return `${collectionLabel}: any collection token`;
+        }
+
+        const matchMode = getGroupNftOwnershipMatchMode(nft);
+        const tokenModeLabel =
+          matchMode === ApiGroupNftOwnershipMatchMode.AnyToken
+            ? "any selected"
+            : "all selected";
+        return `${collectionLabel}: ${tokenModeLabel} (${nft.tokens.length})`;
+      })
+      .join(", ");
+
+    return {
+      key: GroupDescriptionType.OWNS_NFTS,
+      value,
+      tooltip: NFT_TOOLTIP,
+    };
+  };
+
   const getWalletsConfig = (
     wallet_group_wallets_count: ApiGroupDescription["identity_group_identities_count"]
   ): GroupCardConfigProps => {
@@ -251,18 +293,20 @@ export default function GroupCardConfigs({
       ];
     }
     const configs: GroupCardConfigProps[] = [];
-    const { tdh, rep, cic, level, identity_group_identities_count } =
+    const { tdh, rep, cic, level, owns_nfts, identity_group_identities_count } =
       group.group;
     const tdhConfig = getTdhConfig(tdh);
     const repConfig = getRepConfig(rep);
     const cicConfig = getCicConfig(cic);
     const levelConfig = getLevelConfig(level);
+    const nftsConfig = getNftsConfig(owns_nfts);
     const grantConfig = getGrantConfig(group.group);
     const walletsConfig = getWalletsConfig(identity_group_identities_count);
     if (tdhConfig) configs.push(tdhConfig);
     if (repConfig) configs.push(repConfig);
     if (cicConfig) configs.push(cicConfig);
     if (levelConfig) configs.push(levelConfig);
+    if (nftsConfig) configs.push(nftsConfig);
     if (grantConfig) configs.push(grantConfig);
     configs.push(walletsConfig);
 

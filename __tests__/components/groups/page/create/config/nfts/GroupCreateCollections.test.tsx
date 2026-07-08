@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GroupCreateCollections from '@/components/groups/page/create/config/nfts/GroupCreateCollections';
 import { ApiGroupOwnsNftNameEnum } from '@/generated/models/ApiGroupOwnsNft';
+import { ApiGroupNftOwnershipMatchMode } from '@/generated/models/ApiGroupNftOwnershipMatchMode';
 
 describe('GroupCreateCollections', () => {
   it('adds collection when button clicked', async () => {
@@ -12,7 +13,13 @@ describe('GroupCreateCollections', () => {
     const gradients = screen.getByRole('button', { name: 'Gradients' });
     expect(gradients).toHaveClass('tw-bg-iron-900');
     await userEvent.click(gradients);
-    expect(setNfts).toHaveBeenCalledWith([{ name: ApiGroupOwnsNftNameEnum.Gradients, tokens: [] }]);
+    expect(setNfts).toHaveBeenCalledWith([
+      {
+        name: ApiGroupOwnsNftNameEnum.Gradients,
+        tokens: [],
+        match_mode: ApiGroupNftOwnershipMatchMode.AllTokens,
+      },
+    ]);
   });
 
   it('removes collection when already selected', async () => {

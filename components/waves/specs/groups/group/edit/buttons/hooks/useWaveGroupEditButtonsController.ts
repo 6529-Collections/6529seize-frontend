@@ -14,6 +14,7 @@ import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirect
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { normalizeGroupNftOwnerships } from "@/helpers/groups/group-nft-ownership";
 import {
   createGroup,
   publishGroup,
@@ -105,7 +106,9 @@ const cloneGroupPayload = (group: ApiGroupFull): ApiCreateGroup => ({
     rep: { ...group.group.rep },
     cic: { ...group.group.cic },
     level: { ...group.group.level },
-    owns_nfts: group.group.owns_nfts.map((nft) => ({ ...nft })),
+    owns_nfts: normalizeGroupNftOwnerships(
+      group.group.owns_nfts.map((nft) => ({ ...nft }))
+    ),
     identity_addresses: null,
     excluded_identity_addresses: null,
   },
