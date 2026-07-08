@@ -48,14 +48,27 @@ function resolveWebhookConfig() {
       secret: CI_PIPELINES_WAVE_WEBHOOK_SECRET_STAGING
     };
   }
+  if (targetEnv) {
+    return {
+      targetEnv,
+      unsupported: true
+    };
+  }
   return {
-    targetEnv: targetEnv || 'default',
+    targetEnv: 'default',
     url: CI_PIPELINES_WAVE_WEBHOOK_URL,
     secret: CI_PIPELINES_WAVE_WEBHOOK_SECRET
   };
 }
 
 const webhookConfig = resolveWebhookConfig();
+
+if (webhookConfig.unsupported) {
+  console.error(
+    `Unsupported CI pipeline wave target environment: ${webhookConfig.targetEnv}`
+  );
+  process.exit(1);
+}
 
 if (!webhookConfig.url || !webhookConfig.secret) {
   console.log(
