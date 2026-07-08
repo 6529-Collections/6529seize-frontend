@@ -159,12 +159,13 @@ describe("getContainedImageBounds", () => {
 
   it("keeps the current style when resize observation reports unchanged bounds", async () => {
     const resizeObserver = installResizeObserverMock();
+    const getNaturalWidth = jest.fn(() => 500);
 
     try {
       render(
         createElement(BoundsProbe, {
           getNaturalHeight: () => 400,
-          getNaturalWidth: () => 500,
+          getNaturalWidth,
         })
       );
 
@@ -176,12 +177,17 @@ describe("getContainedImageBounds", () => {
 
       const measuredRenderCount =
         screen.getByTestId("render-count").textContent ?? "";
+      const measuredNaturalWidthReads = getNaturalWidth.mock.calls.length;
 
-      await act(async () => {
+      act(() => {
         resizeObserver.trigger();
-        await new Promise((resolve) => globalThis.setTimeout(resolve, 50));
       });
 
+      await waitFor(() => {
+        expect(getNaturalWidth).toHaveBeenCalledTimes(
+          measuredNaturalWidthReads + 1
+        );
+      });
       expect(screen.getByTestId("render-count")).toHaveTextContent(
         measuredRenderCount
       );
