@@ -473,6 +473,12 @@ describe("session-v2.utils", () => {
     resolveRefresh?.(sessionResponse);
     await expect(waitingRefresh).resolves.toBe(sessionResponse);
     expect(commonApiPost).toHaveBeenCalledTimes(1);
+    expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+      "started",
+      "deduped_in_flight",
+      "aborted",
+      "success",
+    ]);
   });
 
   it("cooldowns failed web refreshes for the same session context", async () => {
@@ -726,6 +732,56 @@ describe("session-v2.utils", () => {
     ).resolves.toBe(false);
   });
 
+  it("logs native session refresh success telemetry", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(
+      "native-refresh-token"
+    );
+    const sessionResponse = {
+      client_type: "native",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "rotated-native-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBe(
+      sessionResponse
+    );
+
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "native",
+        outcome: "started",
+      }),
+      expect.objectContaining({
+        client_type: "native",
+        outcome: "success",
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+  });
+
+  it("counts missing native refresh tokens as unauthorized without a backend request", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(null);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "native",
+        outcome: "unauthorized",
+      }),
+    ]);
+    expect(getSessionRefreshWarnTelemetry()).toEqual([]);
+  });
+
   it("treats unauthorized native refresh as an invalid session", async () => {
     const unauthorizedError = Object.assign(new Error("Unauthorized"), {
       status: 401,
@@ -751,6 +807,18 @@ describe("session-v2.utils", () => {
       errorMode: "structured",
       includeWalletAuth: false,
     });
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "native",
+        outcome: "started",
+      }),
+      expect.objectContaining({
+        client_type: "native",
+        outcome: "unauthorized",
+        status_code: 401,
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
   });
 
   it("revokes an existing native session", async () => {

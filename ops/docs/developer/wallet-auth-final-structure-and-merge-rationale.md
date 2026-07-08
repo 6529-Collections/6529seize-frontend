@@ -94,7 +94,10 @@ Useful fields:
 - `client_type=web|native|desktop`
 - `outcome=started|success|unauthorized|aborted|network_error|backend_error|cooldown_used_empty|cooldown_used_retry|deduped_in_flight`
 - `status_code`, when a backend HTTP status is known
-- `duration_bucket_ms`, when a backend request was attempted
+- `duration_bucket_ms`, on terminal backend request outcomes after `started`
+
+`unauthorized` includes backend 401 responses and native refresh attempts that
+cannot find a local native refresh token. The latter has no `status_code`.
 
 Example Sentry log queries:
 
