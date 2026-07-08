@@ -14,6 +14,8 @@ import {
   normalizeGroupNftOwnerships,
   withDefaultGroupNftOwnershipMatchMode,
 } from "@/helpers/groups/group-nft-ownership";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import GroupCreateNftsSelect from "./GroupCreateNftsSelect";
 import GroupCreateNftsSelected from "./GroupCreateNftsSelected";
 
@@ -105,8 +107,7 @@ export default function GroupCreateNfts({
           Required NFTs
         </p>
         <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
-          Choose whether identities must own any selected token or every
-          selected token.
+          {t(DEFAULT_LOCALE, "groups.nftOwnership.description")}
         </p>
       </div>
       <div className="tw-mt-2 sm:tw-mt-4">

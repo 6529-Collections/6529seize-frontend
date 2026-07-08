@@ -48,7 +48,7 @@ describe("GroupCreateNftsSelected", () => {
       { name: ApiGroupOwnsNftNameEnum.Gradients, token: "5" },
     ]);
     expect(
-      screen.getByRole("group", { name: "The Memes token requirement" })
+      screen.getByRole("group", { name: "Memes token requirement" })
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("button", { name: "Own all" })[0]

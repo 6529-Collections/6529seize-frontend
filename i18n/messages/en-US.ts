@@ -653,6 +653,23 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
 } as const);
 
+const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
+  "collection.gradients": "Gradients",
+  "collection.memelab": "Meme Lab",
+  "collection.memes": "Memes",
+  "collection.nextgen": "NextGen",
+  "matchMode.any": "Own any",
+  "matchMode.all": "Own all",
+  requirementLabel: "{collection} requirement",
+  tokenRequirementLabel: "{collection} token requirement",
+  description:
+    "Choose whether identities must own any selected token or all selected tokens.",
+  "card.tooltip": "Internal NFT ownership requirements for this group.",
+  "card.anyCollectionToken": "{collection}: any collection token",
+  "card.anySelected": "{collection}: any selected ({count})",
+  "card.allSelected": "{collection}: all selected ({count})",
+} as const);
+
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
 } as const);
@@ -1581,6 +1598,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
+  ...GROUP_NFT_OWNERSHIP_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,

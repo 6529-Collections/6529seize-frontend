@@ -6,13 +6,13 @@ import type { ApiGroupDescription } from "@/generated/models/ApiGroupDescription
 import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiGroupNftOwnershipMatchMode } from "@/generated/models/ApiGroupNftOwnershipMatchMode";
-import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
 import { toShortGrantId } from "@/components/groups/page/create/config/xtdh-grant/utils";
-import { getGroupNftOwnershipMatchMode } from "@/helpers/groups/group-nft-ownership";
+import { getGroupNftOwnershipCardSummary } from "@/helpers/groups/group-nft-ownership";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {
@@ -28,15 +28,6 @@ const MANUAL_LIST_TOOLTIP =
 
 const GRANT_TOOLTIP =
   "Identity must be a beneficiary of the selected xTDH grant.";
-
-const NFT_TOOLTIP = "Internal NFT ownership requirements for this group.";
-
-const NFT_COLLECTION_LABELS: Record<ApiGroupOwnsNftNameEnum, string> = {
-  [ApiGroupOwnsNftNameEnum.Gradients]: "Gradients",
-  [ApiGroupOwnsNftNameEnum.Memelab]: "Meme Lab",
-  [ApiGroupOwnsNftNameEnum.Memes]: "Memes",
-  [ApiGroupOwnsNftNameEnum.Nextgen]: "NextGen",
-};
 
 const GRANT_STATUS_LABELS: Record<ApiXTdhGrantStatus, string> = {
   [ApiXTdhGrantStatus.Pending]: "PENDING",
@@ -193,25 +184,13 @@ export default function GroupCardConfigs({
     }
 
     const value = owns_nfts
-      .map((nft) => {
-        const collectionLabel = NFT_COLLECTION_LABELS[nft.name];
-        if (nft.tokens.length === 0) {
-          return `${collectionLabel}: any collection token`;
-        }
-
-        const matchMode = getGroupNftOwnershipMatchMode(nft);
-        const tokenModeLabel =
-          matchMode === ApiGroupNftOwnershipMatchMode.AnyToken
-            ? "any selected"
-            : "all selected";
-        return `${collectionLabel}: ${tokenModeLabel} (${nft.tokens.length})`;
-      })
+      .map((nft) => getGroupNftOwnershipCardSummary(nft))
       .join(", ");
 
     return {
       key: GroupDescriptionType.OWNS_NFTS,
       value,
-      tooltip: NFT_TOOLTIP,
+      tooltip: t(DEFAULT_LOCALE, "groups.nftOwnership.card.tooltip"),
     };
   };
 

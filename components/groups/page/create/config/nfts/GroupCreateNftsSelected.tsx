@@ -3,25 +3,18 @@ import {
   ApiGroupOwnsNftNameEnum,
 } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiGroupNftOwnershipMatchMode } from "@/generated/models/ApiGroupNftOwnershipMatchMode";
-import { getGroupNftOwnershipMatchMode } from "@/helpers/groups/group-nft-ownership";
+import {
+  getGroupNftOwnershipCollectionLabel,
+  getGroupNftOwnershipMatchMode,
+  getGroupNftOwnershipMatchModeLabel,
+} from "@/helpers/groups/group-nft-ownership";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import GroupCreateNftsSelectedItem from "./GroupCreateNftsSelectedItem";
 
-const NFT_GROUP_LABELS: Record<ApiGroupOwnsNftNameEnum, string> = {
-  [ApiGroupOwnsNftNameEnum.Gradients]: "Gradients",
-  [ApiGroupOwnsNftNameEnum.Memelab]: "Meme Lab",
-  [ApiGroupOwnsNftNameEnum.Memes]: "The Memes",
-  [ApiGroupOwnsNftNameEnum.Nextgen]: "NextGen",
-};
-
 const MATCH_MODE_OPTIONS = [
-  {
-    value: ApiGroupNftOwnershipMatchMode.AnyToken,
-    label: "Own any",
-  },
-  {
-    value: ApiGroupNftOwnershipMatchMode.AllTokens,
-    label: "Own all",
-  },
+  ApiGroupNftOwnershipMatchMode.AnyToken,
+  ApiGroupNftOwnershipMatchMode.AllTokens,
 ] as const;
 
 export default function GroupCreateNftsSelected({
@@ -57,7 +50,7 @@ export default function GroupCreateNftsSelected({
     <div className="tw-mt-4 tw-space-y-4">
       {selectedSpecificTokens.map((group) => {
         const matchMode = getGroupNftOwnershipMatchMode(group);
-        const groupLabel = NFT_GROUP_LABELS[group.name];
+        const groupLabel = getGroupNftOwnershipCollectionLabel(group.name);
         return (
           <div
             key={group.name}
@@ -65,24 +58,32 @@ export default function GroupCreateNftsSelected({
           >
             <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
               <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-                {groupLabel} requirement
+                {t(DEFAULT_LOCALE, "groups.nftOwnership.requirementLabel", {
+                  collection: groupLabel,
+                })}
               </span>
               <div
                 role="group"
-                aria-label={`${groupLabel} token requirement`}
+                aria-label={t(
+                  DEFAULT_LOCALE,
+                  "groups.nftOwnership.tokenRequirementLabel",
+                  {
+                    collection: groupLabel,
+                  }
+                )}
                 className="tw-flex tw-flex-wrap tw-gap-2"
               >
                 {MATCH_MODE_OPTIONS.map((option) => {
-                  const isActive = matchMode === option.value;
+                  const isActive = matchMode === option;
                   return (
                     <button
-                      key={option.value}
+                      key={option}
                       type="button"
                       aria-pressed={isActive}
                       onClick={() =>
                         onMatchModeChange({
                           name: group.name,
-                          matchMode: option.value,
+                          matchMode: option,
                         })
                       }
                       className={`tw-rounded-md tw-border tw-border-solid tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-outline-none tw-transition tw-duration-200 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
@@ -91,7 +92,7 @@ export default function GroupCreateNftsSelected({
                           : "tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900"
                       }`}
                     >
-                      {option.label}
+                      {getGroupNftOwnershipMatchModeLabel(option)}
                     </button>
                   );
                 })}
