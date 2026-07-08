@@ -1,49 +1,46 @@
-import React from 'react';
-/* eslint-disable react/display-name */
-import { render, screen } from '@testing-library/react';
-import MediaPage from '@/app/about/media/page';
+import MediaPage, { generateMetadata } from "@/app/about/media/page";
+import { aboutMediaMigratedWordPressPage } from "@/app/about/media/content";
+import { render, screen } from "@testing-library/react";
 
-jest.mock('@/components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);
+describe("MediaPage (migrated WordPress static page)", () => {
+  it("renders the media center title and brand collateral links", () => {
+    render(<MediaPage />);
 
-describe('MediaPage', () => {
-  const renderComponent = () => render(<MediaPage />);
-
-  it('renders the page title', () => {
-    renderComponent();
-    const title = document.querySelector('title');
-    expect(title?.textContent).toBe('MEDIA CENTER - 6529.io');
+    expect(
+      screen.getByRole("heading", { level: 1, name: "MEDIA CENTER" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Official brand collateral for use in publications is below:"
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText("Punk with background")).toHaveAttribute(
+      "href",
+      "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Punk6529.png"
+    );
   });
 
-  it('includes canonical link', () => {
-    renderComponent();
-    const canonical = document.querySelector('link[rel="canonical"]');
-    expect(canonical).toBeInTheDocument();
-    expect(canonical?.getAttribute('href')).toBe('/about/media/');
+  it("marks the page with its auditable migration source", () => {
+    render(<MediaPage />);
+
+    expect(document.querySelector("main")).toHaveAttribute(
+      "data-content-source",
+      "migrated-wordpress"
+    );
   });
 
-  it('includes robots meta tag', () => {
-    renderComponent();
-    const robots = document.querySelector('meta[name="robots"]');
-    expect(robots?.getAttribute('content')).toBe('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  it("exposes title and Open Graph metadata via generateMetadata", () => {
+    const metadata = generateMetadata();
+
+    expect(metadata.title).toBe("MEDIA CENTER - 6529.io");
+    expect(metadata.openGraph).toMatchObject({
+      siteName: "6529.io",
+      title: "MEDIA CENTER - 6529.io",
+    });
   });
 
-  it('includes Open Graph title', () => {
-    renderComponent();
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    expect(ogTitle?.getAttribute('content')).toBe('MEDIA CENTER - 6529.io');
-  });
-
-  it('has skip to content link', () => {
-    renderComponent();
-    const skip = screen.getByText('Skip to content');
-    expect(skip).toBeInTheDocument();
-    expect(skip).toHaveAttribute('href', '#content');
-  });
-
-  it('has go to top link', () => {
-    renderComponent();
-    const link = document.querySelector('#toTop');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveClass('fusion-top-top-link');
+  it("keeps the content module aligned with the page path", () => {
+    expect(aboutMediaMigratedWordPressPage.path).toBe("/about/media");
+    expect(aboutMediaMigratedWordPressPage.source).toBe("migrated-wordpress");
   });
 });
