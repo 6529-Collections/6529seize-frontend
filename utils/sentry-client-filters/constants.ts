@@ -50,6 +50,11 @@ export const walletWebSocketBreadcrumbConnectorTokens = [
   "@coinbase+wallet-sdk",
   "walletconnect",
 ];
+export const walletWebSocketAppKitBootstrapBreadcrumbTokens = [
+  "wagmi_appkit_init_start",
+  "wagmi_appkit_init_ok",
+  "wagmi_adapter_created",
+];
 export const appOwnedFramePathPrefixes = [
   "app/",
   "components/",
