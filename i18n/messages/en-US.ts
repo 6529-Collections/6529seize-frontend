@@ -40,6 +40,8 @@ function namespaceMessages<
 
 type MessageMap = Record<string, string>;
 
+const PLEASE_TRY_AGAIN = "Please try again.";
+
 type ObjectMessages<Prefix extends string, Entries extends MessageMap> = {
   readonly [Entry in keyof Entries as `${Prefix}.${Entry & string}`]: Entries[Entry];
 };
@@ -345,6 +347,14 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyFailed: "Copy failed",
 } as const);
 
+const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
+  "actions.viewResults": "View results",
+  "actions.vote": "Vote",
+  "actions.changeVote": "Change vote",
+  "status.voted": "Voted",
+  "status.updated": "Updated",
+} as const);
+
 const WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES = objectMessages(
   "waves.submissionButtonLabel",
   {
@@ -359,7 +369,7 @@ const WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES = objectMessages(
     rowLabel: "Submission button",
     toastAuthFailed:
       "Couldn't authenticate. Reconnect your wallet and try again.",
-    toastRetry: "Please try again.",
+    toastRetry: PLEASE_TRY_AGAIN,
     toastSaveFailedTitle: "Couldn't save this submission button label.",
     useDefault: "Use default",
   } as const
@@ -447,7 +457,7 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
   "dm.createFailed.title": "Couldn't create this direct message.",
-  "dm.createFailed.description": "Please try again.",
+  "dm.createFailed.description": PLEASE_TRY_AGAIN,
   "name.profileEnabled": "Profile enabled: {date}",
   "pfp.alt": "{name}'s profile picture",
   "pfp.edit": "Edit {name}'s profile picture",
@@ -615,11 +625,11 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
     ["mute.tooltip.disable", "Click to unmute this wave"],
     ["mute.error.muteTitle", "Couldn't mute this wave."],
     ["mute.error.unmuteTitle", "Couldn't unmute this wave."],
-    ["mute.error.description", "Please try again."],
+    ["mute.error.description", PLEASE_TRY_AGAIN],
     ["mute.error.fallbackMute", "Unable to mute wave"],
     ["mute.error.fallbackUnmute", "Unable to unmute wave"],
     ["preferences.error.updateTitle", "Couldn't update notification settings."],
-    ["preferences.error.description", "Please try again."],
+    ["preferences.error.description", PLEASE_TRY_AGAIN],
     [
       "preferences.error.enableAllMentions",
       "Unable to enable @ALL notifications",
@@ -651,6 +661,23 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Add identities one by one to build this access group.",
   "inlineIdentities.creatorExcludedWarning":
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
+} as const);
+
+const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
+  "collection.gradients": "Gradients",
+  "collection.memelab": "Meme Lab",
+  "collection.memes": "Memes",
+  "collection.nextgen": "NextGen",
+  "matchMode.any": "Own any",
+  "matchMode.all": "Own all",
+  requirementLabel: "{collection} requirement",
+  tokenRequirementLabel: "{collection} token requirement",
+  description:
+    "Choose whether identities must own any selected token or all selected tokens.",
+  "card.tooltip": "Internal NFT ownership requirements for this group.",
+  "card.anyCollectionToken": "{collection}: any collection token",
+  "card.anySelected": "{collection}: any selected ({count})",
+  "card.allSelected": "{collection}: all selected ({count})",
 } as const);
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
@@ -1541,7 +1568,7 @@ export const EN_US_MESSAGES = {
     "Unmute notifications from this profile",
   "profile.mute.error.mute": "Couldn't mute this profile.",
   "profile.mute.error.unmute": "Couldn't unmute this profile.",
-  "profile.mute.error.description": "Please try again.",
+  "profile.mute.error.description": PLEASE_TRY_AGAIN,
   "profile.mute.status.muted": "Notifications from this profile are muted.",
   "profile.mute.status.unmuted":
     "Notifications from this profile are not muted.",
@@ -1581,6 +1608,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
+  ...GROUP_NFT_OWNERSHIP_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
@@ -1606,6 +1634,7 @@ export const EN_US_MESSAGES = {
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;
 

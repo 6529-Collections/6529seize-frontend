@@ -32,6 +32,12 @@ const subscribers = new Set<KeyboardStateSubscriber>();
 let listenerHandles: PluginListenerHandle[] = [];
 let listenerSetupPromise: Promise<void> | null = null;
 let listenerSetupToken = 0;
+let browserFallbackTeardown: (() => void) | null = null;
+let hiddenFallbackTimeout: ReturnType<typeof setTimeout> | null = null;
+let keyboardClosedViewportHeight = 0;
+
+const VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX = 24;
+const FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS = 180;
 
 function readPlatformState(): Pick<
   NativeKeyboardState,
@@ -99,6 +105,187 @@ function setKeyboardState(
   });
 }
 
+function clearHiddenFallbackTimeout(): void {
+  if (hiddenFallbackTimeout === null) {
+    return;
+  }
+
+  clearTimeout(hiddenFallbackTimeout);
+  hiddenFallbackTimeout = null;
+}
+
+function getViewportHeight(): number {
+  const visualViewportHeight = globalThis.visualViewport?.height;
+  if (
+    typeof visualViewportHeight === "number" &&
+    Number.isFinite(visualViewportHeight) &&
+    visualViewportHeight > 0
+  ) {
+    return visualViewportHeight;
+  }
+
+  const windowHeight = typeof window !== "undefined" ? window.innerHeight : 0;
+  if (
+    typeof windowHeight === "number" &&
+    Number.isFinite(windowHeight) &&
+    windowHeight > 0
+  ) {
+    return windowHeight;
+  }
+
+  return typeof document !== "undefined"
+    ? document.documentElement.clientHeight
+    : 0;
+}
+
+function rememberKeyboardClosedViewportHeight(): number {
+  const viewportHeight = getViewportHeight();
+  if (viewportHeight > 0) {
+    keyboardClosedViewportHeight = viewportHeight;
+  }
+
+  return viewportHeight;
+}
+
+function isEditableElement(element: Element | null): boolean {
+  if (!(element instanceof HTMLElement)) {
+    return false;
+  }
+
+  return (
+    element.isContentEditable ||
+    element.matches(
+      'input:not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled]), [contenteditable="true"], [contenteditable="plaintext-only"]'
+    )
+  );
+}
+
+function hasEditableFocus(): boolean {
+  const documentRef = globalThis.document as Document | undefined;
+
+  if (documentRef === undefined) {
+    return false;
+  }
+
+  return isEditableElement(documentRef.activeElement);
+}
+
+function markKeyboardHiddenFromFallback(): void {
+  clearHiddenFallbackTimeout();
+
+  if (!currentState.isVisible) {
+    rememberKeyboardClosedViewportHeight();
+    return;
+  }
+
+  setKeyboardState({
+    isVisible: false,
+    keyboardHeight: 0,
+    phase: "hidden",
+  });
+  rememberKeyboardClosedViewportHeight();
+}
+
+function syncKeyboardVisibilityFromViewport(): void {
+  const viewportHeight = getViewportHeight();
+  if (viewportHeight <= 0) {
+    return;
+  }
+
+  if (!currentState.isVisible) {
+    rememberKeyboardClosedViewportHeight();
+    return;
+  }
+
+  if (keyboardClosedViewportHeight <= 0) {
+    keyboardClosedViewportHeight = viewportHeight;
+    return;
+  }
+
+  if (
+    viewportHeight >=
+    keyboardClosedViewportHeight - VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX
+  ) {
+    markKeyboardHiddenFromFallback();
+  }
+}
+
+function scheduleFocusoutKeyboardHideFallback(): void {
+  clearHiddenFallbackTimeout();
+
+  hiddenFallbackTimeout = setTimeout(() => {
+    hiddenFallbackTimeout = null;
+    if (!currentState.isVisible || hasEditableFocus()) {
+      return;
+    }
+
+    markKeyboardHiddenFromFallback();
+  }, FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS);
+}
+
+function setupBrowserKeyboardFallbackListeners(): void {
+  const windowRef = globalThis.window as Window | undefined;
+  const documentRef = globalThis.document as Document | undefined;
+
+  if (
+    browserFallbackTeardown !== null ||
+    windowRef === undefined ||
+    documentRef === undefined
+  ) {
+    return;
+  }
+
+  rememberKeyboardClosedViewportHeight();
+
+  const handleFocusIn = () => {
+    clearHiddenFallbackTimeout();
+  };
+  const handleFocusOut = () => {
+    scheduleFocusoutKeyboardHideFallback();
+  };
+  const handleViewportChange = () => {
+    syncKeyboardVisibilityFromViewport();
+  };
+  const handleVisibilityChange = () => {
+    if (documentRef.visibilityState === "hidden") {
+      markKeyboardHiddenFromFallback();
+    }
+  };
+
+  documentRef.addEventListener("focusin", handleFocusIn, true);
+  documentRef.addEventListener("focusout", handleFocusOut, true);
+  documentRef.addEventListener(
+    "visibilitychange",
+    handleVisibilityChange
+  );
+  windowRef.addEventListener("resize", handleViewportChange, {
+    passive: true,
+  });
+  globalThis.visualViewport?.addEventListener("resize", handleViewportChange, {
+    passive: true,
+  });
+  globalThis.visualViewport?.addEventListener("scroll", handleViewportChange, {
+    passive: true,
+  });
+
+  browserFallbackTeardown = () => {
+    clearHiddenFallbackTimeout();
+    documentRef.removeEventListener("focusin", handleFocusIn, true);
+    documentRef.removeEventListener("focusout", handleFocusOut, true);
+    documentRef.removeEventListener("visibilitychange", handleVisibilityChange);
+    windowRef.removeEventListener("resize", handleViewportChange);
+    globalThis.visualViewport?.removeEventListener(
+      "resize",
+      handleViewportChange
+    );
+    globalThis.visualViewport?.removeEventListener(
+      "scroll",
+      handleViewportChange
+    );
+    browserFallbackTeardown = null;
+  };
+}
+
 function getKeyboardHeight(info?: { keyboardHeight?: number | null }): number {
   const height = info?.keyboardHeight;
 
@@ -122,14 +309,25 @@ async function removeListenerHandles(
 
 function teardownKeyboardListeners(): void {
   listenerSetupToken += 1;
+  browserFallbackTeardown?.();
 
   if (listenerHandles.length === 0) {
+    setKeyboardState({
+      isVisible: false,
+      keyboardHeight: 0,
+      phase: "hidden",
+    });
     return;
   }
 
   const handles = listenerHandles;
   listenerHandles = [];
   void removeListenerHandles(handles);
+  setKeyboardState({
+    isVisible: false,
+    keyboardHeight: 0,
+    phase: "hidden",
+  });
 }
 
 function ensureKeyboardListeners(): void {
@@ -146,6 +344,8 @@ function ensureKeyboardListeners(): void {
   ) {
     return;
   }
+
+  setupBrowserKeyboardFallbackListeners();
 
   const setupToken = listenerSetupToken;
 
@@ -246,9 +446,12 @@ export function useNativeKeyboard(): NativeKeyboardState {
 
 export function __resetNativeKeyboardForTests(): void {
   teardownKeyboardListeners();
+  browserFallbackTeardown?.();
+  clearHiddenFallbackTimeout();
   currentState = defaultState;
   subscribers.clear();
   listenerHandles = [];
   listenerSetupPromise = null;
   listenerSetupToken = 0;
+  keyboardClosedViewportHeight = 0;
 }

@@ -2108,6 +2108,7 @@
       ],
       "facts": [
         "Group create/edit flows define group details and membership rules.",
+        "For selected internal NFTs such as Memes, Meme Lab, Gradients, and NextGen, group creators can require members to own any selected token or all selected tokens.",
         "xTDH grant beneficiary group rules can use typed grant IDs or the grant picker.",
         "For token-specific xTDH grants, group creators can require members to own any specified token or all specified tokens.",
         "For full-collection xTDH grants, group membership requires ownership of at least one collection token.",
@@ -3988,12 +3989,28 @@
       "id": "waves.content-tabs",
       "kind": "ui_affordance",
       "title": "Wave content tabs",
-      "aliases": ["wave tabs", "content tabs", "chat tabs", "gallery tab"],
-      "keywords": ["waves", "tabs", "content", "chat", "gallery"],
+      "aliases": [
+        "wave tabs",
+        "content tabs",
+        "chat tabs",
+        "gallery tab",
+        "polls tab",
+        "poll results"
+      ],
+      "keywords": [
+        "waves",
+        "tabs",
+        "content",
+        "chat",
+        "gallery",
+        "polls",
+        "results"
+      ],
       "facts": [
         "Wave content tabs organize the visible wave content area.",
         "Some waves can switch between chat and gallery-style views.",
-        "Available tabs depend on wave type, state, and content."
+        "Available tabs depend on wave type, state, and content.",
+        "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
