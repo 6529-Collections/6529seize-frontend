@@ -66,8 +66,13 @@ export function useSessionUpgradeExpiry({
         reason: "session_upgrade_deadline_expired",
         wasConnectedWallet: hasActiveWalletAddress,
       });
-      await removeAuthJwt();
-      invalidateAll();
+      try {
+        await removeAuthJwt();
+        invalidateAll();
+      } catch (error) {
+        expiredSessionUpgradeAddressRef.current = null;
+        throw error;
+      }
     },
     [
       hasActiveWalletAddress,
