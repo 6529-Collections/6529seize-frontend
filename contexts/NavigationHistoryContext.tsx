@@ -9,7 +9,6 @@ import {
   useState,
   useRef,
   useMemo,
-  Suspense,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ViewKey } from "@/components/navigation/navTypes";
@@ -32,8 +31,6 @@ interface StackView {
 }
 
 type StackEntry = StackRoute | StackView;
-type MutableRef<T> = { current: T };
-type SearchParamsLike = Pick<URLSearchParams, "toString"> | null | undefined;
 
 interface NavigationHistoryContextValue {
   canGoBack: boolean;
@@ -46,100 +43,18 @@ const Context = createContext<NavigationHistoryContextValue | undefined>(
 );
 const MAX_STACK = 50;
 
-const getFullPath = (
-  pathname: string | null | undefined,
-  searchParams: SearchParamsLike
-): string => {
-  const search = searchParams?.toString();
-  const path = pathname ?? "/";
-  return search ? `${path}?${search}` : path;
-};
-
-const getRoutePathKey = (
-  pathname: string | null | undefined,
-  searchParams: SearchParamsLike
-): string => {
-  const url = getFullPath(pathname, searchParams);
-  const isProfile = pathname?.startsWith("/[user]");
-  const [pathOnly, searchOnly = ""] = url.split("?");
-  const activeWaveId = getActiveWaveIdFromUrl({
-    pathname: pathOnly,
-    searchParams: new URLSearchParams(searchOnly),
-  });
-  const isWaveRoute =
-    Boolean(activeWaveId) &&
-    (pathOnly === "/" ||
-      pathOnly?.startsWith("/waves") ||
-      pathOnly?.startsWith("/messages"));
-
-  if (isProfile) {
-    return mainSegment(url);
-  }
-
-  if (isWaveRoute && activeWaveId) {
-    const isMessagesRoute = pathOnly?.startsWith("/messages");
-    return isMessagesRoute
-      ? getMessagePathRoute(activeWaveId)
-      : getWavePathRoute(activeWaveId);
-  }
-
-  return url.split(/[?#]/)[0]!;
-};
-
-const getInitialSearchParams = (): URLSearchParams => {
-  if (typeof window === "undefined") {
-    return new URLSearchParams();
-  }
-
-  return new URLSearchParams(window.location.search);
-};
-
-function NavigationHistoryRouteTracker({
-  pushStack,
-  skipNext,
-  prevPathRef,
-}: {
-  readonly pushStack: (entry: StackRoute) => void;
-  readonly skipNext: MutableRef<boolean>;
-  readonly prevPathRef: MutableRef<string>;
-}) {
-  const pathname = usePathname();
-  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by NavigationHistoryProvider Suspense wrapper
-  const searchParams = useSearchParams();
-  const fullPath = getFullPath(pathname, searchParams);
-
-  useEffect(() => {
-    const url = fullPath;
-
-    if (skipNext.current) {
-      skipNext.current = false;
-      return;
-    }
-
-    if (url === prevPathRef.current) return;
-    prevPathRef.current = url;
-
-    pushStack({
-      type: "route",
-      path: getRoutePathKey(pathname, searchParams),
-    });
-  }, [fullPath, pathname, searchParams, pushStack, skipNext, prevPathRef]);
-
-  return null;
-}
-
 export const NavigationHistoryProvider: React.FC<{
   readonly children: ReactNode;
 }> = ({ children }) => {
   const { hardBack } = useViewContext();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
 
+  const fullPath =
+    pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
   const historyRef = useRef<StackEntry[]>([
-    {
-      type: "route",
-      path: getRoutePathKey(pathname, getInitialSearchParams()),
-    },
+    { type: "route", path: mainSegment(fullPath) },
   ]);
   const [index, setIndex] = useState(0);
   const skipNext = useRef(false);
@@ -172,19 +87,50 @@ export const NavigationHistoryProvider: React.FC<{
     });
   }, []);
 
-  const pushRouteEntry = useCallback(
-    (entry: StackRoute) => {
-      let i = historyRef.current.length - 1;
-      while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
-      const lastRoute = i >= 0 ? historyRef.current[i] : null;
-      const isDuplicate =
-        lastRoute?.type === "route" && lastRoute.path === entry.path;
-      if (!isDuplicate) {
-        pushStack(entry);
-      }
-    },
-    [pushStack]
-  );
+  useEffect(() => {
+    const url = fullPath;
+
+    if (skipNext.current) {
+      skipNext.current = false;
+      return;
+    }
+
+    if (url === prevPathRef.current) return;
+    prevPathRef.current = url;
+
+    const isProfile = pathname?.startsWith("/[user]");
+    const [pathOnly, searchOnly = ""] = url.split("?");
+    const activeWaveId = getActiveWaveIdFromUrl({
+      pathname: pathOnly,
+      searchParams: new URLSearchParams(searchOnly),
+    });
+    const isWaveRoute =
+      Boolean(activeWaveId) &&
+      (pathOnly === "/" ||
+        pathOnly?.startsWith("/waves") ||
+        pathOnly?.startsWith("/messages"));
+
+    let pathKey: string;
+    if (isProfile) {
+      pathKey = mainSegment(url);
+    } else if (isWaveRoute && activeWaveId) {
+      const isMessagesRoute = pathOnly?.startsWith("/messages");
+      pathKey = isMessagesRoute
+        ? getMessagePathRoute(activeWaveId)
+        : getWavePathRoute(activeWaveId);
+    } else {
+      pathKey = url.split(/[?#]/)[0]!;
+    }
+
+    let i = historyRef.current.length - 1;
+    while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
+    const lastRoute = i >= 0 ? historyRef.current[i] : null;
+    const isDuplicate =
+      lastRoute?.type === "route" && lastRoute.path === pathKey;
+    if (!isDuplicate) {
+      pushStack({ type: "route", path: pathKey });
+    }
+  }, [fullPath, pathname, searchParams, pushStack]);
 
   const pushView = useCallback(
     (view: ViewKey) => {
@@ -233,18 +179,7 @@ export const NavigationHistoryProvider: React.FC<{
     [canGoBack, goBack, pushView]
   );
 
-  return (
-    <Context.Provider value={value}>
-      <Suspense fallback={null}>
-        <NavigationHistoryRouteTracker
-          pushStack={pushRouteEntry}
-          skipNext={skipNext}
-          prevPathRef={prevPathRef}
-        />
-      </Suspense>
-      {children}
-    </Context.Provider>
-  );
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
 export const useNavigationHistoryContext =

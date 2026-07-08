@@ -19,7 +19,6 @@ import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
-import { EN_US_WALLET_STARTUP_MESSAGES } from "@/i18n/messages/wallet-startup";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -1564,9 +1563,6 @@ export const EN_US_MESSAGES = {
   "walletAddress.copy.walletAriaLabel": "Copy wallet address",
   "walletAddress.copy.tooltip": "Copy",
   "walletAddress.copy.copiedTooltip": "Copied",
-  ...EN_US_WALLET_STARTUP_MESSAGES,
-  "openMobile.openingStatus": "Opening 6529 Mobile...",
-  "nextgen.admin.loadingStatus": "Loading NextGen admin",
   ...QR_SCANNER_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
