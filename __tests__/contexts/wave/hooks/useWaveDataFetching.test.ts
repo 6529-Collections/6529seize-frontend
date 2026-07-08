@@ -195,7 +195,11 @@ describe("useWaveDataFetching", () => {
       await Promise.resolve();
     });
 
-    expect(updateData).toHaveBeenCalledTimes(1);
+    expect(updateData).toHaveBeenCalledTimes(2);
+    expect(updateData).toHaveBeenLastCalledWith({
+      key: "wave1",
+      isLoading: false,
+    });
     expect(mockTrackWaveFeedLoadFailed).toHaveBeenCalledWith({
       durationMs: 0,
       error: failureError,
@@ -228,7 +232,11 @@ describe("useWaveDataFetching", () => {
       await Promise.resolve();
     });
 
-    expect(updateData).toHaveBeenCalledTimes(1);
+    expect(updateData).toHaveBeenCalledTimes(2);
+    expect(updateData).toHaveBeenLastCalledWith({
+      key: "wave1",
+      isLoading: false,
+    });
     expect(mockTrackWaveFeedLoadCancelled).toHaveBeenCalledWith({
       durationMs: 0,
       error: abortError,

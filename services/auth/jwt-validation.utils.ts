@@ -324,7 +324,7 @@ export const validateJwt = async ({
   const refreshOutcome = refreshedResult.refreshOutcome ?? "not_attempted";
 
   if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
-    return createValidJwtResult(refreshOutcome);
+    return createValidJwtResult("local_valid_after_failure");
   }
 
   if (hasValidLocalJwt) {

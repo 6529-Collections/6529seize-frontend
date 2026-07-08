@@ -136,6 +136,38 @@ describe("jwt-validation.utils", () => {
     expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
   });
 
+  it("keeps a locally valid JWT when session-v2 appears after an empty refresh", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    mockedRefreshSessionV2.mockResolvedValue(null);
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: true,
+      refreshOutcome: "local_valid_after_failure",
+      wasCancelled: false,
+    });
+    expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
+      address: "0x123",
+      abortSignal: validParams.abortSignal,
+    });
+  });
+
+  it("keeps a locally valid JWT when session-v2 appears after a thrown refresh failure", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));
+
+    await expect(validateJwt(validParams)).resolves.toEqual({
+      isValid: true,
+      refreshOutcome: "local_valid_after_failure",
+      wasCancelled: false,
+    });
+  });
+
   it("requires session-v2 upgrade when refresh transport fails but current JWT is valid", async () => {
     mockedJwtDecode.mockReturnValue(validPayload);
     mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));

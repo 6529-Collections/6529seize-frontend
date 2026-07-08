@@ -91,4 +91,50 @@ describe("productImpactTelemetry", () => {
       "secret"
     );
   });
+
+  it("classifies wave feed HTTP failures into status and error buckets", async () => {
+    const { telemetry } = await loadProductImpactTelemetry();
+    const serviceError = Object.assign(new Error("Service unavailable"), {
+      status: 503,
+    });
+
+    telemetry.trackWaveFeedLoadFailed({
+      durationMs: 900,
+      error: serviceError,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+      remainedUnavailable: true,
+    });
+
+    expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
+      "Wave Feed Load Failed",
+      expect.objectContaining({
+        error_kind: "server",
+        product_failure: true,
+        status_bucket: "5xx",
+      })
+    );
+  });
+
+  it("classifies non-HTTP wave feed failures as unknown", async () => {
+    const { telemetry } = await loadProductImpactTelemetry();
+
+    telemetry.trackWaveFeedLoadFailed({
+      durationMs: 900,
+      error: new Error("Unexpected parser failure"),
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+      remainedUnavailable: true,
+    });
+
+    expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
+      "Wave Feed Load Failed",
+      expect.objectContaining({
+        error_kind: "unknown",
+        status_bucket: "unknown",
+      })
+    );
+  });
 });

@@ -84,6 +84,11 @@ const createAbortError = (): DOMException =>
 const createWaveFeedUnavailableError = (): Error =>
   new Error("Wave feed request returned no data");
 
+const clearWaveMessagesLoading = (waveId: string): WaveMessagesUpdate => ({
+  key: waveId,
+  isLoading: false,
+});
+
 const getTelemetryDurationMs = (startedAtMs: number): number =>
   Math.max(0, Math.round(getProductImpactNowMs() - startedAtMs));
 
@@ -510,6 +515,7 @@ export function useWaveDataFetching({
     (waveId: string, drops: ApiDrop[] | null) => {
       clearLoadingState(waveId);
       if (drops === null) {
+        updateData(clearWaveMessagesLoading(waveId));
         return null;
       }
 

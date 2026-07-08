@@ -173,8 +173,7 @@ describe("wave-messages-utils additional", () => {
     expect(mockFetchRetry).toHaveBeenCalledWith(
       expect.objectContaining({ endpoint: "drop-ids" })
     );
-    expect(result).not.toBeNull();
-    expect(result!.length).toBe(9996);
+    expect(result).toHaveLength(9996);
     expect(result![0]?.serial_no).toBe(10000);
     expect(result![result!.length - 1]?.serial_no).toBe(5);
     expect(result!.find((d) => d.serial_no === 5)).toMatchObject({
