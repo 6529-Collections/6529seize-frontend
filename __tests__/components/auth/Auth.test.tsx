@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
@@ -153,7 +159,13 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@/services/auth/immediate-validation.utils", () => ({
-  validateAuthImmediate: jest.fn(async () => ({ wasCancelled: false })),
+  validateAuthImmediate: jest.fn(async () => ({
+    isValid: true,
+    validationCompleted: true,
+    authRefreshOutcome: "not_attempted",
+    wasCancelled: false,
+    shouldShowModal: false,
+  })),
 }));
 
 jest.mock("@/services/analytics/productImpactTelemetry", () => ({
@@ -415,7 +427,9 @@ describe("Auth component", () => {
       require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
     immediateValidation.mockReset();
     immediateValidation.mockResolvedValue({
+      isValid: true,
       validationCompleted: true,
+      authRefreshOutcome: "not_attempted",
       wasCancelled: false,
       shouldShowModal: false,
     });
@@ -1187,6 +1201,60 @@ describe("Auth component", () => {
           </Auth>
         </ReactQueryWrapperContext.Provider>
       );
+
+      await waitFor(() => {
+        expect(mockTrackAuthValidationCancelled).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: true,
+          refreshOutcome: "cancelled",
+        });
+      });
+      expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
+    });
+
+    it("tracks cancelled auth validation after stale operation cleanup", async () => {
+      mockGetAuthJwt.mockReturnValue("stale-jwt-token");
+      const validation = createDeferredPromise<{
+        readonly isValid: boolean;
+        readonly validationCompleted: boolean;
+        readonly authRefreshOutcome: "cancelled";
+        readonly wasCancelled: boolean;
+        readonly shouldShowModal: boolean;
+      }>();
+      let validationSignal: AbortSignal | undefined;
+
+      mockValidateAuthImmediate.mockImplementationOnce(async ({ params }) => {
+        validationSignal = params.abortSignal;
+        return validation.promise;
+      });
+
+      const { unmount } = render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalled();
+      });
+
+      unmount();
+      expect(validationSignal?.aborted).toBe(true);
+
+      await act(async () => {
+        validation.resolve({
+          isValid: false,
+          validationCompleted: false,
+          authRefreshOutcome: "cancelled",
+          wasCancelled: true,
+          shouldShowModal: false,
+        });
+        await validation.promise;
+      });
 
       await waitFor(() => {
         expect(mockTrackAuthValidationCancelled).toHaveBeenCalledWith({

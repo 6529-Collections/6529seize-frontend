@@ -584,10 +584,15 @@ export function useWaveDataFetching({
         isNative: isCapacitor,
         loadSource: "initial_visible",
       });
-      const initialFetchOptions =
-        initialWaveDropsLimit === WAVE_DROPS_PARAMS.limit
-          ? undefined
-          : { limit: initialWaveDropsLimit };
+      let fetchFailureError: unknown;
+      const initialFetchOptions = {
+        ...(initialWaveDropsLimit === WAVE_DROPS_PARAMS.limit
+          ? {}
+          : { limit: initialWaveDropsLimit }),
+        onFailure: (error: unknown) => {
+          fetchFailureError = error;
+        },
+      };
       const fetchPromise = (async (): Promise<ApiDrop[] | null> => {
         try {
           const drops = await fetchWaveMessages(
@@ -601,7 +606,7 @@ export function useWaveDataFetching({
           if (fetchedDrops === null) {
             trackWaveFeedLoadFailed({
               durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
-              error: createWaveFeedUnavailableError(),
+              error: fetchFailureError ?? createWaveFeedUnavailableError(),
               hadCachedDrops: false,
               isNative: isCapacitor,
               loadSource: "initial_visible",

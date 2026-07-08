@@ -646,6 +646,15 @@ const runImmediateAuthValidation = async ({
         })
     );
 
+    if (result.wasCancelled) {
+      trackImmediateAuthValidationTelemetry({
+        result,
+        hadLocalJwt: authJwt !== null,
+        hasActiveWalletAddress,
+      });
+      return;
+    }
+
     if (
       isCurrentValidationOperation({
         latestAddressRef,

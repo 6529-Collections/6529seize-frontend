@@ -119,7 +119,7 @@ describe("useWaveDataFetching", () => {
       null,
       expect.any(Object),
       expect.any(Function),
-      undefined
+      expect.objectContaining({ onFailure: expect.any(Function) })
     );
     expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
       "wave_messages_loaded"
@@ -172,7 +172,21 @@ describe("useWaveDataFetching", () => {
   });
 
   it("tracks non-abort initial feed failures as unavailable", async () => {
-    fetchWaveMessages.mockResolvedValue(null);
+    const failureError = Object.assign(new Error("Service unavailable"), {
+      status: 503,
+    });
+    fetchWaveMessages.mockImplementation(
+      async (
+        _waveId: unknown,
+        _serialNo: unknown,
+        _signal: unknown,
+        _updateEligibility: unknown,
+        options: { readonly onFailure?: (error: unknown) => void }
+      ) => {
+        options.onFailure?.(failureError);
+        return null;
+      }
+    );
     createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
     const { result, updateData } = setup({ wave1: { drops: [] } });
 
@@ -184,7 +198,7 @@ describe("useWaveDataFetching", () => {
     expect(updateData).toHaveBeenCalledTimes(2);
     expect(mockTrackWaveFeedLoadFailed).toHaveBeenCalledWith({
       durationMs: 0,
-      error: expect.any(Error),
+      error: failureError,
       hadCachedDrops: false,
       isNative: false,
       loadSource: "initial_visible",
@@ -346,7 +360,10 @@ describe("useWaveDataFetching", () => {
       null,
       expect.any(Object),
       expect.any(Function),
-      { limit: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit }
+      expect.objectContaining({
+        limit: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit,
+        onFailure: expect.any(Function),
+      })
     );
 
     await act(async () => {
