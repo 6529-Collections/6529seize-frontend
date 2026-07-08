@@ -62,7 +62,7 @@ function mergeProfiles(
     handle:
       getNonEmptyIdentityValue(preferred.handle) ??
       getNonEmptyIdentityValue(fallback.handle),
-    pfp: preferred.pfp ?? fallback.pfp,
+    pfp: getNonEmptyIdentityValue(preferred.pfp) ?? fallback.pfp,
     primary_address:
       getNonEmptyIdentityValue(preferred.primary_address) ??
       fallback.primary_address,
