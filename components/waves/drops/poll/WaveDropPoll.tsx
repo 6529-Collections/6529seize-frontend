@@ -10,6 +10,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -169,6 +171,7 @@ const useUpdatedVoteStatus = () => {
 };
 
 export default function WaveDropPoll({ drop }: WaveDropPollProps) {
+  const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
   const { getEligibility } = useWaveEligibility();
@@ -448,6 +451,12 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const isChangingVote = effectiveView === "vote" && hasVoted;
   const showVoteEditFooterAction =
     effectiveView === "vote" && poll.is_open && isChangingVote;
+  const resultsFooterActionLabel = hasVoted
+    ? t(locale, "waves.poll.actions.changeVote")
+    : t(locale, "waves.poll.actions.vote");
+  const voteStatusLabel = showUpdated
+    ? t(locale, "waves.poll.status.updated")
+    : t(locale, "waves.poll.status.voted");
   const showMultichoiceActions =
     poll.multichoice && (selectedOptions.size > 0 || isChangingVote);
   const multichoiceSubmitDisabled =
@@ -590,7 +599,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
               }}
               className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
             >
-              View results
+              {t(locale, "waves.poll.actions.viewResults")}
             </button>
           </div>
         </div>
@@ -653,7 +662,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
               }}
               className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
             >
-              {hasVoted ? "Change vote" : "Vote"}
+              {resultsFooterActionLabel}
             </button>
             {hasVoted && (
               <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
@@ -671,7 +680,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                     showUpdated ? "tw-text-emerald-400" : "tw-text-iron-300"
                   }`}
                 >
-                  {showUpdated ? "Updated" : "Voted"}
+                  {voteStatusLabel}
                 </span>
               </span>
             )}
