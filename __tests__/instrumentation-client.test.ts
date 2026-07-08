@@ -44,6 +44,8 @@ describe("instrumentation-client", () => {
   ].join(" ");
   const observedWasmModuleCspUnsafeEvalMessage =
     "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
+  const anonymousUnsafeEvalCspMessage =
+    "Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com https://dataplane.rum.us-east-1.amazonaws.com\".";
   const sentryRouteParameterizationMessage =
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
@@ -372,6 +374,60 @@ describe("instrumentation-client", () => {
         environment: "production",
         transaction: "/waves",
         url: "/waves",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops observed anonymous EvalError CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      transaction: "/",
+      exception: {
+        values: [
+          {
+            type: "EvalError",
+            value: anonymousUnsafeEvalCspMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                  abs_path:
+                    "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                  function: "n",
+                },
+                {
+                  filename: "<anonymous>:234:30",
+                  abs_path: "<anonymous>:234:30",
+                  function: "next",
+                },
+                {
+                  filename: "<anonymous>:234:30",
+                  abs_path: "<anonymous>:234:30",
+                  function: "predicate",
+                },
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "eval",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tags: {
+        environment: "production",
+        transaction: "/",
+        url: "/",
       },
     };
 
