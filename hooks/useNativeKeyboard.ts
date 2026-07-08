@@ -310,24 +310,22 @@ function teardownKeyboardListeners(): void {
   browserFallbackTeardown?.();
 
   if (listenerHandles.length === 0) {
-    currentState = {
-      ...currentState,
+    setKeyboardState({
       isVisible: false,
       keyboardHeight: 0,
       phase: "hidden",
-    };
+    });
     return;
   }
 
   const handles = listenerHandles;
   listenerHandles = [];
   void removeListenerHandles(handles);
-  currentState = {
-    ...currentState,
+  setKeyboardState({
     isVisible: false,
     keyboardHeight: 0,
     phase: "hidden",
-  };
+  });
 }
 
 function ensureKeyboardListeners(): void {

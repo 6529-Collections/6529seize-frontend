@@ -65,7 +65,7 @@ export default function NotificationsWrapper({
 
   const onDropContentClick = useCallback(
     (drop: ExtendedDrop) => {
-      if (!drop?.wave?.id) {
+      if (!drop.wave.id) {
         return;
       }
 
@@ -117,7 +117,7 @@ export default function NotificationsWrapper({
         <textarea
           ref={keyboardPrimerRef}
           tabIndex={-1}
-          aria-label="Post a reply"
+          aria-hidden="true"
           autoCapitalize="none"
           autoComplete="off"
           autoCorrect="off"
