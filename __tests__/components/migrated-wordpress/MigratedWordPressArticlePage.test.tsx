@@ -114,6 +114,7 @@ describe("MigratedWordPressArticlePage", () => {
     );
     expect(screen.getByText("February 23, 2023")).toBeInTheDocument();
     expect(screen.getByText("4 minutes")).toBeInTheDocument();
+    expect(container.querySelector(".tw-max-w-5xl")).not.toBeInTheDocument();
     expect(screen.getByAltText("Hero artwork")).toHaveAttribute(
       "src",
       "https://example.com/hero.jpg"
@@ -142,12 +143,15 @@ describe("MigratedWordPressArticlePage", () => {
   });
 
   it("renders migrated static WordPress pages without article metadata chrome", () => {
-    render(<MigratedWordPressStaticPage content={staticContent} />);
+    const { container } = render(
+      <MigratedWordPressStaticPage content={staticContent} />
+    );
 
     expect(screen.getByRole("main")).toHaveAttribute(
       "data-content-source",
       "migrated-wordpress"
     );
+    expect(container.querySelector(".tw-max-w-5xl")).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 1, name: "Migrated Static Page" })
     ).toBeInTheDocument();
