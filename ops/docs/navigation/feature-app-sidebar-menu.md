@@ -13,7 +13,7 @@ standalone row after `About`.
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
+- Primary rows/groups: `NFTs`, `Waves`, `DMs`, and `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Drawer header: connected profile avatar shortcut to
@@ -43,13 +43,12 @@ standalone row after `About`.
    - `NFTs`
    - `Waves`
    - `DMs`
-   - `Join 6529`
    - `About`
 5. Tap the connected profile avatar to open your own profile route
    (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `DMs` for
-   `/messages`, tap `Join 6529` for `/join-6529`, use the standalone `Drop
-   Forge` row when present, or expand grouped sections for nested routes. About
-   opens to group headings first, then each group expands to its links.
+   `/messages`, use the standalone `Drop Forge` row when present, or expand
+   grouped sections for nested routes. About opens to group headings first,
+   then each group expands to its links.
 6. Drawer closes and route navigation runs.
 7. Use footer actions for QR scan, connect/session actions, push settings, and
    optional chain switching.
@@ -61,8 +60,6 @@ standalone row after `About`.
   `/nft-activity`, `/meme-calendar`.
 - Open `Waves`:
   `/waves` and `Discover Waves` at `/discover`.
-- Open `Join 6529`:
-  `/join-6529`.
 - Open `About > Network & Reputation`:
   `/network`, `/network/activity`, `/network/groups`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
