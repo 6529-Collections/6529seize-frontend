@@ -783,27 +783,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       deviceId: string,
       deviceInfo: DeviceInfo,
       token: string,
-      profile?: ApiIdentity
+      profileId: string
     ): Promise<boolean> => {
-      const profileId = getUsableProfileId(profile);
-
-      if (profileId === null) {
-        console.warn("Skipping push registration: profile id is unavailable", {
-          platform: deviceInfo.platform,
-        });
-        Sentry.addBreadcrumb({
-          category: "notifications",
-          level: "warning",
-          message: "Push registration skipped (profile id unavailable).",
-          data: {
-            component: "NotificationsProvider",
-            operation: "registerPushNotification",
-            platform: deviceInfo.platform,
-          },
-        });
-        return false;
-      }
-
       for (
         let attempt = 0;
         attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
@@ -995,6 +976,24 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const fingerprint = createPushRegistrationFingerprint(fingerprintInput);
+      const profileId = fingerprint.profileId;
+      if (profileId === null) {
+        console.warn("Skipping push registration: profile id is unavailable", {
+          platform: deviceInfo.platform,
+        });
+        Sentry.addBreadcrumb({
+          category: "notifications",
+          level: "warning",
+          message: "Push registration skipped (profile id unavailable).",
+          data: {
+            component: "NotificationsProvider",
+            operation: "registerPushNotification",
+            platform: deviceInfo.platform,
+          },
+        });
+        return;
+      }
+
       const previousSuccess = lastSuccessfulRegistrationRef.current;
 
       if (
@@ -1043,7 +1042,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           deviceId,
           deviceInfo,
           token,
-          profile
+          profileId
         );
         if (didRegister) {
           lastSuccessfulRegistrationRef.current = fingerprint;
