@@ -81,6 +81,33 @@ The active `client_address` keeps multi-account web refresh/logout bound to the
 address-scoped cookie for the selected profile instead of whichever account last
 wrote the compatibility cookie.
 
+### Frontend Refresh Telemetry
+
+The frontend records privacy-safe Sentry logger events named
+`auth_session_refresh` around `/api/auth/session-refresh` attempts. Use these
+events to separate expected expiration and frontend control-flow noise from
+real disruption.
+
+Useful fields:
+
+- `source=refreshSessionV2`
+- `client_type=web|native|desktop`
+- `outcome=started|success|unauthorized|aborted|network_error|backend_error|cooldown_used_empty|cooldown_used_retry|deduped_in_flight`
+- `status_code`, when a backend HTTP status is known
+- `duration_bucket_ms`, when a backend request was attempted
+
+Example Sentry log queries:
+
+```text
+message:"auth_session_refresh" outcome:unauthorized client_type:web
+message:"auth_session_refresh" outcome:network_error
+message:"auth_session_refresh" outcome:cooldown_used_empty OR outcome:cooldown_used_retry OR outcome:deduped_in_flight
+```
+
+These events intentionally do not include wallet addresses, JWTs, cookies,
+refresh tokens, native refresh tokens, request bodies, profile ids, or raw error
+objects/messages.
+
 ## Native Auth
 
 Native login requests a session nonce with:

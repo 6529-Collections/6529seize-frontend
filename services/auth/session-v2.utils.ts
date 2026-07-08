@@ -1,6 +1,8 @@
 import { Capacitor } from "@capacitor/core";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { bucketMs } from "@/utils/monitoring/mobileLaunchTimingBuckets";
+import * as Sentry from "@sentry/nextjs";
 import { getWalletAddress, setAuthJwt } from "./auth.utils";
 import {
   getNativeRefreshToken,
@@ -53,6 +55,23 @@ type SessionRefreshInFlight = {
   readonly controller: AbortController;
   readonly promise: Promise<SessionRefreshResponse | null>;
   activeConsumers: number;
+};
+type SessionRefreshTelemetryOutcome =
+  | "started"
+  | "success"
+  | "unauthorized"
+  | "aborted"
+  | "network_error"
+  | "backend_error"
+  | "cooldown_used_empty"
+  | "cooldown_used_retry"
+  | "deduped_in_flight";
+type SessionRefreshTelemetryAttrs = {
+  readonly source: "refreshSessionV2";
+  readonly client_type: AuthSessionClientType;
+  readonly outcome: SessionRefreshTelemetryOutcome;
+  readonly status_code?: number;
+  readonly duration_bucket_ms?: string;
 };
 
 type ApiStatusError = {
@@ -134,6 +153,146 @@ const isAbortError = (error: unknown): boolean =>
   error !== null &&
   "name" in error &&
   error.name === "AbortError";
+
+function getSessionRefreshTimingNow(): number {
+  if (globalThis.performance?.now) {
+    return globalThis.performance.now();
+  }
+  return Date.now();
+}
+
+function getKnownApiStatusCode(error: unknown): number | undefined {
+  if (typeof error !== "object" || error === null) {
+    return undefined;
+  }
+
+  const statusError = error as ApiStatusError;
+  const status = statusError.status ?? statusError.response?.status;
+  return typeof status === "number" && Number.isInteger(status)
+    ? status
+    : undefined;
+}
+
+function isNetworkApiError(error: unknown): boolean {
+  if (error instanceof TypeError) {
+    return true;
+  }
+
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("network request failed") ||
+    message.includes("network error") ||
+    message.includes("failed to fetch") ||
+    message.includes("load failed")
+  );
+}
+
+function recordSessionRefreshTelemetry(
+  attrs: SessionRefreshTelemetryAttrs
+): void {
+  try {
+    if (
+      attrs.outcome === "backend_error" ||
+      attrs.outcome === "network_error"
+    ) {
+      Sentry.logger.warn("auth_session_refresh", attrs);
+      return;
+    }
+
+    Sentry.logger.info("auth_session_refresh", attrs);
+  } catch {
+    // Telemetry must not affect auth state transitions.
+  }
+}
+
+function recordSessionRefreshOutcome({
+  clientType,
+  outcome,
+  statusCode,
+  startedAtMs,
+}: {
+  readonly clientType: AuthSessionClientType;
+  readonly outcome: SessionRefreshTelemetryOutcome;
+  readonly statusCode?: number | undefined;
+  readonly startedAtMs?: number | undefined;
+}): void {
+  recordSessionRefreshTelemetry({
+    source: "refreshSessionV2",
+    client_type: clientType,
+    outcome,
+    ...(statusCode !== undefined ? { status_code: statusCode } : {}),
+    ...(startedAtMs !== undefined
+      ? {
+          duration_bucket_ms: bucketMs(
+            getSessionRefreshTimingNow() - startedAtMs
+          ),
+        }
+      : {}),
+  });
+}
+
+function recordSessionRefreshFailureOutcome({
+  clientType,
+  error,
+  startedAtMs,
+}: {
+  readonly clientType: AuthSessionClientType;
+  readonly error: unknown;
+  readonly startedAtMs: number;
+}): void {
+  const statusCode = getKnownApiStatusCode(error);
+  if (statusCode === 401) {
+    recordSessionRefreshOutcome({
+      clientType,
+      outcome: "unauthorized",
+      statusCode,
+      startedAtMs,
+    });
+    return;
+  }
+
+  if (statusCode !== undefined) {
+    recordSessionRefreshOutcome({
+      clientType,
+      outcome: "backend_error",
+      statusCode,
+      startedAtMs,
+    });
+    return;
+  }
+
+  if (isNetworkApiError(error)) {
+    recordSessionRefreshOutcome({
+      clientType,
+      outcome: "network_error",
+      startedAtMs,
+    });
+  }
+}
+
+async function withSessionRefreshAbortTelemetry<T>({
+  clientType,
+  task,
+}: {
+  readonly clientType: AuthSessionClientType;
+  readonly task: () => Promise<T>;
+}): Promise<T> {
+  try {
+    return await task();
+  } catch (error: unknown) {
+    if (isAbortError(error)) {
+      recordSessionRefreshOutcome({
+        clientType,
+        outcome: "aborted",
+      });
+    }
+    throw error;
+  }
+}
 
 function getActiveFailureCooldown(
   key: string
@@ -369,53 +528,83 @@ async function executeSessionRefreshV2({
     if (!nativeRefreshToken) {
       return null;
     }
-    try {
-      return await commonApiPost<
+
+    return await executeSessionRefreshRequest({
+      clientType,
+      request: () =>
+        commonApiPost<
+          {
+            readonly client_type: RefreshTokenSessionClientType;
+            readonly client_address: string;
+            readonly native_refresh_token: string;
+          },
+          SessionNativeResponse
+        >({
+          endpoint: "auth/session-refresh",
+          body: {
+            client_type: clientType,
+            client_address: address,
+            native_refresh_token: nativeRefreshToken,
+          },
+          signal: abortSignal,
+          credentials: getSessionCredentialsMode(),
+          errorMode: "structured",
+          includeWalletAuth: false,
+        }),
+    });
+  }
+
+  return await executeSessionRefreshRequest({
+    clientType,
+    request: () =>
+      commonApiPost<
         {
-          readonly client_type: RefreshTokenSessionClientType;
+          readonly client_type: "web";
           readonly client_address: string;
-          readonly native_refresh_token: string;
         },
-        SessionNativeResponse
+        SessionWebResponse
       >({
         endpoint: "auth/session-refresh",
         body: {
-          client_type: clientType,
+          client_type: "web",
           client_address: address,
-          native_refresh_token: nativeRefreshToken,
         },
         signal: abortSignal,
         credentials: getSessionCredentialsMode(),
         errorMode: "structured",
         includeWalletAuth: false,
-      });
-    } catch (error: unknown) {
-      if (isUnauthorizedApiError(error)) {
-        return null;
-      }
-      throw error;
-    }
-  }
+      }),
+  });
+}
+
+async function executeSessionRefreshRequest<T extends SessionRefreshResponse>({
+  clientType,
+  request,
+}: {
+  readonly clientType: AuthSessionClientType;
+  readonly request: () => Promise<T>;
+}): Promise<T | null> {
+  const startedAtMs = getSessionRefreshTimingNow();
+  recordSessionRefreshOutcome({
+    clientType,
+    outcome: "started",
+  });
 
   try {
-    return await commonApiPost<
-      {
-        readonly client_type: "web";
-        readonly client_address: string;
-      },
-      SessionWebResponse
-    >({
-      endpoint: "auth/session-refresh",
-      body: {
-        client_type: "web",
-        client_address: address,
-      },
-      signal: abortSignal,
-      credentials: getSessionCredentialsMode(),
-      errorMode: "structured",
-      includeWalletAuth: false,
+    const response = await request();
+    recordSessionRefreshOutcome({
+      clientType,
+      outcome: "success",
+      startedAtMs,
     });
+    return response;
   } catch (error: unknown) {
+    recordSessionRefreshFailureOutcome({
+      clientType,
+      error,
+      startedAtMs,
+    });
+
     if (isUnauthorizedApiError(error)) {
       return null;
     }
@@ -430,19 +619,35 @@ export async function refreshSessionV2({
   readonly address: string;
   readonly abortSignal?: AbortSignal | undefined;
 }): Promise<SessionRefreshResponse | null> {
+  const clientType = getSessionClientType();
   if (abortSignal?.aborted) {
+    recordSessionRefreshOutcome({
+      clientType,
+      outcome: "aborted",
+    });
     throw createAbortError();
   }
 
-  const clientType = getSessionClientType();
   const key = getSessionRefreshKey({ address, clientType });
   const cooldown = getActiveFailureCooldown(key);
 
   if (cooldown?.type === "empty") {
+    recordSessionRefreshOutcome({
+      clientType,
+      outcome: "cooldown_used_empty",
+    });
     return null;
   }
   if (cooldown?.type === "retry") {
-    await waitForSessionRefreshRetryCooldown({ cooldown, abortSignal });
+    recordSessionRefreshOutcome({
+      clientType,
+      outcome: "cooldown_used_retry",
+    });
+    await withSessionRefreshAbortTelemetry({
+      clientType,
+      task: () =>
+        waitForSessionRefreshRetryCooldown({ cooldown, abortSignal }),
+    });
     if (sessionRefreshFailureCooldowns.get(key) === cooldown) {
       sessionRefreshFailureCooldowns.delete(key);
     }
@@ -456,10 +661,18 @@ export async function refreshSessionV2({
 
   if (existingEntry) {
     existingEntry.activeConsumers += 1;
-    return await withCallerAbort<SessionRefreshResponse | null>({
-      entry: existingEntry,
-      key,
-      abortSignal,
+    recordSessionRefreshOutcome({
+      clientType,
+      outcome: "deduped_in_flight",
+    });
+    return await withSessionRefreshAbortTelemetry({
+      clientType,
+      task: () =>
+        withCallerAbort<SessionRefreshResponse | null>({
+          entry: existingEntry,
+          key,
+          abortSignal,
+        }),
     });
   }
 
@@ -496,10 +709,14 @@ export async function refreshSessionV2({
     }
   })();
 
-  return await withCallerAbort<SessionRefreshResponse | null>({
-    entry,
-    key,
-    abortSignal,
+  return await withSessionRefreshAbortTelemetry({
+    clientType,
+    task: () =>
+      withCallerAbort<SessionRefreshResponse | null>({
+        entry,
+        key,
+        abortSignal,
+      }),
   });
 }
 
