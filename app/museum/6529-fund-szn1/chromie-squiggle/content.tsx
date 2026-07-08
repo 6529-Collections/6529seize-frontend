@@ -19,7 +19,7 @@ export const museum_6529FundSzn1ChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/xTzWo4Db/chromie-squiggle-6.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 1",
       },
     },
     {
@@ -30,7 +30,7 @@ export const museum_6529FundSzn1ChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/V5qIt714/chromie-squiggle-30.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 2",
       },
     },
     {
@@ -41,7 +41,7 @@ export const museum_6529FundSzn1ChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/2LV0tIVy/chromie-squiggle-96.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 3",
       },
     },
     {
@@ -52,7 +52,7 @@ export const museum_6529FundSzn1ChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/9AqejdMm/chromie-squiggle-3199.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 4",
       },
     },
     {
@@ -63,7 +63,7 @@ export const museum_6529FundSzn1ChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/TcJT6epe/chromie-squiggle-66.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 5",
       },
     },
     {
@@ -74,7 +74,7 @@ export const museum_6529FundSzn1ChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/PGBbclMr/chromie-squiggle-2298.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 6",
       },
     },
     {

@@ -37,7 +37,7 @@ export const museumGenesisFrammentiMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/NoYTiqrY/s3_frammenti_361.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "FRAMMENTI artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisFrammentiMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/EZ76cImF/s3_frammenti_315.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "FRAMMENTI artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisFrammentiMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/wOFpQRgU/s3_frammenti_217.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "FRAMMENTI artwork video 3",
       },
     },
     {

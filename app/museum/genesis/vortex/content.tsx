@@ -37,7 +37,7 @@ export const museumGenesisVortexMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/GtNgQtKV/s5_vortex_280.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "VORTEX artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisVortexMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/JfpS7qmS/s5_vortex_592.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "VORTEX artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisVortexMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/sJfTbOMx/s5_vortex_932.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "VORTEX artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisVortexMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/mhlF4UUJ/s5_vortex_670.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "VORTEX artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisVortexMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/i7XXhwna/s5_vortex_844.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "VORTEX artwork video 5",
       },
     },
     {
@@ -182,7 +182,7 @@ export const museumGenesisVortexMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/t55hzNUo/s5_vortex_109.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "VORTEX artwork video 6",
       },
     },
     {

@@ -37,7 +37,7 @@ export const museumGenesisSkulptuurMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/GFr7PaK7/s4_skulptuur_647.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SKULPTUUR artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisSkulptuurMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Fhua45fh/s4_skulptuur_719.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SKULPTUUR artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisSkulptuurMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/VTE0bQpG/s4_skulptuur_282.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SKULPTUUR artwork video 3",
       },
     },
     {
@@ -118,7 +118,7 @@ export const museumGenesisSkulptuurMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/jZohJjIV/s4_skulptuur_170.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SKULPTUUR artwork video 4",
       },
     },
     {
@@ -141,7 +141,7 @@ export const museumGenesisSkulptuurMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/sqmodyZR/s4_skulptuur_637.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SKULPTUUR artwork video 5",
       },
     },
     {
@@ -164,7 +164,7 @@ export const museumGenesisSkulptuurMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/whVcGTGc/s4_skulptuur_580.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SKULPTUUR artwork video 6",
       },
     },
     {

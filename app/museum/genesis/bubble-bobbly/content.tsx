@@ -31,7 +31,7 @@ export const museumGenesisBubbleBobblyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/pMf3bE7v/s3_bubble_blobby_47.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BUBBLE BOBBLY artwork video 1",
       },
     },
     {
@@ -60,7 +60,7 @@ export const museumGenesisBubbleBobblyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Qg42DIfk/s3_bubble_blobby_240.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BUBBLE BOBBLY artwork video 2",
       },
     },
     {
@@ -89,7 +89,7 @@ export const museumGenesisBubbleBobblyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/1ct3CGBv/s3_bubble_blobby_180.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BUBBLE BOBBLY artwork video 3",
       },
     },
     {

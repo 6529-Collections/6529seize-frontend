@@ -37,7 +37,7 @@ export const museumGenesisEdificeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/KOjmrfN1/s5_edifice_605.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "EDIFICE artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisEdificeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/QsZNvbZt/s5_edifice_432.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "EDIFICE artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisEdificeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/6TcLB4oA/s5_edifice_52.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "EDIFICE artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisEdificeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/AQcQLnC6/s5_edifice_767.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "EDIFICE artwork video 4",
       },
     },
     {

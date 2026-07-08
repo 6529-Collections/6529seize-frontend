@@ -37,7 +37,7 @@ export const museumGenesisPhaseMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/10eGhwgP/abc_s4_phase_473-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "PHASE artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisPhaseMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/shtznIqw/abc_s4_phase_251-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "PHASE artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisPhaseMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/HCrETp10/abc_s4_phase_654-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "PHASE artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisPhaseMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/suRCgjSk/abc_s4_phase_396-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "PHASE artwork video 4",
       },
     },
     {

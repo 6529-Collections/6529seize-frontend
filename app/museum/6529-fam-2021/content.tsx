@@ -6,7 +6,7 @@ export const museum_6529Fam2021MigratedWordPressPage = {
   path: "/museum/6529-fam-2021",
   title: "6529 FAM 2021",
   description:
-    "6529 FAM 2021 6529 Fam 2021 is our crowdsourced collection of 6529-themed art. It is all fun. VISIT 6529 FAM 2021",
+    "6529 Fam 2021 is our crowdsourced collection of 6529-themed art. It is all fun.",
   section: "Museum",
   blocks: [
     {

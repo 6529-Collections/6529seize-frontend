@@ -6,7 +6,7 @@ export const museum_6529FundSzn1ActOfKindnessMigratedWordPressPage = {
   path: "/museum/6529-fund-szn1/act-of-kindness",
   title: "ACT OF KINDNESS",
   description:
-    "Act of Kindness Dangiuz Act of Kindness Description Dangiuz, an Italian digital artist, marries the styles of Van Gogh post impressionism and cyberpunk scenes in his resplendent and evocative pieces. Act of Kindness features a lone figure kneeling to pet a...",
+    "Dangiuz's Act of Kindness marries post-impressionist and cyberpunk influences in a luminous city scene where a lone figure kneels to comfort a stray cat.",
   section: "Museum / 6529 Fund SZN1",
   blocks: [
     {

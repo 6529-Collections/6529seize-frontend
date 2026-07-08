@@ -6,7 +6,7 @@ export const museumMigratedWordPressPage = {
   path: "/museum",
   title: "6529 MUSEUM OF ART",
   description:
-    "VISIT 6529 MUSEUM DISTRICT The 6529 Museum of Art has one of the largest and most valuable NFT collections in the world across all major NFT categories. The 6529 Museum has a particular focus on generative art where it has one of the top horizontal generati...",
+    "The 6529 Museum of Art has one of the largest and most valuable NFT collections in the world across all major NFT categories, with a particular focus on generative art.",
   section: "Museum",
   blocks: [
     {
@@ -73,7 +73,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/imagined-worlds/"><u>IMAGINED WORLDS</u></a></li><li><a href="/museum/early-nft-art/"><u>EARLY NFT ART</u></a></li><li><a href="/museum/yongoh-kim/">Y<u>ONGOH KIM</u></a></li><li><a href="/museum/sozet-lounge/"><u>SOZET LOUNGE</u></a></li></ul>'
+        '<ul><li><a href="/museum/imagined-worlds"><u>IMAGINED WORLDS</u></a></li><li><a href="/museum/early-nft-art"><u>EARLY NFT ART</u></a></li><li><a href="/museum/yongoh-kim">Y<u>ONGOH KIM</u></a></li><li><a href="/museum/sozet-lounge"><u>SOZET LOUNGE</u></a></li></ul>'
       ),
     },
     {
@@ -92,7 +92,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/genesis/"><u>GENESIS</u></a></li></ul>'
+        '<ul><li><a href="/museum/genesis"><u>GENESIS</u></a></li></ul>'
       ),
     },
     {
@@ -111,7 +111,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/6529-photo-a/"><u>6529 PHOTO A</u></a></li><li><a href="/museum/6529-photo-b/"><u>6529 PHOTO B</u></a></li></ul>'
+        '<ul><li><a href="/museum/6529-photo-a"><u>6529 PHOTO A</u></a></li><li><a href="/museum/6529-photo-b"><u>6529 PHOTO B</u></a></li></ul>'
       ),
     },
     {
@@ -130,7 +130,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/general-assembly/"><u>GENERAL ASSEMBLY</u></a></li></ul>'
+        '<ul><li><a href="/museum/general-assembly"><u>GENERAL ASSEMBLY</u></a></li></ul>'
       ),
     },
     {
@@ -149,7 +149,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/6529-fam-2021/"><u>6529 FAM 2021</u></a></li><li><a href="/museum/6529-gradient-collector-curated/"><u>6529 GRADIENT COLLECTOR CURATED</u></a></li><li><a href="/museum/6529-public-domain/"><u>6529 PUBLIC DOMAIN</u></a></li></ul>'
+        '<ul><li><a href="/museum/6529-fam-2021"><u>6529 FAM 2021</u></a></li><li><a href="/museum/6529-gradient-collector-curated"><u>6529 GRADIENT COLLECTOR CURATED</u></a></li><li><a href="/museum/6529-public-domain"><u>6529 PUBLIC DOMAIN</u></a></li></ul>'
       ),
     },
     {
@@ -168,7 +168,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/6529-fund-szn1/"><u>6529 FUND SZN1</u></a></li></ul>'
+        '<ul><li><a href="/museum/6529-fund-szn1"><u>6529 FUND SZN1</u></a></li></ul>'
       ),
     },
     {
@@ -230,7 +230,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/bharat-krymo-museum-1/"><u>BHARAT KRYMO MUSEE D\'ART 1</u></a></li><li><a href="/museum/bharat-krymo-museum-2/"><u>BHARAT KRYMO MUSEE D\'ART 2</u></a></li><li><a href="/museum/bharat-krymo-museum-3/"><u>BHARAT KRYMO MUSEE D\'ART 3</u></a></li></ul>'
+        '<ul><li><a href="/museum/bharat-krymo-museum-1"><u>BHARAT KRYMO MUSEE D\'ART 1</u></a></li><li><a href="/museum/bharat-krymo-museum-2"><u>BHARAT KRYMO MUSEE D\'ART 2</u></a></li><li><a href="/museum/bharat-krymo-museum-3"><u>BHARAT KRYMO MUSEE D\'ART 3</u></a></li></ul>'
       ),
     },
     {
@@ -249,7 +249,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/batsoupyum-museum-1/"><u>BATSOUPCAVE</u></a></li><li><a href="/museum/batsoupyum-museum-2/"><u>BATSOUPLOUNGE</u></a></li></ul>'
+        '<ul><li><a href="/museum/batsoupyum-museum-1"><u>BATSOUPCAVE</u></a></li><li><a href="/museum/batsoupyum-museum-2"><u>BATSOUPLOUNGE</u></a></li></ul>'
       ),
     },
     {
@@ -268,7 +268,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/ac-museum/"><u>AC COLLECTION</u></a></li></ul>'
+        '<ul><li><a href="/museum/ac-museum"><u>AC COLLECTION</u></a></li></ul>'
       ),
     },
     {
@@ -287,7 +287,7 @@ export const museumMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<ul><li><a href="/museum/bonafidehan-museum/"><u>BONAFIDEHAN GALLERY</u></a></li></ul>'
+        '<ul><li><a href="/museum/bonafidehan-museum"><u>BONAFIDEHAN GALLERY</u></a></li></ul>'
       ),
     },
     {

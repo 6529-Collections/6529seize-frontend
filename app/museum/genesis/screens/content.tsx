@@ -37,7 +37,7 @@ export const museumGenesisScreensMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Y5CD6urz/s6_screens_391.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SCREENS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisScreensMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/xRmLS8bg/s6_screens_301.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SCREENS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisScreensMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/oIR66Oud/s6_screens_170.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SCREENS artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisScreensMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Vzcqe7W8/s6_screens_455.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SCREENS artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisScreensMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/p0z0PUCO/s6_screens_184.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SCREENS artwork video 5",
       },
     },
     {

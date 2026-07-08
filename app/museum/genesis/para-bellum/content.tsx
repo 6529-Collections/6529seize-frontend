@@ -37,7 +37,7 @@ export const museumGenesisParaBellumMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/DrQXcHEk/s6_para-bellum_577.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "PARA BELLUM artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisParaBellumMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/yiptJTvR/s6_para-bellum_761.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "PARA BELLUM artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisParaBellumMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Ac7qh9mT/s6_para-bellum_343.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "PARA BELLUM artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisParaBellumMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/3NPlVLXQ/s6_para-bellum_311.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "PARA BELLUM artwork video 4",
       },
     },
     {

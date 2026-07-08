@@ -37,7 +37,7 @@ export const museumGenesisCenturyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/sudOMuBx/s3_century_698.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CENTURY artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisCenturyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/AXpClHAh/s3_century_853.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CENTURY artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisCenturyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/uGZgcsmG/s3_century_563.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CENTURY artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisCenturyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/zxCc38Yu/s3_century_430.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CENTURY artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisCenturyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/z8esckRN/s3_century_102.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CENTURY artwork video 5",
       },
     },
     {
@@ -182,7 +182,7 @@ export const museumGenesisCenturyMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Vmj0NJw7/s3_century_419.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CENTURY artwork video 6",
       },
     },
     {

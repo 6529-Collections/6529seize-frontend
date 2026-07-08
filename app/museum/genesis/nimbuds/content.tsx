@@ -37,7 +37,7 @@ export const museumGenesisNimbudsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/re8iyg56/s2_nimbuds_211.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "NIMBUDS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisNimbudsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/in1BHrHs/s2_nimbuds_321.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "NIMBUDS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisNimbudsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/b0z2l820/s2_nimbuds_74.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "NIMBUDS artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisNimbudsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/iB43qq1W/s2_nimbuds_264.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "NIMBUDS artwork video 4",
       },
     },
     {

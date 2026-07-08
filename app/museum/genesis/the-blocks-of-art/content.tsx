@@ -25,7 +25,7 @@ export const museumGenesisTheBlocksOfArtMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/VkhiSBko/s3_blocks_of_art_8.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "THE BLOCKS OF ART artwork video 1",
       },
     },
     {
@@ -54,7 +54,7 @@ export const museumGenesisTheBlocksOfArtMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ONOYXWbP/s3_blocks_of_art_280.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "THE BLOCKS OF ART artwork video 2",
       },
     },
     {
@@ -83,7 +83,7 @@ export const museumGenesisTheBlocksOfArtMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/cEg17hoB/s3_blocks_of_art_109.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "THE BLOCKS OF ART artwork video 3",
       },
     },
     {

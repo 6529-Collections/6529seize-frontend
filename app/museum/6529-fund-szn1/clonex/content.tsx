@@ -6,7 +6,7 @@ export const museum_6529FundSzn1ClonexMigratedWordPressPage = {
   path: "/museum/6529-fund-szn1/clonex",
   title: "CLONEX",
   description:
-    "CloneX RTFKT x Takashi Murakami CLONEX #17307 Description In partnership with RTFKT, designed by Japaense artist Takashi Murakami, the CloneX collection features a population of avatars that have unique features and traits designed by the artist who has an...",
+    "Designed by Japanese artist Takashi Murakami in partnership with RTFKT, CloneX presents a population of richly varied avatars with traits drawn from contemporary art and digital identity.",
   section: "Museum / 6529 Fund SZN1",
   blocks: [
     {
@@ -38,7 +38,7 @@ export const museum_6529FundSzn1ClonexMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        "<p>In partnership with RTFKT, designed by Japaense artist Takashi Murakami, the CloneX collection features a population of avatars that have unique features and traits designed by the artist who has an extensive background in contemporary art. Complete with a dazzling array of features and traits, the possibilities for the avatar generation is endless and an entire universe of characters result from the varied process. </p>"
+        "<p>In partnership with RTFKT, designed by Japanese artist Takashi Murakami, the CloneX collection features a population of avatars that have unique features and traits designed by the artist who has an extensive background in contemporary art. Complete with a dazzling array of features and traits, the possibilities for the avatar generation is endless and an entire universe of characters result from the varied process. </p>"
       ),
     },
     {

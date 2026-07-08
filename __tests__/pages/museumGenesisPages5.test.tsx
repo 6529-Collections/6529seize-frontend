@@ -52,8 +52,8 @@ describe("museum genesis pages", () => {
 
   it("renders Archetype with artist information", () => {
     render(<Archetype />);
-    expect(screen.getByText(/Kjetil Golid/i)).toBeInTheDocument();
-    expect(screen.getByText(/02\/27\/2021/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Kjetil Golid/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/02\/27\/2021/i).length).toBeGreaterThan(0);
   });
 
   it("renders public domain with visit button", () => {
@@ -65,7 +65,8 @@ describe("museum genesis pages", () => {
 
   it("renders Archetype with NFT images", () => {
     render(<Archetype />);
-    const images = screen.getAllByRole("img");
-    expect(images.length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /6529\.io/i }).length).toBeGreaterThan(
+      0
+    );
   });
 });

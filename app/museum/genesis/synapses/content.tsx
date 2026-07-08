@@ -37,7 +37,7 @@ export const museumGenesisSynapsesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/l9qTvMn8/s3_synapses_153.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SYNAPSES artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisSynapsesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/elCRWChF/s3_synapses_504.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SYNAPSES artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisSynapsesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/bAa15lfK/s3_synapses_600.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SYNAPSES artwork video 3",
       },
     },
     {

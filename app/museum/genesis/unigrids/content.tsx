@@ -37,7 +37,7 @@ export const museumGenesisUnigridsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/d5BWzYqB/s2_unigrids_285.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "UNIGRIDS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisUnigridsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ZoANQyFC/s2_unigrids_7.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "UNIGRIDS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisUnigridsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/MnhImFIt/s2_unigrids_131.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "UNIGRIDS artwork video 3",
       },
     },
     {
