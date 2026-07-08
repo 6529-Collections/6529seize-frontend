@@ -59,6 +59,7 @@ jest.mock("@sentry/nextjs", () => ({
 type SessionRefreshTelemetryAttrs = {
   readonly source?: unknown;
   readonly client_type?: unknown;
+  readonly auth_refresh_outcome?: unknown;
   readonly outcome?: unknown;
   readonly status_code?: unknown;
   readonly duration_bucket_ms?: unknown;
@@ -79,18 +80,30 @@ const getSessionRefreshWarnTelemetry = (): SessionRefreshTelemetryAttrs[] =>
 
 const getTelemetryOutcomes = (
   attrs: SessionRefreshTelemetryAttrs[]
-): unknown[] => attrs.map((attr) => attr.outcome);
+): unknown[] => attrs.map((attr) => attr.auth_refresh_outcome);
 
 const expectNoSensitiveRefreshTelemetry = (
   attrs: SessionRefreshTelemetryAttrs[]
 ): void => {
   for (const attr of attrs) {
+    expect(attr).toHaveProperty("auth_refresh_outcome", attr.outcome);
     expect(attr).not.toHaveProperty("address");
     expect(attr).not.toHaveProperty("client_address");
     expect(attr).not.toHaveProperty("access_token");
+    expect(attr).not.toHaveProperty("auth_jwt");
+    expect(attr).not.toHaveProperty("jwt");
+    expect(attr).not.toHaveProperty("cookie");
+    expect(attr).not.toHaveProperty("cookies");
     expect(attr).not.toHaveProperty("refresh_token");
     expect(attr).not.toHaveProperty("native_refresh_token");
+    expect(attr).not.toHaveProperty("profile_id");
+    expect(attr).not.toHaveProperty("request_body");
+    expect(attr).not.toHaveProperty("body");
     expect(attr).not.toHaveProperty("error");
+    expect(attr).not.toHaveProperty("raw_error");
+    expect(attr).not.toHaveProperty("raw_error_message");
+    expect(attr).not.toHaveProperty("error_message");
+    expect(attr).not.toHaveProperty("message");
   }
 };
 
@@ -352,11 +365,13 @@ describe("session-v2.utils", () => {
       expect.objectContaining({
         source: "refreshSessionV2",
         client_type: "web",
+        auth_refresh_outcome: "started",
         outcome: "started",
       }),
       expect.objectContaining({
         source: "refreshSessionV2",
         client_type: "web",
+        auth_refresh_outcome: "success",
         outcome: "success",
         duration_bucket_ms: expect.any(String),
       }),
@@ -388,16 +403,19 @@ describe("session-v2.utils", () => {
     expect(getSessionRefreshInfoTelemetry()).toEqual([
       expect.objectContaining({
         client_type: "web",
+        auth_refresh_outcome: "started",
         outcome: "started",
       }),
       expect.objectContaining({
         client_type: "web",
+        auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
         status_code: 401,
         duration_bucket_ms: expect.any(String),
       }),
     ]);
     expect(getSessionRefreshWarnTelemetry()).toEqual([]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("shares concurrent refreshes for the same web session context", async () => {
@@ -558,6 +576,7 @@ describe("session-v2.utils", () => {
       expect(getSessionRefreshWarnTelemetry()).toEqual([
         expect.objectContaining({
           client_type: "web",
+          auth_refresh_outcome: "network_error",
           outcome: "network_error",
           duration_bucket_ms: expect.any(String),
         }),
@@ -585,10 +604,12 @@ describe("session-v2.utils", () => {
     expect(getSessionRefreshInfoTelemetry()).toEqual([
       expect.objectContaining({
         client_type: "web",
+        auth_refresh_outcome: "aborted",
         outcome: "aborted",
       }),
     ]);
     expect(getSessionRefreshWarnTelemetry()).toEqual([]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("logs non-401 backend refresh errors with status only", async () => {
@@ -605,6 +626,7 @@ describe("session-v2.utils", () => {
     expect(getSessionRefreshWarnTelemetry()).toEqual([
       expect.objectContaining({
         client_type: "web",
+        auth_refresh_outcome: "backend_error",
         outcome: "backend_error",
         status_code: 500,
         duration_bucket_ms: expect.any(String),
@@ -755,10 +777,12 @@ describe("session-v2.utils", () => {
     expect(getSessionRefreshInfoTelemetry()).toEqual([
       expect.objectContaining({
         client_type: "native",
+        auth_refresh_outcome: "started",
         outcome: "started",
       }),
       expect.objectContaining({
         client_type: "native",
+        auth_refresh_outcome: "success",
         outcome: "success",
         duration_bucket_ms: expect.any(String),
       }),
@@ -776,10 +800,12 @@ describe("session-v2.utils", () => {
     expect(getSessionRefreshInfoTelemetry()).toEqual([
       expect.objectContaining({
         client_type: "native",
+        auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
       }),
     ]);
     expect(getSessionRefreshWarnTelemetry()).toEqual([]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("treats unauthorized native refresh as an invalid session", async () => {
@@ -810,15 +836,18 @@ describe("session-v2.utils", () => {
     expect(getSessionRefreshInfoTelemetry()).toEqual([
       expect.objectContaining({
         client_type: "native",
+        auth_refresh_outcome: "started",
         outcome: "started",
       }),
       expect.objectContaining({
         client_type: "native",
+        auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
         status_code: 401,
         duration_bucket_ms: expect.any(String),
       }),
     ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("revokes an existing native session", async () => {

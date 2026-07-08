@@ -15,6 +15,7 @@ type SessionRefreshTelemetryOutcome =
 type SessionRefreshTelemetryAttrs = {
   readonly source: "refreshSessionV2";
   readonly client_type: SessionRefreshTelemetryClientType;
+  readonly auth_refresh_outcome: SessionRefreshTelemetryOutcome;
   readonly outcome: SessionRefreshTelemetryOutcome;
   readonly status_code?: number;
   readonly duration_bucket_ms?: string;
@@ -108,6 +109,7 @@ export function recordSessionRefreshOutcome({
   recordSessionRefreshTelemetry({
     source: "refreshSessionV2",
     client_type: clientType,
+    auth_refresh_outcome: outcome,
     outcome,
     ...(statusCode !== undefined ? { status_code: statusCode } : {}),
     ...(startedAtMs !== undefined
