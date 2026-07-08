@@ -37,7 +37,7 @@ export const museumGenesisGeometryRunnersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Y5VVpcwy/s4_geometry_runners_698-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GEOMETRY RUNNERS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisGeometryRunnersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/mICLxAz2/s4_geometry_runners_887-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GEOMETRY RUNNERS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisGeometryRunnersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/w3UDdoYx/s4_geometry_runners_840-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GEOMETRY RUNNERS artwork video 3",
       },
     },
     {

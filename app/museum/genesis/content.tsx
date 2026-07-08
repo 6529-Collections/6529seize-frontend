@@ -6,19 +6,9 @@ export const museumGenesisMigratedWordPressPage = {
   path: "/museum/genesis",
   title: "GENESIS",
   description:
-    "GENESIS Genesis is the flagship gallery of the Generative collection and of the whole museum. It contains one of the top generative art collections in the world, stretching horizontally across almost every meaningful collection of early generative art. VISI...",
+    "Genesis is the flagship gallery of the Generative collection and of the whole museum. It contains one of the top generative art collections in the world, stretching horizontally across almost every meaningful collection of early generative art.",
   section: "Museum / Genesis",
   blocks: [
-    {
-      type: "heading",
-      content: "GENESIS",
-    },
-    {
-      type: "html",
-      html: migratedWordPressTrustedHtml(
-        "<p>Genesis is the flagship gallery of the Generative collection and of the whole museum. It contains one of the top generative art collections in the world, stretching horizontally across almost every meaningful collection of early generative art. </p>"
-      ),
-    },
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
@@ -46,13 +36,13 @@ export const museumGenesisMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<p><a href="/museum/genesis/autoglyphs/"><strong>Autoglyphs</strong></a><br>Larva Labs </p>'
+        '<p><a href="/museum/genesis/autoglyphs"><strong>Autoglyphs</strong></a><br>Larva Labs </p>'
       ),
     },
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<p><a href="/museum/genesis/squiggly-wtf/"><strong>Squiggly.wtf</strong></a><br>natealex </p>'
+        '<p><a href="/museum/genesis/squiggly-wtf"><strong>Squiggly.wtf</strong></a><br>natealex </p>'
       ),
     },
     {

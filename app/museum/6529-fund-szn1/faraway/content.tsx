@@ -6,7 +6,7 @@ export const museum_6529FundSzn1FarawayMigratedWordPressPage = {
   path: "/museum/6529-fund-szn1/faraway",
   title: "FARAWAY",
   description:
-    "Faraway Ca Chou FARAWAY Description Ca Chou states, “I try to imply the correlation between human, earth and technology through the creation of my own world view.” In Faraway, this correlation is beautifully married in a chillingly bleak and lovely romantic...",
+    "Ca Chou's Faraway explores the correlation between humanity, earth, and technology through a bleakly romantic portrait of troubled lovers in a desolate world.",
   section: "Museum / 6529 Fund SZN1",
   blocks: [
     {
@@ -19,7 +19,7 @@ export const museum_6529FundSzn1FarawayMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/NKBc1gR5/faraway.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "Faraway by Ca Chou",
       },
     },
     {

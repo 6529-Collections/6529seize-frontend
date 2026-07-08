@@ -37,7 +37,7 @@ export const museumGenesisScribbledBoundariesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/2kH7Rh8B/s4_scribbled_boundaries_745.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SCRIBBLED BOUNDARIES artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisScribbledBoundariesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/KWy2sglS/s4_scribbled_boundaries_189.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SCRIBBLED BOUNDARIES artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisScribbledBoundariesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/8pZhbBXc/s4_scribbled_boundaries_490.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SCRIBBLED BOUNDARIES artwork video 3",
       },
     },
     {

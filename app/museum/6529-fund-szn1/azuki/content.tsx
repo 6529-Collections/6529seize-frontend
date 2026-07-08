@@ -6,7 +6,7 @@ export const museum_6529FundSzn1AzukiMigratedWordPressPage = {
   path: "/museum/6529-fund-szn1/azuki",
   title: "AZUKI",
   description:
-    "Azuki Chiru Labs AZUKI #3259 AZUKI #536 AZUKI #4992 AZUKI #9871 Description This collection invites you to join the garden: “A corner of the internet where art, community, and culture fuse to create magic.” Created by four anonymous men, Azuki has seized th...",
+    "Azuki invites viewers into a garden where art, community, and culture fuse into anime-inspired characters built for a new digital frontier.",
   section: "Museum / 6529 Fund SZN1",
   blocks: [
     {

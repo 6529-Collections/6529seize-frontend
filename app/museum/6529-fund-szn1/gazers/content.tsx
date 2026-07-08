@@ -6,7 +6,7 @@ export const museum_6529FundSzn1GazersMigratedWordPressPage = {
   path: "/museum/6529-fund-szn1/gazers",
   title: "GAZERS",
   description:
-    "Gazers Matt Kane GAZERS #788 GAZERS #566 GAZERS #403 Description A Chicago-born oil painter and coder extraordinaire, Kane applies the best of both skills to his collection, merging color theory with coding that serves to create living pieces of art that ch...",
+    "Matt Kane's Gazers merges color theory and code into living lunar artworks that change continuously, reflecting moon phases, memory, and the passage of time.",
   section: "Museum / 6529 Fund SZN1",
   blocks: [
     {

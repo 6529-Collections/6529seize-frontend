@@ -37,7 +37,7 @@ export const museumGenesisAlgorhythmsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/CWkbHbC5/s3_algorhythms_371.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ALGORHYTHMS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisAlgorhythmsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/3iDBDNsC/s3_algorhythms_326.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ALGORHYTHMS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisAlgorhythmsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/lB96WKuQ/s3_algorhythms_4.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ALGORHYTHMS artwork video 3",
       },
     },
     {

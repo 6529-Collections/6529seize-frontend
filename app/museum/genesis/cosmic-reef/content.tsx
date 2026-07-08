@@ -37,7 +37,7 @@ export const museumGenesisCosmicReefMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "COSMIC REEF artwork video 1",
       },
     },
     {
@@ -64,7 +64,7 @@ export const museumGenesisCosmicReefMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "COSMIC REEF artwork video 2",
       },
     },
     {
@@ -93,7 +93,7 @@ export const museumGenesisCosmicReefMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "COSMIC REEF artwork video 3",
       },
     },
     {
@@ -122,7 +122,7 @@ export const museumGenesisCosmicReefMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "COSMIC REEF artwork video 4",
       },
     },
     {
@@ -151,7 +151,7 @@ export const museumGenesisCosmicReefMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "COSMIC REEF artwork video 5",
       },
     },
     {
@@ -180,7 +180,7 @@ export const museumGenesisCosmicReefMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "COSMIC REEF artwork video 6",
       },
     },
     {

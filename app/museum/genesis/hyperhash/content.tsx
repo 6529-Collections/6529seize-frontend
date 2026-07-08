@@ -37,7 +37,7 @@ export const museumGenesisHyperhashMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/pUXPnAHO/s2_hyperhash_189.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "HYPERHASH artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisHyperhashMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/UZzKVnkZ/s2_hyperhash_93.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "HYPERHASH artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisHyperhashMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ulqIq6Td/s2_hyperhash_80.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "HYPERHASH artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisHyperhashMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Z5e7JFdV/s2_hyperhash_251.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "HYPERHASH artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisHyperhashMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Hr8kJn4K/s2_hyperhash_191.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "HYPERHASH artwork video 5",
       },
     },
     {
@@ -182,7 +182,7 @@ export const museumGenesisHyperhashMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/cMdwl7Va/s2_hyperhash_74.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "HYPERHASH artwork video 6",
       },
     },
     {
@@ -211,7 +211,7 @@ export const museumGenesisHyperhashMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/AnM8OjGL/s2_hyperhash_323.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "HYPERHASH artwork video 7",
       },
     },
     {
@@ -240,7 +240,7 @@ export const museumGenesisHyperhashMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/iSEHOc4A/s2_hyperhash_102.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "HYPERHASH artwork video 8",
       },
     },
     {

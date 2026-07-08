@@ -37,7 +37,7 @@ export const museumGenesisChimeraMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/9A94Gu1I/s6_chimera_488.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHIMERA artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisChimeraMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ytcEYZCm/s6_chimera_801.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHIMERA artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisChimeraMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/cwuTde6n/s6_chimera_699.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHIMERA artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisChimeraMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/NtjZWWgy/s6_chimera_454.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHIMERA artwork video 4",
       },
     },
     {

@@ -37,7 +37,7 @@ export const museumGenesisSpectronMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/0NoEIXeX/s2_spectrons_123.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SPECTRON artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisSpectronMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Oc0lbEae/s2_spectrons_84.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SPECTRON artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisSpectronMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/eSsCNZK0/s2_spectrons_340.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "SPECTRON artwork video 3",
       },
     },
     {

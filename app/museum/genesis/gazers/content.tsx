@@ -37,7 +37,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/9VHqNI5X/s5_gazers_500.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/zOARe8Dx/s5_gazers_520.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/WLfZdIG4/s5_gazers_303.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/mug2EiOu/s5_gazers_581.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/laXRonAq/s5_gazers_195.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 5",
       },
     },
     {
@@ -182,7 +182,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/dceLBAjk/s5_gazers_318.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 6",
       },
     },
     {
@@ -211,7 +211,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ripsX1wm/s5_gazers_766.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 7",
       },
     },
     {
@@ -240,7 +240,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/aouaWuIj/s5_gazers_585.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 8",
       },
     },
     {
@@ -269,7 +269,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/DUTz9vb1/s5_gazers_878.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 9",
       },
     },
     {
@@ -298,7 +298,7 @@ export const museumGenesisGazersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/sAiosh6B/s5_gazers_899.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GAZERS artwork video 10",
       },
     },
     {

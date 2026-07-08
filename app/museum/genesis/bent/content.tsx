@@ -37,7 +37,7 @@ export const museumGenesisBentMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/5NMSX0pU/s5_bent_347.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BENT artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisBentMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/VWhLn2PF/s5_bent_661.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BENT artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisBentMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/DWBAhZet/s5_bent_998.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BENT artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisBentMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/K6IU09tw/s5_bent_252.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BENT artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisBentMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/EkYJcSdE/s5_bent_290.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BENT artwork video 5",
       },
     },
     {
@@ -182,7 +182,7 @@ export const museumGenesisBentMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Zf9iXChR/s5_bent_566.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "BENT artwork video 6",
       },
     },
     {

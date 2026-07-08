@@ -37,7 +37,7 @@ export const museumGenesisChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/dMGOrHD7/s1_chromie_squiggles_1862.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/07TZzXOk/s1_chromie_squiggles_6339.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Gh7AYnyS/s1_chromie_squiggles_927.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/TdAgDXKr/s1_chromie_squiggles_2163.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/lNwPTs3s/s1_chromie_squiggles_2852.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 5",
       },
     },
     {
@@ -214,7 +214,7 @@ export const museumGenesisChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/2lZpQ1Yq/s1_chromie_squiggles_7925.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 6",
       },
     },
     {
@@ -243,7 +243,7 @@ export const museumGenesisChromieSquiggleMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/X7SMHpGf/s1_chromie_squiggles_554.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "CHROMIE SQUIGGLE artwork video 7",
       },
     },
     {

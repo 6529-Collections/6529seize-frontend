@@ -5,6 +5,7 @@
     "any_casts": 0,
     "todo_comments": 0,
     "oversized_files": 41,
+    "legacy_wordpress_runtime": 0,
     "bootstrap_imports": 0,
     "redux_imports": 0,
     "pages_router_files": 0

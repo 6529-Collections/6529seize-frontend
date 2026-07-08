@@ -37,7 +37,7 @@ export const museumGenesis_720MinutesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/xTfqrEbx/s2_720_minutes_395b.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "720 MINUTES artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesis_720MinutesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/qq4M5dAs/s2_720_minutes_126b.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "720 MINUTES artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesis_720MinutesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/djxqI3zR/s2_720_minutes_420b.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "720 MINUTES artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesis_720MinutesMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/pWqslkum/s2_720_minutes_691b.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "720 MINUTES artwork video 4",
       },
     },
     {

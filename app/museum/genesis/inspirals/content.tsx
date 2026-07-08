@@ -37,7 +37,7 @@ export const museumGenesisInspiralsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/J1yR1CNE/s2_inspirals_447b.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "INSPIRALS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisInspiralsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/MjwVQvMm/s2_inspirals_777b.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "INSPIRALS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisInspiralsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/c3pkRUD0/s2_inspirals_60b.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "INSPIRALS artwork video 3",
       },
     },
     {

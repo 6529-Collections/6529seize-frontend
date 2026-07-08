@@ -6,7 +6,7 @@ export const museum_6529FundSzn1BalladOfGhostsMigratedWordPressPage = {
   path: "/museum/6529-fund-szn1/ballad-of-ghosts",
   title: "BALLAD OF GHOSTS",
   description:
-    "Ballad of Ghosts Otherworld BALLAD OF GHOSTS Description Inspired by Dance to the Music of Time by Nicolas Poussin, OtherWorld_xx creates Ballad of Ghosts. This abstract rendering is predominantly cotton candy pink layered over bright blue. Through the clou...",
+    "Inspired by Dance to the Music of Time by Nicolas Poussin, OtherWorld_xx's Ballad of Ghosts layers cotton candy pink over bright blue to suggest ghostly dancers moving through clouds of time.",
   section: "Museum / 6529 Fund SZN1",
   blocks: [
     {

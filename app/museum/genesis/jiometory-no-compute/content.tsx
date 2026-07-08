@@ -37,7 +37,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/yWLEgYFb/s5_jiometory_655.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Jr1dLLyh/s5_jiometory_281.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/1X92hHzv/s5_jiometory_546.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/aQvsVNGf/s5_jiometory_627.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/bhaiiSD0/s5_jiometory_715.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 5",
       },
     },
     {
@@ -182,7 +182,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Jw8uIIpj/s5_jiometory_842.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 6",
       },
     },
     {
@@ -211,7 +211,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Iy4T7EQR/s5_jiometory_166.mov",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 7",
       },
     },
     {
@@ -240,7 +240,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/QuLBlqSf/s5_jiometory_845.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 8",
       },
     },
     {
@@ -269,7 +269,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/7tboGJmP/s5_jiometory_303.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 9",
       },
     },
     {
@@ -298,7 +298,7 @@ export const museumGenesisJiometoryNoComputeMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/DEmMn4YK/s5_jiometory_633.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "JIOMETORY NO COMPUTE artwork video 10",
       },
     },
     {

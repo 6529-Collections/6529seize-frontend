@@ -37,7 +37,7 @@ export const museumGenesisGlitchCrystalMonstersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/LnuKNFVF/s4_glitch_crystal_monsters_8-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GLITCH CRYSTAL MONSTERS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisGlitchCrystalMonstersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ZOSW7RwY/s4_glitch_crystal_monsters_561-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GLITCH CRYSTAL MONSTERS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisGlitchCrystalMonstersMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/dqTLfDSx/s4_glitch_crystal_monsters_540-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "GLITCH CRYSTAL MONSTERS artwork video 3",
       },
     },
     {

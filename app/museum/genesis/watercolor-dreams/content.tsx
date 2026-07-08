@@ -37,7 +37,7 @@ export const museumGenesisWatercolorDreamsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/EieDu2iw/s3_watercolor_dreams_171.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "WATERCOLOR DREAMS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisWatercolorDreamsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/SUuf1pA4/s3_watercolor_dreams_538.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "WATERCOLOR DREAMS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisWatercolorDreamsMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/lrjXRG0i/s3_watercolor_dreams_64.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "WATERCOLOR DREAMS artwork video 3",
       },
     },
     {

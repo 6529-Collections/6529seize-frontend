@@ -37,7 +37,7 @@ export const museumGenesisEntretiemposMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/ndfmlHI2/s6_entretiempos_954.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENTRETIEMPOS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisEntretiemposMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/VGkZIxJL/s6_entretiempos_660.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENTRETIEMPOS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisEntretiemposMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/G3oxCfG7/s6_entretiempos_868.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENTRETIEMPOS artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisEntretiemposMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/NMvThjes/s6_entretiempos_671.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENTRETIEMPOS artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisEntretiemposMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/4liYalCY/s6_entretiempos_385.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENTRETIEMPOS artwork video 5",
       },
     },
     {
@@ -182,7 +182,7 @@ export const museumGenesisEntretiemposMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/nRuiKxC1/s6_entretiempos_540.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENTRETIEMPOS artwork video 6",
       },
     },
     {
@@ -211,7 +211,7 @@ export const museumGenesisEntretiemposMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/lnPwVeNs/s6_entretiempos_749.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENTRETIEMPOS artwork video 7",
       },
     },
     {

@@ -37,7 +37,7 @@ export const museumGenesisEndlessNamelessMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/JDIvgiKo/s4_endless_nameless_79-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENDLESS NAMELESS artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisEndlessNamelessMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/dTHoulxU/s4_endless_nameless_943-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENDLESS NAMELESS artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisEndlessNamelessMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/GxbOlaQp/s4_endless_nameless_1-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENDLESS NAMELESS artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisEndlessNamelessMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/EvmixtGM/s4_endless_nameless_243-1.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "ENDLESS NAMELESS artwork video 4",
       },
     },
     {

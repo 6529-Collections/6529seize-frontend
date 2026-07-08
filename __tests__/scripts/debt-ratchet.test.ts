@@ -9,12 +9,14 @@ const {
   countImportStatements,
   countLines,
   countMatches,
+  isLegacyWordPressRuntimeSource,
   isWordPressMigratedSource,
 } = require(path.join(process.cwd(), "scripts", "debt-ratchet.cjs")) as {
   countAnyCasts: (content: string, filePath?: string) => number;
   countImportStatements: (content: string, packages: string[]) => number;
   countLines: (content: string) => number;
   countMatches: (content: string, pattern: RegExp) => number;
+  isLegacyWordPressRuntimeSource: (content: string) => boolean;
   isWordPressMigratedSource: (content: string) => boolean;
 };
 
@@ -106,6 +108,22 @@ describe("debt-ratchet counting helpers", () => {
     expect(isWordPressMigratedSource("export const normal = true;\n")).toBe(
       false
     );
+  });
+
+  it("detects old live WordPress runtime markers", () => {
+    expect(
+      isLegacyWordPressRuntimeSource(
+        [
+          'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
+          '<WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/810" />',
+        ].join("\n")
+      )
+    ).toBe(true);
+    expect(
+      isLegacyWordPressRuntimeSource(
+        'const image = "https://cdn.example/wp-content/uploads/file.jpg";\n'
+      )
+    ).toBe(false);
   });
 });
 
@@ -217,11 +235,31 @@ describe("debt-ratchet check mode", () => {
     expect(Object.keys(parsed.counts).sort()).toEqual([
       "any_casts",
       "bootstrap_imports",
+      "legacy_wordpress_runtime",
       "oversized_files",
       "pages_router_files",
       "redux_imports",
       "todo_comments",
     ]);
+  });
+
+  it("fails when old live WordPress runtime markers are introduced", () => {
+    expect(runRatchet(root, ["--update"]).status).toBe(0);
+    writeFixture(
+      "app/legacy/page.tsx",
+      [
+        'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
+        "export default function LegacyPage() {",
+        '  return <WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/1" />;',
+        "}",
+      ].join("\n")
+    );
+
+    const check = runRatchet(root);
+    expect(check.status).toBe(1);
+    expect(check.stderr).toContain(
+      "legacy_wordpress_runtime rose from 0 to 1"
+    );
   });
 
   it("prints per-file counts from --details", () => {

@@ -37,7 +37,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/aafuseor/kai_gen_609.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 1",
       },
     },
     {
@@ -66,7 +66,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/AkiAFwHn/kai_gen_444.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 2",
       },
     },
     {
@@ -95,7 +95,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/kyuL9Qur/kai_gen_746.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 3",
       },
     },
     {
@@ -124,7 +124,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/Po2s8tWA/kai_gen_237.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 4",
       },
     },
     {
@@ -153,7 +153,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/tHmK946P/kai_gen_114.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 5",
       },
     },
     {
@@ -182,7 +182,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/8cj0VD1T/kai_gen_688.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 6",
       },
     },
     {
@@ -211,7 +211,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/zLD7OxnT/kai_gen_681.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 7",
       },
     },
     {
@@ -240,7 +240,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/xeFJsuEA/kai_gen_110.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 8",
       },
     },
     {
@@ -269,7 +269,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/747OPBoz/kai_gen_595.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 9",
       },
     },
     {
@@ -298,7 +298,7 @@ export const museumGenesisKaiGenMigratedWordPressPage = {
       type: "video",
       video: {
         src: "https://videos.files.wordpress.com/qb1rsPtw/kai_gen_725.mp4",
-        title: "Sorry, your browser doesn't support embedded videos.",
+        title: "KAI-GEN artwork video 10",
       },
     },
     {
