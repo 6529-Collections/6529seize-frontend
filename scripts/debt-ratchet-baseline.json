@@ -4,7 +4,7 @@
   "counts": {
     "any_casts": 0,
     "todo_comments": 0,
-    "oversized_files": 70,
+    "oversized_files": 67,
     "bootstrap_imports": 0,
     "redux_imports": 0,
     "pages_router_files": 0
@@ -19,7 +19,6 @@
     "app/api/open-graph/utils.ts",
     "app/api/pepe/resolve/route.ts",
     "app/api/wikimedia-card/route.ts",
-    "app/capital/company-portfolio/page.tsx",
     "app/join/page.client.tsx",
     "app/museum/6529-fund-szn1/capsule-house/page.tsx",
     "app/museum/6529-fund-szn1/cod/page.tsx",
@@ -44,8 +43,6 @@
     "app/museum/genesis/skulptuur/page.tsx",
     "app/museum/genesis/vortex/page.tsx",
     "app/museum/page.tsx",
-    "app/om/6529-museum-district/page.tsx",
-    "app/om/page.tsx",
     "components/about/AboutTermsOfService.tsx",
     "components/auth/Auth.tsx",
     "components/auth/SeizeConnectContext.tsx",
