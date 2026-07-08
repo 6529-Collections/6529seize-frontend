@@ -318,6 +318,10 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
 }
 
 function getDropCreatedAtMillis(drop: Drop): number {
+  if (drop.created_at === undefined) {
+    return drop.serial_no;
+  }
+
   const timestamp =
     typeof drop.created_at === "number"
       ? drop.created_at
