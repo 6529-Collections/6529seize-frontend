@@ -17,6 +17,7 @@ import {
   getLowValueNetworkErrorDecision,
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
+  shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
@@ -137,6 +138,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterInjectedWasmCspUnsafeEval(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterAnonymousUnsafeEvalCspError(event, hint)) {
     return true;
   }
 
