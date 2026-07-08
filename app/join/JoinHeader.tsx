@@ -212,6 +212,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
             card={HERO_MEME_CARDS.topLeft}
             fallbackLabel={fallbackLabel}
             heroMuted
+            imageLoading="eager"
           />
         </div>
       </div>
@@ -230,6 +231,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
             card={HERO_MEME_CARDS.left}
             fallbackLabel={fallbackLabel}
             heroMuted
+            imageLoading="eager"
           />
         </div>
       </div>
@@ -249,6 +251,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
             fallbackLabel={fallbackLabel}
             heroMuted
             imageAspectClass="tw-aspect-[4/3]"
+            imageLoading="eager"
           />
         </div>
       </div>

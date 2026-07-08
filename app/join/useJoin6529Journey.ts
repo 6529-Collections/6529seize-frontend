@@ -27,7 +27,7 @@ export function useJoin6529Journey(locale: SupportedLocale) {
     undefined
   );
   const subscriptionsHref =
-    subscriptionProfileIdentity === null
+    !subscriptionProfileIdentity
       ? SUBSCRIPTIONS_INFO_HREF
       : `/${subscriptionProfileIdentity}/subscriptions`;
   const pageState = getJoinPageState({

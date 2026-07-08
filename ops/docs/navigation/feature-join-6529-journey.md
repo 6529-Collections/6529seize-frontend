@@ -47,8 +47,9 @@ The compact focus area links users to:
   `/waves/b6128077-ea78-4dd9-b381-52c4eadb2077?divider=1167698`.
 - Public Waves at `/waves`.
 - Subscription minting through the current profile's `/{user}/subscriptions`
-  route when a profile or wallet identity is available, with
-  `/open-data/meme-subscriptions` as the logged-out information fallback.
+  route when a connected profile identity is available, with
+  `/open-data/meme-subscriptions` as the wallet-only or logged-out information
+  fallback.
 - Delegation at `/delegation/delegation-center`.
 - Public Waves for asking `@help6529`.
 
