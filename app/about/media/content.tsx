@@ -6,15 +6,9 @@ export const aboutMediaMigratedWordPressPage = {
   path: "/about/media",
   title: "MEDIA CENTER",
   description:
-    "Media requests (podcasts, conferences, interviews or comments on specific topics) can be made using the form on this page.",
+    "Media requests (podcasts, conferences, interviews or comments on specific topics) can be sent to support@6529.io.",
   section: "About",
   blocks: [
-    {
-      type: "html",
-      html: migratedWordPressTrustedHtml(
-        "<p>Media requests (podcasts, conferences, interviews or comments on specific topics) can be made using the form on this page.</p>"
-      ),
-    },
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
@@ -42,6 +36,12 @@ export const aboutMediaMigratedWordPressPage = {
     {
       type: "heading",
       content: "MEDIA REQUESTS",
+    },
+    {
+      type: "html",
+      html: migratedWordPressTrustedHtml(
+        '<p>For media requests, email <a href="mailto:support@6529.io">support@6529.io</a>.</p>'
+      ),
     },
   ],
 } satisfies MigratedWordPressStaticPageContent;

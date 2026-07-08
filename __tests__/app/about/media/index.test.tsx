@@ -18,6 +18,9 @@ describe("MediaPage (migrated WordPress static page)", () => {
       "href",
       "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Punk6529.png"
     );
+    expect(
+      screen.getByRole("link", { name: "support@6529.io" })
+    ).toHaveAttribute("href", "mailto:support@6529.io");
   });
 
   it("marks the page with its auditable migration source", () => {

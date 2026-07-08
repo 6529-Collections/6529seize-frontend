@@ -5,7 +5,7 @@ export const omMigratedWordPressPage = {
   source: "migrated-wordpress",
   path: "/om",
   title: "OM",
-  description: "Phase 1 – Alpha Version6529 MUSEUM DISTRICTSpring 2022",
+  description: "Phase 1 – Alpha Version, 6529 Museum District, Spring 2022",
   section: "OM",
   blocks: [
     {

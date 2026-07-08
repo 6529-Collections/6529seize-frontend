@@ -32,7 +32,7 @@ export const categoryBlogMigratedWordPressPage = {
       type: "image",
       media: {
         src: "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg",
-        alt: "summer.jpg",
+        alt: "XCOPY summer artwork",
         width: 1455,
         height: 2560,
       },
