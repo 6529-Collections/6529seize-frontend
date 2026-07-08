@@ -1,17 +1,17 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import GroupCreateCollections from '@/components/groups/page/create/config/nfts/GroupCreateCollections';
-import { ApiGroupOwnsNftNameEnum } from '@/generated/models/ApiGroupOwnsNft';
-import { ApiGroupNftOwnershipMatchMode } from '@/generated/models/ApiGroupNftOwnershipMatchMode';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import GroupCreateCollections from "@/components/groups/page/create/config/nfts/GroupCreateCollections";
+import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import { ApiGroupNftOwnershipMatchMode } from "@/generated/models/ApiGroupNftOwnershipMatchMode";
 
-describe('GroupCreateCollections', () => {
-  it('adds collection when button clicked', async () => {
+describe("GroupCreateCollections", () => {
+  it("adds collection when button clicked", async () => {
     const setNfts = jest.fn();
     render(<GroupCreateCollections nfts={[]} setNfts={setNfts} />);
 
-    const gradients = screen.getByRole('button', { name: 'Gradients' });
-    expect(gradients).toHaveClass('tw-bg-iron-900');
+    const gradients = screen.getByRole("button", { name: "Gradients" });
+    expect(gradients).toHaveClass("tw-bg-iron-900");
     await userEvent.click(gradients);
     expect(setNfts).toHaveBeenCalledWith([
       {
@@ -22,7 +22,7 @@ describe('GroupCreateCollections', () => {
     ]);
   });
 
-  it('removes collection when already selected', async () => {
+  it("removes collection when already selected", async () => {
     const setNfts = jest.fn();
     render(
       <GroupCreateCollections
@@ -31,8 +31,8 @@ describe('GroupCreateCollections', () => {
       />
     );
 
-    const memes = screen.getByRole('button', { name: 'Memes' });
-    expect(memes).toHaveClass('tw-bg-primary-500/10');
+    const memes = screen.getByRole("button", { name: "Memes" });
+    expect(memes).toHaveClass("tw-bg-primary-500/10");
     await userEvent.click(memes);
     expect(setNfts).toHaveBeenCalledWith([]);
   });
