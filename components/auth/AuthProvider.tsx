@@ -27,7 +27,6 @@ import {
   getWalletAddress,
   hasActiveSessionV2Auth,
   PROFILE_SWITCHED_EVENT,
-  removeAuthJwt,
   setActiveWalletAccount,
   syncConnectedWalletProfile,
   WALLET_ACCOUNTS_UPDATED_EVENT,
@@ -48,10 +47,12 @@ import { AuthContext } from "./authContext";
 import { useAuthImpactTracking } from "./auth-impact-tracking";
 import { navigateAfterProfileSwitch } from "./authProfileNavigation";
 import { isProfileForAddress } from "./authProfileUtils";
-import { useSessionUpgradeDeadlineRefresh } from "./auth-session-upgrade-deadline";
+import {
+  useSessionUpgradeDeadlineRefresh,
+  useSessionUpgradeExpiry,
+} from "./auth-session-upgrade-deadline";
 import {
   AUTH_TOKEN_CHANGED_EVENT_NAME,
-  clearSessionUpgradeReminder,
   DEFAULT_AUTH_ROLLOUT_SETTINGS,
   dismissSessionUpgradePrompt,
   getManualSessionUpgradePromptStatus,
@@ -140,7 +141,6 @@ export default function Auth({
   const latestAddressRef = useRef<string | undefined>(address);
   const activeValidationOperationIdRef = useRef<string | null>(null);
   const validationOperationCounterRef = useRef(0);
-  const expiredSessionUpgradeAddressRef = useRef<string | null>(null);
   const [pendingProfileSwitch, setPendingProfileSwitch] = useState<{
     readonly targetAddress: string | null;
   } | null>(null);
@@ -272,6 +272,17 @@ export default function Auth({
     setActiveProfileProxy(null);
     seizeDisconnectAndLogout();
   }, [invalidateAll, seizeDisconnectAndLogout, trackForcedLogout]);
+
+  const { expireSessionUpgradeAuth, resetSessionUpgradeExpiryDedupe } =
+    useSessionUpgradeExpiry({
+      hasActiveWalletAddress,
+      invalidateAll,
+      setSessionUpgradeHasDeadline,
+      setSessionUpgradeRequired,
+      setShowSignModal,
+      setSignModalReason,
+      trackForcedLogout,
+    });
 
   useEffect(() => {
     return () => {
@@ -443,6 +454,7 @@ export default function Auth({
       setShowSignModal,
       invalidateAll,
       reset,
+      resetSessionUpgradeExpiryDedupe,
       authRolloutSettings,
     }).catch((error) => {
       logErrorSecurely("auth_immediate_validation_unhandled", error);
@@ -462,6 +474,7 @@ export default function Auth({
     abortCurrentAuthOperation,
     invalidateAll,
     reset,
+    resetSessionUpgradeExpiryDedupe,
     authRolloutSettings,
     authStorageRevision,
   ]);
@@ -502,29 +515,6 @@ export default function Auth({
     [address, authRolloutSettings, canSignActiveWallet]
   );
 
-  const expireSessionUpgradeAuth = useCallback(
-    async (walletAddress: string): Promise<void> => {
-      const normalizedAddress = walletAddress.toLowerCase();
-      if (expiredSessionUpgradeAddressRef.current === normalizedAddress) {
-        return;
-      }
-      expiredSessionUpgradeAddressRef.current = normalizedAddress;
-
-      clearSessionUpgradeReminder(walletAddress);
-      setShowSignModal(false);
-      setSignModalReason("auth");
-      setSessionUpgradeHasDeadline(false);
-      setSessionUpgradeRequired(false);
-      trackForcedLogout({
-        reason: "session_upgrade_deadline_expired",
-        wasConnectedWallet: hasActiveWalletAddress,
-      });
-      await removeAuthJwt();
-      invalidateAll();
-    },
-    [hasActiveWalletAddress, invalidateAll, trackForcedLogout]
-  );
-
   useSessionUpgradeDeadlineRefresh({
     address,
     authRolloutSettings,
@@ -546,6 +536,7 @@ export default function Auth({
       invalidateAll,
       isAddressAuthorized,
       seizeDisconnect,
+      resetSessionUpgradeExpiryDedupe,
       setActiveProfileProxy,
       setAuthLoadingState,
       setSessionUpgradeRequired,

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
@@ -773,6 +773,113 @@ describe("Auth component", () => {
         })
       );
       expect(mockCommonApiPost).not.toHaveBeenCalled();
+    });
+
+    it("shows one toast when wallet signing already reported the failure", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      const { ConnectionMismatchError } = require("@/hooks/useSecureSign");
+      const toast = require("react-toastify").toast;
+      mockSignMessage.mockResolvedValueOnce({
+        signature: null,
+        userRejected: false,
+        error: new ConnectionMismatchError(validAddress),
+      });
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      await waitFor(() => {
+        expect(toast).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("times out manual authorized-wallet validation instead of hanging signing state", async () => {
+      jest.useFakeTimers();
+      try {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        const toast = require("react-toastify").toast;
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        mockValidateJwt.mockImplementation(
+          ({
+            abortSignal,
+          }: {
+            readonly abortSignal: AbortSignal;
+          }): Promise<{ isValid: boolean; wasCancelled: boolean }> =>
+            new Promise((resolve) => {
+              abortSignal.addEventListener(
+                "abort",
+                () => {
+                  resolve({ isValid: false, wasCancelled: true });
+                },
+                { once: true }
+              );
+            })
+        );
+
+        const Child = () => {
+          const { requestAuth } = React.useContext(AuthContext);
+          const [result, setResult] = React.useState("pending");
+
+          return (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  void requestAuth().then(({ success }) => {
+                    setResult(String(success));
+                  });
+                }}
+                data-testid="timed-auth"
+              >
+                auth
+              </button>
+              <span data-testid="timed-auth-result">{result}</span>
+            </>
+          );
+        };
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        fireEvent.click(screen.getByTestId("timed-auth"));
+
+        await waitFor(() => {
+          expect(mockValidateJwt).toHaveBeenCalled();
+        });
+
+        await act(async () => {
+          jest.advanceTimersByTime(30_000);
+          await Promise.resolve();
+        });
+
+        expect(screen.getByTestId("timed-auth-result")).toHaveTextContent(
+          "false"
+        );
+        expect(toast).toHaveBeenCalledTimes(1);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it("allows adding a second web account when below the connected profile limit", async () => {
@@ -1708,6 +1815,38 @@ describe("Auth component", () => {
           was_connected_wallet: true,
         }
       );
+    });
+
+    it("expires a later session-upgrade cycle for the same wallet", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
+      const mockRemoveAuthJwt = require("@/services/auth/auth.utils")
+        .removeAuthJwt as jest.MockedFunction<any>;
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("request-session-upgrade"));
+
+      await waitFor(() => {
+        expect(mockRemoveAuthJwt).toHaveBeenCalledTimes(1);
+      });
+
+      mockRemoveAuthJwt.mockClear();
+      await user.click(screen.getByTestId("request-session-upgrade"));
+
+      await waitFor(() => {
+        expect(mockRemoveAuthJwt).toHaveBeenCalledTimes(1);
+      });
     });
 
     it("should handle modal cancel button", async () => {

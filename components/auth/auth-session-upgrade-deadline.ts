@@ -1,12 +1,87 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import type { AuthImpactReason } from "@/services/analytics/mixpanel";
+import { removeAuthJwt } from "@/services/auth/auth.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
+  clearSessionUpgradeReminder,
   getOrCreateSessionUpgradePromptStatus,
   hasSessionUpgradeRollout,
 } from "./authSessionUpgrade";
 import type { AuthRolloutSettings, SignModalReason } from "./authTypes";
+
+type TrackForcedLogout = (params: {
+  readonly reason: AuthImpactReason;
+  readonly wasConnectedWallet: boolean;
+}) => void;
+
+interface UseSessionUpgradeExpiryParams {
+  readonly hasActiveWalletAddress: boolean;
+  readonly invalidateAll: () => void;
+  readonly setSessionUpgradeHasDeadline: (hasDeadline: boolean) => void;
+  readonly setSessionUpgradeRequired: (required: boolean) => void;
+  readonly setShowSignModal: (show: boolean) => void;
+  readonly setSignModalReason: (reason: SignModalReason) => void;
+  readonly trackForcedLogout: TrackForcedLogout;
+}
+
+export function useSessionUpgradeExpiry({
+  hasActiveWalletAddress,
+  invalidateAll,
+  setSessionUpgradeHasDeadline,
+  setSessionUpgradeRequired,
+  setShowSignModal,
+  setSignModalReason,
+  trackForcedLogout,
+}: UseSessionUpgradeExpiryParams) {
+  const expiredSessionUpgradeAddressRef = useRef<string | null>(null);
+
+  const resetSessionUpgradeExpiryDedupe = useCallback(
+    (walletAddress: string) => {
+      if (
+        expiredSessionUpgradeAddressRef.current ===
+        walletAddress.toLowerCase()
+      ) {
+        expiredSessionUpgradeAddressRef.current = null;
+      }
+    },
+    []
+  );
+
+  const expireSessionUpgradeAuth = useCallback(
+    async (walletAddress: string): Promise<void> => {
+      const normalizedAddress = walletAddress.toLowerCase();
+      if (expiredSessionUpgradeAddressRef.current === normalizedAddress) {
+        return;
+      }
+      expiredSessionUpgradeAddressRef.current = normalizedAddress;
+
+      clearSessionUpgradeReminder(walletAddress);
+      setShowSignModal(false);
+      setSignModalReason("auth");
+      setSessionUpgradeHasDeadline(false);
+      setSessionUpgradeRequired(false);
+      trackForcedLogout({
+        reason: "session_upgrade_deadline_expired",
+        wasConnectedWallet: hasActiveWalletAddress,
+      });
+      await removeAuthJwt();
+      invalidateAll();
+    },
+    [
+      hasActiveWalletAddress,
+      invalidateAll,
+      setSessionUpgradeHasDeadline,
+      setSessionUpgradeRequired,
+      setShowSignModal,
+      setSignModalReason,
+      trackForcedLogout,
+    ]
+  );
+
+  return { expireSessionUpgradeAuth, resetSessionUpgradeExpiryDedupe };
+}
 
 interface UseSessionUpgradeDeadlineRefreshParams {
   readonly address: string | undefined;
