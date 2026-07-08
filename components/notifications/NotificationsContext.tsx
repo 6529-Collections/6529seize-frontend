@@ -810,7 +810,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
               operation: "registerPushNotification",
               attempt: attempt + 1,
               max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-              profile_id: profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
             },
           });
@@ -871,7 +871,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 delay_ms: delayMs,
                 rate_limited: rateLimited,
                 ...errorExtra,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -900,7 +900,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 attempt: attemptNumber,
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
                 status_code: statusCode ?? undefined,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -926,7 +926,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
                 delay_ms: retryAfterMs ?? undefined,
                 ...errorExtra,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -942,7 +942,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             extra: {
               attempt: attemptNumber,
               max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-              profile_id: profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
               ...errorExtra,
             },
@@ -1007,7 +1007,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           data: {
             component: "NotificationsProvider",
             operation: "registerPushNotification",
-            profile_id: fingerprint.profileId ?? undefined,
+            profile_id: profileId,
             platform: deviceInfo.platform,
           },
         });
@@ -1029,7 +1029,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             data: {
               component: "NotificationsProvider",
               operation: "registerPushNotification",
-              profile_id: fingerprint.profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
             },
           });

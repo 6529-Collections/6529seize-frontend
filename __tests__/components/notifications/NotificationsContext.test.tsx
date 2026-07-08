@@ -321,32 +321,35 @@ describe("push registration behavior", () => {
     );
   });
 
-  it("skips registration when profile id is unavailable", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    const sentry = require("@sentry/nextjs");
+  it.each([null, "   "])(
+    "skips registration when profile id is unavailable (%p)",
+    async (profileId) => {
+      const { commonApiPost } = require("@/services/api/common-api");
+      const sentry = require("@sentry/nextjs");
 
-    mockConnectedProfile = { id: null, handle: "owner" };
+      mockConnectedProfile = { id: profileId, handle: "owner" };
 
-    const { registrationCallback } = await setupRegistrationCallback();
+      const { registrationCallback } = await setupRegistrationCallback();
 
-    await act(async () => {
-      await registrationCallback({ value: "test-token" });
-    });
+      await act(async () => {
+        await registrationCallback({ value: "test-token" });
+      });
 
-    expect(commonApiPost).not.toHaveBeenCalled();
-    expect(sentry.captureException).not.toHaveBeenCalled();
-    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
-      expect.objectContaining({
-        level: "warning",
-        message: "Push registration skipped (profile id unavailable).",
-        data: expect.objectContaining({
-          component: "NotificationsProvider",
-          operation: "registerPushNotification",
-          platform: "ios",
-        }),
-      })
-    );
-  });
+      expect(commonApiPost).not.toHaveBeenCalled();
+      expect(sentry.captureException).not.toHaveBeenCalled();
+      expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: "warning",
+          message: "Push registration skipped (profile id unavailable).",
+          data: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "registerPushNotification",
+            platform: "ios",
+          }),
+        })
+      );
+    }
+  );
 
   it("reinitializes registration when auth becomes usable", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
