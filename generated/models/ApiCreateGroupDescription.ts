@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiGroupBeneficiaryGrantMatchMode } from '../models/ApiGroupBeneficiaryGrantMatchMode';
 import { ApiGroupCicFilter } from '../models/ApiGroupCicFilter';
 import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
 import { ApiGroupOwnsNft } from '../models/ApiGroupOwnsNft';
@@ -27,6 +28,7 @@ export class ApiCreateGroupDescription {
     'identity_addresses': Array<string> | null;
     'excluded_identity_addresses': Array<string> | null;
     'is_beneficiary_of_grant_id'?: string | null;
+    'is_beneficiary_of_grant_match_mode'?: ApiGroupBeneficiaryGrantMatchMode;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -80,6 +82,12 @@ export class ApiCreateGroupDescription {
             "baseName": "is_beneficiary_of_grant_id",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "is_beneficiary_of_grant_match_mode",
+            "baseName": "is_beneficiary_of_grant_match_mode",
+            "type": "ApiGroupBeneficiaryGrantMatchMode",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -89,3 +97,5 @@ export class ApiCreateGroupDescription {
     public constructor() {
     }
 }
+
+

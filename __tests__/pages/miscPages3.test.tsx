@@ -3,7 +3,9 @@ import React from "react";
 import { render } from "@testing-library/react";
 import AuthorPage from "@/app/author/6529er6529-io/page";
 import CompanyPortfolio from "@/app/capital/company-portfolio/page";
-import EducationPage from "@/app/education/page";
+import EducationPage, {
+  generateMetadata as generateEducationMetadata,
+} from "@/app/education/page";
 import FakeRares from "@/app/museum/6529-fund-szn1/fakerares/page";
 import Gazers from "@/app/museum/6529-fund-szn1/gazers/page";
 import RarePepe from "@/app/museum/6529-fund-szn1/rarepepe/page";
@@ -43,12 +45,6 @@ describe("static content pages render meta tags and headings", () => {
       title: "COMPANY PORTFOLIO - 6529.io",
       canonical: "/capital/company-portfolio/",
       heading: /COMPANY PORTFOLIO/i,
-    },
-    {
-      Component: EducationPage,
-      title: "EDUCATION",
-      canonical: "/education/",
-      heading: /EDUCATION/i,
     },
     {
       Component: FakeRares,
@@ -106,5 +102,15 @@ describe("static content pages render meta tags and headings", () => {
         expect(h1?.textContent).toMatch(heading);
       }
     });
+  });
+
+  it("renders the migrated EDUCATION page via generateMetadata", () => {
+    render(<EducationPage />);
+
+    const metadata = generateEducationMetadata();
+    expect(metadata.title).toBe("EDUCATION - 6529.io");
+
+    const h1 = document.querySelector("h1");
+    expect(h1?.textContent).toMatch(/EDUCATION/i);
   });
 });
