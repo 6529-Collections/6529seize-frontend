@@ -318,8 +318,7 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
       return b.serial_no - a.serial_no;
     }
 
-    const createdAtDiff =
-      getDropCreatedAtMillis(b) - getDropCreatedAtMillis(a);
+    const createdAtDiff = getDropCreatedAtMillis(b) - getDropCreatedAtMillis(a);
     return createdAtDiff || b.serial_no - a.serial_no;
   });
 
@@ -327,7 +326,7 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
 }
 
 function getDropCreatedAtMillis(drop: Drop): number {
-  if (drop.created_at === undefined) {
+  if (drop.created_at === undefined || drop.created_at === null) {
     return drop.serial_no;
   }
 

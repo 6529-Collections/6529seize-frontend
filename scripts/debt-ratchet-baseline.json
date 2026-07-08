@@ -43,7 +43,6 @@
     "components/react-query-wrapper/ReactQueryWrapper.tsx",
     "components/rememes/RememePage.tsx",
     "components/user/collected/UserPageCollected.tsx",
-    "components/waves/CreateDropContent.tsx",
     "components/waves/TwitterPreviewCard.tsx",
     "components/waves/WaveTrustSignals.tsx",
     "components/waves/drops/WaveDrop.tsx",
