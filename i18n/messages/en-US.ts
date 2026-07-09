@@ -711,11 +711,12 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "loading.title": "Searching messages",
     placeholder: "Search messages",
     "result.open": "Open message {serialNo} by {author}",
-    "results.count.many": "{count} results",
+    "result.unavailable": "Message by {author} cannot be opened",
     "results.count.one": "{count} result",
+    "results.count.other": "{count} results",
     "results.query": 'for "{query}"',
-    "results.status.many": '{count} results for "{query}"',
     "results.status.one": '{count} result for "{query}"',
+    "results.status.other": '{count} results for "{query}"',
     title: "Search messages",
   } as const
 );

@@ -4,6 +4,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import {
   ChevronLeftIcon,
@@ -48,7 +49,7 @@ function WaveDropsSearchState({
   const stateRole =
     variant === "error"
       ? "alert"
-      : variant === "loading"
+      : variant === "loading" || variant === "empty"
         ? "status"
         : undefined;
   const iconClasses = "tw-size-5 tw-flex-shrink-0";
@@ -79,7 +80,9 @@ function WaveDropsSearchState({
     <div
       id={id}
       role={stateRole}
-      aria-live={variant === "loading" ? "polite" : undefined}
+      aria-live={
+        variant === "loading" || variant === "empty" ? "polite" : undefined
+      }
       className="tw-flex tw-min-h-[220px] tw-flex-col tw-items-center tw-justify-center tw-px-6 tw-py-10 tw-text-center"
     >
       <div className="tw-mb-4 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-text-iron-200">
@@ -150,6 +153,9 @@ export default function WaveDropsSearchModal({
     enabled: isOpen && meetsMinLength,
     size: 50,
   });
+
+  const formattedMinQueryLength = formatInteger(locale, MIN_QUERY_LENGTH);
+  const formattedResultCount = formatInteger(locale, results.length);
 
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -263,7 +269,7 @@ export default function WaveDropsSearchModal({
                       locale,
                       "waves.drops.searchModal.inputDescription",
                       {
-                        minLength: MIN_QUERY_LENGTH,
+                        minLength: formattedMinQueryLength,
                         waveName: wave.name,
                       }
                     )}
@@ -327,7 +333,7 @@ export default function WaveDropsSearchModal({
                     description={t(
                       locale,
                       "waves.drops.searchModal.idle.description",
-                      { minLength: MIN_QUERY_LENGTH }
+                      { minLength: formattedMinQueryLength }
                     )}
                   />
                 )}
@@ -363,9 +369,9 @@ export default function WaveDropsSearchModal({
                           locale,
                           results.length === 1
                             ? "waves.drops.searchModal.results.status.one"
-                            : "waves.drops.searchModal.results.status.many",
+                            : "waves.drops.searchModal.results.status.other",
                           {
-                            count: results.length,
+                            count: formattedResultCount,
                             query: normalizedQuery,
                           }
                         )}
@@ -376,8 +382,8 @@ export default function WaveDropsSearchModal({
                             locale,
                             results.length === 1
                               ? "waves.drops.searchModal.results.count.one"
-                              : "waves.drops.searchModal.results.count.many",
-                            { count: results.length }
+                              : "waves.drops.searchModal.results.count.other",
+                            { count: formattedResultCount }
                           )}
                         </p>
                         <p className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-400">
@@ -401,6 +407,18 @@ export default function WaveDropsSearchModal({
                               locale,
                               "waves.drops.searchModal.authorFallback"
                             );
+                          const resultButtonLabel =
+                            typeof serialNo === "number"
+                              ? t(
+                                  locale,
+                                  "waves.drops.searchModal.result.open",
+                                  { serialNo, author }
+                                )
+                              : t(
+                                  locale,
+                                  "waves.drops.searchModal.result.unavailable",
+                                  { author }
+                                );
                           return (
                             <div
                               key={drop.stableKey}
@@ -437,18 +455,20 @@ export default function WaveDropsSearchModal({
                                   }
                                 />
                               </div>
-                              {typeof serialNo === "number" && (
-                                <button
-                                  type="button"
-                                  onClick={() => selectDropResult(serialNo)}
-                                  aria-label={t(
-                                    locale,
-                                    "waves.drops.searchModal.result.open",
-                                    { serialNo, author }
-                                  )}
-                                  className="tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
-                                />
-                              )}
+                              <button
+                                type="button"
+                                disabled={!canSelect}
+                                onClick={() => {
+                                  if (typeof serialNo !== "number") return;
+                                  selectDropResult(serialNo);
+                                }}
+                                aria-label={resultButtonLabel}
+                                className={`tw-absolute tw-inset-0 tw-z-10 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed ${
+                                  canSelect
+                                    ? "tw-cursor-pointer"
+                                    : "tw-cursor-not-allowed"
+                                }`}
+                              />
                             </div>
                           );
                         })}
