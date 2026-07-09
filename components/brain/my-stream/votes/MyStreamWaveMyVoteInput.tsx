@@ -19,6 +19,9 @@ interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
   readonly isResetting?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly onExplainVote?:
+    | ((voteTotal: number, voteChange: number) => void)
+    | undefined;
 }
 
 interface OptimisticVoteState {
@@ -34,11 +37,18 @@ interface VoteDraftState {
   readonly value: string;
 }
 
+interface LastAppliedVoteChange {
+  readonly dropId: string;
+  readonly voteTotal: number;
+  readonly voteChange: number;
+}
+
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   drop,
   isResetting = false,
   isVotingClosed = false,
+  onExplainVote,
 }) => {
   const { requestAuth, setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
@@ -48,6 +58,8 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
     null
   );
+  const [lastAppliedVoteChange, setLastAppliedVoteChange] =
+    useState<LastAppliedVoteChange | null>(null);
   const rawCurrentVoteValue = drop.context_profile_context?.rating ?? 0;
   const rawMinRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
@@ -146,6 +158,11 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         response.context_profile_context?.rating ?? variables.rate;
       const nextMaxRating =
         response.context_profile_context?.max_rating ?? liveMaxRating;
+      setLastAppliedVoteChange({
+        dropId: drop.id,
+        voteTotal: nextVoteValue,
+        voteChange: nextVoteValue - currentVoteValue,
+      });
       setOptimisticVoteState({
         dropId: drop.id,
         baseCurrentVoteValue: currentVoteValue,
@@ -215,6 +232,28 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       void handleSubmit();
     }
   };
+
+  const currentRationaleVoteChange =
+    lastAppliedVoteChange?.dropId === drop.id &&
+    lastAppliedVoteChange.voteTotal === liveCurrentVoteValue
+      ? lastAppliedVoteChange.voteChange
+      : liveCurrentVoteValue;
+
+  const canExplainVote =
+    !!onExplainVote &&
+    liveCurrentVoteValue !== 0 &&
+    !isProcessing &&
+    !isResetting &&
+    !isVotingClosed;
+
+  const handleExplainVote = () => {
+    if (!onExplainVote || !canExplainVote) {
+      return;
+    }
+
+    onExplainVote(liveCurrentVoteValue, currentRationaleVoteChange);
+  };
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-1.5">
       <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
@@ -223,8 +262,8 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           {formatNumberWithCommas(liveMaxRating)}
         </span>
       </p>
-      <div className="tw-flex tw-items-center tw-gap-x-3">
-        <div className="tw-relative tw-w-full md:tw-w-36">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+        <div className="tw-relative tw-min-w-[9rem] tw-flex-1 md:tw-w-36 md:tw-flex-none">
           <input
             onClick={(e) => {
               e.stopPropagation();
@@ -244,7 +283,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           </div>
         </div>
 
-        <div className="tw-flex tw-items-center">
+        <div className="tw-flex tw-items-center tw-gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -279,6 +318,20 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
               "Vote"
             )}
           </button>
+          {onExplainVote && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleExplainVote();
+              }}
+              disabled={!canExplainVote}
+              className="tw-relative tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-300 active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-ring-iron-600"
+              aria-label="Reply with vote rationale"
+            >
+              Explain
+            </button>
+          )}
         </div>
       </div>
     </div>

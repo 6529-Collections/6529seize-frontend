@@ -95,6 +95,8 @@ interface CreateDropLayoutProps {
   readonly onMentionedWave: (newWave: MentionedWave) => void;
   readonly canEditLastDropWithArrow: boolean;
   readonly handleRequestEditLastDrop: () => boolean;
+  readonly initialMarkdown: string | null;
+  readonly initialMarkdownKey: string | null;
   readonly onDrop: () => Promise<void>;
   readonly pollDraft: CreateDropPollDraft | null;
   readonly pollValidationError: string | null;
@@ -175,6 +177,8 @@ export default function CreateDropLayout({
   onMentionedWave,
   canEditLastDropWithArrow,
   handleRequestEditLastDrop,
+  initialMarkdown,
+  initialMarkdownKey,
   onDrop,
   pollDraft,
   pollValidationError,
@@ -319,6 +323,8 @@ export default function CreateDropLayout({
                   onAttachmentFiles={handleFileChange}
                   canEditLastDropWithArrow={canEditLastDropWithArrow}
                   onRequestEditLastDrop={handleRequestEditLastDrop}
+                  initialMarkdown={initialMarkdown}
+                  initialMarkdownKey={initialMarkdownKey}
                   onDrop={onDrop}
                 />
                 {pollDraft && (
