@@ -11,6 +11,28 @@ jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
 }));
 
 const markMobileLaunchStepMock = markMobileLaunchStep as jest.Mock;
+const mockTrackWaveFeedLoadCancelled = jest.fn();
+const mockTrackWaveFeedLoadFailed = jest.fn();
+const mockTrackWaveFeedLoadStarted = jest.fn();
+const mockTrackWaveFeedLoadSucceeded = jest.fn();
+
+jest.mock("@/services/analytics/productImpactTelemetry", () => ({
+  getProductImpactNowMs: jest.fn(() => 1000),
+  isProductImpactAbortError: (error: unknown) =>
+    error instanceof DOMException && error.name === "AbortError",
+  trackWaveFeedLoadCancelled: (
+    ...args: Parameters<typeof mockTrackWaveFeedLoadCancelled>
+  ) => mockTrackWaveFeedLoadCancelled(...args),
+  trackWaveFeedLoadFailed: (
+    ...args: Parameters<typeof mockTrackWaveFeedLoadFailed>
+  ) => mockTrackWaveFeedLoadFailed(...args),
+  trackWaveFeedLoadStarted: (
+    ...args: Parameters<typeof mockTrackWaveFeedLoadStarted>
+  ) => mockTrackWaveFeedLoadStarted(...args),
+  trackWaveFeedLoadSucceeded: (
+    ...args: Parameters<typeof mockTrackWaveFeedLoadSucceeded>
+  ) => mockTrackWaveFeedLoadSucceeded(...args),
+}));
 
 const getLoadingState = jest.fn(() => ({
   state: { isLoading: false, promise: null },
@@ -97,11 +119,23 @@ describe("useWaveDataFetching", () => {
       null,
       expect.any(Object),
       expect.any(Function),
-      undefined
+      expect.objectContaining({ onFailure: expect.any(Function) })
     );
     expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
       "wave_messages_loaded"
     );
+    expect(mockTrackWaveFeedLoadStarted).toHaveBeenCalledWith({
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+    });
+    expect(mockTrackWaveFeedLoadSucceeded).toHaveBeenCalledWith({
+      dropCount: 1,
+      durationMs: 0,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+    });
     expect(updateData).toHaveBeenNthCalledWith(1, { key: "wave1", drops: [] });
     expect(updateData).toHaveBeenLastCalledWith({
       key: "wave1",
@@ -125,7 +159,93 @@ describe("useWaveDataFetching", () => {
 
     expect(updateData).toHaveBeenCalledTimes(1); // only initial empty state
     expect(consoleSpy).not.toHaveBeenCalled();
+    expect(mockTrackWaveFeedLoadCancelled).toHaveBeenCalledWith({
+      durationMs: 0,
+      error: abortError,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+      remainedUnavailable: false,
+    });
+    expect(mockTrackWaveFeedLoadFailed).not.toHaveBeenCalled();
     consoleSpy.mockRestore();
+  });
+
+  it("tracks non-abort initial feed failures as unavailable", async () => {
+    const failureError = Object.assign(new Error("Service unavailable"), {
+      status: 503,
+    });
+    fetchWaveMessages.mockImplementation(
+      async (
+        _waveId: unknown,
+        _serialNo: unknown,
+        _signal: unknown,
+        _updateEligibility: unknown,
+        options: { readonly onFailure?: (error: unknown) => void }
+      ) => {
+        options.onFailure?.(failureError);
+        return null;
+      }
+    );
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const { result, updateData } = setup({ wave1: { drops: [] } });
+
+    await act(async () => {
+      result.current.registerWave("wave1");
+      await Promise.resolve();
+    });
+
+    expect(updateData).toHaveBeenCalledTimes(2);
+    expect(updateData).toHaveBeenLastCalledWith({
+      key: "wave1",
+      isLoading: false,
+    });
+    expect(mockTrackWaveFeedLoadFailed).toHaveBeenCalledWith({
+      durationMs: 0,
+      error: failureError,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+      remainedUnavailable: true,
+    });
+  });
+
+  it("tracks abort-like null feed results as cancellations", async () => {
+    const abortError = new DOMException("Fetch is aborted", "AbortError");
+    fetchWaveMessages.mockImplementation(
+      async (
+        _waveId: unknown,
+        _serialNo: unknown,
+        _signal: unknown,
+        _updateEligibility: unknown,
+        options: { readonly onFailure?: (error: unknown) => void }
+      ) => {
+        options.onFailure?.(abortError);
+        return null;
+      }
+    );
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const { result, updateData } = setup({ wave1: { drops: [] } });
+
+    await act(async () => {
+      result.current.registerWave("wave1");
+      await Promise.resolve();
+    });
+
+    expect(updateData).toHaveBeenCalledTimes(2);
+    expect(updateData).toHaveBeenLastCalledWith({
+      key: "wave1",
+      isLoading: false,
+    });
+    expect(mockTrackWaveFeedLoadCancelled).toHaveBeenCalledWith({
+      durationMs: 0,
+      error: abortError,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+      remainedUnavailable: false,
+    });
+    expect(mockTrackWaveFeedLoadFailed).not.toHaveBeenCalled();
   });
 
   it("syncNewestMessages updates data and returns result", async () => {
@@ -282,7 +402,10 @@ describe("useWaveDataFetching", () => {
       null,
       expect.any(Object),
       expect.any(Function),
-      { limit: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit }
+      expect.objectContaining({
+        limit: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit,
+        onFailure: expect.any(Function),
+      })
     );
 
     await act(async () => {

@@ -25,7 +25,8 @@ const {
 
 function requireValue(name, value) {
   if (!value) {
-    throw new Error(`${name} is required`);
+    console.error(`${name} is required`);
+    process.exit(1);
   }
   return value;
 }
@@ -81,6 +82,8 @@ const repository = requireValue('GITHUB_REPOSITORY', GITHUB_REPOSITORY);
 const runId = requireValue('GITHUB_RUN_ID', GITHUB_RUN_ID);
 const status = requireValue('CI_PIPELINES_STATUS', CI_PIPELINES_STATUS);
 const title = requireValue('CI_PIPELINES_TITLE', CI_PIPELINES_TITLE);
+const targetEnvironment =
+  CI_PIPELINES_TARGET_ENV || CI_PIPELINES_ENVIRONMENT || null;
 
 const payload = {
   repo: repository.split('/').pop() ?? repository,
@@ -92,7 +95,7 @@ const payload = {
   run_url: `${GITHUB_SERVER_URL}/${repository}/actions/runs/${runId}`,
   sha: GITHUB_SHA || null,
   branch: GITHUB_REF_NAME || null,
-  environment: CI_PIPELINES_ENVIRONMENT || CI_PIPELINES_TARGET_ENV || null,
+  environment: targetEnvironment,
   service: CI_PIPELINES_SERVICE || null
 };
 

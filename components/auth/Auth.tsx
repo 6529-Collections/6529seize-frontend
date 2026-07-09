@@ -47,6 +47,11 @@ import {
 } from "@/hooks/useSecureSign";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
+  trackAuthSessionRefreshProductImpact,
+  trackAuthSessionRefreshSucceeded,
+  trackAuthValidationCancelled,
+} from "@/services/analytics/productImpactTelemetry";
+import {
   trackAuthImpactEvent,
   type AuthImpactAuthState,
   type AuthImpactEventName,
@@ -185,6 +190,10 @@ interface RunImmediateAuthValidationParams {
   readonly reset: () => void;
   readonly authRolloutSettings: AuthRolloutSettings;
 }
+
+type ImmediateAuthValidationResult = Awaited<
+  ReturnType<typeof validateAuthImmediate>
+>;
 
 const SESSION_UPGRADE_REMINDER_STORAGE_KEY =
   "6529-session-v2-upgrade-reminders";
@@ -475,6 +484,93 @@ const isCurrentValidationOperation = ({
   latestAddressRef.current === currentAddress &&
   activeValidationOperationIdRef.current === operationId;
 
+const trackImmediateAuthValidationTelemetry = ({
+  result,
+  hadLocalJwt,
+  hasActiveWalletAddress,
+}: {
+  readonly result: ImmediateAuthValidationResult;
+  readonly hadLocalJwt: boolean;
+  readonly hasActiveWalletAddress: boolean;
+}): void => {
+  const refreshOutcome = result.authRefreshOutcome;
+  const clientType = getSessionClientType();
+
+  if (result.wasCancelled) {
+    trackAuthValidationCancelled({
+      clientType,
+      hadLocalJwt,
+      refreshOutcome,
+    });
+    return;
+  }
+
+  if (result.isValid) {
+    if (refreshOutcome === "success") {
+      trackAuthSessionRefreshSucceeded({
+        clientType,
+        hadLocalJwt,
+        refreshOutcome,
+      });
+      return;
+    }
+
+    if (refreshOutcome === "local_valid_after_failure") {
+      trackAuthSessionRefreshProductImpact({
+        clientType,
+        hadLocalJwt,
+        outcome: "failed_without_prompt",
+        refreshOutcome,
+        requiresReauth: false,
+      });
+    }
+    return;
+  }
+
+  if (result.requiresSessionUpgrade) {
+    trackAuthSessionRefreshProductImpact({
+      clientType,
+      hadLocalJwt,
+      outcome: "session_upgrade_required",
+      refreshOutcome,
+      requiresReauth: true,
+    });
+    return;
+  }
+
+  if (result.shouldShowModal) {
+    trackAuthSessionRefreshProductImpact({
+      clientType,
+      hadLocalJwt,
+      outcome: "reauth_required",
+      refreshOutcome,
+      requiresReauth: true,
+    });
+    return;
+  }
+
+  if (!hasActiveWalletAddress) {
+    trackAuthSessionRefreshProductImpact({
+      clientType,
+      hadLocalJwt,
+      outcome: "logout_required",
+      refreshOutcome,
+      requiresReauth: true,
+    });
+    return;
+  }
+
+  if (refreshOutcome !== "not_attempted") {
+    trackAuthSessionRefreshProductImpact({
+      clientType,
+      hadLocalJwt,
+      outcome: "failed_without_prompt",
+      refreshOutcome,
+      requiresReauth: false,
+    });
+  }
+};
+
 const runImmediateAuthValidation = async ({
   currentAddress,
   operationId,
@@ -510,6 +606,7 @@ const runImmediateAuthValidation = async ({
   const abortController = new AbortController();
   abortControllerRef.current = abortController;
   setAuthLoadingState("validating");
+  const authJwt = getAuthJwt();
 
   const markSessionUpgradeRequired = () => {
     setSessionUpgradeRequired(true);
@@ -540,7 +637,7 @@ const runImmediateAuthValidation = async ({
           params: {
             currentAddress,
             connectionAddress: currentAddress,
-            jwt: getAuthJwt(),
+            jwt: authJwt,
             activeProfileProxy,
             isConnected: hasActiveWalletAddress,
             operationId,
@@ -557,8 +654,16 @@ const runImmediateAuthValidation = async ({
         })
     );
 
+    if (result.wasCancelled) {
+      trackImmediateAuthValidationTelemetry({
+        result,
+        hadLocalJwt: authJwt !== null,
+        hasActiveWalletAddress,
+      });
+      return;
+    }
+
     if (
-      result.wasCancelled ||
       isCurrentValidationOperation({
         latestAddressRef,
         activeValidationOperationIdRef,
@@ -568,6 +673,12 @@ const runImmediateAuthValidation = async ({
     ) {
       return;
     }
+
+    trackImmediateAuthValidationTelemetry({
+      result,
+      hadLocalJwt: authJwt !== null,
+      hasActiveWalletAddress,
+    });
   } finally {
     if (
       abortControllerRef.current === abortController &&
@@ -652,8 +763,9 @@ export default function Auth({
   const [sessionUpgradeRequired, setSessionUpgradeRequired] = useState(false);
   const [authStorageRevision, setAuthStorageRevision] = useState(0);
   const signModalReasonRef = useRef<SignModalReason>(signModalReason);
-  const authPromptTrackingReasonRef =
-    useRef<AuthImpactReason>("auth_validation_failed");
+  const authPromptTrackingReasonRef = useRef<AuthImpactReason>(
+    "auth_validation_failed"
+  );
   const visibleAuthPromptEventRef = useRef<SignModalReason | null>(null);
   const lastTrackedForcedLogoutKeyRef = useRef<string | null>(null);
   const lastTrackedValidationFailureKeyRef = useRef<string | null>(null);
@@ -1902,9 +2014,7 @@ export default function Auth({
 
     const reason = authPromptTrackingReasonRef.current;
     const authStateBefore: AuthImpactAuthState =
-      reason === "wallet_not_authorized"
-        ? "wallet_connected"
-        : "authenticated";
+      reason === "wallet_not_authorized" ? "wallet_connected" : "authenticated";
     trackAuthImpact("Auth Reauth Prompt Shown", {
       auth_state_after: "reauth_prompt",
       auth_state_before: authStateBefore,
