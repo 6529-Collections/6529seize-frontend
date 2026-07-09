@@ -58,10 +58,16 @@ jest.mock("@sentry/nextjs", () => ({
 
 type SessionRefreshTelemetryAttrs = {
   readonly source?: unknown;
+  readonly refresh_source?: unknown;
   readonly client_type?: unknown;
+  readonly refresh_client_type?: unknown;
+  readonly refresh_result?: unknown;
   readonly auth_refresh_outcome?: unknown;
   readonly outcome?: unknown;
+  readonly refresh_status_bucket?: unknown;
+  readonly refresh_status_code?: unknown;
   readonly status_code?: unknown;
+  readonly refresh_duration_bucket_ms?: unknown;
   readonly duration_bucket_ms?: unknown;
 };
 
@@ -84,10 +90,16 @@ const getTelemetryOutcomes = (
 
 const allowedRefreshTelemetryAttrNames = new Set([
   "source",
+  "refresh_source",
   "client_type",
+  "refresh_client_type",
+  "refresh_result",
   "auth_refresh_outcome",
   "outcome",
+  "refresh_status_bucket",
+  "refresh_status_code",
   "status_code",
+  "refresh_duration_bucket_ms",
   "duration_bucket_ms",
 ]);
 
@@ -99,7 +111,20 @@ const expectNoSensitiveRefreshTelemetry = (
       (key) => !allowedRefreshTelemetryAttrNames.has(key)
     );
     expect(unexpectedAttrNames).toEqual([]);
+    expect(attr).toHaveProperty("refresh_source", attr.source);
+    expect(attr).toHaveProperty("refresh_client_type", attr.client_type);
+    expect(attr).toHaveProperty("refresh_result", attr.auth_refresh_outcome);
     expect(attr).toHaveProperty("auth_refresh_outcome", attr.outcome);
+    expect(attr).toHaveProperty("refresh_status_bucket");
+    if (attr.status_code !== undefined) {
+      expect(attr).toHaveProperty("refresh_status_code", attr.status_code);
+    }
+    if (attr.duration_bucket_ms !== undefined) {
+      expect(attr).toHaveProperty(
+        "refresh_duration_bucket_ms",
+        attr.duration_bucket_ms
+      );
+    }
     expect(attr).not.toHaveProperty("address");
     expect(attr).not.toHaveProperty("client_address");
     expect(attr).not.toHaveProperty("access_token");

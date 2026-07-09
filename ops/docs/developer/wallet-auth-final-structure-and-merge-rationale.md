@@ -91,22 +91,32 @@ real disruption.
 Useful fields:
 
 - `source=refreshSessionV2`
+- `refresh_source=refreshSessionV2`
 - `client_type=web|native|desktop`
+- `refresh_client_type=web|native|desktop`
+- `refresh_result=started|success|unauthorized|aborted|network_error|backend_error|cooldown_used_empty|cooldown_used_retry|deduped_in_flight`
+- `refresh_status_bucket=not_applicable|aborted|network_error|http_401|http_4xx|http_5xx|http_other`
+- `refresh_status_code`, when a backend HTTP status is known
+- `refresh_duration_bucket_ms`, on terminal backend request outcomes after `started`
 - `auth_refresh_outcome=started|success|unauthorized|aborted|network_error|backend_error|cooldown_used_empty|cooldown_used_retry|deduped_in_flight`
-- `outcome`, kept for compatibility with older query examples
-- `status_code`, when a backend HTTP status is known
-- `duration_bucket_ms`, on terminal backend request outcomes after `started`
+- `outcome`, `status_code`, and `duration_bucket_ms`, kept for compatibility
+  with older query examples
 
 `unauthorized` includes backend 401 responses and native refresh attempts that
 cannot find a local native refresh token. The latter has no `status_code`.
+Prefer the `refresh_*` fields in new Sentry Logs queries because the legacy
+`auth_refresh_outcome` field name can match sensitive-key scrub rules. Saved
+Sentry Logs URLs must put the search expression in `logsQuery=...`; `query=...`
+does not restore the Logs search correctly.
 
 Example Sentry log queries:
 
 ```text
-message:"auth_session_refresh" auth_refresh_outcome:unauthorized client_type:web
-message:"auth_session_refresh" auth_refresh_outcome:aborted
-message:"auth_session_refresh" auth_refresh_outcome:network_error OR auth_refresh_outcome:backend_error
-message:"auth_session_refresh" auth_refresh_outcome:cooldown_used_empty OR auth_refresh_outcome:cooldown_used_retry OR auth_refresh_outcome:deduped_in_flight
+message:"auth_session_refresh" refresh_result:unauthorized refresh_client_type:web
+message:"auth_session_refresh" refresh_result:aborted
+message:"auth_session_refresh" refresh_result:network_error OR refresh_result:backend_error
+message:"auth_session_refresh" refresh_status_bucket:http_401 OR refresh_status_bucket:http_5xx
+message:"auth_session_refresh" refresh_result:cooldown_used_empty OR refresh_result:cooldown_used_retry OR refresh_result:deduped_in_flight
 ```
 
 These events intentionally do not include wallet addresses, JWTs, cookies,

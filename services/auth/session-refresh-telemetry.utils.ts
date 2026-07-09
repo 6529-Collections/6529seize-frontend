@@ -12,12 +12,26 @@ type SessionRefreshTelemetryOutcome =
   | "cooldown_used_empty"
   | "cooldown_used_retry"
   | "deduped_in_flight";
+type SessionRefreshTelemetryStatusBucket =
+  | "not_applicable"
+  | "aborted"
+  | "network_error"
+  | "http_401"
+  | "http_4xx"
+  | "http_5xx"
+  | "http_other";
 type SessionRefreshTelemetryAttrs = {
   readonly source: "refreshSessionV2";
+  readonly refresh_source: "refreshSessionV2";
   readonly client_type: SessionRefreshTelemetryClientType;
+  readonly refresh_client_type: SessionRefreshTelemetryClientType;
+  readonly refresh_result: SessionRefreshTelemetryOutcome;
   readonly auth_refresh_outcome: SessionRefreshTelemetryOutcome;
   readonly outcome: SessionRefreshTelemetryOutcome;
+  readonly refresh_status_bucket: SessionRefreshTelemetryStatusBucket;
+  readonly refresh_status_code?: number;
   readonly status_code?: number;
+  readonly refresh_duration_bucket_ms?: string;
   readonly duration_bucket_ms?: string;
 };
 type ApiStatusError = {
@@ -95,6 +109,34 @@ function recordSessionRefreshTelemetry(
   }
 }
 
+function getRefreshStatusBucket({
+  outcome,
+  statusCode,
+}: {
+  readonly outcome: SessionRefreshTelemetryOutcome;
+  readonly statusCode?: number | undefined;
+}): SessionRefreshTelemetryStatusBucket {
+  if (statusCode === 401) {
+    return "http_401";
+  }
+  if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
+    return "http_4xx";
+  }
+  if (statusCode !== undefined && statusCode >= 500 && statusCode < 600) {
+    return "http_5xx";
+  }
+  if (statusCode !== undefined) {
+    return "http_other";
+  }
+  if (outcome === "network_error") {
+    return "network_error";
+  }
+  if (outcome === "aborted") {
+    return "aborted";
+  }
+  return "not_applicable";
+}
+
 export function recordSessionRefreshOutcome({
   clientType,
   outcome,
@@ -106,18 +148,27 @@ export function recordSessionRefreshOutcome({
   readonly statusCode?: number | undefined;
   readonly startedAtMs?: number | undefined;
 }): void {
+  const durationBucketMs =
+    startedAtMs !== undefined
+      ? bucketMs(getSessionRefreshTelemetryTimestamp() - startedAtMs)
+      : undefined;
+
   recordSessionRefreshTelemetry({
     source: "refreshSessionV2",
+    refresh_source: "refreshSessionV2",
     client_type: clientType,
+    refresh_client_type: clientType,
+    refresh_result: outcome,
     auth_refresh_outcome: outcome,
     outcome,
+    refresh_status_bucket: getRefreshStatusBucket({ outcome, statusCode }),
+    ...(statusCode !== undefined ? { refresh_status_code: statusCode } : {}),
     ...(statusCode !== undefined ? { status_code: statusCode } : {}),
-    ...(startedAtMs !== undefined
-      ? {
-          duration_bucket_ms: bucketMs(
-            getSessionRefreshTelemetryTimestamp() - startedAtMs
-          ),
-        }
+    ...(durationBucketMs !== undefined
+      ? { refresh_duration_bucket_ms: durationBucketMs }
+      : {}),
+    ...(durationBucketMs !== undefined
+      ? { duration_bucket_ms: durationBucketMs }
       : {}),
   });
 }

@@ -229,6 +229,30 @@ describe("sentry-sanitizer", () => {
     }
   );
 
+  it("keeps neutral refresh telemetry aliases while redacting auth/session-prefixed legacy keys in event data", () => {
+    const event = sanitizeSentryEvent({
+      extra: {
+        auth_refresh_outcome: "unauthorized",
+        session_refresh_result: "unauthorized",
+        refresh_result: "unauthorized",
+        refresh_client_type: "web",
+        refresh_status_bucket: "http_401",
+        refresh_status_code: 401,
+      },
+    });
+
+    expect(event.extra).toEqual(
+      expect.objectContaining({
+        auth_refresh_outcome: "[Filtered]",
+        session_refresh_result: "[Filtered]",
+        refresh_result: "unauthorized",
+        refresh_client_type: "web",
+        refresh_status_bucket: "http_401",
+        refresh_status_code: 401,
+      })
+    );
+  });
+
   it("marks bare API paths as first-party API breadcrumb URLs", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       type: "http",
