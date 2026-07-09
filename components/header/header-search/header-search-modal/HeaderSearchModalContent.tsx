@@ -69,6 +69,7 @@ import {
 } from "./pageSearch";
 
 const HEADER_SEARCH_DIALOG_TITLE_ID = "header-search-dialog-title";
+const HEADER_SEARCH_INPUT_DESCRIPTION_ID = "header-search-input-description";
 
 export default function HeaderSearchModal({
   onClose,
@@ -122,6 +123,14 @@ export default function HeaderSearchModal({
 
   // Wave search (shorter debounce, lower min length)
   const WAVE_SEARCH_MIN_LENGTH = 2;
+  const dialogTitle =
+    searchMode === SEARCH_MODE.WAVE
+      ? t(locale, "headerSearch.dialogTitle.wave")
+      : t(locale, "headerSearch.dialogTitle.site");
+  const inputMinLength =
+    searchMode === SEARCH_MODE.WAVE
+      ? WAVE_SEARCH_MIN_LENGTH
+      : MIN_SEARCH_LENGTH;
   const [waveSearchDebouncedValue, setWaveSearchDebouncedValue] =
     useState<string>("");
   useDebounce(
@@ -604,7 +613,7 @@ export default function HeaderSearchModal({
               className="tw-relative tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-[520px] tw-max-h-[70vh] tw-min-h-0 tw-w-full tw-max-w-[min(100vw-3rem,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl"
             >
               <h2 id={HEADER_SEARCH_DIALOG_TITLE_ID} className="tw-sr-only">
-                {t(locale, "headerSearch.inputLabel")}
+                {dialogTitle}
               </h2>
               <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-4">
                 <button
@@ -632,11 +641,20 @@ export default function HeaderSearchModal({
                   <label className="tw-sr-only" htmlFor="header-search-input">
                     {t(locale, "headerSearch.inputLabel")}
                   </label>
+                  <p
+                    id={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
+                    className="tw-sr-only"
+                  >
+                    {t(locale, "headerSearch.inputDescription", {
+                      minLength: inputMinLength,
+                    })}
+                  </p>
                   <input
                     id="header-search-input"
                     ref={inputRef}
                     type="text"
                     required
+                    aria-describedby={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
                     autoComplete="off"
                     value={searchValue}
                     onChange={handleInputChange}
