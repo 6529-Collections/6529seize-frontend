@@ -219,14 +219,6 @@ async function runNativeInitialBackfill({
       return;
     }
 
-    trackWaveFeedLoadSuccess({
-      dropCount: backfillDrops.length,
-      hadCachedDrops: true,
-      isNative,
-      loadSource: "native_initial_backfill",
-      startedAtMs: telemetryStartedAtMs,
-    });
-
     updateData(
       formatNativeBackfillMessages({
         backfillDrops,
@@ -235,6 +227,14 @@ async function runNativeInitialBackfill({
         waveId,
       })
     );
+
+    trackWaveFeedLoadSuccess({
+      dropCount: backfillDrops.length,
+      hadCachedDrops: true,
+      isNative,
+      loadSource: "native_initial_backfill",
+      startedAtMs: telemetryStartedAtMs,
+    });
   } catch (error: unknown) {
     trackWaveFeedLoadTerminalFromError({
       error,
