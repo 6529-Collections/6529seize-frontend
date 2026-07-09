@@ -39,7 +39,6 @@ const BrainContent: React.FC<BrainContentProps> = ({
   const composerPositionClassName = isApp
     ? "tw-fixed tw-inset-x-0"
     : "tw-absolute tw-inset-x-0 tw-bottom-0";
-  const composerStyle = isApp ? { bottom: composerBottomOffset } : undefined;
   const containerStyle: BrainContentStyle = {
     "--brain-content-composer-reserve": `${composerReserve}px`,
   };
@@ -95,7 +94,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
           <motion.div
             ref={handleComposerRef}
             className={`${composerPositionClassName} tw-z-[80] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0`}
-            style={composerStyle}
+            {...(isApp ? { style: { bottom: composerBottomOffset } } : {})}
             initial={composerMotionInitial}
             animate={composerMotionAnimate}
             exit={composerMotionExit}
