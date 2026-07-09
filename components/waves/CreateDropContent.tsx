@@ -1621,9 +1621,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    const shouldFocusInitialActiveDrop =
+      focusOnInitialActiveDrop && isInitialMount;
+
     if (isApp) {
-      if (focusOnInitialActiveDrop) {
+      if (shouldFocusInitialActiveDrop) {
         createDropInputRef.current?.focus();
+        return;
+      }
+
+      if (focusOnInitialActiveDrop) {
         return;
       }
 
@@ -1637,8 +1644,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         cancelScheduledFocus?.();
       };
     }
-    if (focusOnInitialActiveDrop) {
+    if (shouldFocusInitialActiveDrop) {
       focusDesktopInput();
+      return;
+    }
+
+    if (focusOnInitialActiveDrop) {
       return;
     }
 

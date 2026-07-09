@@ -25,6 +25,9 @@ const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
   const animate = suppressInitialHeightAnimation
     ? { opacity: 1, y: 0 }
     : { opacity: 1, height: "auto" };
+  const exit = suppressInitialHeightAnimation
+    ? { opacity: 0, y: shouldReduceMotion ? 0 : 4 }
+    : { opacity: 0, height: 0 };
   const transition = {
     duration: shouldReduceMotion
       ? 0
@@ -40,7 +43,7 @@ const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
         <motion.div
           initial={initial}
           animate={animate}
-          exit={{ opacity: 0, height: 0 }}
+          exit={exit}
           transition={transition}
         >
           <CreateDropReplying
