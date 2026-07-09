@@ -5,6 +5,14 @@ import {
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import {
+  getProductImpactNowMs,
+  isProductImpactAbortError,
+  trackWaveFeedLoadCancelled,
+  trackWaveFeedLoadFailed,
+  trackWaveFeedLoadStarted,
+  trackWaveFeedLoadSucceeded,
+} from "@/services/analytics/productImpactTelemetry";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useCallback, useEffect, useRef } from "react";
 import {
@@ -68,10 +76,21 @@ const getOldestSerialNo = (
 };
 
 const isAbortError = (error: unknown): boolean =>
-  error instanceof DOMException && error.name === "AbortError";
+  isProductImpactAbortError(error);
 
 const createAbortError = (): DOMException =>
   new DOMException("Aborted", "AbortError");
+
+const createWaveFeedUnavailableError = (): Error =>
+  new Error("Wave feed request returned no data");
+
+const clearWaveMessagesLoading = (waveId: string): WaveMessagesUpdate => ({
+  key: waveId,
+  isLoading: false,
+});
+
+const getTelemetryDurationMs = (startedAtMs: number): number =>
+  Math.max(0, Math.round(getProductImpactNowMs() - startedAtMs));
 
 const throwIfAborted = (signal: AbortSignal): void => {
   if (signal.aborted) {
@@ -469,6 +488,7 @@ export function useWaveDataFetching({
     useWaveAbortController();
   const { updateEligibility } = useWaveEligibility();
   const initialWaveDropsLimit = getWaveDropsInitialLimit(isCapacitor);
+  const trackedCacheSuccessWaveIdsRef = useRef<Set<string>>(new Set());
   const syncNewestMessages = useSyncNewestMessages({
     updateData,
     updateEligibility,
@@ -494,11 +514,13 @@ export function useWaveDataFetching({
   const handleFetchSuccess = useCallback(
     (waveId: string, drops: ApiDrop[] | null) => {
       clearLoadingState(waveId);
-      if (drops !== null) {
-        markMobileLaunchStep("wave_messages_loaded");
-        updateData(formatWaveMessages(waveId, drops, { isLoading: false }));
+      if (drops === null) {
+        updateData(clearWaveMessagesLoading(waveId));
+        return null;
       }
 
+      markMobileLaunchStep("wave_messages_loaded");
+      updateData(formatWaveMessages(waveId, drops, { isLoading: false }));
       return drops;
     },
     [clearLoadingState, updateData]
@@ -527,7 +549,18 @@ export function useWaveDataFetching({
       syncNewest = false,
       options?: RegisterWaveOptions
     ) => {
-      if ((getData(waveId)?.drops.length ?? 0) > 0) {
+      const existingDropsCount = getData(waveId)?.drops.length ?? 0;
+      if (existingDropsCount > 0) {
+        if (!trackedCacheSuccessWaveIdsRef.current.has(waveId)) {
+          trackedCacheSuccessWaveIdsRef.current.add(waveId);
+          trackWaveFeedLoadSucceeded({
+            dropCount: existingDropsCount,
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "cache",
+          });
+        }
+
         if (syncNewest) {
           try {
             await syncExistingWaveNewestMessages(waveId);
@@ -550,10 +583,21 @@ export function useWaveDataFetching({
       updateData(createEmptyWaveMessages(waveId, { isLoading: true }));
 
       const controller = createController(waveId);
-      const initialFetchOptions =
-        initialWaveDropsLimit === WAVE_DROPS_PARAMS.limit
-          ? undefined
-          : { limit: initialWaveDropsLimit };
+      const telemetryStartedAtMs = getProductImpactNowMs();
+      trackWaveFeedLoadStarted({
+        hadCachedDrops: false,
+        isNative: isCapacitor,
+        loadSource: "initial_visible",
+      });
+      let fetchFailureError: unknown;
+      const initialFetchOptions = {
+        ...(initialWaveDropsLimit === WAVE_DROPS_PARAMS.limit
+          ? {}
+          : { limit: initialWaveDropsLimit }),
+        onFailure: (error: unknown) => {
+          fetchFailureError = error;
+        },
+      };
       const fetchPromise = (async (): Promise<ApiDrop[] | null> => {
         try {
           const drops = await fetchWaveMessages(
@@ -564,9 +608,60 @@ export function useWaveDataFetching({
             initialFetchOptions
           );
           const fetchedDrops = handleFetchSuccess(waveId, drops);
+          if (fetchedDrops === null) {
+            const failureError =
+              fetchFailureError ?? createWaveFeedUnavailableError();
+            if (isAbortError(failureError)) {
+              trackWaveFeedLoadCancelled({
+                durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+                error: failureError,
+                hadCachedDrops: false,
+                isNative: isCapacitor,
+                loadSource: "initial_visible",
+                remainedUnavailable: false,
+              });
+            } else {
+              trackWaveFeedLoadFailed({
+                durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+                error: failureError,
+                hadCachedDrops: false,
+                isNative: isCapacitor,
+                loadSource: "initial_visible",
+                remainedUnavailable: true,
+              });
+            }
+            return null;
+          }
+
+          trackWaveFeedLoadSucceeded({
+            dropCount: fetchedDrops.length,
+            durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+            hadCachedDrops: false,
+            isNative: isCapacitor,
+            loadSource: "initial_visible",
+          });
           scheduleNativeInitialBackfill(waveId, fetchedDrops, options);
           return fetchedDrops;
         } catch (error: unknown) {
+          if (isAbortError(error)) {
+            trackWaveFeedLoadCancelled({
+              durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+              error,
+              hadCachedDrops: false,
+              isNative: isCapacitor,
+              loadSource: "initial_visible",
+              remainedUnavailable: false,
+            });
+          } else {
+            trackWaveFeedLoadFailed({
+              durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+              error,
+              hadCachedDrops: false,
+              isNative: isCapacitor,
+              loadSource: "initial_visible",
+              remainedUnavailable: true,
+            });
+          }
           handleFetchError(waveId, error);
           return null;
         } finally {
@@ -585,6 +680,7 @@ export function useWaveDataFetching({
       getLoadingState,
       handleFetchError,
       handleFetchSuccess,
+      isCapacitor,
       initialWaveDropsLimit,
       scheduleNativeInitialBackfill,
       setLoadingState,
