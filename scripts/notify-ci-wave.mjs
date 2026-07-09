@@ -15,6 +15,7 @@ const {
   GITHUB_REPOSITORY,
   GITHUB_WORKFLOW,
   GITHUB_RUN_ID,
+  GITHUB_RUN_NUMBER,
   GITHUB_SERVER_URL = 'https://github.com',
   GITHUB_SHA,
   GITHUB_REF_NAME
@@ -45,6 +46,15 @@ function normalizeTargetEnvironment(value) {
   return `unsupported:${targetEnv}`;
 }
 
+function getFetchFailureMessage(error) {
+  if (error instanceof Error) {
+    return error.name === 'AbortError'
+      ? 'request timed out'
+      : error.message;
+  }
+  return 'unknown request error';
+}
+
 const targetEnvironment = normalizeTargetEnvironment(
   CI_PIPELINES_TARGET_ENV || CI_PIPELINES_ENVIRONMENT
 );
@@ -73,6 +83,7 @@ const payload = {
   title,
   description: CI_PIPELINES_DESCRIPTION || null,
   run_id: runId,
+  run_number: GITHUB_RUN_NUMBER || null,
   run_url: `${GITHUB_SERVER_URL}/${repository}/actions/runs/${runId}`,
   sha: GITHUB_SHA || null,
   branch: GITHUB_REF_NAME || null,
@@ -98,11 +109,25 @@ if (CI_PIPELINES_ALERT_API_AUTH) {
   headers['x-6529-auth'] = CI_PIPELINES_ALERT_API_AUTH;
 }
 
-const response = await fetch(CI_PIPELINES_ALERT_URL, {
-  method: 'POST',
-  headers,
-  body
-});
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 10_000);
+
+let response;
+try {
+  response = await fetch(CI_PIPELINES_ALERT_URL, {
+    method: 'POST',
+    headers,
+    body,
+    signal: controller.signal
+  });
+} catch (error) {
+  console.error(
+    `CI pipeline wave notification request failed: ${getFetchFailureMessage(error)}`
+  );
+  process.exit(1);
+} finally {
+  clearTimeout(timeoutId);
+}
 
 if (!response.ok) {
   console.error(
