@@ -238,6 +238,8 @@ describe("sentry-sanitizer", () => {
         refresh_client_type: "web",
         refresh_status_bucket: "http_401",
         refresh_status_code: 401,
+        refresh_authorization: "Bearer secret-token",
+        refresh_token: "secret-refresh-token",
       },
     });
 
@@ -249,6 +251,8 @@ describe("sentry-sanitizer", () => {
         refresh_client_type: "web",
         refresh_status_bucket: "http_401",
         refresh_status_code: 401,
+        refresh_authorization: "[Filtered]",
+        refresh_token: "[Filtered]",
       })
     );
   });

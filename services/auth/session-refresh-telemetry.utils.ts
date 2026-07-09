@@ -16,6 +16,7 @@ type SessionRefreshTelemetryStatusBucket =
   | "not_applicable"
   | "aborted"
   | "network_error"
+  | "unauthorized"
   | "http_401"
   | "http_4xx"
   | "http_5xx"
@@ -133,6 +134,9 @@ function getRefreshStatusBucket({
   }
   if (outcome === "aborted") {
     return "aborted";
+  }
+  if (outcome === "unauthorized") {
+    return "unauthorized";
   }
   return "not_applicable";
 }

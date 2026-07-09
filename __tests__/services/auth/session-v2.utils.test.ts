@@ -405,12 +405,14 @@ describe("session-v2.utils", () => {
         client_type: "web",
         auth_refresh_outcome: "started",
         outcome: "started",
+        refresh_status_bucket: "not_applicable",
       }),
       expect.objectContaining({
         source: "refreshSessionV2",
         client_type: "web",
         auth_refresh_outcome: "success",
         outcome: "success",
+        refresh_status_bucket: "not_applicable",
         duration_bucket_ms: expect.any(String),
       }),
     ]);
@@ -443,11 +445,13 @@ describe("session-v2.utils", () => {
         client_type: "web",
         auth_refresh_outcome: "started",
         outcome: "started",
+        refresh_status_bucket: "not_applicable",
       }),
       expect.objectContaining({
         client_type: "web",
         auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
+        refresh_status_bucket: "http_401",
         status_code: 401,
         duration_bucket_ms: expect.any(String),
       }),
@@ -621,6 +625,7 @@ describe("session-v2.utils", () => {
           client_type: "web",
           auth_refresh_outcome: "network_error",
           outcome: "network_error",
+          refresh_status_bucket: "network_error",
           duration_bucket_ms: expect.any(String),
         }),
       ]);
@@ -649,6 +654,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         auth_refresh_outcome: "aborted",
         outcome: "aborted",
+        refresh_status_bucket: "aborted",
       }),
     ]);
     expect(getSessionRefreshWarnTelemetry()).toEqual([]);
@@ -674,6 +680,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         auth_refresh_outcome: "backend_error",
         outcome: "backend_error",
+        refresh_status_bucket: "http_5xx",
         status_code: 500,
         duration_bucket_ms: expect.any(String),
       }),
@@ -681,6 +688,30 @@ describe("session-v2.utils", () => {
     expect(JSON.stringify(getSessionRefreshWarnTelemetry())).not.toContain(
       "secret-token"
     );
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
+  });
+
+  it("buckets non-401 4xx refresh errors separately from 401s", async () => {
+    const forbiddenError = Object.assign(new Error("Forbidden"), {
+      status: 403,
+      response: { status: 403 },
+    });
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(forbiddenError);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
+      forbiddenError
+    );
+
+    expect(getSessionRefreshWarnTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "web",
+        auth_refresh_outcome: "backend_error",
+        outcome: "backend_error",
+        refresh_status_bucket: "http_4xx",
+        status_code: 403,
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
     expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
   });
 
@@ -832,11 +863,13 @@ describe("session-v2.utils", () => {
         client_type: "native",
         auth_refresh_outcome: "started",
         outcome: "started",
+        refresh_status_bucket: "not_applicable",
       }),
       expect.objectContaining({
         client_type: "native",
         auth_refresh_outcome: "success",
         outcome: "success",
+        refresh_status_bucket: "not_applicable",
         duration_bucket_ms: expect.any(String),
       }),
     ]);
@@ -855,6 +888,7 @@ describe("session-v2.utils", () => {
         client_type: "native",
         auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
+        refresh_status_bucket: "unauthorized",
       }),
     ]);
     expect(getSessionRefreshWarnTelemetry()).toEqual([]);
@@ -891,11 +925,13 @@ describe("session-v2.utils", () => {
         client_type: "native",
         auth_refresh_outcome: "started",
         outcome: "started",
+        refresh_status_bucket: "not_applicable",
       }),
       expect.objectContaining({
         client_type: "native",
         auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
+        refresh_status_bucket: "http_401",
         status_code: 401,
         duration_bucket_ms: expect.any(String),
       }),
