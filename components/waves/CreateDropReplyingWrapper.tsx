@@ -20,19 +20,19 @@ const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
 }) => {
   const shouldReduceMotion = useReducedMotion();
   const initial = suppressInitialHeightAnimation
-    ? { opacity: 0, y: shouldReduceMotion ? 0 : 4 }
+    ? { opacity: 0, y: shouldReduceMotion ? 0 : 8 }
     : { opacity: 0, height: 0 };
   const animate = suppressInitialHeightAnimation
     ? { opacity: 1, y: 0 }
     : { opacity: 1, height: "auto" };
   const exit = suppressInitialHeightAnimation
-    ? { opacity: 0, y: shouldReduceMotion ? 0 : 4 }
+    ? { opacity: 0, y: shouldReduceMotion ? 0 : 6 }
     : { opacity: 0, height: 0 };
   const transition = {
     duration: shouldReduceMotion
       ? 0
       : suppressInitialHeightAnimation
-        ? 0.18
+        ? 0.2
         : 0.3,
     ease: "easeOut",
   };
@@ -45,6 +45,9 @@ const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
           animate={animate}
           exit={exit}
           transition={transition}
+          {...(suppressInitialHeightAnimation
+            ? { className: "tw-transform-gpu tw-will-change-transform" }
+            : {})}
         >
           <CreateDropReplying
             drop={activeDrop.drop}
