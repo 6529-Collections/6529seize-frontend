@@ -52,7 +52,8 @@ The AWS RUM service will automatically create:
   visible; low-signal third-party telemetry/provider endpoints such as AWS RUM
   service traffic, Google Analytics collect, Coinbase telemetry, Mixpanel
   track/engage, and WalletConnect RPC/identity requests are excluded from HTTP
-  telemetry.
+  telemetry. The provider's `urlsToExclude` list is the source of truth for the
+  exact URL patterns.
 - `interaction`: User clicks and interactions
 
 ### Session Management

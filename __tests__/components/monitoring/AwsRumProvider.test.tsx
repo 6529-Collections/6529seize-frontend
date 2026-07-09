@@ -111,6 +111,9 @@ describe("AwsRumProvider", () => {
     expect(isExcluded("https://rpc.walletconnect.com/v1/?chainId=eip155:1")).toBe(
       true
     );
+    expect(isExcluded("https://rpc.walletconnect.com/v1/sessions/abc")).toBe(
+      true
+    );
     expect(
       isExcluded("https://identity.walletconnect.org/v1/profile?projectId=test")
     ).toBe(true);
@@ -133,6 +136,11 @@ describe("AwsRumProvider", () => {
     expect(
       isExcluded("https://api.6529.io/api/dm-drops/unread?identity=simo")
     ).toBe(false);
+    expect(isExcluded("https://api-js.mixpanel.com/groups/?verbose=1")).toBe(
+      false
+    );
+    expect(isExcluded("https://identity.walletconnect.org/v1beta")).toBe(false);
+    expect(isExcluded("https://relay.walletconnect.com/v2/")).toBe(false);
   });
 
   it("skips AWS RUM initialization in development", async () => {
