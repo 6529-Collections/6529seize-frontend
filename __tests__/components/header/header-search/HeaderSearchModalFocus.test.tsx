@@ -185,6 +185,7 @@ describe("HeaderSearchModal focus management", () => {
 
     await screen.findByRole("dialog", { name: PLACEHOLDER_TEXT });
     expect(input).not.toHaveAttribute("required");
+    expect(input.closest("form")).toBeNull();
     const modalRoot = document.body.querySelector(
       ".tailwind-scope.tw-cursor-default.tw-relative.tw-z-1000"
     ) as HTMLElement | null;
