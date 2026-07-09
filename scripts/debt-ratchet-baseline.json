@@ -20,7 +20,6 @@
     "app/api/open-graph/utils.ts",
     "app/api/pepe/resolve/route.ts",
     "app/api/wikimedia-card/route.ts",
-    "app/join/page.client.tsx",
     "components/about/AboutTermsOfService.tsx",
     "components/auth/SeizeConnectProvider.tsx",
     "components/brain/left-sidebar/waves/memes-quick-vote/useMemesQuickVotePreviewSwipe.ts",

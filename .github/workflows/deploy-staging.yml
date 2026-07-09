@@ -38,6 +38,11 @@ jobs:
         id: expected-commit
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
+      - name: Get commit details
+        run: |
+          printf 'COMMIT_SHA=%s\n' "${{ steps.expected-commit.outputs.sha }}" >> "$GITHUB_ENV"
+          printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s "${{ steps.expected-commit.outputs.sha }}")" >> "$GITHUB_ENV"
+
       - name: Resolve production candidate
         id: production-candidate
         run: |
@@ -541,3 +546,40 @@ jobs:
             deployment-version-evidence.json
           if-no-files-found: ignore
           retention-days: 30
+
+      - name: Checkout notification script
+        if: always()
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ env.COMMIT_SHA }}
+          persist-credentials: false
+
+      - name: Notify CI wave about failure
+        if: failure()
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline is broken!!!"
+          CI_PIPELINES_DESCRIPTION: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+          CI_PIPELINES_ENVIRONMENT: staging
+          CI_PIPELINES_SERVICE: web
+        run: node scripts/notify-ci-wave.mjs
+
+      - name: Notify CI wave about success
+        if: success()
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: success
+          CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline complete"
+          CI_PIPELINES_DESCRIPTION: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
+          CI_PIPELINES_ENVIRONMENT: staging
+          CI_PIPELINES_SERVICE: web
+        run: node scripts/notify-ci-wave.mjs

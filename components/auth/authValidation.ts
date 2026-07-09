@@ -157,6 +157,7 @@ export const runImmediateAuthValidation = async ({
   abortControllerRef.current = abortController;
   setAuthLoadingState("validating");
   const authJwt = getAuthJwt();
+  const hadLocalJwt = Boolean(authJwt);
 
   const markSessionUpgradeRequired = () => {
     resetSessionUpgradeExpiryDedupe(currentAddress);
@@ -208,7 +209,7 @@ export const runImmediateAuthValidation = async ({
     if (result.wasCancelled) {
       trackImmediateAuthValidationTelemetry({
         result,
-        hadLocalJwt: authJwt !== null,
+        hadLocalJwt,
         hasActiveWalletAddress,
       });
       return;
@@ -227,7 +228,7 @@ export const runImmediateAuthValidation = async ({
 
     trackImmediateAuthValidationTelemetry({
       result,
-      hadLocalJwt: authJwt !== null,
+      hadLocalJwt,
       hasActiveWalletAddress,
     });
   } finally {
