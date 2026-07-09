@@ -92,7 +92,8 @@ Useful fields:
 
 - `source=refreshSessionV2`
 - `client_type=web|native|desktop`
-- `outcome=started|success|unauthorized|aborted|network_error|backend_error|cooldown_used_empty|cooldown_used_retry|deduped_in_flight`
+- `auth_refresh_outcome=started|success|unauthorized|aborted|network_error|backend_error|cooldown_used_empty|cooldown_used_retry|deduped_in_flight`
+- `outcome`, kept for compatibility with older query examples
 - `status_code`, when a backend HTTP status is known
 - `duration_bucket_ms`, on terminal backend request outcomes after `started`
 
@@ -102,9 +103,10 @@ cannot find a local native refresh token. The latter has no `status_code`.
 Example Sentry log queries:
 
 ```text
-message:"auth_session_refresh" outcome:unauthorized client_type:web
-message:"auth_session_refresh" outcome:network_error
-message:"auth_session_refresh" outcome:cooldown_used_empty OR outcome:cooldown_used_retry OR outcome:deduped_in_flight
+message:"auth_session_refresh" auth_refresh_outcome:unauthorized client_type:web
+message:"auth_session_refresh" auth_refresh_outcome:aborted
+message:"auth_session_refresh" auth_refresh_outcome:network_error OR auth_refresh_outcome:backend_error
+message:"auth_session_refresh" auth_refresh_outcome:cooldown_used_empty OR auth_refresh_outcome:cooldown_used_retry OR auth_refresh_outcome:deduped_in_flight
 ```
 
 These events intentionally do not include wallet addresses, JWTs, cookies,
