@@ -25,7 +25,11 @@ import Drop, { DropLocation } from "../Drop";
 const MIN_QUERY_LENGTH = 2;
 const DIALOG_TITLE_ID = "wave-drops-search-title";
 const DIALOG_DESCRIPTION_ID = "wave-drops-search-description";
-const SEARCH_STATUS_ID = "wave-drops-search-status";
+const SEARCH_EMPTY_STATUS_ID = "wave-drops-search-empty-status";
+const SEARCH_ERROR_STATUS_ID = "wave-drops-search-error-status";
+const SEARCH_IDLE_STATUS_ID = "wave-drops-search-idle-status";
+const SEARCH_LOADING_STATUS_ID = "wave-drops-search-loading-status";
+const SEARCH_RESULTS_STATUS_ID = "wave-drops-search-results-status";
 
 const normalize = (value: string) => value.trim();
 
@@ -145,6 +149,16 @@ export default function WaveDropsSearchModal({
     size: 50,
   });
 
+  const searchStatusId = isLoading
+    ? SEARCH_LOADING_STATUS_ID
+    : isError
+      ? SEARCH_ERROR_STATUS_ID
+      : !meetsMinLength
+        ? SEARCH_IDLE_STATUS_ID
+        : results.length === 0
+          ? SEARCH_EMPTY_STATUS_ID
+          : SEARCH_RESULTS_STATUS_ID;
+
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!isOpen) return;
@@ -163,14 +177,23 @@ export default function WaveDropsSearchModal({
 
   const handleDropResultKeyDown = (
     event: KeyboardEvent<HTMLDivElement>,
-    serialNo: number,
-    canSelect: boolean
+    serialNo: number
   ) => {
-    if (!canSelect) {
-      return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      selectDropResult(serialNo);
     }
 
-    if (event.key === "Enter" || event.key === " ") {
+    if (event.key === " ") {
+      event.preventDefault();
+    }
+  };
+
+  const handleDropResultKeyUp = (
+    event: KeyboardEvent<HTMLDivElement>,
+    serialNo: number
+  ) => {
+    if (event.key === " ") {
       event.preventDefault();
       selectDropResult(serialNo);
     }
@@ -256,7 +279,7 @@ export default function WaveDropsSearchModal({
                     autoComplete="off"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    aria-describedby={SEARCH_STATUS_ID}
+                    aria-describedby={searchStatusId}
                     className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
                     placeholder="Search messages"
                   />
@@ -279,7 +302,7 @@ export default function WaveDropsSearchModal({
               >
                 {isLoading && (
                   <WaveDropsSearchState
-                    id={SEARCH_STATUS_ID}
+                    id={SEARCH_LOADING_STATUS_ID}
                     variant="loading"
                     title="Searching messages"
                     description={`Looking through ${wave.name}.`}
@@ -288,7 +311,7 @@ export default function WaveDropsSearchModal({
 
                 {!isLoading && isError && (
                   <WaveDropsSearchState
-                    id={SEARCH_STATUS_ID}
+                    id={SEARCH_ERROR_STATUS_ID}
                     variant="error"
                     title="Couldn't load results"
                     description="Change the query or reopen search to try again."
@@ -297,7 +320,7 @@ export default function WaveDropsSearchModal({
 
                 {!isLoading && !isError && !meetsMinLength && (
                   <WaveDropsSearchState
-                    id={SEARCH_STATUS_ID}
+                    id={SEARCH_IDLE_STATUS_ID}
                     variant="idle"
                     title="Ready to search"
                     description={`Type at least ${MIN_QUERY_LENGTH} characters to search this wave.`}
@@ -309,7 +332,7 @@ export default function WaveDropsSearchModal({
                   meetsMinLength &&
                   results.length === 0 && (
                     <WaveDropsSearchState
-                      id={SEARCH_STATUS_ID}
+                      id={SEARCH_EMPTY_STATUS_ID}
                       variant="empty"
                       title="No messages found"
                       description="Try a different word or phrase."
@@ -322,7 +345,7 @@ export default function WaveDropsSearchModal({
                   results.length > 0 && (
                     <div className="tw-space-y-2.5">
                       <div
-                        id={SEARCH_STATUS_ID}
+                        id={SEARCH_RESULTS_STATUS_ID}
                         role="status"
                         aria-live="polite"
                         aria-label={`${results.length} result${
@@ -345,7 +368,9 @@ export default function WaveDropsSearchModal({
                           const serialNo = drop.serial_no;
                           const canSelect = typeof serialNo === "number";
                           const author =
-                            drop.author.handle ?? drop.author.primary_address;
+                            drop.author?.handle ??
+                            drop.author?.primary_address ??
+                            "unknown author";
                           return (
                             <div
                               key={drop.stableKey}
@@ -358,16 +383,17 @@ export default function WaveDropsSearchModal({
                               }
                               aria-disabled={canSelect ? undefined : true}
                               onClick={() => {
-                                if (!canSelect) return;
+                                if (typeof serialNo !== "number") return;
                                 selectDropResult(serialNo);
                               }}
-                              onKeyDown={(event) =>
-                                handleDropResultKeyDown(
-                                  event,
-                                  serialNo ?? -1,
-                                  canSelect
-                                )
-                              }
+                              onKeyDown={(event) => {
+                                if (typeof serialNo !== "number") return;
+                                handleDropResultKeyDown(event, serialNo);
+                              }}
+                              onKeyUp={(event) => {
+                                if (typeof serialNo !== "number") return;
+                                handleDropResultKeyUp(event, serialNo);
+                              }}
                               className={`tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-left tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
                                 canSelect
                                   ? "tw-cursor-pointer desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80"
@@ -376,7 +402,7 @@ export default function WaveDropsSearchModal({
                             >
                               <div
                                 className="tw-pointer-events-none"
-                                inert
+                                inert={true}
                                 aria-hidden="true"
                               >
                                 <Drop
