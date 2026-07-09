@@ -4,7 +4,7 @@
   "counts": {
     "any_casts": 0,
     "todo_comments": 0,
-    "oversized_files": 43,
+    "oversized_files": 42,
     "legacy_wordpress_runtime": 0,
     "bootstrap_imports": 0,
     "redux_imports": 0,
