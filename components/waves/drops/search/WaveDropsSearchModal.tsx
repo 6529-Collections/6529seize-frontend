@@ -9,7 +9,6 @@ import { t } from "@/i18n/messages";
 import {
   ChevronLeftIcon,
   ExclamationTriangleIcon,
-  InboxIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -65,7 +64,7 @@ function WaveDropsSearchState({
         aria-hidden="true"
       />
     ) : variant === "empty" ? (
-      <InboxIcon
+      <MagnifyingGlassIcon
         className={`${iconClasses} tw-text-iron-300`}
         aria-hidden="true"
       />
