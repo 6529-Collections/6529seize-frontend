@@ -21,6 +21,7 @@ import Drop, { DropLocation } from "../Drop";
 const MIN_QUERY_LENGTH = 2;
 const DIALOG_TITLE_ID = "wave-drops-search-title";
 const DIALOG_DESCRIPTION_ID = "wave-drops-search-description";
+const SEARCH_INPUT_DESCRIPTION_ID = "wave-drops-search-input-description";
 const SEARCH_EMPTY_STATUS_ID = "wave-drops-search-empty-status";
 const SEARCH_ERROR_STATUS_ID = "wave-drops-search-error-status";
 const SEARCH_IDLE_STATUS_ID = "wave-drops-search-idle-status";
@@ -28,6 +29,10 @@ const SEARCH_LOADING_STATUS_ID = "wave-drops-search-loading-status";
 const SEARCH_RESULTS_STATUS_ID = "wave-drops-search-results-status";
 
 const normalize = (value: string) => value.trim();
+
+const setInertPreviewRef = (element: HTMLDivElement | null) => {
+  element?.setAttribute("inert", "");
+};
 
 function WaveDropsSearchState({
   description,
@@ -146,16 +151,6 @@ export default function WaveDropsSearchModal({
     size: 50,
   });
 
-  const searchStatusId = isLoading
-    ? SEARCH_LOADING_STATUS_ID
-    : isError
-      ? SEARCH_ERROR_STATUS_ID
-      : !meetsMinLength
-        ? SEARCH_IDLE_STATUS_ID
-        : results.length === 0
-          ? SEARCH_EMPTY_STATUS_ID
-          : SEARCH_RESULTS_STATUS_ID;
-
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!isOpen) return;
@@ -256,13 +251,23 @@ export default function WaveDropsSearchModal({
                     autoComplete="off"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    aria-describedby={searchStatusId}
+                    aria-describedby={SEARCH_INPUT_DESCRIPTION_ID}
                     className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
                     placeholder={t(
                       locale,
                       "waves.drops.searchModal.placeholder"
                     )}
                   />
+                  <p id={SEARCH_INPUT_DESCRIPTION_ID} className="tw-sr-only">
+                    {t(
+                      locale,
+                      "waves.drops.searchModal.inputDescription",
+                      {
+                        minLength: MIN_QUERY_LENGTH,
+                        waveName: wave.name,
+                      }
+                    )}
+                  </p>
                   {query.length > 0 && (
                     <button
                       type="button"
@@ -406,8 +411,8 @@ export default function WaveDropsSearchModal({
                               }`}
                             >
                               <div
+                                ref={setInertPreviewRef}
                                 className="tw-pointer-events-none"
-                                inert={true}
                                 aria-hidden="true"
                               >
                                 <Drop

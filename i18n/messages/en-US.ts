@@ -702,6 +702,8 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "idle.description":
       "Type at least {minLength} characters to search this wave.",
     "idle.title": "Ready to search",
+    inputDescription:
+      "Type at least {minLength} characters to search messages in {waveName}.",
     inputLabel: "Search messages in {waveName}",
     loadMore: "Load more",
     loadingMore: "Loading...",
