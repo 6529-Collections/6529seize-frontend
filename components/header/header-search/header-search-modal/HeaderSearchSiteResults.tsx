@@ -8,6 +8,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { usePathname, useRouter } from "next/navigation";
@@ -121,6 +122,19 @@ export function HeaderSearchSiteResults({
   const { isApp } = useDeviceInfo();
   const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
   const activeElementRef = useRef<HTMLDivElement>(null);
+  const formattedCharactersRemaining = formatInteger(
+    locale,
+    charactersRemaining
+  );
+  const idlePrompt = shouldShowCountdown
+    ? t(
+        locale,
+        charactersRemaining === 1
+          ? "headerSearch.idleWithCountdown.one"
+          : "headerSearch.idleWithCountdown.other",
+        { count: formattedCharactersRemaining }
+      )
+    : t(locale, "headerSearch.idle");
 
   const tabOptions = useMemo(
     () =>
@@ -383,7 +397,7 @@ export function HeaderSearchSiteResults({
             className="tw-text-sm tw-font-normal tw-text-iron-300"
             aria-live="polite"
           >
-            Something went wrong while searching. Please try again.
+            {t(locale, "headerSearch.error")}
           </p>
           <button
             type="button"
@@ -392,7 +406,7 @@ export function HeaderSearchSiteResults({
             aria-busy={isRetryPending ? true : undefined}
             className="tw-items-center tw-rounded-full tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-1.5 tw-font-medium tw-text-iron-800 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-200"
           >
-            Try Again
+            {t(locale, "headerSearch.retry")}
           </button>
         </div>
       );
@@ -406,11 +420,7 @@ export function HeaderSearchSiteResults({
         className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
       >
         <p className="tw-text-center tw-text-sm tw-font-normal tw-text-iron-300">
-          Start typing to search 6529.io
-          {shouldShowCountdown &&
-            ` (${charactersRemaining} more character${
-              charactersRemaining === 1 ? "" : "s"
-            })`}
+          {idlePrompt}
         </p>
       </div>
     );

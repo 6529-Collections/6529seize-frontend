@@ -940,7 +940,12 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   close: "Close search",
   "dialogTitle.site": "Search 6529.io",
   "dialogTitle.wave": "Search this Wave",
+  error: "Something went wrong while searching. Please try again.",
   goBack: "Go back",
+  idle: "Start typing to search 6529.io",
+  "idleWithCountdown.one": "Start typing to search 6529.io ({count} more character)",
+  "idleWithCountdown.other":
+    "Start typing to search 6529.io ({count} more characters)",
   inputDescription: "Type at least {minLength} characters to search.",
   inputLabel: "Search",
   loading: "Loading...",
@@ -949,6 +954,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   noResults: "No results found",
   "placeholder.site": "Search 6529.io",
   "placeholder.wave": "Search messages",
+  retry: "Try Again",
   viewAllCategory: "View all {category}",
 } as const);
 
