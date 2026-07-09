@@ -355,6 +355,29 @@ describe("useWaveDataFetching", () => {
       "wave1-newest-sync",
       newestSyncController
     );
+    expect(mockTrackWaveFeedLoadStarted).toHaveBeenCalledWith({
+      hadCachedDrops: true,
+      isNative: false,
+      loadSource: "cache",
+    });
+    expect(mockTrackWaveFeedLoadSucceeded).toHaveBeenCalledWith({
+      dropCount: 1,
+      hadCachedDrops: true,
+      isNative: false,
+      loadSource: "cache",
+    });
+    expect(mockTrackWaveFeedLoadStarted).toHaveBeenCalledWith({
+      hadCachedDrops: true,
+      isNative: false,
+      loadSource: "background_sync",
+    });
+    expect(mockTrackWaveFeedLoadSucceeded).toHaveBeenCalledWith({
+      dropCount: 0,
+      durationMs: 0,
+      hadCachedDrops: true,
+      isNative: false,
+      loadSource: "background_sync",
+    });
   });
 
   it("uses a smaller native initial limit and backfills the remaining first page later", async () => {
@@ -420,7 +443,10 @@ describe("useWaveDataFetching", () => {
       81,
       expect.any(Object),
       expect.any(Function),
-      { limit: backfillLimit }
+      expect.objectContaining({
+        limit: backfillLimit,
+        onFailure: expect.any(Function),
+      })
     );
 
     expect(updateData).toHaveBeenLastCalledWith(
@@ -437,6 +463,70 @@ describe("useWaveDataFetching", () => {
       ...initialDrops.map((drop) => drop.id),
       ...backfillDrops.map((drop) => drop.id),
     ]);
+    expect(mockTrackWaveFeedLoadStarted).toHaveBeenCalledWith({
+      hadCachedDrops: true,
+      isNative: true,
+      loadSource: "native_initial_backfill",
+    });
+    expect(mockTrackWaveFeedLoadSucceeded).toHaveBeenCalledWith({
+      dropCount: backfillDrops.length,
+      durationMs: 0,
+      hadCachedDrops: true,
+      isNative: true,
+      loadSource: "native_initial_backfill",
+    });
+
+    jest.useRealTimers();
+  });
+
+  it("tracks aborted native initial backfills as cancellations", async () => {
+    jest.useFakeTimers();
+    const initialDrops = Array.from(
+      { length: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit },
+      (_, index) => ({
+        id: `initial-${index}`,
+        serial_no: 100 - index,
+      })
+    );
+    const abortError = new DOMException("aborted", "AbortError");
+
+    fetchWaveMessages
+      .mockResolvedValueOnce(initialDrops)
+      .mockRejectedValueOnce(abortError);
+    formatWaveMessages.mockImplementation((waveId, drops) => ({
+      key: waveId,
+      drops,
+    }));
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+
+    const { result } = setup(
+      {
+        wave1: {
+          drops: [],
+        },
+      },
+      { isCapacitor: true }
+    );
+
+    await act(async () => {
+      result.current.registerWave("wave1");
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(250);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(mockTrackWaveFeedLoadCancelled).toHaveBeenCalledWith({
+      durationMs: 0,
+      error: abortError,
+      hadCachedDrops: true,
+      isNative: true,
+      loadSource: "native_initial_backfill",
+      remainedUnavailable: false,
+    });
 
     jest.useRealTimers();
   });

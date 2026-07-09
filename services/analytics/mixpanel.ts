@@ -10,7 +10,9 @@ export type AuthImpactEventName =
   | "Auth Forced Logout"
   | "Auth Reauth Prompt Shown"
   | "Auth Session Refresh Recovered"
+  | "Auth Session Refresh Succeeded"
   | "Auth Session Upgrade Prompt Shown"
+  | "Auth Validation Cancelled"
   | "Auth Validation Failed While Connected";
 
 export type AuthImpactReason =
@@ -37,9 +39,13 @@ export type AuthImpactProperties = {
   readonly auth_state_after?: AuthImpactAuthState | undefined;
   readonly auth_state_before?: AuthImpactAuthState | undefined;
   readonly client_type?: AuthImpactClientType | undefined;
+  readonly endpoint_family?: "auth_session_refresh" | undefined;
   readonly page_group?: string | undefined;
+  readonly product_failure?: boolean | undefined;
   readonly reason?: AuthImpactReason | undefined;
+  readonly refresh_outcome?: string | undefined;
   readonly route_pattern?: string | undefined;
+  readonly status_bucket?: "2xx" | "aborted" | undefined;
   readonly was_connected_wallet?: boolean | undefined;
 };
 

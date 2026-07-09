@@ -245,7 +245,11 @@ describe("jwt-validation.utils", () => {
         auth_state_after: "authenticated",
         auth_state_before: "refresh_needed",
         client_type: "web",
+        endpoint_family: "auth_session_refresh",
+        product_failure: false,
         reason: "session_refresh",
+        refresh_outcome: "success",
+        status_bucket: "2xx",
       }
     );
   });

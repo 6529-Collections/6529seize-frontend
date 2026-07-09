@@ -28,6 +28,15 @@ type ProductImpactStatusBucket =
 
 type ProductImpactSeverity = "info" | "warning";
 
+type ProductImpactEventName =
+  | "Auth Session Refresh Product Impact"
+  | "Auth Session Refresh Succeeded"
+  | "Auth Validation Cancelled"
+  | "Wave Feed Load Cancelled"
+  | "Wave Feed Load Failed"
+  | "Wave Feed Load Started"
+  | "Wave Feed Load Succeeded";
+
 type ProductImpactProperties = AnalyticsProperties & {
   readonly endpoint_family?: "auth_session_refresh" | "wave_drops_feed";
   readonly error_kind?: ProductImpactErrorKind;
@@ -338,7 +347,7 @@ function buildBaseProperties(
 }
 
 function logProductImpactEvent(
-  eventName: string,
+  eventName: ProductImpactEventName,
   properties: ProductImpactProperties,
   severity: ProductImpactSeverity
 ): void {

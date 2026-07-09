@@ -168,6 +168,7 @@ async function runNativeInitialBackfill({
   createController,
   getData,
   initialOldestSerialNo,
+  isNative,
   updateData,
   updateEligibility,
   waveId,
@@ -179,6 +180,7 @@ async function runNativeInitialBackfill({
   readonly createController: (waveId: string) => AbortController;
   readonly getData: WaveDataStoreUpdater["getData"];
   readonly initialOldestSerialNo: number;
+  readonly isNative: boolean;
   readonly updateData: WaveDataStoreUpdater["updateData"];
   readonly updateEligibility: UpdateEligibility;
   readonly waveId: string;
@@ -190,6 +192,13 @@ async function runNativeInitialBackfill({
 
   const abortKey = `${waveId}-initial-backfill`;
   const controller = createController(abortKey);
+  const telemetryStartedAtMs = getProductImpactNowMs();
+  trackWaveFeedLoadStarted({
+    hadCachedDrops: true,
+    isNative,
+    loadSource: "native_initial_backfill",
+  });
+  let fetchFailureError: unknown;
 
   try {
     const backfillDrops = await fetchWaveMessages(
@@ -197,12 +206,45 @@ async function runNativeInitialBackfill({
       request.serialNo,
       controller.signal,
       updateEligibility,
-      { limit: request.limit }
+      {
+        limit: request.limit,
+        onFailure: (error: unknown) => {
+          fetchFailureError = error;
+        },
+      }
     );
 
     if (backfillDrops === null) {
+      const failureError = fetchFailureError ?? createWaveFeedUnavailableError();
+      if (isAbortError(failureError)) {
+        trackWaveFeedLoadCancelled({
+          durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+          error: failureError,
+          hadCachedDrops: true,
+          isNative,
+          loadSource: "native_initial_backfill",
+          remainedUnavailable: false,
+        });
+      } else {
+        trackWaveFeedLoadFailed({
+          durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+          error: failureError,
+          hadCachedDrops: true,
+          isNative,
+          loadSource: "native_initial_backfill",
+          remainedUnavailable: false,
+        });
+      }
       return;
     }
+
+    trackWaveFeedLoadSucceeded({
+      dropCount: backfillDrops.length,
+      durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+      hadCachedDrops: true,
+      isNative,
+      loadSource: "native_initial_backfill",
+    });
 
     updateData(
       formatNativeBackfillMessages({
@@ -214,9 +256,25 @@ async function runNativeInitialBackfill({
     );
   } catch (error: unknown) {
     if (isAbortError(error)) {
+      trackWaveFeedLoadCancelled({
+        durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+        error,
+        hadCachedDrops: true,
+        isNative,
+        loadSource: "native_initial_backfill",
+        remainedUnavailable: false,
+      });
       return;
     }
 
+    trackWaveFeedLoadFailed({
+      durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+      error,
+      hadCachedDrops: true,
+      isNative,
+      loadSource: "native_initial_backfill",
+      remainedUnavailable: false,
+    });
     console.error(
       `[WaveDataManager] Error backfilling initial messages for ${waveId}:`,
       error
@@ -308,6 +366,7 @@ function useNativeInitialBackfill({
             initialOldestSerialNo,
             updateData,
             updateEligibility,
+            isNative: isCapacitor,
             waveId,
           }
         );
@@ -440,6 +499,7 @@ function useSyncExistingWaveNewestMessages({
   cleanupController,
   createController,
   getData,
+  isCapacitor,
   syncNewestMessages,
 }: {
   readonly cleanupController: (
@@ -448,6 +508,7 @@ function useSyncExistingWaveNewestMessages({
   ) => void;
   readonly createController: (waveId: string) => AbortController;
   readonly getData: WaveDataStoreUpdater["getData"];
+  readonly isCapacitor: boolean;
   readonly syncNewestMessages: ReturnType<typeof useSyncNewestMessages>;
 }) {
   return useCallback(
@@ -466,14 +527,70 @@ function useSyncExistingWaveNewestMessages({
 
       const abortKey = getNewestSyncAbortKey(waveId);
       const controller = createController(abortKey);
+      const telemetryStartedAtMs = getProductImpactNowMs();
+      trackWaveFeedLoadStarted({
+        hadCachedDrops: true,
+        isNative: isCapacitor,
+        loadSource: "background_sync",
+      });
 
       try {
-        await syncNewestMessages(waveId, highestSerialNo, controller.signal);
+        const result = await syncNewestMessages(
+          waveId,
+          highestSerialNo,
+          controller.signal
+        );
+        if (result.drops === null) {
+          trackWaveFeedLoadFailed({
+            durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+            error: createWaveFeedUnavailableError(),
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "background_sync",
+            remainedUnavailable: false,
+          });
+          return;
+        }
+
+        trackWaveFeedLoadSucceeded({
+          dropCount: result.drops.length,
+          durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+          hadCachedDrops: true,
+          isNative: isCapacitor,
+          loadSource: "background_sync",
+        });
+      } catch (error: unknown) {
+        if (isAbortError(error)) {
+          trackWaveFeedLoadCancelled({
+            durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+            error,
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "background_sync",
+            remainedUnavailable: false,
+          });
+        } else {
+          trackWaveFeedLoadFailed({
+            durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
+            error,
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "background_sync",
+            remainedUnavailable: false,
+          });
+        }
+        throw error;
       } finally {
         cleanupController(abortKey, controller);
       }
     },
-    [cleanupController, createController, getData, syncNewestMessages]
+    [
+      cleanupController,
+      createController,
+      getData,
+      isCapacitor,
+      syncNewestMessages,
+    ]
   );
 }
 
@@ -497,6 +614,7 @@ export function useWaveDataFetching({
     cleanupController,
     createController,
     getData,
+    isCapacitor,
     syncNewestMessages,
   });
   const { clearInitialBackfillTimeout, scheduleNativeInitialBackfill } =
@@ -553,6 +671,11 @@ export function useWaveDataFetching({
       if (existingDropsCount > 0) {
         if (!trackedCacheSuccessWaveIdsRef.current.has(waveId)) {
           trackedCacheSuccessWaveIdsRef.current.add(waveId);
+          trackWaveFeedLoadStarted({
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "cache",
+          });
           trackWaveFeedLoadSucceeded({
             dropCount: existingDropsCount,
             hadCachedDrops: true,
