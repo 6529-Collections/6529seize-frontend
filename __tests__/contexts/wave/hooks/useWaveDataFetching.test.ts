@@ -362,6 +362,7 @@ describe("useWaveDataFetching", () => {
     });
     expect(mockTrackWaveFeedLoadSucceeded).toHaveBeenCalledWith({
       dropCount: 1,
+      durationMs: 0,
       hadCachedDrops: true,
       isNative: false,
       loadSource: "cache",
