@@ -609,7 +609,12 @@ describe("session-v2.utils", () => {
     jest.useFakeTimers();
     const rateLimitError = Object.assign(new Error("Rate limit exceeded"), {
       status: 429,
-      response: { status: 429 },
+      response: {
+        status: 429,
+        headers: new Headers({
+          "Retry-After": "1",
+        }),
+      },
     });
     const sessionResponse = {
       client_type: "web",

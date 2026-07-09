@@ -9,14 +9,8 @@ export type SessionRefreshFailureCooldownType =
 
 type ApiStatusError = {
   readonly status?: unknown;
-  readonly headers?: {
-    get(name: string): string | null;
-  };
   readonly response?: {
     readonly status?: unknown;
-    readonly headers?: {
-      get(name: string): string | null;
-    };
   };
 };
 
@@ -53,36 +47,6 @@ export function getSessionRefreshFailureCooldownMs(
   return SESSION_REFRESH_RETRY_COOLDOWN_MS;
 }
 
-function getRetryAfterHeader(error: unknown): string | null {
-  if (typeof error !== "object" || error === null) {
-    return null;
-  }
-
-  const statusError = error as ApiStatusError;
-  return (
-    statusError.response?.headers?.get("Retry-After") ??
-    statusError.response?.headers?.get("retry-after") ??
-    statusError.headers?.get("Retry-After") ??
-    statusError.headers?.get("retry-after") ??
-    null
-  );
-}
-
-export function getRateLimitCooldownMs(error: unknown): number {
-  const retryAfter = getRetryAfterHeader(error);
-  if (!retryAfter) {
-    return SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS;
-  }
-
-  const retryAfterSeconds = Number(retryAfter);
-  if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds >= 0) {
-    return Math.max(1000, retryAfterSeconds * 1000);
-  }
-
-  const retryAfterDateMs = Date.parse(retryAfter);
-  if (Number.isFinite(retryAfterDateMs)) {
-    return Math.max(1000, retryAfterDateMs - Date.now());
-  }
-
+export function getRateLimitCooldownMs(): number {
   return SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS;
 }

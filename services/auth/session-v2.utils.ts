@@ -539,7 +539,7 @@ export async function refreshSessionV2({
         rememberSessionRefreshFailure(
           key,
           "rate_limit",
-          getRateLimitCooldownMs(error)
+          getRateLimitCooldownMs()
         );
         return;
       }
