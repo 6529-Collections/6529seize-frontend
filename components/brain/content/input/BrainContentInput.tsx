@@ -33,24 +33,29 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
     }
 
     return (
-      <div
-        className={`${composerSurfaceClassName} motion-safe:tw-animate-pulse`}
-        aria-hidden="true"
-      >
-        <div className="-tw-mt-2 tw-mb-1 tw-flex tw-h-8 tw-items-center tw-justify-between">
-          <div className="tw-h-3 tw-w-28 tw-rounded tw-bg-iron-900" />
-          <div className="tw-h-8 tw-w-8 tw-rounded-lg tw-bg-iron-900" />
-        </div>
-        <div className="tw-flex tw-w-full tw-items-end">
-          <div className="tw-grid tw-w-full tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
-            <div className="tw-col-start-1 tw-row-start-2 tw-mb-1 tw-h-9 tw-w-9 tw-self-end tw-rounded-lg tw-bg-iron-900" />
-            <div className="tw-col-start-2 tw-row-start-2 tw-h-11 tw-min-w-0 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800" />
+      <>
+        <span className="tw-sr-only" role="status" aria-live="polite">
+          Loading reply composer
+        </span>
+        <div
+          className={`${composerSurfaceClassName} motion-safe:tw-animate-pulse`}
+          aria-hidden="true"
+        >
+          <div className="-tw-mt-2 tw-mb-1 tw-flex tw-h-8 tw-items-center tw-justify-between">
+            <div className="tw-h-3 tw-w-28 tw-rounded tw-bg-iron-900" />
+            <div className="tw-h-8 tw-w-8 tw-rounded-lg tw-bg-iron-900" />
           </div>
-          <div className="tw-ml-2 lg:tw-ml-3">
-            <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-900" />
+          <div className="tw-flex tw-w-full tw-items-end">
+            <div className="tw-grid tw-w-full tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
+              <div className="tw-col-start-1 tw-row-start-2 tw-mb-1 tw-h-9 tw-w-9 tw-self-end tw-rounded-lg tw-bg-iron-900" />
+              <div className="tw-col-start-2 tw-row-start-2 tw-h-11 tw-min-w-0 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800" />
+            </div>
+            <div className="tw-ml-2 lg:tw-ml-3">
+              <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-900" />
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
