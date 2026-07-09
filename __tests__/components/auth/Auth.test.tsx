@@ -1262,6 +1262,35 @@ describe("Auth component", () => {
       expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
     });
 
+    it("treats an empty local jwt as absent in auth validation telemetry", async () => {
+      mockGetAuthJwt.mockReturnValue("");
+      mockValidateAuthImmediate.mockResolvedValue({
+        isValid: true,
+        validationCompleted: true,
+        authRefreshOutcome: "success",
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthSessionRefreshSucceeded).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: false,
+          refreshOutcome: "success",
+        });
+      });
+    });
+
     it("tracks re-auth product impact after refresh returns no session", async () => {
       mockGetAuthJwt.mockReturnValue("expired-jwt-token");
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
