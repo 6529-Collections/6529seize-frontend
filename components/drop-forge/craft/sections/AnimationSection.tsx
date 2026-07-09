@@ -6,6 +6,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import MediaSourceLinkCard from "@/components/drop-forge/craft/MediaSourceLinkCard";
+import { usePendingObjectUrl } from "@/components/drop-forge/craft/usePendingObjectUrl";
 import {
   BTN_DANGER,
   BTN_PRIMARY,
@@ -98,12 +99,12 @@ export default function AnimationSection({
   const [pendingAnimation, setPendingAnimation] = useState<
     string | null | undefined
   >(undefined);
-  const [pendingAnimationFile, setPendingAnimationFile] = useState<File | null>(
-    null
-  );
-  const [pendingAnimationPreviewUrl, setPendingAnimationPreviewUrl] = useState<
-    string | null
-  >(null);
+  const {
+    pendingFile: pendingAnimationFile,
+    pendingPreviewUrl: pendingAnimationPreviewUrl,
+    clearPendingFile: clearPendingAnimationFileSelection,
+    setPendingFile: setPendingAnimationFile,
+  } = usePendingObjectUrl();
   const [replaceMode, setReplaceMode] = useState<AnimationReplaceMode>(null);
   const [linkInput, setLinkInput] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
@@ -129,38 +130,19 @@ export default function AnimationSection({
     claimAnimationUrl: claim.animation_url,
   });
 
-  function clearPendingAnimationFileSelection() {
-    setPendingAnimationFile(null);
-    setPendingAnimationPreviewUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
-  }
-
   useEffect(() => {
     setPendingAnimation(undefined);
     clearPendingAnimationFileSelection();
     setReplaceMode(null);
     setLinkInput("");
     setLinkError(null);
-  }, [claim.claim_id, claim.animation_url]);
-
-  useEffect(() => {
-    return () => {
-      clearPendingAnimationFileSelection();
-    };
-  }, []);
+  }, [claim.claim_id, claim.animation_url, clearPendingAnimationFileSelection]);
 
   function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
-    const previewUrl = URL.createObjectURL(file);
     setPendingAnimationFile(file);
-    setPendingAnimationPreviewUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return previewUrl;
-    });
     setPendingAnimation(undefined);
     setReplaceMode(null);
     setFormError(null);

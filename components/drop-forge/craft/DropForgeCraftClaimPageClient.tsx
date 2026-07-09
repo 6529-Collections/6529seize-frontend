@@ -163,7 +163,7 @@ export default function DropForgeCraftClaimPageClient({
     <div className={PAGE_CONTAINER_CLASS}>
       <DropForgeCraftClaimHeader
         pageTitle={pageTitle}
-        {...(craftDropHref ? { dropHref: craftDropHref } : {})}
+        dropHref={craftDropHref}
       />
 
       <div className="tw-flex tw-flex-col tw-gap-5">

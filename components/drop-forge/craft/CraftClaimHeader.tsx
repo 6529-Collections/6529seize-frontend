@@ -17,7 +17,7 @@ export default function DropForgeCraftClaimHeader({
   dropHref,
 }: Readonly<{
   pageTitle: string;
-  dropHref?: string;
+  dropHref?: string | undefined;
 }>) {
   const { isApp } = useDeviceInfo();
 

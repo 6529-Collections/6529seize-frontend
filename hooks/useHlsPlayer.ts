@@ -28,6 +28,14 @@ const HLS_NETWORK_MAX_RECOVERIES = 2;
 const HLS_MANIFEST_RETRY_DELAY_MS = 2000;
 const SAFE_MEDIA_SOURCE_PROTOCOLS = new Set(["http:", "https:", "blob:"]);
 
+function getMediaSourceParseBase(): string {
+  return (
+    globalThis.document?.baseURI ??
+    globalThis.location?.href ??
+    "https://6529.io/"
+  );
+}
+
 function getSafeMediaSourceUrl(source: string): string | null {
   try {
     const resolvedSource =
@@ -35,7 +43,7 @@ function getSafeMediaSourceUrl(source: string): string | null {
         source,
         publicEnv.MEDIA_RESOLVER_ENDPOINT
       ) ?? source;
-    const parsed = new URL(resolvedSource);
+    const parsed = new URL(resolvedSource, getMediaSourceParseBase());
     return SAFE_MEDIA_SOURCE_PROTOCOLS.has(parsed.protocol)
       ? parsed.href
       : null;
