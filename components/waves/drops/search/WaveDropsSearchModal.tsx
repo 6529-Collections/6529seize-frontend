@@ -217,16 +217,16 @@ export default function WaveDropsSearchModal({
                   </h2>
                   <p
                     id={DIALOG_DESCRIPTION_ID}
-                    className="tw-m-0 -tw-mt-0.5 tw-truncate tw-text-xs tw-leading-4"
+                    className="tw-m-0 tw-mt-0.5 tw-truncate tw-text-xs tw-leading-4"
                   >
-                    <span className="tw-text-iron-500">
+                    <span className="tw-text-iron-600">
                       {t(
                         locale,
                         "waves.drops.searchModal.descriptionPrefix"
                       )}
                     </span>
                     {" "}
-                    <span className="tw-min-w-0 tw-truncate tw-text-iron-400">
+                    <span className="tw-min-w-0 tw-truncate tw-text-iron-300">
                       {wave.name}
                     </span>
                   </p>
@@ -264,7 +264,7 @@ export default function WaveDropsSearchModal({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     aria-describedby={SEARCH_INPUT_DESCRIPTION_ID}
-                    className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
+                    className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
                     placeholder={t(
                       locale,
                       "waves.drops.searchModal.placeholder"
@@ -288,9 +288,9 @@ export default function WaveDropsSearchModal({
                         locale,
                         "waves.drops.searchModal.clear"
                       )}
-                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-size-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition tw-duration-150 hover:tw-bg-iron-800 hover:tw-text-iron-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                     >
-                      <XMarkIcon className="tw-size-4 tw-flex-shrink-0" />
+                      {t(locale, "waves.drops.searchModal.clearShort")}
                     </button>
                   )}
                 </div>
@@ -383,7 +383,7 @@ export default function WaveDropsSearchModal({
                         )}
                         className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-1"
                       >
-                        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+                        <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-300">
                           {t(
                             locale,
                             results.length === 1
@@ -392,12 +392,17 @@ export default function WaveDropsSearchModal({
                             { count: formattedResultCount }
                           )}
                         </p>
-                        <p className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-400">
-                          {t(
-                            locale,
-                            "waves.drops.searchModal.results.query",
-                            { query: normalizedQuery }
-                          )}
+                        <p className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs">
+                          <span className="tw-text-iron-600">
+                            {t(
+                              locale,
+                              "waves.drops.searchModal.results.queryPrefix"
+                            )}
+                          </span>
+                          {" "}
+                          <span className="tw-text-iron-300">
+                            &quot;{normalizedQuery}&quot;
+                          </span>
                         </p>
                       </div>
                       <div className="tw-space-y-2">

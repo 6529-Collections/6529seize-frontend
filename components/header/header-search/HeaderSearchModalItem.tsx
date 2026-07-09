@@ -273,7 +273,7 @@ export default function HeaderSearchModalItem({
 
   const getSecondaryTextClassName = () => {
     const baseClassName =
-      "tw-mb-0 tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap";
+      "tw-m-0 tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap";
 
     if (isWave()) {
       return `${baseClassName} tw-text-xs tw-text-iron-500`;
@@ -284,9 +284,8 @@ export default function HeaderSearchModalItem({
 
   const primaryText = getPrimaryText();
   const secondaryText = getSecondaryText();
-  const primaryTextClassName = `tw-min-w-0 tw-flex-1 tw-font-semibold tw-text-white ${
-    isWave() ? "tw-text-base" : "tw-text-sm"
-  }`;
+  const primaryTextClassName =
+    "tw-min-w-0 tw-flex-1 tw-text-sm tw-font-semibold tw-text-white";
 
   return (
     <div
@@ -301,7 +300,7 @@ export default function HeaderSearchModalItem({
         className="tw-group tw-flex tw-w-full tw-min-w-0 tw-select-none tw-items-center tw-gap-3 tw-text-left tw-text-sm tw-font-medium tw-no-underline"
       >
         {getMedia()}
-        <div className="tw-min-w-0 tw-flex-1">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-0.5">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
             <span className={primaryTextClassName} title={primaryText}>
               <span className="tw-block tw-min-w-0 tw-truncate">

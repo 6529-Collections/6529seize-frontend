@@ -693,6 +693,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
   {
     authorFallback: "unknown author",
     clear: "Clear search",
+    clearShort: "Clear",
     close: "Close search",
     descriptionPrefix: "in",
     "empty.description": "Try a different word or phrase.",
@@ -714,7 +715,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "result.unavailable": "Message by {author} cannot be opened",
     "results.count.one": "{count} result",
     "results.count.other": "{count} results",
-    "results.query": 'for "{query}"',
+    "results.queryPrefix": "for",
     "results.status.one": '{count} result for "{query}"',
     "results.status.other": '{count} results for "{query}"',
     title: "Search messages",
@@ -930,6 +931,18 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 
 const COMMON_MESSAGES = objectMessages("common", {
   close: "Close",
+} as const);
+
+const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
+  clear: "Clear search",
+  clearShort: "Clear",
+  close: "Close search",
+  goBack: "Go back",
+  inputLabel: "Search",
+  "mode.site": "Site-wide",
+  "mode.wave": "In this Wave",
+  "placeholder.site": "Search 6529.io",
+  "placeholder.wave": "Search messages",
 } as const);
 
 export const EN_US_MESSAGES = {
@@ -1660,6 +1673,7 @@ export const EN_US_MESSAGES = {
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
+  ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,

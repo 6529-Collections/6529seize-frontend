@@ -25,6 +25,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
   mapSidebarSectionsToPages,
@@ -33,6 +34,7 @@ import {
 } from "@/hooks/useSidebarSections";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { useWaves } from "@/hooks/useWaves";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import type {
@@ -76,6 +78,7 @@ export default function HeaderSearchModal({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const locale = useBrowserLocale();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
@@ -601,8 +604,8 @@ export default function HeaderSearchModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Go back"
-                  className="-tw-ml-1 tw-mr-1 tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-text-white sm:tw-hidden"
+                  aria-label={t(locale, "headerSearch.goBack")}
+                  className="-tw-ml-1 tw-mr-1 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-hidden"
                 >
                   <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
                 </button>
@@ -621,7 +624,7 @@ export default function HeaderSearchModal({
                     />
                   </svg>
                   <label className="tw-sr-only" htmlFor="header-search-input">
-                    Search
+                    {t(locale, "headerSearch.inputLabel")}
                   </label>
                   <input
                     id="header-search-input"
@@ -634,18 +637,18 @@ export default function HeaderSearchModal({
                     className="sm:text-sm tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300"
                     placeholder={
                       searchMode === SEARCH_MODE.WAVE
-                        ? "Search messages"
-                        : "Search 6529.io"
+                        ? t(locale, "headerSearch.placeholder.wave")
+                        : t(locale, "headerSearch.placeholder.site")
                     }
                   />
                   {searchValue.length > 0 && (
                     <button
                       type="button"
                       onClick={handleClearSearch}
-                      aria-label="Clear search"
-                      className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 hover:tw-text-white"
+                      aria-label={t(locale, "headerSearch.clear")}
+                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                     >
-                      Clear
+                      {t(locale, "headerSearch.clearShort")}
                     </button>
                   )}
                 </div>
@@ -653,8 +656,8 @@ export default function HeaderSearchModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Close search"
-                  className="tw-hidden tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white sm:tw-inline-flex"
+                  aria-label={t(locale, "headerSearch.close")}
+                  className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-inline-flex"
                 >
                   <XMarkIcon className="tw-size-5" />
                 </button>
@@ -671,7 +674,7 @@ export default function HeaderSearchModal({
                           : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
                       }`}
                     >
-                      In this Wave
+                      {t(locale, "headerSearch.mode.wave")}
                     </button>
                     <button
                       type="button"
@@ -682,7 +685,7 @@ export default function HeaderSearchModal({
                           : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
                       }`}
                     >
-                      Site-wide
+                      {t(locale, "headerSearch.mode.site")}
                     </button>
                   </div>
                 </div>
