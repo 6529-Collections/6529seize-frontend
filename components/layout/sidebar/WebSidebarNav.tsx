@@ -4,6 +4,7 @@ import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
+import Join6529Icon from "@/components/common/icons/Join6529Icon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
@@ -294,6 +295,19 @@ const WebSidebarNav = React.forwardRef<
             collapsed={isCollapsed}
             label={t(DEFAULT_LOCALE, "navigation.primary.dms")}
             hasIndicator={hasUnreadMessages}
+          />
+        </li>
+
+        <li>
+          <WebSidebarNavItem
+            href="/join-6529"
+            icon={Join6529Icon}
+            active={
+              safePathname === "/join-6529" ||
+              safePathname.startsWith("/join-6529/")
+            }
+            collapsed={isCollapsed}
+            label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
           />
         </li>
 
