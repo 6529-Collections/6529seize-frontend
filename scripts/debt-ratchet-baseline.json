@@ -4,7 +4,7 @@
   "counts": {
     "any_casts": 0,
     "todo_comments": 0,
-    "oversized_files": 44,
+    "oversized_files": 43,
     "legacy_wordpress_runtime": 0,
     "bootstrap_imports": 0,
     "redux_imports": 0,
@@ -20,7 +20,6 @@
     "app/api/open-graph/utils.ts",
     "app/api/pepe/resolve/route.ts",
     "app/api/wikimedia-card/route.ts",
-    "app/join/page.client.tsx",
     "components/about/AboutTermsOfService.tsx",
     "components/auth/Auth.tsx",
     "components/auth/SeizeConnectContext.tsx",
