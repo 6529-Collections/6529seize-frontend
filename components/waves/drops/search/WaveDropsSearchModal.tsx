@@ -288,9 +288,9 @@ export default function WaveDropsSearchModal({
                         locale,
                         "waves.drops.searchModal.clear"
                       )}
-                      className="tw-absolute tw-right-2 tw-top-1/2 tw-flex tw-size-8 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition tw-duration-150 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-size-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition tw-duration-150 hover:tw-bg-iron-800 hover:tw-text-iron-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                     >
-                      <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
+                      <XMarkIcon className="tw-size-4 tw-flex-shrink-0" />
                     </button>
                   )}
                 </div>
