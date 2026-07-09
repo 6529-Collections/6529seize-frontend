@@ -657,6 +657,7 @@ export default function HeaderSearchModal({
                   >
                     {inputDescription}
                   </p>
+                  {/* Search updates results directly; avoid form constraint state. */}
                   <input
                     id="header-search-input"
                     ref={inputRef}
