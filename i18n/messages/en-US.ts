@@ -934,6 +934,7 @@ const COMMON_MESSAGES = objectMessages("common", {
 } as const);
 
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
+  "category.all": "All",
   clear: "Clear search",
   clearShort: "Clear",
   close: "Close search",
@@ -942,10 +943,13 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   goBack: "Go back",
   inputDescription: "Type at least {minLength} characters to search.",
   inputLabel: "Search",
+  loading: "Loading...",
   "mode.site": "Site-wide",
   "mode.wave": "In this Wave",
+  noResults: "No results found",
   "placeholder.site": "Search 6529.io",
   "placeholder.wave": "Search messages",
+  viewAllCategory: "View all {category}",
 } as const);
 
 export const EN_US_MESSAGES = {

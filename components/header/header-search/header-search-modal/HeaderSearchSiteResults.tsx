@@ -7,6 +7,8 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { usePathname, useRouter } from "next/navigation";
 import { useKeyPressEvent } from "react-use";
@@ -114,6 +116,7 @@ export function HeaderSearchSiteResults({
 }: HeaderSearchSiteResultsProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const locale = useBrowserLocale();
   const myStream = useMyStreamOptional();
   const { isApp } = useDeviceInfo();
   const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
@@ -125,11 +128,11 @@ export function HeaderSearchSiteResults({
         key: category,
         label:
           category === CATEGORY.ALL
-            ? "All"
+            ? t(locale, "headerSearch.category.all")
             : CATEGORY_LABELS[category as FilterableCategory],
         panelId: HEADER_SEARCH_RESULTS_PANEL_ID,
       })),
-    [categoriesWithResults]
+    [categoriesWithResults, locale]
   );
 
   const shouldRenderCategoryToggle =
@@ -299,7 +302,9 @@ export function HeaderSearchSiteResults({
                 onClick={() => handleViewAll(group.category)}
                 className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
               >
-                View all {CATEGORY_LABELS[group.category]}
+                {t(locale, "headerSearch.viewAllCategory", {
+                  category: CATEGORY_LABELS[group.category],
+                })}
               </button>
             )}
           </div>
@@ -345,7 +350,7 @@ export function HeaderSearchSiteResults({
           className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
         >
           <p className="tw-text-sm tw-font-normal tw-text-iron-300">
-            Loading...
+            {t(locale, "headerSearch.loading")}
           </p>
         </div>
       );
@@ -359,7 +364,9 @@ export function HeaderSearchSiteResults({
           role="tabpanel"
           className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
         >
-          <p className="tw-text-sm tw-text-iron-300">No results found</p>
+          <p className="tw-text-sm tw-text-iron-300">
+            {t(locale, "headerSearch.noResults")}
+          </p>
         </div>
       );
     }

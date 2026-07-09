@@ -34,6 +34,7 @@ import {
 } from "@/hooks/useSidebarSections";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { useWaves } from "@/hooks/useWaves";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -646,7 +647,7 @@ export default function HeaderSearchModal({
                     className="tw-sr-only"
                   >
                     {t(locale, "headerSearch.inputDescription", {
-                      minLength: inputMinLength,
+                      minLength: formatInteger(locale, inputMinLength),
                     })}
                   </p>
                   <input
