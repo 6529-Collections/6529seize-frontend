@@ -46,6 +46,15 @@ function normalizeTargetEnvironment(value) {
   return `unsupported:${targetEnv}`;
 }
 
+function getFetchFailureMessage(error) {
+  if (error instanceof Error) {
+    return error.name === 'AbortError'
+      ? 'request timed out'
+      : error.message;
+  }
+  return 'unknown request error';
+}
+
 const targetEnvironment = normalizeTargetEnvironment(
   CI_PIPELINES_TARGET_ENV || CI_PIPELINES_ENVIRONMENT
 );
@@ -100,11 +109,25 @@ if (CI_PIPELINES_ALERT_API_AUTH) {
   headers['x-6529-auth'] = CI_PIPELINES_ALERT_API_AUTH;
 }
 
-const response = await fetch(CI_PIPELINES_ALERT_URL, {
-  method: 'POST',
-  headers,
-  body
-});
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 10_000);
+
+let response;
+try {
+  response = await fetch(CI_PIPELINES_ALERT_URL, {
+    method: 'POST',
+    headers,
+    body,
+    signal: controller.signal
+  });
+} catch (error) {
+  console.error(
+    `CI pipeline wave notification request failed: ${getFetchFailureMessage(error)}`
+  );
+  process.exit(1);
+} finally {
+  clearTimeout(timeoutId);
+}
 
 if (!response.ok) {
   console.error(
