@@ -83,24 +83,29 @@ export function JourneyTimelineSection({
 
   return (
     <section
-      className="tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-py-12 md:tw-py-16 lg:tw-px-6 xl:tw-px-0"
+      className={cx(
+        "tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-pb-12 lg:tw-px-6 xl:tw-px-0",
+        timelineProgress.visible
+          ? "tw-pt-8 md:tw-pb-16 md:tw-pt-10"
+          : "tw-pt-12 md:tw-py-16"
+      )}
       id="journey"
     >
-      <div
-        className={cx(
-          "tw-text-center",
-          timelineProgress.visible ? "tw-mb-0" : "tw-mb-6 md:tw-mb-8"
-        )}
-      >
-        <span className={cx("tw-mb-4 tw-block", SECTION_EYEBROW_CLASS)}>
-          {m(locale, headerKeys.eyebrowKey)}
-        </span>
-        <h2 className={SECTION_HEADING_CLASS}>
-          {m(locale, headerKeys.headingKey)}
-        </h2>
-      </div>
-      {timelineProgress.visible && (
-        <TimelineProgressStrip locale={locale} progress={timelineProgress} />
+      {timelineProgress.visible ? (
+        <TimelineProgressStrip
+          className="tw-mx-auto tw-mb-10 md:tw-mb-12"
+          locale={locale}
+          progress={timelineProgress}
+        />
+      ) : (
+        <div className="tw-mb-6 tw-text-center md:tw-mb-8">
+          <span className={cx("tw-mb-4 tw-block", SECTION_EYEBROW_CLASS)}>
+            {m(locale, headerKeys.eyebrowKey)}
+          </span>
+          <h2 className={SECTION_HEADING_CLASS}>
+            {m(locale, headerKeys.headingKey)}
+          </h2>
+        </div>
       )}
       <div className="tw-relative">
         <div
@@ -130,22 +135,24 @@ export function JourneyTimelineSection({
 }
 
 function TimelineProgressStrip({
+  className,
   locale,
   progress,
 }: {
+  readonly className?: string;
   readonly locale: SupportedLocale;
   readonly progress: TimelineProgress;
 }) {
   return (
     <div
       aria-label={m(locale, "join6529.progress.ariaLabel")}
-      className="tw-mx-auto tw-mb-12 tw-mt-5 tw-w-full tw-max-w-[520px] md:tw-mb-14"
+      className={cx("tw-w-full tw-max-w-[520px]", className)}
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-        <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
+        <p className={cx("tw-mb-0", SECTION_EYEBROW_CLASS)}>
           {m(locale, "join6529.progress.label")}
         </p>
-        <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
+        <p className={cx("tw-mb-0", SECTION_EYEBROW_CLASS)}>
           {m(locale, "join6529.progress.value", {
             completed: progress.completed,
             total: progress.total,
@@ -234,7 +241,7 @@ function TimelineRow({
           </h3>
           {showStatusBadge && <StatusBadge locale={locale} status={status} />}
         </div>
-        <p className="tw-mt-1.5 tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
+        <p className="tw-mt-1.5 tw-text-pretty tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
           {m(locale, item.bodyKey)}
         </p>
         {actionHref && actionLabel && (

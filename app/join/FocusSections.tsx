@@ -19,6 +19,7 @@ import {
   m,
   resolveHref,
   SECTION_EYEBROW_CLASS,
+  SECTION_HEADING_CLASS,
   TERTIARY_ACTION_CLASS,
   TERTIARY_ACTION_LABEL_CLASS,
 } from "./page.utils";
@@ -44,6 +45,11 @@ export function FocusSections({
   return (
     <section className="tw-relative tw-isolate tw-mx-auto tw-w-full tw-max-w-[1088px] tw-overflow-hidden tw-px-4 tw-py-12 md:tw-py-16 lg:tw-px-6 xl:tw-px-0">
       <AmbientArtifacts className="tw-opacity-40" locale={locale} />
+      <div className="tw-relative tw-z-10 tw-mb-6 md:tw-mb-7">
+        <h2 className={SECTION_HEADING_CLASS}>
+          {m(locale, "join6529.focus.heading")}
+        </h2>
+      </div>
       <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 md:tw-grid-cols-12">
         <FeatureCard
           className="sm:tw-col-span-2 md:tw-col-span-7 lg:tw-col-span-8 lg:tw-min-h-[260px] lg:tw-pb-5 xl:tw-min-h-[300px]"
