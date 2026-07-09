@@ -458,8 +458,8 @@ jobs:
         if: failure() && github.event_name == 'schedule'
         continue-on-error: true
         env:
-          CI_PIPELINES_WAVE_WEBHOOK_URL_PROD: ${{ secrets.CI_PIPELINES_WAVE_WEBHOOK_URL_PROD }}
-          CI_PIPELINES_WAVE_WEBHOOK_SECRET_PROD: ${{ secrets.CI_PIPELINES_WAVE_WEBHOOK_SECRET_PROD }}
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
           CI_PIPELINES_TARGET_ENV: production
           CI_PIPELINES_STATUS: failure
           CI_PIPELINES_TITLE: "Device Farm Mobile QA: weekly real-device pack failed"
