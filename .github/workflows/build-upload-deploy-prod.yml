@@ -25,6 +25,8 @@ env:
   IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
   IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
   ASSETS_FROM_S3: "true"
+  ANNOUNCED_VERSION_OBJECT_KEY: "web_build/current-production-version.json"
+  ANNOUNCED_VERSION_ENDPOINT: "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json"
 
 jobs:
   assert-main-ref:
@@ -124,6 +126,9 @@ jobs:
       - name: Lint package.json versions
         run: ./bin/6529 lint:package-json
 
+      - name: Capture production build timestamp
+        run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$GITHUB_ENV"
+
       - name: Build App
         env:
           NODE_ENV: "production"
@@ -131,6 +136,7 @@ jobs:
           ALLOWLIST_API_ENDPOINT: ${{ env.ALLOWLIST_API_ENDPOINT }}
           BASE_ENDPOINT: ${{ env.BASE_ENDPOINT }}
           VERSION: ${{ env.COMMIT_SHA }}
+          VERSION_BUILD_TIMESTAMP: ${{ env.VERSION_BUILD_TIMESTAMP }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           NEXTGEN_CHAIN_ID: ${{ env.NEXTGEN_CHAIN_ID }}
           GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
@@ -139,6 +145,7 @@ jobs:
           AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
           NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
           ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
+          ANNOUNCED_VERSION_ENDPOINT: ${{ env.ANNOUNCED_VERSION_ENDPOINT }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./bin/6529 run build
@@ -340,6 +347,7 @@ jobs:
             --base-url https://6529.io \
             --expected-version "${COMMIT_SHA}" \
             --attempts 12 \
+            --required-matches 3 \
             --delay-ms 10000 \
             --timeout-ms 10000 \
             --output deployment-version-evidence.json
@@ -352,6 +360,49 @@ jobs:
             --checkpoint-status passed \
             --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             --notes "GET /api/version matched the production commit SHA."
+
+      - name: Publish announced production version
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          announcement_file="current-production-version.json"
+          published_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+          cat > "$announcement_file" <<JSON
+          {
+            "schema_version": "frontend-announced-version.v1",
+            "environment": "production",
+            "version": "${COMMIT_SHA}",
+            "ready": true,
+            "published_at": "${published_at}",
+            "workflow_run_url": "${RUN_URL}"
+          }
+          JSON
+
+          aws s3 cp "$announcement_file" "s3://${AWS_BUCKET}/${ANNOUNCED_VERSION_OBJECT_KEY}" \
+            --cache-control "no-store, max-age=0, must-revalidate" \
+            --content-type "application/json"
+
+          if distribution_id="$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?DomainName=='dnclu2fna0b2b.cloudfront.net'].Id | [0]" \
+            --output text 2>/tmp/announced-version-cloudfront-error)"; then
+            if [ -n "$distribution_id" ] && [ "$distribution_id" != "None" ]; then
+              if aws cloudfront create-invalidation \
+                --distribution-id "$distribution_id" \
+                --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}"; then
+                echo "Requested CloudFront invalidation for /${ANNOUNCED_VERSION_OBJECT_KEY}."
+              else
+                echo "::warning::Could not invalidate /${ANNOUNCED_VERSION_OBJECT_KEY}; announced version may update after the CDN cache expires."
+              fi
+            else
+              echo "::warning::Could not find the asset CloudFront distribution for ${ANNOUNCED_VERSION_ENDPOINT}; announced version may update after the CDN cache expires."
+            fi
+          else
+            echo "::warning::Could not list CloudFront distributions for announced version invalidation."
+            cat /tmp/announced-version-cloudfront-error || true
+          fi
 
       - name: Upload durable production version evidence
         id: durable-version-evidence

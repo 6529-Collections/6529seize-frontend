@@ -125,6 +125,8 @@ async function fetchVersion({ fetchImpl, endpointUrl, headers, timeoutMs }) {
 function buildEvidence({
   baseUrl,
   expectedVersion,
+  consecutiveMatches,
+  requiredMatches,
   attempt,
   maxAttempts,
   startedAt,
@@ -148,6 +150,8 @@ function buildEvidence({
     expected_version: expectedVersion,
     actual_version: actualVersion,
     matched,
+    consecutive_matches: consecutiveMatches,
+    required_matches: requiredMatches,
     status,
     cache_control: cacheControl,
     no_store: noStore,
@@ -175,6 +179,11 @@ async function verifyDeploymentVersion(options) {
   const baseUrl = normalizeBaseUrl(options.baseUrl);
   const endpointUrl = resolveVersionEndpoint(baseUrl);
   const attempts = parsePositiveInteger(options.attempts, 8, "--attempts");
+  const requiredMatches = parsePositiveInteger(
+    options.requiredMatches,
+    1,
+    "--required-matches"
+  );
   const delayMs = parsePositiveInteger(options.delayMs, 15000, "--delay-ms");
   const timeoutMs = parsePositiveInteger(
     options.timeoutMs,
@@ -190,6 +199,7 @@ async function verifyDeploymentVersion(options) {
   const startedAt = now();
   const startedMs = monotonicNow();
   let evidence = null;
+  let consecutiveMatches = 0;
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
@@ -202,6 +212,8 @@ async function verifyDeploymentVersion(options) {
       evidence = buildEvidence({
         baseUrl,
         expectedVersion,
+        consecutiveMatches,
+        requiredMatches,
         attempt,
         maxAttempts: attempts,
         startedAt,
@@ -213,6 +225,8 @@ async function verifyDeploymentVersion(options) {
       evidence = buildEvidence({
         baseUrl,
         expectedVersion,
+        consecutiveMatches,
+        requiredMatches,
         attempt,
         maxAttempts: attempts,
         startedAt,
@@ -222,7 +236,10 @@ async function verifyDeploymentVersion(options) {
       });
     }
 
-    if (evidence.matched) {
+    consecutiveMatches = evidence.matched ? consecutiveMatches + 1 : 0;
+    evidence.consecutive_matches = consecutiveMatches;
+
+    if (consecutiveMatches >= requiredMatches) {
       return { ok: true, evidence };
     }
 
@@ -252,6 +269,7 @@ async function main() {
     baseUrl: args["base-url"],
     expectedVersion: args["expected-version"],
     attempts: args.attempts,
+    requiredMatches: args["required-matches"],
     delayMs: args["delay-ms"],
     timeoutMs: args["timeout-ms"],
   });
