@@ -705,7 +705,6 @@ describe("WaveLeaderboardGridItem", () => {
         drop={{
           ...baseDrop,
           drop_type: ApiDropType.Chat,
-          context_profile_context: { curatable: false, curated: false },
         }}
         mode="content_only"
         onDropClick={jest.fn()}
@@ -728,7 +727,6 @@ describe("WaveLeaderboardGridItem", () => {
         drop={{
           ...baseDrop,
           drop_type: ApiDropType.Chat,
-          context_profile_context: { curatable: false, curated: false },
         }}
         mode="content_only"
         onDropClick={jest.fn()}

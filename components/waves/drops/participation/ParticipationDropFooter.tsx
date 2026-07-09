@@ -35,12 +35,11 @@ export default function ParticipationDropFooter({
   const hasReactions = drop.reactions.length > 0;
   const normalizedVoteAction = Children.toArray(voteAction);
   const hasVoteAction = normalizedVoteAction.length > 0;
-  const hasPrimaryActions = hasVoteAction;
   const primaryActionsJustificationClass = hasWinningThreshold
     ? "tw-justify-end"
     : "tw-justify-center";
   const shouldShowVoteFooter =
-    canShowVoting && (shouldShowRatings || hasPrimaryActions);
+    canShowVoting && (shouldShowRatings || hasVoteAction);
   const shouldShowRatingsOnlyFooter = !canShowVoting && shouldShowRatings;
   const shouldShowReactionsFooter = hasReactions;
   const shouldShowReactionsBeforeVoteFooter =
@@ -76,7 +75,7 @@ export default function ParticipationDropFooter({
               </div>
             )}
 
-            {hasPrimaryActions && (
+            {hasVoteAction && (
               <div
                 className={`tw-flex tw-w-full tw-items-center ${primaryActionsJustificationClass} tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-justify-center @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0`}
               >

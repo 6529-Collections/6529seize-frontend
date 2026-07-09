@@ -132,6 +132,15 @@ function EndedParticipationDropInner({
     }
 
     mobileMenu?.close();
+
+    const resetTouchSheetState = globalThis.setTimeout(() => {
+      setIsSlideUp(false);
+      setLongPressTriggered(false);
+    }, 0);
+
+    return () => {
+      globalThis.clearTimeout(resetTouchSheetState);
+    };
   }, [canUseTouchActionSheet, mobileMenu]);
 
   const handleOnReply = useCallback(() => {
