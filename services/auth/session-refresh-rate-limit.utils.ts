@@ -1,6 +1,6 @@
-const SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS = 2000;
 const SESSION_REFRESH_RETRY_COOLDOWN_MS = 250;
 const SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS = 60 * 1000;
+const SESSION_REFRESH_INVALID_SESSION_COOLDOWN_MS = Number.POSITIVE_INFINITY;
 
 export type SessionRefreshFailureCooldownType =
   | "empty"
@@ -37,7 +37,7 @@ export function getSessionRefreshFailureCooldownMs(
   }
 
   if (type === "empty") {
-    return SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS;
+    return SESSION_REFRESH_INVALID_SESSION_COOLDOWN_MS;
   }
 
   if (type === "rate_limit") {

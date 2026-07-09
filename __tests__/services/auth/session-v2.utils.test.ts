@@ -514,23 +514,32 @@ describe("session-v2.utils", () => {
     expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
-  it("cooldowns failed web refreshes for the same session context", async () => {
+  it("blocks invalid web session refreshes until auth state changes", async () => {
+    jest.useFakeTimers();
     const unauthorizedError = Object.assign(new Error("Unauthorized"), {
       status: 401,
       response: { status: 401 },
     });
     (commonApiPost as jest.Mock).mockRejectedValueOnce(unauthorizedError);
 
-    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
-    await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+    try {
+      await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
 
-    expect(commonApiPost).toHaveBeenCalledTimes(1);
-    expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
-      "started",
-      "unauthorized",
-      "cooldown_used_empty",
-    ]);
-    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+      await jest.advanceTimersByTimeAsync(5 * 60 * 1000);
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+      expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+        "started",
+        "unauthorized",
+        "cooldown_used_empty",
+        "cooldown_used_empty",
+      ]);
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("clears a failed refresh cooldown after successful auth persistence", async () => {
