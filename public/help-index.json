@@ -48,7 +48,7 @@
         "expand"
       ],
       "facts": [
-        "The primary navigation concepts are NFTs, Waves, DMs, and About.",
+        "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
@@ -60,6 +60,7 @@
         "/the-memes",
         "/waves",
         "/messages",
+        "/join-6529",
         "/about",
         "/drop-forge",
         "/discover",
@@ -94,28 +95,32 @@
         "getting-started",
         "wallet",
         "profile",
-        "pfp",
         "waves",
-        "first",
-        "message"
+        "collecting",
+        "subscription"
       ],
       "facts": [
-        "The Join 6529 page lives at /join.",
-        "It is a state-aware onboarding guide that adapts to the user's current state across wallet connection, wallet auth, profile setup, profile image, public Waves, and first public message.",
-        "The profile-image step remains incomplete until an image is uploaded, but it does not block public Waves or messaging steps.",
-        "Create Wave links from the guide use the web create URL /waves?create=wave.",
-        "Join 6529 lives at /join but is not shown as a primary sidebar or app drawer menu item."
+        "The Join 6529 page lives at /join-6529.",
+        "/join redirects to /join-6529 for compatibility.",
+        "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
+        "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
+        "The focus area links to The Memes Main Stage Wave, Waves, the current user's subscriptions route when available, delegation, and @help6529."
       ],
-      "canonical_path": "/join",
+      "canonical_path": "/join-6529",
       "related_paths": [
+        "/join",
         "/waves",
-        "/waves?create=wave",
+        "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077?divider=1167698",
+        "/the-memes",
+        "/{user}/subscriptions",
         "/open-data/meme-subscriptions",
         "/delegation/delegation-center"
       ],
       "tags": ["join", "navigation", "getting-started", "waves"],
       "source_refs": [
+        "app/join-6529/page.tsx",
         "app/join/page.tsx",
+        "app/join/page.content.ts",
         "ops/docs/navigation/feature-join-6529-journey.md"
       ]
     },
