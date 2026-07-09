@@ -183,7 +183,8 @@ describe("HeaderSearchModal focus management", () => {
     const input = await screen.findByPlaceholderText(PLACEHOLDER_TEXT);
     await waitFor(() => expect(input).toHaveFocus());
 
-    await screen.findByRole("dialog");
+    await screen.findByRole("dialog", { name: PLACEHOLDER_TEXT });
+    expect(input).not.toHaveAttribute("required");
     const modalRoot = document.body.querySelector(
       ".tailwind-scope.tw-cursor-default.tw-relative.tw-z-1000"
     ) as HTMLElement | null;
