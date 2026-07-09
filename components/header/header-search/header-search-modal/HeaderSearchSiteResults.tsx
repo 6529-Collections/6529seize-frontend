@@ -421,7 +421,11 @@ export function HeaderSearchSiteResults({
         role="tabpanel"
         className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
       >
-        <p className="tw-text-center tw-text-sm tw-font-normal tw-text-iron-300">
+        <p
+          role="status"
+          aria-live="polite"
+          className="tw-text-center tw-text-sm tw-font-normal tw-text-iron-300"
+        >
           {idlePrompt}
         </p>
       </div>
