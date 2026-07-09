@@ -126,21 +126,19 @@ function EndedParticipationDropInner({
     setIsSlideUp(true);
   }, [canUseTouchActionSheet, showInteractions]);
 
+  const handleMobileMenuOpenChange = useCallback((open: boolean) => {
+    setIsSlideUp(open);
+    if (!open) {
+      setLongPressTriggered(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (canUseTouchActionSheet) {
       return;
     }
 
     mobileMenu?.close();
-
-    const resetTouchSheetState = globalThis.setTimeout(() => {
-      setIsSlideUp(false);
-      setLongPressTriggered(false);
-    }, 0);
-
-    return () => {
-      globalThis.clearTimeout(resetTouchSheetState);
-    };
   }, [canUseTouchActionSheet, mobileMenu]);
 
   const handleOnReply = useCallback(() => {
@@ -245,7 +243,7 @@ function EndedParticipationDropInner({
     isOpen: effectiveIsSlideUp,
     longPressTriggered,
     showReplyAndQuote,
-    onOpenChange: setIsSlideUp,
+    onOpenChange: handleMobileMenuOpenChange,
     onReply: handleOnReply,
     onAddReaction: handleOnAddReaction,
   });
