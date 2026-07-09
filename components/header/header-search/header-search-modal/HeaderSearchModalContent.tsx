@@ -68,6 +68,8 @@ import {
   type RankedPageMatch,
 } from "./pageSearch";
 
+const HEADER_SEARCH_DIALOG_TITLE_ID = "header-search-dialog-title";
+
 export default function HeaderSearchModal({
   onClose,
   wave,
@@ -596,10 +598,14 @@ export default function HeaderSearchModal({
           <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center sm:tw-p-6 lg:tw-items-center">
             <div
               ref={modalRef}
+              role="dialog"
               aria-modal="true"
-              aria-labelledby="header-search-input"
+              aria-labelledby={HEADER_SEARCH_DIALOG_TITLE_ID}
               className="tw-relative tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-[520px] tw-max-h-[70vh] tw-min-h-0 tw-w-full tw-max-w-[min(100vw-3rem,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl"
             >
+              <h2 id={HEADER_SEARCH_DIALOG_TITLE_ID} className="tw-sr-only">
+                {t(locale, "headerSearch.inputLabel")}
+              </h2>
               <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-4">
                 <button
                   type="button"
