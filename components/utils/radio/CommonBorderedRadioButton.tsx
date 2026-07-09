@@ -3,6 +3,7 @@ type CommonBorderedRadioButtonProps<T extends string> = {
   readonly selected: T;
   readonly disabled?: boolean | undefined;
   readonly variant?: "default" | "subtle" | undefined;
+  readonly ariaLabel?: string | undefined;
   readonly onChange: (type: T) => void;
 } & (
   | { readonly label: string; readonly children?: undefined }
@@ -65,6 +66,7 @@ export default function CommonBorderedRadioButton<T extends string>({
   label,
   disabled = false,
   variant = "default",
+  ariaLabel,
   onChange,
   children,
 }: CommonBorderedRadioButtonProps<T>) {
@@ -101,6 +103,7 @@ export default function CommonBorderedRadioButton<T extends string>({
         type="radio"
         disabled={disabled}
         checked={isSelected}
+        aria-label={ariaLabel}
         onChange={onSelectedChange}
         className={
           isSubtle

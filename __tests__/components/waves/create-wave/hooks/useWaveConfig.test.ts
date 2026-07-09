@@ -990,6 +990,64 @@ describe("useWaveConfig", () => {
 
       expect(result.current.endDateConfig).toEqual(newEndDateConfig);
     });
+
+    it("forces outcomes visible when ongoing ranking is enabled", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Rank,
+          name: "Rank wave",
+          image: null,
+        });
+      });
+
+      act(() => {
+        result.current.setDisplay({
+          ...result.current.config.display,
+          outcomesVisible: false,
+        });
+      });
+
+      expect(result.current.config.display.outcomesVisible).toBe(false);
+
+      act(() => {
+        result.current.setDates({
+          ...result.current.config.dates,
+          ongoingRanking: true,
+        });
+      });
+
+      expect(result.current.config.display.outcomesVisible).toBe(true);
+    });
+
+    it("does not force outcomes visible for non-rank waves with a stray ongoing flag", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve wave",
+          image: null,
+        });
+      });
+
+      act(() => {
+        result.current.setDates({
+          ...result.current.config.dates,
+          ongoingRanking: true,
+        });
+      });
+
+      act(() => {
+        result.current.setDisplay({
+          ...result.current.config.display,
+          outcomesVisible: false,
+        });
+      });
+
+      expect(result.current.config.display.outcomesVisible).toBe(false);
+    });
   });
 
   describe("Error Management", () => {

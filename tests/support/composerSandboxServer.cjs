@@ -43,6 +43,9 @@ const SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID =
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
 const SANDBOX_CREATED_WAVE_DESCRIPTION =
   "Local-only create-wave description for Playwright.";
+const SANDBOX_PERPETUAL_WAVE_NAME = "Sandbox Perpetual Rank Wave";
+const SANDBOX_PERPETUAL_WAVE_DESCRIPTION =
+  "Local-only perpetual rank wave description for Playwright.";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
 const SANDBOX_SIGNATURE_WAVE_NAME = "Local Signature Sandbox Wave";
 const SANDBOX_SIGNATURE_WAVE_DESCRIPTION =
@@ -1007,19 +1010,21 @@ function hasNullGroupScope(value) {
   );
 }
 
-function isExpectedRuntimePeriod(period) {
+function isExpectedOpenEndedPeriod(period) {
+  // Chat waves and perpetual rank waves have a start but no end date.
   return (
     hasOnlyKeys(period, ["max", "min"]) &&
     typeof period.min === "number" &&
     Number.isFinite(period.min) &&
     period.min > 0 &&
-    typeof period.max === "number" &&
-    Number.isFinite(period.max) &&
-    period.max >= period.min
+    period.max === null
   );
 }
 
-function isExpectedDescriptionDrop(drop) {
+function isExpectedDescriptionDrop(
+  drop,
+  expectedContent = SANDBOX_CREATED_WAVE_DESCRIPTION
+) {
   if (
     !hasOnlyKeys(drop, [
       "mentioned_users",
@@ -1037,7 +1042,7 @@ function isExpectedDescriptionDrop(drop) {
   return (
     drop.parts.length === 1 &&
     hasOnlyKeys(drop.parts[0], ["content", "media", "quoted_drop"]) &&
-    drop.parts[0]?.content === SANDBOX_CREATED_WAVE_DESCRIPTION &&
+    drop.parts[0]?.content === expectedContent &&
     Array.isArray(drop.parts[0]?.media) &&
     drop.parts[0].media.length === 0 &&
     drop.parts[0]?.quoted_drop === null &&
@@ -1071,7 +1076,7 @@ function isExpectedCreateWaveVotingConfig(voting) {
     voting.credit_category === null &&
     voting.creditor_id === null &&
     voting.signature_required === false &&
-    isExpectedRuntimePeriod(voting.period) &&
+    isExpectedOpenEndedPeriod(voting.period) &&
     voting.forbid_negative_votes === false
   );
 }
@@ -1095,7 +1100,7 @@ function isExpectedCreateWaveParticipationConfig(participation) {
     Array.isArray(participation.required_metadata) &&
     participation.required_metadata.length === 0 &&
     participation.signature_required === false &&
-    isExpectedRuntimePeriod(participation.period) &&
+    isExpectedOpenEndedPeriod(participation.period) &&
     participation.terms === null
   );
 }
@@ -1162,6 +1167,68 @@ function isExpectedCreateWaveBody(body) {
     isExpectedCreateWaveVotingConfig(body.voting) &&
     isExpectedCreateWaveChatConfig(body.chat) &&
     isExpectedCreateWaveConfig(body.wave) &&
+    Array.isArray(body.outcomes) &&
+    body.outcomes.length === 0
+  );
+}
+
+function isExpectedPerpetualRankWaveConfig(wave) {
+  // A perpetual rank wave must never carry a decision schedule, an end, or
+  // outcome thresholds; anything else is an unsafe mutation.
+  return (
+    hasOnlyKeys(wave, [
+      "admin_drop_deletion_enabled",
+      "admin_group",
+      "decisions_strategy",
+      "max_votes_per_identity_to_drop",
+      "max_winners",
+      "time_lock_ms",
+      "type",
+      "winning_threshold",
+      "winning_threshold_min_duration_ms",
+    ]) &&
+    hasOnlyKeys(wave.admin_group, ["group_id"]) &&
+    wave.admin_group.group_id === SANDBOX_ADMIN_GROUP_ID &&
+    wave.type === "RANK" &&
+    wave.admin_drop_deletion_enabled === true &&
+    wave.winning_threshold === null &&
+    wave.winning_threshold_min_duration_ms === null &&
+    wave.max_winners === null &&
+    wave.max_votes_per_identity_to_drop === null &&
+    wave.time_lock_ms === null &&
+    wave.decisions_strategy === null
+  );
+}
+
+function isExpectedCreatePerpetualRankWaveBody(body) {
+  if (
+    !hasOnlyKeys(body, [
+      "chat",
+      "description_drop",
+      "outcomes",
+      "participation",
+      "picture",
+      "visibility",
+      "voting",
+      "wave",
+      "name",
+    ])
+  ) {
+    return false;
+  }
+
+  return (
+    body.name === SANDBOX_PERPETUAL_WAVE_NAME &&
+    body.picture === null &&
+    isExpectedDescriptionDrop(
+      body.description_drop,
+      SANDBOX_PERPETUAL_WAVE_DESCRIPTION
+    ) &&
+    hasNullGroupScope(body.visibility) &&
+    isExpectedCreateWaveParticipationConfig(body.participation) &&
+    isExpectedCreateWaveVotingConfig(body.voting) &&
+    isExpectedCreateWaveChatConfig(body.chat) &&
+    isExpectedPerpetualRankWaveConfig(body.wave) &&
     Array.isArray(body.outcomes) &&
     body.outcomes.length === 0
   );
@@ -1289,7 +1356,10 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   }
 
   if (pathname === "/api/waves") {
-    return isExpectedCreateWaveBody(body);
+    return (
+      isExpectedCreateWaveBody(body) ||
+      isExpectedCreatePerpetualRankWaveBody(body)
+    );
   }
 
   const notificationId = notificationIdFromPath(pathname);

@@ -58,6 +58,7 @@ export function useWaveConfig() {
         firstDecisionTime: now,
         subsequentDecisions: [],
         isRolling: false,
+        ongoingRanking: false,
       },
       drops: {
         noOfApplicationsAllowedPerParticipant: null,
@@ -152,6 +153,28 @@ export function useWaveConfig() {
       setEndDateConfig({ time: null, period: null });
     }
   }, [config.dates.endDate]);
+
+  // Perpetual rank waves always show their leaderboard: the outcomes-visibility
+  // toggle is disabled in that mode, so keep the underlying flag on.
+  useEffect(() => {
+    if (
+      config.overview.type === ApiWaveType.Rank &&
+      config.dates.ongoingRanking &&
+      !config.display.outcomesVisible
+    ) {
+      setConfig((prev) => ({
+        ...prev,
+        display: {
+          ...prev.display,
+          outcomesVisible: true,
+        },
+      }));
+    }
+  }, [
+    config.overview.type,
+    config.dates.ongoingRanking,
+    config.display.outcomesVisible,
+  ]);
 
   // Clear errors when config changes
   useEffect(() => {

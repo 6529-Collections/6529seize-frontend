@@ -49,15 +49,27 @@ jest.mock("@/components/utils/animation/CommonAnimationHeight", () => ({
 }));
 
 describe("CreateWaveOutcomes", () => {
+  const baseDisplay = {
+    customRules: null,
+    outcomesVisible: true,
+    submissionButtonLabel: null,
+    approve: {
+      approvalsTabLabel: "",
+      approvedTabLabel: "",
+    },
+  };
+
   const baseProps = {
     outcomes: [],
     outcomeType: null as CreateWaveOutcomeType | null,
     waveType: ApiWaveType.Approve,
     errors: [],
     dates: {} as any,
+    display: baseDisplay,
     maxWinners: null,
     setOutcomeType: jest.fn(),
     setOutcomes: jest.fn(),
+    setDisplay: jest.fn(),
     setMaxWinners: jest.fn(),
   };
 
@@ -116,5 +128,54 @@ describe("CreateWaveOutcomes", () => {
     render(<CreateWaveOutcomes {...baseProps} waveType={ApiWaveType.Rank} />);
 
     expect(screen.queryByLabelText(/Max Winners/)).not.toBeInTheDocument();
+  });
+
+  it("shows an enabled outcomes-visibility toggle", () => {
+    const setDisplay = jest.fn();
+    render(<CreateWaveOutcomes {...baseProps} setDisplay={setDisplay} />);
+
+    const toggle = screen.getByRole("checkbox");
+    expect(toggle).toBeEnabled();
+    expect(toggle).toBeChecked();
+
+    fireEvent.click(toggle);
+
+    expect(setDisplay).toHaveBeenCalledWith({
+      ...baseDisplay,
+      outcomesVisible: false,
+    });
+  });
+
+  it("replaces outcome configuration with an explainer for perpetual rank waves", () => {
+    render(
+      <CreateWaveOutcomes
+        {...baseProps}
+        waveType={ApiWaveType.Rank}
+        dates={{ ongoingRanking: true } as any}
+      />
+    );
+
+    expect(
+      screen.getByText("Outcome is leaderboard position")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("types")).toBeNull();
+    expect(screen.queryByTestId("rows")).toBeNull();
+
+    const toggle = screen.getByRole("checkbox");
+    expect(toggle).toBeDisabled();
+    expect(toggle).toBeChecked();
+  });
+
+  it("keeps outcome configuration for scheduled rank waves", () => {
+    render(
+      <CreateWaveOutcomes
+        {...baseProps}
+        waveType={ApiWaveType.Rank}
+        dates={{ ongoingRanking: false } as any}
+      />
+    );
+
+    expect(screen.getByTestId("types")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome is leaderboard position")).toBeNull();
   });
 });

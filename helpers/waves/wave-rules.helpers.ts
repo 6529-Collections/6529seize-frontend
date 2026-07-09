@@ -94,7 +94,9 @@ const formatDateTime = (value: number | null | undefined): string | null =>
     ? Time.millis(value).toLocaleDateTimeString()
     : null;
 
-const formatDuration = (durationMs: number | null | undefined): string | null => {
+const formatDuration = (
+  durationMs: number | null | undefined
+): string | null => {
   if (
     typeof durationMs !== "number" ||
     !Number.isFinite(durationMs) ||
@@ -355,6 +357,28 @@ const getDecisionCadenceLabel = ({
   return `${subsequentDecisions.length + 1} scheduled decisions`;
 };
 
+const getRankScheduleRows = (config: CreateWaveConfig): WaveRuleRow[] => {
+  if (config.overview.type !== ApiWaveType.Rank) {
+    return [];
+  }
+
+  if (config.dates.ongoingRanking) {
+    return [
+      {
+        id: "ongoing-ranking",
+        label: "Winner announcements",
+        value: "None (ongoing ranking, no end date)",
+      },
+    ];
+  }
+
+  return getDecisionRows({
+    first_decision_time: config.dates.firstDecisionTime,
+    subsequent_decisions: config.dates.subsequentDecisions,
+    is_rolling: config.dates.isRolling,
+  });
+};
+
 const getApprovalThresholdLabel = ({
   approvalThreshold,
   creditLabel,
@@ -478,15 +502,7 @@ const getCreateRules = ({
             max: endDate,
           }),
         },
-        ...getDecisionRows(
-          config.overview.type === ApiWaveType.Rank
-            ? {
-                first_decision_time: config.dates.firstDecisionTime,
-                subsequent_decisions: config.dates.subsequentDecisions,
-                is_rolling: config.dates.isRolling,
-              }
-            : null
-        ),
+        ...getRankScheduleRows(config),
       ],
     },
     {
