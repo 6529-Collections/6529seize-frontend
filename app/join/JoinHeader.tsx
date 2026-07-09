@@ -165,7 +165,7 @@ export function JoinHeader({
 
 function HeroPoints({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <div className="tw-mt-16 tw-grid tw-w-full tw-max-w-4xl tw-grid-cols-1 tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-7 sm:tw-grid-cols-3 sm:tw-gap-0">
+    <div className="tw-mt-16 tw-grid tw-w-full tw-max-w-4xl tw-grid-cols-1 tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-7 sm:tw-grid-cols-3 sm:tw-gap-0 lg:tw-mb-12 xl:tw-mb-14">
       {HERO_POINTS.map((point, index) => (
         <div
           className={cx(
@@ -212,6 +212,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
             card={HERO_MEME_CARDS.topLeft}
             fallbackLabel={fallbackLabel}
             heroMuted
+            imageLoading="eager"
           />
         </div>
       </div>
@@ -230,6 +231,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
             card={HERO_MEME_CARDS.left}
             fallbackLabel={fallbackLabel}
             heroMuted
+            imageLoading="eager"
           />
         </div>
       </div>
@@ -249,6 +251,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
             fallbackLabel={fallbackLabel}
             heroMuted
             imageAspectClass="tw-aspect-[4/3]"
+            imageLoading="eager"
           />
         </div>
       </div>

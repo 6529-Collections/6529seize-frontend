@@ -6,7 +6,6 @@ import Link from "next/link";
 
 import {
   cx,
-  GLASS_PANEL_CLASS,
   TERTIARY_ACTION_CLASS,
   TERTIARY_ACTION_LABEL_CLASS,
 } from "./page.utils";
@@ -41,7 +40,10 @@ export function FaqAccordion({
         const panelId = `join-6529-faq-${item.id}`;
 
         return (
-          <article className={cx(GLASS_PANEL_CLASS, "tw-group")} key={item.id}>
+          <article
+            className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-transition hover:tw-border-white/[0.14] hover:tw-bg-white/[0.045]"
+            key={item.id}
+          >
             <button
               aria-controls={panelId}
               aria-expanded={isOpen}

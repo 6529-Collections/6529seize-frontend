@@ -96,32 +96,31 @@
         "wallet",
         "profile",
         "waves",
-        "first",
-        "message",
-        "progress",
-        "subscription minting"
+        "collecting",
+        "subscription"
       ],
       "facts": [
-        "The Join 6529 page lives at /join-6529; /join redirects there for compatibility.",
-        "It is a state-aware onboarding guide that adapts to wallet connection, wallet auth, and profile setup.",
-        "The journey shows five steps: connect a wallet, set up a profile, join a Wave, participate, and collect.",
-        "The compact focus area links to The Memes Main Stage through Waves, public Waves, subscription minting information, delegation, and asking @help6529.",
-        "The hero primary action connects a wallet, opens profile setup, or returns logged-in users to Waves."
+        "The Join 6529 page lives at /join-6529.",
+        "/join redirects to /join-6529 for compatibility.",
+        "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
+        "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
+        "The focus area links to The Memes Main Stage Wave, Waves, the current user's subscriptions route when available, delegation, and @help6529."
       ],
       "canonical_path": "/join-6529",
       "related_paths": [
         "/join",
         "/waves",
+        "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077?divider=1167698",
         "/the-memes",
-        "/about/subscriptions",
+        "/{user}/subscriptions",
         "/open-data/meme-subscriptions",
-        "/network/tdh"
+        "/delegation/delegation-center"
       ],
       "tags": ["join", "navigation", "getting-started", "waves"],
       "source_refs": [
         "app/join-6529/page.tsx",
         "app/join/page.tsx",
-        "app/join/page.client.tsx",
+        "app/join/page.content.ts",
         "ops/docs/navigation/feature-join-6529-journey.md"
       ]
     },

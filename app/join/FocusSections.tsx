@@ -19,6 +19,7 @@ import {
   m,
   resolveHref,
   SECTION_EYEBROW_CLASS,
+  SECTION_HEADING_CLASS,
   TERTIARY_ACTION_CLASS,
   TERTIARY_ACTION_LABEL_CLASS,
 } from "./page.utils";
@@ -44,6 +45,11 @@ export function FocusSections({
   return (
     <section className="tw-relative tw-isolate tw-mx-auto tw-w-full tw-max-w-[1088px] tw-overflow-hidden tw-px-4 tw-py-12 md:tw-py-16 lg:tw-px-6 xl:tw-px-0">
       <AmbientArtifacts className="tw-opacity-40" locale={locale} />
+      <div className="tw-relative tw-z-10 tw-mb-6 md:tw-mb-7">
+        <h2 className={SECTION_HEADING_CLASS}>
+          {m(locale, "join6529.focus.heading")}
+        </h2>
+      </div>
       <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 md:tw-grid-cols-12">
         <FeatureCard
           className="sm:tw-col-span-2 md:tw-col-span-7 lg:tw-col-span-8 lg:tw-min-h-[260px] lg:tw-pb-5 xl:tw-min-h-[300px]"
@@ -190,7 +196,10 @@ function ThingCard({
 
 function NftCardFan({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <div className="tw-group/fan tw-[perspective:1000px] tw-pointer-events-none tw-relative tw-z-0 tw-flex tw-h-[126px] tw-w-full tw-items-center tw-justify-center tw-overflow-visible sm:tw-absolute sm:tw-bottom-4 sm:tw-right-4 sm:tw-mt-0 sm:tw-h-[124px] sm:tw-w-[250px] md:-tw-right-4 md:tw-h-[118px] md:tw-w-[235px] lg:tw-relative lg:tw-bottom-auto lg:tw-right-auto lg:tw-z-10 lg:tw-h-[190px] lg:tw-w-1/2">
+    <div
+      aria-hidden="true"
+      className="tw-group/fan tw-[perspective:1000px] tw-pointer-events-none tw-relative tw-z-0 tw-flex tw-h-[126px] tw-w-full tw-items-center tw-justify-center tw-overflow-visible sm:tw-absolute sm:tw-bottom-4 sm:tw-right-4 sm:tw-mt-0 sm:tw-h-[124px] sm:tw-w-[250px] md:-tw-right-4 md:tw-h-[118px] md:tw-w-[235px] lg:tw-relative lg:tw-bottom-auto lg:tw-right-auto lg:tw-z-10 lg:tw-h-[190px] lg:tw-w-1/2"
+    >
       <div className="tw-absolute -tw-inset-x-12 -tw-inset-y-10 tw-bg-[radial-gradient(ellipse_at_50%_48%,rgba(132,173,255,0.18)_0%,rgba(132,173,255,0.08)_34%,transparent_72%)]" />
       <div className="tw-relative tw-z-10 tw-scale-[0.98] sm:tw-hidden">
         <MemeFan cards={SUBMIT_MEME_CARDS} compact locale={locale} />

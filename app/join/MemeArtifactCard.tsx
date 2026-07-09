@@ -10,6 +10,7 @@ export function MemeArtifactCard({
   fallbackLabel,
   heroMuted = false,
   imageAspectClass = "tw-aspect-[3/4]",
+  imageLoading = "lazy",
 }: {
   readonly ariaLabel: string;
   readonly card: Pick<
@@ -20,9 +21,11 @@ export function MemeArtifactCard({
   readonly fallbackLabel: string;
   readonly heroMuted?: boolean;
   readonly imageAspectClass?: string;
+  readonly imageLoading?: "eager" | "lazy";
 }) {
   const cardNumberLabel =
     card.number === undefined ? fallbackLabel : `#${card.number}`;
+  const shouldUseRawImage = card.image.toUpperCase().endsWith(".GIF");
 
   return (
     <div
@@ -48,10 +51,10 @@ export function MemeArtifactCard({
           )}
           decoding="async"
           fill
-          loading="lazy"
+          loading={imageLoading}
           sizes="(max-width: 640px) 120px, 220px"
           src={card.image}
-          unoptimized
+          unoptimized={shouldUseRawImage}
         />
         {heroMuted && (
           <>

@@ -75,7 +75,7 @@ const LICENSE_HREF = "/about/license";
 const MEME_MINT_HREF = "/the-memes/mint";
 const MEMES_MAIN_STAGE_WAVE_HREF =
   "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077?divider=1167698";
-const OPEN_DATA_MEME_SUBSCRIPTIONS_HREF = "/open-data/meme-subscriptions";
+export const SUBSCRIPTIONS_INFO_HREF = "/open-data/meme-subscriptions";
 const TDH_HREF = "/network/tdh";
 const MEMES_CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
 
@@ -156,7 +156,7 @@ export const FOCUS_FEATURE_SPECS: readonly FocusFeatureSpec[] = [
     titleKey: "join6529.focus.subscriptions.title",
     bodyKey: "join6529.focus.subscriptions.body",
     actionLabelKey: "join6529.focus.subscriptions.action",
-    href: OPEN_DATA_MEME_SUBSCRIPTIONS_HREF,
+    href: ({ subscriptionsHref }) => subscriptionsHref,
   },
   {
     id: "waves",
