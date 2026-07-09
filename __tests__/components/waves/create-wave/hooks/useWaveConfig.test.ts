@@ -991,7 +991,7 @@ describe("useWaveConfig", () => {
       expect(result.current.endDateConfig).toEqual(newEndDateConfig);
     });
 
-    it("forces outcomes visible when ongoing ranking is enabled", () => {
+    it("preserves the outcomes-visibility preference across perpetual toggles", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
@@ -1009,40 +1009,21 @@ describe("useWaveConfig", () => {
         });
       });
 
+      // Entering and leaving perpetual mode never rewrites the stored display
+      // preference; the submit path treats perpetual as visible instead.
+      act(() => {
+        result.current.setDates({
+          ...result.current.config.dates,
+          ongoingRanking: true,
+        });
+      });
+
       expect(result.current.config.display.outcomesVisible).toBe(false);
 
       act(() => {
         result.current.setDates({
           ...result.current.config.dates,
-          ongoingRanking: true,
-        });
-      });
-
-      expect(result.current.config.display.outcomesVisible).toBe(true);
-    });
-
-    it("does not force outcomes visible for non-rank waves with a stray ongoing flag", () => {
-      const { result } = renderHook(() => useWaveConfig());
-
-      act(() => {
-        result.current.setOverview({
-          type: ApiWaveType.Approve,
-          name: "Approve wave",
-          image: null,
-        });
-      });
-
-      act(() => {
-        result.current.setDates({
-          ...result.current.config.dates,
-          ongoingRanking: true,
-        });
-      });
-
-      act(() => {
-        result.current.setDisplay({
-          ...result.current.config.display,
-          outcomesVisible: false,
+          ongoingRanking: false,
         });
       });
 

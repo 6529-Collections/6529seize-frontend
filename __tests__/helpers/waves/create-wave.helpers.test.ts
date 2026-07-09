@@ -369,6 +369,29 @@ describe("create-wave.helpers", () => {
       expect(res.voting.period.max).toBeNull();
       expect(res.participation.period.max).toBeNull();
       expect(res.outcomes).toEqual([]);
+      // Time-weighted voting is disabled in the base config, so no time lock.
+      expect(res.wave.time_lock_ms).toBeNull();
+    });
+
+    it("keeps the time-weighted vote lock for ongoing rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.ongoingRanking = true;
+      // Time-weighted voting drives the live leaderboard (not just decision
+      // snapshots), so it stays meaningful for perpetual waves.
+      config.voting.timeWeighted = {
+        enabled: true,
+        averagingInterval: 10,
+        averagingIntervalUnit: "minutes",
+      };
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.decisions_strategy).toBeNull();
+      expect(res.wave.time_lock_ms).toBe(10 * 60 * 1000);
     });
 
     it("ignores a stray ongoing flag on approve waves", () => {

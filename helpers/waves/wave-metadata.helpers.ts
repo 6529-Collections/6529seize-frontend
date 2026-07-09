@@ -219,16 +219,22 @@ const getSubmissionButtonLabelMetadataRequest = (
 export const getCreateWaveDisplayMetadataRequests = ({
   display,
   waveType,
+  ongoingRanking = false,
 }: {
   readonly display: CreateWaveDisplayConfig | null | undefined;
   readonly waveType: ApiWaveType;
+  readonly ongoingRanking?: boolean;
 }): ApiCreateWaveMetadataRequest[] => {
   if (!display) {
     return [];
   }
 
+  // Perpetual rank waves always show their leaderboard: any stored "hidden"
+  // preference stays in config (so it is restored if the user switches back
+  // to scheduled announcements) but is never submitted for a perpetual wave.
+  const isPerpetualRank = waveType === ApiWaveType.Rank && ongoingRanking;
   const outcomeVisibilityRequest =
-    waveType === ApiWaveType.Chat
+    waveType === ApiWaveType.Chat || isPerpetualRank
       ? null
       : getOutcomeVisibilityMetadataRequest(display.outcomesVisible);
   const customRulesRequest = getCustomRulesMetadataRequest(display.customRules);

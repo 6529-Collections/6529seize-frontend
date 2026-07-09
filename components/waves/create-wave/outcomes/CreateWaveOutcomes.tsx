@@ -14,6 +14,8 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import CreateWaveApprovalMaxWinners from "./CreateWaveApprovalMaxWinners";
 import CreateWaveOutcomeWarning from "./CreateWaveOutcomeWarning";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 import type { JSX } from "react";
 
@@ -33,7 +35,7 @@ function ShowOutcomesToggle({
       }`}
     >
       <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-        Show outcomes
+        {t(DEFAULT_LOCALE, "waves.create.outcomes.showOutcomes")}
       </span>
       <input
         type="checkbox"
@@ -117,21 +119,23 @@ export default function WavesOutcome({
     return (
       <div className="tw-mx-auto tw-w-full">
         <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
-          Outcomes
+          {t(DEFAULT_LOCALE, "waves.create.outcomes.title")}
         </p>
         <div className="tw-mt-3 tw-space-y-4">
           <div className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-p-4 tw-shadow-inner">
             <p className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-50">
-              Outcome is leaderboard position
+              {t(DEFAULT_LOCALE, "waves.create.outcomes.perpetual.title")}
             </p>
             <p className="tw-mb-0 tw-text-xs tw-text-iron-300">
-              This wave ranks continuously &mdash; no winners are announced and
-              the wave never ends, so there are no outcome awards to configure.
-              The live leaderboard is the outcome and stays visible to viewers.
+              {t(DEFAULT_LOCALE, "waves.create.outcomes.perpetual.description")}
             </p>
           </div>
+          {/* The leaderboard is always visible for perpetual waves. The stored
+              preference is left untouched so it is restored if the user
+              switches back to scheduled announcements; the submit path treats
+              perpetual as visible regardless. */}
           <ShowOutcomesToggle
-            display={display}
+            display={{ ...display, outcomesVisible: true }}
             disabled
             onChange={setDisplay}
           />

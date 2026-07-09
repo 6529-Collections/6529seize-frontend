@@ -13,6 +13,8 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getCreateWaveEndDate } from "@/helpers/waves/create-wave.helpers";
 import {
   getWaveCustomRulesFromMetadata,
@@ -366,8 +368,14 @@ const getRankScheduleRows = (config: CreateWaveConfig): WaveRuleRow[] => {
     return [
       {
         id: "ongoing-ranking",
-        label: "Winner announcements",
-        value: "None (ongoing ranking, no end date)",
+        label: t(
+          DEFAULT_LOCALE,
+          "waves.rules.schedule.winnerAnnouncements.label"
+        ),
+        value: t(
+          DEFAULT_LOCALE,
+          "waves.rules.schedule.winnerAnnouncements.none"
+        ),
       },
     ];
   }

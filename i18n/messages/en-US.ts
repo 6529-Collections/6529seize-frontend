@@ -663,6 +663,32 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
 } as const);
 
+const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
+  "waves.create.rank.mode",
+  {
+    legend: "Ranking mode",
+    "announceWinners.title": "Announce Winners",
+    "announceWinners.description":
+      "Winners are announced on the schedule you set below — a fixed timeline that ends the wave, or repeating cycles.",
+    "perpetualRanking.title": "Perpetual Ranking",
+    "perpetualRanking.description":
+      "Rankings update continuously with no winners and no end date — a live, always-on leaderboard.",
+  } as const
+);
+
+const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
+  title: "Outcomes",
+  showOutcomes: "Show outcomes",
+  "perpetual.title": "Outcome is leaderboard position",
+  "perpetual.description":
+    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure. The live leaderboard is the outcome and stays visible to viewers.",
+} as const);
+
+const WAVE_RULES_SCHEDULE_MESSAGES = objectMessages("waves.rules.schedule", {
+  "winnerAnnouncements.label": "Winner announcements",
+  "winnerAnnouncements.none": "None (ongoing ranking, no end date)",
+} as const);
+
 const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
   "collection.gradients": "Gradients",
   "collection.memelab": "Meme Lab",
@@ -1608,6 +1634,9 @@ export const EN_US_MESSAGES = {
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
+  ...WAVE_CREATE_RANK_MODE_MESSAGES,
+  ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_RULES_SCHEDULE_MESSAGES,
   ...GROUP_NFT_OWNERSHIP_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,

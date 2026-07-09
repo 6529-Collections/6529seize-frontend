@@ -15,6 +15,8 @@ import {
 } from "../services/waveDecisionService";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { Time } from "@/helpers/time";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface CreateWaveDatesRankProps {
   readonly waveType: ApiWaveType;
@@ -32,15 +34,19 @@ const RANK_SCHEDULE_MODES: {
 }[] = [
   {
     mode: "ANNOUNCE_WINNERS",
-    title: "Announce Winners",
-    description:
-      "Winners are announced on the schedule you set below — a fixed timeline that ends the wave, or repeating cycles.",
+    title: t(DEFAULT_LOCALE, "waves.create.rank.mode.announceWinners.title"),
+    description: t(
+      DEFAULT_LOCALE,
+      "waves.create.rank.mode.announceWinners.description"
+    ),
   },
   {
     mode: "PERPETUAL_RANKING",
-    title: "Perpetual Ranking",
-    description:
-      "Rankings update continuously with no winners and no end date — a live, always-on leaderboard.",
+    title: t(DEFAULT_LOCALE, "waves.create.rank.mode.perpetualRanking.title"),
+    description: t(
+      DEFAULT_LOCALE,
+      "waves.create.rank.mode.perpetualRanking.description"
+    ),
   },
 ];
 
@@ -208,7 +214,9 @@ export default function CreateWaveDatesRank({
       />
 
       <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
-        <legend className="tw-sr-only">Ranking mode</legend>
+        <legend className="tw-sr-only">
+          {t(DEFAULT_LOCALE, "waves.create.rank.mode.legend")}
+        </legend>
         <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 [&>div]:tw-rounded-xl [&>div]:tw-px-3 [&>div]:tw-py-3 [&>div]:tw-shadow-none">
           {RANK_SCHEDULE_MODES.map(({ mode, title, description }) => {
             const isSelected = selectedScheduleMode === mode;
@@ -225,6 +233,7 @@ export default function CreateWaveDatesRank({
                 type={mode}
                 selected={selectedScheduleMode}
                 variant="subtle"
+                name="rank-schedule-mode"
                 ariaLabel={title}
                 onChange={handleScheduleModeChange}
               >

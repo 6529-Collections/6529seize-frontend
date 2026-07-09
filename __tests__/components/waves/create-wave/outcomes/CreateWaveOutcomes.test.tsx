@@ -166,6 +166,23 @@ describe("CreateWaveOutcomes", () => {
     expect(toggle).toBeChecked();
   });
 
+  it("renders the perpetual toggle checked even when the stored preference is hidden", () => {
+    render(
+      <CreateWaveOutcomes
+        {...baseProps}
+        waveType={ApiWaveType.Rank}
+        dates={{ ongoingRanking: true } as any}
+        display={{ ...baseDisplay, outcomesVisible: false }}
+      />
+    );
+
+    // The stored preference is preserved for a switch back to scheduled mode,
+    // but the perpetual UI always presents the leaderboard as visible.
+    const toggle = screen.getByRole("checkbox");
+    expect(toggle).toBeChecked();
+    expect(toggle).toBeDisabled();
+  });
+
   it("keeps outcome configuration for scheduled rank waves", () => {
     render(
       <CreateWaveOutcomes
