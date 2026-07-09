@@ -581,12 +581,13 @@ function buildOversizedBreakdownRows(baseline, actuals) {
 
 function getReportColumnWidths(rows) {
   const dataRows = rows.filter((row) => row.kind !== "label");
+  const maxWidth = (selectValue) =>
+    Math.max(1, ...dataRows.map((row) => String(selectValue(row)).length));
+
   return {
-    metric: Math.max(...dataRows.map((row) => row.metric.length)),
-    baseline: Math.max(
-      ...dataRows.map((row) => String(row.baseline).length)
-    ),
-    actual: Math.max(...dataRows.map((row) => String(row.actual).length)),
+    metric: maxWidth((row) => row.metric),
+    baseline: maxWidth((row) => row.baseline),
+    actual: maxWidth((row) => row.actual),
   };
 }
 

@@ -185,6 +185,8 @@ describe("debt-ratchet check mode", () => {
     const legacyWordPressLine = reportLines.find((line) =>
       line.startsWith("legacy_wordpress_runtime")
     );
+    expect(anyCastsLine).toBeDefined();
+    expect(legacyWordPressLine).toBeDefined();
     expect(anyCastsLine?.indexOf("baseline")).toBe(
       legacyWordPressLine?.indexOf("baseline")
     );
@@ -268,9 +270,7 @@ describe("debt-ratchet check mode", () => {
 
     const check = runRatchet(root);
     expect(check.status).toBe(1);
-    expect(check.stderr).toContain(
-      "legacy_wordpress_runtime rose from 0 to 1"
-    );
+    expect(check.stderr).toContain("legacy_wordpress_runtime rose from 0 to 1");
   });
 
   it("prints per-file counts from --details", () => {
