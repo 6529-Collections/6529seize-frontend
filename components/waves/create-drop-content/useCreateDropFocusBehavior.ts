@@ -49,9 +49,9 @@ export function useCreateDropFocusBehavior({
 
   useLayoutEffect(() => {
     const isInitialMount = isInitialMountRef.current;
-    isInitialMountRef.current = false;
 
     if (!activeDrop) {
+      isInitialMountRef.current = false;
       wasNativeKeyboardVisibleRef.current = false;
       return;
     }
@@ -59,8 +59,13 @@ export function useCreateDropFocusBehavior({
     // Most app composers should not open the keyboard on page load. Surfaces
     // that mount only after a user reply action can opt into initial focus.
     if (isApp && isInitialMount && !focusOnInitialActiveDrop) {
-      return;
+      const timer = setTimeout(() => {
+        isInitialMountRef.current = false;
+      }, 0);
+      return () => clearTimeout(timer);
     }
+
+    isInitialMountRef.current = false;
 
     if (isApp) {
       if (focusOnInitialActiveDrop) {
