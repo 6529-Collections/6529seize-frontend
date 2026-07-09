@@ -579,12 +579,25 @@ function buildOversizedBreakdownRows(baseline, actuals) {
   ];
 }
 
-function formatReportRow(row) {
+function getReportColumnWidths(rows) {
+  const dataRows = rows.filter((row) => row.kind !== "label");
+  const maxWidth = (selectValue) =>
+    Math.max(1, ...dataRows.map((row) => String(selectValue(row)).length));
+
+  return {
+    metric: maxWidth((row) => row.metric),
+    baseline: maxWidth((row) => row.baseline),
+    actual: maxWidth((row) => row.actual),
+  };
+}
+
+function formatReportRow(row, widths) {
   if (row.kind === "label") return row.metric;
 
   const countColumns =
-    `${row.metric.padEnd(20)} baseline ${String(row.baseline).padStart(5)} ` +
-    `actual ${String(row.actual).padStart(5)}`;
+    `${row.metric.padEnd(widths.metric)}  ` +
+    `baseline ${String(row.baseline).padStart(widths.baseline)}  ` +
+    `actual ${String(row.actual).padStart(widths.actual)}`;
   return row.status ? `${countColumns}  ${row.status}` : countColumns;
 }
 
@@ -655,8 +668,9 @@ function runCheck() {
   const reportRows = rows.flatMap((row) =>
     row.metric === "oversized_files" ? [row, ...oversizedBreakdownRows] : [row]
   );
+  const reportColumnWidths = getReportColumnWidths(reportRows);
   for (const row of reportRows) {
-    console.log(formatReportRow(row));
+    console.log(formatReportRow(row, reportColumnWidths));
   }
 
   for (const warning of warnings) {
