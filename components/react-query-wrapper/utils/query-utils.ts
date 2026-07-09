@@ -33,21 +33,6 @@ export const WAVE_LOGS_PARAMS = {
   limit: 20,
 };
 
-export const getDefaultQueryRetry = (errorCallback?: () => void) => {
-  return {
-    retry: (failureCount: number) => {
-      if (failureCount >= 3) {
-        errorCallback?.();
-        return false;
-      }
-      return true;
-    },
-    retryDelay: (failureCount: number) => {
-      return failureCount * 1000;
-    },
-  };
-};
-
 type QueryErrorWithStatus = {
   readonly status?: unknown;
   readonly response?: {
@@ -70,6 +55,29 @@ const getQueryErrorStatus = (error: unknown): number | null => {
     statusError.cause?.status;
 
   return typeof status === "number" ? status : null;
+};
+
+export const isRateLimitQueryError = (error: unknown): boolean => {
+  return getQueryErrorStatus(error) === 429;
+};
+
+export const getDefaultQueryRetry = (errorCallback?: () => void) => {
+  return {
+    retry: (failureCount: number, error: unknown) => {
+      if (isRateLimitQueryError(error)) {
+        errorCallback?.();
+        return false;
+      }
+      if (failureCount >= 3) {
+        errorCallback?.();
+        return false;
+      }
+      return true;
+    },
+    retryDelay: (failureCount: number) => {
+      return failureCount * 1000;
+    },
+  };
 };
 
 export const isUnauthorizedQueryError = (error: unknown): boolean => {

@@ -605,6 +605,62 @@ describe("session-v2.utils", () => {
     }
   });
 
+  it("short-circuits refresh retries for sixty seconds while rate limited", async () => {
+    jest.useFakeTimers();
+    const rateLimitError = Object.assign(new Error("Rate limit exceeded"), {
+      status: 429,
+      response: { status: 429 },
+    });
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(rateLimitError)
+      .mockResolvedValueOnce(sessionResponse);
+
+    try {
+      await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
+        rateLimitError
+      );
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+
+      await jest.advanceTimersByTimeAsync(59_000);
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBe(
+        sessionResponse
+      );
+
+      expect(commonApiPost).toHaveBeenCalledTimes(2);
+      expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+        "started",
+        "cooldown_used_rate_limit",
+        "cooldown_used_rate_limit",
+        "started",
+        "success",
+      ]);
+      expect(getSessionRefreshWarnTelemetry()).toEqual([
+        expect.objectContaining({
+          client_type: "web",
+          auth_refresh_outcome: "backend_error",
+          outcome: "backend_error",
+          status_code: 429,
+          duration_bucket_ms: expect.any(String),
+        }),
+      ]);
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("counts aborted refreshes without logging them as failures", async () => {
     const abortController = new AbortController();
     abortController.abort();
