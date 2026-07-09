@@ -217,11 +217,18 @@ export default function WaveDropsSearchModal({
                   </h2>
                   <p
                     id={DIALOG_DESCRIPTION_ID}
-                    className="tw-m-0 tw-mt-0.5 tw-truncate tw-text-sm tw-leading-5 tw-text-iron-400"
+                    className="tw-m-0 tw-mt-0.5 tw-truncate tw-text-xs tw-leading-4"
                   >
-                    {t(locale, "waves.drops.searchModal.description", {
-                      waveName: wave.name,
-                    })}
+                    <span className="tw-text-iron-500">
+                      {t(
+                        locale,
+                        "waves.drops.searchModal.descriptionPrefix"
+                      )}
+                    </span>
+                    {" "}
+                    <span className="tw-min-w-0 tw-truncate tw-text-iron-400">
+                      {wave.name}
+                    </span>
                   </p>
                 </div>
 

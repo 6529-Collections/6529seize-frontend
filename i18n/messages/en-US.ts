@@ -694,7 +694,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     authorFallback: "unknown author",
     clear: "Clear search",
     close: "Close search",
-    description: "in {waveName}",
+    descriptionPrefix: "in",
     "empty.description": "Try a different word or phrase.",
     "empty.title": "No messages found",
     "error.description": "Change the query or reopen search to try again.",
