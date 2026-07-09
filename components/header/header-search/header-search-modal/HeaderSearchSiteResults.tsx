@@ -126,7 +126,9 @@ export function HeaderSearchSiteResults({
     locale,
     charactersRemaining
   );
-  const idlePrompt = shouldShowCountdown
+  const shouldShowIdleCountdown =
+    shouldShowCountdown && charactersRemaining > 0;
+  const idlePrompt = shouldShowIdleCountdown
     ? t(
         locale,
         charactersRemaining === 1
