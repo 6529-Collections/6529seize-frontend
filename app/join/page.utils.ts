@@ -5,9 +5,6 @@ import type { Join6529MessageKey, JoinHref, JoinLinks } from "./page.content";
 
 type MessageParams = Record<string, string | number>;
 
-export const GLASS_PANEL_CLASS =
-  "tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.03] tw-bg-[#0a0a0c]/40 tw-transition hover:tw-border-white/[0.08] hover:tw-bg-[#0f0f12]/60";
-
 export const SECTION_EYEBROW_CLASS =
   "tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-500";
 
