@@ -132,6 +132,15 @@ export default function HeaderSearchModal({
     searchMode === SEARCH_MODE.WAVE
       ? WAVE_SEARCH_MIN_LENGTH
       : MIN_SEARCH_LENGTH;
+  const formattedInputMinLength = formatInteger(locale, inputMinLength);
+  const inputDescription =
+    searchMode === SEARCH_MODE.WAVE
+      ? t(locale, "headerSearch.inputDescription.wave", {
+          minLength: formattedInputMinLength,
+        })
+      : t(locale, "headerSearch.inputDescription.site", {
+          minLength: formattedInputMinLength,
+        });
   const [waveSearchDebouncedValue, setWaveSearchDebouncedValue] =
     useState<string>("");
   useDebounce(
@@ -646,15 +655,12 @@ export default function HeaderSearchModal({
                     id={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
                     className="tw-sr-only"
                   >
-                    {t(locale, "headerSearch.inputDescription", {
-                      minLength: formatInteger(locale, inputMinLength),
-                    })}
+                    {inputDescription}
                   </p>
                   <input
                     id="header-search-input"
                     ref={inputRef}
                     type="text"
-                    required
                     aria-describedby={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
                     autoComplete="off"
                     value={searchValue}

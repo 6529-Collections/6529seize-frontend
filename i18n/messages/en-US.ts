@@ -943,10 +943,14 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   error: "Something went wrong while searching. Please try again.",
   goBack: "Go back",
   idle: "Start typing to search 6529.io",
-  "idleWithCountdown.one": "Start typing to search 6529.io ({count} more character)",
+  "idleWithCountdown.one":
+    "Start typing to search 6529.io ({count} more character)",
   "idleWithCountdown.other":
     "Start typing to search 6529.io ({count} more characters)",
-  inputDescription: "Type at least {minLength} characters to search.",
+  "inputDescription.site":
+    "Type at least {minLength} characters to search 6529.io.",
+  "inputDescription.wave":
+    "Type at least {minLength} characters to search messages in this Wave.",
   inputLabel: "Search",
   loading: "Loading...",
   "mode.site": "Site-wide",
