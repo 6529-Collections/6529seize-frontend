@@ -15,6 +15,7 @@ const {
   GITHUB_REPOSITORY,
   GITHUB_WORKFLOW,
   GITHUB_RUN_ID,
+  GITHUB_RUN_NUMBER,
   GITHUB_SERVER_URL = 'https://github.com',
   GITHUB_SHA,
   GITHUB_REF_NAME
@@ -73,6 +74,7 @@ const payload = {
   title,
   description: CI_PIPELINES_DESCRIPTION || null,
   run_id: runId,
+  run_number: GITHUB_RUN_NUMBER || null,
   run_url: `${GITHUB_SERVER_URL}/${repository}/actions/runs/${runId}`,
   sha: GITHUB_SHA || null,
   branch: GITHUB_REF_NAME || null,
