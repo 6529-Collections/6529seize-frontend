@@ -170,7 +170,8 @@ beforeEach(() => {
   });
 });
 
-const PLACEHOLDER_TEXT = "Search 6529.io";
+const SITE_SEARCH_DIALOG_TITLE = "Search 6529.io";
+const SITE_SEARCH_PLACEHOLDER = "Search 6529.io";
 
 describe("HeaderSearchModal focus management", () => {
   it("keeps focus trapped within the modal while it is open", async () => {
@@ -180,10 +181,10 @@ describe("HeaderSearchModal focus management", () => {
     const trigger = screen.getByRole("button", { name: /search/i });
     await user.click(trigger);
 
-    const input = await screen.findByPlaceholderText(PLACEHOLDER_TEXT);
+    const input = await screen.findByPlaceholderText(SITE_SEARCH_PLACEHOLDER);
     await waitFor(() => expect(input).toHaveFocus());
 
-    await screen.findByRole("dialog", { name: PLACEHOLDER_TEXT });
+    await screen.findByRole("dialog", { name: SITE_SEARCH_DIALOG_TITLE });
     expect(input).not.toHaveAttribute("required");
     const modalRoot = document.body.querySelector(
       ".tailwind-scope.tw-cursor-default.tw-relative.tw-z-1000"
@@ -219,14 +220,14 @@ describe("HeaderSearchModal focus management", () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByPlaceholderText(PLACEHOLDER_TEXT)
+        screen.queryByPlaceholderText(SITE_SEARCH_PLACEHOLDER)
       ).not.toBeInTheDocument();
       expect(trigger).toHaveFocus();
     });
 
     await user.keyboard("[Space]");
 
-    await screen.findByPlaceholderText(PLACEHOLDER_TEXT);
+    await screen.findByPlaceholderText(SITE_SEARCH_PLACEHOLDER);
 
     expect(escapeHandler).not.toBeNull();
 
@@ -236,7 +237,7 @@ describe("HeaderSearchModal focus management", () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByPlaceholderText(PLACEHOLDER_TEXT)
+        screen.queryByPlaceholderText(SITE_SEARCH_PLACEHOLDER)
       ).not.toBeInTheDocument();
       expect(trigger).toHaveFocus();
     });
