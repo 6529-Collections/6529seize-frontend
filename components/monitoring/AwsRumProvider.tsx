@@ -16,6 +16,9 @@ const AWS_RUM_HTTP_URLS_TO_EXCLUDE: readonly RegExp[] = [
   /^https:\/\/[a-z0-9-]+\.google-analytics\.com\/g\/collect(?:[?#]|$)/i,
   /^https:\/\/cca-lite\.coinbase\.com\/amp(?:[/?#]|$)/,
   /^https:\/\/cca-lite\.coinbase\.com\/metrics(?:[/?#]|$)/,
+  /^https:\/\/api-js\.mixpanel\.com\/(?:track|engage)\/?(?:[?#]|$)/i,
+  /^https:\/\/rpc\.walletconnect\.(?:com|org)\/v1\/?(?:[?#]|$)/i,
+  /^https:\/\/identity\.walletconnect\.(?:com|org)\/v1(?:[/?#]|$)/i,
 ];
 
 interface AwsRumProviderProps {

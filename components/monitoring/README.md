@@ -48,7 +48,11 @@ The AWS RUM service will automatically create:
 
 - `errors`: JavaScript errors and exceptions
 - `performance`: Page load times, Core Web Vitals
-- `http`: Network requests and responses
+- `http`: Network requests and responses. Product-owned API routes remain
+  visible; low-signal third-party telemetry/provider endpoints such as AWS RUM
+  service traffic, Google Analytics collect, Coinbase telemetry, Mixpanel
+  track/engage, and WalletConnect RPC/identity requests are excluded from HTTP
+  telemetry.
 - `interaction`: User clicks and interactions
 
 ### Session Management
