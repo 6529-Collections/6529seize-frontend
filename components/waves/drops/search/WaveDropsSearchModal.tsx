@@ -217,7 +217,7 @@ export default function WaveDropsSearchModal({
                   </h2>
                   <p
                     id={DIALOG_DESCRIPTION_ID}
-                    className="tw-m-0 tw-mt-0.5 tw-truncate tw-text-xs tw-leading-4"
+                    className="tw-m-0 -tw-mt-0.5 tw-truncate tw-text-xs tw-leading-4"
                   >
                     <span className="tw-text-iron-500">
                       {t(
