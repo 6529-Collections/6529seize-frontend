@@ -36,6 +36,15 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
       page.getByRole("link", { name: "Sandbox Notifications Wave" }).last()
     ).toBeVisible();
 
+    await page
+      .getByText("Mentioned @playwright inside the sandbox notification flow.")
+      .hover();
+    await page.getByRole("button", { name: "Reply to drop" }).first().click();
+    await expect(page.getByText("Replying to")).toBeVisible({ timeout: 1500 });
+    await expect(page.getByLabel("Post a reply")).toBeVisible({
+      timeout: 1500,
+    });
+
     await page.getByRole("button", { name: "Reactions", exact: true }).click();
     await expect(page.getByText("New reactions").first()).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
