@@ -7,7 +7,6 @@ import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submi
 
 const startDropOpen = jest.fn();
 let markdownProps: any;
-const toggleCuration = jest.fn();
 
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (url: string) => url,
@@ -66,11 +65,6 @@ jest.mock(
   })
 );
 
-jest.mock("@/components/waves/drops/DropCurationButton", () => ({
-  __esModule: true,
-  default: () => <button data-testid="curate-action">Curate</button>,
-}));
-
 jest.mock("@/hooks/isMobileScreen", () => () => false);
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
@@ -85,10 +79,6 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
 
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
-}));
-
-jest.mock("@/hooks/drops/useDropCurationMutation", () => ({
-  useDropCurationMutation: jest.fn(),
 }));
 
 jest.mock("@/components/voting", () => ({
@@ -139,8 +129,6 @@ const useLongPressInteraction = require("@/hooks/useLongPressInteraction")
   .default as jest.Mock;
 const useDropInteractionRules = require("@/hooks/drops/useDropInteractionRules")
   .useDropInteractionRules as jest.Mock;
-const useDropCurationMutation = require("@/hooks/drops/useDropCurationMutation")
-  .useDropCurationMutation as jest.Mock;
 
 describe("WaveLeaderboardGridItem", () => {
   const baseDrop: any = {
@@ -178,7 +166,6 @@ describe("WaveLeaderboardGridItem", () => {
   beforeEach(() => {
     markdownProps = undefined;
     startDropOpen.mockReset();
-    toggleCuration.mockReset();
     useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
     useLongPressInteraction.mockReturnValue({
       isActive: false,
@@ -186,10 +173,6 @@ describe("WaveLeaderboardGridItem", () => {
       touchHandlers: {},
     });
     useDropInteractionRules.mockReturnValue({ canShowVote: true });
-    useDropCurationMutation.mockReturnValue({
-      toggleCuration,
-      isPending: false,
-    });
   });
 
   it("renders compact media cards with clipped text and footer actions", () => {
@@ -229,7 +212,6 @@ describe("WaveLeaderboardGridItem", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("rank")).toBeInTheDocument();
     expect(screen.getByTestId("votes")).toBeInTheDocument();
-    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
     const footer = screen.getByTestId("wave-leaderboard-grid-item-footer-d1");
     expect(footer).toBeInTheDocument();
@@ -294,7 +276,7 @@ describe("WaveLeaderboardGridItem", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("does not open compact drops from footer action buttons", () => {
+  it("does not open compact drops from footer vote action", () => {
     const onDropClick = jest.fn();
 
     render(
@@ -305,7 +287,6 @@ describe("WaveLeaderboardGridItem", () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId("curate-action"));
     fireEvent.click(screen.getByTestId("vote-button"));
 
     expect(onDropClick).not.toHaveBeenCalled();
@@ -323,7 +304,6 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.queryByTestId("vote-button")).toBeNull();
-    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
   });
 
   it("closes voting modal when voting closes", () => {
@@ -364,7 +344,6 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.queryByTestId("vote-button")).toBeNull();
-    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
     expect(screen.getByTestId("votes")).toHaveAttribute(
       "data-winning-threshold",
       "12"
@@ -446,7 +425,6 @@ describe("WaveLeaderboardGridItem", () => {
     expect(contentOnlyActions).toBeInTheDocument();
     expect(contentOnlyActions).toHaveClass("tw-z-0");
     expect(screen.getByTestId("open-action")).toBeInTheDocument();
-    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
     expect(screen.getByTestId("media")).toBeInTheDocument();
     const mediaWrapper = screen.getByTestId("media")
@@ -682,7 +660,6 @@ describe("WaveLeaderboardGridItem", () => {
 
     fireEvent.click(screen.getByTestId("markdown-link"));
     fireEvent.click(screen.getByTestId("open-action"));
-    fireEvent.click(screen.getByTestId("curate-action"));
     fireEvent.click(screen.getByTestId("vote-button"));
 
     expect(onDropClick).not.toHaveBeenCalled();
@@ -708,22 +685,10 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("mobile-wrapper")).toBeInTheDocument();
     expect(screen.getByTestId("mobile-open-action")).toBeInTheDocument();
     expect(screen.getByTestId("mobile-copy-action")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Curate drop" })
-    ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Curate drop" }));
-
-    expect(toggleCuration).toHaveBeenCalledWith({
-      dropId: "d1",
-      waveId: "w1",
-      isCuratable: true,
-      isCurated: false,
-    });
-    expect(setIsActive).toHaveBeenCalledWith(false);
 
     fireEvent.click(screen.getByRole("button", { name: "Vote" }));
     expect(screen.getByTestId("modal")).toBeInTheDocument();
+    expect(setIsActive).toHaveBeenCalledWith(false);
   });
 
   it("shows copy action on touch devices when it is the only content-only action", () => {
@@ -751,9 +716,6 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("mobile-copy-action")).toBeInTheDocument();
     expect(screen.queryByTestId("mobile-open-action")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Curate drop" })
-    ).not.toBeInTheDocument();
-    expect(
       screen.queryByRole("button", { name: "Vote" })
     ).not.toBeInTheDocument();
   });
@@ -777,7 +739,6 @@ describe("WaveLeaderboardGridItem", () => {
       screen.queryByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId("open-action")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("curate-action")).not.toBeInTheDocument();
     expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
     expect(screen.queryByTestId("mobile-copy-action")).not.toBeInTheDocument();
   });
