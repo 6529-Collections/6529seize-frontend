@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 const {
   CI_PIPELINES_ALERT_URL,
   CI_PIPELINES_ALERT_SECRET,
+  CI_PIPELINES_ALERT_API_AUTH,
   CI_PIPELINES_TARGET_ENV,
   CI_PIPELINES_STATUS,
   CI_PIPELINES_TITLE,
@@ -87,13 +88,19 @@ const signature = crypto
   .update(body)
   .digest('hex');
 
+const headers = {
+  'content-type': 'application/json',
+  'x-6529-ci-timestamp': timestamp,
+  'x-6529-ci-signature': `sha256=${signature}`
+};
+
+if (CI_PIPELINES_ALERT_API_AUTH) {
+  headers['x-6529-auth'] = CI_PIPELINES_ALERT_API_AUTH;
+}
+
 const response = await fetch(CI_PIPELINES_ALERT_URL, {
   method: 'POST',
-  headers: {
-    'content-type': 'application/json',
-    'x-6529-ci-timestamp': timestamp,
-    'x-6529-ci-signature': `sha256=${signature}`
-  },
+  headers,
   body
 });
 

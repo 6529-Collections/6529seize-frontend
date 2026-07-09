@@ -560,6 +560,7 @@ jobs:
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
           CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
           CI_PIPELINES_TARGET_ENV: staging
           CI_PIPELINES_STATUS: failure
           CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline is broken!!!"
@@ -574,6 +575,7 @@ jobs:
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
           CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
           CI_PIPELINES_TARGET_ENV: staging
           CI_PIPELINES_STATUS: success
           CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline complete"
