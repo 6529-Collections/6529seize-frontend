@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useLayoutEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import BrainContentInput from "./input/BrainContentInput";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
@@ -25,6 +26,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   const { isApp } = useDeviceInfo();
   const { spaces } = useLayout();
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
+  const shouldReduceMotion = useReducedMotion();
   const [composerElement, setComposerElement] = useState<HTMLDivElement | null>(
     null
   );
@@ -40,6 +42,19 @@ const BrainContent: React.FC<BrainContentProps> = ({
   const composerStyle = isApp ? { bottom: composerBottomOffset } : undefined;
   const containerStyle: BrainContentStyle = {
     "--brain-content-composer-reserve": `${composerReserve}px`,
+  };
+  const composerMotionInitial = shouldReduceMotion
+    ? { opacity: 0 }
+    : { opacity: 0, y: 8 };
+  const composerMotionAnimate = shouldReduceMotion
+    ? { opacity: 1 }
+    : { opacity: 1, y: 0 };
+  const composerMotionExit = shouldReduceMotion
+    ? { opacity: 0 }
+    : { opacity: 0, y: 6 };
+  const composerMotionTransition = {
+    duration: shouldReduceMotion ? 0 : 0.18,
+    ease: "easeOut",
   };
   const handleComposerRef = useCallback((node: HTMLDivElement | null) => {
     setComposerElement(node);
@@ -75,18 +90,24 @@ const BrainContent: React.FC<BrainContentProps> = ({
       <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
         <div className="tw-h-full tw-min-h-0">{children}</div>
       </div>
-      {activeDrop && (
-        <div
-          ref={handleComposerRef}
-          className={`${composerPositionClassName} tw-z-[80] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0`}
-          style={composerStyle}
-        >
-          <BrainContentInput
-            activeDrop={activeDrop}
-            onCancelReplyQuote={onCancelReplyQuote}
-          />
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {activeDrop && (
+          <motion.div
+            ref={handleComposerRef}
+            className={`${composerPositionClassName} tw-z-[80] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0`}
+            style={composerStyle}
+            initial={composerMotionInitial}
+            animate={composerMotionAnimate}
+            exit={composerMotionExit}
+            transition={composerMotionTransition}
+          >
+            <BrainContentInput
+              activeDrop={activeDrop}
+              onCancelReplyQuote={onCancelReplyQuote}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

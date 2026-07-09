@@ -1602,9 +1602,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     };
   }, []);
 
-  const focusDesktopInput = () => {
+  const focusDesktopInput = useCallback(() => {
     createDropInputRef.current?.focus();
-  };
+  }, []);
 
   useLayoutEffect(() => {
     const isInitialMount = isInitialMountRef.current;
@@ -1637,11 +1637,22 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         cancelScheduledFocus?.();
       };
     }
+    if (focusOnInitialActiveDrop) {
+      focusDesktopInput();
+      return;
+    }
+
     const timer = setTimeout(() => {
       focusDesktopInput();
     }, 100);
     return () => clearTimeout(timer);
-  }, [activeDrop, isApp, scheduleMobileInputFocus, focusOnInitialActiveDrop]);
+  }, [
+    activeDrop,
+    focusDesktopInput,
+    focusOnInitialActiveDrop,
+    isApp,
+    scheduleMobileInputFocus,
+  ]);
 
   useEffect(() => {
     if (!isApp || !activeDrop) {
@@ -2108,6 +2119,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         submitting={submitting}
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
+        suppressInitialHeightAnimation={focusOnInitialActiveDrop}
       />
       {showIdentityField && (
         <CreateDropIdentityField

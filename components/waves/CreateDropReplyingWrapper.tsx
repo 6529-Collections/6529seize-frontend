@@ -1,5 +1,5 @@
 import React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import CreateDropReplying from "./CreateDropReplying";
 
@@ -8,6 +8,7 @@ interface CreateDropReplyingWrapperProps {
   readonly submitting: boolean;
   readonly dropId: string | null;
   readonly onCancelReplyQuote: () => void;
+  readonly suppressInitialHeightAnimation?: boolean | undefined;
 }
 
 const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
@@ -15,15 +16,32 @@ const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
   submitting,
   dropId,
   onCancelReplyQuote,
+  suppressInitialHeightAnimation = false,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const initial = suppressInitialHeightAnimation
+    ? { opacity: 0, y: shouldReduceMotion ? 0 : 4 }
+    : { opacity: 0, height: 0 };
+  const animate = suppressInitialHeightAnimation
+    ? { opacity: 1, y: 0 }
+    : { opacity: 1, height: "auto" };
+  const transition = {
+    duration: shouldReduceMotion
+      ? 0
+      : suppressInitialHeightAnimation
+        ? 0.18
+        : 0.3,
+    ease: "easeOut",
+  };
+
   return (
     <AnimatePresence>
       {activeDrop && activeDrop.drop.id !== dropId && (
         <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
+          initial={initial}
+          animate={animate}
           exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={transition}
         >
           <CreateDropReplying
             drop={activeDrop.drop}
