@@ -688,6 +688,36 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
 
+const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
+  "waves.drops.searchModal",
+  {
+    authorFallback: "unknown author",
+    clear: "Clear search",
+    close: "Close search",
+    description: "Search in {waveName}",
+    "empty.description": "Try a different word or phrase.",
+    "empty.title": "No messages found",
+    "error.description": "Change the query or reopen search to try again.",
+    "error.title": "Couldn't load results",
+    "idle.description":
+      "Type at least {minLength} characters to search this wave.",
+    "idle.title": "Ready to search",
+    inputLabel: "Search messages in {waveName}",
+    loadMore: "Load more",
+    loadingMore: "Loading...",
+    "loading.description": "Looking through {waveName}.",
+    "loading.title": "Searching messages",
+    placeholder: "Search messages",
+    "result.open": "Open message {serialNo} by {author}",
+    "results.count.many": "{count} results",
+    "results.count.one": "{count} result",
+    "results.query": 'for "{query}"',
+    "results.status.many": '{count} results for "{query}"',
+    "results.status.one": '{count} result for "{query}"',
+    title: "Search messages",
+  } as const
+);
+
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
   dialogTitle: "GIF search",
   searchPlaceholder: "Search GIFs",
@@ -1604,6 +1634,7 @@ export const EN_US_MESSAGES = {
   ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
+  ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,

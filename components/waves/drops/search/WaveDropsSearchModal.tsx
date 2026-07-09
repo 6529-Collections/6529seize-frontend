@@ -1,8 +1,10 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
+import { t } from "@/i18n/messages";
 import {
   ChevronLeftIcon,
   ExclamationTriangleIcon,
@@ -11,13 +13,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { FocusTrap } from "focus-trap-react";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import Drop, { DropLocation } from "../Drop";
@@ -104,6 +100,7 @@ export default function WaveDropsSearchModal({
   readonly onSelectSerialNo: (serialNo: number) => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const locale = useBrowserLocale();
   useClickAway(modalRef, () => {
     if (isOpen) onClose();
   });
@@ -175,30 +172,6 @@ export default function WaveDropsSearchModal({
     onClose();
   };
 
-  const handleDropResultKeyDown = (
-    event: KeyboardEvent<HTMLDivElement>,
-    serialNo: number
-  ) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      selectDropResult(serialNo);
-    }
-
-    if (event.key === " ") {
-      event.preventDefault();
-    }
-  };
-
-  const handleDropResultKeyUp = (
-    event: KeyboardEvent<HTMLDivElement>,
-    serialNo: number
-  ) => {
-    if (event.key === " ") {
-      event.preventDefault();
-      selectDropResult(serialNo);
-    }
-  };
-
   return createPortal(
     <FocusTrap
       focusTrapOptions={{
@@ -229,7 +202,7 @@ export default function WaveDropsSearchModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Close search"
+                  aria-label={t(locale, "waves.drops.searchModal.close")}
                   className="-tw-ml-1 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-hidden"
                 >
                   <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
@@ -240,20 +213,22 @@ export default function WaveDropsSearchModal({
                     id={DIALOG_TITLE_ID}
                     className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50"
                   >
-                    Search messages
+                    {t(locale, "waves.drops.searchModal.title")}
                   </h2>
                   <p
                     id={DIALOG_DESCRIPTION_ID}
                     className="tw-m-0 tw-mt-0.5 tw-truncate tw-text-sm tw-leading-5 tw-text-iron-400"
                   >
-                    in {wave.name}
+                    {t(locale, "waves.drops.searchModal.description", {
+                      waveName: wave.name,
+                    })}
                   </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Close search"
+                  aria-label={t(locale, "waves.drops.searchModal.close")}
                   className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-inline-flex"
                 >
                   <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
@@ -270,7 +245,9 @@ export default function WaveDropsSearchModal({
                     className="tw-sr-only"
                     htmlFor="wave-drops-search-input"
                   >
-                    Search messages in {wave.name}
+                    {t(locale, "waves.drops.searchModal.inputLabel", {
+                      waveName: wave.name,
+                    })}
                   </label>
                   <input
                     id="wave-drops-search-input"
@@ -281,13 +258,19 @@ export default function WaveDropsSearchModal({
                     onChange={(e) => setQuery(e.target.value)}
                     aria-describedby={searchStatusId}
                     className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
-                    placeholder="Search messages"
+                    placeholder={t(
+                      locale,
+                      "waves.drops.searchModal.placeholder"
+                    )}
                   />
                   {query.length > 0 && (
                     <button
                       type="button"
                       onClick={() => setQuery("")}
-                      aria-label="Clear search"
+                      aria-label={t(
+                        locale,
+                        "waves.drops.searchModal.clear"
+                      )}
                       className="tw-absolute tw-right-2 tw-top-1/2 tw-flex tw-size-8 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition tw-duration-150 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                     >
                       <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
@@ -304,8 +287,15 @@ export default function WaveDropsSearchModal({
                   <WaveDropsSearchState
                     id={SEARCH_LOADING_STATUS_ID}
                     variant="loading"
-                    title="Searching messages"
-                    description={`Looking through ${wave.name}.`}
+                    title={t(
+                      locale,
+                      "waves.drops.searchModal.loading.title"
+                    )}
+                    description={t(
+                      locale,
+                      "waves.drops.searchModal.loading.description",
+                      { waveName: wave.name }
+                    )}
                   />
                 )}
 
@@ -313,8 +303,14 @@ export default function WaveDropsSearchModal({
                   <WaveDropsSearchState
                     id={SEARCH_ERROR_STATUS_ID}
                     variant="error"
-                    title="Couldn't load results"
-                    description="Change the query or reopen search to try again."
+                    title={t(
+                      locale,
+                      "waves.drops.searchModal.error.title"
+                    )}
+                    description={t(
+                      locale,
+                      "waves.drops.searchModal.error.description"
+                    )}
                   />
                 )}
 
@@ -322,8 +318,12 @@ export default function WaveDropsSearchModal({
                   <WaveDropsSearchState
                     id={SEARCH_IDLE_STATUS_ID}
                     variant="idle"
-                    title="Ready to search"
-                    description={`Type at least ${MIN_QUERY_LENGTH} characters to search this wave.`}
+                    title={t(locale, "waves.drops.searchModal.idle.title")}
+                    description={t(
+                      locale,
+                      "waves.drops.searchModal.idle.description",
+                      { minLength: MIN_QUERY_LENGTH }
+                    )}
                   />
                 )}
 
@@ -334,8 +334,14 @@ export default function WaveDropsSearchModal({
                     <WaveDropsSearchState
                       id={SEARCH_EMPTY_STATUS_ID}
                       variant="empty"
-                      title="No messages found"
-                      description="Try a different word or phrase."
+                      title={t(
+                        locale,
+                        "waves.drops.searchModal.empty.title"
+                      )}
+                      description={t(
+                        locale,
+                        "waves.drops.searchModal.empty.description"
+                      )}
                     />
                   )}
 
@@ -348,17 +354,33 @@ export default function WaveDropsSearchModal({
                         id={SEARCH_RESULTS_STATUS_ID}
                         role="status"
                         aria-live="polite"
-                        aria-label={`${results.length} result${
-                          results.length === 1 ? "" : "s"
-                        } for "${normalizedQuery}"`}
+                        aria-label={t(
+                          locale,
+                          results.length === 1
+                            ? "waves.drops.searchModal.results.status.one"
+                            : "waves.drops.searchModal.results.status.many",
+                          {
+                            count: results.length,
+                            query: normalizedQuery,
+                          }
+                        )}
                         className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-1"
                       >
                         <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
-                          {results.length} result
-                          {results.length === 1 ? "" : "s"}
+                          {t(
+                            locale,
+                            results.length === 1
+                              ? "waves.drops.searchModal.results.count.one"
+                              : "waves.drops.searchModal.results.count.many",
+                            { count: results.length }
+                          )}
                         </p>
                         <p className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-400">
-                          for "{normalizedQuery}"
+                          {t(
+                            locale,
+                            "waves.drops.searchModal.results.query",
+                            { query: normalizedQuery }
+                          )}
                         </p>
                       </div>
                       <div className="tw-space-y-2">
@@ -370,31 +392,14 @@ export default function WaveDropsSearchModal({
                           const author =
                             drop.author?.handle ??
                             drop.author?.primary_address ??
-                            "unknown author";
+                            t(
+                              locale,
+                              "waves.drops.searchModal.authorFallback"
+                            );
                           return (
                             <div
                               key={drop.stableKey}
-                              role={canSelect ? "button" : undefined}
-                              tabIndex={canSelect ? 0 : -1}
-                              aria-label={
-                                canSelect
-                                  ? `Open message ${serialNo} by ${author}`
-                                  : undefined
-                              }
-                              aria-disabled={canSelect ? undefined : true}
-                              onClick={() => {
-                                if (typeof serialNo !== "number") return;
-                                selectDropResult(serialNo);
-                              }}
-                              onKeyDown={(event) => {
-                                if (typeof serialNo !== "number") return;
-                                handleDropResultKeyDown(event, serialNo);
-                              }}
-                              onKeyUp={(event) => {
-                                if (typeof serialNo !== "number") return;
-                                handleDropResultKeyUp(event, serialNo);
-                              }}
-                              className={`tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-left tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
+                              className={`tw-relative tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-left tw-transition tw-duration-150 ${
                                 canSelect
                                   ? "tw-cursor-pointer desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80"
                                   : "tw-cursor-not-allowed tw-opacity-60"
@@ -427,6 +432,18 @@ export default function WaveDropsSearchModal({
                                   }
                                 />
                               </div>
+                              {typeof serialNo === "number" && (
+                                <button
+                                  type="button"
+                                  onClick={() => selectDropResult(serialNo)}
+                                  aria-label={t(
+                                    locale,
+                                    "waves.drops.searchModal.result.open",
+                                    { serialNo, author }
+                                  )}
+                                  className="tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+                                />
+                              )}
                             </div>
                           );
                         })}
@@ -439,7 +456,12 @@ export default function WaveDropsSearchModal({
                             disabled={isFetchingNextPage}
                             className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
                           >
-                            {isFetchingNextPage ? "Loading..." : "Load more"}
+                            {isFetchingNextPage
+                              ? t(
+                                  locale,
+                                  "waves.drops.searchModal.loadingMore"
+                                )
+                              : t(locale, "waves.drops.searchModal.loadMore")}
                           </button>
                         </div>
                       )}
