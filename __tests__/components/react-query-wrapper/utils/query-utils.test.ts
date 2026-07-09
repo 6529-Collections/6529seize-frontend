@@ -24,7 +24,7 @@ describe("wave drop query params", () => {
 describe("default query retry policy", () => {
   it("does not retry rate limit responses", () => {
     const onRetryStopped = jest.fn();
-    const retryPolicy = getDefaultQueryRetry(onRetryStopped);
+    const retryPolicy = getDefaultQueryRetry<unknown>(onRetryStopped);
 
     expect(retryPolicy.retry(0, { status: 429 })).toBe(false);
 
@@ -39,7 +39,7 @@ describe("default query retry policy", () => {
 
   it("keeps retrying non-rate-limit failures until the default retry count", () => {
     const onRetryStopped = jest.fn();
-    const retryPolicy = getDefaultQueryRetry(onRetryStopped);
+    const retryPolicy = getDefaultQueryRetry<unknown>(onRetryStopped);
 
     expect(retryPolicy.retry(2, { status: 500 })).toBe(true);
     expect(retryPolicy.retry(3, { status: 500 })).toBe(false);

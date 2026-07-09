@@ -1,5 +1,6 @@
 const SESSION_REFRESH_RETRY_COOLDOWN_MS = 250;
 const SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS = 60 * 1000;
+// Invalid sessions require user action; successful auth persistence clears this block.
 const SESSION_REFRESH_INVALID_SESSION_COOLDOWN_MS = Number.POSITIVE_INFINITY;
 
 export type SessionRefreshFailureCooldownType =

@@ -61,9 +61,16 @@ export const isRateLimitQueryError = (error: unknown): boolean => {
   return getQueryErrorStatus(error) === 429;
 };
 
-export const getDefaultQueryRetry = (errorCallback?: () => void) => {
+type DefaultQueryRetryPolicy<TError> = {
+  readonly retry: (failureCount: number, error: TError) => boolean;
+  readonly retryDelay: (failureCount: number) => number;
+};
+
+export const getDefaultQueryRetry = <TError = Error>(
+  errorCallback?: () => void
+): DefaultQueryRetryPolicy<TError> => {
   return {
-    retry: (failureCount: number, error: unknown) => {
+    retry: (failureCount: number, error: TError) => {
       if (isRateLimitQueryError(error)) {
         errorCallback?.();
         return false;
