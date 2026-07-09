@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import {
   trackAnalyticsEvent,
   type AnalyticsProperties,
+  type AuthImpactRefreshOutcome,
 } from "@/services/analytics/mixpanel";
 import { classifyPageView } from "@/services/analytics/pageClassification";
 
@@ -70,7 +71,7 @@ interface WaveFeedFailureTelemetry extends WaveFeedTelemetryBase {
 interface AuthRefreshTelemetryBase {
   readonly clientType: "desktop" | "native" | "web";
   readonly hadLocalJwt: boolean;
-  readonly refreshOutcome: string;
+  readonly refreshOutcome: AuthImpactRefreshOutcome;
 }
 
 interface AuthRefreshImpactTelemetry extends AuthRefreshTelemetryBase {

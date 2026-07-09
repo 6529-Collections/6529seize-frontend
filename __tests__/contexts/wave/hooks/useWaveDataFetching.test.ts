@@ -381,6 +381,48 @@ describe("useWaveDataFetching", () => {
     });
   });
 
+  it("tracks aborted newest syncs without surfacing console errors", async () => {
+    const abortError = new DOMException("aborted", "AbortError");
+    fetchNewestWaveMessages.mockRejectedValue(abortError);
+    const newestSyncController = { signal: {} } as AbortController;
+    createController.mockReturnValueOnce(newestSyncController);
+    const consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const { result } = setup({
+      wave1: {
+        drops: [{ id: "existing", serial_no: 5 }],
+      },
+    });
+
+    await act(async () => {
+      await result.current.registerWave("wave1", true);
+    });
+
+    expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
+      "wave1",
+      5,
+      50,
+      newestSyncController.signal,
+      expect.any(Function)
+    );
+    expect(mockTrackWaveFeedLoadCancelled).toHaveBeenCalledWith({
+      durationMs: 0,
+      error: abortError,
+      hadCachedDrops: true,
+      isNative: false,
+      loadSource: "background_sync",
+      remainedUnavailable: false,
+    });
+    expect(cleanupController).toHaveBeenCalledWith(
+      "wave1-newest-sync",
+      newestSyncController
+    );
+    expect(consoleSpy).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
   it("uses a smaller native initial limit and backfills the remaining first page later", async () => {
     jest.useFakeTimers();
     const initialDrops = Array.from(

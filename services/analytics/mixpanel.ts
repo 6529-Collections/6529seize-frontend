@@ -23,6 +23,15 @@ export type AuthImpactReason =
   | "stored_auth_invalid"
   | "wallet_not_authorized";
 
+export type AuthImpactRefreshOutcome =
+  | "cancelled"
+  | "empty"
+  | "failed"
+  | "local_valid_after_failure"
+  | "missing_wallet"
+  | "not_attempted"
+  | "success";
+
 export type AuthImpactAuthState =
   | "authenticated"
   | "auth_validation_failed"
@@ -43,7 +52,7 @@ export type AuthImpactProperties = {
   readonly page_group?: string | undefined;
   readonly product_failure?: boolean | undefined;
   readonly reason?: AuthImpactReason | undefined;
-  readonly refresh_outcome?: string | undefined;
+  readonly refresh_outcome?: AuthImpactRefreshOutcome | undefined;
   readonly route_pattern?: string | undefined;
   readonly status_bucket?: "2xx" | "aborted" | undefined;
   readonly was_connected_wallet?: boolean | undefined;
