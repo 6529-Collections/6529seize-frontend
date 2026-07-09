@@ -3,16 +3,90 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
-import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronLeftIcon,
+  ExclamationTriangleIcon,
+  InboxIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { FocusTrap } from "focus-trap-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import Drop, { DropLocation } from "../Drop";
 
 const MIN_QUERY_LENGTH = 2;
+const DIALOG_TITLE_ID = "wave-drops-search-title";
+const DIALOG_DESCRIPTION_ID = "wave-drops-search-description";
+const SEARCH_STATUS_ID = "wave-drops-search-status";
 
 const normalize = (value: string) => value.trim();
+
+function WaveDropsSearchState({
+  description,
+  id,
+  title,
+  variant,
+}: {
+  readonly description: string;
+  readonly id: string;
+  readonly title: string;
+  readonly variant: "empty" | "error" | "idle" | "loading";
+}) {
+  const stateRole =
+    variant === "error"
+      ? "alert"
+      : variant === "loading"
+        ? "status"
+        : undefined;
+  const iconClasses = "tw-size-5 tw-flex-shrink-0";
+  const icon =
+    variant === "loading" ? (
+      <span
+        className="tw-size-4 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-500 tw-border-t-primary-300"
+        aria-hidden="true"
+      />
+    ) : variant === "error" ? (
+      <ExclamationTriangleIcon
+        className={`${iconClasses} tw-text-error`}
+        aria-hidden="true"
+      />
+    ) : variant === "empty" ? (
+      <InboxIcon
+        className={`${iconClasses} tw-text-iron-300`}
+        aria-hidden="true"
+      />
+    ) : (
+      <MagnifyingGlassIcon
+        className={`${iconClasses} tw-text-primary-300`}
+        aria-hidden="true"
+      />
+    );
+
+  return (
+    <div
+      id={id}
+      role={stateRole}
+      aria-live={variant === "loading" ? "polite" : undefined}
+      className="tw-flex tw-min-h-[220px] tw-flex-col tw-items-center tw-justify-center tw-px-6 tw-py-10 tw-text-center"
+    >
+      <div className="tw-mb-4 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-text-iron-200">
+        {icon}
+      </div>
+      <p className="tw-text-sm tw-font-semibold tw-text-iron-100">{title}</p>
+      <p className="tw-mt-1 tw-max-w-sm tw-text-sm tw-leading-6 tw-text-iron-400">
+        {description}
+      </p>
+    </div>
+  );
+}
 
 export default function WaveDropsSearchModal({
   isOpen,
@@ -82,6 +156,26 @@ export default function WaveDropsSearchModal({
     return null;
   }
 
+  const selectDropResult = (serialNo: number) => {
+    onSelectSerialNo(serialNo);
+    onClose();
+  };
+
+  const handleDropResultKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+    serialNo: number,
+    canSelect: boolean
+  ) => {
+    if (!canSelect) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      selectDropResult(serialNo);
+    }
+  };
+
   return createPortal(
     <FocusTrap
       focusTrapOptions={{
@@ -98,62 +192,62 @@ export default function WaveDropsSearchModal({
     >
       <div className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default">
         <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" />
-        <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
-          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-0 tw-text-center sm:tw-items-center sm:tw-p-6">
+        <div className="tw-fixed tw-inset-0 tw-z-1000 tw-h-full tw-overflow-y-auto">
+          <div className="tw-flex tw-h-full tw-min-h-full tw-items-start tw-justify-center tw-p-0 tw-text-center sm:tw-items-center sm:tw-p-5">
             <div
               ref={modalRef}
+              role="dialog"
               aria-modal="true"
-              aria-labelledby="wave-drops-search-input"
-              className="tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-full tw-min-h-0 tw-w-full tw-max-w-[min(100vw,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all sm:tw-h-[70vh] sm:tw-rounded-xl"
+              aria-labelledby={DIALOG_TITLE_ID}
+              aria-describedby={DIALOG_DESCRIPTION_ID}
+              className="tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-full tw-min-h-0 tw-w-full tw-max-w-[min(100vw,860px)] tw-transform tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-left tw-shadow-[0_24px_70px_rgba(0,0,0,0.55)] tw-transition-all sm:tw-h-[min(720px,78vh)] sm:tw-rounded-xl"
             >
-              <div className="tw-flex tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-py-4">
+              <div className="tw-flex tw-items-start tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-items-center sm:tw-px-5">
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Close search"
-                  className="-tw-ml-1 tw-mr-1 tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-text-white sm:tw-hidden"
+                  className="-tw-ml-1 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-hidden"
                 >
                   <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
                 </button>
 
                 <div className="tw-min-w-0 tw-flex-1">
-                  <div className="tw-text-xs tw-tracking-wide tw-text-iron-400">
-                    Search in
-                  </div>
-                  <div className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
-                    {wave.name}
-                  </div>
+                  <h2
+                    id={DIALOG_TITLE_ID}
+                    className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50"
+                  >
+                    Search messages
+                  </h2>
+                  <p
+                    id={DIALOG_DESCRIPTION_ID}
+                    className="tw-m-0 tw-mt-0.5 tw-truncate tw-text-sm tw-leading-5 tw-text-iron-400"
+                  >
+                    in {wave.name}
+                  </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Close search"
-                  className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white sm:tw-inline-flex"
+                  className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-inline-flex"
                 >
                   <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
                 </button>
               </div>
 
-              <div className="tw-px-4 tw-pb-4">
+              <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-5">
                 <div className="tw-relative">
-                  <svg
-                    className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                  <MagnifyingGlassIcon
+                    className="tw-pointer-events-none tw-absolute tw-left-3.5 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-400"
                     aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  />
                   <label
                     className="tw-sr-only"
                     htmlFor="wave-drops-search-input"
                   >
-                    Search messages
+                    Search messages in {wave.name}
                   </label>
                   <input
                     id="wave-drops-search-input"
@@ -162,7 +256,8 @@ export default function WaveDropsSearchModal({
                     autoComplete="off"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="sm:text-sm tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300"
+                    aria-describedby={SEARCH_STATUS_ID}
+                    className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
                     placeholder="Search messages"
                   />
                   {query.length > 0 && (
@@ -170,7 +265,7 @@ export default function WaveDropsSearchModal({
                       type="button"
                       onClick={() => setQuery("")}
                       aria-label="Clear search"
-                      className="tw-absolute tw-right-2 tw-top-1/2 tw-flex tw-size-8 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition tw-duration-150 hover:tw-text-iron-100"
+                      className="tw-absolute tw-right-2 tw-top-1/2 tw-flex tw-size-8 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition tw-duration-150 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                     >
                       <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
                     </button>
@@ -178,41 +273,70 @@ export default function WaveDropsSearchModal({
                 </div>
               </div>
 
-              <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-pb-6">
+              <div
+                className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-pb-5 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/20 desktop-hover:hover:tw-scrollbar-thumb-white/30 sm:tw-px-5"
+                aria-busy={isLoading}
+              >
                 {isLoading && (
-                  <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-iron-300">
-                    Loading…
-                  </div>
+                  <WaveDropsSearchState
+                    id={SEARCH_STATUS_ID}
+                    variant="loading"
+                    title="Searching messages"
+                    description={`Looking through ${wave.name}.`}
+                  />
                 )}
 
                 {!isLoading && isError && (
-                  <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-iron-300">
-                    Couldn’t load drops for search.
-                  </div>
+                  <WaveDropsSearchState
+                    id={SEARCH_STATUS_ID}
+                    variant="error"
+                    title="Couldn't load results"
+                    description="Change the query or reopen search to try again."
+                  />
                 )}
 
                 {!isLoading && !isError && !meetsMinLength && (
-                  <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-sm tw-text-iron-400">
-                    Type at least {MIN_QUERY_LENGTH} characters to search.
-                  </div>
+                  <WaveDropsSearchState
+                    id={SEARCH_STATUS_ID}
+                    variant="idle"
+                    title="Ready to search"
+                    description={`Type at least ${MIN_QUERY_LENGTH} characters to search this wave.`}
+                  />
                 )}
 
                 {!isLoading &&
                   !isError &&
                   meetsMinLength &&
                   results.length === 0 && (
-                    <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-sm tw-text-iron-400">
-                      No matches found.
-                    </div>
+                    <WaveDropsSearchState
+                      id={SEARCH_STATUS_ID}
+                      variant="empty"
+                      title="No messages found"
+                      description="Try a different word or phrase."
+                    />
                   )}
 
                 {!isLoading &&
                   !isError &&
                   meetsMinLength &&
                   results.length > 0 && (
-                    <div className="tw-space-y-2">
-                      <div className="tw-text-xs tw-text-iron-400">
-                        {results.length} result{results.length === 1 ? "" : "s"}
+                    <div className="tw-space-y-2.5">
+                      <div
+                        id={SEARCH_STATUS_ID}
+                        role="status"
+                        aria-live="polite"
+                        aria-label={`${results.length} result${
+                          results.length === 1 ? "" : "s"
+                        } for "${normalizedQuery}"`}
+                        className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-1"
+                      >
+                        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+                          {results.length} result
+                          {results.length === 1 ? "" : "s"}
+                        </p>
+                        <p className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-400">
+                          for "{normalizedQuery}"
+                        </p>
                       </div>
                       <div className="tw-space-y-2">
                         {results.map((drop, index) => {
@@ -220,19 +344,41 @@ export default function WaveDropsSearchModal({
                           const nextDrop = results[index + 1] ?? null;
                           const serialNo = drop.serial_no;
                           const canSelect = typeof serialNo === "number";
+                          const author =
+                            drop.author.handle ?? drop.author.primary_address;
                           return (
-                            <button
-                              type="button"
+                            <div
                               key={drop.stableKey}
-                              disabled={!canSelect}
+                              role={canSelect ? "button" : undefined}
+                              tabIndex={canSelect ? 0 : -1}
+                              aria-label={
+                                canSelect
+                                  ? `Open message ${serialNo} by ${author}`
+                                  : undefined
+                              }
+                              aria-disabled={canSelect ? undefined : true}
                               onClick={() => {
                                 if (!canSelect) return;
-                                onSelectSerialNo(serialNo);
-                                onClose();
+                                selectDropResult(serialNo);
                               }}
-                              className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-text-left tw-transition tw-duration-150 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900/40"
+                              onKeyDown={(event) =>
+                                handleDropResultKeyDown(
+                                  event,
+                                  serialNo ?? -1,
+                                  canSelect
+                                )
+                              }
+                              className={`tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-left tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
+                                canSelect
+                                  ? "tw-cursor-pointer desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80"
+                                  : "tw-cursor-not-allowed tw-opacity-60"
+                              }`}
                             >
-                              <div className="tw-pointer-events-none">
+                              <div
+                                className="tw-pointer-events-none"
+                                inert
+                                aria-hidden="true"
+                              >
                                 <Drop
                                   drop={drop}
                                   previousDrop={previousDrop}
@@ -255,7 +401,7 @@ export default function WaveDropsSearchModal({
                                   }
                                 />
                               </div>
-                            </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -265,9 +411,9 @@ export default function WaveDropsSearchModal({
                             type="button"
                             onClick={() => fetchNextPage()}
                             disabled={isFetchingNextPage}
-                            className="tw-inline-flex tw-items-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                            className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
                           >
-                            {isFetchingNextPage ? "Loading…" : "Load more"}
+                            {isFetchingNextPage ? "Loading..." : "Load more"}
                           </button>
                         </div>
                       )}
