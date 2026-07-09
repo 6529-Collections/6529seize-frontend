@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 
 export function usePendingObjectUrl() {
-  const [pendingFile, setPendingFileState] = useState<File | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(
     null
   );
 
   const clearPendingFile = useCallback(() => {
-    setPendingFileState(null);
+    setPendingFile(null);
     setPendingPreviewUrl((previousPreviewUrl) => {
       if (previousPreviewUrl) URL.revokeObjectURL(previousPreviewUrl);
       return null;
     });
   }, []);
 
-  const setPendingFile = useCallback((file: File) => {
+  const setPendingObjectUrlFile = useCallback((file: File) => {
     const previewUrl = URL.createObjectURL(file);
-    setPendingFileState(file);
+    setPendingFile(file);
     setPendingPreviewUrl((previousPreviewUrl) => {
       if (previousPreviewUrl) URL.revokeObjectURL(previousPreviewUrl);
       return previewUrl;
@@ -29,6 +29,6 @@ export function usePendingObjectUrl() {
     pendingFile,
     pendingPreviewUrl,
     clearPendingFile,
-    setPendingFile,
+    setPendingFile: setPendingObjectUrlFile,
   };
 }
