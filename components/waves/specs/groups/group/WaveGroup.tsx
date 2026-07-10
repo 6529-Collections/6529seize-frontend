@@ -7,8 +7,10 @@ import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import WaveGroupScope from "./WaveGroupScope";
-import type { WaveGroupType } from "./WaveGroup.types";
+import { WaveGroupType } from "./WaveGroup.types";
 
 export default function WaveGroup({
   scope,
@@ -23,6 +25,10 @@ export default function WaveGroup({
   const showEdit =
     canEditWave({ connectedProfile, activeProfileProxy, wave }) &&
     !scope.group?.is_direct_message;
+  const emptyScopeLabel =
+    type === WaveGroupType.CHAT
+      ? t(DEFAULT_LOCALE, "waves.chatSettings.access.anyoneWhenEnabled")
+      : t(DEFAULT_LOCALE, "waves.chatSettings.access.anyone");
 
   return (
     <div className="tw-group tw-relative tw-flex tw-min-h-8 tw-w-full tw-items-center tw-justify-between tw-px-2 tw-py-1 tw-text-sm">
@@ -34,7 +40,7 @@ export default function WaveGroup({
           <WaveGroupScope group={scope.group} />
         ) : (
           <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-            Anyone
+            {emptyScopeLabel}
           </span>
         )}
         {showEdit && (

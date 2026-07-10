@@ -35,6 +35,13 @@ availability. Submission availability is exposed through the Chat tab
   shows `You cannot participate in this wave at the moment`.
 - Closed-chat panel: if composer rendering reaches a chat-type wave with chat
   disabled, footer shows `Wave is closed`.
+- `Chat` waves require chat to stay enabled, so their Settings and Rules panels
+  do not show a `Chat status` enable/disable row.
+- `Rank` and `Approve` wave Settings show `Chat status` as `Enabled` or
+  `Disabled`. Wave admins can edit this row to re-enable disabled chat.
+- The Rules panel separates `Chat status` from `Chat access` for `Rank` and
+  `Approve` waves. `Chat access` names the group that can chat when chat is
+  enabled; `Anyone when enabled` means no chat access group is attached.
 
 ## Mode Rules
 
@@ -58,7 +65,9 @@ availability. Submission availability is exposed through the Chat tab
 - If posting is unexpectedly blocked, verify wallet/profile access first.
 - Check wave eligibility for chat and submission.
 - Check submission window and per-user submission limits.
-- Check whether chat is disabled for the current chat-type wave.
+- For `Rank` and `Approve` waves, check whether chat is disabled.
+- If you can edit a `Rank` or `Approve` wave, open Settings -> Chat ->
+  `Chat status` to re-enable chat.
 - If app edit mode is active and footer is hidden, exit edit mode.
 - If state looks stale after changes, refresh the thread.
 
