@@ -35,8 +35,11 @@ preview.
 The automatic rules preview summarizes configured wave behavior, including:
 
 - wave type
-- who can view, chat, and administer the wave
+- who can view and administer the wave
 - who can drop and vote for `Rank` and `Approve` waves
+- chat access group for `Chat` waves
+- chat status (`Enabled` or `Disabled`) and chat access group for `Rank` and
+  `Approve` waves
 - submission and voting windows for `Rank` and `Approve` waves
 - rank-wave decision timing
 - standard drops or identity nominations
@@ -92,7 +95,9 @@ use the existing submit acceptance flow.
 
 ## Edge Cases
 
-- `Chat` automatic rules focus on wave type, access, and chat settings.
+- `Chat` automatic rules focus on wave type and access. They do not show a
+  chat-status enable/disable row because chat waves require chat to stay
+  enabled.
 - `Chat` custom rules are display-only.
 - Leaving custom-rule fields blank is valid.
 - Display-only creator rules are capped at `2,000` characters.

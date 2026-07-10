@@ -5,14 +5,6 @@ import {
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import {
-  getProductImpactNowMs,
-  isProductImpactAbortError,
-  trackWaveFeedLoadCancelled,
-  trackWaveFeedLoadFailed,
-  trackWaveFeedLoadStarted,
-  trackWaveFeedLoadSucceeded,
-} from "@/services/analytics/productImpactTelemetry";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useCallback, useEffect, useRef } from "react";
 import {
@@ -26,6 +18,16 @@ import {
   formatWaveMessages,
 } from "../utils/wave-messages-utils";
 import { useWaveAbortController } from "./useWaveAbortController";
+import {
+  createWaveFeedAbortError,
+  createWaveFeedUnavailableError,
+  getWaveFeedTelemetryStartedAtMs,
+  isWaveFeedAbortError,
+  trackWaveFeedLoadFailure,
+  trackWaveFeedLoadStart,
+  trackWaveFeedLoadSuccess,
+  trackWaveFeedLoadTerminalFromError,
+} from "./waveFeedTelemetry";
 import { useWaveLoadingState } from "./useWaveLoadingState";
 import type {
   WaveDataStoreUpdater,
@@ -75,26 +77,16 @@ const getOldestSerialNo = (
   return Math.min(...drops.map((drop) => drop.serial_no));
 };
 
-const isAbortError = (error: unknown): boolean =>
-  isProductImpactAbortError(error);
-
-const createAbortError = (): DOMException =>
-  new DOMException("Aborted", "AbortError");
-
-const createWaveFeedUnavailableError = (): Error =>
-  new Error("Wave feed request returned no data");
+const isAbortError = isWaveFeedAbortError;
 
 const clearWaveMessagesLoading = (waveId: string): WaveMessagesUpdate => ({
   key: waveId,
   isLoading: false,
 });
 
-const getTelemetryDurationMs = (startedAtMs: number): number =>
-  Math.max(0, Math.round(getProductImpactNowMs() - startedAtMs));
-
 const throwIfAborted = (signal: AbortSignal): void => {
   if (signal.aborted) {
-    throw createAbortError();
+    throw createWaveFeedAbortError();
   }
 };
 
@@ -168,6 +160,7 @@ async function runNativeInitialBackfill({
   createController,
   getData,
   initialOldestSerialNo,
+  isNative,
   updateData,
   updateEligibility,
   waveId,
@@ -179,6 +172,7 @@ async function runNativeInitialBackfill({
   readonly createController: (waveId: string) => AbortController;
   readonly getData: WaveDataStoreUpdater["getData"];
   readonly initialOldestSerialNo: number;
+  readonly isNative: boolean;
   readonly updateData: WaveDataStoreUpdater["updateData"];
   readonly updateEligibility: UpdateEligibility;
   readonly waveId: string;
@@ -190,6 +184,13 @@ async function runNativeInitialBackfill({
 
   const abortKey = `${waveId}-initial-backfill`;
   const controller = createController(abortKey);
+  const telemetryStartedAtMs = getWaveFeedTelemetryStartedAtMs();
+  trackWaveFeedLoadStart({
+    hadCachedDrops: true,
+    isNative,
+    loadSource: "native_initial_backfill",
+  });
+  let fetchFailureError: unknown;
 
   try {
     const backfillDrops = await fetchWaveMessages(
@@ -197,10 +198,24 @@ async function runNativeInitialBackfill({
       request.serialNo,
       controller.signal,
       updateEligibility,
-      { limit: request.limit }
+      {
+        limit: request.limit,
+        onFailure: (error: unknown) => {
+          fetchFailureError = error;
+        },
+      }
     );
 
     if (backfillDrops === null) {
+      const failureError = fetchFailureError ?? createWaveFeedUnavailableError();
+      trackWaveFeedLoadTerminalFromError({
+        error: failureError,
+        hadCachedDrops: true,
+        isNative,
+        loadSource: "native_initial_backfill",
+        remainedUnavailable: false,
+        startedAtMs: telemetryStartedAtMs,
+      });
       return;
     }
 
@@ -212,7 +227,23 @@ async function runNativeInitialBackfill({
         waveId,
       })
     );
+
+    trackWaveFeedLoadSuccess({
+      dropCount: backfillDrops.length,
+      hadCachedDrops: true,
+      isNative,
+      loadSource: "native_initial_backfill",
+      startedAtMs: telemetryStartedAtMs,
+    });
   } catch (error: unknown) {
+    trackWaveFeedLoadTerminalFromError({
+      error,
+      hadCachedDrops: true,
+      isNative,
+      loadSource: "native_initial_backfill",
+      remainedUnavailable: false,
+      startedAtMs: telemetryStartedAtMs,
+    });
     if (isAbortError(error)) {
       return;
     }
@@ -308,6 +339,7 @@ function useNativeInitialBackfill({
             initialOldestSerialNo,
             updateData,
             updateEligibility,
+            isNative: isCapacitor,
             waveId,
           }
         );
@@ -440,6 +472,7 @@ function useSyncExistingWaveNewestMessages({
   cleanupController,
   createController,
   getData,
+  isCapacitor,
   syncNewestMessages,
 }: {
   readonly cleanupController: (
@@ -448,6 +481,7 @@ function useSyncExistingWaveNewestMessages({
   ) => void;
   readonly createController: (waveId: string) => AbortController;
   readonly getData: WaveDataStoreUpdater["getData"];
+  readonly isCapacitor: boolean;
   readonly syncNewestMessages: ReturnType<typeof useSyncNewestMessages>;
 }) {
   return useCallback(
@@ -466,14 +500,59 @@ function useSyncExistingWaveNewestMessages({
 
       const abortKey = getNewestSyncAbortKey(waveId);
       const controller = createController(abortKey);
+      const telemetryStartedAtMs = getWaveFeedTelemetryStartedAtMs();
+      trackWaveFeedLoadStart({
+        hadCachedDrops: true,
+        isNative: isCapacitor,
+        loadSource: "background_sync",
+      });
 
       try {
-        await syncNewestMessages(waveId, highestSerialNo, controller.signal);
+        const result = await syncNewestMessages(
+          waveId,
+          highestSerialNo,
+          controller.signal
+        );
+        if (result.drops === null) {
+          trackWaveFeedLoadFailure({
+            error: createWaveFeedUnavailableError(),
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "background_sync",
+            remainedUnavailable: false,
+            startedAtMs: telemetryStartedAtMs,
+          });
+          return;
+        }
+
+        trackWaveFeedLoadSuccess({
+          dropCount: result.drops.length,
+          hadCachedDrops: true,
+          isNative: isCapacitor,
+          loadSource: "background_sync",
+          startedAtMs: telemetryStartedAtMs,
+        });
+      } catch (error: unknown) {
+        trackWaveFeedLoadTerminalFromError({
+          error,
+          hadCachedDrops: true,
+          isNative: isCapacitor,
+          loadSource: "background_sync",
+          remainedUnavailable: false,
+          startedAtMs: telemetryStartedAtMs,
+        });
+        throw error;
       } finally {
         cleanupController(abortKey, controller);
       }
     },
-    [cleanupController, createController, getData, syncNewestMessages]
+    [
+      cleanupController,
+      createController,
+      getData,
+      isCapacitor,
+      syncNewestMessages,
+    ]
   );
 }
 
@@ -497,6 +576,7 @@ export function useWaveDataFetching({
     cleanupController,
     createController,
     getData,
+    isCapacitor,
     syncNewestMessages,
   });
   const { clearInitialBackfillTimeout, scheduleNativeInitialBackfill } =
@@ -553,11 +633,17 @@ export function useWaveDataFetching({
       if (existingDropsCount > 0) {
         if (!trackedCacheSuccessWaveIdsRef.current.has(waveId)) {
           trackedCacheSuccessWaveIdsRef.current.add(waveId);
-          trackWaveFeedLoadSucceeded({
+          trackWaveFeedLoadStart({
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "cache",
+          });
+          trackWaveFeedLoadSuccess({
             dropCount: existingDropsCount,
             hadCachedDrops: true,
             isNative: isCapacitor,
             loadSource: "cache",
+            startedAtMs: getWaveFeedTelemetryStartedAtMs(),
           });
         }
 
@@ -583,8 +669,8 @@ export function useWaveDataFetching({
       updateData(createEmptyWaveMessages(waveId, { isLoading: true }));
 
       const controller = createController(waveId);
-      const telemetryStartedAtMs = getProductImpactNowMs();
-      trackWaveFeedLoadStarted({
+      const telemetryStartedAtMs = getWaveFeedTelemetryStartedAtMs();
+      trackWaveFeedLoadStart({
         hadCachedDrops: false,
         isNative: isCapacitor,
         loadSource: "initial_visible",
@@ -611,57 +697,35 @@ export function useWaveDataFetching({
           if (fetchedDrops === null) {
             const failureError =
               fetchFailureError ?? createWaveFeedUnavailableError();
-            if (isAbortError(failureError)) {
-              trackWaveFeedLoadCancelled({
-                durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
-                error: failureError,
-                hadCachedDrops: false,
-                isNative: isCapacitor,
-                loadSource: "initial_visible",
-                remainedUnavailable: false,
-              });
-            } else {
-              trackWaveFeedLoadFailed({
-                durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
-                error: failureError,
-                hadCachedDrops: false,
-                isNative: isCapacitor,
-                loadSource: "initial_visible",
-                remainedUnavailable: true,
-              });
-            }
-            return null;
-          }
-
-          trackWaveFeedLoadSucceeded({
-            dropCount: fetchedDrops.length,
-            durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
-            hadCachedDrops: false,
-            isNative: isCapacitor,
-            loadSource: "initial_visible",
-          });
-          scheduleNativeInitialBackfill(waveId, fetchedDrops, options);
-          return fetchedDrops;
-        } catch (error: unknown) {
-          if (isAbortError(error)) {
-            trackWaveFeedLoadCancelled({
-              durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
-              error,
-              hadCachedDrops: false,
-              isNative: isCapacitor,
-              loadSource: "initial_visible",
-              remainedUnavailable: false,
-            });
-          } else {
-            trackWaveFeedLoadFailed({
-              durationMs: getTelemetryDurationMs(telemetryStartedAtMs),
-              error,
+            trackWaveFeedLoadTerminalFromError({
+              error: failureError,
               hadCachedDrops: false,
               isNative: isCapacitor,
               loadSource: "initial_visible",
               remainedUnavailable: true,
+              startedAtMs: telemetryStartedAtMs,
             });
+            return null;
           }
+
+          trackWaveFeedLoadSuccess({
+            dropCount: fetchedDrops.length,
+            hadCachedDrops: false,
+            isNative: isCapacitor,
+            loadSource: "initial_visible",
+            startedAtMs: telemetryStartedAtMs,
+          });
+          scheduleNativeInitialBackfill(waveId, fetchedDrops, options);
+          return fetchedDrops;
+        } catch (error: unknown) {
+          trackWaveFeedLoadTerminalFromError({
+            error,
+            hadCachedDrops: false,
+            isNative: isCapacitor,
+            loadSource: "initial_visible",
+            remainedUnavailable: true,
+            startedAtMs: telemetryStartedAtMs,
+          });
           handleFetchError(waveId, error);
           return null;
         } finally {

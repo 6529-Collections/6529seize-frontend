@@ -3,7 +3,6 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { Children, type ReactNode } from "react";
-import DropCurationButton from "../DropCurationButton";
 import WaveDropReactions from "../WaveDropReactions";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 
@@ -29,7 +28,6 @@ export default function ParticipationDropFooter({
   const { canShowVote } = useDropInteractionRules(drop);
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
   const canShowVoting = canShowVote && !isVotingActionLocked;
-  const canShowCuration = drop.context_profile_context?.curatable ?? false;
   const hasRatings = drop.raters_count > 0;
   const hasWinningThreshold =
     typeof winningThreshold === "number" && winningThreshold > 0;
@@ -37,15 +35,13 @@ export default function ParticipationDropFooter({
   const hasReactions = drop.reactions.length > 0;
   const normalizedVoteAction = Children.toArray(voteAction);
   const hasVoteAction = normalizedVoteAction.length > 0;
-  const hasPrimaryActions = canShowCuration || hasVoteAction;
   const primaryActionsJustificationClass = hasWinningThreshold
     ? "tw-justify-end"
     : "tw-justify-center";
   const shouldShowVoteFooter =
-    canShowVoting && (shouldShowRatings || hasPrimaryActions);
+    canShowVoting && (shouldShowRatings || hasVoteAction);
   const shouldShowRatingsOnlyFooter = !canShowVoting && shouldShowRatings;
-  const shouldShowReactionsFooter =
-    hasReactions || (!canShowVoting && canShowCuration);
+  const shouldShowReactionsFooter = hasReactions;
   const shouldShowReactionsBeforeVoteFooter =
     hasWinningThreshold && shouldShowVoteFooter && shouldShowReactionsFooter;
 
@@ -73,24 +69,16 @@ export default function ParticipationDropFooter({
                   drop={drop}
                   rank={drop.rank}
                   winningThreshold={winningThreshold}
-                  winningThresholdMinDurationMs={
-                    winningThresholdMinDurationMs
-                  }
+                  winningThresholdMinDurationMs={winningThresholdMinDurationMs}
                   isVotingClosed={isVotingClosed}
                 />
               </div>
             )}
 
-            {hasPrimaryActions && (
+            {hasVoteAction && (
               <div
                 className={`tw-flex tw-w-full tw-items-center ${primaryActionsJustificationClass} tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-justify-center @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0`}
               >
-                <DropCurationButton
-                  dropId={drop.id}
-                  waveId={drop.wave.id}
-                  isCuratable={canShowCuration}
-                  isCurated={drop.context_profile_context?.curated ?? false}
-                />
                 {normalizedVoteAction}
               </div>
             )}
@@ -113,14 +101,6 @@ export default function ParticipationDropFooter({
 
       {shouldShowReactionsFooter && !shouldShowReactionsBeforeVoteFooter && (
         <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
-          {!canShowVoting && (
-            <DropCurationButton
-              dropId={drop.id}
-              waveId={drop.wave.id}
-              isCuratable={canShowCuration}
-              isCurated={drop.context_profile_context?.curated ?? false}
-            />
-          )}
           <WaveDropReactions drop={drop} />
         </div>
       )}
