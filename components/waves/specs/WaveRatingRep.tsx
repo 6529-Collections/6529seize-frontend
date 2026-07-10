@@ -18,14 +18,19 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
   const unknownLabel = waveRightPanelText(
     "waves.sidebar.rightPanel.specs.unknown"
   );
+  const creditorHandle = [creditor?.handle]
+    .find((handle) => handle?.trim())
+    ?.trim();
+  const creditorHandleLabel = creditorHandle ?? unknownLabel;
 
   if (!hasCategory && !hasCreditor) {
     return null;
   }
 
+  const creditorHandleInitial = creditorHandle?.charAt(0).toUpperCase();
+  const creditorPfpInitial = creditor?.pfp?.charAt(0).toUpperCase();
   const creditorInitial =
-    creditor?.handle?.charAt(0).toUpperCase() ??
-    creditor?.pfp?.charAt(0).toUpperCase() ??
+    [creditorHandleInitial, creditorPfpInitial].find((initial) => initial) ??
     "?";
 
   return (
@@ -46,7 +51,7 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
           className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2"
           aria-label={waveRightPanelText(
             "waves.sidebar.rightPanel.specs.creditorAriaLabel",
-            { handle: creditor.handle ?? unknownLabel }
+            { handle: creditorHandleLabel }
           )}
         >
           <span className="tw-font-normal tw-text-iron-500">
@@ -66,18 +71,18 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
                 {creditorInitial}
               </div>
             )}
-            {creditor.handle ? (
+            {creditorHandle?.trim() ? (
               <Link
-                href={`/${creditor.handle}`}
+                href={`/${creditorHandle}`}
                 className="tw-truncate tw-font-medium tw-text-iron-50 tw-no-underline tw-transition-colors hover:tw-text-iron-200"
               >
-                <UserProfileTooltipWrapper user={creditor.handle}>
-                  <span className="tw-truncate">{creditor.handle}</span>
+                <UserProfileTooltipWrapper user={creditorHandle}>
+                  <span className="tw-truncate">{creditorHandle}</span>
                 </UserProfileTooltipWrapper>
               </Link>
             ) : (
               <span className="tw-font-medium tw-text-iron-50">
-                {unknownLabel}
+                {creditorHandleLabel}
               </span>
             )}
           </div>

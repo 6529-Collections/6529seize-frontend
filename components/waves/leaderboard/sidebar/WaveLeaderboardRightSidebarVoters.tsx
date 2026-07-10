@@ -16,10 +16,11 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
   WaveLeaderboardRightSidebarVotersProps
 > = ({ wave }) => {
   const { connectedProfile } = useAuth();
+  const connectedProfileHandle = connectedProfile?.handle ?? undefined;
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.handle ?? undefined,
+      connectedProfileHandle,
       reverse: false,
       dropId: null,
       sortDirection: "DESC",
@@ -31,6 +32,20 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
       fetchNextPage().catch(() => undefined);
     }
   });
+
+  if (!connectedProfileHandle) {
+    return (
+      <WaveLeaderboardRightSidebarState
+        icon={<UserGroupIcon aria-hidden="true" className="tw-size-5" />}
+        title={waveRightPanelText(
+          "waves.sidebar.rightPanel.voters.connectTitle"
+        )}
+        description={waveRightPanelText(
+          "waves.sidebar.rightPanel.voters.connectDescription"
+        )}
+      />
+    );
+  }
 
   if (voters.length === 0 && isLoading) {
     return (

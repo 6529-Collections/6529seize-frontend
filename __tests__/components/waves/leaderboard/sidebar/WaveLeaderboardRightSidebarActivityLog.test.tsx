@@ -182,6 +182,23 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     expect(placeholderDiv).toBeInTheDocument();
   });
 
+  it("uses the drop author's address when the handle is missing", () => {
+    const logWithoutAuthorHandle = {
+      ...mockLog,
+      drop_author: {
+        ...mockLog.drop_author,
+        handle: null,
+        primary_address: "0xauthor",
+      },
+    };
+
+    renderComponent({ log: logWithoutAuthorHandle });
+
+    const authorLink = screen.getByTitle("Drop creator: 0xauthor");
+    expect(authorLink).toHaveAttribute("href", "/0xauthor");
+    expect(authorLink).toHaveTextContent("0xauthor");
+  });
+
   it("displays vote change from old to new", () => {
     renderComponent();
 

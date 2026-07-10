@@ -74,7 +74,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   const sidebarTabComponents: Partial<Record<SidebarTab, JSX.Element>> = {
     [SidebarTab.ABOUT]: (
-      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5">
         <WaveHeader
           wave={wave}
           onFollowersClick={onFollowersClick}

@@ -19,7 +19,6 @@ jest.mock(
 
 const mockTopVoters = useWaveTopVoters as jest.Mock;
 const mockIntersection = useIntersectionObserver as jest.Mock;
-(useAuth as jest.Mock).mockReturnValue({ connectedProfile: null });
 
 let intersectionCb: any;
 mockIntersection.mockImplementation((cb: any) => {
@@ -33,7 +32,13 @@ describe("WaveLeaderboardRightSidebarVoters", () => {
     voting: { credit_type: "REP" },
   } as unknown as ApiWave;
 
-  it("shows placeholder when no voters", () => {
+  beforeEach(() => {
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: { handle: "connected-user" },
+    });
+  });
+
+  it("shows the empty state when an authenticated profile has no voters", () => {
     mockTopVoters.mockReturnValue({
       voters: [],
       isFetchingNextPage: false,
@@ -43,6 +48,25 @@ describe("WaveLeaderboardRightSidebarVoters", () => {
     });
     render(<WaveLeaderboardRightSidebarVoters wave={wave} />);
     expect(screen.getByText("No votes yet")).toBeInTheDocument();
+  });
+
+  it("prompts guests to connect instead of reporting an empty vote list", () => {
+    (useAuth as jest.Mock).mockReturnValue({ connectedProfile: null });
+    mockTopVoters.mockReturnValue({
+      voters: [],
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isLoading: false,
+    });
+
+    render(<WaveLeaderboardRightSidebarVoters wave={wave} />);
+
+    expect(screen.getByText("Connect to view votes")).toBeInTheDocument();
+    expect(
+      screen.getByText("Connect a profile to see who has voted.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("No votes yet")).not.toBeInTheDocument();
   });
 
   it("fetches next page on intersection", () => {
