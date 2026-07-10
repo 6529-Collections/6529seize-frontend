@@ -671,7 +671,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             {printContent()}
           </>
         )}
-        {nftNotFound && <UpcomingMemePage id={nftId} />}
+        {nftNotFound && <UpcomingMemePage id={nftId} locale={locale} />}
       </div>
     </div>
   );

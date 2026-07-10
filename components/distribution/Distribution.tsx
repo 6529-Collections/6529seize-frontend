@@ -128,12 +128,14 @@ export default function DistributionPage(props: Readonly<Props>) {
             distributionPhotosUrl
           );
           setDistributionPhotos(photos);
+          setActiveDistributionPhotoIndex(0);
         } catch (error) {
           console.error(
             `Failed to fetch distribution photos for NFT ${nftId}`,
             error
           );
           setDistributionPhotos([]);
+          setActiveDistributionPhotoIndex(0);
         } finally {
           fetchDistribution();
         }
@@ -154,10 +156,6 @@ export default function DistributionPage(props: Readonly<Props>) {
       fetchDistribution();
     }
   }, [pageProps]);
-
-  useEffect(() => {
-    setActiveDistributionPhotoIndex(0);
-  }, [distributionPhotos]);
 
   function goToPreviousDistributionPhoto() {
     setActiveDistributionPhotoIndex((activeIndex) =>
@@ -492,33 +490,44 @@ export default function DistributionPage(props: Readonly<Props>) {
       <div>
         {nftId && (
           <div className="tw-w-full">
-            <UpcomingMemePage id={nftId} />
+            <UpcomingMemePage
+              id={nftId}
+              locale={locale}
+              showDistributionLink={false}
+            />
           </div>
         )}
-        <div className="tw-w-full">
-          <Image
-            unoptimized
-            loading="eager"
-            width={0}
-            height={0}
-            style={{ height: "auto", width: "100px" }}
-            src="/SummerGlasses.svg"
-            alt=""
-            aria-hidden="true"
-          />{" "}
-          {t(locale, "distribution.empty.soon")}
-        </div>
-        <div className="tw-flex tw-w-full tw-flex-wrap tw-gap-x-1">
-          <span>{t(locale, "distribution.empty.checkBack")}</span>
-          <span>{t(locale, "distribution.empty.dropUpdates")}</span>
-          <a
-            href="https://x.com/6529Collections"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={t(locale, "distribution.empty.xLink.ariaLabel")}
-          >
-            &#64;6529Collections
-          </a>
+        <div className="tw-flex tw-w-full tw-justify-center tw-pt-8">
+          <div className="tw-flex tw-max-w-full tw-items-center tw-gap-4 sm:tw-gap-5">
+            <Image
+              unoptimized
+              loading="eager"
+              width={112}
+              height={112}
+              className="tw-h-20 tw-w-auto tw-flex-shrink-0 sm:tw-h-24"
+              src="/SummerGlasses.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <div className="tw-min-w-0 tw-text-left tw-text-base tw-font-medium tw-leading-7 tw-text-white sm:tw-text-xl sm:tw-leading-8">
+              <p className="tw-mb-0">{t(locale, "distribution.empty.soon")}</p>
+              <p className="tw-mb-0">
+                {t(locale, "distribution.empty.checkBack")}
+              </p>
+              <p className="tw-mb-0">
+                <span>{t(locale, "distribution.empty.dropUpdates")}</span>{" "}
+                <a
+                  href="https://x.com/6529Collections"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t(locale, "distribution.empty.xLink.ariaLabel")}
+                  className="tw-text-white tw-underline tw-underline-offset-2 tw-transition-colors hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                >
+                  &#64;6529Collections
+                </a>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
