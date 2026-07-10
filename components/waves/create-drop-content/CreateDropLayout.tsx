@@ -120,6 +120,7 @@ interface CreateDropLayoutProps {
   readonly uploadingFiles: UploadingFile[];
   readonly removeFile: (file: File, partIndex?: number) => void;
   readonly termsSignatureFlowEnabled: boolean;
+  readonly suppressInitialHeightAnimation?: boolean | undefined;
 }
 
 export default function CreateDropLayout({
@@ -196,6 +197,7 @@ export default function CreateDropLayout({
   uploadingFiles,
   removeFile,
   termsSignatureFlowEnabled,
+  suppressInitialHeightAnimation = false,
 }: CreateDropLayoutProps) {
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
@@ -215,6 +217,7 @@ export default function CreateDropLayout({
         submitting={submitting}
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
+        suppressInitialHeightAnimation={suppressInitialHeightAnimation}
       />
       {showIdentityField && (
         <CreateDropIdentityField
