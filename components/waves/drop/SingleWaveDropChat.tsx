@@ -35,17 +35,21 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   isVotingControlsLocked = false,
 }) => {
   const { isApp } = useDeviceInfo();
-  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
+  const nativeKeyboard = useNativeKeyboard();
   const { updateEligibility } = useWaveEligibility();
+  const isKeyboardOccupyingViewport =
+    nativeKeyboard.isVisible ||
+    nativeKeyboard.phase === "hiding" ||
+    nativeKeyboard.keyboardHeight > 0;
 
   // Drop safe-area padding as soon as the native keyboard starts moving.
   const inputContainerStyle = useMemo(() => {
     return {
-      paddingBottom: isKeyboardVisible
+      paddingBottom: isKeyboardOccupyingViewport
         ? "0px"
         : "calc(env(safe-area-inset-bottom))",
     };
-  }, [isKeyboardVisible]);
+  }, [isKeyboardOccupyingViewport]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
     action: ActiveDropAction.REPLY,
@@ -75,13 +79,12 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   React.useEffect(() => {
     updateEligibility(wave.id, {
       authenticated_user_eligible_to_chat:
-        wave.chat?.authenticated_user_eligible ?? false,
+        wave.chat.authenticated_user_eligible,
       authenticated_user_eligible_to_vote:
-        wave.voting?.authenticated_user_eligible ?? false,
+        wave.voting.authenticated_user_eligible,
       authenticated_user_eligible_to_participate:
-        wave.participation?.authenticated_user_eligible ?? false,
-      authenticated_user_admin:
-        wave.wave?.authenticated_user_eligible_for_admin ?? false,
+        wave.participation.authenticated_user_eligible,
+      authenticated_user_admin: wave.wave.authenticated_user_eligible_for_admin,
     });
   }, [updateEligibility, wave]);
 
