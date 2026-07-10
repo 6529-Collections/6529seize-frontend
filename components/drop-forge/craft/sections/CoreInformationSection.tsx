@@ -145,9 +145,10 @@ export default function CoreInformationSection({
                 min={1}
                 step={1}
                 value={season}
+                disabled={coreSaving}
                 onChange={(e) => setSeason(e.target.value)}
                 placeholder="Season"
-                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
+                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 desktop-hover:hover:tw-ring-iron-650 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
                 style={{
                   MozAppearance: "textfield",
                   WebkitAppearance: "none",
@@ -172,8 +173,9 @@ export default function CoreInformationSection({
                 min={1}
                 step={1}
                 value={editionSize}
+                disabled={coreSaving}
                 onChange={(e) => setEditionSize(e.target.value)}
-                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
+                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 desktop-hover:hover:tw-ring-iron-650 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
                 style={{
                   MozAppearance: "textfield",
                   WebkitAppearance: "none",
@@ -206,7 +208,7 @@ export default function CoreInformationSection({
         </button>
         <button
           type="button"
-          disabled={!coreChanged}
+          disabled={coreSaving || !coreChanged}
           onClick={() => {
             setEditionSize(formatNullableEditionSize(claim.edition_size));
             setSeason(getClaimSeason(claim));

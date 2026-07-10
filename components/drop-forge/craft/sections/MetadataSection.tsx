@@ -143,50 +143,55 @@ export default function MetadataSection({
       noValidate
       className="tw-flex tw-flex-col tw-gap-4"
     >
-      <ArtworkDetails
-        title={traits.title}
-        description={traits.description}
-        onTitleChange={(title) => setTraits((prev) => ({ ...prev, title }))}
-        onDescriptionChange={(description) =>
-          setTraits((prev) => ({ ...prev, description }))
-        }
-      />
+      <fieldset
+        disabled={traitsSaving}
+        className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-4 tw-border-0 tw-p-0 disabled:tw-cursor-not-allowed"
+      >
+        <ArtworkDetails
+          title={traits.title}
+          description={traits.description}
+          onTitleChange={(title) => setTraits((prev) => ({ ...prev, title }))}
+          onDescriptionChange={(description) =>
+            setTraits((prev) => ({ ...prev, description }))
+          }
+        />
 
-      <div className="tw-group tw-relative tw-mt-2">
-        <div className="tw-relative">
-          <label
-            htmlFor="metadata-external-url"
-            className="group-focus-visible-within:tw-text-primary-400 tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all"
-          >
-            External URL
-          </label>
-          <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
-            <input
-              id="metadata-external-url"
-              type="url"
-              value={externalUrl}
-              onChange={(e) => setExternalUrl(e.target.value)}
-              placeholder="https://..."
-              className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"
-            />
+        <div className="tw-group tw-relative tw-mt-2">
+          <div className="tw-relative">
+            <label
+              htmlFor="metadata-external-url"
+              className="group-focus-visible-within:tw-text-primary-400 tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all"
+            >
+              External URL
+            </label>
+            <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
+              <input
+                id="metadata-external-url"
+                type="url"
+                value={externalUrl}
+                onChange={(e) => setExternalUrl(e.target.value)}
+                placeholder="https://..."
+                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 desktop-hover:hover:tw-ring-iron-650"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="tw-mt-6 tw-space-y-4">
-        <h3 className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-mb-6 sm:tw-text-xl">
-          Artwork Traits
-        </h3>
-        <ClaimTraitsEditor
-          key={`metadata-traits-${traitsFormKey}`}
-          traits={traits}
-          setTraits={(partial) =>
-            setTraits((prev) => ({ ...prev, ...partial }))
-          }
-          showTitle={false}
-          readOnlyOverrides={{ seizeArtistProfile: false }}
-        />
-      </div>
+        <div className="tw-mt-6 tw-space-y-4">
+          <h3 className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-mb-6 sm:tw-text-xl">
+            Artwork Traits
+          </h3>
+          <ClaimTraitsEditor
+            key={`metadata-traits-${traitsFormKey}`}
+            traits={traits}
+            setTraits={(partial) =>
+              setTraits((prev) => ({ ...prev, ...partial }))
+            }
+            showTitle={false}
+            readOnlyOverrides={{ seizeArtistProfile: false }}
+          />
+        </div>
+      </fieldset>
       {traitsError && (
         <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
           {traitsError}
@@ -210,7 +215,7 @@ export default function MetadataSection({
         </button>
         <button
           type="button"
-          disabled={!metadataChanged}
+          disabled={traitsSaving || !metadataChanged}
           onClick={() => {
             setTraits(claimToTraitsData(claim));
             setExternalUrl(claim.external_url ?? "");

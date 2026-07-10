@@ -2,7 +2,7 @@ import {
   ArrowTopRightOnSquareIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import {
@@ -554,17 +554,67 @@ function DistributionPhotoLightbox({
   photoFileName: string;
   onClose: () => void;
 }>) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!photo) return;
     const previousOverflow = document.body.style.overflow;
+    previouslyFocusedElementRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    const getFocusableElements = () =>
+      Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      ).filter((element) => element.tabIndex >= 0);
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length === 0) {
+        event.preventDefault();
+        dialogRef.current?.focus();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey) {
+        if (
+          document.activeElement === firstElement ||
+          document.activeElement === dialogRef.current
+        ) {
+          event.preventDefault();
+          lastElement?.focus();
+        }
+        return;
+      }
+
+      if (document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement?.focus();
+      }
     };
     document.body.style.overflow = "hidden";
     globalThis.addEventListener("keydown", handleKeyDown);
+    requestAnimationFrame(() => dialogRef.current?.focus());
     return () => {
       document.body.style.overflow = previousOverflow;
       globalThis.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElementRef.current?.focus();
+      previouslyFocusedElementRef.current = null;
     };
   }, [photo, onClose]);
 
@@ -582,7 +632,14 @@ function DistributionPhotoLightbox({
         className="tw-absolute tw-inset-0 tw-border-0 tw-bg-black/85 tw-p-0"
       />
 
-      <div className="tw-relative tw-z-[1001] tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Distribution photo ${photoFileName}`}
+        tabIndex={-1}
+        className="tw-relative tw-z-[1001] tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5 focus:tw-outline-none"
+      >
         <img
           src={photo.link}
           alt={photoFileName}
