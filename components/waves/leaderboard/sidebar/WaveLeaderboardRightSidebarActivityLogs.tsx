@@ -11,7 +11,13 @@ import { ArrowPathIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { WaveLeaderboardRightSidebarState } from "./WaveLeaderboardRightSidebarState";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
-const getDropSerialNo = (contents: ApiWaveLog["contents"]): number | null => {
+const getDropSerialNo = (
+  contents: ApiWaveLog["contents"] | null | undefined
+): number | null => {
+  if (!contents) {
+    return null;
+  }
+
   const drop = (contents as { readonly drop?: unknown }).drop;
 
   if (typeof drop !== "object" || drop === null || !("serial_no" in drop)) {
