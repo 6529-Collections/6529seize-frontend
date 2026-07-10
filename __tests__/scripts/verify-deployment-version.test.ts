@@ -169,6 +169,25 @@ describe("verify-deployment-version", () => {
     });
   });
 
+  it("rejects impossible consecutive match requirements", async () => {
+    const fetchImpl = jest.fn();
+
+    await expect(
+      verifyDeploymentVersion({
+        baseUrl: "https://6529.io",
+        expectedVersion: EXPECTED_SHA,
+        attempts: 1,
+        requiredMatches: 2,
+        delayMs: 1,
+        timeoutMs: 100,
+        fetchImpl,
+        sleep: jest.fn(),
+      })
+    ).rejects.toThrow("--required-matches cannot exceed --attempts");
+
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it("fails when the version never matches", async () => {
     const clock = deterministicClock();
     const fetchImpl = jest.fn().mockResolvedValue(

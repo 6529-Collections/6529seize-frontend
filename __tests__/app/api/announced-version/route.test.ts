@@ -9,6 +9,8 @@ import { NextResponse } from "next/server";
 
 const jsonMock = NextResponse.json as jest.Mock;
 const NO_STORE_HEADERS = { "Cache-Control": "no-store, must-revalidate" };
+const ANNOUNCED_VERSION_ENDPOINT =
+  "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json";
 
 describe("GET announced version route", () => {
   beforeEach(() => {
@@ -36,8 +38,7 @@ describe("GET announced version route", () => {
 
   it("returns the externally announced version when it is ready", async () => {
     const { publicEnv } = require("@/config/env");
-    publicEnv.ANNOUNCED_VERSION_ENDPOINT =
-      "https://cdn.example.test/current-production-version.json";
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
     const expected = { foo: "bar" };
     jsonMock.mockReturnValue(expected);
     (globalThis.fetch as jest.Mock).mockResolvedValue({
@@ -52,7 +53,7 @@ describe("GET announced version route", () => {
     const result = await GET();
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      "https://cdn.example.test/current-production-version.json",
+      ANNOUNCED_VERSION_ENDPOINT,
       expect.objectContaining({
         cache: "no-store",
         headers: expect.objectContaining({
@@ -71,8 +72,7 @@ describe("GET announced version route", () => {
 
   it("keeps the current version when the announcement predates this build", async () => {
     const { publicEnv } = require("@/config/env");
-    publicEnv.ANNOUNCED_VERSION_ENDPOINT =
-      "https://cdn.example.test/current-production-version.json";
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
     jsonMock.mockReturnValue({ ok: true });
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
@@ -93,8 +93,7 @@ describe("GET announced version route", () => {
 
   it("falls back to the current version when the announcement is not ready", async () => {
     const { publicEnv } = require("@/config/env");
-    publicEnv.ANNOUNCED_VERSION_ENDPOINT =
-      "https://cdn.example.test/current-production-version.json";
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
     jsonMock.mockReturnValue({ ok: true });
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
@@ -109,10 +108,66 @@ describe("GET announced version route", () => {
     );
   });
 
-  it("falls back to the current version when the announcement request fails", async () => {
+  it("falls back to the current version when ready is omitted", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
+    jsonMock.mockReturnValue({ ok: true });
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        published_at: "2026-07-09T10:05:00.000Z",
+        version: "announced-version",
+      }),
+    });
+
+    await GET();
+
+    expect(jsonMock).toHaveBeenCalledWith(
+      { version: "current-version" },
+      { headers: NO_STORE_HEADERS }
+    );
+  });
+
+  it("uses a ready announcement when this build has no timestamp", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
+    publicEnv.VERSION_BUILD_TIMESTAMP = undefined;
+    jsonMock.mockReturnValue({ ok: true });
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        published_at: "2026-07-09T10:05:00.000Z",
+        ready: true,
+        version: "announced-version",
+      }),
+    });
+
+    await GET();
+
+    expect(jsonMock).toHaveBeenCalledWith(
+      { version: "announced-version" },
+      { headers: NO_STORE_HEADERS }
+    );
+  });
+
+  it("does not fetch disallowed announcement endpoints", async () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.ANNOUNCED_VERSION_ENDPOINT =
-      "https://cdn.example.test/current-production-version.json";
+      "https://example.com/current-production-version.json";
+    jsonMock.mockReturnValue({ ok: true });
+
+    await GET();
+
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(jsonMock).toHaveBeenCalledWith(
+      { version: "current-version" },
+      { headers: NO_STORE_HEADERS }
+    );
+  });
+
+  it("falls back to the current version when the announcement request fails", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
     jsonMock.mockReturnValue({ ok: true });
     (globalThis.fetch as jest.Mock).mockRejectedValue(new Error("network"));
 

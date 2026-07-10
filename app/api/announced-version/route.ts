@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store, must-revalidate" };
 const ANNOUNCED_VERSION_TIMEOUT_MS = 5_000;
+const ANNOUNCED_VERSION_ALLOWED_HOSTS = new Set([
+  "dnclu2fna0b2b.cloudfront.net",
+]);
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +38,24 @@ const parseTimestamp = (value: unknown): number | null => {
 
 const getCurrentVersion = () => publicEnv.VERSION ?? "unknown";
 
+const normalizeAnnouncementEndpoint = (endpoint: string): string | null => {
+  try {
+    const url = new URL(endpoint);
+    if (
+      url.protocol !== "https:" ||
+      url.username ||
+      url.password ||
+      !ANNOUNCED_VERSION_ALLOWED_HOSTS.has(url.hostname)
+    ) {
+      return null;
+    }
+
+    return url.toString();
+  } catch {
+    return null;
+  }
+};
+
 const shouldUseAnnouncedVersion = ({
   publishedAt,
   version,
@@ -46,13 +67,19 @@ const shouldUseAnnouncedVersion = ({
   const buildTime = parseTimestamp(publicEnv.VERSION_BUILD_TIMESTAMP);
   const publishedTime = parseTimestamp(publishedAt);
 
-  return (
-    buildTime !== null && publishedTime !== null && publishedTime > buildTime
-  );
+  if (publishedTime === null) {
+    return false;
+  }
+
+  // Production sets VERSION_BUILD_TIMESTAMP before the build; only newer
+  // announcements should stale that bundle. Local/custom configs without that
+  // timestamp still honor a valid ready announcement instead of suppressing all
+  // external announcements forever.
+  return buildTime === null || publishedTime > buildTime;
 };
 
 const extractReadyVersion = (payload: unknown): AnnouncedVersion | null => {
-  if (!isRecord(payload) || payload["ready"] === false) {
+  if (!isRecord(payload) || payload["ready"] !== true) {
     return null;
   }
 
@@ -112,10 +139,13 @@ async function fetchAnnouncedVersion(
 
 export async function GET() {
   const endpoint = publicEnv.ANNOUNCED_VERSION_ENDPOINT;
+  const announcementEndpoint =
+    endpoint === undefined ? null : normalizeAnnouncementEndpoint(endpoint);
 
-  if (endpoint) {
+  if (announcementEndpoint) {
     try {
-      const announcedVersion = await fetchAnnouncedVersion(endpoint);
+      const announcedVersion =
+        await fetchAnnouncedVersion(announcementEndpoint);
       if (announcedVersion && shouldUseAnnouncedVersion(announcedVersion)) {
         return NextResponse.json(
           { version: announcedVersion.version },

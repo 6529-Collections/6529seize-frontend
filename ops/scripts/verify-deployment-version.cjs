@@ -125,7 +125,6 @@ async function fetchVersion({ fetchImpl, endpointUrl, headers, timeoutMs }) {
 function buildEvidence({
   baseUrl,
   expectedVersion,
-  consecutiveMatches,
   requiredMatches,
   attempt,
   maxAttempts,
@@ -150,7 +149,6 @@ function buildEvidence({
     expected_version: expectedVersion,
     actual_version: actualVersion,
     matched,
-    consecutive_matches: consecutiveMatches,
     required_matches: requiredMatches,
     status,
     cache_control: cacheControl,
@@ -184,6 +182,9 @@ async function verifyDeploymentVersion(options) {
     1,
     "--required-matches"
   );
+  if (requiredMatches > attempts) {
+    throw new Error("--required-matches cannot exceed --attempts");
+  }
   const delayMs = parsePositiveInteger(options.delayMs, 15000, "--delay-ms");
   const timeoutMs = parsePositiveInteger(
     options.timeoutMs,
@@ -212,7 +213,6 @@ async function verifyDeploymentVersion(options) {
       evidence = buildEvidence({
         baseUrl,
         expectedVersion,
-        consecutiveMatches,
         requiredMatches,
         attempt,
         maxAttempts: attempts,
@@ -225,7 +225,6 @@ async function verifyDeploymentVersion(options) {
       evidence = buildEvidence({
         baseUrl,
         expectedVersion,
-        consecutiveMatches,
         requiredMatches,
         attempt,
         maxAttempts: attempts,

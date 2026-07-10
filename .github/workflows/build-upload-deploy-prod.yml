@@ -369,7 +369,9 @@ jobs:
 
           announcement_file="current-production-version.json"
           published_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          announced_version_cdn_host="$(node -e 'process.stdout.write(new URL(process.env.ANNOUNCED_VERSION_ENDPOINT).hostname)')"
 
+          # The app only treats this announcement as newer when published_at is after VERSION_BUILD_TIMESTAMP.
           cat > "$announcement_file" <<JSON
           {
             "schema_version": "frontend-announced-version.v1",
@@ -386,7 +388,7 @@ jobs:
             --content-type "application/json"
 
           if distribution_id="$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?DomainName=='dnclu2fna0b2b.cloudfront.net'].Id | [0]" \
+            --query "DistributionList.Items[?DomainName=='${announced_version_cdn_host}'].Id | [0]" \
             --output text 2>/tmp/announced-version-cloudfront-error)"; then
             if [ -n "$distribution_id" ] && [ "$distribution_id" != "None" ]; then
               if aws cloudfront create-invalidation \
@@ -397,7 +399,7 @@ jobs:
                 echo "::warning::Could not invalidate /${ANNOUNCED_VERSION_OBJECT_KEY}; announced version may update after the CDN cache expires."
               fi
             else
-              echo "::warning::Could not find the asset CloudFront distribution for ${ANNOUNCED_VERSION_ENDPOINT}; announced version may update after the CDN cache expires."
+              echo "::warning::Could not find the asset CloudFront distribution for ${announced_version_cdn_host}; announced version may update after the CDN cache expires."
             fi
           else
             echo "::warning::Could not list CloudFront distributions for announced version invalidation."
