@@ -25,6 +25,7 @@ interface BrainContentProps {
   readonly onCancelReplyQuote: () => void;
 }
 
+// Reserve the compact one-line composer height before ResizeObserver runs.
 const MIN_REPLY_COMPOSER_RESERVE_PX = 104;
 
 const BrainContent: React.FC<BrainContentProps> = ({
@@ -94,7 +95,8 @@ const BrainContent: React.FC<BrainContentProps> = ({
       return;
     }
 
-    return registerWaveComposerDock(composerElement);
+    const unregister = registerWaveComposerDock(composerElement);
+    return typeof unregister === "function" ? unregister : undefined;
   }, [composerElement]);
 
   return (
@@ -106,7 +108,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
         <div className="tw-h-full tw-min-h-0">{children}</div>
       </div>
       <LazyMotion features={domAnimation}>
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {activeDrop && (
             <m.div
               ref={handleComposerRef}
