@@ -263,6 +263,9 @@ function getViewportKeyboardHeight(): number {
   const unappliedViewportShrinkHeight =
     visualViewportShrinkHeight - getLayoutViewportShrinkHeight();
 
+  // Use the closed-viewport shrink when available, but keep bottom overlap as
+  // the first-focus/offsetTop fallback for WebViews that do not expose a stable
+  // pre-keyboard baseline.
   return normalizeKeyboardHeight(
     Math.max(unappliedViewportShrinkHeight, viewportBottomOverlap)
   );
@@ -535,6 +538,9 @@ function ensureKeyboardListeners(): void {
         Keyboard.addListener("keyboardWillHide", () => {
           const wasKeyboardActive =
             currentState.isVisible || currentState.keyboardHeight > 0;
+          // willHide starts the native dismissal animation; target zero inset
+          // now so the app layout travels down with the keyboard instead of
+          // waiting for didHide.
           setKeyboardState(
             {
               isVisible: wasKeyboardActive,

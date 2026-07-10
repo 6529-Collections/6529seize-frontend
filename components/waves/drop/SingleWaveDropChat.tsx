@@ -77,14 +77,20 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   };
 
   React.useEffect(() => {
+    // Preserve the existing runtime fallback for partial wave payloads.
+    const eligibilityWave = wave as Partial<
+      Pick<ApiWave, "chat" | "participation" | "voting" | "wave">
+    >;
+
     updateEligibility(wave.id, {
       authenticated_user_eligible_to_chat:
-        wave.chat.authenticated_user_eligible,
+        eligibilityWave.chat?.authenticated_user_eligible ?? false,
       authenticated_user_eligible_to_vote:
-        wave.voting.authenticated_user_eligible,
+        eligibilityWave.voting?.authenticated_user_eligible ?? false,
       authenticated_user_eligible_to_participate:
-        wave.participation.authenticated_user_eligible,
-      authenticated_user_admin: wave.wave.authenticated_user_eligible_for_admin,
+        eligibilityWave.participation?.authenticated_user_eligible ?? false,
+      authenticated_user_admin:
+        eligibilityWave.wave?.authenticated_user_eligible_for_admin ?? false,
     });
   }, [updateEligibility, wave]);
 
