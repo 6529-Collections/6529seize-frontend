@@ -1133,6 +1133,28 @@ describe("DropPartMarkdown", () => {
     expect(a).toHaveAttribute("href", "https://google.com");
   });
 
+  it("renders specialized markdown links with anchor text as plain links", () => {
+    const href = "https://warpcast.com/alice/0x123";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`[cast](${href})`}
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockFarcasterCard).not.toHaveBeenCalled();
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    expect(screen.getByRole("link", { name: "cast" })).toHaveAttribute(
+      "href",
+      href
+    );
+  });
+
   it("keeps bare URL previews when a part also has a markdown anchor link", () => {
     const tweetUrl = "https://twitter.com/someuser/status/2222222222";
 
