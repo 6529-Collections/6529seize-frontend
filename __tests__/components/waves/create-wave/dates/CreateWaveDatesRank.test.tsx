@@ -499,6 +499,22 @@ describe("CreateWaveDatesRank", () => {
     );
   });
 
+  it("expands winner announcements by default so the schedule is not missed", () => {
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={baseDates}
+        errors={[]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-expanded",
+      "true"
+    );
+  });
+
   it("re-selecting the active mode does not rewrite the dates", async () => {
     const user = userEvent.setup();
     const setDates = jest.fn();
