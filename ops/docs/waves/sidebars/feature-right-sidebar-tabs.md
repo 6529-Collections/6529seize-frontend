@@ -20,7 +20,8 @@ linked section pages.
 
 - Open a wave thread.
 - Open the right sidebar.
-- Select a tab button, or open `More` and select an overflow tab.
+- Select a tab button. Scroll the tab strip horizontally when the full row does
+  not fit the panel width.
 
 ## Tab Availability and Order
 
@@ -30,25 +31,28 @@ linked section pages.
 
 ## Overflow and Keyboard Behavior
 
-- The first three available tabs render as visible buttons.
-- When more than three tabs are available, remaining tabs move into `More`.
-- If the active tab is in overflow, the `More` trigger label switches to that
-  active tab name.
-- Visible tabs support `ArrowLeft`, `ArrowRight`, `Home`, and `End`.
-- `More` options are keyboard accessible.
+- Every available section remains a direct tab in the tab strip.
+- The tab strip scrolls horizontally when its tabs do not fit. This behavior is
+  CSS-driven and does not depend on viewport measurements in JavaScript.
+- The tab strip stays within the panel width. It does not widen the panel or
+  make the panel body horizontally scrollable.
+- The tab row remains fixed at the top while the active section scrolls
+  vertically below it.
+- Switching tabs never carries a horizontal scroll offset into the next
+  section, including in narrow overlay layouts.
+- Tabs support `ArrowLeft`, `ArrowRight`, `Home`, and `End`.
 
 ## User Journey
 
 1. Open a wave thread on `/waves/{waveId}` or `/messages/{waveId}`.
 2. Open the right sidebar.
-3. Select a visible tab, or open `More` and pick an overflow tab.
+3. Select a tab, scrolling the tab strip horizontally first when needed.
 4. Sidebar content switches in place without route navigation.
 
 ## State Changes and Recovery
 
 - If the active tab is no longer available for the current wave type, the
   sidebar automatically returns to `About`.
-- Closing `More` without a selection keeps the current tab.
 - Tab choice is in-session UI state, not a URL tab parameter.
 - Closing and reopening the sidebar keeps the current tab choice unless wave
   state rules make that tab unavailable.

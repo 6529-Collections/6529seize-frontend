@@ -335,54 +335,63 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
   const isShowingPreviousContributors = contributorsQuery.isPlaceholderData;
 
   return (
-    <div className="tw-flex tw-h-full tw-flex-col tw-gap-5 tw-p-4">
+    <div className="tw-flex tw-h-full tw-flex-col tw-gap-4 tw-p-4 tw-@container/rep">
       <section aria-labelledby="wave-rep-summary-heading">
-        <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
-          <h3
-            id="wave-rep-summary-heading"
-            className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
-          >
-            {detailText("waves.rep.details.summary.title")}
-          </h3>
-          <span className="tw-text-xs tw-font-medium tw-text-iron-500">
-            {getContributorCountLabel(summary.contributorCount)}
-          </span>
-        </div>
-        <div className="tw-grid tw-grid-cols-2 tw-gap-2">
-          <SummaryStat
-            label={detailText("waves.rep.details.summary.total")}
-            value={formatSignedRep(summary.totalRep)}
-            toneClassName={getRepTextClass(summary.totalRep)}
-          />
-          <SummaryStat
-            label={detailText("waves.rep.details.summary.yourRep")}
-            value={
-              summary.authenticatedUserContribution === null
-                ? "-"
-                : formatSignedRep(summary.authenticatedUserContribution)
-            }
-            toneClassName={getRepTextClass(
-              summary.authenticatedUserContribution ?? 0
-            )}
-          />
-          <SummaryStat
-            label={detailText("waves.rep.details.summary.positive")}
-            value={formatSignedRep(summary.positiveRep)}
-            toneClassName={getRepTextClass(summary.positiveRep)}
-          />
-          <SummaryStat
-            label={detailText("waves.rep.details.summary.negative")}
-            value={formatSignedRep(summary.negativeRep)}
-            toneClassName={getRepTextClass(summary.negativeRep)}
-          />
+        <h2
+          id="wave-rep-summary-heading"
+          className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400"
+        >
+          {detailText("waves.rep.details.summary.title")}
+        </h2>
+        <div className="tw-mt-2.5 tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
+          <div className="tw-flex tw-items-end tw-justify-between tw-gap-4 tw-px-2 tw-py-2.5">
+            <div className="tw-min-w-0">
+              <p className="tw-mb-1 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+                {detailText("waves.rep.details.summary.total")}
+              </p>
+              <p
+                className={`tw-mb-0 tw-text-xl tw-font-semibold tw-tabular-nums tw-leading-none ${getRepTextClass(
+                  summary.totalRep
+                )}`}
+              >
+                {formatSignedRep(summary.totalRep)}
+              </p>
+            </div>
+            <span className="tw-max-w-32 tw-text-right tw-text-[0.6875rem] tw-font-medium tw-leading-4 tw-text-iron-500">
+              {getContributorCountLabel(summary.contributorCount)}
+            </span>
+          </div>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-px tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-white/5 @[18rem]/rep:tw-grid-cols-3">
+            <SummaryStat
+              label={detailText("waves.rep.details.summary.yourRep")}
+              value={
+                summary.authenticatedUserContribution === null
+                  ? "-"
+                  : formatSignedRep(summary.authenticatedUserContribution)
+              }
+              toneClassName={getRepTextClass(
+                summary.authenticatedUserContribution ?? 0
+              )}
+            />
+            <SummaryStat
+              label={detailText("waves.rep.details.summary.positive")}
+              value={formatSignedRep(summary.positiveRep)}
+              toneClassName={getRepTextClass(summary.positiveRep)}
+            />
+            <SummaryStat
+              label={detailText("waves.rep.details.summary.negative")}
+              value={formatSignedRep(summary.negativeRep)}
+              toneClassName={getRepTextClass(summary.negativeRep)}
+            />
+          </div>
         </div>
       </section>
 
       <section aria-labelledby="wave-rep-categories-heading">
-        <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <h3
             id="wave-rep-categories-heading"
-            className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
+            className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400"
           >
             {detailText("waves.rep.details.categories.title")}
           </h3>
@@ -392,7 +401,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             </span>
           )}
         </div>
-        <div className="tw-flex tw-flex-col tw-gap-2">
+        <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5 tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
           <CategoryRow
             label={detailText("waves.rep.details.categories.all")}
             totalRep={summary.totalRep}
@@ -488,17 +497,17 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         <div
           role="tablist"
           aria-label={detailText("waves.rep.details.view.ariaLabel")}
-          className="tw-grid tw-grid-cols-2 tw-gap-1 tw-rounded-md tw-bg-white/[0.04] tw-p-1"
+          className="tw-grid tw-grid-cols-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5"
         >
           <button
             type="button"
             role="tab"
             aria-selected={activeView === "contributors"}
             onClick={() => setActiveView("contributors")}
-            className={`tw-cursor-pointer tw-rounded tw-border-none tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
+            className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
               activeView === "contributors"
-                ? "tw-bg-white/10 tw-text-white"
-                : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
+                ? "tw-border-primary-300/60 tw-text-iron-100"
+                : "tw-border-transparent tw-text-iron-500 hover:tw-text-iron-300"
             }`}
           >
             {detailText("waves.rep.details.view.contributors")}
@@ -508,10 +517,10 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             role="tab"
             aria-selected={activeView === "activity"}
             onClick={showActivity}
-            className={`tw-cursor-pointer tw-rounded tw-border-none tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
+            className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
               activeView === "activity"
-                ? "tw-bg-white/10 tw-text-white"
-                : "tw-bg-transparent tw-text-iron-400 hover:tw-text-white"
+                ? "tw-border-primary-300/60 tw-text-iron-100"
+                : "tw-border-transparent tw-text-iron-500 hover:tw-text-iron-300"
             }`}
           >
             {detailText("waves.rep.details.view.activity")}
@@ -525,11 +534,11 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             <div className="tw-min-w-0">
               <h3
                 id="wave-rep-contributors-heading"
-                className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
+                className="tw-mb-0 tw-break-words tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400"
               >
                 {contributorHeading}
               </h3>
-              <p className="tw-mb-0 tw-mt-0.5 tw-truncate tw-text-xs tw-text-iron-500">
+              <p className="tw-mb-0 tw-mt-1 tw-break-words tw-text-xs tw-leading-4 tw-text-iron-500">
                 {contributorDescription}
               </p>
             </div>
@@ -575,7 +584,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             )}
 
           {!isShowingPreviousContributors && contributors.length > 0 && (
-            <div className="tw-flex tw-flex-col tw-gap-2">
+            <div className="tw-flex tw-flex-col">
               {contributors.map((contributor) => (
                 <ContributorRow
                   key={`${contributor.profile.id}-${selectedCategory ?? "all"}`}
@@ -628,7 +637,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             <div>
               <h3
                 id="wave-rep-activity-heading"
-                className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white"
+                className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400"
               >
                 {detailText("waves.rep.details.activity.title")}
               </h3>
@@ -663,7 +672,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           )}
 
           {logs.length > 0 && (
-            <div className="tw-flex tw-flex-col tw-gap-2">
+            <div className="tw-flex tw-flex-col">
               {logs.map((log) => (
                 <LogRow key={log.id} log={log} />
               ))}

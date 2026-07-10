@@ -32,9 +32,9 @@ const SettingsSection = ({
 }) => (
   <section>
     <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-6">
-      <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
+      <h2 className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400">
         {title}
-      </p>
+      </h2>
     </div>
     <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-0.5 tw-px-2">
       {children}

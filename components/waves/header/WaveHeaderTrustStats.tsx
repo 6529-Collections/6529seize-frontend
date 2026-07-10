@@ -43,23 +43,14 @@ const formatFullRepTotal = (
   return formatInteger(WAVE_HEADER_TRUST_LOCALE, value);
 };
 
-type TrustStatTone = "score" | "quality" | "hot" | "rep";
-
 interface TrustStat {
   readonly id: string;
   readonly label: string;
   readonly value: string;
   readonly ariaLabel: string;
   readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
-  readonly tone: TrustStatTone;
+  readonly iconClassName: string;
 }
-
-const toneClasses: Record<TrustStatTone, string> = {
-  score: "tw-border-emerald-400/20 tw-bg-emerald-500/10 tw-text-emerald-200",
-  quality: "tw-border-sky-400/20 tw-bg-sky-500/10 tw-text-sky-200",
-  hot: "tw-border-amber-400/20 tw-bg-amber-500/10 tw-text-amber-200",
-  rep: "tw-border-violet-400/20 tw-bg-violet-500/10 tw-text-violet-200",
-};
 
 export default function WaveHeaderTrustStats({
   wave,
@@ -88,7 +79,7 @@ export default function WaveHeaderTrustStats({
               { visibilityScore }
             ),
             icon: ShieldCheckIcon,
-            tone: "score" as const,
+            iconClassName: "tw-text-emerald-400/80",
           },
         ]),
     ...(qualityScore === null
@@ -104,7 +95,7 @@ export default function WaveHeaderTrustStats({
               { qualityScore }
             ),
             icon: ChartBarIcon,
-            tone: "quality" as const,
+            iconClassName: "tw-text-sky-400/80",
           },
         ]),
     ...(hotnessScore === null
@@ -120,7 +111,7 @@ export default function WaveHeaderTrustStats({
               { hotnessScore }
             ),
             icon: FireIcon,
-            tone: "hot" as const,
+            iconClassName: "tw-text-amber-400/80",
           },
         ]),
     ...(compactWaveRep === null
@@ -136,7 +127,7 @@ export default function WaveHeaderTrustStats({
               { value: fullWaveRep ?? compactWaveRep }
             ),
             icon: ScaleIcon,
-            tone: "rep" as const,
+            iconClassName: "tw-text-indigo-400/80",
           },
         ]),
   ];
@@ -151,25 +142,35 @@ export default function WaveHeaderTrustStats({
         WAVE_HEADER_TRUST_LOCALE,
         "waves.score.details.statsAriaLabel"
       )}
-      className="tw-grid tw-grid-cols-2 tw-gap-1.5"
+      className={`tw-grid tw-gap-px tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5 tw-bg-white/5 ${
+        stats.length === 1 ? "tw-grid-cols-1" : "tw-grid-cols-2"
+      }`}
     >
-      {stats.map((stat) => {
+      {stats.map((stat, index) => {
         const Icon = stat.icon;
+        const fillsLastRow =
+          stats.length > 1 &&
+          stats.length % 2 === 1 &&
+          index === stats.length - 1;
+
         return (
           <div
             key={stat.id}
             aria-label={stat.ariaLabel}
-            className={`tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-1.5 ${toneClasses[stat.tone]}`}
+            className={`tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-bg-iron-950 tw-px-2 tw-py-2 ${
+              fillsLastRow ? "tw-col-span-2" : ""
+            }`}
           >
-            <Icon
-              className="tw-size-3.5 tw-flex-shrink-0"
-              aria-hidden="true"
-            />
+            <span
+              className={`tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center ${stat.iconClassName}`}
+            >
+              <Icon className="tw-size-3.5" aria-hidden="true" />
+            </span>
             <div className="tw-min-w-0">
-              <dt className="tw-truncate tw-text-[9px] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-wide tw-text-iron-400">
+              <dt className="tw-truncate tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.12em] tw-text-iron-500">
                 {stat.label}
               </dt>
-              <dd className="tw-m-0 tw-truncate tw-text-[13px] tw-font-semibold tw-tabular-nums tw-leading-4 tw-text-current">
+              <dd className="tw-m-0 tw-truncate tw-text-[0.8125rem] tw-font-semibold tw-tabular-nums tw-leading-4 tw-text-iron-100">
                 {stat.value}
               </dd>
             </div>

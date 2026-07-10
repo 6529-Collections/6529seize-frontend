@@ -58,10 +58,10 @@ export function getContributorCountLabel(count: number): string {
 
 export function getRepTextClass(value: number): string {
   if (value > 0) {
-    return "tw-text-emerald-300";
+    return "tw-text-emerald-400";
   }
   if (value < 0) {
-    return "tw-text-rose-300";
+    return "tw-text-rose-400";
   }
   return "tw-text-iron-300";
 }
@@ -130,11 +130,14 @@ export function SummaryStat({
   readonly toneClassName?: string | undefined;
 }) {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2">
-      <p className="tw-mb-1 tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-text-iron-500">
+    <div className="tw-min-w-0 tw-bg-iron-950 tw-px-2 tw-py-2">
+      <p className="tw-mb-0.5 tw-text-[0.5625rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
         {label}
       </p>
-      <p className={`tw-mb-0 tw-text-sm tw-font-semibold ${toneClassName}`}>
+      <p
+        title={value}
+        className={`tw-mb-0 tw-whitespace-nowrap tw-text-[0.8125rem] tw-font-semibold tw-tabular-nums ${toneClassName}`}
+      >
         {value}
       </p>
     </div>
@@ -163,22 +166,22 @@ export function CategoryRow({
       aria-pressed={selected}
       title={label}
       onClick={onClick}
-      className={`tw-grid tw-min-h-[3.25rem] tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-left tw-transition ${
+      className={`tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-border-y-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-px-2.5 tw-py-1.5 tw-text-left tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
         selected
-          ? "tw-border-primary-400 tw-bg-primary-400/10"
-          : "tw-border-white/10 tw-bg-white/[0.02] hover:tw-border-white/20 hover:tw-bg-white/[0.05]"
+          ? "tw-border-l-primary-400 tw-bg-white/[0.035]"
+          : "tw-border-l-transparent tw-bg-transparent hover:tw-bg-white/[0.025]"
       }`}
     >
       <span className="tw-min-w-0">
-        <span className="tw-block tw-break-words tw-text-xs tw-font-semibold tw-leading-snug tw-text-white">
+        <span className="tw-block tw-break-words tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100">
           {label}
         </span>
-        <span className="tw-mt-0.5 tw-block tw-text-[0.6875rem] tw-font-medium tw-text-iron-500">
+        <span className="tw-mt-0.5 tw-block tw-text-[0.625rem] tw-font-medium tw-leading-3 tw-text-iron-500">
           {getContributorCountLabel(contributorCount)}
         </span>
       </span>
       <span
-        className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold ${getRepTextClass(
+        className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-tabular-nums ${getRepTextClass(
           totalRep
         )}`}
       >
@@ -272,8 +275,8 @@ export function CategoryMenu({
           },
         ];
   const triggerClassName = isSticky
-    ? "tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-transition hover:tw-border-white/20 hover:tw-bg-iron-900"
-    : "tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-dashed tw-border-white/15 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-left tw-transition hover:tw-border-white/25 hover:tw-bg-white/[0.05]";
+    ? "tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-transition hover:tw-border-white/10 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+    : "tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-transition hover:tw-bg-white/[0.025] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400";
 
   return (
     <CompactMenu
@@ -352,7 +355,7 @@ export function CategoryMenu({
       inactiveItemClassName="tw-text-iron-200 hover:tw-bg-iron-800"
       activeItemClassName="tw-bg-primary-400/10 tw-text-primary-100"
       focusItemClassName="tw-bg-iron-800 tw-text-white"
-      menuWidthClassName="tw-w-[18rem]"
+      menuWidthClassName="tw-w-[calc(100vw-2rem)] tw-max-w-[18rem]"
       menuClassName="tw-z-50 tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-md tw-bg-iron-950 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-primary-400/20 focus:tw-outline-none"
       itemsWrapperClassName="tw-py-1"
       anchor="bottom end"
@@ -374,7 +377,7 @@ export function ContributorRow({
   return (
     <Link
       href={getProfileHref(contributor.profile)}
-      className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5 tw-no-underline tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.04]"
+      className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-2.5 tw-no-underline tw-transition hover:tw-bg-white/[0.025] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
     >
       <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
         <ProfileAvatar
@@ -421,7 +424,7 @@ export function LogRow({
   const visibleReason = getVisibleReason(log.contents.change_reason);
 
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5">
+    <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-2.5">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-min-w-0">
           {raterHref ? (

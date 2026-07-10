@@ -6,7 +6,11 @@ import { getCreateRules } from "./wave-create-rules.helpers";
 import { getWaveRules } from "./wave-existing-rules.helpers";
 import type { WaveRules } from "./wave-rules.shared";
 
-export type { WaveCustomRules, WaveRules } from "./wave-rules.shared";
+export type {
+  WaveCustomRules,
+  WaveRuleRow,
+  WaveRules,
+} from "./wave-rules.shared";
 
 type BuildWaveRulesInput =
   | {

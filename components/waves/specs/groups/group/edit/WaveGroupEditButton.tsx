@@ -59,7 +59,7 @@ const WaveGroupEditButton = forwardRef<
         aria-label="Edit group"
         title="Edit"
         onClick={handleOpen}
-        className="tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-text-iron-300"
+        className="tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-text-iron-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         <FontAwesomeIcon icon={faPen} className="tw-h-4 tw-w-4" />
       </button>

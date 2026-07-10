@@ -27,9 +27,11 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
       {hasCategory && (
-        <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2">
-          <span className="tw-font-normal tw-text-iron-500">Category</span>
-          <span className="tw-break-words tw-text-right tw-font-medium tw-text-iron-50">
+        <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-1 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2.5">
+          <span className="tw-text-xs tw-font-normal tw-text-iron-500">
+            Category
+          </span>
+          <span className="tw-w-full tw-break-words tw-text-left tw-font-medium tw-leading-5 tw-text-iron-50">
             {category}
           </span>
         </div>
