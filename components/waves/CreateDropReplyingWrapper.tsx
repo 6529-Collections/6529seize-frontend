@@ -28,12 +28,9 @@ const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
   const exit = suppressInitialHeightAnimation
     ? { opacity: 0, y: shouldReduceMotion ? 0 : 6 }
     : { opacity: 0, height: 0 };
+  const animationDuration = suppressInitialHeightAnimation ? 0.2 : 0.3;
   const transition = {
-    duration: shouldReduceMotion
-      ? 0
-      : suppressInitialHeightAnimation
-        ? 0.2
-        : 0.3,
+    duration: shouldReduceMotion ? 0 : animationDuration,
     ease: "easeOut",
   };
 

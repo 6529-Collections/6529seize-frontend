@@ -111,17 +111,15 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
       "notifications-reply-composer-before"
     );
     await clickReplyForDropText(page, mentionedDropText);
-    await page.waitForTimeout(140);
+    await expect(page.getByText("Replying to")).toBeVisible({ timeout: 1500 });
     await captureSafeScreenshot(
       page,
       testInfo,
       "notifications-reply-composer-opening"
     );
-    await expect(page.getByText("Replying to")).toBeVisible({ timeout: 1500 });
     await expect(page.getByLabel("Post a reply")).toBeVisible({
       timeout: 1500,
     });
-    await page.waitForTimeout(300);
     await captureSafeScreenshot(
       page,
       testInfo,
@@ -132,7 +130,6 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await expect(page.getByLabel("Post a reply")).toHaveCount(0, {
       timeout: 1500,
     });
-    await page.waitForTimeout(300);
     await captureSafeScreenshot(
       page,
       testInfo,
