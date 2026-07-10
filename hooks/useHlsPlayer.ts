@@ -1,5 +1,7 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
+import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type HlsType from "hls.js";
 import type { ErrorData } from "hls.js";
@@ -24,6 +26,44 @@ interface UseHlsPlayerParams {
 const HLS_MANIFEST_MAX_RETRIES = 2;
 const HLS_NETWORK_MAX_RECOVERIES = 2;
 const HLS_MANIFEST_RETRY_DELAY_MS = 2000;
+const SAFE_MEDIA_SOURCE_PROTOCOLS = new Set(["http:", "https:", "blob:"]);
+
+function getMediaSourceParseBase(): string {
+  return (
+    globalThis.document?.baseURI ??
+    globalThis.location?.href ??
+    "https://6529.io/"
+  );
+}
+
+function getSafeMediaSourceUrl(source: string): string | null {
+  try {
+    const resolvedSource =
+      normalizeDecentralizedMediaUrl(
+        source,
+        publicEnv.MEDIA_RESOLVER_ENDPOINT
+      ) ?? source;
+    const parsed = new URL(resolvedSource, getMediaSourceParseBase());
+    return SAFE_MEDIA_SOURCE_PROTOCOLS.has(parsed.protocol)
+      ? parsed.href
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function assignSafeMediaSource(
+  videoEl: HTMLVideoElement,
+  source: string
+): boolean {
+  const safeSource = getSafeMediaSourceUrl(source);
+  if (!safeSource) {
+    return false;
+  }
+
+  videoEl.src = safeSource;
+  return true;
+}
 
 /**
  * A custom hook for Hls.js setup/cleanup.
@@ -109,7 +149,11 @@ export function useHlsPlayer({
    * Fallback to a raw MP4 (or original src) if HLS is unsupported or fails.
    */
   function fallbackToSrc(videoEl: HTMLVideoElement, fallback: string) {
-    videoEl.src = fallback;
+    if (!assignSafeMediaSource(videoEl, fallback)) {
+      setIsLoading(false);
+      return;
+    }
+
     videoEl.load();
     setIsLoading(false);
     if (autoPlay) {
@@ -313,6 +357,10 @@ export function useHlsPlayer({
     // Setup HLS or fallback to direct MP4
     if (isHls) {
       if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
+        if (!assignSafeMediaSource(videoEl, src)) {
+          setIsLoading(false);
+          return;
+        }
         nativeErrorHandler = () => {
           if (!isCurrentSetup(setupVersion, videoEl)) {
             return;
@@ -320,7 +368,6 @@ export function useHlsPlayer({
           fallbackToSrc(videoEl, fallbackSrc ?? src);
         };
         videoEl.addEventListener("error", nativeErrorHandler, { once: true });
-        videoEl.src = src;
         videoEl.load();
         setIsLoading(false);
         if (autoPlay) {
@@ -331,7 +378,10 @@ export function useHlsPlayer({
       }
     } else {
       // Not HLS => just assign the src
-      videoEl.src = src;
+      if (!assignSafeMediaSource(videoEl, src)) {
+        setIsLoading(false);
+        return;
+      }
       videoEl.load();
       setIsLoading(false);
       if (autoPlay) {

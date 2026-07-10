@@ -58,10 +58,16 @@ jest.mock("@sentry/nextjs", () => ({
 
 type SessionRefreshTelemetryAttrs = {
   readonly source?: unknown;
+  readonly refresh_source?: unknown;
   readonly client_type?: unknown;
+  readonly refresh_client_type?: unknown;
+  readonly refresh_result?: unknown;
   readonly auth_refresh_outcome?: unknown;
   readonly outcome?: unknown;
+  readonly refresh_status_bucket?: unknown;
+  readonly refresh_status_code?: unknown;
   readonly status_code?: unknown;
+  readonly refresh_duration_bucket_ms?: unknown;
   readonly duration_bucket_ms?: unknown;
 };
 
@@ -84,10 +90,16 @@ const getTelemetryOutcomes = (
 
 const allowedRefreshTelemetryAttrNames = new Set([
   "source",
+  "refresh_source",
   "client_type",
+  "refresh_client_type",
+  "refresh_result",
   "auth_refresh_outcome",
   "outcome",
+  "refresh_status_bucket",
+  "refresh_status_code",
   "status_code",
+  "refresh_duration_bucket_ms",
   "duration_bucket_ms",
 ]);
 
@@ -99,7 +111,20 @@ const expectNoSensitiveRefreshTelemetry = (
       (key) => !allowedRefreshTelemetryAttrNames.has(key)
     );
     expect(unexpectedAttrNames).toEqual([]);
+    expect(attr).toHaveProperty("refresh_source", attr.source);
+    expect(attr).toHaveProperty("refresh_client_type", attr.client_type);
+    expect(attr).toHaveProperty("refresh_result", attr.auth_refresh_outcome);
     expect(attr).toHaveProperty("auth_refresh_outcome", attr.outcome);
+    expect(attr).toHaveProperty("refresh_status_bucket");
+    if (attr.status_code !== undefined) {
+      expect(attr).toHaveProperty("refresh_status_code", attr.status_code);
+    }
+    if (attr.duration_bucket_ms !== undefined) {
+      expect(attr).toHaveProperty(
+        "refresh_duration_bucket_ms",
+        attr.duration_bucket_ms
+      );
+    }
     expect(attr).not.toHaveProperty("address");
     expect(attr).not.toHaveProperty("client_address");
     expect(attr).not.toHaveProperty("access_token");
@@ -380,12 +405,14 @@ describe("session-v2.utils", () => {
         client_type: "web",
         auth_refresh_outcome: "started",
         outcome: "started",
+        refresh_status_bucket: "not_applicable",
       }),
       expect.objectContaining({
         source: "refreshSessionV2",
         client_type: "web",
         auth_refresh_outcome: "success",
         outcome: "success",
+        refresh_status_bucket: "not_applicable",
         duration_bucket_ms: expect.any(String),
       }),
     ]);
@@ -418,11 +445,13 @@ describe("session-v2.utils", () => {
         client_type: "web",
         auth_refresh_outcome: "started",
         outcome: "started",
+        refresh_status_bucket: "not_applicable",
       }),
       expect.objectContaining({
         client_type: "web",
         auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
+        refresh_status_bucket: "http_401",
         status_code: 401,
         duration_bucket_ms: expect.any(String),
       }),
@@ -622,6 +651,7 @@ describe("session-v2.utils", () => {
           client_type: "web",
           auth_refresh_outcome: "network_error",
           outcome: "network_error",
+          refresh_status_bucket: "network_error",
           duration_bucket_ms: expect.any(String),
         }),
       ]);
@@ -711,6 +741,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         auth_refresh_outcome: "aborted",
         outcome: "aborted",
+        refresh_status_bucket: "aborted",
       }),
     ]);
     expect(getSessionRefreshWarnTelemetry()).toEqual([]);
@@ -736,6 +767,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         auth_refresh_outcome: "backend_error",
         outcome: "backend_error",
+        refresh_status_bucket: "http_5xx",
         status_code: 500,
         duration_bucket_ms: expect.any(String),
       }),
@@ -743,6 +775,30 @@ describe("session-v2.utils", () => {
     expect(JSON.stringify(getSessionRefreshWarnTelemetry())).not.toContain(
       "secret-token"
     );
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
+  });
+
+  it("buckets non-401 4xx refresh errors separately from 401s", async () => {
+    const forbiddenError = Object.assign(new Error("Forbidden"), {
+      status: 403,
+      response: { status: 403 },
+    });
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(forbiddenError);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
+      forbiddenError
+    );
+
+    expect(getSessionRefreshWarnTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "web",
+        auth_refresh_outcome: "backend_error",
+        outcome: "backend_error",
+        refresh_status_bucket: "http_4xx",
+        status_code: 403,
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
     expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
   });
 
@@ -894,11 +950,13 @@ describe("session-v2.utils", () => {
         client_type: "native",
         auth_refresh_outcome: "started",
         outcome: "started",
+        refresh_status_bucket: "not_applicable",
       }),
       expect.objectContaining({
         client_type: "native",
         auth_refresh_outcome: "success",
         outcome: "success",
+        refresh_status_bucket: "not_applicable",
         duration_bucket_ms: expect.any(String),
       }),
     ]);
@@ -917,6 +975,7 @@ describe("session-v2.utils", () => {
         client_type: "native",
         auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
+        refresh_status_bucket: "unauthorized",
       }),
     ]);
     expect(getSessionRefreshWarnTelemetry()).toEqual([]);
@@ -953,11 +1012,13 @@ describe("session-v2.utils", () => {
         client_type: "native",
         auth_refresh_outcome: "started",
         outcome: "started",
+        refresh_status_bucket: "not_applicable",
       }),
       expect.objectContaining({
         client_type: "native",
         auth_refresh_outcome: "unauthorized",
         outcome: "unauthorized",
+        refresh_status_bucket: "http_401",
         status_code: 401,
         duration_bucket_ms: expect.any(String),
       }),

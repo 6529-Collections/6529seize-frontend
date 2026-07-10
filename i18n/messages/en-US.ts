@@ -710,6 +710,23 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
 } as const);
 
+const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
+  "access.anyone": "Anyone",
+  "access.anyoneWhenEnabled": "Anyone when enabled",
+  "access.label": "Chat access",
+  "groups.admin": "Admin",
+  "groups.drop": "Drop",
+  "groups.view": "View",
+  "groups.vote": "Vote",
+  "status.disabled": "Disabled",
+  "status.editLabel": "Edit chat status",
+  "status.enabled": "Enabled",
+  "status.enableHelp":
+    "The chat access group still controls who can chat when chat is enabled.",
+  "status.enableLabel": "Enable chat",
+  "status.label": "Chat status",
+} as const);
+
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
@@ -1692,6 +1709,7 @@ export const EN_US_MESSAGES = {
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
   ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,

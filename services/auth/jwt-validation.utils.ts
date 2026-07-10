@@ -278,7 +278,11 @@ const handleTokenRefresh = async ({
         auth_state_after: "authenticated",
         auth_state_before: "refresh_needed",
         client_type: refreshedSession.client_type,
+        endpoint_family: "auth_session_refresh",
+        product_failure: false,
         reason: "session_refresh",
+        refresh_outcome: "success",
+        status_bucket: "2xx",
       });
     }
 

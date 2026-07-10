@@ -44,9 +44,6 @@ jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
     Actions
   </button>
 ));
-jest.mock("@/components/waves/drops/DropCurationButton", () => () => (
-  <div data-testid="curation" />
-));
 jest.mock("@/components/waves/drops/WaveDropMetadata", () => (props: any) => {
   WaveDropMetadataMock(props);
   return <div data-testid="metadata" />;
