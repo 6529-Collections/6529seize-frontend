@@ -363,6 +363,20 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Área de carga de archivos del chat de wave",
+  "waves.chat.replyTargetDeletedToast.title": "Respuesta eliminada.",
+  "waves.chat.replyTargetDeletedToast.description":
+    "El mensaje al que respondías fue eliminado. Tu borrador sigue aquí.",
+  "waves.chat.replyTargetUnavailableToast.title": "Respuesta no enviada.",
+  "waves.chat.replyTargetUnavailableToast.descriptionRestored":
+    "El mensaje al que respondías ya no está disponible. Tu borrador fue restaurado.",
+  "waves.chat.replyTargetUnavailableToast.descriptionKept":
+    "El mensaje al que respondías ya no está disponible. Se conservó tu borrador actual.",
+  "waves.chat.replyTargetUnavailableToast.detailsRestored":
+    "Puedes enviarlo como un mensaje nuevo.",
+  "waves.chat.replyTargetUnavailableToast.detailsKept":
+    "Tu borrador actual no se modificó.",
+  "waves.chat.replyTargetUnavailableToast.actionReviewDraft":
+    "Revisar borrador",
   "waves.loadingStatus": "Cargando waves",
   "waves.gifPicker.dialogTitle": "Busqueda de GIF",
   "waves.gifPicker.searchPlaceholder": "Buscar GIF",

@@ -14,14 +14,18 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { useDropSignature } from "@/hooks/drops/useDropSignature";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { Dispatch, SetStateAction } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import type { CreateDropPollDraft } from "../CreateDropPoll";
 import {
   filterMentionedUsers,
   filterMentionedWaves,
   getMentionedGroupsForParts,
+  hasMetadataContent,
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
 import {
@@ -249,10 +253,12 @@ export const useCreateDropSubmission = ({
   isLinksSubmitBlocked,
   canMentionAll,
   connectedProfile,
+  locale,
   submitting,
   getMarkdown,
   files,
   metadata,
+  pollDraft,
   drop,
   hasPendingInlineImageUpload,
   identityValidationMessage,
@@ -280,8 +286,11 @@ export const useCreateDropSubmission = ({
   setFiles,
   setDrop,
   setIsStormMode,
+  setMetadata,
+  setPollDraftState,
   setMetadataOpenState,
   onReplyTargetUnavailable,
+  restoreMentionedEntities,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
   shouldCollapseOptionsAfterMarkdownSyncRef,
@@ -296,10 +305,12 @@ export const useCreateDropSubmission = ({
   readonly isLinksSubmitBlocked: boolean;
   readonly canMentionAll: boolean;
   readonly connectedProfile: ConnectedProfile;
+  readonly locale: SupportedLocale;
   readonly submitting: boolean;
   readonly getMarkdown: string | null;
   readonly files: File[];
   readonly metadata: CreateDropMetadataType[];
+  readonly pollDraft: CreateDropPollDraft | null;
   readonly drop: CreateDropConfig | null;
   readonly hasPendingInlineImageUpload: boolean;
   readonly identityValidationMessage: string | null;
@@ -329,15 +340,59 @@ export const useCreateDropSubmission = ({
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setIsStormMode: Dispatch<SetStateAction<boolean>>;
+  readonly setMetadata: Dispatch<SetStateAction<CreateDropMetadataType[]>>;
+  readonly setPollDraftState: Dispatch<
+    SetStateAction<ScopedValueState<CreateDropPollDraft> | null>
+  >;
   readonly setMetadataOpenState: Dispatch<
     SetStateAction<ScopedValueState<boolean> | null>
   >;
   readonly onReplyTargetUnavailable?: (() => void) | undefined;
+  readonly restoreMentionedEntities: (params: {
+    readonly mentionedUsers: CreateDropConfig["mentioned_users"];
+    readonly mentionedWaves: NonNullable<CreateDropConfig["mentioned_waves"]>;
+    readonly referencedNfts: CreateDropConfig["referenced_nfts"];
+  }) => void;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
   readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
-  const restoreFailedDropDraft = (failedDropRequest: CreateDropConfig) => {
+  const latestDraftStateRef = useRef({
+    drop,
+    files,
+    getMarkdown,
+    metadata,
+    pollDraft,
+  });
+
+  useEffect(() => {
+    latestDraftStateRef.current = {
+      drop,
+      files,
+      getMarkdown,
+      metadata,
+      pollDraft,
+    };
+  }, [drop, files, getMarkdown, metadata, pollDraft]);
+
+  const isComposerStillEmptyForRestore = (): boolean => {
+    const latestDraftState = latestDraftStateRef.current;
+    return (
+      latestDraftState.drop === null &&
+      latestDraftState.files.length === 0 &&
+      (latestDraftState.getMarkdown?.trim().length ?? 0) === 0 &&
+      !hasMetadataContent(latestDraftState.metadata) &&
+      latestDraftState.pollDraft === null
+    );
+  };
+
+  const restoreFailedDropDraft = (
+    failedDropRequest: CreateDropConfig
+  ): boolean => {
+    if (!isComposerStillEmptyForRestore()) {
+      return false;
+    }
+
     const lastPart = failedDropRequest.parts.at(-1) ?? null;
     const restoredParts = failedDropRequest.parts.slice(0, -1);
     const restoredDrop =
@@ -350,16 +405,26 @@ export const useCreateDropSubmission = ({
 
     setDrop(restoredDrop);
     setIsStormMode(restoredParts.length > 0);
+    setMetadata(metadata);
+    setPollDraftState(
+      pollDraft ? { scopeKey: wave.id, value: pollDraft } : null
+    );
+    restoreMentionedEntities({
+      mentionedUsers: failedDropRequest.mentioned_users,
+      mentionedWaves: failedDropRequest.mentioned_waves ?? [],
+      referencedNfts: failedDropRequest.referenced_nfts,
+    });
     setFiles(lastPart ? [...lastPart.media] : []);
     setUploadingFiles([]);
 
     if (lastPart?.content) {
       createDropInputRef.current?.clearEditorState();
       createDropInputRef.current?.setMarkdown(lastPart.content);
-      return;
+      return true;
     }
 
     createDropInputRef.current?.clearEditorState();
+    return true;
   };
 
   const getUpdatedDropRequest = async (
@@ -497,15 +562,27 @@ export const useCreateDropSubmission = ({
 
         const dropWithoutReply = getDropRequestWithoutReply(dropRequest);
         onReplyTargetUnavailable?.();
-        restoreFailedDropDraft(dropWithoutReply);
+        const wasDraftRestored = restoreFailedDropDraft(dropWithoutReply);
         setToast({
           type: "error",
-          title: "Reply not sent.",
-          description:
-            "The message you replied to is no longer available. Your draft was restored.",
-          details: "You can send it as a new message instead.",
+          title: t(locale, "waves.chat.replyTargetUnavailableToast.title"),
+          description: t(
+            locale,
+            wasDraftRestored
+              ? "waves.chat.replyTargetUnavailableToast.descriptionRestored"
+              : "waves.chat.replyTargetUnavailableToast.descriptionKept"
+          ),
+          details: t(
+            locale,
+            wasDraftRestored
+              ? "waves.chat.replyTargetUnavailableToast.detailsRestored"
+              : "waves.chat.replyTargetUnavailableToast.detailsKept"
+          ),
           action: {
-            label: "Review draft",
+            label: t(
+              locale,
+              "waves.chat.replyTargetUnavailableToast.actionReviewDraft"
+            ),
             onClick: () => {
               createDropInputRef.current?.focus();
             },

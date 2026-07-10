@@ -352,6 +352,19 @@ export const EN_GB_MESSAGES = {
   ...EN_GB_QR_SCANNER_MESSAGES,
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
+  "waves.chat.replyTargetDeletedToast.title": "Reply removed.",
+  "waves.chat.replyTargetDeletedToast.description":
+    "The message you were replying to was deleted. Your draft is still here.",
+  "waves.chat.replyTargetUnavailableToast.title": "Reply not sent.",
+  "waves.chat.replyTargetUnavailableToast.descriptionRestored":
+    "The message you replied to is no longer available. Your draft was restored.",
+  "waves.chat.replyTargetUnavailableToast.descriptionKept":
+    "The message you replied to is no longer available. Your current draft was kept.",
+  "waves.chat.replyTargetUnavailableToast.detailsRestored":
+    "You can send it as a new message instead.",
+  "waves.chat.replyTargetUnavailableToast.detailsKept":
+    "Your current draft was not changed.",
+  "waves.chat.replyTargetUnavailableToast.actionReviewDraft": "Review draft",
   "waves.loadingStatus": "Loading waves",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",

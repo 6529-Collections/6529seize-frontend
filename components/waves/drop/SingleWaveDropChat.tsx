@@ -25,7 +25,10 @@ import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { useAuth } from "@/components/auth/Auth";
 import type { WsDropDeleteMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
+import { t } from "@/i18n/messages";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "../create-drop-content/reply-target-unavailable";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
@@ -48,6 +51,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const { updateEligibility } = useWaveEligibility();
   const { setToast } = useAuth();
+  const locale = useBrowserLocale();
   const rootDropAvailableRef = useRef(true);
 
   // Drop safe-area padding as soon as the native keyboard starts moving.
@@ -129,13 +133,15 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
         setActiveDrop(null);
         setToast({
           type: "warning",
-          title: "Reply removed.",
-          description:
-            "The message you were replying to was deleted. Your draft is still here.",
-          toastId: `reply-target-deleted-${messageData.drop_id}`,
+          title: t(locale, "waves.chat.replyTargetDeletedToast.title"),
+          description: t(
+            locale,
+            "waves.chat.replyTargetDeletedToast.description"
+          ),
+          toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
         });
       },
-      [drop.id, setToast, wave.id]
+      [drop.id, locale, setToast, wave.id]
     )
   );
 

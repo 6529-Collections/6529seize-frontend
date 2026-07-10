@@ -26,6 +26,7 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import type { WsDropDeleteMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
+import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
 import {
   ACCEPTED_FILE_TYPE_LABELS,
   isSupportedUploadFile,
@@ -358,13 +359,15 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         setActiveDropForWave(null);
         setToast({
           type: "warning",
-          title: "Reply removed.",
-          description:
-            "The message you were replying to was deleted. Your draft is still here.",
-          toastId: `reply-target-deleted-${messageData.drop_id}`,
+          title: t(locale, "waves.chat.replyTargetDeletedToast.title"),
+          description: t(
+            locale,
+            "waves.chat.replyTargetDeletedToast.description"
+          ),
+          toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
         });
       },
-      [setActiveDropForWave, setToast, wave.id]
+      [locale, setActiveDropForWave, setToast, wave.id]
     )
   );
   const {

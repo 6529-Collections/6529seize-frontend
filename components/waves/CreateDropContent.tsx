@@ -38,6 +38,7 @@ import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identit
 import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -109,6 +110,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const actionsContainerRef = useRef<HTMLDivElement>(null);
   const [actionsContainerElement, setActionsContainerElement] =
     useState<HTMLDivElement | null>(null);
@@ -446,6 +448,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     onReferencedNft,
     onMentionedUser,
     onMentionedWave,
+    restoreMentionedEntities,
     getUpdatedDrop,
     createGifDrop,
     finalizeAndAddDropPart,
@@ -513,10 +516,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isLinksSubmitBlocked,
     canMentionAll,
     connectedProfile,
+    locale,
     submitting,
     getMarkdown,
     files,
     metadata,
+    pollDraft,
     drop,
     hasPendingInlineImageUpload,
     identityValidationMessage,
@@ -544,8 +549,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setFiles,
     setDrop,
     setIsStormMode,
+    setMetadata,
+    setPollDraftState,
     setMetadataOpenState,
     onReplyTargetUnavailable,
+    restoreMentionedEntities,
     createDropInputRef,
     shouldRefocusAfterChatSubmitRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,

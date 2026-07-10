@@ -370,6 +370,20 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
+  "waves.chat.replyTargetDeletedToast.title": "Réponse supprimée.",
+  "waves.chat.replyTargetDeletedToast.description":
+    "Le message auquel vous répondiez a été supprimé. Votre brouillon est toujours là.",
+  "waves.chat.replyTargetUnavailableToast.title": "Réponse non envoyée.",
+  "waves.chat.replyTargetUnavailableToast.descriptionRestored":
+    "Le message auquel vous répondiez n'est plus disponible. Votre brouillon a été restauré.",
+  "waves.chat.replyTargetUnavailableToast.descriptionKept":
+    "Le message auquel vous répondiez n'est plus disponible. Votre brouillon actuel a été conservé.",
+  "waves.chat.replyTargetUnavailableToast.detailsRestored":
+    "Vous pouvez l'envoyer comme nouveau message.",
+  "waves.chat.replyTargetUnavailableToast.detailsKept":
+    "Votre brouillon actuel n'a pas été modifié.",
+  "waves.chat.replyTargetUnavailableToast.actionReviewDraft":
+    "Vérifier le brouillon",
   "waves.loadingStatus": "Chargement des waves",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
   "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",
