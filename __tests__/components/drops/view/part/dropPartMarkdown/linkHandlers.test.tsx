@@ -18,6 +18,22 @@ jest.mock("@/helpers/SeizeLinkParser", () => ({
 const mockedEnsureStableSeizeLink =
   ensureStableSeizeLink as jest.MockedFunction<typeof ensureStableSeizeLink>;
 
+const createBareHrefNode = (href: string) => ({
+  children: [
+    {
+      position: {
+        end: { offset: href.length },
+        start: { offset: 0 },
+      },
+      type: "text",
+    },
+  ],
+  position: {
+    end: { offset: href.length },
+    start: { offset: 0 },
+  },
+});
+
 describe("createLinkRenderer", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,7 +64,15 @@ describe("createLinkRenderer", () => {
       onQuoteClick: jest.fn(),
     });
 
-    render(<>{renderAnchor({ href: rawHref, children: rawHref } as any)}</>);
+    render(
+      <>
+        {renderAnchor({
+          href: rawHref,
+          children: rawHref,
+          node: createBareHrefNode(rawHref),
+        } as any)}
+      </>
+    );
 
     expect(seizeMatch).toHaveBeenCalledWith(rawHref);
     expect(seizeMatch).not.toHaveBeenCalledWith(stableHref);
@@ -80,7 +104,15 @@ describe("createLinkRenderer", () => {
       onQuoteClick: jest.fn(),
     });
 
-    render(<>{renderAnchor({ href: rawHref, children: rawHref } as any)}</>);
+    render(
+      <>
+        {renderAnchor({
+          href: rawHref,
+          children: rawHref,
+          node: createBareHrefNode(rawHref),
+        } as any)}
+      </>
+    );
 
     expect(externalMatch).toHaveBeenCalledWith(stableHref);
     expect(externalRender).toHaveBeenCalledWith(stableHref);
