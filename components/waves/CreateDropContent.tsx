@@ -83,6 +83,7 @@ const CONTAINER_WIDTH_THRESHOLD = 500;
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
   onCancelReplyQuote,
+  onReplyTargetUnavailable,
   wave,
   drop,
   isStormMode,
@@ -541,7 +542,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setSubmitting,
     setUploadingFiles,
     setFiles,
+    setDrop,
+    setIsStormMode,
     setMetadataOpenState,
+    onReplyTargetUnavailable,
     createDropInputRef,
     shouldRefocusAfterChatSubmitRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,

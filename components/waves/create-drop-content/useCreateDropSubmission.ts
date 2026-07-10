@@ -24,6 +24,10 @@ import {
   getMentionedGroupsForParts,
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
+import {
+  isReplyTargetUnavailableError,
+  REPLY_TARGET_UNAVAILABLE_TOAST_ID,
+} from "./reply-target-unavailable";
 import type {
   ConnectedProfile,
   CreateDropMetadataType,
@@ -227,6 +231,10 @@ const getDropModeSubmitCallbacks = ({
   };
 };
 
+const getDropRequestWithoutReply = (
+  dropRequest: CreateDropConfig
+): CreateDropConfig => ({ ...dropRequest, reply_to: undefined });
+
 export const useCreateDropSubmission = ({
   activeDrop,
   wave,
@@ -267,7 +275,10 @@ export const useCreateDropSubmission = ({
   setSubmitting,
   setUploadingFiles,
   setFiles,
+  setDrop,
+  setIsStormMode,
   setMetadataOpenState,
+  onReplyTargetUnavailable,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
   shouldCollapseOptionsAfterMarkdownSyncRef,
@@ -313,13 +324,41 @@ export const useCreateDropSubmission = ({
   readonly setSubmitting: Dispatch<SetStateAction<boolean>>;
   readonly setUploadingFiles: Dispatch<SetStateAction<UploadingFile[]>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
+  readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
+  readonly setIsStormMode: Dispatch<SetStateAction<boolean>>;
   readonly setMetadataOpenState: Dispatch<
     SetStateAction<ScopedValueState<boolean> | null>
   >;
+  readonly onReplyTargetUnavailable?: (() => void) | undefined;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
   readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
+  const restoreFailedDropDraft = (failedDropRequest: CreateDropConfig) => {
+    const lastPart = failedDropRequest.parts.at(-1) ?? null;
+    const restoredParts = failedDropRequest.parts.slice(0, -1);
+    const restoredDrop =
+      restoredParts.length > 0
+        ? {
+            ...getDropRequestWithoutReply(failedDropRequest),
+            parts: restoredParts,
+          }
+        : null;
+
+    setDrop(restoredDrop);
+    setIsStormMode(restoredParts.length > 0);
+    setFiles(lastPart ? [...lastPart.media] : []);
+    setUploadingFiles([]);
+
+    if (lastPart?.content) {
+      createDropInputRef.current?.clearEditorState();
+      createDropInputRef.current?.setMarkdown(lastPart.content);
+      return;
+    }
+
+    createDropInputRef.current?.clearEditorState();
+  };
+
   const getUpdatedDropRequest = async (
     requestBody: ApiCreateDropRequest
   ): Promise<ApiCreateDropRequest | null> => {
@@ -431,24 +470,66 @@ export const useCreateDropSubmission = ({
         return;
       }
 
+      const optimisticActiveDrop = updatedDropRequest.reply_to
+        ? activeDrop
+        : null;
       const optimisticDrop = getOptimisticDropForSubmission({
         updatedDropRequest,
         generatedParts,
         connectedProfile,
         wave,
-        activeDrop,
+        activeDrop: optimisticActiveDrop,
         isDropMode,
+      });
+
+      const handleReplyTargetUnavailableError = (
+        error: unknown
+      ): boolean => {
+        if (
+          dropRequest.reply_to === undefined ||
+          !isReplyTargetUnavailableError(error)
+        ) {
+          return false;
+        }
+
+        const dropWithoutReply = getDropRequestWithoutReply(dropRequest);
+        onReplyTargetUnavailable?.();
+        restoreFailedDropDraft(dropWithoutReply);
+        setToast({
+          type: "error",
+          title: "Reply not sent.",
+          description:
+            "The message you replied to is no longer available. Your draft was restored.",
+          details: "You can send it as a new message instead.",
+          action: {
+            label: "Review draft",
+            onClick: () => {
+              createDropInputRef.current?.focus();
+            },
+          },
+          autoClose: false,
+          toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
+        });
+        return true;
+      };
+
+      const dropModeSubmitCallbacks = getDropModeSubmitCallbacks({
+        isDropMode,
+        canExitDropMode,
+        handleDropModeChange,
+        handleDuplicateIdentitySubmissionError,
       });
 
       const submitAccepted = submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
-        ...getDropModeSubmitCallbacks({
-          isDropMode,
-          canExitDropMode,
-          handleDropModeChange,
-          handleDuplicateIdentitySubmissionError,
-        }),
+        onSuccess: dropModeSubmitCallbacks.onSuccess,
+        onError: (error) => {
+          if (handleReplyTargetUnavailableError(error)) {
+            return true;
+          }
+          return dropModeSubmitCallbacks.onError?.(error);
+        },
       });
       if (!submitAccepted) {
         return;
