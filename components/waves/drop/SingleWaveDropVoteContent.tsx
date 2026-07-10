@@ -20,6 +20,8 @@ import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useSingleWaveDropVoteState } from "./useSingleWaveDropVoteState";
 import { useSingleWaveDropVoteRationale } from "./useSingleWaveDropVoteRationale";
 import styles from "./VoteButton.module.css";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
@@ -172,6 +174,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   voteMode,
   onVoteModeChange,
 }) => {
+  const locale = useBrowserLocale();
   const {
     displayDrop,
     minRating,
@@ -211,12 +214,18 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   });
   const rationaleTextareaId = useId();
   const rationaleSwitchId = useId();
+  const rationaleSwitchLabelId = useId();
   const rationaleDescriptionId = useId();
-  const rationaleSubmitBlockReason =
-    voteRationale.shouldPostRationale &&
-    voteRationale.rationaleText.trim().length === 0
-      ? "Add rationale text or turn Vote with reply off."
-      : submitBlockReason;
+  const rationaleValidationId = useId();
+  const isRationaleEmpty = voteRationale.rationaleText.trim().length === 0;
+  const showRationaleValidation =
+    voteRationale.shouldPostRationale && isRationaleEmpty;
+  const rationaleDescriptionIds = showRationaleValidation
+    ? `${rationaleDescriptionId} ${rationaleValidationId}`
+    : rationaleDescriptionId;
+  const rationaleSubmitBlockReason = showRationaleValidation
+    ? t(locale, "waves.voteRationale.emptyBlockReason")
+    : submitBlockReason;
   const creditScope =
     (displayDrop.wave as Partial<typeof displayDrop.wave>)
       .voting_credit_scope ?? ApiWaveCreditScope.Wave;
@@ -348,7 +357,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           htmlFor={rationaleTextareaId}
           className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400"
         >
-          Optional rationale reply
+          {t(locale, "waves.voteRationale.fieldLabel")}
         </label>
         <textarea
           id={rationaleTextareaId}
@@ -358,18 +367,22 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           }
           rows={4}
           className="tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-iron-100 tw-outline-none tw-transition-colors placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-ring-1 focus:tw-ring-primary-400"
-          aria-describedby={rationaleDescriptionId}
+          aria-describedby={rationaleDescriptionIds}
         />
         <p id={rationaleDescriptionId} className="tw-sr-only">
-          Editing this text turns on Vote with reply until you choose the switch
-          setting yourself.
+          {t(locale, "waves.voteRationale.fieldDescription")}
         </p>
+        {showRationaleValidation && (
+          <p id={rationaleValidationId} className="tw-sr-only">
+            {t(locale, "waves.voteRationale.emptyBlockReason")}
+          </p>
+        )}
       </div>
 
       <div className="tw-grid tw-grid-cols-1 tw-gap-3">
         <label
           htmlFor={rationaleSwitchId}
-          className="tw-flex tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2"
+          className="tw-flex tw-w-fit tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-2"
         >
           <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center">
             <input
@@ -381,6 +394,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
                 voteRationale.handlePostRationaleChange(event.target.checked)
               }
               className="tw-peer tw-sr-only"
+              aria-labelledby={rationaleSwitchLabelId}
               aria-describedby={rationaleDescriptionId}
             />
             <span
@@ -398,11 +412,19 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               }`}
             />
           </span>
-          <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-            Vote with reply
+          <span
+            id={rationaleSwitchLabelId}
+            className="tw-text-sm tw-font-medium tw-text-iron-200"
+          >
+            {t(locale, "waves.voteRationale.switchLabel")}
           </span>
-          <span className="tw-rounded-full tw-bg-white/[0.06] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400">
-            {voteRationale.shouldPostRationale ? "On" : "Off"}
+          <span
+            aria-hidden="true"
+            className="tw-rounded-full tw-bg-white/[0.06] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400"
+          >
+            {voteRationale.shouldPostRationale
+              ? t(locale, "waves.voteRationale.stateOn")
+              : t(locale, "waves.voteRationale.stateOff")}
           </span>
         </label>
 
@@ -420,7 +442,9 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             submissionMode={submissionMode}
             submitBlockReason={rationaleSubmitBlockReason}
             submitLabelOverride={
-              voteRationale.shouldPostRationale ? "Vote + reply" : undefined
+              voteRationale.shouldPostRationale
+                ? t(locale, "waves.voteRationale.submitLabel")
+                : undefined
             }
           />
         </div>

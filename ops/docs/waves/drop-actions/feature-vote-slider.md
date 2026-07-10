@@ -38,7 +38,9 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
    - `%` quick buttons (normal numeric mode)
    - `+` and `-` step buttons (normal numeric mode)
 4. Review the live value and vote-credit label.
-5. Select `Vote` to submit.
+5. Optional: edit the prefilled rationale reply and leave `Vote with reply`
+   on.
+6. Select `Vote` or `Vote + reply` to submit.
 
 ## Common Scenarios
 
@@ -54,6 +56,12 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
   (`±69`, `±420`, `±6529`, `±42069`, `±69420`) and pauses briefly before
   continuing.
 - Pressing `Enter` in numeric input submits immediately.
+- Normal vote modal/sheet controls include an optional rationale reply. The
+  switch starts off, turns on with the first text edit, and keeps the user's
+  later manual on/off choice.
+- Users can turn `Vote with reply` on without editing. In that case, the reply
+  contains only the generated vote total, plus the vote change when it differs
+  from the total.
 
 ## Edge Cases
 
@@ -72,6 +80,10 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 ## Failure and Recovery
 
 - Changing slider or numeric input does not submit automatically.
+- A rationale reply is posted only when `Vote with reply` is on. Turning it off
+  keeps the text but submits only the vote.
+- If the vote succeeds but the optional reply fails, the vote stays saved and
+  an error toast tells the user to retry the reply.
 - Submit always runs an auth check first; canceling auth keeps controls open.
 - If vote submission fails, users stay in place, see an error toast, and can
   retry with the same value.

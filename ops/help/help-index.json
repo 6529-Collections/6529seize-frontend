@@ -1889,6 +1889,7 @@
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
+        "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
         "Boosting is a per-user flame toggle on full drop cards and boosted cards in wave and direct-message threads.",
         "Wave creator badges and drop state indicators explain context around submitted drops."
       ],

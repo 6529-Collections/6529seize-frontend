@@ -19,6 +19,7 @@ import PrivilegedDropCreator, {
 } from "@/components/waves/PrivilegedDropCreator";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
@@ -36,6 +37,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   wave,
   onDropClick,
 }) => {
+  const locale = useBrowserLocale();
   const [isResettingVotes, setIsResettingVotes] = useState(false);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
@@ -138,11 +140,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
         markdown: getVoteRationaleReplyMarkdown({
           voteTotal,
           voteChange,
+          locale,
         }),
         markdownKey: `${drop.id}:${voteRationaleReplyCounterRef.current}`,
       });
     },
-    []
+    [locale]
   );
 
   const intersectionElementRef = useIntersectionObserver(() => {

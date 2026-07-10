@@ -347,6 +347,26 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyFailed: "Copy failed",
 } as const);
 
+const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
+  explain: "Explain",
+  explainAriaLabel: "Reply with vote rationale",
+  fieldLabel: "Optional rationale reply",
+  fieldDescription:
+    "Editing this text turns on Vote with reply until you choose the switch setting yourself.",
+  switchLabel: "Vote with reply",
+  stateOn: "On",
+  stateOff: "Off",
+  emptyBlockReason: "Add rationale text or turn Vote with reply off.",
+  submitLabel: "Vote + reply",
+  postErrorTitle: "Vote saved, but couldn't post your rationale reply.",
+  postErrorRetry: "Please try posting the reply again.",
+  postErrorEmpty: "Add rationale text and try posting the reply again.",
+  postErrorNoTarget: "The voted drop has no reply target.",
+  prefixTotal: "Vote rationale ({voteTotal} at time of posting):\n\n",
+  prefixTotalAndChange:
+    "Vote rationale ({voteTotal} total, {voteChange} change at time of posting):\n\n",
+} as const);
+
 const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
   "actions.viewResults": "View results",
   "actions.vote": "Vote",
@@ -1730,6 +1750,7 @@ export const EN_US_MESSAGES = {
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;

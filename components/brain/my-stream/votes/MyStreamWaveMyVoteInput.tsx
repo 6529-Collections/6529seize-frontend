@@ -14,6 +14,8 @@ import {
   getWaveVoteScopeMaxLabel,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
@@ -50,6 +52,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   isVotingClosed = false,
   onExplainVote,
 }) => {
+  const locale = useBrowserLocale();
   const { requestAuth, setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -327,9 +330,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
               }}
               disabled={!canExplainVote}
               className="tw-relative tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-300 active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-ring-iron-600"
-              aria-label="Reply with vote rationale"
+              aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
             >
-              Explain
+              {t(locale, "waves.voteRationale.explain")}
             </button>
           )}
         </div>

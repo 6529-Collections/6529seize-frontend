@@ -185,6 +185,7 @@ describe("SingleWaveDropVoteContent", () => {
     const rationaleSwitch = screen.getByRole("switch", {
       name: /vote with reply/i,
     });
+    expect(rationaleSwitch).toHaveAccessibleName("Vote with reply");
     expect(rationaleSwitch).not.toBeChecked();
     expect(rationaleSwitch).not.toBeDisabled();
 

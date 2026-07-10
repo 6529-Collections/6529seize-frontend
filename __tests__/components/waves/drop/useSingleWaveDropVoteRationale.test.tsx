@@ -116,6 +116,37 @@ describe("useSingleWaveDropVoteRationale", () => {
     });
   });
 
+  it("posts the generated vote summary when explicitly enabled without edits", async () => {
+    const { result } = renderHook(
+      () =>
+        useSingleWaveDropVoteRationale({
+          drop,
+          voteTotal: 5,
+          voteChange: 5,
+        }),
+      { wrapper }
+    );
+
+    act(() => {
+      result.current.handlePostRationaleChange(true);
+    });
+    await act(async () => {
+      await result.current.submitRationaleReply(drop);
+    });
+
+    expect(commonApiPostMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          parts: [
+            expect.objectContaining({
+              content: "Vote rationale (+5 at time of posting):",
+            }),
+          ],
+        }),
+      })
+    );
+  });
+
   it("preserves the written reason when the generated vote prefix changes", () => {
     const { result, rerender } = renderHook(
       ({ voteTotal, voteChange }) =>

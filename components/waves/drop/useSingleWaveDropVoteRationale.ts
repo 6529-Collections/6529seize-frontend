@@ -10,6 +10,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 
 interface UseSingleWaveDropVoteRationaleParams {
@@ -75,19 +77,17 @@ export const useSingleWaveDropVoteRationale = (
   params: UseSingleWaveDropVoteRationaleParams
 ): UseSingleWaveDropVoteRationaleResult => {
   const { drop, voteTotal, voteChange } = params;
+  const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const generatedRationaleText = getVoteRationaleReplyMarkdown({
     voteTotal,
     voteChange,
+    locale,
   });
   const [rationaleDraft, setRationaleDraft] =
     useState<VoteRationaleDraft | null>(null);
-
-  if (rationaleDraft !== null && rationaleDraft.dropId !== drop.id) {
-    setRationaleDraft(null);
-  }
 
   const activeRationaleDraft =
     rationaleDraft?.dropId === drop.id ? rationaleDraft : null;
@@ -128,8 +128,8 @@ export const useSingleWaveDropVoteRationale = (
     onError: (error) => {
       setToast({
         type: "error",
-        title: "Vote saved, but couldn't post your rationale reply.",
-        description: "Please try posting the reply again.",
+        title: t(locale, "waves.voteRationale.postErrorTitle"),
+        description: t(locale, "waves.voteRationale.postErrorRetry"),
         details: getToastErrorDetails(error),
       });
     },
@@ -168,8 +168,8 @@ export const useSingleWaveDropVoteRationale = (
       if (trimmedRationaleText.length === 0) {
         setToast({
           type: "error",
-          title: "Vote saved, but couldn't post your rationale reply.",
-          description: "Add rationale text and try posting the reply again.",
+          title: t(locale, "waves.voteRationale.postErrorTitle"),
+          description: t(locale, "waves.voteRationale.postErrorEmpty"),
         });
         return;
       }
@@ -178,8 +178,8 @@ export const useSingleWaveDropVoteRationale = (
       if (partId === undefined) {
         setToast({
           type: "error",
-          title: "Vote saved, but couldn't post your rationale reply.",
-          description: "The voted drop has no reply target.",
+          title: t(locale, "waves.voteRationale.postErrorTitle"),
+          description: t(locale, "waves.voteRationale.postErrorNoTarget"),
         });
         return;
       }
@@ -202,6 +202,7 @@ export const useSingleWaveDropVoteRationale = (
       address,
       createRationaleReply,
       isSafeWallet,
+      locale,
       rationaleText,
       setToast,
       postRationale,
