@@ -36,6 +36,7 @@ let browserFallbackTeardown: (() => void) | null = null;
 let hiddenFallbackTimeout: ReturnType<typeof setTimeout> | null = null;
 let keyboardClosedViewportHeight = 0;
 let keyboardClosedLayoutViewportHeight = 0;
+let nativeKeyboardLifecycleActive = false;
 
 const KEYBOARD_INSET_CSS_VARIABLE = "--native-keyboard-inset-bottom";
 const KEYBOARD_LAYOUT_TRANSITION_DURATION_CSS_VARIABLE =
@@ -131,7 +132,7 @@ function normalizeKeyboardHeight(height: number | null | undefined): number {
 }
 
 function applyKeyboardLayoutVariables(
-  state: Pick<NativeKeyboardState, "keyboardHeight" | "phase">,
+  state: Pick<NativeKeyboardState, "keyboardHeight" | "phase" | "isAndroid">,
   transitionMs: number
 ): void {
   const documentRef = (globalThis as Partial<{ readonly document: Document }>)
@@ -142,7 +143,7 @@ function applyKeyboardLayoutVariables(
   }
 
   const keyboardHeight = normalizeKeyboardHeight(state.keyboardHeight);
-  const keyboardInset = getKeyboardLayoutInset(keyboardHeight);
+  const keyboardInset = getKeyboardLayoutInset(keyboardHeight, state.isAndroid);
   const isKeyboardActive = keyboardHeight > 0 || state.phase !== "hidden";
   documentElement.style.setProperty(
     KEYBOARD_INSET_CSS_VARIABLE,
@@ -212,7 +213,14 @@ function getLayoutViewportShrinkHeight(): number {
   return Math.max(0, keyboardClosedLayoutViewportHeight - layoutViewportHeight);
 }
 
-function getKeyboardLayoutInset(keyboardHeight: number): number {
+function getKeyboardLayoutInset(
+  keyboardHeight: number,
+  isAndroid: boolean
+): number {
+  if (!isAndroid) {
+    return normalizeKeyboardHeight(keyboardHeight);
+  }
+
   // Android WebViews can shrink the layout viewport themselves. Only publish
   // the keyboard overlap that has not already been removed from 100dvh.
   return normalizeKeyboardHeight(
@@ -253,15 +261,18 @@ function getViewportKeyboardHeight(): number {
 
   const visualViewportShrinkHeight =
     keyboardClosedViewportHeight > 0
-      ? keyboardClosedViewportHeight - visualViewportHeight
+      ? keyboardClosedViewportHeight -
+        visualViewport.offsetTop -
+        visualViewportHeight
       : 0;
   const windowHeight = typeof window !== "undefined" ? window.innerHeight : 0;
   const viewportBottomOverlap =
     windowHeight > 0
       ? windowHeight - visualViewport.offsetTop - visualViewportHeight
       : 0;
-  const unappliedViewportShrinkHeight =
-    visualViewportShrinkHeight - getLayoutViewportShrinkHeight();
+  const unappliedViewportShrinkHeight = currentState.isAndroid
+    ? visualViewportShrinkHeight - getLayoutViewportShrinkHeight()
+    : visualViewportShrinkHeight;
 
   // Use the closed-viewport shrink when available, but keep bottom overlap as
   // the first-focus/offsetTop fallback for WebViews that do not expose a stable
@@ -296,6 +307,7 @@ function hasEditableFocus(): boolean {
 
 function markKeyboardHiddenFromFallback(): void {
   clearHiddenFallbackTimeout();
+  nativeKeyboardLifecycleActive = false;
 
   if (!currentState.isVisible) {
     rememberKeyboardClosedViewportHeight();
@@ -311,6 +323,16 @@ function markKeyboardHiddenFromFallback(): void {
 }
 
 function syncKeyboardVisibilityFromViewport(): void {
+  // Native iOS will-events provide the final geometry before animation starts.
+  // Intermediate viewport frames must not replace that animation target.
+  if (
+    currentState.isIos &&
+    nativeKeyboardLifecycleActive &&
+    (currentState.phase === "showing" || currentState.phase === "hiding")
+  ) {
+    return;
+  }
+
   const viewportHeight = getViewportHeight();
   if (viewportHeight <= 0) {
     return;
@@ -462,6 +484,7 @@ async function removeListenerHandles(
 
 function teardownKeyboardListeners(): void {
   listenerSetupToken += 1;
+  nativeKeyboardLifecycleActive = false;
   browserFallbackTeardown?.();
 
   if (listenerHandles.length === 0) {
@@ -518,6 +541,7 @@ function ensureKeyboardListeners(): void {
       const handles = await Promise.all([
         Keyboard.addListener("keyboardWillShow", (info) => {
           const keyboardHeight = getKeyboardHeight(info);
+          nativeKeyboardLifecycleActive = keyboardHeight > 0;
           setKeyboardState(
             {
               isVisible: keyboardHeight > 0,
@@ -529,6 +553,7 @@ function ensureKeyboardListeners(): void {
         }),
         Keyboard.addListener("keyboardDidShow", (info) => {
           const keyboardHeight = getKeyboardHeight(info);
+          nativeKeyboardLifecycleActive = keyboardHeight > 0;
           setKeyboardState({
             isVisible: keyboardHeight > 0,
             keyboardHeight,
@@ -538,6 +563,7 @@ function ensureKeyboardListeners(): void {
         Keyboard.addListener("keyboardWillHide", () => {
           const wasKeyboardActive =
             currentState.isVisible || currentState.keyboardHeight > 0;
+          nativeKeyboardLifecycleActive = wasKeyboardActive;
           // willHide starts the native dismissal animation; target zero inset
           // now so the app layout travels down with the keyboard instead of
           // waiting for didHide.
@@ -551,6 +577,7 @@ function ensureKeyboardListeners(): void {
           );
         }),
         Keyboard.addListener("keyboardDidHide", () => {
+          nativeKeyboardLifecycleActive = false;
           setKeyboardState({
             isVisible: false,
             keyboardHeight: 0,
@@ -621,5 +648,6 @@ export function __resetNativeKeyboardForTests(): void {
   listenerSetupToken = 0;
   keyboardClosedViewportHeight = 0;
   keyboardClosedLayoutViewportHeight = 0;
+  nativeKeyboardLifecycleActive = false;
   resetKeyboardLayoutVariables();
 }

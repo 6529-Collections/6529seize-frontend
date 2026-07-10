@@ -123,6 +123,7 @@ describe("useNativeKeyboard", () => {
   });
 
   it("publishes only the keyboard inset not already removed by layout viewport resize", async () => {
+    mockGetPlatform.mockReturnValue("android");
     const originalInnerHeight = globalThis.innerHeight;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
     const originalCancelAnimationFrame = window.cancelAnimationFrame;
@@ -163,6 +164,52 @@ describe("useNativeKeyboard", () => {
           "--native-keyboard-inset-bottom"
         )
       ).toBe("120px");
+    } finally {
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+      window.cancelAnimationFrame = originalCancelAnimationFrame;
+    }
+  });
+
+  it("keeps the native iOS inset authoritative while the keyboard opens", async () => {
+    const originalInnerHeight = globalThis.innerHeight;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    Object.defineProperty(globalThis, "innerHeight", {
+      configurable: true,
+      value: 800,
+    });
+    window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    };
+    window.cancelAnimationFrame = jest.fn();
+
+    try {
+      const { result } = await renderNativeKeyboardHook();
+
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+      });
+
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: 600,
+      });
+
+      act(() => {
+        globalThis.dispatchEvent(new Event("resize"));
+      });
+
+      expect(result.current.phase).toBe("showing");
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--native-keyboard-inset-bottom"
+        )
+      ).toBe("320px");
     } finally {
       Object.defineProperty(globalThis, "innerHeight", {
         configurable: true,
