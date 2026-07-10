@@ -505,6 +505,25 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     [canExitDropMode, handleDropModeChange]
   );
 
+  const replyTargetRecovery = useMemo(
+    () => ({
+      locale,
+      pollDraft,
+      setMetadata,
+      setPollDraftState,
+      onReplyTargetUnavailable,
+      restoreMentionedEntities,
+    }),
+    [
+      locale,
+      onReplyTargetUnavailable,
+      pollDraft,
+      restoreMentionedEntities,
+      setMetadata,
+      setPollDraftState,
+    ]
+  );
+
   const { missingRequirements, onDrop, onGifDrop } = useCreateDropSubmission({
     activeDrop,
     wave,
@@ -516,12 +535,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isLinksSubmitBlocked,
     canMentionAll,
     connectedProfile,
-    locale,
+    replyTargetRecovery,
     submitting,
     getMarkdown,
     files,
     metadata,
-    pollDraft,
     drop,
     hasPendingInlineImageUpload,
     identityValidationMessage,
@@ -549,11 +567,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setFiles,
     setDrop,
     setIsStormMode,
-    setMetadata,
-    setPollDraftState,
     setMetadataOpenState,
-    onReplyTargetUnavailable,
-    restoreMentionedEntities,
     createDropInputRef,
     shouldRefocusAfterChatSubmitRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,

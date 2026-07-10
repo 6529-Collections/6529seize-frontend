@@ -46,6 +46,20 @@ type ProcessIncomingDrop = (
   type: ProcessIncomingDropType
 ) => Promise<void>;
 type DropModeSubmitCallbacks = Pick<DropMutationBody, "onSuccess" | "onError">;
+type ReplyTargetRecovery = {
+  readonly locale: SupportedLocale;
+  readonly pollDraft: CreateDropPollDraft | null;
+  readonly setMetadata: Dispatch<SetStateAction<CreateDropMetadataType[]>>;
+  readonly setPollDraftState: Dispatch<
+    SetStateAction<ScopedValueState<CreateDropPollDraft> | null>
+  >;
+  readonly onReplyTargetUnavailable: (() => void) | undefined;
+  readonly restoreMentionedEntities: (params: {
+    readonly mentionedUsers: CreateDropConfig["mentioned_users"];
+    readonly mentionedWaves: NonNullable<CreateDropConfig["mentioned_waves"]>;
+    readonly referencedNfts: CreateDropConfig["referenced_nfts"];
+  }) => void;
+};
 
 const isBlockedChatDropRequest = ({
   dropRequest,
@@ -253,12 +267,11 @@ export const useCreateDropSubmission = ({
   isLinksSubmitBlocked,
   canMentionAll,
   connectedProfile,
-  locale,
+  replyTargetRecovery,
   submitting,
   getMarkdown,
   files,
   metadata,
-  pollDraft,
   drop,
   hasPendingInlineImageUpload,
   identityValidationMessage,
@@ -286,11 +299,7 @@ export const useCreateDropSubmission = ({
   setFiles,
   setDrop,
   setIsStormMode,
-  setMetadata,
-  setPollDraftState,
   setMetadataOpenState,
-  onReplyTargetUnavailable,
-  restoreMentionedEntities,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
   shouldCollapseOptionsAfterMarkdownSyncRef,
@@ -305,12 +314,11 @@ export const useCreateDropSubmission = ({
   readonly isLinksSubmitBlocked: boolean;
   readonly canMentionAll: boolean;
   readonly connectedProfile: ConnectedProfile;
-  readonly locale: SupportedLocale;
+  readonly replyTargetRecovery: ReplyTargetRecovery;
   readonly submitting: boolean;
   readonly getMarkdown: string | null;
   readonly files: File[];
   readonly metadata: CreateDropMetadataType[];
-  readonly pollDraft: CreateDropPollDraft | null;
   readonly drop: CreateDropConfig | null;
   readonly hasPendingInlineImageUpload: boolean;
   readonly identityValidationMessage: string | null;
@@ -340,23 +348,22 @@ export const useCreateDropSubmission = ({
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setIsStormMode: Dispatch<SetStateAction<boolean>>;
-  readonly setMetadata: Dispatch<SetStateAction<CreateDropMetadataType[]>>;
-  readonly setPollDraftState: Dispatch<
-    SetStateAction<ScopedValueState<CreateDropPollDraft> | null>
-  >;
   readonly setMetadataOpenState: Dispatch<
     SetStateAction<ScopedValueState<boolean> | null>
   >;
-  readonly onReplyTargetUnavailable?: (() => void) | undefined;
-  readonly restoreMentionedEntities: (params: {
-    readonly mentionedUsers: CreateDropConfig["mentioned_users"];
-    readonly mentionedWaves: NonNullable<CreateDropConfig["mentioned_waves"]>;
-    readonly referencedNfts: CreateDropConfig["referenced_nfts"];
-  }) => void;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
   readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
+  const {
+    locale,
+    pollDraft,
+    setMetadata,
+    setPollDraftState,
+    onReplyTargetUnavailable,
+    restoreMentionedEntities,
+  } = replyTargetRecovery;
+
   const latestDraftStateRef = useRef({
     drop,
     files,
