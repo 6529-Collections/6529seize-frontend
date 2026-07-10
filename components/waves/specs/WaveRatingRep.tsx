@@ -31,8 +31,7 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
   const creditorHandleInitial = creditorHandle?.charAt(0).toUpperCase();
   const creditorPfpInitial = creditor?.pfp?.charAt(0).toUpperCase();
   const creditorInitial =
-    [creditorHandleInitial, creditorPfpInitial].find((initial) => initial) ??
-    "?";
+    [creditorHandleInitial, creditorPfpInitial].find(Boolean) ?? "?";
 
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
