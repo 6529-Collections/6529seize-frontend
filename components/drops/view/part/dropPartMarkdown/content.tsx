@@ -9,6 +9,7 @@ import type { ExtraProps } from "react-markdown";
 import emojiRegex from "emoji-regex";
 
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { ApiDropGroupMention as ApiDropGroupMentionValue } from "@/generated/models/ApiDropGroupMention";
@@ -82,6 +83,7 @@ type MarkdownImageElement = ReactElement<{
 }>;
 
 type MarkdownLinkElement = ReactElement<{
+  readonly children?: ReactNode | undefined;
   readonly href: string;
 }>;
 
@@ -132,6 +134,22 @@ const getSmartHref = (
 ): string | null =>
   typeof elementProps?.href === "string" ? elementProps.href : null;
 
+const isBareHrefLabel = (
+  children: ReactNode | undefined,
+  href: string
+): boolean => {
+  const linkText = getTextFromChildren(children)?.trim();
+  if (linkText === undefined || linkText === null) {
+    return false;
+  }
+
+  const trimmedHref = href.trim();
+  return (
+    linkText === trimmedHref ||
+    linkText === ensureStableSeizeLink(trimmedHref).trim()
+  );
+};
+
 const getBareImageHref = (
   elementProps: MarkdownElementProps | null
 ): string | null => {
@@ -172,8 +190,15 @@ const isSmartLinkElement = (
   node: ReactNode,
   isSmartLink: (href: string) => boolean
 ): node is MarkdownLinkElement => {
-  const href = getSmartHref(getMarkdownElementProps(node));
-  return href !== null && href.length > 0 && isSmartLink(href);
+  const elementProps = getMarkdownElementProps(node);
+  const href = getSmartHref(elementProps);
+
+  return (
+    href !== null &&
+    href.length > 0 &&
+    isBareHrefLabel(elementProps?.children, href) &&
+    isSmartLink(href)
+  );
 };
 
 const containsOnlyNativeEmojis = (str: string): boolean => {
