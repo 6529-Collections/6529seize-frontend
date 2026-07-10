@@ -14,16 +14,24 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { useDropSignature } from "@/hooks/drops/useDropSignature";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { Dispatch, SetStateAction } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import type { CreateDropPollDraft } from "../CreateDropPoll";
 import {
   filterMentionedUsers,
   filterMentionedWaves,
   getMentionedGroupsForParts,
+  hasMetadataContent,
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
+import {
+  isReplyTargetUnavailableError,
+  REPLY_TARGET_UNAVAILABLE_TOAST_ID,
+} from "./reply-target-unavailable";
 import type {
   ConnectedProfile,
   CreateDropMetadataType,
@@ -38,6 +46,24 @@ type ProcessIncomingDrop = (
   type: ProcessIncomingDropType
 ) => Promise<void>;
 type DropModeSubmitCallbacks = Pick<DropMutationBody, "onSuccess" | "onError">;
+type DraftStateSnapshot = {
+  readonly metadata: CreateDropMetadataType[];
+  readonly pollDraft: CreateDropPollDraft | null;
+};
+type ReplyTargetRecovery = {
+  readonly locale: SupportedLocale;
+  readonly pollDraft: CreateDropPollDraft | null;
+  readonly setMetadata: Dispatch<SetStateAction<CreateDropMetadataType[]>>;
+  readonly setPollDraftState: Dispatch<
+    SetStateAction<ScopedValueState<CreateDropPollDraft> | null>
+  >;
+  readonly onReplyTargetUnavailable: (() => void) | undefined;
+  readonly restoreMentionedEntities: (params: {
+    readonly mentionedUsers: CreateDropConfig["mentioned_users"];
+    readonly mentionedWaves: NonNullable<CreateDropConfig["mentioned_waves"]>;
+    readonly referencedNfts: CreateDropConfig["referenced_nfts"];
+  }) => void;
+};
 
 const isBlockedChatDropRequest = ({
   dropRequest,
@@ -227,6 +253,13 @@ const getDropModeSubmitCallbacks = ({
   };
 };
 
+const getDropRequestWithoutReply = (
+  dropRequest: CreateDropConfig
+): CreateDropConfig => {
+  const { reply_to: _replyTo, ...dropWithoutReply } = dropRequest;
+  return dropWithoutReply;
+};
+
 export const useCreateDropSubmission = ({
   activeDrop,
   wave,
@@ -238,6 +271,7 @@ export const useCreateDropSubmission = ({
   isLinksSubmitBlocked,
   canMentionAll,
   connectedProfile,
+  replyTargetRecovery,
   submitting,
   getMarkdown,
   files,
@@ -267,6 +301,8 @@ export const useCreateDropSubmission = ({
   setSubmitting,
   setUploadingFiles,
   setFiles,
+  setDrop,
+  setIsStormMode,
   setMetadataOpenState,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
@@ -282,6 +318,7 @@ export const useCreateDropSubmission = ({
   readonly isLinksSubmitBlocked: boolean;
   readonly canMentionAll: boolean;
   readonly connectedProfile: ConnectedProfile;
+  readonly replyTargetRecovery: ReplyTargetRecovery;
   readonly submitting: boolean;
   readonly getMarkdown: string | null;
   readonly files: File[];
@@ -313,6 +350,8 @@ export const useCreateDropSubmission = ({
   readonly setSubmitting: Dispatch<SetStateAction<boolean>>;
   readonly setUploadingFiles: Dispatch<SetStateAction<UploadingFile[]>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
+  readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
+  readonly setIsStormMode: Dispatch<SetStateAction<boolean>>;
   readonly setMetadataOpenState: Dispatch<
     SetStateAction<ScopedValueState<boolean> | null>
   >;
@@ -320,6 +359,101 @@ export const useCreateDropSubmission = ({
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
   readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
+  const {
+    locale,
+    pollDraft,
+    setMetadata,
+    setPollDraftState,
+    onReplyTargetUnavailable,
+    restoreMentionedEntities,
+  } = replyTargetRecovery;
+
+  const latestDraftStateRef = useRef({
+    drop,
+    files,
+    getMarkdown,
+    metadata,
+    pollDraft,
+  });
+
+  useEffect(() => {
+    latestDraftStateRef.current = {
+      drop,
+      files,
+      getMarkdown,
+      metadata,
+      pollDraft,
+    };
+  }, [drop, files, getMarkdown, metadata, pollDraft]);
+
+  const isComposerStillEmptyForRestore = (): boolean => {
+    const latestDraftState = latestDraftStateRef.current;
+    return (
+      latestDraftState.drop === null &&
+      latestDraftState.files.length === 0 &&
+      (latestDraftState.getMarkdown?.trim().length ?? 0) === 0 &&
+      !hasMetadataContent(latestDraftState.metadata) &&
+      latestDraftState.pollDraft === null
+    );
+  };
+
+  const getDraftStateSnapshot = (): DraftStateSnapshot => {
+    const latestDraftState = latestDraftStateRef.current;
+    return {
+      metadata: latestDraftState.metadata.map((item) => ({ ...item })),
+      pollDraft: latestDraftState.pollDraft
+        ? {
+            ...latestDraftState.pollDraft,
+            options: [...latestDraftState.pollDraft.options],
+          }
+        : null,
+    };
+  };
+
+  const restoreFailedDropDraft = (
+    failedDropRequest: CreateDropConfig,
+    submittedDraftState: DraftStateSnapshot
+  ): boolean => {
+    if (!isComposerStillEmptyForRestore()) {
+      return false;
+    }
+
+    const lastPart = failedDropRequest.parts.at(-1) ?? null;
+    const restoredParts = failedDropRequest.parts.slice(0, -1);
+    const restoredDrop =
+      restoredParts.length > 0
+        ? {
+            ...getDropRequestWithoutReply(failedDropRequest),
+            parts: restoredParts,
+          }
+        : null;
+
+    setDrop(restoredDrop);
+    setIsStormMode(restoredParts.length > 0);
+    setMetadata(submittedDraftState.metadata);
+    setPollDraftState(
+      submittedDraftState.pollDraft
+        ? { scopeKey: wave.id, value: submittedDraftState.pollDraft }
+        : null
+    );
+    restoreMentionedEntities({
+      mentionedUsers: failedDropRequest.mentioned_users,
+      mentionedWaves: failedDropRequest.mentioned_waves ?? [],
+      referencedNfts: failedDropRequest.referenced_nfts,
+    });
+    setFiles(lastPart ? [...lastPart.media] : []);
+    setUploadingFiles([]);
+
+    if (lastPart?.content) {
+      createDropInputRef.current?.clearEditorState();
+      createDropInputRef.current?.setMarkdown(lastPart.content);
+      return true;
+    }
+
+    createDropInputRef.current?.clearEditorState();
+    return true;
+  };
+
   const getUpdatedDropRequest = async (
     requestBody: ApiCreateDropRequest
   ): Promise<ApiCreateDropRequest | null> => {
@@ -398,6 +532,8 @@ export const useCreateDropSubmission = ({
       return;
     }
 
+    const submittedDraftState = getDraftStateSnapshot();
+
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -431,24 +567,81 @@ export const useCreateDropSubmission = ({
         return;
       }
 
+      const optimisticActiveDrop = updatedDropRequest.reply_to
+        ? activeDrop
+        : null;
       const optimisticDrop = getOptimisticDropForSubmission({
         updatedDropRequest,
         generatedParts,
         connectedProfile,
         wave,
-        activeDrop,
+        activeDrop: optimisticActiveDrop,
         isDropMode,
+      });
+
+      const handleReplyTargetUnavailableError = (
+        error: unknown
+      ): boolean => {
+        if (
+          dropRequest.reply_to === undefined ||
+          !isReplyTargetUnavailableError(error)
+        ) {
+          return false;
+        }
+
+        const dropWithoutReply = getDropRequestWithoutReply(dropRequest);
+        onReplyTargetUnavailable?.();
+        const wasDraftRestored = restoreFailedDropDraft(
+          dropWithoutReply,
+          submittedDraftState
+        );
+        setToast({
+          type: "error",
+          title: t(locale, "waves.chat.replyTargetUnavailableToast.title"),
+          description: t(
+            locale,
+            wasDraftRestored
+              ? "waves.chat.replyTargetUnavailableToast.descriptionRestored"
+              : "waves.chat.replyTargetUnavailableToast.descriptionKept"
+          ),
+          details: t(
+            locale,
+            wasDraftRestored
+              ? "waves.chat.replyTargetUnavailableToast.detailsRestored"
+              : "waves.chat.replyTargetUnavailableToast.detailsKept"
+          ),
+          action: {
+            label: t(
+              locale,
+              "waves.chat.replyTargetUnavailableToast.actionReviewDraft"
+            ),
+            onClick: () => {
+              createDropInputRef.current?.focus();
+            },
+          },
+          autoClose: false,
+          toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
+        });
+        return true;
+      };
+
+      const dropModeSubmitCallbacks = getDropModeSubmitCallbacks({
+        isDropMode,
+        canExitDropMode,
+        handleDropModeChange,
+        handleDuplicateIdentitySubmissionError,
       });
 
       const submitAccepted = submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
-        ...getDropModeSubmitCallbacks({
-          isDropMode,
-          canExitDropMode,
-          handleDropModeChange,
-          handleDuplicateIdentitySubmissionError,
-        }),
+        onSuccess: dropModeSubmitCallbacks.onSuccess,
+        onError: (error) => {
+          if (handleReplyTargetUnavailableError(error)) {
+            return true;
+          }
+          return dropModeSubmitCallbacks.onError?.(error);
+        },
       });
       if (!submitAccepted) {
         return;

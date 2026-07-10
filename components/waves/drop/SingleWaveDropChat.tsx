@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -16,6 +22,13 @@ import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import { DropMode } from "../dropComposer.types";
 import { WaveDropLayerProvider } from "../drops/WaveDropLayerContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { useAuth } from "@/components/auth/Auth";
+import type { WsDropDeleteMessage } from "@/helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
+import { t } from "@/i18n/messages";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "../create-drop-content/reply-target-unavailable";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
@@ -37,6 +50,9 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const { updateEligibility } = useWaveEligibility();
+  const { setToast } = useAuth();
+  const locale = useBrowserLocale();
+  const rootDropAvailableRef = useRef(true);
 
   // Drop safe-area padding as soon as the native keyboard starts moving.
   const inputContainerStyle = useMemo(() => {
@@ -52,25 +68,82 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     drop: drop,
     partId: 1,
   });
-  const handleDropAction = ({
-    targetDrop,
-    partId,
-    action,
-  }: {
-    targetDrop: ApiDrop;
-    partId: number;
-    action: ActiveDropAction;
-  }) => {
-    setActiveDrop({ action, drop: targetDrop, partId });
-  };
+  const activeDropRef = useRef(activeDrop);
 
-  const resetActiveDrop = () => {
+  useEffect(() => {
+    rootDropAvailableRef.current = true;
+  }, [drop.id]);
+
+  useEffect(() => {
+    activeDropRef.current = activeDrop;
+  }, [activeDrop]);
+
+  const handleDropAction = useCallback(
+    ({
+      targetDrop,
+      partId,
+      action,
+    }: {
+      targetDrop: ApiDrop;
+      partId: number;
+      action: ActiveDropAction;
+    }) => {
+      setActiveDrop({ action, drop: targetDrop, partId });
+    },
+    []
+  );
+
+  const resetActiveDrop = useCallback(() => {
+    if (!rootDropAvailableRef.current) {
+      setActiveDrop(null);
+      return;
+    }
+
     setActiveDrop({
       action: ActiveDropAction.REPLY,
       drop: drop,
       partId: 1,
     });
-  };
+  }, [drop]);
+
+  const clearUnavailableReplyTarget = useCallback(() => {
+    resetActiveDrop();
+  }, [resetActiveDrop]);
+
+  useWebSocketMessage<WsDropDeleteMessage["data"]>(
+    WsMessageType.DROP_DELETE,
+    useCallback(
+      (messageData) => {
+        if (messageData.wave_id !== wave.id) {
+          return;
+        }
+
+        const deletedRootDrop = messageData.drop_id === drop.id;
+        if (deletedRootDrop) {
+          rootDropAvailableRef.current = false;
+        }
+
+        const activeTargetDeleted =
+          activeDropRef.current?.drop.id === messageData.drop_id;
+
+        if (!activeTargetDeleted) {
+          return;
+        }
+
+        setActiveDrop(null);
+        setToast({
+          type: "warning",
+          title: t(locale, "waves.chat.replyTargetDeletedToast.title"),
+          description: t(
+            locale,
+            "waves.chat.replyTargetDeletedToast.description"
+          ),
+          toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
+        });
+      },
+      [drop.id, locale, setToast, wave.id]
+    )
+  );
 
   React.useEffect(() => {
     updateEligibility(wave.id, {
@@ -143,6 +216,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                     <PrivilegedDropCreator
                       activeDrop={activeDrop}
                       onCancelReplyQuote={resetActiveDrop}
+                      onReplyTargetUnavailable={clearUnavailableReplyTarget}
                       onDropAddedToQueue={resetActiveDrop}
                       wave={wave}
                       dropId={drop.id}
