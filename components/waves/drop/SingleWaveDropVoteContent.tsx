@@ -422,9 +422,6 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             submitLabelOverride={
               voteRationale.shouldPostRationale ? "Vote + reply" : undefined
             }
-            waitForVoteAppliedBeforeBackgroundClose={
-              voteRationale.shouldPostRationale
-            }
           />
         </div>
       </div>

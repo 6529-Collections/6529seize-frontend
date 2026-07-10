@@ -237,7 +237,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     lastAppliedVoteChange?.dropId === drop.id &&
     lastAppliedVoteChange.voteTotal === liveCurrentVoteValue
       ? lastAppliedVoteChange.voteChange
-      : liveCurrentVoteValue;
+      : 0;
 
   const canExplainVote =
     !!onExplainVote &&

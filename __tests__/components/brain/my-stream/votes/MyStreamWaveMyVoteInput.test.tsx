@@ -430,4 +430,56 @@ describe("MyStreamWaveMyVoteInput", () => {
     expectMaxVotes("9");
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
   });
+
+  it("explains an unchanged existing vote with zero change", () => {
+    const onExplainVote = jest.fn();
+    const dropWithRating = {
+      ...drop,
+      context_profile_context: { rating: 4, min_rating: 0, max_rating: 10 },
+    };
+
+    render(
+      <MyStreamWaveMyVoteInput
+        drop={dropWithRating}
+        onExplainVote={onExplainVote}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reply with vote rationale" })
+    );
+
+    expect(onExplainVote).toHaveBeenCalledWith(4, 0);
+  });
+
+  it("explains a newly updated vote with its applied change", async () => {
+    const onExplainVote = jest.fn();
+    const dropWithRating = {
+      ...drop,
+      context_profile_context: { rating: 2, min_rating: 0, max_rating: 10 },
+    };
+
+    render(
+      <MyStreamWaveMyVoteInput
+        drop={dropWithRating}
+        onExplainVote={onExplainVote}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "5" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+
+    await waitFor(() =>
+      expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("5")
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reply with vote rationale" })
+    );
+
+    expect(onExplainVote).toHaveBeenCalledWith(5, 3);
+  });
 });

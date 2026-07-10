@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -56,6 +56,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   );
   const [voteRationaleReply, setVoteRationaleReply] =
     useState<VoteRationaleReplyState | null>(null);
+  const voteRationaleReplyCounterRef = useRef(0);
 
   const sharedAvailableVotes = useMemo(() => {
     const dropWithContext = drops.find((drop) => drop.context_profile_context);
@@ -130,6 +131,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
         return;
       }
 
+      voteRationaleReplyCounterRef.current += 1;
       setVoteRationaleReply({
         drop,
         partId,
@@ -137,7 +139,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
           voteTotal,
           voteChange,
         }),
-        markdownKey: `${drop.id}:${voteTotal}:${voteChange}:${Date.now()}`,
+        markdownKey: `${drop.id}:${voteRationaleReplyCounterRef.current}`,
       });
     },
     []

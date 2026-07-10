@@ -71,7 +71,6 @@ interface Props {
   readonly submissionMode?: SingleWaveDropVoteSubmissionMode | undefined;
   readonly submitBlockReason?: string | null | undefined;
   readonly submitLabelOverride?: string | undefined;
-  readonly waitForVoteAppliedBeforeBackgroundClose?: boolean | undefined;
 }
 
 const SingleWaveDropVoteSubmit = forwardRef<
@@ -90,7 +89,6 @@ const SingleWaveDropVoteSubmit = forwardRef<
       submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
       submitBlockReason = null,
       submitLabelOverride,
-      waitForVoteAppliedBeforeBackgroundClose = false,
     }: Props,
     ref
   ) => {
@@ -385,19 +383,13 @@ const SingleWaveDropVoteSubmit = forwardRef<
         })
         .then(async (updatedDrop) => {
           await runOnVoteApplied(updatedDrop);
-          if (waitForVoteAppliedBeforeBackgroundClose) {
-            scheduleBackgroundModalClose();
-          }
         })
         .catch(() => {
           resetFastFailedBackgroundVote();
         });
 
       showSuccessfulVote();
-
-      if (!waitForVoteAppliedBeforeBackgroundClose) {
-        scheduleBackgroundModalClose();
-      }
+      scheduleBackgroundModalClose();
 
       backgroundSuccessTimeoutRef.current = finishSuccessState();
     };

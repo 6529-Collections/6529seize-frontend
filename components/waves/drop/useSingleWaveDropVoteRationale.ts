@@ -165,8 +165,17 @@ export const useSingleWaveDropVoteRationale = (
       }
 
       const trimmedRationaleText = rationaleText.trim();
+      if (trimmedRationaleText.length === 0) {
+        setToast({
+          type: "error",
+          title: "Vote saved, but couldn't post your rationale reply.",
+          description: "Add rationale text and try posting the reply again.",
+        });
+        return;
+      }
+
       const partId = targetDrop.parts.at(0)?.part_id;
-      if (partId === undefined || trimmedRationaleText.length === 0) {
+      if (partId === undefined) {
         setToast({
           type: "error",
           title: "Vote saved, but couldn't post your rationale reply.",
