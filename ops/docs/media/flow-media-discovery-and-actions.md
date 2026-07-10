@@ -87,9 +87,11 @@ This flow covers cross-route media tasks:
 - `/the-memes/{id}` ignores unsupported `focus` values and falls back to
   `Live`.
 - Upcoming numeric `/the-memes/{id}` routes can show the next-mint fallback
-  panel instead of full card data.
+  panel instead of full card data. Positive ids also show a header-row
+  `Distribution Plan` link to `/the-memes/{id}/distribution`.
 - `/the-memes/{id}/distribution` with no published distribution shows
-  next-mint fallback plus `The Distribution Plan will be made available soon!`.
+  next-mint fallback plus the centered `The Distribution Plan will be made
+  available soon!` message.
 - Invalid or non-positive distribution IDs show the `DISTRIBUTION` not-found
   view.
 - `/rememes` keeps only `meme_id` in the URL. Sort, token type, and page reset
