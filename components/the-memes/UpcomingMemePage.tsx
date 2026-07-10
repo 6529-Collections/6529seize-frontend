@@ -44,11 +44,11 @@ export default function UpcomingMemePage({
   readonly showDistributionLink?: boolean;
 }) {
   const numId = Number(id);
-  if (Number.isInteger(numId) && numId > 0) {
+  if (Number.isInteger(numId)) {
     return (
       <div className="tw-mt-6 tw-flex tw-w-full tw-flex-col tw-gap-4">
         <LatestDropNextMintSubscribe tokenId={numId} />
-        {showDistributionLink && (
+        {showDistributionLink && numId > 0 && (
           <UpcomingMemeDistributionLink id={numId} locale={locale} />
         )}
         <MemeCalendarOverviewNextMint

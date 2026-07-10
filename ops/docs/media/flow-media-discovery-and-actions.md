@@ -86,8 +86,8 @@ This flow covers cross-route media tasks:
   `Mint on 6529.io`.
 - `/the-memes/{id}` ignores unsupported `focus` values and falls back to
   `Live`.
-- Upcoming positive numeric `/the-memes/{id}` routes can show the next-mint
-  fallback panel instead of full card data, including a `Distribution Plan`
+- Upcoming numeric `/the-memes/{id}` routes can show the next-mint fallback
+  panel instead of full card data. Positive ids also show a `Distribution Plan`
   link to `/the-memes/{id}/distribution`.
 - `/the-memes/{id}/distribution` with no published distribution shows
   next-mint fallback plus the centered `The Distribution Plan will be made
