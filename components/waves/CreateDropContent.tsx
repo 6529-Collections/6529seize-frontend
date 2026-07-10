@@ -758,6 +758,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       uploadingFiles={uploadingFiles}
       removeFile={removeFile}
       termsSignatureFlowEnabled={termsSignatureFlowEnabled}
+      suppressInitialHeightAnimation={focusOnInitialActiveDrop}
     />
   );
 };
