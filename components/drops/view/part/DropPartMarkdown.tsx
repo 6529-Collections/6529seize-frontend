@@ -17,10 +17,7 @@ import Markdown, {
   type ExtraProps,
 } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
-import rehypeSanitize, {
-  defaultSchema,
-  type Options as RehypeSanitizeOptions,
-} from "rehype-sanitize";
+import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { useQueryClient } from "@tanstack/react-query";
 import type { PluggableList } from "unified";
@@ -48,37 +45,12 @@ import {
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
 import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
-import {
-  PARENTHESIZED_ORDERED_LIST_CLASS_NAME,
-  remarkPreserveOrderedListDelimiter,
-} from "./dropPartMarkdown/orderedListDelimiter";
+import { rehypePreserveOrderedListDelimiter } from "./dropPartMarkdown/orderedListDelimiter";
 
 const BreakComponent = () => <br />;
 
 const EMPTY_MENTIONED_GROUPS: ApiDropGroupMention[] = [];
 const EMOJI_SHORTCODE_REGEX = /:\w+:/;
-const DROP_MARKDOWN_ORDERED_LIST_ATTRIBUTES = (
-  defaultSchema.attributes?.["ol"] ?? []
-).map((attribute) =>
-  Array.isArray(attribute) && attribute[0] === "className"
-    ? ([
-        ...attribute,
-        PARENTHESIZED_ORDERED_LIST_CLASS_NAME,
-      ] as typeof attribute)
-    : attribute
-);
-const DROP_MARKDOWN_SANITIZE_SCHEMA = {
-  attributes: {
-    ...(defaultSchema.attributes ?? {}),
-    ol: DROP_MARKDOWN_ORDERED_LIST_ATTRIBUTES,
-  },
-  protocols: {
-    cite: ["http", "https"],
-    href: ["http", "https", "irc", "ircs", "mailto", "xmpp"],
-    longDesc: ["http", "https"],
-    src: ["http", "https", "data"],
-  },
-} satisfies RehypeSanitizeOptions;
 
 const mergeClassNames = (...classes: Array<string | undefined>): string =>
   classes.filter(Boolean).join(" ");
@@ -417,15 +389,50 @@ function DropPartMarkdown({
           protocols: ["http", "https"],
         },
       ],
-      [rehypeSanitize, DROP_MARKDOWN_SANITIZE_SCHEMA],
+      [
+        rehypeSanitize,
+        {
+          allowedTags: [
+            "p",
+            "br",
+            "strong",
+            "em",
+            "a",
+            "code",
+            "pre",
+            "blockquote",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "ul",
+            "ol",
+            "li",
+            "img",
+          ],
+          allowedAttributes: {
+            a: ["href", "title"],
+            img: ["src", "alt", "title"],
+            code: ["className"],
+            pre: ["className"],
+          },
+          protocols: {
+            cite: ["http", "https"],
+            href: ["http", "https", "irc", "ircs", "mailto", "xmpp"],
+            longDesc: ["http", "https"],
+            src: ["http", "https", "data"],
+          },
+        },
+      ],
+      // This trusted plugin only adds one static renderer-owned class.
+      rehypePreserveOrderedListDelimiter,
     ],
     []
   );
 
-  const remarkPlugins = useMemo<PluggableList>(
-    () => [remarkGfm, remarkPreserveOrderedListDelimiter],
-    []
-  );
+  const remarkPlugins = useMemo<PluggableList>(() => [remarkGfm], []);
 
   const markdownComponents = useMemo<Components>(
     () =>

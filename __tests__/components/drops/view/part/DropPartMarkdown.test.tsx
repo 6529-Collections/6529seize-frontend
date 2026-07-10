@@ -1306,6 +1306,23 @@ describe("DropPartMarkdown", () => {
     expect(lists[1]).not.toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
   });
 
+  it("preserves parenthesized markers on nested ordered lists", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"1) Parent\n   1) Child\n   2) Nested"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const lists = container.querySelectorAll("ol");
+    expect(lists).toHaveLength(2);
+    expect(lists[0]).toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
+    expect(lists[1]).toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
+  });
+
   it("renders separate paragraphs for blank-line content with tight spacing", () => {
     render(
       <DropPartMarkdown

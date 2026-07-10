@@ -5,18 +5,16 @@ export const PARENTHESIZED_ORDERED_LIST_CLASS_NAME =
 
 const ORDERED_LIST_MARKER_PATTERN = /^[\t ]*\d{1,9}([.)])(?:[\t ]+|$)/;
 
-interface MarkdownAstNode {
+interface MarkdownHastNode {
   readonly type?: unknown;
-  readonly ordered?: unknown;
+  readonly tagName?: unknown;
   readonly position?: {
     readonly start?: {
       readonly offset?: number | undefined;
     };
   };
-  data?: {
-    hProperties?: Record<string, unknown> | undefined;
-  };
-  readonly children?: readonly MarkdownAstNode[] | undefined;
+  properties?: Record<string, unknown> | undefined;
+  readonly children?: readonly MarkdownHastNode[] | undefined;
 }
 
 const normalizeClassNames = (className: unknown): string[] => {
@@ -33,28 +31,25 @@ const normalizeClassNames = (className: unknown): string[] => {
   );
 };
 
-const addParenthesizedListClass = (node: MarkdownAstNode): void => {
-  const hProperties = node.data?.hProperties ?? {};
-  const classNames = normalizeClassNames(hProperties["className"]);
+const addParenthesizedListClass = (node: MarkdownHastNode): void => {
+  const properties = node.properties ?? {};
+  const classNames = normalizeClassNames(properties["className"]);
 
   if (!classNames.includes(PARENTHESIZED_ORDERED_LIST_CLASS_NAME)) {
     classNames.push(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
   }
 
-  node.data = {
-    ...node.data,
-    hProperties: {
-      ...hProperties,
-      className: classNames,
-    },
+  node.properties = {
+    ...properties,
+    className: classNames,
   };
 };
 
 const preserveOrderedListDelimiter = (
-  node: MarkdownAstNode,
+  node: MarkdownHastNode,
   source: string
 ): void => {
-  if (node.type === "list" && node.ordered === true) {
+  if (node.type === "element" && node.tagName === "ol") {
     const offset = node.position?.start?.offset;
     if (typeof offset === "number") {
       const marker = ORDERED_LIST_MARKER_PATTERN.exec(source.slice(offset));
@@ -69,8 +64,8 @@ const preserveOrderedListDelimiter = (
   });
 };
 
-export const remarkPreserveOrderedListDelimiter: Plugin = () => {
+export const rehypePreserveOrderedListDelimiter: Plugin = () => {
   return (tree, file) => {
-    preserveOrderedListDelimiter(tree as MarkdownAstNode, String(file.value));
+    preserveOrderedListDelimiter(tree as MarkdownHastNode, String(file.value));
   };
 };
