@@ -397,8 +397,19 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [navAdjustedSpaces]);
 
   const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
-    return calculateHeightStyle({ ...navAdjustedSpaces, mobileNavSpace: 0 }, 0);
-  }, [navAdjustedSpaces]);
+    const style = calculateHeightStyle(
+      { ...navAdjustedSpaces, mobileNavSpace: 0 },
+      isCapacitor ? NATIVE_KEYBOARD_INSET : 0
+    );
+
+    if (isCapacitor) {
+      return {
+        ...style,
+        transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+      };
+    }
+    return style;
+  }, [navAdjustedSpaces, isCapacitor]);
 
   const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {
     return calculateHeightStyle(navAdjustedSpaces, 0);
