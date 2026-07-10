@@ -96,8 +96,30 @@ describe("useWaveListSwipeBack", () => {
     fireEvent.touchMove(target, { touches: [touch(18, 125)] });
     fireEvent.touchEnd(target, { changedTouches: [touch(120, 130)] });
 
-    expect(onIntentStart).toHaveBeenCalledTimes(1);
+    expect(onIntentStart).not.toHaveBeenCalled();
     expect(onSwipeBack).not.toHaveBeenCalled();
+  });
+
+  it("does not start intent for a left-edge tap", () => {
+    renderHarness();
+    const target = screen.getByTestId("plain-target");
+
+    fireEvent.touchStart(target, { touches: [touch(10, 100)] });
+    fireEvent.touchEnd(target, { changedTouches: [touch(10, 100)] });
+
+    expect(onIntentStart).not.toHaveBeenCalled();
+    expect(onSwipeBack).not.toHaveBeenCalled();
+  });
+
+  it("starts intent once after horizontal movement is confirmed", () => {
+    renderHarness();
+    const target = screen.getByTestId("plain-target");
+
+    fireEvent.touchStart(target, { touches: [touch(10, 100)] });
+    fireEvent.touchMove(target, { touches: [touch(24, 102)] });
+    fireEvent.touchMove(target, { touches: [touch(60, 104)] });
+
+    expect(onIntentStart).toHaveBeenCalledTimes(1);
   });
 
   it("does not commit a short, leftward, or cancelled gesture", () => {

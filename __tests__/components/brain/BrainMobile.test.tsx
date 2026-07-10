@@ -429,6 +429,31 @@ describe("BrainMobile", () => {
     });
   });
 
+  it("enables wave-list swipe when the active wave comes from the URL", async () => {
+    mockPathname = "/waves/1";
+    mockActiveWaveId = null;
+    waveData = createWave(false);
+
+    render(<BrainMobile>child</BrainMobile>);
+
+    const waveContent = await screen.findByText("child");
+    fireEvent.touchStart(waveContent, {
+      touches: [{ clientX: 10, clientY: 100 }],
+    });
+    fireEvent.touchMove(waveContent, {
+      touches: [{ clientX: 60, clientY: 104 }],
+    });
+    fireEvent.touchEnd(waveContent, {
+      changedTouches: [{ clientX: 100, clientY: 106 }],
+    });
+
+    expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
+    expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
+    expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
+      isDirectMessage: false,
+    });
+  });
+
   it.each([
     { app: false, pathname: "/waves/1", query: "" },
     { app: true, pathname: "/messages/1", query: "" },

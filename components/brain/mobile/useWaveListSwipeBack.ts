@@ -37,6 +37,7 @@ interface SwipeGesture {
   readonly startY: number;
   currentX: number;
   currentY: number;
+  intentStarted: boolean;
 }
 
 const isHorizontallyScrollable = (element: HTMLElement): boolean => {
@@ -111,10 +112,10 @@ export function useWaveListSwipeBack({
         startY: touch.clientY,
         currentX: touch.clientX,
         currentY: touch.clientY,
+        intentStarted: false,
       };
-      onIntentStart?.();
     },
-    [enabled, onIntentStart, resetGesture]
+    [enabled, resetGesture]
   );
 
   const handleTouchMove = useCallback(
@@ -140,9 +141,19 @@ export function useWaveListSwipeBack({
           absoluteDeltaY > absoluteDeltaX)
       ) {
         resetGesture();
+        return;
+      }
+
+      if (
+        !gesture.intentStarted &&
+        deltaX >= SWIPE_AXIS_LOCK_DISTANCE_PX &&
+        deltaX >= absoluteDeltaY * SWIPE_HORIZONTAL_DOMINANCE_RATIO
+      ) {
+        gesture.intentStarted = true;
+        onIntentStart?.();
       }
     },
-    [resetGesture]
+    [onIntentStart, resetGesture]
   );
 
   const handleTouchEnd = useCallback(
