@@ -16,7 +16,7 @@ jest.mock(
       <div
         data-testid="items"
         onClick={() => {
-          props.onReply({ drop: { id: "d" }, partId: "p" });
+          props.onReply({ drop: { id: "d", wave: { id: "w" } }, partId: "p" });
           props.onDropContentClick({ wave: { id: "w" }, serial_no: 1 } as any);
         }}
       />
