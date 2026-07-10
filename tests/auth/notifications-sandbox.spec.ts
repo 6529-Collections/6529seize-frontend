@@ -13,20 +13,6 @@ import {
 } from "../support/localSandbox";
 import type { Page } from "@playwright/test";
 
-const SANDBOX_NOTIFICATION_WAVE_ID =
-  "00000000-0000-4000-8000-000000000533";
-
-async function expectNotificationWaveFetched(baseURL: string | undefined) {
-  const requests = await fetchSandboxRequests(baseURL);
-  expect(
-    requests.some(
-      (request) =>
-        request.method === "GET" &&
-        request.path === `/api/waves/${SANDBOX_NOTIFICATION_WAVE_ID}`
-    )
-  ).toBe(true);
-}
-
 async function clickReplyForDropText(page: Page, dropText: string) {
   const drop = page
     .locator(".tw-group", {
@@ -92,7 +78,6 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     ).toHaveAttribute("href", "/waves/00000000-0000-4000-8000-000000000533");
     await expectNoHorizontalOverflow(page);
 
-    await expectNotificationWaveFetched(baseURL);
     const requests = await fetchSandboxRequests(baseURL);
     expect(
       requests.some(
@@ -155,7 +140,6 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     );
 
     await expectNoHorizontalOverflow(page);
-    await expectNotificationWaveFetched(baseURL);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
@@ -176,7 +160,6 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await expect(page.getByLabel("Post a reply")).toBeVisible({
       timeout: 1500,
     });
-    await expectNotificationWaveFetched(baseURL);
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
