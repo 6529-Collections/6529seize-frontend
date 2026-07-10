@@ -264,6 +264,11 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
               name: SANDBOX_PERPETUAL_WAVE_NAME,
               admin_group_id: SANDBOX_ADMIN_GROUP_ID,
               description: SANDBOX_PERPETUAL_WAVE_DESCRIPTION,
+              wave_type: "RANK",
+              decisions_strategy: null,
+              voting_period_max: null,
+              participation_period_max: null,
+              outcomes_count: 0,
             }),
           }),
         ])

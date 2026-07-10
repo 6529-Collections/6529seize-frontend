@@ -1401,6 +1401,17 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
     );
   }
 
+  if (pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/metadata`) {
+    // A perpetual rank wave submits its outcomes tab as hidden right after
+    // creation; nothing else is allowed to write wave metadata here.
+    return (
+      isPlainObject(body) &&
+      hasOnlyKeys(body, ["data_key", "data_value"]) &&
+      body.data_key === "wave_display.outcomes.visible" &&
+      body.data_value === "false"
+    );
+  }
+
   const notificationId = notificationIdFromPath(pathname);
   if (notificationId) {
     return (
@@ -1527,6 +1538,13 @@ function loggedRequestBody(pathname, body) {
       name: typeof body.name === "string" ? body.name : null,
       admin_group_id: body.wave?.admin_group?.group_id ?? null,
       description: isPlainObject(firstPart) ? firstPart.content : null,
+      wave_type: body.wave?.type ?? null,
+      decisions_strategy: body.wave?.decisions_strategy ?? null,
+      voting_period_max: body.voting?.period?.max ?? null,
+      participation_period_max: body.participation?.period?.max ?? null,
+      outcomes_count: Array.isArray(body.outcomes)
+        ? body.outcomes.length
+        : null,
       keys: sortedKeys(body),
       description_drop_keys: isPlainObject(body.description_drop)
         ? sortedKeys(body.description_drop)
@@ -1739,6 +1757,16 @@ const mockApiKnownPostRoutes = [
   {
     matches: (pathname) => pathname === "/api/waves",
     respond: (res) => writeJsonResponse(res, createdWave),
+  },
+  {
+    matches: (pathname) =>
+      pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/metadata`,
+    respond: (res) =>
+      writeJsonResponse(res, {
+        id: 1,
+        data_key: "wave_display.outcomes.visible",
+        data_value: "false",
+      }),
   },
   {
     matches: (pathname) => Boolean(notificationWaveIdFromPath(pathname)),
