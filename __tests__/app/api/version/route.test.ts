@@ -4,7 +4,10 @@ jest.mock("next/server", () => ({
   },
 }));
 
-import { GET } from "@/app/api/version/route";
+import {
+  __resetAnnouncedVersionCacheForTests,
+  GET,
+} from "@/app/api/version/route";
 import { NextResponse } from "next/server";
 
 const jsonMock = NextResponse.json as jest.Mock;
@@ -23,11 +26,16 @@ const requestWithClientVersion = (version: string) =>
 describe("GET version route", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    __resetAnnouncedVersionCacheForTests();
     globalThis.fetch = jest.fn();
     const { publicEnv } = require("@/config/env");
     publicEnv.VERSION = "current-version";
     publicEnv.VERSION_BUILD_TIMESTAMP = "2026-07-09T10:00:00.000Z";
     publicEnv.ANNOUNCED_VERSION_ENDPOINT = undefined;
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("returns current instance version fields and disables cache", async () => {
@@ -116,6 +124,34 @@ describe("GET version route", () => {
       { headers: NO_STORE_HEADERS }
     );
     expect(result).toBe(expected);
+  });
+
+  it("coalesces concurrent announcement requests and reuses the short cache", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
+    jsonMock.mockReturnValue({ ok: true });
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        published_at: "2026-07-09T10:05:00.000Z",
+        ready: true,
+        version: "announced-version",
+      }),
+    });
+
+    await Promise.all([GET(), GET()]);
+    await GET();
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(jsonMock).toHaveBeenCalledTimes(3);
+    expect(jsonMock).toHaveBeenLastCalledWith(
+      {
+        announced_version: "announced-version",
+        stale: true,
+        version: "current-version",
+      },
+      { headers: NO_STORE_HEADERS }
+    );
   });
 
   it("reports not stale when the ready announcement matches this instance", async () => {
@@ -287,6 +323,31 @@ describe("GET version route", () => {
     );
   });
 
+  it("falls back to live instance comparison when the announcement endpoint is invalid", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT =
+      "https://example.com/current-production-version.json";
+    const warnMock = jest
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
+    jsonMock.mockReturnValue({ ok: true });
+
+    await GET(requestWithClientVersion("previous-version"));
+
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(warnMock).toHaveBeenCalledWith(
+      "Ignoring invalid ANNOUNCED_VERSION_ENDPOINT; falling back to live version checks."
+    );
+    expect(jsonMock).toHaveBeenCalledWith(
+      {
+        announced_version: null,
+        stale: true,
+        version: "current-version",
+      },
+      { headers: NO_STORE_HEADERS }
+    );
+  });
+
   it("falls back to current instance fields when the announcement request fails", async () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
@@ -299,6 +360,32 @@ describe("GET version route", () => {
       {
         announced_version: null,
         stale: false,
+        version: "current-version",
+      },
+      { headers: NO_STORE_HEADERS }
+    );
+  });
+
+  it("falls back to live instance comparison when the announcement request fails", async () => {
+    const { publicEnv } = require("@/config/env");
+    const error = new Error("network");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
+    const warnMock = jest
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
+    jsonMock.mockReturnValue({ ok: true });
+    (globalThis.fetch as jest.Mock).mockRejectedValue(error);
+
+    await GET(requestWithClientVersion("previous-version"));
+
+    expect(warnMock).toHaveBeenCalledWith(
+      "Failed to fetch announced version; falling back to live version checks.",
+      error
+    );
+    expect(jsonMock).toHaveBeenCalledWith(
+      {
+        announced_version: null,
+        stale: true,
         version: "current-version",
       },
       { headers: NO_STORE_HEADERS }
