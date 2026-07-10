@@ -208,6 +208,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
     () => logsQuery.data?.pages.flatMap((page) => page.data) ?? [],
     [logsQuery.data?.pages]
   );
+
   const overview = contributorsQuery.data?.pages[0]?.overview;
   const summary = {
     totalRep: overview?.total_rep ?? wave.wave_rep?.total_rep ?? 0,
@@ -230,6 +231,27 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
   const fetchNextCategoriesPage = () => {
     runQueryAction(() => categoriesQuery.fetchNextPage());
+  };
+
+  const fetchRemainingCategories = async (): Promise<void> => {
+    const result = await categoriesQuery.fetchNextPage();
+    if (result.hasNextPage) {
+      await fetchRemainingCategories();
+    }
+  };
+
+  const updateCategorySearch = (value: string) => {
+    setCategorySearch(value);
+    if (
+      value.trim().length === 0 ||
+      categoriesQuery.status !== "success" ||
+      !categoriesQuery.hasNextPage ||
+      categoriesQuery.isFetchingNextPage
+    ) {
+      return;
+    }
+
+    runQueryAction(fetchRemainingCategories);
   };
 
   const retryCategories = () => {
@@ -339,7 +361,11 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             </span>
           )}
         </div>
-        <CategorySearch value={categorySearch} onChange={setCategorySearch} />
+        <CategorySearch
+          value={categorySearch}
+          disabled={categoriesQuery.status !== "success"}
+          onChange={updateCategorySearch}
+        />
         <div className="tw-mt-2 tw-divide-y tw-divide-solid tw-divide-white/5 tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
           <CategoryRow
             label={detailText("waves.rep.details.categories.all")}
@@ -373,7 +399,10 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             />
           ))}
           {normalizedCategorySearch.length > 0 &&
-            filteredCategories.length === 0 && (
+            filteredCategories.length === 0 &&
+            categoriesQuery.status === "success" &&
+            !categoriesQuery.hasNextPage &&
+            !categoriesQuery.isFetchingNextPage && (
               <p className="tw-mb-0 tw-px-2.5 tw-py-3 tw-text-xs tw-font-medium tw-text-iron-500">
                 {detailText("waves.rep.details.categories.noMatches")}
               </p>
