@@ -38,6 +38,7 @@ import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identit
 import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -83,6 +84,7 @@ const CONTAINER_WIDTH_THRESHOLD = 500;
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
   onCancelReplyQuote,
+  onReplyTargetUnavailable,
   wave,
   drop,
   isStormMode,
@@ -108,6 +110,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const actionsContainerRef = useRef<HTMLDivElement>(null);
   const [actionsContainerElement, setActionsContainerElement] =
     useState<HTMLDivElement | null>(null);
@@ -445,6 +448,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     onReferencedNft,
     onMentionedUser,
     onMentionedWave,
+    restoreMentionedEntities,
     getUpdatedDrop,
     createGifDrop,
     finalizeAndAddDropPart,
@@ -501,6 +505,25 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     [canExitDropMode, handleDropModeChange]
   );
 
+  const replyTargetRecovery = useMemo(
+    () => ({
+      locale,
+      pollDraft,
+      setMetadata,
+      setPollDraftState,
+      onReplyTargetUnavailable,
+      restoreMentionedEntities,
+    }),
+    [
+      locale,
+      onReplyTargetUnavailable,
+      pollDraft,
+      restoreMentionedEntities,
+      setMetadata,
+      setPollDraftState,
+    ]
+  );
+
   const { missingRequirements, onDrop, onGifDrop } = useCreateDropSubmission({
     activeDrop,
     wave,
@@ -512,6 +535,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isLinksSubmitBlocked,
     canMentionAll,
     connectedProfile,
+    replyTargetRecovery,
     submitting,
     getMarkdown,
     files,
@@ -541,6 +565,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setSubmitting,
     setUploadingFiles,
     setFiles,
+    setDrop,
+    setIsStormMode,
     setMetadataOpenState,
     createDropInputRef,
     shouldRefocusAfterChatSubmitRef,

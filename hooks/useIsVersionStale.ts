@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 
 const CURRENT = publicEnv.VERSION!; // baked into the bundle
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
-const VERSION_ANNOUNCEMENT_ENDPOINT = "/api/announced-version";
+const VERSION_ENDPOINT = "/api/version";
+
+type VersionStatusResponse = {
+  readonly announced_version?: unknown;
+  readonly version?: unknown;
+};
 
 const shouldForceShowNewVersionToast = () =>
   globalThis.window !== undefined &&
@@ -26,11 +31,17 @@ export function useIsVersionStale(interval = 120_000) {
 
     async function check() {
       try {
-        const { version } = await fetch(VERSION_ANNOUNCEMENT_ENDPOINT, {
+        const { announced_version, version } = await fetch(VERSION_ENDPOINT, {
           cache: "no-store",
-        }).then((r) => r.json());
-        if (typeof version === "string" && version.length > 0) {
-          setStale(version !== CURRENT);
+        }).then((r) => r.json() as Promise<VersionStatusResponse>);
+        const targetVersion =
+          typeof publicEnv.ANNOUNCED_VERSION_ENDPOINT === "string" &&
+          publicEnv.ANNOUNCED_VERSION_ENDPOINT.length > 0
+            ? announced_version
+            : (announced_version ?? version);
+
+        if (typeof targetVersion === "string" && targetVersion.length > 0) {
+          setStale(targetVersion !== CURRENT);
         }
       } catch {
         /* ignore network errors */

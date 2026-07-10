@@ -713,6 +713,19 @@ const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "replyTargetDeletedToast.title": "Reply removed.",
+  "replyTargetDeletedToast.description":
+    "The message you were replying to was deleted. Your draft is still here.",
+  "replyTargetUnavailableToast.title": "Reply not sent.",
+  "replyTargetUnavailableToast.descriptionRestored":
+    "The message you replied to is no longer available. Your draft was restored.",
+  "replyTargetUnavailableToast.descriptionKept":
+    "The message you replied to is no longer available. Your current draft was kept.",
+  "replyTargetUnavailableToast.detailsRestored":
+    "You can send it as a new message instead.",
+  "replyTargetUnavailableToast.detailsKept":
+    "Your current draft was not changed.",
+  "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
 } as const);
 
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
