@@ -197,10 +197,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                   onToggleCheck={handleToggleCheck}
                 />
                 {voteRationaleReply?.drop.id === drop.id && (
-                  <div
-                    className="tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3"
-                    onClick={(event) => event.stopPropagation()}
-                  >
+                  <div className="tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3">
                     <PrivilegedDropCreator
                       activeDrop={{
                         action: ActiveDropAction.REPLY,
