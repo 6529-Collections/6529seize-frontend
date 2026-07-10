@@ -9,10 +9,7 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { ArrowPathIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { WaveLeaderboardRightSidebarState } from "./WaveLeaderboardRightSidebarState";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-
-const WAVE_RIGHT_SIDEBAR_LOCALE = DEFAULT_LOCALE;
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 const getDropSerialNo = (contents: ApiWaveLog["contents"]): number | null => {
   const drop = (contents as { readonly drop?: unknown }).drop;
@@ -69,10 +66,7 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
             className="tw-size-5 tw-animate-spin motion-reduce:tw-animate-none"
           />
         }
-        title={t(
-          WAVE_RIGHT_SIDEBAR_LOCALE,
-          "waves.sidebar.rightPanel.activity.loading"
-        )}
+        title={waveRightPanelText("waves.sidebar.rightPanel.activity.loading")}
       />
     );
   }
@@ -81,12 +75,10 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
     return (
       <WaveLeaderboardRightSidebarState
         icon={<ClockIcon aria-hidden="true" className="tw-size-5" />}
-        title={t(
-          WAVE_RIGHT_SIDEBAR_LOCALE,
+        title={waveRightPanelText(
           "waves.sidebar.rightPanel.activity.emptyTitle"
         )}
-        description={t(
-          WAVE_RIGHT_SIDEBAR_LOCALE,
+        description={waveRightPanelText(
           "waves.sidebar.rightPanel.activity.emptyDescription"
         )}
       />

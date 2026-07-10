@@ -13,8 +13,7 @@ import WaveRepDetails from "./WaveRepDetails";
 import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
 import WaveRules from "@/components/waves/specs/WaveRules";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -28,8 +27,6 @@ interface TabOption {
   key: SidebarTab;
   label: string;
 }
-
-const WAVE_RIGHT_SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
 export const WaveContent: React.FC<WaveContentProps> = ({
   wave,
@@ -47,44 +44,29 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   const options: TabOption[] = [
     {
       key: SidebarTab.ABOUT,
-      label: t(
-        WAVE_RIGHT_SIDEBAR_LOCALE,
-        "waves.sidebar.rightPanel.tabs.about"
-      ),
+      label: waveRightPanelText("waves.sidebar.rightPanel.tabs.about"),
     },
     {
       key: SidebarTab.RULES,
-      label: t(
-        WAVE_RIGHT_SIDEBAR_LOCALE,
-        "waves.sidebar.rightPanel.tabs.rules"
-      ),
+      label: waveRightPanelText("waves.sidebar.rightPanel.tabs.rules"),
     },
     {
       key: SidebarTab.REP,
-      label: t(WAVE_RIGHT_SIDEBAR_LOCALE, "waves.sidebar.rightPanel.tabs.rep"),
+      label: waveRightPanelText("waves.sidebar.rightPanel.tabs.rep"),
     },
     {
       key: SidebarTab.SETTINGS,
-      label: t(
-        WAVE_RIGHT_SIDEBAR_LOCALE,
-        "waves.sidebar.rightPanel.tabs.settings"
-      ),
+      label: waveRightPanelText("waves.sidebar.rightPanel.tabs.settings"),
     },
     ...(isCompetitionWave
       ? [
           {
             key: SidebarTab.TOP_VOTERS,
-            label: t(
-              WAVE_RIGHT_SIDEBAR_LOCALE,
-              "waves.sidebar.rightPanel.tabs.voters"
-            ),
+            label: waveRightPanelText("waves.sidebar.rightPanel.tabs.voters"),
           },
           {
             key: SidebarTab.ACTIVITY_LOG,
-            label: t(
-              WAVE_RIGHT_SIDEBAR_LOCALE,
-              "waves.sidebar.rightPanel.tabs.activity"
-            ),
+            label: waveRightPanelText("waves.sidebar.rightPanel.tabs.activity"),
           },
         ]
       : []),

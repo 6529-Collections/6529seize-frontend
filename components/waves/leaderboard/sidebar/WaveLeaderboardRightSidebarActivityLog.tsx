@@ -10,8 +10,7 @@ import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ClockIcon } from "@heroicons/react/24/outline";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;
@@ -22,8 +21,7 @@ interface WaveLeaderboardRightSidebarActivityLogProps {
 export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   WaveLeaderboardRightSidebarActivityLogProps
 > = ({ log, creditType, onDropClick }) => {
-  const unknownProfile = t(
-    DEFAULT_LOCALE,
+  const unknownProfile = waveRightPanelText(
     "waves.sidebar.rightPanel.activity.unknownProfile"
   );
   const voterProfile = log.invoker.handle ?? log.invoker.primary_address;
@@ -57,8 +55,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           <Link
             href={`/${log.invoker.handle ?? log.invoker.primary_address}`}
             className="tw-group tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
-            title={t(
-              DEFAULT_LOCALE,
+            title={waveRightPanelText(
               "waves.sidebar.rightPanel.activity.voterTitle",
               { profile: voterProfile }
             )}
@@ -86,7 +83,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
             {log.contents["oldVote"] === 0 ? (
               <span className="tw-text-sm tw-text-iron-400">
-                {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.activity.voted")}
+                {waveRightPanelText("waves.sidebar.rightPanel.activity.voted")}
               </span>
             ) : (
               <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-500">
@@ -109,8 +106,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           <Link
             href={`/${log.drop_author?.handle ?? log.drop_author?.primary_address}`}
             className="tw-group tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
-            title={t(
-              DEFAULT_LOCALE,
+            title={waveRightPanelText(
               "waves.sidebar.rightPanel.activity.dropCreatorTitle",
               { profile: dropCreatorProfile }
             )}

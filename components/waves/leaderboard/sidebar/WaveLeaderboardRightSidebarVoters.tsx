@@ -6,10 +6,7 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { WaveLeaderboardRightSidebarVoter } from "./WaveLeaderboardRightSidebarVoter";
 import { ArrowPathIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { WaveLeaderboardRightSidebarState } from "./WaveLeaderboardRightSidebarState";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-
-const WAVE_RIGHT_SIDEBAR_LOCALE = DEFAULT_LOCALE;
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarVotersProps {
   readonly wave: ApiWave;
@@ -45,10 +42,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
             className="tw-size-5 tw-animate-spin motion-reduce:tw-animate-none"
           />
         }
-        title={t(
-          WAVE_RIGHT_SIDEBAR_LOCALE,
-          "waves.sidebar.rightPanel.voters.loading"
-        )}
+        title={waveRightPanelText("waves.sidebar.rightPanel.voters.loading")}
       />
     );
   }
@@ -57,12 +51,8 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
     return (
       <WaveLeaderboardRightSidebarState
         icon={<UserGroupIcon aria-hidden="true" className="tw-size-5" />}
-        title={t(
-          WAVE_RIGHT_SIDEBAR_LOCALE,
-          "waves.sidebar.rightPanel.voters.emptyTitle"
-        )}
-        description={t(
-          WAVE_RIGHT_SIDEBAR_LOCALE,
+        title={waveRightPanelText("waves.sidebar.rightPanel.voters.emptyTitle")}
+        description={waveRightPanelText(
           "waves.sidebar.rightPanel.voters.emptyDescription"
         )}
       />

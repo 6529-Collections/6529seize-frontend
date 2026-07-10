@@ -9,8 +9,7 @@ import WaveRating from "./WaveRating";
 import { WaveIdentitySubmissionSpecsRows } from "./WaveIdentitySubmissionSpecs";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { getParentWaveName } from "@/helpers/waves/waves.helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 const CREDIT_SCOPE_LABELS: Record<ApiWaveCreditScope, string> = {
   [ApiWaveCreditScope.Wave]: "Whole wave",
@@ -45,14 +44,14 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
       <div className="tw-pb-4">
         <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-6">
           <h2 className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400">
-            {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.specs.overview")}
+            {waveRightPanelText("waves.sidebar.rightPanel.specs.overview")}
           </h2>
         </div>
 
         <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-y-0.5 tw-px-2">
           <div className="tw-group tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-2 tw-px-2 tw-py-1.5 tw-text-sm">
             <span className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">
-              {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.specs.type")}
+              {waveRightPanelText("waves.sidebar.rightPanel.specs.type")}
             </span>
             <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-end tw-gap-x-1 tw-text-right">
               <WaveTypeIcon waveType={wave.wave.type} />
@@ -62,7 +61,9 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
           {parentWave && parentWaveName && (
             <div className="tw-group tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-2 tw-px-2 tw-py-1.5 tw-text-sm">
               <span className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">
-                {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.specs.parentWave")}
+                {waveRightPanelText(
+                  "waves.sidebar.rightPanel.specs.parentWave"
+                )}
               </span>
               <Link
                 href={getWavePathRoute(parentWave.id)}
@@ -80,7 +81,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
                 className={`tw-group tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] ${votingRowAlignmentClass} tw-gap-2 tw-px-2 tw-py-1.5 tw-text-sm`}
               >
                 <span className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">
-                  {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.specs.voting")}
+                  {waveRightPanelText("waves.sidebar.rightPanel.specs.voting")}
                 </span>
                 <div className="tw-flex tw-min-w-0 tw-justify-end tw-text-right">
                   <WaveRating wave={wave} />
@@ -89,8 +90,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
 
               <div className="tw-group tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-2 tw-px-2 tw-py-1.5 tw-text-sm">
                 <span className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">
-                  {t(
-                    DEFAULT_LOCALE,
+                  {waveRightPanelText(
                     "waves.sidebar.rightPanel.specs.votingPower"
                   )}
                 </span>
@@ -103,7 +103,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
 
           <div className="tw-group tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-2 tw-px-2 tw-py-1.5 tw-text-sm">
             <span className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">
-              {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.specs.creator")}
+              {waveRightPanelText("waves.sidebar.rightPanel.specs.creator")}
             </span>
             <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-end tw-gap-x-1 tw-text-right">
               <WaveAuthor wave={wave} />

@@ -10,8 +10,7 @@ import {
 } from "@/helpers/waves/waves.constants";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;
@@ -40,8 +39,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
               src={resolveIpfsUrlSync(voter.voter.pfp)}
               alt={
                 voter.voter.handle ??
-                t(
-                  DEFAULT_LOCALE,
+                waveRightPanelText(
                   "waves.sidebar.rightPanel.voters.avatarFallback"
                 )
               }

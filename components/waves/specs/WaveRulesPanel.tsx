@@ -2,8 +2,7 @@ import type {
   WaveCustomRules,
   WaveRules,
 } from "@/helpers/waves/wave-rules.helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveRulesPanelProps {
   readonly rules: WaveRules;
@@ -29,10 +28,10 @@ function WaveRulesCustomSection({
     return (
       <section className="tw-px-4 tw-py-4">
         <Heading className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-400">
-          {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.rules.creatorTitle")}
+          {waveRightPanelText("waves.sidebar.rightPanel.rules.creatorTitle")}
         </Heading>
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500">
-          {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.rules.emptyCreator")}
+          {waveRightPanelText("waves.sidebar.rightPanel.rules.emptyCreator")}
         </p>
       </section>
     );
@@ -41,13 +40,13 @@ function WaveRulesCustomSection({
   return (
     <section className="tw-px-4 tw-py-4">
       <Heading className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-400">
-        {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.rules.creatorTitle")}
+        {waveRightPanelText("waves.sidebar.rightPanel.rules.creatorTitle")}
       </Heading>
       <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-3">
         {custom.display && (
           <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3">
             <p className="tw-mb-2 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
-              {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.rules.displayOnly")}
+              {waveRightPanelText("waves.sidebar.rightPanel.rules.displayOnly")}
             </p>
             <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
               {custom.display}
@@ -57,8 +56,7 @@ function WaveRulesCustomSection({
         {custom.binding && (
           <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-primary-400/15 tw-pt-3">
             <p className="tw-mb-2 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-primary-300">
-              {t(
-                DEFAULT_LOCALE,
+              {waveRightPanelText(
                 "waves.sidebar.rightPanel.rules.requiresAcceptance"
               )}
             </p>
@@ -67,8 +65,7 @@ function WaveRulesCustomSection({
             </p>
             {custom.signatureRequired && (
               <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
-                {t(
-                  DEFAULT_LOCALE,
+                {waveRightPanelText(
                   "waves.sidebar.rightPanel.rules.signatureRequired"
                 )}
               </p>
@@ -93,7 +90,7 @@ export default function WaveRulesPanel({
 
   const SectionHeading = showTitle ? "h3" : "h2";
   const resolvedTitle =
-    title ?? t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.rules.title");
+    title ?? waveRightPanelText("waves.sidebar.rightPanel.rules.title");
 
   return (
     <div

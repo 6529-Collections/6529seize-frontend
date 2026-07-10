@@ -18,6 +18,7 @@ import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
 import BoostedDropsDisplayPreference from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveSettingsSectionsProps {
   readonly wave: ApiWave;
@@ -59,7 +60,7 @@ export default function WaveSettingsSections({
       <WaveActiveCurationSection wave={wave} />
 
       <SettingsSection
-        title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.settings.rules")}
+        title={waveRightPanelText("waves.sidebar.rightPanel.settings.rules")}
       >
         <WaveCustomRules wave={wave} />
         {supportsAcceptanceRules && <WaveBindingRules wave={wave} />}
@@ -78,7 +79,9 @@ export default function WaveSettingsSections({
 
       {isDisplaySettingsWave && (
         <SettingsSection
-          title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.settings.display")}
+          title={waveRightPanelText(
+            "waves.sidebar.rightPanel.settings.display"
+          )}
         >
           <WaveSubmissionButtonLabel wave={wave} />
           <WaveOutcomesVisibility wave={wave} />
@@ -88,8 +91,7 @@ export default function WaveSettingsSections({
       {isApproveWave && (
         <>
           <SettingsSection
-            title={t(
-              DEFAULT_LOCALE,
+            title={waveRightPanelText(
               "waves.sidebar.rightPanel.settings.approvalTabs"
             )}
           >
@@ -97,8 +99,7 @@ export default function WaveSettingsSections({
           </SettingsSection>
 
           <SettingsSection
-            title={t(
-              DEFAULT_LOCALE,
+            title={waveRightPanelText(
               "waves.sidebar.rightPanel.settings.approvalRule"
             )}
           >
@@ -109,7 +110,7 @@ export default function WaveSettingsSections({
 
       {showChatSection && (
         <SettingsSection
-          title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.settings.chat")}
+          title={waveRightPanelText("waves.sidebar.rightPanel.settings.chat")}
         >
           {showChatStatus && <WaveChatStatus wave={wave} />}
           {showChatSettings && (
@@ -122,7 +123,7 @@ export default function WaveSettingsSections({
       )}
 
       <SettingsSection
-        title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.settings.access")}
+        title={waveRightPanelText("waves.sidebar.rightPanel.settings.access")}
       >
         <WaveGroup
           scope={wave.visibility.scope}

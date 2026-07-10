@@ -1,11 +1,9 @@
 "use client";
 
 import type { FC } from "react";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
-const OPEN_DROP_LABEL = t(
-  DEFAULT_LOCALE,
+const OPEN_DROP_LABEL = waveRightPanelText(
   "waves.sidebar.rightPanel.activity.openDropAriaLabel"
 );
 
