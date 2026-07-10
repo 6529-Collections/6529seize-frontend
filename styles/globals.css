@@ -64,8 +64,17 @@
   /* Android keyboard height adjustments */
   :root {
     --android-keyboard-height: 0px;
+    --native-keyboard-inset-bottom: 0px;
+    --native-keyboard-layout-transition-duration: 0ms;
+    --native-keyboard-composer-bottom-padding: max(
+      env(safe-area-inset-bottom, 0px),
+      0.5rem
+    );
     --pull-to-refresh-fixed-overlay-offset: 0px;
     --pull-to-refresh-fixed-overlay-transition-duration: 0ms;
+  }
+  :root[data-native-keyboard-visible="true"] {
+    --native-keyboard-composer-bottom-padding: 0px;
   }
   [data-pull-to-refresh-transform-root="true"]
     [data-pull-to-refresh-fixed-overlay="true"] {
