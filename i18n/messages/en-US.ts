@@ -858,6 +858,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "categories.loadMoreError": "Could not load more categories.",
   "categories.loadingMore": "Loading categories",
   "categories.loadMore": "Load more categories",
+  "categories.searchMore": "Search more categories",
   "view.ariaLabel": "Wave REP detail view",
   "view.contributors": "Contributors",
   "view.activity": "Activity",

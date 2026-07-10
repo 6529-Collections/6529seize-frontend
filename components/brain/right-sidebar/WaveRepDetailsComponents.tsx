@@ -176,11 +176,9 @@ export function CategoryRow({
 
 export function CategorySearch({
   value,
-  disabled,
   onChange,
 }: {
   readonly value: string;
-  readonly disabled: boolean;
   readonly onChange: (value: string) => void;
 }) {
   return (
@@ -193,12 +191,11 @@ export function CategorySearch({
         type="search"
         aria-label={detailText("waves.rep.details.categories.searchAriaLabel")}
         value={value}
-        disabled={disabled}
         onChange={(event) => onChange(event.currentTarget.value)}
         placeholder={detailText(
           "waves.rep.details.categories.searchPlaceholder"
         )}
-        className="tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.015] tw-py-2 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-outline-none tw-transition placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-ring-1 focus:tw-ring-primary-400/30 disabled:tw-cursor-wait disabled:tw-opacity-60"
+        className="tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.015] tw-py-2 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-outline-none tw-transition placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-ring-1 focus:tw-ring-primary-400/30"
       />
     </div>
   );

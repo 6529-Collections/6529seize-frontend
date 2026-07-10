@@ -350,7 +350,6 @@ describe("WaveRepDetails", () => {
     );
 
     renderDetails();
-    await screen.findByText("quality");
 
     fireEvent.change(
       await screen.findByRole("searchbox", {
@@ -358,6 +357,12 @@ describe("WaveRepDetails", () => {
       }),
       { target: { value: "helpful" } }
     );
+
+    const searchMoreButton = await screen.findByRole("button", {
+      name: "Search more categories",
+    });
+    expect(screen.queryByText("No matching categories")).toBeNull();
+    fireEvent.click(searchMoreButton);
 
     await waitFor(() =>
       expect(commonApiFetchMock).toHaveBeenCalledWith(

@@ -191,6 +191,10 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
     [categoriesQuery.data?.pages]
   );
   const normalizedCategorySearch = categorySearch.trim().toLowerCase();
+  const categoryLoadMoreMessageKey =
+    normalizedCategorySearch.length > 0
+      ? "waves.rep.details.categories.searchMore"
+      : "waves.rep.details.categories.loadMore";
   const filteredCategories = useMemo(
     () =>
       normalizedCategorySearch.length === 0
@@ -231,27 +235,6 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
   const fetchNextCategoriesPage = () => {
     runQueryAction(() => categoriesQuery.fetchNextPage());
-  };
-
-  const fetchRemainingCategories = async (): Promise<void> => {
-    const result = await categoriesQuery.fetchNextPage();
-    if (result.hasNextPage) {
-      await fetchRemainingCategories();
-    }
-  };
-
-  const updateCategorySearch = (value: string) => {
-    setCategorySearch(value);
-    if (
-      value.trim().length === 0 ||
-      categoriesQuery.status !== "success" ||
-      !categoriesQuery.hasNextPage ||
-      categoriesQuery.isFetchingNextPage
-    ) {
-      return;
-    }
-
-    runQueryAction(fetchRemainingCategories);
   };
 
   const retryCategories = () => {
@@ -361,11 +344,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             </span>
           )}
         </div>
-        <CategorySearch
-          value={categorySearch}
-          disabled={categoriesQuery.status !== "success"}
-          onChange={updateCategorySearch}
-        />
+        <CategorySearch value={categorySearch} onChange={setCategorySearch} />
         <div className="tw-mt-2 tw-divide-y tw-divide-solid tw-divide-white/5 tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
           <CategoryRow
             label={detailText("waves.rep.details.categories.all")}
@@ -447,7 +426,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             >
               {categoriesQuery.isFetchingNextPage
                 ? detailText("waves.rep.details.categories.loadingMore")
-                : detailText("waves.rep.details.categories.loadMore")}
+                : detailText(categoryLoadMoreMessageKey)}
             </button>
           </div>
         )}
