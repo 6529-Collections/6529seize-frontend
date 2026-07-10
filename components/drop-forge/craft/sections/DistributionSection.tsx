@@ -554,7 +554,7 @@ function DistributionPhotoLightbox({
   photoFileName: string;
   onClose: () => void;
 }>) {
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -589,7 +589,7 @@ function DistributionPhotoLightbox({
       }
 
       const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
+      const lastElement = focusableElements.at(-1);
 
       if (event.shiftKey) {
         if (
@@ -632,13 +632,13 @@ function DistributionPhotoLightbox({
         className="tw-absolute tw-inset-0 tw-border-0 tw-bg-black/85 tw-p-0"
       />
 
-      <div
+      <dialog
+        open
         ref={dialogRef}
-        role="dialog"
         aria-modal="true"
         aria-label={`Distribution photo ${photoFileName}`}
         tabIndex={-1}
-        className="tw-relative tw-z-[1001] tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5 focus:tw-outline-none"
+        className="tw-relative tw-z-[1001] tw-m-0 tw-max-h-none tw-max-w-none tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5 focus:tw-outline-none"
       >
         <img
           src={photo.link}
@@ -665,7 +665,7 @@ function DistributionPhotoLightbox({
             <XMarkIcon className="tw-h-5 tw-w-5" />
           </button>
         </div>
-      </div>
+      </dialog>
     </div>,
     document.body
   );
