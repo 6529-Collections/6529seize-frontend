@@ -202,8 +202,9 @@ describe("wave-rules.helpers", () => {
   });
 
   it("summarizes ongoing rank waves with no scheduled decisions", () => {
+    const base = createConfig();
     const config: CreateWaveConfig = {
-      ...createConfig(),
+      ...base,
       overview: { type: ApiWaveType.Rank, name: "Nodes", image: null },
       dates: {
         submissionStartDate: 1000,
@@ -213,6 +214,13 @@ describe("wave-rules.helpers", () => {
         subsequentDecisions: [],
         isRolling: false,
         ongoingRanking: true,
+      },
+      // Raw config carries stale values that the submit path strips; the
+      // summary must report the effective state instead.
+      outcomes: [{ title: "stale" } as any],
+      display: {
+        ...base.display,
+        outcomesVisible: true,
       },
     };
 
@@ -225,6 +233,8 @@ describe("wave-rules.helpers", () => {
       expect.arrayContaining([
         ["Winner announcements", "None (ongoing ranking, no end date)"],
         ["Type", "Rank — Perpetual Ranking"],
+        ["Outcomes visibility", "Hidden"],
+        ["Configured outcomes", "None yet"],
       ])
     );
     const labels = rows.map(([label]) => label);

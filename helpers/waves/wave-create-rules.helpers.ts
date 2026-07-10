@@ -299,22 +299,35 @@ const getCreateVotingSection = ({
 
 const getCreateOutcomesSection = ({
   config,
-}: CreateRulesContext): WaveRuleSection => ({
-  id: "outcomes",
-  title: "Outcomes",
-  rows: [
-    {
-      id: "outcomes-visible",
-      label: "Outcomes visibility",
-      value: config.display.outcomesVisible ? "Shown" : "Hidden",
-    },
-    {
-      id: "outcomes-count",
-      label: "Configured outcomes",
-      value: getOutcomeCountLabel(config.outcomes.length),
-    },
-  ],
-});
+}: CreateRulesContext): WaveRuleSection => {
+  // Perpetual rank waves submit with no outcomes and a hidden outcomes tab
+  // regardless of the stored config, so the summary reports the effective
+  // state rather than the raw values.
+  const isPerpetualRank =
+    config.overview.type === ApiWaveType.Rank &&
+    Boolean(config.dates.ongoingRanking);
+  const outcomesVisible = isPerpetualRank
+    ? false
+    : config.display.outcomesVisible;
+  const outcomesCount = isPerpetualRank ? 0 : config.outcomes.length;
+
+  return {
+    id: "outcomes",
+    title: "Outcomes",
+    rows: [
+      {
+        id: "outcomes-visible",
+        label: "Outcomes visibility",
+        value: outcomesVisible ? "Shown" : "Hidden",
+      },
+      {
+        id: "outcomes-count",
+        label: "Configured outcomes",
+        value: getOutcomeCountLabel(outcomesCount),
+      },
+    ],
+  };
+};
 
 const getCreateApprovalSection = ({
   config,
