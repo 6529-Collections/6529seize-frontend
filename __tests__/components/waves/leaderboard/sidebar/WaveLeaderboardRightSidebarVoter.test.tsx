@@ -33,4 +33,29 @@ describe("WaveLeaderboardRightSidebarVoter", () => {
     );
     expect(screen.getByText("-1")).toHaveClass("tw-text-rose-400");
   });
+
+  it("uses the primary address when the voter has no handle", () => {
+    const voter = {
+      ...baseVoter,
+      voter: {
+        id: "profile-id",
+        handle: null,
+        primary_address: " 0xalice ",
+        pfp: "",
+      },
+    };
+
+    render(
+      <WaveLeaderboardRightSidebarVoter
+        voter={voter as any}
+        position={1}
+        creditType={ApiWaveCreditType.Rep}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "0xalice" })).toHaveAttribute(
+      "href",
+      "/0xalice"
+    );
+  });
 });

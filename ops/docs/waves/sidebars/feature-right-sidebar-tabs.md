@@ -72,6 +72,9 @@ linked section pages.
 - Current behavior: panel navigation, section labels, accessible names, and
   empty/loading states use the `en-US` message catalog. Supported locales that
   do not yet provide these keys fall back to `en-US`.
+- Locale resolution is intentionally uniform across the panel: components use
+  the source catalog until locale-specific right-panel entries are enabled,
+  avoiding a partially translated sidebar during the progressive migration.
 - Remaining debt: rule values produced by the wave-rule helpers and legacy
   voting-unit labels still come from English domain constants.
 - User impact: non-English locales can see English fallback copy within an

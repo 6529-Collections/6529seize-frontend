@@ -391,6 +391,19 @@ describe("frontend i18n helpers", () => {
     );
   });
 
+  it("falls back consistently for wave voter connect copy", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(t(locale, "waves.sidebar.rightPanel.voters.connectTitle")).toBe(
+        t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.voters.connectTitle")
+      );
+      expect(
+        t(locale, "waves.sidebar.rightPanel.voters.connectDescription")
+      ).toBe(
+        t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.voters.connectDescription")
+      );
+    }
+  });
+
   it("formats locale-sensitive values through Intl helpers", () => {
     expect(formatNumber("de-DE", 1234.5, { maximumFractionDigits: 1 })).toBe(
       "1.234,5"

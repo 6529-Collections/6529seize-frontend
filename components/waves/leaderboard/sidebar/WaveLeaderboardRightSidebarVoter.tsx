@@ -10,7 +10,7 @@ import {
 } from "@/helpers/waves/waves.constants";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { getWaveRightPanelProfileIdentifier } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;
@@ -23,6 +23,12 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
 > = ({ voter, position, creditType }) => {
   const hasPositiveVotes = !!voter.positive_votes_summed;
   const hasNegativeVotes = !!voter.negative_votes_summed;
+  const voterProfile =
+    getWaveRightPanelProfileIdentifier([
+      voter.voter.handle,
+      voter.voter.primary_address,
+      voter.voter.id,
+    ]) ?? voter.voter.id.trim();
 
   return (
     <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-2.5">
@@ -31,18 +37,13 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           {position}
         </span>
         <Link
-          href={`/${voter.voter.handle}`}
+          href={`/${voterProfile}`}
           className="tw-group tw-flex tw-min-w-0 tw-max-w-full tw-flex-1 tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80"
         >
           {voter.voter.pfp ? (
             <Image
               src={resolveIpfsUrlSync(voter.voter.pfp)}
-              alt={
-                voter.voter.handle ??
-                waveRightPanelText(
-                  "waves.sidebar.rightPanel.voters.avatarFallback"
-                )
-              }
+              alt=""
               width={24}
               height={24}
               className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-inset tw-ring-white/10"
@@ -50,11 +51,9 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           ) : (
             <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
           )}
-          <UserProfileTooltipWrapper
-            user={voter.voter.handle ?? voter.voter.id}
-          >
+          <UserProfileTooltipWrapper user={voterProfile}>
             <span className="tw-block tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-opacity-80">
-              {voter.voter.handle}
+              {voterProfile}
             </span>
           </UserProfileTooltipWrapper>
         </Link>

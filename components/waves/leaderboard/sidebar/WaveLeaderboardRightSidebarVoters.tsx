@@ -6,7 +6,10 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { WaveLeaderboardRightSidebarVoter } from "./WaveLeaderboardRightSidebarVoter";
 import { ArrowPathIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { WaveLeaderboardRightSidebarState } from "./WaveLeaderboardRightSidebarState";
-import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import {
+  getWaveRightPanelProfileIdentifier,
+  waveRightPanelText,
+} from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarVotersProps {
   readonly wave: ApiWave;
@@ -16,10 +19,13 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
   WaveLeaderboardRightSidebarVotersProps
 > = ({ wave }) => {
   const { connectedProfile } = useAuth();
+  const connectedProfileHandle = getWaveRightPanelProfileIdentifier([
+    connectedProfile?.handle,
+  ]);
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.handle ?? undefined,
+      connectedProfileHandle,
       reverse: false,
       dropId: null,
       sortDirection: "DESC",
@@ -31,6 +37,20 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
       fetchNextPage().catch(() => undefined);
     }
   });
+
+  if (!connectedProfileHandle) {
+    return (
+      <WaveLeaderboardRightSidebarState
+        icon={<UserGroupIcon aria-hidden="true" className="tw-size-5" />}
+        title={waveRightPanelText(
+          "waves.sidebar.rightPanel.voters.connectTitle"
+        )}
+        description={waveRightPanelText(
+          "waves.sidebar.rightPanel.voters.connectDescription"
+        )}
+      />
+    );
+  }
 
   if (voters.length === 0 && isLoading) {
     return (
