@@ -182,6 +182,49 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     expect(placeholderDiv).toBeInTheDocument();
   });
 
+  it("uses the drop author's address when the handle is missing", () => {
+    const logWithoutAuthorHandle = {
+      ...mockLog,
+      drop_author: {
+        ...mockLog.drop_author,
+        handle: null,
+        primary_address: " 0xauthor ",
+      },
+    };
+
+    renderComponent({ log: logWithoutAuthorHandle });
+
+    const authorLink = screen.getByTitle("Drop creator: 0xauthor");
+    expect(authorLink).toHaveAttribute("href", "/0xauthor");
+    expect(authorLink).toHaveTextContent("0xauthor");
+  });
+
+  it("uses a trimmed voter address when the handle is missing", () => {
+    const logWithoutVoterHandle = {
+      ...mockLog,
+      invoker: {
+        ...mockLog.invoker,
+        handle: null,
+        primary_address: " 0xvoter ",
+      },
+    };
+
+    renderComponent({ log: logWithoutVoterHandle });
+
+    const voterLink = screen.getByTitle("Voter: 0xvoter");
+    expect(voterLink).toHaveAttribute("href", "/0xvoter");
+    expect(voterLink).toHaveTextContent("0xvoter");
+  });
+
+  it("renders an unknown drop creator without a broken profile link", () => {
+    renderComponent({ log: { ...mockLog, drop_author: undefined } });
+
+    const creator = screen.getByTitle("Drop creator: Unknown profile");
+    expect(creator.tagName).toBe("DIV");
+    expect(creator).not.toHaveAttribute("href");
+    expect(creator).toHaveTextContent("Unknown profile");
+  });
+
   it("displays vote change from old to new", () => {
     renderComponent();
 

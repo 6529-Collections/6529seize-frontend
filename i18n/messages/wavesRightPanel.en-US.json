@@ -8,6 +8,8 @@
   "waves.sidebar.rightPanel.voters.loading": "Loading voters…",
   "waves.sidebar.rightPanel.voters.emptyTitle": "No votes yet",
   "waves.sidebar.rightPanel.voters.emptyDescription": "Voter rankings will appear after the first vote.",
+  "waves.sidebar.rightPanel.voters.connectTitle": "Connect to view votes",
+  "waves.sidebar.rightPanel.voters.connectDescription": "Connect a profile to see who has voted.",
   "waves.sidebar.rightPanel.voters.avatarFallback": "Voter",
   "waves.sidebar.rightPanel.activity.loading": "Loading voting activity…",
   "waves.sidebar.rightPanel.activity.emptyTitle": "No voting activity yet",

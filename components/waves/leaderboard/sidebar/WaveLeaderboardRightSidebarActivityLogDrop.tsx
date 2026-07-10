@@ -3,10 +3,6 @@
 import type { FC } from "react";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
-const OPEN_DROP_LABEL = waveRightPanelText(
-  "waves.sidebar.rightPanel.activity.openDropAriaLabel"
-);
-
 type WaveLeaderboardRightSidebarActivityLogDropProps = {
   readonly onDropClick: () => void;
 };
@@ -14,6 +10,9 @@ type WaveLeaderboardRightSidebarActivityLogDropProps = {
 export const WaveLeaderboardRightSidebarActivityLogDrop: FC<
   WaveLeaderboardRightSidebarActivityLogDropProps
 > = ({ onDropClick }) => {
+  const openDropLabel = waveRightPanelText(
+    "waves.sidebar.rightPanel.activity.openDropAriaLabel"
+  );
   const handleClick = () => {
     onDropClick();
   };
@@ -22,8 +21,8 @@ export const WaveLeaderboardRightSidebarActivityLogDrop: FC<
     <button
       type="button"
       onClick={handleClick}
-      title={OPEN_DROP_LABEL}
-      aria-label={OPEN_DROP_LABEL}
+      title={openDropLabel}
+      aria-label={openDropLabel}
       className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-none tw-bg-transparent tw-p-1 tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
       <svg
