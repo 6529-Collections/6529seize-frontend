@@ -78,6 +78,7 @@ export function useAuthImpactTracking({
       trackAuthImpact("Auth Forced Logout", {
         auth_state_after: "logged_out",
         auth_state_before: "authenticated",
+        product_failure: true,
         reason,
         was_connected_wallet: wasConnectedWallet,
       });
@@ -100,6 +101,7 @@ export function useAuthImpactTracking({
       trackAuthImpact("Auth Validation Failed While Connected", {
         auth_state_after: "auth_validation_failed",
         auth_state_before: "authenticated",
+        product_failure: true,
         reason,
         was_connected_wallet: true,
       });
@@ -128,6 +130,7 @@ export function useAuthImpactTracking({
         trackAuthImpact("Auth Session Upgrade Prompt Shown", {
           auth_state_after: "session_upgrade_prompt",
           auth_state_before: "session_upgrade_required",
+          product_failure: true,
           reason: "session_upgrade_required",
         });
         return;
@@ -141,6 +144,7 @@ export function useAuthImpactTracking({
       trackAuthImpact("Auth Reauth Prompt Shown", {
         auth_state_after: "reauth_prompt",
         auth_state_before: authStateBefore,
+        product_failure: true,
         reason,
       });
 
