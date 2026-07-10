@@ -49,7 +49,7 @@ export const getCreateWaveMainSteps = ({
   return steps;
 };
 
-export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
+const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
   [ApiWaveType.Chat]: [
     CreateWaveStep.OVERVIEW,
     CreateWaveStep.GROUPS,
