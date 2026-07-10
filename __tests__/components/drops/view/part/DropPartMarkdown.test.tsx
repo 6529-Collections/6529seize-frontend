@@ -713,7 +713,7 @@ describe("DropPartMarkdown", () => {
   });
 
   it("handles external links", () => {
-    const content = "[link](https://google.com)";
+    const content = "https://google.com";
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
@@ -732,7 +732,7 @@ describe("DropPartMarkdown", () => {
     }
     expect(previewCall.href).toBe("https://google.com");
 
-    const a = screen.getByRole("link", { name: "link" });
+    const a = screen.getByRole("link", { name: "https://google.com" });
     expect(a).toHaveAttribute("target", "_blank");
     expect(a).toHaveAttribute("rel", "noopener noreferrer nofollow");
   });
@@ -827,7 +827,7 @@ describe("DropPartMarkdown", () => {
 
   it("renders Art Blocks token card when feature enabled", async () => {
     publicEnv.VITE_FEATURE_AB_CARD = "true";
-    const content = "[token](https://www.artblocks.io/token/662000)";
+    const content = "https://www.artblocks.io/token/662000";
 
     render(
       <DropPartMarkdown
@@ -858,7 +858,7 @@ describe("DropPartMarkdown", () => {
   });
 
   it("renders Farcaster card for Warpcast links", () => {
-    const content = "[cast](https://warpcast.com/alice/0x123)";
+    const content = "https://warpcast.com/alice/0x123";
 
     render(
       <DropPartMarkdown
@@ -927,7 +927,7 @@ describe("DropPartMarkdown", () => {
   });
 
   it("renders Twitter/X links with the local Twitter preview card", () => {
-    const content = "[tweet](https://twitter.com/someuser/status/2222222222)";
+    const content = "https://twitter.com/someuser/status/2222222222";
 
     render(
       <DropPartMarkdown
@@ -1113,6 +1113,23 @@ describe("DropPartMarkdown", () => {
     );
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
     const a = screen.getByRole("link", { name: "link" });
+    expect(a).toHaveAttribute("href", "https://google.com");
+  });
+
+  it("renders markdown links with anchor text as plain links by default", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="[gm](https://google.com)"
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    const a = screen.getByRole("link", { name: "gm" });
     expect(a).toHaveAttribute("href", "https://google.com");
   });
 
