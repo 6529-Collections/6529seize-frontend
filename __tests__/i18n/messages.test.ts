@@ -13,6 +13,7 @@ import {
   normalizeLocale,
 } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
 
 const NEW_VERSION_TOAST_LOCALE_MESSAGES = [
   {
@@ -418,6 +419,22 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "waves.drop.actions.copyFailed")).toBe(
       "Kopieren fehlgeschlagen"
     );
+  });
+
+  it("keeps shared search control copy namespaced", () => {
+    expect(EN_US_MESSAGES["headerSearch.clear"]).toBe("Clear search");
+    expect(EN_US_MESSAGES["headerSearch.clearShort"]).toBe("Clear");
+    expect(EN_US_MESSAGES["headerSearch.close"]).toBe("Close search");
+    expect(EN_US_MESSAGES["waves.drops.searchModal.clear"]).toBe(
+      "Clear search"
+    );
+    expect(EN_US_MESSAGES["waves.drops.searchModal.clearShort"]).toBe("Clear");
+    expect(EN_US_MESSAGES["waves.drops.searchModal.close"]).toBe(
+      "Close search"
+    );
+    expect(EN_US_MESSAGES).not.toHaveProperty("clear");
+    expect(EN_US_MESSAGES).not.toHaveProperty("clearShort");
+    expect(EN_US_MESSAGES).not.toHaveProperty("close");
   });
 
   it("keeps file-kind labels distinguishable within each locale", () => {
