@@ -3,12 +3,12 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getCreateWaveEndDate } from "@/helpers/waves/create-wave.helpers";
 import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   WAVE_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import {
   CREDIT_SCOPE_LABELS,
@@ -43,6 +43,34 @@ interface CreateRulesContext {
 const getOptionalRulesText = (value: string): string | null =>
   value.length > 0 ? value : null;
 
+const getRankScheduleRows = (config: CreateWaveConfig): WaveRuleRow[] => {
+  if (config.overview.type !== ApiWaveType.Rank) {
+    return [];
+  }
+
+  if (config.dates.ongoingRanking) {
+    return [
+      {
+        id: "ongoing-ranking",
+        label: t(
+          DEFAULT_LOCALE,
+          "waves.rules.schedule.winnerAnnouncements.label"
+        ),
+        value: t(
+          DEFAULT_LOCALE,
+          "waves.rules.schedule.winnerAnnouncements.none"
+        ),
+      },
+    ];
+  }
+
+  return getDecisionRows({
+    first_decision_time: config.dates.firstDecisionTime,
+    subsequent_decisions: config.dates.subsequentDecisions,
+    is_rolling: config.dates.isRolling,
+  });
+};
+
 const getCreateOverviewSection = ({
   config,
 }: CreateRulesContext): WaveRuleSection => ({
@@ -52,7 +80,10 @@ const getCreateOverviewSection = ({
     {
       id: "wave-type",
       label: "Type",
-      value: WAVE_LABELS[config.overview.type],
+      value:
+        config.overview.type === ApiWaveType.Rank && config.dates.ongoingRanking
+          ? t(DEFAULT_LOCALE, "waves.rules.schedule.perpetualRankType")
+          : WAVE_LABELS[config.overview.type],
     },
   ],
 });
@@ -164,34 +195,6 @@ const getCreateTimingSection = ({
     ...getRankScheduleRows(config),
   ],
 });
-
-const getRankScheduleRows = (config: CreateWaveConfig): WaveRuleRow[] => {
-  if (config.overview.type !== ApiWaveType.Rank) {
-    return [];
-  }
-
-  if (config.dates.ongoingRanking) {
-    return [
-      {
-        id: "ongoing-ranking",
-        label: t(
-          DEFAULT_LOCALE,
-          "waves.rules.schedule.winnerAnnouncements.label"
-        ),
-        value: t(
-          DEFAULT_LOCALE,
-          "waves.rules.schedule.winnerAnnouncements.none"
-        ),
-      },
-    ];
-  }
-
-  return getDecisionRows({
-    first_decision_time: config.dates.firstDecisionTime,
-    subsequent_decisions: config.dates.subsequentDecisions,
-    is_rolling: config.dates.isRolling,
-  });
-};
 
 const getCreateSubmissionsSection = ({
   config,

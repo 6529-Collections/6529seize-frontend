@@ -82,4 +82,6 @@ export interface CreateDropContentProps {
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
   readonly focusOnInitialActiveDrop?: boolean | undefined;
+  readonly initialMarkdown?: string | null | undefined;
+  readonly initialMarkdownKey?: string | null | undefined;
 }

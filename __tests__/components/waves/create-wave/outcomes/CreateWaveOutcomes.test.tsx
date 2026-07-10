@@ -161,25 +161,26 @@ describe("CreateWaveOutcomes", () => {
     expect(screen.queryByTestId("types")).toBeNull();
     expect(screen.queryByTestId("rows")).toBeNull();
 
+    // No outcomes will ever exist, so the outcomes tab stays hidden.
     const toggle = screen.getByRole("checkbox");
     expect(toggle).toBeDisabled();
-    expect(toggle).toBeChecked();
+    expect(toggle).not.toBeChecked();
   });
 
-  it("renders the perpetual toggle checked even when the stored preference is hidden", () => {
+  it("renders the perpetual toggle unchecked even when the stored preference is visible", () => {
     render(
       <CreateWaveOutcomes
         {...baseProps}
         waveType={ApiWaveType.Rank}
         dates={{ ongoingRanking: true } as any}
-        display={{ ...baseDisplay, outcomesVisible: false }}
+        display={{ ...baseDisplay, outcomesVisible: true }}
       />
     );
 
     // The stored preference is preserved for a switch back to scheduled mode,
-    // but the perpetual UI always presents the leaderboard as visible.
+    // but a perpetual wave has no outcomes to show.
     const toggle = screen.getByRole("checkbox");
-    expect(toggle).toBeChecked();
+    expect(toggle).not.toBeChecked();
     expect(toggle).toBeDisabled();
   });
 

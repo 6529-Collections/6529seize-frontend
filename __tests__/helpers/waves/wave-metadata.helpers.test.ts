@@ -85,17 +85,24 @@ describe("wave-metadata.helpers", () => {
     ]);
   });
 
-  it("never hides outcomes for perpetual rank waves", () => {
+  it("always hides outcomes for perpetual rank waves", () => {
     expect(
       getCreateWaveDisplayMetadataRequests({
         waveType: ApiWaveType.Rank,
         ongoingRanking: true,
         display: {
           ...defaultDisplay,
-          outcomesVisible: false,
+          // Even a stored "visible" preference is not submitted: a perpetual
+          // wave has no outcomes to show.
+          outcomesVisible: true,
         },
       })
-    ).toEqual([]);
+    ).toEqual([
+      {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+        data_value: "false",
+      },
+    ]);
   });
 
   it("still hides outcomes for approve waves with a stray ongoing flag", () => {

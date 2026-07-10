@@ -130,12 +130,12 @@ export default function WavesOutcome({
               {t(DEFAULT_LOCALE, "waves.create.outcomes.perpetual.description")}
             </p>
           </div>
-          {/* The leaderboard is always visible for perpetual waves. The stored
-              preference is left untouched so it is restored if the user
-              switches back to scheduled announcements; the submit path treats
-              perpetual as visible regardless. */}
+          {/* A perpetual wave never has outcomes to show, so its outcomes tab
+              stays hidden. The stored preference is left untouched so it is
+              restored if the user switches back to scheduled announcements;
+              the submit path treats perpetual as hidden regardless. */}
           <ShowOutcomesToggle
-            display={{ ...display, outcomesVisible: true }}
+            display={{ ...display, outcomesVisible: false }}
             disabled
             onChange={setDisplay}
           />

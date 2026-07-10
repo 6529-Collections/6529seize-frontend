@@ -72,6 +72,8 @@ interface CreateDropProps {
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
   readonly forceStandardDropComposer?: boolean | undefined;
   readonly focusOnInitialActiveDrop?: boolean | undefined;
+  readonly initialMarkdown?: string | null | undefined;
+  readonly initialMarkdownKey?: string | null | undefined;
 }
 
 export interface DropMutationBody {
@@ -122,6 +124,8 @@ export default function CreateDrop({
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
   focusOnInitialActiveDrop = false,
+  initialMarkdown = null,
+  initialMarkdownKey = null,
 }: CreateDropProps) {
   const { setToast, connectedProfile } = useAuth();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -680,6 +684,8 @@ export default function CreateDrop({
       curationUrlSubmitRestrictionMessage: curationUrlRestrictionMessage,
       termsSignatureFlowEnabled,
       identityPickerPlacement,
+      initialMarkdown,
+      initialMarkdownKey,
     };
   }, [
     activeDrop,
@@ -703,6 +709,8 @@ export default function CreateDrop({
     curationUrlRestrictionMessage,
     termsSignatureFlowEnabled,
     identityPickerPlacement,
+    initialMarkdown,
+    initialMarkdownKey,
   ]);
 
   let dropComposerContent: ReactNode;
