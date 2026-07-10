@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import {
   AnimatePresence,
   LazyMotion,
@@ -27,6 +32,9 @@ interface BrainContentProps {
 
 // Reserve the compact one-line composer height before ResizeObserver runs.
 const MIN_REPLY_COMPOSER_RESERVE_PX = 104;
+const NATIVE_KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
+const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
+  "var(--native-keyboard-layout-transition-duration, 0ms)";
 
 const BrainContent: React.FC<BrainContentProps> = ({
   children,
@@ -50,20 +58,29 @@ const BrainContent: React.FC<BrainContentProps> = ({
   const composerPositionClassName = isApp
     ? "tw-fixed tw-inset-x-0"
     : "tw-absolute tw-inset-x-0 tw-bottom-0";
-  const composerMotionInitial = shouldReduceMotion
-    ? { opacity: 1, y: "0%" }
-    : { opacity: 1, y: "100%" };
+  const shouldAnimateComposerEntrance = !isApp && !shouldReduceMotion;
+  const composerMotionInitial = shouldAnimateComposerEntrance
+    ? { opacity: 1, y: "100%" }
+    : { opacity: 1, y: "0%" };
   const composerMotionAnimate = { opacity: 1, y: "0%" };
-  const composerMotionExit = shouldReduceMotion
-    ? { opacity: 1, y: "0%" }
-    : { opacity: 1, y: "100%" };
+  const composerMotionExit = shouldAnimateComposerEntrance
+    ? { opacity: 1, y: "100%" }
+    : { opacity: 1, y: "0%" };
   const containerStyle: BrainContentStyle = {
     "--brain-content-composer-reserve": `${composerReserve}px`,
   };
   const composerMotionTransition = {
-    duration: shouldReduceMotion ? 0 : 0.32,
+    duration: shouldAnimateComposerEntrance ? 0.32 : 0,
     ease: "easeOut",
   };
+  const composerStyle = isApp
+    ? {
+        bottom: `calc(${NATIVE_KEYBOARD_INSET} + ${composerBottomOffset}px)`,
+        transitionProperty: "bottom",
+        transitionDuration: NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION,
+        transitionTimingFunction: "ease-out",
+      }
+    : undefined;
   const handleComposerRef = useCallback((node: HTMLDivElement | null) => {
     setComposerElement(node);
     if (!node) {
@@ -113,7 +130,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
             <m.div
               ref={handleComposerRef}
               className={`${composerPositionClassName} tw-z-[80] tw-transform-gpu tw-bg-black tw-px-2 tw-will-change-transform sm:tw-px-4 md:tw-px-6 lg:tw-px-0`}
-              {...(isApp ? { style: { bottom: composerBottomOffset } } : {})}
+              {...(composerStyle ? { style: composerStyle } : {})}
               initial={composerMotionInitial}
               animate={composerMotionAnimate}
               exit={composerMotionExit}
