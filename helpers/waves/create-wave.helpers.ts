@@ -414,8 +414,13 @@ export const getCreateWaveEndDate = ({
     return config.dates.endDate;
   }
 
-  // Ongoing (perpetual) Rank waves never end: no decision schedule, no end date.
-  if (config.dates.ongoingRanking) {
+  // Ongoing (perpetual) Rank waves never end: no decision schedule, no end
+  // date. Only Rank reaches this point, but the explicit type gate keeps the
+  // guarantee local rather than positional.
+  if (
+    config.overview.type === ApiWaveType.Rank &&
+    config.dates.ongoingRanking
+  ) {
     return null;
   }
 
