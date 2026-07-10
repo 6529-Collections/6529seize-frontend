@@ -107,6 +107,14 @@ function FallbackStyleComponent() {
   );
 }
 
+function NotificationsStyleComponent() {
+  const { notificationsViewStyle } = useLayout();
+
+  return (
+    <div data-testid="notifications-view" style={notificationsViewStyle} />
+  );
+}
+
 describe("LayoutProvider", () => {
   it("provides viewport-sized fallback styles before measurement completes", () => {
     const originalRequestAnimationFrame = global.requestAnimationFrame;
@@ -243,5 +251,45 @@ describe("LayoutProvider", () => {
       expect(content.style.maxHeight).toContain("- 100px");
     });
     expect(content.style.maxHeight).not.toContain("- 80px");
+  });
+
+  it("subtracts the shared keyboard inset from native notifications", () => {
+    mockCapacitorValues = { isCapacitor: true, isAndroid: false, isIos: true };
+
+    render(
+      <LayoutProvider>
+        <NotificationsStyleComponent />
+      </LayoutProvider>
+    );
+
+    const notifications = screen.getByTestId("notifications-view");
+
+    expect(notifications.style.height).toContain(
+      "- var(--native-keyboard-inset-bottom, 0px)"
+    );
+    expect(notifications.style.maxHeight).toContain(
+      "- var(--native-keyboard-inset-bottom, 0px)"
+    );
+    expect(notifications.style.transition).toBe(
+      "height var(--native-keyboard-layout-transition-duration, 0ms) ease-out, max-height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+    );
+  });
+
+  it("keeps responsive web notifications free of native keyboard styles", () => {
+    render(
+      <LayoutProvider>
+        <NotificationsStyleComponent />
+      </LayoutProvider>
+    );
+
+    const notifications = screen.getByTestId("notifications-view");
+
+    expect(notifications.style.height).not.toContain(
+      "--native-keyboard-inset-bottom"
+    );
+    expect(notifications.style.maxHeight).not.toContain(
+      "--native-keyboard-inset-bottom"
+    );
+    expect(notifications.style.transition).toBe("");
   });
 });

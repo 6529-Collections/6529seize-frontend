@@ -2,7 +2,6 @@
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import VotingModalButton from "@/components/voting/VotingModalButton";
-import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
@@ -22,8 +21,6 @@ interface WaveLeaderboardGridItemViewportProps {
   readonly isContentOnlyMode: boolean;
   readonly showDesktopContentOnlyActions: boolean;
   readonly canOpenDrop: boolean;
-  readonly isCuratable: boolean;
-  readonly isCurated: boolean;
   readonly canShowVotingAction: boolean;
   readonly onOpenDrop: () => void;
   readonly onVoteButtonClick: () => void;
@@ -133,8 +130,6 @@ export const WaveLeaderboardGridItemViewport: React.FC<
   isContentOnlyMode,
   showDesktopContentOnlyActions,
   canOpenDrop,
-  isCuratable,
-  isCurated,
   canShowVotingAction,
   onOpenDrop,
   onVoteButtonClick,
@@ -269,15 +264,6 @@ export const WaveLeaderboardGridItemViewport: React.FC<
               <div className="tw-flex tw-h-8 tw-items-center">
                 <WaveDropActionsOpen drop={drop} />
               </div>
-            )}
-            {isCuratable && (
-              <DropCurationButton
-                dropId={drop.id}
-                waveId={drop.wave.id}
-                isCuratable={isCuratable}
-                isCurated={isCurated}
-                className="tw-bg-iron-950/70"
-              />
             )}
             {canShowVotingAction && (
               <VotingModalButton

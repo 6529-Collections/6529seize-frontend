@@ -106,6 +106,12 @@ describe("useNativeKeyboard", () => {
     expect(result.current.isVisible).toBe(true);
     expect(result.current.keyboardHeight).toBe(320);
     expect(result.current.phase).toBe("showing");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--native-keyboard-inset-bottom"
+      )
+    ).toBe("320px");
+    expect(document.documentElement.dataset.nativeKeyboardVisible).toBe("true");
 
     act(() => {
       listeners["keyboardDidShow"]?.({ keyboardHeight: 336 });
@@ -114,6 +120,104 @@ describe("useNativeKeyboard", () => {
     expect(result.current.isVisible).toBe(true);
     expect(result.current.keyboardHeight).toBe(336);
     expect(result.current.phase).toBe("visible");
+  });
+
+  it("publishes only the keyboard inset not already removed by layout viewport resize", async () => {
+    mockGetPlatform.mockReturnValue("android");
+    const originalInnerHeight = globalThis.innerHeight;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    Object.defineProperty(globalThis, "innerHeight", {
+      configurable: true,
+      value: 800,
+    });
+    window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    };
+    window.cancelAnimationFrame = jest.fn();
+
+    try {
+      await renderNativeKeyboardHook();
+
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+      });
+
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--native-keyboard-inset-bottom"
+        )
+      ).toBe("320px");
+
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: 600,
+      });
+
+      act(() => {
+        globalThis.dispatchEvent(new Event("resize"));
+      });
+
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--native-keyboard-inset-bottom"
+        )
+      ).toBe("120px");
+    } finally {
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+      window.cancelAnimationFrame = originalCancelAnimationFrame;
+    }
+  });
+
+  it("keeps the native iOS inset authoritative while the keyboard opens", async () => {
+    const originalInnerHeight = globalThis.innerHeight;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    Object.defineProperty(globalThis, "innerHeight", {
+      configurable: true,
+      value: 800,
+    });
+    window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    };
+    window.cancelAnimationFrame = jest.fn();
+
+    try {
+      const { result } = await renderNativeKeyboardHook();
+
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+      });
+
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: 600,
+      });
+
+      act(() => {
+        globalThis.dispatchEvent(new Event("resize"));
+      });
+
+      expect(result.current.phase).toBe("showing");
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--native-keyboard-inset-bottom"
+        )
+      ).toBe("320px");
+    } finally {
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+      window.cancelAnimationFrame = originalCancelAnimationFrame;
+    }
   });
 
   it("updates immediately on iOS keyboard will-hide and reconciles on did-hide", async () => {
@@ -129,9 +233,15 @@ describe("useNativeKeyboard", () => {
       listeners["keyboardWillHide"]?.();
     });
 
-    expect(result.current.isVisible).toBe(false);
+    expect(result.current.isVisible).toBe(true);
     expect(result.current.keyboardHeight).toBe(0);
     expect(result.current.phase).toBe("hiding");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--native-keyboard-inset-bottom"
+      )
+    ).toBe("0px");
+    expect(document.documentElement.dataset.nativeKeyboardVisible).toBe("true");
 
     act(() => {
       listeners["keyboardDidHide"]?.();
@@ -140,6 +250,9 @@ describe("useNativeKeyboard", () => {
     expect(result.current.isVisible).toBe(false);
     expect(result.current.keyboardHeight).toBe(0);
     expect(result.current.phase).toBe("hidden");
+    expect(document.documentElement.dataset.nativeKeyboardVisible).toBe(
+      undefined
+    );
   });
 
   it("supports Android without iOS accessory bar calls", async () => {

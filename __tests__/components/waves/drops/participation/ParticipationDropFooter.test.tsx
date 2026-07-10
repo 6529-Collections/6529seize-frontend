@@ -7,11 +7,6 @@ jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: (...args: any[]) => useDropInteractionRules(...args),
 }));
 
-jest.mock("@/components/waves/drops/DropCurationButton", () => ({
-  __esModule: true,
-  default: () => <button data-testid="curation-button" type="button" />,
-}));
-
 jest.mock("@/components/waves/drops/WaveDropReactions", () => ({
   __esModule: true,
   default: () => <div data-testid="reactions" />,
@@ -166,20 +161,6 @@ describe("ParticipationDropFooter", () => {
     render(<ParticipationDropFooter drop={createDrop({ raters_count: 0 })} />);
 
     expect(screen.queryByTestId("ratings")).not.toBeInTheDocument();
-  });
-
-  it("keeps curation available when voting is closed", () => {
-    render(
-      <ParticipationDropFooter
-        drop={createDrop({
-          raters_count: 0,
-          context_profile_context: { curatable: true, curated: false } as any,
-        })}
-        isVotingClosed={true}
-      />
-    );
-
-    expect(screen.getByTestId("curation-button")).toBeInTheDocument();
   });
 
   it("keeps reactions visible when voting is closed", () => {

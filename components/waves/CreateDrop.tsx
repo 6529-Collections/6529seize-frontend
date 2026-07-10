@@ -44,6 +44,7 @@ import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onReplyTargetUnavailable?: (() => void) | undefined;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
   readonly onServerDropCreated?:
@@ -71,13 +72,15 @@ interface CreateDropProps {
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
   readonly forceStandardDropComposer?: boolean | undefined;
   readonly focusOnInitialActiveDrop?: boolean | undefined;
+  readonly initialMarkdown?: string | null | undefined;
+  readonly initialMarkdownKey?: string | null | undefined;
 }
 
 export interface DropMutationBody {
   readonly drop: ApiCreateDropRequest;
   readonly dropId: string | null;
   readonly onSuccess?: (() => void) | undefined;
-  readonly onError?: ((error: unknown) => void) | undefined;
+  readonly onError?: ((error: unknown) => boolean | void) | undefined;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -101,6 +104,7 @@ interface SlowModeChatWaveState {
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
+  onReplyTargetUnavailable,
   onDropAddedToQueue,
   onAllDropsAdded,
   onServerDropCreated,
@@ -120,6 +124,8 @@ export default function CreateDrop({
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
   focusOnInitialActiveDrop = false,
+  initialMarkdown = null,
+  initialMarkdownKey = null,
 }: CreateDropProps) {
   const { setToast, connectedProfile } = useAuth();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -493,6 +499,7 @@ export default function CreateDrop({
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,
+        errorMode: "structured",
       });
     },
     onSuccess: (serverDrop, body) => {
@@ -522,13 +529,15 @@ export default function CreateDrop({
           processDropRemoved(body.drop.wave_id, body.dropId);
         }
       }, 0);
-      setToast({
-        type: "error",
-        title: "Couldn't submit this drop.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-      body.onError?.(error);
+      const isHandled = body.onError?.(error) === true;
+      if (!isHandled) {
+        setToast({
+          type: "error",
+          title: "Couldn't submit this drop.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error),
+        });
+      }
     },
     retry: false,
   });
@@ -648,6 +657,7 @@ export default function CreateDrop({
     return {
       activeDrop,
       onCancelReplyQuote,
+      onReplyTargetUnavailable,
       drop,
       isStormMode,
       isDropMode,
@@ -674,10 +684,13 @@ export default function CreateDrop({
       curationUrlSubmitRestrictionMessage: curationUrlRestrictionMessage,
       termsSignatureFlowEnabled,
       identityPickerPlacement,
+      initialMarkdown,
+      initialMarkdownKey,
     };
   }, [
     activeDrop,
     onCancelReplyQuote,
+    onReplyTargetUnavailable,
     drop,
     isStormMode,
     isDropMode,
@@ -696,6 +709,8 @@ export default function CreateDrop({
     curationUrlRestrictionMessage,
     termsSignatureFlowEnabled,
     identityPickerPlacement,
+    initialMarkdown,
+    initialMarkdownKey,
   ]);
 
   let dropComposerContent: ReactNode;

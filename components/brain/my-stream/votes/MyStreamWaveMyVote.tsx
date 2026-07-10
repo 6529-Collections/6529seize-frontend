@@ -20,6 +20,9 @@ import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onExplainVote?:
+    | ((drop: ExtendedDrop, voteTotal: number, voteChange: number) => void)
+    | undefined;
   readonly isChecked?: boolean | undefined;
   readonly onToggleCheck?: ((dropId: string) => void) | undefined;
   readonly isResetting?: boolean | undefined;
@@ -133,6 +136,7 @@ const resolveCurationPreviewMedia = (
 const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   drop,
   onDropClick,
+  onExplainVote,
   isChecked = false,
   onToggleCheck,
   isResetting = false,
@@ -163,6 +167,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       return;
     }
     onDropClick(drop);
+  };
+
+  const handleExplainVote = (voteTotal: number, voteChange: number) => {
+    onExplainVote?.(drop, voteTotal, voteChange);
   };
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
@@ -351,6 +359,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   drop={drop}
                   isResetting={isResetting}
                   isVotingClosed={isVotingClosed}
+                  onExplainVote={onExplainVote ? handleExplainVote : undefined}
                 />
               </div>
             )}

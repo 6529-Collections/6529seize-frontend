@@ -23,11 +23,11 @@ import { t, type MessageKey } from "@/i18n/messages";
 
 const WAVE_HEADER_LOCALE = DEFAULT_LOCALE;
 
-const getPostsCountMessageKey = (count: number): MessageKey => {
+const getPostLabelMessageKey = (count: number): MessageKey => {
   const pluralCategory = new Intl.PluralRules(WAVE_HEADER_LOCALE).select(count);
   return pluralCategory === "one"
-    ? "waves.header.postsCount.one"
-    : "waves.header.postsCount.other";
+    ? "waves.header.postLabel.one"
+    : "waves.header.postLabel.other";
 };
 
 interface WaveHeaderProps {
@@ -92,8 +92,7 @@ export default function WaveHeader({
   );
   const postsCountLabel = t(
     WAVE_HEADER_LOCALE,
-    getPostsCountMessageKey(wave.metrics.drops_count),
-    { count: postsCount }
+    getPostLabelMessageKey(wave.metrics.drops_count)
   );
 
   return (

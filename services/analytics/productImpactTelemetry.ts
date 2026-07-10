@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import {
   trackAnalyticsEvent,
   type AnalyticsProperties,
+  type AuthImpactRefreshOutcome,
 } from "@/services/analytics/mixpanel";
 import { classifyPageView } from "@/services/analytics/pageClassification";
 
@@ -27,6 +28,15 @@ type ProductImpactStatusBucket =
   | "unknown";
 
 type ProductImpactSeverity = "info" | "warning";
+
+type ProductImpactEventName =
+  | "Auth Session Refresh Product Impact"
+  | "Auth Session Refresh Succeeded"
+  | "Auth Validation Cancelled"
+  | "Wave Feed Load Cancelled"
+  | "Wave Feed Load Failed"
+  | "Wave Feed Load Started"
+  | "Wave Feed Load Succeeded";
 
 type ProductImpactProperties = AnalyticsProperties & {
   readonly endpoint_family?: "auth_session_refresh" | "wave_drops_feed";
@@ -61,7 +71,7 @@ interface WaveFeedFailureTelemetry extends WaveFeedTelemetryBase {
 interface AuthRefreshTelemetryBase {
   readonly clientType: "desktop" | "native" | "web";
   readonly hadLocalJwt: boolean;
-  readonly refreshOutcome: string;
+  readonly refreshOutcome: AuthImpactRefreshOutcome;
 }
 
 interface AuthRefreshImpactTelemetry extends AuthRefreshTelemetryBase {
@@ -338,7 +348,7 @@ function buildBaseProperties(
 }
 
 function logProductImpactEvent(
-  eventName: string,
+  eventName: ProductImpactEventName,
   properties: ProductImpactProperties,
   severity: ProductImpactSeverity
 ): void {

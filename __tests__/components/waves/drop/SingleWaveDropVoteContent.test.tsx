@@ -12,6 +12,15 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
     <span data-testid="font-awesome-icon" data-flip={flip} />
   ),
 }));
+jest.mock("@tanstack/react-query", () => ({
+  useMutation: () => ({ mutateAsync: jest.fn() }),
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    address: undefined,
+    isSafeWallet: false,
+  }),
+}));
 jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
   return React.forwardRef(function MockSubmit(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({ handleClick: jest.fn() }));
@@ -22,6 +31,7 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
           typeof props.onVoteRequestStarted === "function"
         )}
         data-submission-mode={props.submissionMode}
+        data-submit-label={props.submitLabelOverride ?? ""}
       >
         <button
           onClick={() => {
@@ -125,6 +135,7 @@ describe("SingleWaveDropVoteContent", () => {
         id: "wave-123",
         name: "Test Wave",
         voting_credit_type: ApiWaveCreditType.Tdh,
+        authenticated_user_eligible_to_chat: true,
       } as any,
       context_profile_context: { rating: 50, min_rating: 0, max_rating: 100 },
       parts: [],
@@ -161,6 +172,122 @@ describe("SingleWaveDropVoteContent", () => {
     expect(
       screen.getByRole("button", { name: /numeric/i })
     ).toBeInTheDocument();
+  });
+
+  it("allows Vote with reply to be turned on before editing", () => {
+    render(
+      <SingleWaveDropVoteContent
+        drop={createMockDrop()}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    const rationaleSwitch = screen.getByRole("switch", {
+      name: /vote with reply/i,
+    });
+    expect(rationaleSwitch).toHaveAccessibleName("Vote with reply");
+    expect(rationaleSwitch).not.toBeChecked();
+    expect(rationaleSwitch).not.toBeDisabled();
+
+    fireEvent.click(rationaleSwitch);
+
+    expect(rationaleSwitch).toBeChecked();
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submit-label",
+      "Vote + reply"
+    );
+  });
+
+  it("auto-enables on the first edit and then respects a manual off choice", () => {
+    render(
+      <SingleWaveDropVoteContent
+        drop={createMockDrop()}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    const rationaleSwitch = screen.getByRole("switch", {
+      name: /vote with reply/i,
+    });
+    const rationaleTextarea = screen.getByRole("textbox", {
+      name: /optional rationale reply/i,
+    });
+
+    fireEvent.change(rationaleTextarea, {
+      target: {
+        value: `${(rationaleTextarea as HTMLTextAreaElement).value}Reason`,
+      },
+    });
+    expect(rationaleSwitch).toBeChecked();
+
+    fireEvent.click(rationaleSwitch);
+    expect(rationaleSwitch).not.toBeChecked();
+
+    fireEvent.change(rationaleTextarea, {
+      target: { value: "A different reason" },
+    });
+    expect(rationaleSwitch).not.toBeChecked();
+  });
+
+  it("blocks an enabled reply after all prefilled text is deleted", () => {
+    render(
+      <SingleWaveDropVoteContent
+        drop={createMockDrop()}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    const rationaleTextarea = screen.getByRole("textbox", {
+      name: /optional rationale reply/i,
+    });
+    fireEvent.change(rationaleTextarea, { target: { value: "" } });
+
+    const rationaleSwitch = screen.getByRole("switch", {
+      name: "Vote with reply",
+    });
+    expect(rationaleSwitch).toBeChecked();
+    expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
+      "Add rationale text or turn Vote with reply off."
+    );
+    expect(rationaleTextarea).toHaveAccessibleDescription(
+      /Add rationale text or turn Vote with reply off/i
+    );
+    expect(rationaleSwitch).toHaveAccessibleDescription(
+      /Add rationale text or turn Vote with reply off/i
+    );
+  });
+
+  it("hides rationale controls when the voter cannot reply in the wave", () => {
+    const drop = createMockDrop({
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        authenticated_user_eligible_to_chat: false,
+      } as any,
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(
+      screen.queryByRole("textbox", { name: /optional rationale reply/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("switch", { name: /vote with reply/i })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submit-label",
+      ""
+    );
   });
 
   it("uses confirmed submission mode by default", () => {
