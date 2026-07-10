@@ -16,6 +16,7 @@ import {
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
+import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
@@ -596,8 +597,8 @@ const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
 
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
-  "postsCount.one": "{count} Post",
-  "postsCount.other": "{count} Posts",
+  "postLabel.one": "Post",
+  "postLabel.other": "Posts",
 } as const);
 
 const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
@@ -845,10 +846,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "categories.title": "Categories",
   "categories.loading": "Loading",
   "categories.all": "All",
-  "categories.active": "Category",
-  "categories.activeAriaLabel": "Choose active Wave REP category",
-  "categories.browse": "Show all categories",
-  "categories.searchPlaceholder": "Search categories",
+  "categories.searchPlaceholder": "Search categories…",
   "categories.searchAriaLabel": "Search Wave REP categories",
   "categories.noMatches": "No matching categories",
   "categories.allAriaLabel":
@@ -860,6 +858,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "categories.loadMoreError": "Could not load more categories.",
   "categories.loadingMore": "Loading categories",
   "categories.loadMore": "Load more categories",
+  "categories.searchMore": "Search more categories",
   "view.ariaLabel": "Wave REP detail view",
   "view.contributors": "Contributors",
   "view.activity": "Activity",
@@ -867,8 +866,6 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "contributors.heading.category": "Contributors in {category}",
   "contributors.description.all": "{contributors}",
   "contributors.description.category": "{contributors}, {rep}",
-  "contributors.categoryFilter": "Category: {category}",
-  "contributors.categoryFilterAll": "All",
   "contributors.error": "Could not load contributors.",
   "contributors.empty.all": "No Wave REP yet.",
   "contributors.empty.category": "No contributors in {category} yet.",
@@ -1178,7 +1175,7 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":
-    "Choose how inserted boosted-drop cards appear in wave chat on this device.",
+    "How boosted-drop cards show in chat.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
   "waveChat.boostedDrops.display.hidden": "Hidden",
   "waveChat.boostedDrops.display.compact": "Compact",
@@ -1691,6 +1688,7 @@ export const EN_US_MESSAGES = {
   ...USER_PROFILE_HEADER_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
+  ...wavesRightPanelMessages,
   ...QUICK_DM_MESSAGES,
   ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,

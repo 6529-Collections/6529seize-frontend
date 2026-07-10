@@ -31,20 +31,20 @@ export default function WaveGroup({
       : t(DEFAULT_LOCALE, "waves.chatSettings.access.anyone");
 
   return (
-    <div className="tw-group tw-relative tw-flex tw-min-h-8 tw-w-full tw-items-center tw-justify-between tw-px-2 tw-py-1 tw-text-sm">
-      <div className="tw-flex tw-gap-x-4">
+    <div className="tw-group tw-relative tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-start tw-gap-x-2 tw-px-2 tw-py-1.5 tw-text-sm">
+      <div className="tw-flex tw-min-w-0 tw-gap-x-4 tw-py-0.5 tw-leading-5">
         <WaveGroupTitle type={type} />
       </div>
-      <div className="tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-end tw-gap-x-2 tw-text-right">
         {scope.group ? (
           <WaveGroupScope group={scope.group} />
         ) : (
-          <span className="tw-text-sm tw-font-medium tw-text-iron-50">
+          <span className="tw-min-w-0 tw-break-words tw-py-0.5 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
             {emptyScopeLabel}
           </span>
         )}
         {showEdit && (
-          <div className="tw-flex tw-items-center">
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center">
             <WaveGroupEditButtons
               wave={wave}
               type={type}

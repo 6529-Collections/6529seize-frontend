@@ -3,6 +3,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
 import Link from "next/link";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveRatingRepProps {
   readonly wave: ApiWave;
@@ -14,6 +15,9 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
 
   const hasCategory = !!category;
   const hasCreditor = !!creditor;
+  const unknownLabel = waveRightPanelText(
+    "waves.sidebar.rightPanel.specs.unknown"
+  );
 
   if (!hasCategory && !hasCreditor) {
     return null;
@@ -27,9 +31,11 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
       {hasCategory && (
-        <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2">
-          <span className="tw-font-normal tw-text-iron-500">Category</span>
-          <span className="tw-break-words tw-text-right tw-font-medium tw-text-iron-50">
+        <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-1 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2.5">
+          <span className="tw-text-xs tw-font-normal tw-text-iron-500">
+            {waveRightPanelText("waves.sidebar.rightPanel.specs.category")}
+          </span>
+          <span className="tw-w-full tw-break-words tw-text-left tw-font-medium tw-leading-5 tw-text-iron-50">
             {category}
           </span>
         </div>
@@ -38,9 +44,14 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
       {hasCreditor && (
         <div
           className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2"
-          aria-label={`Creditor ${creditor.handle ?? "unknown"}`}
+          aria-label={waveRightPanelText(
+            "waves.sidebar.rightPanel.specs.creditorAriaLabel",
+            { handle: creditor.handle ?? unknownLabel }
+          )}
         >
-          <span className="tw-font-normal tw-text-iron-500">Creditor</span>
+          <span className="tw-font-normal tw-text-iron-500">
+            {waveRightPanelText("waves.sidebar.rightPanel.specs.creditor")}
+          </span>
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             {creditor.pfp ? (
               <Image
@@ -65,7 +76,9 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
                 </UserProfileTooltipWrapper>
               </Link>
             ) : (
-              <span className="tw-font-medium tw-text-iron-50">Unknown</span>
+              <span className="tw-font-medium tw-text-iron-50">
+                {unknownLabel}
+              </span>
             )}
           </div>
         </div>
