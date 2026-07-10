@@ -66,6 +66,20 @@ linked section pages.
   `REP`, `Settings`, `Voters`, or `Activity`.
 - `Trending` behavior is part of `About` content and is documented separately.
 
+### Localization fallback debt
+
+- Surface: `/waves/{waveId}` and `/messages/{waveId}` right-sidebar sections.
+- Current behavior: panel navigation, section labels, accessible names, and
+  empty/loading states use the `en-US` message catalog. Supported locales that
+  do not yet provide these keys fall back to `en-US`.
+- Remaining debt: rule values produced by the wave-rule helpers and legacy
+  voting-unit labels still come from English domain constants.
+- User impact: non-English locales can see English fallback copy within an
+  otherwise functional panel.
+- Owner/follow-up: Waves frontend maintainers should migrate the remaining
+  rule and voting constants when locale-specific catalogs are enabled for this
+  surface.
+
 ## Related Pages
 
 - [Wave Sidebars Index](README.md)

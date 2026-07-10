@@ -336,14 +336,8 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col tw-gap-4 tw-p-4 tw-@container/rep">
-      <section aria-labelledby="wave-rep-summary-heading">
-        <h2
-          id="wave-rep-summary-heading"
-          className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400"
-        >
-          {detailText("waves.rep.details.summary.title")}
-        </h2>
-        <div className="tw-mt-2.5 tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
+      <section aria-label={detailText("waves.rep.details.summary.title")}>
+        <div className="tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
           <div className="tw-flex tw-items-end tw-justify-between tw-gap-4 tw-px-2 tw-py-2.5">
             <div className="tw-min-w-0">
               <p className="tw-mb-1 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
@@ -389,12 +383,12 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
       <section aria-labelledby="wave-rep-categories-heading">
         <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
-          <h3
+          <h2
             id="wave-rep-categories-heading"
             className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400"
           >
             {detailText("waves.rep.details.categories.title")}
-          </h3>
+          </h2>
           {categoriesQuery.isPending && (
             <span className="tw-text-xs tw-font-medium tw-text-iron-500">
               {detailText("waves.rep.details.categories.loading")}
@@ -495,14 +489,13 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           variant="sticky"
         />
         <div
-          role="tablist"
+          role="group"
           aria-label={detailText("waves.rep.details.view.ariaLabel")}
           className="tw-grid tw-grid-cols-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5"
         >
           <button
             type="button"
-            role="tab"
-            aria-selected={activeView === "contributors"}
+            aria-pressed={activeView === "contributors"}
             onClick={() => setActiveView("contributors")}
             className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition ${
               activeView === "contributors"
@@ -514,8 +507,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={activeView === "activity"}
+            aria-pressed={activeView === "activity"}
             onClick={showActivity}
             className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition ${
               activeView === "activity"
@@ -532,12 +524,12 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         <section aria-labelledby="wave-rep-contributors-heading">
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
             <div className="tw-min-w-0">
-              <h3
+              <h2
                 id="wave-rep-contributors-heading"
                 className="tw-mb-0 tw-break-words tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400"
               >
                 {contributorHeading}
-              </h3>
+              </h2>
               <p className="tw-mb-0 tw-mt-1 tw-break-words tw-text-xs tw-leading-4 tw-text-iron-500">
                 {contributorDescription}
               </p>
@@ -635,12 +627,12 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         <section aria-labelledby="wave-rep-activity-heading">
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
             <div>
-              <h3
+              <h2
                 id="wave-rep-activity-heading"
                 className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400"
               >
                 {detailText("waves.rep.details.activity.title")}
-              </h3>
+              </h2>
               <p className="tw-mb-0 tw-mt-0.5 tw-text-xs tw-text-iron-500">
                 {detailText("waves.rep.details.activity.description")}
               </p>

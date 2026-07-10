@@ -8,6 +8,8 @@ import WaveGroupEdit from "./WaveGroupEdit";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WaveGroupType } from "../WaveGroup.types";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export type WaveGroupEditButtonHandle = {
   open: () => void;
@@ -56,8 +58,11 @@ const WaveGroupEditButton = forwardRef<
     triggerContent = (
       <button
         type="button"
-        aria-label="Edit group"
-        title="Edit"
+        aria-label={t(
+          DEFAULT_LOCALE,
+          "waves.sidebar.rightPanel.group.editAriaLabel"
+        )}
+        title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.group.editTitle")}
         onClick={handleOpen}
         className="tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-text-iron-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >

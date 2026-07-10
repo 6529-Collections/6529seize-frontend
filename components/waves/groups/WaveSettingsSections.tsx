@@ -58,7 +58,9 @@ export default function WaveSettingsSections({
     <div className="tw-pb-4">
       <WaveActiveCurationSection wave={wave} />
 
-      <SettingsSection title="Rules">
+      <SettingsSection
+        title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.settings.rules")}
+      >
         <WaveCustomRules wave={wave} />
         {supportsAcceptanceRules && <WaveBindingRules wave={wave} />}
       </SettingsSection>
@@ -75,7 +77,9 @@ export default function WaveSettingsSections({
       )}
 
       {isDisplaySettingsWave && (
-        <SettingsSection title="Display">
+        <SettingsSection
+          title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.settings.display")}
+        >
           <WaveSubmissionButtonLabel wave={wave} />
           <WaveOutcomesVisibility wave={wave} />
         </SettingsSection>
@@ -83,18 +87,30 @@ export default function WaveSettingsSections({
 
       {isApproveWave && (
         <>
-          <SettingsSection title="Approval tabs">
+          <SettingsSection
+            title={t(
+              DEFAULT_LOCALE,
+              "waves.sidebar.rightPanel.settings.approvalTabs"
+            )}
+          >
             <WaveApproveTabLabels wave={wave} />
           </SettingsSection>
 
-          <SettingsSection title="Approval rule">
+          <SettingsSection
+            title={t(
+              DEFAULT_LOCALE,
+              "waves.sidebar.rightPanel.settings.approvalRule"
+            )}
+          >
             <WaveApprovalThresholds wave={wave} />
           </SettingsSection>
         </>
       )}
 
       {showChatSection && (
-        <SettingsSection title="Chat">
+        <SettingsSection
+          title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.settings.chat")}
+        >
           {showChatStatus && <WaveChatStatus wave={wave} />}
           {showChatSettings && (
             <>
@@ -105,7 +121,9 @@ export default function WaveSettingsSections({
         </SettingsSection>
       )}
 
-      <SettingsSection title="Access">
+      <SettingsSection
+        title={t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.settings.access")}
+      >
         <WaveGroup
           scope={wave.visibility.scope}
           type={WaveGroupType.VIEW}

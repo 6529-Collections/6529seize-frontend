@@ -112,31 +112,19 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     [SidebarTab.REP]: <WaveRepDetails wave={wave} />,
     [SidebarTab.RULES]: (
       <div className="tw-px-0">
-        <WaveRules wave={wave} useRing={false} />
+        <WaveRules wave={wave} useRing={false} showTitle={false} />
       </div>
     ),
     [SidebarTab.SETTINGS]: <BrainRightSidebarSettings wave={wave} />,
     ...(isCompetitionWave
       ? {
           [SidebarTab.TOP_VOTERS]: (
-            <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-p-4">
-              <h2 className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400">
-                {t(
-                  WAVE_RIGHT_SIDEBAR_LOCALE,
-                  "waves.sidebar.rightPanel.tabs.voters"
-                )}
-              </h2>
+            <div className="tw-min-w-0 tw-p-4">
               <WaveLeaderboardRightSidebarVoters wave={wave} />
             </div>
           ),
           [SidebarTab.ACTIVITY_LOG]: (
-            <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-p-4">
-              <h2 className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400">
-                {t(
-                  WAVE_RIGHT_SIDEBAR_LOCALE,
-                  "waves.sidebar.rightPanel.tabs.activity"
-                )}
-              </h2>
+            <div className="tw-min-w-0 tw-p-4">
               <WaveLeaderboardRightSidebarActivityLogs wave={wave} />
             </div>
           ),

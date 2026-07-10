@@ -10,16 +10,28 @@ import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ClockIcon } from "@heroicons/react/24/outline";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;
   readonly creditType: ApiWaveCreditType;
-  readonly onDropClick: () => void;
+  readonly onDropClick: (() => void) | null;
 }
 
 export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   WaveLeaderboardRightSidebarActivityLogProps
 > = ({ log, creditType, onDropClick }) => {
+  const unknownProfile = t(
+    DEFAULT_LOCALE,
+    "waves.sidebar.rightPanel.activity.unknownProfile"
+  );
+  const voterProfile = log.invoker.handle ?? log.invoker.primary_address;
+  const dropCreatorProfile =
+    log.drop_author?.handle ??
+    log.drop_author?.primary_address ??
+    unknownProfile;
+
   return (
     <div className="tw-relative tw-min-w-0">
       <div className="tw-min-w-0 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-3">
@@ -34,16 +46,22 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             </span>
           </div>
 
-          <WaveLeaderboardRightSidebarActivityLogDrop
-            onDropClick={onDropClick}
-          />
+          {onDropClick && (
+            <WaveLeaderboardRightSidebarActivityLogDrop
+              onDropClick={onDropClick}
+            />
+          )}
         </div>
 
         <div className="tw-mt-2.5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2.5">
           <Link
             href={`/${log.invoker.handle ?? log.invoker.primary_address}`}
             className="tw-group tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
-            title={`Voter: ${log.invoker.handle ?? log.invoker.primary_address}`}
+            title={t(
+              DEFAULT_LOCALE,
+              "waves.sidebar.rightPanel.activity.voterTitle",
+              { profile: voterProfile }
+            )}
           >
             {log.invoker.pfp ? (
               <Image
@@ -67,7 +85,9 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
 
           <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
             {log.contents["oldVote"] === 0 ? (
-              <span className="tw-text-sm tw-text-iron-400">voted</span>
+              <span className="tw-text-sm tw-text-iron-400">
+                {t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.activity.voted")}
+              </span>
             ) : (
               <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-500">
                 {formatNumberWithCommas(log.contents["oldVote"])} →
@@ -89,7 +109,11 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           <Link
             href={`/${log.drop_author?.handle ?? log.drop_author?.primary_address}`}
             className="tw-group tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
-            title={`Drop creator: ${log.drop_author?.handle ?? log.drop_author?.primary_address}`}
+            title={t(
+              DEFAULT_LOCALE,
+              "waves.sidebar.rightPanel.activity.dropCreatorTitle",
+              { profile: dropCreatorProfile }
+            )}
           >
             {log.drop_author?.pfp ? (
               <Image

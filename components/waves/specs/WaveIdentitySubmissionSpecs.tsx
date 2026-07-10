@@ -4,6 +4,8 @@ import {
   WAVE_IDENTITY_DUPLICATES_COPY,
   WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY,
 } from "@/helpers/waves/wave-submission-strategy.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 function WaveIdentitySubmissionSpecsRow({
   label,
@@ -56,11 +58,17 @@ export function WaveIdentitySubmissionSpecsRows({
   return (
     <>
       <WaveIdentitySubmissionSpecsRow
-        label="Eligible identities"
+        label={t(
+          DEFAULT_LOCALE,
+          "waves.sidebar.rightPanel.specs.eligibleIdentities"
+        )}
         value={eligibleIdentities.summary}
       />
       <WaveIdentitySubmissionSpecsRow
-        label="Repeat submissions"
+        label={t(
+          DEFAULT_LOCALE,
+          "waves.sidebar.rightPanel.specs.repeatSubmissions"
+        )}
         value={repeatSubmissions.summary}
       />
     </>

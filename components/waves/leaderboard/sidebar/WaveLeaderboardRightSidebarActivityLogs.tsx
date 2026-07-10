@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveLog } from "@/generated/models/ApiWaveLog";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useWaveActivityLogs } from "@/hooks/useWaveActivityLogs";
@@ -12,6 +13,17 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 const WAVE_RIGHT_SIDEBAR_LOCALE = DEFAULT_LOCALE;
+
+const getDropSerialNo = (contents: ApiWaveLog["contents"]): number | null => {
+  const drop = (contents as { readonly drop?: unknown }).drop;
+
+  if (typeof drop !== "object" || drop === null || !("serial_no" in drop)) {
+    return null;
+  }
+
+  const serialNo = drop.serial_no;
+  return typeof serialNo === "number" ? serialNo : null;
+};
 
 interface WaveLeaderboardRightSidebarActivityLogsProps {
   readonly wave: ApiWave;
@@ -43,7 +55,7 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isLoading && !isFetchingNextPage) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   });
 
@@ -83,14 +95,20 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
 
   return (
     <div>
-      {logs.map((log) => (
-        <WaveLeaderboardRightSidebarActivityLog
-          key={log.id}
-          log={log}
-          creditType={wave.voting.credit_type}
-          onDropClick={() => handleDropClick(log.contents["drop"]?.serial_no)}
-        />
-      ))}
+      {logs.map((log) => {
+        const serialNo = getDropSerialNo(log.contents);
+
+        return (
+          <WaveLeaderboardRightSidebarActivityLog
+            key={log.id}
+            log={log}
+            creditType={wave.voting.credit_type}
+            onDropClick={
+              serialNo === null ? null : () => handleDropClick(serialNo)
+            }
+          />
+        );
+      })}
       {isFetchingNextPage && (
         <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
           <div className="tw-size-full tw-animate-loading-bar tw-bg-indigo-400" />

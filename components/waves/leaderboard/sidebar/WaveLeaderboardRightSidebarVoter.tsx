@@ -10,6 +10,8 @@ import {
 } from "@/helpers/waves/waves.constants";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;
@@ -36,7 +38,13 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           {voter.voter.pfp ? (
             <Image
               src={resolveIpfsUrlSync(voter.voter.pfp)}
-              alt={voter.voter.handle ?? "Voter"}
+              alt={
+                voter.voter.handle ??
+                t(
+                  DEFAULT_LOCALE,
+                  "waves.sidebar.rightPanel.voters.avatarFallback"
+                )
+              }
               width={24}
               height={24}
               className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-inset tw-ring-white/10"
