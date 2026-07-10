@@ -1,38 +1,36 @@
-import { renderHook, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
-import React from "react";
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useWaveTopVoters } from '@/hooks/useWaveTopVoters';
+import React from 'react';
 
 // Mock the API fetch
-jest.mock("@/services/api/common-api", () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock("@/components/react-query-wrapper/utils/query-utils", () => ({
+jest.mock('@/components/react-query-wrapper/utils/query-utils', () => ({
   getDefaultQueryRetry: jest.fn(() => ({ retry: 3 })),
 }));
 
-import { commonApiFetch } from "@/services/api/common-api";
+import { commonApiFetch } from '@/services/api/common-api';
 
-const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<
-  typeof commonApiFetch
->;
+const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<typeof commonApiFetch>;
 
-describe("useWaveTopVoters", () => {
+describe('useWaveTopVoters', () => {
   let queryClient: QueryClient;
 
   const mockVotersPage = {
     data: [
-      { id: "1", handle: "voter1", rating: 10 },
-      { id: "2", handle: "voter2", rating: 8 },
+      { id: '1', handle: 'voter1', rating: 10 },
+      { id: '2', handle: 'voter2', rating: 8 },
     ],
     next: null,
     count: 2,
   };
 
   const defaultProps = {
-    waveId: "wave-123",
-    connectedProfileHandle: "test-user",
+    waveId: 'wave-123',
+    connectedProfileHandle: 'test-user',
     reverse: false,
     dropId: null,
   };
@@ -58,7 +56,7 @@ describe("useWaveTopVoters", () => {
     queryClient.clear();
   });
 
-  it("fetches wave voters successfully", async () => {
+  it('fetches wave voters successfully', async () => {
     const { result } = renderHook(() => useWaveTopVoters(defaultProps), {
       wrapper: createWrapper,
     });
@@ -67,17 +65,17 @@ describe("useWaveTopVoters", () => {
       expect(result.current.voters).toEqual(mockVotersPage.data);
     });
     expect(mockCommonApiFetch).toHaveBeenCalledWith({
-      endpoint: "waves/wave-123/voters",
+      endpoint: 'waves/wave-123/voters',
       params: {
-        page_size: "20",
-        sort_direction: "ASC",
-        sort: "ABSOLUTE",
+        page_size: '20',
+        sort_direction: 'ASC',
+        sort: 'ABSOLUTE',
       },
     });
   });
 
-  it("includes dropId in params when provided", async () => {
-    const propsWithDropId = { ...defaultProps, dropId: "drop-456" };
+  it('includes dropId in params when provided', async () => {
+    const propsWithDropId = { ...defaultProps, dropId: 'drop-456' };
 
     renderHook(() => useWaveTopVoters(propsWithDropId), {
       wrapper: createWrapper,
@@ -85,22 +83,22 @@ describe("useWaveTopVoters", () => {
 
     await waitFor(() => {
       expect(mockCommonApiFetch).toHaveBeenCalledWith({
-        endpoint: "waves/wave-123/voters",
+        endpoint: 'waves/wave-123/voters',
         params: {
-          page_size: "20",
-          sort_direction: "ASC",
-          sort: "ABSOLUTE",
-          drop_id: "drop-456",
+          page_size: '20',
+          sort_direction: 'ASC',
+          sort: 'ABSOLUTE',
+          drop_id: 'drop-456',
         },
       });
     });
   });
 
-  it("uses custom sort direction and sort type", async () => {
+  it('uses custom sort direction and sort type', async () => {
     const propsWithCustomSort = {
       ...defaultProps,
-      sortDirection: "DESC" as const,
-      sort: "POSITIVE" as const,
+      sortDirection: 'DESC' as const,
+      sort: 'POSITIVE' as const,
     };
 
     renderHook(() => useWaveTopVoters(propsWithCustomSort), {
@@ -109,17 +107,17 @@ describe("useWaveTopVoters", () => {
 
     await waitFor(() => {
       expect(mockCommonApiFetch).toHaveBeenCalledWith({
-        endpoint: "waves/wave-123/voters",
+        endpoint: 'waves/wave-123/voters',
         params: {
-          page_size: "20",
-          sort_direction: "DESC",
-          sort: "POSITIVE",
+          page_size: '20',
+          sort_direction: 'DESC',
+          sort: 'POSITIVE',
         },
       });
     });
   });
 
-  it("reverses voters when reverse option is true", async () => {
+  it('reverses voters when reverse option is true', async () => {
     const propsWithReverse = { ...defaultProps, reverse: true };
 
     const { result } = renderHook(() => useWaveTopVoters(propsWithReverse), {
@@ -131,11 +129,8 @@ describe("useWaveTopVoters", () => {
     });
   });
 
-  it("returns empty voters when connectedProfileHandle is undefined", async () => {
-    const propsWithoutHandle = {
-      ...defaultProps,
-      connectedProfileHandle: undefined,
-    };
+  it('returns empty voters when connectedProfileHandle is undefined', async () => {
+    const propsWithoutHandle = { ...defaultProps, connectedProfileHandle: undefined };
 
     const { result } = renderHook(() => useWaveTopVoters(propsWithoutHandle), {
       wrapper: createWrapper,
@@ -146,7 +141,7 @@ describe("useWaveTopVoters", () => {
     expect(result.current.hasNextPage).toBe(false);
   });
 
-  it("provides pagination functionality", async () => {
+  it('provides pagination functionality', async () => {
     const { result } = renderHook(() => useWaveTopVoters(defaultProps), {
       wrapper: createWrapper,
     });
@@ -156,13 +151,13 @@ describe("useWaveTopVoters", () => {
     });
 
     // Should provide fetchNextPage function
-    expect(typeof result.current.fetchNextPage).toBe("function");
-    expect(typeof result.current.hasNextPage).toBe("boolean");
+    expect(typeof result.current.fetchNextPage).toBe('function');
+    expect(typeof result.current.hasNextPage).toBe('boolean');
   });
 
-  it("includes page parameter for subsequent pages", async () => {
+  it('includes page parameter for subsequent pages', async () => {
     const mockPageOne = {
-      data: [{ id: "1", handle: "voter1", rating: 10 }],
+      data: [{ id: '1', handle: 'voter1', rating: 10 }],
       next: true,
       count: 2,
     };
@@ -179,11 +174,7 @@ describe("useWaveTopVoters", () => {
     });
 
     const freshWrapper = ({ children }: { children: React.ReactNode }) =>
-      React.createElement(
-        QueryClientProvider,
-        { client: freshQueryClient },
-        children
-      );
+      React.createElement(QueryClientProvider, { client: freshQueryClient }, children);
 
     mockCommonApiFetch.mockReset().mockResolvedValue(mockPageOne);
 
@@ -201,18 +192,18 @@ describe("useWaveTopVoters", () => {
 
     await waitFor(() => {
       expect(mockCommonApiFetch).toHaveBeenCalledWith({
-        endpoint: "waves/wave-123/voters",
+        endpoint: 'waves/wave-123/voters',
         params: {
-          page_size: "20",
-          sort_direction: "ASC",
-          sort: "ABSOLUTE",
-          page: "2",
+          page_size: '20',
+          sort_direction: 'ASC',
+          sort: 'ABSOLUTE',
+          page: '2',
         },
       });
     });
   });
 
-  it("uses custom refetch interval", () => {
+  it('uses custom refetch interval', () => {
     const propsWithRefetchInterval = { ...defaultProps, refetchInterval: 5000 };
 
     renderHook(() => useWaveTopVoters(propsWithRefetchInterval), {
@@ -224,7 +215,7 @@ describe("useWaveTopVoters", () => {
     expect(mockCommonApiFetch).toHaveBeenCalled();
   });
 
-  it("handles empty response", async () => {
+  it('handles empty response', async () => {
     const emptyResponse = {
       data: [],
       next: null,
@@ -244,7 +235,7 @@ describe("useWaveTopVoters", () => {
     expect(result.current.hasNextPage).toBe(false);
   });
 
-  it("provides refetch functionality", async () => {
+  it('provides refetch functionality', async () => {
     const { result } = renderHook(() => useWaveTopVoters(defaultProps), {
       wrapper: createWrapper,
     });
@@ -253,20 +244,20 @@ describe("useWaveTopVoters", () => {
       expect(result.current.voters).toEqual(mockVotersPage.data);
     });
 
-    expect(typeof result.current.refetch).toBe("function");
+    expect(typeof result.current.refetch).toBe('function');
   });
 
-  it("provides error handling capability", async () => {
+  it('provides error handling capability', async () => {
     const { result } = renderHook(() => useWaveTopVoters(defaultProps), {
       wrapper: createWrapper,
     });
 
     // Should have voters array even if empty
     expect(Array.isArray(result.current.voters)).toBe(true);
-    expect(typeof result.current.isLoading).toBe("boolean");
+    expect(typeof result.current.isLoading).toBe('boolean');
   });
 
-  it("updates voters when data changes", async () => {
+  it('updates voters when data changes', async () => {
     const { result, rerender } = renderHook(
       (props) => useWaveTopVoters(props),
       {
@@ -281,21 +272,21 @@ describe("useWaveTopVoters", () => {
 
     // Update data and rerender
     const newMockData = {
-      data: [{ id: "3", handle: "voter3", rating: 15 }],
+      data: [{ id: '3', handle: 'voter3', rating: 15 }],
       next: null,
       count: 1,
     };
 
     mockCommonApiFetch.mockResolvedValue(newMockData);
 
-    rerender({ ...defaultProps, sortDirection: "DESC" as const });
+    rerender({ ...defaultProps, sortDirection: 'DESC' as const });
 
     await waitFor(() => {
       expect(result.current.voters).toEqual(newMockData.data);
     });
   });
 
-  it("prefetches data on mount", () => {
+  it('prefetches data on mount', () => {
     renderHook(() => useWaveTopVoters(defaultProps), {
       wrapper: createWrapper,
     });
@@ -304,23 +295,11 @@ describe("useWaveTopVoters", () => {
     expect(mockCommonApiFetch).toHaveBeenCalled();
   });
 
-  it("handles complex pagination scenario with multiple pages", async () => {
+  it('handles complex pagination scenario with multiple pages', async () => {
     const pages = [
-      {
-        data: [{ id: "1", handle: "voter1", rating: 10 }],
-        next: true,
-        count: 3,
-      },
-      {
-        data: [{ id: "2", handle: "voter2", rating: 8 }],
-        next: true,
-        count: 3,
-      },
-      {
-        data: [{ id: "3", handle: "voter3", rating: 6 }],
-        next: null,
-        count: 3,
-      },
+      { data: [{ id: '1', handle: 'voter1', rating: 10 }], next: true, count: 3 },
+      { data: [{ id: '2', handle: 'voter2', rating: 8 }], next: true, count: 3 },
+      { data: [{ id: '3', handle: 'voter3', rating: 6 }], next: null, count: 3 },
     ];
 
     // Create fresh query client for this test
@@ -335,11 +314,7 @@ describe("useWaveTopVoters", () => {
     });
 
     const freshWrapper = ({ children }: { children: React.ReactNode }) =>
-      React.createElement(
-        QueryClientProvider,
-        { client: freshQueryClient },
-        children
-      );
+      React.createElement(QueryClientProvider, { client: freshQueryClient }, children);
 
     mockCommonApiFetch
       .mockReset()
