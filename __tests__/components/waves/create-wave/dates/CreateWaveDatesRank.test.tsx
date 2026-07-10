@@ -413,30 +413,6 @@ describe("CreateWaveDatesRank", () => {
     );
   });
 
-  it("renders the ranking-mode radios with both options explained", () => {
-    render(
-      <CreateWaveDatesRank
-        waveType={ApiWaveType.Rank}
-        dates={baseDates}
-        errors={[]}
-        setDates={jest.fn()}
-      />
-    );
-
-    expect(
-      screen.getByRole("radio", { name: /announce winners/i })
-    ).toBeChecked();
-    expect(
-      screen.getByRole("radio", { name: /perpetual ranking/i })
-    ).not.toBeChecked();
-    expect(
-      screen.getByText(/winners are announced on the schedule/i)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/rankings update continuously/i)
-    ).toBeInTheDocument();
-  });
-
   it("hides winner announcements when perpetual ranking is selected", () => {
     render(
       <CreateWaveDatesRank
@@ -449,53 +425,26 @@ describe("CreateWaveDatesRank", () => {
 
     expect(screen.queryByTestId("decisions")).toBeNull();
     expect(screen.queryByTestId("rolling")).toBeNull();
-    expect(
-      screen.getByRole("radio", { name: /perpetual ranking/i })
-    ).toBeChecked();
+    // The mode itself is chosen on the Overview step, not here.
+    expect(screen.queryByText("Perpetual Ranking")).toBeNull();
   });
 
-  it("selecting perpetual ranking keeps the schedule but clears the end date", async () => {
-    const user = userEvent.setup();
+  it("keeps the perpetual end date cleared when other dates change", async () => {
     const setDates = jest.fn();
+    const user = userEvent.setup();
     render(
       <CreateWaveDatesRank
         waveType={ApiWaveType.Rank}
-        dates={{ ...baseDates, subsequentDecisions: [1], isRolling: true }}
+        dates={{ ...baseDates, ongoingRanking: true, endDate: 999 }}
         errors={[]}
         setDates={setDates}
       />
     );
 
-    await user.click(screen.getByText("Perpetual Ranking"));
+    await user.click(screen.getByTestId("start"));
 
     expect(setDates).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ongoingRanking: true,
-        // The configured schedule is preserved so switching back restores it;
-        // it has no effect while perpetual.
-        isRolling: true,
-        subsequentDecisions: [1],
-        endDate: null,
-      })
-    );
-  });
-
-  it("selecting announce winners returns to the scheduled flow", async () => {
-    const user = userEvent.setup();
-    const setDates = jest.fn();
-    render(
-      <CreateWaveDatesRank
-        waveType={ApiWaveType.Rank}
-        dates={{ ...baseDates, ongoingRanking: true }}
-        errors={[]}
-        setDates={setDates}
-      />
-    );
-
-    await user.click(screen.getByText("Announce Winners"));
-
-    expect(setDates).toHaveBeenCalledWith(
-      expect.objectContaining({ ongoingRanking: false })
+      expect.objectContaining({ ongoingRanking: true, endDate: null })
     );
   });
 
@@ -513,22 +462,5 @@ describe("CreateWaveDatesRank", () => {
       "data-expanded",
       "true"
     );
-  });
-
-  it("re-selecting the active mode does not rewrite the dates", async () => {
-    const user = userEvent.setup();
-    const setDates = jest.fn();
-    render(
-      <CreateWaveDatesRank
-        waveType={ApiWaveType.Rank}
-        dates={baseDates}
-        errors={[]}
-        setDates={setDates}
-      />
-    );
-
-    await user.click(screen.getByText("Announce Winners"));
-
-    expect(setDates).not.toHaveBeenCalled();
   });
 });

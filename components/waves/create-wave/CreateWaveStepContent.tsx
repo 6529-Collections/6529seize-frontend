@@ -72,8 +72,12 @@ export default function CreateWaveStepContent({
           overview={config.overview}
           display={config.display}
           errors={errors}
+          ongoingRanking={config.dates.ongoingRanking ?? false}
           setOverview={setOverview}
           setDisplay={setDisplay}
+          onOngoingRankingChange={(ongoingRanking) =>
+            setDates({ ...config.dates, ongoingRanking })
+          }
         />
       );
     case CreateWaveStep.GROUPS:
