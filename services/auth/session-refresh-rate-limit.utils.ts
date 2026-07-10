@@ -1,0 +1,53 @@
+const SESSION_REFRESH_RETRY_COOLDOWN_MS = 250;
+const SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS = 60 * 1000;
+// Invalid sessions require user action; successful auth persistence clears this block.
+const SESSION_REFRESH_INVALID_SESSION_COOLDOWN_MS = Number.POSITIVE_INFINITY;
+
+export type SessionRefreshFailureCooldownType =
+  | "empty"
+  | "retry"
+  | "rate_limit";
+
+type ApiStatusError = {
+  readonly status?: unknown;
+  readonly response?: {
+    readonly status?: unknown;
+  };
+};
+
+function getApiErrorStatus(error: unknown): number | null {
+  if (typeof error !== "object" || error === null) {
+    return null;
+  }
+
+  const statusError = error as ApiStatusError;
+  const status = statusError.status ?? statusError.response?.status;
+  return typeof status === "number" && Number.isInteger(status) ? status : null;
+}
+
+export function isRateLimitError(error: unknown): boolean {
+  return getApiErrorStatus(error) === 429;
+}
+
+export function getSessionRefreshFailureCooldownMs(
+  type: SessionRefreshFailureCooldownType,
+  cooldownMsOverride?: number
+): number {
+  if (cooldownMsOverride !== undefined) {
+    return cooldownMsOverride;
+  }
+
+  if (type === "empty") {
+    return SESSION_REFRESH_INVALID_SESSION_COOLDOWN_MS;
+  }
+
+  if (type === "rate_limit") {
+    return SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS;
+  }
+
+  return SESSION_REFRESH_RETRY_COOLDOWN_MS;
+}
+
+export function getRateLimitCooldownMs(): number {
+  return SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS;
+}
