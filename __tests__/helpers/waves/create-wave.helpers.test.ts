@@ -4,6 +4,7 @@ import {
   getCreateWavePreviousStep,
   calculateLastDecisionTime,
 } from "@/helpers/waves/create-wave.helpers";
+import { getCreateWaveMainSteps } from "@/helpers/waves/waves.constants";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
@@ -118,6 +119,66 @@ describe("create-wave.helpers", () => {
           waveType: ApiWaveType.Rank,
         })
       ).toBeNull();
+    });
+
+    it("skips the outcomes step for perpetual rank waves", () => {
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.VOTING,
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: true,
+        })
+      ).toBe(CreateWaveStep.DESCRIPTION);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.VOTING,
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: false,
+        })
+      ).toBe(CreateWaveStep.OUTCOMES);
+      // A stray flag never changes other wave types' flows.
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.VOTING,
+          waveType: ApiWaveType.Approve,
+          ongoingRanking: true,
+        })
+      ).toBe(CreateWaveStep.OUTCOMES);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.DESCRIPTION,
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: true,
+        })
+      ).toBe(CreateWaveStep.VOTING);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.DESCRIPTION,
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: false,
+        })
+      ).toBe(CreateWaveStep.OUTCOMES);
+    });
+
+    it("filters the outcomes step from the perpetual rank stepper", () => {
+      expect(
+        getCreateWaveMainSteps({
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: true,
+        })
+      ).not.toContain(CreateWaveStep.OUTCOMES);
+      expect(
+        getCreateWaveMainSteps({
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: false,
+        })
+      ).toContain(CreateWaveStep.OUTCOMES);
+      expect(
+        getCreateWaveMainSteps({
+          waveType: ApiWaveType.Approve,
+          ongoingRanking: true,
+        })
+      ).toContain(CreateWaveStep.OUTCOMES);
     });
   });
 
