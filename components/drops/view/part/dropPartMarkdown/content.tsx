@@ -27,6 +27,7 @@ import {
 } from "@/helpers/waves/drop-group-mentions";
 import { isDirectImageUrl } from "./linkUtils";
 import { normalizeDropMarkdownContent } from "./normalizeContent";
+import { isPreviewableHrefSource } from "./sourcePositions";
 import {
   DropPartMarkdownImageGroup,
   type DropPartMarkdownImageLayout,
@@ -51,6 +52,7 @@ interface CustomEmojiImageProps {
 interface MarkdownElementProps {
   readonly children?: ReactNode | undefined;
   readonly href?: unknown;
+  readonly node?: unknown;
   readonly src?: unknown;
 }
 
@@ -139,7 +141,7 @@ const isBareHrefLabel = (
   href: string
 ): boolean => {
   const linkText = getTextFromChildren(children)?.trim();
-  if (linkText === undefined || linkText === null) {
+  if (linkText === null) {
     return false;
   }
 
@@ -155,6 +157,10 @@ const getBareImageHref = (
 ): string | null => {
   const href = getSmartHref(elementProps);
   if (!href || !isDirectImageUrl(href)) {
+    return null;
+  }
+
+  if (!isPreviewableHrefSource(elementProps?.node)) {
     return null;
   }
 
@@ -197,6 +203,7 @@ const isSmartLinkElement = (
     href !== null &&
     href.length > 0 &&
     isBareHrefLabel(elementProps?.children, href) &&
+    isPreviewableHrefSource(elementProps?.node) &&
     isSmartLink(href)
   );
 };

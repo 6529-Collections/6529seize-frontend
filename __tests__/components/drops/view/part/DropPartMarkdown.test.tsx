@@ -601,7 +601,7 @@ describe("DropPartMarkdown", () => {
     );
   });
 
-  it("opens bare direct image markdown links from the full body gallery", () => {
+  it("keeps direct image markdown links as links", () => {
     const linkSrc = "https://cdn.example.com/linked.jpg";
     const markdownSrc = "https://cdn.example.com/second.jpg";
     const partContent = `[${linkSrc}](${linkSrc})\n![second](${markdownSrc})`;
@@ -622,19 +622,25 @@ describe("DropPartMarkdown", () => {
       </DropImageGalleryProvider>
     );
 
+    expect(screen.getByRole("link", { name: linkSrc })).toHaveAttribute(
+      "href",
+      linkSrc
+    );
+    expect(
+      screen.queryByRole("button", { name: `Open image ${linkSrc}` })
+    ).toBeNull();
+
     fireEvent.click(
       screen.getByRole("button", {
-        name: `Open image ${linkSrc}`,
+        name: `Open image ${markdownSrc}`,
       })
     );
 
     expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
       "src",
-      linkSrc
+      markdownSrc
     );
-    expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
-      "1 / 2"
-    );
+    expect(screen.queryByTestId("image-gallery-counter")).toBeNull();
   });
 
   it("opens reference-style markdown images from the full body gallery", () => {
@@ -1140,6 +1146,31 @@ describe("DropPartMarkdown", () => {
     expect(paragraphs).toHaveLength(1);
     expect(paragraphs[0]).toHaveTextContent("field test: deep sea");
     expect(link).toHaveAttribute("href", "https://neal.fun/deep-sea/");
+    expect(link.closest("p")).toBe(paragraphs[0]);
+  });
+
+  it("keeps markdown links whose label is the href inline without rendering previews", () => {
+    const href = "https://google.com";
+
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`field test: [${href}](${href})`}
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const link = screen.getByRole("link", { name: href });
+
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]).toHaveTextContent(`field test: ${href}`);
+    expect(link).toHaveAttribute("href", href);
     expect(link.closest("p")).toBe(paragraphs[0]);
   });
 
