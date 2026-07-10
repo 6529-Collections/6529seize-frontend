@@ -3,7 +3,6 @@
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
-import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
@@ -157,12 +156,6 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
           </span>
         )}
         <div className="tw-ml-auto tw-flex tw-items-center tw-gap-1.5">
-          <DropCurationButton
-            dropId={drop.id}
-            waveId={drop.wave.id}
-            isCuratable={drop.context_profile_context?.curatable ?? false}
-            isCurated={drop.context_profile_context?.curated ?? false}
-          />
           {canShowVotingAction && (
             <VotingModalButton
               drop={drop}

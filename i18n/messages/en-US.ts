@@ -684,9 +684,60 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
 } as const);
 
+const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
+  "access.anyone": "Anyone",
+  "access.anyoneWhenEnabled": "Anyone when enabled",
+  "access.label": "Chat access",
+  "groups.admin": "Admin",
+  "groups.drop": "Drop",
+  "groups.view": "View",
+  "groups.vote": "Vote",
+  "status.disabled": "Disabled",
+  "status.editLabel": "Edit chat status",
+  "status.enabled": "Enabled",
+  "status.enableHelp":
+    "The chat access group still controls who can chat when chat is enabled.",
+  "status.enableLabel": "Enable chat",
+  "status.label": "Chat status",
+} as const);
+
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
+
+const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
+  "waves.drops.searchModal",
+  {
+    authorFallback: "unknown author",
+    clear: "Clear search",
+    clearShort: "Clear",
+    close: "Close search",
+    descriptionPrefix: "in",
+    "empty.description": "Try a different word or phrase.",
+    "empty.title": "No messages found",
+    "error.description": "Change the query or reopen search to try again.",
+    "error.title": "Couldn't load results",
+    "idle.description":
+      "Type at least {minLength} characters to search this wave.",
+    "idle.title": "Ready to search",
+    inputDescription:
+      "Type at least {minLength} characters to search messages in {waveName}.",
+    inputLabel: "Search messages in {waveName}",
+    loadMore: "Load more",
+    loadingMore: "Loading...",
+    "loading.description": "Looking through {waveName}.",
+    "loading.title": "Searching messages",
+    placeholder: "Search messages",
+    "result.open": "Open message {serialNo} by {author}",
+    "result.unavailable": "Message by {author} cannot be opened",
+    "results.count.one": "{count} result",
+    "results.count.other": "{count} results",
+    "results.queryPrefix": "for",
+    "results.status.one": '{count} result for "{query}"',
+    "results.status.other": '{count} results for "{query}"',
+    title: "Search messages",
+  } as const
+);
 
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
   dialogTitle: "GIF search",
@@ -897,6 +948,35 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 
 const COMMON_MESSAGES = objectMessages("common", {
   close: "Close",
+} as const);
+
+const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
+  "category.all": "All",
+  clear: "Clear search",
+  clearShort: "Clear",
+  close: "Close search",
+  "dialogTitle.site": "Search 6529.io",
+  "dialogTitle.wave": "Search this Wave",
+  error: "Something went wrong while searching. Please try again.",
+  goBack: "Go back",
+  idle: "Start typing to search 6529.io",
+  "idleWithCountdown.one":
+    "Start typing to search 6529.io ({count} more character)",
+  "idleWithCountdown.other":
+    "Start typing to search 6529.io ({count} more characters)",
+  "inputDescription.site":
+    "Type at least {minLength} characters to search 6529.io.",
+  "inputDescription.wave":
+    "Type at least {minLength} characters to search messages in this Wave.",
+  inputLabel: "Search",
+  loading: "Loading...",
+  "mode.site": "Site-wide",
+  "mode.wave": "In this Wave",
+  noResults: "No results found",
+  "placeholder.site": "Search 6529.io",
+  "placeholder.wave": "Search messages",
+  retry: "Try Again",
+  viewAllCategory: "View all {category}",
 } as const);
 
 export const EN_US_MESSAGES = {
@@ -1603,7 +1683,9 @@ export const EN_US_MESSAGES = {
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
   ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
+  ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
@@ -1626,6 +1708,7 @@ export const EN_US_MESSAGES = {
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
+  ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
