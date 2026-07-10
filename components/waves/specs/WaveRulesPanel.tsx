@@ -116,10 +116,10 @@ export default function WaveRulesPanel({
                   key={row.id}
                   className="tw-grid tw-min-h-9 tw-grid-cols-[minmax(6.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-start tw-gap-x-3 tw-gap-y-1.5 tw-py-2 tw-text-sm"
                 >
-                  <dt className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">
+                  <dt className="tw-min-w-0 tw-break-words tw-font-normal tw-leading-5 tw-text-iron-500">
                     {row.label}
                   </dt>
-                  <dd className="tw-mb-0 tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-5 tw-text-iron-50">
+                  <dd className="tw-mb-0 tw-ml-0 tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-5 tw-text-iron-50">
                     {row.value}
                     {row.description && (
                       <span className="tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500">
