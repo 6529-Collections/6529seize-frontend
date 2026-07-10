@@ -265,10 +265,10 @@ describe("LayoutProvider", () => {
     const notifications = screen.getByTestId("notifications-view");
 
     expect(notifications.style.height).toContain(
-      "var(--native-keyboard-inset-bottom, 0px)"
+      "- var(--native-keyboard-inset-bottom, 0px)"
     );
     expect(notifications.style.maxHeight).toContain(
-      "var(--native-keyboard-inset-bottom, 0px)"
+      "- var(--native-keyboard-inset-bottom, 0px)"
     );
     expect(notifications.style.transition).toBe(
       "height var(--native-keyboard-layout-transition-duration, 0ms) ease-out, max-height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
