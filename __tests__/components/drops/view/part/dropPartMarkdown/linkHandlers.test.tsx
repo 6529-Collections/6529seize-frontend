@@ -48,7 +48,7 @@ describe("createLinkRenderer", () => {
       onQuoteClick: jest.fn(),
     });
 
-    render(<>{renderAnchor({ href: rawHref, children: "link" } as any)}</>);
+    render(<>{renderAnchor({ href: rawHref, children: rawHref } as any)}</>);
 
     expect(seizeMatch).toHaveBeenCalledWith(rawHref);
     expect(seizeMatch).not.toHaveBeenCalledWith(stableHref);
@@ -80,7 +80,7 @@ describe("createLinkRenderer", () => {
       onQuoteClick: jest.fn(),
     });
 
-    render(<>{renderAnchor({ href: rawHref, children: "link" } as any)}</>);
+    render(<>{renderAnchor({ href: rawHref, children: rawHref } as any)}</>);
 
     expect(externalMatch).toHaveBeenCalledWith(stableHref);
     expect(externalRender).toHaveBeenCalledWith(stableHref);
