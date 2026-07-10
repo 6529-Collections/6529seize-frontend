@@ -7,8 +7,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
-import { PARENTHESIZED_ORDERED_LIST_CLASS_NAME } from "@/components/drops/view/part/dropPartMarkdown/orderedListDelimiter";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+
+const PARENTHESIZED_ORDERED_LIST_CLASS_NAME =
+  "drop-markdown-ordered-list-paren";
 
 class MockIntersectionObserver {
   observe = jest.fn();

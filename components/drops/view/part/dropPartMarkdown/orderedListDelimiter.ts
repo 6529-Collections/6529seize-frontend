@@ -1,6 +1,6 @@
 import type { Plugin } from "unified";
 
-export const PARENTHESIZED_ORDERED_LIST_CLASS_NAME =
+const PARENTHESIZED_ORDERED_LIST_CLASS_NAME =
   "drop-markdown-ordered-list-paren";
 
 const ORDERED_LIST_MARKER_PATTERN = /^[\t ]*\d{1,9}([.)])(?:[\t ]+|$)/;
