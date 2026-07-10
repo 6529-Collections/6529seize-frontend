@@ -29,6 +29,70 @@ const getBoostedDropsDisplayPreferenceMenuLabel = (
     mode: getBoostedDropsDisplayPreferenceLabel(preference),
   });
 
+function ExpandedPreview() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 34 22"
+      fill="none"
+      className="tw-h-5 tw-w-[1.9375rem]"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <rect x="1.5" y="1.5" width="31" height="19" rx="3" />
+      <circle cx="7" cy="7" r="2.2" fill="currentColor" stroke="none" />
+      <path d="M12 6h15M12 10h11M4 15h26" opacity="0.65" />
+    </svg>
+  );
+}
+
+function CompactPreview() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 34 22"
+      fill="none"
+      className="tw-h-5 tw-w-[1.9375rem]"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <rect x="4" y="7" width="26" height="8" rx="2" />
+      <circle cx="8.5" cy="11" r="1.6" fill="currentColor" stroke="none" />
+      <path d="M12 11h13" />
+    </svg>
+  );
+}
+
+function HiddenPreview() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 34 22"
+      fill="none"
+      className="tw-h-5 tw-w-[1.9375rem]"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <rect
+        x="4"
+        y="7"
+        width="26"
+        height="8"
+        rx="2"
+        strokeDasharray="3 3"
+        opacity="0.65"
+      />
+      <path d="m3 3 28 16" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+const BOOSTED_DROPS_DISPLAY_PREVIEWS = {
+  expanded: ExpandedPreview,
+  compact: CompactPreview,
+  hidden: HiddenPreview,
+} satisfies Record<BoostedDropsDisplayPreference, typeof ExpandedPreview>;
+
 export const getBoostedDropsDisplayPreferenceMenuItems = ({
   preference,
   setPreference,
@@ -74,7 +138,7 @@ export default function BoostedDropsDisplayPreference({
   return (
     <fieldset
       className={clsx(
-        "tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-black/20 tw-p-3",
+        "tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.015] tw-p-3",
         className
       )}
       aria-describedby={descriptionId}
@@ -88,13 +152,17 @@ export default function BoostedDropsDisplayPreference({
       >
         {t(DEFAULT_LOCALE, "waveChat.boostedDrops.display.description")}
       </p>
-      <div className="tw-grid tw-grid-cols-3 tw-gap-1.5">
+      <div className="tw-grid tw-grid-cols-3 tw-gap-2">
         {BOOSTED_DROPS_DISPLAY_PREFERENCES.map((option) => {
           const selected = preference === option;
           const label = getBoostedDropsDisplayPreferenceLabel(option);
+          const Preview = BOOSTED_DROPS_DISPLAY_PREVIEWS[option];
 
           return (
-            <label key={option} className="tw-min-w-0">
+            <label
+              key={option}
+              className="tw-relative tw-flex tw-min-w-0 tw-cursor-pointer"
+            >
               <input
                 type="radio"
                 name={groupName}
@@ -105,13 +173,16 @@ export default function BoostedDropsDisplayPreference({
               />
               <span
                 className={clsx(
-                  "tw-flex tw-min-h-9 tw-w-full tw-min-w-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-transition-colors tw-duration-200 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400",
+                  "tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-2.5 tw-text-center tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950",
                   selected
-                    ? "tw-border-primary-500/40 tw-bg-primary-500/10 tw-text-primary-300"
-                    : "tw-border-white/5 tw-bg-iron-950 tw-text-iron-300 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+                    ? "tw-border-primary-400 tw-bg-primary-500/[0.08] tw-text-primary-300"
+                    : "tw-border-white/10 tw-bg-white/[0.015] tw-text-iron-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
                 )}
               >
-                <span className="tw-min-w-0 tw-truncate">{label}</span>
+                <Preview />
+                <span className="tw-min-w-0 tw-truncate tw-text-xs tw-font-medium tw-leading-4">
+                  {label}
+                </span>
               </span>
             </label>
           );
