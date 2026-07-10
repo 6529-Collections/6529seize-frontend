@@ -1,6 +1,8 @@
 import { act, render } from "@testing-library/react";
 
 describe("useIsVersionStale", () => {
+  const CLIENT_VERSION_HEADER = "x-6529-client-version";
+
   beforeEach(() => {
     jest.useFakeTimers();
     globalThis.fetch = jest.fn();
@@ -35,6 +37,9 @@ describe("useIsVersionStale", () => {
     });
     expect(globalThis.fetch).toHaveBeenCalledWith("/api/version", {
       cache: "no-store",
+      headers: {
+        [CLIENT_VERSION_HEADER]: "1.0.0",
+      },
     });
     expect(await findByText("fresh")).toBeInTheDocument();
   });
@@ -56,7 +61,7 @@ describe("useIsVersionStale", () => {
     expect(await findByText("stale")).toBeInTheDocument();
   });
 
-  it("shows stale when the announced version differs from the current bundle", async () => {
+  it("shows stale when the version endpoint marks the current bundle stale", async () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.VERSION = "1.0.0";
     publicEnv.ANNOUNCED_VERSION_ENDPOINT =
@@ -64,7 +69,7 @@ describe("useIsVersionStale", () => {
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       json: async () => ({
         announced_version: "2.0.0",
-        stale: false,
+        stale: true,
         version: "2.0.0",
       }),
     });
@@ -83,7 +88,7 @@ describe("useIsVersionStale", () => {
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       json: async () => ({
         announced_version: null,
-        stale: true,
+        stale: false,
         version: "2.0.0",
       }),
     });

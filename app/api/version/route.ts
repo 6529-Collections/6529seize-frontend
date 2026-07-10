@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store, must-revalidate" };
 const ANNOUNCED_VERSION_TIMEOUT_MS = 5_000;
+const ANNOUNCED_VERSION_CACHE_TTL_MS = 5_000;
+const CLIENT_VERSION_HEADER = "x-6529-client-version";
 const ANNOUNCED_VERSION_ALLOWED_HOSTS = new Set([
   "dnclu2fna0b2b.cloudfront.net",
 ]);
@@ -13,6 +15,20 @@ type AnnouncedVersion = {
   readonly publishedAt: string | null;
   readonly version: string;
 };
+
+type AnnouncedVersionCacheEntry = {
+  readonly endpoint: string;
+  readonly expiresAt: number;
+  readonly version: AnnouncedVersion;
+};
+
+type AnnouncedVersionInFlightRequest = {
+  endpoint: string;
+  promise: Promise<AnnouncedVersion | null>;
+};
+
+let announcedVersionCache: AnnouncedVersionCacheEntry | null = null;
+let announcedVersionInFlight: AnnouncedVersionInFlightRequest | null = null;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -131,45 +147,145 @@ async function fetchAnnouncedVersion(
   }
 }
 
-const versionResponse = ({
+async function getAnnouncedVersion(
+  endpoint: string
+): Promise<AnnouncedVersion | null> {
+  const now = Date.now();
+
+  if (
+    announcedVersionCache?.endpoint === endpoint &&
+    announcedVersionCache.expiresAt > now
+  ) {
+    return announcedVersionCache.version;
+  }
+
+  if (announcedVersionInFlight?.endpoint === endpoint) {
+    return announcedVersionInFlight.promise;
+  }
+
+  const request: AnnouncedVersionInFlightRequest = {
+    endpoint,
+    promise: fetchAnnouncedVersion(endpoint).then((announcedVersion) => {
+      if (announcedVersion) {
+        announcedVersionCache = {
+          endpoint,
+          expiresAt: Date.now() + ANNOUNCED_VERSION_CACHE_TTL_MS,
+          version: announcedVersion,
+        };
+      }
+
+      return announcedVersion;
+    }),
+  };
+
+  request.promise = request.promise.finally(() => {
+    if (announcedVersionInFlight === request) {
+      announcedVersionInFlight = null;
+    }
+  });
+  announcedVersionInFlight = request;
+
+  return request.promise;
+}
+
+const shouldRefreshClient = ({
   announcedVersion,
+  clientVersion,
+  useAnnouncementGate,
   version,
 }: {
   readonly announcedVersion: string | null;
+  readonly clientVersion: string | null;
+  readonly useAnnouncementGate: boolean;
+  readonly version: string;
+}): boolean => {
+  const currentClientVersion = clientVersion ?? version;
+
+  // Production intentionally gates the toast on a valid, reachable announcement
+  // endpoint. Local/staging or broken endpoint configs keep the historical
+  // live-instance comparison so version drift remains detectable.
+  const targetVersion = useAnnouncementGate
+    ? announcedVersion
+    : (announcedVersion ?? version);
+
+  return targetVersion !== null && targetVersion !== currentClientVersion;
+};
+
+const versionResponse = ({
+  announcedVersion,
+  clientVersion,
+  useAnnouncementGate,
+  version,
+}: {
+  readonly announcedVersion: string | null;
+  readonly clientVersion: string | null;
+  readonly useAnnouncementGate: boolean;
   readonly version: string;
 }) =>
   NextResponse.json(
     {
       announced_version: announcedVersion,
-      stale: announcedVersion !== null && announcedVersion !== version,
+      stale: shouldRefreshClient({
+        announcedVersion,
+        clientVersion,
+        useAnnouncementGate,
+        version,
+      }),
       version,
     },
     { headers: NO_STORE_HEADERS }
   );
 
-export async function GET() {
+export async function GET(request?: Request) {
   const version = getCurrentVersion();
+  const clientVersion = normalizeVersion(
+    request?.headers.get(CLIENT_VERSION_HEADER)
+  );
   const endpoint = publicEnv.ANNOUNCED_VERSION_ENDPOINT;
-  const announcementEndpoint =
-    endpoint === undefined ? null : normalizeAnnouncementEndpoint(endpoint);
+  const configuredEndpoint = normalizeVersion(endpoint);
+  const announcementEndpoint = configuredEndpoint
+    ? normalizeAnnouncementEndpoint(configuredEndpoint)
+    : null;
+  let useAnnouncementGate = announcementEndpoint !== null;
+
+  if (configuredEndpoint && !announcementEndpoint) {
+    console.warn(
+      "Ignoring invalid ANNOUNCED_VERSION_ENDPOINT; falling back to live version checks."
+    );
+  }
 
   if (announcementEndpoint) {
     try {
-      const announcedVersion =
-        await fetchAnnouncedVersion(announcementEndpoint);
+      const announcedVersion = await getAnnouncedVersion(announcementEndpoint);
       if (
         announcedVersion &&
         shouldExposeAnnouncedVersion(announcedVersion, version)
       ) {
         return versionResponse({
           announcedVersion: announcedVersion.version,
+          clientVersion,
+          useAnnouncementGate,
           version,
         });
       }
-    } catch {
-      /* Fall back to the current instance version. */
+    } catch (error) {
+      useAnnouncementGate = false;
+      console.warn(
+        "Failed to fetch announced version; falling back to live version checks.",
+        error
+      );
     }
   }
 
-  return versionResponse({ announcedVersion: null, version });
+  return versionResponse({
+    announcedVersion: null,
+    clientVersion,
+    useAnnouncementGate,
+    version,
+  });
 }
+
+export const __resetAnnouncedVersionCacheForTests = () => {
+  announcedVersionCache = null;
+  announcedVersionInFlight = null;
+};
