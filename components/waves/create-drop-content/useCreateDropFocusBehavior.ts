@@ -66,10 +66,16 @@ export function useCreateDropFocusBehavior({
     }
 
     isInitialMountRef.current = false;
+    const shouldFocusInitialActiveDrop =
+      focusOnInitialActiveDrop && isInitialMount;
 
     if (isApp) {
-      if (focusOnInitialActiveDrop) {
+      if (shouldFocusInitialActiveDrop) {
         createDropInputRef.current?.focus();
+        return;
+      }
+
+      if (focusOnInitialActiveDrop) {
         return;
       }
 
@@ -82,6 +88,15 @@ export function useCreateDropFocusBehavior({
         clearTimeout(timer);
         cancelScheduledFocus?.();
       };
+    }
+
+    if (shouldFocusInitialActiveDrop) {
+      createDropInputRef.current?.focus();
+      return;
+    }
+
+    if (focusOnInitialActiveDrop) {
+      return;
     }
 
     const timer = setTimeout(() => {

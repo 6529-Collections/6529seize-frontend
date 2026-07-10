@@ -33,6 +33,8 @@ const SANDBOX_NOTIFICATION_WAVE_ID = "00000000-0000-4000-8000-000000000533";
 const SANDBOX_NOTIFICATION_DROP_ID = "00000000-0000-4000-8000-000000000534";
 const SANDBOX_NOTIFICATION_REACTION_DROP_ID =
   "00000000-0000-4000-8000-000000000535";
+const SANDBOX_NOTIFICATION_ALL_DROPS_DROP_ID =
+  "00000000-0000-4000-8000-000000000544";
 const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
 const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
@@ -618,6 +620,21 @@ const notificationWaveOverview = {
   total_drops_count: 2,
 };
 
+const notificationWave = {
+  ...localWave,
+  id: SANDBOX_NOTIFICATION_WAVE_ID,
+  name: notificationWaveOverview.name,
+  description_drop: {
+    ...localWave.description_drop,
+    id: notificationWaveOverview.description_drop.id,
+    content: notificationWaveOverview.description_drop.content,
+  },
+  metrics: {
+    ...localWave.metrics,
+    drops_count: notificationWaveOverview.total_drops_count,
+  },
+};
+
 const dmWave = {
   ...localWave,
   id: SANDBOX_DM_WAVE_ID,
@@ -646,6 +663,12 @@ function notificationDrop({
     author,
     content,
     created_at: CREATED_AT + serialNo,
+    wave: {
+      ...localWaveMin,
+      id: SANDBOX_NOTIFICATION_WAVE_ID,
+      name: notificationWaveOverview.name,
+      description_drop_id: notificationWaveOverview.description_drop.id,
+    },
   };
 }
 
@@ -661,6 +684,12 @@ const reactionDrop = notificationDrop({
   content: "A sandbox drop with grouped reactions.",
 });
 
+const allDropsNotificationDrop = notificationDrop({
+  id: SANDBOX_NOTIFICATION_ALL_DROPS_DROP_ID,
+  serialNo: 4,
+  content: "Sandbox following notification drop.",
+});
+
 function notificationIdentity(handle, idSuffix) {
   return identityOverview({
     id: `00000000-0000-4000-8000-000000000${idSuffix}`,
@@ -674,6 +703,16 @@ const notificationReactorOne = notificationIdentity("sandbox-bob", "542");
 const notificationReactorTwo = notificationIdentity("sandbox-carol", "543");
 
 const sandboxNotifications = [
+  {
+    id: 1000,
+    cause: "ALL_DROPS",
+    created_at: CREATED_AT + 1000,
+    read_at: null,
+    related_identity: notificationActor,
+    related_drops: [allDropsNotificationDrop],
+    related_wave: notificationWaveOverview,
+    additional_context: {},
+  },
   {
     id: 1001,
     cause: "IDENTITY_MENTIONED",
@@ -1495,6 +1534,14 @@ const mockApiExactReadRoutes = new Map([
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
     () => ({ wave: dmWaveOverview, drops: [] }),
+  ],
+  [`/api/waves/${SANDBOX_NOTIFICATION_WAVE_ID}`, () => notificationWave],
+  [
+    `/api/v2/waves/${SANDBOX_NOTIFICATION_WAVE_ID}/drops`,
+    () => ({
+      wave: notificationWaveOverview,
+      drops: [mentionDrop, reactionDrop, allDropsNotificationDrop],
+    }),
   ],
   [`/api/waves/${SANDBOX_CREATED_WAVE_ID}`, () => createdWave],
   [
