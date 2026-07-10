@@ -6,7 +6,10 @@ import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificat
 import { commonApiFetch } from "@/services/api/common-api";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { isUnauthorizedQueryError } from "@/components/react-query-wrapper/utils/query-utils";
+import {
+  isRateLimitQueryError,
+  isUnauthorizedQueryError,
+} from "@/components/react-query-wrapper/utils/query-utils";
 import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 
@@ -115,6 +118,9 @@ export function useUnreadNotifications(
         return false;
       }
       if (isUnauthorizedQueryError(error)) {
+        return false;
+      }
+      if (isRateLimitQueryError(error)) {
         return false;
       }
 

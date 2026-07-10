@@ -133,6 +133,76 @@ describe("mergeDrops", () => {
     expect(merged[0]?.id).toBe("drop-2");
     expect(merged[0]?.serial_no).toBe(6);
   });
+
+  it("orders temporary and canonical drops by created time consistently", () => {
+    const current = [
+      {
+        ...sampleDrop,
+        id: "temp-text",
+        serial_no: 999_999_999,
+        created_at: 1_000,
+        stableKey: "temp-text",
+        stableHash: "temp-text",
+        type: DropSize.FULL,
+      },
+      {
+        ...sampleDrop,
+        id: "older-file",
+        serial_no: 10,
+        created_at: 500,
+        stableKey: "older-file",
+        stableHash: "older-file",
+        type: DropSize.FULL,
+      },
+    ] as any[];
+    const incoming = [
+      {
+        ...sampleDrop,
+        id: "server-file",
+        serial_no: 12,
+        created_at: 2_000,
+        type: DropSize.FULL,
+      },
+    ] as any[];
+
+    const merged = mergeDrops(current, incoming);
+
+    expect(merged.map((drop) => drop.id)).toEqual([
+      "server-file",
+      "temp-text",
+      "older-file",
+    ]);
+  });
+
+  it("falls back to serial number when created_at is null", () => {
+    const current = [
+      {
+        ...sampleDrop,
+        id: "null-created-at",
+        serial_no: 20,
+        created_at: null,
+        stableKey: "null-created-at",
+        stableHash: "null-created-at",
+        type: DropSize.FULL,
+      },
+    ] as any[];
+    const incoming = [
+      {
+        ...sampleDrop,
+        id: "low-created-at",
+        serial_no: 10,
+        created_at: 5,
+        type: DropSize.FULL,
+      },
+    ] as any[];
+
+    const merged = mergeDrops(current, incoming);
+
+    expect(merged.map((drop) => drop.id)).toEqual([
+      "null-created-at",
+      "low-created-at",
+    ]);
+  });
 });
 
 describe("fetchNewestWaveMessages", () => {

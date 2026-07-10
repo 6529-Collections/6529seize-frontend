@@ -25,6 +25,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
   mapSidebarSectionsToPages,
@@ -33,6 +34,8 @@ import {
 } from "@/hooks/useSidebarSections";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { useWaves } from "@/hooks/useWaves";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import type {
@@ -66,6 +69,9 @@ import {
   type RankedPageMatch,
 } from "./pageSearch";
 
+const HEADER_SEARCH_DIALOG_TITLE_ID = "header-search-dialog-title";
+const HEADER_SEARCH_INPUT_DESCRIPTION_ID = "header-search-input-description";
+
 export default function HeaderSearchModal({
   onClose,
   wave,
@@ -76,6 +82,7 @@ export default function HeaderSearchModal({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const locale = useBrowserLocale();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
@@ -117,6 +124,23 @@ export default function HeaderSearchModal({
 
   // Wave search (shorter debounce, lower min length)
   const WAVE_SEARCH_MIN_LENGTH = 2;
+  const dialogTitle =
+    searchMode === SEARCH_MODE.WAVE
+      ? t(locale, "headerSearch.dialogTitle.wave")
+      : t(locale, "headerSearch.dialogTitle.site");
+  const inputMinLength =
+    searchMode === SEARCH_MODE.WAVE
+      ? WAVE_SEARCH_MIN_LENGTH
+      : MIN_SEARCH_LENGTH;
+  const formattedInputMinLength = formatInteger(locale, inputMinLength);
+  const inputDescription =
+    searchMode === SEARCH_MODE.WAVE
+      ? t(locale, "headerSearch.inputDescription.wave", {
+          minLength: formattedInputMinLength,
+        })
+      : t(locale, "headerSearch.inputDescription.site", {
+          minLength: formattedInputMinLength,
+        });
   const [waveSearchDebouncedValue, setWaveSearchDebouncedValue] =
     useState<string>("");
   useDebounce(
@@ -593,16 +617,20 @@ export default function HeaderSearchModal({
           <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center sm:tw-p-6 lg:tw-items-center">
             <div
               ref={modalRef}
+              role="dialog"
               aria-modal="true"
-              aria-labelledby="header-search-input"
+              aria-labelledby={HEADER_SEARCH_DIALOG_TITLE_ID}
               className="tw-relative tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-[520px] tw-max-h-[70vh] tw-min-h-0 tw-w-full tw-max-w-[min(100vw-3rem,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl"
             >
+              <h2 id={HEADER_SEARCH_DIALOG_TITLE_ID} className="tw-sr-only">
+                {dialogTitle}
+              </h2>
               <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-4">
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Go back"
-                  className="-tw-ml-1 tw-mr-1 tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-text-white sm:tw-hidden"
+                  aria-label={t(locale, "headerSearch.goBack")}
+                  className="-tw-ml-1 tw-mr-1 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-hidden"
                 >
                   <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
                 </button>
@@ -621,31 +649,38 @@ export default function HeaderSearchModal({
                     />
                   </svg>
                   <label className="tw-sr-only" htmlFor="header-search-input">
-                    Search
+                    {t(locale, "headerSearch.inputLabel")}
                   </label>
+                  <p
+                    id={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
+                    className="tw-sr-only"
+                  >
+                    {inputDescription}
+                  </p>
+                  {/* Search updates results directly; avoid form constraint state. */}
                   <input
                     id="header-search-input"
                     ref={inputRef}
                     type="text"
-                    required
+                    aria-describedby={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
                     autoComplete="off"
                     value={searchValue}
                     onChange={handleInputChange}
                     className="sm:text-sm tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300"
                     placeholder={
                       searchMode === SEARCH_MODE.WAVE
-                        ? "Search messages"
-                        : "Search 6529.io"
+                        ? t(locale, "headerSearch.placeholder.wave")
+                        : t(locale, "headerSearch.placeholder.site")
                     }
                   />
                   {searchValue.length > 0 && (
                     <button
                       type="button"
                       onClick={handleClearSearch}
-                      aria-label="Clear search"
-                      className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 hover:tw-text-white"
+                      aria-label={t(locale, "headerSearch.clear")}
+                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                     >
-                      Clear
+                      {t(locale, "headerSearch.clearShort")}
                     </button>
                   )}
                 </div>
@@ -653,8 +688,8 @@ export default function HeaderSearchModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Close search"
-                  className="tw-hidden tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white sm:tw-inline-flex"
+                  aria-label={t(locale, "headerSearch.close")}
+                  className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-inline-flex"
                 >
                   <XMarkIcon className="tw-size-5" />
                 </button>
@@ -671,7 +706,7 @@ export default function HeaderSearchModal({
                           : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
                       }`}
                     >
-                      In this Wave
+                      {t(locale, "headerSearch.mode.wave")}
                     </button>
                     <button
                       type="button"
@@ -682,7 +717,7 @@ export default function HeaderSearchModal({
                           : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
                       }`}
                     >
-                      Site-wide
+                      {t(locale, "headerSearch.mode.site")}
                     </button>
                   </div>
                 </div>
