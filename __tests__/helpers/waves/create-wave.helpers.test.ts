@@ -350,6 +350,99 @@ describe("create-wave.helpers", () => {
       expect(res.voting.forbid_negative_votes).toBe(false);
     });
 
+    it("omits the decision strategy, end date and outcomes for ongoing rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.ongoingRanking = true;
+      // Even with a fixed schedule and outcomes configured, ongoing mode wins.
+      config.dates.firstDecisionTime = 2;
+      config.dates.subsequentDecisions = [3, 5];
+      config.dates.endDate = 10;
+      config.outcomes = [{ title: "stale outcome" }];
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.decisions_strategy).toBeNull();
+      expect(res.voting.period.max).toBeNull();
+      expect(res.participation.period.max).toBeNull();
+      expect(res.outcomes).toEqual([]);
+      // Time-weighted voting is disabled in the base config, so no time lock.
+      expect(res.wave.time_lock_ms).toBeNull();
+    });
+
+    it("keeps the time-weighted vote lock for ongoing rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.ongoingRanking = true;
+      // Time-weighted voting drives the live leaderboard (not just decision
+      // snapshots), so it stays meaningful for perpetual waves.
+      config.voting.timeWeighted = {
+        enabled: true,
+        averagingInterval: 10,
+        averagingIntervalUnit: "minutes",
+      };
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.decisions_strategy).toBeNull();
+      expect(res.wave.time_lock_ms).toBe(10 * 60 * 1000);
+    });
+
+    it("ignores a stray ongoing flag on approve waves", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      // ongoingRanking is a Rank-only concept; a stray flag must not leak into
+      // other wave types' payloads.
+      config.dates.ongoingRanking = true;
+      config.dates.endDate = 999;
+      config.outcomes = [
+        {
+          type: "MANUAL",
+          title: "outcome",
+          credit: null,
+          category: null,
+          winnersConfig: null,
+          maxWinners: null,
+        },
+      ];
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.period.max).toBe(999);
+      expect(res.participation.period.max).toBe(999);
+      expect(res.outcomes).not.toEqual([]);
+    });
+
+    it("keeps the rolling decision strategy for open-ended scheduled rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.firstDecisionTime = 2;
+      config.dates.subsequentDecisions = [3];
+      config.dates.isRolling = true;
+      config.dates.endDate = null;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.decisions_strategy).toEqual({
+        first_decision_time: 2,
+        subsequent_decisions: [3],
+        is_rolling: true,
+      });
+      expect(res.voting.period.max).toBeNull();
+    });
+
     it("includes identity submission strategy when configured", () => {
       const config = {
         overview: { type: ApiWaveType.Rank, name: "W", image: null },

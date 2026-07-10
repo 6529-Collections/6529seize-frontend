@@ -412,6 +412,11 @@ export const getCreateWaveEndDate = ({
     return config.dates.endDate;
   }
 
+  // Ongoing (perpetual) Rank waves never end: no decision schedule, no end date.
+  if (config.dates.ongoingRanking) {
+    return null;
+  }
+
   return calculateRankEndDate(config.dates);
 };
 
@@ -433,6 +438,9 @@ export const getCreateNewWaveBody = ({
     : null;
   const signatureRequired =
     config.drops.signatureRequired && Boolean(participationTerms);
+  const isPerpetualRank =
+    config.overview.type === ApiWaveType.Rank &&
+    Boolean(config.dates.ongoingRanking);
 
   return {
     name: config.overview.name,
@@ -520,7 +528,7 @@ export const getCreateNewWaveBody = ({
         group_id: config.groups.admin,
       },
       decisions_strategy:
-        config.overview.type === ApiWaveType.Rank
+        config.overview.type === ApiWaveType.Rank && !isPerpetualRank
           ? {
               first_decision_time: config.dates.firstDecisionTime,
               subsequent_decisions: config.dates.subsequentDecisions,
@@ -528,6 +536,9 @@ export const getCreateNewWaveBody = ({
             }
           : null,
     },
-    outcomes: getOutcomes({ config }),
+    // Ongoing rank waves never announce winners, so outcome awards would be
+    // dead config; the live leaderboard is the outcome. Type-gated so a stray
+    // flag can never strip outcomes from other wave types.
+    outcomes: isPerpetualRank ? [] : getOutcomes({ config }),
   };
 };

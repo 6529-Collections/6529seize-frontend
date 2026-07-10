@@ -162,6 +162,12 @@ const getDatesValidationErrors = ({
       );
     }
 
+    // Ongoing (perpetual) Rank waves have no winner announcements and no end
+    // date, so there are no decision times to validate.
+    if (dates.ongoingRanking) {
+      return errors;
+    }
+
     if (
       dates.votingStartDate &&
       dates.firstDecisionTime < dates.votingStartDate
@@ -519,12 +525,18 @@ const getApprovalValidationErrors = ({
 const getOutcomesValidationErrors = ({
   waveType,
   outcomes,
+  ongoingRanking,
 }: {
   readonly waveType: ApiWaveType;
   readonly outcomes: CreateWaveOutcomeConfig[];
+  readonly ongoingRanking: boolean;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   if (waveType === ApiWaveType.Chat) {
+    return errors;
+  }
+  // Ongoing rank waves never announce winners, so awarding outcomes is optional.
+  if (waveType === ApiWaveType.Rank && ongoingRanking) {
     return errors;
   }
   if (!outcomes.length) {
@@ -622,6 +634,7 @@ export const getCreateWaveValidationErrors = ({
         ...getOutcomesValidationErrors({
           waveType: config.overview.type,
           outcomes: config.outcomes,
+          ongoingRanking: config.dates.ongoingRanking ?? false,
         })
       );
       break;

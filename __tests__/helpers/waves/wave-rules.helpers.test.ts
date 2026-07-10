@@ -195,6 +195,36 @@ describe("wave-rules.helpers", () => {
     );
   });
 
+  it("summarizes ongoing rank waves with no scheduled decisions", () => {
+    const config: CreateWaveConfig = {
+      ...createConfig(),
+      overview: { type: ApiWaveType.Rank, name: "Nodes", image: null },
+      dates: {
+        submissionStartDate: 1000,
+        votingStartDate: 2000,
+        endDate: null,
+        firstDecisionTime: 5000,
+        subsequentDecisions: [],
+        isRolling: false,
+        ongoingRanking: true,
+      },
+    };
+
+    const rules = buildWaveRules({ config, groupsCache: {} });
+    const rows = rules.automatic
+      .flatMap((section) => section.rows)
+      .map((row) => [row.label, row.value]);
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        ["Winner announcements", "None (ongoing ranking, no end date)"],
+      ])
+    );
+    const labels = rows.map(([label]) => label);
+    expect(labels).not.toContain("First decision");
+    expect(labels).not.toContain("Decision cadence");
+  });
+
   it("builds existing chat rules from chat settings", () => {
     const wave = {
       wave: {

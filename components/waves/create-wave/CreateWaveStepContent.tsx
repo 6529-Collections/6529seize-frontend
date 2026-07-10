@@ -158,9 +158,11 @@ export default function CreateWaveStepContent({
           waveType={config.overview.type}
           errors={errors}
           dates={config.dates}
+          display={config.display}
           maxWinners={config.approval.maxWinners}
           setOutcomeType={onOutcomeTypeChange}
           setOutcomes={setOutcomes}
+          setDisplay={setDisplay}
           setMaxWinners={onApprovalMaxWinnersChange}
         />
       );
