@@ -129,6 +129,28 @@ export const useCreateDropDraftState = ({
     });
   }, []);
 
+  const restoreMentionedEntities = useCallback(
+    ({
+      mentionedUsers,
+      mentionedWaves,
+      referencedNfts,
+    }: {
+      readonly mentionedUsers: CreateDropConfig["mentioned_users"];
+      readonly mentionedWaves: NonNullable<CreateDropConfig["mentioned_waves"]>;
+      readonly referencedNfts: CreateDropConfig["referenced_nfts"];
+    }) => {
+      setMentionedUsers(
+        mentionedUsers.map(({ mentioned_profile_id, handle_in_content }) => ({
+          mentioned_profile_id,
+          handle_in_content,
+        }))
+      );
+      setMentionedWaves([...mentionedWaves]);
+      setReferencedNfts([...referencedNfts]);
+    },
+    []
+  );
+
   const getSubmissionMetadata = useCallback(() => {
     return buildDropSubmissionMetadata({
       metadata,
@@ -286,6 +308,7 @@ export const useCreateDropDraftState = ({
     onReferencedNft,
     onMentionedUser,
     onMentionedWave,
+    restoreMentionedEntities,
     getUpdatedDrop,
     createGifDrop,
     finalizeAndAddDropPart,

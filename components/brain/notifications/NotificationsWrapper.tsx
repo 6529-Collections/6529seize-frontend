@@ -93,13 +93,9 @@ export default function NotificationsWrapper({
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
-      for (const waveId of visibleWaveIds) {
-        prefetchWaveData(waveId);
-      }
-    }, 100);
-
-    return () => window.clearTimeout(timeoutId);
+    for (const waveId of visibleWaveIds) {
+      prefetchWaveData(waveId);
+    }
   }, [prefetchWaveData, visibleWaveIds]);
 
   useEffect(() => {
@@ -145,6 +141,7 @@ export default function NotificationsWrapper({
         drop: param.drop,
         partId: param.partId,
       };
+      prefetchWaveData(param.drop.wave.id);
 
       if (isApp) {
         // WKWebView only opens the soft keyboard when focus starts inside the
@@ -159,7 +156,7 @@ export default function NotificationsWrapper({
 
       setActiveDrop(nextActiveDrop);
     },
-    [focusKeyboardPrimer, isApp, setActiveDrop]
+    [focusKeyboardPrimer, isApp, prefetchWaveData, setActiveDrop]
   );
 
   return (
