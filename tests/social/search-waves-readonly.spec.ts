@@ -420,15 +420,23 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
           url.searchParams.get("wave") === expectedQueryWaveId)
     );
     await expect(searchInput).toHaveAttribute("placeholder", "Search messages");
-    await expect(page.getByText(/Type at least 2 characters/)).toBeVisible();
+    const minimumQueryMessage = page
+      .locator("#wave-drops-search-idle-status")
+      .getByText("Type at least 2 characters to search this wave.", {
+        exact: true,
+      });
+    await expect(minimumQueryMessage).toBeVisible();
 
     await searchInput.fill("x");
-    await expect(page.getByText(/Type at least 2 characters/)).toBeVisible();
+    await expect(minimumQueryMessage).toBeVisible();
 
     await searchInput.fill(UNMATCHABLE_WAVE_QUERY);
-    await expect(page.getByText("No matches found.")).toBeVisible({
-      timeout: NAVIGATION_TIMEOUT_MS,
-    });
+    await expect(searchInput).toHaveValue(UNMATCHABLE_WAVE_QUERY);
+    await expect(
+      page
+        .locator("#wave-drops-search-empty-status")
+        .getByText("No messages found", { exact: true })
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
 
     await page.getByRole("button", { name: "Clear search" }).click();
     await expect(searchInput).toHaveValue("");

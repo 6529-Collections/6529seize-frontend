@@ -121,6 +121,8 @@ interface WaveLeaderboardCurationDropModalProps {
 }
 
 const MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST = 3;
+const NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING =
+  "var(--native-keyboard-composer-bottom-padding, max(env(safe-area-inset-bottom,0px), 0.5rem))";
 const noop = () => {};
 
 const WaveGallery = dynamic<WaveGalleryProps>(
@@ -321,6 +323,18 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
 
     return `${baseStyles} ${heightClass}`;
   }, []);
+  const composerContainerClassName = isApp
+    ? "tw-mt-auto tw-bg-iron-950"
+    : "tw-mt-auto tw-bg-iron-950 tw-pb-[max(env(safe-area-inset-bottom,0px),0.5rem)] lg:tw-pb-0";
+  const composerContainerStyle = useMemo<React.CSSProperties | undefined>(
+    () =>
+      isApp
+        ? {
+            paddingBottom: NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING,
+          }
+        : undefined,
+    [isApp]
+  );
 
   const onReply = useCallback(
     (drop: ApiDrop, partId: number) => {
@@ -598,7 +612,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           isVotingControlsLocked={isVotingControlsLocked}
         />
         {!(isApp && editingDropId) && (
-          <div className="tw-mt-auto tw-bg-iron-950 tw-pb-[max(env(safe-area-inset-bottom,0px),0.5rem)] lg:tw-pb-0">
+          <div
+            className={composerContainerClassName}
+            style={composerContainerStyle}
+          >
             <CreateDropWaveWrapper>
               <PrivilegedDropCreator
                 activeDrop={activeDrop}
