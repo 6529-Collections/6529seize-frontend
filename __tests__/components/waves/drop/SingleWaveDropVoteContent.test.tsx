@@ -245,13 +245,17 @@ describe("SingleWaveDropVoteContent", () => {
     });
     fireEvent.change(rationaleTextarea, { target: { value: "" } });
 
-    expect(
-      screen.getByRole("switch", { name: "Vote with reply" })
-    ).toBeChecked();
+    const rationaleSwitch = screen.getByRole("switch", {
+      name: "Vote with reply",
+    });
+    expect(rationaleSwitch).toBeChecked();
     expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
       "Add rationale text or turn Vote with reply off."
     );
     expect(rationaleTextarea).toHaveAccessibleDescription(
+      /Add rationale text or turn Vote with reply off/i
+    );
+    expect(rationaleSwitch).toHaveAccessibleDescription(
       /Add rationale text or turn Vote with reply off/i
     );
   });

@@ -404,7 +404,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
                 }
                 className="tw-peer tw-sr-only"
                 aria-labelledby={rationaleSwitchLabelId}
-                aria-describedby={rationaleDescriptionId}
+                aria-describedby={rationaleDescriptionIds}
               />
               <span
                 aria-hidden="true"
