@@ -63,7 +63,7 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
       onFocus={onPrefetchQuickVote}
       onMouseEnter={onPrefetchQuickVote}
       onPointerDown={onPrefetchQuickVote}
-      className={`tw-flex tw-items-center tw-gap-x-0.5 tw-rounded-full tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-px-1.5 tw-py-2 tw-text-primary-300 tw-shadow-[0_12px_24px_rgba(11,93,255,0.2)] tw-transition-colors tw-duration-300 desktop-hover:hover:tw-border-primary-400/40 desktop-hover:hover:tw-bg-primary-500/15 ${
+      className={`tw-flex tw-w-14 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-0.5 tw-rounded-full tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-px-0.5 tw-py-2 tw-text-primary-300 tw-shadow-[0_12px_24px_rgba(11,93,255,0.2)] tw-transition-colors tw-duration-300 desktop-hover:hover:tw-border-primary-400/40 desktop-hover:hover:tw-bg-primary-500/15 ${
         className ?? ""
       }`}
     >
