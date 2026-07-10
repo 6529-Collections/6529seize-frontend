@@ -3,7 +3,10 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
 import Link from "next/link";
-import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import {
+  getWaveRightPanelProfileIdentifier,
+  waveRightPanelText,
+} from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveRatingRepProps {
   readonly wave: ApiWave;
@@ -18,9 +21,7 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
   const unknownLabel = waveRightPanelText(
     "waves.sidebar.rightPanel.specs.unknown"
   );
-  const creditorHandle = [creditor?.handle]
-    .find((handle) => handle?.trim())
-    ?.trim();
+  const creditorHandle = getWaveRightPanelProfileIdentifier([creditor?.handle]);
   const creditorHandleLabel = creditorHandle ?? unknownLabel;
 
   if (!hasCategory && !hasCreditor) {
@@ -62,7 +63,7 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
               <Image
                 className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover"
                 src={getScaledImageUri(creditor.pfp, ImageScale.W_AUTO_H_50)}
-                alt={creditor.handle ?? ""}
+                alt=""
                 width={24}
                 height={24}
               />
@@ -71,7 +72,7 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
                 {creditorInitial}
               </div>
             )}
-            {creditorHandle?.trim() ? (
+            {creditorHandle ? (
               <Link
                 href={`/${creditorHandle}`}
                 className="tw-truncate tw-font-medium tw-text-iron-50 tw-no-underline tw-transition-colors hover:tw-text-iron-200"

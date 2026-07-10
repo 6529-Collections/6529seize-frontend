@@ -10,7 +10,10 @@ import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ClockIcon } from "@heroicons/react/24/outline";
-import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import {
+  getWaveRightPanelProfileIdentifier,
+  waveRightPanelText,
+} from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;
@@ -24,22 +27,56 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   const unknownProfile = waveRightPanelText(
     "waves.sidebar.rightPanel.activity.unknownProfile"
   );
-  const voterHandle = log.invoker.handle?.trim();
+  const voterHandle = getWaveRightPanelProfileIdentifier([log.invoker.handle]);
   const voterProfile =
-    [voterHandle, log.invoker.primary_address, log.invoker.id].find((profile) =>
-      profile?.trim()
-    ) ?? unknownProfile;
-  const dropCreatorHandle = log.drop_author?.handle?.trim();
-  const dropCreatorProfile =
-    [
-      dropCreatorHandle,
-      log.drop_author?.primary_address,
-      log.drop_author?.id,
-    ].find((profile) => profile?.trim()) ?? unknownProfile;
+    getWaveRightPanelProfileIdentifier([
+      voterHandle,
+      log.invoker.primary_address,
+      log.invoker.id,
+    ]) ?? unknownProfile;
+  const dropCreatorHandle = getWaveRightPanelProfileIdentifier([
+    log.drop_author?.handle,
+  ]);
+  const dropCreatorProfile = getWaveRightPanelProfileIdentifier([
+    dropCreatorHandle,
+    log.drop_author?.primary_address,
+    log.drop_author?.id,
+  ]);
+  const dropCreatorLabel = dropCreatorProfile ?? unknownProfile;
   const oldVoteValue: unknown = log.contents["oldVote"];
   const newVoteValue: unknown = log.contents["newVote"];
   const oldVote = typeof oldVoteValue === "number" ? oldVoteValue : 0;
   const newVote = typeof newVoteValue === "number" ? newVoteValue : 0;
+  const dropCreatorTitle = waveRightPanelText(
+    "waves.sidebar.rightPanel.activity.dropCreatorTitle",
+    { profile: dropCreatorLabel }
+  );
+  const dropCreatorContent = (
+    <>
+      {log.drop_author?.pfp ? (
+        <Image
+          src={resolveIpfsUrlSync(log.drop_author.pfp)}
+          alt=""
+          width={20}
+          height={20}
+          className="tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/10"
+        />
+      ) : (
+        <div className="tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
+      )}
+      {dropCreatorHandle ? (
+        <UserProfileTooltipWrapper user={dropCreatorHandle}>
+          <span className="tw-block tw-max-w-36 tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
+            {dropCreatorHandle}
+          </span>
+        </UserProfileTooltipWrapper>
+      ) : (
+        <span className="tw-block tw-max-w-36 tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
+          {dropCreatorLabel}
+        </span>
+      )}
+    </>
+  );
 
   return (
     <div className="tw-relative tw-min-w-0">
@@ -111,37 +148,22 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             )}
           </div>
 
-          <Link
-            href={`/${dropCreatorProfile}`}
-            className="tw-group tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
-            title={waveRightPanelText(
-              "waves.sidebar.rightPanel.activity.dropCreatorTitle",
-              { profile: dropCreatorProfile }
-            )}
-          >
-            {log.drop_author?.pfp ? (
-              <Image
-                src={resolveIpfsUrlSync(log.drop_author.pfp)}
-                alt=""
-                width={20}
-                height={20}
-                className="tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/10"
-              />
-            ) : (
-              <div className="tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
-            )}
-            {dropCreatorHandle?.trim() ? (
-              <UserProfileTooltipWrapper user={dropCreatorHandle}>
-                <span className="tw-block tw-max-w-36 tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
-                  {dropCreatorHandle}
-                </span>
-              </UserProfileTooltipWrapper>
-            ) : (
-              <span className="tw-block tw-max-w-36 tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
-                {dropCreatorProfile}
-              </span>
-            )}
-          </Link>
+          {dropCreatorProfile ? (
+            <Link
+              href={`/${dropCreatorProfile}`}
+              className="tw-group tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
+              title={dropCreatorTitle}
+            >
+              {dropCreatorContent}
+            </Link>
+          ) : (
+            <div
+              className="tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2"
+              title={dropCreatorTitle}
+            >
+              {dropCreatorContent}
+            </div>
+          )}
         </div>
       </div>
     </div>

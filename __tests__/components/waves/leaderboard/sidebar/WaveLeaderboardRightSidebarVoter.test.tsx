@@ -40,7 +40,7 @@ describe("WaveLeaderboardRightSidebarVoter", () => {
       voter: {
         id: "profile-id",
         handle: null,
-        primary_address: "0xalice",
+        primary_address: " 0xalice ",
         pfp: "",
       },
     };

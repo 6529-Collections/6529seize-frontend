@@ -69,6 +69,26 @@ describe("WaveLeaderboardRightSidebarVoters", () => {
     expect(screen.queryByText("No votes yet")).not.toBeInTheDocument();
   });
 
+  it("treats a whitespace-only connected handle as unavailable", () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: { handle: "   " },
+    });
+    mockTopVoters.mockReturnValue({
+      voters: [],
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isLoading: false,
+    });
+
+    render(<WaveLeaderboardRightSidebarVoters wave={wave} />);
+
+    expect(mockTopVoters).toHaveBeenCalledWith(
+      expect.objectContaining({ connectedProfileHandle: undefined })
+    );
+    expect(screen.getByText("Connect to view votes")).toBeInTheDocument();
+  });
+
   it("fetches next page on intersection", () => {
     const fetchNextPage = jest.fn().mockResolvedValue(undefined);
     mockTopVoters.mockReturnValue({

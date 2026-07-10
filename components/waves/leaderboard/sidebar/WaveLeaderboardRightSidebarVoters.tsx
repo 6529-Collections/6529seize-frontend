@@ -6,7 +6,10 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { WaveLeaderboardRightSidebarVoter } from "./WaveLeaderboardRightSidebarVoter";
 import { ArrowPathIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { WaveLeaderboardRightSidebarState } from "./WaveLeaderboardRightSidebarState";
-import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import {
+  getWaveRightPanelProfileIdentifier,
+  waveRightPanelText,
+} from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarVotersProps {
   readonly wave: ApiWave;
@@ -16,7 +19,9 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
   WaveLeaderboardRightSidebarVotersProps
 > = ({ wave }) => {
   const { connectedProfile } = useAuth();
-  const connectedProfileHandle = connectedProfile?.handle ?? undefined;
+  const connectedProfileHandle = getWaveRightPanelProfileIdentifier([
+    connectedProfile?.handle,
+  ]);
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: wave.id,

@@ -94,17 +94,22 @@ describe("WaveRating", () => {
   });
 
   it("uses one fallback label for a REP creditor without a handle", () => {
-    render(
+    const { container } = render(
       <WaveRating
         wave={makeWave({
           creditType: ApiWaveCreditType.Rep,
-          creditor: { id: "creditor-id", handle: "", pfp: null },
+          creditor: {
+            id: "creditor-id",
+            handle: "   ",
+            pfp: "ipfs://creditor-avatar",
+          },
         })}
       />
     );
 
     const creditorRow = screen.getByLabelText("Creditor Unknown");
     expect(within(creditorRow).getByText("Unknown")).toBeInTheDocument();
+    expect(container.querySelector("img")).toHaveAttribute("alt", "");
   });
 
   it("renders a compact card-set row and does not fetch metadata before opening", () => {

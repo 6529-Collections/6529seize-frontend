@@ -10,6 +10,7 @@ import {
 } from "@/helpers/waves/waves.constants";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getWaveRightPanelProfileIdentifier } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;
@@ -23,9 +24,11 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
   const hasPositiveVotes = !!voter.positive_votes_summed;
   const hasNegativeVotes = !!voter.negative_votes_summed;
   const voterProfile =
-    [voter.voter.handle, voter.voter.primary_address, voter.voter.id].find(
-      (profile) => profile?.trim()
-    ) ?? voter.voter.id;
+    getWaveRightPanelProfileIdentifier([
+      voter.voter.handle,
+      voter.voter.primary_address,
+      voter.voter.id,
+    ]) ?? voter.voter.id.trim();
 
   return (
     <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-2.5">
