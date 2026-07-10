@@ -128,15 +128,18 @@ describe("ArtistActiveSubmissionContent", () => {
     });
   });
 
-  it("returns null when searchParams is null", () => {
+  it("navigates safely when searchParams is null", () => {
     mockUseSearchParams.mockReturnValueOnce(null);
 
-    const { container } = renderWithProviders(
-      <ArtistActiveSubmissionContent {...defaultProps} />
-    );
+    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
 
-    expect(container.firstChild).not.toBeNull();
-    expect(screen.getByText("Test Artwork 1")).toBeInTheDocument();
+    const firstSubmission = screen
+      .getByText("Test Artwork 1")
+      .closest(".tw-group");
+    expect(firstSubmission).not.toBeNull();
+    fireEvent.click(firstSubmission!);
+
+    expect(mockPush).toHaveBeenCalledWith("/test-path?drop=drop-1");
   });
 
   it("renders submissions when data is available", () => {
@@ -246,9 +249,8 @@ describe("ArtistActiveSubmissionContent", () => {
     const firstSubmission = screen
       .getByText("Test Artwork 1")
       .closest(".tw-group");
-    if (firstSubmission) {
-      fireEvent.click(firstSubmission);
-    }
+    expect(firstSubmission).not.toBeNull();
+    fireEvent.click(firstSubmission!);
 
     expect(mockPush).toHaveBeenCalledWith("/test-path?drop=drop-1");
   });
@@ -283,9 +285,8 @@ describe("ArtistActiveSubmissionContent", () => {
     const firstSubmission = screen
       .getByText("Test Artwork 1")
       .closest(".tw-group");
-    if (firstSubmission) {
-      fireEvent.click(firstSubmission);
-    }
+    expect(firstSubmission).not.toBeNull();
+    fireEvent.click(firstSubmission!);
 
     expect(mockOnClose).toHaveBeenCalled();
   });
@@ -293,9 +294,8 @@ describe("ArtistActiveSubmissionContent", () => {
   it("renders date information for submissions", () => {
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
 
-    // Check that calendar icons are present
-    const calendarIcons = document.querySelectorAll("svg");
-    expect(calendarIcons.length).toBeGreaterThan(0);
+    expect(screen.getByText("Jan 1, 2022")).toBeInTheDocument();
+    expect(screen.getByText("Jan 2, 2022")).toBeInTheDocument();
   });
 
   it("renders submission grid correctly", () => {

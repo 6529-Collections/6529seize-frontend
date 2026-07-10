@@ -135,6 +135,7 @@ describe("SingleWaveDropVoteContent", () => {
         id: "wave-123",
         name: "Test Wave",
         voting_credit_type: ApiWaveCreditType.Tdh,
+        authenticated_user_eligible_to_chat: true,
       } as any,
       context_profile_context: { rating: 50, min_rating: 0, max_rating: 100 },
       parts: [],
@@ -252,6 +253,36 @@ describe("SingleWaveDropVoteContent", () => {
     );
     expect(rationaleTextarea).toHaveAccessibleDescription(
       /Add rationale text or turn Vote with reply off/i
+    );
+  });
+
+  it("hides rationale controls when the voter cannot reply in the wave", () => {
+    const drop = createMockDrop({
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        authenticated_user_eligible_to_chat: false,
+      } as any,
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(
+      screen.queryByRole("textbox", { name: /optional rationale reply/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("switch", { name: /vote with reply/i })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submit-label",
+      ""
     );
   });
 

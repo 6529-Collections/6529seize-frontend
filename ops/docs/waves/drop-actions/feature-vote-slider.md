@@ -82,6 +82,9 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - Changing slider or numeric input does not submit automatically.
 - A rationale reply is posted only when `Vote with reply` is on. Turning it off
   keeps the text but submits only the vote.
+- If `Vote with reply` is on and all rationale text is removed, submission is
+  blocked with a visible and accessible message until text is added or the
+  switch is turned off.
 - If the vote succeeds but the optional reply fails, the vote stays saved and
   an error toast tells the user to retry the reply.
 - Submit always runs an auth check first; canceling auth keeps controls open.

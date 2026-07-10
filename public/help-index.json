@@ -1890,6 +1890,8 @@
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
         "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
+        "When Vote with reply is enabled, removing all rationale text blocks submission until text is added or the switch is turned off.",
+        "If an optional rationale reply fails after a successful vote, the vote stays saved and the user is told that the reply failed.",
         "Boosting is a per-user flame toggle on full drop cards and boosted cards in wave and direct-message threads.",
         "Wave creator badges and drop state indicators explain context around submitted drops."
       ],
@@ -4604,7 +4606,7 @@
         "The My Votes tab is documented under wave leaderboard features.",
         "It helps a user inspect their own voting activity where the wave supports it.",
         "Availability depends on wave type, eligibility, and voting state.",
-        "Rows can include an Explain action that opens a normal drop reply prefilled with a vote rationale prefix."
+        "Rows can include an Explain action that opens a normal drop reply prefilled with a vote rationale prefix without submitting or changing the vote."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

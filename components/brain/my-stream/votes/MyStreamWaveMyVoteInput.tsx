@@ -45,6 +45,11 @@ interface LastAppliedVoteChange {
   readonly voteChange: number;
 }
 
+interface VoteMutationVariables {
+  readonly rate: number;
+  readonly previousRate: number;
+}
+
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   drop,
@@ -148,7 +153,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   };
 
   const rateChangeMutation = useMutation({
-    mutationFn: async (param: { rate: number }) =>
+    mutationFn: async (param: VoteMutationVariables) =>
       await commonApiPost<DropRateChangeRequest, ApiDrop>({
         endpoint: `drops/${drop.id}/ratings`,
         body: {
@@ -156,7 +161,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
       }),
-    onSuccess: (response: ApiDrop, variables: { rate: number }) => {
+    onSuccess: (response: ApiDrop, variables: VoteMutationVariables) => {
       const nextVoteValue =
         response.context_profile_context?.rating ?? variables.rate;
       const nextMaxRating =
@@ -164,7 +169,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       setLastAppliedVoteChange({
         dropId: drop.id,
         voteTotal: nextVoteValue,
-        voteChange: nextVoteValue - currentVoteValue,
+        voteChange: nextVoteValue - variables.previousRate,
       });
       setOptimisticVoteState({
         dropId: drop.id,
@@ -222,6 +227,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
 
       await rateChangeMutation.mutateAsync({
         rate: clampedValue,
+        previousRate: liveCurrentVoteValue,
       });
     } catch (error) {
       console.error("Failed to submit vote:", error);
