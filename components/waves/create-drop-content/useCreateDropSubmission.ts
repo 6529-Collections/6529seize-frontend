@@ -233,7 +233,10 @@ const getDropModeSubmitCallbacks = ({
 
 const getDropRequestWithoutReply = (
   dropRequest: CreateDropConfig
-): CreateDropConfig => ({ ...dropRequest, reply_to: undefined });
+): CreateDropConfig => {
+  const { reply_to: _replyTo, ...dropWithoutReply } = dropRequest;
+  return dropWithoutReply;
+};
 
 export const useCreateDropSubmission = ({
   activeDrop,
