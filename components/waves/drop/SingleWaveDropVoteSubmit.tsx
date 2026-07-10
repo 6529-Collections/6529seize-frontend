@@ -62,12 +62,15 @@ interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
   readonly voteLabel: string;
-  readonly onVoteApplied?: ((drop: ApiDrop) => void) | undefined;
+  readonly onVoteApplied?:
+    | ((drop: ApiDrop) => void | Promise<void>)
+    | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
   readonly onVoteRequestStarted?: (() => void) | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
   readonly submissionMode?: SingleWaveDropVoteSubmissionMode | undefined;
   readonly submitBlockReason?: string | null | undefined;
+  readonly submitLabelOverride?: string | undefined;
 }
 
 const SingleWaveDropVoteSubmit = forwardRef<
@@ -85,6 +88,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
       size = SingleWaveDropVoteSize.NORMAL,
       submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
       submitBlockReason = null,
+      submitLabelOverride,
     }: Props,
     ref
   ) => {
@@ -138,7 +142,9 @@ const SingleWaveDropVoteSubmit = forwardRef<
     });
 
     const theme =
-      position && position <= 3 ? rankingThemes[position] : defaultTheme;
+      position !== null && position > 0 && position <= 3
+        ? rankingThemes[position]
+        : defaultTheme;
 
     const getVoteError = () => {
       if (submitBlockReason) {
@@ -276,9 +282,9 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const delayWhileMounted = (delayMs: number) =>
       new Promise<boolean>((resolve) => {
         let settled = false;
-        let timeout: NodeJS.Timeout;
-        let cancelDelay: () => void;
-
+        const cancelDelay = () => {
+          settle(false);
+        };
         const settle = (mounted: boolean) => {
           if (settled) {
             return;
@@ -290,12 +296,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           removeDelayCanceler(cancelDelay);
           resolve(mounted);
         };
-
-        cancelDelay = () => {
-          settle(false);
-        };
-
-        timeout = setTimeout(() => {
+        const timeout = setTimeout(() => {
           settle(isMountedRef.current);
         }, delayMs);
         timeoutsRef.current.push(timeout);
@@ -351,21 +352,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
       resetLoadingState();
     };
 
-    const submitVoteInBackground = () => {
-      backgroundCloseFiredRef.current = false;
-
-      void rateChangeMutation
-        .mutateAsync({
-          rate: newRating,
-        })
-        .then((updatedDrop) => {
-          onVoteApplied?.(updatedDrop);
-        })
-        .catch(() => {
-          resetFastFailedBackgroundVote();
-        });
-
-      showSuccessfulVote();
+    const scheduleBackgroundModalClose = () => {
+      if (!isMountedRef.current) {
+        return;
+      }
 
       const closeTimeout = setTimeout(() => {
         backgroundCloseFiredRef.current = true;
@@ -374,6 +364,32 @@ const SingleWaveDropVoteSubmit = forwardRef<
       }, backgroundModalCloseDelay);
       backgroundCloseTimeoutRef.current = closeTimeout;
       timeoutsRef.current.push(closeTimeout);
+    };
+
+    const runOnVoteApplied = async (updatedDrop: ApiDrop) => {
+      try {
+        await onVoteApplied?.(updatedDrop);
+      } catch {
+        // Post-vote side effects must not turn a successful vote into a failed vote.
+      }
+    };
+
+    const submitVoteInBackground = () => {
+      backgroundCloseFiredRef.current = false;
+
+      void rateChangeMutation
+        .mutateAsync({
+          rate: newRating,
+        })
+        .then(async (updatedDrop) => {
+          await runOnVoteApplied(updatedDrop);
+        })
+        .catch(() => {
+          resetFastFailedBackgroundVote();
+        });
+
+      showSuccessfulVote();
+      scheduleBackgroundModalClose();
 
       backgroundSuccessTimeoutRef.current = finishSuccessState();
     };
@@ -383,7 +399,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
         const updatedDrop = await rateChangeMutation.mutateAsync({
           rate: newRating,
         });
-        onVoteApplied?.(updatedDrop);
+        await runOnVoteApplied(updatedDrop);
       } catch {
         resetLoadingState();
         return;
@@ -501,15 +517,16 @@ const SingleWaveDropVoteSubmit = forwardRef<
     }
 
     const idleButtonLabel =
-      voteAmountLabel === null ? "Vote" : `Vote ${voteAmountLabel}`;
+      submitLabelOverride ??
+      (voteAmountLabel === null ? "Vote" : `Vote ${voteAmountLabel}`);
 
     const getButtonContent = () => {
       return (
-        <div className={styles["buttonContent"]}>
+        <div className={styles["buttonContent"] ?? ""}>
           {(!loading || isTextExiting) && (
             <span
-              className={`${styles["buttonText"]} ${
-                isTextExiting ? styles["exit"] : styles["enter"]
+              className={`${styles["buttonText"] ?? ""} ${
+                isTextExiting ? (styles["exit"] ?? "") : (styles["enter"] ?? "")
               }`}
             >
               {showSuccess ? "Voted" : idleButtonLabel}
@@ -517,8 +534,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
           )}
           {loading && (
             <div
-              className={`${styles["spinner"]} ${
-                isSpinnerExiting ? styles["exit"] : styles["enter"]
+              className={`${styles["spinner"] ?? ""} ${
+                isSpinnerExiting
+                  ? (styles["exit"] ?? "")
+                  : (styles["enter"] ?? "")
               }`}
             >
               <div className={styles["bounce1"]}></div>
@@ -536,9 +555,9 @@ const SingleWaveDropVoteSubmit = forwardRef<
           id={`vote-button-${randomID}`}
           className={`${
             size === SingleWaveDropVoteSize.MINI
-              ? styles["voteButtonMini"]
-              : styles["voteButton"]
-          } ${voteDirectionClass} ${isProcessing ? styles["processing"] : ""}`}
+              ? (styles["voteButtonMini"] ?? "")
+              : (styles["voteButton"] ?? "")
+          } ${voteDirectionClass} ${isProcessing ? (styles["processing"] ?? "") : ""}`}
           onClick={(e) => {
             e.stopPropagation();
             void handleClick();

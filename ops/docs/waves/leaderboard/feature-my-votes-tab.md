@@ -3,7 +3,8 @@
 ## Overview
 
 `My Votes` lists drops where your current vote is not `0`.
-You can update votes one row at a time or reset selected rows to `0`.
+You can update votes one row at a time, reset selected rows to `0`, or open a
+prefilled reply for explaining a vote.
 
 The tab is available only on eligible rank-wave layouts:
 - memes waves
@@ -19,7 +20,7 @@ The tab is available only on eligible rank-wave layouts:
 
 - Open an eligible wave.
 - Switch to `My Votes` from the wave tab row.
-- Use row checkboxes and vote inputs in the list.
+- Use row checkboxes, vote inputs, and `Explain` actions in the list.
 
 ## User Journey
 
@@ -30,9 +31,11 @@ The tab is available only on eligible rank-wave layouts:
    value, voter count, and your current vote input.
 4. Optional: click a row to open that drop in the current wave route.
 5. Edit a vote, then submit with `Vote` or `Enter`.
-6. Use `Select All` or `Deselect All`, then `Reset Votes` to set selected rows
+6. Optional: select `Explain` to open an inline reply composer prefilled as
+   `Vote rationale (...)`.
+7. Use `Select All` or `Deselect All`, then `Reset Votes` to set selected rows
    to `0`.
-7. Scroll to the bottom to load more rows.
+8. Scroll to the bottom to load more rows.
 
 ## Common Scenarios
 
@@ -41,6 +44,11 @@ The tab is available only on eligible rank-wave layouts:
 - Submitted values are clamped to that row's current min/max range.
 - `Vote` is enabled only when the input is valid and changed.
 - `Vote` shows a spinner while the row request is running.
+- `Explain` opens the normal drop reply composer and does not submit or change a
+  vote by itself.
+- The prefilled reply includes the user's vote total at time of posting. If the
+  current session just applied a vote change and that change differs from the
+  total, the prefix includes both total and change.
 - During bulk reset, `Select All` and `Reset Votes` are disabled.
 - During bulk reset, row vote inputs are disabled and a
   `Resetting votes...` progress bar shows progress.
@@ -71,6 +79,8 @@ The tab is available only on eligible rank-wave layouts:
 - This tab does not show drops where your current vote is already `0`.
 - Editing and reset still depend on wave voting permissions and backend
   validation.
+- `Explain` uses standard chat replies; it does not create a separate rationale
+  object or require dedicated backend support.
 - `Available` and `Max` use comma formatting.
 - Tab selection is UI state and is not encoded in a URL tab parameter.
 
