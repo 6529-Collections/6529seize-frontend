@@ -18,7 +18,7 @@ import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
-import { getVoteRationaleReplyMarkdown } from "./voteRationaleReply.helpers";
+import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;

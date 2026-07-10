@@ -12,6 +12,15 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
     <span data-testid="font-awesome-icon" data-flip={flip} />
   ),
 }));
+jest.mock("@tanstack/react-query", () => ({
+  useMutation: () => ({ mutateAsync: jest.fn() }),
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    address: undefined,
+    isSafeWallet: false,
+  }),
+}));
 jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
   return React.forwardRef(function MockSubmit(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({ handleClick: jest.fn() }));
@@ -22,6 +31,7 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
           typeof props.onVoteRequestStarted === "function"
         )}
         data-submission-mode={props.submissionMode}
+        data-submit-label={props.submitLabelOverride ?? ""}
       >
         <button
           onClick={() => {
@@ -161,6 +171,62 @@ describe("SingleWaveDropVoteContent", () => {
     expect(
       screen.getByRole("button", { name: /numeric/i })
     ).toBeInTheDocument();
+  });
+
+  it("allows Vote with reply to be turned on before editing", () => {
+    render(
+      <SingleWaveDropVoteContent
+        drop={createMockDrop()}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    const rationaleSwitch = screen.getByRole("switch", {
+      name: /vote with reply/i,
+    });
+    expect(rationaleSwitch).not.toBeChecked();
+    expect(rationaleSwitch).not.toBeDisabled();
+
+    fireEvent.click(rationaleSwitch);
+
+    expect(rationaleSwitch).toBeChecked();
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submit-label",
+      "Vote + reply"
+    );
+  });
+
+  it("auto-enables on the first edit and then respects a manual off choice", () => {
+    render(
+      <SingleWaveDropVoteContent
+        drop={createMockDrop()}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    const rationaleSwitch = screen.getByRole("switch", {
+      name: /vote with reply/i,
+    });
+    const rationaleTextarea = screen.getByRole("textbox", {
+      name: /optional rationale reply/i,
+    });
+
+    fireEvent.change(rationaleTextarea, {
+      target: {
+        value: `${(rationaleTextarea as HTMLTextAreaElement).value}Reason`,
+      },
+    });
+    expect(rationaleSwitch).toBeChecked();
+
+    fireEvent.click(rationaleSwitch);
+    expect(rationaleSwitch).not.toBeChecked();
+
+    fireEvent.change(rationaleTextarea, {
+      target: { value: "A different reason" },
+    });
+    expect(rationaleSwitch).not.toBeChecked();
   });
 
   it("uses confirmed submission mode by default", () => {
