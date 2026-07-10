@@ -490,26 +490,22 @@ export default function DistributionPage(props: Readonly<Props>) {
       <div>
         {nftId && (
           <div className="tw-w-full">
-            <UpcomingMemePage
-              id={nftId}
-              locale={locale}
-              showDistributionLink={false}
-            />
+            <UpcomingMemePage id={nftId} locale={locale} />
           </div>
         )}
         <div className="tw-flex tw-w-full tw-justify-center tw-pt-8">
-          <div className="tw-flex tw-max-w-full tw-items-center tw-gap-4 sm:tw-gap-5">
+          <div className="tw-flex tw-max-w-full tw-items-center tw-gap-3 sm:tw-gap-4">
             <Image
               unoptimized
               loading="eager"
-              width={112}
-              height={112}
-              className="tw-h-20 tw-w-auto tw-flex-shrink-0 sm:tw-h-24"
+              width={72}
+              height={72}
+              className="tw-h-12 tw-w-auto tw-flex-shrink-0 sm:tw-h-14"
               src="/SummerGlasses.svg"
               alt=""
               aria-hidden="true"
             />
-            <div className="tw-min-w-0 tw-text-left tw-text-base tw-font-medium tw-leading-7 tw-text-white sm:tw-text-xl sm:tw-leading-8">
+            <div className="tw-min-w-0 tw-text-left tw-text-sm tw-font-medium tw-leading-6 tw-text-white sm:tw-text-base sm:tw-leading-7">
               <p className="tw-mb-0">{t(locale, "distribution.empty.soon")}</p>
               <p className="tw-mb-0">
                 {t(locale, "distribution.empty.checkBack")}

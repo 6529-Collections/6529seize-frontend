@@ -55,7 +55,8 @@ distribution routes.
 8. On fallback routes, the compact panel auto-selects the URL id and stays
    local-time read-only (no timezone toggle, no `Next Mint` button, no `Meme #`
    input, no upcoming table). On unresolved positive `/the-memes/{id}` pages,
-   use `Distribution Plan` to open `/the-memes/{id}/distribution`.
+   use the header-row `Distribution Plan` link to open
+   `/the-memes/{id}/distribution`.
 
 ## Common Scenarios
 
@@ -64,7 +65,8 @@ distribution routes.
 - Export any upcoming mint to calendar from the top panel or day tooltip.
 - Compare `Local` vs `UTC` renderings for cross-time-zone coordination.
 - Open unresolved future card URLs and still see timing details in the fallback
-  panel; positive ids also show a `Distribution Plan` link for that card.
+  panel; positive ids also show a header-row `Distribution Plan` link for that
+  card.
 - Open early distribution URLs and still see the same fallback timing panel
   above the centered "Distribution Plan will be made available soon!" message.
 - Query `/api/meme-calendar/{id}` for a mint timeline summary.
@@ -89,8 +91,8 @@ distribution routes.
 - `/the-memes/{id}` behavior:
   - Non-integer ids show `MEME` not-found.
   - Integer ids that do not resolve show the fallback panel.
-  - Positive integer ids that do not resolve also show a `Distribution Plan`
-    link.
+  - Positive integer ids that do not resolve also show a header-row
+    `Distribution Plan` link.
 - `/the-memes/{id}/distribution` behavior:
   - Non-positive or non-integer ids show `DISTRIBUTION` not-found.
 - `/about/memes-calendar` is unsupported; use `/meme-calendar`.

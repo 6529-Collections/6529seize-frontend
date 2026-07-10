@@ -1,8 +1,10 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -130,6 +132,33 @@ function MemePageTabButton({
     >
       {title}
     </button>
+  );
+}
+
+function UpcomingMemeDistributionHeaderLink({
+  id,
+  locale,
+}: {
+  readonly id: number;
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <Link
+      href={getDistributionDetailHref({
+        basePath: "/the-memes",
+        id,
+        locale,
+      })}
+      className="tw-ml-auto tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-md tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-text-sm"
+    >
+      <span className="tw-whitespace-nowrap">
+        {t(locale, "distribution.planLink")}
+      </span>
+      <ArrowUpRightIcon
+        aria-hidden="true"
+        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
+      />
+    </Link>
   );
 }
 
@@ -575,13 +604,16 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const isLastCard = nftMeta?.collection_size === nft?.id;
   const isLoadingNft = !nft && !nftNotFound;
   const nftYear = nft === undefined ? null : getMemeYearFromMintNumber(nft.id);
+  const numericNftId = Number(nftId);
+  const showUpcomingDistributionLink =
+    nftNotFound && Number.isInteger(numericNftId) && numericNftId > 0;
 
   return (
     <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
               <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
                   href={getTheMemesRouteHrefWithLocale({
@@ -598,6 +630,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                   {t(locale, "theMemes.title")}
                 </Link>
               </div>
+              {showUpcomingDistributionLink && (
+                <UpcomingMemeDistributionHeaderLink
+                  id={numericNftId}
+                  locale={locale}
+                />
+              )}
               {nftMeta && nft && (
                 <div className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center md:tw-ml-0">
                   <MemeCalendarPeriods
