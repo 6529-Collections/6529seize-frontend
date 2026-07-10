@@ -168,7 +168,14 @@ jobs:
             pack_artifacts="$artifact_root/$pack_slug"
             pack_log="$pack_artifacts/output.log"
             mkdir -p "$pack_artifacts"
-            rm -rf test-results playwright-report
+            if ! rm -rf test-results playwright-report; then
+              failed=1
+              echo "::error::Failed to clean previous Playwright output for $pack"
+              {
+                echo "- :warning: \`$pack\` cleanup failed before execution"
+                echo "  - Artifacts: \`$pack_artifacts/\`"
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
 
             if ./bin/6529 run "$pack" 2>&1 | tee "$pack_log"; then
               {
@@ -193,7 +200,14 @@ jobs:
 
             for path in test-results playwright-report; do
               if [ -e "$path" ]; then
-                cp -R "$path" "$pack_artifacts/"
+                if ! cp -R "$path" "$pack_artifacts/"; then
+                  failed=1
+                  echo "::error::Failed to preserve $path for $pack"
+                  {
+                    echo "- :warning: \`$pack\` artifact copy failed for \`$path\`"
+                    echo "  - Artifacts: \`$pack_artifacts/\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
+                fi
               fi
             done
           done
