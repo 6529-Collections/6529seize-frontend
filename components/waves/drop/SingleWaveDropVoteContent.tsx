@@ -217,6 +217,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   const rationaleSwitchLabelId = useId();
   const rationaleDescriptionId = useId();
   const rationaleValidationId = useId();
+  // The voter can delete the generated prefix while the reply switch stays on.
   const isRationaleEmpty = voteRationale.rationaleText.trim().length === 0;
   const showRationaleValidation =
     voteRationale.shouldPostRationale && isRationaleEmpty;

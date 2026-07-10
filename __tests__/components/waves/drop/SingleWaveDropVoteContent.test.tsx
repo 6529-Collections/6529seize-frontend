@@ -230,6 +230,31 @@ describe("SingleWaveDropVoteContent", () => {
     expect(rationaleSwitch).not.toBeChecked();
   });
 
+  it("blocks an enabled reply after all prefilled text is deleted", () => {
+    render(
+      <SingleWaveDropVoteContent
+        drop={createMockDrop()}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    const rationaleTextarea = screen.getByRole("textbox", {
+      name: /optional rationale reply/i,
+    });
+    fireEvent.change(rationaleTextarea, { target: { value: "" } });
+
+    expect(
+      screen.getByRole("switch", { name: "Vote with reply" })
+    ).toBeChecked();
+    expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
+      "Add rationale text or turn Vote with reply off."
+    );
+    expect(rationaleTextarea).toHaveAccessibleDescription(
+      /Add rationale text or turn Vote with reply off/i
+    );
+  });
+
   it("uses confirmed submission mode by default", () => {
     const drop = createMockDrop();
 
