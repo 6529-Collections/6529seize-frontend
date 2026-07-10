@@ -498,19 +498,19 @@ export default function DistributionPage(props: Readonly<Props>) {
             <Image
               unoptimized
               loading="eager"
-              width={72}
-              height={72}
-              className="tw-h-12 tw-w-auto tw-flex-shrink-0 sm:tw-h-14"
+              width={96}
+              height={96}
+              className="tw-h-20 tw-w-auto tw-flex-shrink-0"
               src="/SummerGlasses.svg"
               alt=""
               aria-hidden="true"
             />
             <div className="tw-min-w-0 tw-text-left tw-text-sm tw-font-medium tw-leading-6 tw-text-white sm:tw-text-base sm:tw-leading-7">
-              <p className="tw-mb-0">{t(locale, "distribution.empty.soon")}</p>
-              <p className="tw-mb-0">
+              <p className="tw-m-0">{t(locale, "distribution.empty.soon")}</p>
+              <p className="tw-m-0">
                 {t(locale, "distribution.empty.checkBack")}
               </p>
-              <p className="tw-mb-0">
+              <p className="tw-m-0">
                 <span>{t(locale, "distribution.empty.dropUpdates")}</span>{" "}
                 <a
                   href="https://x.com/6529Collections"
