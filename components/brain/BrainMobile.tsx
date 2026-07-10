@@ -33,6 +33,7 @@ import {
 import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
+import { useExitActiveWave } from "@/components/navigation/useExitActiveWave";
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
@@ -45,6 +46,7 @@ import {
   fetchDropByIdBatched,
   getDropQueryKey,
 } from "@/services/api/drop-api";
+import { useWaveListSwipeBack } from "./mobile/useWaveListSwipeBack";
 
 interface Props {
   readonly children: ReactNode;
@@ -65,6 +67,8 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     () => false
   );
   const myStream = useMyStreamOptional();
+  const requestMainWavesList = myStream?.requestMainWavesList;
+  const exitActiveWave = useExitActiveWave();
 
   const dropId = searchParams.get("drop") ?? undefined;
   const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
@@ -157,6 +161,23 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     drop.id.toLowerCase() === effectiveDropId.toLowerCase();
 
   const hasWave = Boolean(waveId);
+  const canSwipeBackToWaves =
+    isApp &&
+    hasWave &&
+    pathname.startsWith("/waves/") &&
+    dropId === undefined &&
+    searchParams.get("create") === null;
+  const handleSwipeBackIntent = useCallback(() => {
+    requestMainWavesList?.();
+  }, [requestMainWavesList]);
+  const handleSwipeBackToWaves = useCallback(() => {
+    exitActiveWave(false);
+  }, [exitActiveWave]);
+  const swipeBackHandlers = useWaveListSwipeBack({
+    enabled: canSwipeBackToWaves,
+    onIntentStart: handleSwipeBackIntent,
+    onSwipeBack: handleSwipeBackToWaves,
+  });
 
   const closeCreateOverlay = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString() || "");
@@ -237,6 +258,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         <AnimatePresence mode="wait">
           <m.div
             key={activeView}
+            {...swipeBackHandlers}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}

@@ -3,7 +3,9 @@
 ## Overview
 
 In the app layout, header `Back` is context-aware. It appears only in supported
-contexts, then runs route rules before history.
+contexts, then runs route rules before history. Standard wave detail views also
+support a right swipe from the left edge of the main content as a shortcut back
+to the Waves list.
 
 ## Location in the Site
 
@@ -16,6 +18,8 @@ contexts, then runs route rules before history.
 ## Entry Points
 
 - Open a wave or DM thread.
+- In the native app, open a standard wave at `/waves/{waveId}` and start a
+  right swipe from the left edge of the main content.
 - Open a route with `?drop={dropId}`.
 - Open `/waves/create` or `/messages/create`.
 - Open a profile route after moving from another app route.
@@ -26,7 +30,8 @@ contexts, then runs route rules before history.
    - active wave context exists,
    - route is `/waves/create` or `/messages/create`,
    - route is a profile page and in-app history can go back.
-2. User taps `Back`.
+2. User taps `Back`. In a native-app standard wave, the user can instead swipe
+   right from the left edge of the main content.
 3. The app applies the first match in this order:
    - `/waves/create` -> replace to `/waves`
    - `/messages/create` -> replace to `/messages`
@@ -42,12 +47,19 @@ contexts, then runs route rules before history.
   to the matching list route.
 - Close focused drop: if `?drop=` exists, `Back` removes only `drop`.
 - Leave thread: `Back` clears active thread state and returns to section root.
+- Leave a standard wave in the native app: an edge swipe right clears the
+  active wave and returns to `/waves`, using the same state reset as `Back`.
 - Return from profile: if in-app history has a valid target, `Back` returns to
   it.
 
 ## Edge Cases
 
 - Repeat taps are ignored while fallback loading is active.
+- Edge swipe applies only to native-app `/waves/{waveId}` views. It does not run
+  on web, direct messages, list/create routes, or while a focused drop or create
+  overlay is active.
+- Vertical gestures and touches that begin on sliders, editors, media controls,
+  or horizontally scrollable content do not trigger Back.
 - Profile routes hide `Back` when there is no valid in-app target (for example
   direct entry or same-profile-only browsing).
 - If active wave metadata is missing, the app clears wave state and routes to
@@ -56,6 +68,8 @@ contexts, then runs route rules before history.
 ## Failure and Recovery
 
 - If `Back` is missing, use menu or bottom navigation to return to section root.
+- If the edge gesture is unavailable or does not complete, use the visible
+  app-header `Back` control.
 - If no valid history target exists, navigate directly to `/waves`,
   `/messages`, or another root route from navigation controls.
 - If a route transition stalls, refresh the current route and retry.
@@ -64,6 +78,8 @@ contexts, then runs route rules before history.
 
 - This behavior is app-layout only.
 - `Back` is context-aware, not a strict browser-back wrapper.
+- Edge swipe is an optional shortcut and never replaces the visible `Back`
+  control.
 - Leaving a thread with `Back` clears last-visited thread memory for that
   section.
 - Loading spinner appears only during history fallback.

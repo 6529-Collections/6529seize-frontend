@@ -38,6 +38,26 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: () => ({ isApp }),
 }));
 
+let mockActiveWaveId: string | null = null;
+const mockSetActiveWave = jest.fn();
+const mockRequestMainWavesList = jest.fn(() => jest.fn());
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => ({
+    activeWave: {
+      id: mockActiveWaveId,
+      set: mockSetActiveWave,
+    },
+    requestMainWavesList: mockRequestMainWavesList,
+  }),
+}));
+
+const mockClearLastVisited = jest.fn();
+jest.mock("@/components/navigation/ViewContext", () => ({
+  useViewContext: () => ({
+    clearLastVisited: mockClearLastVisited,
+  }),
+}));
+
 let dropData: any = null;
 let waveData: any = null;
 let mockIsCompleted = false;
@@ -290,6 +310,10 @@ describe("BrainMobile", () => {
     dropData = null;
     waveData = null;
     isApp = true;
+    mockActiveWaveId = null;
+    mockSetActiveWave.mockClear();
+    mockRequestMainWavesList.mockClear();
+    mockClearLastVisited.mockClear();
     mockIsCompleted = false;
     mockFirstDecisionDone = true;
     mockOutcomesVisible = true;
@@ -379,6 +403,61 @@ describe("BrainMobile", () => {
       wave: waveData,
     });
   });
+
+  it("returns from an app wave detail to the waves list on edge swipe", async () => {
+    mockPathname = "/waves/1";
+    mockActiveWaveId = "1";
+    waveData = createWave(false);
+
+    render(<BrainMobile>child</BrainMobile>);
+
+    const waveContent = await screen.findByText("child");
+    fireEvent.touchStart(waveContent, {
+      touches: [{ clientX: 10, clientY: 100 }],
+    });
+    fireEvent.touchMove(waveContent, {
+      touches: [{ clientX: 60, clientY: 104 }],
+    });
+    fireEvent.touchEnd(waveContent, {
+      changedTouches: [{ clientX: 100, clientY: 106 }],
+    });
+
+    expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
+    expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
+    expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
+      isDirectMessage: false,
+    });
+  });
+
+  it.each([
+    { app: false, pathname: "/waves/1", query: "" },
+    { app: true, pathname: "/messages/1", query: "" },
+    { app: true, pathname: "/waves/1", query: "drop=drop-1" },
+    { app: true, pathname: "/waves/1", query: "create=wave" },
+  ])(
+    "does not enable wave-list swipe for app=$app path=$pathname query=$query",
+    async ({ app, pathname, query }) => {
+      isApp = app;
+      mockPathname = pathname;
+      mockSearchParams = new URLSearchParams(query);
+      mockActiveWaveId = "1";
+      waveData = createWave(pathname.startsWith("/messages/"));
+
+      render(<BrainMobile>child</BrainMobile>);
+
+      const waveContent = await screen.findByText("child");
+      fireEvent.touchStart(waveContent, {
+        touches: [{ clientX: 10, clientY: 100 }],
+      });
+      fireEvent.touchEnd(waveContent, {
+        changedTouches: [{ clientX: 100, clientY: 100 }],
+      });
+
+      expect(mockRequestMainWavesList).not.toHaveBeenCalled();
+      expect(mockClearLastVisited).not.toHaveBeenCalled();
+      expect(mockSetActiveWave).not.toHaveBeenCalled();
+    }
+  );
 
   it("keeps My Votes unavailable for guests on memes waves", async () => {
     mockSearchParams.set("wave", "1");
