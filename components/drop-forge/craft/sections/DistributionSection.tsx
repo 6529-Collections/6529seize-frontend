@@ -638,7 +638,7 @@ function DistributionPhotoLightbox({
         aria-modal="true"
         aria-label={`Distribution photo ${photoFileName}`}
         tabIndex={-1}
-        className="tw-relative tw-z-[1001] tw-m-0 tw-max-h-none tw-max-w-none tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5 focus:tw-outline-none"
+        className="tw-relative tw-z-[1001] tw-m-0 tw-max-h-none tw-w-[min(90vw,980px)] tw-max-w-none tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5 focus:tw-outline-none"
       >
         <img
           src={photo.link}
