@@ -1,9 +1,36 @@
 import { render, screen, fireEvent } from "@testing-library/react";
+import type { ReactNode, Ref } from "react";
 import BrainContent from "@/components/brain/content/BrainContent";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 
 let mockIsApp = false;
 let mockIsKeyboardVisible = false;
+
+jest.mock("framer-motion", () => {
+  const React = jest.requireActual("react");
+  const MotionDiv = React.forwardRef(
+    (
+      { initial, animate, exit, transition, ...props }: Record<string, unknown>,
+      ref: Ref<HTMLDivElement>
+    ) =>
+      React.createElement("div", {
+        ...props,
+        ref,
+        "data-motion-initial": JSON.stringify(initial),
+        "data-motion-animate": JSON.stringify(animate),
+        "data-motion-exit": JSON.stringify(exit),
+        "data-motion-transition": JSON.stringify(transition),
+      })
+  );
+
+  return {
+    AnimatePresence: ({ children }: { children: ReactNode }) => children,
+    LazyMotion: ({ children }: { children: ReactNode }) => children,
+    domAnimation: {},
+    m: { div: MotionDiv },
+    useReducedMotion: () => false,
+  };
+});
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -96,6 +123,18 @@ describe("BrainContent", () => {
     expect(composer?.style.transitionProperty).toBe("bottom");
     expect(composer?.style.transitionDuration).toBe(
       "var(--native-keyboard-layout-transition-duration, 0ms)"
+    );
+    expect(composer).toHaveAttribute(
+      "data-motion-initial",
+      JSON.stringify({ opacity: 1, y: "0%" })
+    );
+    expect(composer).toHaveAttribute(
+      "data-motion-exit",
+      JSON.stringify({ opacity: 1, y: "0%" })
+    );
+    expect(composer).toHaveAttribute(
+      "data-motion-transition",
+      JSON.stringify({ duration: 0, ease: "easeOut" })
     );
   });
 
