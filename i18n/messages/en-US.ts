@@ -676,6 +676,11 @@ const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
   } as const
 );
 
+const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
+  identityDuplicatesRequireWinners:
+    "Perpetual ranking waves never announce winners, so identities can't be resubmitted “after a win”. Choose a different re-submission rule.",
+} as const);
+
 const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   title: "Outcomes",
   showOutcomes: "Show outcomes",
@@ -1635,6 +1640,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
+  ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,
   ...GROUP_NFT_OWNERSHIP_MESSAGES,

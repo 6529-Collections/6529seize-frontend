@@ -121,6 +121,54 @@ describe("create-wave.validation", () => {
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED);
   });
 
+  it("rejects the after-a-win duplicates rule for ongoing rank waves", () => {
+    const config = {
+      ...baseConfig,
+      dates: { ...baseConfig.dates, ongoingRanking: true },
+      drops: {
+        ...baseConfig.drops,
+        submissionStrategy: {
+          type: "IDENTITY",
+          config: {
+            duplicates: "ALLOW_AFTER_WIN",
+            who_can_be_submitted: "EVERYONE",
+          },
+        },
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DROPS,
+      config,
+    });
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.IDENTITY_DUPLICATES_REQUIRE_WINNERS
+    );
+  });
+
+  it("allows the after-a-win duplicates rule for scheduled rank waves", () => {
+    const config = {
+      ...baseConfig,
+      dates: { ...baseConfig.dates, ongoingRanking: false },
+      drops: {
+        ...baseConfig.drops,
+        submissionStrategy: {
+          type: "IDENTITY",
+          config: {
+            duplicates: "ALLOW_AFTER_WIN",
+            who_can_be_submitted: "EVERYONE",
+          },
+        },
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DROPS,
+      config,
+    });
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.IDENTITY_DUPLICATES_REQUIRE_WINNERS
+    );
+  });
+
   it("still validates start-date ordering for ongoing rank waves", () => {
     const config = {
       ...baseConfig,

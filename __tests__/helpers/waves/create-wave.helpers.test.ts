@@ -373,6 +373,55 @@ describe("create-wave.helpers", () => {
       expect(res.wave.time_lock_ms).toBeNull();
     });
 
+    it("normalizes the after-a-win duplicates rule for ongoing rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.ongoingRanking = true;
+      config.drops.submissionStrategy = {
+        type: "IDENTITY",
+        config: {
+          duplicates: "ALLOW_AFTER_WIN",
+          who_can_be_submitted: "EVERYONE",
+        },
+      };
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      // Behaviorally identical under perpetual rules (nothing ever wins), so
+      // a bypassed validation still produces a coherent wave.
+      expect(res.participation.submission_strategy).toEqual({
+        type: "IDENTITY",
+        config: {
+          duplicates: "NEVER_ALLOW",
+          who_can_be_submitted: "EVERYONE",
+        },
+      });
+    });
+
+    it("keeps the after-a-win duplicates rule for scheduled rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.drops.submissionStrategy = {
+        type: "IDENTITY",
+        config: {
+          duplicates: "ALLOW_AFTER_WIN",
+          who_can_be_submitted: "EVERYONE",
+        },
+      };
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.submission_strategy?.config.duplicates).toBe(
+        "ALLOW_AFTER_WIN"
+      );
+    });
+
     it("keeps the time-weighted vote lock for ongoing rank waves", () => {
       const config = createBaseConfig(ApiWaveType.Rank);
       config.dates.ongoingRanking = true;
