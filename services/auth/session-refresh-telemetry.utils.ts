@@ -10,6 +10,7 @@ type SessionRefreshTelemetryOutcome =
   | "network_error"
   | "backend_error"
   | "cooldown_used_empty"
+  | "cooldown_used_rate_limit"
   | "cooldown_used_retry"
   | "deduped_in_flight";
 type SessionRefreshTelemetryAttrs = {

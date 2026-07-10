@@ -15,6 +15,12 @@ import {
   recordSessionRefreshOutcome,
   withSessionRefreshAbortTelemetry,
 } from "./session-refresh-telemetry.utils";
+import {
+  getRateLimitCooldownMs,
+  getSessionRefreshFailureCooldownMs,
+  isRateLimitError,
+  type SessionRefreshFailureCooldownType,
+} from "./session-refresh-rate-limit.utils";
 
 type AuthSessionClientType = "web" | "native" | "desktop";
 type RefreshTokenSessionClientType = Exclude<AuthSessionClientType, "web">;
@@ -47,15 +53,7 @@ interface SessionNativeResponse {
 
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
-type SessionRefreshFailureCooldown =
-  | {
-      readonly type: "empty";
-      readonly expiresAtMs: number;
-    }
-  | {
-      readonly type: "retry";
-      readonly expiresAtMs: number;
-    };
+type SessionRefreshFailureCooldown = { readonly type: SessionRefreshFailureCooldownType; readonly expiresAtMs: number };
 type SessionRefreshInFlight = {
   readonly controller: AbortController;
   readonly promise: Promise<SessionRefreshResponse | null>;
@@ -94,8 +92,6 @@ interface NativeConnectionShareSourceProof {
   readonly native_refresh_token: string;
 }
 
-const SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS = 2000;
-const SESSION_REFRESH_RETRY_COOLDOWN_MS = 250;
 const sessionRefreshInFlight = new Map<string, SessionRefreshInFlight>();
 const sessionRefreshFailureCooldowns = new Map<
   string,
@@ -144,15 +140,14 @@ function getActiveFailureCooldown(
 
 function rememberSessionRefreshFailure(
   key: string,
-  type: SessionRefreshFailureCooldown["type"]
+  type: SessionRefreshFailureCooldownType,
+  cooldownMsOverride?: number
 ): void {
   sessionRefreshFailureCooldowns.set(key, {
     type,
     expiresAtMs:
       Date.now() +
-      (type === "empty"
-        ? SESSION_REFRESH_EMPTY_FAILURE_COOLDOWN_MS
-        : SESSION_REFRESH_RETRY_COOLDOWN_MS),
+      getSessionRefreshFailureCooldownMs(type, cooldownMsOverride),
   });
 }
 
@@ -467,10 +462,13 @@ export async function refreshSessionV2({
   const key = getSessionRefreshKey({ address, clientType });
   const cooldown = getActiveFailureCooldown(key);
 
-  if (cooldown?.type === "empty") {
+  if (cooldown?.type === "empty" || cooldown?.type === "rate_limit") {
     recordSessionRefreshOutcome({
       clientType,
-      outcome: "cooldown_used_empty",
+      outcome:
+        cooldown.type === "empty"
+          ? "cooldown_used_empty"
+          : "cooldown_used_rate_limit",
     });
     return null;
   }
@@ -535,6 +533,14 @@ export async function refreshSessionV2({
       rememberSessionRefreshFailure(key, "empty");
     } catch (error: unknown) {
       if (isAbortError(error)) {
+        return;
+      }
+      if (isRateLimitError(error)) {
+        rememberSessionRefreshFailure(
+          key,
+          "rate_limit",
+          getRateLimitCooldownMs()
+        );
         return;
       }
       rememberSessionRefreshFailure(key, "retry");

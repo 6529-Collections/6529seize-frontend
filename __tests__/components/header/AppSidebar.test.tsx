@@ -121,16 +121,16 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         "NFTs",
         "Waves",
         "DMs",
+        "Join 6529",
         "About",
       ]);
       expect(getMenu()).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ label: "DMs", path: "/messages" }),
-        ])
-      );
-      expect(getMenu()).toEqual(
-        expect.not.arrayContaining([
-          expect.objectContaining({ label: "Join 6529" }),
+          expect.objectContaining({
+            label: "Join 6529",
+            path: "/join-6529",
+          }),
         ])
       );
       expect(getMenuChildren("NFTs")).toEqual([
@@ -240,6 +240,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         "NFTs",
         "Waves",
         "DMs",
+        "Join 6529",
         "About",
         "Drop Forge",
       ]);

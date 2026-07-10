@@ -3,7 +3,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { isUnauthorizedQueryError } from "@/components/react-query-wrapper/utils/query-utils";
+import {
+  isRateLimitQueryError,
+  isUnauthorizedQueryError,
+} from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import {
   isAuthJwtUsable,
@@ -254,6 +257,9 @@ export function useConnectedAccountsUnreadNotifications(
         return false;
       }
       if (isUnauthorizedQueryError(error)) {
+        return false;
+      }
+      if (isRateLimitQueryError(error)) {
         return false;
       }
 
