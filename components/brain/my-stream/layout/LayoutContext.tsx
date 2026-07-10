@@ -49,13 +49,20 @@ const spacesAreEqual = (a: LayoutSpaces, b: LayoutSpaces) =>
   a.contentSpace === b.contentSpace &&
   a.measurementsComplete === b.measurementsComplete;
 
+const NATIVE_KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
+const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
+  "var(--native-keyboard-layout-transition-duration, 0ms)";
+
+const formatCssLength = (value: number | string): string =>
+  typeof value === "number" ? `${value}px` : value;
+
 // Helper function to calculate height style
 const calculateHeightStyle = (
   spaces: LayoutSpaces,
-  capacitorSpace: number // Accept specific space value
+  bottomInset: number | string
 ): React.CSSProperties => {
   // Use dynamic viewport height to avoid extra space on mobile browsers
-  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
+  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${formatCssLength(bottomInset)})`;
   return {
     height: heightCalc,
     maxHeight: heightCalc,
@@ -213,7 +220,7 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { isAndroid } = useCapacitor();
+  const { isCapacitor } = useCapacitor();
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
 
   // Internal ref storage (source of truth)
@@ -351,16 +358,19 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [spaces, isNavHiddenForKeyboard]);
 
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
-    const style = calculateHeightStyle(navAdjustedSpaces, 0);
+    const style = calculateHeightStyle(
+      navAdjustedSpaces,
+      isCapacitor ? NATIVE_KEYBOARD_INSET : 0
+    );
 
-    if (isAndroid) {
+    if (isCapacitor) {
       return {
         ...style,
-        transition: "height 75ms ease-out, max-height 75ms ease-out",
+        transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
       };
     }
     return style;
-  }, [navAdjustedSpaces, isAndroid]);
+  }, [navAdjustedSpaces, isCapacitor]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     return calculateHeightStyle(navAdjustedSpaces, 0);
@@ -387,8 +397,19 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [navAdjustedSpaces]);
 
   const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
-    return calculateHeightStyle({ ...navAdjustedSpaces, mobileNavSpace: 0 }, 0);
-  }, [navAdjustedSpaces]);
+    const style = calculateHeightStyle(
+      { ...navAdjustedSpaces, mobileNavSpace: 0 },
+      isCapacitor ? NATIVE_KEYBOARD_INSET : 0
+    );
+
+    if (isCapacitor) {
+      return {
+        ...style,
+        transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+      };
+    }
+    return style;
+  }, [navAdjustedSpaces, isCapacitor]);
 
   const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {
     return calculateHeightStyle(navAdjustedSpaces, 0);

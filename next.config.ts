@@ -77,6 +77,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         ALLOWLIST_API_ENDPOINT: publicEnv.ALLOWLIST_API_ENDPOINT,
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
         VERSION,
+        VERSION_BUILD_TIMESTAMP: publicEnv.VERSION_BUILD_TIMESTAMP,
         ASSETS_FROM_S3: String(ASSETS_FROM_S3),
         NEXTGEN_CHAIN_ID:
           publicEnv.NEXTGEN_CHAIN_ID === undefined
@@ -101,6 +102,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         AWS_RUM_REGION: publicEnv.AWS_RUM_REGION,
         AWS_RUM_SAMPLE_RATE: publicEnv.AWS_RUM_SAMPLE_RATE,
         ENABLE_SECURITY_LOGGING: publicEnv.ENABLE_SECURITY_LOGGING,
+        ANNOUNCED_VERSION_ENDPOINT: publicEnv.ANNOUNCED_VERSION_ENDPOINT,
         DROP_FORGE_TESTNET:
           publicEnv.DROP_FORGE_TESTNET === undefined
             ? undefined
