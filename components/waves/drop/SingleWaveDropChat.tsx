@@ -93,10 +93,6 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     []
   );
 
-  const clearUnavailableReplyTarget = useCallback(() => {
-    setActiveDrop(null);
-  }, []);
-
   const resetActiveDrop = useCallback(() => {
     if (!rootDropAvailableRef.current) {
       setActiveDrop(null);
@@ -109,6 +105,10 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
       partId: 1,
     });
   }, [drop]);
+
+  const clearUnavailableReplyTarget = useCallback(() => {
+    resetActiveDrop();
+  }, [resetActiveDrop]);
 
   useWebSocketMessage<WsDropDeleteMessage["data"]>(
     WsMessageType.DROP_DELETE,
@@ -123,10 +123,10 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
           rootDropAvailableRef.current = false;
         }
 
-        if (
-          activeDropRef.current?.drop.id !== messageData.drop_id &&
-          !deletedRootDrop
-        ) {
+        const activeTargetDeleted =
+          activeDropRef.current?.drop.id === messageData.drop_id;
+
+        if (!activeTargetDeleted) {
           return;
         }
 

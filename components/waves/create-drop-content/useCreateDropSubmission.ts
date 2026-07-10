@@ -46,6 +46,10 @@ type ProcessIncomingDrop = (
   type: ProcessIncomingDropType
 ) => Promise<void>;
 type DropModeSubmitCallbacks = Pick<DropMutationBody, "onSuccess" | "onError">;
+type DraftStateSnapshot = {
+  readonly metadata: CreateDropMetadataType[];
+  readonly pollDraft: CreateDropPollDraft | null;
+};
 type ReplyTargetRecovery = {
   readonly locale: SupportedLocale;
   readonly pollDraft: CreateDropPollDraft | null;
@@ -393,8 +397,22 @@ export const useCreateDropSubmission = ({
     );
   };
 
+  const getDraftStateSnapshot = (): DraftStateSnapshot => {
+    const latestDraftState = latestDraftStateRef.current;
+    return {
+      metadata: latestDraftState.metadata.map((item) => ({ ...item })),
+      pollDraft: latestDraftState.pollDraft
+        ? {
+            ...latestDraftState.pollDraft,
+            options: [...latestDraftState.pollDraft.options],
+          }
+        : null,
+    };
+  };
+
   const restoreFailedDropDraft = (
-    failedDropRequest: CreateDropConfig
+    failedDropRequest: CreateDropConfig,
+    submittedDraftState: DraftStateSnapshot
   ): boolean => {
     if (!isComposerStillEmptyForRestore()) {
       return false;
@@ -412,9 +430,11 @@ export const useCreateDropSubmission = ({
 
     setDrop(restoredDrop);
     setIsStormMode(restoredParts.length > 0);
-    setMetadata(metadata);
+    setMetadata(submittedDraftState.metadata);
     setPollDraftState(
-      pollDraft ? { scopeKey: wave.id, value: pollDraft } : null
+      submittedDraftState.pollDraft
+        ? { scopeKey: wave.id, value: submittedDraftState.pollDraft }
+        : null
     );
     restoreMentionedEntities({
       mentionedUsers: failedDropRequest.mentioned_users,
@@ -512,6 +532,8 @@ export const useCreateDropSubmission = ({
       return;
     }
 
+    const submittedDraftState = getDraftStateSnapshot();
+
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -569,7 +591,10 @@ export const useCreateDropSubmission = ({
 
         const dropWithoutReply = getDropRequestWithoutReply(dropRequest);
         onReplyTargetUnavailable?.();
-        const wasDraftRestored = restoreFailedDropDraft(dropWithoutReply);
+        const wasDraftRestored = restoreFailedDropDraft(
+          dropWithoutReply,
+          submittedDraftState
+        );
         setToast({
           type: "error",
           title: t(locale, "waves.chat.replyTargetUnavailableToast.title"),

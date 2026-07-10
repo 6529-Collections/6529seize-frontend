@@ -752,6 +752,7 @@ describe("MyStreamWaveChat", () => {
       getDropDeleteCallback()({
         wave_id: wave.id,
         drop_id: "deleted-drop",
+        drop_serial: 1,
       });
     });
 

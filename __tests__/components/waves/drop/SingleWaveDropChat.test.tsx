@@ -152,6 +152,7 @@ describe("SingleWaveDropChat", () => {
       getDropDeleteCallback()({
         wave_id: wave.id,
         drop_id: "d1",
+        drop_serial: 1,
       });
     });
 
@@ -165,6 +166,50 @@ describe("SingleWaveDropChat", () => {
 
     fireEvent.click(document.querySelector('[data-testid="creator"]')!);
     expect(capturedCreatorProps.activeDrop).toBeNull();
+  });
+
+  it("keeps a nested reply active when only the root drop is deleted", () => {
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+    const nestedDrop: any = { id: "nested-drop" };
+    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+
+    act(() => {
+      capturedProps.onReply({ drop: nestedDrop, partId: 3 });
+    });
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("nested-drop");
+
+    act(() => {
+      getDropDeleteCallback()({
+        wave_id: wave.id,
+        drop_id: "d1",
+        drop_serial: 1,
+      });
+    });
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("nested-drop");
+    expect(mockSetToast).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the root reply when a nested reply target is unavailable", () => {
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+    const nestedDrop: any = { id: "nested-drop" };
+    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+
+    act(() => {
+      capturedProps.onReply({ drop: nestedDrop, partId: 3 });
+    });
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("nested-drop");
+
+    act(() => {
+      capturedCreatorProps.onReplyTargetUnavailable();
+    });
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("d1");
+    expect(capturedCreatorProps.activeDrop?.partId).toBe(1);
   });
 
   it("applies safe-area-inset-bottom padding when keyboard is hidden", () => {
