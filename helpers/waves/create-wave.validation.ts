@@ -1,4 +1,5 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -45,6 +46,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES",
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA",
   DROPS_SUBMISSION_STRATEGY_INVALID = "DROPS_SUBMISSION_STRATEGY_INVALID",
+  IDENTITY_DUPLICATES_REQUIRE_WINNERS = "IDENTITY_DUPLICATES_REQUIRE_WINNERS",
   APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE = "APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE",
   VOTING_TYPE_REQUIRED = "VOTING_TYPE_REQUIRED",
   CHAT_WAVE_CANNOT_HAVE_VOTING = "CHAT_WAVE_CANNOT_HAVE_VOTING",
@@ -261,9 +263,11 @@ const getUniqueCreditNftIdsCount = (voting: CreateWaveVotingConfig): number => {
 const getDropsValidationErrors = ({
   waveType,
   drops,
+  ongoingRanking,
 }: {
   readonly waveType: ApiWaveType;
   readonly drops: CreateWaveDropsConfig;
+  readonly ongoingRanking: boolean;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   const submissionStrategy = drops.submissionStrategy;
@@ -315,6 +319,19 @@ const getDropsValidationErrors = ({
     if (hasReservedIdentitySubmissionMetadataKey({ drops })) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY
+      );
+    }
+
+    // A perpetual rank wave never announces winners, so a "resubmit after it
+    // wins" duplicates rule could never unlock; require an explicit choice.
+    if (
+      waveType === ApiWaveType.Rank &&
+      ongoingRanking &&
+      submissionStrategy?.config?.duplicates ===
+        ApiWaveParticipationIdentitySubmissionAllowDuplicates.AllowAfterWin
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.IDENTITY_DUPLICATES_REQUIRE_WINNERS
       );
     }
   }
@@ -605,6 +622,7 @@ export const getCreateWaveValidationErrors = ({
         ...getDropsValidationErrors({
           waveType: config.overview.type,
           drops: config.drops,
+          ongoingRanking: config.dates.ongoingRanking ?? false,
         })
       );
       break;

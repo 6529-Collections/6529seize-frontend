@@ -6,6 +6,8 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
+import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
+import type { ApiWaveParticipationSubmissionStrategy } from "@/generated/models/ApiWaveParticipationSubmissionStrategy";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
@@ -420,6 +422,34 @@ export const getCreateWaveEndDate = ({
   return calculateRankEndDate(config.dates);
 };
 
+const getSubmissionStrategyForWave = ({
+  submissionStrategy,
+  isPerpetualRank,
+}: {
+  readonly submissionStrategy: ApiWaveParticipationSubmissionStrategy;
+  readonly isPerpetualRank: boolean;
+}): ApiWaveParticipationSubmissionStrategy => {
+  // A perpetual rank wave never announces winners, so "resubmit after a win"
+  // could never unlock; it is behaviorally identical to "never again", and
+  // the UI blocks it, but normalize here too in case validation was bypassed.
+  if (
+    isPerpetualRank &&
+    submissionStrategy.config.duplicates ===
+      ApiWaveParticipationIdentitySubmissionAllowDuplicates.AllowAfterWin
+  ) {
+    return {
+      ...submissionStrategy,
+      config: {
+        ...submissionStrategy.config,
+        duplicates:
+          ApiWaveParticipationIdentitySubmissionAllowDuplicates.NeverAllow,
+      },
+    };
+  }
+
+  return submissionStrategy;
+};
+
 export const getCreateNewWaveBody = ({
   drop,
   picture,
@@ -496,7 +526,10 @@ export const getCreateNewWaveBody = ({
       terms: signatureRequired ? participationTerms : null,
       ...(config.drops.submissionStrategy
         ? {
-            submission_strategy: config.drops.submissionStrategy,
+            submission_strategy: getSubmissionStrategyForWave({
+              submissionStrategy: config.drops.submissionStrategy,
+              isPerpetualRank,
+            }),
           }
         : {}),
     },

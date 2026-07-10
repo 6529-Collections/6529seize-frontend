@@ -106,6 +106,7 @@ export default function CreateWaveStepContent({
           waveType={config.overview.type}
           drops={config.drops}
           errors={errors}
+          ongoingRanking={config.dates.ongoingRanking ?? false}
           setDrops={setDrops}
         />
       );
