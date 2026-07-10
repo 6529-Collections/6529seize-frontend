@@ -208,6 +208,11 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
     ).toBeHidden();
+    // A perpetual wave has no outcomes to configure, so the step disappears
+    // from the flow entirely.
+    await expect(
+      page.getByRole("navigation", { name: "Progress" }).getByText("Outcomes")
+    ).toBeHidden();
 
     await nextStepButton(page).click();
     await expect(
@@ -220,17 +225,8 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await nextStepButton(page).click();
 
-    // Voting step keeps its defaults (TDH + XTDH).
-    await nextStepButton(page).click();
-
-    // Outcomes step: no awards to configure, visibility locked on.
-    await expect(page.getByText("Outcome is leaderboard position")).toBeVisible(
-      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
-    );
-    await expect(page.getByText("Choose outcome type")).toBeHidden();
-    const outcomesToggle = page.getByRole("checkbox");
-    await expect(outcomesToggle).not.toBeChecked();
-    await expect(outcomesToggle).toBeDisabled();
+    // Voting step keeps its defaults (TDH + XTDH); Next goes straight to the
+    // description step, skipping outcomes.
     await nextStepButton(page).click();
 
     await expect(

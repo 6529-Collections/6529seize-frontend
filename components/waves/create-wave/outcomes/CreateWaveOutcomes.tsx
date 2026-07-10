@@ -130,15 +130,8 @@ export default function WavesOutcome({
               {t(DEFAULT_LOCALE, "waves.create.outcomes.perpetual.description")}
             </p>
           </div>
-          {/* A perpetual wave never has outcomes to show, so its outcomes tab
-              stays hidden. The stored preference is left untouched so it is
-              restored if the user switches back to scheduled announcements;
-              the submit path treats perpetual as hidden regardless. */}
-          <ShowOutcomesToggle
-            display={{ ...display, outcomesVisible: false }}
-            disabled
-            onChange={setDisplay}
-          />
+          {/* The step flow skips this page for perpetual waves; this branch
+              is only a safety net for direct navigation. */}
         </div>
       </div>
     );

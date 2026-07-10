@@ -95,10 +95,15 @@ const isPositiveWholeNumber = (
 export const getCreateWaveNextStep = ({
   step,
   waveType,
+  ongoingRanking = false,
 }: {
   readonly step: CreateWaveStep;
   readonly waveType: ApiWaveType;
+  readonly ongoingRanking?: boolean;
 }): CreateWaveStep | null => {
+  // Perpetual rank waves never award outcomes, so their flow skips the
+  // Outcomes step entirely.
+  const skipsOutcomes = waveType === ApiWaveType.Rank && ongoingRanking;
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       return CreateWaveStep.GROUPS;
@@ -120,7 +125,7 @@ export const getCreateWaveNextStep = ({
       }
       return CreateWaveStep.VOTING;
     case CreateWaveStep.VOTING:
-      if (waveType === ApiWaveType.Chat) {
+      if (waveType === ApiWaveType.Chat || skipsOutcomes) {
         return CreateWaveStep.DESCRIPTION;
       }
       return CreateWaveStep.OUTCOMES;
@@ -139,10 +144,13 @@ export const getCreateWaveNextStep = ({
 export const getCreateWavePreviousStep = ({
   step,
   waveType,
+  ongoingRanking = false,
 }: {
   readonly step: CreateWaveStep;
   readonly waveType: ApiWaveType;
+  readonly ongoingRanking?: boolean;
 }): CreateWaveStep | null => {
+  const skipsOutcomes = waveType === ApiWaveType.Rank && ongoingRanking;
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       return null;
@@ -172,6 +180,9 @@ export const getCreateWavePreviousStep = ({
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.RULES;
+      }
+      if (skipsOutcomes) {
+        return CreateWaveStep.VOTING;
       }
       return CreateWaveStep.OUTCOMES;
     default:
