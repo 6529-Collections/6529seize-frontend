@@ -213,11 +213,11 @@ export const createLinkRenderer = ({
     }
 
     const parsedUrl = parseUrl(stableHref);
-    if (
-      isDirectImageUrl(stableHref, parsedUrl) &&
-      (isBareHrefLabel(props.children, rawHref) ||
-        isBareHrefLabel(props.children, stableHref))
-    ) {
+    const hasBareHrefLabel =
+      isBareHrefLabel(props.children, rawHref) ||
+      isBareHrefLabel(props.children, stableHref);
+
+    if (isDirectImageUrl(stableHref, parsedUrl) && hasBareHrefLabel) {
       return (
         <DropPartMarkdownImage
           src={stableHref}
@@ -247,6 +247,10 @@ export const createLinkRenderer = ({
         />
       );
     };
+
+    if (!hasBareHrefLabel) {
+      return renderFallbackAnchor();
+    }
 
     const tryRenderOpenGraph = () => {
       try {

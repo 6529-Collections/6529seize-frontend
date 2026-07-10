@@ -52,6 +52,7 @@ export interface UploadingFile {
 export interface CreateDropContentProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onReplyTargetUnavailable?: (() => void) | undefined;
   readonly wave: ApiWave;
   readonly drop: CreateDropConfig | null;
   readonly isStormMode: boolean;

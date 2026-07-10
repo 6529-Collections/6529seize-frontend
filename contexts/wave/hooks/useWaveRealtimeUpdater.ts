@@ -5,6 +5,7 @@ import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type {
   WsAttachmentStatusUpdateMessage,
+  WsDropDeleteMessage,
   WsDropUpdateMessage,
 } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
@@ -832,6 +833,17 @@ const useDropUpdateMessages = (
   );
 };
 
+const useDropDeleteMessages = (
+  processDropRemoved: (waveId: string, dropId: string) => void
+): void => {
+  useWebSocketMessage<WsDropDeleteMessage["data"]>(
+    WsMessageType.DROP_DELETE,
+    (messageData) => {
+      processDropRemoved(messageData.wave_id, messageData.drop_id);
+    }
+  );
+};
+
 export function useWaveRealtimeUpdater({
   activeWaveId,
   getData,
@@ -872,6 +884,7 @@ export function useWaveRealtimeUpdater({
   });
 
   useDropUpdateMessages(processIncomingDrop);
+  useDropDeleteMessages(processDropRemoved);
 
   useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(
     WsMessageType.ATTACHMENT_STATUS_UPDATE,

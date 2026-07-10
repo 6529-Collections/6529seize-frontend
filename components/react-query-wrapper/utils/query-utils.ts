@@ -61,6 +61,10 @@ export const isRateLimitQueryError = (error: unknown): boolean => {
   return getQueryErrorStatus(error) === 429;
 };
 
+export const shouldStopPollingRetry = (error: unknown): boolean => {
+  return isUnauthorizedQueryError(error) || isRateLimitQueryError(error);
+};
+
 type DefaultQueryRetryPolicy<TError> = {
   readonly retry: (failureCount: number, error: TError) => boolean;
   readonly retryDelay: (failureCount: number) => number;

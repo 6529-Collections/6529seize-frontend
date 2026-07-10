@@ -366,6 +366,15 @@ export interface WsDropUpdateMessage {
   reason?: WsDropUpdateReason;
 }
 
+export interface WsDropDeleteMessage {
+  type: WsMessageType.DROP_DELETE;
+  data: {
+    readonly drop_id: string;
+    readonly wave_id: string;
+    readonly drop_serial: number;
+  };
+}
+
 export interface WsAttachmentStatusUpdateMessage {
   type: WsMessageType.ATTACHMENT_STATUS_UPDATE;
   data: ApiAttachment;
