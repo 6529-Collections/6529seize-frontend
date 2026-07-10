@@ -9,8 +9,16 @@ import { NextResponse } from "next/server";
 
 const jsonMock = NextResponse.json as jest.Mock;
 const NO_STORE_HEADERS = { "Cache-Control": "no-store, must-revalidate" };
+const CLIENT_VERSION_HEADER = "x-6529-client-version";
 const ANNOUNCED_VERSION_ENDPOINT =
   "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json";
+
+const requestWithClientVersion = (version: string) =>
+  ({
+    headers: {
+      get: (name: string) => (name === CLIENT_VERSION_HEADER ? version : null),
+    },
+  }) as Request;
 
 describe("GET version route", () => {
   beforeEach(() => {
@@ -37,6 +45,21 @@ describe("GET version route", () => {
       { headers: NO_STORE_HEADERS }
     );
     expect(result).toBe(expected);
+  });
+
+  it("compares live instance version to the requesting bundle without an announcement endpoint", async () => {
+    jsonMock.mockReturnValue({ ok: true });
+
+    await GET(requestWithClientVersion("previous-version"));
+
+    expect(jsonMock).toHaveBeenCalledWith(
+      {
+        announced_version: null,
+        stale: true,
+        version: "current-version",
+      },
+      { headers: NO_STORE_HEADERS }
+    );
   });
 
   it("returns default version when env variable is undefined", async () => {
@@ -120,6 +143,31 @@ describe("GET version route", () => {
     );
   });
 
+  it("compares ready announcements to the requesting bundle", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
+    jsonMock.mockReturnValue({ ok: true });
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        published_at: "2026-07-09T10:05:00.000Z",
+        ready: true,
+        version: "current-version",
+      }),
+    });
+
+    await GET(requestWithClientVersion("previous-version"));
+
+    expect(jsonMock).toHaveBeenCalledWith(
+      {
+        announced_version: "current-version",
+        stale: true,
+        version: "current-version",
+      },
+      { headers: NO_STORE_HEADERS }
+    );
+  });
+
   it("ignores announcements that predate this build", async () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
@@ -134,6 +182,31 @@ describe("GET version route", () => {
     });
 
     await GET();
+
+    expect(jsonMock).toHaveBeenCalledWith(
+      {
+        announced_version: null,
+        stale: false,
+        version: "current-version",
+      },
+      { headers: NO_STORE_HEADERS }
+    );
+  });
+
+  it("waits for a configured announcement before staling an older bundle", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
+    jsonMock.mockReturnValue({ ok: true });
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        published_at: "2026-07-09T09:55:00.000Z",
+        ready: true,
+        version: "previous-version",
+      }),
+    });
+
+    await GET(requestWithClientVersion("previous-version"));
 
     expect(jsonMock).toHaveBeenCalledWith(
       {

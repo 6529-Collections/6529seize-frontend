@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store, must-revalidate" };
 const ANNOUNCED_VERSION_TIMEOUT_MS = 5_000;
+const CLIENT_VERSION_HEADER = "x-6529-client-version";
 const ANNOUNCED_VERSION_ALLOWED_HOSTS = new Set([
   "dnclu2fna0b2b.cloudfront.net",
 ]);
@@ -37,6 +38,10 @@ const parseTimestamp = (value: unknown): number | null => {
 };
 
 const getCurrentVersion = () => publicEnv.VERSION ?? "unknown";
+
+const hasConfiguredAnnouncementEndpoint = () =>
+  typeof publicEnv.ANNOUNCED_VERSION_ENDPOINT === "string" &&
+  publicEnv.ANNOUNCED_VERSION_ENDPOINT.length > 0;
 
 const normalizeAnnouncementEndpoint = (endpoint: string): string | null => {
   try {
@@ -131,24 +136,54 @@ async function fetchAnnouncedVersion(
   }
 }
 
-const versionResponse = ({
+const shouldRefreshClient = ({
   announcedVersion,
+  clientVersion,
   version,
 }: {
   readonly announcedVersion: string | null;
+  readonly clientVersion: string | null;
+  readonly version: string;
+}): boolean => {
+  const currentClientVersion = clientVersion ?? version;
+
+  // Production intentionally gates the toast on the ready announcement. Local
+  // and staging builds without the endpoint keep the historical live-instance
+  // comparison so version drift remains easy to test.
+  const targetVersion = hasConfiguredAnnouncementEndpoint()
+    ? announcedVersion
+    : (announcedVersion ?? version);
+
+  return targetVersion !== null && targetVersion !== currentClientVersion;
+};
+
+const versionResponse = ({
+  announcedVersion,
+  clientVersion,
+  version,
+}: {
+  readonly announcedVersion: string | null;
+  readonly clientVersion: string | null;
   readonly version: string;
 }) =>
   NextResponse.json(
     {
       announced_version: announcedVersion,
-      stale: announcedVersion !== null && announcedVersion !== version,
+      stale: shouldRefreshClient({
+        announcedVersion,
+        clientVersion,
+        version,
+      }),
       version,
     },
     { headers: NO_STORE_HEADERS }
   );
 
-export async function GET() {
+export async function GET(request?: Request) {
   const version = getCurrentVersion();
+  const clientVersion = normalizeVersion(
+    request?.headers.get(CLIENT_VERSION_HEADER)
+  );
   const endpoint = publicEnv.ANNOUNCED_VERSION_ENDPOINT;
   const announcementEndpoint =
     endpoint === undefined ? null : normalizeAnnouncementEndpoint(endpoint);
@@ -163,6 +198,7 @@ export async function GET() {
       ) {
         return versionResponse({
           announcedVersion: announcedVersion.version,
+          clientVersion,
           version,
         });
       }
@@ -171,5 +207,5 @@ export async function GET() {
     }
   }
 
-  return versionResponse({ announcedVersion: null, version });
+  return versionResponse({ announcedVersion: null, clientVersion, version });
 }
