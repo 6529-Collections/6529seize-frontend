@@ -2,11 +2,15 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import NotificationsWrapper from "@/components/brain/notifications/NotificationsWrapper";
 import { useRouter } from "next/navigation";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
+}));
+jest.mock("@/hooks/usePrefetchWaveData", () => ({
+  usePrefetchWaveData: jest.fn(),
 }));
 jest.mock(
   "@/components/brain/notifications/NotificationItems",
@@ -25,9 +29,16 @@ jest.mock(
 );
 
 const push = jest.fn();
+const prefetchWaveData = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push });
 
 describe("NotificationsWrapper", () => {
+  beforeEach(() => {
+    push.mockClear();
+    prefetchWaveData.mockClear();
+    (usePrefetchWaveData as jest.Mock).mockReturnValue(prefetchWaveData);
+  });
+
   it("shows loading spinner and handles actions", () => {
     const setActive = jest.fn();
     render(
@@ -55,6 +66,7 @@ describe("NotificationsWrapper", () => {
     );
     screen.getByTestId("items").click();
     expect(setActive).toHaveBeenCalledTimes(1);
+    expect(prefetchWaveData).toHaveBeenCalledWith("w");
     expect(push).toHaveBeenCalledWith("/waves/w?serialNo=1");
   });
 });
