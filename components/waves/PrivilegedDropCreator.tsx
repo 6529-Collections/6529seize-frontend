@@ -22,6 +22,7 @@ export { DropMode } from "./dropComposer.types";
 interface PrivilegedDropCreatorProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onReplyTargetUnavailable?: (() => void) | undefined;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
   readonly onServerDropCreated?:
@@ -53,6 +54,7 @@ interface PrivilegedDropCreatorProps {
 export default function PrivilegedDropCreator({
   activeDrop,
   onCancelReplyQuote,
+  onReplyTargetUnavailable,
   wave,
   dropId,
   fixedDropMode,
@@ -168,6 +170,7 @@ export default function PrivilegedDropCreator({
     <CreateDrop
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
+      onReplyTargetUnavailable={onReplyTargetUnavailable}
       onAllDropsAdded={onAllDropsAdded}
       onServerDropCreated={onServerDropCreated}
       onExitFixedDropMode={onExitFixedDropMode}
