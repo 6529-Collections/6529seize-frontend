@@ -60,7 +60,10 @@ export default function CreateWaveDatesRank({
   const isOngoingRanking = dates.ongoingRanking ?? false;
   const [expandedSections, setExpandedSections] = useState({
     start: true,
-    decisions: false,
+    // Expanded by default so the announcement schedule is visible before Next;
+    // a collapsed section made it easy to miss that scheduled (non-perpetual)
+    // waves need their winner announcements configured.
+    decisions: true,
     rolling: dates.isRolling,
   });
   const [hasAutoCollapsedStart, setHasAutoCollapsedStart] = useState(false);
