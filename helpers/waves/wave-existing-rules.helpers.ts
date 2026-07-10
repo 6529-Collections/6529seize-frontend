@@ -11,6 +11,8 @@ import {
   WAVE_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   CREDIT_SCOPE_LABELS,
   formatDuration,
@@ -56,7 +58,12 @@ const getWaveOverviewSection = ({
     {
       id: "wave-type",
       label: "Type",
-      value: WAVE_LABELS[wave.wave.type],
+      // A rank wave with no decision strategy never announces winners: it is
+      // a perpetual (ongoing) leaderboard.
+      value:
+        wave.wave.type === ApiWaveType.Rank && !wave.wave.decisions_strategy
+          ? t(DEFAULT_LOCALE, "waves.rules.schedule.perpetualRankType")
+          : WAVE_LABELS[wave.wave.type],
     },
   ],
 });

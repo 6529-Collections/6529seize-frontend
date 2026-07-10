@@ -707,10 +707,11 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   showOutcomes: "Show outcomes",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
-    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure. The live leaderboard is the outcome and stays visible to viewers.",
+    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
 } as const);
 
 const WAVE_RULES_SCHEDULE_MESSAGES = objectMessages("waves.rules.schedule", {
+  perpetualRankType: "Rank — Perpetual Ranking",
   "winnerAnnouncements.label": "Winner announcements",
   "winnerAnnouncements.none": "None (ongoing ranking, no end date)",
 } as const);

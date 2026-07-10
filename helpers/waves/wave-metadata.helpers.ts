@@ -229,14 +229,20 @@ export const getCreateWaveDisplayMetadataRequests = ({
     return [];
   }
 
-  // Perpetual rank waves always show their leaderboard: any stored "hidden"
-  // preference stays in config (so it is restored if the user switches back
-  // to scheduled announcements) but is never submitted for a perpetual wave.
+  // A perpetual rank wave never has outcomes to show, so its outcomes tab is
+  // always submitted as hidden. The stored preference stays in config (so it
+  // is restored if the user switches back to scheduled announcements).
   const isPerpetualRank = waveType === ApiWaveType.Rank && ongoingRanking;
-  const outcomeVisibilityRequest =
-    waveType === ApiWaveType.Chat || isPerpetualRank
-      ? null
-      : getOutcomeVisibilityMetadataRequest(display.outcomesVisible);
+  let outcomeVisibilityRequest: ApiCreateWaveMetadataRequest | null;
+  if (waveType === ApiWaveType.Chat) {
+    outcomeVisibilityRequest = null;
+  } else if (isPerpetualRank) {
+    outcomeVisibilityRequest = getOutcomeVisibilityMetadataRequest(false);
+  } else {
+    outcomeVisibilityRequest = getOutcomeVisibilityMetadataRequest(
+      display.outcomesVisible
+    );
+  }
   const customRulesRequest = getCustomRulesMetadataRequest(display.customRules);
   const submissionButtonLabelRequest =
     waveType === ApiWaveType.Chat

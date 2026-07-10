@@ -229,7 +229,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     );
     await expect(page.getByText("Choose outcome type")).toBeHidden();
     const outcomesToggle = page.getByRole("checkbox");
-    await expect(outcomesToggle).toBeChecked();
+    await expect(outcomesToggle).not.toBeChecked();
     await expect(outcomesToggle).toBeDisabled();
     await nextStepButton(page).click();
 

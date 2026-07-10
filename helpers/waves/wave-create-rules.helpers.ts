@@ -80,7 +80,10 @@ const getCreateOverviewSection = ({
     {
       id: "wave-type",
       label: "Type",
-      value: WAVE_LABELS[config.overview.type],
+      value:
+        config.overview.type === ApiWaveType.Rank && config.dates.ongoingRanking
+          ? t(DEFAULT_LOCALE, "waves.rules.schedule.perpetualRankType")
+          : WAVE_LABELS[config.overview.type],
     },
   ],
 });
