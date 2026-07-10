@@ -137,4 +137,68 @@ describe("productImpactTelemetry", () => {
       })
     );
   });
+
+  it("tracks wave feed cancellations as expected aborts", async () => {
+    const { telemetry } = await loadProductImpactTelemetry();
+    const abortError = new DOMException(
+      "The operation was aborted",
+      "AbortError"
+    );
+
+    telemetry.trackWaveFeedLoadCancelled({
+      durationMs: 150,
+      error: abortError,
+      hadCachedDrops: true,
+      isNative: true,
+      loadSource: "background_sync",
+      remainedUnavailable: false,
+    });
+
+    expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
+      "Wave Feed Load Cancelled",
+      expect.objectContaining({
+        endpoint_family: "wave_drops_feed",
+        error_kind: "abort",
+        load_source: "background_sync",
+        product_failure: false,
+        status_bucket: "aborted",
+      })
+    );
+  });
+
+  it("tracks auth refresh success and cancellation as reportable outcomes", async () => {
+    const { telemetry } = await loadProductImpactTelemetry();
+
+    telemetry.trackAuthSessionRefreshSucceeded({
+      clientType: "native",
+      hadLocalJwt: true,
+      refreshOutcome: "success",
+    });
+    telemetry.trackAuthValidationCancelled({
+      clientType: "native",
+      hadLocalJwt: true,
+      refreshOutcome: "cancelled",
+    });
+
+    expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
+      "Auth Session Refresh Succeeded",
+      expect.objectContaining({
+        client_type: "native",
+        endpoint_family: "auth_session_refresh",
+        product_failure: false,
+        refresh_outcome: "success",
+        status_bucket: "2xx",
+      })
+    );
+    expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
+      "Auth Validation Cancelled",
+      expect.objectContaining({
+        client_type: "native",
+        endpoint_family: "auth_session_refresh",
+        product_failure: false,
+        refresh_outcome: "cancelled",
+        status_bucket: "aborted",
+      })
+    );
+  });
 });

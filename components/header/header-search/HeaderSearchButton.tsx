@@ -71,7 +71,6 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
           <CommonAnimationOpacity
             key="modal"
             elementClasses="tw-absolute tw-z-10"
-            elementRole="dialog"
             onClicked={(e) => e.stopPropagation()}
           >
             <HeaderSearchModal onClose={handleClose} wave={wave} />
