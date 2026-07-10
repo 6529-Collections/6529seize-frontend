@@ -27,6 +27,9 @@ describe("useIsVersionStale", () => {
     await act(async () => {
       jest.runOnlyPendingTimers();
     });
+    expect(globalThis.fetch).toHaveBeenCalledWith("/api/announced-version", {
+      cache: "no-store",
+    });
     expect(await findByText("fresh")).toBeInTheDocument();
   });
 
@@ -41,6 +44,19 @@ describe("useIsVersionStale", () => {
       jest.runOnlyPendingTimers();
     });
     expect(await findByText("stale")).toBeInTheDocument();
+  });
+
+  it("ignores malformed version responses", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VERSION = "1.0.0";
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      json: async () => ({}),
+    });
+    const { findByText } = render(<TestComponent interval={1000} />);
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(await findByText("fresh")).toBeInTheDocument();
   });
 
   it("shows stale when forced by query param", async () => {
