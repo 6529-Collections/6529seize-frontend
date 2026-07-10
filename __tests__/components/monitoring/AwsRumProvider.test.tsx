@@ -101,6 +101,22 @@ describe("AwsRumProvider", () => {
     expect(
       isExcluded("https://cca-lite.coinbase.com/metrics?event=load")
     ).toBe(true);
+    expect(isExcluded("https://api-js.mixpanel.com/track/?ip=1")).toBe(true);
+    expect(isExcluded("https://api-js.mixpanel.com/engage/?verbose=1")).toBe(
+      true
+    );
+    expect(isExcluded("https://rpc.walletconnect.org/v1/?chainId=eip155:1")).toBe(
+      true
+    );
+    expect(isExcluded("https://rpc.walletconnect.com/v1/?chainId=eip155:1")).toBe(
+      true
+    );
+    expect(isExcluded("https://rpc.walletconnect.com/v1/sessions/abc")).toBe(
+      true
+    );
+    expect(
+      isExcluded("https://identity.walletconnect.org/v1/profile?projectId=test")
+    ).toBe(true);
     expect(isExcluded("https://sts.amazonaws.com/")).toBe(true);
     expect(isExcluded("https://cognito-identity.us-east-1.amazonaws.com/")).toBe(
       true
@@ -115,6 +131,16 @@ describe("AwsRumProvider", () => {
     expect(
       isExcluded("https://api.6529.io/api/v2/waves/123/drops?limit=50")
     ).toBe(false);
+    expect(isExcluded("https://api.6529.io/api/v2/waves")).toBe(false);
+    expect(isExcluded("https://api.6529.io/api/v2/notifications")).toBe(false);
+    expect(
+      isExcluded("https://api.6529.io/api/dm-drops/unread?identity=simo")
+    ).toBe(false);
+    expect(isExcluded("https://api-js.mixpanel.com/groups/?verbose=1")).toBe(
+      false
+    );
+    expect(isExcluded("https://identity.walletconnect.org/v1beta")).toBe(false);
+    expect(isExcluded("https://relay.walletconnect.com/v2/")).toBe(false);
   });
 
   it("skips AWS RUM initialization in development", async () => {
