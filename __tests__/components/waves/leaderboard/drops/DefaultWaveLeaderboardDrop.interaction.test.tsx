@@ -34,10 +34,6 @@ jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
   __esModule: true,
   default: () => <div />,
 }));
-jest.mock("@/components/waves/drops/DropCurationButton", () => ({
-  __esModule: true,
-  default: () => <div data-testid="curate" />,
-}));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => (p: any) => (
   <button
     type="button"

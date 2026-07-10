@@ -1941,6 +1941,47 @@
       ]
     },
     {
+      "id": "waves.chat-status-settings",
+      "kind": "ui_affordance",
+      "title": "Wave chat status settings",
+      "aliases": [
+        "enable chat",
+        "disable chat",
+        "re-enable chat",
+        "chat disabled",
+        "who can chat",
+        "chat access"
+      ],
+      "keywords": [
+        "waves",
+        "chat",
+        "settings",
+        "enabled",
+        "disabled",
+        "access",
+        "group",
+        "anyone"
+      ],
+      "facts": [
+        "Wave chat has two separate settings for Rank and Approve waves: chat.enabled controls whether chat is on, and chat.scope controls who can chat when chat is enabled.",
+        "Chat waves require chat to stay enabled, so their Settings and Rules panels do not show a Chat status enable/disable row.",
+        "Rank and Approve wave Settings show Chat status as Enabled or Disabled, and wave admins can edit that row to enable or disable chat.",
+        "The Access row uses Chat access wording; `Anyone when enabled` means no chat access group is attached, not that chat is currently enabled.",
+        "The Rank and Approve Rules panels also show Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
+        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "chat", "settings", "groups"],
+      "source_refs": [
+        "components/waves/specs/WaveChatStatus.tsx",
+        "helpers/waves/wave-rules.helpers.ts",
+        "components/waves/specs/groups/group/WaveGroup.tsx",
+        "ops/docs/waves/chat/feature-chat-composer-availability.md",
+        "ops/docs/waves/sidebars/feature-right-sidebar-group-management.md"
+      ]
+    },
+    {
       "id": "waves.boosted-drops-display",
       "kind": "ui_affordance",
       "title": "Boosted drops display preference",
