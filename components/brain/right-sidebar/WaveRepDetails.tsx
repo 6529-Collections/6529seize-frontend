@@ -504,7 +504,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             role="tab"
             aria-selected={activeView === "contributors"}
             onClick={() => setActiveView("contributors")}
-            className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
+            className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition ${
               activeView === "contributors"
                 ? "tw-border-primary-300/60 tw-text-iron-100"
                 : "tw-border-transparent tw-text-iron-500 hover:tw-text-iron-300"
@@ -517,7 +517,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             role="tab"
             aria-selected={activeView === "activity"}
             onClick={showActivity}
-            className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition ${
+            className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition ${
               activeView === "activity"
                 ? "tw-border-primary-300/60 tw-text-iron-100"
                 : "tw-border-transparent tw-text-iron-500 hover:tw-text-iron-300"

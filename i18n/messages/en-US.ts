@@ -611,8 +611,8 @@ const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
 
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
-  "postsCount.one": "{count} Post",
-  "postsCount.other": "{count} Posts",
+  "postLabel.one": "Post",
+  "postLabel.other": "Posts",
 } as const);
 
 const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
