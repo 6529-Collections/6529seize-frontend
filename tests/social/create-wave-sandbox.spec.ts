@@ -142,7 +142,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("creates a perpetual rank wave and blocks stale announcement schedules", async ({
+  test("creates a perpetual rank wave after choosing the mode on the overview", async ({
     baseURL,
     page,
   }) => {
@@ -150,17 +150,8 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
 
     await page.getByLabel(/Wave Name/).fill(SANDBOX_PERPETUAL_WAVE_NAME);
     await page.getByText("Rank", { exact: true }).click();
-    await nextStepButton(page).click();
 
-    await expect(
-      page.getByRole("heading", { name: "Who can vote" })
-    ).toBeVisible();
-    await nextStepButton(page).click();
-
-    // Dates step: both scheduling modes are presented as explicit choices.
-    await expect(page.getByText("Wave Timeline")).toBeVisible({
-      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
-    });
+    // The scheduling mode is chosen up front on the Overview step.
     const announceRadio = page.getByRole("radio", {
       name: "Announce Winners",
     });
@@ -169,30 +160,54 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     });
     await expect(announceRadio).toBeChecked();
     await expect(perpetualRadio).not.toBeChecked();
-    await expect(page.getByText("Winners Announcements")).toBeVisible();
+    await nextStepButton(page).click();
 
-    // The default announcement time is already in the past by the time the
-    // user clicks Next, so the scheduled path must block navigation.
+    await expect(
+      page.getByRole("heading", { name: "Who can vote" })
+    ).toBeVisible();
+    await nextStepButton(page).click();
+
+    // Dates step in scheduled mode shows the announcement schedule, expanded
+    // by default; mounting it also defaults the first announcement to a valid
+    // future time, so Next proceeds to the Drops step.
+    await expect(page.getByText("Wave Timeline")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("button", { name: "Winners Announcements" })
+    ).toBeVisible();
+    await expect(
+      page.getByText("First Winners Announcement").first()
+    ).toBeVisible();
     await nextStepButton(page).click();
     await expect(
-      page
-        .getByText(
-          "First winners announcement and wave end must be in the future."
-        )
-        .first()
-    ).toBeVisible();
-    await expect(page.getByText("Wave Timeline")).toBeVisible();
+      page.locator("#no-of-applications-allowed-per-participant")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
 
-    // Switching to perpetual hides the announcement schedule…
+    // Go back to the Overview and switch the wave to perpetual ranking.
+    await previousStepButton(page).click();
+    await expect(page.getByText("Wave Timeline")).toBeVisible();
+    await previousStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Who can vote" })
+    ).toBeVisible();
+    await previousStepButton(page).click();
+    await expect(perpetualRadio).toBeVisible();
     await page.getByText("Perpetual Ranking", { exact: true }).click();
     await expect(perpetualRadio).toBeChecked();
-    await expect(page.getByText("Winners Announcements")).toBeHidden();
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Who can vote" })
+    ).toBeVisible();
+    await nextStepButton(page).click();
 
-    // …and switching back restores it before continuing as perpetual.
-    await page.getByText("Announce Winners", { exact: true }).click();
-    await expect(page.getByText("Winners Announcements")).toBeVisible();
-    await page.getByText("Perpetual Ranking", { exact: true }).click();
-    await expect(page.getByText("Winners Announcements")).toBeHidden();
+    // The dates step is now purely about dates: no announcement schedule.
+    await expect(page.getByText("Wave Timeline")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("button", { name: "Winners Announcements" })
+    ).toBeHidden();
 
     await nextStepButton(page).click();
     await expect(
@@ -268,6 +283,8 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
 
     await page.getByLabel(/Wave Name/).fill("Sandbox Approve Wave");
     await page.getByText("Approve", { exact: true }).click();
+    // The ranking-mode choice is a Rank-only concept, on Overview included.
+    await expect(page.getByText("Perpetual Ranking")).toBeHidden();
     await nextStepButton(page).click();
 
     await expect(
@@ -281,7 +298,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(page.getByText("Perpetual Ranking")).toBeHidden();
-    await expect(page.getByText("Winners Announcements")).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Winners Announcements" })
+    ).toBeHidden();
   });
 });
 
@@ -307,6 +326,10 @@ async function fillDescription(page: Page, text: string) {
 
 function nextStepButton(page: Page) {
   return page.getByRole("button", { name: "Next", exact: true });
+}
+
+function previousStepButton(page: Page) {
+  return page.getByRole("button", { name: "Previous", exact: true });
 }
 
 async function installExternalDataFixtures(page: Page) {

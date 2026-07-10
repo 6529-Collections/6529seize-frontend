@@ -669,7 +669,7 @@ const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
     legend: "Ranking mode",
     "announceWinners.title": "Announce Winners",
     "announceWinners.description":
-      "Winners are announced on the schedule you set below — a fixed timeline that ends the wave, or repeating cycles.",
+      "Winners are announced on a schedule you'll set on the Dates step — a fixed timeline that ends the wave, or repeating cycles.",
     "perpetualRanking.title": "Perpetual Ranking",
     "perpetualRanking.description":
       "Rankings update continuously with no winners and no end date — a live, always-on leaderboard.",
