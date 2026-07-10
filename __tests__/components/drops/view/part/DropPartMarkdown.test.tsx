@@ -1116,21 +1116,58 @@ describe("DropPartMarkdown", () => {
     expect(a).toHaveAttribute("href", "https://google.com");
   });
 
-  it("renders markdown links with anchor text as plain links by default", () => {
-    render(
+  it("keeps markdown links with anchor text inline without rendering previews", () => {
+    const { container } = render(
       <DropPartMarkdown
         mentionedUsers={[]}
         mentionedWaves={[]}
         referencedNfts={[]}
-        partContent="[gm](https://google.com)"
+        partContent="field test: [deep sea](https://neal.fun/deep-sea/)"
         onQuoteClick={jest.fn()}
         hideLinkPreviews={false}
       />
     );
 
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
-    const a = screen.getByRole("link", { name: "gm" });
-    expect(a).toHaveAttribute("href", "https://google.com");
+    expect(mockArtBlocksTokenCard).not.toHaveBeenCalled();
+    expect(mockFarcasterCard).not.toHaveBeenCalled();
+    expect(mockTwitterPreviewCard).not.toHaveBeenCalled();
+    expect(mockGithubLinkPreview).not.toHaveBeenCalled();
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const link = screen.getByRole("link", { name: "deep sea" });
+
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]).toHaveTextContent("field test: deep sea");
+    expect(link).toHaveAttribute("href", "https://neal.fun/deep-sea/");
+    expect(link.closest("p")).toBe(paragraphs[0]);
+  });
+
+  it("keeps bare URL previews split out as block cards", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="field test: https://neal.fun/deep-sea/"
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockLinkPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "https://neal.fun/deep-sea/",
+      })
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const preview = screen.getByTestId("link-preview");
+
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]).toHaveTextContent("field test:");
+    expect(preview).toHaveAttribute("data-href", "https://neal.fun/deep-sea/");
+    expect(preview.closest("p")).toBeNull();
   });
 
   it("renders specialized markdown links with anchor text as plain links", () => {
@@ -1156,29 +1193,35 @@ describe("DropPartMarkdown", () => {
   });
 
   it("keeps bare URL previews when a part also has a markdown anchor link", () => {
-    const tweetUrl = "https://twitter.com/someuser/status/2222222222";
+    const previewUrl = "https://neal.fun/deep-sea/";
 
-    render(
+    const { container } = render(
       <DropPartMarkdown
         mentionedUsers={[]}
         mentionedWaves={[]}
         referencedNfts={[]}
-        partContent={`${tweetUrl} see [details](https://google.com)`}
+        partContent={`${previewUrl} see [deep sea](${previewUrl})`}
         onQuoteClick={jest.fn()}
         hideLinkPreviews={false}
       />
     );
 
-    expect(mockTwitterPreviewCard).toHaveBeenCalledWith(
+    expect(mockLinkPreviewCard).toHaveBeenCalledWith(
       expect.objectContaining({
-        href: tweetUrl,
-        tweetId: "2222222222",
+        href: previewUrl,
       })
     );
-    expect(screen.getByRole("link", { name: "details" })).toHaveAttribute(
-      "href",
-      "https://google.com"
-    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const previews = screen.getAllByTestId("link-preview");
+    const anchor = screen.getByRole("link", { name: "deep sea" });
+
+    expect(previews).toHaveLength(1);
+    expect(previews[0]?.closest("p")).toBeNull();
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]).toHaveTextContent("see deep sea");
+    expect(anchor).toHaveAttribute("href", previewUrl);
+    expect(anchor.closest("p")).toBe(paragraphs[0]);
   });
 
   it("renders separate paragraphs for blank-line content with tight spacing", () => {
