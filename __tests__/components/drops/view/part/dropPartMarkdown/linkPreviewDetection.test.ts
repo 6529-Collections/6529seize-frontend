@@ -1,7 +1,4 @@
-import {
-  containsDisallowedLink,
-  containsMarkdownLinkWithAnchorText,
-} from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
+import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 
 describe("linkPreviewDetection", () => {
   it("detects markdown links and bare urls blocked by chat restrictions", () => {
@@ -23,36 +20,6 @@ describe("linkPreviewDetection", () => {
 
   it("ignores non-url markdown image placeholders", () => {
     expect(containsDisallowedLink("![Seize](loading)")).toBe(false);
-  });
-
-  it("detects markdown links with custom anchor text", () => {
-    expect(
-      containsMarkdownLinkWithAnchorText("[gm](https://google.com)")
-    ).toBe(true);
-    expect(
-      containsMarkdownLinkWithAnchorText(
-        "[Google](https://google.com/search?q=6529)"
-      )
-    ).toBe(true);
-  });
-
-  it("does not treat bare-url markdown links as custom anchor text", () => {
-    expect(
-      containsMarkdownLinkWithAnchorText(
-        "[https://google.com](https://google.com)"
-      )
-    ).toBe(false);
-    expect(
-      containsMarkdownLinkWithAnchorText(
-        "[www.google.com](https://www.google.com)"
-      )
-    ).toBe(false);
-    expect(
-      containsMarkdownLinkWithAnchorText("![gm](https://google.com/gm.png)")
-    ).toBe(false);
-    expect(
-      containsMarkdownLinkWithAnchorText("`[gm](https://google.com)`")
-    ).toBe(false);
   });
 
   it("blocks non-allowed direct media urls", () => {

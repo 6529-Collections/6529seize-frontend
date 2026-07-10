@@ -1133,6 +1133,32 @@ describe("DropPartMarkdown", () => {
     expect(a).toHaveAttribute("href", "https://google.com");
   });
 
+  it("keeps bare URL previews when a part also has a markdown anchor link", () => {
+    const tweetUrl = "https://twitter.com/someuser/status/2222222222";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`${tweetUrl} see [details](https://google.com)`}
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockTwitterPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: tweetUrl,
+        tweetId: "2222222222",
+      })
+    );
+    expect(screen.getByRole("link", { name: "details" })).toHaveAttribute(
+      "href",
+      "https://google.com"
+    );
+  });
+
   it("renders separate paragraphs for blank-line content with tight spacing", () => {
     render(
       <DropPartMarkdown

@@ -195,13 +195,8 @@ const readMarkdownHref = (
     : readPlainHref(content, hrefStart);
 };
 
-interface MarkdownLinkCandidate {
-  readonly href: string;
-  readonly label: string;
-}
-
-const extractMarkdownLinks = (content: string): MarkdownLinkCandidate[] => {
-  const links: MarkdownLinkCandidate[] = [];
+const extractMarkdownLinkHrefs = (content: string): string[] => {
+  const hrefs: string[] = [];
   let searchIndex = 0;
 
   while (searchIndex < content.length) {
@@ -216,49 +211,15 @@ const extractMarkdownLinks = (content: string): MarkdownLinkCandidate[] => {
       continue;
     }
 
-    if (openBracketIndex > 0 && content[openBracketIndex - 1] === "!") {
-      searchIndex = closeBracketIndex + 2;
-      continue;
-    }
-
     const href = readMarkdownHref(content, closeBracketIndex);
     if (href) {
-      links.push({
-        href,
-        label: content.slice(openBracketIndex + 1, closeBracketIndex),
-      });
+      hrefs.push(href);
     }
 
     searchIndex = closeBracketIndex + 2;
   }
 
-  return links;
-};
-
-const isHttpHref = (href: string): boolean => {
-  const normalizedHref = normalizeHrefCandidate(href);
-  const stableHref = ensureStableSeizeLink(normalizedHref);
-  const parsedHref = parseUrl(stableHref);
-  return parsedHref?.protocol === "http:" || parsedHref?.protocol === "https:";
-};
-
-const isBareHrefLabel = (label: string, href: string): boolean => {
-  const normalizedHref = ensureStableSeizeLink(normalizeHrefCandidate(href));
-  const normalizedLabel = ensureStableSeizeLink(normalizeHrefCandidate(label));
-
-  return normalizedLabel === normalizedHref;
-};
-
-export const containsMarkdownLinkWithAnchorText = (
-  content: string | null | undefined
-): boolean => {
-  if (!content) {
-    return false;
-  }
-
-  return extractMarkdownLinks(stripMarkdownCode(content)).some(
-    ({ href, label }) => isHttpHref(href) && !isBareHrefLabel(label, href)
-  );
+  return hrefs;
 };
 
 export const containsDisallowedLink = (
@@ -271,7 +232,7 @@ export const containsDisallowedLink = (
   const withoutCode = stripMarkdownCode(content);
   let match: RegExpExecArray | null;
 
-  for (const { href } of extractMarkdownLinks(withoutCode)) {
+  for (const href of extractMarkdownLinkHrefs(withoutCode)) {
     if (isDisallowedLinkHref(href)) {
       return true;
     }

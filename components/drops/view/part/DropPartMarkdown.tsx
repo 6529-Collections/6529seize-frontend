@@ -44,7 +44,6 @@ import {
   createLinkRenderer,
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
-import { containsMarkdownLinkWithAnchorText } from "./dropPartMarkdown/linkPreviewDetection";
 import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
 
 const BreakComponent = () => <br />;
@@ -320,17 +319,12 @@ function DropPartMarkdown({
     [quotePath]
   );
 
-  const effectiveHideLinkPreviews = useMemo(
-    () => hideLinkPreviews || containsMarkdownLinkWithAnchorText(partContent),
-    [hideLinkPreviews, partContent]
-  );
-
   const { renderAnchor, isSmartLink, renderImage } = useMemo(
     () =>
       createLinkRenderer({
         onQuoteClick,
         currentDropId,
-        hideLinkPreviews: effectiveHideLinkPreviews,
+        hideLinkPreviews,
         isMemesWaveById: seizeSettings?.isMemesWave,
         isQuorumWaveById: seizeSettings?.isQuorumWave,
         embedPath: normalizedEmbedPath,
@@ -343,7 +337,7 @@ function DropPartMarkdown({
     [
       onQuoteClick,
       currentDropId,
-      effectiveHideLinkPreviews,
+      hideLinkPreviews,
       seizeSettings?.isMemesWave,
       seizeSettings?.isQuorumWave,
       normalizedEmbedPath,
