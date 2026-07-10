@@ -3,10 +3,6 @@ import React from "react";
 import { WaveLeaderboardRightSidebarActivityLogDrop } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogDrop";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
-jest.mock("@/hooks/useBrowserLocale", () => ({
-  useBrowserLocale: () => "fr-FR",
-}));
-
 jest.mock("@/helpers/waves/wave-right-panel.helpers", () => ({
   waveRightPanelText: jest.fn(() => "View drop in chat"),
 }));
@@ -20,13 +16,11 @@ function setup() {
 }
 
 describe("WaveLeaderboardRightSidebarActivityLogDrop", () => {
-  it("resolves its accessible label with the active locale", () => {
+  it("resolves its accessible label when rendered", () => {
     setup();
 
     expect(waveRightPanelText).toHaveBeenCalledWith(
-      "waves.sidebar.rightPanel.activity.openDropAriaLabel",
-      {},
-      "fr-FR"
+      "waves.sidebar.rightPanel.activity.openDropAriaLabel"
     );
     expect(
       screen.getByRole("button", { name: "View drop in chat" })

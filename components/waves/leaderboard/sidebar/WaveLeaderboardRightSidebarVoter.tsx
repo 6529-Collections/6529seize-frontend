@@ -40,7 +40,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           {voter.voter.pfp ? (
             <Image
               src={resolveIpfsUrlSync(voter.voter.pfp)}
-              alt={voterProfile}
+              alt=""
               width={24}
               height={24}
               className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-inset tw-ring-white/10"

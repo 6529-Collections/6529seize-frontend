@@ -2,7 +2,6 @@
 
 import type { FC } from "react";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 
 type WaveLeaderboardRightSidebarActivityLogDropProps = {
   readonly onDropClick: () => void;
@@ -11,11 +10,8 @@ type WaveLeaderboardRightSidebarActivityLogDropProps = {
 export const WaveLeaderboardRightSidebarActivityLogDrop: FC<
   WaveLeaderboardRightSidebarActivityLogDropProps
 > = ({ onDropClick }) => {
-  const locale = useBrowserLocale();
   const openDropLabel = waveRightPanelText(
-    "waves.sidebar.rightPanel.activity.openDropAriaLabel",
-    {},
-    locale
+    "waves.sidebar.rightPanel.activity.openDropAriaLabel"
   );
   const handleClick = () => {
     onDropClick();
