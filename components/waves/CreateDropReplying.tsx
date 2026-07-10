@@ -29,6 +29,7 @@ export default function CreateDropReplying({
       </span>
       <button
         type="button"
+        aria-label="Cancel reply"
         onClick={onCancel}
         disabled={disabled}
         className={`tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2 tw-transition tw-duration-300 tw-ease-out ${
