@@ -82,7 +82,6 @@ function LaunchPhaseTabButton({
 
   return (
     <button
-      id={`phase-tab-${tab.key}`}
       type="button"
       role="tab"
       aria-selected={isSelected}
@@ -402,14 +401,7 @@ export function DropForgePhaseSelectionSection({
           />
         ))}
       </div>
-      <div
-        id={selectedPhase ? `phase-panel-${selectedPhase}` : undefined}
-        role="tabpanel"
-        aria-labelledby={
-          selectedPhase ? `phase-tab-${selectedPhase}` : undefined
-        }
-        className="tw-min-h-[18rem] lg:tw-min-h-[30rem]"
-      >
+      <div className="tw-min-h-[18rem] lg:tw-min-h-[30rem]">
         {renderSelectedPhasePanel({
           phasePanelProps,
           selectedPhase,

@@ -162,7 +162,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
       </span>
       {parsedCanonicalUrl ? (
         <a
-          href={parsedCanonicalUrl.href}
+          href={canonicalSrc}
           target="_blank"
           rel="noopener noreferrer"
           className="tw-text-xs tw-font-medium tw-text-primary-300 tw-transition hover:tw-text-primary-300"
