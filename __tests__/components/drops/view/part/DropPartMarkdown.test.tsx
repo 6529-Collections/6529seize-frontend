@@ -7,6 +7,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
+import { PARENTHESIZED_ORDERED_LIST_CLASS_NAME } from "@/components/drops/view/part/dropPartMarkdown/orderedListDelimiter";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 class MockIntersectionObserver {
@@ -1253,6 +1254,56 @@ describe("DropPartMarkdown", () => {
     expect(paragraphs[0]).toHaveTextContent("see deep sea");
     expect(anchor).toHaveAttribute("href", previewUrl);
     expect(anchor.closest("p")).toBe(paragraphs[0]);
+  });
+
+  it("preserves a parenthesized ordered-list marker", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="1) What"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const list = container.querySelector("ol");
+    expect(list).toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
+    expect(screen.getByRole("listitem")).toHaveTextContent("What");
+  });
+
+  it("keeps period-delimited ordered lists on the default marker style", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="1. What"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(container.querySelector("ol")).not.toHaveClass(
+      PARENTHESIZED_ORDERED_LIST_CLASS_NAME
+    );
+  });
+
+  it("preserves non-one numbering only on parenthesized ordered lists", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"3) Three\n4) Four\n\n1. One"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const lists = container.querySelectorAll("ol");
+    expect(lists).toHaveLength(2);
+    expect(lists[0]).toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
+    expect(lists[0]).toHaveAttribute("start", "3");
+    expect(lists[1]).not.toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
   });
 
   it("renders separate paragraphs for blank-line content with tight spacing", () => {

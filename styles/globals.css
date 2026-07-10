@@ -4,6 +4,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.drop-markdown-ordered-list-paren > li::marker {
+  content: counter(list-item) ") ";
+}
+
 @layer components {
   .layout-root {
     min-height: 100dvh;
