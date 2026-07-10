@@ -1,6 +1,7 @@
 "use client";
 
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
+import { $convertFromMarkdownString } from "@lexical/markdown";
 import type { FocusEvent } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import {
@@ -11,7 +12,7 @@ import {
   useRef,
 } from "react";
 import type { EditorState } from "lexical";
-import { COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import { $getRoot, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -19,7 +20,6 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { $convertFromMarkdownString } from "@lexical/markdown";
 
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
@@ -69,6 +69,7 @@ import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
+import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -134,6 +135,38 @@ const SetMarkdownPlugin = forwardRef<
 });
 SetMarkdownPlugin.displayName = "SetMarkdownPlugin";
 
+function InitialMarkdownPlugin({
+  initialMarkdown,
+  initialMarkdownKey,
+}: {
+  readonly initialMarkdown: string | null;
+  readonly initialMarkdownKey: string | null;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const appliedKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!initialMarkdown || !initialMarkdownKey) {
+      return;
+    }
+
+    if (appliedKeyRef.current === initialMarkdownKey) {
+      return;
+    }
+
+    appliedKeyRef.current = initialMarkdownKey;
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+      $convertFromMarkdownString(initialMarkdown, SAFE_MARKDOWN_TRANSFORMERS);
+      $selectEndOfRootBlock(root);
+    });
+    editor.focus();
+  }, [editor, initialMarkdown, initialMarkdownKey]);
+
+  return null;
+}
+
 const CreateDropInput = forwardRef<
   CreateDropInputHandles,
   {
@@ -158,6 +191,8 @@ const CreateDropInput = forwardRef<
     readonly validationHelperText?: string | null | undefined;
     readonly canEditLastDropWithArrow?: boolean | undefined;
     readonly onRequestEditLastDrop?: (() => boolean) | undefined;
+    readonly initialMarkdown?: string | null | undefined;
+    readonly initialMarkdownKey?: string | null | undefined;
   }
 >(
   (
@@ -180,6 +215,8 @@ const CreateDropInput = forwardRef<
       validationHelperText = null,
       canEditLastDropWithArrow = false,
       onRequestEditLastDrop,
+      initialMarkdown = null,
+      initialMarkdownKey = null,
       onDrop,
     },
     ref
@@ -387,6 +424,10 @@ const CreateDropInput = forwardRef<
                 canMentionAll={canMentionAll}
               />
               <DisableEditPlugin disabled={submitting} />
+              <InitialMarkdownPlugin
+                initialMarkdown={initialMarkdown}
+                initialMarkdownKey={initialMarkdownKey}
+              />
               <EnterKeyPlugin
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}
