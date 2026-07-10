@@ -157,7 +157,7 @@ export default function WaveHeaderTrustStats({
           <div
             key={stat.id}
             aria-label={stat.ariaLabel}
-            className={`tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-bg-iron-950 tw-px-2 tw-py-2 ${
+            className={`tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-bg-iron-950 tw-px-2 tw-py-2 ${
               fillsLastRow ? "tw-col-span-2" : ""
             }`}
           >
@@ -166,11 +166,11 @@ export default function WaveHeaderTrustStats({
             >
               <Icon className="tw-size-3.5" aria-hidden="true" />
             </span>
-            <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-              <dt className="tw-truncate tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
+            <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+              <dt className="tw-truncate tw-text-[0.5625rem] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.1em] tw-text-iron-500">
                 {stat.label}
               </dt>
-              <dd className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-iron-100">
+              <dd className="tw-m-0 tw-truncate tw-text-sm tw-font-medium tw-tabular-nums tw-leading-5 tw-text-iron-100">
                 {stat.value}
               </dd>
             </div>

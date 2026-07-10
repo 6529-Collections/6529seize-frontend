@@ -95,10 +95,10 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
 
   const panel = (
     <div
-      className={`tw-flex tw-h-full tw-w-[20.5rem] tw-min-w-0 tw-max-w-full tw-flex-col tw-overflow-hidden tw-bg-iron-950 ${
+      className={`tw-flex tw-h-full tw-w-[20.5rem] tw-min-w-0 tw-max-w-full tw-flex-col tw-bg-iron-950 ${
         isOverlay
-          ? `tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-800 tw-shadow-2xl lg:tw-bg-opacity-95 lg:tw-backdrop-blur min-[1300px]:tw-bg-opacity-100 min-[1300px]:tw-backdrop-blur-none`
-          : "tw-max-h-[calc(100vh-16px)] tw-rounded-lg tw-border tw-border-solid tw-border-iron-800"
+          ? `tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-overflow-visible tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-800 tw-shadow-2xl lg:tw-bg-opacity-95 lg:tw-backdrop-blur min-[1300px]:tw-bg-opacity-100 min-[1300px]:tw-backdrop-blur-none`
+          : "tw-max-h-[calc(100vh-16px)] tw-overflow-hidden tw-rounded-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800"
       }`}
     >
       {isOverlay && (
@@ -136,7 +136,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           type="button"
           onClick={close}
           aria-label="Close right overlay"
-          className="tw-fixed tw-inset-0 tw-z-[90] tw-border-0 tw-bg-black/50 focus:tw-outline-none"
+          className="tw-fixed tw-inset-0 tw-z-[90] tw-border-0 tw-bg-gray-700/75 tw-backdrop-blur-[1px] focus:tw-outline-none"
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               event.preventDefault();

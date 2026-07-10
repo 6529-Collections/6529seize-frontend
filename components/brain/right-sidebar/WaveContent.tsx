@@ -74,7 +74,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   const sidebarTabComponents: Partial<Record<SidebarTab, JSX.Element>> = {
     [SidebarTab.ABOUT]: (
-      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
+      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
         <WaveHeader
           wave={wave}
           onFollowersClick={onFollowersClick}
@@ -120,7 +120,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col tw-overflow-hidden">
-      <div className="tw-no-scrollbar tw-min-w-0 tw-flex-shrink-0 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-2 [&_button[role=tab][aria-selected=true]]:tw-border-iron-400 [&_button[role=tab][aria-selected=true]]:tw-text-iron-100 [&_button[role=tab]]:tw-px-2 [&_button[role=tab]]:tw-py-2.5 [&_button[role=tab]]:tw-text-sm [&_button[role=tab]]:tw-font-semibold [&_button[role=tab]]:tw-tracking-normal">
+      <div className="tw-no-scrollbar tw-min-w-0 tw-flex-shrink-0 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-2 [&_button[role=tab][aria-selected=true]]:tw-border-iron-400 [&_button[role=tab][aria-selected=true]]:tw-text-iron-100 [&_button[role=tab]]:tw-px-2 [&_button[role=tab]]:tw-py-2.5 [&_button[role=tab]]:!tw-text-sm [&_button[role=tab]]:tw-font-medium [&_button[role=tab]]:tw-tracking-normal">
         <TabToggleWithOverflow
           options={options}
           activeKey={activeSidebarTab}

@@ -846,10 +846,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "categories.title": "Categories",
   "categories.loading": "Loading",
   "categories.all": "All",
-  "categories.active": "Category",
-  "categories.activeAriaLabel": "Choose active Wave REP category",
-  "categories.browse": "Show all categories",
-  "categories.searchPlaceholder": "Search categories",
+  "categories.searchPlaceholder": "Search categories…",
   "categories.searchAriaLabel": "Search Wave REP categories",
   "categories.noMatches": "No matching categories",
   "categories.allAriaLabel":
@@ -868,8 +865,6 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "contributors.heading.category": "Contributors in {category}",
   "contributors.description.all": "{contributors}",
   "contributors.description.category": "{contributors}, {rep}",
-  "contributors.categoryFilter": "Category: {category}",
-  "contributors.categoryFilterAll": "All",
   "contributors.error": "Could not load contributors.",
   "contributors.empty.all": "No Wave REP yet.",
   "contributors.empty.category": "No contributors in {category} yet.",
@@ -1179,7 +1174,7 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":
-    "Choose how inserted boosted-drop cards appear in wave chat on this device.",
+    "How boosted-drop cards show in chat.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
   "waveChat.boostedDrops.display.hidden": "Hidden",
   "waveChat.boostedDrops.display.compact": "Compact",

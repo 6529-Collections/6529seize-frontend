@@ -28,7 +28,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isLoading && !isFetchingNextPage) {
-      void fetchNextPage();
+      fetchNextPage().catch(() => undefined);
     }
   });
 
@@ -36,6 +36,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
     return (
       <WaveLeaderboardRightSidebarState
         announce
+        emphasizeTitle={false}
         icon={
           <ArrowPathIcon
             aria-hidden="true"

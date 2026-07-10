@@ -5,6 +5,7 @@ interface WaveLeaderboardRightSidebarStateProps {
   readonly title: string;
   readonly description?: string | undefined;
   readonly announce?: boolean | undefined;
+  readonly emphasizeTitle?: boolean | undefined;
 }
 
 export function WaveLeaderboardRightSidebarState({
@@ -12,6 +13,7 @@ export function WaveLeaderboardRightSidebarState({
   title,
   description,
   announce = false,
+  emphasizeTitle = true,
 }: WaveLeaderboardRightSidebarStateProps) {
   const Container = announce ? "output" : "div";
 
@@ -23,7 +25,11 @@ export function WaveLeaderboardRightSidebarState({
       <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-text-iron-500">
         {icon}
       </span>
-      <span className="tw-mt-2 tw-text-sm tw-font-semibold tw-text-iron-300">
+      <span
+        className={`tw-mt-2 tw-text-sm tw-text-iron-300 ${
+          emphasizeTitle ? "tw-font-semibold" : "tw-font-normal"
+        }`}
+      >
         {title}
       </span>
       {description && (

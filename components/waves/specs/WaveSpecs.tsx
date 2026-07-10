@@ -43,7 +43,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     >
       <div className="tw-pb-4">
         <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-6">
-          <h2 className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400">
+          <h2 className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.1em] !tw-text-iron-400">
             {waveRightPanelText("waves.sidebar.rightPanel.specs.overview")}
           </h2>
         </div>
