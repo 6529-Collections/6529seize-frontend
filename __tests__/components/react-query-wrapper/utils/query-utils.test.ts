@@ -2,6 +2,7 @@ import {
   getDefaultQueryRetry,
   getWaveDropsInitialLimit,
   isRateLimitQueryError,
+  shouldStopPollingRetry,
   WAVE_DROPS_NATIVE_INITIAL_PARAMS,
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
@@ -35,6 +36,12 @@ describe("default query retry policy", () => {
     expect(isRateLimitQueryError({ response: { status: 429 } })).toBe(true);
     expect(isRateLimitQueryError({ cause: { status: 429 } })).toBe(true);
     expect(isRateLimitQueryError({ status: 500 })).toBe(false);
+  });
+
+  it("stops polling retries for auth and rate-limit responses", () => {
+    expect(shouldStopPollingRetry({ status: 401 })).toBe(true);
+    expect(shouldStopPollingRetry({ status: 429 })).toBe(true);
+    expect(shouldStopPollingRetry({ status: 500 })).toBe(false);
   });
 
   it("keeps retrying non-rate-limit failures until the default retry count", () => {
