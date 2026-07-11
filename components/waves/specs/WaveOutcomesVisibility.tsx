@@ -24,8 +24,14 @@ interface WaveOutcomesVisibilityProps {
   readonly wave: ApiWave;
 }
 
-const isOutcomeVisibilityWave = (wave: ApiWave): boolean =>
-  wave.wave.type === ApiWaveType.Rank || wave.wave.type === ApiWaveType.Approve;
+const isOutcomeVisibilityWave = (wave: ApiWave): boolean => {
+  // Perpetual rank waves (no decision strategy) never produce outcomes, so
+  // there is nothing for the visibility toggle to show or hide.
+  if (wave.wave.type === ApiWaveType.Rank) {
+    return Boolean(wave.wave.decisions_strategy);
+  }
+  return wave.wave.type === ApiWaveType.Approve;
+};
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);

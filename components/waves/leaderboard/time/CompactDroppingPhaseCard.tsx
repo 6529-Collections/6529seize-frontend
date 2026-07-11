@@ -2,8 +2,7 @@ import React from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave } from "@/hooks/useWave";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { OpenEndedPhaseRow } from "./OpenEndedPhaseRow";
 interface CompactDroppingPhaseCardProps {
   readonly wave: ApiWave;
 }
@@ -28,16 +27,7 @@ export const CompactDroppingPhaseCard: React.FC<
 
   if (hasNoEnd && !isUpcoming) {
     return (
-      <div className="tw-px-2">
-        <div className="tw-flex tw-flex-col tw-justify-between tw-gap-y-1 sm:tw-flex-row sm:tw-flex-nowrap sm:tw-items-center">
-          <span className="tw-text-xs tw-text-iron-400">
-            {t(DEFAULT_LOCALE, "waves.leaderboard.phase.droppingOngoing")}
-          </span>{" "}
-          <span className="tw-ml-2 tw-whitespace-nowrap tw-px-1.5 tw-text-xs tw-text-iron-400">
-            {t(DEFAULT_LOCALE, "waves.leaderboard.phase.noEndDate")}
-          </span>
-        </div>
-      </div>
+      <OpenEndedPhaseRow labelKey="waves.leaderboard.phase.droppingOngoing" />
     );
   }
 
