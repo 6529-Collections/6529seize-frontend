@@ -309,7 +309,11 @@ const getCreateOutcomesSection = ({
   const outcomesVisible = isPerpetualRank
     ? false
     : config.display.outcomesVisible;
-  const outcomesCount = isPerpetualRank ? 0 : config.outcomes.length;
+  // "None yet" would imply outcomes are still coming; a perpetual wave never
+  // has any.
+  const outcomesCountLabel = isPerpetualRank
+    ? t(DEFAULT_LOCALE, "waves.rules.schedule.outcomesNotAvailable")
+    : getOutcomeCountLabel(config.outcomes.length);
 
   return {
     id: "outcomes",
@@ -323,7 +327,7 @@ const getCreateOutcomesSection = ({
       {
         id: "outcomes-count",
         label: "Configured outcomes",
-        value: getOutcomeCountLabel(outcomesCount),
+        value: outcomesCountLabel,
       },
     ],
   };

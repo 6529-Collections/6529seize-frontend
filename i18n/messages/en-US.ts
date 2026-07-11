@@ -712,6 +712,7 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
 
 const WAVE_RULES_SCHEDULE_MESSAGES = objectMessages("waves.rules.schedule", {
   perpetualRankType: "Rank — Perpetual Ranking",
+  outcomesNotAvailable: "Not available (perpetual wave)",
   "winnerAnnouncements.label": "Winner announcements",
   "winnerAnnouncements.none": "None (ongoing ranking, no end date)",
 } as const);

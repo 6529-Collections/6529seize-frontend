@@ -234,7 +234,7 @@ describe("wave-rules.helpers", () => {
         ["Winner announcements", "None (ongoing ranking, no end date)"],
         ["Type", "Rank — Perpetual Ranking"],
         ["Outcomes visibility", "Hidden"],
-        ["Configured outcomes", "None yet"],
+        ["Configured outcomes", "Not available (perpetual wave)"],
       ])
     );
     const labels = rows.map(([label]) => label);
