@@ -2,6 +2,8 @@ import React from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave } from "@/hooks/useWave";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 interface CompactDroppingPhaseCardProps {
   readonly wave: ApiWave;
 }
@@ -20,19 +22,38 @@ export const CompactDroppingPhaseCard: React.FC<
     participation: { startTime, endTime },
   } = useWave(wave);
 
+  // Open-ended submissions (e.g. perpetual rank waves) have no end to count
+  // down to.
+  const hasNoEnd = wave.participation?.period?.max == null;
+
+  if (hasNoEnd && !isUpcoming) {
+    return (
+      <div className="tw-px-2">
+        <div className="tw-flex tw-flex-col tw-justify-between tw-gap-y-1 sm:tw-flex-row sm:tw-flex-nowrap sm:tw-items-center">
+          <span className="tw-text-xs tw-text-iron-400">
+            {t(DEFAULT_LOCALE, "waves.leaderboard.phase.droppingOngoing")}
+          </span>{" "}
+          <span className="tw-ml-2 tw-whitespace-nowrap tw-px-1.5 tw-text-xs tw-text-iron-400">
+            {t(DEFAULT_LOCALE, "waves.leaderboard.phase.noEndDate")}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="tw-px-2">
       {!isCompleted ? (
-        <div className="tw-flex sm:tw-items-center tw-flex-col sm:tw-flex-row tw-justify-between sm:tw-flex-nowrap tw-gap-y-1">
+        <div className="tw-flex tw-flex-col tw-justify-between tw-gap-y-1 sm:tw-flex-row sm:tw-flex-nowrap sm:tw-items-center">
           <span className="tw-text-xs tw-text-iron-400">
             {isUpcoming ? "Dropping starts in" : "Dropping ends in"}
           </span>{" "}
           <span>
-            <span className="tw-text-xs tw-font-mono tw-text-iron-300 tw-tracking-tight tw-ml-1">
+            <span className="tw-ml-1 tw-font-mono tw-text-xs tw-tracking-tight tw-text-iron-300">
               {timeLeft.days > 0 && `${timeLeft.days}d `}
               {timeLeft.hours}h {timeLeft.minutes}m
             </span>
-            <span className="tw-text-xs tw-text-iron-400 tw-px-1.5 tw-whitespace-nowrap tw-ml-2">
+            <span className="tw-ml-2 tw-whitespace-nowrap tw-px-1.5 tw-text-xs tw-text-iron-400">
               {isUpcoming
                 ? new Date(startTime).toLocaleDateString(undefined, {
                     month: "short",
@@ -46,7 +67,7 @@ export const CompactDroppingPhaseCard: React.FC<
           </span>
         </div>
       ) : (
-        <div className="tw-flex tw-items-center tw-justify-between tw-flex-nowrap">
+        <div className="tw-flex tw-flex-nowrap tw-items-center tw-justify-between">
           <div className="tw-flex-1">
             <span className="tw-font-normal">
               <span className="tw-text-xs tw-text-iron-400">
@@ -55,7 +76,7 @@ export const CompactDroppingPhaseCard: React.FC<
             </span>
           </div>
 
-          <span className="tw-text-xs tw-text-iron-400 tw-px-1.5 tw-whitespace-nowrap tw-ml-2">
+          <span className="tw-ml-2 tw-whitespace-nowrap tw-px-1.5 tw-text-xs tw-text-iron-400">
             {new Date(endTime).toLocaleDateString(undefined, {
               month: "short",
               day: "numeric",

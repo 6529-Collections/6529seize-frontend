@@ -710,6 +710,15 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
 } as const);
 
+const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
+  "waves.leaderboard.phase",
+  {
+    votingOngoing: "Voting ongoing",
+    droppingOngoing: "Dropping open",
+    noEndDate: "No end date",
+  } as const
+);
+
 const WAVE_RULES_SCHEDULE_MESSAGES = objectMessages("waves.rules.schedule", {
   perpetualRankType: "Rank — Perpetual Ranking",
   outcomesNotAvailable: "Not available (perpetual wave)",
@@ -1757,6 +1766,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_LEADERBOARD_PHASE_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,
   ...GROUP_NFT_OWNERSHIP_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
