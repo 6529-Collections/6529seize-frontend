@@ -1045,6 +1045,12 @@ const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
   title: "Filter by identity",
 } as const);
 
+const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  "search.emptyDescription":
+    "Try another collection name or clear the search to see all collections.",
+  "search.emptyTitle": "No collections found for “{query}”",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.all": "All",
   "category.nfts": "NFTs",
@@ -1087,11 +1093,13 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "results.count.one": "{count} result",
   "results.count.other": "{count} results",
   "results.queryPrefix": "for",
+  "results.panelLabel": "{category} results",
   "results.status.one": '{count} result for "{query}"',
   "results.status.other": '{count} results for "{query}"',
   "recent.description": "Pick up where you left off.",
   "recent.title": "Recent searches",
   scopeLabel: "Result type",
+  "scope.allResults": "all results",
   "status.keyboardHint":
     "Use arrow keys to move through results and Enter to open.",
   viewAllCategory: "View all {category}",
@@ -1099,6 +1107,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
 
 export const EN_US_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
+  ...XTDH_COLLECTION_MESSAGES,
   ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",

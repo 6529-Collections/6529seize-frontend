@@ -36,8 +36,11 @@ const STATIC_ALLOWED_IMAGE_HOSTS = new Set([
 ]);
 
 const getSafeImageSource = (source: string): string | null => {
-  const resolvedSource = resolveIpfsUrlSync(source);
+  const resolvedSource = resolveIpfsUrlSync(source.trim());
 
+  if (!resolvedSource || resolvedSource.startsWith("//")) {
+    return null;
+  }
   if (resolvedSource.startsWith("/")) {
     return resolvedSource;
   }
@@ -73,14 +76,13 @@ const HeaderSearchModalItemMedia = memo(
     alt = "",
     roundedFull = false,
   }: HeaderSearchModalItemMediaProps) => {
-    const nftSources: unknown[] = nft
+    const nftSources = nft
       ? [nft.icon_url, nft.thumbnail_url, nft.image_url]
       : [];
     const nftSource = nft
-      ? nftSources.find(
-          (value): value is string =>
-            typeof value === "string" && value.length > 0
-        )
+      ? nftSources
+          .find((value) => typeof value === "string" && value.trim().length > 0)
+          ?.trim()
       : undefined;
     const candidateSrc = src ?? nftSource ?? null;
     let altText = alt;
@@ -99,7 +101,9 @@ const HeaderSearchModalItemMedia = memo(
           className={`${
             roundedFull ? "tw-rounded-full" : "tw-rounded-md"
           } tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-bg-iron-900 tw-text-iron-500 tw-ring-1 tw-ring-white/10`}
-          aria-hidden="true"
+          role={altText ? "img" : undefined}
+          aria-label={altText || undefined}
+          aria-hidden={altText ? undefined : "true"}
         >
           <PhotoIcon className="tw-size-4" />
         </div>

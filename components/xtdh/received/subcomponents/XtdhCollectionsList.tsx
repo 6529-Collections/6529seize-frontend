@@ -1,6 +1,8 @@
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 
 import { EmptyState } from "@/components/common/EmptyState";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   InlineRetry,
   ListError,
@@ -40,6 +42,7 @@ export function XtdhCollectionsList({
   isIdentityScoped = true,
   searchTerm = "",
 }: Readonly<XtdhCollectionsListProps>) {
+  const locale = useBrowserLocale();
   const targetLabel = isIdentityScoped ? "this identity" : "the ecosystem";
   const normalizedSearchTerm = searchTerm.trim();
   if (!isEnabled) {
@@ -69,8 +72,10 @@ export function XtdhCollectionsList({
     if (normalizedSearchTerm) {
       return (
         <EmptyState
-          title={`No collections found for “${normalizedSearchTerm}”`}
-          message="Try another collection name or clear the search to see all collections."
+          title={t(locale, "xtdh.collections.search.emptyTitle", {
+            query: normalizedSearchTerm,
+          })}
+          message={t(locale, "xtdh.collections.search.emptyDescription")}
         />
       );
     }

@@ -98,7 +98,7 @@ interface HeaderSearchSiteResultsProps {
   readonly searchValue: string;
   readonly liveSearchValue: string;
   readonly onClose: () => void;
-  readonly onRetry: () => void;
+  readonly onRetry: (categories: readonly FilterableCategory[]) => void;
   readonly onRememberSearch: (query: string) => void;
   readonly recentSearches: readonly string[];
   readonly onRecentSearchSelect: (query: string) => void;
@@ -432,7 +432,7 @@ export function HeaderSearchSiteResults({
   );
   const activeCategoryLabel =
     selectedCategory === CATEGORY.ALL
-      ? "all results"
+      ? t(locale, "headerSearch.scope.allResults")
       : getCategoryLabel(selectedCategory);
   let idleMessage = t(locale, "headerSearch.idle");
   if (shouldShowCountdown) {
@@ -452,13 +452,6 @@ export function HeaderSearchSiteResults({
           <div
             role="status"
             aria-live="polite"
-            aria-label={t(
-              locale,
-              selectedResultCount === 1
-                ? "headerSearch.results.status.one"
-                : "headerSearch.results.status.other",
-              { count: formattedResultCount, query: searchValue }
-            )}
             className="tw-mb-3 tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-3"
           >
             <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-300">
@@ -499,7 +492,7 @@ export function HeaderSearchSiteResults({
               </p>
               <button
                 type="button"
-                onClick={onRetry}
+                onClick={() => onRetry(failedCategories)}
                 className="tw-text-primary-200 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
                 {t(locale, "headerSearch.retry")}
@@ -577,7 +570,7 @@ export function HeaderSearchSiteResults({
           </p>
           <button
             type="button"
-            onClick={onRetry}
+            onClick={() => onRetry(failedCategories)}
             className="tw-text-primary-100 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/15 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold hover:tw-bg-primary-500/25 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             {t(locale, "headerSearch.retry")}
@@ -659,7 +652,9 @@ export function HeaderSearchSiteResults({
           ref={resultsPanelRef}
           id={HEADER_SEARCH_RESULTS_PANEL_ID}
           role="tabpanel"
-          aria-label={`${getCategoryLabel(selectedCategory)} results`}
+          aria-label={t(locale, "headerSearch.results.panelLabel", {
+            category: getCategoryLabel(selectedCategory),
+          })}
           aria-busy={derivedState === STATE.LOADING}
           className="tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pb-5 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/20 desktop-hover:hover:tw-scrollbar-thumb-white/30 md:tw-px-0"
         >

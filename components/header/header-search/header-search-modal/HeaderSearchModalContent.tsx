@@ -20,6 +20,7 @@ import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { useAuth } from "@/components/auth/authContext";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
@@ -82,21 +83,22 @@ const HEADER_SEARCH_SESSION_QUERY_KEY = "headerSearchLastQuery";
 const HEADER_SEARCH_RECENT_QUERIES_KEY = "headerSearchRecentQueries";
 const MAX_RECENT_SEARCHES = 5;
 
-const readSessionQuery = (): string => {
+const getScopedStorageKey = (key: string, scope: string): string =>
+  `${key}:${scope}`;
+
+const readSessionQuery = (storageKey: string): string => {
   if (typeof window === "undefined") return "";
   try {
-    return sessionStorage.getItem(HEADER_SEARCH_SESSION_QUERY_KEY) ?? "";
+    return sessionStorage.getItem(storageKey) ?? "";
   } catch {
     return "";
   }
 };
 
-const readRecentSearches = (): string[] => {
+const readRecentSearches = (storageKey: string): string[] => {
   if (typeof window === "undefined") return [];
   try {
-    const savedRecent = sessionStorage.getItem(
-      HEADER_SEARCH_RECENT_QUERIES_KEY
-    );
+    const savedRecent = sessionStorage.getItem(storageKey);
     if (!savedRecent) return [];
     const parsed: unknown = JSON.parse(savedRecent);
     if (!Array.isArray(parsed)) return [];
@@ -181,6 +183,25 @@ export default function HeaderSearchModal({
   readonly wave: ApiWave | null;
 }) {
   const locale = useBrowserLocale();
+  const { connectedProfile } = useAuth();
+  let storageScope = "anonymous";
+  const connectedProfileId = connectedProfile?.id?.trim();
+  if (connectedProfileId) {
+    storageScope = connectedProfileId;
+  } else if (connectedProfile) {
+    const primaryWallet = connectedProfile.primary_wallet.trim();
+    if (primaryWallet) {
+      storageScope = primaryWallet.toLocaleLowerCase(locale);
+    }
+  }
+  const sessionQueryStorageKey = getScopedStorageKey(
+    HEADER_SEARCH_SESSION_QUERY_KEY,
+    storageScope
+  );
+  const recentQueriesStorageKey = getScopedStorageKey(
+    HEADER_SEARCH_RECENT_QUERIES_KEY,
+    storageScope
+  );
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsPanelRef = useRef<HTMLDivElement>(null);
@@ -190,10 +211,15 @@ export default function HeaderSearchModal({
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const [searchValue, setSearchValue] = useState(readSessionQuery);
+  const [searchValue, setSearchValue] = useState(() =>
+    readSessionQuery(sessionQueryStorageKey)
+  );
   const [debouncedValue, setDebouncedValue] = useState("");
-  const [recentSearches, setRecentSearches] =
-    useState<string[]>(readRecentSearches);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() =>
+    readRecentSearches(recentQueriesStorageKey)
+  );
+  const activeStorageScopeRef = useRef(storageScope);
+  const skipStorageWriteRef = useRef(false);
   const [selectedCategory, setSelectedCategory] = useLocalPreference<CATEGORY>(
     "headerSearchCategoryFilter",
     CATEGORY.ALL,
@@ -299,16 +325,29 @@ export default function HeaderSearchModal({
   }, []);
 
   useEffect(() => {
+    if (activeStorageScopeRef.current === storageScope) return;
+    activeStorageScopeRef.current = storageScope;
+    skipStorageWriteRef.current = true;
+    setSearchValue(readSessionQuery(sessionQueryStorageKey));
+    setDebouncedValue("");
+    setRecentSearches(readRecentSearches(recentQueriesStorageKey));
+  }, [recentQueriesStorageKey, sessionQueryStorageKey, storageScope]);
+
+  useEffect(() => {
+    if (skipStorageWriteRef.current) {
+      skipStorageWriteRef.current = false;
+      return;
+    }
     try {
       if (searchValue) {
-        sessionStorage.setItem(HEADER_SEARCH_SESSION_QUERY_KEY, searchValue);
+        sessionStorage.setItem(sessionQueryStorageKey, searchValue);
       } else {
-        sessionStorage.removeItem(HEADER_SEARCH_SESSION_QUERY_KEY);
+        sessionStorage.removeItem(sessionQueryStorageKey);
       }
     } catch {
       // Search remains fully functional without session storage.
     }
-  }, [searchValue]);
+  }, [searchValue, sessionQueryStorageKey]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -324,28 +363,29 @@ export default function HeaderSearchModal({
     };
   }, []);
 
-  const rememberSearch = useCallback((query: string) => {
-    const normalizedQuery = query.trim();
-    if (!normalizedQuery) return;
-    setRecentSearches((current) => {
-      const next = [
-        normalizedQuery,
-        ...current.filter(
-          (item) =>
-            item.toLocaleLowerCase() !== normalizedQuery.toLocaleLowerCase()
-        ),
-      ].slice(0, MAX_RECENT_SEARCHES);
-      try {
-        sessionStorage.setItem(
-          HEADER_SEARCH_RECENT_QUERIES_KEY,
-          JSON.stringify(next)
-        );
-      } catch {
-        // Navigation must not depend on session storage.
-      }
-      return next;
-    });
-  }, []);
+  const rememberSearch = useCallback(
+    (query: string) => {
+      const normalizedQuery = query.trim();
+      if (!normalizedQuery) return;
+      setRecentSearches((current) => {
+        const next = [
+          normalizedQuery,
+          ...current.filter(
+            (item) =>
+              item.toLocaleLowerCase(locale) !==
+              normalizedQuery.toLocaleLowerCase(locale)
+          ),
+        ].slice(0, MAX_RECENT_SEARCHES);
+        try {
+          sessionStorage.setItem(recentQueriesStorageKey, JSON.stringify(next));
+        } catch {
+          // Navigation must not depend on session storage.
+        }
+        return next;
+      });
+    },
+    [locale, recentQueriesStorageKey]
+  );
 
   const {
     isFetching: isFetchingProfiles,
@@ -502,26 +542,15 @@ export default function HeaderSearchModal({
     selectedSearchCategory,
   ]);
 
-  const handleRetry = () => {
-    if (
-      (selectedSearchCategory === CATEGORY.ALL ||
-        selectedSearchCategory === CATEGORY.PROFILES) &&
-      shouldSearchDefault
-    ) {
+  const handleRetry = (categories: readonly FilterableCategory[]) => {
+    const retryCategories = new Set(categories);
+    if (retryCategories.has(CATEGORY.PROFILES) && shouldSearchDefault) {
       refetchProfiles().catch(() => undefined);
     }
-    if (
-      (selectedSearchCategory === CATEGORY.ALL ||
-        selectedSearchCategory === CATEGORY.NFTS) &&
-      shouldSearchNfts
-    ) {
+    if (retryCategories.has(CATEGORY.NFTS) && shouldSearchNfts) {
       refetchNfts().catch(() => undefined);
     }
-    if (
-      (selectedSearchCategory === CATEGORY.ALL ||
-        selectedSearchCategory === CATEGORY.WAVES) &&
-      shouldSearchDefault
-    ) {
+    if (retryCategories.has(CATEGORY.WAVES) && shouldSearchDefault) {
       refetchWaves().catch(() => undefined);
     }
   };
@@ -617,7 +646,11 @@ export default function HeaderSearchModal({
                     role="combobox"
                     aria-autocomplete="list"
                     aria-haspopup="listbox"
-                    aria-controls={HEADER_SEARCH_RESULTS_LISTBOX_ID}
+                    aria-controls={
+                      derivedState === STATE.SUCCESS
+                        ? HEADER_SEARCH_RESULTS_LISTBOX_ID
+                        : undefined
+                    }
                     aria-expanded={derivedState === STATE.SUCCESS}
                     aria-describedby={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
                     autoComplete="off"

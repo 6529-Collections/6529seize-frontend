@@ -350,7 +350,8 @@ describe("HeaderSearchModal", () => {
 
   it("associates the search input with an accessible label", () => {
     setup();
-    expect(getSearchInput()).toBeInTheDocument();
+    expect(getSearchInput()).toHaveAttribute("aria-expanded", "false");
+    expect(getSearchInput()).not.toHaveAttribute("aria-controls");
   });
 
   it("calls onClose when escape is pressed", () => {
@@ -367,6 +368,14 @@ describe("HeaderSearchModal", () => {
       screen.getByRole("heading", { name: "Profiles" })
     ).toBeInTheDocument();
     expect(screen.getAllByTestId("item").length).toBeGreaterThan(0);
+    expect(input).toHaveAttribute(
+      "aria-controls",
+      "header-search-results-listbox"
+    );
+    expect(
+      screen.getByRole("tabpanel", { name: "All results" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).not.toHaveAttribute("aria-label");
   });
 
   it("keeps the modal header stable when results load", () => {
@@ -950,12 +959,17 @@ describe("HeaderSearchModal", () => {
   });
 
   it("shows partial category failures without hiding successful results", () => {
+    const wavesRefetch = jest.fn(() => Promise.resolve());
+    const profilesRefetch = jest.fn(() => Promise.resolve());
+    const nftsRefetch = jest.fn(() => Promise.resolve());
     setup({
+      profilesRefetch,
+      nftsRefetch,
       wavesReturn: {
         waves: [],
         isFetching: false,
         error: new Error("Wave search failed"),
-        refetch: jest.fn(() => Promise.resolve()),
+        refetch: wavesRefetch,
       },
     });
     fireEvent.change(getSearchInput(), { target: { value: "alice" } });
@@ -964,6 +978,10 @@ describe("HeaderSearchModal", () => {
     expect(
       screen.getByText("Waves results could not be loaded.")
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+    expect(wavesRefetch).toHaveBeenCalledTimes(1);
+    expect(profilesRefetch).not.toHaveBeenCalled();
+    expect(nftsRefetch).not.toHaveBeenCalled();
   });
 
   it("shows an error message and allows retry when a search fails", async () => {
@@ -1005,6 +1023,6 @@ describe("HeaderSearchModal", () => {
     fireEvent.click(retryButton);
 
     expect(profilesRefetch).toHaveBeenCalled();
-    expect(wavesRefetchMock).toHaveBeenCalled();
+    expect(wavesRefetchMock).not.toHaveBeenCalled();
   });
 });

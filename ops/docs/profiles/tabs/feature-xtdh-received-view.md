@@ -112,6 +112,20 @@ Shared tab routing and owner-mode rules are documented in:
 - Deep links with unknown `xtdh_received_contract` values can open token view
   without collection summary metadata.
 
+### Localization fallback debt
+
+- Surface: `XtdhCollectionsList` under `/{user}/xtdh?tab=received` and `/xtdh`.
+- Current fallback: the touched collection-search empty state uses the `en-US`
+  catalog and falls back to that source copy in locales without these keys.
+- Remaining untranslated surface: legacy collection loading, failure, generic
+  empty-state, and pagination copy is still embedded in the component.
+- User impact: non-English locales can see English fallback copy while search,
+  retry, selection, and pagination remain functional.
+- Owner/follow-up: xTDH frontend maintainers should move the remaining legacy
+  collection-state copy into the catalog during the next xTDH UI change.
+- Expected remediation: add stable `xtdh.collections.*` keys, locale-aware
+  formatting where needed, and focused fallback tests.
+
 ## Related Pages
 
 - [Profiles Tabs Index](README.md)

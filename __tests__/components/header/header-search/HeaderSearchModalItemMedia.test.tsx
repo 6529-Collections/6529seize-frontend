@@ -23,6 +23,7 @@ describe("HeaderSearchModalItemMedia", () => {
     expect(placeholder).toHaveClass("tw-rounded-full");
     expect(placeholder).toHaveClass("tw-h-10");
     expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByRole("img", { name: "NFT" })).toBe(placeholder);
   });
 
   it("renders provided src and alt", () => {
@@ -66,7 +67,21 @@ describe("HeaderSearchModalItemMedia", () => {
         alt="Remote"
       />
     );
-    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Remote" })).toBeInTheDocument();
+    expect(document.querySelector("img")).not.toBeInTheDocument();
+  });
+
+  it("rejects protocol-relative remote images", () => {
+    render(
+      <HeaderSearchModalItemMedia
+        src="//untrusted.example/image.png"
+        alt="Protocol relative"
+      />
+    );
+    expect(
+      screen.getByRole("img", { name: "Protocol relative" })
+    ).toBeInTheDocument();
+    expect(document.querySelector("img")).not.toBeInTheDocument();
   });
 
   it("allows the known Seize media host that previously crashed search", () => {

@@ -67,7 +67,9 @@ export const HeaderSearchTabToggle: React.FC<HeaderSearchTabToggleProps> = ({
     onSelect(nextOption.key);
     globalThis.requestAnimationFrame(() => {
       const tabButtons = tabList?.querySelectorAll<HTMLElement>('[role="tab"]');
-      tabButtons?.[nextIndex]?.focus();
+      Array.from(tabButtons ?? [])
+        .find((button) => button.dataset["tabKey"] === nextOption.key)
+        ?.focus();
     });
   };
 
@@ -116,6 +118,7 @@ export const HeaderSearchTabToggle: React.FC<HeaderSearchTabToggleProps> = ({
             role="tab"
             aria-selected={activeKey === option.key}
             aria-controls={option.panelId}
+            data-tab-key={option.key}
             tabIndex={activeKey === option.key ? 0 : -1}
             className={`tw-relative tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-text-sm tw-font-medium tw-transition-all tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 ${
               isVertical
