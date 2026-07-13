@@ -14,6 +14,8 @@ For every supplied pull request:
 - Avoid vague phrases such as "various improvements" or "minor fixes."
 - Do not include pull request numbers, URLs, contributor names, Markdown links, bullets, headings, or preamble in the summary. The renderer adds those deterministically.
 
+The renderer formats each final entry as `- [PR #123](link): Summary. - @[contributor]`.
+
 Return valid JSON only, matching this shape:
 
 {

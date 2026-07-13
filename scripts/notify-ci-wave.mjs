@@ -39,12 +39,11 @@ function normalizeTargetEnvironment(value) {
   if (!targetEnv) {
     return null;
   }
-  if (
-    targetEnv === 'staging' ||
-    targetEnv === 'prod' ||
-    targetEnv === 'production'
-  ) {
-    return targetEnv;
+  if (targetEnv === 'staging') {
+    return 'staging';
+  }
+  if (targetEnv === 'prod' || targetEnv === 'production') {
+    return 'prod';
   }
   return `unsupported:${targetEnv}`;
 }
