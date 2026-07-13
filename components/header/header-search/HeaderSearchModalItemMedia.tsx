@@ -90,9 +90,7 @@ const HeaderSearchModalItemMedia = memo(
           className={`${
             roundedFull ? "tw-rounded-full" : "tw-rounded-md"
           } tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-bg-iron-900 tw-text-iron-500 tw-ring-1 tw-ring-white/10`}
-          role={altText ? "img" : undefined}
-          aria-label={altText || undefined}
-          aria-hidden={altText ? undefined : "true"}
+          aria-hidden="true"
         >
           <PhotoIcon className="tw-size-4" />
         </div>

@@ -449,12 +449,11 @@ export function HeaderSearchSiteResults({
     if (derivedState === STATE.SUCCESS) {
       return (
         <>
-          <div
-            role="status"
+          <output
             aria-live="polite"
             className="tw-mb-3 tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-3"
           >
-            <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-300">
+            <span className="tw-text-xs tw-font-medium tw-text-iron-300">
               {t(
                 locale,
                 selectedResultCount === 1
@@ -462,16 +461,16 @@ export function HeaderSearchSiteResults({
                   : "headerSearch.results.count.other",
                 { count: formattedResultCount }
               )}
-            </p>
-            <p className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs">
+            </span>
+            <span className="tw-min-w-0 tw-truncate tw-text-xs">
               <span className="tw-text-iron-600">
                 {t(locale, "headerSearch.results.queryPrefix")}
               </span>{" "}
               <span className="tw-font-medium tw-text-iron-200">
                 &quot;{searchValue}&quot;
               </span>
-            </p>
-          </div>
+            </span>
+          </output>
           {failedCategories.length > 0 && (
             <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-error/30 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-200">
               <ExclamationTriangleIcon className="tw-size-4 tw-flex-shrink-0 tw-text-error" />
@@ -485,7 +484,7 @@ export function HeaderSearchSiteResults({
                     ? { category: getCategoryLabel(failedCategories[0]!) }
                     : {
                         categories: failedCategories
-                          .map(getCategoryLabel)
+                          .map((category) => getCategoryLabel(category))
                           .join(", "),
                       }
                 )}
@@ -501,7 +500,9 @@ export function HeaderSearchSiteResults({
           )}
           <div
             id={HEADER_SEARCH_RESULTS_LISTBOX_ID}
-            role="listbox"
+            role={
+              "listbox" /* NOSONAR: rich search results use the ARIA combobox listbox pattern */
+            }
             aria-label={activeCategoryLabel}
           >
             {renderSuccessContent()}
@@ -515,12 +516,15 @@ export function HeaderSearchSiteResults({
 
     if (derivedState === STATE.LOADING) {
       return (
-        <div role="status" aria-live="polite" className="tw-pt-1">
-          <p className="tw-mb-3 tw-mt-0 tw-text-sm tw-font-medium tw-text-iron-300">
+        <div className="tw-pt-1">
+          <output
+            aria-live="polite"
+            className="tw-mb-3 tw-block tw-text-sm tw-font-medium tw-text-iron-300"
+          >
             {t(locale, "headerSearch.loadingFor", {
               query: liveSearchValue.trim(),
             })}
-          </p>
+          </output>
           <div className="tw-space-y-2" aria-hidden="true">
             {[0, 1, 2, 3].map((index) => (
               <div
@@ -545,15 +549,12 @@ export function HeaderSearchSiteResults({
           <div className="tw-mb-4 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900">
             <MagnifyingGlassIcon className="tw-size-5 tw-text-iron-300" />
           </div>
-          <p
-            role="status"
-            className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
-          >
+          <output className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
             {t(locale, "headerSearch.noResultsFor", {
               category: activeCategoryLabel,
               query: liveSearchValue.trim(),
             })}
-          </p>
+          </output>
           <p className="tw-mb-0 tw-mt-2 tw-max-w-sm tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(locale, "headerSearch.noResultsHint")}
           </p>
@@ -612,12 +613,9 @@ export function HeaderSearchSiteResults({
             <div className="tw-mb-4 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900">
               <MagnifyingGlassIcon className="tw-size-5 tw-text-primary-300" />
             </div>
-            <p
-              role="status"
-              className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300"
-            >
+            <output className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
               {idleMessage}
-            </p>
+            </output>
           </>
         )}
       </div>

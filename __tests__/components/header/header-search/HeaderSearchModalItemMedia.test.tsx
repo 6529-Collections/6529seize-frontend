@@ -22,8 +22,9 @@ describe("HeaderSearchModalItemMedia", () => {
     const placeholder = container.querySelector("div");
     expect(placeholder).toHaveClass("tw-rounded-full");
     expect(placeholder).toHaveClass("tw-h-10");
+    expect(placeholder).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelector("img")).toBeNull();
-    expect(screen.getByRole("img", { name: "NFT" })).toBe(placeholder);
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
   it("renders provided src and alt", () => {
@@ -67,7 +68,7 @@ describe("HeaderSearchModalItemMedia", () => {
         alt="Remote"
       />
     );
-    expect(screen.getByRole("img", { name: "Remote" })).toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(document.querySelector("img")).not.toBeInTheDocument();
   });
 
@@ -78,9 +79,7 @@ describe("HeaderSearchModalItemMedia", () => {
         alt="Protocol relative"
       />
     );
-    expect(
-      screen.getByRole("img", { name: "Protocol relative" })
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(document.querySelector("img")).not.toBeInTheDocument();
   });
 
