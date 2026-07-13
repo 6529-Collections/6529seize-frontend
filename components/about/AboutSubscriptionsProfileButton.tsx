@@ -46,10 +46,6 @@ export default function AboutSubscriptionsProfileButton({
       console.error("Failed to open profile subscriptions", error);
     });
   };
-  const manageSubscriptionsLabel = t(
-    locale,
-    "home.mintSubscriptions.manageSubscriptionsLink"
-  );
   const connectToSubscribeLabel = t(
     locale,
     "home.mintSubscriptions.connectToSubscribe"
@@ -80,7 +76,7 @@ export default function AboutSubscriptionsProfileButton({
         onClick={handleOpenProfileSubscriptions}
         className={`${buttonClassName} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
-        {manageSubscriptionsLabel}
+        {connectToSubscribeLabel}
         <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
       </button>
     );
@@ -93,7 +89,7 @@ export default function AboutSubscriptionsProfileButton({
         variant === "blue" ? "desktop-hover:hover:tw-text-white" : ""
       }`}
     >
-      {manageSubscriptionsLabel}
+      {connectToSubscribeLabel}
       <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
     </Link>
   );

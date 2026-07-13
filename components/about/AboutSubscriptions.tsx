@@ -69,7 +69,7 @@ export default function AboutSubscriptions() {
 
   return (
     <article
-      className={`tw-mx-auto tw-w-full tw-max-w-5xl tw-pb-12 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
+      className={`tw-w-full tw-pb-12 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
     >
       <SubscriptionHeader locale={locale} />
       <Overview locale={locale} />
@@ -85,7 +85,7 @@ function SubscriptionHeader({
 }) {
   return (
     <header className="tw-px-1 tw-pb-12 tw-pt-6 sm:tw-px-2 sm:tw-pt-8">
-      <div className="tw-max-w-3xl">
+      <div className="tw-max-w-4xl">
         <h1 className="tw-m-0 tw-text-3xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white/90 sm:tw-text-4xl">
           {m(locale, "about.subscriptions.hero.title")}
         </h1>
@@ -96,7 +96,7 @@ function SubscriptionHeader({
           <AboutSubscriptionsProfileButton variant="white" />
         </div>
         <Link
-          className="tw-group/report tw-mt-7 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-white/40 tw-no-underline tw-transition-all hover:tw-border-white/10 hover:tw-bg-white/[0.04] hover:tw-text-white/50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto"
+          className="tw-group/report tw-mt-7 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-white/40 tw-no-underline tw-transition-all hover:tw-border-white/10 hover:tw-bg-white/[0.04] hover:tw-text-white/50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto lg:tw-whitespace-nowrap"
           href="/tools/subscriptions-report"
         >
           <FontAwesomeIcon

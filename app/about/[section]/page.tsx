@@ -28,8 +28,16 @@ export default async function AboutPage(props: Readonly<Props>) {
     notFound();
   }
 
+  const isSubscriptions = section === AboutSection.SUBSCRIPTIONS;
+
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main
+      className={`${styles["main"]} tailwind-scope ${
+        isSubscriptions
+          ? "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
+          : ""
+      }`}
+    >
       <Container fluid className="tw-pt-4">
         <Row>
           <Col>
