@@ -466,6 +466,39 @@ describe("HeaderSearchModal", () => {
     ).toBe(true);
   });
 
+  it.each([
+    "6529 Apps",
+    "6529 Desktop",
+    "6529 Mobile",
+    "apps",
+    "desktop",
+    "mobile",
+  ])("finds the 6529 Apps page for %s", async (query) => {
+    setup({
+      selectedCategory: "PAGES",
+      useActualSidebarSections: true,
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Search" }), {
+      target: { value: query },
+    });
+
+    const items = await screen.findAllByTestId("item");
+    expect(
+      items.some(
+        (item) =>
+          (item.textContent ?? "").includes('"title":"6529 Apps"') &&
+          (item.textContent ?? "").includes('"/about/6529-apps"')
+      )
+    ).toBe(true);
+  });
+
   it("finds the Network Wave Score page by formula aliases", () => {
     setup();
     const input = screen.getByRole("textbox", { name: "Search" });
