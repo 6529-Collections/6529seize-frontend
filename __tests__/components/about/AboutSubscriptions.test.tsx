@@ -10,7 +10,10 @@ describe("AboutSubscriptions", () => {
   it("renders heading", () => {
     render(<AboutSubscriptions />);
     expect(
-      screen.getByRole("heading", { name: /Subscription/ })
+      screen.getByRole("heading", {
+        name: "Subscription Minting",
+        level: 1,
+      })
     ).toBeInTheDocument();
   });
 
@@ -18,11 +21,11 @@ describe("AboutSubscriptions", () => {
     render(<AboutSubscriptions />);
 
     const reportLink = screen.getByRole("link", {
-      name: "Subscriptions Report",
+      name: /Subscriptions Report$/,
     });
     expect(reportLink).toHaveAttribute("href", "/tools/subscriptions-report");
-    expect(reportLink).toHaveClass("tw-text-primary-300");
-    expect(reportLink).not.toHaveClass("tw-underline");
+    expect(reportLink).toHaveClass("tw-text-iron-400");
+    expect(reportLink).toHaveClass("tw-no-underline");
   });
 
   it("places the subscription action in the page content", () => {
@@ -38,5 +41,24 @@ describe("AboutSubscriptions", () => {
     expect(action.compareDocumentPosition(heading)).toBe(
       Node.DOCUMENT_POSITION_PRECEDING
     );
+  });
+
+  it("shows all original information sections", () => {
+    const { container } = render(<AboutSubscriptions />);
+
+    expect(
+      screen.getByRole("heading", { name: "Overview" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "How it Works" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Gas Savings" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Remote Minting" })
+    ).toBeInTheDocument();
+    expect(container.querySelector("details")).toBeInTheDocument();
+    expect(screen.getByText("Delegation")).toBeInTheDocument();
   });
 });
