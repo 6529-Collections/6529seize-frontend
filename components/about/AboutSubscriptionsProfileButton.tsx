@@ -14,6 +14,20 @@ const PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME =
 
 type SubscriptionActionContext = "hero" | "final";
 
+const CONTEXTUAL_ACTION_LABEL_KEYS = {
+  hero: {
+    connect: "about.subscriptions.action.connectHero",
+    manage: "about.subscriptions.action.manageHero",
+  },
+  final: {
+    connect: "about.subscriptions.action.connectFinal",
+    manage: "about.subscriptions.action.manageFinal",
+  },
+} as const satisfies Record<
+  SubscriptionActionContext,
+  { readonly connect: string; readonly manage: string }
+>;
+
 export default function AboutSubscriptionsProfileButton({
   actionContext,
   descriptiveLabels = false,
@@ -59,21 +73,14 @@ export default function AboutSubscriptionsProfileButton({
       ? "about.subscriptions.action.connect"
       : "home.mintSubscriptions.connectToSubscribe"
   );
-  const contextualConnectLabel = actionContext
-    ? t(
-        locale,
-        actionContext === "hero"
-          ? "about.subscriptions.action.connectHero"
-          : "about.subscriptions.action.connectFinal"
-      )
+  const contextualLabelKeys = actionContext
+    ? CONTEXTUAL_ACTION_LABEL_KEYS[actionContext]
     : undefined;
-  const contextualManageLabel = actionContext
-    ? t(
-        locale,
-        actionContext === "hero"
-          ? "about.subscriptions.action.manageHero"
-          : "about.subscriptions.action.manageFinal"
-      )
+  const contextualConnectLabel = contextualLabelKeys
+    ? t(locale, contextualLabelKeys.connect)
+    : undefined;
+  const contextualManageLabel = contextualLabelKeys
+    ? t(locale, contextualLabelKeys.manage)
     : undefined;
 
   if (!profileSubscriptionsHref) {
