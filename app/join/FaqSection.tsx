@@ -29,7 +29,7 @@ export function FaqSection({
 
   return (
     <section
-      className="tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-py-12 md:tw-py-16 lg:tw-px-6 xl:tw-px-0"
+      className="tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-py-12 md:tw-px-6 md:tw-py-16 lg:tw-px-8"
       id="faq"
     >
       <div className="tw-mx-auto tw-mb-12 tw-max-w-4xl tw-text-center">

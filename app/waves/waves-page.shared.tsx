@@ -4,26 +4,22 @@ import {
   HydrationBoundary,
 } from "@tanstack/react-query";
 import { Suspense, cache } from "react";
-import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   getAppMetadata,
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import WavesPageClient from "./page.client";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import { prefetchWavesOverview } from "@/helpers/stream.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { getWaveQueryKey } from "@/services/api/wave-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
 import type { ApiOgMetadataProfile } from "@/generated/models/ApiOgMetadataProfile";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
-import { Time } from "@/helpers/time";
 import { formatAddress } from "@/helpers/Helpers";
-import { DROP_CLOSE_COOKIE_NAME } from "@/helpers/drop-close-navigation.helpers";
 import {
   getWaveRouteWithSearchParams,
   type RouteSearchParams,
@@ -40,10 +36,7 @@ type WaveRequestContext = {
   readonly waveId: string | null;
   readonly wave: ApiWave | null;
   readonly headers: Record<string, string>;
-  readonly feedItemsFetchedAt: number | null;
 };
-
-type CookieStore = Awaited<ReturnType<typeof cookies>>;
 
 export const getFirstSearchParamValue = (
   searchParams: WavesSearchParams,
@@ -155,26 +148,16 @@ export const isApiWaveDirectMessage = (wave: ApiWave): boolean =>
   wave.chat?.scope?.group?.is_direct_message === true;
 
 export async function fetchWaveContext(
-  waveId: string | null,
-  providedCookies?: CookieStore
+  waveId: string | null
 ): Promise<WaveRequestContext> {
-  const cookieStore = providedCookies ?? (await cookies());
   const headers = await getAppCommonHeaders();
   const headersKey = JSON.stringify(headers);
-  const feedItemsFetchedRaw = cookieStore.get(
-    String(QueryKey.FEED_ITEMS)
-  )?.value;
-  const feedItemsFetchedAt = Number.parseInt(feedItemsFetchedRaw ?? "", 10);
-
   const wave = await fetchWaveCached(waveId, headersKey);
 
   return {
     waveId,
     wave,
     headers,
-    feedItemsFetchedAt: Number.isFinite(feedItemsFetchedAt)
-      ? feedItemsFetchedAt
-      : null,
   };
 }
 
@@ -187,8 +170,18 @@ export async function renderWavesPageContent({
   searchParams: WavesSearchParams;
   routeContext?: "waves" | "messages" | undefined;
 }) {
-  const cookieStore = await cookies();
-  const context = await fetchWaveContext(waveId, cookieStore);
+  if (waveId === null) {
+    return (
+      <>
+        <JsonLdScript data={buildWavesIndexPageJsonLd()} />
+        <Suspense fallback={null}>
+          <WavesPageClient />
+        </Suspense>
+      </>
+    );
+  }
+
+  const context = await fetchWaveContext(waveId);
   const queryClient = new QueryClient();
 
   if (context.waveId && context.wave) {
@@ -206,13 +199,9 @@ export async function renderWavesPageContent({
       );
     }
 
-    queryClient.setQueryData(
-      [QueryKey.WAVE, { wave_id: context.waveId }],
-      context.wave
-    );
+    queryClient.setQueryData(getWaveQueryKey(context.waveId), context.wave);
   }
 
-  const hasDrop = Boolean(getFirstSearchParamValue(searchParams, "drop"));
   const dropMetadataId = getDropMetadataId(searchParams)?.trim();
   const dropMetadata =
     context.wave && dropMetadataId
@@ -221,28 +210,6 @@ export async function renderWavesPageContent({
           JSON.stringify(context.headers)
         )
       : null;
-  const hasRecentDropCloseNavigation =
-    cookieStore.get(DROP_CLOSE_COOKIE_NAME)?.value === "1";
-  const shouldPrefetch =
-    !hasDrop &&
-    !hasRecentDropCloseNavigation &&
-    (context.feedItemsFetchedAt === null ||
-      context.feedItemsFetchedAt < Time.now().toMillis() - 60000);
-
-  if (shouldPrefetch) {
-    try {
-      await prefetchWavesOverview({
-        queryClient,
-        headers: context.headers,
-        waveId: context.waveId,
-      });
-    } catch (error) {
-      console.warn("Waves overview prefetch failed", {
-        waveId: context.waveId,
-        error,
-      });
-    }
-  }
 
   return (
     <>
