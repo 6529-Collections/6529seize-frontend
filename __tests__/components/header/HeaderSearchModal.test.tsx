@@ -25,6 +25,7 @@ const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
 const mockUseMyStreamOptional = jest.fn();
+const useAuthMock = jest.fn();
 type HeaderSearchModalItemProps = {
   readonly isSelected: boolean;
   readonly searchValue: string;
@@ -104,6 +105,9 @@ jest.mock(
 );
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: () => useAppWalletsMock(),
+}));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => useAuthMock(),
 }));
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => useCookieConsentMock(),
@@ -332,8 +336,17 @@ function setup(options: SetupOptions = {}) {
       };
     });
   }
-  render(<HeaderSearchModal onClose={onClose} wave={null} />);
-  return { onClose, push, profilesRefetch, nftsRefetch, wavesRefetch };
+  const renderResult = render(
+    <HeaderSearchModal onClose={onClose} wave={null} />
+  );
+  return {
+    onClose,
+    push,
+    profilesRefetch,
+    nftsRefetch,
+    wavesRefetch,
+    ...renderResult,
+  };
 }
 
 const getSearchInput = () =>
@@ -346,12 +359,37 @@ describe("HeaderSearchModal", () => {
     autoFlushDebounce = true;
     pendingDebounce = null;
     mockUseMyStreamOptional.mockReturnValue(null);
+    useAuthMock.mockReturnValue({ connectedProfile: null });
   });
 
   it("associates the search input with an accessible label", () => {
     setup();
     expect(getSearchInput()).toHaveAttribute("aria-expanded", "false");
     expect(getSearchInput()).not.toHaveAttribute("aria-controls");
+  });
+
+  it("restores session queries within the active profile scope", () => {
+    sessionStorage.setItem("headerSearchLastQuery:profile-a", "alpha");
+    sessionStorage.setItem("headerSearchLastQuery:profile-b", "beta");
+    useAuthMock.mockReturnValue({
+      connectedProfile: { id: "profile-a", primary_wallet: "0xA" },
+    });
+    const { onClose, rerender } = setup();
+
+    expect(getSearchInput()).toHaveValue("alpha");
+
+    useAuthMock.mockReturnValue({
+      connectedProfile: { id: "profile-b", primary_wallet: "0xB" },
+    });
+    rerender(<HeaderSearchModal onClose={onClose} wave={null} />);
+
+    expect(getSearchInput()).toHaveValue("beta");
+    expect(sessionStorage.getItem("headerSearchLastQuery:profile-a")).toBe(
+      "alpha"
+    );
+    expect(sessionStorage.getItem("headerSearchLastQuery:profile-b")).toBe(
+      "beta"
+    );
   });
 
   it("calls onClose when escape is pressed", () => {

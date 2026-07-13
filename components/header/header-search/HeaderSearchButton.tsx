@@ -49,11 +49,15 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
 
   const openContextSearch = () => setOpenSearch(wave ? "wave" : "site");
   const closeSearch = () => setOpenSearch(null);
+  const handleSearchShortcut = (event?: KeyboardEvent) => {
+    event?.preventDefault();
+    openContextSearch();
+  };
 
   useKey(
     (event) =>
       (event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === "k",
-    openContextSearch,
+    handleSearchShortcut,
     { event: "keydown" }
   );
 

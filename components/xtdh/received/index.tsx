@@ -66,9 +66,13 @@ export default function XtdhReceivedSection({
     }
     const normalized = selectedContract.trim().toLowerCase();
     return (
-      collections.find(
-        (collection) => collection.contract.trim().toLowerCase() === normalized
-      ) ?? null
+      collections.find((collection) => {
+        const contract: unknown = collection.contract;
+        return (
+          typeof contract === "string" &&
+          contract.trim().toLowerCase() === normalized
+        );
+      }) ?? null
     );
   }, [collections, selectedContract]);
 

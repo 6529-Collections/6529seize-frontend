@@ -4,10 +4,14 @@ import HeaderSearchButton from "@/components/header/header-search/HeaderSearchBu
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 let keyFilter: (e: KeyboardEvent) => boolean;
-let keyCb: () => void;
+let keyCb: (event: KeyboardEvent) => void;
+const mockRouterReplace = jest.fn();
 
 jest.mock("react-use", () => ({
-  useKey: (filter: (e: KeyboardEvent) => boolean, cb: () => void) => {
+  useKey: (
+    filter: (e: KeyboardEvent) => boolean,
+    cb: (event: KeyboardEvent) => void
+  ) => {
     keyFilter = filter;
     keyCb = cb;
   },
@@ -36,13 +40,16 @@ jest.mock("@/components/waves/drops/search/WaveDropsSearchModal", () => ({
     props.isOpen ? (
       <div data-testid="wave-search-modal">
         <button onClick={props.onSearchAll}>Search all 6529</button>
+        <button onClick={() => props.onSelectSerialNo(42)}>
+          Open result 42
+        </button>
         <button onClick={props.onClose}>Close wave search</button>
       </div>
     ) : null,
 }));
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: jest.fn() }),
+  useRouter: () => ({ replace: mockRouterReplace }),
   usePathname: () => "/waves/wave-1",
   useSearchParams: () => new URLSearchParams(),
 }));
@@ -64,8 +71,9 @@ const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
 describe("HeaderSearchButton", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.history.replaceState({}, "", "/");
     keyFilter = () => false;
-    keyCb = () => {};
+    keyCb = () => undefined;
   });
 
   it("opens modal when button is clicked and closes via onClose", () => {
@@ -88,10 +96,29 @@ describe("HeaderSearchButton", () => {
     const event = new KeyboardEvent("keydown", { key: "k", metaKey: true });
     if (keyFilter(event)) {
       act(() => {
-        keyCb();
+        keyCb(event);
       });
     }
 
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
+  });
+
+  it("opens modal and prevents the browser shortcut for ctrl+k", () => {
+    useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
+    render(<HeaderSearchButton wave={null} />);
+
+    const event = new KeyboardEvent("keydown", {
+      key: "k",
+      ctrlKey: true,
+      cancelable: true,
+    });
+    if (keyFilter(event)) {
+      act(() => {
+        keyCb(event);
+      });
+    }
+
+    expect(event.defaultPrevented).toBe(true);
     expect(screen.getByTestId("modal")).toBeInTheDocument();
   });
 
@@ -117,5 +144,24 @@ describe("HeaderSearchButton", () => {
     fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
     expect(screen.queryByTestId("wave-search-modal")).not.toBeInTheDocument();
     expect(screen.getByTestId("modal")).toBeInTheDocument();
+  });
+
+  it("preserves existing query parameters when opening a wave result", () => {
+    useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
+    window.history.replaceState({}, "", "/waves/wave-1?divider=1&tab=chat");
+    const wave = { id: "wave-1", name: "Design Wave" } as any;
+    render(<HeaderSearchButton wave={wave} />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Search messages in Design Wave",
+      })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Open result 42" }));
+
+    expect(mockRouterReplace).toHaveBeenCalledWith(
+      "/waves/wave-1?divider=1&tab=chat&serialNo=42",
+      { scroll: false }
+    );
   });
 });

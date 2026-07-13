@@ -20,7 +20,7 @@ import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
-import { useAuth } from "@/components/auth/authContext";
+import { useAuth } from "@/components/auth/Auth";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
@@ -32,6 +32,7 @@ import {
 } from "@/components/drop-forge/drop-forge.constants";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -44,6 +45,7 @@ import {
 } from "@/hooks/useSidebarSections";
 import { useWaves } from "@/hooks/useWaves";
 import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -108,6 +110,18 @@ const readRecentSearches = (storageKey: string): string[] => {
   } catch {
     return [];
   }
+};
+
+const getSearchStorageScope = (
+  connectedProfile: ApiIdentity | null,
+  locale: SupportedLocale
+): string => {
+  const connectedProfileId = connectedProfile?.id?.trim();
+  if (connectedProfileId) return connectedProfileId;
+  if (!connectedProfile) return "anonymous";
+
+  const primaryWallet = connectedProfile.primary_wallet.trim();
+  return primaryWallet ? primaryWallet.toLocaleLowerCase(locale) : "anonymous";
 };
 
 const rankPageResults = ({
@@ -175,25 +189,40 @@ const rankPageResults = ({
     .map((result) => result.page);
 };
 
-export default function HeaderSearchModal({
-  onClose,
-  wave: _wave,
-}: {
+interface HeaderSearchModalProps {
   readonly onClose: () => void;
   readonly wave: ApiWave | null;
-}) {
+}
+
+interface ScopedHeaderSearchModalProps extends HeaderSearchModalProps {
+  readonly locale: SupportedLocale;
+  readonly storageScope: string;
+}
+
+export default function HeaderSearchModal(props: HeaderSearchModalProps) {
   const locale = useBrowserLocale();
   const { connectedProfile } = useAuth();
-  let storageScope = "anonymous";
-  const connectedProfileId = connectedProfile?.id?.trim();
-  if (connectedProfileId) {
-    storageScope = connectedProfileId;
-  } else if (connectedProfile) {
-    const primaryWallet = connectedProfile.primary_wallet.trim();
-    if (primaryWallet) {
-      storageScope = primaryWallet.toLocaleLowerCase(locale);
-    }
-  }
+  const storageScope = useMemo(
+    () => getSearchStorageScope(connectedProfile, locale),
+    [connectedProfile, locale]
+  );
+
+  return (
+    <ScopedHeaderSearchModal
+      key={storageScope}
+      {...props}
+      locale={locale}
+      storageScope={storageScope}
+    />
+  );
+}
+
+function ScopedHeaderSearchModal({
+  onClose,
+  wave: _wave,
+  locale,
+  storageScope,
+}: ScopedHeaderSearchModalProps) {
   const sessionQueryStorageKey = getScopedStorageKey(
     HEADER_SEARCH_SESSION_QUERY_KEY,
     storageScope
@@ -218,8 +247,6 @@ export default function HeaderSearchModal({
   const [recentSearches, setRecentSearches] = useState<string[]>(() =>
     readRecentSearches(recentQueriesStorageKey)
   );
-  const activeStorageScopeRef = useRef(storageScope);
-  const skipStorageWriteRef = useRef(false);
   const [selectedCategory, setSelectedCategory] = useLocalPreference<CATEGORY>(
     "headerSearchCategoryFilter",
     CATEGORY.ALL,
@@ -325,19 +352,6 @@ export default function HeaderSearchModal({
   }, []);
 
   useEffect(() => {
-    if (activeStorageScopeRef.current === storageScope) return;
-    activeStorageScopeRef.current = storageScope;
-    skipStorageWriteRef.current = true;
-    setSearchValue(readSessionQuery(sessionQueryStorageKey));
-    setDebouncedValue("");
-    setRecentSearches(readRecentSearches(recentQueriesStorageKey));
-  }, [recentQueriesStorageKey, sessionQueryStorageKey, storageScope]);
-
-  useEffect(() => {
-    if (skipStorageWriteRef.current) {
-      skipStorageWriteRef.current = false;
-      return;
-    }
     try {
       if (searchValue) {
         sessionStorage.setItem(sessionQueryStorageKey, searchValue);

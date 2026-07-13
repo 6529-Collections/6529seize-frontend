@@ -89,6 +89,19 @@ describe("SearchModalDisplay", () => {
     );
   });
 
+  it("prevents duplicates that differ only by casing", () => {
+    render(<Wrapper initial={["Alice"]} />);
+    const input = screen.getByPlaceholderText("Handle, ENS, or wallet address");
+    fireEvent.change(input, { target: { value: "alice" } });
+    fireEvent.click(screen.getByLabelText("Add identity filter"));
+
+    expect(screen.getAllByText("Alice")).toHaveLength(1);
+    expect(screen.queryByText("alice")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "That identity is already included."
+    );
+  });
+
   it("clears all wallets", () => {
     render(<Wrapper initial={["a", "b"]} />);
     fireEvent.click(screen.getByText("Clear all"));
