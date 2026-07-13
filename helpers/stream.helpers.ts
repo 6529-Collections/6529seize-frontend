@@ -288,11 +288,11 @@ const prefetchAuthenticatedNotificationsItems = async ({
   await queryClient.prefetchInfiniteQuery({
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
-      { identity: handle, limit: "10", cause: null, version: "v2" },
+      { identity: handle, limit: "30", cause: null, version: "v2" },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       return await fetchNotificationsV2({
-        limit: "10",
+        limit: "30",
         pageParam,
         headers,
       });
