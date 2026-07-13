@@ -56,6 +56,7 @@ describe("waves-v2-api", () => {
           context_profile_context: {
             first_unread_drop_serial_no: 7,
             unread_drops: 2,
+            subwave_unread_drops: 8,
             followed_subwaves_count: 3,
             latest_followed_subwave_activity_timestamp: 999,
             hidden_followed_subwave_unread_drops: 4,
@@ -95,7 +96,7 @@ describe("waves-v2-api", () => {
           firstUnreadDropSerialNo: 7,
           followedSubwavesCount: 3,
           latestFollowedSubwaveDropTimestamp: 999,
-          unreadFollowedSubwaveDrops: 4,
+          unreadSubwaveDrops: 8,
           firstUnreadFollowedSubwaveDropSerialNo: 12,
           subscribed: true,
         },
