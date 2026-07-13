@@ -117,7 +117,7 @@ interface FetchWaveCompetitionDropsV2Props {
   readonly signal?: AbortSignal | undefined;
 }
 
-export type WaveCompetitionDrop = ApiDrop & {
+type WaveCompetitionDrop = ApiDrop & {
   readonly voting_open: boolean;
 };
 
