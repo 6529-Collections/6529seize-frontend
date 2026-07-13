@@ -201,6 +201,11 @@ describe("fetchWaveDropsFeedV2", () => {
         {
           ...createDrop(1),
           drop_type: ApiDropMainType.Participatory,
+          submission_context: {
+            voting: {
+              is_open: false,
+            },
+          },
         },
       ],
       page: 1,
@@ -227,7 +232,7 @@ describe("fetchWaveDropsFeedV2", () => {
     });
     expect(result).toEqual(
       expect.objectContaining({
-        data: [expect.objectContaining({ id: "drop-1" })],
+        data: [expect.objectContaining({ id: "drop-1", voting_open: false })],
         page: 1,
         next: false,
       })

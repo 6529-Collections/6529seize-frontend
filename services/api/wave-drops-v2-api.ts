@@ -117,8 +117,12 @@ interface FetchWaveCompetitionDropsV2Props {
   readonly signal?: AbortSignal | undefined;
 }
 
+export type WaveCompetitionDrop = ApiDrop & {
+  readonly voting_open: boolean;
+};
+
 interface WaveCompetitionDropsPage {
-  readonly data: ApiDrop[];
+  readonly data: WaveCompetitionDrop[];
   readonly page: number;
   readonly next: boolean;
 }
@@ -695,15 +699,21 @@ export async function fetchWaveCompetitionDropsV2({
     },
     signal,
   });
+  const data = await Promise.all(
+    response.data.map(async (drop) => ({
+      ...(await hydrateDropV2({
+        drop,
+        wave: waveMin,
+        signal,
+        includeFullMetadata: false,
+        includeTopRaters: false,
+      })),
+      voting_open: drop.submission_context?.voting?.is_open === true,
+    }))
+  );
 
   return {
-    data: await hydrateDropsV2({
-      drops: response.data,
-      wave: waveMin,
-      signal,
-      includeFullMetadata: false,
-      includeTopRaters: false,
-    }),
+    data,
     page: response.page,
     next: response.next,
   };

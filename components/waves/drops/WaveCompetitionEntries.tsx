@@ -6,7 +6,6 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import { Time } from "@/helpers/time";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import {
   getWaveCompetitionEntriesQueryKey,
@@ -157,17 +156,8 @@ export const WaveCompetitionEntries = ({
           const media = getFirstMedia(drop);
           const entryText = getEntryText(drop);
           const title = getEntryTitle(drop, untitledLabel);
-          const now = Time.currentMillis();
-          const votingHasStarted =
-            drop.wave.voting_period_start == null ||
-            now >= drop.wave.voting_period_start;
-          const votingHasNotEnded =
-            drop.wave.voting_period_end == null ||
-            now <= drop.wave.voting_period_end;
           const showVote =
-            drop.drop_type === ApiDropType.Participatory &&
-            votingHasStarted &&
-            votingHasNotEnded;
+            drop.drop_type === ApiDropType.Participatory && drop.voting_open;
 
           return (
             <div key={drop.id} className="tw-flex tw-h-full tw-flex-col">

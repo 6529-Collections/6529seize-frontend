@@ -1,7 +1,6 @@
 import { WaveCompetitionEntries } from "@/components/waves/drops/WaveCompetitionEntries";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { Time } from "@/helpers/time";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
@@ -54,23 +53,17 @@ jest.mock("@/components/waves/drop/SingleWaveDropVote", () => ({
 
 const createDrop = ({
   dropType,
-  votingPeriodStart = 1_000,
-  votingPeriodEnd = 3_000,
+  votingOpen = true,
 }: {
   readonly dropType: ApiDropType;
-  readonly votingPeriodStart?: number | null;
-  readonly votingPeriodEnd?: number | null;
-}): ApiDrop =>
+  readonly votingOpen?: boolean;
+}): ApiDrop & { readonly voting_open: boolean } =>
   ({
     id: `${dropType}-drop`,
     title: "Entry title",
     drop_type: dropType,
-    wave: {
-      id: "wave-1",
-      name: "Cool Comp",
-      voting_period_start: votingPeriodStart,
-      voting_period_end: votingPeriodEnd,
-    },
+    voting_open: votingOpen,
+    wave: { id: "wave-1", name: "Cool Comp" },
     parts: [
       {
         content: "Entry text",
@@ -99,11 +92,6 @@ const mockEntriesResult = (entries: ApiDrop[]) => ({
 describe("WaveCompetitionEntries", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(Time, "currentMillis").mockReturnValue(2_000);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   it("offers voting only for an active entry while voting is open", () => {
@@ -136,7 +124,7 @@ describe("WaveCompetitionEntries", () => {
       "closed active entry",
       createDrop({
         dropType: ApiDropType.Participatory,
-        votingPeriodEnd: 1_999,
+        votingOpen: false,
       }),
     ],
     ["winning entry", createDrop({ dropType: ApiDropType.Winner })],
