@@ -1,7 +1,10 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropHeader from "@/components/waves/drops/WaveDropHeader";
+
+const mockDropAuthorBadges = jest.fn();
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -36,7 +39,10 @@ jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
 }));
 
 jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
-  DropAuthorBadges: () => <div data-testid="drop-author-badges" />,
+  DropAuthorBadges: (props: unknown) => {
+    mockDropAuthorBadges(props);
+    return <div data-testid="drop-author-badges" />;
+  },
 }));
 
 jest.mock("@/components/waves/drops/time/WaveDropTime", () => ({
@@ -56,7 +62,8 @@ describe("WaveDropHeader", () => {
   const createDrop = (
     handle: string | null,
     primaryAddress: string,
-    classification: ApiProfileClassification
+    classification: ApiProfileClassification,
+    dropType: ApiDropType = ApiDropType.Chat
   ) =>
     ({
       id: "drop-1",
@@ -72,6 +79,7 @@ describe("WaveDropHeader", () => {
         id: "wave-1",
         name: "Wave Name",
       },
+      drop_type: dropType,
       parts: [],
     }) as any;
 
@@ -149,4 +157,30 @@ describe("WaveDropHeader", () => {
       "0x1111111111111111111111111111111111111111"
     );
   });
+
+  it.each([ApiDropType.Chat, ApiDropType.Participatory, ApiDropType.Winner])(
+    "passes the current wave to %s author badges",
+    (dropType) => {
+      render(
+        <WaveDropHeader
+          drop={createDrop(
+            "alice",
+            "0xabc",
+            ApiProfileClassification.Pseudonym,
+            dropType
+          )}
+          isStorm={false}
+          currentPartIndex={0}
+          partsCount={1}
+          showWaveInfo={false}
+        />
+      );
+
+      expect(mockDropAuthorBadges).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          wave: expect.objectContaining({ id: "wave-1" }),
+        })
+      );
+    }
+  );
 });
