@@ -5,7 +5,9 @@ import { HeaderProvider } from "@/contexts/HeaderContext";
 const registerRef = jest.fn();
 let pathname = "/";
 
-jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({ useLayout: () => ({ registerRef }) }));
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ registerRef }),
+}));
 jest.mock("@/components/layout/sidebar/WebSidebar", () => ({
   __esModule: true,
   default: () => <div data-testid="web-sidebar" />,
@@ -18,10 +20,12 @@ jest.mock("@/hooks/useIdentity", () => ({
 }));
 jest.mock("next/navigation", () => ({
   usePathname: () => pathname,
+  useRouter: () => ({ push: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
 
-const SmallScreenLayout = require("@/components/layout/SmallScreenLayout").default;
+const SmallScreenLayout =
+  require("@/components/layout/SmallScreenLayout").default;
 
 describe("SmallScreenLayout", () => {
   beforeEach(() => {
@@ -36,8 +40,12 @@ describe("SmallScreenLayout", () => {
       </HeaderProvider>
     );
     expect(await screen.findByAltText("6529Seize")).toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: "Search" })).toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: "Open menu" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "Search 6529" })
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "Open menu" })
+    ).toBeInTheDocument();
   });
 
   it("still renders header on non-home page", async () => {

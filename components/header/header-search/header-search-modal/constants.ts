@@ -18,11 +18,6 @@ export enum STATE {
   SUCCESS = "SUCCESS",
 }
 
-export enum SEARCH_MODE {
-  WAVE = "WAVE",
-  SITE = "SITE",
-}
-
 export enum CATEGORY {
   ALL = "ALL",
   PROFILES = "PROFILES",
@@ -62,13 +57,6 @@ export const HEADER_SEARCH_LABELS = {
   waves: t(DEFAULT_LOCALE, "navigation.primary.waves"),
 } as const;
 
-export const CATEGORY_LABELS: Record<FilterableCategory, string> = {
-  [CATEGORY.PAGES]: "Pages",
-  [CATEGORY.PROFILES]: "Profiles",
-  [CATEGORY.NFTS]: HEADER_SEARCH_LABELS.nfts,
-  [CATEGORY.WAVES]: HEADER_SEARCH_LABELS.waves,
-};
-
 export const CATEGORY_PREVIEW_LIMIT = 3;
 
 export const DIRECT_NAVIGATION_PAGES: SidebarPageEntry[] = [
@@ -104,5 +92,6 @@ export const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
 export const MIN_SEARCH_LENGTH = 3;
 export const NFT_SEARCH_MIN_LENGTH = 3;
 export const HEADER_SEARCH_RESULTS_PANEL_ID = "header-search-results-panel";
+export const HEADER_SEARCH_RESULTS_LISTBOX_ID = "header-search-results-listbox";
 export const EMPTY_PROFILE_RESULTS: CommunityMemberMinimal[] = [];
 export const EMPTY_NFT_RESULTS: NFTSearchResult[] = [];

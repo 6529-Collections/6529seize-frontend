@@ -170,7 +170,7 @@ beforeEach(() => {
   });
 });
 
-const SITE_SEARCH_DIALOG_TITLE = "Search 6529.io";
+const SITE_SEARCH_DIALOG_TITLE = "Search 6529";
 const SITE_SEARCH_PLACEHOLDER = "Search 6529.io";
 
 describe("HeaderSearchModal focus management", () => {
