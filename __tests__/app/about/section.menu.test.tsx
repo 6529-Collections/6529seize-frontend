@@ -505,7 +505,7 @@ describe("About contents dropdown", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /manage/i,
+        name: /connect to subscribe/i,
       })
     );
 
@@ -548,7 +548,9 @@ describe("About contents dropdown", () => {
     );
     const { rerender } = render(renderButton("test-handle"));
 
-    fireEvent.click(screen.getByRole("button", { name: /manage/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /connect to subscribe/i })
+    );
     await waitFor(() => {
       expect(requestAuth).toHaveBeenCalledTimes(1);
     });
