@@ -1,4 +1,5 @@
 interface ExtractErrorStatusCodeOptions {
+  /** Parse leading digits from strings such as `"404 Not Found"`. */
   readonly allowPartialStringStatus?: boolean;
 }
 
