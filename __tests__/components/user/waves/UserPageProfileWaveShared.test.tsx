@@ -48,6 +48,7 @@ describe("OfficialWaveSummary", () => {
       name: "Profile wave switch controls",
     });
 
+    expect(controls).toHaveClass("tw-border-0", "tw-p-0");
     expect(
       within(controls).getByRole("button", { name: "Switch wave" })
     ).toBeInTheDocument();
