@@ -24,10 +24,13 @@ export default function CreateWaveActions({
   ) => void;
   readonly onComplete: () => Promise<void>;
 }) {
+  const ongoingRanking = config.dates?.ongoingRanking ?? false;
+
   const onNextStep = (): void => {
     const nextStep = getCreateWaveNextStep({
       step,
       waveType: config.overview.type,
+      ongoingRanking,
     });
     if (nextStep !== null) {
       setStep(nextStep, "forward");
@@ -39,6 +42,7 @@ export default function CreateWaveActions({
   const previousStep = getCreateWavePreviousStep({
     step,
     waveType: config.overview.type,
+    ongoingRanking,
   });
 
   return (
