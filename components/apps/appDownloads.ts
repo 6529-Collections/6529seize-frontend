@@ -54,6 +54,20 @@ function isValidReleaseVersion(value: unknown): value is string {
   );
 }
 
+function isCancellation(error: unknown, signal?: AbortSignal): boolean {
+  if (!signal?.aborted) {
+    return false;
+  }
+
+  return (
+    error === signal.reason ||
+    (typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      error.name === "AbortError")
+  );
+}
+
 async function fetchLatestRelease(
   url: string,
   signal?: AbortSignal
@@ -116,14 +130,22 @@ export async function fetchDesktopAppVersions(
       return [result.value];
     }
 
-    console.error(
-      `Failed to fetch or process ${DESKTOP_APP_CONFIGS[index]!.displayName} release`,
-      result.reason
-    );
+    if (!isCancellation(result.reason, signal)) {
+      console.error(
+        `Failed to fetch or process ${DESKTOP_APP_CONFIGS[index]!.displayName} release`,
+        result.reason
+      );
+    }
     return [];
   });
 
   if (versions.length === 0) {
+    if (signal?.aborted) {
+      throw (
+        signal.reason ??
+        new DOMException("The operation was aborted", "AbortError")
+      );
+    }
     throw new Error("No desktop app versions are currently available");
   }
 

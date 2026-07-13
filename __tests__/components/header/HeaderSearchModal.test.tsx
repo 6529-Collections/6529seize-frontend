@@ -33,9 +33,22 @@ type HeaderSearchModalItemProps = {
   readonly onWaveSelect?: ((wave: ApiWave) => void) | undefined;
 };
 const mockHeaderSearchModalItem = jest.fn(
-  (props: HeaderSearchModalItemProps) => (
-    <div data-testid="item">{JSON.stringify(props)}</div>
-  )
+  (props: HeaderSearchModalItemProps) => {
+    const page =
+      (props.content as { readonly type?: unknown }).type === "PAGE"
+        ? (props.content as {
+            readonly title: string;
+            readonly href: string;
+          })
+        : null;
+
+    return (
+      <div data-testid="item">
+        {page && <a href={page.href}>{page.title}</a>}
+        {JSON.stringify(props)}
+      </div>
+    );
+  }
 );
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 const originalHtmlScrollIntoView = HTMLElement.prototype.scrollIntoView;
@@ -489,14 +502,9 @@ describe("HeaderSearchModal", () => {
       target: { value: query },
     });
 
-    const items = await screen.findAllByTestId("item");
     expect(
-      items.some(
-        (item) =>
-          (item.textContent ?? "").includes('"title":"6529 Apps"') &&
-          (item.textContent ?? "").includes('"/about/6529-apps"')
-      )
-    ).toBe(true);
+      await screen.findByRole("link", { name: "6529 Apps" })
+    ).toHaveAttribute("href", "/about/6529-apps");
   });
 
   it("finds the Network Wave Score page by formula aliases", () => {

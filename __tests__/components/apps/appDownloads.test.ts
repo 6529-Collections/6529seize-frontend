@@ -73,6 +73,28 @@ describe("desktop app downloads", () => {
     }
   });
 
+  it("propagates query cancellation without logging release failures", async () => {
+    const controller = new AbortController();
+    const reason = new DOMException("Query cancelled", "AbortError");
+    fetchMock.mockImplementation(
+      (_url: string, options: { readonly signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          options.signal.addEventListener(
+            "abort",
+            () => reject(options.signal.reason),
+            { once: true }
+          );
+        })
+    );
+
+    const versionsPromise = fetchDesktopAppVersions(controller.signal);
+    const rejection = expect(versionsPromise).rejects.toBe(reason);
+    controller.abort(reason);
+
+    await rejection;
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
   it("aborts release-manifest requests after the timeout", async () => {
     jest.useFakeTimers();
     try {

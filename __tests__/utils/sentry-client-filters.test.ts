@@ -898,6 +898,96 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const observedFrameAntNetworkFrames: SentryStackFrame[] = [
+    {
+      filename: "app:///frame_ant/frame_ant.js",
+      abs_path: "app:///frame_ant/frame_ant.js",
+      function: "o",
+      in_app: true,
+    },
+    {
+      filename: "app:///frame_ant/frame_ant.js",
+      abs_path: "app:///frame_ant/frame_ant.js",
+      function: "window.fetch",
+      in_app: true,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/@sentry+core@10.45.0/node_modules/@sentry/core/src/instrument/fetch.ts",
+      function: "<anonymous>",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/sessions/VirtualPageLoadTimer.js",
+      function: "i.fetch",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/sessions/VirtualPageLoadTimer.js",
+      function: "<anonymous>",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/plugins/event-plugins/FetchPlugin.js",
+      function: "n.fetch",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/plugins/event-plugins/FetchPlugin.js",
+      function: "<anonymous>",
+      in_app: false,
+    },
+    {
+      filename: "<anonymous>",
+      function: "_t",
+      in_app: false,
+    },
+    {
+      filename: "<anonymous>",
+      function: "<anonymous>",
+      in_app: false,
+    },
+  ];
+
+  const createObservedFrameAntNetworkException = (
+    value: string = coinbaseMetricsNetworkMessage,
+    frames: SentryStackFrame[] = observedFrameAntNetworkFrames
+  ): NonNullable<TestSentryClientEvent["exception"]> => ({
+    values: [
+      {
+        type: "TypeError",
+        value,
+        mechanism: {
+          type: "auto.browser.global_handlers.onunhandledrejection",
+          handled: false,
+        },
+        stacktrace: {
+          frames,
+        },
+      },
+    ],
+  });
+
+  const createObservedFrameAntMetricsNetworkErrorEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    event_id: "frame-ant-metrics-network-error",
+    transaction: "/:user",
+    exception: createObservedFrameAntNetworkException(),
+    tags: {
+      environment: "production",
+      errorType: "network",
+      handled: "no",
+      transaction: "/:user",
+      url: "/example",
+    },
+    ...overrides,
+  });
+
   const createWalletConnectStaleSessionTopicEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -1614,6 +1704,38 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the observed frame_ant metrics network error", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent()
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("preserves frame_ant network errors for other targets", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent({
+        exception: createObservedFrameAntNetworkException(
+          "Network request failed. Please check your connection and try again. (/messages)"
+        ),
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("preserves non-network metrics messages from frame_ant", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent({
+        exception: createObservedFrameAntNetworkException(
+          "Telemetry request rejected. (/metrics)"
+        ),
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
   it("does not filter first-party spans", () => {
     const result = shouldFilterThirdPartyTelemetrySpan(
       buildSpan({
@@ -1653,6 +1775,49 @@ describe("sentry-client-filters", () => {
             },
           ],
         },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("preserves the observed frame_ant metrics error with an app-owned frame", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent({
+        exception: createObservedFrameAntNetworkException(
+          coinbaseMetricsNetworkMessage,
+          [
+            ...observedFrameAntNetworkFrames,
+            {
+              filename: "services/api/common-api.ts",
+              abs_path: "services/api/common-api.ts",
+              function: "fetchUrl",
+              in_app: true,
+            },
+          ]
+        ),
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("preserves the same metrics message for a matching first-party failure", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            level: "error",
+            data: {
+              url: "https://api.6529.io/metrics",
+              status_code: 0,
+              "url.is_first_party": true,
+              "url.is_first_party_api": true,
+            },
+          },
+        ],
       })
     );
 
@@ -5227,6 +5392,46 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the observed Sentry 6V content-script messaging failure", () => {
+    // Arrange
+    const event: TestSentryClientEvent = {
+      transaction: "/waves/:wave",
+      tags: {
+        browser: "Chrome 147.0.0",
+        environment: "production",
+      },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///content-scripts/content.js",
+                  function: "R",
+                  in_app: true,
+                  lineno: 1,
+                  colno: 14440,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters extension messaging failures from browser extension frames", () => {
     // Arrange
     const event = createBrowserExtensionMessagingConnectionEvent({
@@ -5269,15 +5474,44 @@ describe("sentry-client-filters", () => {
             stacktrace: {
               frames: [
                 {
-                  filename: "app:///injectedScript.bundle.js",
-                  abs_path: "app:///injectedScript.bundle.js",
-                  function: "n",
+                  filename: "app:///content-scripts/content.js",
+                  function: "R",
+                  in_app: true,
                 },
                 {
                   filename:
                     "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
                   abs_path:
                     "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  function: "sendBrowserExtensionMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unobserved content-script-like app paths", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///content-scripts/application.js",
                   function: "sendBrowserExtensionMessage",
                   in_app: true,
                 },
