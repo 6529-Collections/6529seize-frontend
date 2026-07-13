@@ -441,22 +441,22 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                       className={`${styles.autorFontSize} tw-line-clamp-2 tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-200 ${hoverTextColorClass} tw-transition-colors`}
                     >
                       {authorProfileLabel}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100`}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
-                        />
-                      </svg>
                     </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100`}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                      />
+                    </svg>
                   </Link>
                 </UserProfileTooltipWrapper>
               )}
