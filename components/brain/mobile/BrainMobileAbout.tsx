@@ -2,27 +2,24 @@
 
 import React, { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import WaveHeader from "@/components/waves/header/WaveHeader";
 import type { ApiWave } from "@/generated/models/ApiWave";
 
 import { commonApiFetch } from "@/services/api/common-api";
-import BrainRightSidebarContent from "../right-sidebar/BrainRightSidebarContent";
-import BrainRightSidebarFollowers from "../right-sidebar/BrainRightSidebarFollowers";
+import { Mode, type SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
+import { WaveContent } from "../right-sidebar/WaveContent";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import WaveRules from "@/components/waves/specs/WaveRules";
 
 interface BrainMobileAboutProps {
   readonly activeWaveId: string | null;
-}
-
-enum Mode {
-  CONTENT = "CONTENT",
-  FOLLOWERS = "FOLLOWERS",
+  readonly activeTab: SidebarTab;
+  readonly setActiveTab: (tab: SidebarTab) => void;
 }
 
 const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   activeWaveId,
+  activeTab,
+  setActiveTab,
 }) => {
   const { data: wave } = useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id: activeWaveId }],
@@ -38,40 +35,17 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
   const { mobileAboutViewStyle } = useLayout();
 
-  // Use mobileAboutViewStyle for capacitor spacing
-  const containerClassName = `tw-px-2 sm:tw-px-4 md:tw-px-6 tw-overflow-y-auto tw-no-scrollbar tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0`;
-
-  const onFollowersClick = () => {
-    if (mode === Mode.FOLLOWERS) {
-      setMode(Mode.CONTENT);
-    } else {
-      setMode(Mode.FOLLOWERS);
-    }
-  };
-
   return (
-    <div className={containerClassName} style={mobileAboutViewStyle}>
+    <div className="tw-min-h-0 tw-overflow-hidden" style={mobileAboutViewStyle}>
       {wave && (
-        <>
-          <WaveHeader
-            wave={wave}
-            onFollowersClick={onFollowersClick}
-            useRing={false}
-            useRounded={false}
-          />
-          {mode === Mode.CONTENT && <BrainRightSidebarContent wave={wave} />}
-          {mode === Mode.CONTENT && (
-            <div className="tw-py-4">
-              <WaveRules wave={wave} useRing={false} />
-            </div>
-          )}
-          {mode === Mode.FOLLOWERS && (
-            <BrainRightSidebarFollowers
-              wave={wave}
-              closeFollowers={() => setMode(Mode.CONTENT)}
-            />
-          )}
-        </>
+        <WaveContent
+          wave={wave}
+          mode={mode}
+          setMode={setMode}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          showTabs={false}
+        />
       )}
     </div>
   );
