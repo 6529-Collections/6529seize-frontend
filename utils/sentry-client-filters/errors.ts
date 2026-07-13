@@ -55,6 +55,7 @@ import {
   hasOnlyAppUriFrames,
   hasReactDomNotFoundErrorSignature,
   hasSentryRouteParameterizationFrame,
+  isSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
 
 const sentryBrowserPathTokens = ["@sentry/browser", "@sentry+browser"];
@@ -463,7 +464,7 @@ export function shouldFilterSentryRouteParameterizationError(
 
   const frames = value.stacktrace?.frames;
   const framesWithoutSentryRouteParameterization = frames?.filter(
-    (frame) => !hasSentryRouteParameterizationFrame([frame])
+    (frame) => !isSentryRouteParameterizationFrame(frame)
   );
   if (
     hasLikelyAppOwnedFrame(framesWithoutSentryRouteParameterization) ||
