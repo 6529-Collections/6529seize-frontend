@@ -1,312 +1,301 @@
-import Link from "next/link";
+"use client";
 
 import {
-  AboutCol as Col,
-  AboutContainer as Container,
-  AboutRow as Row,
-} from "./AboutLayout";
+  BoltIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
+import type { ComponentType, SVGProps } from "react";
+
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
+import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
+
+type SubscriptionMessageKey = Extract<
+  MessageKey,
+  `about.subscriptions.${string}`
+>;
+type OutlineIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+interface Highlight {
+  readonly bodyKey: SubscriptionMessageKey;
+  readonly icon: OutlineIcon;
+  readonly titleKey: SubscriptionMessageKey;
+}
+
+interface Step {
+  readonly bodyKey: SubscriptionMessageKey;
+  readonly titleKey: SubscriptionMessageKey;
+}
+
+const HIGHLIGHTS: readonly Highlight[] = [
+  {
+    icon: CheckCircleIcon,
+    titleKey: "about.subscriptions.benefits.choice.title",
+    bodyKey: "about.subscriptions.benefits.choice.body",
+  },
+  {
+    icon: ClockIcon,
+    titleKey: "about.subscriptions.benefits.remote.title",
+    bodyKey: "about.subscriptions.benefits.remote.body",
+  },
+  {
+    icon: BoltIcon,
+    titleKey: "about.subscriptions.benefits.gas.title",
+    bodyKey: "about.subscriptions.benefits.gas.body",
+  },
+] as const;
+
+const STEPS: readonly Step[] = [
+  {
+    titleKey: "about.subscriptions.steps.open.title",
+    bodyKey: "about.subscriptions.steps.open.body",
+  },
+  {
+    titleKey: "about.subscriptions.steps.fund.title",
+    bodyKey: "about.subscriptions.steps.fund.body",
+  },
+  {
+    titleKey: "about.subscriptions.steps.choose.title",
+    bodyKey: "about.subscriptions.steps.choose.body",
+  },
+  {
+    titleKey: "about.subscriptions.steps.receive.title",
+    bodyKey: "about.subscriptions.steps.receive.body",
+  },
+] as const;
+
+const m = (locale: SupportedLocale, key: SubscriptionMessageKey) =>
+  t(locale, key);
 
 export default function AboutSubscriptions() {
+  const locale = useBrowserLocale();
+
   return (
-    <Container className="!tw-px-0">
-      <Row>
-        <Col>
-          <h1>Subscription Minting</h1>
-          <div className="tw-mt-3 tw-flex tw-justify-start empty:tw-hidden">
-            <AboutSubscriptionsProfileButton />
+    <article className="tw-mx-auto tw-w-full tw-max-w-6xl tw-pb-12 max-sm:-tw-mx-3 max-sm:tw-w-[calc(100%+1.5rem)]">
+      <SubscriptionHero locale={locale} />
+      <HowItWorks locale={locale} />
+      <WhatHappensNext locale={locale} />
+      <AboutSubscriptionsReference locale={locale} />
+      <FinalAction locale={locale} />
+    </article>
+  );
+}
+
+function SubscriptionHero({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <header className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-4 tw-py-8 sm:tw-px-8 sm:tw-py-10 lg:tw-px-10 lg:tw-py-12">
+      <div
+        aria-hidden="true"
+        className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-primary-400/60"
+      />
+      <div className="tw-max-w-3xl">
+        <p className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+          {m(locale, "about.subscriptions.hero.eyebrow")}
+        </p>
+        <h1 className="tw-m-0 tw-max-w-3xl tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl lg:tw-text-5xl">
+          {m(locale, "about.subscriptions.hero.title")}
+        </h1>
+        <p className="tw-mb-0 tw-mt-5 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-text-lg">
+          {m(locale, "about.subscriptions.hero.body")}
+        </p>
+        <div className="tw-mt-7 tw-flex tw-flex-col tw-items-stretch tw-gap-3 min-[480px]:tw-flex-row min-[480px]:tw-items-center">
+          <AboutSubscriptionsProfileButton descriptiveLabels />
+          <a
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+            href="#how-subscription-minting-works"
+          >
+            {m(locale, "about.subscriptions.action.learnHow")}
+          </a>
+        </div>
+      </div>
+
+      <div className="tw-mt-9 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3">
+        {HIGHLIGHTS.map((highlight) => {
+          const Icon = highlight.icon;
+          return (
+            <div
+              className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-5"
+              key={highlight.titleKey}
+            >
+              <Icon
+                aria-hidden="true"
+                className="tw-mb-4 tw-size-6 tw-text-primary-300"
+              />
+              <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+                {m(locale, highlight.titleKey)}
+              </h2>
+              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+                {m(locale, highlight.bodyKey)}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="tw-mt-4 tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.06] tw-p-4">
+        <Cog6ToothIcon
+          aria-hidden="true"
+          className="tw-mt-0.5 tw-size-5 tw-shrink-0 tw-text-primary-300"
+        />
+        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <strong className="tw-font-semibold tw-text-iron-100">
+            {m(locale, "about.subscriptions.notMintpass.title")}
+          </strong>{" "}
+          {m(locale, "about.subscriptions.notMintpass.body")}
+        </p>
+      </div>
+    </header>
+  );
+}
+
+function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <section
+      aria-labelledby="how-subscription-minting-heading"
+      className="tw-scroll-mt-24 tw-px-1 tw-py-14 sm:tw-px-2 sm:tw-py-16"
+      id="how-subscription-minting-works"
+    >
+      <SectionHeading
+        eyebrow={m(locale, "about.subscriptions.how.eyebrow")}
+        heading={m(locale, "about.subscriptions.how.title")}
+        id="how-subscription-minting-heading"
+        intro={m(locale, "about.subscriptions.how.body")}
+      />
+      <ol className="tw-m-0 tw-mt-9 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 md:tw-grid-cols-2">
+        {STEPS.map((step, index) => (
+          <li
+            className="tw-flex tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-5 sm:tw-p-6"
+            key={step.titleKey}
+          >
+            <span className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-text-sm tw-font-semibold tw-text-primary-300">
+              {index + 1}
+            </span>
+            <div>
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+                {m(locale, step.titleKey)}
+              </h3>
+              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+                {m(locale, step.bodyKey)}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function WhatHappensNext({ locale }: { readonly locale: SupportedLocale }) {
+  const outcomes = [
+    {
+      title: m(locale, "about.subscriptions.after.balance.title"),
+      body: m(locale, "about.subscriptions.after.balance.body"),
+    },
+    {
+      title: m(locale, "about.subscriptions.after.eligibility.title"),
+      body: m(locale, "about.subscriptions.after.eligibility.body"),
+    },
+    {
+      title: m(locale, "about.subscriptions.after.delivery.title"),
+      body: m(locale, "about.subscriptions.after.delivery.body"),
+    },
+  ];
+
+  return (
+    <section
+      aria-labelledby="what-happens-after-subscribing"
+      className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-5 sm:tw-p-8"
+    >
+      <SectionHeading
+        eyebrow={m(locale, "about.subscriptions.after.eyebrow")}
+        heading={m(locale, "about.subscriptions.after.title")}
+        id="what-happens-after-subscribing"
+      />
+      <div className="tw-mt-7 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-3 md:tw-gap-8">
+        {outcomes.map((outcome) => (
+          <div key={outcome.title}>
+            <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+              {outcome.title}
+            </h3>
+            <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {outcome.body}
+            </p>
           </div>
-        </Col>
-      </Row>
-      <Row className="tw-pt-2">
-        <Col>
-          <p className="tw-text-lg tw-font-bold">Overview</p>
-          <ul>
-            <li className="tw-mt-2">
-              Subscription Minting is another way to mint Meme Cards
-              <ul>
-                <li className="tw-mt-1">
-                  With up to 98% significant gas savings and/or
-                </li>
-                <li className="tw-mt-1">
-                  While being away from your computer at the time of mint and/or
-                </li>
-                <li className="tw-mt-1">
-                  On a &quot;set it and forget it&quot; basis for whole SZNs
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Subscriptions are not a mintpass:
-              <ul>
-                <li className="tw-mt-1">
-                  You can decide to mint or not mint any specific Meme Card
-                </li>
-                <li className="tw-mt-1">
-                  Subscriptions respect the allowlist and phase process: A
-                  subscription only allows you to mint within the Phase you
-                  would otherwise be eligible for
-                </li>
-                <li className="tw-mt-1">
-                  It is better to think about subscriptions as &quot;remote
-                  minting&quot;
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Subscriptions are not a replacement for the regular minting
-              process:
-              <ul>
-                <li className="tw-mt-1">
-                  You can still mint in the normal manner if you don&apos;t
-                  subscribe
-                </li>
-                <li className="tw-mt-1">
-                  Subscriptions are an alternative method of minting for those
-                  who choose to use them
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              You can monitor aggregate projected and redeemed subscription
-              counts in the{" "}
-              <Link
-                href="/tools/subscriptions-report"
-                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-transition-colors"
-              >
-                Subscriptions Report
-              </Link>
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      <Row className="tw-pt-3">
-        <Col>
-          <p className="tw-text-lg tw-font-bold">How it Works</p>
-          <ul>
-            <li className="tw-mt-2">
-              Fill Balance
-              <ul>
-                <li className="tw-mt-1">
-                  You can top up your minting balance at any time by sending ETH
-                  to: seize.6529.eth from any wallet of your consolidation
-                </li>
-                <li className="tw-mt-1">
-                  Any amount sent to seize.6529.eth is{" "}
-                  <b>completely non-refundable</b>: you can choose which cards
-                  to mint but we do not have the capacity to send ETH back
-                </li>
-                <li className="tw-mt-1">
-                  The calculator on your profile will calculate the correct
-                  amount to send for any number of cards, with options for the
-                  remainder of the SZN and remainder of the year
-                </li>
-                <li className="tw-mt-1">
-                  The balance will appear on the site profile associated with
-                  the sending ETH address
-                </li>
-                <li className="tw-mt-1">
-                  Top ups must be received by 00:00 UTC (eg, 19:00 EST) the day
-                  before the Meme Card mint to be eligible for the mint;
-                  otherwise they will roll over to the next mint
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Minting
-              <ul>
-                <li className="tw-mt-1">
-                  Automatic Mode: By default, you will auto-mint (get airdrop
-                  for) as many Meme Cards as you are eligible for, until your
-                  balance is used
-                </li>
-                <li className="tw-mt-1">
-                  You can choose to opt-out of any Meme Card mint:
-                  <ul>
-                    <li className="tw-mt-1">
-                      You must turn off minting for that specific drop before
-                      00:00 UTC (eg, 19:00 EST) the day before the mint
-                    </li>
-                    <li className="tw-mt-1">
-                      The card reveal will move forward one day so that you can
-                      see the card before making a decision to mint it or not
-                    </li>
-                    <li className="tw-mt-1">
-                      This means that you can opt out on Sunday (for
-                      Monday&apos;s card), Tuesday (for Wednesday&apos;s card)
-                      and Thursday (for Friday&apos;s card)
-                    </li>
-                  </ul>
-                </li>
-                <li className="tw-mt-1">
-                  You can choose to move your whole profile to
-                  &quot;manual&quot; as opposed to &quot;automatic&quot;: in
-                  this case, you will not mint any cards unless you manully
-                  opt-in to the specific cards you want to selectively mint
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Delegation
-              <ul>
-                <li className="tw-mt-1">
-                  Your card will be airdropped according on the following
-                  criteria:
-                </li>
-                <li className="tw-mt-1">
-                  If no delegation, to the primary address of a consolidation
-                </li>
-                <li className="tw-mt-1">
-                  If no consolidation, to the address you send the ETH from
-                </li>
-                <li className="tw-mt-1">
-                  If there is a delegation, in this order:
-                  <ul>
-                    <li className="tw-mt-1">
-                      The delegated address for The Memes for use case
-                      &quot;Airdrop&quot;
-                    </li>
-                    <li className="tw-mt-1">
-                      The delegated address for The Memes for use case
-                      &quot;All&quot;
-                    </li>
-                    <li className="tw-mt-1">
-                      The delegated address for Any Collection for use case
-                      &quot;Airdrop&quot;
-                    </li>
-                    <li className="tw-mt-1">
-                      The delegated address for Any Collection for use case
-                      &quot;All&quot;
-                    </li>
-                  </ul>
-                </li>
-                <li className="tw-mt-1">
-                  If you have the suggested TAP configuration with a
-                  vault/warm/hot consolidation with your vault delegating ALL to
-                  warm or hot, and you would like your airdrops directly to your
-                  vault, we recommend:
-                  <ul>
-                    <li className="tw-mt-1">
-                      sending ETH to seize.6529.eth from warm or hot address
-                    </li>
-                    <li className="tw-mt-1">
-                      adding delegation use-case &quot;Airdrop&quot; for the
-                      &quot;The Memes&quot; from that address to your vault
-                    </li>
-                  </ul>
-                </li>
-                <li className="tw-mt-1">
-                  If you have a single address (not consolidated) that has
-                  delegated &quot;All&quot; to a minting address and you want to
-                  send ETH from the original address and have the airdrop
-                  received by that same address, then you should change your
-                  delegation to &quot;Minting&quot; otherwise the airdrop will
-                  go to your minting address
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Allowlists and Phases
-              <ul>
-                <li className="tw-mt-1">
-                  Subscription Minting respects the same Allowlist and Phases as
-                  regular minting
-                </li>
-                <li className="tw-mt-1">
-                  If you are in Phase 0, subscription minting will automatically
-                  airdrop you the card at the beginning of Phase 0: since Phase
-                  0 is underallocated, you are guaranteed a mint
-                </li>
-                <li className="tw-mt-1">
-                  If you are eligible for Phase 1 or Phase 2, you will be
-                  airdropped the card at the beginning of Phase 1 or Phase 2
-                  <ul>
-                    <li className="tw-mt-1">
-                      In the event that no cards are available to mint in that
-                      phase, you will not be airdropped the card and your
-                      balance will remain available
-                    </li>
-                    <li className="tw-mt-1">
-                      In the event that at the beginning of a Phase, there are
-                      more subscription mints than available cards, the cards
-                      will be airdropped in order of when the subscription
-                      payment was received
-                    </li>
-                  </ul>
-                </li>
-                <li className="tw-mt-1">
-                  As with regular minting methods, you are only guaranteed a
-                  mint in Phase 0
-                </li>
-                <li className="tw-mt-1">
-                  For popular mints, your opportunity will be determined by your
-                  phase, how many other subscription mints are in place for that
-                  mint, and when you subscribed relative to other subscribers
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      <Row className="tw-pt-3">
-        <Col>
-          <p className="tw-text-lg tw-font-bold">Gas Savings</p>
-          <ul>
-            <li className="tw-mt-2">
-              Meme Cards are relatively inexpensive (0.06529 ETH) so in periods
-              of high Ethereum gas, minting costs can become a substantial % of
-              the card&apos;s cost
-              <ul>
-                <li className="tw-mt-1">
-                  At gwei of 20, they make up 3.4% of the card&apos;s cost
-                </li>
-                <li className="tw-mt-1">
-                  At gwei of 200, they make up 33.7% of the card&apos;s cost
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              ETH transfers are the lowest cost transaction on the Ethereum
-              network
-              <ul>
-                <li className="tw-mt-1">
-                  Someone who subscription-mints 1 card at a time will save
-                  approximately 80% in gas costs
-                </li>
-                <li className="tw-mt-1">
-                  Someone who subscription-mints 10 cards at a time (with one
-                  ETH transfer) will save approximately 98% in gas costs
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              The Memes will absorb the gas cost of the airdrop internally, so
-              it will not be charged to the collector
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      <Row className="tw-pt-3">
-        <Col>
-          <p className="tw-text-lg tw-font-bold">Remote Minting</p>
-          <ul>
-            <li className="tw-mt-2">
-              Many collectors have busy schedules and may not be able to be
-              available three times per week at the time of the mint, due to
-              personal or professional commitments
-            </li>
-            <li className="tw-mt-2">
-              Subscription minting allows them to separate the decision of if
-              they should mint a series of Meme Cards or a specific Meme Card
-              from the specific time of the mint
-            </li>
-            <li className="tw-mt-2">
-              This is a benefit to all collectors, but especially to those who
-              live in time zones that do not overlap well with the minting time
-            </li>
-          </ul>
-        </Col>
-      </Row>
-    </Container>
+        ))}
+      </div>
+      <div className="tw-mt-8 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-6">
+        <p className="tw-mb-3 tw-text-sm tw-font-semibold tw-text-iron-100">
+          {m(locale, "about.subscriptions.important.title")}
+        </p>
+        <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-primary-300">
+          <li>{m(locale, "about.subscriptions.important.nonRefundable")}</li>
+          <li>{m(locale, "about.subscriptions.important.deadline")}</li>
+          <li>{m(locale, "about.subscriptions.important.optional")}</li>
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function FinalAction({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <section
+      aria-labelledby="subscription-minting-final-action"
+      className="tw-mt-14 tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-6 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.07] tw-p-6 sm:tw-p-8 md:tw-flex-row md:tw-items-center"
+    >
+      <div className="tw-max-w-2xl">
+        <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+          {m(locale, "about.subscriptions.final.eyebrow")}
+        </p>
+        <h2
+          className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+          id="subscription-minting-final-action"
+        >
+          {m(locale, "about.subscriptions.final.title")}
+        </h2>
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {m(locale, "about.subscriptions.final.body")}
+        </p>
+      </div>
+      <div className="tw-w-full tw-shrink-0 sm:tw-w-auto">
+        <AboutSubscriptionsProfileButton descriptiveLabels />
+      </div>
+    </section>
+  );
+}
+
+function SectionHeading({
+  eyebrow,
+  heading,
+  id,
+  intro,
+}: {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly id: string;
+  readonly intro?: string;
+}) {
+  return (
+    <div className="tw-max-w-2xl">
+      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+        {eyebrow}
+      </p>
+      <h2
+        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl"
+        id={id}
+      >
+        {heading}
+      </h2>
+      {intro !== undefined && (
+        <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-400">
+          {intro}
+        </p>
+      )}
+    </div>
   );
 }

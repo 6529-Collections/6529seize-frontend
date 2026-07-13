@@ -59,7 +59,7 @@ export function AboutCol({
     <div
       className={clsx(
         xs === 12 ? "tw-w-full tw-flex-none" : "tw-flex-1",
-        "tw-px-3",
+        "tw-min-w-0 tw-px-3",
         className
       )}
       {...props}
