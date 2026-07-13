@@ -207,7 +207,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
       <details
         className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-group tw-cursor-pointer tw-overflow-hidden`}
       >
-        <summary className="tw-flex tw-min-h-16 tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/60 tw-px-6 tw-py-5 tw-text-white/80 tw-transition-colors hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/50 sm:tw-px-8 [&::-webkit-details-marker]:tw-hidden">
+        <summary className="tw-flex tw-min-h-16 tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/45 tw-px-6 tw-py-5 tw-text-white/80 tw-transition-colors hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/50 sm:tw-px-8 [&::-webkit-details-marker]:tw-hidden">
           <span className="tw-flex tw-items-center tw-gap-3">
             <FontAwesomeIcon
               aria-hidden="true"
@@ -227,7 +227,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
             icon={faChevronDown}
           />
         </summary>
-        <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-6 tw-pb-8 tw-pt-5 sm:tw-px-8">
+        <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/70 tw-px-6 tw-pb-8 tw-pt-5 sm:tw-px-8">
           <ul className={LIST_CLASS}>
             <li>
               {m(
