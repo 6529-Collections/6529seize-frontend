@@ -116,22 +116,6 @@ export default function CreateWaveDisplaySettings({
         <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
           Display settings
         </p>
-        <label className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-px-4 tw-py-3">
-          <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-            Show outcomes
-          </span>
-          <input
-            type="checkbox"
-            checked={display.outcomesVisible}
-            onChange={(event) =>
-              onChange({
-                ...display,
-                outcomesVisible: event.target.checked,
-              })
-            }
-            className="tw-form-checkbox tw-size-5 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
-          />
-        </label>
         <div className="tw-space-y-2">
           <label
             htmlFor="create-wave-submission-button-label"

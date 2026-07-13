@@ -131,6 +131,26 @@ function isInjectedWasmCspStaticChunkFramePath(
   );
 }
 
+function hasOnlyInjectedWasmCspStaticChunkFrames(
+  frames: SentryStackFrame[]
+): boolean {
+  const markerFrame = frames.find(isInjectedWasmCspStaticChunkFrame);
+  if (!markerFrame) {
+    return false;
+  }
+
+  const markerPaths = new Set(
+    getFramePaths(markerFrame)
+      .map((path) => path.trim())
+      .filter((path) => injectedWasmCspStaticChunkPathPattern.test(path))
+  );
+
+  return frames.every((frame) => {
+    const paths = getFramePaths(frame).map((path) => path.trim());
+    return paths.length > 0 && paths.every((path) => markerPaths.has(path));
+  });
+}
+
 function hasAppOwnedWasmCspFramePath(frame: SentryStackFrame): boolean {
   return getFramePaths(frame).some(
     (path) =>
@@ -254,6 +274,10 @@ export function hasInjectedWasmCspFrameSignature(
     return false;
   }
 
+  if (hasOnlyInjectedWasmCspStaticChunkFrames(frames)) {
+    return true;
+  }
+
   if (frames.some(isAppOwnedWasmCspFrame)) {
     return false;
   }
@@ -325,14 +349,18 @@ function isSentryRouteParameterizationPath(path: string): boolean {
   );
 }
 
+export function isSentryRouteParameterizationFrame(
+  frame: SentryStackFrame
+): boolean {
+  return getFramePaths(frame).some(isSentryRouteParameterizationPath);
+}
+
 export function hasSentryRouteParameterizationFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return (
     Array.isArray(frames) &&
-    frames.some((frame) =>
-      getFramePaths(frame).some(isSentryRouteParameterizationPath)
-    )
+    frames.some(isSentryRouteParameterizationFrame)
   );
 }
 

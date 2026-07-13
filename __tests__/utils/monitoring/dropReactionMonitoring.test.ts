@@ -165,6 +165,121 @@ describe("dropReactionMonitoring", () => {
     );
   });
 
+  it("breadcrumbs the exact proxy reaction permission denial without capturing it", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-proxy",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-proxy/reaction",
+      method: "POST",
+    });
+
+    const error = Object.assign(
+      new Error("Proxy doesn't have permission to add reactions"),
+      {
+        name: "ApiError",
+        status: 403,
+        response: { status: 403 },
+      }
+    );
+
+    dateNowSpy.mockReturnValue(1_200);
+    const result = recordReactionRequestFailed(mutation, error);
+
+    expect(result).toEqual({
+      isLatestMutation: true,
+      supersededByMutationId: null,
+    });
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.proxy_permission_denied",
+        data: expect.objectContaining({
+          status_code: 403,
+          error_kind: "auth",
+          error_message: "Proxy doesn't have permission to add reactions",
+          captured: false,
+        }),
+      })
+    );
+    expect(withScopeMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it.each(
+    [
+      {
+        caseName: "the same denial returned as 401",
+        endpoint: "drops/drop-proxy/reaction",
+        message: "Proxy doesn't have permission to add reactions",
+        method: "POST",
+        status: 401,
+      },
+      {
+        caseName: "an unexpected 403 auth message",
+        endpoint: "drops/drop-proxy/reaction",
+        message: "Forbidden",
+        method: "POST",
+        status: 403,
+      },
+      {
+        caseName: "the denial from a different endpoint",
+        endpoint: "drops/another-drop/reaction",
+        message: "Proxy doesn't have permission to add reactions",
+        method: "POST",
+        status: 403,
+      },
+      {
+        caseName: "the denial on a remove request",
+        endpoint: "drops/drop-proxy/reaction",
+        message: "Proxy doesn't have permission to add reactions",
+        method: "DELETE",
+        status: 403,
+      },
+      {
+        caseName: "the same message returned as a server error",
+        endpoint: "drops/drop-proxy/reaction",
+        message: "Proxy doesn't have permission to add reactions",
+        method: "POST",
+        status: 500,
+      },
+    ] as const
+  )("captures $caseName", ({ endpoint, message, method, status }) => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-proxy",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, { endpoint, method });
+
+    const error = Object.assign(new Error(message), {
+      name: "ApiError",
+      status,
+      response: { status },
+    });
+
+    dateNowSpy.mockReturnValue(1_200);
+    recordReactionRequestFailed(mutation, error);
+
+    expect(withScopeMock).toHaveBeenCalled();
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+  });
+
   it("records rate-limit warning metadata without capturing an exception", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-rate-limit",
@@ -526,15 +641,15 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
-  it("captures reconciliation mismatch after the guard window", () => {
+  it("captures the production-shaped slow reconciliation mismatch", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-4",
       waveId: "wave-1",
-      source: "chip",
-      action: "replace",
-      previousReaction: ":wave:",
-      intendedReaction: ":smile:",
-      optimisticReaction: ":smile:",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
       profileId: "profile-1",
       websocketStatus: WebSocketStatus.CONNECTED,
     });
@@ -548,13 +663,13 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestSucceeded(mutation);
     expect(mutation.apiFailedAt).toBeNull();
 
-    dateNowSpy.mockReturnValue(17_000);
+    dateNowSpy.mockReturnValue(218_657);
     const result = recordReactionRealtimeReconciliation({
       drop: {
         id: "drop-4",
         wave: { id: "wave-1" },
         context_profile_context: {
-          reaction: ":wave:",
+          reaction: null,
         } as any,
       },
       websocketStatus: WebSocketStatus.CONNECTED,
@@ -562,14 +677,14 @@ describe("dropReactionMonitoring", () => {
 
     expect(result).toEqual({
       shouldApplyCanonicalDrop: true,
-      expectedReaction: ":smile:",
-      serverReaction: ":wave:",
+      expectedReaction: ":joy:",
+      serverReaction: null,
     });
     expect(addBreadcrumbMock).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "reaction.optimistic_reverted",
         data: expect.objectContaining({
-          server_reaction: ":wave:",
+          time_since_mutation_ms: 217_657,
         }),
       })
     );
@@ -623,6 +738,136 @@ describe("dropReactionMonitoring", () => {
         message: "reaction.realtime_reconciled",
       })
     );
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("does not attribute a later canonical change to a reconciled mutation", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-5-reconciled",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-5-reconciled/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    dateNowSpy.mockReturnValue(1_300);
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-reconciled",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":joy:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    addBreadcrumbMock.mockClear();
+    dateNowSpy.mockReturnValue(218_657);
+    const result = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-reconciled",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: null,
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(result).toEqual({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: null,
+      serverReaction: null,
+    });
+    expect(addBreadcrumbMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps the realtime guard until the matching request succeeds", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-5-pending",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-5-pending/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_200);
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-pending",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":joy:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_300);
+    const staleResult = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-pending",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: null,
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(staleResult).toEqual({
+      shouldApplyCanonicalDrop: false,
+      expectedReaction: ":joy:",
+      serverReaction: null,
+      supersededByMutationId: mutation.mutationId,
+    });
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+
+    dateNowSpy.mockReturnValue(1_400);
+    recordReactionRequestSucceeded(mutation);
+
+    addBreadcrumbMock.mockClear();
+    dateNowSpy.mockReturnValue(1_500);
+    const laterResult = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-pending",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: null,
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(laterResult).toEqual({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: null,
+      serverReaction: null,
+    });
+    expect(addBreadcrumbMock).not.toHaveBeenCalled();
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 

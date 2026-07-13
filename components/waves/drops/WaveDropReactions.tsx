@@ -362,13 +362,13 @@ function WaveDropReaction({
   readonly isDetailsLoading: boolean;
   readonly isTouchDevice: boolean;
 }) {
-  const { setToast, connectedProfile } = useAuth();
+  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
   const locale = useBrowserLocale();
   const rollbackRef = useRef<OwnedOptimisticRollback>(null);
-  const canReact = Boolean(connectedProfile?.handle);
+  const canReact = Boolean(connectedProfile?.handle) && !activeProfileProxy;
   const applyOptimisticReactionToNotificationQueries =
     useOptimisticNotificationDropReaction({
       connectedProfile,

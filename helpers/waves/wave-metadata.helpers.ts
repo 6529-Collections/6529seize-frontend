@@ -219,18 +219,30 @@ const getSubmissionButtonLabelMetadataRequest = (
 export const getCreateWaveDisplayMetadataRequests = ({
   display,
   waveType,
+  ongoingRanking = false,
 }: {
   readonly display: CreateWaveDisplayConfig | null | undefined;
   readonly waveType: ApiWaveType;
+  readonly ongoingRanking?: boolean;
 }): ApiCreateWaveMetadataRequest[] => {
   if (!display) {
     return [];
   }
 
-  const outcomeVisibilityRequest =
-    waveType === ApiWaveType.Chat
-      ? null
-      : getOutcomeVisibilityMetadataRequest(display.outcomesVisible);
+  // A perpetual rank wave never has outcomes to show, so its outcomes tab is
+  // always submitted as hidden. The stored preference stays in config (so it
+  // is restored if the user switches back to scheduled announcements).
+  const isPerpetualRank = waveType === ApiWaveType.Rank && ongoingRanking;
+  let outcomeVisibilityRequest: ApiCreateWaveMetadataRequest | null;
+  if (waveType === ApiWaveType.Chat) {
+    outcomeVisibilityRequest = null;
+  } else if (isPerpetualRank) {
+    outcomeVisibilityRequest = getOutcomeVisibilityMetadataRequest(false);
+  } else {
+    outcomeVisibilityRequest = getOutcomeVisibilityMetadataRequest(
+      display.outcomesVisible
+    );
+  }
   const customRulesRequest = getCustomRulesMetadataRequest(display.customRules);
   const submissionButtonLabelRequest =
     waveType === ApiWaveType.Chat

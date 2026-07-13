@@ -74,7 +74,14 @@ describe("useSidebarSections", () => {
     ]);
     expect(
       aboutSection?.subsections[0]?.items.map((item) => item.name)
-    ).toEqual(["FAQ", "ENS", "Nakamoto Threshold", "Apply", "Contact Us"]);
+    ).toEqual([
+      "6529 Apps",
+      "FAQ",
+      "ENS",
+      "Nakamoto Threshold",
+      "Apply",
+      "Contact Us",
+    ]);
     expect(aboutSection?.subsections[1]?.items).toEqual([
       { name: "About The Memes", href: "/about/the-memes" },
       { name: "Subscription Minting", href: "/about/subscriptions" },

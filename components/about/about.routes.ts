@@ -104,6 +104,7 @@ function aboutRouteItem(
 
 const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
   aboutGroup("about6529", [
+    aboutRouteItem("6529-apps", "/about/6529-apps", "apps"),
     aboutSectionItem(AboutSection.FAQ, "faq"),
     aboutSectionItem(AboutSection.ENS, "ens"),
     aboutSectionItem(AboutSection.NAKAMOTO_THRESHOLD, "nakamotoThreshold"),
