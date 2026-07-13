@@ -212,7 +212,7 @@ export interface SidebarWave {
   readonly firstUnreadFollowedSubwaveDropSerialNo: number | null;
   readonly unreadDropsCount: number;
   readonly followedSubwavesCount: number;
-  readonly unreadFollowedSubwaveDrops: number;
+  readonly unreadSubwaveDrops: number;
   readonly latestReadTimestamp: number;
   readonly pinned: boolean;
   readonly muted: boolean;
