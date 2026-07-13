@@ -6,7 +6,7 @@ The top of `/` shows the home headline and state-aware context before discovery
 sections:
 
 - Brand label and headline
-- A compact newcomer introduction for logged-out visitors
+- Compact newcomer actions for logged-out visitors
 - A network-health shortcut on home layouts
 - A mission block below the latest-drop slot
 
@@ -29,8 +29,7 @@ sections:
 2. The header shows:
    - Label: `6529`
    - Headline: `Building a decentralized network state`
-3. Logged-out visitors see one plain-language sentence beneath the main
-   headline and two actions:
+3. Logged-out visitors see two actions beneath the main headline:
    - `Start here`, which opens `/join-6529`
    - `Connect wallet`, which opens the wallet connection flow
 4. A compact `Explore what's happening` divider introduces the public activity
@@ -52,19 +51,19 @@ sections:
 
 - Desktop/tablet: health shortcut is visible near the top-right.
 - Mobile/app small-screen: health shortcut is visible in the header action row.
-- Logged-out or unauthenticated: the compact newcomer introduction appears
-  before the dashboard-style activity sections.
+- Logged-out or unauthenticated: the compact newcomer actions appear before
+  the dashboard-style activity sections.
 - Authenticated: the current dashboard-first layout remains unchanged and the
-  newcomer introduction is not shown.
+  newcomer actions are not shown.
 - Latest-drop data unavailable: mission block still renders below the slot.
 
 ## Edge Cases
 
 - On reduced-motion settings, heart animation is disabled.
 - While wallet state is initializing, the page does not assume the visitor is
-  logged out. The newcomer introduction appears once that state resolves.
+  logged out. The newcomer actions appear once that state resolves.
 - If a wallet is present but authentication is not valid, the newcomer
-  introduction remains available so the visitor can continue through onboarding.
+  actions remain available so the visitor can continue through onboarding.
 - The mission block has no interactive controls or outbound links.
 
 ## Failure and Recovery
@@ -79,8 +78,8 @@ sections:
 
 ## Limitations / Notes
 
-- Home activity remains public; the visitor introduction changes orientation and
-  entry actions rather than gating the dashboard content.
+- Home activity remains public; the visitor actions provide onboarding entry
+  points rather than gating the dashboard content.
 - Core interactive actions for home continue in sections below (`Latest Drop`,
   `Coming up`, `Boosted Drops`, and `Most active waves`).
 

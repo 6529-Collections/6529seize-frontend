@@ -35,15 +35,12 @@ export default function HomeNewcomerIntro() {
     <>
       <section
         aria-labelledby="home-newcomer-title"
-        className="tw-px-4 tw-pb-10 tw-pt-3 md:tw-mx-auto md:tw-max-w-3xl md:tw-px-6 md:tw-pb-12 md:tw-text-center lg:tw-px-8"
+        className="tw-px-4 tw-pb-10 tw-pt-4 md:tw-mx-auto md:tw-max-w-3xl md:tw-px-6 md:tw-pb-12 lg:tw-px-8"
       >
         <h2 id="home-newcomer-title" className="tw-sr-only">
           {t(locale, "home.newcomer.title")}
         </h2>
-        <p className="tw-m-0 tw-max-w-2xl tw-text-pretty tw-text-base tw-leading-7 tw-text-iron-300 md:tw-mx-auto md:tw-text-lg">
-          {t(locale, "home.newcomer.description")}
-        </p>
-        <div className="tw-mt-5 tw-flex tw-flex-wrap tw-gap-2 md:tw-justify-center">
+        <div className="tw-flex tw-flex-wrap tw-gap-2 md:tw-justify-center">
           <Link
             href="/join-6529"
             className="tw-inline-flex tw-min-h-11 tw-min-w-32 tw-flex-1 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-black tw-no-underline tw-transition-colors focus:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/70 desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-200 desktop-hover:hover:tw-text-black desktop-hover:hover:tw-no-underline md:tw-flex-none"

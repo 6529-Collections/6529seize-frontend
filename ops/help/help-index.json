@@ -23,7 +23,7 @@
       ],
       "facts": [
         "The home page is the main 6529.io entry point.",
-        "Logged-out visitors see a plain-language introduction before home activity, with a prominent Start here link to /join-6529 and a visible Connect wallet action.",
+        "Logged-out visitors see a prominent Start here link to /join-6529 and a visible Connect wallet action before home activity.",
         "Visitors can browse the public home activity without connecting a wallet.",
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
