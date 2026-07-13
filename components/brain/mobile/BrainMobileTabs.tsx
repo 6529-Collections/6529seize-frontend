@@ -14,6 +14,8 @@ import { useAuth } from "@/components/auth/Auth";
 import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import MyStreamWaveCurationCreateDialog from "../my-stream/tabs/MyStreamWaveCurationCreateDialog";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const ACTIVE_TAB_BACKGROUND = "tw-bg-iron-800";
 const INACTIVE_TAB_BACKGROUND = "tw-bg-iron-950";
@@ -24,12 +26,12 @@ const BASE_TAB_BUTTON_CLASS_NAME =
 const BASE_TAB_TEXT_CLASS_NAME =
   "tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-semibold sm:tw-max-w-44 sm:tw-text-sm";
 
-const WAVE_TAB_SKELETON_WIDTHS = [
-  "tw-w-14",
-  "tw-w-20",
-  "tw-w-24",
-  "tw-w-16",
-  "tw-w-20",
+const WAVE_TAB_SKELETONS = [
+  { id: "chat", widthClassName: "tw-w-14" },
+  { id: "about", widthClassName: "tw-w-20" },
+  { id: "primary", widthClassName: "tw-w-24" },
+  { id: "secondary", widthClassName: "tw-w-16" },
+  { id: "outcome", widthClassName: "tw-w-20" },
 ];
 
 const getTabButtonClassName = (isActive: boolean): string =>
@@ -52,7 +54,7 @@ const getTabTextClassName = ({
 
 const getTabStateProps = (isActive: boolean) => ({
   type: "button" as const,
-  "aria-current": isActive ? ("page" as const) : undefined,
+  "aria-current": isActive ? ("true" as const) : undefined,
 });
 
 interface BrainMobileTabsProps {
@@ -83,6 +85,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const locale = useBrowserLocale();
   const { registerRef } = useLayout();
   const { connectedProfile, isAuthenticated } = useAuth();
   const hasValidNotificationAuth = isAuthenticated === true;
@@ -209,8 +212,14 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       return mappedCurations;
     }
 
-    return [{ id: activeCurationId, name: "Curation" }, ...mappedCurations];
-  }, [activeCurationId, curations]);
+    return [
+      {
+        id: activeCurationId,
+        name: t(locale, "wave.navigation.fallbackCuration"),
+      },
+      ...mappedCurations,
+    ];
+  }, [activeCurationId, curations, locale]);
   const handleWaveViewChange = (view: BrainView) => {
     const shouldPreserveSelectedCuration =
       isApp && view === BrainView.ABOUT && activeCurationId !== null;
@@ -256,20 +265,26 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     <div
       ref={setMobileTabsRef}
       role="navigation"
-      aria-label={waveActive ? "Wave sections" : "App sections"}
-      aria-busy={isWaveNavigationLoading}
+      aria-label={t(
+        locale,
+        waveActive
+          ? "wave.navigation.waveSections"
+          : "wave.navigation.appSections"
+      )}
       className="tw-overflow-x-auto tw-px-2 tw-py-2 sm:tw-px-4 md:tw-px-6"
     >
       {isWaveNavigationLoading ? (
         <div
           role="status"
-          aria-label="Loading wave sections"
+          aria-label={t(locale, "wave.navigation.loadingSections")}
           className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
         >
-          <span className="tw-sr-only">Loading wave sections</span>
-          {WAVE_TAB_SKELETON_WIDTHS.map((widthClassName) => (
+          <span className="tw-sr-only">
+            {t(locale, "wave.navigation.loadingSections")}
+          </span>
+          {WAVE_TAB_SKELETONS.map(({ id, widthClassName }) => (
             <span
-              key={widthClassName}
+              key={id}
               aria-hidden="true"
               className={`tw-h-10 tw-shrink-0 tw-rounded-md tw-bg-iron-800/70 motion-safe:tw-animate-pulse ${widthClassName}`}
             />
@@ -454,7 +469,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   key={curation.id}
                   type="button"
                   data-curation-id={curation.id}
-                  aria-current={isActive ? "page" : undefined}
+                  aria-current={isActive ? "true" : undefined}
                   ref={getActiveButtonRef(isActive)}
                   onClick={() => onCurationClick(curation.id)}
                   className={getTabButtonClassName(isActive)}

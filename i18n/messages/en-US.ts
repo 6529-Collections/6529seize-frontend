@@ -296,6 +296,13 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "subsection.developerOpenData": "Data & Developer Tools",
 } as const);
 
+const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  waveSections: "Wave sections",
+  appSections: "App sections",
+  loadingSections: "Loading wave sections",
+  fallbackCuration: "Curation",
+} as const);
+
 const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
   "back.wave": "Back to wave",
   "back.previous": "Back to previous page",
@@ -1742,6 +1749,7 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...WAVE_NAVIGATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,

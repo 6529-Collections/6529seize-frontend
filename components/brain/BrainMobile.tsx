@@ -124,7 +124,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   } = useWaveTimers(wave);
   const { hasPolls, isPending: isWavePollsPending } = useWavePollSummary({
     waveId,
-    enabled: wave !== undefined,
+    enabled: Boolean(wave),
   });
   const waveNavigationReady =
     !waveId ||
