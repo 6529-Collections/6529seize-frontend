@@ -215,18 +215,23 @@ describe("useSidebarWaveTree", () => {
     });
   });
 
-  it("keeps parent unread metadata separate from unread subwave metadata", () => {
+  it("reconciles the aggregate with loaded subwave unread counts", () => {
     const wavesWithParentAndSubwaveUnread = [
       createMockMinimalWave({
         id: "parent",
         hasSubwaves: true,
         unreadDropsCount: 2,
-        unreadFollowedSubwaveDrops: 7,
+        unreadSubwaveDrops: 7,
       }),
       createMockMinimalWave({
-        id: "child",
+        id: "first-child",
         parentWaveId: "parent",
         unreadDropsCount: 9,
+      }),
+      createMockMinimalWave({
+        id: "second-child",
+        parentWaveId: "parent",
+        unreadDropsCount: 4,
       }),
     ];
     const { result } = renderHook(() =>
@@ -240,7 +245,7 @@ describe("useSidebarWaveTree", () => {
 
     expect(rows[0]).toMatchObject({
       rowType: "wave",
-      unreadSubwaveDropsCount: 7,
+      unreadSubwaveDropsCount: 13,
       wave: expect.objectContaining({
         unreadDropsCount: 2,
       }),
@@ -248,7 +253,7 @@ describe("useSidebarWaveTree", () => {
     expect(rows[1]).toMatchObject({
       rowType: "subwaves-toggle",
       hasUnreadSubwaves: true,
-      unreadSubwaveDropsCount: 7,
+      unreadSubwaveDropsCount: 13,
     });
   });
 
@@ -433,7 +438,7 @@ describe("useSidebarWaveTree", () => {
     const parentContainer = createMockMinimalWave({
       id: "parent-container",
       followedSubwavesCount: 1,
-      unreadFollowedSubwaveDrops: 2,
+      unreadSubwaveDrops: 2,
     });
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
@@ -474,7 +479,7 @@ describe("useSidebarWaveTree", () => {
     const mutedParentContainer = createMockMinimalWave({
       id: "muted-parent-container",
       followedSubwavesCount: 1,
-      unreadFollowedSubwaveDrops: 2,
+      unreadSubwaveDrops: 2,
       isMuted: true,
     });
     const unreadChild = createMockMinimalWave({

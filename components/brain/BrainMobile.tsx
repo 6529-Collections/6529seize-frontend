@@ -17,8 +17,11 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { useWave } from "@/hooks/useWave";
-import { useWaveHasPolls } from "@/hooks/useWaveHasPolls";
-import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
+import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
+import {
+  useWaveMetadata,
+  useWaveOutcomeVisibility,
+} from "@/hooks/waves/useWaveMetadata";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
@@ -57,7 +60,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, fetchingProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const quickVote = useMemesQuickVoteRuntimeLauncher();
   const hydrated = useSyncExternalStore(
@@ -108,16 +111,28 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
 
   const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =
     useWave(wave);
+  const isCompetitionWave = isRankWave || isApproveWave;
+  const { isPending: isWaveMetadataPending } = useWaveMetadata(wave?.id, {
+    enabled: isCompetitionWave,
+  });
   const outcomesVisible = useWaveOutcomeVisibility(wave);
 
   const {
     voting: { isCompleted },
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
-  const hasPolls = useWaveHasPolls({
+  const { hasPolls, isPending: isWavePollsPending } = useWavePollSummary({
     waveId,
-    enabled: wave !== undefined,
+    enabled: Boolean(wave),
   });
+  const waveNavigationReady =
+    !waveId ||
+    Boolean(
+      wave &&
+        !fetchingProfile &&
+        !(isCompetitionWave && isWaveMetadataPending) &&
+        !isWavePollsPending
+    );
   const { activeView, onViewChange } = useBrainMobileActiveView({
     firstDecisionDone,
     isApp,
@@ -246,6 +261,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           waveActive={hasWave}
           hasPolls={hasPolls}
           outcomesVisible={outcomesVisible}
+          waveNavigationReady={waveNavigationReady}
           showWavesTab={hydrated}
           showStreamBack={hydrated}
           isApp={isApp}

@@ -20,6 +20,10 @@ export class ApiWaveOverviewContextProfileContext {
     'next_drop_allowed'?: number;
     'unread_drops': number;
     'first_unread_drop_serial_no'?: number;
+    /**
+    * Unread drops across all visible subwaves, independent of whether the authenticated profile follows each subwave.
+    */
+    'subwave_unread_drops'?: number;
     'followed_subwaves_count'?: number;
     'latest_followed_subwave_activity_timestamp'?: number;
     'hidden_followed_subwave_unread_drops'?: number;
@@ -64,6 +68,12 @@ export class ApiWaveOverviewContextProfileContext {
         {
             "name": "first_unread_drop_serial_no",
             "baseName": "first_unread_drop_serial_no",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "subwave_unread_drops",
+            "baseName": "subwave_unread_drops",
             "type": "number",
             "format": "int64"
         },

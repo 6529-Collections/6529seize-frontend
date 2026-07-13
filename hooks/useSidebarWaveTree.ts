@@ -55,11 +55,7 @@ const getUnreadSubwaveDropsCount = (
     0
   );
 
-  if (wave.unreadFollowedSubwaveDrops > 0) {
-    return wave.unreadFollowedSubwaveDrops;
-  }
-
-  return loadedSubwaveUnreadCount;
+  return Math.max(wave.unreadSubwaveDrops, loadedSubwaveUnreadCount);
 };
 
 const normalizeParentIds = (value: unknown): readonly string[] => {
@@ -314,7 +310,7 @@ export function useSidebarWaveTree({
   const getHasUnreadSubwaves = useCallback(
     (wave: MinimalWave) =>
       !wave.isMuted &&
-      (wave.unreadFollowedSubwaveDrops > 0 ||
+      (wave.unreadSubwaveDrops > 0 ||
         (subwavesByParentId.get(wave.id) ?? []).some(hasUnreadDrops)),
     [subwavesByParentId]
   );

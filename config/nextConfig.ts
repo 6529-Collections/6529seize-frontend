@@ -4,6 +4,7 @@ import { NextConfig } from "next";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 import { getMediaResolverHostname } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
+import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "../lib/media/static-image-hosts";
 
 const HTML_LIMITED_METADATA_BOTS =
   /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
@@ -31,8 +32,10 @@ export function sharedConfig(
     images: {
       loader: "default",
       remotePatterns: [
-        { protocol: "https", hostname: "6529.io" },
-        { protocol: "https", hostname: "staging.6529.io" },
+        ...STATIC_ALLOWED_IMAGE_HOSTNAMES.map((hostname) => ({
+          protocol: "https" as const,
+          hostname,
+        })),
         {
           protocol: "https",
           hostname: getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT),
@@ -46,16 +49,6 @@ export function sharedConfig(
           hostname,
         })),
         { protocol: "http", hostname: "localhost" },
-        { protocol: "https", hostname: "media.generator.seize.io" },
-        { protocol: "https", hostname: "d3lqz0a4bldqgf.cloudfront.net" },
-        { protocol: "https", hostname: "img.youtube.com" },
-        { protocol: "https", hostname: "i.seadn.io" },
-        { protocol: "https", hostname: "i2.seadn.io" },
-        { protocol: "https", hostname: "i2c.seadn.io" },
-        { protocol: "https", hostname: "i.ytimg.com" },
-        { protocol: "https", hostname: "res.cloudinary.com" },
-        { protocol: "https", hostname: "ipfs.6529.io" },
-        { protocol: "https", hostname: "ipfs.io" },
       ],
       minimumCacheTTL: 86400,
       formats: ["image/avif", "image/webp"],
