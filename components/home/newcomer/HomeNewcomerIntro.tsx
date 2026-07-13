@@ -2,6 +2,7 @@
 
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -30,8 +31,11 @@ export default function HomeNewcomerIntro() {
   const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const { seizeConnectFresh, seizeConnectOpen } = useSeizeConnectContext();
+  const [isOpeningWallet, setIsOpeningWallet] = useState(false);
+  const isConnectBusy = isOpeningWallet || seizeConnectOpen;
 
   const handleConnect = async (): Promise<void> => {
+    setIsOpeningWallet(true);
     try {
       await seizeConnectFresh();
     } catch (error) {
@@ -40,6 +44,8 @@ export default function HomeNewcomerIntro() {
         message: t(locale, "home.newcomer.connectFailed"),
         type: "error",
       });
+    } finally {
+      setIsOpeningWallet(false);
     }
   };
 
@@ -77,8 +83,8 @@ export default function HomeNewcomerIntro() {
                 </Link>
                 <button
                   type="button"
-                  aria-busy={seizeConnectOpen}
-                  disabled={seizeConnectOpen}
+                  aria-busy={isConnectBusy}
+                  disabled={isConnectBusy}
                   onClick={() => {
                     void handleConnect();
                   }}
@@ -86,7 +92,7 @@ export default function HomeNewcomerIntro() {
                 >
                   {t(
                     locale,
-                    seizeConnectOpen
+                    isConnectBusy
                       ? "join6529.action.connecting"
                       : "home.newcomer.connectAction"
                   )}
@@ -97,9 +103,7 @@ export default function HomeNewcomerIntro() {
                   className="tw-sr-only"
                   role="status"
                 >
-                  {seizeConnectOpen
-                    ? t(locale, "join6529.action.connecting")
-                    : ""}
+                  {isConnectBusy ? t(locale, "join6529.action.connecting") : ""}
                 </span>
               </div>
               <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-400">
