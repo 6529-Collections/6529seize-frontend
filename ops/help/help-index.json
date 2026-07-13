@@ -1602,6 +1602,30 @@
       "tags": ["waves", "drop", "glossary", "concept"]
     },
     {
+      "id": "waves.subwaves.unread-count",
+      "kind": "ui_affordance",
+      "title": "Parent wave unread subwave count",
+      "aliases": [
+        "subwave unread count",
+        "new subwave messages",
+        "hide subwaves new badge",
+        "parent wave new badge"
+      ],
+      "keywords": ["waves", "subwaves", "unread", "new", "badge", "sidebar"],
+      "facts": [
+        "The new badge beside a parent wave's subwave control totals unread drops across visible, unmuted subwaves where read state is available.",
+        "A subwave contributes to the parent badge whether or not the viewer has joined or followed it.",
+        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "subwaves", "unread", "sidebar"],
+      "source_refs": [
+        "ops/docs/waves/sidebars/feature-brain-list-last-drop-indicator.md",
+        "ops/docs/wave-subwave-interaction-model.md"
+      ]
+    },
+    {
       "id": "waves.create.entrypoint.sidebar",
       "kind": "ui_affordance",
       "title": "Create a wave from the Waves panel",
