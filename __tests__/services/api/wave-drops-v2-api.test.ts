@@ -357,7 +357,6 @@ describe("fetchWaveDropsFeedV2", () => {
         rating: 10,
         realtime_rating: 14,
         rating_prediction: 12,
-        voting_open: true,
       })
     );
   });
@@ -486,7 +485,6 @@ describe("fetchWaveDropsFeedV2", () => {
         rating: 10,
         realtime_rating: 14,
         rating_prediction: 12,
-        voting_open: true,
       })
     );
   });

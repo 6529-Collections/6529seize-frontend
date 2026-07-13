@@ -65,4 +65,37 @@ describe("useWaveCompetitionEntries", () => {
       })
     );
   });
+
+  it("loads the matching drop type when the preview kind changes", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { readonly children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { rerender } = renderHook(
+      ({ kind }: { kind: "active" | "winners" }) =>
+        useWaveCompetitionEntries({
+          authorId: "author-1",
+          wave,
+          kind,
+          enabled: true,
+        }),
+      { initialProps: { kind: "active" as const }, wrapper }
+    );
+
+    await waitFor(() =>
+      expect(fetchCompetitionDropsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ dropType: "PARTICIPATORY" })
+      )
+    );
+
+    rerender({ kind: "winners" });
+
+    await waitFor(() =>
+      expect(fetchCompetitionDropsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ dropType: "WINNER" })
+      )
+    );
+  });
 });

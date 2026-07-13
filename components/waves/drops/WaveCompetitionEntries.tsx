@@ -6,8 +6,12 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { Time } from "@/helpers/time";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useWaveCompetitionEntries } from "@/hooks/useWaveCompetitionEntries";
+import {
+  getWaveCompetitionEntriesQueryKey,
+  useWaveCompetitionEntries,
+} from "@/hooks/useWaveCompetitionEntries";
 import { formatDate, formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { CalendarDaysIcon, FlagIcon } from "@heroicons/react/24/outline";
@@ -61,7 +65,7 @@ const LoadingState = () => {
   return (
     <output className="tw-flex tw-h-72 tw-items-center tw-justify-center">
       <span className="tw-flex tw-flex-col tw-items-center tw-gap-4">
-        <span className="tw-size-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400" />
+        <span className="tw-size-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400 motion-reduce:tw-animate-none" />
         <span className="tw-text-sm tw-text-iron-400">
           {t(locale, "waves.competitionBadges.loading")}
         </span>
@@ -92,8 +96,17 @@ export const WaveCompetitionEntries = ({
   const untitledLabel = t(locale, "waves.competitionBadges.untitled");
 
   const handleVoteSuccess = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: [QueryKey.DROP] });
-  }, [queryClient]);
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: [QueryKey.DROP] }),
+      queryClient.invalidateQueries({
+        queryKey: getWaveCompetitionEntriesQueryKey({
+          authorId,
+          waveId: wave.id,
+          kind,
+        }),
+      }),
+    ]);
+  }, [authorId, kind, queryClient, wave.id]);
 
   if (isLoading) {
     return <LoadingState />;
@@ -144,9 +157,17 @@ export const WaveCompetitionEntries = ({
           const media = getFirstMedia(drop);
           const entryText = getEntryText(drop);
           const title = getEntryTitle(drop, untitledLabel);
+          const now = Time.currentMillis();
+          const votingHasStarted =
+            drop.wave.voting_period_start == null ||
+            now >= drop.wave.voting_period_start;
+          const votingHasNotEnded =
+            drop.wave.voting_period_end == null ||
+            now <= drop.wave.voting_period_end;
           const showVote =
             drop.drop_type === ApiDropType.Participatory &&
-            drop.voting_open === true;
+            votingHasStarted &&
+            votingHasNotEnded;
 
           return (
             <div key={drop.id} className="tw-flex tw-h-full tw-flex-col">

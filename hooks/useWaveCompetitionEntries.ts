@@ -18,6 +18,24 @@ interface UseWaveCompetitionEntriesProps {
   readonly enabled: boolean;
 }
 
+export const getWaveCompetitionEntriesQueryKey = ({
+  authorId,
+  waveId,
+  kind,
+}: {
+  readonly authorId: string;
+  readonly waveId: string;
+  readonly kind: "active" | "winners";
+}) =>
+  [
+    QueryKey.DROPS,
+    {
+      author_id: authorId,
+      wave_id: waveId,
+      scope: `wave-competition-${kind}`,
+    },
+  ] as const;
+
 export const useWaveCompetitionEntries = ({
   authorId,
   wave,
@@ -29,14 +47,11 @@ export const useWaveCompetitionEntries = ({
     kind === "active" ? ApiDropType.Participatory : ApiDropType.Winner;
 
   const query = useInfiniteQuery({
-    queryKey: [
-      QueryKey.DROPS,
-      {
-        author_id: authorId,
-        wave_id: wave.id,
-        scope: `wave-competition-${kind}`,
-      },
-    ],
+    queryKey: getWaveCompetitionEntriesQueryKey({
+      authorId,
+      waveId: wave.id,
+      kind,
+    }),
     queryFn: async ({
       pageParam,
       signal,

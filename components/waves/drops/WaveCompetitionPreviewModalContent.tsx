@@ -48,8 +48,7 @@ const TabButton = ({
   return (
     <button
       type="button"
-      role="tab"
-      aria-selected={isActive}
+      aria-pressed={isActive}
       onClick={() => onTabChange(tab)}
       className={`tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${
         isActive
@@ -158,10 +157,7 @@ export const WaveCompetitionPreviewModalContent = ({
       </header>
 
       {showTabs && (
-        <div
-          className="tw-relative tw-z-[100] tw-mt-4 tw-flex tw-w-full tw-px-6 sm:tw-w-auto"
-          role="tablist"
-        >
+        <div className="tw-relative tw-z-[100] tw-mt-4 tw-flex tw-w-full tw-px-6 sm:tw-w-auto">
           <div className="tw-flex tw-h-10 tw-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 sm:tw-w-auto">
             <TabButton
               tab="active"

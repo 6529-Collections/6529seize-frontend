@@ -45,6 +45,67 @@ const getTooltipKey = (kind: BadgeKind): MessageKey => {
   return "waves.competitionBadges.winnerTooltip";
 };
 
+const WaveCompetitionBadge = ({
+  kind,
+  waveName,
+  tooltipIdPrefix,
+  showTooltip,
+  onBadgeClick,
+}: {
+  readonly kind: BadgeKind;
+  readonly waveName: string;
+  readonly tooltipIdPrefix: string;
+  readonly showTooltip: boolean;
+  readonly onBadgeClick: (tab: WaveCompetitionPreviewTab) => void;
+}) => {
+  const locale = useBrowserLocale();
+  const id = useId();
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const config = BADGE_CONFIG[kind];
+  const tooltipId = `${tooltipIdPrefix}-${kind}-${id}`;
+  const label = t(locale, getTooltipKey(kind), {
+    wave: waveName,
+  });
+
+  return (
+    <span className="tw-inline-flex">
+      <button
+        type="button"
+        aria-label={label}
+        aria-describedby={showTooltip && isTooltipOpen ? tooltipId : undefined}
+        {...(showTooltip && { "data-tooltip-id": tooltipId })}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setIsTooltipOpen(false);
+          onBadgeClick(config.tab);
+        }}
+        onMouseEnter={() => setIsTooltipOpen(true)}
+        onMouseLeave={() => setIsTooltipOpen(false)}
+        className={`tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${config.className}`}
+      >
+        <FontAwesomeIcon
+          icon={config.icon}
+          className="tw-size-3 tw-flex-shrink-0"
+        />
+      </button>
+      {showTooltip && (
+        <Tooltip
+          id={tooltipId}
+          place="top"
+          positionStrategy="fixed"
+          offset={8}
+          opacity={1}
+          style={TOOLTIP_STYLES}
+          isOpen={isTooltipOpen}
+        >
+          <span className="tw-text-xs">{label}</span>
+        </Tooltip>
+      )}
+    </span>
+  );
+};
+
 export const WaveCompetitionBadges = ({
   isParticipant,
   isWinner,
@@ -52,70 +113,30 @@ export const WaveCompetitionBadges = ({
   onBadgeClick,
   tooltipIdPrefix = "wave-competition-badge",
 }: WaveCompetitionBadgesProps) => {
-  const locale = useBrowserLocale();
   const isMobile = useIsMobileDevice();
   const { hasTouchScreen } = useDeviceInfo();
-  const id = useId();
-  const [openTooltip, setOpenTooltip] = useState<BadgeKind | null>(null);
   const showTooltip = !isMobile && !hasTouchScreen;
-
-  const renderBadge = (kind: BadgeKind, shouldRender: boolean) => {
-    if (!shouldRender) {
-      return null;
-    }
-
-    const config = BADGE_CONFIG[kind];
-    const tooltipId = `${tooltipIdPrefix}-${kind}-${id}`;
-    const label = t(locale, getTooltipKey(kind), {
-      wave: waveName,
-    });
-    const isTooltipOpen = openTooltip === kind;
-
-    return (
-      <span className="tw-inline-flex" key={kind}>
-        <button
-          type="button"
-          aria-label={label}
-          aria-describedby={
-            showTooltip && isTooltipOpen ? tooltipId : undefined
-          }
-          {...(showTooltip && { "data-tooltip-id": tooltipId })}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            setOpenTooltip(null);
-            onBadgeClick(config.tab);
-          }}
-          onMouseEnter={() => setOpenTooltip(kind)}
-          onMouseLeave={() => setOpenTooltip(null)}
-          className={`tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${config.className}`}
-        >
-          <FontAwesomeIcon
-            icon={config.icon}
-            className="tw-size-3 tw-flex-shrink-0"
-          />
-        </button>
-        {showTooltip && (
-          <Tooltip
-            id={tooltipId}
-            place="top"
-            positionStrategy="fixed"
-            offset={8}
-            opacity={1}
-            style={TOOLTIP_STYLES}
-            isOpen={isTooltipOpen}
-          >
-            <span className="tw-text-xs">{label}</span>
-          </Tooltip>
-        )}
-      </span>
-    );
-  };
 
   return (
     <>
-      {renderBadge("participant", isParticipant)}
-      {renderBadge("winner", isWinner)}
+      {isParticipant && (
+        <WaveCompetitionBadge
+          kind="participant"
+          waveName={waveName}
+          tooltipIdPrefix={tooltipIdPrefix}
+          showTooltip={showTooltip}
+          onBadgeClick={onBadgeClick}
+        />
+      )}
+      {isWinner && (
+        <WaveCompetitionBadge
+          kind="winner"
+          waveName={waveName}
+          tooltipIdPrefix={tooltipIdPrefix}
+          showTooltip={showTooltip}
+          onBadgeClick={onBadgeClick}
+        />
+      )}
     </>
   );
 };

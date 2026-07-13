@@ -1,6 +1,7 @@
 import { WaveCompetitionEntries } from "@/components/waves/drops/WaveCompetitionEntries";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { Time } from "@/helpers/time";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
@@ -8,6 +9,22 @@ const mockUseWaveCompetitionEntries = jest.fn();
 const mockInvalidateQueries = jest.fn();
 
 jest.mock("@/hooks/useWaveCompetitionEntries", () => ({
+  getWaveCompetitionEntriesQueryKey: ({
+    authorId,
+    waveId,
+    kind,
+  }: {
+    authorId: string;
+    waveId: string;
+    kind: string;
+  }) => [
+    "DROPS",
+    {
+      author_id: authorId,
+      wave_id: waveId,
+      scope: `wave-competition-${kind}`,
+    },
+  ],
   useWaveCompetitionEntries: (...args: unknown[]) =>
     mockUseWaveCompetitionEntries(...args),
 }));
@@ -27,17 +44,33 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
 }));
 
 jest.mock("@/components/waves/drop/SingleWaveDropVote", () => ({
-  SingleWaveDropVote: () => <div data-testid="vote-control" />,
+  SingleWaveDropVote: ({ onVoteSuccess }: { onVoteSuccess: () => void }) => (
+    <button type="button" data-testid="vote-control" onClick={onVoteSuccess}>
+      Vote
+    </button>
+  ),
   SingleWaveDropVoteSize: { MINI: "mini" },
 }));
 
-const createDrop = (dropType: ApiDropType, votingOpen: boolean): ApiDrop =>
+const createDrop = ({
+  dropType,
+  votingPeriodStart = 1_000,
+  votingPeriodEnd = 3_000,
+}: {
+  readonly dropType: ApiDropType;
+  readonly votingPeriodStart?: number | null;
+  readonly votingPeriodEnd?: number | null;
+}): ApiDrop =>
   ({
     id: `${dropType}-drop`,
     title: "Entry title",
     drop_type: dropType,
-    voting_open: votingOpen,
-    wave: { id: "wave-1", name: "Cool Comp" },
+    wave: {
+      id: "wave-1",
+      name: "Cool Comp",
+      voting_period_start: votingPeriodStart,
+      voting_period_end: votingPeriodEnd,
+    },
     parts: [
       {
         content: "Entry text",
@@ -66,11 +99,16 @@ const mockEntriesResult = (entries: ApiDrop[]) => ({
 describe("WaveCompetitionEntries", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(Time, "currentMillis").mockReturnValue(2_000);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("offers voting only for an active entry while voting is open", () => {
     mockUseWaveCompetitionEntries.mockReturnValue(
-      mockEntriesResult([createDrop(ApiDropType.Participatory, true)])
+      mockEntriesResult([createDrop({ dropType: ApiDropType.Participatory })])
     );
 
     render(
@@ -94,18 +132,22 @@ describe("WaveCompetitionEntries", () => {
   });
 
   it.each([
-    [ApiDropType.Participatory, false, "closed active entry"],
-    [ApiDropType.Winner, true, "winning entry"],
-  ])("does not offer voting for a %s", (dropType, votingOpen) => {
-    mockUseWaveCompetitionEntries.mockReturnValue(
-      mockEntriesResult([createDrop(dropType, votingOpen)])
-    );
+    [
+      "closed active entry",
+      createDrop({
+        dropType: ApiDropType.Participatory,
+        votingPeriodEnd: 1_999,
+      }),
+    ],
+    ["winning entry", createDrop({ dropType: ApiDropType.Winner })],
+  ])("does not offer voting for a %s", (_label, drop) => {
+    mockUseWaveCompetitionEntries.mockReturnValue(mockEntriesResult([drop]));
 
     render(
       <WaveCompetitionEntries
         authorId="author-1"
         wave={wave}
-        kind={dropType === ApiDropType.Winner ? "winners" : "active"}
+        kind={drop.drop_type === ApiDropType.Winner ? "winners" : "active"}
         isOpen={true}
         isApp={false}
         onDropClick={jest.fn()}
@@ -118,7 +160,9 @@ describe("WaveCompetitionEntries", () => {
   it("loads another page only after the viewer requests it", () => {
     const fetchNextPage = jest.fn();
     mockUseWaveCompetitionEntries.mockReturnValue({
-      ...mockEntriesResult([createDrop(ApiDropType.Participatory, true)]),
+      ...mockEntriesResult([
+        createDrop({ dropType: ApiDropType.Participatory }),
+      ]),
       fetchNextPage,
       hasNextPage: true,
     });
@@ -137,5 +181,38 @@ describe("WaveCompetitionEntries", () => {
     expect(fetchNextPage).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Load more entries" }));
     expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("refreshes the open entry list after a vote", () => {
+    mockUseWaveCompetitionEntries.mockReturnValue(
+      mockEntriesResult([createDrop({ dropType: ApiDropType.Participatory })])
+    );
+
+    render(
+      <WaveCompetitionEntries
+        authorId="author-1"
+        wave={wave}
+        kind="active"
+        isOpen={true}
+        isApp={false}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("vote-control"));
+
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["DROP"],
+    });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: [
+        "DROPS",
+        {
+          author_id: "author-1",
+          wave_id: "wave-1",
+          scope: "wave-competition-active",
+        },
+      ],
+    });
   });
 });

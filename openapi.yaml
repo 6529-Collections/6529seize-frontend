@@ -9486,6 +9486,7 @@ paths:
           required: true
           schema:
             type: string
+            minLength: 1
             maxLength: 100
         - name: drop_type
           in: query
@@ -12983,9 +12984,6 @@ components:
           nullable: true
         winning_context:
           $ref: "#/components/schemas/ApiDropWinningContext"
-        voting_open:
-          type: boolean
-          description: Whether voting is currently open for this submission.
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
         reply_to:
@@ -13919,9 +13917,6 @@ components:
           nullable: true
         winning_context:
           $ref: "#/components/schemas/ApiDropWinningContext"
-        voting_open:
-          type: boolean
-          description: Whether voting is currently open for this submission.
         reply_to:
           $ref: "#/components/schemas/ApiReplyToDropResponse"
         author:
