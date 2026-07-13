@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { WavePodiumItem } from "@/components/waves/winners/podium/WavePodiumItem";
+import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -70,12 +71,75 @@ const drop: any = {
   parts: [],
   metadata: [],
 };
+const longIdentityLabel = "identity-with-a-very-long-unbroken-label";
+
+const renderWinner = (dropOverrides: any) => {
+  render(
+    <WavePodiumItem
+      winner={{ drop: { ...drop, ...dropOverrides } } as any}
+      position="first"
+      onDropClick={jest.fn()}
+    />
+  );
+};
 
 it("renders placeholder when no winner", () => {
   render(<WavePodiumItem position="second" onDropClick={jest.fn()} />);
   expect(screen.getByTestId("placeholder")).toHaveAttribute(
     "data-position",
     "second"
+  );
+});
+
+it.each([
+  {
+    name: "resolved profile identity",
+    dropOverrides: {
+      wave: {
+        ...drop.wave,
+        submission_type: ApiWaveParticipationSubmissionStrategyType.Identity,
+      },
+      metadata: [
+        {
+          data_key: "identity",
+          data_value: longIdentityLabel,
+          resolved_profile: {
+            handle: longIdentityLabel,
+            primary_address: "0xabc",
+            pfp: null,
+          },
+        },
+      ],
+    },
+  },
+  {
+    name: "unresolved identity fallback",
+    dropOverrides: {
+      wave: {
+        ...drop.wave,
+        submission_type: ApiWaveParticipationSubmissionStrategyType.Identity,
+      },
+      metadata: [
+        {
+          data_key: "identity",
+          data_value: longIdentityLabel,
+        },
+      ],
+    },
+  },
+  {
+    name: "regular author",
+    dropOverrides: {
+      author: { handle: longIdentityLabel, pfp: "pfp.png" },
+    },
+  },
+])("fits $name labels within the podium card", ({ dropOverrides }) => {
+  renderWinner(dropOverrides);
+
+  expect(screen.getByText(longIdentityLabel)).toHaveClass(
+    "tw-line-clamp-2",
+    "tw-whitespace-normal",
+    "tw-break-words"
   );
 });
 
