@@ -64,7 +64,7 @@ interface BrainMobileTabsProps {
   readonly waveActive: boolean;
   readonly hasPolls?: boolean | undefined;
   readonly outcomesVisible?: boolean | undefined;
-  readonly waveNavigationReady: boolean;
+  readonly waveNavigationReady?: boolean | undefined;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;
   readonly isApp?: boolean | undefined;
@@ -77,7 +77,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   waveActive,
   hasPolls = false,
   outcomesVisible = true,
-  waveNavigationReady,
+  waveNavigationReady = true,
   showWavesTab,
   showStreamBack,
   isApp,
@@ -191,6 +191,27 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const isChatActive =
     activeView === BrainView.DEFAULT && activeCurationId === null;
   const backButtonClasses = `tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`;
+  const streamBackButton =
+    waveActive && showStreamBack && !isApp ? (
+      <>
+        <button
+          type="button"
+          onClick={() => {
+            router.push(
+              getWaveHomeRoute({ isDirectMessage: false, isApp: !!isApp })
+            );
+            onViewChange(BrainView.DEFAULT);
+          }}
+          className={backButtonClasses}
+        >
+          <ArrowLeftIcon className="tw-size-4 tw-text-iron-400" />
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-text-iron-400 sm:tw-text-sm">
+            My Stream
+          </span>
+        </button>
+        <div className="tw-mx-1 tw-h-4 tw-w-px tw-flex-shrink-0 tw-bg-iron-700" />
+      </>
+    ) : null;
   const isWaveNavigationLoading =
     waveActive &&
     (!wave ||
@@ -274,45 +295,28 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       className="tw-overflow-x-auto tw-px-2 tw-py-2 sm:tw-px-4 md:tw-px-6"
     >
       {isWaveNavigationLoading ? (
-        <div
-          role="status"
-          aria-label={t(locale, "wave.navigation.loadingSections")}
-          className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
-        >
-          <span className="tw-sr-only">
-            {t(locale, "wave.navigation.loadingSections")}
-          </span>
-          {WAVE_TAB_SKELETONS.map(({ id, widthClassName }) => (
-            <span
-              key={id}
-              aria-hidden="true"
-              className={`tw-h-10 tw-shrink-0 tw-rounded-md tw-bg-iron-800/70 motion-safe:tw-animate-pulse ${widthClassName}`}
-            />
-          ))}
+        <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500">
+          {streamBackButton}
+          <div
+            role="status"
+            aria-label={t(locale, "wave.navigation.loadingSections")}
+            className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 tw-overflow-hidden"
+          >
+            <span className="tw-sr-only">
+              {t(locale, "wave.navigation.loadingSections")}
+            </span>
+            {WAVE_TAB_SKELETONS.map(({ id, widthClassName }) => (
+              <span
+                key={id}
+                aria-hidden="true"
+                className={`tw-h-10 tw-shrink-0 tw-rounded-md tw-bg-iron-800/70 motion-safe:tw-animate-pulse ${widthClassName}`}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <div className="tw-inline-flex tw-min-w-full tw-w-max tw-items-center tw-justify-start tw-gap-1 tw-overflow-x-auto tw-overflow-y-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-          {waveActive && showStreamBack && !isApp && (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  router.push(
-                    getWaveHomeRoute({ isDirectMessage: false, isApp: !!isApp })
-                  );
-                  onViewChange(BrainView.DEFAULT);
-                }}
-                className={backButtonClasses}
-              >
-                <ArrowLeftIcon className="tw-size-4 tw-text-iron-400" />
-                <span className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-text-iron-400 sm:tw-text-sm">
-                  My Stream
-                </span>
-              </button>
-              {/* Divider */}
-              <div className="tw-mx-1 tw-h-4 tw-w-px tw-flex-shrink-0 tw-bg-iron-700" />
-            </>
-          )}
+          {streamBackButton}
           {!waveActive && showWavesTab && (
             <button
               {...getTabStateProps(activeView === BrainView.WAVES)}
