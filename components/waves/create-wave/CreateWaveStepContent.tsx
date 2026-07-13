@@ -72,8 +72,12 @@ export default function CreateWaveStepContent({
           overview={config.overview}
           display={config.display}
           errors={errors}
+          ongoingRanking={config.dates.ongoingRanking ?? false}
           setOverview={setOverview}
           setDisplay={setDisplay}
+          onOngoingRankingChange={(ongoingRanking) =>
+            setDates({ ...config.dates, ongoingRanking })
+          }
         />
       );
     case CreateWaveStep.GROUPS:
@@ -106,6 +110,7 @@ export default function CreateWaveStepContent({
           waveType={config.overview.type}
           drops={config.drops}
           errors={errors}
+          ongoingRanking={config.dates.ongoingRanking ?? false}
           setDrops={setDrops}
         />
       );
@@ -158,9 +163,11 @@ export default function CreateWaveStepContent({
           waveType={config.overview.type}
           errors={errors}
           dates={config.dates}
+          display={config.display}
           maxWinners={config.approval.maxWinners}
           setOutcomeType={onOutcomeTypeChange}
           setOutcomes={setOutcomes}
+          setDisplay={setDisplay}
           setMaxWinners={onApprovalMaxWinnersChange}
         />
       );
