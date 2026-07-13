@@ -131,6 +131,26 @@ function isInjectedWasmCspStaticChunkFramePath(
   );
 }
 
+function hasOnlyInjectedWasmCspStaticChunkFrames(
+  frames: SentryStackFrame[]
+): boolean {
+  const markerFrame = frames.find(isInjectedWasmCspStaticChunkFrame);
+  if (!markerFrame) {
+    return false;
+  }
+
+  const markerPaths = new Set(
+    getFramePaths(markerFrame)
+      .map((path) => path.trim())
+      .filter((path) => injectedWasmCspStaticChunkPathPattern.test(path))
+  );
+
+  return frames.every((frame) => {
+    const paths = getFramePaths(frame).map((path) => path.trim());
+    return paths.length > 0 && paths.every((path) => markerPaths.has(path));
+  });
+}
+
 function hasAppOwnedWasmCspFramePath(frame: SentryStackFrame): boolean {
   return getFramePaths(frame).some(
     (path) =>
@@ -252,6 +272,10 @@ export function hasInjectedWasmCspFrameSignature(
 ): boolean {
   if (!Array.isArray(frames) || frames.length === 0) {
     return false;
+  }
+
+  if (hasOnlyInjectedWasmCspStaticChunkFrames(frames)) {
+    return true;
   }
 
   if (frames.some(isAppOwnedWasmCspFrame)) {
