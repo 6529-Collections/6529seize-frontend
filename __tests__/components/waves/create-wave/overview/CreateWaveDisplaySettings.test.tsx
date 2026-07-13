@@ -118,26 +118,19 @@ describe("CreateWaveDisplaySettings", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows outcome toggle for rank waves without approve labels", () => {
-    const onChange = jest.fn();
+  it("hides approve labels and the outcome toggle for rank waves", () => {
     render(
       <CreateWaveDisplaySettings
         display={baseDisplay}
         errors={[]}
-        onChange={onChange}
+        onChange={jest.fn()}
         waveType={ApiWaveType.Rank}
       />
     );
 
-    expect(screen.getByText("Show outcomes")).toBeInTheDocument();
+    // The outcomes-visibility toggle lives on the Outcomes step now.
+    expect(screen.queryByText("Show outcomes")).toBeNull();
     expect(screen.queryByLabelText("Approvals tab label")).toBeNull();
-
-    fireEvent.click(screen.getByRole("checkbox"));
-
-    expect(onChange).toHaveBeenCalledWith({
-      ...baseDisplay,
-      outcomesVisible: false,
-    });
   });
 
   it("shows duplicate label validation", () => {

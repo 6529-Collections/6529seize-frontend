@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import CreateWavesMainSteps from "@/components/waves/create-wave/main-steps/CreateWavesMainSteps";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { CREATE_WAVE_MAIN_STEPS } from "@/helpers/waves/waves.constants";
+import { getCreateWaveMainSteps } from "@/helpers/waves/waves.constants";
 import { CreateWaveStep } from "@/types/waves.types";
 
 jest.mock(
@@ -23,7 +23,12 @@ describe("CreateWavesMainSteps", () => {
       />
     );
     const steps = screen.getAllByTestId("step");
-    expect(steps).toHaveLength(CREATE_WAVE_MAIN_STEPS[ApiWaveType.Rank].length);
+    expect(steps).toHaveLength(
+      getCreateWaveMainSteps({
+        waveType: ApiWaveType.Rank,
+        ongoingRanking: false,
+      }).length
+    );
     expect(steps[0]).toHaveAttribute("data-step", CreateWaveStep.OVERVIEW);
   });
 

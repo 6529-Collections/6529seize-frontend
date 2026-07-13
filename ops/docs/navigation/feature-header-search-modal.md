@@ -40,7 +40,8 @@ It supports:
 - Pages catalog:
   - Page results can include top-level navigation destinations such as
     `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`, secondary destinations
-    such as `Discover Waves` (`/discover`), plus
+    such as `Discover Waves` (`/discover`) and `6529 Apps`
+    (`/about/6529-apps`), plus
     permission-gated operational routes such as `Drop Forge`, `Craft Claims`,
     or `Launch Claims`, subject to the current route catalog.
 - Category persistence:
@@ -89,6 +90,8 @@ It supports:
 - `Ctrl+K` is supported from the desktop-web sidebar path only; header search
   buttons do not guarantee that shortcut.
 - `Pages` results come from navigation entries, not full-page text content.
+- `6529 Apps` has explicit aliases for `6529 Mobile`, `6529 Desktop`, `apps`,
+  `mobile`, `desktop`, and supported platform terms.
 - Page results change with runtime route visibility (for example wallet/device/region-gated entries).
 
 ## Related Pages
@@ -96,5 +99,6 @@ It supports:
 - [Navigation Index](README.md)
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
+- [6529 Apps Page](feature-6529-apps-page.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
 - [Docs Home](../README.md)

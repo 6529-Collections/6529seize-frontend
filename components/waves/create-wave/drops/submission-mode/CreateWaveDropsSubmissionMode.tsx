@@ -8,6 +8,8 @@ import {
   WAVE_IDENTITY_DUPLICATES_COPY,
   WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY,
 } from "@/helpers/waves/wave-submission-strategy.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 enum CreateWaveSubmissionMode {
   STANDARD = "STANDARD",
@@ -123,10 +125,12 @@ function SubmissionOptionRow<T extends string>({
 export default function CreateWaveDropsSubmissionMode({
   submissionStrategy,
   errors,
+  isOngoingRanking = false,
   onChange,
 }: {
   readonly submissionStrategy: ApiWaveParticipationSubmissionStrategy | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
+  readonly isOngoingRanking?: boolean;
   readonly onChange: (
     submissionStrategy: ApiWaveParticipationSubmissionStrategy | null
   ) => void;
@@ -138,6 +142,22 @@ export default function CreateWaveDropsSubmissionMode({
 
   const showSubmissionStrategyError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.DROPS_SUBMISSION_STRATEGY_INVALID
+  );
+  const showDuplicatesRequireWinnersError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.IDENTITY_DUPLICATES_REQUIRE_WINNERS
+  );
+
+  // A perpetual rank wave never announces winners, so a "resubmit after it
+  // wins" rule could never unlock; hide it from the choices.
+  const duplicatesOptions = (
+    Object.values(
+      ApiWaveParticipationIdentitySubmissionAllowDuplicates
+    ) as ApiWaveParticipationIdentitySubmissionAllowDuplicates[]
+  ).filter(
+    (option) =>
+      !isOngoingRanking ||
+      option !==
+        ApiWaveParticipationIdentitySubmissionAllowDuplicates.AllowAfterWin
   );
 
   const onSubmissionModeChange = (mode: CreateWaveSubmissionMode) => {
@@ -269,11 +289,7 @@ export default function CreateWaveDropsSubmissionMode({
                 When can the same identity be submitted again?
               </p>
               <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3">
-                {(
-                  Object.values(
-                    ApiWaveParticipationIdentitySubmissionAllowDuplicates
-                  ) as ApiWaveParticipationIdentitySubmissionAllowDuplicates[]
-                ).map((option) => {
+                {duplicatesOptions.map((option) => {
                   const titleId = getOptionTitleId(
                     "duplicate-submissions",
                     option
@@ -309,6 +325,17 @@ export default function CreateWaveDropsSubmissionMode({
         {showSubmissionStrategyError && (
           <div className="tw-text-sm tw-font-medium tw-text-error">
             Complete the identity nomination settings before continuing.
+          </div>
+        )}
+      </CommonAnimationHeight>
+
+      <CommonAnimationHeight>
+        {showDuplicatesRequireWinnersError && (
+          <div className="tw-text-sm tw-font-medium tw-text-error">
+            {t(
+              DEFAULT_LOCALE,
+              "waves.create.drops.identityDuplicatesRequireWinners"
+            )}
           </div>
         )}
       </CommonAnimationHeight>

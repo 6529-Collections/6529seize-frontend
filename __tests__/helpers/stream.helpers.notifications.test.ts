@@ -1,3 +1,4 @@
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { prefetchAuthenticatedNotifications } from '@/helpers/stream.helpers';
 
 jest.mock('jwt-decode', () => ({ jwtDecode: () => ({ sub: 'wallet' }) }));
@@ -11,6 +12,14 @@ describe('prefetchAuthenticatedNotifications', () => {
     const queryClient = createClient();
     await prefetchAuthenticatedNotifications({ queryClient: queryClient as any, headers: { Authorization: 'Bearer t' }, context: {} as any });
     expect(queryClient.prefetchInfiniteQuery).toHaveBeenCalledTimes(3);
+    expect(queryClient.prefetchInfiniteQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: [
+          QueryKey.IDENTITY_NOTIFICATIONS,
+          { identity: 'alice', limit: '30', cause: null, version: 'v2' },
+        ],
+      })
+    );
   });
 
   it('skips when no auth header', async () => {

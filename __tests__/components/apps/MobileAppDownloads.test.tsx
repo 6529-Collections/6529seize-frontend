@@ -1,4 +1,4 @@
-import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
+import { MobileAppDownload } from "@/components/apps/MobileAppDownloads";
 import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -6,35 +6,28 @@ jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: any) => <img {...props} />,
 }));
-jest.mock("next/link", () => ({
-  __esModule: true,
-  default: ({ href, children, target, onClick, className }: any) => (
-    <a
-      href={href}
-      target={target}
-      onClick={onClick}
-      className={className}
-      data-testid="link"
-    >
-      {children}
-    </a>
-  ),
-}));
 
-describe("ShareMobileApp", () => {
+describe("MobileAppDownload", () => {
   it("renders iOS link with default target", () => {
-    render(<ShareMobileApp platform="ios" />);
-    const link = screen.getByTestId("link");
+    render(<MobileAppDownload platform="iOS" />);
+    const link = screen.getByRole("link", {
+      name: "Download 6529 Mobile for iOS from the App Store",
+    });
     expect(link).toHaveAttribute("href", MOBILE_APP_IOS);
     expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAccessibleName(
+      "Download 6529 Mobile for iOS from the App Store"
+    );
     const img = link.querySelector("img")!;
     expect(img).toHaveAttribute("src", "/app-store.png");
-    expect(img).toHaveAttribute("alt", "6529 Mobile iOS");
+    expect(img).toHaveAttribute("alt", "");
   });
 
   it("redirects at top level when target is _self", () => {
-    render(<ShareMobileApp platform="android" target="_self" />);
-    const link = screen.getByTestId("link");
+    render(<MobileAppDownload platform="Android" target="_self" />);
+    const link = screen.getByRole("link", {
+      name: "Download 6529 Mobile for Android from Google Play",
+    });
     const clickEvent = new MouseEvent("click", {
       bubbles: true,
       cancelable: true,

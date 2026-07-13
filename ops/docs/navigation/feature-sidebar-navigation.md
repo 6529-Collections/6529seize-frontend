@@ -17,8 +17,8 @@ On web layouts, route switching is sidebar-first.
   are direct rows.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary Waves experience link and searchable destination.
-- When the connected wallet can access Drop Forge, the sidebar adds `Drop
-  Forge` as a standalone row after `About`.
+- When the connected wallet can access Drop Forge, the sidebar adds a
+  standalone `Drop Forge` row after `About`.
 - `DMs` keeps a main-nav unread dot; connected users get a lower
   `Notifications` row with its own unread dot.
 - Connected account avatar in the sidebar account area can show an unread dot
@@ -84,6 +84,8 @@ On web layouts, route switching is sidebar-first.
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,
   `/network/nerd`, `/network/prenodes`, and
   `/network/tdh/historic-boosts`.
+- Open `About > About 6529 > 6529 Apps` for the combined 6529 Mobile and 6529
+  Desktop download page at `/about/6529-apps`.
 - Open `Drop Forge` from its standalone row after `About` when the current
   wallet has landing access.
 - Open `About` tool routes:
@@ -172,5 +174,6 @@ On web layouts, route switching is sidebar-first.
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Header Search Modal](feature-header-search-modal.md)
 - [Share Modal](feature-share-modal.md)
+- [6529 Apps Page](feature-6529-apps-page.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Network Index](../network/README.md)
