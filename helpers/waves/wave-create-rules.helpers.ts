@@ -3,6 +3,8 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getCreateWaveEndDate } from "@/helpers/waves/create-wave.helpers";
 import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   WAVE_LABELS,
   WAVE_VOTING_LABELS,
@@ -41,6 +43,34 @@ interface CreateRulesContext {
 const getOptionalRulesText = (value: string): string | null =>
   value.length > 0 ? value : null;
 
+const getRankScheduleRows = (config: CreateWaveConfig): WaveRuleRow[] => {
+  if (config.overview.type !== ApiWaveType.Rank) {
+    return [];
+  }
+
+  if (config.dates.ongoingRanking) {
+    return [
+      {
+        id: "ongoing-ranking",
+        label: t(
+          DEFAULT_LOCALE,
+          "waves.rules.schedule.winnerAnnouncements.label"
+        ),
+        value: t(
+          DEFAULT_LOCALE,
+          "waves.rules.schedule.winnerAnnouncements.none"
+        ),
+      },
+    ];
+  }
+
+  return getDecisionRows({
+    first_decision_time: config.dates.firstDecisionTime,
+    subsequent_decisions: config.dates.subsequentDecisions,
+    is_rolling: config.dates.isRolling,
+  });
+};
+
 const getCreateOverviewSection = ({
   config,
 }: CreateRulesContext): WaveRuleSection => ({
@@ -50,7 +80,10 @@ const getCreateOverviewSection = ({
     {
       id: "wave-type",
       label: "Type",
-      value: WAVE_LABELS[config.overview.type],
+      value:
+        config.overview.type === ApiWaveType.Rank && config.dates.ongoingRanking
+          ? t(DEFAULT_LOCALE, "waves.rules.schedule.perpetualRankType")
+          : WAVE_LABELS[config.overview.type],
     },
   ],
 });
@@ -159,15 +192,7 @@ const getCreateTimingSection = ({
         max: endDate,
       }),
     },
-    ...getDecisionRows(
-      config.overview.type === ApiWaveType.Rank
-        ? {
-            first_decision_time: config.dates.firstDecisionTime,
-            subsequent_decisions: config.dates.subsequentDecisions,
-            is_rolling: config.dates.isRolling,
-          }
-        : null
-    ),
+    ...getRankScheduleRows(config),
   ],
 });
 
@@ -274,22 +299,39 @@ const getCreateVotingSection = ({
 
 const getCreateOutcomesSection = ({
   config,
-}: CreateRulesContext): WaveRuleSection => ({
-  id: "outcomes",
-  title: "Outcomes",
-  rows: [
-    {
-      id: "outcomes-visible",
-      label: "Outcomes visibility",
-      value: config.display.outcomesVisible ? "Shown" : "Hidden",
-    },
-    {
-      id: "outcomes-count",
-      label: "Configured outcomes",
-      value: getOutcomeCountLabel(config.outcomes.length),
-    },
-  ],
-});
+}: CreateRulesContext): WaveRuleSection => {
+  // Perpetual rank waves submit with no outcomes and a hidden outcomes tab
+  // regardless of the stored config, so the summary reports the effective
+  // state rather than the raw values.
+  const isPerpetualRank =
+    config.overview.type === ApiWaveType.Rank &&
+    Boolean(config.dates.ongoingRanking);
+  const outcomesVisible = isPerpetualRank
+    ? false
+    : config.display.outcomesVisible;
+  // "None yet" would imply outcomes are still coming; a perpetual wave never
+  // has any.
+  const outcomesCountLabel = isPerpetualRank
+    ? t(DEFAULT_LOCALE, "waves.rules.schedule.outcomesNotAvailable")
+    : getOutcomeCountLabel(config.outcomes.length);
+
+  return {
+    id: "outcomes",
+    title: "Outcomes",
+    rows: [
+      {
+        id: "outcomes-visible",
+        label: "Outcomes visibility",
+        value: outcomesVisible ? "Shown" : "Hidden",
+      },
+      {
+        id: "outcomes-count",
+        label: "Configured outcomes",
+        value: outcomesCountLabel,
+      },
+    ],
+  };
+};
 
 const getCreateApprovalSection = ({
   config,
