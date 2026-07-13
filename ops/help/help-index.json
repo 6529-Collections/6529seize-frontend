@@ -2902,15 +2902,21 @@
         "up"
       ],
       "facts": [
-        "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
+        "The Memes subscriptions are an optional way to mint eligible Meme Cards remotely without being online at mint time, with estimated gas savings of about 80% for one card and up to 98% for ten cards funded by one ETH transfer.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
+        "The setup path is: connect a wallet, open the profile Subscriptions tab, add a completely non-refundable ETH balance, choose Automatic or Manual mode, and select or skip upcoming eligible cards.",
+        "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions", "/tools/subscriptions-report"],
       "tags": ["subscriptions", "memes", "glossary"],
       "source_refs": [
+        "components/about/AboutSubscriptions.tsx",
+        "components/about/AboutSubscriptionsReference.tsx",
         "ops/docs/open-data/feature-meme-subscriptions.md",
         "ops/docs/profiles/tabs/feature-subscriptions-tab.md"
       ]
@@ -2947,12 +2953,17 @@
       "facts": [
         "Subscriptions do not create extra eligibility.",
         "A subscription can only mint within the phase and allowlist access the profile would otherwise have.",
+        "Phase 0 subscription mints are guaranteed because Phase 0 is underallocated; Phase 1 and Phase 2 mints depend on card availability.",
+        "When a phase has more subscription mints than available cards, cards are airdropped in the order subscription payments were received.",
         "Top-ups must be received by 00:00 UTC the day before a Meme Card mint to be eligible for that mint."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions"],
       "tags": ["subscriptions", "eligibility"],
-      "source_refs": ["ops/docs/open-data/feature-meme-subscriptions.md"]
+      "source_refs": [
+        "components/about/AboutSubscriptionsReference.tsx",
+        "ops/docs/open-data/feature-meme-subscriptions.md"
+      ]
     },
     {
       "id": "subscriptions.top-up-troubleshooting",
