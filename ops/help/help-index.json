@@ -4656,7 +4656,7 @@
         "Wave Winners tab behavior is documented under leaderboard features.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
         "Single-decision and multi-decision waves have different winner display behavior.",
-        "Mapped winners in The Memes Main Stage show a Meme #N link in the Winners tab and on the open winning drop."
+        "Mapped winners in The Memes Main Stage show a Meme #N link in the Winners tab and on the open winning drop; the frontend never guesses a Meme ID when the backend mapping is absent."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

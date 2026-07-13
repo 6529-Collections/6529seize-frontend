@@ -158,6 +158,21 @@ test("links a mapped Main Stage winner to its Meme card", () => {
   );
 });
 
+test("does not infer a Meme card link when the mapping is absent", () => {
+  render(
+    <MemeWinnerDrop
+      drop={{ ...drop, submission_context: {} }}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    />
+  );
+
+  expect(
+    screen.queryByRole("link", { name: /Meme #/ })
+  ).not.toBeInTheDocument();
+});
+
 test("does not trigger the mobile menu wrapper when vote details is clicked", () => {
   render(
     <MemeWinnerDrop

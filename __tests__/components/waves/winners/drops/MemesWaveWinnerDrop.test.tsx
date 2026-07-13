@@ -212,6 +212,20 @@ describe("MemesWaveWinnersDrop", () => {
     );
   });
 
+  it("does not infer a Meme card link when the mapping is absent", () => {
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByRole("link", { name: /Meme #/ })
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps native tap behavior for touch long-press handlers", () => {
     useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
 
