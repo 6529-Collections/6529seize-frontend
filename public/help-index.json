@@ -1889,6 +1889,9 @@
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
+        "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
+        "When Vote with reply is enabled, removing all rationale text blocks submission until text is added or the switch is turned off.",
+        "If an optional rationale reply fails after a successful vote, the vote stays saved and the user is told that the reply failed.",
         "Boosting is a per-user flame toggle on full drop cards and boosted cards in wave and direct-message threads.",
         "Wave creator badges and drop state indicators explain context around submitted drops."
       ],
@@ -3341,11 +3344,28 @@
       "id": "navigation.back-button",
       "kind": "ui_affordance",
       "title": "Back button behavior",
-      "aliases": ["back button", "go back", "return", "previous page"],
-      "keywords": ["back", "button", "navigation", "history", "return"],
+      "aliases": [
+        "back button",
+        "go back",
+        "return",
+        "previous page",
+        "swipe back",
+        "swipe right"
+      ],
+      "keywords": [
+        "back",
+        "button",
+        "navigation",
+        "history",
+        "return",
+        "swipe",
+        "gesture",
+        "mobile"
+      ],
       "facts": [
         "Back button behavior is documented as shared navigation behavior.",
         "It depends on route history and app shell context.",
+        "In the native app, swiping right from the left edge of a standard wave detail returns to the Waves list; the shortcut is disabled for direct messages and focused drop or create overlays.",
         "Use it when users ask why a back control returns to a prior app surface."
       ],
       "canonical_path": "/waves",
@@ -4602,7 +4622,8 @@
       "facts": [
         "The My Votes tab is documented under wave leaderboard features.",
         "It helps a user inspect their own voting activity where the wave supports it.",
-        "Availability depends on wave type, eligibility, and voting state."
+        "Availability depends on wave type, eligibility, and voting state.",
+        "Rows can include an Explain action that opens a normal drop reply prefilled with a vote rationale prefix without submitting or changing the vote."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -4901,7 +4922,7 @@
         "Individual Meme Card pages live at /the-memes/{id}.",
         "Use /the-memes/{id} for a specific Meme Card number such as Meme #1 or The Memes #1.",
         "Meme Card preview/data surfaces expose fields such as edition size, TDH rate, season, mint date, and supply when available.",
-        "Upcoming unresolved Meme Card pages show mint timing and subscription awareness for that card.",
+        "Upcoming unresolved Meme Card pages show mint timing and subscription awareness; positive card ids also show a Distribution Plan link for that card.",
         "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
         "Card tabs and focus links are documented for deep-linking into card page sections.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."
@@ -4929,6 +4950,7 @@
       "keywords": ["memes", "distribution", "card", "holders", "route"],
       "facts": [
         "Meme Card distribution pages live at /the-memes/{id}/distribution.",
+        "Unpublished Meme Card distribution pages can show the upcoming mint panel plus a centered message that the Distribution Plan will be made available soon.",
         "Use distribution routes when users ask where card distribution details are shown.",
         "Meme Lab cards have a separate distribution route under /meme-lab/{id}/distribution."
       ],
