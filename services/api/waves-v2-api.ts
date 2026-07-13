@@ -175,8 +175,10 @@ const mapApiWaveOverviewToSidebarWave = (
       context?.first_hidden_followed_subwave_unread_drop_serial_no ?? null,
     unreadDropsCount: context?.unread_drops ?? 0,
     followedSubwavesCount: context?.followed_subwaves_count ?? 0,
-    unreadFollowedSubwaveDrops:
-      context?.hidden_followed_subwave_unread_drops ?? 0,
+    unreadSubwaveDrops:
+      context?.subwave_unread_drops ??
+      context?.hidden_followed_subwave_unread_drops ??
+      0,
     latestReadTimestamp: 0,
     pinned: context?.pinned ?? false,
     muted: context?.muted ?? false,
@@ -231,7 +233,7 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     firstUnreadFollowedSubwaveDropSerialNo: null,
     unreadDropsCount: wave.metrics.your_unread_drops_count,
     followedSubwavesCount: 0,
-    unreadFollowedSubwaveDrops: 0,
+    unreadSubwaveDrops: 0,
     latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
     pinned: wave.pinned,
     muted: wave.metrics.muted,
