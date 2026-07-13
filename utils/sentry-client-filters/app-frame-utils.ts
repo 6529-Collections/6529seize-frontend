@@ -349,14 +349,18 @@ function isSentryRouteParameterizationPath(path: string): boolean {
   );
 }
 
+export function isSentryRouteParameterizationFrame(
+  frame: SentryStackFrame
+): boolean {
+  return getFramePaths(frame).some(isSentryRouteParameterizationPath);
+}
+
 export function hasSentryRouteParameterizationFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return (
     Array.isArray(frames) &&
-    frames.some((frame) =>
-      getFramePaths(frame).some(isSentryRouteParameterizationPath)
-    )
+    frames.some(isSentryRouteParameterizationFrame)
   );
 }
 

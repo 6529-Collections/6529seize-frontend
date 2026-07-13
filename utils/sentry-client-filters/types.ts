@@ -5,6 +5,7 @@ export type SentryStackFrame = {
   in_app?: boolean | undefined;
   lineno?: number | undefined;
   colno?: number | undefined;
+  context_line?: string | undefined;
 };
 
 export type SentryTransactionSpan = {
