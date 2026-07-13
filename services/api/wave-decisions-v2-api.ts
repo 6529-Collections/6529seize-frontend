@@ -1,4 +1,3 @@
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropWinningContext } from "@/generated/models/ApiDropWinningContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
