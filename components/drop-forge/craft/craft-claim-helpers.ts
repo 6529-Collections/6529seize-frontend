@@ -38,7 +38,9 @@ export function getClaimMediaType(claim: MintingClaim): ClaimMediaType {
   );
   if (!hasImageData && !hasAnimationData) return "unknown";
   if (hasAnimationData) {
-    const format = claim.animation_details?.format;
+    const format = (
+      claim.animation_details as { format?: string } | null | undefined
+    )?.format;
     if (format === "HTML") return "html";
     if (format === "GLB") return "glb";
     return "video";

@@ -5,7 +5,6 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import MediaSourceLinkCard from "@/components/drop-forge/craft/MediaSourceLinkCard";
-import { usePendingObjectUrl } from "@/components/drop-forge/craft/usePendingObjectUrl";
 import {
   BTN_DANGER,
   BTN_PRIMARY,
@@ -32,12 +31,10 @@ export default function ImageSection({
   onPendingChange: (dirty: boolean) => void;
 }>) {
   const { setToast } = useAuth();
-  const {
-    pendingFile: pendingImageFile,
-    pendingPreviewUrl: pendingImagePreviewUrl,
-    clearPendingFile: clearPendingImageSelection,
-    setPendingFile: setPendingImageFile,
-  } = usePendingObjectUrl();
+  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
+  const [pendingImagePreviewUrl, setPendingImagePreviewUrl] = useState<
+    string | null
+  >(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -53,15 +50,34 @@ export default function ImageSection({
     imagePreviewMimeType = pendingImageFile.type;
   }
 
+  function clearPendingImageSelection() {
+    setPendingImageFile(null);
+    setPendingImagePreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+  }
+
   useEffect(() => {
     clearPendingImageSelection();
-  }, [claim.claim_id, claim.image_url, clearPendingImageSelection]);
+  }, [claim.claim_id, claim.image_url]);
+
+  useEffect(() => {
+    return () => {
+      clearPendingImageSelection();
+    };
+  }, []);
 
   function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
+    const previewUrl = URL.createObjectURL(file);
     setPendingImageFile(file);
+    setPendingImagePreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return previewUrl;
+    });
     setFormError(null);
   }
 
