@@ -120,7 +120,9 @@ const getSearchStorageScope = (
   if (connectedProfileId) return connectedProfileId;
   if (!connectedProfile) return "anonymous";
 
-  const primaryWallet = connectedProfile.primary_wallet.trim();
+  const rawPrimaryWallet: unknown = connectedProfile.primary_wallet;
+  const primaryWallet =
+    typeof rawPrimaryWallet === "string" ? rawPrimaryWallet.trim() : "";
   return primaryWallet ? primaryWallet.toLocaleLowerCase(locale) : "anonymous";
 };
 

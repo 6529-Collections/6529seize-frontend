@@ -392,6 +392,17 @@ describe("HeaderSearchModal", () => {
     );
   });
 
+  it("falls back to anonymous storage for an incomplete profile payload", () => {
+    sessionStorage.setItem("headerSearchLastQuery:anonymous", "public query");
+    useAuthMock.mockReturnValue({
+      connectedProfile: { id: null, primary_wallet: null },
+    });
+
+    setup();
+
+    expect(getSearchInput()).toHaveValue("public query");
+  });
+
   it("calls onClose when escape is pressed", () => {
     const { onClose } = setup();
     escapeCb();
