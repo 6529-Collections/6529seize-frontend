@@ -14,6 +14,7 @@ import {
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
+import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
@@ -1163,28 +1164,7 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
-  "home.newcomer.eyebrow": "New to 6529?",
-  "home.newcomer.title": "Shape what gets built next.",
-  "home.newcomer.description":
-    "6529 is an open community coordinating art, culture, and public goods. Browse first, then join conversations, help choose what moves forward, or collect the art.",
-  "home.newcomer.startAction": "Start here",
-  "home.newcomer.connectAction": "Connect wallet",
-  "home.newcomer.connectFailed":
-    "Failed to open wallet connection. Please try again.",
-  "home.newcomer.browseNote": "No wallet is needed to explore.",
-  "home.newcomer.value.coordinate.title": "Talk and build together",
-  "home.newcomer.value.coordinate.body":
-    "Join public conversations around ideas, art, and projects.",
-  "home.newcomer.value.decide.title": "Help decide what moves forward",
-  "home.newcomer.value.decide.body":
-    "Community participation guides what gets supported and created.",
-  "home.newcomer.value.collect.title": "Collect open art",
-  "home.newcomer.value.collect.body":
-    "Discover community-curated CC0 work that supports public goods.",
-  "home.newcomer.activityEyebrow": "Happening now",
-  "home.newcomer.activityTitle": "See the network in motion",
-  "home.newcomer.activityDescription":
-    "The sections below show current art, community picks, and active conversations.",
+  ...homeNewcomerMessages,
   "home.mintSubscriptions.balanceLabel": "Balance",
   "home.mintSubscriptions.infoLinkAriaLabel":
     "Learn more about The Memes subscriptions",
