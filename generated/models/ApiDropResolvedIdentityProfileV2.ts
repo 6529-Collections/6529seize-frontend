@@ -13,6 +13,7 @@
 
 import { ApiIdentityOverviewBadges } from '../models/ApiIdentityOverviewBadges';
 import { ApiIdentityOverviewContextProfileContext } from '../models/ApiIdentityOverviewContextProfileContext';
+import { ApiIdentityWaveParticipation } from '../models/ApiIdentityWaveParticipation';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileRepCategorySummary } from '../models/ApiProfileRepCategorySummary';
 import { HttpFile } from '../http/http';
@@ -26,6 +27,7 @@ export class ApiDropResolvedIdentityProfileV2 {
     'classification': ApiProfileClassification;
     'context_profile_context'?: ApiIdentityOverviewContextProfileContext;
     'badges': ApiIdentityOverviewBadges;
+    'wave_participation'?: ApiIdentityWaveParticipation;
     'bio'?: string;
     'top_rep_categories'?: Array<ApiProfileRepCategorySummary>;
 
@@ -80,6 +82,12 @@ export class ApiDropResolvedIdentityProfileV2 {
             "name": "badges",
             "baseName": "badges",
             "type": "ApiIdentityOverviewBadges",
+            "format": ""
+        },
+        {
+            "name": "wave_participation",
+            "baseName": "wave_participation",
+            "type": "ApiIdentityWaveParticipation",
             "format": ""
         },
         {

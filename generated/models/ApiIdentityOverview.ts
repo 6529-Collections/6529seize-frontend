@@ -13,6 +13,7 @@
 
 import { ApiIdentityOverviewBadges } from '../models/ApiIdentityOverviewBadges';
 import { ApiIdentityOverviewContextProfileContext } from '../models/ApiIdentityOverviewContextProfileContext';
+import { ApiIdentityWaveParticipation } from '../models/ApiIdentityWaveParticipation';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { HttpFile } from '../http/http';
 
@@ -25,6 +26,7 @@ export class ApiIdentityOverview {
     'classification': ApiProfileClassification;
     'context_profile_context'?: ApiIdentityOverviewContextProfileContext;
     'badges': ApiIdentityOverviewBadges;
+    'wave_participation'?: ApiIdentityWaveParticipation;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -77,6 +79,12 @@ export class ApiIdentityOverview {
             "name": "badges",
             "baseName": "badges",
             "type": "ApiIdentityOverviewBadges",
+            "format": ""
+        },
+        {
+            "name": "wave_participation",
+            "baseName": "wave_participation",
+            "type": "ApiIdentityWaveParticipation",
             "format": ""
         }    ];
 

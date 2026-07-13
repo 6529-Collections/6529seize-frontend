@@ -109,6 +109,25 @@ interface FetchWaveDropsSearchV2Props {
   readonly signal?: AbortSignal | undefined;
 }
 
+interface FetchWaveCompetitionDropsV2Props {
+  readonly wave: ApiWave | ApiWaveMin;
+  readonly authorId: string;
+  readonly dropType: ApiDropType.Participatory | ApiDropType.Winner;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly signal?: AbortSignal | undefined;
+}
+
+type WaveCompetitionDrop = ApiDrop & {
+  readonly voting_open: boolean;
+};
+
+interface WaveCompetitionDropsPage {
+  readonly data: WaveCompetitionDrop[];
+  readonly page: number;
+  readonly next: boolean;
+}
+
 export type WavePollsState = "OPEN" | "CLOSED";
 export type WavePollsSort = "created_at" | "closing_time";
 export type ApiWavePollDropRow = Partial<ApiWavePoll> & {
@@ -592,6 +611,45 @@ export async function fetchWaveDropsSearchV2({
     data: response.data.map((drop) =>
       mapLeaderboardDropV2({ drop, wave: waveMin })
     ),
+    page: response.page,
+    next: response.next,
+  };
+}
+
+export async function fetchWaveCompetitionDropsV2({
+  wave,
+  authorId,
+  dropType,
+  page,
+  pageSize,
+  signal,
+}: FetchWaveCompetitionDropsV2Props): Promise<WaveCompetitionDropsPage> {
+  const waveMin = normalizeWaveMin(wave);
+  const response = await commonApiFetch<ApiDropV2PageWithoutCount>({
+    endpoint: `v2/waves/${encodeURIComponent(waveMin.id)}/competition-drops`,
+    params: {
+      author_id: authorId,
+      drop_type: dropType,
+      page: page.toString(),
+      page_size: pageSize.toString(),
+    },
+    signal,
+  });
+  const data = await Promise.all(
+    response.data.map(async (drop) => ({
+      ...(await hydrateDropV2({
+        drop,
+        wave: waveMin,
+        signal,
+        includeFullMetadata: false,
+        includeTopRaters: false,
+      })),
+      voting_open: drop.submission_context?.voting?.is_open === true,
+    }))
+  );
+
+  return {
+    data,
     page: response.page,
     next: response.next,
   };

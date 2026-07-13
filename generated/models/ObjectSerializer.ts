@@ -206,6 +206,7 @@ export * from '../models/ApiIdentityOverviewContextProfileContext';
 export * from '../models/ApiIdentitySubscriptionActions';
 export * from '../models/ApiIdentitySubscriptionTargetAction';
 export * from '../models/ApiIdentitySubscriptionTargetType';
+export * from '../models/ApiIdentityWaveParticipation';
 export * from '../models/ApiIncomingIdentitySubscriptionsPage';
 export * from '../models/ApiIntRange';
 export * from '../models/ApiLightDrop';
@@ -661,7 +662,7 @@ import { ApiDropReactionCounter } from '../models/ApiDropReactionCounter';
 import { ApiDropReactionV2 } from '../models/ApiDropReactionV2';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropResolvedIdentityProfile                         } from '../models/ApiDropResolvedIdentityProfile';
-import { ApiDropResolvedIdentityProfileV2           } from '../models/ApiDropResolvedIdentityProfileV2';
+import { ApiDropResolvedIdentityProfileV2            } from '../models/ApiDropResolvedIdentityProfileV2';
 import { ApiDropSearchStrategy } from '../models/ApiDropSearchStrategy';
 import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
@@ -713,12 +714,13 @@ import { ApiIdentity                          } from '../models/ApiIdentity';
 import { ApiIdentityActivity } from '../models/ApiIdentityActivity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentityMuteState } from '../models/ApiIdentityMuteState';
-import { ApiIdentityOverview         } from '../models/ApiIdentityOverview';
+import { ApiIdentityOverview          } from '../models/ApiIdentityOverview';
 import { ApiIdentityOverviewBadges } from '../models/ApiIdentityOverviewBadges';
 import { ApiIdentityOverviewContextProfileContext } from '../models/ApiIdentityOverviewContextProfileContext';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
 import { ApiIdentitySubscriptionTargetType } from '../models/ApiIdentitySubscriptionTargetType';
+import { ApiIdentityWaveParticipation } from '../models/ApiIdentityWaveParticipation';
 import { ApiIncomingIdentitySubscriptionsPage } from '../models/ApiIncomingIdentitySubscriptionsPage';
 import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiLightDrop             } from '../models/ApiLightDrop';
@@ -1329,6 +1331,7 @@ let typeMap: {[index: string]: any} = {
     "ApiIdentityOverviewBadges": ApiIdentityOverviewBadges,
     "ApiIdentityOverviewContextProfileContext": ApiIdentityOverviewContextProfileContext,
     "ApiIdentitySubscriptionActions": ApiIdentitySubscriptionActions,
+    "ApiIdentityWaveParticipation": ApiIdentityWaveParticipation,
     "ApiIncomingIdentitySubscriptionsPage": ApiIncomingIdentitySubscriptionsPage,
     "ApiIntRange": ApiIntRange,
     "ApiLightDrop": ApiLightDrop,

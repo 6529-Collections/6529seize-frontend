@@ -214,6 +214,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     />
                     <DropAuthorBadges
                       profile={winner.drop.author}
+                      wave={winner.drop.wave}
                       tooltipIdPrefix={`memes-winner-author-badges-${winner.drop.id}`}
                     />
 
