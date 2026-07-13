@@ -203,7 +203,28 @@ describe("MobileWaveSubwavesBar", () => {
     });
   });
 
-  it("keeps Main visible while subwaves are still loading", () => {
+  it("shows a stable loading row instead of an incomplete Main tab", () => {
+    render(
+      <MobileWaveSubwavesBar wave={createApiWave({ hasSubwaves: true })} />
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent("Loading subwaves");
+    expect(
+      screen.queryByRole("button", { name: "Open Main" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps cached subwaves visible during a background refresh", () => {
+    mockSubwavesByParentId = new Map([
+      [
+        "root-wave",
+        {
+          subwaves: [createSubwave("child-1", { name: "Cached Child" })],
+          isFetching: true,
+        },
+      ],
+    ]);
+
     render(
       <MobileWaveSubwavesBar wave={createApiWave({ hasSubwaves: true })} />
     );
@@ -211,6 +232,10 @@ describe("MobileWaveSubwavesBar", () => {
     expect(
       screen.getByRole("button", { name: "Open Main" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open Cached Child" })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("renders a subwave fallback when the active subwave is missing from loaded siblings", () => {

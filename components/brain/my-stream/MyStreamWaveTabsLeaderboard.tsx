@@ -45,11 +45,19 @@ const MyStreamWaveTabsLeaderboard: React.FC<
   const showWinnersTab = isApproveWave || firstDecisionDone;
   const winnersLabel = isApproveWave ? approveLabels.approved : "Winners";
   const baseButtonClasses =
-    "tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border-0 tw-px-3 tw-py-2 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+    "tw-group -tw-mb-px tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-px-3 tw-py-2 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300";
   const getButtonStateClasses = (isActive: boolean) =>
-    `${baseButtonClasses} ${isActive ? "tw-bg-iron-800" : "tw-bg-iron-950"}`;
+    `${baseButtonClasses} ${
+      isActive
+        ? "tw-border-primary-300 tw-bg-transparent"
+        : "tw-border-transparent tw-bg-transparent active:tw-bg-white/[0.05]"
+    }`;
   const getButtonTextClasses = (isActive: boolean) =>
-    `tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-semibold sm:tw-max-w-44 sm:tw-text-sm ${isActive ? "tw-text-iron-300" : "tw-text-iron-400"}`;
+    `tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium sm:tw-max-w-44 ${
+      isActive
+        ? "tw-text-white"
+        : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-200 group-active:tw-text-iron-100"
+    }`;
 
   return (
     <>
@@ -59,7 +67,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
           registerTabRef?.(primaryView, el);
         }}
         onClick={() => onViewChange(primaryView)}
-        aria-current={activeView === primaryView ? "true" : undefined}
+        aria-current={activeView === primaryView ? "page" : undefined}
         className={getButtonStateClasses(activeView === primaryView)}
       >
         <span className={getButtonTextClasses(activeView === primaryView)}>
@@ -75,7 +83,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
           }}
           onClick={() => onViewChange(BrainView.WINNERS)}
           aria-current={
-            activeView === BrainView.WINNERS ? "true" : undefined
+            activeView === BrainView.WINNERS ? "page" : undefined
           }
           className={getButtonStateClasses(activeView === BrainView.WINNERS)}
         >

@@ -17,14 +17,17 @@ import MyStreamWaveCurationCreateDialog from "../my-stream/tabs/MyStreamWaveCura
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
-const ACTIVE_TAB_BACKGROUND = "tw-bg-iron-800";
-const INACTIVE_TAB_BACKGROUND = "tw-bg-iron-950";
-const ACTIVE_TAB_TEXT = "tw-text-iron-300";
-const INACTIVE_TAB_TEXT = "tw-text-iron-400";
+const ACTIVE_TAB_BACKGROUND =
+  "tw-border-primary-300 tw-bg-transparent";
+const INACTIVE_TAB_BACKGROUND =
+  "tw-border-transparent tw-bg-transparent active:tw-bg-white/[0.05]";
+const ACTIVE_TAB_TEXT = "tw-text-white";
+const INACTIVE_TAB_TEXT =
+  "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-200 group-active:tw-text-iron-100";
 const BASE_TAB_BUTTON_CLASS_NAME =
-  "tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border-0 tw-px-3 tw-py-2 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-group -tw-mb-px tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-px-3 tw-py-2 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300";
 const BASE_TAB_TEXT_CLASS_NAME =
-  "tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-semibold sm:tw-max-w-44 sm:tw-text-sm";
+  "tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium sm:tw-max-w-44";
 
 const WAVE_TAB_SKELETONS = [
   { id: "chat", widthClassName: "tw-w-14" },
@@ -54,7 +57,7 @@ const getTabTextClassName = ({
 
 const getTabStateProps = (isActive: boolean) => ({
   type: "button" as const,
-  "aria-current": isActive ? ("true" as const) : undefined,
+  "aria-current": isActive ? ("page" as const) : undefined,
 });
 
 interface BrainMobileTabsProps {
@@ -190,7 +193,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   const isChatActive =
     activeView === BrainView.DEFAULT && activeCurationId === null;
-  const backButtonClasses = `tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`;
+  const backButtonClasses =
+    "tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-px-3 tw-py-2 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none desktop-hover:hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black";
   const streamBackButton =
     waveActive && showStreamBack && !isApp ? (
       <>
@@ -209,7 +213,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             My Stream
           </span>
         </button>
-        <div className="tw-mx-1 tw-h-4 tw-w-px tw-flex-shrink-0 tw-bg-iron-700" />
+        <div className="tw-mx-1 tw-h-4 tw-w-px tw-flex-shrink-0 tw-self-center tw-bg-iron-700" />
       </>
     ) : null;
   const isWaveNavigationLoading =
@@ -283,24 +287,23 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     ) : null;
 
   return (
-    <div
+    <nav
       ref={setMobileTabsRef}
-      role="navigation"
       aria-label={t(
         locale,
         waveActive
           ? "wave.navigation.waveSections"
           : "wave.navigation.appSections"
       )}
-      className="tw-overflow-x-auto tw-px-2 tw-py-2 sm:tw-px-4 md:tw-px-6"
+      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-px-2 sm:tw-px-4 md:tw-px-6"
     >
       {isWaveNavigationLoading ? (
-        <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500">
+        <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1.5 tw-overflow-hidden tw-px-0.5">
           {streamBackButton}
-          <div
-            role="status"
+          <output
             aria-label={t(locale, "wave.navigation.loadingSections")}
-            className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 tw-overflow-hidden"
+            aria-busy="true"
+            className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1.5 tw-overflow-hidden"
           >
             <span className="tw-sr-only">
               {t(locale, "wave.navigation.loadingSections")}
@@ -309,13 +312,15 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               <span
                 key={id}
                 aria-hidden="true"
-                className={`tw-h-10 tw-shrink-0 tw-rounded-md tw-bg-iron-800/70 motion-safe:tw-animate-pulse ${widthClassName}`}
-              />
+                className={`tw-flex tw-h-10 tw-shrink-0 tw-items-center tw-px-3 ${widthClassName}`}
+              >
+                <span className="tw-h-4 tw-w-full tw-rounded-md tw-bg-iron-700/70 motion-safe:tw-animate-pulse" />
+              </span>
             ))}
-          </div>
+          </output>
         </div>
       ) : (
-        <div className="tw-inline-flex tw-min-w-full tw-w-max tw-items-center tw-justify-start tw-gap-1 tw-overflow-x-auto tw-overflow-y-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+        <div className="tw-flex tw-min-h-12 tw-w-full tw-items-stretch tw-justify-start tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-px-0.5 tw-scrollbar-none">
           {streamBackButton}
           {!waveActive && showWavesTab && (
             <button
@@ -473,7 +478,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   key={curation.id}
                   type="button"
                   data-curation-id={curation.id}
-                  aria-current={isActive ? "true" : undefined}
+                  aria-current={isActive ? "page" : undefined}
                   ref={getActiveButtonRef(isActive)}
                   onClick={() => onCurationClick(curation.id)}
                   className={getTabButtonClassName(isActive)}
@@ -493,7 +498,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <button
               type="button"
               onClick={() => setIsCreateCurationOpen(true)}
-              className="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
+              className="tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-150 motion-reduce:tw-transition-none desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
               aria-label="Create curation"
             >
               <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
@@ -534,7 +539,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           }}
         />
       )}
-    </div>
+    </nav>
   );
 };
 export default BrainMobileTabs;
