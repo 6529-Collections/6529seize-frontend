@@ -125,7 +125,7 @@ export function JoinHeader({
 
   return (
     <header
-      className="tw-relative tw-isolate tw-mx-auto tw-flex tw-min-h-[620px] tw-w-full tw-max-w-7xl tw-flex-col tw-items-center tw-justify-center tw-overflow-visible tw-px-4 tw-py-20 md:tw-min-h-[700px] md:tw-py-24 lg:tw-px-6 xl:tw-px-0"
+      className="tw-relative tw-isolate tw-mx-auto tw-flex tw-min-h-[620px] tw-w-full tw-max-w-7xl tw-flex-col tw-items-center tw-justify-center tw-overflow-visible tw-px-4 tw-py-20 md:tw-min-h-[700px] md:tw-px-6 md:tw-py-24 lg:tw-px-8"
       onPointerLeave={handleHeroPointerLeave}
       onPointerMove={handleHeroPointerMove}
       style={HERO_MAGNETIC_REST_STYLE}
