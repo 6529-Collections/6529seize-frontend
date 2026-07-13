@@ -14,7 +14,6 @@ import {
   getWavesBaseRoute,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useExitActiveWave } from "./useExitActiveWave";
@@ -82,7 +81,6 @@ export default function BackButton() {
     // Drop open → close drop (remove ?drop param)
     if (dropId) {
       beginClosingDrop(dropId);
-      markDropCloseNavigation();
       const params = new URLSearchParams(searchParamsString || "");
       params.delete("drop");
       const basePath =
