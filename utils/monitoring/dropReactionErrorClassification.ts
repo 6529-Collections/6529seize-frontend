@@ -1,3 +1,5 @@
+import { extractErrorStatusCode } from "@/utils/errorStatus";
+
 const PROXY_REACTION_PERMISSION_DENIED_MESSAGE =
   "Proxy doesn't have permission to add reactions";
 
@@ -35,53 +37,6 @@ export function toCaptureExceptionInput(error: unknown): Error {
     return error;
   }
   return new Error(toErrorMessage(error));
-}
-
-function parseStatusCode(status: unknown): number | null {
-  if (typeof status === "number" && Number.isFinite(status)) {
-    return status;
-  }
-
-  if (typeof status === "string") {
-    const normalizedStatus = status.trim();
-    if (!/^\d+$/.test(normalizedStatus)) {
-      return null;
-    }
-    const parsed = Number.parseInt(normalizedStatus, 10);
-    return Number.isNaN(parsed) ? null : parsed;
-  }
-
-  return null;
-}
-
-function extractErrorStatusCode(error: unknown): number | null {
-  if (error === null || typeof error !== "object") {
-    return null;
-  }
-
-  const typedError = error as {
-    status?: unknown;
-    code?: unknown;
-    response?: {
-      status?: unknown;
-    };
-    cause?: {
-      status?: unknown;
-      code?: unknown;
-      response?: {
-        status?: unknown;
-      };
-    };
-  };
-
-  return (
-    parseStatusCode(typedError.status) ??
-    parseStatusCode(typedError.response?.status) ??
-    parseStatusCode(typedError.code) ??
-    parseStatusCode(typedError.cause?.status) ??
-    parseStatusCode(typedError.cause?.response?.status) ??
-    parseStatusCode(typedError.cause?.code)
-  );
 }
 
 function isNetworkError(error: unknown): boolean {
