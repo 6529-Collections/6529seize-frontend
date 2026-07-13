@@ -1812,7 +1812,8 @@
         "overview tab",
         "wave information",
         "wave settings",
-        "wave activity"
+        "wave activity",
+        "top voters"
       ],
       "keywords": [
         "wave",
@@ -1822,15 +1823,17 @@
         "rep",
         "settings",
         "voters",
+        "top voters",
         "activity",
         "mobile",
         "sidebar"
       ],
       "facts": [
         "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
+        "For Rank and Approve waves, the desktop right sidebar also includes Voters and Activity.",
         "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
         "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
-        "For Rank and Approve waves, More also includes Voters and Activity.",
+        "In the native app, More contains Settings and, for Rank and Approve waves, Voters and Activity.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",

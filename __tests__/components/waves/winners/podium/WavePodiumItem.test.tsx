@@ -71,7 +71,8 @@ const drop: any = {
   parts: [],
   metadata: [],
 };
-const longIdentityLabel = "identity-with-a-very-long-unbroken-label";
+const longIdentityLabel =
+  "identitywithaverylongunbrokenlabelthatmustwrapsafely";
 
 const renderWinner = (dropOverrides: any) => {
   render(
