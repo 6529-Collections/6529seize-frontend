@@ -30,9 +30,9 @@ const m = (
 ) => t(locale, key, params);
 
 const LIST_CLASS =
-  "tw-m-0 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-white/50 marker:tw-text-white/30";
+  "tw-m-0 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-600";
 const NESTED_LIST_CLASS =
-  "tw-mt-3 tw-space-y-3 tw-pl-5 tw-text-white/40 marker:tw-text-white/20";
+  "tw-mt-3 tw-space-y-3 tw-pl-5 tw-text-iron-400 marker:tw-text-iron-600";
 const REMOTE_MESSAGE_KEYS = [
   "about.subscriptions.reference.remote.busy",
   "about.subscriptions.reference.remote.separate",
@@ -75,7 +75,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
           number="1"
           title={m(locale, "about.subscriptions.reference.funding.title")}
         >
-          <div className="tw-space-y-4 tw-text-sm tw-leading-6 tw-text-white/50">
+          <div className="tw-space-y-4 tw-text-sm tw-leading-6 tw-text-iron-300">
             <p className="tw-m-0">
               {m(locale, "about.subscriptions.reference.funding.send")}
             </p>
@@ -118,7 +118,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
           number="2"
           title={m(locale, "about.subscriptions.reference.modes.title")}
         >
-          <div className="tw-space-y-6 tw-text-sm tw-leading-6 tw-text-white/50">
+          <div className="tw-space-y-6 tw-text-sm tw-leading-6 tw-text-iron-300">
             <p className="tw-m-0">
               {m(locale, "about.subscriptions.reference.modes.auto")}
             </p>
@@ -156,11 +156,11 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
           number="3"
           title={m(locale, "about.subscriptions.reference.phases.title")}
         >
-          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-white/50">
+          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
             {m(locale, "about.subscriptions.reference.phases.same")}
           </p>
 
-          <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-6 tw-text-sm tw-leading-6 tw-text-white/50 md:tw-grid-cols-2">
+          <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-6 tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-grid-cols-2">
             <div className="tw-space-y-3">
               <p className="tw-m-0">
                 {m(locale, "about.subscriptions.reference.phases.zero")}
@@ -207,11 +207,11 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
       <details
         className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-group tw-cursor-pointer tw-overflow-hidden`}
       >
-        <summary className="tw-flex tw-min-h-12 tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/45 tw-px-5 tw-py-3 tw-text-white/80 tw-transition-colors hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/50 sm:tw-px-6 [&::-webkit-details-marker]:tw-hidden">
+        <summary className="tw-flex tw-min-h-12 tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/45 tw-px-5 tw-py-3 tw-text-iron-100 tw-transition-colors hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/50 sm:tw-px-6 [&::-webkit-details-marker]:tw-hidden">
           <span className="tw-flex tw-items-center tw-gap-3">
             <FontAwesomeIcon
               aria-hidden="true"
-              className="tw-text-white/40"
+              className="tw-text-iron-500"
               icon={faNetworkWired}
             />
             <span
@@ -223,7 +223,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
           </span>
           <FontAwesomeIcon
             aria-hidden="true"
-            className="tw-shrink-0 tw-text-sm tw-text-white/30 tw-transition-transform tw-duration-300 group-open:-tw-rotate-180 motion-reduce:tw-transition-none"
+            className="tw-shrink-0 tw-text-sm tw-text-iron-600 tw-transition-transform tw-duration-300 group-open:-tw-rotate-180 motion-reduce:tw-transition-none"
             icon={faChevronDown}
           />
         </summary>
@@ -397,7 +397,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
       <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-6 tw-p-0 md:tw-grid-cols-3">
         {REMOTE_MESSAGE_KEYS.map((messageKey) => (
           <li
-            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-6 tw-text-sm tw-leading-6 tw-text-white/40`}
+            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-6 tw-text-sm tw-leading-6 tw-text-iron-400`}
             key={messageKey}
           >
             {m(locale, messageKey)}
@@ -426,10 +426,10 @@ function RulePanel({
       className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-border-t-2 tw-p-6 sm:tw-p-8 ${accentClassName} ${className}`}
     >
       <div className="tw-mb-6 tw-flex tw-items-center tw-gap-4">
-        <span className="tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-text-sm tw-text-white/50">
+        <span className="tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-sm tw-text-iron-400">
           {number}
         </span>
-        <h3 className="tw-m-0 tw-text-xl tw-font-medium tw-text-white/90">
+        <h3 className="tw-m-0 tw-text-xl tw-font-medium tw-text-iron-100">
           {title}
         </h3>
       </div>

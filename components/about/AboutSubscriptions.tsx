@@ -52,8 +52,8 @@ const OVERVIEW_BENEFITS: readonly OverviewBenefit[] = [
   },
   {
     icon: faSliders,
-    iconClassName: "tw-text-white/70",
-    iconWrapperClassName: "tw-bg-white/5",
+    iconClassName: "tw-text-iron-300",
+    iconWrapperClassName: "tw-bg-iron-900",
     messageKey: "about.subscriptions.overview.setAndForget",
   },
 ] as const;
@@ -86,35 +86,35 @@ function SubscriptionHeader({
   return (
     <header className="tw-px-1 tw-pb-12 tw-pt-6 sm:tw-px-2 sm:tw-pt-8">
       <div className="tw-max-w-4xl">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white/90 sm:tw-text-[26px]">
+        <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
           {m(locale, "about.subscriptions.hero.title")}
         </h1>
         <div className="tw-mt-5 tw-flex tw-justify-start empty:tw-hidden">
           <AboutSubscriptionsProfileButton variant="white" />
         </div>
         <Link
-          className="tw-group/report tw-mt-3 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-white/40 tw-no-underline tw-transition-all hover:tw-border-white/[0.12] hover:tw-bg-iron-900/60 hover:tw-text-white/50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto lg:tw-whitespace-nowrap"
+          className="tw-group/report tw-mt-3 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-iron-400 tw-no-underline tw-transition-all hover:tw-border-white/[0.12] hover:tw-bg-iron-900/60 hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto lg:tw-whitespace-nowrap"
           href="/tools/subscriptions-report"
         >
           <FontAwesomeIcon
             aria-hidden="true"
-            className="tw-shrink-0 tw-text-white/30 tw-transition-colors group-hover/report:tw-text-[#00f0ff]"
+            className="tw-shrink-0 tw-text-iron-600 tw-transition-colors group-hover/report:tw-text-[#00f0ff]"
             icon={faChartLine}
           />
           <span>
             {m(locale, "about.subscriptions.reference.reportLead")} {" "}
-            <span className="tw-font-medium tw-text-white/70 tw-transition-colors group-hover/report:tw-text-white">
+            <span className="tw-font-medium tw-text-iron-200 tw-transition-colors group-hover/report:tw-text-iron-50">
               {m(locale, "about.subscriptions.reference.reportLink")}
             </span>
           </span>
           <FontAwesomeIcon
             aria-hidden="true"
-            className="tw-ml-auto tw-shrink-0 tw-text-[10px] tw-text-white/20 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-white motion-reduce:tw-transform-none"
+            className="tw-ml-auto tw-shrink-0 tw-text-[10px] tw-text-iron-700 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-iron-200 motion-reduce:tw-transform-none"
             icon={faArrowRight}
           />
         </Link>
       </div>
-      <div className="tw-mt-12 tw-h-px tw-bg-white/5" />
+      <div className="tw-mt-12 tw-h-px tw-bg-iron-900" />
     </header>
   );
 }
@@ -132,7 +132,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         >
           {m(locale, "about.subscriptions.overview.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-light tw-leading-6 tw-text-white/50 sm:tw-text-base sm:tw-leading-7">
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-light tw-leading-6 tw-text-iron-400 sm:tw-text-base sm:tw-leading-7">
           {m(locale, "about.subscriptions.overview.intro")}
         </p>
       </div>
@@ -153,7 +153,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
                   icon={benefit.icon}
                 />
               </span>
-              <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-white/40">
+              <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-400">
                 {m(locale, benefit.messageKey)}
               </p>
             </li>
@@ -222,7 +222,7 @@ function OverviewRule({
 }) {
   return (
     <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-6 sm:tw-p-8`}>
-      <h3 className="tw-m-0 tw-text-lg tw-font-medium tw-text-white/90">
+      <h3 className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100">
         {title}
       </h3>
       <div className="tw-mt-5">{children}</div>
