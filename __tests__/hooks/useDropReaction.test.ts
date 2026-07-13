@@ -219,6 +219,7 @@ describe("useDropReaction", () => {
     (fetchDropByIdBatched as jest.Mock).mockResolvedValue(null);
     mockUseAuth.mockReturnValue({
       setToast: setToastMock,
+      activeProfileProxy: null,
       connectedProfile: {
         id: "identity-1",
         handle: "user",
@@ -243,6 +244,28 @@ describe("useDropReaction", () => {
     mockUseMyStream.mockReturnValue({
       applyOptimisticDropUpdate: applyOptimisticDropUpdateMock,
     });
+  });
+
+  it("disables reactions while a proxy profile is active", async () => {
+    mockUseAuth.mockReturnValue({
+      setToast: setToastMock,
+      activeProfileProxy: { id: "proxy-1" },
+      connectedProfile: { id: "identity-1", handle: "user" },
+    });
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    expect(result.current.canReact).toBe(false);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(dropReactionMonitoring.beginReactionMutation).not.toHaveBeenCalled();
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
   });
 
   it("shows structured API error messages for quick react failures", async () => {
