@@ -3,7 +3,6 @@
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
   faArrowRight,
-  faBolt,
   faChartLine,
   faEarthAmericas,
   faGasPump,
@@ -85,23 +84,19 @@ function SubscriptionHeader({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <header className="tw-px-1 tw-pb-16 tw-pt-8 sm:tw-px-2 sm:tw-pb-20 sm:tw-pt-12">
+    <header className="tw-px-1 tw-pb-12 tw-pt-6 sm:tw-px-2 sm:tw-pt-8">
       <div className="tw-max-w-3xl">
-        <p className="tw-m-0 tw-inline-flex tw-items-center tw-gap-3 tw-rounded tw-border tw-border-solid tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/5 tw-px-3 tw-py-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-[0.2em] tw-text-[#00f0ff]">
-          <FontAwesomeIcon aria-hidden="true" icon={faBolt} />
-          {m(locale, "about.subscriptions.reference.remote.title")}
-        </p>
-        <h1 className="tw-m-0 tw-mt-6 tw-text-3xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white/90 sm:tw-text-5xl">
+        <h1 className="tw-m-0 tw-text-3xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white/90 sm:tw-text-4xl">
           {m(locale, "about.subscriptions.hero.title")}
         </h1>
-        <p className="tw-mb-0 tw-mt-6 tw-max-w-3xl tw-text-base tw-font-light tw-leading-7 tw-text-white/50 sm:tw-text-lg sm:tw-leading-8">
+        <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-font-light tw-leading-6 tw-text-white/50 sm:tw-text-base sm:tw-leading-7">
           {m(locale, "about.subscriptions.overview.intro")}
         </p>
-        <div className="tw-mt-7 tw-flex tw-justify-start empty:tw-hidden">
+        <div className="tw-mt-5 tw-flex tw-justify-start empty:tw-hidden">
           <AboutSubscriptionsProfileButton variant="white" />
         </div>
         <Link
-          className="tw-group/report tw-mt-10 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-white/40 tw-no-underline tw-transition-all hover:tw-border-white/10 hover:tw-bg-white/[0.04] hover:tw-text-white/50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto"
+          className="tw-group/report tw-mt-7 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-white/40 tw-no-underline tw-transition-all hover:tw-border-white/10 hover:tw-bg-white/[0.04] hover:tw-text-white/50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto"
           href="/tools/subscriptions-report"
         >
           <FontAwesomeIcon
@@ -122,7 +117,7 @@ function SubscriptionHeader({
           />
         </Link>
       </div>
-      <div className="tw-mt-16 tw-h-px tw-bg-white/5" />
+      <div className="tw-mt-12 tw-h-px tw-bg-white/5" />
     </header>
   );
 }
