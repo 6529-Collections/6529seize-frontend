@@ -161,7 +161,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             ref={(element) => {
               tabRefs.current[index] = element;
             }}
-            className={`tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
+            className={`-tw-mb-px tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
               fullWidth ? "tw-flex tw-justify-center tw-text-center" : ""
             } ${
               activeKey === option.key
@@ -181,10 +181,10 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           unstyledMenu
           unstyledItems
           triggerClassName={clsx(
-            "tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200",
+            "-tw-mb-px tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200",
             isActiveInOverflow
-              ? "tw-border-b-2 tw-border-primary-400 tw-text-primary-300"
-              : "tw-text-iron-400 hover:tw-text-iron-200"
+              ? "tw-border-primary-300 tw-text-white"
+              : "tw-border-transparent tw-text-iron-400 hover:tw-text-iron-200"
           )}
           trigger={
             <OverflowTrigger
