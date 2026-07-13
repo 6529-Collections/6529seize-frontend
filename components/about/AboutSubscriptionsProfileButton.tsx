@@ -57,6 +57,10 @@ export default function AboutSubscriptionsProfileButton({
   const subscriptionActionLabel = canNavigateToProfileSubscriptionsDirectly
     ? manageSubscriptionsLabel
     : connectToSubscribeLabel;
+  const directProfileSubscriptionsHref =
+    canNavigateToProfileSubscriptionsDirectly
+      ? profileSubscriptionsHref
+      : undefined;
 
   if (variant === "white") {
     return (
@@ -64,6 +68,7 @@ export default function AboutSubscriptionsProfileButton({
         loading={isConnecting}
         disabled={isConnecting}
         onClicked={handleOpenProfileSubscriptions}
+        href={directProfileSubscriptionsHref}
       >
         {subscriptionActionLabel}
         {profileSubscriptionsHref && (

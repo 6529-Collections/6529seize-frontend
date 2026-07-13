@@ -157,7 +157,7 @@
   "about.subscriptions.reference.modes.optOutDeadline": "You must turn off minting for that specific drop before 00:00 UTC (eg, 19:00 EST) the day before the mint",
   "about.subscriptions.reference.modes.revealTiming": "The card reveal will move forward one day so that you can see the card before making a decision to mint it or not",
   "about.subscriptions.reference.modes.schedule": "This means that you can opt out on Sunday (for Monday's card), Tuesday (for Wednesday's card) and Thursday (for Friday's card)",
-  "about.subscriptions.reference.modes.manual": "You can choose to move your whole profile to \"manual\" as opposed to \"automatic\": in this case, you will not mint any cards unless you manully opt-in to the specific cards you want to selectively mint",
+  "about.subscriptions.reference.modes.manual": "You can choose to move your whole profile to \"manual\" as opposed to \"automatic\": in this case, you will not mint any cards unless you manually opt-in to the specific cards you want to selectively mint",
   "about.subscriptions.reference.delegation.title": "Delegation",
   "about.subscriptions.reference.delegation.intro": "Your card will be airdropped according on the following criteria:",
   "about.subscriptions.reference.delegation.noDelegation": "If no delegation, to the primary address of a consolidation",
