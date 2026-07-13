@@ -12,15 +12,15 @@ next route.
 - Entry route: `/`
 - Authenticated section order on `/`: `Header` -> `Latest Drop` or `Next Drop`
   -> mission block -> `Coming up` -> `Boosted Drops` -> `Most active waves`
-- Logged-out section order on `/`: `Header` -> newcomer orientation ->
-  activity introduction -> `Latest Drop` or `Next Drop` -> mission block ->
+- Logged-out section order on `/`: `Header` -> compact newcomer introduction ->
+  activity divider -> `Latest Drop` or `Next Drop` -> mission block ->
   `Coming up` -> `Boosted Drops` -> `Most active waves`
 
 ### Route map by section
 
 - Header:
   - Health shortcut: `/network/health`
-- Logged-out newcomer orientation:
+- Logged-out newcomer introduction:
   - `Start here`: `/join-6529`
   - `Connect wallet`: opens the wallet connection flow
 - `Latest Drop`:
@@ -54,7 +54,7 @@ next route.
 ## User Journey
 
 1. Open `/`.
-2. If logged out, read the newcomer orientation and either:
+2. If logged out, use the compact newcomer actions to either:
    - Select `Start here` to continue through `/join-6529`.
    - Select `Connect wallet` to begin connecting immediately.
    - Keep browsing without a wallet and continue into current activity.
@@ -75,7 +75,7 @@ next route.
 
 - Top slot shows a loading skeleton first, then resolves to `Latest Drop`,
   `Next Drop`, or hidden when no eligible card exists.
-- Newcomer orientation is shown only after wallet state resolves without valid
+- The newcomer introduction is shown only after wallet state resolves without valid
   authentication. Authenticated visitors keep the dashboard-first order.
 - `Coming up` can show:
   - up to 3 leaderboard cards, or

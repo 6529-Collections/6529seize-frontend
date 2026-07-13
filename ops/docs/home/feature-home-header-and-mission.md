@@ -6,7 +6,7 @@ The top of `/` shows the home headline and state-aware context before discovery
 sections:
 
 - Brand label and headline
-- A newcomer orientation panel for logged-out visitors
+- A compact newcomer introduction for logged-out visitors
 - A network-health shortcut on home layouts
 - A mission block below the latest-drop slot
 
@@ -29,13 +29,12 @@ sections:
 2. The header shows:
    - Label: `6529`
    - Headline: `Building a decentralized network state`
-3. Logged-out visitors see an orientation panel that explains 6529 in plain
-   language and offers:
+3. Logged-out visitors see one plain-language sentence beneath the main
+   headline and two actions:
    - `Start here`, which opens `/join-6529`
    - `Connect wallet`, which opens the wallet connection flow
-   - A reminder that no wallet is needed to explore
-4. The orientation panel introduces the activity sections as current art,
-   community picks, and active conversations before the latest-drop slot.
+4. A compact `Explore what's happening` divider introduces the public activity
+   sections before the latest-drop slot.
 5. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
    - Mobile/app small-screen layouts: in the top header actions
@@ -53,19 +52,19 @@ sections:
 
 - Desktop/tablet: health shortcut is visible near the top-right.
 - Mobile/app small-screen: health shortcut is visible in the header action row.
-- Logged-out or unauthenticated: the newcomer panel appears before the
-  dashboard-style activity sections.
+- Logged-out or unauthenticated: the compact newcomer introduction appears
+  before the dashboard-style activity sections.
 - Authenticated: the current dashboard-first layout remains unchanged and the
-  newcomer panel is not shown.
+  newcomer introduction is not shown.
 - Latest-drop data unavailable: mission block still renders below the slot.
 
 ## Edge Cases
 
 - On reduced-motion settings, heart animation is disabled.
 - While wallet state is initializing, the page does not assume the visitor is
-  logged out. The newcomer panel appears once that state resolves.
-- If a wallet is present but authentication is not valid, the newcomer panel
-  remains available so the visitor can continue through onboarding.
+  logged out. The newcomer introduction appears once that state resolves.
+- If a wallet is present but authentication is not valid, the newcomer
+  introduction remains available so the visitor can continue through onboarding.
 - The mission block has no interactive controls or outbound links.
 
 ## Failure and Recovery
@@ -80,7 +79,7 @@ sections:
 
 ## Limitations / Notes
 
-- Home activity remains public; the visitor panel changes orientation and
+- Home activity remains public; the visitor introduction changes orientation and
   entry actions rather than gating the dashboard content.
 - Core interactive actions for home continue in sections below (`Latest Drop`,
   `Coming up`, `Boosted Drops`, and `Most active waves`).
