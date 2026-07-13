@@ -13818,14 +13818,6 @@ components:
         sale_price_currency:
           type: string
           nullable: true
-        meme_card_id:
-          description: >-
-            The Memes card ID assigned to this winning Main Stage submission.
-            Omitted for winners outside the configured Main Stage wave and
-            legacy winners whose relationship is unavailable.
-          type: integer
-          format: int64
-          minimum: 1
     ApiDropWithoutWave:
       type: object
       required:

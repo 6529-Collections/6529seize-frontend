@@ -11,6 +11,7 @@ import type { ApiWaveDecisionWinnerV2 } from "@/generated/models/ApiWaveDecision
 import type { ApiWaveDecisionsPage } from "@/generated/models/ApiWaveDecisionsPage";
 import type { ApiWaveDecisionsPageV2 } from "@/generated/models/ApiWaveDecisionsPageV2";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
   createBasePart,
@@ -59,7 +60,7 @@ const mapDecisionDropV2 = ({
   readonly drop: ApiDropV2;
   readonly place: number;
   readonly wave: ApiWaveMin;
-}): ApiDrop => {
+}): ApiDropV2View => {
   const voting = drop.submission_context?.voting;
   const replyTo = mapReplyToDrop(drop);
 
@@ -73,6 +74,9 @@ const mapDecisionDropV2 = ({
       decisionTime,
       place,
     }),
+    ...(drop.submission_context
+      ? { submission_context: drop.submission_context }
+      : {}),
     wave,
     ...(replyTo ? { reply_to: replyTo } : {}),
     author: mapIdentityOverviewToProfileMin(drop.author),

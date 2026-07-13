@@ -422,7 +422,7 @@ describe("fetchWaveDropsFeedV2", () => {
     );
   });
 
-  it("carries a Main Stage Meme card ID into the legacy winning context", () => {
+  it("preserves a Main Stage Meme card ID in the V2 submission context", () => {
     const drop = mapLeaderboardDropV2({
       drop: createEnrichableDrop({
         submission_context: {
@@ -439,7 +439,7 @@ describe("fetchWaveDropsFeedV2", () => {
       } as unknown as ApiWaveMin,
     });
 
-    expect(drop.winning_context).toEqual(
+    expect(drop.submission_context).toEqual(
       expect.objectContaining({ meme_card_id: 521 })
     );
   });

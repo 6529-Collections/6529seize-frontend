@@ -3,7 +3,6 @@ import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
 import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import type { ApiDropsLeaderboardPageV2 } from "@/generated/models/ApiDropsLeaderboardPageV2";
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
-import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropPartV2 } from "@/generated/models/ApiDropPartV2";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
@@ -50,6 +49,10 @@ import {
   getWinningContext,
   rethrowAbortFetchError,
 } from "@/services/api/wave-drops-v2-helpers";
+import type {
+  ApiDropV2View,
+  ApiDropWithoutWaveV2View,
+} from "@/services/api/drop-v2-view.types";
 
 const DEFAULT_RETRY_OPTIONS = {
   maxRetries: 2,
@@ -306,7 +309,7 @@ const hydrateDropV2 = async ({
   readonly signal?: AbortSignal | undefined;
   readonly includeFullMetadata?: boolean | undefined;
   readonly includeTopRaters?: boolean | undefined;
-}): Promise<ApiDrop> => {
+}): Promise<ApiDropV2View> => {
   const [parts, metadata, topRaters] = await Promise.all([
     hydrateDropParts(drop, signal),
     fetchDropMetadataV2(drop, signal, includeFullMetadata),
@@ -323,6 +326,9 @@ const hydrateDropV2 = async ({
     drop_type: dropType,
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
+    ...(drop.submission_context
+      ? { submission_context: drop.submission_context }
+      : {}),
     ...getDropApprovalTiming(drop),
     wave,
     ...(replyTo ? { reply_to: replyTo } : {}),
@@ -362,7 +368,7 @@ export const mapLeaderboardDropV2 = ({
 }: {
   readonly drop: ApiDropV2;
   readonly wave: ApiWaveMin;
-}): ApiDropWithoutWave => {
+}): ApiDropWithoutWaveV2View => {
   const voting = drop.submission_context?.voting;
   const dropType = getDropType(drop);
   const winningContext = getWinningContext(drop);
@@ -374,6 +380,9 @@ export const mapLeaderboardDropV2 = ({
     drop_type: dropType,
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
+    ...(drop.submission_context
+      ? { submission_context: drop.submission_context }
+      : {}),
     ...getDropApprovalTiming(drop),
     ...(replyTo ? { reply_to: replyTo } : {}),
     author: mapIdentityOverviewToProfileMin(drop.author),

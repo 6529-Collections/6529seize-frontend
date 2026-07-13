@@ -194,7 +194,7 @@ describe("MemesWaveWinnersDrop", () => {
             ...winner,
             drop: {
               ...winner.drop,
-              winning_context: { place: 1, meme_card_id: 521 },
+              submission_context: { meme_card_id: 521 },
             },
           } as ApiWaveDecisionWinner
         }

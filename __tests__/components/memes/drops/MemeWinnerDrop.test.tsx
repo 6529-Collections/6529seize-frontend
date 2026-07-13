@@ -145,7 +145,7 @@ test("renders vote details through meme vote stats", () => {
 test("links a mapped Main Stage winner to its Meme card", () => {
   render(
     <MemeWinnerDrop
-      drop={{ ...drop, winning_context: { place: 1, meme_card_id: 521 } }}
+      drop={{ ...drop, submission_context: { meme_card_id: 521 } }}
       showReplyAndQuote
       onReply={jest.fn()}
       onQuote={jest.fn()}
