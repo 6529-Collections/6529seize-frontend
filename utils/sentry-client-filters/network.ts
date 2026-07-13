@@ -15,6 +15,7 @@ import type {
   NetworkTargetCandidate,
   SentryBreadcrumb,
   SentryClientEvent,
+  SentryStackFrame,
   SentryTransactionSpan,
 } from "./types";
 import {
@@ -25,6 +26,7 @@ import {
   getBooleanValue,
   getBreadcrumbValues,
   getEventMessage,
+  getFramePaths,
   getNumericValue,
   getRequestPathname,
   getSerializedExceptionStack,
@@ -39,6 +41,8 @@ import {
   parseAbsoluteRequestUrl,
   uniqueStrings,
 } from "./value-utils";
+
+const injectedFrameAntFramePath = "app:///frame_ant/frame_ant.js";
 
 function isFirstPartyApiTarget(candidate: NetworkTargetCandidate): boolean {
   if (candidate.isFirstPartyApi === true) {
@@ -694,11 +698,56 @@ function hasThirdPartyTelemetryNetworkMessageTarget(
   );
 }
 
+function isInjectedFrameAntFrame(frame: SentryStackFrame): boolean {
+  return getFramePaths(frame).some(
+    (path) => path.trim().toLowerCase() === injectedFrameAntFramePath
+  );
+}
+
+function isFirstPartyNetworkTarget(candidate: NetworkTargetCandidate): boolean {
+  if (candidate.isFirstParty === true) {
+    return true;
+  }
+
+  const absoluteUrl = parseAbsoluteRequestUrl(candidate.url);
+  return absoluteUrl !== null && isFirstPartyHost(absoluteUrl.hostname);
+}
+
+function hasMatchingFirstPartyNetworkFailure(
+  event: SentryClientEvent
+): boolean {
+  const messageTargets = getMessageTargetCandidates(event);
+
+  return getHttpBreadcrumbs(event).some((breadcrumb) => {
+    if (getBreadcrumbFailureKind(breadcrumb) === null) {
+      return false;
+    }
+
+    const breadcrumbTarget = getBreadcrumbTargetCandidate(breadcrumb);
+    if (!breadcrumbTarget || !isFirstPartyNetworkTarget(breadcrumbTarget)) {
+      return false;
+    }
+
+    const breadcrumbPath = getRequestPathname(breadcrumbTarget.url);
+    return (
+      breadcrumbPath !== null &&
+      messageTargets.some(
+        (messageTarget) =>
+          getRequestPathname(messageTarget.url) === breadcrumbPath
+      )
+    );
+  });
+}
+
 function hasAppOwnedNetworkErrorEvidence(event: SentryClientEvent): boolean {
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  const framesWithoutInjectedFrameAnt = frames?.filter(
+    (frame) => !isInjectedFrameAntFrame(frame)
+  );
   return (
-    hasLikelyAppOwnedFrame(frames) ||
-    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event))
+    hasLikelyAppOwnedFrame(framesWithoutInjectedFrameAnt) ||
+    hasAppOwnedSourceStackValue(getSerializedExceptionStack(event)) ||
+    hasMatchingFirstPartyNetworkFailure(event)
   );
 }
 
