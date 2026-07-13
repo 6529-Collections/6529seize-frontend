@@ -100,6 +100,15 @@ describe("sentry-client-filters", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const observedSentryE7WasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Refused to compile or instantiate",
+    "WebAssembly module because 'unsafe-eval' is not an allowed source of script in the",
+    "following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'",
+    "https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
+    'https://dataplane.rum.us-east-1.amazonaws.com\").',
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
   const observedWasmModuleCspUnsafeEvalMessage =
     "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
   const anonymousUnsafeEvalCspMessage =
@@ -485,14 +494,28 @@ describe("sentry-client-filters", () => {
   const createObservedSentryE7WasmCspUnsafeEvalEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
-    transaction: "/waves",
+    transaction: "/the-memes/:id",
     exception: {
       values: [
         {
           type: "RuntimeError",
-          value: wasmCspUnsafeEvalMessage,
+          value: observedSentryE7WasmCspUnsafeEvalMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
           stacktrace: {
             frames: [
+              {
+                filename: "app:///chunks/utils-DNoBWR8F.js",
+                abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                in_app: true,
+              },
+              {
+                filename: "app:///chunks/utils-DNoBWR8F.js",
+                abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                in_app: true,
+              },
               {
                 filename: "app:///chunks/utils-DNoBWR8F.js",
                 abs_path: "app:///chunks/utils-DNoBWR8F.js",
@@ -506,8 +529,8 @@ describe("sentry-client-filters", () => {
     },
     contexts: {
       browser: {
-        name: "Chrome",
-        version: "150",
+        name: "Edge",
+        version: "125.0.0",
       },
       os: {
         name: "Windows",
@@ -515,8 +538,8 @@ describe("sentry-client-filters", () => {
     },
     tags: {
       environment: "production",
-      transaction: "/waves",
-      url: "/waves",
+      transaction: "/the-memes/:id",
+      url: "/the-memes/447",
     },
     ...overrides,
   });
