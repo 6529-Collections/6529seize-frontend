@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
 
 const {
   CI_PIPELINES_ALERT_URL,
@@ -63,28 +62,6 @@ const targetEnvironment = normalizeTargetEnvironment(
   CI_PIPELINES_TARGET_ENV || CI_PIPELINES_ENVIRONMENT
 );
 
-async function loadReleaseNotesPrompt() {
-  if (
-    status !== 'success' ||
-    targetEnvironment !== 'prod' ||
-    !CI_RELEASE_NOTES_PROMPT_PATH
-  ) {
-    return null;
-  }
-
-  try {
-    const prompt = (
-      await fs.readFile(CI_RELEASE_NOTES_PROMPT_PATH, 'utf8')
-    ).trim();
-    return prompt || null;
-  } catch (error) {
-    console.error(
-      `Could not read release notes prompt ${CI_RELEASE_NOTES_PROMPT_PATH}: ${getFetchFailureMessage(error)}`
-    );
-    return null;
-  }
-}
-
 if (targetEnvironment?.startsWith('unsupported:')) {
   console.error(
     `Unsupported CI pipeline alert target environment: ${targetEnvironment.slice(12)}`
@@ -101,7 +78,10 @@ const repository = requireValue('GITHUB_REPOSITORY', GITHUB_REPOSITORY);
 const runId = requireValue('GITHUB_RUN_ID', GITHUB_RUN_ID);
 const status = requireValue('CI_PIPELINES_STATUS', CI_PIPELINES_STATUS);
 const title = requireValue('CI_PIPELINES_TITLE', CI_PIPELINES_TITLE);
-const releaseNotesPrompt = await loadReleaseNotesPrompt();
+const isReleaseNotesEligible =
+  status === 'success' &&
+  targetEnvironment === 'prod' &&
+  Boolean(CI_RELEASE_NOTES_PROMPT_PATH);
 const releaseGroupServices = (
   CI_RELEASE_GROUP_SERVICES ||
   CI_PIPELINES_SERVICE ||
@@ -110,9 +90,17 @@ const releaseGroupServices = (
   .split(',')
   .map((service) => service.trim())
   .filter(Boolean);
+const releaseNotesFields = isReleaseNotesEligible
+  ? {
+      release_notes_prompt_path: CI_RELEASE_NOTES_PROMPT_PATH,
+      release_group_id: CI_RELEASE_GROUP_ID || `${repository}:${runId}`,
+      release_group_services: releaseGroupServices,
+      deployed_at: new Date().toISOString()
+    }
+  : {};
 
 const payload = {
-  repo: repository,
+  repo: repository.split('/').pop() ?? repository,
   workflow: CI_PIPELINES_WORKFLOW || GITHUB_WORKFLOW || 'GitHub Actions',
   status,
   title,
@@ -124,10 +112,7 @@ const payload = {
   branch: GITHUB_REF_NAME || null,
   environment: targetEnvironment || null,
   service: CI_PIPELINES_SERVICE || null,
-  release_notes_prompt: releaseNotesPrompt,
-  release_group_id: CI_RELEASE_GROUP_ID || `${repository}:${runId}`,
-  release_group_services: releaseGroupServices,
-  deployed_at: new Date().toISOString()
+  ...releaseNotesFields
 };
 
 const body = Buffer.from(JSON.stringify(payload));
