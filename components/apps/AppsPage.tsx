@@ -29,9 +29,6 @@ export default function AppsPage() {
           <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white md:tw-text-4xl">
             {t(APPS_LOCALE, "apps.title")}
           </h1>
-          <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
-            {t(APPS_LOCALE, "apps.description")}
-          </p>
         </header>
 
         <div className="tw-grid tw-gap-5 lg:tw-grid-cols-2">
@@ -40,6 +37,7 @@ export default function AppsPage() {
             icon={DevicePhoneMobileIcon}
             title={t(APPS_LOCALE, "apps.mobile.title")}
             description={t(APPS_LOCALE, "apps.mobile.description")}
+            contentClassName="tw-flex tw-flex-1 tw-items-center tw-justify-center"
           >
             <MobileAppDownloads />
           </AppPanel>
@@ -64,12 +62,14 @@ function AppPanel({
   title,
   description,
   children,
+  contentClassName = "tw-mt-auto",
 }: {
   readonly id: string;
   readonly icon: typeof DevicePhoneMobileIcon;
   readonly title: string;
   readonly description: string;
   readonly children: React.ReactNode;
+  readonly contentClassName?: string | undefined;
 }) {
   const headingId = `${id}-heading`;
 
@@ -79,7 +79,7 @@ function AppPanel({
       aria-labelledby={headingId}
       className="tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-5 sm:tw-p-6"
     >
-      <div className="tw-mb-6 tw-flex tw-items-start tw-gap-4">
+      <div className="tw-mb-6 tw-flex tw-items-center tw-gap-4">
         <span className="tw-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-primary-300">
           <Icon aria-hidden="true" className="tw-size-6" />
         </span>
@@ -95,7 +95,7 @@ function AppPanel({
           </p>
         </div>
       </div>
-      <div className="tw-mt-auto">{children}</div>
+      <div className={contentClassName}>{children}</div>
     </section>
   );
 }
