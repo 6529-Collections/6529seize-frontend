@@ -5,6 +5,7 @@ import React, {
   Suspense,
   useCallback,
   useMemo,
+  useState,
   useSyncExternalStore,
 } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
@@ -49,9 +50,17 @@ import {
   getDropQueryKey,
 } from "@/services/api/drop-api";
 import { useWaveListSwipeBack } from "./mobile/useWaveListSwipeBack";
+import { SidebarTab } from "./right-sidebar/BrainRightSidebarTypes";
+import { WaveContentTabs } from "./right-sidebar/WaveContent";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface Props {
   readonly children: ReactNode;
+}
+
+interface MobileAboutTabState {
+  readonly waveId: string | null;
+  readonly activeTab: SidebarTab;
 }
 
 const BrainMobileContent: React.FC<Props> = ({ children }) => {
@@ -149,6 +158,25 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     wave,
     waveId,
   });
+  const [aboutTabState, setAboutTabState] = useState<MobileAboutTabState>({
+    waveId: null,
+    activeTab: SidebarTab.ABOUT,
+  });
+  const activeAboutTab =
+    aboutTabState.waveId === wave?.id
+      ? aboutTabState.activeTab
+      : SidebarTab.ABOUT;
+  const currentWaveId = wave?.id ?? null;
+  const onAboutTabChange = useCallback(
+    (tab: SidebarTab) => {
+      if (!currentWaveId) {
+        return;
+      }
+
+      setAboutTabState({ waveId: currentWaveId, activeTab: tab });
+    },
+    [currentWaveId]
+  );
 
   const onDropClick = (selectedDrop: ExtendedDrop) => {
     const params = new URLSearchParams(searchParams.toString() || "");
@@ -267,7 +295,22 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           isApp={isApp}
         />
       )}
-      {isApp && wave && <MobileWaveSubwavesBar wave={wave} />}
+      {isApp &&
+        wave &&
+        (activeView === BrainView.ABOUT ? (
+          <WaveContentTabs
+            wave={wave}
+            activeTab={activeAboutTab}
+            setActiveTab={onAboutTabChange}
+            maxVisibleTabs={3}
+            variant="compactPills"
+            aboutTabLabel={waveRightPanelText(
+              "waves.sidebar.rightPanel.tabs.overview"
+            )}
+          />
+        ) : (
+          <MobileWaveSubwavesBar wave={wave} />
+        ))}
       <LazyMotion features={domAnimation}>
         <AnimatePresence mode="wait">
           <m.div
@@ -282,6 +325,8 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
             <BrainMobileViewContent
               activeView={activeView}
               activeWaveId={waveId}
+              activeAboutTab={activeAboutTab}
+              onAboutTabChange={onAboutTabChange}
               isCurationWave={isCurationWave}
               isMemesWave={isMemesWave}
               isRankWave={isRankWave}
