@@ -7,7 +7,6 @@ import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import type { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
@@ -92,7 +91,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const onDropClose = useCallback(() => {
     if (dropId) {
       beginClosingDrop(dropId);
-      markDropCloseNavigation();
     }
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("drop");

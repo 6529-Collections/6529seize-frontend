@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getIdentityQueryOptions } from "@/services/api/identity-query";
 
 interface UseIdentityProps {
   /** User handle or wallet address */
@@ -20,11 +19,7 @@ export function useIdentity({
   initialProfile,
 }: Readonly<UseIdentityProps>) {
   const { data: profile, isLoading } = useQuery<ApiIdentity | undefined>({
-    queryKey: [QueryKey.PROFILE, handleOrWallet?.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<ApiIdentity>({
-        endpoint: `identities/${handleOrWallet?.toLowerCase()}`,
-      }),
+    ...getIdentityQueryOptions({ handleOrWallet }),
     enabled: !!handleOrWallet,
     initialData: initialProfile ?? undefined,
     retry: 3,
