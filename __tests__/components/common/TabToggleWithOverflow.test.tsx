@@ -108,6 +108,34 @@ describe("TabToggleWithOverflow", () => {
     );
   });
 
+  it("matches compact pill typography to the subwave bar", () => {
+    render(
+      <TabToggleWithOverflow
+        options={options}
+        activeKey="a"
+        onSelect={() => {}}
+        maxVisibleTabs={3}
+        variant="compactPills"
+      />
+    );
+
+    expect(screen.getByRole("tab", { name: "A" })).toHaveClass(
+      "tw-h-7",
+      "tw-text-xs",
+      "tw-font-semibold"
+    );
+    expect(screen.getByRole("tab", { name: "B" })).toHaveClass(
+      "tw-h-7",
+      "tw-text-xs",
+      "tw-font-medium"
+    );
+    expect(screen.getByRole("button", { name: "More tabs" })).toHaveClass(
+      "tw-h-7",
+      "tw-text-xs",
+      "tw-font-medium"
+    );
+  });
+
   it("toggles the overflow menu with keyboard interactions", async () => {
     const user = userEvent.setup();
     render(

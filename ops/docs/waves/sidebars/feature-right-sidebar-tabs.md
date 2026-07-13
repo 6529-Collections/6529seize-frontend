@@ -4,7 +4,8 @@
 
 Wave threads expose shared information sections so users can inspect the active
 wave without leaving the current thread route. Desktop renders them in the
-right sidebar; the native app renders them inside the main `About` view.
+right sidebar; the native app renders their navigation in the contextual row
+beneath the main tabs and their content in the main `About` view.
 
 This page owns tab-shell behavior only. Section rendering is documented in the
 linked section pages.
@@ -23,7 +24,8 @@ linked section pages.
 
 - Desktop: open a wave thread, open the right sidebar, and select a tab.
 - Native app: open an active wave, select the main `About` tab, and select an
-  information pill.
+  information pill. The information pills replace the subwave pills while
+  `About` is active; selecting another main tab restores the subwave pills.
 
 ## Tab Availability and Order
 
@@ -45,6 +47,10 @@ linked section pages.
   horizontally when needed.
 - Native keeps three compact pills visible and moves remaining sections into
   `More`, avoiding a compressed desktop tab row on narrow phones.
+- The native information and subwave bars use the same height, background,
+  responsive insets, pill height, and label size, so switching the contextual
+  row does not shift the content below it. Active information pills use a
+  semibold label; inactive pills use medium weight.
 - The tab strip stays within the panel width. It does not widen the panel or
   make the panel body horizontally scrollable.
 - The tab row remains fixed at the top while the active section scrolls
@@ -59,7 +65,8 @@ linked section pages.
 2. Open the right sidebar.
 3. Select a desktop tab or native information pill. Use `More` for secondary
    native sections.
-4. Sidebar content switches in place without route navigation.
+4. Sidebar content switches in place without route navigation. On native,
+   selecting another main tab swaps the contextual row back to subwave pills.
 
 ## State Changes and Recovery
 
@@ -68,6 +75,9 @@ linked section pages.
 - Tab choice is in-session UI state, not a URL tab parameter.
 - Closing and reopening the sidebar keeps the current tab choice unless wave
   state rules make that tab unavailable.
+- Native keeps the selected information section while switching main tabs for
+  the same wave. A selection saved for one wave is not applied to another
+  active wave.
 - If wave data does not load, the tab row does not appear and the sidebar can
   stay blank.
 

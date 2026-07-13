@@ -5,18 +5,21 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
 
 import { commonApiFetch } from "@/services/api/common-api";
-import { Mode, SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
+import { Mode, type SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
 import { WaveContent } from "../right-sidebar/WaveContent";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface BrainMobileAboutProps {
   readonly activeWaveId: string | null;
+  readonly activeTab: SidebarTab;
+  readonly setActiveTab: (tab: SidebarTab) => void;
 }
 
 const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   activeWaveId,
+  activeTab,
+  setActiveTab,
 }) => {
   const { data: wave } = useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id: activeWaveId }],
@@ -30,15 +33,10 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   });
 
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
-  const [activeTab, setActiveTab] = useState<SidebarTab>(SidebarTab.ABOUT);
   const { mobileAboutViewStyle } = useLayout();
 
-  // Use mobileAboutViewStyle for capacitor spacing
-  const containerClassName =
-    "tw-min-h-0 tw-overflow-hidden tw-px-2 sm:tw-px-4 md:tw-px-6";
-
   return (
-    <div className={containerClassName} style={mobileAboutViewStyle}>
+    <div className="tw-min-h-0 tw-overflow-hidden" style={mobileAboutViewStyle}>
       {wave && (
         <WaveContent
           wave={wave}
@@ -46,11 +44,7 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
           setMode={setMode}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          maxVisibleTabs={3}
-          tabVariant="compactPills"
-          aboutTabLabel={waveRightPanelText(
-            "waves.sidebar.rightPanel.tabs.overview"
-          )}
+          showTabs={false}
         />
       )}
     </div>

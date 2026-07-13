@@ -1816,6 +1816,7 @@
       "facts": [
         "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
         "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
+        "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
         "For Rank and Approve waves, More also includes Voters and Activity.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
@@ -1824,6 +1825,7 @@
       "tags": ["waves", "about", "navigation", "mobile", "sidebar"],
       "source_refs": [
         "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md",
+        "components/brain/BrainMobile.tsx",
         "components/brain/mobile/BrainMobileAbout.tsx",
         "components/brain/right-sidebar/WaveContent.tsx"
       ]

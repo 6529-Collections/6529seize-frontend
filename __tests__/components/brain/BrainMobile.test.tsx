@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import BrainMobile from "@/components/brain/BrainMobile";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
+import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -127,6 +128,20 @@ const mockMobileWaveSubwavesBar = jest.fn(() => (
 jest.mock("@/components/brain/mobile/MobileWaveSubwavesBar", () => ({
   __esModule: true,
   default: (props: any) => mockMobileWaveSubwavesBar(props),
+}));
+
+const mockWaveContentTabs = jest.fn((props: any) => (
+  <button
+    type="button"
+    data-testid="about-sections-bar"
+    onClick={() => props.setActiveTab(SidebarTab.RULES)}
+  >
+    {props.activeTab}
+  </button>
+));
+jest.mock("@/components/brain/right-sidebar/WaveContent", () => ({
+  __esModule: true,
+  WaveContentTabs: (props: any) => mockWaveContentTabs(props),
 }));
 
 jest.mock("@/components/brain/mobile/BrainMobileAbout", () => ({
@@ -331,6 +346,7 @@ describe("BrainMobile", () => {
     mockCreateWaveModal.mockClear();
     mockCreateDirectMessageModal.mockClear();
     mockMobileWaveSubwavesBar.mockClear();
+    mockWaveContentTabs.mockClear();
     globalThis.history.replaceState(null, "", "/");
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "alice" },
@@ -411,6 +427,61 @@ describe("BrainMobile", () => {
     expect(mockMobileWaveSubwavesBar).toHaveBeenCalledWith({
       wave: waveData,
     });
+  });
+
+  it("switches the secondary bar between subwaves and About sections", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("mobile-subwaves-bar")).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("about-sections-bar")).toBeNull();
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.ABOUT);
+    });
+
+    const aboutSectionsBar = await screen.findByTestId("about-sections-bar");
+    expect(screen.queryByTestId("mobile-subwaves-bar")).toBeNull();
+    expect(aboutSectionsBar).toHaveTextContent(SidebarTab.ABOUT);
+
+    fireEvent.click(aboutSectionsBar);
+    expect(aboutSectionsBar).toHaveTextContent(SidebarTab.RULES);
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.DEFAULT);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("mobile-subwaves-bar")).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("about-sections-bar")).toBeNull();
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.ABOUT);
+    });
+
+    expect(await screen.findByTestId("about-sections-bar")).toHaveTextContent(
+      SidebarTab.RULES
+    );
+
+    mockSearchParams.set("wave", "2");
+    waveData = { ...createWave(false), id: "2" };
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.ABOUT);
+    });
+
+    expect(await screen.findByTestId("about-sections-bar")).toHaveTextContent(
+      SidebarTab.ABOUT
+    );
   });
 
   it("returns from an app wave detail to the waves list on edge swipe", async () => {
