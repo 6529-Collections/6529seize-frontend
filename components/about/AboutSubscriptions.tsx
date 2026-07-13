@@ -92,6 +92,27 @@ function SubscriptionHeader({
         <div className="tw-mt-5 tw-flex tw-justify-start empty:tw-hidden">
           <AboutSubscriptionsProfileButton variant="white" />
         </div>
+        <Link
+          className="tw-group/report tw-mt-3 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-white/40 tw-no-underline tw-transition-all hover:tw-border-white/[0.12] hover:tw-bg-iron-900/60 hover:tw-text-white/50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto lg:tw-whitespace-nowrap"
+          href="/tools/subscriptions-report"
+        >
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className="tw-shrink-0 tw-text-white/30 tw-transition-colors group-hover/report:tw-text-[#00f0ff]"
+            icon={faChartLine}
+          />
+          <span>
+            {m(locale, "about.subscriptions.reference.reportLead")} {" "}
+            <span className="tw-font-medium tw-text-white/70 tw-transition-colors group-hover/report:tw-text-white">
+              {m(locale, "about.subscriptions.reference.reportLink")}
+            </span>
+          </span>
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className="tw-ml-auto tw-shrink-0 tw-text-[10px] tw-text-white/20 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-white motion-reduce:tw-transform-none"
+            icon={faArrowRight}
+          />
+        </Link>
       </div>
       <div className="tw-mt-12 tw-h-px tw-bg-white/5" />
     </header>
@@ -188,28 +209,6 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
           </ul>
         </OverviewRule>
       </div>
-
-      <Link
-        className="tw-group/report tw-mt-6 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-white/40 tw-no-underline tw-transition-all hover:tw-border-white/[0.12] hover:tw-bg-iron-900/60 hover:tw-text-white/50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto lg:tw-whitespace-nowrap"
-        href="/tools/subscriptions-report"
-      >
-        <FontAwesomeIcon
-          aria-hidden="true"
-          className="tw-shrink-0 tw-text-white/30 tw-transition-colors group-hover/report:tw-text-[#00f0ff]"
-          icon={faChartLine}
-        />
-        <span>
-          {m(locale, "about.subscriptions.reference.reportLead")} {" "}
-          <span className="tw-font-medium tw-text-white/70 tw-transition-colors group-hover/report:tw-text-white">
-            {m(locale, "about.subscriptions.reference.reportLink")}
-          </span>
-        </span>
-        <FontAwesomeIcon
-          aria-hidden="true"
-          className="tw-ml-auto tw-shrink-0 tw-text-[10px] tw-text-white/20 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-white motion-reduce:tw-transform-none"
-          icon={faArrowRight}
-        />
-      </Link>
     </section>
   );
 }
