@@ -137,11 +137,11 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         </h2>
       </div>
 
-      <ul className="tw-m-0 tw-mt-8 tw-grid tw-list-none tw-grid-cols-1 tw-gap-6 tw-p-0 md:tw-grid-cols-3">
+      <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-6 tw-p-0 md:tw-grid-cols-3">
         {OVERVIEW_BENEFITS.map((benefit) => {
           return (
             <li
-              className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-flex tw-min-h-[240px] tw-flex-col tw-items-start tw-p-8`}
+              className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-flex tw-flex-col tw-items-start tw-p-6`}
               key={benefit.messageKey}
             >
               <span
@@ -153,7 +153,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
                   icon={benefit.icon}
                 />
               </span>
-              <p className="tw-mb-0 tw-mt-6 tw-text-sm tw-leading-6 tw-text-white/40">
+              <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-white/40">
                 {m(locale, benefit.messageKey)}
               </p>
             </li>
