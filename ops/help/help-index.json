@@ -577,16 +577,29 @@
       "title": "Header search",
       "aliases": [
         "search",
+        "search 6529",
+        "search messages",
         "find a user",
         "find a profile",
         "search modal",
         "header search"
       ],
-      "keywords": ["search", "header", "modal", "profile", "route", "find"],
+      "keywords": [
+        "search",
+        "header",
+        "modal",
+        "profile",
+        "NFT",
+        "Wave",
+        "message",
+        "route",
+        "find"
+      ],
       "facts": [
-        "Header search opens a modal for finding app targets such as profiles and navigable entities.",
-        "Use the search control in the app header when users ask how to find people or pages.",
-        "Search and direct route navigation are separate from Waves feed filtering."
+        "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
+        "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
+        "Arrow keys move through site results and Enter opens the selected result.",
+        "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
       "canonical_path": "/",
       "related_paths": ["/network"],

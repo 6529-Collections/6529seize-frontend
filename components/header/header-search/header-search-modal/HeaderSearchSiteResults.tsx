@@ -1,7 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import {
+  ExclamationTriangleIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type RefObject,
+} from "react";
 
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -10,28 +24,24 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
-import { usePathname, useRouter } from "next/navigation";
-import { useKeyPressEvent } from "react-use";
 
 import HeaderSearchModalItem, {
   getHeaderSearchWavePath,
   getNftCollectionMap,
   isHeaderSearchWaveDirectMessage,
+  type HeaderSearchModalItemType,
+  type NFTSearchResult,
+  type PageSearchResult,
 } from "../HeaderSearchModalItem";
 import { HeaderSearchTabToggle } from "../HeaderSearchTabToggle";
-import type {
-  HeaderSearchModalItemType,
-  NFTSearchResult,
-  PageSearchResult,
-} from "../HeaderSearchModalItem";
 import {
   CATEGORY,
-  CATEGORY_LABELS,
   CATEGORY_PREVIEW_LIMIT,
+  FILTERABLE_CATEGORIES,
+  HEADER_SEARCH_RESULTS_LISTBOX_ID,
   HEADER_SEARCH_RESULTS_PANEL_ID,
-  isFilterableCategory,
   STATE,
+  isFilterableCategory,
   type FilterableCategory,
 } from "./constants";
 
@@ -45,6 +55,8 @@ interface PreviewGroup {
   readonly items: PreviewGroupItem[];
   readonly total: number;
 }
+
+type InputKeyHandler = (event: ReactKeyboardEvent<HTMLInputElement>) => void;
 
 const isPageResult = (
   item: HeaderSearchModalItemType
@@ -63,22 +75,16 @@ const isWaveResult = (item: HeaderSearchModalItemType): item is ApiWave =>
   Object.hasOwn(item, "serial_no");
 
 const getHeaderSearchItemKey = (item: HeaderSearchModalItemType): string => {
-  if (isPageResult(item)) {
-    return `page:${item.href}`;
-  }
-  if (isNftResult(item)) {
-    return `nft:${item.contract}:${item.id}`;
-  }
+  if (isPageResult(item)) return `page:${item.href}`;
+  if (isNftResult(item)) return `nft:${item.contract}:${item.id}`;
   if (isProfileResult(item)) {
-    const base = (item.profile_id ?? item.wallet).toLowerCase();
-    return `profile:${base}`;
+    return `profile:${(item.profile_id ?? item.wallet).toLowerCase()}`;
   }
-  if (isWaveResult(item)) {
-    return `wave:${item.id}`;
-  }
+  if (isWaveResult(item)) return `wave:${item.id}`;
   return JSON.stringify(item);
 };
 
+const getResultOptionId = (index: number) => `header-search-result-${index}`;
 interface HeaderSearchSiteResultsProps {
   readonly selectedCategory: CATEGORY;
   readonly setSelectedCategory: (category: CATEGORY) => void;
@@ -86,14 +92,17 @@ interface HeaderSearchSiteResultsProps {
     FilterableCategory,
     HeaderSearchModalItemType[]
   >;
-  readonly categoriesWithResults: readonly FilterableCategory[];
+  readonly categoryErrors: Record<FilterableCategory, boolean>;
+  readonly categoryFetching: Record<FilterableCategory, boolean>;
   readonly derivedState: STATE;
-  readonly debouncedValue: string;
+  readonly searchValue: string;
+  readonly liveSearchValue: string;
   readonly onClose: () => void;
-  readonly onRetry: () => void;
-  readonly isFetchingProfiles: boolean;
-  readonly isFetchingNfts: boolean;
-  readonly isFetchingWaves: boolean;
+  readonly onRetry: (categories: readonly FilterableCategory[]) => void;
+  readonly onRememberSearch: (query: string) => void;
+  readonly recentSearches: readonly string[];
+  readonly onRecentSearchSelect: (query: string) => void;
+  readonly inputKeyHandlerRef: RefObject<InputKeyHandler | null>;
   readonly shouldShowCountdown: boolean;
   readonly charactersRemaining: number;
   readonly resultsPanelRef: RefObject<HTMLDivElement | null>;
@@ -103,14 +112,17 @@ export function HeaderSearchSiteResults({
   selectedCategory,
   setSelectedCategory,
   resultsByCategory,
-  categoriesWithResults,
+  categoryErrors,
+  categoryFetching,
   derivedState,
-  debouncedValue,
+  searchValue,
+  liveSearchValue,
   onClose,
   onRetry,
-  isFetchingProfiles,
-  isFetchingNfts,
-  isFetchingWaves,
+  onRememberSearch,
+  recentSearches,
+  onRecentSearchSelect,
+  inputKeyHandlerRef,
   shouldShowCountdown,
   charactersRemaining,
   resultsPanelRef,
@@ -120,57 +132,84 @@ export function HeaderSearchSiteResults({
   const locale = useBrowserLocale();
   const myStream = useMyStreamOptional();
   const { isApp } = useDeviceInfo();
-  const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
+  const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const activeElementRef = useRef<HTMLDivElement>(null);
-  const formattedCharactersRemaining = formatInteger(
-    locale,
-    charactersRemaining
+  const shouldScrollActiveItemRef = useRef(false);
+
+  const getCategoryLabel = useCallback(
+    (category: CATEGORY): string => {
+      switch (category) {
+        case CATEGORY.ALL:
+          return t(locale, "headerSearch.category.all");
+        case CATEGORY.PAGES:
+          return t(locale, "headerSearch.category.pages");
+        case CATEGORY.NFTS:
+          return t(locale, "headerSearch.category.nfts");
+        case CATEGORY.PROFILES:
+          return t(locale, "headerSearch.category.profiles");
+        case CATEGORY.WAVES:
+          return t(locale, "headerSearch.category.waves");
+      }
+    },
+    [locale]
   );
-  const shouldShowIdleCountdown =
-    shouldShowCountdown && charactersRemaining > 0;
-  const idlePrompt = shouldShowIdleCountdown
-    ? t(
-        locale,
-        charactersRemaining === 1
-          ? "headerSearch.idleWithCountdown.one"
-          : "headerSearch.idleWithCountdown.other",
-        { count: formattedCharactersRemaining }
-      )
-    : t(locale, "headerSearch.idle");
+
+  const categoriesWithResults = useMemo(
+    () =>
+      FILTERABLE_CATEGORIES.filter(
+        (category) => resultsByCategory[category].length > 0
+      ),
+    [resultsByCategory]
+  );
+  const totalResultCount = FILTERABLE_CATEGORIES.reduce(
+    (count, category) => count + resultsByCategory[category].length,
+    0
+  );
+  const selectedResultCount = isFilterableCategory(selectedCategory)
+    ? resultsByCategory[selectedCategory].length
+    : totalResultCount;
 
   const tabOptions = useMemo(
     () =>
-      [CATEGORY.ALL, ...categoriesWithResults].map((category) => ({
-        key: category,
-        label:
-          category === CATEGORY.ALL
-            ? t(locale, "headerSearch.category.all")
-            : CATEGORY_LABELS[category as FilterableCategory],
-        panelId: HEADER_SEARCH_RESULTS_PANEL_ID,
-      })),
-    [categoriesWithResults, locale]
+      [CATEGORY.ALL, ...FILTERABLE_CATEGORIES].map((category) => {
+        const scopedCategories = isFilterableCategory(category)
+          ? [category]
+          : FILTERABLE_CATEGORIES;
+        const count = isFilterableCategory(category)
+          ? resultsByCategory[category].length
+          : totalResultCount;
+        return {
+          key: category,
+          label: getCategoryLabel(category),
+          panelId: HEADER_SEARCH_RESULTS_PANEL_ID,
+          count,
+          isLoading: scopedCategories.some(
+            (scopedCategory) => categoryFetching[scopedCategory]
+          ),
+          hasError: scopedCategories.some(
+            (scopedCategory) => categoryErrors[scopedCategory]
+          ),
+        };
+      }),
+    [
+      categoryErrors,
+      categoryFetching,
+      getCategoryLabel,
+      resultsByCategory,
+      totalResultCount,
+    ]
   );
 
-  const shouldRenderCategoryToggle =
-    categoriesWithResults.length > 0 || selectedCategory !== CATEGORY.ALL;
-
   const previewGroups = useMemo<PreviewGroup[]>(() => {
-    if (selectedCategory !== CATEGORY.ALL) {
-      return [];
-    }
+    if (selectedCategory !== CATEGORY.ALL) return [];
 
     let runningIndex = 0;
-    return categoriesWithResults.map<PreviewGroup>((category) => {
+    return categoriesWithResults.map((category) => {
       const items = resultsByCategory[category];
       const previewItems = items
         .slice(0, CATEGORY_PREVIEW_LIMIT)
         .map((item) => ({ item, index: runningIndex++ }));
-
-      return {
-        category,
-        items: previewItems,
-        total: items.length,
-      };
+      return { category, items: previewItems, total: items.length };
     });
   }, [categoriesWithResults, resultsByCategory, selectedCategory]);
 
@@ -180,208 +219,344 @@ export function HeaderSearchSiteResults({
         group.items.map((entry) => entry.item)
       );
     }
-
-    if (isFilterableCategory(selectedCategory)) {
-      return resultsByCategory[selectedCategory];
-    }
-
-    return [];
+    return isFilterableCategory(selectedCategory)
+      ? resultsByCategory[selectedCategory]
+      : [];
   }, [previewGroups, resultsByCategory, selectedCategory]);
+  const activeItemIndex = Math.min(
+    selectedItemIndex,
+    Math.max(flattenedItems.length - 1, 0)
+  );
 
   const handleCategorySelect = (category: CATEGORY) => {
     setSelectedCategory(category);
     setSelectedItemIndex(0);
   };
 
-  const handleTabSelect = (key: string) => {
-    handleCategorySelect(key as CATEGORY);
-  };
+  const rememberCurrentSearch = useCallback(() => {
+    if (searchValue.trim()) onRememberSearch(searchValue.trim());
+  }, [onRememberSearch, searchValue]);
 
-  const handleViewAll = (category: FilterableCategory) => {
-    handleCategorySelect(category);
-  };
-
-  const onHover = (index: number, state: boolean) => {
-    if (!state) return;
-    setSelectedItemIndex(index);
-  };
-
-  const goToProfile = (profile: CommunityMemberMinimal) => {
-    const handleOrWallet = profile.handle ?? profile.wallet.toLowerCase();
-    const path = getProfileTargetRoute({
-      handleOrWallet,
-      pathname: pathname,
-      defaultPath: USER_PAGE_TAB_IDS.REP,
-    });
-    router.push(path);
-    onClose();
-  };
-
-  const goToWave = (wave: ApiWave) => {
-    const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
-
-    if (myStream) {
-      myStream.activeWave.set(wave.id, { isDirectMessage });
-    } else {
+  const goToProfile = useCallback(
+    (profile: CommunityMemberMinimal) => {
+      rememberCurrentSearch();
       router.push(
-        getHeaderSearchWavePath({
-          wave,
-          isApp,
+        getProfileTargetRoute({
+          handleOrWallet: profile.handle ?? profile.wallet.toLowerCase(),
+          pathname,
+          defaultPath: USER_PAGE_TAB_IDS.REP,
         })
       );
-    }
-
-    onClose();
-  };
-
-  useKeyPressEvent("ArrowDown", () =>
-    setSelectedItemIndex((index) =>
-      index + 1 < flattenedItems.length ? index + 1 : index
-    )
+      onClose();
+    },
+    [onClose, pathname, rememberCurrentSearch, router]
   );
 
-  useKeyPressEvent("ArrowUp", () =>
-    setSelectedItemIndex((index) => (index > 0 ? index - 1 : index))
+  const goToWave = useCallback(
+    (wave: ApiWave) => {
+      rememberCurrentSearch();
+      const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
+      if (myStream) {
+        myStream.activeWave.set(wave.id, { isDirectMessage });
+      } else {
+        router.push(getHeaderSearchWavePath({ wave, isApp }));
+      }
+      onClose();
+    },
+    [isApp, myStream, onClose, rememberCurrentSearch, router]
   );
 
-  useKeyPressEvent("Enter", () => {
-    if (derivedState !== STATE.SUCCESS) return;
-    const item = flattenedItems[selectedItemIndex];
-    if (!item) return;
+  const openItem = useCallback(
+    (item: HeaderSearchModalItemType) => {
+      if (isPageResult(item)) {
+        rememberCurrentSearch();
+        router.push(item.href);
+        onClose();
+      } else if (isNftResult(item)) {
+        const collection = getNftCollectionMap()[item.contract.toLowerCase()];
+        if (!collection) return;
+        rememberCurrentSearch();
+        router.push(`${collection.path}/${item.id}`);
+        onClose();
+      } else if (isProfileResult(item)) {
+        goToProfile(item);
+      } else if (isWaveResult(item)) {
+        goToWave(item);
+      }
+    },
+    [goToProfile, goToWave, onClose, rememberCurrentSearch, router]
+  );
 
-    if (isPageResult(item)) {
-      router.push(item.href);
-      onClose();
-      return;
-    }
+  const handleInputKeyDown = useCallback<InputKeyHandler>(
+    (event) => {
+      if (
+        event.nativeEvent.isComposing ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey
+      ) {
+        return;
+      }
 
-    if (isNftResult(item)) {
-      const collectionMap = getNftCollectionMap();
-      const key = item.contract.toLowerCase();
-      const collection = collectionMap[key];
-      if (!collection) return;
-      router.push(`${collection.path}/${item.id}`);
-      onClose();
-      return;
-    }
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        if (derivedState !== STATE.SUCCESS || flattenedItems.length === 0)
+          return;
+        event.preventDefault();
+        shouldScrollActiveItemRef.current = true;
+        setSelectedItemIndex((index) => {
+          if (event.key === "ArrowDown") {
+            return index >= flattenedItems.length - 1 ? 0 : index + 1;
+          }
+          return index <= 0 ? flattenedItems.length - 1 : index - 1;
+        });
+        return;
+      }
 
-    if (isProfileResult(item)) {
-      goToProfile(item);
-      return;
-    }
+      if (event.key === "Home" || event.key === "End") {
+        if (derivedState !== STATE.SUCCESS || flattenedItems.length === 0)
+          return;
+        event.preventDefault();
+        shouldScrollActiveItemRef.current = true;
+        setSelectedItemIndex(
+          event.key === "Home" ? 0 : flattenedItems.length - 1
+        );
+        return;
+      }
 
-    if (isWaveResult(item)) {
-      goToWave(item);
-    }
-  });
+      if (event.key !== "Enter" || derivedState !== STATE.SUCCESS) return;
+      const item = flattenedItems[activeItemIndex];
+      if (!item) return;
+      event.preventDefault();
+      openItem(item);
+    },
+    [activeItemIndex, derivedState, flattenedItems, openItem]
+  );
 
   useEffect(() => {
-    if (activeElementRef.current) {
-      activeElementRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "start",
-      });
-    }
-  }, [selectedItemIndex]);
+    inputKeyHandlerRef.current = handleInputKeyDown;
+    return () => {
+      inputKeyHandlerRef.current = null;
+    };
+  }, [handleInputKeyDown, inputKeyHandlerRef]);
+
+  useEffect(() => {
+    const id =
+      derivedState === STATE.SUCCESS && flattenedItems[activeItemIndex]
+        ? getResultOptionId(activeItemIndex)
+        : undefined;
+    const input = document.getElementById("header-search-input");
+    if (id) input?.setAttribute("aria-activedescendant", id);
+    else input?.removeAttribute("aria-activedescendant");
+    return () => input?.removeAttribute("aria-activedescendant");
+  }, [activeItemIndex, derivedState, flattenedItems]);
+
+  useEffect(() => {
+    if (!shouldScrollActiveItemRef.current) return;
+    shouldScrollActiveItemRef.current = false;
+    activeElementRef.current?.scrollIntoView({
+      behavior: "auto",
+      block: "nearest",
+      inline: "start",
+    });
+  }, [activeItemIndex]);
 
   const renderItem = (item: HeaderSearchModalItemType, index: number) => (
     <div
-      ref={index === selectedItemIndex ? activeElementRef : null}
+      ref={index === activeItemIndex ? activeElementRef : null}
       key={getHeaderSearchItemKey(item)}
     >
       <HeaderSearchModalItem
         content={item}
-        searchValue={debouncedValue}
-        isSelected={index === selectedItemIndex}
-        onHover={(state) => onHover(index, state)}
-        onClose={onClose}
+        searchValue={searchValue}
+        optionId={getResultOptionId(index)}
+        isSelected={index === activeItemIndex}
+        onHover={(state) => {
+          if (state) setSelectedItemIndex(index);
+        }}
+        onClose={() => {
+          rememberCurrentSearch();
+          onClose();
+        }}
         onWaveSelect={goToWave}
       />
     </div>
   );
 
-  const renderItems = (items: HeaderSearchModalItemType[], offset = 0) =>
-    items.map((item, index) => renderItem(item, offset + index));
-
   const renderSuccessContent = () => {
     if (selectedCategory === CATEGORY.ALL) {
       return previewGroups.map((group) => (
-        <section key={group.category} className="tw-mb-4 last:tw-mb-0">
-          <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between">
-            <h3 className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-              {CATEGORY_LABELS[group.category]}
+        <section key={group.category} className="tw-mb-5 last:tw-mb-0">
+          <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
+            <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+              {getCategoryLabel(group.category)}
             </h3>
             {group.total > group.items.length && (
               <button
                 type="button"
-                onClick={() => handleViewAll(group.category)}
-                className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+                onClick={() => handleCategorySelect(group.category)}
+                className="tw-inline-flex tw-min-h-8 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
                 {t(locale, "headerSearch.viewAllCategory", {
-                  category: CATEGORY_LABELS[group.category],
+                  category: getCategoryLabel(group.category),
                 })}
               </button>
             )}
           </div>
-          <div className="tw-space-y-1.5">
+          <div className="tw-space-y-1">
             {group.items.map(({ item, index }) => renderItem(item, index))}
           </div>
         </section>
       ));
     }
 
-    if (isFilterableCategory(selectedCategory)) {
-      return renderItems(resultsByCategory[selectedCategory]);
-    }
-
-    return null;
+    if (!isFilterableCategory(selectedCategory)) return null;
+    return (
+      <div className="tw-space-y-1">
+        {resultsByCategory[selectedCategory].map((item, index) =>
+          renderItem(item, index)
+        )}
+      </div>
+    );
   };
 
-  const isRetryPending =
-    (selectedCategory === CATEGORY.NFTS && isFetchingNfts) ||
-    (selectedCategory === CATEGORY.PROFILES && isFetchingProfiles) ||
-    (selectedCategory === CATEGORY.WAVES && isFetchingWaves);
+  const relevantCategories = isFilterableCategory(selectedCategory)
+    ? [selectedCategory]
+    : FILTERABLE_CATEGORIES;
+  const failedCategories = relevantCategories.filter(
+    (category) => categoryErrors[category]
+  );
+  const formattedResultCount = formatInteger(locale, selectedResultCount);
+  const formattedCharactersRemaining = formatInteger(
+    locale,
+    charactersRemaining
+  );
+  const activeCategoryLabel =
+    selectedCategory === CATEGORY.ALL
+      ? t(locale, "headerSearch.scope.allResults")
+      : getCategoryLabel(selectedCategory);
+  let idleMessage = t(locale, "headerSearch.idle");
+  if (shouldShowCountdown) {
+    const countdownKey =
+      charactersRemaining === 1
+        ? "headerSearch.idleWithCountdown.one"
+        : "headerSearch.idleWithCountdown.other";
+    idleMessage = t(locale, countdownKey, {
+      count: formattedCharactersRemaining,
+    });
+  }
 
-  const renderResultsPanel = () => {
+  const renderPanelContent = () => {
     if (derivedState === STATE.SUCCESS) {
       return (
-        <div
-          ref={resultsPanelRef}
-          id={HEADER_SEARCH_RESULTS_PANEL_ID}
-          role="tabpanel"
-          className="tw-h-0 tw-min-h-0 tw-flex-1 tw-scroll-py-2 tw-overflow-y-auto tw-px-4 tw-pb-3 tw-pt-5 tw-text-sm tw-text-iron-200 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 md:tw-pl-0 md:tw-pr-4"
-        >
-          {renderSuccessContent()}
-        </div>
+        <>
+          <output
+            aria-live="polite"
+            className="tw-mb-3 tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-3"
+          >
+            <span className="tw-text-xs tw-font-medium tw-text-iron-300">
+              {t(
+                locale,
+                selectedResultCount === 1
+                  ? "headerSearch.results.count.one"
+                  : "headerSearch.results.count.other",
+                { count: formattedResultCount }
+              )}
+            </span>
+            <span className="tw-min-w-0 tw-truncate tw-text-xs">
+              <span className="tw-text-iron-600">
+                {t(locale, "headerSearch.results.queryPrefix")}
+              </span>{" "}
+              <span className="tw-font-medium tw-text-iron-200">
+                &quot;{searchValue}&quot;
+              </span>
+            </span>
+          </output>
+          {failedCategories.length > 0 && (
+            <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-error/30 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-200">
+              <ExclamationTriangleIcon className="tw-size-4 tw-flex-shrink-0 tw-text-error" />
+              <p className="tw-m-0 tw-min-w-0 tw-flex-1">
+                {t(
+                  locale,
+                  failedCategories.length === 1
+                    ? "headerSearch.error.partial.one"
+                    : "headerSearch.error.partial.other",
+                  failedCategories.length === 1
+                    ? { category: getCategoryLabel(failedCategories[0]!) }
+                    : {
+                        categories: failedCategories
+                          .map((category) => getCategoryLabel(category))
+                          .join(", "),
+                      }
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => onRetry(failedCategories)}
+                className="tw-text-primary-200 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {t(locale, "headerSearch.retry")}
+              </button>
+            </div>
+          )}
+          <div
+            id={HEADER_SEARCH_RESULTS_LISTBOX_ID}
+            role={
+              "listbox" /* NOSONAR: rich search results use the ARIA combobox listbox pattern */
+            }
+            aria-label={activeCategoryLabel}
+          >
+            {renderSuccessContent()}
+          </div>
+          <p className="tw-mb-0 tw-mt-4 tw-text-center tw-text-[11px] tw-text-iron-600">
+            {t(locale, "headerSearch.status.keyboardHint")}
+          </p>
+        </>
       );
     }
 
     if (derivedState === STATE.LOADING) {
       return (
-        <div
-          ref={resultsPanelRef}
-          id={HEADER_SEARCH_RESULTS_PANEL_ID}
-          role="tabpanel"
-          className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
-        >
-          <p className="tw-text-sm tw-font-normal tw-text-iron-300">
-            {t(locale, "headerSearch.loading")}
-          </p>
+        <div className="tw-pt-1">
+          <output
+            aria-live="polite"
+            className="tw-mb-3 tw-block tw-text-sm tw-font-medium tw-text-iron-300"
+          >
+            {t(locale, "headerSearch.loadingFor", {
+              query: liveSearchValue.trim(),
+            })}
+          </output>
+          <div className="tw-space-y-2" aria-hidden="true">
+            {[0, 1, 2, 3].map((index) => (
+              <div
+                key={index}
+                className="tw-flex tw-h-14 tw-animate-pulse tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900/70 tw-px-2.5"
+              >
+                <span className="tw-size-10 tw-rounded-lg tw-bg-iron-800" />
+                <span className="tw-flex tw-flex-1 tw-flex-col tw-gap-2">
+                  <span className="tw-h-3 tw-w-2/5 tw-rounded tw-bg-iron-800" />
+                  <span className="tw-bg-iron-850 tw-h-2.5 tw-w-3/5 tw-rounded" />
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       );
     }
 
     if (derivedState === STATE.NO_RESULTS) {
       return (
-        <div
-          ref={resultsPanelRef}
-          id={HEADER_SEARCH_RESULTS_PANEL_ID}
-          role="tabpanel"
-          className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
-        >
-          <p className="tw-text-sm tw-text-iron-300">
-            {t(locale, "headerSearch.noResults")}
+        <div className="tw-flex tw-min-h-[250px] tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-text-center">
+          <div className="tw-mb-4 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900">
+            <MagnifyingGlassIcon className="tw-size-5 tw-text-iron-300" />
+          </div>
+          <output className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+            {t(locale, "headerSearch.noResultsFor", {
+              category: activeCategoryLabel,
+              query: liveSearchValue.trim(),
+            })}
+          </output>
+          <p className="tw-mb-0 tw-mt-2 tw-max-w-sm tw-text-sm tw-leading-6 tw-text-iron-400">
+            {t(locale, "headerSearch.noResultsHint")}
           </p>
         </div>
       );
@@ -389,24 +564,15 @@ export function HeaderSearchSiteResults({
 
     if (derivedState === STATE.ERROR) {
       return (
-        <div
-          ref={resultsPanelRef}
-          id={HEADER_SEARCH_RESULTS_PANEL_ID}
-          role="tabpanel"
-          className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center md:tw-px-0"
-        >
-          <p
-            className="tw-text-sm tw-font-normal tw-text-iron-300"
-            aria-live="polite"
-          >
+        <div className="tw-flex tw-min-h-[250px] tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center">
+          <ExclamationTriangleIcon className="tw-size-6 tw-text-error" />
+          <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
             {t(locale, "headerSearch.error")}
           </p>
           <button
             type="button"
-            onClick={onRetry}
-            disabled={isRetryPending}
-            aria-busy={isRetryPending ? true : undefined}
-            className="tw-items-center tw-rounded-full tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-1.5 tw-font-medium tw-text-iron-800 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-200"
+            onClick={() => onRetry(failedCategories)}
+            className="tw-text-primary-100 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/15 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold hover:tw-bg-primary-500/25 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             {t(locale, "headerSearch.retry")}
           </button>
@@ -415,58 +581,82 @@ export function HeaderSearchSiteResults({
     }
 
     return (
-      <div
-        ref={resultsPanelRef}
-        id={HEADER_SEARCH_RESULTS_PANEL_ID}
-        role="tabpanel"
-        className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
-      >
-        <p
-          role="status"
-          aria-live="polite"
-          className="tw-text-center tw-text-sm tw-font-normal tw-text-iron-300"
-        >
-          {idlePrompt}
-        </p>
+      <div className="tw-flex tw-min-h-[250px] tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-text-center">
+        {recentSearches.length > 0 ? (
+          <div className="tw-w-full tw-max-w-md">
+            <div className="tw-mb-4 tw-flex tw-flex-col tw-items-center">
+              <div className="tw-mb-3 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900">
+                <MagnifyingGlassIcon className="tw-size-5 tw-text-primary-300" />
+              </div>
+              <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                {t(locale, "headerSearch.recent.title")}
+              </h3>
+              <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
+                {t(locale, "headerSearch.recent.description")}
+              </p>
+            </div>
+            <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-2">
+              {recentSearches.map((query) => (
+                <button
+                  key={query}
+                  type="button"
+                  onClick={() => onRecentSearchSelect(query)}
+                  className="tw-min-h-10 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                >
+                  {query}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="tw-mb-4 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900">
+              <MagnifyingGlassIcon className="tw-size-5 tw-text-primary-300" />
+            </div>
+            <output className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
+              {idleMessage}
+            </output>
+          </>
+        )}
       </div>
     );
   };
 
   return (
     <>
-      {shouldRenderCategoryToggle && (
-        <div className="tw-px-4 tw-py-3 md:tw-hidden">
+      <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-2.5 md:tw-hidden">
+        <HeaderSearchTabToggle
+          options={tabOptions}
+          activeKey={selectedCategory}
+          onSelect={(key) => handleCategorySelect(key as CATEGORY)}
+          fullWidth
+        />
+      </div>
+
+      <div className="tw-grid tw-min-h-0 tw-flex-1 tw-grid-cols-1 md:tw-grid-cols-[12rem_minmax(0,1fr)] md:tw-gap-4 md:tw-px-5 md:tw-pb-5">
+        <aside
+          aria-label={t(locale, "headerSearch.scopeLabel")}
+          className="tw-hidden md:tw-flex md:tw-flex-col md:tw-pt-4"
+        >
           <HeaderSearchTabToggle
             options={tabOptions}
             activeKey={selectedCategory}
-            onSelect={handleTabSelect}
+            onSelect={(key) => handleCategorySelect(key as CATEGORY)}
             fullWidth
+            orientation="vertical"
           />
-        </div>
-      )}
-
-      <div
-        className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col md:tw-gap-4 md:tw-px-5 md:tw-pb-5 ${
-          shouldRenderCategoryToggle
-            ? "md:tw-grid md:tw-grid-cols-[12rem_minmax(0,1fr)]"
-            : "md:tw-flex-row"
-        }`}
-      >
-        {shouldRenderCategoryToggle && (
-          <aside className="tw-hidden md:tw-flex md:tw-flex-col md:tw-gap-2 md:tw-pt-5">
-            <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-2xl tw-border tw-border-iron-900/60 tw-bg-iron-950/80">
-              <HeaderSearchTabToggle
-                options={tabOptions}
-                activeKey={selectedCategory}
-                onSelect={handleTabSelect}
-                fullWidth
-                orientation="vertical"
-              />
-            </div>
-          </aside>
-        )}
-        <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col md:tw-min-w-0">
-          {renderResultsPanel()}
+        </aside>
+        <div
+          ref={resultsPanelRef}
+          id={HEADER_SEARCH_RESULTS_PANEL_ID}
+          role="tabpanel"
+          aria-label={t(locale, "headerSearch.results.panelLabel", {
+            category: getCategoryLabel(selectedCategory),
+          })}
+          aria-busy={derivedState === STATE.LOADING}
+          className="tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pb-5 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/20 desktop-hover:hover:tw-scrollbar-thumb-white/30 md:tw-px-0"
+        >
+          {renderPanelContent()}
         </div>
       </div>
     </>

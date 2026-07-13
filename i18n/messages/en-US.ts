@@ -801,6 +801,8 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "empty.title": "No messages found",
     "error.description": "Change the query or reopen search to try again.",
     "error.title": "Couldn't load results",
+    "error.retry": "Try again",
+    "error.retrying": "Trying again...",
     "idle.description":
       "Type at least {minLength} characters to search this wave.",
     "idle.title": "Ready to search",
@@ -813,12 +815,15 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "loading.title": "Searching messages",
     placeholder: "Search messages",
     "result.open": "Open message {serialNo} by {author}",
+    "result.mediaOnly": "Message with media or an attachment",
+    "result.serial": "Message #{serialNo}",
     "result.unavailable": "Message by {author} cannot be opened",
     "results.count.one": "{count} result",
     "results.count.other": "{count} results",
     "results.queryPrefix": "for",
     "results.status.one": '{count} result for "{query}"',
     "results.status.other": '{count} results for "{query}"',
+    searchAll: "Search all 6529",
     title: "Search messages",
   } as const
 );
@@ -1030,14 +1035,47 @@ const COMMON_MESSAGES = objectMessages("common", {
   close: "Close",
 } as const);
 
+const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
+  add: "Add",
+  addAriaLabel: "Add identity filter",
+  apply: "Done",
+  clearAll: "Clear all",
+  description:
+    "Add handles, ENS names, or wallet addresses. Results update as filters change.",
+  duplicate: "That identity is already included.",
+  empty: "No identity filters added. Showing everyone.",
+  inputLabel: "Handle, ENS name, or wallet address",
+  open: "Filter by identity",
+  placeholder: "Handle, ENS, or wallet address",
+  remove: "Remove {identity} from filters",
+  "selected.one": "{count} identity selected",
+  "selected.other": "{count} identities selected",
+  title: "Filter by identity",
+} as const);
+
+const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  "search.emptyDescription":
+    "Try another collection name or clear the search to see all collections.",
+  "search.emptyTitle": "No collections found for “{query}”",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.all": "All",
+  "category.nfts": "NFTs",
+  "category.pages": "Pages",
+  "category.profiles": "Profiles",
+  "category.waves": "Waves",
+  "category.error": "Some results could not be loaded",
+  "category.loading": "Loading {category} results",
   clear: "Clear search",
   clearShort: "Clear",
   close: "Close search",
-  "dialogTitle.site": "Search 6529.io",
+  "dialogTitle.site": "Search 6529",
   "dialogTitle.wave": "Search this Wave",
+  "dialogDescription.site": "Find pages, NFTs, profiles, and Waves.",
   error: "Something went wrong while searching. Please try again.",
+  "error.partial.one": "{category} results could not be loaded.",
+  "error.partial.other": "Some result types could not be loaded: {categories}.",
   goBack: "Go back",
   idle: "Start typing to search 6529.io",
   "idleWithCountdown.one":
@@ -1048,18 +1086,36 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
     "Type at least {minLength} characters to search 6529.io.",
   "inputDescription.wave":
     "Type at least {minLength} characters to search messages in this Wave.",
-  inputLabel: "Search",
-  loading: "Loading...",
+  inputLabel: "Search 6529",
+  loading: "Searching...",
+  loadingFor: 'Searching for "{query}"',
   "mode.site": "Site-wide",
   "mode.wave": "In this Wave",
   noResults: "No results found",
+  noResultsFor: 'No matches in {category} for "{query}"',
+  noResultsHint:
+    "Check the spelling, try fewer words, or choose another result type.",
   "placeholder.site": "Search 6529.io",
   "placeholder.wave": "Search messages",
   retry: "Try Again",
+  "results.count.one": "{count} result",
+  "results.count.other": "{count} results",
+  "results.queryPrefix": "for",
+  "results.panelLabel": "{category} results",
+  "results.status.one": '{count} result for "{query}"',
+  "results.status.other": '{count} results for "{query}"',
+  "recent.description": "Pick up where you left off.",
+  "recent.title": "Recent searches",
+  scopeLabel: "Result type",
+  "scope.allResults": "all results",
+  "status.keyboardHint":
+    "Use arrow keys to move through results and Enter to open.",
   viewAllCategory: "View all {category}",
 } as const);
 
 export const EN_US_MESSAGES = {
+  ...IDENTITY_FILTER_MESSAGES,
+  ...XTDH_COLLECTION_MESSAGES,
   ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import MyStreamWaveTabsHeader from "@/components/brain/my-stream/tabs/MyStreamWaveTabsHeader";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import type { ReactNode } from "react";
@@ -47,8 +47,21 @@ jest.mock("@/components/waves/WavePicture", () => () => (
   <span data-testid="wave-picture" />
 ));
 
-jest.mock("@/components/waves/drops/search/WaveDropsSearchModal", () => () => (
-  <div data-testid="wave-drops-search-modal" />
+jest.mock(
+  "@/components/waves/drops/search/WaveDropsSearchModal",
+  () =>
+    ({ isOpen, onSearchAll }: { isOpen: boolean; onSearchAll?: () => void }) =>
+      isOpen ? (
+        <div data-testid="wave-drops-search-modal">
+          <button type="button" onClick={onSearchAll}>
+            Search all 6529
+          </button>
+        </div>
+      ) : null
+);
+
+jest.mock("@/components/header/header-search/HeaderSearchModal", () => () => (
+  <div data-testid="header-search-modal" />
 ));
 
 jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
@@ -81,6 +94,31 @@ const wave = {
 } as any;
 
 describe("MyStreamWaveTabsHeader", () => {
+  it("can expand Wave search into the site-wide search", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    );
+    expect(screen.getByTestId("wave-drops-search-modal")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
+    expect(screen.queryByTestId("wave-drops-search-modal")).toBeNull();
+    expect(screen.getByTestId("header-search-modal")).toBeInTheDocument();
+  });
+
   it("offsets the score actions row so the score icon aligns with the title", () => {
     render(
       <MyStreamWaveTabsHeader
