@@ -153,6 +153,33 @@ describe("BrainMobileTabs", () => {
     expect(screen.queryByRole("button", { name: /^chat$/i })).toBeNull();
   });
 
+  it("keeps the create curation action outside the scrollable tabs", () => {
+    const wave = createWave();
+    wave.wave.authenticated_user_eligible_for_admin = true;
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.DEFAULT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={true}
+        wave={wave}
+      />
+    );
+
+    const createButton = screen.getByRole("button", {
+      name: /create curation/i,
+    });
+    const scrollableTabs = createButton.parentElement?.querySelector(
+      ".tw-overflow-x-auto"
+    );
+
+    expect(scrollableTabs).toBeInTheDocument();
+    expect(scrollableTabs).not.toContainElement(createButton);
+  });
+
   it("shows unread indicators and handles message/notification clicks", async () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,

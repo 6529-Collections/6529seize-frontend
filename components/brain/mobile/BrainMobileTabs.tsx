@@ -17,8 +17,7 @@ import MyStreamWaveCurationCreateDialog from "../my-stream/tabs/MyStreamWaveCura
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
-const ACTIVE_TAB_BACKGROUND =
-  "tw-border-primary-300 tw-bg-transparent";
+const ACTIVE_TAB_BACKGROUND = "tw-border-primary-300 tw-bg-transparent";
 const INACTIVE_TAB_BACKGROUND =
   "tw-border-transparent tw-bg-transparent active:tw-bg-white/[0.05]";
 const ACTIVE_TAB_TEXT = "tw-text-white";
@@ -98,13 +97,11 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const activeCurationId = shouldShowCurationTabs
     ? searchParams.get("curation")
     : null;
-  const {
-    data: curations = [],
-    isPending: isCurationsPending,
-  } = useWaveCurations({
-    waveId: wave?.id ?? "",
-    enabled: shouldShowCurationTabs,
-  });
+  const { data: curations = [], isPending: isCurationsPending } =
+    useWaveCurations({
+      waveId: wave?.id ?? "",
+      enabled: shouldShowCurationTabs,
+    });
   const canManageCurations =
     wave?.wave.authenticated_user_eligible_for_admin === true;
 
@@ -285,6 +282,17 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
         </span>
       </button>
     ) : null;
+  const createCurationButton =
+    isApp && canManageCurations ? (
+      <button
+        type="button"
+        onClick={() => setIsCreateCurationOpen(true)}
+        className="tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-self-center tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
+        aria-label="Create curation"
+      >
+        <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
+      </button>
+    ) : null;
 
   return (
     <nav
@@ -318,214 +326,219 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               </span>
             ))}
           </output>
+          {createCurationButton}
         </div>
       ) : (
-        <div className="tw-flex tw-min-h-12 tw-w-full tw-items-stretch tw-justify-start tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-px-0.5 tw-scrollbar-none">
-          {streamBackButton}
-          {!waveActive && showWavesTab && (
-            <button
-              {...getTabStateProps(activeView === BrainView.WAVES)}
-              ref={getActiveButtonRef(activeView === BrainView.WAVES)}
-              onClick={() => handleWaveViewChange(BrainView.WAVES)}
-              className={getTabButtonClassName(activeView === BrainView.WAVES)}
-            >
-              <span
-                className={getTabTextClassName({
-                  isActive: activeView === BrainView.WAVES,
-                })}
-              >
-                Waves
-              </span>
-            </button>
-          )}
-          {!isApp && !waveActive && (
-            <button
-              {...getTabStateProps(activeView === BrainView.MESSAGES)}
-              ref={getActiveButtonRef(activeView === BrainView.MESSAGES)}
-              onClick={() => handleWaveViewChange(BrainView.MESSAGES)}
-              className={getTabButtonClassName(activeView === BrainView.MESSAGES)}
-            >
-              <span
-                className={getTabTextClassName({
-                  isActive: activeView === BrainView.MESSAGES,
-                  additionalClasses: "tw-relative",
-                })}
-              >
-                <span>Messages</span>
-                {hasUnreadMessages && (
-                  <div className="tw-absolute -tw-right-3 tw-top-0 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
+        <div className="tw-flex tw-min-h-12 tw-w-full tw-min-w-0 tw-items-stretch tw-gap-1.5 tw-px-0.5">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-stretch tw-justify-start tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-none">
+            {streamBackButton}
+            {!waveActive && showWavesTab && (
+              <button
+                {...getTabStateProps(activeView === BrainView.WAVES)}
+                ref={getActiveButtonRef(activeView === BrainView.WAVES)}
+                onClick={() => handleWaveViewChange(BrainView.WAVES)}
+                className={getTabButtonClassName(
+                  activeView === BrainView.WAVES
                 )}
-              </span>
-            </button>
-          )}
-          <button
-            {...getTabStateProps(isChatActive)}
-            ref={getActiveButtonRef(isChatActive)}
-            onClick={onChatClick}
-            className={getTabButtonClassName(isChatActive)}
-          >
-            <span className={getTabTextClassName({ isActive: isChatActive })}>
-              {waveActive ? "Chat" : "My Stream"}
-            </span>
-          </button>
-          {waveActive && (
-            <button
-              {...getTabStateProps(activeView === BrainView.ABOUT)}
-              ref={getActiveButtonRef(activeView === BrainView.ABOUT)}
-              onClick={() => handleWaveViewChange(BrainView.ABOUT)}
-              className={getTabButtonClassName(activeView === BrainView.ABOUT)}
-            >
-              <span
-                className={getTabTextClassName({
-                  isActive: activeView === BrainView.ABOUT,
-                })}
               >
-                About
-              </span>
-            </button>
-          )}
-          {waveActive && wave && hasPolls && (
-            <button
-              {...getTabStateProps(activeView === BrainView.POLLS)}
-              ref={getActiveButtonRef(activeView === BrainView.POLLS)}
-              onClick={() => handleWaveViewChange(BrainView.POLLS)}
-              className={getTabButtonClassName(activeView === BrainView.POLLS)}
-            >
-              <span
-                className={getTabTextClassName({
-                  isActive: activeView === BrainView.POLLS,
-                })}
+                <span
+                  className={getTabTextClassName({
+                    isActive: activeView === BrainView.WAVES,
+                  })}
+                >
+                  Waves
+                </span>
+              </button>
+            )}
+            {!isApp && !waveActive && (
+              <button
+                {...getTabStateProps(activeView === BrainView.MESSAGES)}
+                ref={getActiveButtonRef(activeView === BrainView.MESSAGES)}
+                onClick={() => handleWaveViewChange(BrainView.MESSAGES)}
+                className={getTabButtonClassName(
+                  activeView === BrainView.MESSAGES
+                )}
               >
-                Polls
+                <span
+                  className={getTabTextClassName({
+                    isActive: activeView === BrainView.MESSAGES,
+                    additionalClasses: "tw-relative",
+                  })}
+                >
+                  <span>Messages</span>
+                  {hasUnreadMessages && (
+                    <div className="tw-absolute -tw-right-3 tw-top-0 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
+                  )}
+                </span>
+              </button>
+            )}
+            <button
+              {...getTabStateProps(isChatActive)}
+              ref={getActiveButtonRef(isChatActive)}
+              onClick={onChatClick}
+              className={getTabButtonClassName(isChatActive)}
+            >
+              <span className={getTabTextClassName({ isActive: isChatActive })}>
+                {waveActive ? "Chat" : "My Stream"}
               </span>
             </button>
-          )}
-          {!isCompetitionWave && salesTabButton}
-          {waveActive && wave && isCompetitionWave && (
-            <>
-              <MyStreamWaveTabsLeaderboard
-                wave={wave}
-                activeView={activeView}
-                onViewChange={handleWaveViewChange}
-                renderAfterLeaderboard={salesTabButton}
-              />
-              {canShowMyVotesTab && (
-                <>
+            {waveActive && (
+              <button
+                {...getTabStateProps(activeView === BrainView.ABOUT)}
+                ref={getActiveButtonRef(activeView === BrainView.ABOUT)}
+                onClick={() => handleWaveViewChange(BrainView.ABOUT)}
+                className={getTabButtonClassName(
+                  activeView === BrainView.ABOUT
+                )}
+              >
+                <span
+                  className={getTabTextClassName({
+                    isActive: activeView === BrainView.ABOUT,
+                  })}
+                >
+                  About
+                </span>
+              </button>
+            )}
+            {waveActive && wave && hasPolls && (
+              <button
+                {...getTabStateProps(activeView === BrainView.POLLS)}
+                ref={getActiveButtonRef(activeView === BrainView.POLLS)}
+                onClick={() => handleWaveViewChange(BrainView.POLLS)}
+                className={getTabButtonClassName(
+                  activeView === BrainView.POLLS
+                )}
+              >
+                <span
+                  className={getTabTextClassName({
+                    isActive: activeView === BrainView.POLLS,
+                  })}
+                >
+                  Polls
+                </span>
+              </button>
+            )}
+            {!isCompetitionWave && salesTabButton}
+            {waveActive && wave && isCompetitionWave && (
+              <>
+                <MyStreamWaveTabsLeaderboard
+                  wave={wave}
+                  activeView={activeView}
+                  onViewChange={handleWaveViewChange}
+                  renderAfterLeaderboard={salesTabButton}
+                />
+                {canShowMyVotesTab && (
+                  <>
+                    <button
+                      {...getTabStateProps(activeView === BrainView.MY_VOTES)}
+                      ref={getActiveButtonRef(
+                        activeView === BrainView.MY_VOTES
+                      )}
+                      onClick={() => handleWaveViewChange(BrainView.MY_VOTES)}
+                      className={getTabButtonClassName(
+                        activeView === BrainView.MY_VOTES
+                      )}
+                    >
+                      <span
+                        className={getTabTextClassName({
+                          isActive: activeView === BrainView.MY_VOTES,
+                        })}
+                      >
+                        My Votes
+                      </span>
+                    </button>
+                  </>
+                )}
+                {supportsOutcomeView && (
                   <button
-                    {...getTabStateProps(activeView === BrainView.MY_VOTES)}
-                    ref={getActiveButtonRef(activeView === BrainView.MY_VOTES)}
-                    onClick={() => handleWaveViewChange(BrainView.MY_VOTES)}
+                    {...getTabStateProps(activeView === BrainView.OUTCOME)}
+                    ref={getActiveButtonRef(activeView === BrainView.OUTCOME)}
+                    onClick={() => handleWaveViewChange(BrainView.OUTCOME)}
                     className={getTabButtonClassName(
-                      activeView === BrainView.MY_VOTES
+                      activeView === BrainView.OUTCOME
                     )}
                   >
                     <span
                       className={getTabTextClassName({
-                        isActive: activeView === BrainView.MY_VOTES,
+                        isActive: activeView === BrainView.OUTCOME,
                       })}
                     >
-                      My Votes
+                      Outcome
                     </span>
                   </button>
-                </>
-              )}
-              {supportsOutcomeView && (
-                <button
-                  {...getTabStateProps(activeView === BrainView.OUTCOME)}
-                  ref={getActiveButtonRef(activeView === BrainView.OUTCOME)}
-                  onClick={() => handleWaveViewChange(BrainView.OUTCOME)}
-                  className={getTabButtonClassName(
-                    activeView === BrainView.OUTCOME
-                  )}
-                >
-                  <span
-                    className={getTabTextClassName({
-                      isActive: activeView === BrainView.OUTCOME,
-                    })}
-                  >
-                    Outcome
-                  </span>
-                </button>
-              )}
-              {isMemesWave && (
-                <button
-                  {...getTabStateProps(activeView === BrainView.FAQ)}
-                  ref={getActiveButtonRef(activeView === BrainView.FAQ)}
-                  onClick={() => handleWaveViewChange(BrainView.FAQ)}
-                  className={getTabButtonClassName(
-                    activeView === BrainView.FAQ
-                  )}
-                >
-                  <span
-                    className={getTabTextClassName({
-                      isActive: activeView === BrainView.FAQ,
-                    })}
-                  >
-                    FAQ
-                  </span>
-                </button>
-              )}
-            </>
-          )}
-          {shouldShowCurationTabs &&
-            curationTabs.map((curation) => {
-              const isActive =
-                activeView === BrainView.DEFAULT &&
-                curation.id === activeCurationId;
-
-              return (
-                <button
-                  key={curation.id}
-                  type="button"
-                  data-curation-id={curation.id}
-                  aria-current={isActive ? "page" : undefined}
-                  ref={getActiveButtonRef(isActive)}
-                  onClick={() => onCurationClick(curation.id)}
-                  className={getTabButtonClassName(isActive)}
-                >
-                  <span
-                    className={getTabTextClassName({
-                      isActive,
-                      additionalClasses: "tw-max-w-28 tw-truncate sm:tw-max-w-36",
-                    })}
-                  >
-                    {curation.name}
-                  </span>
-                </button>
-              );
-            })}
-          {isApp && canManageCurations && (
-            <button
-              type="button"
-              onClick={() => setIsCreateCurationOpen(true)}
-              className="tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-150 motion-reduce:tw-transition-none desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
-              aria-label="Create curation"
-            >
-              <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
-            </button>
-          )}
-          {!isApp && !waveActive && (
-            <button
-              {...getTabStateProps(activeView === BrainView.NOTIFICATIONS)}
-              ref={getActiveButtonRef(activeView === BrainView.NOTIFICATIONS)}
-              onClick={onNotificationsClick}
-              className={getTabButtonClassName(
-                activeView === BrainView.NOTIFICATIONS
-              )}
-            >
-              <span
-                className={getTabTextClassName({
-                  isActive: activeView === BrainView.NOTIFICATIONS,
-                  additionalClasses: "tw-relative",
-                })}
-              >
-                Notifications
-                {haveUnreadNotifications && (
-                  <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
                 )}
-              </span>
-            </button>
-          )}
+                {isMemesWave && (
+                  <button
+                    {...getTabStateProps(activeView === BrainView.FAQ)}
+                    ref={getActiveButtonRef(activeView === BrainView.FAQ)}
+                    onClick={() => handleWaveViewChange(BrainView.FAQ)}
+                    className={getTabButtonClassName(
+                      activeView === BrainView.FAQ
+                    )}
+                  >
+                    <span
+                      className={getTabTextClassName({
+                        isActive: activeView === BrainView.FAQ,
+                      })}
+                    >
+                      FAQ
+                    </span>
+                  </button>
+                )}
+              </>
+            )}
+            {shouldShowCurationTabs &&
+              curationTabs.map((curation) => {
+                const isActive =
+                  activeView === BrainView.DEFAULT &&
+                  curation.id === activeCurationId;
+
+                return (
+                  <button
+                    key={curation.id}
+                    type="button"
+                    data-curation-id={curation.id}
+                    aria-current={isActive ? "page" : undefined}
+                    ref={getActiveButtonRef(isActive)}
+                    onClick={() => onCurationClick(curation.id)}
+                    className={getTabButtonClassName(isActive)}
+                  >
+                    <span
+                      className={getTabTextClassName({
+                        isActive,
+                        additionalClasses:
+                          "tw-max-w-28 tw-truncate sm:tw-max-w-36",
+                      })}
+                    >
+                      {curation.name}
+                    </span>
+                  </button>
+                );
+              })}
+            {!isApp && !waveActive && (
+              <button
+                {...getTabStateProps(activeView === BrainView.NOTIFICATIONS)}
+                ref={getActiveButtonRef(activeView === BrainView.NOTIFICATIONS)}
+                onClick={onNotificationsClick}
+                className={getTabButtonClassName(
+                  activeView === BrainView.NOTIFICATIONS
+                )}
+              >
+                <span
+                  className={getTabTextClassName({
+                    isActive: activeView === BrainView.NOTIFICATIONS,
+                    additionalClasses: "tw-relative",
+                  })}
+                >
+                  Notifications
+                  {haveUnreadNotifications && (
+                    <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
+                  )}
+                </span>
+              </button>
+            )}
+          </div>
+          {createCurationButton}
         </div>
       )}
       {wave && isCreateCurationOpen && (
