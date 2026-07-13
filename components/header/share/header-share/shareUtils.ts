@@ -1,4 +1,3 @@
-import yaml from "js-yaml";
 import type { ReactNode } from "react";
 
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
@@ -219,89 +218,6 @@ export function generateQrCodeSource({
       clearSource();
     });
 }
-
-export async function fetchCoreAppsVersions(): Promise<OSInfo[]> {
-  const fetchYml = async (url: string): Promise<LatestYml> => {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${url}`);
-    }
-
-    const text = await response.text();
-    return yaml.load(text) as LatestYml;
-  };
-
-  const enabledConfigs = CORE_OS_CONFIGS.filter((config) => config.enabled);
-  const results = await Promise.allSettled(
-    enabledConfigs.map((config) => fetchYml(config.url))
-  );
-
-  return results.flatMap((result, index) => {
-    const osConfig = enabledConfigs[index];
-    if (!osConfig) {
-      return [];
-    }
-
-    if (result.status === "fulfilled") {
-      return [{ ...osConfig, version: result.value.version }];
-    }
-
-    console.error(
-      `Failed to fetch or process ${osConfig.displayName}:`,
-      result.reason
-    );
-    return [];
-  });
-}
-
-interface OSInfo {
-  name: "windows" | "mac" | "linux";
-  url: string;
-  displayName: string;
-  downloadPath: string;
-  image: string;
-  enabled: boolean;
-  version?: string | undefined;
-}
-
-interface FileData {
-  url: string;
-  sha512: string;
-  size: number;
-}
-
-interface LatestYml {
-  version: string;
-  files: FileData[];
-}
-
-const CORE_OS_CONFIGS: OSInfo[] = [
-  {
-    name: "windows",
-    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/win/latest.yml",
-    displayName: "Windows",
-    downloadPath: "6529-core-app/win/links",
-    image: "/windows.png",
-    enabled: true,
-  },
-  {
-    name: "mac",
-    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/mac/latest-mac.yml",
-    displayName: "macOS",
-    downloadPath: "6529-core-app/mac/links",
-    image: "/macos.png",
-    enabled: true,
-  },
-  {
-    name: "linux",
-    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/linux/latest-linux.yml",
-    displayName: "Linux",
-    downloadPath: "6529-core-app/linux/links",
-    image: "/linux.png",
-    enabled: true,
-  },
-];
 
 export const bodyScrollLock = (() => {
   let lockCount = 0;

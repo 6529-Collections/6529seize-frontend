@@ -23,7 +23,8 @@ and mobile app layouts.
   `/network`, `/the-memes`, and `/notifications`.
 - Secondary jumps: `Discover Waves` (`/discover`), `/network/*`,
   `/xtdh` (`xTDH Allocations Dashboard`), `/nft-activity`, `/meme-calendar`,
-  collection routes, tools routes, and about routes grouped under `About 6529`,
+  collection routes, tools routes, and about routes including `6529 Apps`
+  (`/about/6529-apps`) grouped under `About 6529`,
   `Collections & Minting`, `Network & Reputation`, `Delegation & Wallets`,
   `Data & Developer Tools`, and `Legal`.
 
@@ -52,11 +53,13 @@ and mobile app layouts.
 - [Wallet and Account Controls](feature-wallet-account-controls.md):
   connect, disconnect, share, and proxy/account actions.
 - [Share Modal](feature-share-modal.md): desktop-web QR/deep-link sharing for
-  current routes, authenticated connection handoff, and 6529 app targets.
+  current routes and authenticated connection handoff.
 - [Internal Link Navigation](feature-internal-link-navigation.md): internal
   route links, hash anchors, and drop-content link behavior.
 - [Join 6529 Journey](feature-join-6529-journey.md): state-aware setup and
   acquisition guide at `/join-6529`.
+- [6529 Apps Page](feature-6529-apps-page.md): official 6529 Mobile and 6529
+  Desktop downloads at `/about/6529-apps`.
 
 ### Mobile-Specific Behavior
 

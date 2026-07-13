@@ -27,6 +27,7 @@ import {
   getAuthJwt,
   isAuthJwtUsable,
 } from "@/services/auth/auth.utils";
+import { extractErrorStatusCode as extractSharedErrorStatusCode } from "@/utils/errorStatus";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { getStableDeviceId } from "./stable-device-id";
@@ -180,45 +181,8 @@ const toErrorMessage = (
   return fallbackMessage;
 };
 
-const parseStatusCode = (status: unknown): number | null => {
-  if (typeof status === "number" && Number.isFinite(status)) {
-    return status;
-  }
-  if (typeof status === "string") {
-    const parsed = Number.parseInt(status, 10);
-    return Number.isNaN(parsed) ? null : parsed;
-  }
-  return null;
-};
-
-const extractErrorStatusCode = (error: unknown): number | null => {
-  if (error === null || error === undefined || typeof error !== "object") {
-    return null;
-  }
-  const typedError = error as {
-    status?: unknown;
-    code?: unknown;
-    response?: {
-      status?: unknown;
-    };
-    cause?: {
-      status?: unknown;
-      code?: unknown;
-      response?: {
-        status?: unknown;
-      };
-    };
-  };
-
-  return (
-    parseStatusCode(typedError.status) ??
-    parseStatusCode(typedError.response?.status) ??
-    parseStatusCode(typedError.code) ??
-    parseStatusCode(typedError.cause?.status) ??
-    parseStatusCode(typedError.cause?.response?.status) ??
-    parseStatusCode(typedError.cause?.code)
-  );
-};
+const extractErrorStatusCode = (error: unknown): number | null =>
+  extractSharedErrorStatusCode(error, { allowPartialStringStatus: true });
 
 const parseRetryAfterHeaderValue = (value: string): number | null => {
   const seconds = Number.parseFloat(value);

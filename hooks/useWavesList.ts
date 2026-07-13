@@ -446,9 +446,9 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
           nextLatestFollowedSubwaveDropTimestamp > 0
             ? nextLatestFollowedSubwaveDropTimestamp
             : null,
-        unreadFollowedSubwaveDrops: Math.max(
-          existingWave?.unreadFollowedSubwaveDrops ?? 0,
-          wave.unreadFollowedSubwaveDrops
+        unreadSubwaveDrops: Math.max(
+          existingWave?.unreadSubwaveDrops ?? 0,
+          wave.unreadSubwaveDrops
         ),
         firstUnreadFollowedSubwaveDropSerialNo: getFirstUnreadSerialNo(
           existingWave?.firstUnreadFollowedSubwaveDropSerialNo ?? null,
