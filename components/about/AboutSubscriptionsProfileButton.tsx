@@ -56,7 +56,7 @@ export default function AboutSubscriptionsProfileButton({
   );
   const buttonClassName =
     variant === "white"
-      ? `${WHITE_PRIMARY_ACTION_CLASS} tw-w-full tw-gap-2 sm:tw-w-auto`
+      ? `${WHITE_PRIMARY_ACTION_CLASS} tw-gap-2`
       : BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME;
 
   if (!profileSubscriptionsHref) {

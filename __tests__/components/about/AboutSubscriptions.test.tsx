@@ -43,7 +43,7 @@ describe("AboutSubscriptions", () => {
     );
   });
 
-  it("shows all original information sections without disclosure controls", () => {
+  it("shows all original information sections", () => {
     const { container } = render(<AboutSubscriptions />);
 
     expect(
@@ -58,6 +58,7 @@ describe("AboutSubscriptions", () => {
     expect(
       screen.getByRole("heading", { name: "Remote Minting" })
     ).toBeInTheDocument();
-    expect(container.querySelector("details")).not.toBeInTheDocument();
+    expect(container.querySelector("details")).toBeInTheDocument();
+    expect(screen.getByText("Delegation")).toBeInTheDocument();
   });
 });
