@@ -30,9 +30,9 @@ const m = (
 ) => t(locale, key, params);
 
 const LIST_CLASS =
-  "tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-600 sm:tw-space-y-3";
+  "tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600 sm:tw-space-y-3";
 const NESTED_LIST_CLASS =
-  "tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-iron-400 marker:tw-text-iron-600 sm:tw-mt-3 sm:tw-space-y-3";
+  "tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600 sm:tw-mt-3 sm:tw-space-y-3";
 const TIMELINE_ITEM_CLASS =
   "tw-relative tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3 sm:tw-grid-cols-[2.5rem_minmax(0,1fr)] sm:tw-gap-5";
 const TIMELINE_MARKER_CLASS =
@@ -83,7 +83,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
           number="1"
           title={m(locale, "about.subscriptions.reference.funding.title")}
         >
-          <div className="tw-space-y-3 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-space-y-4">
+          <div className="tw-space-y-3 tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-space-y-4">
             <p className="tw-m-0">
               {m(locale, "about.subscriptions.reference.funding.send")}
             </p>
@@ -125,7 +125,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
           number="2"
           title={m(locale, "about.subscriptions.reference.modes.title")}
         >
-          <div className="tw-space-y-4 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-space-y-6">
+          <div className="tw-space-y-4 tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-space-y-6">
             <p className="tw-m-0">
               {m(locale, "about.subscriptions.reference.modes.auto")}
             </p>
@@ -164,11 +164,11 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
           number="3"
           title={m(locale, "about.subscriptions.reference.phases.title")}
         >
-          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
             {m(locale, "about.subscriptions.reference.phases.same")}
           </p>
 
-          <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-mt-6 sm:tw-gap-6 md:tw-grid-cols-2">
+          <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-mt-6 sm:tw-gap-6 md:tw-grid-cols-2">
             <div className="tw-space-y-3">
               <p className="tw-m-0">
                 {m(locale, "about.subscriptions.reference.phases.zero")}
@@ -230,7 +230,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
           </h3>
           <FontAwesomeIcon
             aria-hidden="true"
-            className="tw-shrink-0 tw-text-sm tw-text-iron-600 tw-transition-transform tw-duration-300 group-open:-tw-rotate-180 motion-reduce:tw-transition-none"
+            className="tw-shrink-0 tw-text-sm tw-text-iron-500 tw-transition-transform tw-duration-300 group-open:-tw-rotate-180 motion-reduce:tw-transition-none"
             icon={faChevronDown}
           />
         </summary>
@@ -391,7 +391,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
       className="tw-border-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
     >
       <div className="tw-flex tw-items-center tw-gap-3 sm:tw-gap-4">
-        <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#7000ff]/10 tw-text-lg tw-text-[#7000ff] sm:tw-size-12 sm:tw-text-xl">
+        <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#7000ff]/10 tw-text-lg tw-text-[#8f5cff] sm:tw-size-12 sm:tw-text-xl">
           <FontAwesomeIcon aria-hidden="true" icon={faEarthAmericas} />
         </span>
         <h2
@@ -404,7 +404,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
       <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 sm:tw-mt-5 md:tw-grid-cols-3 md:tw-gap-6">
         {REMOTE_MESSAGE_KEYS.map((messageKey) => (
           <li
-            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-p-6`}
+            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-4 tw-text-base tw-leading-7 tw-text-iron-400 md:tw-p-6`}
             key={messageKey}
           >
             {m(locale, messageKey)}

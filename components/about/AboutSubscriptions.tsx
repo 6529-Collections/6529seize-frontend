@@ -46,7 +46,7 @@ const OVERVIEW_BENEFITS: readonly OverviewBenefit[] = [
   },
   {
     icon: faEarthAmericas,
-    iconClassName: "tw-text-[#7000ff]",
+    iconClassName: "tw-text-[#8f5cff]",
     iconWrapperClassName: "tw-bg-[#7000ff]/10",
     messageKey: "about.subscriptions.overview.awayFromComputer",
   },
@@ -84,37 +84,38 @@ function SubscriptionHeader({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <header className="tw-px-1 tw-pb-6 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
+    <header className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
       <div className="tw-max-w-4xl">
         <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
           {m(locale, "about.subscriptions.hero.title")}
         </h1>
-        <div className="tw-mt-4 tw-flex tw-justify-start empty:tw-hidden sm:tw-mt-5">
-          <AboutSubscriptionsProfileButton variant="white" />
-        </div>
-        <Link
-          className="tw-group/report tw-mt-3 tw-inline-flex tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3 tw-text-left tw-text-sm tw-text-iron-400 tw-no-underline tw-transition-all hover:tw-border-white/[0.12] hover:tw-bg-iron-900/60 hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto sm:tw-items-center sm:tw-gap-4 sm:tw-px-5 lg:tw-whitespace-nowrap"
-          href="/tools/subscriptions-report"
-        >
-          <FontAwesomeIcon
-            aria-hidden="true"
-            className="tw-mt-1 tw-shrink-0 tw-text-iron-600 tw-transition-colors group-hover/report:tw-text-[#00f0ff] sm:tw-mt-0"
-            icon={faChartLine}
-          />
-          <span>
-            {m(locale, "about.subscriptions.reference.reportLead")} {" "}
-            <span className="tw-font-medium tw-text-iron-200 tw-transition-colors group-hover/report:tw-text-iron-50">
-              {m(locale, "about.subscriptions.reference.reportLink")}
+        <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-3">
+          <div className="tw-flex tw-justify-start empty:tw-hidden">
+            <AboutSubscriptionsProfileButton variant="white" />
+          </div>
+          <Link
+            className="tw-group/report -tw-ml-1 tw-inline-flex tw-max-w-full tw-items-start tw-gap-2 tw-rounded-md tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-items-center lg:tw-whitespace-nowrap"
+            href="/tools/subscriptions-report"
+          >
+            <FontAwesomeIcon
+              aria-hidden="true"
+              className="tw-mt-1 tw-shrink-0 tw-text-iron-600 tw-transition-colors group-hover/report:tw-text-[#00f0ff] sm:tw-mt-0"
+              icon={faChartLine}
+            />
+            <span>
+              {m(locale, "about.subscriptions.reference.reportLead")} {" "}
+              <span className="tw-font-medium tw-text-iron-200 tw-transition-colors group-hover/report:tw-text-iron-50">
+                {m(locale, "about.subscriptions.reference.reportLink")}
+              </span>
             </span>
-          </span>
-          <FontAwesomeIcon
-            aria-hidden="true"
-            className="tw-ml-auto tw-hidden tw-shrink-0 tw-text-[10px] tw-text-iron-700 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-iron-200 motion-reduce:tw-transform-none sm:tw-block"
-            icon={faArrowRight}
-          />
-        </Link>
+            <FontAwesomeIcon
+              aria-hidden="true"
+              className="tw-mt-1 tw-hidden tw-shrink-0 tw-text-[10px] tw-text-iron-600 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-iron-200 motion-reduce:tw-transform-none sm:tw-mt-0 sm:tw-block"
+              icon={faArrowRight}
+            />
+          </Link>
+        </div>
       </div>
-      <div className="tw-mt-8 tw-h-px tw-bg-iron-900 sm:tw-mt-12" />
     </header>
   );
 }
@@ -132,7 +133,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         >
           {m(locale, "about.subscriptions.overview.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-light tw-leading-6 tw-text-iron-400 sm:tw-text-base sm:tw-leading-7">
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
           {m(locale, "about.subscriptions.overview.intro")}
         </p>
       </div>
@@ -168,7 +169,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
             "about.subscriptions.overview.notMintpass.title"
           )}
         >
-          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
+          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
             <li>
               {m(locale, "about.subscriptions.overview.notMintpass.choice")}
             </li>
@@ -193,7 +194,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
             "about.subscriptions.overview.regularMinting.title"
           )}
         >
-          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
+          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
             <li>
               {m(
                 locale,
