@@ -6,7 +6,6 @@ export const HEADER_SHARE_LOCALE = DEFAULT_LOCALE;
 export enum Mode {
   NAVIGATE,
   SHARE,
-  APPS,
 }
 
 export enum SubMode {
@@ -30,9 +29,6 @@ export function getSubTabCount(activeTab: Mode, isElectron: boolean): number {
 }
 
 export function getSubTabLabel(activeTab: Mode): string {
-  if (activeTab === Mode.APPS) {
-    return t(HEADER_SHARE_LOCALE, "headerShare.menu.selectPlatform");
-  }
   if (activeTab === Mode.SHARE) {
     return t(HEADER_SHARE_LOCALE, "headerShare.menu.openLinkIn");
   }

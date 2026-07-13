@@ -58,6 +58,7 @@ export function useWaveConfig() {
         firstDecisionTime: now,
         subsequentDecisions: [],
         isRolling: false,
+        ongoingRanking: false,
       },
       drops: {
         noOfApplicationsAllowedPerParticipant: null,

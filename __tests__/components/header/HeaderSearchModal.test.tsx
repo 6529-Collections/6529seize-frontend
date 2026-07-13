@@ -33,9 +33,22 @@ type HeaderSearchModalItemProps = {
   readonly onWaveSelect?: ((wave: ApiWave) => void) | undefined;
 };
 const mockHeaderSearchModalItem = jest.fn(
-  (props: HeaderSearchModalItemProps) => (
-    <div data-testid="item">{JSON.stringify(props)}</div>
-  )
+  (props: HeaderSearchModalItemProps) => {
+    const page =
+      (props.content as { readonly type?: unknown }).type === "PAGE"
+        ? (props.content as {
+            readonly title: string;
+            readonly href: string;
+          })
+        : null;
+
+    return (
+      <div data-testid="item">
+        {page && <a href={page.href}>{page.title}</a>}
+        {JSON.stringify(props)}
+      </div>
+    );
+  }
 );
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 const originalHtmlScrollIntoView = HTMLElement.prototype.scrollIntoView;
@@ -464,6 +477,34 @@ describe("HeaderSearchModal", () => {
           content.includes('"breadcrumbs":["About","Resources"]')
       )
     ).toBe(true);
+  });
+
+  it.each([
+    "6529 Apps",
+    "6529 Desktop",
+    "6529 Mobile",
+    "apps",
+    "desktop",
+    "mobile",
+  ])("finds the 6529 Apps page for %s", async (query) => {
+    setup({
+      selectedCategory: "PAGES",
+      useActualSidebarSections: true,
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Search" }), {
+      target: { value: query },
+    });
+
+    expect(
+      await screen.findByRole("link", { name: "6529 Apps" })
+    ).toHaveAttribute("href", "/about/6529-apps");
   });
 
   it("finds the Network Wave Score page by formula aliases", () => {

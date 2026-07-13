@@ -13,11 +13,13 @@ export default function CreateWaveDrops({
   waveType,
   drops,
   errors,
+  ongoingRanking = false,
   setDrops,
 }: {
   readonly waveType: ApiWaveType;
   readonly drops: CreateWaveDropsConfig;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
+  readonly ongoingRanking?: boolean;
   readonly setDrops: (drops: CreateWaveDropsConfig) => void;
 }) {
   const onNoOfApplicationsAllowedPerParticipantChange = (
@@ -68,6 +70,7 @@ export default function CreateWaveDrops({
         <CreateWaveDropsSubmissionMode
           submissionStrategy={drops.submissionStrategy}
           errors={errors}
+          isOngoingRanking={waveType === ApiWaveType.Rank && ongoingRanking}
           onChange={onSubmissionStrategyChange}
         />
       )}

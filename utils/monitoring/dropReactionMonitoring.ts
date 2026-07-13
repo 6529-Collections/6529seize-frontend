@@ -4,6 +4,13 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import * as Sentry from "@sentry/nextjs";
+import {
+  classifyReactionError,
+  isExpectedProxyReactionPermissionDeniedError,
+  isExpectedStaleDropNotFoundError,
+  toCaptureExceptionInput,
+  toErrorMessage,
+} from "./dropReactionErrorClassification";
 
 const RECONCILIATION_WINDOW_MS = 15_000;
 const DEDUPE_WINDOW_MS = 60_000;
@@ -16,13 +23,6 @@ const WEBSOCKET_STATUSES = new Set<string>(Object.values(WebSocketStatus));
 
 export type ReactionSource = "quick-react" | "picker" | "chip";
 type ReactionAction = "add" | "remove" | "replace";
-type ReactionErrorKind =
-  | "network"
-  | "auth"
-  | "rate-limit"
-  | "server"
-  | "endpoint-contract";
-
 interface ReactionMutationContext {
   readonly mutationId: string;
   readonly dropMutationSeq: number;
@@ -179,144 +179,6 @@ function addReactionBreadcrumb(
       ...data,
     },
   });
-}
-
-function toErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  if (typeof error === "string") {
-    return error;
-  }
-  if (typeof error === "object" && error) {
-    const typedError = error as {
-      message?: unknown;
-      error?: unknown;
-    };
-    if (typeof typedError.message === "string") {
-      return typedError.message;
-    }
-    if (typeof typedError.error === "string") {
-      return typedError.error;
-    }
-  }
-  return String(error);
-}
-
-function toCaptureExceptionInput(error: unknown): Error {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(toErrorMessage(error));
-}
-
-function parseStatusCode(status: unknown): number | null {
-  if (typeof status === "number" && Number.isFinite(status)) {
-    return status;
-  }
-
-  if (typeof status === "string") {
-    const normalizedStatus = status.trim();
-    if (!/^\d+$/.test(normalizedStatus)) {
-      return null;
-    }
-    const parsed = Number.parseInt(normalizedStatus, 10);
-    return Number.isNaN(parsed) ? null : parsed;
-  }
-
-  return null;
-}
-
-function extractErrorStatusCode(error: unknown): number | null {
-  if (error === null || typeof error !== "object") {
-    return null;
-  }
-
-  const typedError = error as {
-    status?: unknown;
-    code?: unknown;
-    response?: {
-      status?: unknown;
-    };
-    cause?: {
-      status?: unknown;
-      code?: unknown;
-      response?: {
-        status?: unknown;
-      };
-    };
-  };
-
-  return (
-    parseStatusCode(typedError.status) ??
-    parseStatusCode(typedError.response?.status) ??
-    parseStatusCode(typedError.code) ??
-    parseStatusCode(typedError.cause?.status) ??
-    parseStatusCode(typedError.cause?.response?.status) ??
-    parseStatusCode(typedError.cause?.code)
-  );
-}
-
-function isNetworkError(error: unknown): boolean {
-  if (error instanceof TypeError) {
-    return true;
-  }
-
-  const normalizedMessage = toErrorMessage(error).toLowerCase();
-  return (
-    normalizedMessage.includes("failed to fetch") ||
-    normalizedMessage.includes("load failed") ||
-    normalizedMessage.includes("networkerror") ||
-    normalizedMessage.includes("network error") ||
-    normalizedMessage.includes("network request failed")
-  );
-}
-
-function classifyReactionError(error: unknown): {
-  statusCode: number | null;
-  errorKind: ReactionErrorKind;
-} {
-  const statusCode = extractErrorStatusCode(error);
-
-  if (statusCode === 401 || statusCode === 403) {
-    return { statusCode, errorKind: "auth" };
-  }
-
-  if (statusCode === 429) {
-    return { statusCode, errorKind: "rate-limit" };
-  }
-
-  if (statusCode === 404 || statusCode === 405) {
-    return { statusCode, errorKind: "endpoint-contract" };
-  }
-
-  if (typeof statusCode === "number" && statusCode >= 500) {
-    return { statusCode, errorKind: "server" };
-  }
-
-  if (isNetworkError(error)) {
-    return { statusCode, errorKind: "network" };
-  }
-
-  return { statusCode, errorKind: "server" };
-}
-
-function isExpectedStaleDropNotFoundError({
-  context,
-  errorMessage,
-  statusCode,
-}: {
-  readonly context: ReactionMutationContext;
-  readonly errorMessage: string;
-  readonly statusCode: number | null;
-}): boolean {
-  // Intentionally exact: if the backend changes this stale-drop 404 shape,
-  // capture resumes so we can re-evaluate the contract.
-  return (
-    statusCode === 404 &&
-    context.endpoint === `drops/${context.dropId}/reaction` &&
-    errorMessage === `Drop ${context.dropId} not found`
-  );
 }
 
 function captureReactionEvent({
@@ -484,6 +346,10 @@ export function recordReactionRequestSucceeded(
     latency_ms: now - (context.requestSentAt ?? context.startedAt),
   });
 
+  if (result.isLatestMutation && context.realtimeReconciledAt !== null) {
+    clearActiveIntentForContext(context);
+  }
+
   return result;
 }
 
@@ -525,8 +391,34 @@ export function recordReactionRequestFailed(
   }
 
   if (
-    isExpectedStaleDropNotFoundError({
+    isExpectedProxyReactionPermissionDeniedError({
+      dropId: context.dropId,
+      endpoint: context.endpoint,
+      errorMessage,
+      method: context.method,
+      statusCode,
+    })
+  ) {
+    addReactionBreadcrumb(
+      "reaction.proxy_permission_denied",
       context,
+      {
+        status_code: statusCode ?? undefined,
+        latency_ms: latencyMs,
+        error_kind: errorKind,
+        error_message: errorMessage,
+        captured: false,
+      },
+      "warning"
+    );
+    clearActiveIntentForContext(context);
+    return result;
+  }
+
+  if (
+    isExpectedStaleDropNotFoundError({
+      dropId: context.dropId,
+      endpoint: context.endpoint,
       errorMessage,
       statusCode,
     })
@@ -655,6 +547,9 @@ export function recordReactionRealtimeReconciliation(params: {
       time_since_mutation_ms: timeSinceMutationMs,
       websocket_status: websocketStatus,
     });
+    if (context.apiSucceededAt !== null) {
+      clearActiveIntentForContext(context);
+    }
     return {
       ...resultBase,
       shouldApplyCanonicalDrop: true,
