@@ -169,13 +169,13 @@ describe("ReactQueryWrapper context", () => {
     });
   });
 
-  it("invalidateNotifications invalidates notification queries", () => {
+  it("invalidateNotifications leaves other connected accounts cached", () => {
     const { client, ctx } = createTestSetup();
     act(() => ctx.invalidateNotifications());
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
     });
-    expect(client.invalidateQueries).toHaveBeenCalledWith({
+    expect(client.invalidateQueries).not.toHaveBeenCalledWith({
       queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
     });
     expect(client.invalidateQueries).toHaveBeenCalledWith({

@@ -4,8 +4,6 @@ import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 
 import { t } from "@/i18n/messages";
-import { ShareMobileApp } from "../HeaderShareMobileApps";
-import { CoreAppsDownload } from "./CoreAppsDownload";
 import { HEADER_SHARE_LOCALE, Mode, squareStyle, SubMode } from "./constants";
 import { ModalMenu } from "./HeaderShareMenu";
 import type {
@@ -282,35 +280,12 @@ export function HeaderShareModalView({
     );
   };
 
-  const getAppsContent = () => {
-    if (activeSubTab === SubMode.CORE) {
-      return { content: <CoreAppsDownload />, url: "" };
-    }
-
-    return {
-      content: (
-        <div
-          className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-12 tw-p-10"
-          style={squareStyle}
-        >
-          <ShareMobileApp platform="ios" />
-          <ShareMobileApp platform="android" />
-        </div>
-      ),
-      url: "",
-    };
-  };
-
   const getCurrentDisplayContent = (): DisplayContent => {
     if (activeTab === Mode.NAVIGATE) {
       return getNavigateContent();
     }
 
-    if (activeTab === Mode.SHARE) {
-      return getShareContent();
-    }
-
-    return getAppsContent();
+    return getShareContent();
   };
 
   const getDisplayContent = (): DisplayContent => {

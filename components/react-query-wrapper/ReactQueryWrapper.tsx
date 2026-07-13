@@ -1112,14 +1112,11 @@ const createReactQueryContextValue = (
   };
 
   const invalidateNotifications = () => {
+    // Notification read mutations use the active account's JWT. Other connected
+    // accounts keep their cached unread counts and continue their normal polling.
     queryClient
       .invalidateQueries({
         queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-      })
-      .catch(() => undefined);
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
       })
       .catch(() => undefined);
     invalidateWavesV2();

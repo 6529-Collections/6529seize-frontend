@@ -13,6 +13,19 @@ export interface RankedPageMatch {
 }
 
 export const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
+  "/about/6529-apps": [
+    "6529 Apps",
+    "6529 Desktop",
+    "6529 Mobile",
+    "Apps",
+    "Desktop",
+    "Mobile",
+    "iOS app",
+    "Android app",
+    "Windows app",
+    "macOS app",
+    "Linux app",
+  ],
   [DROP_FORGE_PATH]: [DROP_FORGE_TITLE],
   [DROP_FORGE_SECTIONS.CRAFT.path]: [`${DROP_FORGE_TITLE} Craft`],
   [DROP_FORGE_SECTIONS.LAUNCH.path]: [`${DROP_FORGE_TITLE} Launch`],

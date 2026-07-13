@@ -29,9 +29,13 @@ export default function CreateWaveDatesRank({
   setDates,
 }: CreateWaveDatesRankProps) {
   const isRollingMode = dates.isRolling;
+  const isOngoingRanking = dates.ongoingRanking ?? false;
   const [expandedSections, setExpandedSections] = useState({
     start: true,
-    decisions: false,
+    // Expanded by default so the announcement schedule is visible before Next;
+    // a collapsed section made it easy to miss that scheduled (non-perpetual)
+    // waves need their winner announcements configured.
+    decisions: true,
     rolling: dates.isRolling,
   });
   const [hasAutoCollapsedStart, setHasAutoCollapsedStart] = useState(false);
@@ -107,7 +111,13 @@ export default function CreateWaveDatesRank({
       };
     }
 
-    if (normalizedDates.isRolling) {
+    if (normalizedDates.ongoingRanking) {
+      // Perpetual ranking: no decision schedule and no end date.
+      normalizedDates = {
+        ...normalizedDates,
+        endDate: null,
+      };
+    } else if (normalizedDates.isRolling) {
       normalizedDates = {
         ...normalizedDates,
         endDate: clampRollingEndDate(normalizedDates),
@@ -158,24 +168,28 @@ export default function CreateWaveDatesRank({
         setIsExpanded={() => toggleSection("start")}
       />
 
-      <Decisions
-        dates={dates}
-        errors={decisionErrors}
-        setDates={commitDates}
-        onRollingEnabled={handleRollingEnabled}
-        isExpanded={expandedSections.decisions}
-        setIsExpanded={() => toggleSection("decisions")}
-        onInteraction={handleDecisionsInteraction}
-      />
+      {!isOngoingRanking && (
+        <>
+          <Decisions
+            dates={dates}
+            errors={decisionErrors}
+            setDates={commitDates}
+            onRollingEnabled={handleRollingEnabled}
+            isExpanded={expandedSections.decisions}
+            setIsExpanded={() => toggleSection("decisions")}
+            onInteraction={handleDecisionsInteraction}
+          />
 
-      {dates.subsequentDecisions.length > 0 && isRollingMode && (
-        <RollingEndDate
-          dates={dates}
-          errors={rollingEndDateErrors}
-          setDates={commitDates}
-          isExpanded={expandedSections.rolling}
-          setIsExpanded={() => toggleSection("rolling")}
-        />
+          {dates.subsequentDecisions.length > 0 && isRollingMode && (
+            <RollingEndDate
+              dates={dates}
+              errors={rollingEndDateErrors}
+              setDates={commitDates}
+              isExpanded={expandedSections.rolling}
+              setIsExpanded={() => toggleSection("rolling")}
+            />
+          )}
+        </>
       )}
     </div>
   );
