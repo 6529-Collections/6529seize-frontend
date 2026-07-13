@@ -526,15 +526,15 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
-  it("captures reconciliation mismatch after the guard window", () => {
+  it("captures the production-shaped slow reconciliation mismatch", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-4",
       waveId: "wave-1",
-      source: "chip",
-      action: "replace",
-      previousReaction: ":wave:",
-      intendedReaction: ":smile:",
-      optimisticReaction: ":smile:",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
       profileId: "profile-1",
       websocketStatus: WebSocketStatus.CONNECTED,
     });
@@ -548,13 +548,13 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestSucceeded(mutation);
     expect(mutation.apiFailedAt).toBeNull();
 
-    dateNowSpy.mockReturnValue(17_000);
+    dateNowSpy.mockReturnValue(218_657);
     const result = recordReactionRealtimeReconciliation({
       drop: {
         id: "drop-4",
         wave: { id: "wave-1" },
         context_profile_context: {
-          reaction: ":wave:",
+          reaction: null,
         } as any,
       },
       websocketStatus: WebSocketStatus.CONNECTED,
@@ -562,14 +562,14 @@ describe("dropReactionMonitoring", () => {
 
     expect(result).toEqual({
       shouldApplyCanonicalDrop: true,
-      expectedReaction: ":smile:",
-      serverReaction: ":wave:",
+      expectedReaction: ":joy:",
+      serverReaction: null,
     });
     expect(addBreadcrumbMock).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "reaction.optimistic_reverted",
         data: expect.objectContaining({
-          server_reaction: ":wave:",
+          time_since_mutation_ms: 217_657,
         }),
       })
     );
@@ -623,6 +623,61 @@ describe("dropReactionMonitoring", () => {
         message: "reaction.realtime_reconciled",
       })
     );
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("does not attribute a later canonical change to a reconciled mutation", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-5-reconciled",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-5-reconciled/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    dateNowSpy.mockReturnValue(1_300);
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-reconciled",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":joy:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    addBreadcrumbMock.mockClear();
+    dateNowSpy.mockReturnValue(218_657);
+    const result = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-reconciled",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: null,
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(result).toEqual({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: null,
+      serverReaction: null,
+    });
+    expect(addBreadcrumbMock).not.toHaveBeenCalled();
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
