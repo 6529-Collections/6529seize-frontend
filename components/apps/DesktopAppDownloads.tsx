@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
@@ -17,8 +17,12 @@ const APPS_LOCALE = DEFAULT_LOCALE;
 export function DesktopAppDownloads() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["desktop-app-versions"],
-    queryFn: fetchDesktopAppVersions,
+    queryFn: ({ signal }) => fetchDesktopAppVersions(signal),
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+    retryDelay: 1_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   if (isLoading) {
@@ -97,9 +101,9 @@ function DesktopAppDownload({ app }: { readonly app: DesktopAppVersion }) {
           {t(APPS_LOCALE, "apps.desktop.version", { version: app.version })}
         </span>
       </span>
-      <ArrowDownTrayIcon
+      <ArrowTopRightOnSquareIcon
         aria-hidden="true"
-        className="tw-size-5 tw-flex-none tw-text-iron-500 tw-transition group-hover:tw-translate-y-0.5 group-hover:tw-text-primary-300"
+        className="tw-size-5 tw-flex-none tw-text-iron-500 tw-transition group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 group-hover:tw-text-primary-300"
       />
     </a>
   );

@@ -4447,11 +4447,29 @@
       "id": "waves.drop.content-display",
       "kind": "ui_affordance",
       "title": "Wave drop content display",
-      "aliases": ["drop content", "read drop", "drop display", "drop media"],
-      "keywords": ["waves", "drop", "content", "display", "media", "text"],
+      "aliases": [
+        "drop content",
+        "read drop",
+        "drop display",
+        "drop media",
+        "ordered list",
+        "numbered list"
+      ],
+      "keywords": [
+        "waves",
+        "drop",
+        "content",
+        "display",
+        "media",
+        "text",
+        "markdown",
+        "list",
+        "numbered"
+      ],
       "facts": [
         "Wave drop content display docs explain how posted drop content is rendered.",
         "Content display is separate from composer submission behavior.",
+        "Ordered lists accept both 1. and 1) markers and preserve the chosen delimiter when rendered.",
         "Media, quote links, replies, and selection copy have additional drop-action records."
       ],
       "canonical_path": "/waves",
