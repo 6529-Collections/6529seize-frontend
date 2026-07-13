@@ -114,6 +114,22 @@ describe("prefetchNotificationsPageData", () => {
     expect(fetchNotificationsV2).not.toHaveBeenCalled();
   });
 
+  it("does not prefetch when the bearer token cannot be decoded", async () => {
+    const queryClient = new QueryClient();
+    (jwtDecode as jest.Mock).mockImplementationOnce(() => {
+      throw new Error("invalid token");
+    });
+
+    await prefetchNotificationsPageData({
+      queryClient,
+      headers: { Authorization: "Bearer invalid" },
+    });
+
+    expect(commonApiFetch).not.toHaveBeenCalled();
+    expect(fetchNotificationsV2).not.toHaveBeenCalled();
+    expect(queryClient.getQueryCache().getAll()).toHaveLength(0);
+  });
+
   it("seeds the fetched profile but skips notifications when it has no handle", async () => {
     const queryClient = new QueryClient();
     const profileWithoutHandle = { ...profile, handle: null };

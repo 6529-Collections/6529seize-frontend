@@ -13,8 +13,14 @@ const getWalletFromJwt = (headers: Record<string, string>): string | null => {
     return null;
   }
 
-  const decodedJwt = jwtDecode<{ readonly sub: string }>(jwt);
-  return decodedJwt.sub;
+  try {
+    const decodedJwt = jwtDecode<{ readonly sub?: unknown }>(jwt);
+    return typeof decodedJwt.sub === "string" && decodedJwt.sub.length > 0
+      ? decodedJwt.sub
+      : null;
+  } catch {
+    return null;
+  }
 };
 
 export const prefetchNotificationsPageData = async ({
