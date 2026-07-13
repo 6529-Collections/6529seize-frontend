@@ -32,8 +32,7 @@ sections:
 3. Logged-out visitors see two actions beneath the main headline:
    - `Start here`, which opens `/join-6529`
    - `Connect wallet`, which opens the wallet connection flow
-4. A compact `Explore what's happening` divider introduces the public activity
-   sections before the latest-drop slot.
+4. The latest-drop slot follows the newcomer actions directly.
 5. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
    - Mobile/app small-screen layouts: in the top header actions

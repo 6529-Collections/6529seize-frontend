@@ -2,6 +2,5 @@
   "home.newcomer.title": "New to 6529",
   "home.newcomer.startAction": "Start here",
   "home.newcomer.connectAction": "Connect wallet",
-  "home.newcomer.connectFailed": "Failed to open wallet connection. Please try again.",
-  "home.newcomer.activityTitle": "Explore what's happening"
+  "home.newcomer.connectFailed": "Failed to open wallet connection. Please try again."
 }

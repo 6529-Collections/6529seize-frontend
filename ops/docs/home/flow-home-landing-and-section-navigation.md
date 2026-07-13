@@ -13,8 +13,8 @@ next route.
 - Authenticated section order on `/`: `Header` -> `Latest Drop` or `Next Drop`
   -> mission block -> `Coming up` -> `Boosted Drops` -> `Most active waves`
 - Logged-out section order on `/`: `Header` -> compact newcomer actions ->
-  activity divider -> `Latest Drop` or `Next Drop` -> mission block ->
-  `Coming up` -> `Boosted Drops` -> `Most active waves`
+  `Latest Drop` or `Next Drop` -> mission block -> `Coming up` ->
+  `Boosted Drops` -> `Most active waves`
 
 ### Route map by section
 
