@@ -14,6 +14,7 @@ import {
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
+import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
@@ -294,6 +295,13 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "subsection.networkData": "Network & Reputation",
   "subsection.nftReportingTools": "Collections & Minting",
   "subsection.developerOpenData": "Data & Developer Tools",
+} as const);
+
+const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  waveSections: "Wave sections",
+  appSections: "App sections",
+  loadingSections: "Loading wave sections",
+  fallbackCuration: "Curation",
 } as const);
 
 const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
@@ -1203,6 +1211,7 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  ...homeNewcomerMessages,
   "home.mintSubscriptions.balanceLabel": "Balance",
   "home.mintSubscriptions.infoLinkAriaLabel":
     "Learn more about The Memes subscriptions",
@@ -1787,6 +1796,7 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...WAVE_NAVIGATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
