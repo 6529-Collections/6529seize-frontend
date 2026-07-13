@@ -1,50 +1,76 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import clsx from "clsx";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import HeaderSearchModal from "./HeaderSearchModal";
-import { useKey } from "react-use";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useKey } from "react-use";
+
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
+import HeaderSearchModal from "./HeaderSearchModal";
 
 interface HeaderSearchButtonProps {
   readonly wave: ApiWave | null;
 }
 
+type OpenSearch = "site" | "wave" | null;
+
 export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const waveChatScroll = useWaveChatScrollOptional();
+  const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
 
   useEffect(() => {
     let rafId: number | null = null;
-
+    const isOpen = openSearch !== null;
     if (wasOpenRef.current && !isOpen) {
       rafId = window.requestAnimationFrame(() => {
         buttonRef.current?.focus({ preventScroll: true });
       });
     }
-
     wasOpenRef.current = isOpen;
-
     return () => {
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-      }
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
     };
-  }, [isOpen]);
+  }, [openSearch]);
 
-  const handleOpen = () => setIsOpen(true);
-  const handleClose = () => setIsOpen(false);
+  const openContextSearch = () => setOpenSearch(wave ? "wave" : "site");
+  const closeSearch = () => setOpenSearch(null);
 
-  useKey((event) => event.metaKey && event.key === "k", handleOpen, {
-    event: "keydown",
-  });
+  useKey(
+    (event) =>
+      (event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === "k",
+    openContextSearch,
+    { event: "keydown" }
+  );
 
+  const handleWaveResultSelect = (serialNo: number) => {
+    if (!wave) return;
+    if (waveChatScroll) {
+      waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
+    } else {
+      const params = new URLSearchParams(window.location.search);
+      params.set("serialNo", String(serialNo));
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  };
+
+  const buttonLabel = wave
+    ? t(locale, "waves.drops.searchModal.inputLabel", { waveName: wave.name })
+    : t(locale, "headerSearch.inputLabel");
   const iconSizeClasses = isApp ? "tw-h-6 tw-w-6" : "tw-h-5 tw-w-5";
 
   return (
@@ -52,11 +78,11 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
       <button
         ref={buttonRef}
         type="button"
-        aria-label="Search"
-        title="Search"
-        onClick={handleOpen}
+        aria-label={buttonLabel}
+        title={buttonLabel}
+        onClick={openContextSearch}
         className={clsx(
-          "tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
+          "tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
           isApp
             ? "tw-bg-black"
             : "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
@@ -66,14 +92,25 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
           className={clsx("tw-flex-shrink-0", iconSizeClasses)}
         />
       </button>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isOpen && (
+
+      {wave && (
+        <WaveDropsSearchModal
+          isOpen={openSearch === "wave"}
+          onClose={closeSearch}
+          wave={wave}
+          onSelectSerialNo={handleWaveResultSelect}
+          onSearchAll={() => setOpenSearch("site")}
+        />
+      )}
+
+      <CommonAnimationWrapper mode="sync" initial>
+        {openSearch === "site" && (
           <CommonAnimationOpacity
-            key="modal"
+            key="site-search-modal"
             elementClasses="tw-absolute tw-z-10"
-            onClicked={(e) => e.stopPropagation()}
+            onClicked={(event) => event.stopPropagation()}
           >
-            <HeaderSearchModal onClose={handleClose} wave={wave} />
+            <HeaderSearchModal onClose={closeSearch} wave={null} />
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>

@@ -71,30 +71,31 @@ describe("SearchModalDisplay", () => {
 
   it("adds new wallet from input", () => {
     render(<Wrapper initial={[]} />);
-    const input = screen.getByPlaceholderText(
-      "Search for address, ENS or username"
-    );
+    const input = screen.getByPlaceholderText("Handle, ENS, or wallet address");
     fireEvent.change(input, { target: { value: "0xabc" } });
-    fireEvent.click(screen.getByLabelText("Add search wallet"));
+    fireEvent.click(screen.getByLabelText("Add identity filter"));
     expect(screen.getByText("0xabc")).toBeInTheDocument();
   });
 
   it("prevents duplicate wallets and toggles error class", () => {
     render(<Wrapper initial={["dup"]} />);
-    const input = screen.getByPlaceholderText(
-      "Search for address, ENS or username"
-    );
+    const input = screen.getByPlaceholderText("Handle, ENS, or wallet address");
     fireEvent.change(input, { target: { value: "dup" } });
-    fireEvent.click(screen.getByLabelText("Add search wallet"));
+    fireEvent.click(screen.getByLabelText("Add identity filter"));
     expect(screen.getAllByText("dup").length).toBe(1);
     expect(input.closest("form")).toHaveClass("shakeWalletInput");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "That identity is already included."
+    );
   });
 
   it("clears all wallets", () => {
     render(<Wrapper initial={["a", "b"]} />);
-    fireEvent.click(screen.getByText("Clear All"));
+    fireEvent.click(screen.getByText("Clear all"));
     expect(screen.queryByText("a")).not.toBeInTheDocument();
-    expect(screen.getByText("No search queries added")).toBeInTheDocument();
+    expect(
+      screen.getByText("No identity filters added. Showing everyone.")
+    ).toBeInTheDocument();
   });
 });
 

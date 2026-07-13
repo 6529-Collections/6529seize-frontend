@@ -128,10 +128,11 @@ describe("HeaderSearchModalItem", () => {
       tdh: 10,
     };
     const { onClose, onHover } = renderComponent(profile, "ali", false);
-    expect(onHover).toHaveBeenCalledWith(true);
     const link = screen.getByTestId("link");
+    fireEvent.mouseEnter(link.parentElement!);
+    expect(onHover).toHaveBeenCalledWith(true);
     expect(link).toHaveAttribute("href", "/profile-route");
-    expect(screen.getByText("alice")).toBeInTheDocument();
+    expect(screen.getByText("ali").tagName).toBe("MARK");
     expect(link.textContent).toContain("alice");
     expect(screen.getByText(/TDH: 10 - Level: 1/i)).toBeInTheDocument();
     fireEvent.click(link);
@@ -150,7 +151,7 @@ describe("HeaderSearchModalItem", () => {
       image_url: "",
     };
     const { onClose, onHover } = renderComponent(nft, "me", false);
-    expect(onHover).toHaveBeenCalledWith(false);
+    expect(onHover).not.toHaveBeenCalled();
     const link = screen.getByTestId("link");
     expect(link).toHaveAttribute("href", "/the-memes/1");
     expect(link.textContent).toContain("Meme");

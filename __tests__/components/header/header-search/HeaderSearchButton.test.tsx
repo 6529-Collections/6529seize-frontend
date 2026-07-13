@@ -30,6 +30,27 @@ jest.mock("@/components/header/header-search/HeaderSearchModal", () => ({
   ),
 }));
 
+jest.mock("@/components/waves/drops/search/WaveDropsSearchModal", () => ({
+  __esModule: true,
+  default: (props: any) =>
+    props.isOpen ? (
+      <div data-testid="wave-search-modal">
+        <button onClick={props.onSearchAll}>Search all 6529</button>
+        <button onClick={props.onClose}>Close wave search</button>
+      </div>
+    ) : null,
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: jest.fn() }),
+  usePathname: () => "/waves/wave-1",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+jest.mock("@/contexts/wave/WaveChatScrollContext", () => ({
+  useWaveChatScrollOptional: () => null,
+}));
+
 jest.mock("@heroicons/react/24/outline", () => ({
   MagnifyingGlassIcon: (props: any) => <svg data-testid="icon" {...props} />,
 }));
@@ -79,5 +100,22 @@ describe("HeaderSearchButton", () => {
     render(<HeaderSearchButton wave={null} />);
     const icon = screen.getByTestId("icon");
     expect(icon).toHaveClass("tw-h-6 tw-w-6");
+  });
+
+  it("opens the scoped message search in a wave and can switch to site search", () => {
+    useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
+    const wave = { id: "wave-1", name: "Design Wave" } as any;
+    render(<HeaderSearchButton wave={wave} />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Search messages in Design Wave",
+      })
+    );
+    expect(screen.getByTestId("wave-search-modal")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
+    expect(screen.queryByTestId("wave-search-modal")).not.toBeInTheDocument();
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
   });
 });

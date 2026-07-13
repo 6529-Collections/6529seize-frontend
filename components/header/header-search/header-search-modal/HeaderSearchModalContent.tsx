@@ -1,10 +1,21 @@
 "use client";
 
-import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  ChevronLeftIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { useQuery } from "@tanstack/react-query";
 import { FocusTrap } from "focus-trap-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 
@@ -12,27 +23,24 @@ import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_SECTIONS,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
   mapSidebarSectionsToPages,
   type SidebarPageEntry,
   useSidebarSections,
 } from "@/hooks/useSidebarSections";
-import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { useWaves } from "@/hooks/useWaves";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -50,16 +58,15 @@ import {
   EMPTY_PROFILE_RESULTS,
   FILTERABLE_CATEGORIES,
   HEADER_SEARCH_LABELS,
+  HEADER_SEARCH_RESULTS_LISTBOX_ID,
   MIN_SEARCH_LENGTH,
   NFT_SEARCH_MIN_LENGTH,
-  SEARCH_MODE,
   SEARCH_ONLY_PAGES,
   STATE,
   isFilterableCategory,
   type FilterableCategory,
 } from "./constants";
 import { HeaderSearchSiteResults } from "./HeaderSearchSiteResults";
-import { HeaderSearchWaveResults } from "./HeaderSearchWaveResults";
 import {
   getCompositePageSearchValues,
   getPageMatchPriority,
@@ -71,28 +78,122 @@ import {
 
 const HEADER_SEARCH_DIALOG_TITLE_ID = "header-search-dialog-title";
 const HEADER_SEARCH_INPUT_DESCRIPTION_ID = "header-search-input-description";
+const HEADER_SEARCH_SESSION_QUERY_KEY = "headerSearchLastQuery";
+const HEADER_SEARCH_RECENT_QUERIES_KEY = "headerSearchRecentQueries";
+const MAX_RECENT_SEARCHES = 5;
+
+const readSessionQuery = (): string => {
+  if (typeof window === "undefined") return "";
+  try {
+    return sessionStorage.getItem(HEADER_SEARCH_SESSION_QUERY_KEY) ?? "";
+  } catch {
+    return "";
+  }
+};
+
+const readRecentSearches = (): string[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const savedRecent = sessionStorage.getItem(
+      HEADER_SEARCH_RECENT_QUERIES_KEY
+    );
+    if (!savedRecent) return [];
+    const parsed: unknown = JSON.parse(savedRecent);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((value): value is string => typeof value === "string")
+      .slice(0, MAX_RECENT_SEARCHES);
+  } catch {
+    return [];
+  }
+};
+
+const rankPageResults = ({
+  locale,
+  pageCatalog,
+  query,
+}: {
+  readonly locale: string;
+  readonly pageCatalog: readonly PageSearchResult[];
+  readonly query: string;
+}): PageSearchResult[] => {
+  const normalizedQuery = query.toLocaleLowerCase(locale);
+  if (!normalizedQuery) return [];
+  const canonicalQueryTokens = getPageSearchTokens(query);
+
+  const rankedMatches = pageCatalog.reduce<RankedPageMatch[]>(
+    (accumulator, page) => {
+      const normalizedTitle = page.title.toLocaleLowerCase(locale);
+      const normalizedHref = page.href.toLocaleLowerCase(locale);
+      const normalizedBreadcrumbs = page.breadcrumbs.map((value) =>
+        value.toLocaleLowerCase(locale)
+      );
+      const normalizedSearchTerms = (page.searchTerms ?? []).map((value) =>
+        value.toLocaleLowerCase(locale)
+      );
+      const compositeValues = getCompositePageSearchValues(
+        normalizedTitle,
+        normalizedBreadcrumbs,
+        normalizedSearchTerms
+      );
+      const matchInputs = {
+        normalizedTitle,
+        normalizedHref,
+        hrefSegments: normalizedHref.split("/").filter(Boolean),
+        normalizedBreadcrumbs,
+        normalizedSearchTerms,
+        compositeValues,
+      };
+      const matchQuery = { normalizedQuery, canonicalQueryTokens };
+
+      if (!pageMatchesQuery(matchInputs, matchQuery)) return accumulator;
+      accumulator.push({
+        page,
+        normalizedTitle,
+        priority: getPageMatchPriority(
+          matchInputs,
+          normalizedQuery,
+          canonicalQueryTokens
+        ),
+      });
+      return accumulator;
+    },
+    []
+  );
+
+  return rankedMatches
+    .sort((a, b) => {
+      if (a.priority !== b.priority) return a.priority - b.priority;
+      const titleComparison = a.normalizedTitle.localeCompare(
+        b.normalizedTitle,
+        locale
+      );
+      return titleComparison || a.page.href.localeCompare(b.page.href, locale);
+    })
+    .map((result) => result.page);
+};
 
 export default function HeaderSearchModal({
   onClose,
-  wave,
+  wave: _wave,
 }: {
   readonly onClose: () => void;
   readonly wave: ApiWave | null;
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const locale = useBrowserLocale();
   const modalRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const resultsPanelRef = useRef<HTMLDivElement>(null);
+  const inputKeyHandlerRef = useRef<
+    ((event: ReactKeyboardEvent<HTMLInputElement>) => void) | null
+  >(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const waveChatScroll = useWaveChatScrollOptional();
-  const [searchMode, setSearchMode] = useState<SEARCH_MODE>(
-    wave ? SEARCH_MODE.WAVE : SEARCH_MODE.SITE
-  );
-
-  const [searchValue, setSearchValue] = useState<string>("");
+  const [searchValue, setSearchValue] = useState(readSessionQuery);
+  const [debouncedValue, setDebouncedValue] = useState("");
+  const [recentSearches, setRecentSearches] =
+    useState<string[]>(readRecentSearches);
   const [selectedCategory, setSelectedCategory] = useLocalPreference<CATEGORY>(
     "headerSearchCategoryFilter",
     CATEGORY.ALL,
@@ -101,80 +202,23 @@ export default function HeaderSearchModal({
       (Object.values(CATEGORY) as CATEGORY[]).includes(value as CATEGORY)
   );
 
-  const [debouncedValue, setDebouncedValue] = useState<string>("");
-  useDebounce(
-    () => {
-      setDebouncedValue(searchValue);
-    },
-    500,
-    [searchValue]
-  );
+  useDebounce(() => setDebouncedValue(searchValue), 350, [searchValue]);
 
   const trimmedSearchValue = searchValue.trim();
   const trimmedDebouncedValue = debouncedValue.trim();
-  const searchInputLength = trimmedSearchValue.length;
-  const meetsCharacterThreshold = searchInputLength >= MIN_SEARCH_LENGTH;
-  const shouldSearchPages = meetsCharacterThreshold;
+  const meetsCharacterThreshold =
+    trimmedSearchValue.length >= MIN_SEARCH_LENGTH;
+  const isLiveNumericSearch =
+    trimmedSearchValue.length > 0 && !Number.isNaN(Number(trimmedSearchValue));
+  const isLiveSearchEligible = meetsCharacterThreshold || isLiveNumericSearch;
   const shouldSearchDefault = trimmedDebouncedValue.length >= MIN_SEARCH_LENGTH;
   const shouldSearchNfts =
     trimmedDebouncedValue.length >= NFT_SEARCH_MIN_LENGTH ||
     (trimmedDebouncedValue.length > 0 &&
       !Number.isNaN(Number(trimmedDebouncedValue)));
-  const hasActiveDebouncedSearch = shouldSearchNfts;
-
-  // Wave search (shorter debounce, lower min length)
-  const WAVE_SEARCH_MIN_LENGTH = 2;
-  const dialogTitle =
-    searchMode === SEARCH_MODE.WAVE
-      ? t(locale, "headerSearch.dialogTitle.wave")
-      : t(locale, "headerSearch.dialogTitle.site");
-  const inputMinLength =
-    searchMode === SEARCH_MODE.WAVE
-      ? WAVE_SEARCH_MIN_LENGTH
-      : MIN_SEARCH_LENGTH;
-  const formattedInputMinLength = formatInteger(locale, inputMinLength);
-  const inputDescription =
-    searchMode === SEARCH_MODE.WAVE
-      ? t(locale, "headerSearch.inputDescription.wave", {
-          minLength: formattedInputMinLength,
-        })
-      : t(locale, "headerSearch.inputDescription.site", {
-          minLength: formattedInputMinLength,
-        });
-  const [waveSearchDebouncedValue, setWaveSearchDebouncedValue] =
-    useState<string>("");
-  useDebounce(
-    () => {
-      setWaveSearchDebouncedValue(searchValue);
-    },
-    250,
-    [searchValue]
-  );
-  const trimmedWaveSearchValue = waveSearchDebouncedValue.trim();
-  const shouldSearchWave =
-    wave !== null &&
-    searchMode === SEARCH_MODE.WAVE &&
-    trimmedWaveSearchValue.length >= WAVE_SEARCH_MIN_LENGTH;
-  const {
-    winningThreshold,
-    winningThresholdMinDurationMs,
-    isVotingClosed,
-    isVotingControlsLocked,
-  } = useApprovalWaveStatus({ wave });
-
-  const {
-    drops: waveDropResults,
-    isLoading: isLoadingWaveDrops,
-    isError: isWaveDropsError,
-    hasNextPage: waveDropsHasNextPage,
-    fetchNextPage: fetchNextWaveDropsPage,
-    isFetchingNextPage: isFetchingNextWaveDropsPage,
-  } = useWaveDropsSearch({
-    wave,
-    term: trimmedWaveSearchValue,
-    enabled: shouldSearchWave,
-    size: 50,
-  });
+  const isQuerySettled = trimmedSearchValue === trimmedDebouncedValue;
+  const isAwaitingDebouncedSearch = isLiveSearchEligible && !isQuerySettled;
+  const formattedInputMinLength = formatInteger(locale, MIN_SEARCH_LENGTH);
 
   const { appWalletsSupported } = useAppWallets();
   const { country } = useCookieConsent();
@@ -191,10 +235,7 @@ export default function HeaderSearchModal({
   const { canAccessLanding, canAccessCraft, canAccessLaunch } =
     useDropForgePermissions();
   const dropForgePages = useMemo<SidebarPageEntry[]>(() => {
-    if (!canAccessLanding) {
-      return [];
-    }
-
+    if (!canAccessLanding) return [];
     const pages: SidebarPageEntry[] = [
       {
         name: DROP_FORGE_TITLE,
@@ -204,7 +245,6 @@ export default function HeaderSearchModal({
         icon: DropForgeIcon,
       },
     ];
-
     if (canAccessCraft) {
       pages.push({
         name: DROP_FORGE_SECTIONS.CRAFT.title,
@@ -214,7 +254,6 @@ export default function HeaderSearchModal({
         icon: DropForgeCraftIcon,
       });
     }
-
     if (canAccessLaunch) {
       pages.push({
         name: DROP_FORGE_SECTIONS.LAUNCH.title,
@@ -224,90 +263,89 @@ export default function HeaderSearchModal({
         icon: DropForgeLaunchIcon,
       });
     }
-
     return pages;
-  }, [canAccessLanding, canAccessCraft, canAccessLaunch]);
-  const allPageEntries = useMemo(() => {
+  }, [canAccessCraft, canAccessLanding, canAccessLaunch]);
+
+  const pageCatalog = useMemo<PageSearchResult[]>(() => {
     const seen = new Set<string>();
     return [
       ...DIRECT_NAVIGATION_PAGES,
       ...SEARCH_ONLY_PAGES,
       ...sidebarPages,
       ...dropForgePages,
-    ].filter((entry) => {
-      if (seen.has(entry.href)) return false;
-      seen.add(entry.href);
-      return true;
-    });
-  }, [sidebarPages, dropForgePages]);
-
-  const pageCatalog = useMemo<PageSearchResult[]>(
-    () =>
-      allPageEntries.map((entry) => ({
-        type: "PAGE",
-        title: entry.name,
-        href: entry.href,
-        icon: entry.icon,
-        searchTerms: PAGE_SEARCH_ALIASES_BY_HREF[entry.href] ?? [],
-        breadcrumbs: [entry.section, entry.subsection]
-          .filter((value): value is string => !!value)
-          .map((value) => value),
-      })),
-    [allPageEntries]
-  );
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.value;
-    setSearchValue(newValue);
-  };
-
-  const inputRef = useRef<HTMLInputElement>(null);
+    ]
+      .filter((entry) => {
+        if (seen.has(entry.href)) return false;
+        seen.add(entry.href);
+        return true;
+      })
+      .map((entry) => {
+        const iconProps = entry.icon ? { icon: entry.icon } : {};
+        return {
+          type: "PAGE",
+          title: entry.name,
+          href: entry.href,
+          searchTerms: PAGE_SEARCH_ALIASES_BY_HREF[entry.href] ?? [],
+          breadcrumbs: [entry.section, entry.subsection].filter(
+            (value): value is string => Boolean(value)
+          ),
+          ...iconProps,
+        };
+      });
+  }, [dropForgePages, sidebarPages]);
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    inputRef.current?.focus();
   }, []);
 
-  const resultsPanelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    try {
+      if (searchValue) {
+        sessionStorage.setItem(HEADER_SEARCH_SESSION_QUERY_KEY, searchValue);
+      } else {
+        sessionStorage.removeItem(HEADER_SEARCH_SESSION_QUERY_KEY);
+      }
+    } catch {
+      // Search remains fully functional without session storage.
+    }
+  }, [searchValue]);
 
   useEffect(() => {
-    if (typeof document === "undefined") {
-      return;
-    }
-
     const previousOverflow = document.body.style.overflow;
     const previousPaddingRight = document.body.style.paddingRight;
     const scrollbarGap =
       window.innerWidth - document.documentElement.clientWidth;
-
     document.body.style.overflow = "hidden";
-    if (scrollbarGap > 0) {
+    if (scrollbarGap > 0)
       document.body.style.paddingRight = `${scrollbarGap}px`;
-    }
-
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault();
-      if (resultsPanelRef.current) {
-        resultsPanelRef.current.scrollBy({
-          top: event.deltaY,
-          left: event.deltaX,
-        });
-      }
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-
     return () => {
       document.body.style.overflow = previousOverflow;
       document.body.style.paddingRight = previousPaddingRight;
-      window.removeEventListener("wheel", handleWheel);
     };
   }, []);
 
-  const sharedQueryDefaults = {
-    placeholderData: keepPreviousData,
-  } as const;
+  const rememberSearch = useCallback((query: string) => {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) return;
+    setRecentSearches((current) => {
+      const next = [
+        normalizedQuery,
+        ...current.filter(
+          (item) =>
+            item.toLocaleLowerCase() !== normalizedQuery.toLocaleLowerCase()
+        ),
+      ].slice(0, MAX_RECENT_SEARCHES);
+      try {
+        sessionStorage.setItem(
+          HEADER_SEARCH_RECENT_QUERIES_KEY,
+          JSON.stringify(next)
+        );
+      } catch {
+        // Navigation must not depend on session storage.
+      }
+      return next;
+    });
+  }, []);
 
   const {
     isFetching: isFetchingProfiles,
@@ -319,12 +357,9 @@ export default function HeaderSearchModal({
     queryFn: async () =>
       await commonApiFetch<CommunityMemberMinimal[]>({
         endpoint: "community-members",
-        params: {
-          param: trimmedDebouncedValue,
-        },
+        params: { param: trimmedDebouncedValue },
       }),
     enabled: shouldSearchDefault,
-    ...sharedQueryDefaults,
   });
 
   const {
@@ -334,16 +369,12 @@ export default function HeaderSearchModal({
     refetch: refetchNfts,
   } = useQuery<NFTSearchResult[], Error>({
     queryKey: [QueryKey.NFTS_SEARCH, trimmedDebouncedValue],
-    queryFn: async () => {
-      return await commonApiFetch<NFTSearchResult[]>({
+    queryFn: async () =>
+      await commonApiFetch<NFTSearchResult[]>({
         endpoint: "nfts_search",
-        params: {
-          search: trimmedDebouncedValue,
-        },
-      });
-    },
+        params: { search: trimmedDebouncedValue },
+      }),
     enabled: shouldSearchNfts,
-    ...sharedQueryDefaults,
   });
 
   const {
@@ -358,296 +389,216 @@ export default function HeaderSearchModal({
     enabled: shouldSearchDefault,
   });
 
-  const pageResults = useMemo(() => {
-    if (!shouldSearchPages) {
-      return [];
-    }
-    const normalizedQuery = trimmedSearchValue.toLowerCase();
-    const canonicalQueryTokens = getPageSearchTokens(trimmedSearchValue);
-    if (!normalizedQuery) {
-      return [];
-    }
-
-    const rankedMatches = pageCatalog.reduce<RankedPageMatch[]>(
-      (accumulator, page) => {
-        const normalizedTitle = page.title.toLowerCase();
-        const normalizedHref = page.href.toLowerCase();
-        const normalizedBreadcrumbs = page.breadcrumbs.map((value) =>
-          value.toLowerCase()
-        );
-        const normalizedSearchTerms = (page.searchTerms ?? []).map((value) =>
-          value.toLowerCase()
-        );
-        const compositeValues = getCompositePageSearchValues(
-          normalizedTitle,
-          normalizedBreadcrumbs,
-          normalizedSearchTerms
-        );
-
-        const hrefSegments = normalizedHref.split("/").filter(Boolean);
-        const matchInputs = {
-          normalizedTitle,
-          normalizedHref,
-          hrefSegments,
-          normalizedBreadcrumbs,
-          normalizedSearchTerms,
-          compositeValues,
-        };
-        const matchQuery = {
-          normalizedQuery,
-          canonicalQueryTokens,
-        };
-
-        if (!pageMatchesQuery(matchInputs, matchQuery)) {
-          return accumulator;
-        }
-
-        accumulator.push({
-          page,
-          normalizedTitle,
-          priority: getPageMatchPriority(
-            matchInputs,
-            matchQuery.normalizedQuery,
-            matchQuery.canonicalQueryTokens
-          ),
-        });
-
-        return accumulator;
-      },
-      []
-    );
-
-    return rankedMatches
-      .sort((a, b) => {
-        if (a.priority !== b.priority) {
-          return a.priority - b.priority;
-        }
-
-        const titleComparison = a.normalizedTitle.localeCompare(
-          b.normalizedTitle
-        );
-        if (titleComparison !== 0) {
-          return titleComparison;
-        }
-
-        return a.page.href.localeCompare(b.page.href);
-      })
-      .map((result) => result.page);
-  }, [shouldSearchPages, trimmedSearchValue, pageCatalog]);
-
-  const profileResults: CommunityMemberMinimal[] = useMemo(
-    () => (shouldSearchDefault ? profiles : []),
-    [shouldSearchDefault, profiles]
+  const pageResults = useMemo(
+    () =>
+      shouldSearchDefault
+        ? rankPageResults({
+            locale,
+            pageCatalog,
+            query: trimmedDebouncedValue,
+          })
+        : [],
+    [locale, pageCatalog, shouldSearchDefault, trimmedDebouncedValue]
   );
-
-  const nftResults: NFTSearchResult[] = useMemo(
-    () => (shouldSearchNfts ? nfts : []),
-    [shouldSearchNfts, nfts]
-  );
-
-  const waveResults: ApiWave[] = useMemo(
-    () => (shouldSearchDefault ? waves : []),
-    [shouldSearchDefault, waves]
-  );
-
-  const charactersRemaining = Math.max(
-    MIN_SEARCH_LENGTH - searchInputLength,
-    0
-  );
-  const shouldShowCountdown = searchInputLength > 0 && charactersRemaining > 0;
-  const isAwaitingDebouncedSearch =
-    meetsCharacterThreshold && trimmedDebouncedValue !== trimmedSearchValue;
-
-  const isSearching = shouldSearchPages || hasActiveDebouncedSearch;
 
   const resultsByCategory = useMemo<
     Record<FilterableCategory, HeaderSearchModalItemType[]>
   >(
     () => ({
-      [CATEGORY.PAGES]: pageResults,
-      [CATEGORY.PROFILES]: profileResults,
-      [CATEGORY.NFTS]: nftResults,
-      [CATEGORY.WAVES]: waveResults,
+      [CATEGORY.PAGES]: isQuerySettled ? pageResults : [],
+      [CATEGORY.PROFILES]:
+        isQuerySettled && shouldSearchDefault ? profiles : [],
+      [CATEGORY.NFTS]: isQuerySettled && shouldSearchNfts ? nfts : [],
+      [CATEGORY.WAVES]: isQuerySettled && shouldSearchDefault ? waves : [],
     }),
-    [pageResults, profileResults, nftResults, waveResults]
+    [
+      isQuerySettled,
+      nfts,
+      pageResults,
+      profiles,
+      shouldSearchDefault,
+      shouldSearchNfts,
+      waves,
+    ]
   );
 
-  const categoriesWithResults = useMemo(
-    () =>
-      FILTERABLE_CATEGORIES.filter(
+  const categoryFetching = useMemo<Record<FilterableCategory, boolean>>(
+    () => ({
+      [CATEGORY.PAGES]: isAwaitingDebouncedSearch && meetsCharacterThreshold,
+      [CATEGORY.PROFILES]:
+        (isAwaitingDebouncedSearch && meetsCharacterThreshold) ||
+        (isQuerySettled && shouldSearchDefault && isFetchingProfiles),
+      [CATEGORY.NFTS]:
+        isAwaitingDebouncedSearch ||
+        (isQuerySettled && shouldSearchNfts && isFetchingNfts),
+      [CATEGORY.WAVES]:
+        (isAwaitingDebouncedSearch && meetsCharacterThreshold) ||
+        (isQuerySettled && shouldSearchDefault && isFetchingWaves),
+    }),
+    [
+      isAwaitingDebouncedSearch,
+      isFetchingNfts,
+      isFetchingProfiles,
+      isFetchingWaves,
+      isQuerySettled,
+      meetsCharacterThreshold,
+      shouldSearchDefault,
+      shouldSearchNfts,
+    ]
+  );
+
+  const categoryErrors = useMemo<Record<FilterableCategory, boolean>>(
+    () => ({
+      [CATEGORY.PAGES]: false,
+      [CATEGORY.PROFILES]:
+        isQuerySettled && shouldSearchDefault && Boolean(profilesError),
+      [CATEGORY.NFTS]: isQuerySettled && shouldSearchNfts && Boolean(nftsError),
+      [CATEGORY.WAVES]:
+        isQuerySettled && shouldSearchDefault && Boolean(wavesError),
+    }),
+    [
+      isQuerySettled,
+      nftsError,
+      profilesError,
+      shouldSearchDefault,
+      shouldSearchNfts,
+      wavesError,
+    ]
+  );
+
+  const selectedSearchCategory = isFilterableCategory(selectedCategory)
+    ? selectedCategory
+    : CATEGORY.ALL;
+
+  const derivedState = useMemo(() => {
+    if (!isLiveSearchEligible) return STATE.INITIAL;
+    if (isAwaitingDebouncedSearch || !isQuerySettled) return STATE.LOADING;
+
+    const relevantCategories: readonly FilterableCategory[] =
+      isFilterableCategory(selectedSearchCategory)
+        ? [selectedSearchCategory]
+        : FILTERABLE_CATEGORIES;
+    if (
+      relevantCategories.some(
         (category) => resultsByCategory[category].length > 0
-      ),
-    [resultsByCategory]
-  );
+      )
+    ) {
+      return STATE.SUCCESS;
+    }
+    if (relevantCategories.some((category) => categoryFetching[category])) {
+      return STATE.LOADING;
+    }
+    if (relevantCategories.some((category) => categoryErrors[category])) {
+      return STATE.ERROR;
+    }
+    return STATE.NO_RESULTS;
+  }, [
+    categoryErrors,
+    categoryFetching,
+    isAwaitingDebouncedSearch,
+    isLiveSearchEligible,
+    isQuerySettled,
+    resultsByCategory,
+    selectedSearchCategory,
+  ]);
 
-  const selectedSearchCategory = useMemo(() => {
-    if (selectedCategory === CATEGORY.ALL) {
-      return CATEGORY.ALL;
+  const handleRetry = () => {
+    if (
+      (selectedSearchCategory === CATEGORY.ALL ||
+        selectedSearchCategory === CATEGORY.PROFILES) &&
+      shouldSearchDefault
+    ) {
+      refetchProfiles().catch(() => undefined);
     }
-    if (!isFilterableCategory(selectedCategory)) {
-      return CATEGORY.ALL;
+    if (
+      (selectedSearchCategory === CATEGORY.ALL ||
+        selectedSearchCategory === CATEGORY.NFTS) &&
+      shouldSearchNfts
+    ) {
+      refetchNfts().catch(() => undefined);
     }
-    return categoriesWithResults.includes(selectedCategory)
-      ? selectedCategory
-      : CATEGORY.ALL;
-  }, [categoriesWithResults, selectedCategory]);
+    if (
+      (selectedSearchCategory === CATEGORY.ALL ||
+        selectedSearchCategory === CATEGORY.WAVES) &&
+      shouldSearchDefault
+    ) {
+      refetchWaves().catch(() => undefined);
+    }
+  };
 
   const handleClearSearch = () => {
     setSearchValue("");
     setDebouncedValue("");
-    setWaveSearchDebouncedValue("");
     setSelectedCategory(CATEGORY.ALL);
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
+    globalThis.setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleWaveDropSelect = (serialNo: number) => {
-    if (!wave) return;
-    if (waveChatScroll) {
-      waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
-    } else {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("serialNo", String(serialNo));
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    }
-    onClose();
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(event.target.value);
   };
+  const charactersRemaining = Math.max(
+    MIN_SEARCH_LENGTH - trimmedSearchValue.length,
+    0
+  );
 
-  const derivedState = useMemo(() => {
-    if (!isSearching) {
-      return STATE.INITIAL;
-    }
-
-    const hasResults = categoriesWithResults.length > 0;
-
-    if (hasResults) {
-      return STATE.SUCCESS;
-    }
-
-    if (isAwaitingDebouncedSearch) {
-      return STATE.LOADING;
-    }
-
-    const anyFetching =
-      (shouldSearchDefault && (isFetchingProfiles || isFetchingWaves)) ||
-      (shouldSearchNfts && isFetchingNfts);
-
-    if (anyFetching) {
-      return STATE.LOADING;
-    }
-
-    const anyError =
-      (shouldSearchDefault &&
-        (Boolean(profilesError) || Boolean(wavesError))) ||
-      (shouldSearchNfts && Boolean(nftsError));
-
-    if (anyError) {
-      return STATE.ERROR;
-    }
-
-    return STATE.NO_RESULTS;
-  }, [
-    categoriesWithResults.length,
-    isFetchingProfiles,
-    isFetchingNfts,
-    isFetchingWaves,
-    isSearching,
-    shouldSearchDefault,
-    shouldSearchNfts,
-    profilesError,
-    nftsError,
-    wavesError,
-    isAwaitingDebouncedSearch,
-  ]);
-
-  const handleRetry = () => {
-    const retryProfiles = () => {
-      refetchProfiles().catch(() => undefined);
-    };
-    const retryNfts = () => {
-      refetchNfts().catch(() => undefined);
-    };
-    const retryWaves = () => {
-      refetchWaves().catch(() => undefined);
-    };
-
-    if (selectedSearchCategory === CATEGORY.PAGES) {
-      return;
-    }
-
-    if (selectedSearchCategory === CATEGORY.ALL) {
-      if (shouldSearchDefault) {
-        retryProfiles();
-        retryWaves();
-      }
-      if (shouldSearchNfts) {
-        retryNfts();
-      }
-    } else if (selectedSearchCategory === CATEGORY.PROFILES) {
-      if (shouldSearchDefault) {
-        retryProfiles();
-      }
-    } else if (selectedSearchCategory === CATEGORY.NFTS) {
-      if (shouldSearchNfts) {
-        retryNfts();
-      }
-    } else if (shouldSearchDefault) {
-      retryWaves();
-    }
-  };
+  if (typeof document === "undefined") return null;
 
   return createPortal(
     <FocusTrap
       focusTrapOptions={{
         allowOutsideClick: true,
-        fallbackFocus: () =>
-          (modalRef.current as HTMLElement | null) ??
-          (inputRef.current as HTMLElement | null) ??
-          document.body,
+        fallbackFocus: () => modalRef.current ?? document.body,
         initialFocus: () =>
-          (inputRef.current as HTMLElement | null) ??
-          (modalRef.current as HTMLElement | null) ??
-          document.body,
+          inputRef.current ?? modalRef.current ?? document.body,
       }}
     >
       <div className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default">
-        <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]"></div>
-        <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
-          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center sm:tw-p-6 lg:tw-items-center">
+        <div className="tw-fixed tw-inset-0 tw-bg-black/70 tw-backdrop-blur-sm" />
+        <div className="tw-fixed tw-inset-0 tw-z-1000 tw-h-[100dvh] tw-overflow-hidden tw-overscroll-none">
+          <div className="tw-flex tw-h-full tw-min-h-0 tw-items-start tw-justify-center tw-p-0 tw-text-center sm:tw-items-center sm:tw-p-5">
             <div
               ref={modalRef}
               role="dialog"
               aria-modal="true"
               aria-labelledby={HEADER_SEARCH_DIALOG_TITLE_ID}
-              className="tw-relative tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-[520px] tw-max-h-[70vh] tw-min-h-0 tw-w-full tw-max-w-[min(100vw-3rem,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl"
+              className="tw-flex tw-h-[100dvh] tw-min-h-0 tw-w-full tw-max-w-[900px] tw-transform tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-pt-[env(safe-area-inset-top)] tw-text-left tw-shadow-[0_24px_70px_rgba(0,0,0,0.6)] sm:tw-h-[min(720px,82vh)] sm:tw-rounded-2xl sm:tw-pt-0"
             >
-              <h2 id={HEADER_SEARCH_DIALOG_TITLE_ID} className="tw-sr-only">
-                {dialogTitle}
-              </h2>
-              <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-4">
+              <div className="tw-flex tw-flex-shrink-0 tw-items-start tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-items-center sm:tw-px-5">
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label={t(locale, "headerSearch.goBack")}
-                  className="-tw-ml-1 tw-mr-1 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-hidden"
+                  className="-tw-ml-1 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-hidden"
                 >
-                  <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
+                  <ChevronLeftIcon className="tw-size-6" />
                 </button>
-
-                <div className="tw-relative tw-flex-1">
-                  <svg
-                    className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
+                <div className="tw-min-w-0 tw-flex-1">
+                  <h2
+                    id={HEADER_SEARCH_DIALOG_TITLE_ID}
+                    className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                    {t(locale, "headerSearch.dialogTitle.site")}
+                  </h2>
+                  <p className="tw-m-0 tw-mt-0.5 tw-text-xs tw-leading-4 tw-text-iron-400">
+                    {t(locale, "headerSearch.dialogDescription.site")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label={t(locale, "headerSearch.close")}
+                  className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-inline-flex"
+                >
+                  <XMarkIcon className="tw-size-5" />
+                </button>
+              </div>
+
+              <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-5">
+                <div className="tw-relative">
+                  <MagnifyingGlassIcon
+                    className="tw-pointer-events-none tw-absolute tw-left-3.5 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-400"
+                    aria-hidden="true"
+                  />
                   <label className="tw-sr-only" htmlFor="header-search-input">
                     {t(locale, "headerSearch.inputLabel")}
                   </label>
@@ -655,110 +606,65 @@ export default function HeaderSearchModal({
                     id={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
                     className="tw-sr-only"
                   >
-                    {inputDescription}
+                    {t(locale, "headerSearch.inputDescription.site", {
+                      minLength: formattedInputMinLength,
+                    })}
                   </p>
-                  {/* Search updates results directly; avoid form constraint state. */}
                   <input
                     id="header-search-input"
                     ref={inputRef}
                     type="text"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-haspopup="listbox"
+                    aria-controls={HEADER_SEARCH_RESULTS_LISTBOX_ID}
+                    aria-expanded={derivedState === STATE.SUCCESS}
                     aria-describedby={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
                     autoComplete="off"
                     value={searchValue}
                     onChange={handleInputChange}
-                    className="sm:text-sm tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300"
-                    placeholder={
-                      searchMode === SEARCH_MODE.WAVE
-                        ? t(locale, "headerSearch.placeholder.wave")
-                        : t(locale, "headerSearch.placeholder.site")
-                    }
+                    onKeyDown={(event) => inputKeyHandlerRef.current?.(event)}
+                    className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
+                    placeholder={t(locale, "headerSearch.placeholder.site")}
                   />
                   {searchValue.length > 0 && (
                     <button
                       type="button"
                       onClick={handleClearSearch}
                       aria-label={t(locale, "headerSearch.clear")}
-                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                     >
                       {t(locale, "headerSearch.clearShort")}
                     </button>
                   )}
                 </div>
-
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label={t(locale, "headerSearch.close")}
-                  className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-inline-flex"
-                >
-                  <XMarkIcon className="tw-size-5" />
-                </button>
               </div>
-              {wave && (
-                <div className="tw-px-4 tw-pb-3 tw-pt-1">
-                  <div className="tw-inline-flex tw-gap-0.5 tw-rounded-lg tw-bg-iron-900 tw-p-0.5">
-                    <button
-                      type="button"
-                      onClick={() => setSearchMode(SEARCH_MODE.WAVE)}
-                      className={`tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-transition tw-duration-150 ${
-                        searchMode === SEARCH_MODE.WAVE
-                          ? "tw-bg-primary-500 tw-text-white"
-                          : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
-                      }`}
-                    >
-                      {t(locale, "headerSearch.mode.wave")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSearchMode(SEARCH_MODE.SITE)}
-                      className={`tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-transition tw-duration-150 ${
-                        searchMode === SEARCH_MODE.SITE
-                          ? "tw-bg-primary-500 tw-text-white"
-                          : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
-                      }`}
-                    >
-                      {t(locale, "headerSearch.mode.site")}
-                    </button>
-                  </div>
-                </div>
-              )}
-              {searchMode === SEARCH_MODE.WAVE && wave && (
-                <HeaderSearchWaveResults
-                  wave={wave}
-                  resultsPanelRef={resultsPanelRef}
-                  isLoadingWaveDrops={isLoadingWaveDrops}
-                  isWaveDropsError={isWaveDropsError}
-                  shouldSearchWave={shouldSearchWave}
-                  waveDropResults={waveDropResults}
-                  waveDropsHasNextPage={waveDropsHasNextPage}
-                  fetchNextWaveDropsPage={fetchNextWaveDropsPage}
-                  isFetchingNextWaveDropsPage={isFetchingNextWaveDropsPage}
-                  onSelectSerialNo={handleWaveDropSelect}
-                  winningThreshold={winningThreshold}
-                  winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-                  isVotingClosed={isVotingClosed}
-                  isVotingControlsLocked={isVotingControlsLocked}
-                />
-              )}
-              {searchMode === SEARCH_MODE.SITE && (
-                <HeaderSearchSiteResults
-                  key={trimmedDebouncedValue}
-                  selectedCategory={selectedSearchCategory}
-                  setSelectedCategory={setSelectedCategory}
-                  resultsByCategory={resultsByCategory}
-                  categoriesWithResults={categoriesWithResults}
-                  derivedState={derivedState}
-                  debouncedValue={debouncedValue}
-                  onClose={onClose}
-                  onRetry={handleRetry}
-                  isFetchingProfiles={isFetchingProfiles}
-                  isFetchingNfts={isFetchingNfts}
-                  isFetchingWaves={isFetchingWaves}
-                  shouldShowCountdown={shouldShowCountdown}
-                  charactersRemaining={charactersRemaining}
-                  resultsPanelRef={resultsPanelRef}
-                />
-              )}
+
+              <HeaderSearchSiteResults
+                key={`${trimmedDebouncedValue}:${selectedSearchCategory}`}
+                selectedCategory={selectedSearchCategory}
+                setSelectedCategory={setSelectedCategory}
+                resultsByCategory={resultsByCategory}
+                categoryErrors={categoryErrors}
+                categoryFetching={categoryFetching}
+                derivedState={derivedState}
+                searchValue={trimmedDebouncedValue}
+                liveSearchValue={searchValue}
+                onClose={onClose}
+                onRetry={handleRetry}
+                onRememberSearch={rememberSearch}
+                recentSearches={recentSearches}
+                onRecentSearchSelect={(query) => {
+                  setSearchValue(query);
+                  inputRef.current?.focus();
+                }}
+                inputKeyHandlerRef={inputKeyHandlerRef}
+                shouldShowCountdown={
+                  trimmedSearchValue.length > 0 && charactersRemaining > 0
+                }
+                charactersRemaining={charactersRemaining}
+                resultsPanelRef={resultsPanelRef}
+              />
             </div>
           </div>
         </div>

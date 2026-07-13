@@ -23,11 +23,9 @@ interface XtdhCollectionsListProps {
   readonly errorMessage?: string | undefined;
   readonly onRetry: () => void;
   readonly selectedContract?: string | null | undefined;
-  readonly onSelectCollection?:
-    | ((contract: string | null) => void)
-    | undefined
-    | undefined;
+  readonly onSelectCollection?: ((contract: string | null) => void) | undefined;
   readonly isIdentityScoped?: boolean | undefined;
+  readonly searchTerm?: string | undefined;
 }
 
 export function XtdhCollectionsList({
@@ -40,8 +38,10 @@ export function XtdhCollectionsList({
   selectedContract,
   onSelectCollection,
   isIdentityScoped = true,
+  searchTerm = "",
 }: Readonly<XtdhCollectionsListProps>) {
   const targetLabel = isIdentityScoped ? "this identity" : "the ecosystem";
+  const normalizedSearchTerm = searchTerm.trim();
   if (!isEnabled) {
     return (
       <ListMessage>
@@ -66,6 +66,15 @@ export function XtdhCollectionsList({
   }
 
   if (!collections.length) {
+    if (normalizedSearchTerm) {
+      return (
+        <EmptyState
+          title={`No collections found for “${normalizedSearchTerm}”`}
+          message="Try another collection name or clear the search to see all collections."
+        />
+      );
+    }
+
     return (
       <EmptyState
         title={isIdentityScoped ? "No xTDH received" : "No collections found"}
@@ -82,7 +91,7 @@ export function XtdhCollectionsList({
 
   return (
     <div>
-      <ul className="tw-m-0 tw-p-0 tw-flex tw-flex-col tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
+      <ul className="tw-m-0 tw-flex tw-flex-col tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
         {collections.map((collection, index) => (
           <XtdhReceivedCollectionCard
             key={getCollectionKey(collection, index)}
@@ -90,8 +99,7 @@ export function XtdhCollectionsList({
             onSelect={onSelectCollection}
             isSelected={
               normalizedSelected !== null &&
-              (collection.contract?.trim().toLowerCase() ?? null) ===
-                normalizedSelected
+              collection.contract.trim().toLowerCase() === normalizedSelected
             }
           />
         ))}
@@ -113,20 +121,20 @@ function CollectionsSkeleton() {
         {SKELETON_INDICES.map((index) => (
           <li
             key={`skeleton-${index}`}
-            className="tw-list-none tw-animate-pulse tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
+            className="tw-animate-pulse tw-list-none tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
           >
             <div className="tw-flex tw-items-center tw-gap-3">
               <div className="tw-h-14 tw-w-14 tw-rounded-lg tw-bg-iron-800" />
               <div className="tw-flex-1 tw-space-y-2">
                 <div className="tw-h-4 tw-w-32 tw-rounded tw-bg-iron-800" />
-                <div className="tw-h-3 tw-w-48 tw-rounded tw-bg-iron-850" />
+                <div className="tw-bg-iron-850 tw-h-3 tw-w-48 tw-rounded" />
               </div>
             </div>
             <div className="tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
               {SKELETON_METRIC_KEYS.map((metricKey) => (
                 <div key={metricKey} className="tw-space-y-2">
                   <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
-                  <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-850" />
+                  <div className="tw-bg-iron-850 tw-h-4 tw-w-24 tw-rounded" />
                 </div>
               ))}
             </div>

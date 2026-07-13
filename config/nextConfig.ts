@@ -32,6 +32,7 @@ export function sharedConfig(
       loader: "default",
       remotePatterns: [
         { protocol: "https", hostname: "6529.io" },
+        { protocol: "https", hostname: "seize.io" },
         { protocol: "https", hostname: "staging.6529.io" },
         {
           protocol: "https",
