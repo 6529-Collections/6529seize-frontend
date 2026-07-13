@@ -54,7 +54,7 @@ describe("TabToggleWithOverflow", () => {
   });
 
   it("shows active label when active tab is in overflow", () => {
-    render(
+    const { getByRole } = render(
       <TabToggleWithOverflow
         options={options}
         activeKey="d"
@@ -65,6 +65,26 @@ describe("TabToggleWithOverflow", () => {
 
     // Button label should show active label
     expect(screen.getByText("D")).toBeInTheDocument();
+    expect(getByRole("button", { name: "More tabs" })).toHaveClass(
+      "tw-border-primary-300",
+      "tw-text-white"
+    );
+  });
+
+  it("keeps More inactive when a visible tab is selected", () => {
+    render(
+      <TabToggleWithOverflow
+        options={options}
+        activeKey="a"
+        onSelect={() => {}}
+        maxVisibleTabs={2}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "More tabs" })).toHaveClass(
+      "tw-border-transparent",
+      "tw-text-iron-400"
+    );
   });
 
   it("applies ARIA roles to visible tabs", () => {
@@ -88,6 +108,34 @@ describe("TabToggleWithOverflow", () => {
     );
   });
 
+  it("matches compact pill typography to the subwave bar", () => {
+    render(
+      <TabToggleWithOverflow
+        options={options}
+        activeKey="a"
+        onSelect={() => {}}
+        maxVisibleTabs={3}
+        variant="compactPills"
+      />
+    );
+
+    expect(screen.getByRole("tab", { name: "A" })).toHaveClass(
+      "tw-h-7",
+      "tw-text-xs",
+      "tw-font-semibold"
+    );
+    expect(screen.getByRole("tab", { name: "B" })).toHaveClass(
+      "tw-h-7",
+      "tw-text-xs",
+      "tw-font-medium"
+    );
+    expect(screen.getByRole("button", { name: "More tabs" })).toHaveClass(
+      "tw-h-7",
+      "tw-text-xs",
+      "tw-font-medium"
+    );
+  });
+
   it("toggles the overflow menu with keyboard interactions", async () => {
     const user = userEvent.setup();
     render(
@@ -102,10 +150,9 @@ describe("TabToggleWithOverflow", () => {
     const moreButton = screen.getByRole("button", { name: "More tabs" });
     expect(moreButton).toHaveAttribute("aria-expanded", "false");
 
-    await waitFor(() => {
-      const activeTab = screen.getByRole("tab", { name: "A" });
-      expect(activeTab).toHaveFocus();
-    });
+    const activeTab = screen.getByRole("tab", { name: "A" });
+    expect(activeTab).toHaveAttribute("tabindex", "0");
+    expect(activeTab).not.toHaveFocus();
 
     await ensureButtonFocused(moreButton);
 

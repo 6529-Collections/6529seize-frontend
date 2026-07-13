@@ -2,8 +2,10 @@
 
 ## Overview
 
-Wave threads show a right-sidebar tab row so users can switch sidebar sections
-without leaving the current thread route.
+Wave threads expose shared information sections so users can inspect the active
+wave without leaving the current thread route. Desktop renders them in the
+right sidebar; the native app renders their navigation in the contextual row
+beneath the main tabs and their content in the main `About` view.
 
 This page owns tab-shell behavior only. Section rendering is documented in the
 linked section pages.
@@ -11,29 +13,44 @@ linked section pages.
 ## Location in the Site
 
 - `/waves/{waveId}` and `/messages/{waveId}`
-- Right sidebar open (`inline` on large web layouts, `overlay` on smaller ones)
+- Desktop right sidebar open (`inline` on large web layouts, `overlay` on
+  smaller ones)
+- Native app main `About` view
 - All wave types render base sidebar tabs
 - Hidden while full drop overlay is open (`drop={dropId}`)
 - Tab row renders only after wave data is available
 
 ## Entry Points
 
-- Open a wave thread.
-- Open the right sidebar.
-- Select a tab button. Scroll the tab strip horizontally when the full row does
-  not fit the panel width.
+- Desktop: open a wave thread, open the right sidebar, and select a tab.
+- Native app: open an active wave, select the main `About` tab, and select an
+  information pill. The information pills replace the subwave pills while
+  `About` is active; selecting another main tab restores the subwave pills.
 
 ## Tab Availability and Order
 
-- Base tab order for all waves: `About`, `Rules`, `REP`, `Settings`.
+- Base section order for all waves: `About`, `Rules`, `REP`, `Settings`.
 - `Rank` and `Approve` waves add `Voters` and `Activity` after `Settings`.
 - `Rules` shows automatic wave rules plus optional creator rules.
+- Desktop labels the first section `About` because it is a standalone sidebar
+  tab.
+- Native app labels the same first section `Overview` because it is nested
+  inside the main `About` view. It shows compact `Overview`, `Rules`, and `REP`
+  pills followed by `More`.
+- Native `More` contains `Settings` and, for `Rank` or `Approve` waves,
+  `Voters` and `Activity`. When one is selected, the trigger displays that
+  section name and uses the selected pill treatment.
 
 ## Overflow and Keyboard Behavior
 
-- Every available section remains a direct tab in the tab strip.
-- The tab strip scrolls horizontally when its tabs do not fit. This behavior is
-  CSS-driven and does not depend on viewport measurements in JavaScript.
+- Desktop keeps every available section as a direct tab and scrolls the strip
+  horizontally when needed.
+- Native keeps three compact pills visible and moves remaining sections into
+  `More`, avoiding a compressed desktop tab row on narrow phones.
+- The native information and subwave bars use the same height, background,
+  responsive insets, pill height, and label size, so switching the contextual
+  row does not shift the content below it. Active information pills use a
+  semibold label; inactive pills use medium weight.
 - The tab strip stays within the panel width. It does not widen the panel or
   make the panel body horizontally scrollable.
 - The tab row remains fixed at the top while the active section scrolls
@@ -46,8 +63,10 @@ linked section pages.
 
 1. Open a wave thread on `/waves/{waveId}` or `/messages/{waveId}`.
 2. Open the right sidebar.
-3. Select a tab, scrolling the tab strip horizontally first when needed.
-4. Sidebar content switches in place without route navigation.
+3. Select a desktop tab or native information pill. Use `More` for secondary
+   native sections.
+4. Sidebar content switches in place without route navigation. On native,
+   selecting another main tab swaps the contextual row back to subwave pills.
 
 ## State Changes and Recovery
 
@@ -56,6 +75,9 @@ linked section pages.
 - Tab choice is in-session UI state, not a URL tab parameter.
 - Closing and reopening the sidebar keeps the current tab choice unless wave
   state rules make that tab unavailable.
+- Native keeps the selected information section while switching main tabs for
+  the same wave. A selection saved for one wave is not applied to another
+  active wave.
 - If wave data does not load, the tab row does not appear and the sidebar can
   stay blank.
 
