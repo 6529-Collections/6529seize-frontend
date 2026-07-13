@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 
@@ -9,6 +10,7 @@ const mockCloseAllCustomTooltips = jest.fn();
 const mockArtistHandleBadgeClick = jest.fn();
 const mockArtistHandleModalClose = jest.fn();
 const mockRouterPush = jest.fn();
+const mockIsMemesWave = jest.fn(() => false);
 
 const mockUseArtistPreviewModal = jest.fn();
 
@@ -35,6 +37,19 @@ type ArtistPreviewModalProps = {
   readonly onTabChange: (tab: ArtistPreviewTab) => void;
 };
 
+type WaveCompetitionBadgesProps = {
+  readonly isParticipant: boolean;
+  readonly isWinner: boolean;
+  readonly onBadgeClick: (tab: "active" | "winners") => void;
+};
+
+type WaveCompetitionPreviewModalProps = {
+  readonly isOpen: boolean;
+  readonly activeTab: "active" | "winners";
+  readonly hasActiveEntries: boolean;
+  readonly hasWinningEntries: boolean;
+};
+
 jest.mock("@/hooks/useArtistPreviewModal", () => ({
   useArtistPreviewModal: () => mockUseArtistPreviewModal(),
 }));
@@ -42,6 +57,12 @@ jest.mock("@/hooks/useArtistPreviewModal", () => ({
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockRouterPush,
+  }),
+}));
+
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettingsOptional: () => ({
+    isMemesWave: mockIsMemesWave,
   }),
 }));
 
@@ -107,6 +128,44 @@ jest.mock("@/components/waves/drops/ArtistPreviewModal", () => ({
   ),
 }));
 
+jest.mock("@/components/waves/drops/WaveCompetitionBadges", () => ({
+  WaveCompetitionBadges: ({
+    isParticipant,
+    isWinner,
+    onBadgeClick,
+  }: WaveCompetitionBadgesProps) => (
+    <div data-testid="wave-competition-badges">
+      {isParticipant && (
+        <button type="button" onClick={() => onBadgeClick("active")}>
+          Participant
+        </button>
+      )}
+      {isWinner && (
+        <button type="button" onClick={() => onBadgeClick("winners")}>
+          Winner
+        </button>
+      )}
+    </div>
+  ),
+}));
+
+jest.mock("@/components/waves/drops/WaveCompetitionPreviewModal", () => ({
+  WaveCompetitionPreviewModal: ({
+    isOpen,
+    activeTab,
+    hasActiveEntries,
+    hasWinningEntries,
+  }: WaveCompetitionPreviewModalProps) => (
+    <div
+      data-testid="wave-competition-preview-modal"
+      data-open={String(isOpen)}
+      data-active-tab={activeTab}
+      data-has-active={String(hasActiveEntries)}
+      data-has-winners={String(hasWinningEntries)}
+    />
+  ),
+}));
+
 const baseProfile = {
   id: "profile-1",
   handle: "artist",
@@ -118,10 +177,16 @@ const baseProfile = {
   is_wave_creator: false,
 };
 
+const competitionWave = {
+  id: "wave-1",
+  name: "Cool Comp",
+} as ApiWaveMin;
+
 describe("DropAuthorBadges", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRouterPush.mockClear();
+    mockIsMemesWave.mockReturnValue(false);
     mockUseArtistPreviewModal.mockReturnValue({
       isModalOpen: false,
       activeTab: "active",
@@ -154,6 +219,69 @@ describe("DropAuthorBadges", () => {
     expect(badge).toHaveAttribute("data-submission-count", "2");
     expect(badge).toHaveAttribute("data-trophy-count", "2");
     expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
+  });
+
+  it("renders competition badges from contextual participation booleans", () => {
+    render(
+      <DropAuthorBadges
+        profile={{
+          ...baseProfile,
+          wave_participation: {
+            is_participant: true,
+            is_winner: true,
+          },
+        }}
+        wave={competitionWave}
+      />
+    );
+
+    expect(screen.getByText("Participant")).toBeInTheDocument();
+    expect(screen.getByText("Winner")).toBeInTheDocument();
+    const previewModal = screen.getByTestId("wave-competition-preview-modal");
+    expect(previewModal).toHaveAttribute("data-has-active", "true");
+    expect(previewModal).toHaveAttribute("data-has-winners", "true");
+
+    fireEvent.click(screen.getByText("Winner"));
+
+    expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(1);
+    expect(previewModal).toHaveAttribute("data-open", "true");
+    expect(previewModal).toHaveAttribute("data-active-tab", "winners");
+  });
+
+  it("does not render competition badges when both contextual flags are false", () => {
+    render(
+      <DropAuthorBadges
+        profile={{
+          ...baseProfile,
+          wave_participation: {
+            is_participant: false,
+            is_winner: false,
+          },
+        }}
+        wave={competitionWave}
+      />
+    );
+
+    expect(screen.queryByTestId("wave-competition-badges")).toBeNull();
+  });
+
+  it("does not render competition badges in Main Stage", () => {
+    mockIsMemesWave.mockReturnValue(true);
+
+    render(
+      <DropAuthorBadges
+        profile={{
+          ...baseProfile,
+          wave_participation: {
+            is_participant: true,
+            is_winner: true,
+          },
+        }}
+        wave={{ ...competitionWave, id: "main-stage", name: "Main Stage" }}
+      />
+    );
+
+    expect(screen.queryByTestId("wave-competition-badges")).toBeNull();
   });
 
   it("renders activity and profile wave badges from V2 count-only badges", () => {

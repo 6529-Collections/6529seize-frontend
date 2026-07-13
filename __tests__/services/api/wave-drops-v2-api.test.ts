@@ -1,4 +1,5 @@
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -14,6 +15,7 @@ import {
   fetchDropV2ById,
   fetchGlobalBoostedDropsV2,
   fetchWaveDropsFeedV2,
+  fetchWaveCompetitionDropsV2,
   mapLeaderboardDropV2,
   voteDropPollV2,
 } from "@/services/api/wave-drops-v2-api";
@@ -193,13 +195,56 @@ describe("fetchWaveDropsFeedV2", () => {
     ]);
   });
 
-  it("preserves V2 author badges without fabricating legacy artwork ids", async () => {
+  it("loads full competition drops only from the lazy author endpoint", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      data: [
+        {
+          ...createDrop(1),
+          drop_type: ApiDropMainType.Participatory,
+        },
+      ],
+      page: 1,
+      next: false,
+    });
+
+    const result = await fetchWaveCompetitionDropsV2({
+      wave: { id: "wave-1", name: "Cool Comp" } as ApiWaveMin,
+      authorId: "author-1",
+      dropType: ApiDropType.Participatory,
+      page: 1,
+      pageSize: 50,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves/wave-1/competition-drops",
+      params: {
+        author_id: "author-1",
+        drop_type: ApiDropType.Participatory,
+        page: "1",
+        page_size: "50",
+      },
+      signal: undefined,
+    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        data: [expect.objectContaining({ id: "drop-1" })],
+        page: 1,
+        next: false,
+      })
+    );
+  });
+
+  it("preserves V2 author badges and wave participation without fabricating legacy artwork ids", async () => {
     const badges = {
       artist_of_main_stage_submissions: 1,
       artist_of_memes: 1,
       profile_wave_id: "profile-wave-1",
       profile_wave_name: "Profile Wave",
       profile_wave_pfp: "https://example.com/wave.png",
+    };
+    const waveParticipation = {
+      is_participant: true,
+      is_winner: true,
     };
 
     commonApiFetchMock.mockResolvedValueOnce({
@@ -210,6 +255,7 @@ describe("fetchWaveDropsFeedV2", () => {
           author: {
             ...identity,
             badges,
+            wave_participation: waveParticipation,
           },
         },
       ],
@@ -228,6 +274,7 @@ describe("fetchWaveDropsFeedV2", () => {
         is_wave_creator: true,
         profile_wave_id: "profile-wave-1",
         winner_main_stage_drop_ids: [],
+        wave_participation: waveParticipation,
       })
     );
   });
@@ -310,6 +357,7 @@ describe("fetchWaveDropsFeedV2", () => {
         rating: 10,
         realtime_rating: 14,
         rating_prediction: 12,
+        voting_open: true,
       })
     );
   });
@@ -438,6 +486,7 @@ describe("fetchWaveDropsFeedV2", () => {
         rating: 10,
         realtime_rating: 14,
         rating_prediction: 12,
+        voting_open: true,
       })
     );
   });

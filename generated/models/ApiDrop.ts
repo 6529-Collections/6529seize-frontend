@@ -39,6 +39,10 @@ export class ApiDrop {
     'drop_type': ApiDropType;
     'rank': number | null;
     'winning_context'?: ApiDropWinningContext;
+    /**
+    * Whether voting is currently open for this submission.
+    */
+    'voting_open'?: boolean;
     'wave': ApiWaveMin;
     'reply_to'?: ApiReplyToDropResponse;
     'author': ApiProfileMin;
@@ -109,6 +113,12 @@ export class ApiDrop {
             "name": "winning_context",
             "baseName": "winning_context",
             "type": "ApiDropWinningContext",
+            "format": ""
+        },
+        {
+            "name": "voting_open",
+            "baseName": "voting_open",
+            "type": "boolean",
             "format": ""
         },
         {

@@ -349,6 +349,30 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyFailed: "Copy failed",
 } as const);
 
+const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
+  "waves.competitionBadges",
+  {
+    participantTooltip: "View this participant’s competition entries in {wave}",
+    winnerTooltip: "View this winner’s competition entries in {wave}",
+    title: "{profile}'s competition entries",
+    profileFallback: "This member",
+    "tabs.active": "Active entries",
+    "tabs.winners": "Winning entries",
+    loading: "Loading competition entries…",
+    error: "Couldn’t load competition entries.",
+    emptyActive: "No active entries are available.",
+    emptyWinners: "No winning entries are available.",
+    retry: "Retry",
+    loadMore: "Load more entries",
+    loadingMore: "Loading more entries…",
+    close: "Close competition entries",
+    openEntry: "Open competition entry {title}",
+    untitled: "Untitled entry",
+    winner: "Winner",
+    rating: "{rating} total",
+  } as const
+);
+
 const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
   explain: "Explain",
   explainAriaLabel: "Reply with vote rationale",
@@ -1795,6 +1819,7 @@ export const EN_US_MESSAGES = {
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,

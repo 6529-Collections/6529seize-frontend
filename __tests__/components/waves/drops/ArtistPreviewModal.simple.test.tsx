@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
@@ -122,5 +122,13 @@ describe("ArtistPreviewModal", () => {
 
     expect(screen.queryByTestId("dialog")).not.toBeInTheDocument();
     expect(screen.queryByTestId("app-wrapper")).not.toBeInTheDocument();
+  });
+
+  it("closes when Escape is pressed on desktop", () => {
+    render(<ArtistPreviewModal {...defaultProps} />);
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
   });
 });

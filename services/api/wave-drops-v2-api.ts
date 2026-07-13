@@ -108,6 +108,21 @@ interface FetchWaveDropsSearchV2Props {
   readonly signal?: AbortSignal | undefined;
 }
 
+interface FetchWaveCompetitionDropsV2Props {
+  readonly wave: ApiWave | ApiWaveMin;
+  readonly authorId: string;
+  readonly dropType: ApiDropType.Participatory | ApiDropType.Winner;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly signal?: AbortSignal | undefined;
+}
+
+interface WaveCompetitionDropsPage {
+  readonly data: ApiDrop[];
+  readonly page: number;
+  readonly next: boolean;
+}
+
 export type WavePollsState = "OPEN" | "CLOSED";
 export type WavePollsSort = "created_at" | "closing_time";
 export type ApiWavePollDropRow = Partial<ApiWavePoll> & {
@@ -387,6 +402,7 @@ const hydrateDropV2 = async ({
     drop_type: dropType,
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
+    voting_open: voting?.is_open ?? false,
     ...getDropApprovalTiming(drop),
     wave,
     ...(replyTo ? { reply_to: replyTo } : {}),
@@ -438,6 +454,7 @@ export const mapLeaderboardDropV2 = ({
     drop_type: dropType,
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
+    voting_open: voting?.is_open ?? false,
     ...getDropApprovalTiming(drop),
     ...(replyTo ? { reply_to: replyTo } : {}),
     author: mapIdentityOverviewToProfileMin(drop.author),
@@ -656,6 +673,39 @@ export async function fetchWaveDropsSearchV2({
     data: response.data.map((drop) =>
       mapLeaderboardDropV2({ drop, wave: waveMin })
     ),
+    page: response.page,
+    next: response.next,
+  };
+}
+
+export async function fetchWaveCompetitionDropsV2({
+  wave,
+  authorId,
+  dropType,
+  page,
+  pageSize,
+  signal,
+}: FetchWaveCompetitionDropsV2Props): Promise<WaveCompetitionDropsPage> {
+  const waveMin = normalizeWaveMin(wave);
+  const response = await commonApiFetch<ApiDropV2PageWithoutCount>({
+    endpoint: `v2/waves/${encodeURIComponent(waveMin.id)}/competition-drops`,
+    params: {
+      author_id: authorId,
+      drop_type: dropType,
+      page: page.toString(),
+      page_size: pageSize.toString(),
+    },
+    signal,
+  });
+
+  return {
+    data: await hydrateDropsV2({
+      drops: response.data,
+      wave: waveMin,
+      signal,
+      includeFullMetadata: false,
+      includeTopRaters: false,
+    }),
     page: response.page,
     next: response.next,
   };
