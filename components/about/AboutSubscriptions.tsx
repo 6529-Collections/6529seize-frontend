@@ -86,7 +86,7 @@ function SubscriptionHeader({
   return (
     <header className="tw-px-1 tw-pb-12 tw-pt-6 sm:tw-px-2 sm:tw-pt-8">
       <div className="tw-max-w-4xl">
-        <h1 className="tw-m-0 tw-text-3xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white/90 sm:tw-text-4xl">
+        <h1 className="tw-m-0 tw-text-2xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white/90 sm:tw-text-3xl">
           {m(locale, "about.subscriptions.hero.title")}
         </h1>
         <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-font-light tw-leading-6 tw-text-white/50 sm:tw-text-base sm:tw-leading-7">
