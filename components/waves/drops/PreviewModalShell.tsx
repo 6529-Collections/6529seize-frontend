@@ -1,6 +1,8 @@
 "use client";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   Dialog,
   DialogPanel,
@@ -31,6 +33,7 @@ export const PreviewModalShell = ({
   maxWidth = "5xl",
 }: PreviewModalShellProps) => {
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
 
   useEffect(() => {
     if (!isOpen || isApp) {
@@ -84,8 +87,10 @@ export const PreviewModalShell = ({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div
-            className="tw-fixed tw-inset-0 tw-bg-iron-600/60"
+          <button
+            type="button"
+            aria-label={t(locale, "waves.previewModal.close")}
+            className="tw-fixed tw-inset-0 tw-border-0 tw-bg-iron-600/60 tw-p-0"
             onClick={(event) => {
               stopPropagation(event);
               onClose();
@@ -93,13 +98,7 @@ export const PreviewModalShell = ({
           />
         </TransitionChild>
 
-        <div
-          className="tw-fixed tw-inset-0 tw-z-[100] tw-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
-          onClick={(event) => {
-            stopPropagation(event);
-            onClose();
-          }}
-        >
+        <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[100] tw-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block">
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
             <TransitionChild
               as={Fragment}
@@ -111,7 +110,7 @@ export const PreviewModalShell = ({
               leaveTo="tw-opacity-100"
             >
               <DialogPanel
-                className={`tw-relative tw-m-0 tw-max-h-[90vh] tw-w-full ${MAX_WIDTH_CLASS[maxWidth]} tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-shadow-2xl tw-shadow-black/25`}
+                className={`tw-pointer-events-auto tw-relative tw-m-0 tw-max-h-[90vh] tw-w-full ${MAX_WIDTH_CLASS[maxWidth]} tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-shadow-2xl tw-shadow-black/25`}
                 onClick={stopPropagation}
               >
                 {children(false)}
@@ -120,7 +119,7 @@ export const PreviewModalShell = ({
           </div>
         </div>
 
-        <div className="tw-fixed tw-inset-0 tw-block tw-overflow-hidden sm:tw-hidden">
+        <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-block tw-overflow-hidden sm:tw-hidden">
           <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
               <TransitionChild

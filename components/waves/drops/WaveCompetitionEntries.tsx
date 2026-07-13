@@ -59,17 +59,14 @@ const LoadingState = () => {
   const locale = useBrowserLocale();
 
   return (
-    <div
-      className="tw-flex tw-h-72 tw-items-center tw-justify-center"
-      role="status"
-    >
-      <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
-        <div className="tw-size-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400" />
+    <output className="tw-flex tw-h-72 tw-items-center tw-justify-center">
+      <span className="tw-flex tw-flex-col tw-items-center tw-gap-4">
+        <span className="tw-size-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400" />
         <span className="tw-text-sm tw-text-iron-400">
           {t(locale, "waves.competitionBadges.loading")}
         </span>
-      </div>
-    </div>
+      </span>
+    </output>
   );
 };
 

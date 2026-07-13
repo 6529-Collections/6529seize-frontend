@@ -1,6 +1,7 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
@@ -9,7 +10,8 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { t } from "@/i18n/messages";
 import { DialogTitle } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
 import type { WaveCompetitionPreviewTab } from "./WaveCompetitionBadges";
 import { WaveCompetitionEntries } from "./WaveCompetitionEntries";
@@ -74,15 +76,15 @@ export const WaveCompetitionPreviewModalContent = ({
   const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const compact = useCompactMode();
   const isSmallScreen = useMediaQuery("(max-width: 1023px)");
   const showTabs = hasActiveEntries && hasWinningEntries;
-  const currentTab = showTabs
-    ? activeTab
-    : hasWinningEntries
-      ? "winners"
-      : "active";
+  let currentTab: WaveCompetitionPreviewTab = "active";
+  if (showTabs) {
+    currentTab = activeTab;
+  } else if (hasWinningEntries) {
+    currentTab = "winners";
+  }
   const displayName =
     user.handle?.trim() ||
     user.primary_address?.trim() ||
@@ -96,7 +98,7 @@ export const WaveCompetitionPreviewModalContent = ({
 
   const handleDropClick = useCallback(
     (drop: ApiDrop) => {
-      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      const params = new URLSearchParams(globalThis.window.location.search);
       params.set("drop", drop.id);
       router.push(`${pathname}?${params.toString()}`);
       if (compact && isSmallScreen) {
@@ -106,7 +108,7 @@ export const WaveCompetitionPreviewModalContent = ({
       }
       onClose();
     },
-    [compact, isSmallScreen, onClose, pathname, router, searchParams]
+    [compact, isSmallScreen, onClose, pathname, router]
   );
 
   return (
@@ -115,11 +117,13 @@ export const WaveCompetitionPreviewModalContent = ({
 
       <header className="tw-relative tw-z-[100] tw-flex tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/60 tw-p-6">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-4">
-          <div className="tw-size-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-violet-400/25">
+          <div className="tw-relative tw-size-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-violet-400/25">
             {user.pfp && (
-              <img
-                src={user.pfp}
+              <Image
+                src={resolveIpfsUrlSync(user.pfp)}
                 alt=""
+                fill
+                sizes="48px"
                 className="tw-size-full tw-bg-transparent tw-object-contain"
               />
             )}

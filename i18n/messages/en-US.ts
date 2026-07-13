@@ -349,6 +349,10 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyFailed: "Copy failed",
 } as const);
 
+const WAVE_PREVIEW_MODAL_MESSAGES = objectMessages("waves.previewModal", {
+  close: "Close preview",
+} as const);
+
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
   "waves.competitionBadges",
   {
@@ -1819,6 +1823,7 @@ export const EN_US_MESSAGES = {
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_PREVIEW_MODAL_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
