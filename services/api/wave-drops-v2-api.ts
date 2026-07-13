@@ -14,19 +14,17 @@ import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiDropReactionV2 } from "@/generated/models/ApiDropReactionV2";
 import type { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
-import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2Page } from "@/generated/models/ApiDropV2Page";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import type { ApiDropVotersPage } from "@/generated/models/ApiDropVotersPage";
 import type { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/ApiDropWithoutWavesPageWithoutCount";
-import { ApiSubmissionDropStatus } from "@/generated/models/ApiSubmissionDropStatus";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWavePoll } from "@/generated/models/ApiWavePoll";
-import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import type { ApiPageSortDirection } from "@/generated/models/ApiPageSortDirection";
 import {
   commonApiFetch,
@@ -45,10 +43,13 @@ import {
   mapReplyToDrop,
   normalizeWaveMin,
 } from "@/services/api/drop-v2-mappers";
-
-type DropApprovalTiming = {
-  readonly over_threshold_since_ms?: number | null;
-};
+import {
+  getDropApprovalTiming,
+  getDropEndpointId,
+  getDropType,
+  getWinningContext,
+  rethrowAbortFetchError,
+} from "@/services/api/wave-drops-v2-helpers";
 
 const DEFAULT_RETRY_OPTIONS = {
   maxRetries: 2,
@@ -138,35 +139,6 @@ export type ApiWaveDropsV2PageFeed = ApiWaveDropsFeed & {
   readonly count: number;
   readonly page: number;
   readonly next: boolean;
-};
-
-const getDropEndpointId = (dropId: string): string =>
-  encodeURIComponent(dropId);
-
-const isAbortFetchError = (error: unknown): boolean => {
-  if (error instanceof DOMException && error.name === "AbortError") {
-    return true;
-  }
-
-  if (error instanceof Error && error.name === "AbortError") {
-    return true;
-  }
-
-  const maybeAbortError = error as
-    | { readonly code?: unknown; readonly name?: unknown }
-    | null
-    | undefined;
-
-  return (
-    maybeAbortError?.name === "AbortError" ||
-    maybeAbortError?.code === "ERR_CANCELED"
-  );
-};
-
-const rethrowAbortFetchError = (error: unknown) => {
-  if (isAbortFetchError(error)) {
-    throw error;
-  }
 };
 
 const fetchDropPartV2 = async ({
@@ -320,42 +292,6 @@ const fetchTopRatersV2 = async (
     rethrowAbortFetchError(error);
     return [];
   }
-};
-
-const getDropType = (drop: ApiDropV2): ApiDropType => {
-  if (drop.drop_type === ApiDropMainType.Chat) {
-    return ApiDropType.Chat;
-  }
-
-  if (drop.submission_context?.status === ApiSubmissionDropStatus.Winner) {
-    return ApiDropType.Winner;
-  }
-
-  return ApiDropType.Participatory;
-};
-
-const getWinningContext = (drop: ApiDropV2) => {
-  const voting = drop.submission_context?.voting;
-  if (drop.submission_context?.status !== ApiSubmissionDropStatus.Winner) {
-    return undefined;
-  }
-
-  return {
-    place: voting?.place ?? 0,
-    awards: [],
-    decision_time: 0,
-    sale_time: null,
-    sale_price: null,
-    sale_price_currency: null,
-  };
-};
-
-const getDropApprovalTiming = (drop: ApiDropV2): DropApprovalTiming => {
-  const overThresholdSinceMs = drop.submission_context?.over_threshold_since_ms;
-
-  return typeof overThresholdSinceMs === "number"
-    ? { over_threshold_since_ms: overThresholdSinceMs }
-    : {};
 };
 
 const hydrateDropV2 = async ({

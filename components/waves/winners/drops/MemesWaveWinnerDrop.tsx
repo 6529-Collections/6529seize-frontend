@@ -35,6 +35,7 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
+import MainStageMemeCardLink from "@/components/memes/drops/MainStageMemeCardLink";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -236,7 +237,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           {/* Title and Description */}
           <div className="tw-px-4 tw-pb-4 tw-pt-4">
             <div className="tw-space-y-1">
-              <div className="tw-flex tw-items-center tw-gap-x-2">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
                 <MediaTypeBadge
                   mimeType={artworkMedia?.mime_type}
                   dropId={winner.drop.id}
@@ -245,6 +246,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 <h3 className="tw-mb-0 tw-mt-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
                   {title}
                 </h3>
+                <MainStageMemeCardLink
+                  memeCardId={winner.drop.winning_context?.meme_card_id}
+                />
               </div>
               <p className="tw-mb-0 tw-line-clamp-2 tw-text-sm tw-text-iron-400">
                 {description}

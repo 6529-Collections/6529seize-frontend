@@ -142,6 +142,22 @@ test("renders vote details through meme vote stats", () => {
   ).toBeInTheDocument();
 });
 
+test("links a mapped Main Stage winner to its Meme card", () => {
+  render(
+    <MemeWinnerDrop
+      drop={{ ...drop, winning_context: { place: 1, meme_card_id: 521 } }}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    />
+  );
+
+  expect(screen.getByRole("link", { name: "Meme #521" })).toHaveAttribute(
+    "href",
+    "/the-memes/521"
+  );
+});
+
 test("does not trigger the mobile menu wrapper when vote details is clicked", () => {
   render(
     <MemeWinnerDrop

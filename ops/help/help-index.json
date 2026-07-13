@@ -4615,13 +4615,24 @@
         "winners tab",
         "wave winners",
         "winning drops",
-        "decision winners"
+        "decision winners",
+        "which meme did this submission mint"
       ],
-      "keywords": ["waves", "leaderboard", "winners", "decision", "drops"],
+      "keywords": [
+        "waves",
+        "leaderboard",
+        "winners",
+        "decision",
+        "drops",
+        "memes",
+        "main stage",
+        "minted card"
+      ],
       "facts": [
         "Wave Winners tab behavior is documented under leaderboard features.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
-        "Single-decision and multi-decision waves have different winner display behavior."
+        "Single-decision and multi-decision waves have different winner display behavior.",
+        "Mapped winners in The Memes Main Stage show a Meme #N link in the Winners tab and on the open winning drop."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
