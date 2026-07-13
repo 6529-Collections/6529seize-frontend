@@ -5227,6 +5227,46 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the observed Sentry 6V content-script messaging failure", () => {
+    // Arrange
+    const event: TestSentryClientEvent = {
+      transaction: "/waves/:wave",
+      tags: {
+        browser: "Chrome 147.0.0",
+        environment: "production",
+      },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///content-scripts/content.js",
+                  function: "R",
+                  in_app: true,
+                  lineno: 1,
+                  colno: 14440,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters extension messaging failures from browser extension frames", () => {
     // Arrange
     const event = createBrowserExtensionMessagingConnectionEvent({
@@ -5269,15 +5309,44 @@ describe("sentry-client-filters", () => {
             stacktrace: {
               frames: [
                 {
-                  filename: "app:///injectedScript.bundle.js",
-                  abs_path: "app:///injectedScript.bundle.js",
-                  function: "n",
+                  filename: "app:///content-scripts/content.js",
+                  function: "R",
+                  in_app: true,
                 },
                 {
                   filename:
                     "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
                   abs_path:
                     "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  function: "sendBrowserExtensionMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unobserved content-script-like app paths", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///content-scripts/application.js",
                   function: "sendBrowserExtensionMessage",
                   in_app: true,
                 },
