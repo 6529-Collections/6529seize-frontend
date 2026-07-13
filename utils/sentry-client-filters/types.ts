@@ -3,6 +3,9 @@ export type SentryStackFrame = {
   abs_path?: string | undefined;
   function?: string | undefined;
   in_app?: boolean | undefined;
+  lineno?: number | undefined;
+  colno?: number | undefined;
+  context_line?: string | undefined;
 };
 
 export type SentryTransactionSpan = {

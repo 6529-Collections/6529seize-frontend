@@ -4,8 +4,8 @@
 
 The desktop-web share modal lets users reopen the current route in other 6529
 clients, copy the active browser URL, and share an authenticated connection
-into supported 6529 apps. The same dialog also surfaces mobile-app and desktop-
-app download targets.
+into supported 6529 apps. Official app installation and desktop downloads live
+on the separate [6529 Apps Page](feature-6529-apps-page.md).
 
 Native app route sharing is separate from this modal: supported native app
 routes outside `/`, Waves, Messages, and Notifications show a direct
@@ -39,14 +39,12 @@ current route.
 3. Review the `Share Type` row:
    - `Connection`
    - `Current URL`
-   - `6529 Apps`
 4. Default selection is state-driven:
    - authenticated sessions open on `Connection` -> `6529 Mobile`
    - unauthenticated sessions open on `Current URL` -> `6529 Mobile`
 5. Use the second control row for the active mode:
    - `Connection` shows `Open Link In`
    - `Current URL` shows `Open URL In`
-   - `6529 Apps` shows `Select Platform`
 6. In `Current URL`, choose the destination format:
    - `6529 Mobile`: QR code plus mobile-app deep link for the current route
    - `Browser`: QR code plus the absolute web URL for the current route
@@ -57,13 +55,9 @@ current route.
    - `6529 Mobile`: QR code plus session-v2 share-connection deep link
    - `6529 Desktop`: legacy desktop accept-connection deep link when not in
      Electron
-8. In `6529 Apps`, choose install/open targets:
-   - `6529 Mobile`: iOS and Android app targets
-   - `6529 Desktop`: Windows, macOS, and Linux download targets when not in
-     Electron
-9. Use the copy action next to the visible URL to copy the currently selected
+8. Use the copy action next to the visible URL to copy the currently selected
    target.
-10. Close the dialog by pressing `Escape` or activating the backdrop outside the
+9. Close the dialog by pressing `Escape` or activating the backdrop outside the
    panel.
 
 ## Common Scenarios
@@ -72,7 +66,7 @@ current route.
 - Open the current route in 6529 Mobile from a desktop QR code.
 - Share an authenticated connection from desktop web into 6529 Mobile or the
   current legacy 6529 Desktop app.
-- Use the dialog as an install/open surface for 6529 apps.
+- Open the separate `6529 Apps` page when installation or downloads are needed.
 - Share routes with query state preserved; generated targets keep the current
   pathname plus search params.
 - From the native app, use the header `Share page` control on supported routes
@@ -91,10 +85,9 @@ current route.
   update-authentication, loading, or unavailable state instead of a QR code or
   desktop link.
 - `6529 Desktop` subtabs are hidden when the modal is rendered inside Electron.
-- `Browser` exists only under `Current URL`; `Connection` and `6529 Apps` do
-  not expose a browser target.
-- QR panels can show a loading placeholder while codes or desktop version
-  manifests are generated/fetched.
+- `Browser` exists only under `Current URL`; `Connection` does not expose a
+  browser target.
+- QR panels can show a loading placeholder while codes are generated.
 - Copy feedback is transient (`Copied!`) and applies only to the currently
   visible URL row.
 - Clipboard-copy failure is silent in the UI; errors log to console and the
@@ -116,8 +109,8 @@ current route.
   try again after confirming the backend is reachable.
 - If a QR panel stays blank, switch tabs or reopen the dialog; the visible URL
   row still shows the target being shared.
-- If 6529 Desktop download entries do not load, retry from `6529 Apps`, or use
-  the mobile/browser targets as fallback.
+- If you need to install 6529 Mobile or Desktop, open the `6529 Apps` page from
+  the `About 6529` section.
 - If keyboard focus feels stuck, press `Escape` to close the dialog and reopen
   it from the original entry point.
 
@@ -131,7 +124,6 @@ current route.
   active wallet and is not available as a disconnected onboarding flow.
 - Desktop connection sharing remains on the legacy Desktop auth handoff until a
   separate Desktop v2 auth receiver is released.
-- Desktop download metadata is fetched from release manifests at runtime.
 
 ## Related Pages
 
@@ -140,3 +132,4 @@ current route.
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Mobile App Landing Page](feature-mobile-app-landing.md)
+- [6529 Apps Page](feature-6529-apps-page.md)

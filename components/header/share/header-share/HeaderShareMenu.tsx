@@ -21,7 +21,7 @@ export function ModalMenu({
   readonly onTabChange: (tab: Mode, subTab: SubMode) => void;
 }) {
   const isElectron = useElectron() ?? false;
-  const topTabCount = 3;
+  const topTabCount = 2;
   const subTabCount = getSubTabCount(activeTab, isElectron);
   const subTabLabel = getSubTabLabel(activeTab);
   const getMenuButtonClass = (active: boolean) => {
@@ -62,14 +62,6 @@ export function ModalMenu({
             onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}
           >
             {t(HEADER_SHARE_LOCALE, "headerShare.menu.currentUrl")}
-          </button>
-          <button
-            type="button"
-            disabled={activeTab === Mode.APPS}
-            className={getMenuButtonClass(activeTab === Mode.APPS)}
-            onClick={() => onTabChange(Mode.APPS, SubMode.APP)}
-          >
-            {t(HEADER_SHARE_LOCALE, "headerShare.menu.apps")}
           </button>
         </div>
       </div>

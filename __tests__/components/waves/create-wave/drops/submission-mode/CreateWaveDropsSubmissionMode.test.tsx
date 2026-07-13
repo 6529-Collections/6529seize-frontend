@@ -110,4 +110,48 @@ describe("CreateWaveDropsSubmissionMode", () => {
       },
     });
   });
+
+  it("hides the after-a-win option for perpetual ranking waves", () => {
+    render(
+      <CreateWaveDropsSubmissionMode
+        submissionStrategy={{
+          type: ApiWaveParticipationSubmissionStrategyType.Identity,
+          config: {
+            duplicates:
+              ApiWaveParticipationIdentitySubmissionAllowDuplicates.NeverAllow,
+            who_can_be_submitted:
+              ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.Everyone,
+          },
+        }}
+        errors={[]}
+        isOngoingRanking
+        onChange={() => {}}
+      />
+    );
+
+    expect(screen.getByText("Never again")).toBeInTheDocument();
+    expect(screen.getByText("At any time")).toBeInTheDocument();
+    expect(screen.queryByText("After it wins")).toBeNull();
+  });
+
+  it("keeps the after-a-win option for scheduled waves", () => {
+    render(
+      <CreateWaveDropsSubmissionMode
+        submissionStrategy={{
+          type: ApiWaveParticipationSubmissionStrategyType.Identity,
+          config: {
+            duplicates:
+              ApiWaveParticipationIdentitySubmissionAllowDuplicates.NeverAllow,
+            who_can_be_submitted:
+              ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.Everyone,
+          },
+        }}
+        errors={[]}
+        isOngoingRanking={false}
+        onChange={() => {}}
+      />
+    );
+
+    expect(screen.getByText("After it wins")).toBeInTheDocument();
+  });
 });

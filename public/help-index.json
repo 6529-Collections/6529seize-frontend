@@ -1710,9 +1710,10 @@
       ],
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
-        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
+        "On the Overview step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
+        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, and Description; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
-        "Leaderboards, winners, and voting state are part of rank-wave participation."
+        "Leaderboards, winners, and voting state are part of rank-wave participation; perpetual ranking waves keep a live leaderboard but never announce winners or award outcomes."
       ],
       "canonical_path": "/waves?create=wave",
       "related_paths": ["/waves", "/waves/create"],
@@ -1887,6 +1888,7 @@
       "facts": [
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
+        "Reaction controls are disabled while a proxy profile is active.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
         "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
@@ -4457,11 +4459,29 @@
       "id": "waves.drop.content-display",
       "kind": "ui_affordance",
       "title": "Wave drop content display",
-      "aliases": ["drop content", "read drop", "drop display", "drop media"],
-      "keywords": ["waves", "drop", "content", "display", "media", "text"],
+      "aliases": [
+        "drop content",
+        "read drop",
+        "drop display",
+        "drop media",
+        "ordered list",
+        "numbered list"
+      ],
+      "keywords": [
+        "waves",
+        "drop",
+        "content",
+        "display",
+        "media",
+        "text",
+        "markdown",
+        "list",
+        "numbered"
+      ],
       "facts": [
         "Wave drop content display docs explain how posted drop content is rendered.",
         "Content display is separate from composer submission behavior.",
+        "Ordered lists accept both 1. and 1) markers and preserve the chosen delimiter when rendered.",
         "Media, quote links, replies, and selection copy have additional drop-action records."
       ],
       "canonical_path": "/waves",

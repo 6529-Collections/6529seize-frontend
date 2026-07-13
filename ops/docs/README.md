@@ -75,7 +75,8 @@ March 19, 2026.
 - [Open Data](open-data/README.md): `/open-data`, `/open-data/6529bot`,
   `/open-data/meme-subscriptions`, `/open-data/network-metrics`,
   `/open-data/rememes`, `/open-data/royalties`, `/open-data/team`
-- [Navigation](navigation/README.md): app shell controls and `/open-mobile`
+- [Navigation](navigation/README.md): app shell controls, `/open-mobile`, and
+  `/about/6529-apps`
 - [Shared](shared/README.md): behavior reused by multiple areas
 
 ## Route Coverage
@@ -129,12 +130,13 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/open-data/royalties`, `/open-data/team`
 - Shared app-shell behavior:
   [Navigation](navigation/README.md) and [Shared](shared/README.md),
-  including `/open-mobile`
+  including `/open-mobile` and `/about/6529-apps`
 
 ### Out of Scope
 
 - Content, editorial, and legal routes:
-  `/about/*` (except `/about/primary-address`), `/museum`, `/museum/*`,
+  `/about/*` (except `/about/primary-address` and `/about/6529-apps`),
+  `/museum`, `/museum/*`,
   `/blog/*`, `/news/*`, `/city/*`, `/om`, `/om/*`, `/education`,
   `/education/*`, `/capital`, `/capital/*`, `/author/*`, `/category/*`,
   `/buidl`, `/casabatllo`
