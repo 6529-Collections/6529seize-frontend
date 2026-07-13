@@ -573,7 +573,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    fireEvent.change(screen.getByRole("textbox", { name: "Search" }), {
+    fireEvent.change(getSearchInput(), {
       target: { value: query },
     });
 
