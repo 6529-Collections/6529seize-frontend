@@ -30,7 +30,6 @@ import {
   getHomeRoute,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useExitActiveWave } from "@/components/navigation/useExitActiveWave";
@@ -146,7 +145,6 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     if (dropId) {
       beginClosingDrop(dropId);
     }
-    markDropCloseNavigation();
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("drop");
     const newUrl = params.toString()
