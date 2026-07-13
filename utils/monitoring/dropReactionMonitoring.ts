@@ -484,6 +484,10 @@ export function recordReactionRequestSucceeded(
     latency_ms: now - (context.requestSentAt ?? context.startedAt),
   });
 
+  if (result.isLatestMutation && context.realtimeReconciledAt !== null) {
+    clearActiveIntentForContext(context);
+  }
+
   return result;
 }
 
@@ -655,7 +659,9 @@ export function recordReactionRealtimeReconciliation(params: {
       time_since_mutation_ms: timeSinceMutationMs,
       websocket_status: websocketStatus,
     });
-    clearActiveIntentForContext(context);
+    if (context.apiSucceededAt !== null) {
+      clearActiveIntentForContext(context);
+    }
     return {
       ...resultBase,
       shouldApplyCanonicalDrop: true,

@@ -681,6 +681,81 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
+  it("keeps the realtime guard until the matching request succeeds", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-5-pending",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-5-pending/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_200);
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-pending",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":joy:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_300);
+    const staleResult = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-pending",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: null,
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(staleResult).toEqual({
+      shouldApplyCanonicalDrop: false,
+      expectedReaction: ":joy:",
+      serverReaction: null,
+      supersededByMutationId: mutation.mutationId,
+    });
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+
+    dateNowSpy.mockReturnValue(1_400);
+    recordReactionRequestSucceeded(mutation);
+
+    addBreadcrumbMock.mockClear();
+    dateNowSpy.mockReturnValue(1_500);
+    const laterResult = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-5-pending",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: null,
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(laterResult).toEqual({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: null,
+      serverReaction: null,
+    });
+    expect(addBreadcrumbMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
   it("resets the per-drop sequence when the last tracked mutation ages out", () => {
     const firstMutation = beginReactionMutation({
       dropId: "drop-6",
