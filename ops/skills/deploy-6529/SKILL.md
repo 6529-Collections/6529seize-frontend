@@ -92,7 +92,18 @@ shared lane.
    - required CI and DCO passing
    - human approval present when required
    - release risk and rollback/fix-forward plan understood
-4. Use the repo-local `6529` wrapper for frontend project commands in release notes, checked-in docs, CI descriptions, and deploy instructions.
+4. Sequence the final readiness steps deliberately. The `main` ruleset requires
+   the branch to be up to date with `main` (strict checks) and requires approval
+   of the most recent push, so updating the branch invalidates prior approvals.
+   Correct order: update the branch with `main` first, let checks rerun, and
+   seek the maintainer approval last — ideally right before merge, so `main`
+   has no time to advance again.
+5. Know how merges actually land on `main`:
+   - the `main` ruleset restricts updates to bypass actors, so author-side
+     auto-merge never fires; a maintainer must perform the merge themselves
+   - the required review must come from the `6529seize-maintainers` team and
+     be submitted on behalf of that team, or it does not satisfy the ruleset
+6. Use the repo-local `6529` wrapper for frontend project commands in release notes, checked-in docs, CI descriptions, and deploy instructions.
 
 ## Branch Movement
 
