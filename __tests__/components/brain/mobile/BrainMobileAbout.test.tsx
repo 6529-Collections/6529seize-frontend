@@ -4,27 +4,28 @@ import userEvent from '@testing-library/user-event';
 import BrainMobileAbout from '@/components/brain/mobile/BrainMobileAbout';
 import { useQuery } from '@tanstack/react-query';
 import { useLayout } from '@/components/brain/my-stream/layout/LayoutContext';
-import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { Mode } from '@/components/brain/right-sidebar/BrainRightSidebarTypes';
 
-jest.mock('@/components/waves/header/WaveHeader', () => ({
+jest.mock('@/components/brain/right-sidebar/WaveContent', () => ({
   __esModule: true,
-  default: (props: any) => <button data-testid="header" onClick={props.onFollowersClick}>header</button>,
-  WaveHeaderPinnedSide: { LEFT: 'left' }
-}));
-
-jest.mock('@/components/brain/right-sidebar/BrainRightSidebarContent', () => ({
-  __esModule: true,
-  default: (props: any) => <div data-testid="content">content-{props.wave.id}</div>
-}));
-
-jest.mock('@/components/brain/right-sidebar/BrainRightSidebarFollowers', () => ({
-  __esModule: true,
-  default: (props: any) => <div data-testid="followers" onClick={props.closeFollowers}>followers-{props.wave.id}</div>
-}));
-
-jest.mock('@/components/waves/specs/WaveRules', () => ({
-  __esModule: true,
-  default: (props: any) => <div data-testid="rules">rules-{props.wave.id}</div>
+  WaveContent: (props: any) => (
+    <div
+      data-testid="wave-content"
+      data-max-visible-tabs={props.maxVisibleTabs}
+      data-mode={props.mode}
+    >
+      <button
+        data-testid="toggle-followers"
+        onClick={() =>
+          props.setMode(
+            props.mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS
+          )
+        }
+      >
+        toggle followers
+      </button>
+    </div>
+  ),
 }));
 
 jest.mock('@tanstack/react-query');
@@ -40,32 +41,25 @@ beforeEach(() => {
   mockUseLayout.mockReturnValue({ mobileAboutViewStyle: {} });
 });
 
-test('renders header and content when wave data available', () => {
+test('renders the shared right-panel content with mobile tab overflow', () => {
   mockUseQuery.mockReturnValue({ data: wave });
   render(<BrainMobileAbout activeWaveId="1" />);
-  expect(screen.getByTestId('header')).toBeInTheDocument();
-  expect(screen.getByTestId('content')).toHaveTextContent('content-1');
-  expect(screen.queryByTestId('followers')).toBeNull();
-});
-
-test('renders rules for chat waves in content view', () => {
-  mockUseQuery.mockReturnValue({
-    data: { id: '1', wave: { type: ApiWaveType.Chat } },
-  });
-  render(<BrainMobileAbout activeWaveId="1" />);
-  expect(screen.getByTestId('rules')).toHaveTextContent('rules-1');
+  expect(screen.getByTestId('wave-content')).toBeInTheDocument();
+  expect(screen.getByTestId('wave-content')).toHaveAttribute(
+    'data-max-visible-tabs',
+    '3'
+  );
 });
 
 test('toggles to followers view and back', async () => {
   mockUseQuery.mockReturnValue({ data: wave });
   const user = userEvent.setup();
   render(<BrainMobileAbout activeWaveId="1" />);
-  await user.click(screen.getByTestId('header'));
-  expect(screen.queryByTestId('content')).toBeNull();
-  const followers = screen.getByTestId('followers');
-  expect(followers).toBeInTheDocument();
-  await user.click(followers); // triggers closeFollowers
-  expect(screen.getByTestId('content')).toBeInTheDocument();
+  const content = screen.getByTestId('wave-content');
+  await user.click(screen.getByTestId('toggle-followers'));
+  expect(content).toHaveAttribute('data-mode', Mode.FOLLOWERS);
+  await user.click(screen.getByTestId('toggle-followers'));
+  expect(content).toHaveAttribute('data-mode', Mode.CONTENT);
 });
 
 test('renders nothing when no wave data', () => {

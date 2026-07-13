@@ -21,6 +21,7 @@ interface WaveContentProps {
   readonly setMode: (mode: Mode) => void;
   readonly activeTab: SidebarTab;
   readonly setActiveTab: (tab: SidebarTab) => void;
+  readonly maxVisibleTabs?: number | undefined;
 }
 
 interface TabOption {
@@ -34,6 +35,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   setMode,
   activeTab,
   setActiveTab,
+  maxVisibleTabs,
 }) => {
   const onFollowersClick = () =>
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
@@ -125,7 +127,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           options={options}
           activeKey={activeSidebarTab}
           onSelect={(key) => setActiveTab(key as SidebarTab)}
-          maxVisibleTabs={options.length}
+          maxVisibleTabs={maxVisibleTabs ?? options.length}
         />
       </div>
       <div className="tw-min-h-0 tw-min-w-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-x-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">
