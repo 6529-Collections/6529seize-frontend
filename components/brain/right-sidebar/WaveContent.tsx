@@ -1,9 +1,13 @@
 "use client";
 
 import React, { type JSX } from "react";
+import clsx from "clsx";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
+import {
+  TabToggleWithOverflow,
+  type TabToggleWithOverflowVariant,
+} from "@/components/common/TabToggleWithOverflow";
 import WaveHeader from "@/components/waves/header/WaveHeader";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
@@ -22,6 +26,8 @@ interface WaveContentProps {
   readonly activeTab: SidebarTab;
   readonly setActiveTab: (tab: SidebarTab) => void;
   readonly maxVisibleTabs?: number | undefined;
+  readonly tabVariant?: TabToggleWithOverflowVariant | undefined;
+  readonly aboutTabLabel?: string | undefined;
 }
 
 interface TabOption {
@@ -36,6 +42,8 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   activeTab,
   setActiveTab,
   maxVisibleTabs,
+  tabVariant = "underline",
+  aboutTabLabel,
 }) => {
   const onFollowersClick = () =>
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
@@ -46,7 +54,9 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   const options: TabOption[] = [
     {
       key: SidebarTab.ABOUT,
-      label: waveRightPanelText("waves.sidebar.rightPanel.tabs.about"),
+      label:
+        aboutTabLabel ??
+        waveRightPanelText("waves.sidebar.rightPanel.tabs.about"),
     },
     {
       key: SidebarTab.RULES,
@@ -122,12 +132,20 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col tw-overflow-hidden">
-      <div className="tw-no-scrollbar tw-min-w-0 tw-flex-shrink-0 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-2 [&_button[role=tab]]:tw-px-2 [&_button[role=tab]]:tw-py-2.5 [&_button[role=tab]]:!tw-text-sm [&_button[role=tab]]:tw-font-medium [&_button[role=tab]]:tw-tracking-normal">
+      <div
+        className={clsx(
+          "tw-no-scrollbar tw-min-w-0 tw-flex-shrink-0 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5",
+          tabVariant === "compactPills"
+            ? "tw-py-2"
+            : "tw-px-2 [&_button[role=tab]]:tw-px-2 [&_button[role=tab]]:tw-py-2.5 [&_button[role=tab]]:!tw-text-sm [&_button[role=tab]]:tw-font-medium [&_button[role=tab]]:tw-tracking-normal"
+        )}
+      >
         <TabToggleWithOverflow
           options={options}
           activeKey={activeSidebarTab}
           onSelect={(key) => setActiveTab(key as SidebarTab)}
           maxVisibleTabs={maxVisibleTabs ?? options.length}
+          variant={tabVariant}
         />
       </div>
       <div className="tw-min-h-0 tw-min-w-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-x-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">

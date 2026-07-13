@@ -1790,6 +1790,45 @@
       ]
     },
     {
+      "id": "waves.about-sections",
+      "kind": "workflow",
+      "title": "Wave About sections",
+      "aliases": [
+        "wave about",
+        "wave overview",
+        "overview tab",
+        "wave information",
+        "wave settings",
+        "wave activity"
+      ],
+      "keywords": [
+        "wave",
+        "about",
+        "overview",
+        "rules",
+        "rep",
+        "settings",
+        "voters",
+        "activity",
+        "mobile",
+        "sidebar"
+      ],
+      "facts": [
+        "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
+        "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
+        "For Rank and Approve waves, More also includes Voters and Activity.",
+        "Selecting a section switches information for the active wave without navigating away from the thread."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "about", "navigation", "mobile", "sidebar"],
+      "source_refs": [
+        "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md",
+        "components/brain/mobile/BrainMobileAbout.tsx",
+        "components/brain/right-sidebar/WaveContent.tsx"
+      ]
+    },
+    {
       "id": "waves.rules",
       "kind": "workflow",
       "title": "Wave rules",

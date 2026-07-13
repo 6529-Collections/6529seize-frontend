@@ -12,12 +12,15 @@ interface TabOption {
   readonly label: string;
 }
 
+export type TabToggleWithOverflowVariant = "underline" | "compactPills";
+
 interface TabToggleWithOverflowProps {
   readonly options: readonly TabOption[];
   readonly activeKey: string;
   readonly onSelect: (key: string) => void;
   readonly maxVisibleTabs?: number | undefined;
   readonly fullWidth?: boolean | undefined;
+  readonly variant?: TabToggleWithOverflowVariant | undefined;
 }
 
 interface OverflowTriggerProps {
@@ -26,6 +29,24 @@ interface OverflowTriggerProps {
   readonly activeLabel?: string | undefined;
   readonly fallbackLabel: string;
 }
+
+const getTabStateClassName = ({
+  isActive,
+  isCompactPills,
+}: {
+  readonly isActive: boolean;
+  readonly isCompactPills: boolean;
+}): string => {
+  if (isCompactPills) {
+    return isActive
+      ? "tw-border-violet-400/40 tw-bg-violet-500/15 tw-text-violet-200"
+      : "tw-border-white/[0.08] tw-bg-white/[0.035] tw-text-iron-300 active:tw-bg-white/[0.08] desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-white/[0.07] desktop-hover:hover:tw-text-iron-100";
+  }
+
+  return isActive
+    ? "tw-border-primary-300 tw-text-white"
+    : "tw-border-transparent tw-text-iron-400 hover:tw-text-iron-200";
+};
 
 const OverflowTrigger: React.FC<OverflowTriggerProps> = ({
   isOpen = false,
@@ -56,7 +77,9 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   onSelect,
   maxVisibleTabs = 3,
   fullWidth = false,
+  variant = "underline",
 }) => {
+  const isCompactPills = variant === "compactPills";
   const clampedMax = React.useMemo(
     () => Math.max(0, Math.floor(maxVisibleTabs)),
     [maxVisibleTabs]
@@ -92,7 +115,6 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   React.useEffect(() => {
     if (activeVisibleIndex >= 0) {
       setFocusedTabIndex(activeVisibleIndex);
-      tabRefs.current[activeVisibleIndex]?.focus();
       return;
     }
 
@@ -140,14 +162,19 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   return (
     <div
       className={clsx(
-        "tw-flex tw-gap-x-1",
+        "tw-flex",
+        isCompactPills ? "tw-gap-x-1.5" : "tw-gap-x-1",
         fullWidth ? "tw-w-full" : "tw-w-auto"
       )}
     >
       <div
         role="tablist"
         aria-orientation="horizontal"
-        className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}
+        className={clsx(
+          "tw-flex",
+          isCompactPills ? "tw-gap-x-1.5" : "tw-gap-x-1",
+          fullWidth && "tw-flex-1"
+        )}
       >
         {visibleTabs.map((option, index) => (
           <button
@@ -161,13 +188,17 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             ref={(element) => {
               tabRefs.current[index] = element;
             }}
-            className={`-tw-mb-px tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
-              fullWidth ? "tw-flex tw-justify-center tw-text-center" : ""
-            } ${
-              activeKey === option.key
-                ? "tw-border-primary-300 tw-text-white"
-                : "tw-border-transparent tw-text-iron-400 hover:tw-text-iron-200"
-            }`}
+            className={clsx(
+              "tw-whitespace-nowrap tw-border-solid tw-font-medium tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-inset motion-reduce:tw-transition-none",
+              isCompactPills
+                ? "tw-min-h-9 tw-flex-none tw-rounded-full tw-border tw-px-3 tw-py-1.5 tw-text-xs focus-visible:tw-ring-1 focus-visible:tw-ring-violet-300/70"
+                : "-tw-mb-px tw-flex-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-py-3 tw-text-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
+              fullWidth && "tw-flex tw-justify-center tw-text-center",
+              getTabStateClassName({
+                isActive: activeKey === option.key,
+                isCompactPills,
+              })
+            )}
           >
             {option.label}
           </button>
@@ -181,10 +212,14 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           unstyledMenu
           unstyledItems
           triggerClassName={clsx(
-            "-tw-mb-px tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200",
-            isActiveInOverflow
-              ? "tw-border-primary-300 tw-text-white"
-              : "tw-border-transparent tw-text-iron-400 hover:tw-text-iron-200"
+            "tw-whitespace-nowrap tw-border-solid tw-font-medium tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-inset motion-reduce:tw-transition-none",
+            isCompactPills
+              ? "tw-inline-flex tw-min-h-9 tw-flex-none tw-items-center tw-rounded-full tw-border tw-px-3 tw-py-1.5 tw-text-xs focus-visible:tw-ring-1 focus-visible:tw-ring-violet-300/70"
+              : "-tw-mb-px tw-flex-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-py-3 tw-text-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
+            getTabStateClassName({
+              isActive: isActiveInOverflow,
+              isCompactPills,
+            })
           )}
           trigger={
             <OverflowTrigger
@@ -203,7 +238,9 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           }))}
           itemClassName="tw-block tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"
           inactiveItemClassName="tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"
-          activeItemClassName="tw-text-primary-300"
+          activeItemClassName={
+            isCompactPills ? "tw-text-violet-200" : "tw-text-primary-300"
+          }
           focusItemClassName="tw-bg-iron-800 tw-text-iron-100"
           menuWidthClassName="tw-w-36"
           menuClassName="tw-z-50 tw-mt-2 tw-rounded-md tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-primary-400/20 focus:tw-outline-none"

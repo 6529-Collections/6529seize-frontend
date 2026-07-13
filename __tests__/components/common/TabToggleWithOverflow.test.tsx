@@ -122,10 +122,9 @@ describe("TabToggleWithOverflow", () => {
     const moreButton = screen.getByRole("button", { name: "More tabs" });
     expect(moreButton).toHaveAttribute("aria-expanded", "false");
 
-    await waitFor(() => {
-      const activeTab = screen.getByRole("tab", { name: "A" });
-      expect(activeTab).toHaveFocus();
-    });
+    const activeTab = screen.getByRole("tab", { name: "A" });
+    expect(activeTab).toHaveAttribute("tabindex", "0");
+    expect(activeTab).not.toHaveFocus();
 
     await ensureButtonFocused(moreButton);
 

@@ -9,6 +9,7 @@ import { Mode, SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
 import { WaveContent } from "../right-sidebar/WaveContent";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface BrainMobileAboutProps {
   readonly activeWaveId: string | null;
@@ -46,6 +47,10 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           maxVisibleTabs={3}
+          tabVariant="compactPills"
+          aboutTabLabel={waveRightPanelText(
+            "waves.sidebar.rightPanel.tabs.overview"
+          )}
         />
       )}
     </div>
