@@ -56,7 +56,7 @@ const getTabTextClassName = ({
 
 const getTabStateProps = (isActive: boolean) => ({
   type: "button" as const,
-  "aria-current": isActive ? ("page" as const) : undefined,
+  "aria-current": isActive ? ("true" as const) : undefined,
 });
 
 interface BrainMobileTabsProps {
@@ -498,7 +498,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                     key={curation.id}
                     type="button"
                     data-curation-id={curation.id}
-                    aria-current={isActive ? "page" : undefined}
+                    aria-current={isActive ? "true" : undefined}
                     ref={getActiveButtonRef(isActive)}
                     onClick={() => onCurationClick(curation.id)}
                     className={getTabButtonClassName(isActive)}

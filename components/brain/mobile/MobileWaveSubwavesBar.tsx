@@ -257,7 +257,7 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
               <button
                 key={item.id}
                 type="button"
-                aria-current={isActive ? "page" : undefined}
+                aria-current={isActive ? "true" : undefined}
                 aria-label={`Open ${item.label}`}
                 onClick={() => onItemClick(item)}
                 className={`tw-relative tw-flex tw-h-7 tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2 tw-text-left tw-transition ${
@@ -292,9 +292,7 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
                 </span>
                 {showUnreadBadge && (
                   <span className="tw-ml-0.5 tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-px-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-white">
-                    {item.unreadDropsCount > 99
-                      ? "99+"
-                      : item.unreadDropsCount}
+                    {item.unreadDropsCount > 99 ? "99+" : item.unreadDropsCount}
                   </span>
                 )}
               </button>

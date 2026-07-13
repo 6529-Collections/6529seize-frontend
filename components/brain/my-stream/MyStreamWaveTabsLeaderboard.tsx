@@ -67,7 +67,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
           registerTabRef?.(primaryView, el);
         }}
         onClick={() => onViewChange(primaryView)}
-        aria-current={activeView === primaryView ? "page" : undefined}
+        aria-current={activeView === primaryView ? "true" : undefined}
         className={getButtonStateClasses(activeView === primaryView)}
       >
         <span className={getButtonTextClasses(activeView === primaryView)}>
@@ -82,12 +82,12 @@ const MyStreamWaveTabsLeaderboard: React.FC<
             registerTabRef?.(BrainView.WINNERS, el);
           }}
           onClick={() => onViewChange(BrainView.WINNERS)}
-          aria-current={
-            activeView === BrainView.WINNERS ? "page" : undefined
-          }
+          aria-current={activeView === BrainView.WINNERS ? "true" : undefined}
           className={getButtonStateClasses(activeView === BrainView.WINNERS)}
         >
-          <span className={getButtonTextClasses(activeView === BrainView.WINNERS)}>
+          <span
+            className={getButtonTextClasses(activeView === BrainView.WINNERS)}
+          >
             {winnersLabel}
           </span>
         </button>
