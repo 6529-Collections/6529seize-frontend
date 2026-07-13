@@ -57,7 +57,7 @@ export default function HomeNewcomerIntro() {
           onClick={() => {
             void handleConnect();
           }}
-          className="tw-inline-flex tw-min-h-11 tw-min-w-32 tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-5 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-wait disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50 md:tw-flex-none"
+          className="tw-inline-flex tw-min-h-11 tw-min-w-32 tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-transparent tw-px-5 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-wait disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50 md:tw-flex-none"
         >
           {t(
             locale,
