@@ -3,7 +3,7 @@
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptions/useProfileSubscriptionsNavigation";
-import { WHITE_PRIMARY_ACTION_CLASS } from "@/components/utils/button/actionButtonStyles";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
@@ -50,10 +50,21 @@ export default function AboutSubscriptionsProfileButton({
     locale,
     "home.mintSubscriptions.connectToSubscribe"
   );
-  const buttonClassName =
-    variant === "white"
-      ? `${WHITE_PRIMARY_ACTION_CLASS} tw-gap-2`
-      : BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME;
+
+  if (variant === "white") {
+    return (
+      <PrimaryButton
+        loading={isConnecting}
+        disabled={isConnecting}
+        onClicked={handleOpenProfileSubscriptions}
+      >
+        {connectToSubscribeLabel}
+        {profileSubscriptionsHref && (
+          <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
+        )}
+      </PrimaryButton>
+    );
+  }
 
   if (!profileSubscriptionsHref) {
     return (
@@ -61,7 +72,7 @@ export default function AboutSubscriptionsProfileButton({
         type="button"
         disabled={isConnecting}
         onClick={handleOpenProfileSubscriptions}
-        className={`${buttonClassName} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
+        className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
         {connectToSubscribeLabel}
       </button>
@@ -74,7 +85,7 @@ export default function AboutSubscriptionsProfileButton({
         type="button"
         disabled={isConnecting}
         onClick={handleOpenProfileSubscriptions}
-        className={`${buttonClassName} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
+        className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
         {connectToSubscribeLabel}
         <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
@@ -85,9 +96,7 @@ export default function AboutSubscriptionsProfileButton({
   return (
     <Link
       href={profileSubscriptionsHref}
-      className={`${buttonClassName} tw-no-underline ${
-        variant === "blue" ? "desktop-hover:hover:tw-text-white" : ""
-      }`}
+      className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} tw-no-underline desktop-hover:hover:tw-text-white`}
     >
       {connectToSubscribeLabel}
       <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
