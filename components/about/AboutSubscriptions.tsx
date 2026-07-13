@@ -89,9 +89,6 @@ function SubscriptionHeader({
         <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-white/90 sm:tw-text-[26px]">
           {m(locale, "about.subscriptions.hero.title")}
         </h1>
-        <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-font-light tw-leading-6 tw-text-white/50 sm:tw-text-base sm:tw-leading-7">
-          {m(locale, "about.subscriptions.overview.intro")}
-        </p>
         <div className="tw-mt-5 tw-flex tw-justify-start empty:tw-hidden">
           <AboutSubscriptionsProfileButton variant="white" />
         </div>
@@ -114,9 +111,12 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         >
           {m(locale, "about.subscriptions.overview.title")}
         </h2>
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-light tw-leading-6 tw-text-white/50 sm:tw-text-base sm:tw-leading-7">
+          {m(locale, "about.subscriptions.overview.intro")}
+        </p>
       </div>
 
-      <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-6 tw-p-0 md:tw-grid-cols-3">
+      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-6 tw-p-0 md:tw-grid-cols-3">
         {OVERVIEW_BENEFITS.map((benefit) => {
           return (
             <li
