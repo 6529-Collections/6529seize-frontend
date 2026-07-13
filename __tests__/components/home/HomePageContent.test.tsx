@@ -41,8 +41,10 @@ const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
 describe("HomePageContent", () => {
   it.each([
     ["while authentication initializes", "initializing", false, false],
+    ["while a wallet connects", "connecting", false, false],
     ["for an authenticated member", "connected", true, false],
     ["for a logged-out visitor", "disconnected", false, true],
+    ["after a connection error", "error", false, true],
   ] as const)(
     "shows the newcomer intro only %s",
     (_description, connectionState, hasValidWalletAuth, expected) => {

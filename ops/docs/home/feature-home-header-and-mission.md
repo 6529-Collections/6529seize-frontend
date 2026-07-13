@@ -60,8 +60,9 @@ sections:
 ## Edge Cases
 
 - On reduced-motion settings, heart animation is disabled.
-- While wallet state is initializing, the page does not assume the visitor is
-  logged out. The newcomer actions appear once that state resolves.
+- While wallet state is initializing or connecting, the page does not assume
+  the visitor is logged out. The newcomer actions appear once that state
+  resolves.
 - If a wallet is present but authentication is not valid, the newcomer
   actions remain available so the visitor can continue through onboarding.
 - The mission block has no interactive controls or outbound links.

@@ -31,6 +31,28 @@ const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
 const useBrowserLocaleMock = jest.mocked(useBrowserLocale);
 
 describe("HomeNewcomerIntro", () => {
+  it("links to onboarding and reflects an open wallet flow", () => {
+    useBrowserLocaleMock.mockReturnValue("en-US");
+    useAuthMock.mockReturnValue({ setToast: jest.fn() } as ReturnType<
+      typeof useAuth
+    >);
+    useSeizeConnectContextMock.mockReturnValue({
+      seizeConnectFresh: jest.fn(),
+      seizeConnectOpen: true,
+    } as ReturnType<typeof useSeizeConnectContext>);
+
+    render(<HomeNewcomerIntro />);
+
+    expect(screen.getByRole("link", { name: "Start here" })).toHaveAttribute(
+      "href",
+      "/join-6529"
+    );
+    expect(
+      screen.getByRole("button", { name: "Opening wallet" })
+    ).toBeDisabled();
+    expect(screen.getByRole("status")).toHaveTextContent("Opening wallet");
+  });
+
   it("prevents repeat wallet requests and recovers from an open error", async () => {
     const user = userEvent.setup();
     const setToast = jest.fn();

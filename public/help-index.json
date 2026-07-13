@@ -42,7 +42,8 @@
       "source_refs": [
         "components/home/newcomer/HomeNewcomerIntro.tsx",
         "ops/docs/home/README.md",
-        "ops/docs/home/feature-home-header-and-mission.md"
+        "ops/docs/home/feature-home-header-and-mission.md",
+        "ops/docs/home/flow-home-landing-and-section-navigation.md"
       ]
     },
     {

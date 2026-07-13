@@ -12,7 +12,9 @@ import { LatestDropSection } from "./now-minting";
 export default function HomePageContent() {
   const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
   const showNewcomerIntro =
-    connectionState !== "initializing" && !hasValidWalletAuth;
+    connectionState !== "initializing" &&
+    connectionState !== "connecting" &&
+    !hasValidWalletAuth;
 
   return (
     <div className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">

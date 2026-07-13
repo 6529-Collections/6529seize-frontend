@@ -75,8 +75,9 @@ next route.
 
 - Top slot shows a loading skeleton first, then resolves to `Latest Drop`,
   `Next Drop`, or hidden when no eligible card exists.
-- The newcomer actions are shown only after wallet state resolves without valid
-  authentication. Authenticated visitors keep the dashboard-first order.
+- The newcomer actions stay hidden while wallet state is initializing or
+  connecting. They appear when that state settles without valid authentication.
+  Authenticated visitors keep the dashboard-first order.
 - `Coming up` can show:
   - up to 3 leaderboard cards, or
   - `NEXT MINT` plus up to 2 leaderboard cards.
@@ -106,8 +107,8 @@ next route.
 
 - Home sections use independent data sources, so loading and visibility timing
   is not synchronized.
-- Home content has no auth or wallet gate, but visible cards still depend on
-  available data.
+- Public home activity has no auth or wallet gate; only the newcomer actions
+  wait for wallet-state resolution. Visible cards still depend on available data.
 
 ## Related Pages
 
