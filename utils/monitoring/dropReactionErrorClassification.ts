@@ -3,7 +3,7 @@ import { extractErrorStatusCode } from "@/utils/errorStatus";
 const PROXY_REACTION_PERMISSION_DENIED_MESSAGE =
   "Proxy doesn't have permission to add reactions";
 
-export type ReactionErrorKind =
+type ReactionErrorKind =
   | "network"
   | "auth"
   | "rate-limit"
