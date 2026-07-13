@@ -7,6 +7,7 @@ import { publicEnv } from "@/config/env";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "@/lib/media/arweave-gateways";
 import { getMediaResolverHostname } from "@/lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "@/lib/media/ipfs-gateways";
+import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "@/lib/media/static-image-hosts";
 
 import type { NFTSearchResult } from "./HeaderSearchModalItem";
 
@@ -18,19 +19,7 @@ interface HeaderSearchModalItemMediaProps {
 }
 
 const STATIC_ALLOWED_IMAGE_HOSTS = new Set([
-  "6529.io",
-  "seize.io",
-  "staging.6529.io",
-  "media.generator.seize.io",
-  "d3lqz0a4bldqgf.cloudfront.net",
-  "img.youtube.com",
-  "i.seadn.io",
-  "i2.seadn.io",
-  "i2c.seadn.io",
-  "i.ytimg.com",
-  "res.cloudinary.com",
-  "ipfs.6529.io",
-  "ipfs.io",
+  ...STATIC_ALLOWED_IMAGE_HOSTNAMES,
   ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES,
   ...IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES,
 ]);

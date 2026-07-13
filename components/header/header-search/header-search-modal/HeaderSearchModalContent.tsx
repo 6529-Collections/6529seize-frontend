@@ -181,7 +181,7 @@ const rankPageResults = ({
   );
 
   return rankedMatches
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       if (a.priority !== b.priority) return a.priority - b.priority;
       const titleComparison = a.normalizedTitle.localeCompare(
         b.normalizedTitle,
