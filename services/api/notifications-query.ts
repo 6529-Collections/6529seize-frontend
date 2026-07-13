@@ -32,7 +32,9 @@ export const getIdentityNotificationsQueryKey = ({
   const normalizedIdentity =
     typeof identity === "string" ? identity.trim().toLowerCase() : identity;
   const normalizedCause =
-    cause !== null && cause.length > 0 ? [...cause].sort().join(",") : null;
+    cause !== null && cause.length > 0
+      ? [...cause].sort((left, right) => left.localeCompare(right)).join(",")
+      : null;
 
   return [
     QueryKey.IDENTITY_NOTIFICATIONS,
