@@ -100,8 +100,9 @@ shared lane.
    seek the maintainer approval last — ideally right before merge, so `main`
    has no time to advance again.
 5. Know how merges actually land on `main`:
-   - the `main` ruleset restricts updates to bypass actors, so author-side
-     auto-merge never fires; a maintainer must perform the merge themselves
+   - a maintainer performs the merge themselves; the ruleset restricts `main`
+     updates to bypass actors (do not arm auto-merge and wait — it cannot fire
+     for non-bypass accounts)
    - the required review must come from the `6529seize-maintainers` team and
      be submitted on behalf of that team, or it does not satisfy the ruleset
 6. Use the repo-local `6529` wrapper for frontend project commands in release notes, checked-in docs, CI descriptions, and deploy instructions.
