@@ -43,7 +43,7 @@ export function FocusSections({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <section className="tw-relative tw-isolate tw-mx-auto tw-w-full tw-max-w-[1088px] tw-overflow-hidden tw-px-4 tw-py-12 md:tw-py-16 lg:tw-px-6 xl:tw-px-0">
+    <section className="tw-relative tw-isolate tw-mx-auto tw-w-full tw-max-w-[1136px] tw-overflow-hidden tw-px-4 tw-py-12 md:tw-py-16 lg:tw-px-6">
       <AmbientArtifacts className="tw-opacity-40" locale={locale} />
       <div className="tw-relative tw-z-10 tw-mb-6 md:tw-mb-7">
         <h2 className={SECTION_HEADING_CLASS}>
