@@ -86,8 +86,17 @@ jest.mock("@/hooks/useWaveTimers", () => ({
 
 let mockOutcomesVisible = true;
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveMetadata: () => ({ isPending: false }),
   useWaveOutcomeVisibility: () => mockOutcomesVisible,
   useWaveSubmissionButtonLabelOverride: () => null,
+}));
+
+jest.mock("@/hooks/useWaveHasPolls", () => ({
+  useWavePollSummary: () => ({
+    hasPolls: false,
+    unansweredPolls: 0,
+    isPending: false,
+  }),
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
