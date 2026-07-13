@@ -184,6 +184,34 @@ describe("MemesWaveWinnersDrop", () => {
     expect(screen.getByAltText("alice's profile picture")).toBeInTheDocument();
   });
 
+  it("opens the mapped Meme card without opening the winner drop", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+    render(
+      <MemesWaveWinnersDrop
+        winner={
+          {
+            ...winner,
+            drop: {
+              ...winner.drop,
+              winning_context: { place: 1, meme_card_id: 521 },
+            },
+          } as ApiWaveDecisionWinner
+        }
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    await user.click(screen.getByRole("link", { name: "Meme #521" }));
+
+    expect(onDropClick).not.toHaveBeenCalled();
+    expect(screen.getByRole("link", { name: "Meme #521" })).toHaveAttribute(
+      "href",
+      "/the-memes/521"
+    );
+  });
+
   it("keeps native tap behavior for touch long-press handlers", () => {
     useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
 
