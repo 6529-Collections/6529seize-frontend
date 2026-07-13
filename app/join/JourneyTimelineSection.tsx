@@ -84,7 +84,7 @@ export function JourneyTimelineSection({
   return (
     <section
       className={cx(
-        "tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-pb-12 lg:tw-px-6 xl:tw-px-0",
+        "tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8",
         timelineProgress.visible
           ? "tw-pt-8 md:tw-pb-16 md:tw-pt-10"
           : "tw-pt-12 md:tw-py-16"
