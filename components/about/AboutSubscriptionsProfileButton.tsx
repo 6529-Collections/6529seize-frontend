@@ -50,6 +50,10 @@ export default function AboutSubscriptionsProfileButton({
     locale,
     "home.mintSubscriptions.connectToSubscribe"
   );
+  const manageSubscriptionsLabel = t(
+    locale,
+    "home.mintSubscriptions.manageSubscriptionsLink"
+  );
 
   if (variant === "white") {
     return (
@@ -58,7 +62,9 @@ export default function AboutSubscriptionsProfileButton({
         disabled={isConnecting}
         onClicked={handleOpenProfileSubscriptions}
       >
-        {connectToSubscribeLabel}
+        {profileSubscriptionsHref
+          ? manageSubscriptionsLabel
+          : connectToSubscribeLabel}
         {profileSubscriptionsHref && (
           <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
         )}
@@ -87,7 +93,7 @@ export default function AboutSubscriptionsProfileButton({
         onClick={handleOpenProfileSubscriptions}
         className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
-        {connectToSubscribeLabel}
+        {manageSubscriptionsLabel}
         <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
       </button>
     );
@@ -98,7 +104,7 @@ export default function AboutSubscriptionsProfileButton({
       href={profileSubscriptionsHref}
       className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} tw-no-underline desktop-hover:hover:tw-text-white`}
     >
-      {connectToSubscribeLabel}
+      {manageSubscriptionsLabel}
       <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
     </Link>
   );
