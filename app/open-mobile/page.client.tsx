@@ -1,7 +1,7 @@
 "use client";
 
 import ClientOnly from "@/components/client-only/ClientOnly";
-import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
+import { MobileAppDownload } from "@/components/apps/MobileAppDownloads";
 import { publicEnv } from "@/config/env";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useSearchParams } from "next/navigation";
@@ -35,9 +35,11 @@ export default function OpenMobilePage() {
     }
   };
 
-  const printShareMobileApps = () => {
-    const shareIos = <ShareMobileApp platform="ios" target="_self" />;
-    const shareAndroid = <ShareMobileApp platform="android" target="_self" />;
+  const printMobileApps = () => {
+    const shareIos = <MobileAppDownload platform="iOS" target="_self" />;
+    const shareAndroid = (
+      <MobileAppDownload platform="Android" target="_self" />
+    );
 
     const userAgent =
       typeof navigator === "undefined" ? "" : navigator.userAgent;
@@ -59,14 +61,14 @@ export default function OpenMobilePage() {
 
   return (
     <ClientOnly>
-      <div className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen tw-text-center tw-p-4 tw-gap-10">
-        <p className="tw-text-2xl tw-font-bold tw-animate-pulse">
+      <div className="tailwind-scope tw-flex tw-h-screen tw-flex-col tw-items-center tw-justify-center tw-gap-10 tw-p-4 tw-text-center">
+        <p className="tw-animate-pulse tw-text-2xl tw-font-bold">
           Opening 6529 Mobile...
         </p>
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1">
           <p className="tw-text-xl tw-font-bold">Get 6529 Mobile</p>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-4">
-            {printShareMobileApps()}
+            {printMobileApps()}
           </div>
         </div>
         <button
