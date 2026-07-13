@@ -10,8 +10,10 @@ import type { ComponentType, SVGProps } from "react";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
+import { formatPercent } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 
+import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
 
@@ -69,14 +71,19 @@ const STEPS: readonly Step[] = [
   },
 ] as const;
 
-const m = (locale: SupportedLocale, key: SubscriptionMessageKey) =>
-  t(locale, key);
+const m = (
+  locale: SupportedLocale,
+  key: SubscriptionMessageKey,
+  params: Parameters<typeof t>[2] = {}
+) => t(locale, key, params);
 
 export default function AboutSubscriptions() {
   const locale = useBrowserLocale();
 
   return (
-    <article className="tw-mx-auto tw-w-full tw-max-w-6xl tw-pb-12 max-sm:-tw-mx-3 max-sm:tw-w-[calc(100%+1.5rem)]">
+    <article
+      className={`tw-mx-auto tw-w-full tw-max-w-6xl tw-pb-12 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
+    >
       <SubscriptionHero locale={locale} />
       <HowItWorks locale={locale} />
       <WhatHappensNext locale={locale} />
@@ -104,7 +111,10 @@ function SubscriptionHero({ locale }: { readonly locale: SupportedLocale }) {
           {m(locale, "about.subscriptions.hero.body")}
         </p>
         <div className="tw-mt-7 tw-flex tw-flex-col tw-items-stretch tw-gap-3 min-[480px]:tw-flex-row min-[480px]:tw-items-center">
-          <AboutSubscriptionsProfileButton descriptiveLabels />
+          <AboutSubscriptionsProfileButton
+            actionContext="hero"
+            descriptiveLabels
+          />
           <a
             className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
             href="#how-subscription-minting-works"
@@ -126,11 +136,20 @@ function SubscriptionHero({ locale }: { readonly locale: SupportedLocale }) {
                 aria-hidden="true"
                 className="tw-mb-4 tw-size-6 tw-text-primary-300"
               />
-              <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+              <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
                 {m(locale, highlight.titleKey)}
-              </h2>
+              </p>
               <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-                {m(locale, highlight.bodyKey)}
+                {m(
+                  locale,
+                  highlight.bodyKey,
+                  highlight.bodyKey === "about.subscriptions.benefits.gas.body"
+                    ? {
+                        oneCardPercent: formatPercent(locale, 0.8, 0),
+                        tenCardPercent: formatPercent(locale, 0.98, 0),
+                      }
+                    : undefined
+                )}
               </p>
             </div>
           );
@@ -263,7 +282,10 @@ function FinalAction({ locale }: { readonly locale: SupportedLocale }) {
         </p>
       </div>
       <div className="tw-w-full tw-shrink-0 sm:tw-w-auto">
-        <AboutSubscriptionsProfileButton descriptiveLabels />
+        <AboutSubscriptionsProfileButton
+          actionContext="final"
+          descriptiveLabels
+        />
       </div>
     </section>
   );

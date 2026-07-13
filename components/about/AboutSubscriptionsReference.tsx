@@ -2,6 +2,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { formatInteger, formatNumber, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
@@ -10,8 +11,11 @@ type SubscriptionMessageKey = Extract<
   `about.subscriptions.${string}`
 >;
 
-const m = (locale: SupportedLocale, key: SubscriptionMessageKey) =>
-  t(locale, key);
+const m = (
+  locale: SupportedLocale,
+  key: SubscriptionMessageKey,
+  params: Parameters<typeof t>[2] = {}
+) => t(locale, key, params);
 
 const LIST_CLASS =
   "tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-600";
@@ -23,6 +27,9 @@ export default function AboutSubscriptionsReference({
 }: {
   readonly locale: SupportedLocale;
 }) {
+  const oneCardGasSavings = formatPercent(locale, 0.8, 0);
+  const tenCardGasSavings = formatPercent(locale, 0.98, 0);
+
   return (
     <section
       aria-labelledby="subscription-reference-heading"
@@ -211,16 +218,32 @@ export default function AboutSubscriptionsReference({
         </ReferenceDisclosure>
 
         <ReferenceDisclosure
-          summary={m(locale, "about.subscriptions.reference.gas.summary")}
+          summary={m(locale, "about.subscriptions.reference.gas.summary", {
+            oneCardPercent: oneCardGasSavings,
+            tenCardPercent: tenCardGasSavings,
+          })}
           title={m(locale, "about.subscriptions.reference.gas.title")}
         >
           <ul className={LIST_CLASS}>
             <li>
-              {m(locale, "about.subscriptions.reference.gas.context")}
+              {m(locale, "about.subscriptions.reference.gas.context", {
+                cardPrice: formatNumber(locale, 0.06529, {
+                  minimumFractionDigits: 5,
+                  maximumFractionDigits: 5,
+                }),
+              })}
               <ul className={NESTED_LIST_CLASS}>
-                <li>{m(locale, "about.subscriptions.reference.gas.gwei20")}</li>
                 <li>
-                  {m(locale, "about.subscriptions.reference.gas.gwei200")}
+                  {m(locale, "about.subscriptions.reference.gas.gwei20", {
+                    gwei: formatInteger(locale, 20),
+                    percent: formatPercent(locale, 0.034, 1),
+                  })}
+                </li>
+                <li>
+                  {m(locale, "about.subscriptions.reference.gas.gwei200", {
+                    gwei: formatInteger(locale, 200),
+                    percent: formatPercent(locale, 0.337, 1),
+                  })}
                 </li>
               </ul>
             </li>
@@ -228,10 +251,14 @@ export default function AboutSubscriptionsReference({
               {m(locale, "about.subscriptions.reference.gas.transfer")}
               <ul className={NESTED_LIST_CLASS}>
                 <li>
-                  {m(locale, "about.subscriptions.reference.gas.oneCard")}
+                  {m(locale, "about.subscriptions.reference.gas.oneCard", {
+                    percent: oneCardGasSavings,
+                  })}
                 </li>
                 <li>
-                  {m(locale, "about.subscriptions.reference.gas.tenCards")}
+                  {m(locale, "about.subscriptions.reference.gas.tenCards", {
+                    percent: tenCardGasSavings,
+                  })}
                 </li>
               </ul>
             </li>
@@ -255,16 +282,17 @@ export default function AboutSubscriptionsReference({
         </ReferenceDisclosure>
       </div>
 
-      <p className="tw-mb-0 tw-mt-6 tw-text-sm tw-leading-6 tw-text-iron-400">
-        {m(locale, "about.subscriptions.reference.reportLead")}{" "}
+      <div className="tw-mt-6 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-mb-2">
+          {m(locale, "about.subscriptions.reference.reportLead")}
+        </p>
         <Link
           className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition-colors"
           href="/tools/subscriptions-report"
         >
           {m(locale, "about.subscriptions.reference.reportLink")}
         </Link>
-        .
-      </p>
+      </div>
     </section>
   );
 }
@@ -280,12 +308,12 @@ function ReferenceDisclosure({
 }) {
   return (
     <details className="tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] open:tw-bg-white/[0.04]">
-      <summary className="tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-xl tw-px-5 tw-py-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 [&::-webkit-details-marker]:tw-hidden">
+      <summary className="tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-xl tw-px-5 tw-py-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300 [&::-webkit-details-marker]:tw-hidden">
         <span className="tw-min-w-0">
           <span className="tw-block tw-text-base tw-font-semibold tw-text-iron-100">
             {title}
           </span>
-          <span className="tw-mt-1 tw-block tw-text-sm tw-leading-5 tw-text-iron-500">
+          <span className="tw-mt-1 tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
             {summary}
           </span>
         </span>

@@ -3,14 +3,32 @@ import AboutSubscriptions from "@/components/about/AboutSubscriptions";
 
 jest.mock("@/components/about/AboutSubscriptionsProfileButton", () => ({
   __esModule: true,
-  default: () => <button type="button">Connect to Subscribe</button>,
+  default: ({
+    actionContext,
+  }: {
+    readonly actionContext?: "hero" | "final";
+  }) => (
+    <button
+      aria-label={
+        actionContext === "hero"
+          ? "Connect wallet to subscribe from the introduction"
+          : "Connect wallet to subscribe after reading the guide"
+      }
+      type="button"
+    >
+      Connect wallet to subscribe
+    </button>
+  ),
 }));
 
 describe("AboutSubscriptions", () => {
   it("renders heading", () => {
     render(<AboutSubscriptions />);
     expect(
-      screen.getByRole("heading", { name: /Subscription/ })
+      screen.getByRole("heading", {
+        name: "Choose your Meme Cards. Skip the drop-time scramble.",
+        level: 1,
+      })
     ).toBeInTheDocument();
   });
 
@@ -29,14 +47,29 @@ describe("AboutSubscriptions", () => {
     render(<AboutSubscriptions />);
 
     const heading = screen.getByRole("heading", {
-      name: "Subscription Minting",
+      name: "Choose your Meme Cards. Skip the drop-time scramble.",
     });
     const action = screen.getByRole("button", {
-      name: "Connect to Subscribe",
+      name: "Connect wallet to subscribe from the introduction",
     });
 
     expect(action.compareDocumentPosition(heading)).toBe(
       Node.DOCUMENT_POSITION_PRECEDING
     );
+  });
+
+  it("gives repeated subscription actions distinct accessible names", () => {
+    render(<AboutSubscriptions />);
+
+    expect(
+      screen.getByRole("button", {
+        name: "Connect wallet to subscribe from the introduction",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Connect wallet to subscribe after reading the guide",
+      })
+    ).toBeInTheDocument();
   });
 });

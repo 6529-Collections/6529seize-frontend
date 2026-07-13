@@ -6,6 +6,11 @@ import styles from "./AboutLayout.module.css";
 export const ABOUT_TEXT_PAGE_CONTAINER_CLASS =
   "tw-px-5 tw-pb-4 tw-pt-4 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8";
 
+// Reclaims AboutCol's mobile `tw-px-3` gutter for full-bleed feature surfaces.
+// Keep the negative margin and added width paired with that column padding.
+export const ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS =
+  "max-sm:-tw-mx-3 max-sm:tw-w-[calc(100%+1.5rem)]";
+
 type AboutContainerProps = HTMLAttributes<HTMLDivElement> & {
   readonly fluid?: boolean;
 };

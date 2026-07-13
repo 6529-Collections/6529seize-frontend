@@ -145,6 +145,21 @@ Use this page for visibility rules, state switches, and route targets.
 - `NEXT MINT` timestamps are displayed in the viewer's local timezone/locale.
 - No auth or wallet gate is required to view these sections.
 
+### `/about/subscriptions` localization fallback debt
+
+- Route or component: `/about/subscriptions` and its subscription action.
+- Untranslated surface: the redesigned subscription guide, reference
+  disclosures, and contextual action names.
+- Current fallback behavior: `en-GB`, `de-DE`, `es-ES`, and `fr-FR` use the
+  complete `en-US` source messages for missing `about.subscriptions.*` keys.
+- User impact: non-English locale users can see English subscription guidance;
+  the page remains functional and locale-sensitive gas values still use the
+  viewer's number and percentage conventions.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: add reviewed translations for the
+  `about.subscriptions.*` message family to each partial locale dictionary and
+  repeat the responsive and assistive-technology QA pass.
+
 ## Related Pages
 
 - [Home Index](README.md)
