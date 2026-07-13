@@ -109,8 +109,8 @@ Use this page for visibility rules, state switches, and route targets.
   `/{user}/subscriptions`; profile-specific subscription status/count only
   render when the related read-only APIs return data.
 - On `/about/subscriptions`, users who can continue directly see a primary
-  `Manage subscriptions` action. Users who still need the wallet/profile
-  handoff see `Connect wallet to subscribe`; it opens wallet connection and
+  `Manage` action. Users who still need the wallet/profile handoff see
+  `Connect to Subscribe`; it opens wallet connection and
   then routes to profile subscriptions once connected.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
@@ -148,8 +148,8 @@ Use this page for visibility rules, state switches, and route targets.
 ### `/about/subscriptions` localization fallback debt
 
 - Route or component: `/about/subscriptions` and its subscription action.
-- Untranslated surface: the redesigned subscription guide, reference
-  disclosures, and contextual action names.
+- Untranslated surface: the restyled subscription guide and primary
+  subscription action.
 - Current fallback behavior: `en-GB`, `de-DE`, `es-ES`, and `fr-FR` use the
   complete `en-US` source messages for missing `about.subscriptions.*` keys.
 - User impact: non-English locale users can see English subscription guidance;

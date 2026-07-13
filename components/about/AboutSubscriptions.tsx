@@ -4,18 +4,21 @@ import {
   BoltIcon,
   CheckCircleIcon,
   ClockIcon,
-  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import type { ComponentType, SVGProps } from "react";
+import Link from "next/link";
+import type { ComponentType, ReactNode, SVGProps } from "react";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
-import { formatPercent } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 
 import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
+import {
+  SUBSCRIPTIONS_PANEL_CLASS,
+  SUBSCRIPTIONS_SECTION_HEADING_CLASS,
+} from "./aboutSubscriptionsStyles";
 
 type SubscriptionMessageKey = Extract<
   MessageKey,
@@ -23,51 +26,23 @@ type SubscriptionMessageKey = Extract<
 >;
 type OutlineIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
-interface Highlight {
-  readonly bodyKey: SubscriptionMessageKey;
+interface OverviewBenefit {
   readonly icon: OutlineIcon;
-  readonly titleKey: SubscriptionMessageKey;
+  readonly messageKey: SubscriptionMessageKey;
 }
 
-interface Step {
-  readonly bodyKey: SubscriptionMessageKey;
-  readonly titleKey: SubscriptionMessageKey;
-}
-
-const HIGHLIGHTS: readonly Highlight[] = [
+const OVERVIEW_BENEFITS: readonly OverviewBenefit[] = [
   {
-    icon: CheckCircleIcon,
-    titleKey: "about.subscriptions.benefits.choice.title",
-    bodyKey: "about.subscriptions.benefits.choice.body",
+    icon: BoltIcon,
+    messageKey: "about.subscriptions.overview.gasSavings",
   },
   {
     icon: ClockIcon,
-    titleKey: "about.subscriptions.benefits.remote.title",
-    bodyKey: "about.subscriptions.benefits.remote.body",
+    messageKey: "about.subscriptions.overview.awayFromComputer",
   },
   {
-    icon: BoltIcon,
-    titleKey: "about.subscriptions.benefits.gas.title",
-    bodyKey: "about.subscriptions.benefits.gas.body",
-  },
-] as const;
-
-const STEPS: readonly Step[] = [
-  {
-    titleKey: "about.subscriptions.steps.open.title",
-    bodyKey: "about.subscriptions.steps.open.body",
-  },
-  {
-    titleKey: "about.subscriptions.steps.fund.title",
-    bodyKey: "about.subscriptions.steps.fund.body",
-  },
-  {
-    titleKey: "about.subscriptions.steps.choose.title",
-    bodyKey: "about.subscriptions.steps.choose.body",
-  },
-  {
-    titleKey: "about.subscriptions.steps.receive.title",
-    bodyKey: "about.subscriptions.steps.receive.body",
+    icon: CheckCircleIcon,
+    messageKey: "about.subscriptions.overview.setAndForget",
   },
 ] as const;
 
@@ -82,242 +57,149 @@ export default function AboutSubscriptions() {
 
   return (
     <article
-      className={`tw-mx-auto tw-w-full tw-max-w-6xl tw-pb-12 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
+      className={`tw-mx-auto tw-w-full tw-max-w-5xl tw-pb-12 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
     >
-      <SubscriptionHero locale={locale} />
-      <HowItWorks locale={locale} />
-      <WhatHappensNext locale={locale} />
+      <SubscriptionHeader locale={locale} />
+      <Overview locale={locale} />
       <AboutSubscriptionsReference locale={locale} />
-      <FinalAction locale={locale} />
     </article>
   );
 }
 
-function SubscriptionHero({ locale }: { readonly locale: SupportedLocale }) {
+function SubscriptionHeader({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}) {
   return (
-    <header className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-4 tw-py-8 sm:tw-px-8 sm:tw-py-10 lg:tw-px-10 lg:tw-py-12">
-      <div
-        aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-primary-400/60"
-      />
+    <header className="tw-px-1 tw-pb-14 tw-pt-5 sm:tw-px-2 sm:tw-pb-16 sm:tw-pt-9">
       <div className="tw-max-w-3xl">
-        <p className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-          {m(locale, "about.subscriptions.hero.eyebrow")}
-        </p>
-        <h1 className="tw-m-0 tw-max-w-3xl tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl lg:tw-text-5xl">
+        <h1 className="tw-m-0 tw-text-4xl tw-font-medium tw-leading-tight tw-tracking-[-0.035em] tw-text-iron-50 sm:tw-text-5xl lg:tw-text-[58px]">
           {m(locale, "about.subscriptions.hero.title")}
         </h1>
-        <p className="tw-mb-0 tw-mt-5 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-text-lg">
-          {m(locale, "about.subscriptions.hero.body")}
-        </p>
-        <div className="tw-mt-7 tw-flex tw-flex-col tw-items-stretch tw-gap-3 min-[480px]:tw-flex-row min-[480px]:tw-items-center">
-          <AboutSubscriptionsProfileButton
-            actionContext="hero"
-            descriptiveLabels
-          />
-          <a
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
-            href="#how-subscription-minting-works"
-          >
-            {m(locale, "about.subscriptions.action.learnHow")}
-          </a>
+        <div className="tw-mt-7 tw-flex tw-justify-start empty:tw-hidden">
+          <AboutSubscriptionsProfileButton variant="white" />
         </div>
-      </div>
-
-      <div className="tw-mt-9 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3">
-        {HIGHLIGHTS.map((highlight) => {
-          const Icon = highlight.icon;
-          return (
-            <div
-              className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-5"
-              key={highlight.titleKey}
-            >
-              <Icon
-                aria-hidden="true"
-                className="tw-mb-4 tw-size-6 tw-text-primary-300"
-              />
-              <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
-                {m(locale, highlight.titleKey)}
-              </p>
-              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-                {m(
-                  locale,
-                  highlight.bodyKey,
-                  highlight.bodyKey === "about.subscriptions.benefits.gas.body"
-                    ? {
-                        oneCardPercent: formatPercent(locale, 0.8, 0),
-                        tenCardPercent: formatPercent(locale, 0.98, 0),
-                      }
-                    : undefined
-                )}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="tw-mt-4 tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.06] tw-p-4">
-        <Cog6ToothIcon
-          aria-hidden="true"
-          className="tw-mt-0.5 tw-size-5 tw-shrink-0 tw-text-primary-300"
-        />
-        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-          <strong className="tw-font-semibold tw-text-iron-100">
-            {m(locale, "about.subscriptions.notMintpass.title")}
-          </strong>{" "}
-          {m(locale, "about.subscriptions.notMintpass.body")}
-        </p>
       </div>
     </header>
   );
 }
 
-function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
+function Overview({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
-      aria-labelledby="how-subscription-minting-heading"
-      className="tw-scroll-mt-24 tw-px-1 tw-py-14 sm:tw-px-2 sm:tw-py-16"
-      id="how-subscription-minting-works"
+      aria-labelledby="subscription-overview-heading"
+      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-px-1 tw-py-16 sm:tw-px-2 sm:tw-py-20"
     >
-      <SectionHeading
-        eyebrow={m(locale, "about.subscriptions.how.eyebrow")}
-        heading={m(locale, "about.subscriptions.how.title")}
-        id="how-subscription-minting-heading"
-        intro={m(locale, "about.subscriptions.how.body")}
-      />
-      <ol className="tw-m-0 tw-mt-9 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 md:tw-grid-cols-2">
-        {STEPS.map((step, index) => (
-          <li
-            className="tw-flex tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-5 sm:tw-p-6"
-            key={step.titleKey}
-          >
-            <span className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-text-sm tw-font-semibold tw-text-primary-300">
-              {index + 1}
-            </span>
-            <div>
-              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
-                {m(locale, step.titleKey)}
-              </h3>
-              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-                {m(locale, step.bodyKey)}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-function WhatHappensNext({ locale }: { readonly locale: SupportedLocale }) {
-  const outcomes = [
-    {
-      title: m(locale, "about.subscriptions.after.balance.title"),
-      body: m(locale, "about.subscriptions.after.balance.body"),
-    },
-    {
-      title: m(locale, "about.subscriptions.after.eligibility.title"),
-      body: m(locale, "about.subscriptions.after.eligibility.body"),
-    },
-    {
-      title: m(locale, "about.subscriptions.after.delivery.title"),
-      body: m(locale, "about.subscriptions.after.delivery.body"),
-    },
-  ];
-
-  return (
-    <section
-      aria-labelledby="what-happens-after-subscribing"
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-5 sm:tw-p-8"
-    >
-      <SectionHeading
-        eyebrow={m(locale, "about.subscriptions.after.eyebrow")}
-        heading={m(locale, "about.subscriptions.after.title")}
-        id="what-happens-after-subscribing"
-      />
-      <div className="tw-mt-7 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-3 md:tw-gap-8">
-        {outcomes.map((outcome) => (
-          <div key={outcome.title}>
-            <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-              {outcome.title}
-            </h3>
-            <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-              {outcome.body}
-            </p>
-          </div>
-        ))}
-      </div>
-      <div className="tw-mt-8 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-6">
-        <p className="tw-mb-3 tw-text-sm tw-font-semibold tw-text-iron-100">
-          {m(locale, "about.subscriptions.important.title")}
-        </p>
-        <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-primary-300">
-          <li>{m(locale, "about.subscriptions.important.nonRefundable")}</li>
-          <li>{m(locale, "about.subscriptions.important.deadline")}</li>
-          <li>{m(locale, "about.subscriptions.important.optional")}</li>
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-function FinalAction({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <section
-      aria-labelledby="subscription-minting-final-action"
-      className="tw-mt-14 tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-6 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.07] tw-p-6 sm:tw-p-8 md:tw-flex-row md:tw-items-center"
-    >
-      <div className="tw-max-w-2xl">
-        <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-          {m(locale, "about.subscriptions.final.eyebrow")}
-        </p>
+      <div className="tw-max-w-3xl">
         <h2
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
-          id="subscription-minting-final-action"
+          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          id="subscription-overview-heading"
         >
-          {m(locale, "about.subscriptions.final.title")}
+          {m(locale, "about.subscriptions.overview.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {m(locale, "about.subscriptions.final.body")}
+        <p className="tw-mb-0 tw-mt-4 tw-text-lg tw-font-medium tw-leading-8 tw-text-iron-200">
+          {m(locale, "about.subscriptions.overview.intro")}
         </p>
       </div>
-      <div className="tw-w-full tw-shrink-0 sm:tw-w-auto">
-        <AboutSubscriptionsProfileButton
-          actionContext="final"
-          descriptiveLabels
-        />
+
+      <ul className="tw-m-0 tw-mt-8 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 sm:tw-grid-cols-3 sm:tw-gap-5">
+        {OVERVIEW_BENEFITS.map((benefit) => {
+          const Icon = benefit.icon;
+          return (
+            <li
+              className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-flex tw-min-h-[165px] tw-flex-col tw-p-6`}
+              key={benefit.messageKey}
+            >
+              <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.035]">
+                <Icon
+                  aria-hidden="true"
+                  className="tw-size-5 tw-text-primary-300"
+                />
+              </span>
+              <p className="tw-mb-0 tw-mt-6 tw-text-sm tw-leading-6 tw-text-iron-300">
+                {m(locale, benefit.messageKey)}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
+        <OverviewRule
+          title={m(
+            locale,
+            "about.subscriptions.overview.notMintpass.title"
+          )}
+        >
+          <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300">
+            <li>
+              {m(locale, "about.subscriptions.overview.notMintpass.choice")}
+            </li>
+            <li>
+              {m(
+                locale,
+                "about.subscriptions.overview.notMintpass.eligibility"
+              )}
+            </li>
+            <li>
+              {m(
+                locale,
+                "about.subscriptions.overview.notMintpass.remoteMinting"
+              )}
+            </li>
+          </ul>
+        </OverviewRule>
+
+        <OverviewRule
+          title={m(
+            locale,
+            "about.subscriptions.overview.regularMinting.title"
+          )}
+        >
+          <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300">
+            <li>
+              {m(
+                locale,
+                "about.subscriptions.overview.regularMinting.normal"
+              )}
+            </li>
+            <li>
+              {m(
+                locale,
+                "about.subscriptions.overview.regularMinting.alternative"
+              )}
+            </li>
+          </ul>
+        </OverviewRule>
       </div>
+
+      <p className="tw-mb-0 tw-mt-7 tw-text-sm tw-leading-6 tw-text-iron-400">
+        {m(locale, "about.subscriptions.reference.reportLead")} {" "}
+        <Link
+          className="tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors hover:tw-text-primary-200 hover:tw-no-underline focus:tw-rounded-sm focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+          href="/tools/subscriptions-report"
+        >
+          {m(locale, "about.subscriptions.reference.reportLink")}
+        </Link>
+      </p>
     </section>
   );
 }
 
-function SectionHeading({
-  eyebrow,
-  heading,
-  id,
-  intro,
+function OverviewRule({
+  children,
+  title,
 }: {
-  readonly eyebrow: string;
-  readonly heading: string;
-  readonly id: string;
-  readonly intro?: string;
+  readonly children: ReactNode;
+  readonly title: string;
 }) {
   return (
-    <div className="tw-max-w-2xl">
-      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-        {eyebrow}
-      </p>
-      <h2
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl"
-        id={id}
-      >
-        {heading}
-      </h2>
-      {intro !== undefined && (
-        <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-400">
-          {intro}
-        </p>
-      )}
+    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-6 sm:tw-p-7`}>
+      <h3 className="tw-m-0 tw-text-base tw-font-medium tw-text-iron-50">
+        {title}
+      </h3>
+      <div className="tw-mt-5">{children}</div>
     </div>
   );
 }

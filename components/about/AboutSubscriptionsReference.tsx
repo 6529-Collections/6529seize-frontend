@@ -1,10 +1,13 @@
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { formatInteger, formatNumber, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+
+import {
+  SUBSCRIPTIONS_PANEL_CLASS,
+  SUBSCRIPTIONS_SECTION_HEADING_CLASS,
+} from "./aboutSubscriptionsStyles";
 
 type SubscriptionMessageKey = Extract<
   MessageKey,
@@ -18,9 +21,14 @@ const m = (
 ) => t(locale, key, params);
 
 const LIST_CLASS =
-  "tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-600";
+  "tw-m-0 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300";
 const NESTED_LIST_CLASS =
-  "tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-iron-400 marker:tw-text-iron-600";
+  "tw-mt-3 tw-space-y-3 tw-pl-5 tw-text-iron-400 marker:tw-text-iron-600";
+const REMOTE_MESSAGE_KEYS = [
+  "about.subscriptions.reference.remote.busy",
+  "about.subscriptions.reference.remote.separate",
+  "about.subscriptions.reference.remote.timezones",
+] as const satisfies readonly SubscriptionMessageKey[];
 
 export default function AboutSubscriptionsReference({
   locale,
@@ -31,199 +39,217 @@ export default function AboutSubscriptionsReference({
   const tenCardGasSavings = formatPercent(locale, 0.98, 0);
 
   return (
-    <section
-      aria-labelledby="subscription-reference-heading"
-      className="tw-px-1 tw-pt-14 sm:tw-px-2 sm:tw-pt-16"
-    >
-      <div className="tw-max-w-2xl">
-        <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-500">
-          {m(locale, "about.subscriptions.reference.eyebrow")}
-        </p>
+    <>
+      <section
+        aria-labelledby="subscription-how-it-works-heading"
+        className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-px-1 tw-py-16 sm:tw-px-2 sm:tw-py-20"
+      >
         <h2
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl"
-          id="subscription-reference-heading"
+          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          id="subscription-how-it-works-heading"
         >
-          {m(locale, "about.subscriptions.reference.title")}
+          {m(locale, "about.subscriptions.how.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-400">
-          {m(locale, "about.subscriptions.reference.body")}
-        </p>
-      </div>
 
-      <div className="tw-mt-8 tw-space-y-3">
-        <ReferenceDisclosure
-          summary={m(locale, "about.subscriptions.reference.funding.summary")}
-          title={m(locale, "about.subscriptions.reference.funding.title")}
-        >
-          <ul className={LIST_CLASS}>
-            <li>{m(locale, "about.subscriptions.reference.funding.send")}</li>
-            <li>
-              <strong className="tw-font-semibold tw-text-iron-100">
+        <div className="tw-mt-9 tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
+          <ReferencePanel
+            title={m(locale, "about.subscriptions.reference.funding.title")}
+          >
+            <ul className={LIST_CLASS}>
+              <li>
+                {m(locale, "about.subscriptions.reference.funding.send")}
+              </li>
+              <li>
+                <strong className="tw-font-medium tw-text-iron-50">
+                  {m(
+                    locale,
+                    "about.subscriptions.reference.funding.nonRefundableLead"
+                  )}
+                </strong>{" "}
                 {m(
                   locale,
-                  "about.subscriptions.reference.funding.nonRefundableLead"
+                  "about.subscriptions.reference.funding.nonRefundableBody"
                 )}
-              </strong>{" "}
-              {m(
-                locale,
-                "about.subscriptions.reference.funding.nonRefundableBody"
-              )}
-            </li>
-            <li>
-              {m(locale, "about.subscriptions.reference.funding.calculator")}
-            </li>
-            <li>
-              {m(locale, "about.subscriptions.reference.funding.profile")}
-            </li>
-            <li>
-              {m(locale, "about.subscriptions.reference.funding.deadline")}
-            </li>
-          </ul>
-        </ReferenceDisclosure>
+              </li>
+              <li>
+                {m(
+                  locale,
+                  "about.subscriptions.reference.funding.calculator"
+                )}
+              </li>
+              <li>
+                {m(locale, "about.subscriptions.reference.funding.profile")}
+              </li>
+              <li>
+                {m(locale, "about.subscriptions.reference.funding.deadline")}
+              </li>
+            </ul>
+          </ReferencePanel>
 
-        <ReferenceDisclosure
-          summary={m(locale, "about.subscriptions.reference.modes.summary")}
-          title={m(locale, "about.subscriptions.reference.modes.title")}
-        >
-          <ul className={LIST_CLASS}>
-            <li>{m(locale, "about.subscriptions.reference.modes.auto")}</li>
-            <li>
-              {m(locale, "about.subscriptions.reference.modes.optOut")}
-              <ul className={NESTED_LIST_CLASS}>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.modes.optOutDeadline"
-                  )}
-                </li>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.modes.revealTiming"
-                  )}
-                </li>
-                <li>
-                  {m(locale, "about.subscriptions.reference.modes.schedule")}
-                </li>
-              </ul>
-            </li>
-            <li>{m(locale, "about.subscriptions.reference.modes.manual")}</li>
-          </ul>
-        </ReferenceDisclosure>
+          <ReferencePanel
+            title={m(locale, "about.subscriptions.reference.modes.title")}
+          >
+            <ul className={LIST_CLASS}>
+              <li>{m(locale, "about.subscriptions.reference.modes.auto")}</li>
+              <li>
+                {m(locale, "about.subscriptions.reference.modes.optOut")}
+                <ul className={NESTED_LIST_CLASS}>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.modes.optOutDeadline"
+                    )}
+                  </li>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.modes.revealTiming"
+                    )}
+                  </li>
+                  <li>
+                    {m(locale, "about.subscriptions.reference.modes.schedule")}
+                  </li>
+                </ul>
+              </li>
+              <li>
+                {m(locale, "about.subscriptions.reference.modes.manual")}
+              </li>
+            </ul>
+          </ReferencePanel>
+        </div>
 
-        <ReferenceDisclosure
-          summary={m(
-            locale,
-            "about.subscriptions.reference.delegation.summary"
-          )}
-          title={m(locale, "about.subscriptions.reference.delegation.title")}
-        >
-          <ul className={LIST_CLASS}>
-            <li>
-              {m(locale, "about.subscriptions.reference.delegation.intro")}
-            </li>
-            <li>
-              {m(
-                locale,
-                "about.subscriptions.reference.delegation.noDelegation"
-              )}
-            </li>
-            <li>
-              {m(
-                locale,
-                "about.subscriptions.reference.delegation.noConsolidation"
-              )}
-            </li>
-            <li>
-              {m(locale, "about.subscriptions.reference.delegation.order")}
-              <ol className={NESTED_LIST_CLASS}>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.delegation.orderMemesAirdrop"
-                  )}
-                </li>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.delegation.orderMemesAll"
-                  )}
-                </li>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.delegation.orderAnyAirdrop"
-                  )}
-                </li>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.delegation.orderAnyAll"
-                  )}
-                </li>
-              </ol>
-            </li>
-            <li>
-              {m(locale, "about.subscriptions.reference.delegation.tapIntro")}
-              <ul className={NESTED_LIST_CLASS}>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.delegation.tapSend"
-                  )}
-                </li>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.delegation.tapAirdrop"
-                  )}
-                </li>
-              </ul>
-            </li>
-            <li>
-              {m(
-                locale,
-                "about.subscriptions.reference.delegation.singleAddress"
-              )}
-            </li>
-          </ul>
-        </ReferenceDisclosure>
+        <div className="tw-mt-5 tw-space-y-5">
+          <ReferencePanel
+            title={m(
+              locale,
+              "about.subscriptions.reference.delegation.title"
+            )}
+          >
+            <ul className={LIST_CLASS}>
+              <li>
+                {m(
+                  locale,
+                  "about.subscriptions.reference.delegation.intro"
+                )}
+              </li>
+              <li>
+                {m(
+                  locale,
+                  "about.subscriptions.reference.delegation.noDelegation"
+                )}
+              </li>
+              <li>
+                {m(
+                  locale,
+                  "about.subscriptions.reference.delegation.noConsolidation"
+                )}
+              </li>
+              <li>
+                {m(
+                  locale,
+                  "about.subscriptions.reference.delegation.order"
+                )}
+                <ul className={NESTED_LIST_CLASS}>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.delegation.orderMemesAirdrop"
+                    )}
+                  </li>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.delegation.orderMemesAll"
+                    )}
+                  </li>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.delegation.orderAnyAirdrop"
+                    )}
+                  </li>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.delegation.orderAnyAll"
+                    )}
+                  </li>
+                </ul>
+              </li>
+              <li>
+                {m(
+                  locale,
+                  "about.subscriptions.reference.delegation.tapIntro"
+                )}
+                <ul className={NESTED_LIST_CLASS}>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.delegation.tapSend"
+                    )}
+                  </li>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.delegation.tapAirdrop"
+                    )}
+                  </li>
+                </ul>
+              </li>
+              <li>
+                {m(
+                  locale,
+                  "about.subscriptions.reference.delegation.singleAddress"
+                )}
+              </li>
+            </ul>
+          </ReferencePanel>
 
-        <ReferenceDisclosure
-          summary={m(locale, "about.subscriptions.reference.phases.summary")}
-          title={m(locale, "about.subscriptions.reference.phases.title")}
-        >
-          <ul className={LIST_CLASS}>
-            <li>{m(locale, "about.subscriptions.reference.phases.same")}</li>
-            <li>{m(locale, "about.subscriptions.reference.phases.zero")}</li>
-            <li>
-              {m(locale, "about.subscriptions.reference.phases.oneTwo")}
-              <ul className={NESTED_LIST_CLASS}>
-                <li>
-                  {m(
-                    locale,
-                    "about.subscriptions.reference.phases.unavailable"
-                  )}
-                </li>
-                <li>
-                  {m(locale, "about.subscriptions.reference.phases.order")}
-                </li>
-              </ul>
-            </li>
-            <li>
-              {m(locale, "about.subscriptions.reference.phases.guarantee")}
-            </li>
-            <li>{m(locale, "about.subscriptions.reference.phases.popular")}</li>
-          </ul>
-        </ReferenceDisclosure>
+          <ReferencePanel
+            title={m(locale, "about.subscriptions.reference.phases.title")}
+          >
+            <ul className={LIST_CLASS}>
+              <li>{m(locale, "about.subscriptions.reference.phases.same")}</li>
+              <li>{m(locale, "about.subscriptions.reference.phases.zero")}</li>
+              <li>
+                {m(locale, "about.subscriptions.reference.phases.oneTwo")}
+                <ul className={NESTED_LIST_CLASS}>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.phases.unavailable"
+                    )}
+                  </li>
+                  <li>
+                    {m(
+                      locale,
+                      "about.subscriptions.reference.phases.order"
+                    )}
+                  </li>
+                </ul>
+              </li>
+              <li>
+                {m(locale, "about.subscriptions.reference.phases.guarantee")}
+              </li>
+              <li>
+                {m(locale, "about.subscriptions.reference.phases.popular")}
+              </li>
+            </ul>
+          </ReferencePanel>
+        </div>
+      </section>
 
-        <ReferenceDisclosure
-          summary={m(locale, "about.subscriptions.reference.gas.summary", {
-            oneCardPercent: oneCardGasSavings,
-            tenCardPercent: tenCardGasSavings,
-          })}
-          title={m(locale, "about.subscriptions.reference.gas.title")}
+      <section
+        aria-labelledby="subscription-gas-savings-heading"
+        className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-px-1 tw-py-16 sm:tw-px-2 sm:tw-py-20"
+      >
+        <h2
+          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          id="subscription-gas-savings-heading"
         >
+          {m(locale, "about.subscriptions.reference.gas.title")}
+        </h2>
+        <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-mt-9 tw-p-6 sm:tw-p-8`}>
           <ul className={LIST_CLASS}>
             <li>
               {m(locale, "about.subscriptions.reference.gas.context", {
@@ -264,67 +290,47 @@ export default function AboutSubscriptionsReference({
             </li>
             <li>{m(locale, "about.subscriptions.reference.gas.absorbed")}</li>
           </ul>
-        </ReferenceDisclosure>
+        </div>
+      </section>
 
-        <ReferenceDisclosure
-          summary={m(locale, "about.subscriptions.reference.remote.summary")}
-          title={m(locale, "about.subscriptions.reference.remote.title")}
+      <section
+        aria-labelledby="subscription-remote-minting-heading"
+        className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-px-1 tw-py-16 sm:tw-px-2 sm:tw-py-20"
+      >
+        <h2
+          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          id="subscription-remote-minting-heading"
         >
-          <ul className={LIST_CLASS}>
-            <li>{m(locale, "about.subscriptions.reference.remote.busy")}</li>
-            <li>
-              {m(locale, "about.subscriptions.reference.remote.separate")}
+          {m(locale, "about.subscriptions.reference.remote.title")}
+        </h2>
+        <ul className="tw-m-0 tw-mt-9 tw-grid tw-list-none tw-grid-cols-1 tw-gap-5 tw-p-0 md:tw-grid-cols-3">
+          {REMOTE_MESSAGE_KEYS.map((messageKey) => (
+            <li
+              className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-6 tw-text-sm tw-leading-6 tw-text-iron-300`}
+              key={messageKey}
+            >
+              {m(locale, messageKey)}
             </li>
-            <li>
-              {m(locale, "about.subscriptions.reference.remote.timezones")}
-            </li>
-          </ul>
-        </ReferenceDisclosure>
-      </div>
-
-      <div className="tw-mt-6 tw-text-sm tw-leading-6 tw-text-iron-400">
-        <p className="tw-mb-2">
-          {m(locale, "about.subscriptions.reference.reportLead")}
-        </p>
-        <Link
-          className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition-colors"
-          href="/tools/subscriptions-report"
-        >
-          {m(locale, "about.subscriptions.reference.reportLink")}
-        </Link>
-      </div>
-    </section>
+          ))}
+        </ul>
+      </section>
+    </>
   );
 }
 
-function ReferenceDisclosure({
+function ReferencePanel({
   children,
-  summary,
   title,
 }: {
   readonly children: ReactNode;
-  readonly summary: string;
   readonly title: string;
 }) {
   return (
-    <details className="tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] open:tw-bg-white/[0.04]">
-      <summary className="tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-xl tw-px-5 tw-py-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300 [&::-webkit-details-marker]:tw-hidden">
-        <span className="tw-min-w-0">
-          <span className="tw-block tw-text-base tw-font-semibold tw-text-iron-100">
-            {title}
-          </span>
-          <span className="tw-mt-1 tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
-            {summary}
-          </span>
-        </span>
-        <ChevronDownIcon
-          aria-hidden="true"
-          className="tw-size-5 tw-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
-        />
-      </summary>
-      <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-5 tw-py-5 sm:tw-px-6">
-        {children}
-      </div>
-    </details>
+    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-6 sm:tw-p-8`}>
+      <h3 className="tw-m-0 tw-text-xl tw-font-medium tw-text-iron-50">
+        {title}
+      </h3>
+      <div className="tw-mt-6">{children}</div>
+    </div>
   );
 }

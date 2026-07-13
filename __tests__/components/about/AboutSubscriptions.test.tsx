@@ -3,22 +3,7 @@ import AboutSubscriptions from "@/components/about/AboutSubscriptions";
 
 jest.mock("@/components/about/AboutSubscriptionsProfileButton", () => ({
   __esModule: true,
-  default: ({
-    actionContext,
-  }: {
-    readonly actionContext?: "hero" | "final";
-  }) => (
-    <button
-      aria-label={
-        actionContext === "hero"
-          ? "Connect wallet to subscribe from the introduction"
-          : "Connect wallet to subscribe after reading the guide"
-      }
-      type="button"
-    >
-      Connect wallet to subscribe
-    </button>
-  ),
+  default: () => <button type="button">Connect to Subscribe</button>,
 }));
 
 describe("AboutSubscriptions", () => {
@@ -26,7 +11,7 @@ describe("AboutSubscriptions", () => {
     render(<AboutSubscriptions />);
     expect(
       screen.getByRole("heading", {
-        name: "Choose your Meme Cards. Skip the drop-time scramble.",
+        name: "Subscription Minting",
         level: 1,
       })
     ).toBeInTheDocument();
@@ -40,17 +25,17 @@ describe("AboutSubscriptions", () => {
     });
     expect(reportLink).toHaveAttribute("href", "/tools/subscriptions-report");
     expect(reportLink).toHaveClass("tw-text-primary-300");
-    expect(reportLink).not.toHaveClass("tw-underline");
+    expect(reportLink).toHaveClass("tw-no-underline");
   });
 
   it("places the subscription action in the page content", () => {
     render(<AboutSubscriptions />);
 
     const heading = screen.getByRole("heading", {
-      name: "Choose your Meme Cards. Skip the drop-time scramble.",
+      name: "Subscription Minting",
     });
     const action = screen.getByRole("button", {
-      name: "Connect wallet to subscribe from the introduction",
+      name: "Connect to Subscribe",
     });
 
     expect(action.compareDocumentPosition(heading)).toBe(
@@ -58,18 +43,21 @@ describe("AboutSubscriptions", () => {
     );
   });
 
-  it("gives repeated subscription actions distinct accessible names", () => {
-    render(<AboutSubscriptions />);
+  it("shows all original information sections without disclosure controls", () => {
+    const { container } = render(<AboutSubscriptions />);
 
     expect(
-      screen.getByRole("button", {
-        name: "Connect wallet to subscribe from the introduction",
-      })
+      screen.getByRole("heading", { name: "Overview" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", {
-        name: "Connect wallet to subscribe after reading the guide",
-      })
+      screen.getByRole("heading", { name: "How it Works" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Gas Savings" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Remote Minting" })
+    ).toBeInTheDocument();
+    expect(container.querySelector("details")).not.toBeInTheDocument();
   });
 });

@@ -3,37 +3,22 @@
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptions/useProfileSubscriptionsNavigation";
+import { WHITE_PRIMARY_ACTION_CLASS } from "@/components/utils/button/actionButtonStyles";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-const PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME =
+const BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME =
   "tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/60 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-white tw-shadow-sm tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-bg-primary-600";
 
-type SubscriptionActionContext = "hero" | "final";
-
-const CONTEXTUAL_ACTION_LABEL_KEYS = {
-  hero: {
-    connect: "about.subscriptions.action.connectHero",
-    manage: "about.subscriptions.action.manageHero",
-  },
-  final: {
-    connect: "about.subscriptions.action.connectFinal",
-    manage: "about.subscriptions.action.manageFinal",
-  },
-} as const satisfies Record<
-  SubscriptionActionContext,
-  { readonly connect: string; readonly manage: string }
->;
+type SubscriptionActionVariant = "blue" | "white";
 
 export default function AboutSubscriptionsProfileButton({
-  actionContext,
-  descriptiveLabels = false,
+  variant = "blue",
 }: {
-  readonly actionContext?: SubscriptionActionContext;
-  readonly descriptiveLabels?: boolean;
+  readonly variant?: SubscriptionActionVariant;
 }) {
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
@@ -63,25 +48,16 @@ export default function AboutSubscriptionsProfileButton({
   };
   const manageSubscriptionsLabel = t(
     locale,
-    descriptiveLabels
-      ? "about.subscriptions.action.manage"
-      : "home.mintSubscriptions.manageSubscriptionsLink"
+    "home.mintSubscriptions.manageSubscriptionsLink"
   );
   const connectToSubscribeLabel = t(
     locale,
-    descriptiveLabels
-      ? "about.subscriptions.action.connect"
-      : "home.mintSubscriptions.connectToSubscribe"
+    "home.mintSubscriptions.connectToSubscribe"
   );
-  const contextualLabelKeys = actionContext
-    ? CONTEXTUAL_ACTION_LABEL_KEYS[actionContext]
-    : undefined;
-  const contextualConnectLabel = contextualLabelKeys
-    ? t(locale, contextualLabelKeys.connect)
-    : undefined;
-  const contextualManageLabel = contextualLabelKeys
-    ? t(locale, contextualLabelKeys.manage)
-    : undefined;
+  const buttonClassName =
+    variant === "white"
+      ? `${WHITE_PRIMARY_ACTION_CLASS} tw-w-full tw-gap-2 sm:tw-w-auto`
+      : BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME;
 
   if (!profileSubscriptionsHref) {
     return (
@@ -89,8 +65,7 @@ export default function AboutSubscriptionsProfileButton({
         type="button"
         disabled={isConnecting}
         onClick={handleOpenProfileSubscriptions}
-        aria-label={contextualConnectLabel}
-        className={`${PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
+        className={`${buttonClassName} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
         {connectToSubscribeLabel}
       </button>
@@ -103,8 +78,7 @@ export default function AboutSubscriptionsProfileButton({
         type="button"
         disabled={isConnecting}
         onClick={handleOpenProfileSubscriptions}
-        aria-label={contextualManageLabel}
-        className={`${PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
+        className={`${buttonClassName} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
         {manageSubscriptionsLabel}
         <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
@@ -115,8 +89,9 @@ export default function AboutSubscriptionsProfileButton({
   return (
     <Link
       href={profileSubscriptionsHref}
-      aria-label={contextualManageLabel}
-      className={`${PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} tw-no-underline desktop-hover:hover:tw-text-white`}
+      className={`${buttonClassName} tw-no-underline ${
+        variant === "blue" ? "desktop-hover:hover:tw-text-white" : ""
+      }`}
     >
       {manageSubscriptionsLabel}
       <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
