@@ -47,7 +47,7 @@ const OVERVIEW_BENEFITS: readonly OverviewBenefit[] = [
   {
     icon: faEarthAmericas,
     iconClassName: "tw-text-[#8f5cff]",
-    iconWrapperClassName: "tw-bg-[#7000ff]/10",
+    iconWrapperClassName: "tw-bg-[#7000ff]/20",
     messageKey: "about.subscriptions.overview.awayFromComputer",
   },
   {
@@ -162,7 +162,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         <OverviewRule
           title={m(locale, "about.subscriptions.overview.notMintpass.title")}
         >
-          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
+          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
             <li>
               {m(locale, "about.subscriptions.overview.notMintpass.choice")}
             </li>
@@ -184,7 +184,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         <OverviewRule
           title={m(locale, "about.subscriptions.overview.regularMinting.title")}
         >
-          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
+          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
             <li>
               {m(locale, "about.subscriptions.overview.regularMinting.normal")}
             </li>
@@ -209,11 +209,11 @@ function OverviewRule({
   readonly title: string;
 }) {
   return (
-    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-8`}>
-      <h3 className="tw-m-0 tw-text-base tw-font-medium tw-text-iron-100 sm:tw-text-lg">
+    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-6`}>
+      <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
         {title}
       </h3>
-      <div className="tw-mt-4 sm:tw-mt-5">{children}</div>
+      <div className="tw-mt-3">{children}</div>
     </div>
   );
 }
