@@ -19300,6 +19300,12 @@ components:
         first_unread_drop_serial_no:
           type: integer
           format: int64
+        subwave_unread_drops:
+          type: integer
+          format: int64
+          description: >-
+            Unread drops across all visible subwaves, independent of whether
+            the authenticated profile follows each subwave.
         followed_subwaves_count:
           type: integer
           format: int64
