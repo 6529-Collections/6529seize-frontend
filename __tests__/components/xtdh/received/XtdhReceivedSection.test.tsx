@@ -11,13 +11,20 @@ jest.mock("@/components/xtdh/received/hooks/useXtdhCollectionSelection");
 
 // Mock child components to avoid deep rendering issues
 jest.mock("@/components/xtdh/received/collections-controls", () => ({
-  XtdhCollectionsControls: () => <div data-testid="xtdh-collections-controls" />,
+  XtdhCollectionsControls: () => (
+    <div data-testid="xtdh-collections-controls" />
+  ),
 }));
-jest.mock("@/components/xtdh/received/subcomponents/XtdhCollectionsList", () => ({
-  XtdhCollectionsList: () => <div data-testid="xtdh-collections-list" />,
-}));
+jest.mock(
+  "@/components/xtdh/received/subcomponents/XtdhCollectionsList",
+  () => ({
+    XtdhCollectionsList: () => <div data-testid="xtdh-collections-list" />,
+  })
+);
 jest.mock("@/components/xtdh/received/collection-tokens", () => ({
-  XtdhCollectionTokensPanel: () => <div data-testid="xtdh-collection-tokens-panel" />,
+  XtdhCollectionTokensPanel: () => (
+    <div data-testid="xtdh-collection-tokens-panel" />
+  ),
 }));
 
 const mockUseXtdhCollectionsQuery = useXtdhCollectionsQuery as jest.Mock;
@@ -70,7 +77,33 @@ describe("XtdhReceivedSection", () => {
     render(<XtdhReceivedSection profileId="0x123" />);
 
     // This expectation defines the desired behavior
-    expect(screen.queryByTestId("xtdh-collections-controls")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("xtdh-collections-controls")
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("xtdh-collections-list")).toBeInTheDocument();
+  });
+
+  it("ignores a missing collection contract while resolving selection", () => {
+    mockUseXtdhCollectionSelection.mockReturnValue({
+      selectedContract: "0x123",
+      handleCollectionSelect: jest.fn(),
+      clearSelection: jest.fn(),
+    });
+    mockUseXtdhCollectionsQuery.mockReturnValue({
+      collections: [
+        { contract: null, xtdh: 50 },
+        { contract: "0x123", xtdh: 100 },
+      ],
+      isLoading: false,
+      isError: false,
+      isEnabled: true,
+      hasNextPage: false,
+    });
+
+    render(<XtdhReceivedSection profileId="0x123" />);
+
+    expect(
+      screen.getByTestId("xtdh-collection-tokens-panel")
+    ).toBeInTheDocument();
   });
 });

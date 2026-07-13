@@ -12,10 +12,6 @@ jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn().mockResolvedValue({ "x-test": "1" }),
 }));
 
-jest.mock("@/helpers/stream.helpers", () => ({
-  prefetchWavesOverview: jest.fn(),
-}));
-
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));

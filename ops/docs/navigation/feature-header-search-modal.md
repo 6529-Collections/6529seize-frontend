@@ -3,10 +3,11 @@
 ## Overview
 
 Header search opens in a modal over the current page.
-It supports:
+The search control opens one of two clearly scoped experiences:
 
-- `Site-wide` search for `Pages`, `Profiles`, `NFTs`, and `Waves`
-- `In this Wave` message search when opened with active wave context
+- `Search 6529` for `Pages`, `NFTs`, `Profiles`, and `Waves`.
+- `Search messages` when opened from an active Wave. This view names the Wave
+  and includes `Search all 6529` for switching scope.
 
 ## Location in the Site
 
@@ -19,17 +20,19 @@ It supports:
 
 - Click `Search` in desktop sidebar navigation.
 - Click a header search button where available.
-- Press `⌘K` when a search trigger is mounted.
-- On desktop web with sidebar navigation mounted, `Ctrl+K` also opens search.
+- Press `⌘K` or `Ctrl+K` when a search trigger is mounted.
 
 ## User Journey
 
 1. Open search from sidebar, header button, or `⌘K`.
 2. Focus lands in the `Search` input and stays trapped in the modal.
-3. If wave context is available, choose `In this Wave` or `Site-wide`.
-4. Type a query and review results.
-5. Optional: switch category (`All`, `Pages`, `Profiles`, `NFTs`, `Waves`) when tabs are shown.
-6. Use mouse or keyboard (`ArrowUp`, `ArrowDown`, `Enter`) to open a result.
+3. The title and description show whether search covers all of 6529 or the
+   active Wave.
+4. Type a query and review the visible query and loaded-result count.
+5. In site search, switch between the always-visible `All`, `Pages`, `NFTs`,
+   `Profiles`, and `Waves` result types.
+6. Use mouse or keyboard (`ArrowUp`, `ArrowDown`, `Home`, `End`, `Enter`) to
+   open a result. Matching text is highlighted.
 7. Close with `Go back` (mobile), `Close search` (desktop), `Escape`, or outside click.
 
 ## Common Scenarios
@@ -47,7 +50,12 @@ It supports:
 - Category persistence:
   - Selected category is remembered between openings.
   - `Clear` resets category to `All`.
+- Query recovery:
+  - The last site query is kept for the current browser tab session.
+  - Queries that opened a result appear as recent-search shortcuts after clear.
 - In-wave jump:
+  - Results use compact message previews showing the author, message number,
+    date, time, and matching context.
   - Selecting a message result jumps to that drop in the current thread.
   - `Load more` appears when more matches are available.
 
@@ -55,13 +63,17 @@ It supports:
 
 - Site-wide query rules:
   - `Pages` starts at 3 characters and uses the local route catalog.
-  - `Profiles` and `Waves` start at 3 characters with ~500ms debounce.
-  - `NFTs` uses ~500ms debounce and starts at 3 characters, or shorter numeric input.
+  - `Profiles` and `Waves` start at 3 characters with a short debounce.
+  - `NFTs` uses the same debounce and starts at 3 characters, or shorter numeric input.
 - In-wave query rules:
   - Available only when search opens with active wave context.
   - Starts at 2 characters with ~250ms debounce.
-- Category tabs appear only when at least one category has results, or when a non-`All` category was already selected.
-- If the selected category has no results for the current query, selection resets to `All`.
+- Result-type controls keep the same space before, during, and after search so
+  the result panel does not shift horizontally.
+- A selected result type remains selected even when it has no matches, making
+  the active scope explicit.
+- Results from an earlier query are hidden immediately while the next query is
+  settling.
 - Background page scroll is locked while the modal is open.
 - When opened from a header search button, focus returns to that button on close.
 
@@ -69,9 +81,12 @@ It supports:
 
 - Site-wide states:
   - Initial: `Start typing to search 6529.io` (with remaining-character hint before threshold).
-  - Loading: `Loading...`
-  - Empty: `No results found`
+  - Loading: `Searching for "<query>"` with stable result-row placeholders.
+  - Success: loaded-result count plus `for "<query>"`.
+  - Empty: query- and result-type-specific guidance.
   - Error: `Something went wrong while searching. Please try again.` + `Try Again`
+  - Partial error: successful result types remain usable while failed result
+    types are named and can be retried.
 - `Try Again` behavior:
   - `All`: retries `Profiles`, `NFTs`, and `Waves` requests that are in scope.
   - `Profiles`/`NFTs`/`Waves`: retries only that category.
@@ -80,15 +95,14 @@ It supports:
   - Loading: `Loading…`
   - Threshold hint: `Type at least 2 characters to search in <wave name>.`
   - Empty: `No matches found.`
-  - Error: `Couldn't load search results.`
-  - No dedicated retry button. Retry by changing query text or reopening search.
+  - Error: `Couldn't load results` with a `Try again` action.
 
 ## Limitations / Notes
 
 - Search is modal-only; there is no dedicated `/search` route.
 - `⌘K` is available from mounted search triggers.
-- `Ctrl+K` is supported from the desktop-web sidebar path only; header search
-  buttons do not guarantee that shortcut.
+- `⌘K` and `Ctrl+K` open the search appropriate to the mounted trigger's
+  context.
 - `Pages` results come from navigation entries, not full-page text content.
 - `6529 Apps` has explicit aliases for `6529 Mobile`, `6529 Desktop`, `apps`,
   `mobile`, `desktop`, and supported platform terms.
