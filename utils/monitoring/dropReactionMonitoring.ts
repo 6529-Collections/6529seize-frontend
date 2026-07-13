@@ -12,6 +12,8 @@ const REACTION_FEATURE = "drop-reaction";
 const REACTION_REQUEST_OPERATION = "reaction-request";
 const REACTION_ANOMALY_OPERATION = "reaction-anomaly";
 const ANOMALY_OPTIMISTIC_REVERTED = "optimistic-reverted";
+const PROXY_REACTION_PERMISSION_DENIED_MESSAGE =
+  "Proxy doesn't have permission to add reactions";
 const WEBSOCKET_STATUSES = new Set<string>(Object.values(WebSocketStatus));
 
 export type ReactionSource = "quick-react" | "picker" | "chip";
@@ -319,6 +321,24 @@ function isExpectedStaleDropNotFoundError({
   );
 }
 
+function isExpectedProxyReactionPermissionDeniedError({
+  context,
+  errorMessage,
+  statusCode,
+}: {
+  readonly context: ReactionMutationContext;
+  readonly errorMessage: string;
+  readonly statusCode: number | null;
+}): boolean {
+  // Intentionally exact: any different auth failure remains actionable.
+  return (
+    statusCode === 403 &&
+    context.endpoint === `drops/${context.dropId}/reaction` &&
+    context.method === "POST" &&
+    errorMessage === PROXY_REACTION_PERMISSION_DENIED_MESSAGE
+  );
+}
+
 function captureReactionEvent({
   error,
   level,
@@ -520,6 +540,29 @@ export function recordReactionRequestFailed(
   }
 
   if (errorKind === "rate-limit") {
+    clearActiveIntentForContext(context);
+    return result;
+  }
+
+  if (
+    isExpectedProxyReactionPermissionDeniedError({
+      context,
+      errorMessage,
+      statusCode,
+    })
+  ) {
+    addReactionBreadcrumb(
+      "reaction.proxy_permission_denied",
+      context,
+      {
+        status_code: statusCode ?? undefined,
+        latency_ms: latencyMs,
+        error_kind: errorKind,
+        error_message: errorMessage,
+        captured: false,
+      },
+      "warning"
+    );
     clearActiveIntentForContext(context);
     return result;
   }

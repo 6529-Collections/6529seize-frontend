@@ -165,6 +165,121 @@ describe("dropReactionMonitoring", () => {
     );
   });
 
+  it("breadcrumbs the exact proxy reaction permission denial without capturing it", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-proxy",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-proxy/reaction",
+      method: "POST",
+    });
+
+    const error = Object.assign(
+      new Error("Proxy doesn't have permission to add reactions"),
+      {
+        name: "ApiError",
+        status: 403,
+        response: { status: 403 },
+      }
+    );
+
+    dateNowSpy.mockReturnValue(1_200);
+    const result = recordReactionRequestFailed(mutation, error);
+
+    expect(result).toEqual({
+      isLatestMutation: true,
+      supersededByMutationId: null,
+    });
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.proxy_permission_denied",
+        data: expect.objectContaining({
+          status_code: 403,
+          error_kind: "auth",
+          error_message: "Proxy doesn't have permission to add reactions",
+          captured: false,
+        }),
+      })
+    );
+    expect(withScopeMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it.each(
+    [
+      {
+        caseName: "the same denial returned as 401",
+        endpoint: "drops/drop-proxy/reaction",
+        message: "Proxy doesn't have permission to add reactions",
+        method: "POST",
+        status: 401,
+      },
+      {
+        caseName: "an unexpected 403 auth message",
+        endpoint: "drops/drop-proxy/reaction",
+        message: "Forbidden",
+        method: "POST",
+        status: 403,
+      },
+      {
+        caseName: "the denial from a different endpoint",
+        endpoint: "drops/another-drop/reaction",
+        message: "Proxy doesn't have permission to add reactions",
+        method: "POST",
+        status: 403,
+      },
+      {
+        caseName: "the denial on a remove request",
+        endpoint: "drops/drop-proxy/reaction",
+        message: "Proxy doesn't have permission to add reactions",
+        method: "DELETE",
+        status: 403,
+      },
+      {
+        caseName: "the same message returned as a server error",
+        endpoint: "drops/drop-proxy/reaction",
+        message: "Proxy doesn't have permission to add reactions",
+        method: "POST",
+        status: 500,
+      },
+    ] as const
+  )("captures $caseName", ({ endpoint, message, method, status }) => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-proxy",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, { endpoint, method });
+
+    const error = Object.assign(new Error(message), {
+      name: "ApiError",
+      status,
+      response: { status },
+    });
+
+    dateNowSpy.mockReturnValue(1_200);
+    recordReactionRequestFailed(mutation, error);
+
+    expect(withScopeMock).toHaveBeenCalled();
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+  });
+
   it("records rate-limit warning metadata without capturing an exception", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-rate-limit",

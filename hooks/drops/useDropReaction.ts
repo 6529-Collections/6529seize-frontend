@@ -463,7 +463,7 @@ export function useDropReaction(
   drop: ExtendedDrop,
   options?: UseDropReactionOptions
 ): UseDropReactionResult {
-  const { setToast, connectedProfile } = useAuth();
+  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
@@ -473,7 +473,7 @@ export function useDropReaction(
   const onSuccess = options?.onSuccess;
   const updateCurationCache = options?.updateCurationCache ?? false;
 
-  const canReact = !drop.id.startsWith("temp-");
+  const canReact = !activeProfileProxy && !drop.id.startsWith("temp-");
 
   const waveId = drop.wave.id;
   const dropId = drop.id;
