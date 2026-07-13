@@ -94,7 +94,8 @@ shared lane.
    - release risk and rollback/fix-forward plan understood
 4. Sequence the final readiness steps deliberately. The `main` ruleset requires
    the branch to be up to date with `main` (strict checks) and requires approval
-   of the most recent push, so updating the branch invalidates prior approvals.
+   of the most recent push, so updating the branch resets the approval
+   requirement to unmet and prior approvals no longer satisfy it.
    Correct order: update the branch with `main` first, let checks rerun, and
    seek the maintainer approval last — ideally right before merge, so `main`
    has no time to advance again.
