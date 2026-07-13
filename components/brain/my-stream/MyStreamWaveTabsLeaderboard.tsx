@@ -44,44 +44,44 @@ const MyStreamWaveTabsLeaderboard: React.FC<
   }
   const showWinnersTab = isApproveWave || firstDecisionDone;
   const winnersLabel = isApproveWave ? approveLabels.approved : "Winners";
-
-  // Leaderboard tab classes
-  const leaderboardButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-7 tw-rounded-lg ${
-    activeView === primaryView ? "tw-bg-iron-800" : "tw-bg-iron-950"
-  }`;
-  const leaderboardButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    activeView === primaryView ? "tw-text-iron-300" : "tw-text-iron-400"
-  }`;
-
-  // Winners tab classes
-  const winnersButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-7 tw-rounded-lg ${
-    activeView === BrainView.WINNERS ? "tw-bg-iron-800" : "tw-bg-iron-950"
-  }`;
-  const winnersButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    activeView === BrainView.WINNERS ? "tw-text-iron-300" : "tw-text-iron-400"
-  }`;
+  const baseButtonClasses =
+    "tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border-0 tw-px-3 tw-py-2 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  const getButtonStateClasses = (isActive: boolean) =>
+    `${baseButtonClasses} ${isActive ? "tw-bg-iron-800" : "tw-bg-iron-950"}`;
+  const getButtonTextClasses = (isActive: boolean) =>
+    `tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-semibold sm:tw-max-w-44 sm:tw-text-sm ${isActive ? "tw-text-iron-300" : "tw-text-iron-400"}`;
 
   return (
     <>
       <button
+        type="button"
         ref={(el) => {
           registerTabRef?.(primaryView, el);
         }}
         onClick={() => onViewChange(primaryView)}
-        className={leaderboardButtonClasses}
+        aria-current={activeView === primaryView ? "page" : undefined}
+        className={getButtonStateClasses(activeView === primaryView)}
       >
-        <span className={leaderboardButtonTextClasses}>{primaryLabel}</span>
+        <span className={getButtonTextClasses(activeView === primaryView)}>
+          {primaryLabel}
+        </span>
       </button>
       {renderAfterLeaderboard}
       {showWinnersTab && (
         <button
+          type="button"
           ref={(el) => {
             registerTabRef?.(BrainView.WINNERS, el);
           }}
           onClick={() => onViewChange(BrainView.WINNERS)}
-          className={winnersButtonClasses}
+          aria-current={
+            activeView === BrainView.WINNERS ? "page" : undefined
+          }
+          className={getButtonStateClasses(activeView === BrainView.WINNERS)}
         >
-          <span className={winnersButtonTextClasses}>{winnersLabel}</span>
+          <span className={getButtonTextClasses(activeView === BrainView.WINNERS)}>
+            {winnersLabel}
+          </span>
         </button>
       )}
     </>
