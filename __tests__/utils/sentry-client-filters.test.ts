@@ -799,6 +799,77 @@ describe("sentry-client-filters", () => {
       ...overrides,
     });
 
+  const createObservedSentryCpNotificationsEvent =
+    (): TestSentryClientEvent => ({
+      transaction: "/notifications",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@sentry+nextjs@10.45.0_@opentelemetry+context-async-hooks@2.7.1_@opentelemetry+api@1.9._9f030f10fd79c9d796c635bb51c5a1cc/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                  in_app: true,
+                  lineno: 94,
+                  colno: 19,
+                  context_line: "  routeResultCache.clear();",
+                },
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      contexts: {
+        browser: {
+          browser: "Mobile Safari UI/WKWebView",
+          name: "Mobile Safari UI/WKWebView",
+        },
+        device: {
+          family: "iPhone",
+          model: "iPhone",
+          brand: "Apple",
+        },
+        os: {
+          os: "iOS 18.7",
+          name: "iOS",
+          version: "18.7",
+        },
+      },
+      extra: {
+        arguments: [],
+      },
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+        device: "iPhone",
+        "device.family": "iPhone",
+        environment: "production",
+        handled: "no",
+        interface_type: "exception",
+        level: "error",
+        mechanism: __testing.sentryRouteParameterizationMechanismType,
+        os: "iOS 18.7",
+        "os.name": "iOS",
+        release: "c7d1ee2cdf4f09d9e5c88dddf342fdbd145ad093",
+        transaction: "/notifications",
+        turbopack: "True",
+        url: "/notifications",
+      },
+    });
+
   const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
@@ -3096,6 +3167,17 @@ describe("sentry-client-filters", () => {
   it("filters observed iOS WKWebView wave route parameterization cyclic JSON errors without app context", () => {
     // Arrange
     const event = createObservedIosWkWebViewWaveRouteParameterizationEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the observed Sentry CP notifications event when the SDK frame is marked in-app", () => {
+    // Arrange
+    const event = createObservedSentryCpNotificationsEvent();
 
     // Act
     const result = shouldFilterSentryRouteParameterizationError(event);

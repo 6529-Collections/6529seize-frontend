@@ -462,7 +462,13 @@ export function shouldFilterSentryRouteParameterizationError(
   }
 
   const frames = value.stacktrace?.frames;
-  if (hasLikelyAppOwnedFrame(frames) || !hasNativeJsonStringifyFrame(frames)) {
+  const framesWithoutSentryRouteParameterization = frames?.filter(
+    (frame) => !hasSentryRouteParameterizationFrame([frame])
+  );
+  if (
+    hasLikelyAppOwnedFrame(framesWithoutSentryRouteParameterization) ||
+    !hasNativeJsonStringifyFrame(frames)
+  ) {
     return false;
   }
 
