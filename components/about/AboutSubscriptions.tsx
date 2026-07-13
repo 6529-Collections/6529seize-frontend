@@ -84,21 +84,21 @@ function SubscriptionHeader({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <header className="tw-px-1 tw-pb-12 tw-pt-6 sm:tw-px-2 sm:tw-pt-8">
+    <header className="tw-px-1 tw-pb-6 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
       <div className="tw-max-w-4xl">
         <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
           {m(locale, "about.subscriptions.hero.title")}
         </h1>
-        <div className="tw-mt-5 tw-flex tw-justify-start empty:tw-hidden">
+        <div className="tw-mt-4 tw-flex tw-justify-start empty:tw-hidden sm:tw-mt-5">
           <AboutSubscriptionsProfileButton variant="white" />
         </div>
         <Link
-          className="tw-group/report tw-mt-3 tw-inline-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-5 tw-py-3 tw-text-left tw-text-sm tw-text-iron-400 tw-no-underline tw-transition-all hover:tw-border-white/[0.12] hover:tw-bg-iron-900/60 hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto lg:tw-whitespace-nowrap"
+          className="tw-group/report tw-mt-3 tw-inline-flex tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3 tw-text-left tw-text-sm tw-text-iron-400 tw-no-underline tw-transition-all hover:tw-border-white/[0.12] hover:tw-bg-iron-900/60 hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-w-auto sm:tw-items-center sm:tw-gap-4 sm:tw-px-5 lg:tw-whitespace-nowrap"
           href="/tools/subscriptions-report"
         >
           <FontAwesomeIcon
             aria-hidden="true"
-            className="tw-shrink-0 tw-text-iron-600 tw-transition-colors group-hover/report:tw-text-[#00f0ff]"
+            className="tw-mt-1 tw-shrink-0 tw-text-iron-600 tw-transition-colors group-hover/report:tw-text-[#00f0ff] sm:tw-mt-0"
             icon={faChartLine}
           />
           <span>
@@ -109,12 +109,12 @@ function SubscriptionHeader({
           </span>
           <FontAwesomeIcon
             aria-hidden="true"
-            className="tw-ml-auto tw-shrink-0 tw-text-[10px] tw-text-iron-700 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-iron-200 motion-reduce:tw-transform-none"
+            className="tw-ml-auto tw-hidden tw-shrink-0 tw-text-[10px] tw-text-iron-700 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-iron-200 motion-reduce:tw-transform-none sm:tw-block"
             icon={faArrowRight}
           />
         </Link>
       </div>
-      <div className="tw-mt-12 tw-h-px tw-bg-iron-900" />
+      <div className="tw-mt-8 tw-h-px tw-bg-iron-900 sm:tw-mt-12" />
     </header>
   );
 }
@@ -123,7 +123,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-overview-heading"
-      className="tw-px-1 tw-pb-10 sm:tw-px-2 sm:tw-pb-12"
+      className="tw-px-1 tw-pb-8 sm:tw-px-2 sm:tw-pb-12"
     >
       <div className="tw-max-w-3xl">
         <h2
@@ -137,15 +137,15 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         </p>
       </div>
 
-      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-6 tw-p-0 md:tw-grid-cols-3">
+      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 md:tw-grid-cols-3 md:tw-gap-6">
         {OVERVIEW_BENEFITS.map((benefit) => {
           return (
             <li
-              className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-flex tw-flex-col tw-items-start tw-p-6`}
+              className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-flex tw-flex-row tw-items-center tw-gap-4 tw-p-4 md:tw-flex-col md:tw-items-start md:tw-gap-0 md:tw-p-6`}
               key={benefit.messageKey}
             >
               <span
-                className={`tw-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-full ${benefit.iconWrapperClassName}`}
+                className={`tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full md:tw-size-12 ${benefit.iconWrapperClassName}`}
               >
                 <FontAwesomeIcon
                   aria-hidden="true"
@@ -153,7 +153,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
                   icon={benefit.icon}
                 />
               </span>
-              <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-400">
+              <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-mt-5">
                 {m(locale, benefit.messageKey)}
               </p>
             </li>
@@ -161,14 +161,14 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         })}
       </ul>
 
-      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-2">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-mt-6 lg:tw-grid-cols-2 lg:tw-gap-6">
         <OverviewRule
           title={m(
             locale,
             "about.subscriptions.overview.notMintpass.title"
           )}
         >
-          <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300">
+          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
             <li>
               {m(locale, "about.subscriptions.overview.notMintpass.choice")}
             </li>
@@ -193,7 +193,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
             "about.subscriptions.overview.regularMinting.title"
           )}
         >
-          <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300">
+          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
             <li>
               {m(
                 locale,
@@ -221,11 +221,11 @@ function OverviewRule({
   readonly title: string;
 }) {
   return (
-    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-6 sm:tw-p-8`}>
-      <h3 className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100">
+    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-8`}>
+      <h3 className="tw-m-0 tw-text-base tw-font-medium tw-text-iron-100 sm:tw-text-lg">
         {title}
       </h3>
-      <div className="tw-mt-5">{children}</div>
+      <div className="tw-mt-4 sm:tw-mt-5">{children}</div>
     </div>
   );
 }
