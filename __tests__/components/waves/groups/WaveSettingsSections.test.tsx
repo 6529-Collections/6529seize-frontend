@@ -61,6 +61,7 @@ const makeWave = (
     readonly creditScope?: ApiWaveCreditScope | undefined;
     readonly winningThreshold?: number | null | undefined;
     readonly winningThresholdMinDurationMs?: number | null | undefined;
+    readonly decisionsStrategy?: any;
   } = {}
 ): any => ({
   id: "wave-1",
@@ -106,7 +107,18 @@ const makeWave = (
     max_votes_per_identity_to_drop: null,
     time_lock_ms: null,
     admin_group: { group: null },
-    decisions_strategy: null,
+    // Rank waves default to a scheduled decision strategy; pass
+    // decisionsStrategy: null explicitly to model a perpetual wave.
+    decisions_strategy:
+      overrides.decisionsStrategy !== undefined
+        ? overrides.decisionsStrategy
+        : overrides.waveType === ApiWaveType.Rank
+          ? {
+              first_decision_time: 123,
+              subsequent_decisions: [],
+              is_rolling: false,
+            }
+          : null,
     authenticated_user_eligible_for_admin: overrides.canAdmin ?? false,
   },
   metrics: { your_participation_drops_count: 0 },
@@ -263,6 +275,20 @@ describe("WaveSettingsSections", () => {
     expect(screen.queryByText("Approval rule")).not.toBeInTheDocument();
     expect(screen.queryByText("Approve after")).not.toBeInTheDocument();
     expect(fetchWaveMetadataMock).toHaveBeenCalledWith({ waveId: "wave-1" });
+  });
+
+  it("hides outcome visibility for perpetual rank waves", () => {
+    renderSettings({
+      wave: makeWave({
+        waveType: ApiWaveType.Rank,
+        decisionsStrategy: null,
+      }),
+    });
+
+    // A perpetual wave never produces outcomes, so there is nothing for the
+    // visibility toggle to show or hide.
+    expect(screen.queryByText("Outcomes")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Show outcomes")).not.toBeInTheDocument();
   });
 
   it("shows rules settings for chat waves without display or approval settings", () => {

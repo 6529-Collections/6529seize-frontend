@@ -42,6 +42,15 @@ describe("instrumentation-client", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const observedSentryE7WasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Refused to compile or instantiate",
+    "WebAssembly module because 'unsafe-eval' is not an allowed source of script in the",
+    "following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'",
+    "https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
+    'https://dataplane.rum.us-east-1.amazonaws.com\").',
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
   const observedWasmModuleCspUnsafeEvalMessage =
     "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
   const anonymousUnsafeEvalCspMessage =
@@ -351,14 +360,28 @@ describe("instrumentation-client", () => {
   it("drops observed Sentry E7 WebAssembly CSP unsafe-eval errors from injected static chunks", () => {
     const beforeSend = loadBeforeSend();
     const event = {
-      transaction: "/waves",
+      transaction: "/the-memes/:id",
       exception: {
         values: [
           {
             type: "RuntimeError",
-            value: wasmCspUnsafeEvalMessage,
+            value: observedSentryE7WasmCspUnsafeEvalMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  in_app: true,
+                },
                 {
                   filename: "app:///chunks/utils-DNoBWR8F.js",
                   abs_path: "app:///chunks/utils-DNoBWR8F.js",
@@ -372,8 +395,8 @@ describe("instrumentation-client", () => {
       },
       tags: {
         environment: "production",
-        transaction: "/waves",
-        url: "/waves",
+        transaction: "/the-memes/:id",
+        url: "/the-memes/447",
       },
     };
 
