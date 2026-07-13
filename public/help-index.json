@@ -16,23 +16,34 @@
         "coming",
         "discover",
         "mission",
-        "subscriptions"
+        "subscriptions",
+        "start",
+        "connect",
+        "onboarding"
       ],
       "facts": [
         "The home page is the main 6529.io entry point.",
+        "Logged-out visitors see a plain-language introduction before home activity, with a prominent Start here link to /join-6529 and a visible Connect wallet action.",
+        "Visitors can browse the public home activity without connecting a wallet.",
+        "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",
       "related_paths": [
+        "/join-6529",
         "/the-memes",
         "/waves",
         "/about/subscriptions",
         "/{user}/subscriptions"
       ],
       "tags": ["home", "navigation"],
-      "source_refs": ["ops/docs/home/README.md"]
+      "source_refs": [
+        "components/home/newcomer/HomeNewcomerIntro.tsx",
+        "ops/docs/home/README.md",
+        "ops/docs/home/feature-home-header-and-mission.md"
+      ]
     },
     {
       "id": "navigation.sidebar",
