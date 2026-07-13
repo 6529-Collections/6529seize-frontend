@@ -126,7 +126,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-overview-heading"
-      className="tw-px-1 tw-pb-24 sm:tw-px-2 sm:tw-pb-32"
+      className="tw-px-1 tw-pb-10 sm:tw-px-2 sm:tw-pb-12"
     >
       <div className="tw-max-w-3xl">
         <h2

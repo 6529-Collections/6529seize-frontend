@@ -58,9 +58,9 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-how-it-works-heading"
-      className="tw-px-1 tw-pb-24 sm:tw-px-2 sm:tw-pb-32"
+      className="tw-px-1 tw-pb-10 sm:tw-px-2 sm:tw-pb-12"
     >
-      <div className="tw-mb-16 tw-text-center">
+      <div className="tw-mb-5">
         <h2
           className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
           id="subscription-how-it-works-heading"
@@ -69,7 +69,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
         </h2>
       </div>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-8 lg:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-2">
         <RulePanel
           accentClassName="tw-border-t-orange-500/50"
           number="1"
@@ -202,12 +202,12 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-delegation-heading"
-      className="tw-mx-auto tw-max-w-3xl tw-px-1 tw-pb-24 sm:tw-px-2"
+      className="tw-mx-auto tw-max-w-3xl tw-px-1 tw-pb-8 sm:tw-px-2 sm:tw-pb-10"
     >
       <details
         className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-group tw-cursor-pointer tw-overflow-hidden`}
       >
-        <summary className="tw-flex tw-min-h-16 tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/45 tw-px-6 tw-py-5 tw-text-white/80 tw-transition-colors hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/50 sm:tw-px-8 [&::-webkit-details-marker]:tw-hidden">
+        <summary className="tw-flex tw-min-h-12 tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/45 tw-px-5 tw-py-3 tw-text-white/80 tw-transition-colors hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/50 sm:tw-px-6 [&::-webkit-details-marker]:tw-hidden">
           <span className="tw-flex tw-items-center tw-gap-3">
             <FontAwesomeIcon
               aria-hidden="true"
@@ -227,7 +227,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
             icon={faChevronDown}
           />
         </summary>
-        <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/70 tw-px-6 tw-pb-8 tw-pt-5 sm:tw-px-8">
+        <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/70 tw-p-5 sm:tw-p-6">
           <ul className={LIST_CLASS}>
             <li>
               {m(
@@ -316,7 +316,7 @@ function GasSavings({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-gas-savings-heading"
-      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-1 tw-py-16 sm:tw-px-2 sm:tw-py-20"
+      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-10"
     >
       <div className="tw-flex tw-items-center tw-gap-4">
         <span className="tw-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#00f0ff]/10 tw-text-xl tw-text-[#00f0ff]">
@@ -330,7 +330,7 @@ function GasSavings({ locale }: { readonly locale: SupportedLocale }) {
         </h2>
       </div>
       <div
-        className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-mt-9 tw-border-t-2 tw-border-t-[#00f0ff]/50 tw-p-6 sm:tw-p-8`}
+        className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-mt-5 tw-border-t-2 tw-border-t-[#00f0ff]/50 tw-p-6`}
       >
         <ul className={LIST_CLASS}>
           <li>
@@ -381,7 +381,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-remote-minting-heading"
-      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-1 tw-py-16 sm:tw-px-2 sm:tw-py-20"
+      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-10"
     >
       <div className="tw-flex tw-items-center tw-gap-4">
         <span className="tw-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#7000ff]/10 tw-text-xl tw-text-[#7000ff]">
@@ -394,10 +394,10 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
           {m(locale, "about.subscriptions.reference.remote.title")}
         </h2>
       </div>
-      <ul className="tw-m-0 tw-mt-9 tw-grid tw-list-none tw-grid-cols-1 tw-gap-6 tw-p-0 md:tw-grid-cols-3">
+      <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-6 tw-p-0 md:tw-grid-cols-3">
         {REMOTE_MESSAGE_KEYS.map((messageKey) => (
           <li
-            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-6 tw-text-sm tw-leading-6 tw-text-white/40 sm:tw-p-8`}
+            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-6 tw-text-sm tw-leading-6 tw-text-white/40`}
             key={messageKey}
           >
             {m(locale, messageKey)}
