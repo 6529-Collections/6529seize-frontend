@@ -201,6 +201,95 @@ describe("wave-rules.helpers", () => {
     );
   });
 
+  it("summarizes ongoing rank waves with no scheduled decisions", () => {
+    const base = createConfig();
+    const config: CreateWaveConfig = {
+      ...base,
+      overview: { type: ApiWaveType.Rank, name: "Nodes", image: null },
+      dates: {
+        submissionStartDate: 1000,
+        votingStartDate: 2000,
+        endDate: null,
+        firstDecisionTime: 5000,
+        subsequentDecisions: [],
+        isRolling: false,
+        ongoingRanking: true,
+      },
+      // Raw config carries stale values that the submit path strips; the
+      // summary must report the effective state instead.
+      outcomes: [{ title: "stale" } as any],
+      display: {
+        ...base.display,
+        outcomesVisible: true,
+      },
+    };
+
+    const rules = buildWaveRules({ config, groupsCache: {} });
+    const rows = rules.automatic
+      .flatMap((section) => section.rows)
+      .map((row) => [row.label, row.value]);
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        ["Winner announcements", "None (ongoing ranking, no end date)"],
+        ["Type", "Rank — Perpetual Ranking"],
+        ["Outcomes visibility", "Hidden"],
+        ["Configured outcomes", "Not available (perpetual wave)"],
+      ])
+    );
+    const labels = rows.map(([label]) => label);
+    expect(labels).not.toContain("First decision");
+    expect(labels).not.toContain("Decision cadence");
+  });
+
+  it("labels existing perpetual rank waves in the type row", () => {
+    const wave = {
+      wave: {
+        type: ApiWaveType.Rank,
+        admin_group: { group: null },
+        admin_drop_deletion_enabled: false,
+        max_votes_per_identity_to_drop: null,
+        time_lock_ms: null,
+        decisions_strategy: null,
+      },
+      visibility: { scope: { group: null } },
+      participation: {
+        scope: { group: null },
+        period: null,
+        required_media: [],
+        required_metadata: [],
+        no_of_applications_allowed_per_participant: null,
+        signature_required: false,
+        terms: null,
+        submission_strategy: null,
+      },
+      voting: {
+        scope: { group: null },
+        period: null,
+        credit_type: ApiWaveCreditType.TdhPlusXtdh,
+        credit_scope: ApiWaveCreditScope.Wave,
+        credit_category: null,
+        creditor: null,
+        credit_nfts: null,
+        forbid_negative_votes: false,
+      },
+      chat: { enabled: true, scope: { group: null } },
+    } as any;
+
+    const rows = buildWaveRules({ wave, metadata: [] }).automatic.flatMap(
+      (section) => section.rows
+    );
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Type",
+          value: "Rank — Perpetual Ranking",
+        }),
+      ])
+    );
+  });
+
   it("splits disabled chat status and access in create rules", () => {
     const rules = buildWaveRules({
       config: {

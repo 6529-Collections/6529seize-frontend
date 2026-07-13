@@ -1,6 +1,7 @@
 import {
   browserExtensionUrlPrefixes,
   extensionMessagingConnectionFailureMessage,
+  extensionMessagingContentScriptPaths,
   injectedScriptBundlePathToken,
 } from "./constants";
 import type {
@@ -19,6 +20,7 @@ function isExtensionMessagingInjectedPath(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return (
     normalizedValue.includes(injectedScriptBundlePathToken) ||
+    extensionMessagingContentScriptPaths.has(normalizedValue) ||
     browserExtensionUrlPrefixes.some((prefix) =>
       normalizedValue.startsWith(prefix)
     )
