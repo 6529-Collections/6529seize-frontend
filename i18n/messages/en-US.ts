@@ -1169,6 +1169,8 @@ export const EN_US_MESSAGES = {
     "6529 is an open community coordinating art, culture, and public goods. Browse first, then join conversations, help choose what moves forward, or collect the art.",
   "home.newcomer.startAction": "Start here",
   "home.newcomer.connectAction": "Connect wallet",
+  "home.newcomer.connectFailed":
+    "Failed to open wallet connection. Please try again.",
   "home.newcomer.browseNote": "No wallet is needed to explore.",
   "home.newcomer.value.coordinate.title": "Talk and build together",
   "home.newcomer.value.coordinate.body":

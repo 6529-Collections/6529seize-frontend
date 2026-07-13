@@ -37,7 +37,7 @@ export default function HomeNewcomerIntro() {
     } catch (error) {
       console.error("Failed to open wallet connection", error);
       setToast({
-        message: t(locale, "home.mintSubscriptions.connectFailed"),
+        message: t(locale, "home.newcomer.connectFailed"),
         type: "error",
       });
     }
@@ -50,7 +50,7 @@ export default function HomeNewcomerIntro() {
         className="tw-mt-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-iron-950/45 md:tw-mt-10"
       >
         <div className="tw-mx-auto tw-max-w-5xl tw-px-4 tw-py-9 sm:tw-px-6 sm:tw-py-11 lg:tw-px-8">
-          <p className="tw-mb-3 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-500">
+          <p className="tw-mb-3 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-400">
             {t(locale, "home.newcomer.eyebrow")}
           </p>
           <div className="tw-grid tw-grid-cols-1 tw-gap-8 lg:tw-grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:tw-gap-12">
@@ -91,8 +91,18 @@ export default function HomeNewcomerIntro() {
                       : "home.newcomer.connectAction"
                   )}
                 </button>
+                <span
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="tw-sr-only"
+                  role="status"
+                >
+                  {seizeConnectOpen
+                    ? t(locale, "join6529.action.connecting")
+                    : ""}
+                </span>
               </div>
-              <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-500">
+              <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-400">
                 {t(locale, "home.newcomer.browseNote")}
               </p>
             </div>
@@ -103,7 +113,7 @@ export default function HomeNewcomerIntro() {
                   <p className="tw-mb-1 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100">
                     {t(locale, titleKey)}
                   </p>
-                  <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-500">
+                  <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-400">
                     {t(locale, bodyKey)}
                   </p>
                 </li>
@@ -117,7 +127,7 @@ export default function HomeNewcomerIntro() {
         aria-labelledby="home-activity-title"
         className="tw-px-4 tw-pb-2 tw-pt-10 md:tw-px-6 md:tw-pt-14 lg:tw-px-8"
       >
-        <p className="tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-500">
+        <p className="tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-400">
           {t(locale, "home.newcomer.activityEyebrow")}
         </p>
         <h2
@@ -126,7 +136,7 @@ export default function HomeNewcomerIntro() {
         >
           {t(locale, "home.newcomer.activityTitle")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-500">
+        <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-400">
           {t(locale, "home.newcomer.activityDescription")}
         </p>
       </section>
