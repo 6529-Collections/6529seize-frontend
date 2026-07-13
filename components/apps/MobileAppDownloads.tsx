@@ -34,7 +34,7 @@ const MOBILE_APPS = {
 
 export function MobileAppDownloads() {
   return (
-    <div className="tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-4">
+    <div className="tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-center tw-gap-4 lg:tw-flex-col lg:tw-gap-12">
       {Object.values(MOBILE_APPS).map((app) => (
         <MobileAppDownload
           key={app.name}

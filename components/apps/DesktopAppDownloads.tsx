@@ -27,10 +27,10 @@ export function DesktopAppDownloads() {
 
   if (isLoading) {
     return (
-      <div role="status" className="tw-grid tw-gap-3">
-        <span className="tw-sr-only">
+      <div className="tw-grid tw-gap-3">
+        <output className="tw-sr-only">
           {t(APPS_LOCALE, "apps.desktop.loading")}
-        </span>
+        </output>
         {["windows", "mac", "linux"].map((platform) => (
           <div
             key={platform}
@@ -53,7 +53,7 @@ export function DesktopAppDownloads() {
         </p>
         <button
           type="button"
-          onClick={() => void refetch()}
+          onClick={() => refetch()}
           className="tw-mt-4 tw-min-h-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-50 hover:tw-bg-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
         >
           {t(APPS_LOCALE, "apps.desktop.retry")}

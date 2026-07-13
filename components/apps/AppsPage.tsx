@@ -4,6 +4,7 @@ import {
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -68,7 +69,7 @@ function AppPanel({
   readonly icon: typeof DevicePhoneMobileIcon;
   readonly title: string;
   readonly description: string;
-  readonly children: React.ReactNode;
+  readonly children: ReactNode;
   readonly contentClassName?: string | undefined;
 }) {
   const headingId = `${id}-heading`;
