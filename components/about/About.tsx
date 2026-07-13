@@ -44,8 +44,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
   return (
     <Container
       fluid={
-        section === AboutSection.TECH ||
-        section === AboutSection.SUBSCRIPTIONS
+        section === AboutSection.TECH || section === AboutSection.SUBSCRIPTIONS
       }
       className="tw-pt-2"
     >
@@ -54,7 +53,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
           <AboutContentsDropdown
             className={
               section === AboutSection.SUBSCRIPTIONS
-                ? "max-sm:-tw-mt-14 max-sm:!tw-top-2 max-sm:tw-mb-0 max-sm:tw-py-1"
+                ? "max-sm:!tw-top-2 max-sm:-tw-mt-14 max-sm:tw-mb-0 max-sm:tw-py-1"
                 : undefined
             }
             currentSection={section}

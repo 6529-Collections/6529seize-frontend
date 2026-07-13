@@ -21,10 +21,10 @@ describe("AboutSubscriptions", () => {
     render(<AboutSubscriptions />);
 
     const reportLink = screen.getByRole("link", {
-      name: "Subscriptions Report",
+      name: /Subscriptions Report$/,
     });
     expect(reportLink).toHaveAttribute("href", "/tools/subscriptions-report");
-    expect(reportLink).toHaveClass("tw-text-primary-300");
+    expect(reportLink).toHaveClass("tw-text-iron-400");
     expect(reportLink).toHaveClass("tw-no-underline");
   });
 

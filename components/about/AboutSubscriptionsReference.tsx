@@ -196,9 +196,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
             <li>
               {m(locale, "about.subscriptions.reference.phases.guarantee")}
             </li>
-            <li>
-              {m(locale, "about.subscriptions.reference.phases.popular")}
-            </li>
+            <li>{m(locale, "about.subscriptions.reference.phases.popular")}</li>
           </ul>
         </TimelineStep>
       </div>
@@ -237,10 +235,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
         <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/70 tw-p-4 sm:tw-p-6">
           <ul className={LIST_CLASS}>
             <li>
-              {m(
-                locale,
-                "about.subscriptions.reference.delegation.intro"
-              )}
+              {m(locale, "about.subscriptions.reference.delegation.intro")}
             </li>
             <li>
               {m(
@@ -284,10 +279,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
               </ol>
             </li>
             <li>
-              {m(
-                locale,
-                "about.subscriptions.reference.delegation.tapIntro"
-              )}
+              {m(locale, "about.subscriptions.reference.delegation.tapIntro")}
               <ul className={NESTED_LIST_CLASS}>
                 <li>
                   {m(

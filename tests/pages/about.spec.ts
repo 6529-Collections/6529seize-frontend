@@ -56,18 +56,16 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "Choose your Meme Cards. Skip the drop-time scramble.",
+        name: "Subscription Minting",
       })
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
         level: 2,
-        name: "From setup to airdrop in four steps",
+        name: "How it Works",
       })
     ).toBeVisible();
-    await expect(
-      page.getByText("Funding, balance, and deadlines", { exact: true })
-    ).toBeVisible();
+    await expect(page.getByText("Fill Balance", { exact: true })).toBeVisible();
 
     await page
       .getByRole("button", { name: /Open About contents navigation/i })

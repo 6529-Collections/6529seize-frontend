@@ -78,11 +78,7 @@ export default function AboutSubscriptions() {
   );
 }
 
-function SubscriptionHeader({
-  locale,
-}: {
-  readonly locale: SupportedLocale;
-}) {
+function SubscriptionHeader({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <header className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
       <div className="tw-max-w-4xl">
@@ -103,7 +99,7 @@ function SubscriptionHeader({
               icon={faChartLine}
             />
             <span>
-              {m(locale, "about.subscriptions.reference.reportLead")} {" "}
+              {m(locale, "about.subscriptions.reference.reportLead")}{" "}
               <span className="tw-font-medium tw-text-iron-200 tw-transition-colors group-hover/report:tw-text-iron-50">
                 {m(locale, "about.subscriptions.reference.reportLink")}
               </span>
@@ -164,10 +160,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
 
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-mt-6 lg:tw-grid-cols-2 lg:tw-gap-6">
         <OverviewRule
-          title={m(
-            locale,
-            "about.subscriptions.overview.notMintpass.title"
-          )}
+          title={m(locale, "about.subscriptions.overview.notMintpass.title")}
         >
           <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
             <li>
@@ -189,17 +182,11 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         </OverviewRule>
 
         <OverviewRule
-          title={m(
-            locale,
-            "about.subscriptions.overview.regularMinting.title"
-          )}
+          title={m(locale, "about.subscriptions.overview.regularMinting.title")}
         >
           <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-primary-300 sm:tw-space-y-3">
             <li>
-              {m(
-                locale,
-                "about.subscriptions.overview.regularMinting.normal"
-              )}
+              {m(locale, "about.subscriptions.overview.regularMinting.normal")}
             </li>
             <li>
               {m(

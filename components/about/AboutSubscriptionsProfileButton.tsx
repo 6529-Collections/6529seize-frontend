@@ -54,6 +54,9 @@ export default function AboutSubscriptionsProfileButton({
     locale,
     "home.mintSubscriptions.manageSubscriptionsLink"
   );
+  const subscriptionActionLabel = canNavigateToProfileSubscriptionsDirectly
+    ? manageSubscriptionsLabel
+    : connectToSubscribeLabel;
 
   if (variant === "white") {
     return (
@@ -62,9 +65,7 @@ export default function AboutSubscriptionsProfileButton({
         disabled={isConnecting}
         onClicked={handleOpenProfileSubscriptions}
       >
-        {profileSubscriptionsHref
-          ? manageSubscriptionsLabel
-          : connectToSubscribeLabel}
+        {subscriptionActionLabel}
         {profileSubscriptionsHref && (
           <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
         )}
@@ -93,7 +94,7 @@ export default function AboutSubscriptionsProfileButton({
         onClick={handleOpenProfileSubscriptions}
         className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
       >
-        {manageSubscriptionsLabel}
+        {subscriptionActionLabel}
         <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
       </button>
     );
