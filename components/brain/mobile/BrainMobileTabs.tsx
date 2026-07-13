@@ -59,6 +59,24 @@ const getTabStateProps = (isActive: boolean) => ({
   "aria-current": isActive ? ("true" as const) : undefined,
 });
 
+const getIsWaveNavigationLoading = ({
+  waveActive,
+  hasWave,
+  waveNavigationReady,
+  shouldShowCurationTabs,
+  isCurationsPending,
+}: {
+  readonly waveActive: boolean;
+  readonly hasWave: boolean;
+  readonly waveNavigationReady: boolean;
+  readonly shouldShowCurationTabs: boolean;
+  readonly isCurationsPending: boolean;
+}): boolean =>
+  waveActive &&
+  (!hasWave ||
+    !waveNavigationReady ||
+    (shouldShowCurationTabs && isCurationsPending));
+
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
   readonly onViewChange: (view: BrainView) => void;
@@ -213,11 +231,13 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
         <div className="tw-mx-1 tw-h-4 tw-w-px tw-flex-shrink-0 tw-self-center tw-bg-iron-700" />
       </>
     ) : null;
-  const isWaveNavigationLoading =
-    waveActive &&
-    (!wave ||
-      !waveNavigationReady ||
-      (shouldShowCurationTabs && isCurationsPending));
+  const isWaveNavigationLoading = getIsWaveNavigationLoading({
+    waveActive,
+    hasWave: Boolean(wave),
+    waveNavigationReady,
+    shouldShowCurationTabs,
+    isCurationsPending,
+  });
 
   const curationTabs = React.useMemo<
     Array<{ id: string; name: string }>
