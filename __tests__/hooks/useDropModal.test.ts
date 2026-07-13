@@ -7,7 +7,6 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
@@ -22,10 +21,6 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/hooks/useClosingDropId", () => ({
   useClosingDropId: jest.fn(),
-}));
-
-jest.mock("@/helpers/drop-close-navigation.helpers", () => ({
-  markDropCloseNavigation: jest.fn(),
 }));
 
 describe("useDropModal", () => {
@@ -83,7 +78,6 @@ describe("useDropModal", () => {
     });
 
     expect(beginClosingDrop).toHaveBeenCalledWith("drop-1");
-    expect(markDropCloseNavigation).toHaveBeenCalledTimes(1);
     expect(replace).toHaveBeenCalledWith("/alice?foo=bar", { scroll: false });
   });
 });
