@@ -53,17 +53,21 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(page).toHaveTitle("Subscription Minting | About");
     await expectNoHorizontalOverflow(page);
 
-    // Look for the specific paragraph containing "Remote Minting"
-    const remoteMintingParagraph = page.getByText("Remote Minting", {
-      exact: true,
-    });
-    await expect(remoteMintingParagraph).toBeVisible();
-
-    // Additionally, check for some content specific to the Subscriptions page
-    const subscriptionContent = page.getByText(
-      "It is better to think about subscriptions as"
-    );
-    await expect(subscriptionContent).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Choose your Meme Cards. Skip the drop-time scramble.",
+      })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "From setup to airdrop in four steps",
+      })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Funding, balance, and deadlines", { exact: true })
+    ).toBeVisible();
 
     await page
       .getByRole("button", { name: /Open About contents navigation/i })
