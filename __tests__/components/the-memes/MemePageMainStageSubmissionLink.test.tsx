@@ -58,4 +58,26 @@ describe("MemePageMainStageSubmissionLink", () => {
       screen.queryByRole("link", { name: /Main Stage Submission/ })
     ).not.toBeInTheDocument();
   });
+
+  it("renders the mapped submission as an edition-details row", async () => {
+    commonApiFetchMock.mockResolvedValue({
+      meme_card_id: 521,
+      drop_id: "drop-1",
+    });
+
+    render(
+      <MemePageMainStageSubmissionLink
+        memeCardId={521}
+        locale="en-US"
+        variant="details-row"
+      />
+    );
+
+    expect(
+      await screen.findByText("Main Stage Submission")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View Main Stage Submission" })
+    ).toHaveAttribute("href", "/waves/main-stage-wave?drop=drop-1");
+  });
 });
