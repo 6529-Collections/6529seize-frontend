@@ -2042,6 +2042,44 @@
       ]
     },
     {
+      "id": "waves.competition-badges",
+      "kind": "ui_affordance",
+      "title": "Wave competition participant and winner badges",
+      "aliases": [
+        "competition badge",
+        "participant badge",
+        "winner badge",
+        "wave winner medal",
+        "wave participant flag",
+        "competition entries badge"
+      ],
+      "keywords": [
+        "waves",
+        "competition",
+        "participant",
+        "winner",
+        "badge",
+        "entries",
+        "chat",
+        "vote"
+      ],
+      "facts": [
+        "A circular violet flag beside a drop author means that author has an active participatory entry in the current wave.",
+        "A circular emerald medal beside a drop author means that author has a winning entry in the current wave.",
+        "Competition badges can appear on chat, participatory, and winner drops and are scoped to the current wave.",
+        "Competition badges do not appear in other waves unless the author also qualifies there.",
+        "The wave competition badges are hidden in The Memes Main Stage, which keeps its existing artist badges.",
+        "Selecting either badge loads and opens that author's full entries for the current wave; users can switch active and winning sections when both exist.",
+        "The entry viewer offers voting only for participatory entries while voting is open, and normal voting eligibility and credit rules still apply."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "competition", "badges", "voting"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-wave-competition-badges.md"
+      ]
+    },
+    {
       "id": "waves.slow-mode",
       "kind": "business_rule",
       "title": "Wave slow mode",
@@ -2906,15 +2944,21 @@
         "up"
       ],
       "facts": [
-        "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
+        "The Memes subscriptions are an optional way to mint eligible Meme Cards remotely without being online at mint time, with estimated gas savings of about 80% for one card and up to 98% for ten cards funded by one ETH transfer.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
+        "The setup path is: connect a wallet, open the profile Subscriptions tab, add a completely non-refundable ETH balance, choose Automatic or Manual mode, and select or skip upcoming eligible cards.",
+        "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions", "/tools/subscriptions-report"],
       "tags": ["subscriptions", "memes", "glossary"],
       "source_refs": [
+        "components/about/AboutSubscriptions.tsx",
+        "components/about/AboutSubscriptionsReference.tsx",
         "ops/docs/open-data/feature-meme-subscriptions.md",
         "ops/docs/profiles/tabs/feature-subscriptions-tab.md"
       ]
@@ -2951,12 +2995,17 @@
       "facts": [
         "Subscriptions do not create extra eligibility.",
         "A subscription can only mint within the phase and allowlist access the profile would otherwise have.",
+        "Phase 0 subscription mints are guaranteed because Phase 0 is underallocated; Phase 1 and Phase 2 mints depend on card availability.",
+        "When a phase has more subscription mints than available cards, cards are airdropped in the order subscription payments were received.",
         "Top-ups must be received by 00:00 UTC the day before a Meme Card mint to be eligible for that mint."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions"],
       "tags": ["subscriptions", "eligibility"],
-      "source_refs": ["ops/docs/open-data/feature-meme-subscriptions.md"]
+      "source_refs": [
+        "components/about/AboutSubscriptionsReference.tsx",
+        "ops/docs/open-data/feature-meme-subscriptions.md"
+      ]
     },
     {
       "id": "subscriptions.top-up-troubleshooting",
