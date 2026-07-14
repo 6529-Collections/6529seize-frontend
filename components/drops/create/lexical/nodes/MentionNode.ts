@@ -35,7 +35,7 @@ function convertMentionElement(
   if (textContent !== null) {
     const node = $createMentionNode(
       textContent,
-      domNode.dataset.mentionedProfileId ?? null
+      domNode.dataset["mentionedProfileId"] ?? null
     );
     return {
       node,
@@ -107,7 +107,7 @@ export class MentionNode extends TextNode {
     const element = document.createElement("span");
     element.setAttribute("data-lexical-mention", "true");
     if (this.__mentionedProfileId) {
-      element.dataset.mentionedProfileId = this.__mentionedProfileId;
+      element.dataset["mentionedProfileId"] = this.__mentionedProfileId;
     }
     element.textContent = this.__text;
     return { element };
