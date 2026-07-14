@@ -1,6 +1,8 @@
 import { bucketMs } from "@/utils/monitoring/mobileLaunchTimingBuckets";
 import * as Sentry from "@sentry/nextjs";
 
+export const SESSION_REFRESH_SIGNAL_NAME = "auth_session_refresh";
+
 type SessionRefreshTelemetryClientType = "web" | "native" | "desktop";
 type SessionRefreshTelemetryOutcome =
   | "started"
@@ -101,11 +103,11 @@ function recordSessionRefreshTelemetry(
       attrs.outcome === "backend_error" ||
       attrs.outcome === "network_error"
     ) {
-      Sentry.logger.warn("auth_session_refresh", attrs);
+      Sentry.logger.warn(SESSION_REFRESH_SIGNAL_NAME, attrs);
       return;
     }
 
-    Sentry.logger.info("auth_session_refresh", attrs);
+    Sentry.logger.info(SESSION_REFRESH_SIGNAL_NAME, attrs);
   } catch {
     // Telemetry must not affect auth state transitions.
   }

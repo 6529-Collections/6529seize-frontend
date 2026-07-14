@@ -17,9 +17,12 @@ const NORMAL_SAMPLE_RATE = 0.05;
 const FOCUSED_ROUTE_SAMPLE_RATE = 1;
 const TIMEOUT_FLUSH_MS = 15000;
 
+export const MOBILE_LAUNCH_SIGNAL_NAME = "mobile_launch_timing";
+
 type FlushReason =
   | "shell_paint"
   | "waves_content_visible"
+  | "notifications_content_visible"
   | "timeout"
   | "pagehide"
   | "error"
@@ -290,11 +293,11 @@ function flushMobileLaunchTiming(
     sampleRate,
   });
   if (warn) {
-    Sentry.logger.warn("mobile_launch_timing", attrs);
+    Sentry.logger.warn(MOBILE_LAUNCH_SIGNAL_NAME, attrs);
     return;
   }
 
-  Sentry.logger.info("mobile_launch_timing", attrs);
+  Sentry.logger.info(MOBILE_LAUNCH_SIGNAL_NAME, attrs);
 }
 
 function getActiveState(): LaunchState | null {
@@ -554,6 +557,7 @@ function getSampleRate(routeFamily: string, platform: string): number {
 
 function isFocusedLaunchRoute(routeFamily: string): boolean {
   return (
+    routeFamily === "/notifications" ||
     routeFamily === "/waves" ||
     routeFamily === "/waves/[wave]" ||
     routeFamily === "/waves/create" ||
@@ -576,6 +580,7 @@ function buildMilestoneAttributes(
   addStepOffsetAttr(attrs, state, "auth_provider_mounted");
   addStepOffsetAttr(attrs, state, "auth_ready");
   addStepOffsetAttr(attrs, state, "first_useful_app_shell");
+  addStepOffsetAttr(attrs, state, "route_first_useful_content");
   addStepOffsetAttr(attrs, state, "waves_layout_mounted");
   addStepOffsetAttr(attrs, state, "wave_metadata_loaded");
   addStepOffsetAttr(attrs, state, "wave_messages_loaded");
@@ -591,12 +596,17 @@ function buildMilestoneAttributes(
   const wagmiUnblockedMs = getStepOffsetMs(state, "wagmi_children_unblocked");
   const wagmiReadyMs = getStepOffsetMs(state, "wagmi_ready");
   const shellMs = getStepOffsetMs(state, "first_useful_app_shell");
+  const firstUsefulContentMs = getStepOffsetMs(
+    state,
+    "route_first_useful_content"
+  );
   const waveMetadataMs = getStepOffsetMs(state, "wave_metadata_loaded");
   const waveMessagesMs = getStepOffsetMs(state, "wave_messages_loaded");
   const firstDropRenderedMs = getStepOffsetMs(state, "first_drop_rendered");
   const wavesContentMs = getStepOffsetMs(state, "waves_first_content_visible");
 
   addFlatTimingAlias(attrs, "layout_measure_complete", shellMs);
+  addFlatTimingAlias(attrs, "first_useful_content", firstUsefulContentMs);
   addFlatTimingAlias(attrs, "wave_metadata_loaded", waveMetadataMs);
   addFlatTimingAlias(attrs, "wave_messages_loaded", waveMessagesMs);
   addFlatTimingAlias(attrs, "first_drop_rendered", firstDropRenderedMs);

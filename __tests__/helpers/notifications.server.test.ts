@@ -12,6 +12,20 @@ import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import type { TypedNotificationsResponse } from "@/types/feed.types";
 
+const mockTraceServerRouteData = jest.fn(
+  async (_options: unknown, task: () => Promise<unknown>) => task()
+);
+
+jest.mock("@/utils/monitoring/serverRouteTelemetry", () => ({
+  getServerRouteAuthCohort: jest.fn(() => "authenticated"),
+  SERVER_ROUTE_SPAN_NAMES: {
+    notificationsFeedPrefetch: "notifications.feed.prefetch",
+    notificationsProfilePrefetch: "notifications.profile.prefetch",
+  },
+  traceServerRouteData: (options: unknown, task: () => Promise<unknown>) =>
+    mockTraceServerRouteData(options, task),
+}));
+
 jest.mock("jwt-decode", () => ({ jwtDecode: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -38,6 +52,9 @@ const notifications = {
 describe("prefetchNotificationsPageData", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTraceServerRouteData.mockImplementation(
+      async (_options: unknown, task: () => Promise<unknown>) => task()
+    );
     (jwtDecode as jest.Mock).mockReturnValue({ sub: "0xABC" });
     (commonApiFetch as jest.Mock).mockResolvedValue(profile);
     (fetchNotificationsV2 as jest.Mock).mockResolvedValue(notifications);
@@ -88,6 +105,28 @@ describe("prefetchNotificationsPageData", () => {
     ]);
     expect(fetchWaveDropsFeedV2).not.toHaveBeenCalled();
     expect(fetchWavesV2Page).not.toHaveBeenCalled();
+    expect(mockTraceServerRouteData).toHaveBeenNthCalledWith(
+      1,
+      {
+        name: "notifications.profile.prefetch",
+        routeFamily: "/notifications",
+        dataPath: "profile",
+        apiRequestCount: 1,
+        authCohort: "authenticated",
+      },
+      expect.any(Function)
+    );
+    expect(mockTraceServerRouteData).toHaveBeenNthCalledWith(
+      2,
+      {
+        name: "notifications.feed.prefetch",
+        routeFamily: "/notifications",
+        dataPath: "notifications_feed",
+        apiRequestCount: 1,
+        authCohort: "authenticated",
+      },
+      expect.any(Function)
+    );
   });
 
   it("does not fetch or seed user data without authentication", async () => {
@@ -145,6 +184,34 @@ describe("prefetchNotificationsPageData", () => {
     );
     expect(fetchNotificationsV2).not.toHaveBeenCalled();
     expect(queryClient.getQueryCache().getAll()).toHaveLength(1);
+  });
+
+  it("keeps notifications prefetch best-effort while exposing its error to tracing", async () => {
+    const queryClient = new QueryClient();
+    const fetchError = new Error("notifications failed");
+    const tracedTaskErrors: unknown[] = [];
+    mockTraceServerRouteData.mockImplementation(
+      async (_options: unknown, task: () => Promise<unknown>) => {
+        try {
+          return await task();
+        } catch (error) {
+          tracedTaskErrors.push(error);
+          throw error;
+        }
+      }
+    );
+    (fetchNotificationsV2 as jest.Mock).mockRejectedValue(fetchError);
+
+    await expect(
+      prefetchNotificationsPageData({
+        queryClient,
+        headers: { Authorization: "Bearer token" },
+      })
+    ).resolves.toBeUndefined();
+
+    expect(commonApiFetch).toHaveBeenCalledTimes(1);
+    expect(fetchNotificationsV2).toHaveBeenCalledTimes(1);
+    expect(tracedTaskErrors).toEqual([fetchError]);
   });
 
   it("leaves the route fallback to handle profile fetch failures", async () => {
