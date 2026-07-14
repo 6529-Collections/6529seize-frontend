@@ -89,7 +89,9 @@ it("keeps an empty-selection click inside a Lexical block", async () => {
   fireEvent.click(editor);
   await act(async () => Promise.resolve());
 
-  const anchorNode = window.getSelection()?.anchorNode ?? null;
-  expect(anchorNode).not.toBe(editor);
-  expect(editor.contains(anchorNode)).toBe(true);
+  await waitFor(() => {
+    const anchorNode = window.getSelection()?.anchorNode ?? null;
+    expect(anchorNode).not.toBe(editor);
+    expect(editor.contains(anchorNode)).toBe(true);
+  });
 });

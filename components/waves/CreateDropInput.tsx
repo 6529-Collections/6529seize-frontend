@@ -294,17 +294,21 @@ const CreateDropInput = forwardRef<
 
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
     const editorCommandsRef = useRef<EditorCommandsPluginHandles | null>(null);
-    const clearEditorState = () => {
+    const clearEditorState = useCallback(() => {
       clearEditorRef.current?.clearEditorState();
-    };
+    }, []);
 
-    useImperativeHandle(ref, () => ({
-      clearEditorState,
-      setMarkdown: (markdown: string) =>
-        editorCommandsRef.current?.setMarkdown(markdown),
-      focus: () => editorCommandsRef.current?.focus(),
-      blur: () => editorCommandsRef.current?.blur(),
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        clearEditorState,
+        setMarkdown: (markdown: string) =>
+          editorCommandsRef.current?.setMarkdown(markdown),
+        focus: () => editorCommandsRef.current?.focus(),
+        blur: () => editorCommandsRef.current?.blur(),
+      }),
+      [clearEditorState]
+    );
 
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
