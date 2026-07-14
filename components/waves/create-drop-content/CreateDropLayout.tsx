@@ -209,22 +209,26 @@ export default function CreateDropLayout({
   const { setToast } = useAuth();
   const locale = useBrowserLocale();
   const submitWithResolvedAliases = async () => {
+    let expansion: Awaited<
+      ReturnType<CreateDropInputHandles["expandMentionAliases"]>
+    >;
     try {
       const expandMentionAliases =
         createDropInputRef.current?.expandMentionAliases;
       if (!expandMentionAliases) {
         throw new Error("Mention shortcuts are not ready yet.");
       }
-      const expansion = await expandMentionAliases();
-      if (!expansion.completed) return;
-      await onDrop(expansion.editorState);
+      expansion = await expandMentionAliases();
     } catch {
       setToast({
         type: "error",
         title: t(locale, "waves.composer.mentionShortcuts.loadErrorTitle"),
         message: t(locale, "waves.composer.mentionShortcuts.loadErrorMessage"),
       });
+      return;
     }
+    if (!expansion.completed) return;
+    await onDrop(expansion.editorState);
   };
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;

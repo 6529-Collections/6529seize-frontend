@@ -418,7 +418,11 @@ const NewMentionsPlugin = forwardRef<
           ]
         : [];
     const aliasOptions = aliases
-      .filter((alias) => alias.alias.toLowerCase().startsWith(normalizedQuery))
+      .filter(
+        (alias) =>
+          normalizedQuery.length > 0 &&
+          alias.alias.toLowerCase().startsWith(normalizedQuery)
+      )
       .map(
         (alias) =>
           new MentionTypeaheadOption({

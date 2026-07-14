@@ -181,6 +181,8 @@ describe("MentionsPlugin", () => {
     render(
       <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
     );
+    expect(capturedProps.options).toHaveLength(0);
+
     act(() => capturedProps.onQueryChange("FRE"));
 
     expect(capturedProps.options).toHaveLength(1);
