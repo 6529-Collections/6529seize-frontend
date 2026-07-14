@@ -391,6 +391,17 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Profile-Waves-Feed",
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
+  "waves.leaderboard.listLabel": "Leaderboard-Drops",
+  "waves.leaderboard.loadingEarlier": "Frühere Drops werden geladen",
+  "waves.leaderboard.previousLoadError":
+    "Frühere Drops konnten nicht geladen werden. Wähle „Erneut versuchen“, um den Ladevorgang zu wiederholen.",
+  "waves.leaderboard.retryEarlier": "Frühere Drops erneut laden",
+  "waves.leaderboard.loadingMore": "Weitere Drops werden geladen",
+  "waves.leaderboard.nextLoadError":
+    "Weitere Drops konnten nicht geladen werden. Wähle „Erneut versuchen“, um den Ladevorgang zu wiederholen.",
+  "waves.leaderboard.retryMore": "Weitere Drops erneut laden",
+  "waves.leaderboard.loadMore": "Weitere Drops laden",
+  "waves.leaderboard.loadingMoreButton": "Wird geladen…",
   "waves.poll.actions.viewResults": "Ergebnisse anzeigen",
   "waves.poll.actions.vote": "Abstimmen",
   "waves.poll.actions.changeVote": "Stimme ändern",

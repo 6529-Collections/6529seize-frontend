@@ -167,10 +167,10 @@ export default function WaveHeaderTrustStats({
               <Icon className="tw-size-3.5" aria-hidden="true" />
             </span>
             <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-              <dt className="tw-truncate tw-text-[0.5625rem] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.1em] tw-text-iron-500">
+              <dt className="tw-truncate tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.1em]">
                 {stat.label}
               </dt>
-              <dd className="tw-m-0 tw-truncate tw-text-sm tw-font-medium tw-tabular-nums tw-leading-5 tw-text-iron-100">
+              <dd className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-iron-100">
                 {stat.value}
               </dd>
             </div>

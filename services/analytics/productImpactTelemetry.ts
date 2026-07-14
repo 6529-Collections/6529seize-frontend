@@ -29,14 +29,17 @@ type ProductImpactStatusBucket =
 
 type ProductImpactSeverity = "info" | "warning";
 
-type ProductImpactEventName =
-  | "Auth Session Refresh Product Impact"
-  | "Auth Session Refresh Succeeded"
-  | "Auth Validation Cancelled"
-  | "Wave Feed Load Cancelled"
-  | "Wave Feed Load Failed"
-  | "Wave Feed Load Started"
-  | "Wave Feed Load Succeeded";
+export const PRODUCT_IMPACT_EVENT_NAMES = [
+  "Auth Session Refresh Product Impact",
+  "Auth Session Refresh Succeeded",
+  "Auth Validation Cancelled",
+  "Wave Feed Load Cancelled",
+  "Wave Feed Load Failed",
+  "Wave Feed Load Started",
+  "Wave Feed Load Succeeded",
+] as const;
+
+type ProductImpactEventName = (typeof PRODUCT_IMPACT_EVENT_NAMES)[number];
 
 type ProductImpactProperties = AnalyticsProperties & {
   readonly endpoint_family?: "auth_session_refresh" | "wave_drops_feed";
@@ -335,6 +338,14 @@ function getDurationBucket(durationMs: number | undefined): string | undefined {
   return "over_10s";
 }
 
+function getRawDurationMs(durationMs: number | undefined): number | undefined {
+  if (durationMs === undefined || !Number.isFinite(durationMs)) {
+    return undefined;
+  }
+
+  return Math.max(0, Math.round(durationMs));
+}
+
 function buildBaseProperties(
   properties: ProductImpactProperties
 ): ProductImpactProperties {
@@ -350,18 +361,32 @@ function buildBaseProperties(
 function logProductImpactEvent(
   eventName: ProductImpactEventName,
   properties: ProductImpactProperties,
-  severity: ProductImpactSeverity
+  severity: ProductImpactSeverity,
+  sentryOnlyProperties: ProductImpactProperties = {}
 ): void {
   const payload = buildBaseProperties(properties);
-  trackAnalyticsEvent(eventName, payload);
 
-  const sentryLogName = eventName.toLowerCase().replaceAll(" ", "_");
-  if (severity === "warning") {
-    Sentry.logger.warn(sentryLogName, payload);
-    return;
+  try {
+    trackAnalyticsEvent(eventName, payload);
+  } catch {
+    // Product behavior must not depend on Mixpanel availability.
   }
 
-  Sentry.logger.info(sentryLogName, payload);
+  try {
+    const sentryPayload = {
+      ...payload,
+      ...sentryOnlyProperties,
+    };
+    const sentryLogName = eventName.toLowerCase().replaceAll(" ", "_");
+    if (severity === "warning") {
+      Sentry.logger.warn(sentryLogName, sentryPayload);
+      return;
+    }
+
+    Sentry.logger.info(sentryLogName, sentryPayload);
+  } catch {
+    // Product behavior must not depend on Sentry availability.
+  }
 }
 
 function getWaveBaseProperties(
@@ -401,7 +426,10 @@ export function trackWaveFeedLoadSucceeded(
       product_failure: false,
       status_bucket: "2xx",
     },
-    "info"
+    "info",
+    {
+      duration_ms: getRawDurationMs(telemetry.durationMs),
+    }
   );
 }
 

@@ -26,6 +26,7 @@ import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -45,6 +46,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 > = ({
   drop,
   onDropClick,
+  onVoteClick,
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
@@ -112,6 +114,10 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   };
 
   const handleVoteButtonClick = () => {
+    if (onVoteClick) {
+      onVoteClick(drop);
+      return;
+    }
     openVoteModal();
   };
 
@@ -192,19 +198,20 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       </div>
 
       {/* Voting modal */}
-      {isMobileScreen ? (
-        <MobileVotingModal
-          drop={drop}
-          isOpen={isVoteModalOpen}
-          onClose={closeVoteModal}
-        />
-      ) : (
-        <VotingModal
-          drop={drop}
-          isOpen={isVoteModalOpen}
-          onClose={closeVoteModal}
-        />
-      )}
+      {!onVoteClick &&
+        (isMobileScreen ? (
+          <MobileVotingModal
+            drop={drop}
+            isOpen={isVoteModalOpen}
+            onClose={closeVoteModal}
+          />
+        ) : (
+          <VotingModal
+            drop={drop}
+            isOpen={isVoteModalOpen}
+            onClose={closeVoteModal}
+          />
+        ))}
 
       {/* Mobile menu slide-up */}
       {hasTouchScreen &&
