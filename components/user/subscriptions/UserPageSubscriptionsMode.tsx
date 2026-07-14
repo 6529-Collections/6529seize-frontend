@@ -78,14 +78,14 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 sm:tw-gap-5">
-      <div className="tw-min-w-0">
+    <div className="tw-group tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 tw-p-1 sm:tw-gap-5">
+      <div className="tw-min-w-0 tw-pr-2 sm:tw-pr-6">
         <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
-          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+          <h3 className="tw-m-0 tw-text-[15px] tw-font-medium tw-leading-5 tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
             Mode
           </h3>
           {props.details && props.details.last_update > 0 && (
-            <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+            <span className="tw-text-[11px] tw-font-medium tw-text-iron-500">
               {new Date(props.details.last_update).toLocaleString("en-US", {
                 day: "numeric",
                 month: "short",
@@ -101,7 +101,7 @@ export default function UserPageSubscriptionsMode(
         </div>
         <p
           id={descriptionId}
-          className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-leading-5 tw-text-iron-400"
+          className="tw-mb-0 tw-mt-1.5 tw-text-[13px] tw-font-light tw-leading-relaxed tw-text-iron-400"
         >
           <span className="tw-font-medium tw-text-iron-200">
             {isAuto ? "Automatic" : "Manual"}

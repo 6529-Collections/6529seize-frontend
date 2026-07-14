@@ -2,6 +2,7 @@
 
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { BoltIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -62,17 +63,19 @@ function getTopUpModalEmoji(
 }
 
 const TOP_UP_OPTION_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-grid-cols-4";
+  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4";
+const TOP_UP_DEEP_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-3";
 const TOP_UP_ACTION_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end";
+  "tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end";
 const TOP_UP_OPTION_CLASS =
-  "tw-relative tw-min-h-[7.5rem] tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-text-left tw-text-iron-100 tw-transition-all tw-duration-200 motion-reduce:tw-transition-none focus-within:tw-ring-2 focus-within:tw-ring-primary-400";
+  "tw-group tw-relative tw-min-h-36 tw-w-full tw-overflow-hidden tw-rounded-xl tw-p-5 tw-text-left tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-inset tw-transition-all tw-duration-500 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none focus-within:tw-ring-2 focus-within:tw-ring-primary-400 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-shadow-2xl desktop-hover:hover:tw-shadow-black/50";
 
 function getTopUpOptionClass(selected: boolean): string {
   return `${TOP_UP_OPTION_CLASS} ${
     selected
-      ? "tw-border-primary-400/50 tw-bg-iron-900 tw-shadow-[0_12px_28px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.05)]"
-      : "tw-border-white/[0.07] tw-bg-iron-950 tw-shadow-[0_10px_24px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.02)] desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-iron-900/70"
+      ? "tw-bg-iron-900 tw-shadow-2xl tw-ring-white/10"
+      : "tw-bg-iron-950 tw-ring-white/[0.05]"
   }`;
 }
 
@@ -392,7 +395,7 @@ export default function UserPageSubscriptionsTopUp() {
       )}
       {showDeep && (
         <>
-          <div className={`${TOP_UP_OPTION_GRID_CLASS} tw-mt-3`}>
+          <div className={`${TOP_UP_DEEP_GRID_CLASS} tw-mt-3`}>
             {printRemainingMints(
               remainingMintsForPeriod,
               "Period",
@@ -421,7 +424,7 @@ export default function UserPageSubscriptionsTopUp() {
             >
               <span className="tw-sr-only">Select Other card count</span>
             </label>
-            <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-min-h-[5.5rem] tw-flex-col tw-justify-between tw-pr-8">
+            <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-min-h-24 tw-flex-col tw-justify-between tw-pr-8">
               <span className="tw-pointer-events-auto tw-absolute tw-right-0 tw-top-0 tw-flex">
                 <input
                   id="subscription-top-up-other"
@@ -434,7 +437,7 @@ export default function UserPageSubscriptionsTopUp() {
                   className={styles["radioInput"]}
                 />
               </span>
-              <span className="tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+              <span className="tw-text-xl tw-font-medium tw-leading-7 tw-text-iron-100">
                 Other
               </span>
               <div className="tw-mt-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
@@ -445,7 +448,7 @@ export default function UserPageSubscriptionsTopUp() {
                   placeholder="count"
                   aria-label="Custom card count"
                   value={memeCount}
-                  className="tw-pointer-events-auto tw-w-[100px] tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-0.5 tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
+                  className="tw-pointer-events-auto tw-min-h-11 tw-w-[100px] tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-1 tw-text-sm tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
                   onFocus={() => {
                     setSelectedOption("other");
                   }}
@@ -468,10 +471,10 @@ export default function UserPageSubscriptionsTopUp() {
             </div>
           </div>
         </div>
-        <div className="tw-flex tw-items-center tw-justify-center tw-pt-2 sm:tw-pt-0">
+        <div className="tw-flex tw-items-center tw-justify-end tw-pt-2 sm:tw-pt-0">
           <button
             type="button"
-            className="tw-inline-flex tw-min-h-11 tw-w-full tw-min-w-32 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-8 tw-py-2.5 tw-text-base tw-font-semibold tw-text-iron-950 tw-shadow-[0_8px_20px_rgba(0,0,0,0.2)] tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-white sm:tw-w-auto"
+            className="tw-inline-flex tw-min-h-11 tw-w-full tw-min-w-32 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-6 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-950 tw-shadow-lg tw-shadow-white/10 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-white sm:tw-w-auto"
             onClick={handleSend}
             disabled={
               sendTransaction.isPending ||
@@ -482,6 +485,7 @@ export default function UserPageSubscriptionsTopUp() {
             }
             aria-label="Send top up"
           >
+            <BoltIcon className="tw-size-4" aria-hidden="true" />
             Send
           </button>
         </div>
@@ -494,8 +498,9 @@ export default function UserPageSubscriptionsTopUp() {
       <UserPageSubscriptionsSection
         id="profile-subscriptions-top-up"
         title="Top Up"
+        className="tw-pb-4 tw-pt-6"
         action={
-          <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-0.5">
+          <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-0.5 tw-rounded-full tw-bg-white/5 tw-px-3 tw-py-1 tw-ring-1 tw-ring-white/10">
             <span>Sending to</span>
             <span
               className="tw-break-all tw-text-iron-300"
@@ -593,10 +598,9 @@ function CardCountOption(
   return (
     <label
       htmlFor={props.id}
-      aria-label={labelText}
       className={`${getTopUpOptionClass(props.selected)} tw-block tw-cursor-pointer`}
     >
-      <span className="tw-absolute tw-right-4 tw-top-4 tw-flex">
+      <span className="tw-absolute tw-right-5 tw-top-5 tw-flex">
         <input
           id={props.id}
           type="radio"
@@ -613,18 +617,25 @@ function CardCountOption(
           className={styles["radioInput"]}
         />
       </span>
-      <div className="tw-flex tw-min-h-[5.5rem] tw-min-w-0 tw-flex-col tw-justify-between tw-pr-8">
+      <div className="tw-flex tw-min-h-24 tw-min-w-0 tw-flex-col tw-justify-between tw-pr-8">
         {props.display && (
-          <span className="tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-400">
+          <span
+            className={`tw-text-xs tw-font-medium tw-leading-5 ${
+              props.selected ? "tw-text-primary-300" : "tw-text-iron-400"
+            }`}
+          >
             {props.display}
           </span>
         )}
         <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-          <span className="tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+          <span className="tw-text-xl tw-font-medium tw-leading-7 tw-text-iron-100">
             {props.count.toLocaleString()} Card{props.count > 1 && "s"}
           </span>
-          <span className="tw-text-sm tw-leading-5 tw-text-iron-400">
-            {numberWithCommasFromString(getEthForCards(props.count))} ETH
+          <span className="tw-flex tw-items-center tw-gap-1.5">
+            <span className="tw-text-sm tw-leading-5 tw-text-iron-400">
+              {numberWithCommasFromString(getEthForCards(props.count))}
+            </span>
+            <span className="tw-text-xs tw-text-iron-500">ETH</span>
           </span>
         </div>
       </div>

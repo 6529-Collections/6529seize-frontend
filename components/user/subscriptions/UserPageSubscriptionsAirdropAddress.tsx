@@ -28,10 +28,10 @@ export default function UserPageSubscriptionsAirdropAddress(
 
   return (
     <div className="tw-min-w-0">
-      <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-400">
+      <h3 className="tw-m-0 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
         Airdrop Address
       </h3>
-      <div className="tw-mt-3 tw-min-h-8">
+      <div className="tw-mt-2 tw-min-h-8">
         {props.fetching ? (
           <DotLoader />
         ) : (
@@ -39,7 +39,7 @@ export default function UserPageSubscriptionsAirdropAddress(
             {airdropAddress && (
               <span className="tw-min-w-0 tw-break-all">
                 {airdropAddress.ens && (
-                  <span className="tw-mb-1 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+                  <span className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-200">
                     {airdropAddress.ens}
                   </span>
                 )}

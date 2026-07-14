@@ -32,7 +32,7 @@ import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 
 const HISTORY_PAGE_SIZE = 10;
 const SUBSCRIBE_GROUP_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-5 tw-shadow-[0_14px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.025)] sm:tw-p-6";
+  "tw-relative tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.05] tw-transition-all tw-duration-500 tw-ease-out";
 
 function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
@@ -245,7 +245,7 @@ export default function UserPageSubscriptions(
   }
 
   return (
-    <div className="tw-space-y-8 tw-pb-6 sm:tw-space-y-10">
+    <div className="tw-space-y-4 tw-pb-6">
       <UserPageSubscriptionsSection
         id="profile-subscriptions-overview"
         title="Subscribe"
@@ -259,7 +259,7 @@ export default function UserPageSubscriptions(
           </Link>
         }
       >
-        <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
           <div className={SUBSCRIBE_GROUP_CLASS}>
             <UserPageSubscriptionsBalance
               details={details}
@@ -267,7 +267,7 @@ export default function UserPageSubscriptions(
               refresh={refresh}
               show_refresh={isConnectedAccount}
             />
-            <div className="tw-my-5 tw-h-px tw-bg-white/[0.07]" />
+            <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-5" />
             <UserPageSubscriptionsAirdropAddress
               show_edit={isConnectedAccount}
               airdrop={airdropResult}
@@ -275,7 +275,7 @@ export default function UserPageSubscriptions(
             />
           </div>
           <div className={SUBSCRIBE_GROUP_CLASS}>
-            <div className="tw-mb-5 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-400">
+            <div className="tw-mb-5 tw-flex tw-items-center tw-gap-2 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
               <AdjustmentsHorizontalIcon
                 className="tw-size-4"
                 aria-hidden="true"
@@ -288,7 +288,7 @@ export default function UserPageSubscriptions(
               readonly={!isConnectedAccount}
               refresh={refresh}
             />
-            <div className="tw-my-5 tw-h-px tw-bg-white/[0.07]" />
+            <div className="tw-my-4 tw-h-px tw-bg-white/5" />
             <UserPageSubscriptionsEditionPreference
               profileKey={profileKey}
               details={details}

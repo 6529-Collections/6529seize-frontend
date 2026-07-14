@@ -19,7 +19,7 @@ import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 const HISTORY_PAGE_SIZE = 10;
 const HISTORY_ENTRY_CLASS =
-  "tw-min-w-0 tw-rounded-lg tw-bg-iron-900/50 tw-p-4 tw-transition-colors desktop-hover:hover:tw-bg-iron-900/70";
+  "tw-min-w-0 tw-rounded-lg tw-bg-white/[0.02] tw-p-3 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-white/[0.04]";
 
 function getSubscriptionLogKey(log: SubscriptionLog, index: number): string {
   return log.id === undefined
@@ -44,8 +44,9 @@ export default function UserPageSubscriptionsHistory(
     <UserPageSubscriptionsSection
       id="profile-subscriptions-history"
       title="Subscription History"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6"
     >
-      <div className="tw-divide-y tw-divide-solid tw-divide-white/[0.07] tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-px-4 tw-shadow-[0_14px_36px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.025)] sm:tw-px-5">
+      <div className="tw-divide-y tw-divide-solid tw-divide-white/5 tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-1.5 tw-shadow-lg tw-ring-1 tw-ring-white/[0.05]">
         <HistoryDisclosure
           title="Redeemed Subscriptions"
           loading={props.redeemedLoading === true}
@@ -128,14 +129,14 @@ function HistoryDisclosure({
 
   return (
     <details className="tw-group" aria-busy={loading} open>
-      <summary className="tw-flex tw-min-h-14 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-white [&::-webkit-details-marker]:tw-hidden">
+      <summary className="tw-flex tw-min-h-14 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.02] desktop-hover:hover:tw-text-white [&::-webkit-details-marker]:tw-hidden">
         {title}
         <ChevronDownIcon
           className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-180"
           aria-hidden="true"
         />
       </summary>
-      <div className="tw-pb-4">
+      <div className="tw-px-3 tw-pb-3">
         {content}
         {!loading && pagination}
       </div>
@@ -145,7 +146,7 @@ function HistoryDisclosure({
 
 function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
   return (
-    <div className="tw-flex tw-min-h-20 tw-animate-pulse tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40 tw-p-4">
+    <div className="tw-flex tw-min-h-20 tw-animate-pulse tw-items-center tw-rounded-lg tw-bg-white/[0.02] tw-p-4">
       <output className="tw-sr-only">Loading {title}</output>
       <div
         aria-hidden="true"
@@ -157,7 +158,7 @@ function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
 
 function HistoryEmptyState({ children }: { readonly children: ReactNode }) {
   return (
-    <div className="tw-flex tw-min-h-20 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-800 tw-bg-iron-900/30 tw-p-4 tw-text-center">
+    <div className="tw-flex tw-min-h-20 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-white/[0.02] tw-p-4 tw-text-center">
       <ArchiveBoxIcon
         className="tw-size-5 tw-text-iron-500"
         aria-hidden="true"

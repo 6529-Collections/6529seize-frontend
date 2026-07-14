@@ -47,7 +47,7 @@ export default function UserPageSubscriptionsUpcoming(
   let content: ReactNode;
   if (props.loading) {
     content = (
-      <div aria-busy="true" className="tw-space-y-2 tw-p-2">
+      <div aria-busy="true" className="tw-space-y-2 tw-p-1.5">
         <output className="tw-sr-only">Loading upcoming drops</output>
         {UPCOMING_SKELETON_ROWS.map((row) => (
           <div
@@ -61,7 +61,7 @@ export default function UserPageSubscriptionsUpcoming(
   } else if (subscriptions.length > 0) {
     content = (
       <>
-        <div className="tw-space-y-1 tw-p-2">
+        <div className="tw-space-y-1 tw-p-1.5">
           {subscriptions.map((subscription, index) => (
             <MemeSubscriptionRow
               key={subscription.token_id}
@@ -104,8 +104,9 @@ export default function UserPageSubscriptionsUpcoming(
     <UserPageSubscriptionsSection
       id="profile-subscriptions-upcoming"
       title="Upcoming Drops"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6"
     >
-      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-shadow-[0_14px_36px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.025)]">
+      <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.05]">
         {content}
       </div>
     </UserPageSubscriptionsSection>
