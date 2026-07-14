@@ -98,6 +98,10 @@ export interface CreateWaveDatesConfig {
   readonly firstDecisionTime: number;
   readonly subsequentDecisions: number[];
   readonly isRolling: boolean;
+  // Rank waves only: when true the wave ranks continuously with no winner
+  // announcements (no decision strategy) and no end date. Omitted/false means
+  // the wave uses the scheduled winner-announcement flow.
+  readonly ongoingRanking?: boolean;
 }
 
 export interface CreateWaveApprovalConfig {
@@ -115,6 +119,7 @@ export interface CreateWaveDisplayConfig {
   readonly approve: CreateWaveApproveDisplayConfig;
   readonly customRules: string | null;
   readonly outcomesVisible: boolean;
+  readonly submissionButtonLabel: string | null;
 }
 
 export enum CreateWaveOutcomeType {
@@ -207,7 +212,7 @@ export interface SidebarWave {
   readonly firstUnreadFollowedSubwaveDropSerialNo: number | null;
   readonly unreadDropsCount: number;
   readonly followedSubwavesCount: number;
-  readonly unreadFollowedSubwaveDrops: number;
+  readonly unreadSubwaveDrops: number;
   readonly latestReadTimestamp: number;
   readonly pinned: boolean;
   readonly muted: boolean;

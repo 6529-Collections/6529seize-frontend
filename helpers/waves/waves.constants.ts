@@ -33,7 +33,23 @@ export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.CardSetTdh]: "Card Set TDH",
 };
 
-export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
+// Perpetual rank waves never award outcomes, so their flow skips the
+// Outcomes step entirely (steps already vary by wave type).
+export const getCreateWaveMainSteps = ({
+  waveType,
+  ongoingRanking,
+}: {
+  readonly waveType: ApiWaveType;
+  readonly ongoingRanking: boolean;
+}): CreateWaveStep[] => {
+  const steps = CREATE_WAVE_MAIN_STEPS[waveType];
+  if (waveType === ApiWaveType.Rank && ongoingRanking) {
+    return steps.filter((step) => step !== CreateWaveStep.OUTCOMES);
+  }
+  return steps;
+};
+
+const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
   [ApiWaveType.Chat]: [
     CreateWaveStep.OVERVIEW,
     CreateWaveStep.GROUPS,

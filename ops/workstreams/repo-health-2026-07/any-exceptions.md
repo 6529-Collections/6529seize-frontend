@@ -1,23 +1,17 @@
 # `any` exceptions ledger
 
-Sites that keep `: any` / `as any` deliberately, with one-line justifications.
-Everything not listed here is expected to stay at zero; the debt-ratchet
-baseline (`scripts/debt-ratchet-baseline.json`, metric `any_casts`) is the
-enforcement backstop.
+Sites that keep direct `: any` / `as any` deliberately, with one-line
+justifications. Everything not listed here is expected to stay at zero; the
+debt-ratchet baseline (`scripts/debt-ratchet-baseline.json`, metric
+`any_casts`) is the enforcement backstop.
 
-Current floor: `any_casts` = 4 (3 permanent + 1 scan false positive).
+Current floor: `any_casts` = 0.
 
-## Permanent exceptions
+## Current exceptions
 
-| Site | Count | Justification |
-| --- | --- | --- |
-| `wagmiConfig/wagmiAppWalletConnector.ts` | 3 | wagmi `createConnector`'s `connect()` return type is conditional on the `withCapabilities` parameter; expressing it without `any` requires `as unknown as` double-casts that add no safety. Runtime shape matches the wagmi v2 connector contract. |
-
-## Scan false positives (not `any` usages)
-
-| Site | Count | Explanation |
-| --- | --- | --- |
-| `app/blog/disney-deekay-their-secret-to-animation/page.tsx` | 1 | The ratchet's textual `\bas\s+any\b` matches the prose "…as powerfully as any great art can" inside JSX copy. No TypeScript cast exists in the file; editorial copy is not changed to satisfy a counter. |
+| Site | Count | Justification           |
+| ---- | ----- | ----------------------- |
+| None | 0     | Keep the floor at zero. |
 
 ## Resolved deferrals (history)
 
@@ -30,12 +24,21 @@ Current floor: `any_casts` = 4 (3 permanent + 1 scan false positive).
   underlying `.result` misread is tracked in issue #3078.
 - `src/types/window.d.ts`: removed with the layout workstream's `src/`
   fold (resolved 2026-07-05).
+- `wagmiConfig/wagmiAppWalletConnector.ts` (3 sites): replaced with a named
+  wagmi connector return type and one targeted assertion at the
+  `withCapabilities` conditional-generic boundary.
+- `app/blog/disney-deekay-their-secret-to-animation/page.tsx` (1 site): removed
+  as a scanner false positive by switching `any_casts` from textual matching to
+  TypeScript AST matching.
 
 ## Known scanner blind spot (for future calibration)
 
-The ratchet regex counts `: any` and `as any` only; generic type arguments
-like `useState<any>()` are invisible to it. A handful of such generics
-remain in `components/delegation/CollectionDelegation.tsx`
+The ratchet counts direct `: any`-style annotations, `as any` assertions, and
+valid TypeScript `<any>` assertions only; generic type arguments like
+`useState<any>()` are invisible to it. Invalid TSX angle-bracket assertion
+syntax fails parsing instead of silently undercounting. A handful of such
+generics remain in
+`components/delegation/CollectionDelegation.tsx`
 (`revokeDelegationParams`, `batchRevokeDelegationParams`, three
 `useState<any[]>` key arrays). They are outside the metric and were left
 untouched by the typing wave; tighten them opportunistically when that

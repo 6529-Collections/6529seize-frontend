@@ -8,10 +8,12 @@ import CreateWaveDisplaySettings from "./CreateWaveDisplaySettings";
 import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";
+import RankScheduleModeSelector from "./type/RankScheduleModeSelector";
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
   customRules: null,
   outcomesVisible: true,
+  submissionButtonLabel: null,
   approve: {
     approvalsTabLabel: "",
     approvedTabLabel: "",
@@ -22,16 +24,20 @@ export default function CreateWaveOverview({
   overview,
   display = DEFAULT_DISPLAY,
   errors,
+  ongoingRanking = false,
   setOverview,
   setDisplay = () => undefined,
+  onOngoingRankingChange = () => undefined,
 }: {
   readonly overview: WaveOverviewConfig;
   readonly display?: CreateWaveDisplayConfig | undefined;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
+  readonly ongoingRanking?: boolean;
   readonly setOverview: (overview: WaveOverviewConfig) => void;
   readonly setDisplay?:
     | ((display: CreateWaveDisplayConfig) => void)
     | undefined;
+  readonly onOngoingRankingChange?: (ongoingRanking: boolean) => void;
 }) {
   const onChange = <K extends keyof WaveOverviewConfig>({
     key,
@@ -75,6 +81,12 @@ export default function CreateWaveOverview({
           })
         }
       />
+      {overview.type === ApiWaveType.Rank && (
+        <RankScheduleModeSelector
+          ongoingRanking={ongoingRanking}
+          onChange={onOngoingRankingChange}
+        />
+      )}
       {overview.type === ApiWaveType.Rank ||
       overview.type === ApiWaveType.Approve ? (
         <CreateWaveDisplaySettings

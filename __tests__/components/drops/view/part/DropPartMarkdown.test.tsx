@@ -9,6 +9,9 @@ import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImage
 import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
+const PARENTHESIZED_ORDERED_LIST_CLASS_NAME =
+  "drop-markdown-ordered-list-paren";
+
 class MockIntersectionObserver {
   observe = jest.fn();
   unobserve = jest.fn();
@@ -140,10 +143,26 @@ const mockTwitterPreviewCard = jest.fn(({ href, tweetId }: any) => (
   />
 ));
 
+const mockGithubLinkPreview = jest.fn(({ href }: any) => (
+  <div data-testid="github-link-preview" data-href={href} />
+));
+
 jest.mock("@/components/waves/LinkPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockLinkPreviewCard(props),
 }));
+
+jest.mock("@/components/waves/github/GithubLinkPreview", () => {
+  const actual = jest.requireActual(
+    "@/components/waves/github/GithubLinkPreview"
+  );
+
+  return {
+    __esModule: true,
+    ...actual,
+    default: (props: any) => mockGithubLinkPreview(props),
+  };
+});
 
 jest.mock("@/components/waves/ArtBlocksTokenCard", () => ({
   __esModule: true,
@@ -182,6 +201,7 @@ beforeEach(() => {
   mockArtBlocksTokenCard.mockClear();
   mockFarcasterCard.mockClear();
   mockTwitterPreviewCard.mockClear();
+  mockGithubLinkPreview.mockClear();
 });
 
 describe("DropPartMarkdown", () => {
@@ -489,6 +509,30 @@ describe("DropPartMarkdown", () => {
     expect(group?.querySelector(".tw-mt-2")).toBeNull();
   });
 
+  it("routes GitHub blob image URLs through GitHub preview instead of direct image rendering", () => {
+    const href =
+      "https://github.com/david-6529/self-custody-education/blob/main/output/craig-self-custody-comic/pages/page-01.png";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={href}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mockGithubLinkPreview).toHaveBeenCalledWith(
+      expect.objectContaining({ href })
+    );
+    expect(screen.getByTestId("github-link-preview")).toHaveAttribute(
+      "data-href",
+      href
+    );
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+  });
+
   it("opens duplicate body markdown image URLs at the clicked item", () => {
     const duplicateSrc = "https://cdn.example.com/same.jpg";
     const partContent = `![first](${duplicateSrc})\n![second](${duplicateSrc})`;
@@ -560,7 +604,7 @@ describe("DropPartMarkdown", () => {
     );
   });
 
-  it("opens bare direct image markdown links from the full body gallery", () => {
+  it("keeps direct image markdown links as links", () => {
     const linkSrc = "https://cdn.example.com/linked.jpg";
     const markdownSrc = "https://cdn.example.com/second.jpg";
     const partContent = `[${linkSrc}](${linkSrc})\n![second](${markdownSrc})`;
@@ -581,19 +625,25 @@ describe("DropPartMarkdown", () => {
       </DropImageGalleryProvider>
     );
 
+    expect(screen.getByRole("link", { name: linkSrc })).toHaveAttribute(
+      "href",
+      linkSrc
+    );
+    expect(
+      screen.queryByRole("button", { name: `Open image ${linkSrc}` })
+    ).toBeNull();
+
     fireEvent.click(
       screen.getByRole("button", {
-        name: `Open image ${linkSrc}`,
+        name: `Open image ${markdownSrc}`,
       })
     );
 
     expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
       "src",
-      linkSrc
+      markdownSrc
     );
-    expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
-      "1 / 2"
-    );
+    expect(screen.queryByTestId("image-gallery-counter")).toBeNull();
   });
 
   it("opens reference-style markdown images from the full body gallery", () => {
@@ -672,7 +722,7 @@ describe("DropPartMarkdown", () => {
   });
 
   it("handles external links", () => {
-    const content = "[link](https://google.com)";
+    const content = "https://google.com";
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
@@ -691,7 +741,7 @@ describe("DropPartMarkdown", () => {
     }
     expect(previewCall.href).toBe("https://google.com");
 
-    const a = screen.getByRole("link", { name: "link" });
+    const a = screen.getByRole("link", { name: "https://google.com" });
     expect(a).toHaveAttribute("target", "_blank");
     expect(a).toHaveAttribute("rel", "noopener noreferrer nofollow");
   });
@@ -786,7 +836,7 @@ describe("DropPartMarkdown", () => {
 
   it("renders Art Blocks token card when feature enabled", async () => {
     publicEnv.VITE_FEATURE_AB_CARD = "true";
-    const content = "[token](https://www.artblocks.io/token/662000)";
+    const content = "https://www.artblocks.io/token/662000";
 
     render(
       <DropPartMarkdown
@@ -817,7 +867,7 @@ describe("DropPartMarkdown", () => {
   });
 
   it("renders Farcaster card for Warpcast links", () => {
-    const content = "[cast](https://warpcast.com/alice/0x123)";
+    const content = "https://warpcast.com/alice/0x123";
 
     render(
       <DropPartMarkdown
@@ -886,7 +936,7 @@ describe("DropPartMarkdown", () => {
   });
 
   it("renders Twitter/X links with the local Twitter preview card", () => {
-    const content = "[tweet](https://twitter.com/someuser/status/2222222222)";
+    const content = "https://twitter.com/someuser/status/2222222222";
 
     render(
       <DropPartMarkdown
@@ -1073,6 +1123,206 @@ describe("DropPartMarkdown", () => {
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
     const a = screen.getByRole("link", { name: "link" });
     expect(a).toHaveAttribute("href", "https://google.com");
+  });
+
+  it("keeps markdown links with anchor text inline without rendering previews", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="field test: [deep sea](https://neal.fun/deep-sea/)"
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    expect(mockArtBlocksTokenCard).not.toHaveBeenCalled();
+    expect(mockFarcasterCard).not.toHaveBeenCalled();
+    expect(mockTwitterPreviewCard).not.toHaveBeenCalled();
+    expect(mockGithubLinkPreview).not.toHaveBeenCalled();
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const link = screen.getByRole("link", { name: "deep sea" });
+
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]).toHaveTextContent("field test: deep sea");
+    expect(link).toHaveAttribute("href", "https://neal.fun/deep-sea/");
+    expect(link.closest("p")).toBe(paragraphs[0]);
+  });
+
+  it("keeps markdown links whose label is the href inline without rendering previews", () => {
+    const href = "https://google.com";
+
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`field test: [${href}](${href})`}
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const link = screen.getByRole("link", { name: href });
+
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]).toHaveTextContent(`field test: ${href}`);
+    expect(link).toHaveAttribute("href", href);
+    expect(link.closest("p")).toBe(paragraphs[0]);
+  });
+
+  it("keeps bare URL previews split out as block cards", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="field test: https://neal.fun/deep-sea/"
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockLinkPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "https://neal.fun/deep-sea/",
+      })
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const preview = screen.getByTestId("link-preview");
+
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]).toHaveTextContent("field test:");
+    expect(preview).toHaveAttribute("data-href", "https://neal.fun/deep-sea/");
+    expect(preview.closest("p")).toBeNull();
+  });
+
+  it("renders specialized markdown links with anchor text as plain links", () => {
+    const href = "https://warpcast.com/alice/0x123";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`[cast](${href})`}
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockFarcasterCard).not.toHaveBeenCalled();
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    expect(screen.getByRole("link", { name: "cast" })).toHaveAttribute(
+      "href",
+      href
+    );
+  });
+
+  it("keeps bare URL previews when a part also has a markdown anchor link", () => {
+    const previewUrl = "https://neal.fun/deep-sea/";
+
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`${previewUrl} see [deep sea](${previewUrl})`}
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    expect(mockLinkPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: previewUrl,
+      })
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const previews = screen.getAllByTestId("link-preview");
+    const anchor = screen.getByRole("link", { name: "deep sea" });
+
+    expect(previews).toHaveLength(1);
+    expect(previews[0]?.closest("p")).toBeNull();
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]).toHaveTextContent("see deep sea");
+    expect(anchor).toHaveAttribute("href", previewUrl);
+    expect(anchor.closest("p")).toBe(paragraphs[0]);
+  });
+
+  it("preserves a parenthesized ordered-list marker", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="1) What"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const list = container.querySelector("ol");
+    expect(list).toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
+    expect(screen.getByRole("listitem")).toHaveTextContent("What");
+  });
+
+  it("keeps period-delimited ordered lists on the default marker style", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="1. What"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(container.querySelector("ol")).not.toHaveClass(
+      PARENTHESIZED_ORDERED_LIST_CLASS_NAME
+    );
+  });
+
+  it("preserves non-one numbering only on parenthesized ordered lists", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"3) Three\n4) Four\n\n1. One"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const lists = container.querySelectorAll("ol");
+    expect(lists).toHaveLength(2);
+    expect(lists[0]).toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
+    expect(lists[0]).toHaveAttribute("start", "3");
+    expect(lists[1]).not.toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
+  });
+
+  it("preserves parenthesized markers on nested ordered lists", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"1) Parent\n   1) Child\n   2) Nested"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const lists = container.querySelectorAll("ol");
+    expect(lists).toHaveLength(2);
+    expect(lists[0]).toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
+    expect(lists[1]).toHaveClass(PARENTHESIZED_ORDERED_LIST_CLASS_NAME);
   });
 
   it("renders separate paragraphs for blank-line content with tight spacing", () => {

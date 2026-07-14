@@ -224,7 +224,7 @@ export default function UserPageStatsBoostBreakdown({
         <span>
           <Link
             href="/network/tdh#tdh-1-4"
-            className="decoration-hover-underline tw-text-sm"
+            className="tw-text-sm tw-no-underline hover:tw-underline"
           >
             {boostMessage(
               locale,

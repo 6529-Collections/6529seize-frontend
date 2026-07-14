@@ -188,11 +188,13 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expect(page.getByText("Checking delegation records...")).toBeHidden({
       timeout: 20000,
     });
+    // The loading indicator may not have appeared yet when the assertion above
+    // runs, so give the delegation lookup the same budget here.
     await expect(
       page.getByText(
         "No delegation, delegation manager, or consolidation records found for this wallet."
       )
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 20000 });
     await expect(
       page.getByRole("heading", { name: "Delegations (0)" })
     ).toBeVisible();

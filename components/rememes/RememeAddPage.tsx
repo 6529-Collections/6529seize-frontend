@@ -475,7 +475,7 @@ export default function RememeAddPage() {
                           #{t.id} - {t.name}
                           &nbsp;&nbsp;
                           <a
-                            className="font-color"
+                            className="tw-text-white"
                             href={`${publicEnv.BASE_ENDPOINT}/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"
                             rel="noopener noreferrer"

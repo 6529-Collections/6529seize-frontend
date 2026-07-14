@@ -362,13 +362,13 @@ function WaveDropReaction({
   readonly isDetailsLoading: boolean;
   readonly isTouchDevice: boolean;
 }) {
-  const { setToast, connectedProfile } = useAuth();
+  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
   const locale = useBrowserLocale();
   const rollbackRef = useRef<OwnedOptimisticRollback>(null);
-  const canReact = Boolean(connectedProfile?.handle);
+  const canReact = Boolean(connectedProfile?.handle) && !activeProfileProxy;
   const applyOptimisticReactionToNotificationQueries =
     useOptimisticNotificationDropReaction({
       connectedProfile,
@@ -523,12 +523,12 @@ function WaveDropReaction({
     if (native) {
       return {
         emojiNode: (
-          <span className="tw-flex tw-items-center tw-justify-center tw-text-[1rem]">
+          <span className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-text-base tw-leading-none">
             {native.skins[0]?.native}
           </span>
         ),
         emojiNodeTooltip: (
-          <span className="tw-flex tw-items-center tw-justify-center tw-text-2xl">
+          <span className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-text-2xl tw-leading-none">
             {native.skins[0]?.native}
           </span>
         ),
@@ -806,7 +806,7 @@ function WaveDropReaction({
           </div>
           <span
             className={clsx(
-              "tw-min-w-[2ch] tw-text-xs tw-font-normal",
+              "tw-min-w-[2ch] tw-text-xs tw-font-normal tw-leading-none",
               animationStyle
             )}
           >

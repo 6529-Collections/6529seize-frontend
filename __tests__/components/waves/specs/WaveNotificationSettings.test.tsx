@@ -117,7 +117,7 @@ describe("WaveNotificationSettings", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders a speaker notification menu and mute button when following wave", async () => {
+  it("renders a notification menu and mute button when following wave", async () => {
     renderComponent();
 
     const trigger = screen.getByLabelText("Open notification settings");
@@ -125,6 +125,8 @@ describe("WaveNotificationSettings", () => {
 
     expect(trigger).toBeInTheDocument();
     expect(muteButton).toBeInTheDocument();
+    expect(trigger).toHaveClass("tw-cursor-pointer");
+    expect(muteButton).toHaveClass("tw-cursor-pointer");
     expect(trigger.parentElement?.parentElement).toHaveClass(
       "tw-grid",
       "tw-grid-cols-2",
@@ -143,6 +145,7 @@ describe("WaveNotificationSettings", () => {
 
     const menu = screen.getByRole("menu");
     expect(menu).toHaveAttribute("aria-labelledby", trigger.id);
+    expect(menu.querySelector("ul")).toHaveClass("tw-m-0");
 
     const allMentionsButton = screen.getByLabelText(
       "Receive ALL mention notifications"
@@ -154,8 +157,14 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).toBeInTheDocument();
     expect(allMentionsButton).toHaveAttribute("role", "menuitemcheckbox");
     expect(allButton).toHaveAttribute("role", "menuitemcheckbox");
+    expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
+    expect(allButton).toHaveClass("tw-cursor-pointer");
+    expect(allMentionsButton).not.toHaveAttribute("data-tooltip-content");
+    expect(allButton).not.toHaveAttribute("data-tooltip-content");
     expect(allMentionsButton.parentElement).toHaveAttribute("role", "none");
     expect(allButton.parentElement).toHaveAttribute("role", "none");
+    expect(screen.getByText("ALL mentions")).toBeInTheDocument();
+    expect(screen.queryByText("@ALL")).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText("Receive mentions-only notifications")
     ).not.toBeInTheDocument();
@@ -262,9 +271,13 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).not.toBeDisabled();
     expect(allButton).toHaveAttribute("aria-disabled", "true");
     expect(allButton).toHaveAccessibleDescription(
-      "All-message notifications are unavailable for waves with 1,000+ followers."
+      "Below 1,000 followers only."
     );
+    expect(screen.getByText("Below 1,000 followers only.")).toBeInTheDocument();
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
+    expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
+    expect(allMentionsButton).not.toHaveAttribute("data-tooltip-content");
+    expect(allButton).not.toHaveAttribute("data-tooltip-content");
   });
 
   it("keeps unavailable all-message option focusable without firing an update", async () => {
@@ -307,6 +320,12 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).toHaveClass("tw-text-primary-400");
     expect(allButton).not.toHaveClass("tw-cursor-not-allowed");
     expect(allButton.parentElement?.tagName).toBe("LI");
+    expect(allButton).toHaveAccessibleDescription(
+      "Re-enable below 1,000 followers."
+    );
+    expect(
+      screen.getByText("Re-enable below 1,000 followers.")
+    ).toBeInTheDocument();
 
     await userEvent.click(allButton);
 
@@ -469,7 +488,7 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("mutes the wave from the bell-slash button when all-message notifications are unavailable", async () => {
+  it("mutes the wave from the mute button when all-message notifications are unavailable", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({});
 
@@ -486,7 +505,7 @@ describe("WaveNotificationSettings", () => {
     });
   });
 
-  it("mutes the wave from the bell-slash button before joining", async () => {
+  it("mutes the wave from the mute button before joining", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({});
 
@@ -503,7 +522,7 @@ describe("WaveNotificationSettings", () => {
     });
   });
 
-  it("mutes the wave from the bell-slash button when all-message notifications are available", async () => {
+  it("mutes the wave from the mute button when all-message notifications are available", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({});
 
@@ -566,6 +585,7 @@ describe("WaveNotificationSettings", () => {
 
     const retryButton = screen.getByLabelText("Retry notification settings");
     expect(retryButton).toBeEnabled();
+    expect(retryButton).toHaveClass("tw-cursor-pointer");
     expect(screen.getByLabelText("Mute wave")).toBeInTheDocument();
     expect(
       screen.queryByLabelText("Open notification settings")
@@ -689,6 +709,7 @@ describe("WaveNotificationSettings", () => {
 
     const mutedButton = screen.getByLabelText("Unmute wave");
     expect(mutedButton).toBeInTheDocument();
+    expect(mutedButton).toHaveClass("tw-cursor-pointer");
     expect(mutedButton).toHaveClass(
       "tw-bg-error/10",
       "tw-border-error/40",

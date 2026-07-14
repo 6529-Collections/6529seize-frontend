@@ -109,6 +109,39 @@ describe("WaveDropActions", () => {
     );
   });
 
+  it("forces visibility from the row's pointer-driven hover", () => {
+    const { container } = render(
+      <WaveDropActions
+        drop={baseDrop}
+        activePartIndex={0}
+        onReply={() => {}}
+        forceVisible={true}
+      />
+    );
+
+    expect(container.firstElementChild).toHaveClass(
+      "tw-pointer-events-auto",
+      "tw-opacity-100"
+    );
+  });
+
+  it("keeps link-card suppression above the pointer-driven hover", () => {
+    const { container } = render(
+      <WaveDropActions
+        drop={baseDrop}
+        activePartIndex={0}
+        onReply={() => {}}
+        suppressed={true}
+        forceVisible={true}
+      />
+    );
+
+    expect(container.firstElementChild).toHaveClass(
+      "tw-pointer-events-none",
+      "tw-opacity-0"
+    );
+  });
+
   it("renders the voting control for regular drops", () => {
     render(
       <WaveDropActions drop={baseDrop} activePartIndex={0} onReply={() => {}} />

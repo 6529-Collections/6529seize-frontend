@@ -313,7 +313,7 @@ describe("HeaderShare", () => {
       // Should show Connection button when authenticated
       expect(screen.getByText("Connection")).toBeInTheDocument();
       expect(screen.getByText("Current URL")).toBeInTheDocument();
-      expect(screen.getByText("6529 Apps")).toBeInTheDocument();
+      expect(screen.queryByText("6529 Apps")).not.toBeInTheDocument();
     });
 
     it("defaults to Current URL tab when not authenticated", async () => {
@@ -344,7 +344,7 @@ describe("HeaderShare", () => {
 
       expect(screen.getByText("Connection")).toBeInTheDocument();
       expect(screen.getByText("Current URL")).toBeInTheDocument();
-      expect(screen.getByText("6529 Apps")).toBeInTheDocument();
+      expect(screen.queryByText("6529 Apps")).not.toBeInTheDocument();
 
       await userEvent.click(screen.getByText("Connection"));
       expect(screen.getByText("Sign In Required")).toBeInTheDocument();
@@ -379,7 +379,7 @@ describe("HeaderShare", () => {
       // Mobile tab should be active again
     });
 
-    it("switches to 6529 Apps tab", async () => {
+    it("keeps app downloads out of the share modal", async () => {
       renderWithProviders(<HeaderShare />);
 
       const btn = screen.getByRole("button", { name: "QR Code" });
@@ -387,12 +387,9 @@ describe("HeaderShare", () => {
 
       await screen.findByTestId("header-share-modal");
 
-      // Click 6529 Apps tab
-      await userEvent.click(screen.getByText("6529 Apps"));
-
-      // Should still show mobile/core options but content changes
-      expect(screen.getByText("6529 Mobile")).toBeInTheDocument();
-      expect(screen.getByText("6529 Desktop")).toBeInTheDocument();
+      expect(screen.queryByText("6529 Apps")).not.toBeInTheDocument();
+      expect(screen.getByText("Connection")).toBeInTheDocument();
+      expect(screen.getByText("Current URL")).toBeInTheDocument();
     });
   });
 

@@ -193,6 +193,7 @@ export function useCreateWaveSubmission({
       const displayMetadataRequests = getCreateWaveDisplayMetadataRequests({
         display: submissionConfig.display,
         waveType: submissionConfig.overview.type,
+        ongoingRanking: submissionConfig.dates.ongoingRanking ?? false,
       });
 
       mutationStarted = true;

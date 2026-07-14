@@ -25,7 +25,10 @@ import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import MyStreamWaveSales from "./MyStreamWaveSales";
 import MyStreamWavePolls from "./MyStreamWavePolls";
-import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
+import {
+  useWaveOutcomeVisibility,
+  useWaveSubmissionButtonLabelOverride,
+} from "@/hooks/waves/useWaveMetadata";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
@@ -35,6 +38,7 @@ import { SubmissionStatus, useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getDropQueryKey } from "@/services/api/drop-api";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
@@ -213,10 +217,19 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       router.push(newUrl, { scroll: false });
     },
   });
+  const metadataWaveId = wave?.id;
 
   useEffect(() => {
     registerWave(waveId, true);
   }, [registerWave, waveId]);
+
+  useEffect(() => {
+    if (!metadataWaveId) {
+      return;
+    }
+
+    markMobileLaunchStep("wave_metadata_loaded");
+  }, [metadataWaveId]);
 
   useEffect(() => {
     if (!wave) {
@@ -326,7 +339,14 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     !isChatWave &&
     !isMemesWave &&
     submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY;
-  const chatSubmitDropLabels = getChatSubmitDropLabels(submissionExperience);
+  const customSubmissionButtonLabel = useWaveSubmissionButtonLabelOverride({
+    enabled: showChatSubmitDropAction,
+    waveId: loadedWaveId,
+  });
+  const chatSubmitDropLabels = getChatSubmitDropLabels(
+    submissionExperience,
+    customSubmissionButtonLabel
+  );
   const isMemesLegacySubmission =
     submissionExperience === WaveSubmissionExperience.MEMES_LEGACY;
   const outcomesVisible = useWaveOutcomeVisibility(wave);

@@ -25,7 +25,7 @@ Use this page for visibility rules, state switches, and route targets.
   - Artist link: `/{handle}` (only when handle exists)
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
-- Current The Memes detail page:
+- Current and upcoming The Memes detail pages:
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Coming up` actions:
@@ -93,6 +93,8 @@ Use this page for visibility rules, state switches, and route targets.
   for the current or already-dropped card.
 - The current/latest `/the-memes/{id}` detail page uses the same awareness-only
   subscription row beside the mint countdown.
+- Unresolved upcoming `/the-memes/{id}` pages show the next-mint calendar panel
+  plus the same subscription awareness widget for that card.
 - Awareness-only rows do not embed the profile subscription editor. They show a
   blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
   optional `xN` user subscribed count when already subscribed, an
@@ -106,10 +108,10 @@ Use this page for visibility rules, state switches, and route targets.
 - With a connected profile, the subscription row can link to
   `/{user}/subscriptions`; profile-specific subscription status/count only
   render when the related read-only APIs return data.
-- On `/about/subscriptions`, connected users see a primary `Manage`
-  action on the left side of the about-section navigation row. Disconnected
-  users see a primary `Connect to Subscribe` action that opens wallet
-  connection and then routes to their profile subscriptions once connected.
+- On `/about/subscriptions`, users who can continue directly see a primary
+  `Manage` action. Users who still need the wallet/profile handoff see
+  `Connect to Subscribe`; it opens wallet connection and
+  then routes to profile subscriptions once connected.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.
@@ -142,6 +144,21 @@ Use this page for visibility rules, state switches, and route targets.
 - `Coming up` cards use path-style routes (`/waves/{waveId}?drop=...`).
 - `NEXT MINT` timestamps are displayed in the viewer's local timezone/locale.
 - No auth or wallet gate is required to view these sections.
+
+### `/about/subscriptions` localization fallback debt
+
+- Route or component: `/about/subscriptions` and its subscription action.
+- Untranslated surface: the restyled subscription guide and primary
+  subscription action.
+- Current fallback behavior: `en-GB`, `de-DE`, `es-ES`, and `fr-FR` use the
+  complete `en-US` source messages for missing `about.subscriptions.*` keys.
+- User impact: non-English locale users can see English subscription guidance;
+  the page remains functional and locale-sensitive gas values still use the
+  viewer's number and percentage conventions.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: add reviewed translations for the
+  `about.subscriptions.*` message family to each partial locale dictionary and
+  repeat the responsive and assistive-technology QA pass.
 
 ## Related Pages
 

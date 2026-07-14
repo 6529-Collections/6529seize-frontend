@@ -43,6 +43,9 @@ describe("About index page", () => {
       screen.getByRole("heading", { level: 1, name: "About 6529" })
     ).toBeInTheDocument();
     expect(screen.getAllByText("About 6529").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: /open page: 6529 apps/i })
+    ).toHaveAttribute("href", "/about/6529-apps");
     expect(screen.getByText("Collections & Minting")).toBeInTheDocument();
     expect(screen.getByText("Network & Reputation")).toBeInTheDocument();
     expect(screen.getByText("Delegation & Wallets")).toBeInTheDocument();

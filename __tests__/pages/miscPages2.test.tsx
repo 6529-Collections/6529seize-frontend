@@ -82,7 +82,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const value = useMemo(() => ({ setTitle: jest.fn() } as any), []);
+  const value = useMemo(() => ({ setTitle: jest.fn() }) as any, []);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
@@ -127,6 +127,12 @@ describe("misc pages render", () => {
     );
     const elements = screen.getAllByText(/JOIN OM GENERATION 1/i);
     expect(elements.length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "OM Discord channel" })
+    ).toHaveAttribute("href", "https://discord.gg/join-om");
+    expect(
+      screen.getByRole("link", { name: "support@6529.io" })
+    ).toHaveAttribute("href", "mailto:support@6529.io");
   });
 
   it("renders partnership request redirect page", () => {

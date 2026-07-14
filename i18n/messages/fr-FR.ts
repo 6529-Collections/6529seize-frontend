@@ -1,6 +1,7 @@
 import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
@@ -54,8 +55,286 @@ export const FR_FR_MESSAGES = {
   "linkPreview.github.fact.mime": "MIME",
   "linkPreview.github.fact.type": "Type",
   "linkPreview.github.fileKind": "Fichier {kind}",
-  "profileCms.interactive.fullscreen": "Plein ecran",
-  "profileCms.interactive.exitFullscreen": "Quitter le plein ecran",
+  "profileCms.block.audioUnavailable": "Audio indisponible",
+  "profileCms.block.collectionFallback": "Collection",
+  "profileCms.block.galleryUnavailable": "Galerie indisponible",
+  "profileCms.block.imageUnavailable": "Image indisponible",
+  "profileCms.block.linkUnavailable": "Lien indisponible",
+  "profileCms.block.nftReferenceUnavailable": "Référence NFT indisponible",
+  "profileCms.block.openLink": "Ouvrir le lien",
+  "profileCms.block.transactionFallback": "Transaction",
+  "profileCms.block.unsupported": "Bloc non supporté",
+  "profileCms.block.videoUnavailable": "Vidéo indisponible",
+  "profileCms.builder.agent.error.baseHashMismatch":
+    "Le hash du paquet cible du correctif ne correspond pas au brouillon actuel.",
+  "profileCms.builder.agent.error.baseHashMissing":
+    "Le hash du paquet cible du correctif est requis.",
+  "profileCms.builder.agent.error.baseVersionMismatch":
+    "La version de base cible du correctif est obsolète pour le brouillon actuel.",
+  "profileCms.builder.agent.error.blockDuplicateId":
+    "L'id de bloc {id} existe déjà dans ce brouillon.",
+  "profileCms.builder.agent.error.blockFieldUnsupported":
+    "Le champ de bloc {field} ne peut pas être modifié par les correctifs d'agent.",
+  "profileCms.builder.agent.error.blockStructuralMix":
+    "Les opérations de bloc structurelles ne peuvent pas être combinées avec d'autres mutations de bloc dans un seul correctif.",
+  "profileCms.builder.agent.error.codeLabel": "Code : {code}",
+  "profileCms.builder.agent.error.jsonInvalid":
+    "Impossible d'analyser le JSON du correctif.",
+  "profileCms.builder.agent.error.metadataFieldUnsupported":
+    "Le champ de métadonnées {field} ne peut pas être modifié par les correctifs d'agent.",
+  "profileCms.builder.agent.error.navigationMissing":
+    "Le brouillon du constructeur ne contient pas d'élément de navigation modifiable.",
+  "profileCms.builder.agent.error.operationUnsupported":
+    "L'examen du constructeur ne supporte pas {op}.",
+  "profileCms.builder.agent.error.pageMissing":
+    "Le brouillon du constructeur ne contient pas de page d'accueil modifiable.",
+  "profileCms.builder.agent.error.pathUnsupported":
+    "L'examen du constructeur ne peut pas appliquer le chemin {path}.",
+  "profileCms.builder.agent.error.schemaInvalid":
+    "Le JSON du correctif ne correspond pas au schéma du correctif d'agent.",
+  "profileCms.builder.agent.error.targetDraftMismatch":
+    "L'id de brouillon cible du correctif ne correspond pas au brouillon actuel.",
+  "profileCms.builder.agent.error.validationRejected":
+    "La validation locale du paquet a rejeté cette modification ({code}).",
+  "profileCms.builder.agent.error.valueInvalid":
+    "La valeur du correctif n'est pas valide pour cette opération.",
+  "profileCms.builder.agent.packet.authorCopy": "Copie de l'auteur",
+  "profileCms.builder.agent.packet.derivedMetadata": "Métadonnées dérivées",
+  "profileCms.builder.agent.packet.facts": "Faits",
+  "profileCms.builder.agent.packet.label.assets": "Actifs",
+  "profileCms.builder.agent.packet.label.baseVersion": "Version de base",
+  "profileCms.builder.agent.packet.label.blocks": "Blocs",
+  "profileCms.builder.agent.packet.label.canonical": "Canonique",
+  "profileCms.builder.agent.packet.label.draft": "Brouillon",
+  "profileCms.builder.agent.packet.label.issues": "Problèmes",
+  "profileCms.builder.agent.packet.label.navigation": "Navigation",
+  "profileCms.builder.agent.packet.label.package": "Paquet",
+  "profileCms.builder.agent.packet.label.packageHash": "Hash du paquet",
+  "profileCms.builder.agent.packet.label.page": "Page",
+  "profileCms.builder.agent.packet.label.payloadHash":
+    "Hash de la charge utile",
+  "profileCms.builder.agent.packet.label.profile": "Profil",
+  "profileCms.builder.agent.packet.label.route": "Itinéraire",
+  "profileCms.builder.agent.packet.label.site": "Site",
+  "profileCms.builder.agent.packet.label.status": "Statut",
+  "profileCms.builder.agent.packet.label.writable": "Modifiable",
+  "profileCms.builder.agent.packet.safety": "Règles source",
+  "profileCms.builder.agent.packet.validation": "Diagnostics de validation",
+  "profileCms.builder.agent.packet.value.no": "Non",
+  "profileCms.builder.agent.packet.value.yes": "Oui",
+  "profileCms.builder.agent.patch.accepted":
+    "Le correctif est validé par rapport au brouillon actuel.",
+  "profileCms.builder.agent.patch.applied":
+    "Correctif appliqué à ce brouillon.",
+  "profileCms.builder.agent.patch.apply": "Appliquer au brouillon",
+  "profileCms.builder.agent.patch.description":
+    "Collez ou téléchargez un correctif d'agent, examinez le diff, puis appliquez-le à ce brouillon.",
+  "profileCms.builder.agent.patch.diff": "Diff proposé",
+  "profileCms.builder.agent.patch.fileTooLarge":
+    "Le fichier de correctif est trop volumineux. Collez un correctif JSON plus petit.",
+  "profileCms.builder.agent.patch.label": "JSON du correctif d'agent",
+  "profileCms.builder.agent.patch.rejected":
+    "Le correctif a été rejeté avant de pouvoir modifier le brouillon.",
+  "profileCms.builder.agent.patch.review": "Examiner le correctif",
+  "profileCms.builder.agent.patch.title": "Examen du correctif",
+  "profileCms.builder.agent.patch.upload": "Télécharger le correctif",
+  "profileCms.builder.agent.source.description":
+    "Exporter le contexte du brouillon pour les outils locaux et examiner les limites du paquet.",
+  "profileCms.builder.agent.source.title": "Paquet source",
+  "profileCms.builder.api.disabled":
+    "Les écritures de l'API du constructeur ne sont pas activées dans cet environnement frontend.",
+  "profileCms.builder.api.draftSaved": "Brouillon enregistré.",
+  "profileCms.builder.api.failed":
+    "L'action de l'API du constructeur a échoué.",
+  "profileCms.builder.api.missingDraftId":
+    "Enregistrez un brouillon avant de demander une publication.",
+  "profileCms.builder.api.missingProfileId":
+    "Cet itinéraire n'a pas pu résoudre l'id du profil pour l'API du constructeur.",
+  "profileCms.builder.api.profileNotAuthorized":
+    "Connectez-vous à ce profil avant d'utiliser les actions du constructeur du serveur.",
+  "profileCms.builder.api.publishRequiresSignedStorage":
+    "La publication nécessite le flux de stockage décentralisé signé et n'est pas activée dans ce MVP.",
+  "profileCms.builder.api.serverValidationCompleted":
+    "Validation du serveur terminée.",
+  "profileCms.builder.block.body": "Corps",
+  "profileCms.builder.block.buttonLabel": "Libellé du bouton",
+  "profileCms.builder.block.buttonLink": "Lien bouton",
+  "profileCms.builder.block.buttonUrl": "URL du bouton",
+  "profileCms.builder.block.callout": "Encadré",
+  "profileCms.builder.block.calloutTitle": "Titre de l'encadré",
+  "profileCms.builder.block.caption": "Légende",
+  "profileCms.builder.block.citation": "Attribution",
+  "profileCms.builder.block.heading": "Titre",
+  "profileCms.builder.block.headingText": "Texte du titre",
+  "profileCms.builder.block.image": "Image",
+  "profileCms.builder.block.imageAlt": "Texte alternatif de l'image",
+  "profileCms.builder.block.imageUri": "URI de l'image",
+  "profileCms.builder.block.quote": "Citation",
+  "profileCms.builder.block.quoteText": "Texte de la citation",
+  "profileCms.builder.block.remove": "Supprimer",
+  "profileCms.builder.block.richText": "Texte enrichi",
+  "profileCms.builder.block.roomImageUri": "URI de l'œuvre de la salle",
+  "profileCms.builder.block.roomStyle": "Style de la salle",
+  "profileCms.builder.block.roomStyle.darkRoom": "Salle sombre",
+  "profileCms.builder.block.roomStyle.salon": "Salon",
+  "profileCms.builder.block.roomStyle.wall": "Mur simple",
+  "profileCms.builder.block.roomStyle.whiteCube": "Cube blanc",
+  "profileCms.builder.block.roomTitle": "Titre de l'œuvre de la salle",
+  "profileCms.builder.block.roomViewer": "Salle 3D",
+  "profileCms.builder.block.tone": "Ton",
+  "profileCms.builder.blocks.title": "Blocs",
+  "profileCms.builder.cta.publish": "Publier",
+  "profileCms.builder.cta.saveDraft": "Enregistrer le brouillon",
+  "profileCms.builder.cta.serverValidate": "Validation du serveur",
+  "profileCms.builder.field.navigationLabel": "Libellé de navigation primaire",
+  "profileCms.builder.field.pageDescription": "Description de la page",
+  "profileCms.builder.field.pageTitle": "Titre de la page",
+  "profileCms.builder.field.siteDescription": "Description du site",
+  "profileCms.builder.field.siteTitle": "Titre du site",
+  "profileCms.builder.field.socialImageAsset": "Id de l'image sociale",
+  "profileCms.builder.field.themeAccent": "Accent de thème",
+  "profileCms.builder.gallery.assets.empty": "Aucune œuvre n'a été trouvée.",
+  "profileCms.builder.gallery.assets.feature": "Œuvre en vedette",
+  "profileCms.builder.gallery.assets.hide": "Masquer",
+  "profileCms.builder.gallery.assets.mediaPartial": "Médias en attente",
+  "profileCms.builder.gallery.assets.mediaReady": "Média prêt",
+  "profileCms.builder.gallery.assets.moveDown": "Déplacer vers le bas",
+  "profileCms.builder.gallery.assets.moveUp": "Déplacer vers le haut",
+  "profileCms.builder.gallery.assets.owner": "Propriétaire : {owner}",
+  "profileCms.builder.gallery.assets.title": "Œuvres",
+  "profileCms.builder.gallery.assets.unfeature": "Retirer de la vedette",
+  "profileCms.builder.gallery.assets.unhide": "Afficher",
+  "profileCms.builder.gallery.collections.count": "{count} œuvres visibles",
+  "profileCms.builder.gallery.collections.feature": "Collection en vedette",
+  "profileCms.builder.gallery.collections.title": "Collections en vedette",
+  "profileCms.builder.gallery.collections.unfeature": "Retirer de la vedette",
+  "profileCms.builder.gallery.review.description":
+    "Examinez la copie d'écran du portefeuille gelé avant d'enregistrer le paquet de galerie généré.",
+  "profileCms.builder.gallery.review.empty":
+    "Demandez une copie d'écran de portefeuille pour examiner les actifs, les collections, l'état des médias et l'aperçu généré.",
+  "profileCms.builder.gallery.review.title": "Examen de la copie d'écran",
+  "profileCms.builder.gallery.settings": "Paramètres de la galerie",
+  "profileCms.builder.gallery.snapshot.api": "Copie d'écran du serveur",
+  "profileCms.builder.gallery.snapshot.failed":
+    "Impossible de créer la copie d'écran de la galerie.",
+  "profileCms.builder.gallery.snapshot.fixture":
+    "Capture d'écran du dispositif",
+  "profileCms.builder.gallery.snapshot.loading": "Demande en cours...",
+  "profileCms.builder.gallery.snapshot.loadingDetail":
+    "Collecte des avoirs et des candidats médias pour examen.",
+  "profileCms.builder.gallery.snapshot.request": "Demander une copie d'écran",
+  "profileCms.builder.gallery.snapshot.warning.fixtureBackendDisabled":
+    "Copie d'écran du dispositif utilisée jusqu'à ce que le point de terminaison de copie d'écran du serveur de galerie soit activé.",
+  "profileCms.builder.gallery.snapshot.warning.partialMedia":
+    "Certains médias peuvent être en attente ou indisponibles dans la copie d'écran examinée.",
+  "profileCms.builder.gallery.summary.hidden": "Œuvres cachées",
+  "profileCms.builder.gallery.summary.partial": "Médias partiels",
+  "profileCms.builder.gallery.summary.visible": "Œuvres visibles",
+  "profileCms.builder.gallery.summary.wallets": "Portefeuilles",
+  "profileCms.builder.gallery.wallets.emptyError":
+    "Entrez au moins une adresse ETH ou un nom ENS.",
+  "profileCms.builder.gallery.wallets.help":
+    "Collez une ou plusieurs adresses ETH ou noms ENS, séparés par des virgules, des espaces ou des sauts de ligne.",
+  "profileCms.builder.gallery.wallets.invalidError":
+    "Ces entrées de portefeuille nécessitent une attention : {entries}",
+  "profileCms.builder.gallery.wallets.label": "Portefeuilles ou noms ENS",
+  "profileCms.builder.gallery.wallets.title": "Sources de portefeuille",
+  "profileCms.builder.json.downloadPackage": "Télécharger le JSON du paquet",
+  "profileCms.builder.json.downloadSchemaBundle": "Télécharger les schémas",
+  "profileCms.builder.json.downloadSourcePacket":
+    "Télécharger le paquet source",
+  "profileCms.builder.json.import": "Importer JSON",
+  "profileCms.builder.json.importFailed":
+    "Impossible d'importer le JSON du paquet.",
+  "profileCms.builder.json.label": "Candidat au paquet",
+  "profileCms.builder.json.title": "JSON du paquet",
+  "profileCms.builder.pageDescription":
+    "Construire et prévisualiser un paquet de site CMS natif du profil.",
+  "profileCms.builder.pageSettings": "Paramètres de la page d'accueil",
+  "profileCms.builder.pageTitle": "Générateur de CMS de profil",
+  "profileCms.builder.publishState.draftId": "Id du brouillon",
+  "profileCms.builder.publishState.noDraft": "Aucun brouillon enregistré",
+  "profileCms.builder.publishState.packageHash": "Hash du paquet",
+  "profileCms.builder.publishState.payloadHash": "Hash de la charge utile",
+  "profileCms.builder.publishState.pending":
+    "L'enregistrement et la publication nécessitent les points de terminaison du serveur. Cette interface utilisateur ne simulera pas une publication de production.",
+  "profileCms.builder.publishState.title":
+    "État du brouillon et de la publication",
+  "profileCms.builder.siteSettings": "Paramètres du site",
+  "profileCms.builder.tab.agent": "Agent",
+  "profileCms.builder.tab.editor": "Éditeur",
+  "profileCms.builder.tab.json": "JSON",
+  "profileCms.builder.tab.preview": "Aperçu",
+  "profileCms.builder.templates.gallery": "Galerie",
+  "profileCms.builder.templates.homepage": "Page d'accueil simple",
+  "profileCms.builder.templates.room": "Salle 3D",
+  "profileCms.builder.templates.status.comingSoon": "Bientôt disponible",
+  "profileCms.builder.templates.title": "Modèle de site",
+  "profileCms.builder.templates.walletGallery": "Galerie de portefeuille",
+  "profileCms.builder.validation.focusField": "Champ de focus",
+  "profileCms.builder.validation.invalid":
+    "Le candidat au paquet nécessite des modifications.",
+  "profileCms.builder.validation.issueDetail":
+    "Examinez ce champ avant d'enregistrer ou de publier.",
+  "profileCms.builder.validation.noIssues": "Aucun problème de validation.",
+  "profileCms.builder.validation.severity.error": "Erreur",
+  "profileCms.builder.validation.severity.warning": "Avertissement",
+  "profileCms.builder.validation.title": "Validation",
+  "profileCms.builder.validation.valid": "Le candidat au paquet est valide.",
+  "profileCms.builder.workspaceLabel": "Espace de travail du générateur CMS",
+  "profileCms.error.description":
+    "Ce site web du profil n'a pas pu être rendu.",
+  "profileCms.error.retry": "Réessayer",
+  "profileCms.error.title": "Site web indisponible",
+  "profileCms.header.openWebsite": "Ouvrir le site web {handle}",
+  "profileCms.header.website": "Site web",
+  "profileCms.interactive.budgetWarning":
+    "Cet actif 3D dépasse le budget de performance déclaré, le chargement peut être lent.",
+  "profileCms.interactive.canvasLabel": "Aperçu interactif 3D",
+  "profileCms.interactive.deepZoom.description":
+    "Ce rendu V1 garde le zoom profond statique jusqu'à ce que la visionneuse interactive soit activée.",
+  "profileCms.interactive.deepZoom.title": "Aperçu du zoom profond",
+  "profileCms.interactive.embed.description":
+    "Cet intégré n'est pas marqué pour un rendu en bac à sable.",
+  "profileCms.interactive.embed.iframeTitle":
+    "Média du site web du profil intégré",
+  "profileCms.interactive.embed.title": "Aperçu du média intégré",
+  "profileCms.interactive.enterRoom": "Entrer dans la salle",
+  "profileCms.interactive.exitFullscreen": "Quitter le plein écran",
+  "profileCms.interactive.fullscreen": "Plein écran",
+  "profileCms.interactive.loadError":
+    "L'aperçu 3D n'a pas pu être chargé. Utilisez les liens 2D ci-dessous.",
+  "profileCms.interactive.loadObject": "Charger l'objet 3D",
+  "profileCms.interactive.loading": "Chargement {progress}%",
+  "profileCms.interactive.mobileFallback":
+    "Cette vue mobile utilise l'affiche statique et les liens 2D pour une expérience plus légère et plus fiable.",
+  "profileCms.interactive.object.description":
+    "Chargez la visionneuse GLB ou glTF quand vous êtes prêt à inspecter le modèle.",
+  "profileCms.interactive.object.title": "Aperçu de l'objet 3D",
+  "profileCms.interactive.openFallback": "Ouvrir l'alternative 2D",
+  "profileCms.interactive.openSourceMedia": "Ouvrir le média source",
+  "profileCms.interactive.room.description":
+    "Entrez une salle d'exposition simple. Chaque œuvre d'art établit toujours un lien vers sa page de détail 2D canonique.",
+  "profileCms.interactive.room.title": "Aperçu de la salle",
+  "profileCms.interactive.roomWorksLabel": "Œuvres de la salle",
+  "profileCms.media.captionTrackLabel": "Description",
+  "profileCms.media.noCaptions":
+    "Aucune légende n'a été fournie pour cet élément multimédia.",
+  "profileCms.nav.label": "Navigation {siteTitle}",
+  "profileCms.reference.chain": "Chaîne {chainId}",
+  "profileCms.reference.tokenTitle": "Jeton #{tokenId}",
+  "profileCms.state.empty.description":
+    "Ce site web du profil est publié, mais cette page n'est pas disponible.",
+  "profileCms.state.empty.title": "Page du site web non trouvée",
+  "profileCms.state.eyebrow": "Site web du profil",
+  "profileCms.state.loading.title": "Chargement du site web",
+  "profileCms.state.routeUnavailable.title":
+    "Itinéraire du site web indisponible",
+  "profileCms.walletGallery.blockNumber": "Bloc",
+  "profileCms.walletGallery.capturedAt": "Capturé",
+  "profileCms.walletGallery.summary.many": "{count} portefeuilles",
+  "profileCms.walletGallery.summary.one": "{count} portefeuille",
+  "profileCms.walletGallery.title": "Galerie de portefeuille",
   "drop.media.alt": "Media du drop",
   "drop.media.processing": "Image en cours de traitement",
   "drop.media.loading": "Chargement de l'image",
@@ -93,6 +372,10 @@ export const FR_FR_MESSAGES = {
     "Zone d'envoi de fichiers du chat de wave",
   "waves.loadingStatus": "Chargement des waves",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
+  "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",
+  "waves.gifPicker.noResults": "Aucun GIF trouvé.",
+  "waves.gifPicker.poweredBy": "Propulsé par {brandName}",
+  "waves.gifPicker.poweredByPrefix": "Propulsé par",
   "waves.gifPicker.status.checking": "Recherche de GIF...",
   "waves.gifPicker.status.ready": "La recherche de GIF est prete.",
   "waves.gifPicker.unavailable.title":
@@ -116,8 +399,14 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Flux Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
+  "waves.poll.actions.viewResults": "Voir les résultats",
+  "waves.poll.actions.vote": "Voter",
+  "waves.poll.actions.changeVote": "Modifier le vote",
+  "waves.poll.status.voted": "Voté",
+  "waves.poll.status.updated": "Mis à jour",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  ...FR_FR_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Tri des memes",
   "theMemes.sorting.sortBy": "Trier par",
   "theMemes.sorting.directionLegend": "Sens du tri",

@@ -50,4 +50,14 @@ describe("PrimaryButton", () => {
     expect(button).toHaveClass("tw-py-1");
     expect(button).not.toHaveClass("tw-px-2.5");
   });
+
+  it("uses native link behavior when an href is provided", () => {
+    renderPrimaryButton({ href: "/profile/subscriptions" });
+
+    expect(screen.queryByRole("button", { name: "Button" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Button" })).toHaveAttribute(
+      "href",
+      "/profile/subscriptions"
+    );
+  });
 });

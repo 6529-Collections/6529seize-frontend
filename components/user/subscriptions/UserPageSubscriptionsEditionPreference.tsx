@@ -92,7 +92,7 @@ export default function UserPageSubscriptionsEditionPreference(
         <div className="tw-flex tw-items-center tw-gap-2">
           <label
             htmlFor={"subscription-all-editions-mode"}
-            className="font-color"
+            className="tw-text-white"
           >
             <b>One edition</b>
           </label>
@@ -105,7 +105,7 @@ export default function UserPageSubscriptionsEditionPreference(
           />
           <label
             htmlFor={"subscription-all-editions-mode"}
-            className="font-color"
+            className="tw-text-white"
           >
             <b>All eligible</b>
           </label>

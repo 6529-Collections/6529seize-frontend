@@ -22,6 +22,7 @@ export { DropMode } from "./dropComposer.types";
 interface PrivilegedDropCreatorProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onReplyTargetUnavailable?: (() => void) | undefined;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
   readonly onServerDropCreated?:
@@ -47,11 +48,15 @@ interface PrivilegedDropCreatorProps {
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
   readonly forceStandardDropComposer?: boolean | undefined;
+  readonly focusOnInitialActiveDrop?: boolean | undefined;
+  readonly initialMarkdown?: string | null | undefined;
+  readonly initialMarkdownKey?: string | null | undefined;
 }
 
 export default function PrivilegedDropCreator({
   activeDrop,
   onCancelReplyQuote,
+  onReplyTargetUnavailable,
   wave,
   dropId,
   fixedDropMode,
@@ -69,6 +74,9 @@ export default function PrivilegedDropCreator({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
+  focusOnInitialActiveDrop = false,
+  initialMarkdown = null,
+  initialMarkdownKey = null,
 }: PrivilegedDropCreatorProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
@@ -166,6 +174,7 @@ export default function PrivilegedDropCreator({
     <CreateDrop
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
+      onReplyTargetUnavailable={onReplyTargetUnavailable}
       onAllDropsAdded={onAllDropsAdded}
       onServerDropCreated={onServerDropCreated}
       onExitFixedDropMode={onExitFixedDropMode}
@@ -187,6 +196,9 @@ export default function PrivilegedDropCreator({
       termsSignatureFlowEnabled={termsSignatureFlowEnabled}
       identityPickerPlacement={identityPickerPlacement}
       forceStandardDropComposer={forceStandardDropComposer}
+      focusOnInitialActiveDrop={focusOnInitialActiveDrop}
+      initialMarkdown={initialMarkdown}
+      initialMarkdownKey={initialMarkdownKey}
     />
   );
 }

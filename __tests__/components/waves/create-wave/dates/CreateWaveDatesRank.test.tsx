@@ -412,4 +412,55 @@ describe("CreateWaveDatesRank", () => {
       "true"
     );
   });
+
+  it("hides winner announcements when perpetual ranking is selected", () => {
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={{ ...baseDates, ongoingRanking: true }}
+        errors={[]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("decisions")).toBeNull();
+    expect(screen.queryByTestId("rolling")).toBeNull();
+    // The mode itself is chosen on the Overview step, not here.
+    expect(screen.queryByText("Perpetual Ranking")).toBeNull();
+  });
+
+  it("keeps the perpetual end date cleared when other dates change", async () => {
+    const setDates = jest.fn();
+    const user = userEvent.setup();
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={{ ...baseDates, ongoingRanking: true, endDate: 999 }}
+        errors={[]}
+        setDates={setDates}
+      />
+    );
+
+    await user.click(screen.getByTestId("start"));
+
+    expect(setDates).toHaveBeenCalledWith(
+      expect.objectContaining({ ongoingRanking: true, endDate: null })
+    );
+  });
+
+  it("expands winner announcements by default so the schedule is not missed", () => {
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={baseDates}
+        errors={[]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-expanded",
+      "true"
+    );
+  });
 });

@@ -100,7 +100,7 @@ export default function UserPageSubscriptionsMode(
       </div>
       <div className="tw-pt-1">
         <div className="tw-flex tw-items-center tw-gap-2">
-          <label htmlFor={"subscription-mode"} className="font-color">
+          <label htmlFor={"subscription-mode"} className="tw-text-white">
             <b>Manual</b>
           </label>
           <Toggle
@@ -110,7 +110,7 @@ export default function UserPageSubscriptionsMode(
             icons={false}
             onChange={toggleMode}
           />
-          <label htmlFor={"subscription-mode"} className="font-color">
+          <label htmlFor={"subscription-mode"} className="tw-text-white">
             <b>Automatic</b>
           </label>
           {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}

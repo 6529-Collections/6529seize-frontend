@@ -4,6 +4,7 @@ import {
   WAVE_IDENTITY_DUPLICATES_COPY,
   WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY,
 } from "@/helpers/waves/wave-submission-strategy.helpers";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 function WaveIdentitySubmissionSpecsRow({
   label,
@@ -13,9 +14,11 @@ function WaveIdentitySubmissionSpecsRow({
   readonly value: string;
 }) {
   return (
-    <div className="tw-group tw-flex tw-min-h-8 tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-px-2 tw-py-1 tw-text-sm">
-      <span className="tw-font-normal tw-text-iron-500">{label}</span>
-      <span className="tw-flex-1 tw-text-right tw-font-medium tw-text-iron-50">
+    <div className="tw-group tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-start tw-gap-2 tw-px-2 tw-py-1.5 tw-text-sm">
+      <span className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">
+        {label}
+      </span>
+      <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-5 tw-text-iron-50">
         {value}
       </span>
     </div>
@@ -54,11 +57,15 @@ export function WaveIdentitySubmissionSpecsRows({
   return (
     <>
       <WaveIdentitySubmissionSpecsRow
-        label="Eligible identities"
+        label={waveRightPanelText(
+          "waves.sidebar.rightPanel.specs.eligibleIdentities"
+        )}
         value={eligibleIdentities.summary}
       />
       <WaveIdentitySubmissionSpecsRow
-        label="Repeat submissions"
+        label={waveRightPanelText(
+          "waves.sidebar.rightPanel.specs.repeatSubmissions"
+        )}
         value={repeatSubmissions.summary}
       />
     </>

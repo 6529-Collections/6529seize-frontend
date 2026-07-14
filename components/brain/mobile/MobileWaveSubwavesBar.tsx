@@ -9,7 +9,9 @@ import WavePicture from "@/components/waves/WavePicture";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveSubwavesMap } from "@/hooks/useWaveSubwaves";
+import { t } from "@/i18n/messages";
 import type { SidebarWave, SidebarWaveContributor } from "@/types/waves.types";
 
 interface MobileWaveSubwavesBarProps {
@@ -28,6 +30,19 @@ interface MobileWaveSubwaveItem {
 }
 
 const EMPTY_SUBWAVES: readonly SidebarWave[] = [];
+const SUBWAVE_SKELETONS = [
+  { id: "main", widthClassName: "tw-w-20", labelWidthClassName: "tw-w-10" },
+  {
+    id: "secondary",
+    widthClassName: "tw-w-32",
+    labelWidthClassName: "tw-w-20",
+  },
+  {
+    id: "tertiary",
+    widthClassName: "tw-w-24",
+    labelWidthClassName: "tw-w-14",
+  },
+] as const;
 
 const getViewerIdentityKey = ({
   address,
@@ -128,6 +143,7 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
   const { activeWave } = useMyStream();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
+  const locale = useBrowserLocale();
   const currentWaveId = activeWave.id ?? wave.id;
   const isDirectMessage =
     wave.wave.type === ApiWaveType.Chat &&
@@ -148,10 +164,15 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
     parentWaveIds: shouldFetchSubwaves ? [rootWaveId] : [],
     viewerIdentityKey,
   });
+  const subwavesQuery = subwavesByParentId.get(rootWaveId);
   const fetchedSubwaves = useMemo(
-    () => subwavesByParentId.get(rootWaveId)?.subwaves ?? EMPTY_SUBWAVES,
-    [rootWaveId, subwavesByParentId]
+    () => subwavesQuery?.subwaves ?? EMPTY_SUBWAVES,
+    [subwavesQuery]
   );
+  const isInitialSubwavesLoading =
+    shouldFetchSubwaves &&
+    fetchedSubwaves.length === 0 &&
+    (subwavesQuery === undefined || subwavesQuery.isFetching);
 
   const items = useMemo<MobileWaveSubwaveItem[]>(() => {
     const subwaveItems = fetchedSubwaves.map(getSidebarWaveItem);
@@ -201,57 +222,84 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
   return (
     <div
       ref={setBarRef}
-      className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-px-2 tw-pb-2 sm:tw-px-4 md:tw-px-6"
+      className="tw-sticky tw-top-0 tw-z-10 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-px-2 tw-py-1 sm:tw-px-4 md:tw-px-6"
     >
-      <div className="tw-flex tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500">
-        {items.map((item) => {
-          const isActive = item.id === currentWaveId;
-          const isDropWave = item.type !== ApiWaveType.Chat;
-          const showUnreadBadge =
-            !isActive && !item.muted && item.unreadDropsCount > 0;
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              aria-current={isActive ? "page" : undefined}
-              aria-label={`Open ${item.label}`}
-              onClick={() => onItemClick(item)}
-              className={`tw-relative tw-flex tw-h-7 tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-text-left tw-transition ${
-                isActive
-                  ? "tw-border-primary-400/30 tw-bg-primary-500/15 tw-text-primary-300"
-                  : "tw-border-iron-700 tw-bg-iron-800 tw-text-iron-200 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700"
-              }`}
+      {isInitialSubwavesLoading ? (
+        <output
+          aria-busy="true"
+          className="tw-flex tw-items-center tw-gap-1.5 tw-overflow-hidden tw-py-1"
+        >
+          <span className="tw-sr-only">
+            {t(locale, "waves.sidebar.subwavesToggleLoading")}
+          </span>
+          {SUBWAVE_SKELETONS.map((skeleton) => (
+            <span
+              key={skeleton.id}
+              aria-hidden="true"
+              className={`${skeleton.widthClassName} tw-flex tw-h-7 tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.025] tw-px-2 motion-safe:tw-animate-pulse`}
             >
-              <span className="tw-relative tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-visible tw-rounded-full tw-bg-iron-900">
-                <span className="tw-size-4 tw-overflow-hidden tw-rounded-full">
-                  <WavePicture
-                    name={item.pictureName}
-                    picture={item.picture}
-                    contributors={item.contributors}
-                  />
-                </span>
-                {isDropWave && (
-                  <span className="tw-absolute -tw-bottom-0.5 -tw-right-0.5 tw-flex tw-size-2.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950">
-                    <TrophyIcon
-                      className="tw-size-2 tw-text-[#E8D48A]"
-                      aria-hidden="true"
+              <span className="tw-size-4 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700/70" />
+              <span
+                className={`${skeleton.labelWidthClassName} tw-h-2.5 tw-rounded tw-bg-iron-700/70`}
+              />
+            </span>
+          ))}
+        </output>
+      ) : (
+        <div className="tw-flex tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-scrollbar-none">
+          {items.map((item) => {
+            const isActive = item.id === currentWaveId;
+            const isDropWave = item.type !== ApiWaveType.Chat;
+            const showUnreadBadge =
+              !isActive && !item.muted && item.unreadDropsCount > 0;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-current={isActive ? "true" : undefined}
+                aria-label={`Open ${item.label}`}
+                onClick={() => onItemClick(item)}
+                className={`tw-relative tw-flex tw-h-7 tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2 tw-text-left tw-transition ${
+                  isActive
+                    ? "tw-border-primary-400/30 tw-bg-primary-500/15 tw-text-primary-300"
+                    : "tw-border-white/[0.08] tw-bg-white/[0.035] tw-text-iron-300 desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-white/[0.07] desktop-hover:hover:tw-text-iron-100"
+                }`}
+              >
+                <span className="tw-relative tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-visible tw-rounded-full tw-bg-iron-900">
+                  <span className="tw-size-4 tw-overflow-hidden tw-rounded-full">
+                    <WavePicture
+                      name={item.pictureName}
+                      picture={item.picture}
+                      contributors={item.contributors}
                     />
                   </span>
-                )}
-              </span>
-              <span className="tw-max-w-28 tw-truncate tw-text-xs tw-font-semibold">
-                {item.label}
-              </span>
-              {showUnreadBadge && (
-                <span className="tw-ml-0.5 tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-px-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-white">
-                  {item.unreadDropsCount > 99 ? "99+" : item.unreadDropsCount}
+                  {isDropWave && (
+                    <span className="tw-absolute -tw-bottom-0.5 -tw-right-0.5 tw-flex tw-size-2.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950">
+                      <TrophyIcon
+                        className="tw-size-2 tw-text-[#E8D48A]"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  )}
                 </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+                <span
+                  className={`tw-max-w-28 tw-truncate tw-text-xs ${
+                    isActive ? "tw-font-semibold" : "tw-font-medium"
+                  }`}
+                >
+                  {item.label}
+                </span>
+                {showUnreadBadge && (
+                  <span className="tw-ml-0.5 tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-px-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-white">
+                    {item.unreadDropsCount > 99 ? "99+" : item.unreadDropsCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

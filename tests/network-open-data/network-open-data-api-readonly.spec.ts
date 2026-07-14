@@ -158,7 +158,7 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
     for (const section of [
       "Introduction",
       "Key terminology",
-      "Authentication",
+      "Authentication quickstart",
       "Creating drops with embedded media",
     ]) {
       await expect(page.getByText(section, { exact: true })).toBeVisible();

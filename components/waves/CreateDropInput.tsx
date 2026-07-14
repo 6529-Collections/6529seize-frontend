@@ -1,6 +1,7 @@
 "use client";
 
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
+import { $convertFromMarkdownString } from "@lexical/markdown";
 import type { FocusEvent } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import {
@@ -11,7 +12,7 @@ import {
   useRef,
 } from "react";
 import type { EditorState } from "lexical";
-import { COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import { $getRoot, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -59,13 +60,22 @@ import useCapacitor from "@/hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
+import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
+import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
+import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
+import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
+import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
+import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
+  setMarkdown: (markdown: string) => void;
   focus: () => void;
+  blur: () => void;
 }
 
 // Create a custom command
@@ -87,6 +97,72 @@ function DisableEditPlugin({ disabled }: { disabled: boolean }) {
     }
     return () => {};
   }, [editor, disabled]);
+
+  return null;
+}
+
+interface SetMarkdownPluginHandles {
+  setMarkdown: (markdown: string) => void;
+}
+
+const SetMarkdownPlugin = forwardRef<
+  SetMarkdownPluginHandles,
+  { readonly canMentionAll: boolean }
+>(({ canMentionAll }, ref) => {
+  const [editor] = useLexicalComposerContext();
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      setMarkdown: (markdown: string) => {
+        editor.update(() => {
+          $convertFromMarkdownString(markdown, [
+            ...SAFE_MARKDOWN_TRANSFORMERS,
+            MENTION_TRANSFORMER,
+            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
+            HASHTAG_TRANSFORMER,
+            WAVE_MENTION_TRANSFORMER,
+            IMAGE_TRANSFORMER,
+            EMOJI_TRANSFORMER,
+          ]);
+        });
+      },
+    }),
+    [canMentionAll, editor]
+  );
+
+  return null;
+});
+SetMarkdownPlugin.displayName = "SetMarkdownPlugin";
+
+function InitialMarkdownPlugin({
+  initialMarkdown,
+  initialMarkdownKey,
+}: {
+  readonly initialMarkdown: string | null;
+  readonly initialMarkdownKey: string | null;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const appliedKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!initialMarkdown || !initialMarkdownKey) {
+      return;
+    }
+
+    if (appliedKeyRef.current === initialMarkdownKey) {
+      return;
+    }
+
+    appliedKeyRef.current = initialMarkdownKey;
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+      $convertFromMarkdownString(initialMarkdown, SAFE_MARKDOWN_TRANSFORMERS);
+      $selectEndOfRootBlock(root);
+    });
+    editor.focus();
+  }, [editor, initialMarkdown, initialMarkdownKey]);
 
   return null;
 }
@@ -115,6 +191,8 @@ const CreateDropInput = forwardRef<
     readonly validationHelperText?: string | null | undefined;
     readonly canEditLastDropWithArrow?: boolean | undefined;
     readonly onRequestEditLastDrop?: (() => boolean) | undefined;
+    readonly initialMarkdown?: string | null | undefined;
+    readonly initialMarkdownKey?: string | null | undefined;
   }
 >(
   (
@@ -137,6 +215,8 @@ const CreateDropInput = forwardRef<
       validationHelperText = null,
       canEditLastDropWithArrow = false,
       onRequestEditLastDrop,
+      initialMarkdown = null,
+      initialMarkdownKey = null,
       onDrop,
     },
     ref
@@ -209,20 +289,22 @@ const CreateDropInput = forwardRef<
     }
 
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
+    const setMarkdownRef = useRef<SetMarkdownPluginHandles | null>(null);
     const editorRef = useRef<HTMLDivElement>(null);
     const clearEditorState = () => {
       clearEditorRef.current?.clearEditorState();
     };
+    const getEditorElement = () =>
+      editorRef.current?.querySelector<HTMLElement>(
+        '[contenteditable="true"]'
+      ) ?? null;
 
     useImperativeHandle(ref, () => ({
       clearEditorState,
-      focus: () => {
-        (
-          editorRef.current?.querySelector(
-            '[contenteditable="true"]'
-          ) as HTMLElement
-        ).focus();
-      },
+      setMarkdown: (markdown: string) =>
+        setMarkdownRef.current?.setMarkdown(markdown),
+      focus: () => getEditorElement()?.focus(),
+      blur: () => getEditorElement()?.blur(),
     }));
 
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
@@ -337,7 +419,15 @@ const CreateDropInput = forwardRef<
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
+              <SetMarkdownPlugin
+                ref={setMarkdownRef}
+                canMentionAll={canMentionAll}
+              />
               <DisableEditPlugin disabled={submitting} />
+              <InitialMarkdownPlugin
+                initialMarkdown={initialMarkdown}
+                initialMarkdownKey={initialMarkdownKey}
+              />
               <EnterKeyPlugin
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}

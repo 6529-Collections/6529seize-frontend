@@ -207,6 +207,7 @@ describe("WaveDropReactions", () => {
     mockSetQueryData.mockReset();
     mockUseAuth.mockReturnValue({
       connectedProfile: { id: "profile-1", handle: "alice" },
+      activeProfileProxy: null,
       setToast: setToastMock,
     });
     getMyStreamMock().mockReturnValue({
@@ -938,6 +939,48 @@ describe("WaveDropReactions", () => {
     expect(commonApi.commonApiPost).not.toHaveBeenCalled();
     expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
     expect(screen.queryByText("Reactions")).not.toBeInTheDocument();
+  });
+
+  it("renders reaction pills as non-interactive in proxy mode", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { id: "profile-1", handle: "alice" },
+      activeProfileProxy: { id: "proxy-1" },
+      setToast: setToastMock,
+    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "user1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
   });
 
   it("shows 'and X more' in tooltip when more than 3 profiles", async () => {

@@ -17,7 +17,9 @@ import {
   getLowValueNetworkErrorDecision,
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
+  shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterByFilenameExceptions,
+  shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
@@ -139,7 +141,15 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterAnonymousUnsafeEvalCspError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterInjectedProviderProxyStartsWithError(event)) {
+    return true;
+  }
+
+  if (shouldFilterBrowserExtensionMessagingConnectionError(event, hint)) {
     return true;
   }
 

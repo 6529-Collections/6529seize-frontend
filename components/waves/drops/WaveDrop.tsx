@@ -511,10 +511,13 @@ const GroupedDropTimestamp = ({
   swipeOffset = 0,
   timestamp,
   variant,
+  forceVisible = false,
 }: {
   readonly swipeOffset?: number;
   readonly timestamp: number;
   readonly variant: "swipe" | "hover";
+  /** Pointer-driven row hover for browsers whose CSS :hover never fires. */
+  readonly forceVisible?: boolean;
 }) => {
   // "swipe": revealed by the touch swipe gesture via inline opacity.
   // "hover": desktop affordance — swiping would hijack text selection, so the
@@ -534,7 +537,11 @@ const GroupedDropTimestamp = ({
           : "grouped-drop-swipe-timestamp"
       }
       style={
-        isHoverVariant ? undefined : getGroupedTimestampOpacityStyle(swipeOffset)
+        isHoverVariant
+          ? forceVisible
+            ? { opacity: 1 }
+            : undefined
+          : getGroupedTimestampOpacityStyle(swipeOffset)
       }
     >
       <WaveDropTime timestamp={timestamp} size="xs" variant="compactReveal" />
@@ -630,12 +637,6 @@ const getContentBlock = ({
   handleEditCancel,
   allowLongPress,
   handleLinkCardActionsActiveChange,
-  canUseDesktopHoverActions,
-  showInteractions,
-  showReplyAndQuote,
-  handleOnReply,
-  handleOnEdit,
-  hasActiveLinkCardActions,
   inlineAuthorOnDesktop,
   mediaImageScale,
   fullWidthMedia,
@@ -644,7 +645,6 @@ const getContentBlock = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
-  groupedTimestampSwipeOffset,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -674,12 +674,6 @@ const getContentBlock = ({
     actionId: string,
     active: boolean
   ) => void;
-  readonly canUseDesktopHoverActions: boolean;
-  readonly showInteractions: boolean;
-  readonly showReplyAndQuote: boolean;
-  readonly handleOnReply: () => void;
-  readonly handleOnEdit: () => void;
-  readonly hasActiveLinkCardActions: boolean;
   readonly inlineAuthorOnDesktop: boolean;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia: boolean;
@@ -688,7 +682,6 @@ const getContentBlock = ({
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
-  readonly groupedTimestampSwipeOffset: number;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -766,19 +759,6 @@ const getContentBlock = ({
         </div>
       </div>
     </div>
-    {canUseDesktopHoverActions &&
-      showInteractions &&
-      showReplyAndQuote &&
-      !isEditing && (
-        <WaveDropActions
-          drop={drop}
-          activePartIndex={activePartIndex}
-          onReply={handleOnReply}
-          onEdit={handleOnEdit}
-          suppressed={hasActiveLinkCardActions}
-          style={getGroupedTimestampActionStyle(groupedTimestampSwipeOffset)}
-        />
-      )}
   </>
 );
 
@@ -883,6 +863,35 @@ const WaveDropInner = ({
     useDropActionInteractionMode();
   const mobileMenu = useWaveDropMobileMenu();
   const allowLongPress = showInteractions && canUseTouchActionSheet;
+  // Pointer-driven row hover: some browsers (capability-lying convertibles)
+  // never activate CSS :hover although mouse pointer events flow, leaving the
+  // group-hover action reveal invisible. Track the cursor with pointer events
+  // instead; CSS :hover stays as the no-JS fallback. pointerover/out (with a
+  // containment check) rather than enter/leave so child crossings are cheap
+  // no-op state writes and jsdom can exercise the path.
+  const [isRowPointerHovered, setIsRowPointerHovered] = useState(false);
+  const handleRowPointerOver = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (getPointerType(event) === "mouse" && canUseDesktopHoverActions) {
+        setIsRowPointerHovered(true);
+      }
+    },
+    [canUseDesktopHoverActions]
+  );
+  const handleRowPointerOut = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (
+        getPointerType(event) === "mouse" &&
+        !(
+          event.relatedTarget instanceof Node &&
+          event.currentTarget.contains(event.relatedTarget)
+        )
+      ) {
+        setIsRowPointerHovered(false);
+      }
+    },
+    []
+  );
   const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
@@ -1382,12 +1391,6 @@ const WaveDropInner = ({
     handleEditCancel,
     allowLongPress,
     handleLinkCardActionsActiveChange,
-    canUseDesktopHoverActions,
-    showInteractions,
-    showReplyAndQuote,
-    handleOnReply,
-    handleOnEdit,
-    hasActiveLinkCardActions,
     inlineAuthorOnDesktop,
     mediaImageScale,
     fullWidthMedia,
@@ -1396,7 +1399,6 @@ const WaveDropInner = ({
     quotePath,
     embedDepth,
     maxEmbedDepth,
-    groupedTimestampSwipeOffset: timestampSwipeOffset,
   });
 
   const contentOffsetClass = inlineAuthorOnDesktop
@@ -1454,6 +1456,8 @@ const WaveDropInner = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
         onPointerCancel={handlePointerEnd}
+        onPointerOver={handleRowPointerOver}
+        onPointerOut={handleRowPointerOut}
         onClickCapture={handleClickCapture}
       >
         {showGroupedTimestamp && (
@@ -1461,6 +1465,7 @@ const WaveDropInner = ({
             swipeOffset={timestampSwipeOffset}
             timestamp={drop.created_at}
             variant={canUseTouchActionSheet ? "swipe" : "hover"}
+            forceVisible={isRowPointerHovered}
           />
         )}
         <div
@@ -1471,6 +1476,20 @@ const WaveDropInner = ({
           style={swipeableContentStyle}
         >
           {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
+          {canUseDesktopHoverActions &&
+            showInteractions &&
+            showReplyAndQuote &&
+            !isEditing && (
+              <WaveDropActions
+                drop={drop}
+                activePartIndex={activePartIndex}
+                onReply={handleOnReply}
+                onEdit={handleOnEdit}
+                suppressed={hasActiveLinkCardActions}
+                forceVisible={isRowPointerHovered}
+                style={getGroupedTimestampActionStyle(timestampSwipeOffset)}
+              />
+            )}
           {reactionsRow}
           {footerRow}
         </div>

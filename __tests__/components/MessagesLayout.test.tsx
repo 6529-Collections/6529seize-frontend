@@ -3,7 +3,12 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 
 const mockUseAuthenticatedContent = jest.fn();
+const mockUseCreateModalState = jest.fn();
 const mockUseDeviceInfo = jest.fn();
+const mockCreateDirectMessageModal = jest.fn(
+  ({ isOpen }: { readonly isOpen: boolean }) =>
+    isOpen ? <div data-testid="create-dm-modal" /> : null
+);
 
 jest.mock("@/hooks/useAuthenticatedContent", () => ({
   useAuthenticatedContent: () => mockUseAuthenticatedContent(),
@@ -12,6 +17,17 @@ jest.mock("@/hooks/useAuthenticatedContent", () => ({
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => mockUseDeviceInfo(),
+}));
+
+jest.mock("@/hooks/useCreateModalState", () => ({
+  __esModule: true,
+  default: () => mockUseCreateModalState(),
+}));
+
+jest.mock("@/components/waves/create-dm/CreateDirectMessageModal", () => ({
+  __esModule: true,
+  default: (props: { readonly isOpen: boolean }) =>
+    mockCreateDirectMessageModal(props),
 }));
 
 jest.mock("@/components/messages/MessagesDesktop", () => ({
@@ -56,12 +72,20 @@ describe("MessagesLayout", () => {
   beforeEach(() => {
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "not-authenticated",
+      connectedProfile: null,
+    });
+    mockUseCreateModalState.mockReturnValue({
+      close: jest.fn(),
+      isDirectMessageModalOpen: false,
     });
     mockUseDeviceInfo.mockReturnValue({ isApp: false, isMobileDevice: false });
   });
 
   it("renders messages content only when ready", () => {
-    mockUseAuthenticatedContent.mockReturnValue({ contentState: "ready" });
+    mockUseAuthenticatedContent.mockReturnValue({
+      connectedProfile: null,
+      contentState: "ready",
+    });
 
     render(
       <MessagesLayout>
@@ -74,8 +98,36 @@ describe("MessagesLayout", () => {
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 
+  it("owns the desktop create-direct-message modal from the layout", () => {
+    const close = jest.fn();
+    const connectedProfile = { handle: "seize", primary_wallet: "0x1" };
+    mockUseAuthenticatedContent.mockReturnValue({
+      connectedProfile,
+      contentState: "ready",
+    });
+    mockUseCreateModalState.mockReturnValue({
+      close,
+      isDirectMessageModalOpen: true,
+    });
+
+    render(
+      <MessagesLayout>
+        <div data-testid="message-content">DM content</div>
+      </MessagesLayout>
+    );
+
+    expect(screen.getByTestId("create-dm-modal")).toBeInTheDocument();
+    expect(mockCreateDirectMessageModal).toHaveBeenCalledTimes(1);
+    expect(mockCreateDirectMessageModal).toHaveBeenCalledWith({
+      isOpen: true,
+      onClose: close,
+      profile: connectedProfile,
+    });
+  });
+
   it("keeps messages content gated when profile setup is needed", () => {
     mockUseAuthenticatedContent.mockReturnValue({
+      connectedProfile: null,
       contentState: "needs-profile",
     });
 

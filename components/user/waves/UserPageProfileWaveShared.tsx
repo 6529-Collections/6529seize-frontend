@@ -221,13 +221,13 @@ export function OfficialWaveSummary({
             <button
               type="button"
               onClick={onAddPost}
-              className="tw-col-start-2 tw-row-start-1 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-100 sm:tw-py-1.5 tw-self-center"
+              className="tw-col-start-2 tw-row-start-1 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-self-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-100 sm:tw-py-1.5"
             >
               <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
               <span className="tw-text-xs sm:tw-text-sm">Add post</span>
             </button>
           )}
-          <fieldset className="horizontal-menu-hide-scrollbar tw-col-span-full tw-row-start-3 tw-mt-2 tw-w-full tw-overflow-x-auto lg:tw-mt-0 lg:tw-w-auto lg:tw-overflow-visible">
+          <fieldset className="tw-no-scrollbar tw-col-span-full tw-row-start-3 tw-mx-0 tw-mb-0 tw-mt-2 tw-w-full tw-min-w-0 tw-overflow-x-auto tw-border-0 tw-p-0 lg:tw-mt-0 lg:tw-w-auto lg:tw-overflow-visible">
             <legend className="tw-sr-only">Profile wave switch controls</legend>
             <div className="tw-flex tw-w-max tw-items-center tw-gap-2 lg:tw-w-auto lg:tw-justify-end">
               <div className="tw-flex tw-w-auto tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0.5 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)]">

@@ -14,8 +14,8 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import DropCurationButton from "../DropCurationButton";
 import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
+import { DropAuthorBadges } from "../DropAuthorBadges";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
@@ -127,13 +127,18 @@ function EndedParticipationDropInner({
     setIsSlideUp(true);
   }, [canUseTouchActionSheet, showInteractions]);
 
+  const handleMobileMenuOpenChange = useCallback((open: boolean) => {
+    setIsSlideUp(open);
+    if (!open) {
+      setLongPressTriggered(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (canUseTouchActionSheet) {
       return;
     }
 
-    setIsSlideUp(false);
-    setLongPressTriggered(false);
     mobileMenu?.close();
   }, [canUseTouchActionSheet, mobileMenu]);
 
@@ -188,6 +193,12 @@ function EndedParticipationDropInner({
               </Link>
             </p>
 
+            <DropAuthorBadges
+              profile={drop.author}
+              wave={drop.wave}
+              tooltipIdPrefix={`ended-participation-author-badges-${drop.id}`}
+            />
+
             {!isStackedTimestamp && (
               <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
             )}
@@ -239,7 +250,7 @@ function EndedParticipationDropInner({
     isOpen: effectiveIsSlideUp,
     longPressTriggered,
     showReplyAndQuote,
-    onOpenChange: setIsSlideUp,
+    onOpenChange: handleMobileMenuOpenChange,
     onReply: handleOnReply,
     onAddReaction: handleOnAddReaction,
   });
@@ -339,12 +350,6 @@ function EndedParticipationDropInner({
           )}
           {showInteractions && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-              <DropCurationButton
-                dropId={drop.id}
-                waveId={drop.wave.id}
-                isCuratable={drop.context_profile_context?.curatable ?? false}
-                isCurated={drop.context_profile_context?.curated ?? false}
-              />
               <WaveDropReactions drop={drop} />
             </div>
           )}

@@ -77,6 +77,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         ALLOWLIST_API_ENDPOINT: publicEnv.ALLOWLIST_API_ENDPOINT,
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
         VERSION,
+        VERSION_BUILD_TIMESTAMP: publicEnv.VERSION_BUILD_TIMESTAMP,
         ASSETS_FROM_S3: String(ASSETS_FROM_S3),
         NEXTGEN_CHAIN_ID:
           publicEnv.NEXTGEN_CHAIN_ID === undefined
@@ -88,7 +89,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         IPFS_GATEWAY_ENDPOINT: publicEnv.IPFS_GATEWAY_ENDPOINT,
         MEDIA_RESOLVER_ENDPOINT: publicEnv.MEDIA_RESOLVER_ENDPOINT,
         IPFS_MFS_PATH: publicEnv.IPFS_MFS_PATH,
-        TENOR_API_KEY: publicEnv.TENOR_API_KEY,
+        GIPHY_API_KEY: publicEnv.GIPHY_API_KEY,
         WS_ENDPOINT: publicEnv.WS_ENDPOINT,
         DEV_MODE_MEMES_WAVE_ID: publicEnv.DEV_MODE_MEMES_WAVE_ID,
         DEV_MODE_CURATION_WAVE_ID: publicEnv.DEV_MODE_CURATION_WAVE_ID,
@@ -101,6 +102,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         AWS_RUM_REGION: publicEnv.AWS_RUM_REGION,
         AWS_RUM_SAMPLE_RATE: publicEnv.AWS_RUM_SAMPLE_RATE,
         ENABLE_SECURITY_LOGGING: publicEnv.ENABLE_SECURITY_LOGGING,
+        ANNOUNCED_VERSION_ENDPOINT: publicEnv.ANNOUNCED_VERSION_ENDPOINT,
         DROP_FORGE_TESTNET:
           publicEnv.DROP_FORGE_TESTNET === undefined
             ? undefined

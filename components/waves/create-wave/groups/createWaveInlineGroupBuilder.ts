@@ -1,6 +1,7 @@
 "use client";
 
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
@@ -84,6 +85,8 @@ export const createEmptyInlineGroupPayload = (): ApiCreateGroup => ({
     identity_addresses: null,
     excluded_identity_addresses: null,
     is_beneficiary_of_grant_id: null,
+    is_beneficiary_of_grant_match_mode:
+      ApiGroupBeneficiaryGrantMatchMode.AnyToken,
   },
   is_private: false,
 });

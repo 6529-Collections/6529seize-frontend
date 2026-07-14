@@ -35,6 +35,8 @@ Multipart drops ("storms") stay in one card while users switch parts.
 ## Common Scenarios
 
 - Full markdown body renders inline, including headings, lists, quotes, and code.
+- Ordered lists accept both `1.` and `1)` markers and keep the chosen delimiter
+  when rendered.
 - Code blocks use syntax highlighting when available.
 - Paragraphs split by a single blank line render as separate paragraphs with
   tight spacing.

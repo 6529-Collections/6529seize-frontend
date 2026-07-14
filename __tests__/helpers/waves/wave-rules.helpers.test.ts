@@ -57,6 +57,7 @@ const createConfig = (): CreateWaveConfig => ({
   display: {
     customRules: "No AI-only submissions.",
     outcomesVisible: false,
+    submissionButtonLabel: null,
     approve: {
       approvalsTabLabel: "",
       approvedTabLabel: "",
@@ -85,6 +86,8 @@ describe("wave-rules.helpers", () => {
     ).toEqual(
       expect.arrayContaining([
         ["Who can drop", "Artists"],
+        ["Chat status", "Enabled"],
+        ["Chat access", "Anyone when enabled"],
         ["Required metadata", "artist (Text)"],
         ["Negative voting", "Blocked"],
         ["Approval threshold", "25 Rep"],
@@ -100,6 +103,7 @@ describe("wave-rules.helpers", () => {
       display: {
         customRules: "Keep chat respectful.",
         outcomesVisible: false,
+        submissionButtonLabel: null,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",
@@ -118,13 +122,17 @@ describe("wave-rules.helpers", () => {
     expect(rules.automatic.map((section) => section.title)).toEqual([
       "Wave",
       "Access",
-      "Chat",
     ]);
     expect(labels).toEqual(
-      expect.arrayContaining(["Who can view", "Who can chat", "Who can admin"])
+      expect.arrayContaining(["Who can view", "Chat access", "Who can admin"])
     );
     expect(labels).not.toEqual(
-      expect.arrayContaining(["Who can drop", "Who can vote"])
+      expect.arrayContaining([
+        "Who can drop",
+        "Who can vote",
+        "Who can chat",
+        "Chat status",
+      ])
     );
     expect(rules.custom).toEqual({
       binding: null,
@@ -183,14 +191,187 @@ describe("wave-rules.helpers", () => {
     });
 
     expect(rules.custom.display).toBe("Use current-season work.");
-    expect(
-      rules.automatic.flatMap((section) => section.rows)
-    ).toEqual(
+    expect(rules.automatic.flatMap((section) => section.rows)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           label: "Decision cadence",
           value: "Single decision",
         }),
+      ])
+    );
+  });
+
+  it("summarizes ongoing rank waves with no scheduled decisions", () => {
+    const base = createConfig();
+    const config: CreateWaveConfig = {
+      ...base,
+      overview: { type: ApiWaveType.Rank, name: "Nodes", image: null },
+      dates: {
+        submissionStartDate: 1000,
+        votingStartDate: 2000,
+        endDate: null,
+        firstDecisionTime: 5000,
+        subsequentDecisions: [],
+        isRolling: false,
+        ongoingRanking: true,
+      },
+      // Raw config carries stale values that the submit path strips; the
+      // summary must report the effective state instead.
+      outcomes: [{ title: "stale" } as any],
+      display: {
+        ...base.display,
+        outcomesVisible: true,
+      },
+    };
+
+    const rules = buildWaveRules({ config, groupsCache: {} });
+    const rows = rules.automatic
+      .flatMap((section) => section.rows)
+      .map((row) => [row.label, row.value]);
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        ["Winner announcements", "None (ongoing ranking, no end date)"],
+        ["Type", "Rank — Perpetual Ranking"],
+        ["Outcomes visibility", "Hidden"],
+        ["Configured outcomes", "Not available (perpetual wave)"],
+      ])
+    );
+    const labels = rows.map(([label]) => label);
+    expect(labels).not.toContain("First decision");
+    expect(labels).not.toContain("Decision cadence");
+  });
+
+  it("labels existing perpetual rank waves in the type row", () => {
+    const wave = {
+      wave: {
+        type: ApiWaveType.Rank,
+        admin_group: { group: null },
+        admin_drop_deletion_enabled: false,
+        max_votes_per_identity_to_drop: null,
+        time_lock_ms: null,
+        decisions_strategy: null,
+      },
+      visibility: { scope: { group: null } },
+      participation: {
+        scope: { group: null },
+        period: null,
+        required_media: [],
+        required_metadata: [],
+        no_of_applications_allowed_per_participant: null,
+        signature_required: false,
+        terms: null,
+        submission_strategy: null,
+      },
+      voting: {
+        scope: { group: null },
+        period: null,
+        credit_type: ApiWaveCreditType.TdhPlusXtdh,
+        credit_scope: ApiWaveCreditScope.Wave,
+        credit_category: null,
+        creditor: null,
+        credit_nfts: null,
+        forbid_negative_votes: false,
+      },
+      chat: { enabled: true, scope: { group: null } },
+    } as any;
+
+    const rows = buildWaveRules({ wave, metadata: [] }).automatic.flatMap(
+      (section) => section.rows
+    );
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Type",
+          value: "Rank — Perpetual Ranking",
+        }),
+      ])
+    );
+  });
+
+  it("splits disabled chat status and access in create rules", () => {
+    const rules = buildWaveRules({
+      config: {
+        ...createConfig(),
+        chat: { enabled: false },
+      },
+      groupsCache: {},
+    });
+    const rows = rules.automatic.flatMap((section) => section.rows);
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Chat status",
+          value: "Disabled",
+        }),
+        expect.objectContaining({
+          label: "Chat access",
+          value: "Anyone when enabled",
+        }),
+      ])
+    );
+    expect(rows).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Who can chat" }),
+      ])
+    );
+  });
+
+  it("splits disabled chat status and access in existing wave rules", () => {
+    const wave = {
+      wave: {
+        type: ApiWaveType.Rank,
+        admin_group: { group: null },
+        admin_drop_deletion_enabled: false,
+        max_votes_per_identity_to_drop: null,
+        time_lock_ms: null,
+        decisions_strategy: null,
+      },
+      visibility: { scope: { group: null } },
+      participation: {
+        scope: { group: null },
+        period: null,
+        required_media: [],
+        required_metadata: [],
+        no_of_applications_allowed_per_participant: null,
+        signature_required: false,
+        terms: null,
+        submission_strategy: null,
+      },
+      voting: {
+        scope: { group: null },
+        period: null,
+        credit_type: ApiWaveCreditType.TdhPlusXtdh,
+        credit_scope: ApiWaveCreditScope.Wave,
+        credit_category: null,
+        creditor: null,
+        credit_nfts: null,
+        forbid_negative_votes: false,
+      },
+      chat: { enabled: false, scope: { group: null } },
+    } as any;
+
+    const rows = buildWaveRules({ wave, metadata: [] }).automatic.flatMap(
+      (section) => section.rows
+    );
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Chat status",
+          value: "Disabled",
+        }),
+        expect.objectContaining({
+          label: "Chat access",
+          value: "Anyone when enabled",
+        }),
+      ])
+    );
+    expect(rows).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Who can chat" }),
       ])
     );
   });
@@ -244,12 +425,17 @@ describe("wave-rules.helpers", () => {
     ]);
     expect(rows).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          label: "Chat access",
+          value: "Anyone when enabled",
+        }),
         expect.objectContaining({ label: "Links", value: "Disabled" }),
         expect.objectContaining({ label: "Slow mode", value: "2m" }),
       ])
     );
     expect(rows).not.toEqual(
       expect.arrayContaining([
+        expect.objectContaining({ label: "Chat status" }),
         expect.objectContaining({ label: "Credit type" }),
         expect.objectContaining({ label: "Outcomes visibility" }),
       ])

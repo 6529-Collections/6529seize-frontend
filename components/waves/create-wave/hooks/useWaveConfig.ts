@@ -58,6 +58,7 @@ export function useWaveConfig() {
         firstDecisionTime: now,
         subsequentDecisions: [],
         isRolling: false,
+        ongoingRanking: false,
       },
       drops: {
         noOfApplicationsAllowedPerParticipant: null,
@@ -93,6 +94,7 @@ export function useWaveConfig() {
       display: {
         customRules: null,
         outcomesVisible: true,
+        submissionButtonLabel: null,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",
