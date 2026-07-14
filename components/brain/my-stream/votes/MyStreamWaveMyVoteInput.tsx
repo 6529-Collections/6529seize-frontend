@@ -9,7 +9,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
-import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
+import { applyWaveDropVoteUpdate } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 import {
   getWaveVoteScopeMaxLabel,
   WAVE_VOTING_LABELS,
@@ -183,7 +183,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         message: "Vote updated.",
         type: "success",
       });
-      invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
+      applyWaveDropVoteUpdate(queryClient, response, drop.wave.id);
     },
     onError: (error) => {
       setToast({

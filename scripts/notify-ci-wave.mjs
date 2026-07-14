@@ -12,6 +12,9 @@ const {
   CI_PIPELINES_ENVIRONMENT,
   CI_PIPELINES_SERVICE,
   CI_PIPELINES_WORKFLOW,
+  CI_RELEASE_NOTES_PROMPT_PATH,
+  CI_RELEASE_GROUP_ID,
+  CI_RELEASE_GROUP_SERVICES,
   GITHUB_REPOSITORY,
   GITHUB_WORKFLOW,
   GITHUB_RUN_ID,
@@ -36,12 +39,11 @@ function normalizeTargetEnvironment(value) {
   if (!targetEnv) {
     return null;
   }
-  if (
-    targetEnv === 'staging' ||
-    targetEnv === 'prod' ||
-    targetEnv === 'production'
-  ) {
-    return targetEnv;
+  if (targetEnv === 'staging') {
+    return 'staging';
+  }
+  if (targetEnv === 'prod' || targetEnv === 'production') {
+    return 'prod';
   }
   return `unsupported:${targetEnv}`;
 }
@@ -75,6 +77,26 @@ const repository = requireValue('GITHUB_REPOSITORY', GITHUB_REPOSITORY);
 const runId = requireValue('GITHUB_RUN_ID', GITHUB_RUN_ID);
 const status = requireValue('CI_PIPELINES_STATUS', CI_PIPELINES_STATUS);
 const title = requireValue('CI_PIPELINES_TITLE', CI_PIPELINES_TITLE);
+const isReleaseNotesEligible =
+  status === 'success' &&
+  targetEnvironment === 'prod' &&
+  Boolean(CI_RELEASE_NOTES_PROMPT_PATH);
+const releaseGroupServices = (
+  CI_RELEASE_GROUP_SERVICES ||
+  CI_PIPELINES_SERVICE ||
+  ''
+)
+  .split(',')
+  .map((service) => service.trim())
+  .filter(Boolean);
+const releaseNotesFields = isReleaseNotesEligible
+  ? {
+      release_notes_prompt_path: CI_RELEASE_NOTES_PROMPT_PATH,
+      release_group_id: CI_RELEASE_GROUP_ID || `${repository}:${runId}`,
+      release_group_services: releaseGroupServices,
+      deployed_at: new Date().toISOString()
+    }
+  : {};
 
 const payload = {
   repo: repository.split('/').pop() ?? repository,
@@ -88,7 +110,8 @@ const payload = {
   sha: GITHUB_SHA || null,
   branch: GITHUB_REF_NAME || null,
   environment: targetEnvironment || null,
-  service: CI_PIPELINES_SERVICE || null
+  service: CI_PIPELINES_SERVICE || null,
+  ...releaseNotesFields
 };
 
 const body = Buffer.from(JSON.stringify(payload));

@@ -14,8 +14,8 @@ jest.mock("@/components/waves/header/WaveHeader", () => ({
 
 jest.mock("@/components/common/TabToggleWithOverflow", () => ({
   __esModule: true,
-  TabToggleWithOverflow: ({ options, activeKey }: any) => (
-    <div data-testid="tabs">
+  TabToggleWithOverflow: ({ options, activeKey, maxVisibleTabs }: any) => (
+    <div data-testid="tabs" data-max-visible-tabs={maxVisibleTabs}>
       {activeKey}-{options.map((option: any) => option.label).join(",")}
     </div>
   ),
@@ -74,6 +74,7 @@ describe("WaveContent", () => {
       "ABOUT-About,Rules,REP,Settings"
     );
     expect(screen.getByText("content")).toBeInTheDocument();
+    expect(container.firstElementChild).toHaveClass("tw-bg-iron-950");
     expect(container.querySelector(".tw-divide-y")).toHaveClass(
       "tw-divide-white/5"
     );
@@ -178,6 +179,10 @@ describe("WaveContent", () => {
     );
     expect(screen.getByTestId("tabs")).toHaveTextContent(
       "ABOUT-About,Rules,REP,Settings,Voters,Activity"
+    );
+    expect(screen.getByTestId("tabs")).toHaveAttribute(
+      "data-max-visible-tabs",
+      "4"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Leaderboard");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Winners");

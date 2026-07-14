@@ -18,7 +18,8 @@ jest.mock("@tanstack/react-query", () => ({
 const useMutationMock = useMutation as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
 const mutateAsync = jest.fn();
-const invalidateQueries = jest.fn();
+const invalidateQueries = jest.fn().mockResolvedValue(undefined);
+const setQueriesData = jest.fn();
 
 const auth = {
   requestAuth: jest.fn().mockResolvedValue({ success: true }),
@@ -53,7 +54,7 @@ const expectMaxVotes = (value: string, label = "Max for wave") => {
 describe("MyStreamWaveMyVoteInput", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useQueryClientMock.mockReturnValue({ invalidateQueries });
+    useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
     useMutationMock.mockImplementation((config: any) => ({
       mutateAsync: async (variables: {
         rate: number;
@@ -61,6 +62,7 @@ describe("MyStreamWaveMyVoteInput", () => {
       }) => {
         mutateAsync(variables);
         const response = {
+          ...drop,
           id: "d1",
           context_profile_context: {
             rating: variables.rate,
@@ -303,8 +305,9 @@ describe("MyStreamWaveMyVoteInput", () => {
     });
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: "wave-1" }],
+      refetchType: "none",
     });
-    expect(invalidateQueries).toHaveBeenCalledWith({
+    expect(invalidateQueries).not.toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
     });
   });
@@ -357,8 +360,12 @@ describe("MyStreamWaveMyVoteInput", () => {
         previousRate: number;
       }) => {
         mutateAsync(variables);
-        config.onSuccess?.({ id: "d1" }, variables);
-        return { id: "d1" };
+        const response = {
+          ...drop,
+          context_profile_context: undefined,
+        };
+        config.onSuccess?.(response, variables);
+        return response;
       },
     }));
 
