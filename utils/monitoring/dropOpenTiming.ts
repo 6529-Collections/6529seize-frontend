@@ -173,9 +173,14 @@ export const markDropOpenReady = (params: {
       try {
         activeEntry.span.setAttribute("duration_ms", durationMs);
         activeEntry.span.setAttribute("route.family", payload.route_family);
-        endSentrySpan(activeEntry.span);
       } catch {
         // ignore tracing errors
+      } finally {
+        try {
+          endSentrySpan(activeEntry.span);
+        } catch {
+          // ignore tracing teardown errors
+        }
       }
     }
 

@@ -184,19 +184,27 @@ describe("MixpanelSetup", () => {
     );
   });
 
-  it("preserves static fallback route values", () => {
-    performanceConsent = true;
-    pathname = "/about/mission";
+  it.each([
+    ["/about/mission", "about_mission", "about"],
+    ["/discover", "discover", "discover"],
+    ["/join", "join", "join"],
+    ["/join-6529", "join_6529", "join_6529"],
+  ])(
+    "preserves static fallback route values for %s",
+    (staticPath, logicalPage, pageGroup) => {
+      performanceConsent = true;
+      pathname = staticPath;
 
-    render(<MixpanelSetup />);
+      render(<MixpanelSetup />);
 
-    expect(trackPageViewMock).toHaveBeenCalledWith("/about/mission", {
-      has_connected_profile: false,
-      logical_page: "about_mission",
-      page_group: "about",
-      route_pattern: "/about/mission",
-    });
-  });
+      expect(trackPageViewMock).toHaveBeenCalledWith(staticPath, {
+        has_connected_profile: false,
+        logical_page: logicalPage,
+        page_group: pageGroup,
+        route_pattern: staticPath,
+      });
+    }
+  );
 
   it("tracks anonymous profile views separately from signed-in viewers", () => {
     performanceConsent = true;

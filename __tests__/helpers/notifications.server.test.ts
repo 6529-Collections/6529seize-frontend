@@ -186,6 +186,34 @@ describe("prefetchNotificationsPageData", () => {
     expect(queryClient.getQueryCache().getAll()).toHaveLength(1);
   });
 
+  it("keeps notifications prefetch best-effort while exposing its error to tracing", async () => {
+    const queryClient = new QueryClient();
+    const fetchError = new Error("notifications failed");
+    const tracedTaskErrors: unknown[] = [];
+    mockTraceServerRouteData.mockImplementation(
+      async (_options: unknown, task: () => Promise<unknown>) => {
+        try {
+          return await task();
+        } catch (error) {
+          tracedTaskErrors.push(error);
+          throw error;
+        }
+      }
+    );
+    (fetchNotificationsV2 as jest.Mock).mockRejectedValue(fetchError);
+
+    await expect(
+      prefetchNotificationsPageData({
+        queryClient,
+        headers: { Authorization: "Bearer token" },
+      })
+    ).resolves.toBeUndefined();
+
+    expect(commonApiFetch).toHaveBeenCalledTimes(1);
+    expect(fetchNotificationsV2).toHaveBeenCalledTimes(1);
+    expect(tracedTaskErrors).toEqual([fetchError]);
+  });
+
   it("leaves the route fallback to handle profile fetch failures", async () => {
     const queryClient = new QueryClient();
     (commonApiFetch as jest.Mock).mockRejectedValue(

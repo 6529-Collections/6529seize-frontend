@@ -63,23 +63,27 @@ export const prefetchNotificationsPageData = async ({
     return;
   }
 
-  await traceServerRouteData(
-    {
-      name: SERVER_ROUTE_SPAN_NAMES.notificationsFeedPrefetch,
-      routeFamily: "/notifications",
-      dataPath: "notifications_feed",
-      apiRequestCount: 1,
-      authCohort,
-    },
-    () =>
-      queryClient.prefetchInfiniteQuery({
-        ...getIdentityNotificationsInfiniteQueryOptions({
-          identity: profile.handle,
-          limit: NOTIFICATIONS_PAGE_LIMIT,
-          cause: null,
-          headers,
-        }),
-        pages: 1,
-      })
-  );
+  try {
+    await traceServerRouteData(
+      {
+        name: SERVER_ROUTE_SPAN_NAMES.notificationsFeedPrefetch,
+        routeFamily: "/notifications",
+        dataPath: "notifications_feed",
+        apiRequestCount: 1,
+        authCohort,
+      },
+      () =>
+        queryClient.fetchInfiniteQuery({
+          ...getIdentityNotificationsInfiniteQueryOptions({
+            identity: profile.handle,
+            limit: NOTIFICATIONS_PAGE_LIMIT,
+            cause: null,
+            headers,
+          }),
+          pages: 1,
+        })
+    );
+  } catch {
+    // Notifications prefetch is best-effort; the client query owns recovery.
+  }
 };

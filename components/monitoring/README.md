@@ -53,7 +53,7 @@ The AWS RUM service will automatically create:
   track/engage, and WalletConnect RPC/identity requests are excluded from HTTP
   telemetry. The provider's `urlsToExclude` list is the source of truth for the
   exact URL patterns.
-- Custom events are compatibility signals only and are catalogued in
+- Custom-event ownership and compatibility status are catalogued in
   `ops/telemetry/registry.json`.
 
 ### Session Management

@@ -86,7 +86,12 @@ describe("frontend telemetry registry", () => {
       expect(signal.name.trim()).not.toBe("");
       expect(signal.destinations.length).toBeGreaterThan(0);
       for (const destination of signal.destinations) {
-        expect(providerIds).toContain(destination.split(":")[0]);
+        const destinationParts = destination.split(":");
+        expect(destinationParts).toHaveLength(2);
+        expect(providerIds).toContain(destinationParts[0]);
+        expect(["owner", "compatibility", "diagnostic"]).toContain(
+          destinationParts[1]
+        );
       }
       expect(signal.producer).not.toMatch(/^(?:\/|[A-Za-z]:\\)/);
       expect(signal.producer).not.toContain("..");

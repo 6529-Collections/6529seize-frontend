@@ -178,13 +178,8 @@ describe("Notifications component", () => {
     expect(
       screen.getByText("Loading notifications...", { selector: "div" })
     ).toBeInTheDocument();
-    expect(mockMarkMobileLaunchStep).not.toHaveBeenCalledWith(
-      "route_first_useful_content"
-    );
-    expect(mockScheduleMobileLaunchFlush).not.toHaveBeenCalledWith(
-      "notifications_content_visible",
-      250
-    );
+    expect(mockMarkMobileLaunchStep).not.toHaveBeenCalled();
+    expect(mockScheduleMobileLaunchFlush).not.toHaveBeenCalled();
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });

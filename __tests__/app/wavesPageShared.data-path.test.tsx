@@ -140,7 +140,19 @@ describe("renderWavesPageContent data paths", () => {
 
   it("preserves the Wave route fallback when metadata loading fails", async () => {
     const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
-    (commonApiFetch as jest.Mock).mockRejectedValue(new Error("wave failed"));
+    const fetchError = new Error("wave failed");
+    const tracedTaskErrors: unknown[] = [];
+    mockTraceServerRouteData.mockImplementation(
+      async (_options: unknown, task: () => Promise<unknown> | unknown) => {
+        try {
+          return await task();
+        } catch (error) {
+          tracedTaskErrors.push(error);
+          throw error;
+        }
+      }
+    );
+    (commonApiFetch as jest.Mock).mockRejectedValue(fetchError);
 
     await expect(
       renderWavesPageContent({
@@ -152,9 +164,10 @@ describe("renderWavesPageContent data paths", () => {
     expect(setQueryData).not.toHaveBeenCalled();
     expect(prefetchQuery).not.toHaveBeenCalled();
     expect(prefetchInfiniteQuery).not.toHaveBeenCalled();
+    expect(tracedTaskErrors).toEqual([fetchError]);
     expect(warning).toHaveBeenCalledWith("Failed to fetch wave", {
       waveId: "wave-failure-data-path",
-      error: expect.any(Error),
+      error: fetchError,
     });
     warning.mockRestore();
   });

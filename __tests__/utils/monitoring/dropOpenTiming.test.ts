@@ -88,4 +88,25 @@ describe("dropOpenTiming", () => {
     expect(telemetryPayload).not.toContain("private-drop-id");
     expect(telemetryPayload).not.toContain("private-wave-id");
   });
+
+  it("ends the Sentry span when recording an attribute fails", () => {
+    mockSpan.setAttribute.mockImplementationOnce(() => {
+      throw new Error("attribute failed");
+    });
+
+    startDropOpen({
+      dropId: "private-drop-id",
+      waveId: "private-wave-id",
+      source: "leaderboard_list",
+      isMobile: false,
+    });
+
+    expect(() =>
+      markDropOpenReady({
+        dropId: "private-drop-id",
+        waveId: "private-wave-id",
+      })
+    ).not.toThrow();
+    expect(mockSpan.end).toHaveBeenCalledTimes(1);
+  });
 });

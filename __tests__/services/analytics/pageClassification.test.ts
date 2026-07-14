@@ -106,6 +106,9 @@ describe("classifyPageView", () => {
   it.each([
     ["/the-memes", "the_memes", "the_memes"],
     ["/about/mission", "about_mission", "about"],
+    ["/discover", "discover", "discover"],
+    ["/join", "join", "join"],
+    ["/join-6529", "join_6529", "join_6529"],
     ["/notifications", "notifications", "notifications"],
   ])(
     "preserves static fallback route %s",
