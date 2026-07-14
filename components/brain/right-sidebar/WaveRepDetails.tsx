@@ -284,12 +284,12 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
   const isShowingPreviousContributors = contributorsQuery.isPlaceholderData;
 
   return (
-    <div className="tw-flex tw-h-full tw-flex-col tw-gap-4 tw-p-4 tw-@container/rep">
+    <div className="tw-flex tw-min-h-full tw-flex-col tw-gap-4 tw-p-4 tw-@container/rep">
       <section aria-label={detailText("waves.rep.details.summary.title")}>
         <div className="tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
           <div className="tw-flex tw-items-end tw-justify-between tw-gap-4 tw-px-2 tw-py-2.5">
             <div className="tw-min-w-0">
-              <p className="tw-mb-1 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+              <p className="tw-mb-1 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.1em]">
                 {detailText("waves.rep.details.summary.total")}
               </p>
               <p
@@ -300,7 +300,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 {formatSignedRep(summary.totalRep)}
               </p>
             </div>
-            <span className="tw-max-w-32 tw-text-right tw-text-[0.6875rem] tw-font-medium tw-leading-4 tw-text-iron-500">
+            <span className="tw-max-w-32 tw-text-right tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500">
               {getContributorCountLabel(summary.contributorCount)}
             </span>
           </div>
@@ -334,7 +334,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <h2
             id="wave-rep-categories-heading"
-            className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.1em] !tw-text-iron-400"
+            className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]"
           >
             {detailText("waves.rep.details.categories.title")}
           </h2>
@@ -432,7 +432,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         )}
       </section>
 
-      <div className="tw-sticky tw-top-0 tw-z-20 tw--mx-4 tw-flex tw-flex-col tw-bg-iron-950/95 tw-px-4 tw-py-2 tw-backdrop-blur">
+      <div className="tw-sticky tw-top-0 tw-z-20 tw-flex tw-flex-col tw-bg-iron-950/95 tw-py-2 tw-backdrop-blur">
         <fieldset className="tw-m-0 tw-grid tw-min-w-0 tw-grid-cols-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-p-0">
           <legend className="tw-sr-only">
             {detailText("waves.rep.details.view.ariaLabel")}
@@ -470,7 +470,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             <div className="tw-min-w-0">
               <h2
                 id="wave-rep-contributors-heading"
-                className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.08em] !tw-text-iron-400"
+                className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]"
               >
                 {contributorHeading}
               </h2>
@@ -573,7 +573,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             <div>
               <h2
                 id="wave-rep-activity-heading"
-                className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.08em] !tw-text-iron-400"
+                className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]"
               >
                 {detailText("waves.rep.details.activity.title")}
               </h2>
