@@ -19,6 +19,7 @@ import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 
@@ -1891,6 +1892,7 @@ export const EN_US_MESSAGES = {
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
+  ...EN_US_PAGINATION_MESSAGES,
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
