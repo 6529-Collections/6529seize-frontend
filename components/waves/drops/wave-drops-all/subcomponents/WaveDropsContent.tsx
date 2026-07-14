@@ -51,7 +51,6 @@ interface WaveDropsContentProps {
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
   readonly unreadCount?: number | undefined;
-  readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -86,7 +85,6 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onBoostedDropClick,
   onScrollToUnread,
   unreadCount,
-  autoCollapseSerials,
   suspendLightDropHydration = false,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -149,7 +147,6 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onBoostedDropClick={onBoostedDropClick}
         onScrollToUnread={onScrollToUnread}
         onDismissUnread={handleDismissUnread}
-        autoCollapseSerials={autoCollapseSerials}
         suspendLightDropHydration={suspendLightDropHydration}
         winningThreshold={winningThreshold}
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
