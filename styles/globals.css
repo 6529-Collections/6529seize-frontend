@@ -79,14 +79,10 @@
     --pull-to-refresh-fixed-overlay-offset: 0px;
     --pull-to-refresh-fixed-overlay-transition-duration: 0ms;
   }
-  :root[data-native-keyboard-visible="true"] {
+  :root[data-native-keyboard-visible="true"]:not(
+      [data-layout-viewport-locked="true"]
+    ) {
     --native-keyboard-composer-bottom-padding: 0px;
-  }
-  :root[data-layout-viewport-locked="true"] {
-    --native-keyboard-composer-bottom-padding: max(
-      env(safe-area-inset-bottom, 0px),
-      0.5rem
-    );
   }
   [data-pull-to-refresh-transform-root="true"]
     [data-pull-to-refresh-fixed-overlay="true"] {

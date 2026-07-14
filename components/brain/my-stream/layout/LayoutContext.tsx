@@ -73,6 +73,24 @@ const calculateHeightStyle = (
   };
 };
 
+const calculateNativeKeyboardHeightStyle = (
+  spaces: LayoutSpaces,
+  isCapacitor: boolean,
+  isViewportLocked: boolean
+): React.CSSProperties => {
+  const shouldFollowKeyboard = isCapacitor && !isViewportLocked;
+  const style = calculateHeightStyle(
+    spaces,
+    shouldFollowKeyboard ? NATIVE_KEYBOARD_INSET : 0
+  );
+
+  if (!shouldFollowKeyboard) return style;
+  return {
+    ...style,
+    transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+  };
+};
+
 // Context type definition
 // Define valid ref types for type safety
 type LayoutRefType =
@@ -232,7 +250,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor } = useCapacitor();
-  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
+  const { isVisible: isKeyboardVisible, phase: keyboardPhase } =
+    useNativeKeyboard();
 
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
@@ -253,7 +272,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     acquire: acquireViewportLock,
     isLocked: isViewportLocked,
     lockedValue: lockedSpaces,
-  } = useViewportLayoutLock(spaces);
+  } = useViewportLayoutLock(spaces, keyboardPhase !== "hidden");
 
   // Create refs for callback functions to solve circular dependency
   const calculateSpacesRef = useRef<() => void>(() => {});
@@ -375,18 +394,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [effectiveSpaces, isNavHiddenForKeyboard]);
 
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
-    const style = calculateHeightStyle(
+    return calculateNativeKeyboardHeightStyle(
       navAdjustedSpaces,
-      isCapacitor && !isViewportLocked ? NATIVE_KEYBOARD_INSET : 0
+      isCapacitor,
+      isViewportLocked
     );
-
-    if (isCapacitor && !isViewportLocked) {
-      return {
-        ...style,
-        transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
-      };
-    }
-    return style;
   }, [navAdjustedSpaces, isCapacitor, isViewportLocked]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
@@ -414,18 +426,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [navAdjustedSpaces]);
 
   const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
-    const style = calculateHeightStyle(
+    return calculateNativeKeyboardHeightStyle(
       { ...navAdjustedSpaces, mobileNavSpace: 0 },
-      isCapacitor && !isViewportLocked ? NATIVE_KEYBOARD_INSET : 0
+      isCapacitor,
+      isViewportLocked
     );
-
-    if (isCapacitor && !isViewportLocked) {
-      return {
-        ...style,
-        transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
-      };
-    }
-    return style;
   }, [navAdjustedSpaces, isCapacitor, isViewportLocked]);
 
   const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {
