@@ -49,6 +49,33 @@ function getLockUseCaseIndex(value: number) {
   return value - 1;
 }
 
+function CollectionLockUseCaseOptions(
+  props: Readonly<{ locks: CollectionLocks }>
+) {
+  return ALL_USE_CASES.map((useCase, index) => {
+    if (useCase.use_case === 1) return null;
+    const asteriskDisplay = props.locks.useCaseLockStatusesGlobal.data?.[index]
+      ? ` *`
+      : ``;
+    const lockDisplay =
+      props.locks.useCaseLockStatuses.data?.[index] ||
+      props.locks.useCaseLockStatusesGlobal.data?.[index] ||
+      props.locks.collectionLockRead.data
+        ? ` - LOCKED${asteriskDisplay}`
+        : ` - UNLOCKED`;
+
+    return (
+      <option
+        key={`collection-delegation-select-use-case-${useCase.use_case}`}
+        value={useCase.use_case}
+      >
+        #{useCase.use_case} - {useCase.display}
+        {lockDisplay}
+      </option>
+    );
+  });
+}
+
 /**
  * The "Locks" section of the collection-delegation screen: the wallet-level
  * lock button and the per-use-case lock select/button pair.
@@ -165,29 +192,7 @@ export function CollectionDelegationLocks(
                 ? ` *`
                 : ``}
             </option>
-            {ALL_USE_CASES.map((uc, index) => {
-              if (uc.use_case === 1) return null;
-              const asteriskDisplay = locks.useCaseLockStatusesGlobal.data?.[
-                index
-              ]
-                ? ` *`
-                : ``;
-              const lockDisplay =
-                locks.useCaseLockStatuses.data?.[index] ||
-                locks.useCaseLockStatusesGlobal.data?.[index] ||
-                locks.collectionLockRead.data
-                  ? ` - LOCKED${asteriskDisplay}`
-                  : ` - UNLOCKED`;
-              return (
-                <option
-                  key={`collection-delegation-select-use-case-${uc.use_case}`}
-                  value={uc.use_case}
-                >
-                  #{uc.use_case} - {uc.display}
-                  {lockDisplay}
-                </option>
-              );
-            })}
+            <CollectionLockUseCaseOptions locks={locks} />
           </select>
         </div>
         {locks.lockUseCaseValue != 0 && (

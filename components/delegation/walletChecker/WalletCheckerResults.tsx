@@ -43,6 +43,31 @@ function getCollectionDisplay(collection: string) {
   return resolved ? resolved.title : collection;
 }
 
+function getDelegationKey(scope: string, delegation: Delegation) {
+  return [
+    scope,
+    delegation.block,
+    delegation.from_address.toLowerCase(),
+    delegation.to_address.toLowerCase(),
+    delegation.collection.toLowerCase(),
+    delegation.use_case,
+    delegation.expiry,
+    delegation.token_id,
+    delegation.all_tokens,
+  ].join("-");
+}
+
+function getConsolidationKey(
+  scope: string,
+  consolidation: ConsolidationDisplay
+) {
+  return [
+    scope,
+    consolidation.from.toLowerCase(),
+    consolidation.to.toLowerCase(),
+  ].join("-");
+}
+
 function formatExpiry(myDate: number) {
   const date = new Date(myDate * 1000);
   const year = date.getUTCFullYear();
@@ -138,8 +163,8 @@ function DelegationsResults(
                   </tr>
                 </thead>
                 <tbody>
-                  {props.delegations.map((delegation, index) => (
-                    <tr key={`delegations-${index}`}>
+                  {props.delegations.map((delegation) => (
+                    <tr key={getDelegationKey("delegation", delegation)}>
                       <DelegationAddressCells
                         checkedAddress={props.fetchedAddress}
                         delegation={delegation}
@@ -217,8 +242,8 @@ function DelegationsResults(
                   </tr>
                 </thead>
                 <tbody>
-                  {props.subDelegations.map((delegation, index) => (
-                    <tr key={`sub-delegations-${index}`}>
+                  {props.subDelegations.map((delegation) => (
+                    <tr key={getDelegationKey("sub-delegation", delegation)}>
                       <DelegationAddressCells
                         checkedAddress={props.fetchedAddress}
                         delegation={delegation}
@@ -255,8 +280,8 @@ function ConsolidationsResults(
           <div className="tw-overflow-x-auto">
             <table className="tw-w-full tw-min-w-[520px] tw-border-separate tw-border-spacing-y-1">
               <tbody>
-                {props.consolidations.map((consolidation, index) => (
-                  <tr key={`consolidations-${index}`}>
+                {props.consolidations.map((consolidation) => (
+                  <tr key={getConsolidationKey("consolidation", consolidation)}>
                     <td className="tw-flex tw-items-center tw-px-2 tw-py-1">
                       <CheckedWalletAddress
                         checkedAddress={props.fetchedAddress}
@@ -287,7 +312,9 @@ function ConsolidationsResults(
               <h5 className="tw-pb-2 tw-pt-2">Active Consolidation</h5>
               <div className="tw-flex tw-flex-wrap tw-items-center">
                 {props.consolidatedWallets.map((wallet, index) => (
-                  <Fragment key={`consolidated-wallets-${index}`}>
+                  <Fragment
+                    key={`consolidated-wallet-${wallet.address.toLowerCase()}`}
+                  >
                     <CheckedWalletAddress
                       checkedAddress={props.fetchedAddress}
                       address={wallet.address}
@@ -320,9 +347,12 @@ function ConsolidationsResults(
             <div className="tw-pb-2 tw-pt-2">
               Recommended Actions:
               <ul className={`${styles["recommendationsList"]} tw-pt-2`}>
-                {props.consolidationActions.map((consolidation, index) => (
+                {props.consolidationActions.map((consolidation) => (
                   <li
-                    key={`consolidated-wallets-${index}`}
+                    key={getConsolidationKey(
+                      "consolidation-action",
+                      consolidation
+                    )}
                     className="tw-flex tw-items-center tw-gap-2"
                   >
                     &bull;&nbsp;Register Consolidation from{" "}
