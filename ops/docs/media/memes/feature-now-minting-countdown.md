@@ -5,8 +5,8 @@
 The Now Minting countdown card shows the current mint phase timing and status
 for The Memes drops. Depending on state, it shows one of four states: loading,
 live/upcoming countdown, completion, or error. In the home latest-drop card,
-the `Edition Details` section includes a `Distribution Plan` action that links to
-the card’s distribution view.
+the `Edition Details` section includes a `Distribution Plan` action and, when
+the card has an explicit mapping, a `Main Stage Submission` action.
 
 ## Location in the Site
 
@@ -39,6 +39,8 @@ the card’s distribution view.
    settings and platform/country rules) that links to `/the-memes/mint`.
 7. In the `Edition Details` accordion, users can open the card’s distribution
    page directly via `Distribution Plan` → `View`.
+8. For mapped cards, the same accordion ends with `Main Stage Submission` →
+   `View`, which opens the winning drop in the configured Main Stage wave.
 
 ## Common Scenarios
 
@@ -57,6 +59,8 @@ the card’s distribution view.
   - The `Edition Details` accordion always includes `Mint date`,
     `Collection`, `Season`, and a `Distribution Plan` row with a direct link
     to `/the-memes/{id}/distribution`.
+  - It also includes a final `Main Stage Submission` row when an explicit
+    Meme-card-to-drop mapping exists; older unmapped cards omit the row.
   - `File type` and `Dimensions` appear only when the current drop exposes
     usable media format and dimension metadata.
 - Allowlist phase:

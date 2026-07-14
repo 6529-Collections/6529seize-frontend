@@ -99,12 +99,16 @@ describe("SingleWaveDropAuthor", () => {
   });
 
   it("keeps interactive badges outside the profile link", () => {
-    render(<SingleWaveDropAuthor drop={createDrop("alice", "0xabc")} />);
+    const { container } = render(
+      <SingleWaveDropAuthor drop={createDrop("alice", "0xabc")} />
+    );
 
     const profileLink = screen.getByRole("link", { name: "alice" });
     expect(profileLink).not.toContainElement(
       screen.getByTestId("drop-author-badges")
     );
+    expect(container.firstElementChild).toHaveClass("tw-items-center");
+    expect(container.firstElementChild).not.toHaveClass("tw-items-start");
   });
 
   it.each([ApiDropType.Chat, ApiDropType.Participatory, ApiDropType.Winner])(

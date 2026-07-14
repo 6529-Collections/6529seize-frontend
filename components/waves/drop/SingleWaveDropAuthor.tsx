@@ -28,7 +28,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
     : "Profile picture";
 
   return (
-    <div className="tw-flex tw-items-start tw-gap-x-2.5">
+    <div className="tw-flex tw-items-center tw-gap-x-2.5">
       <Link
         href={`/${drop.author.handle ?? drop.author.primary_address}`}
         className="tw-flex tw-items-center tw-gap-x-2.5 tw-no-underline"
