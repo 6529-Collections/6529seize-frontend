@@ -93,14 +93,7 @@ beforeEach(() => {
 
 test("renders actions when desktop hover actions are active", () => {
   const onReply = jest.fn();
-  render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={onReply}
-      onQuote={jest.fn()}
-    />
-  );
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={onReply} />);
   expect(screen.getByTestId("identity")).toBeInTheDocument();
   fireEvent.click(screen.getByTestId("reply"));
   expect(onReply).toHaveBeenCalled();
@@ -112,27 +105,13 @@ test("keeps actions for desktop hover mode even when the user agent is mobile", 
     canUseTouchActionSheet: false,
   });
 
-  render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={jest.fn()}
-      onQuote={jest.fn()}
-    />
-  );
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />);
 
   expect(screen.getByTestId("reply")).toBeInTheDocument();
 });
 
 test("renders vote details through meme vote stats", () => {
-  render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={jest.fn()}
-      onQuote={jest.fn()}
-    />
-  );
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />);
 
   expect(mockMemeDropVoteStats).toHaveBeenCalledWith({ drop });
   expect(
@@ -142,15 +121,37 @@ test("renders vote details through meme vote stats", () => {
   ).toBeInTheDocument();
 });
 
-test("does not trigger the mobile menu wrapper when vote details is clicked", () => {
+test("links a mapped Main Stage winner to its Meme card", () => {
   render(
     <MemeWinnerDrop
-      drop={drop}
+      drop={{ ...drop, submission_context: { meme_card_id: 521 } }}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
+
+  expect(screen.getByRole("link", { name: "The Memes #521" })).toHaveAttribute(
+    "href",
+    "/the-memes/521"
+  );
+});
+
+test("does not infer a Meme card link when the mapping is absent", () => {
+  render(
+    <MemeWinnerDrop
+      drop={{ ...drop, submission_context: {} }}
+      showReplyAndQuote
+      onReply={jest.fn()}
+    />
+  );
+
+  expect(
+    screen.queryByRole("link", { name: /The Memes #/ })
+  ).not.toBeInTheDocument();
+});
+
+test("does not trigger the mobile menu wrapper when vote details is clicked", () => {
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />);
 
   const trigger = screen.getByTestId("winner-vote-details");
 
@@ -170,12 +171,7 @@ test("hides desktop actions when touch sheet mode is active", () => {
   });
 
   const { queryByTestId } = render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={jest.fn()}
-      onQuote={jest.fn()}
-    />
+    <MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />
   );
   expect(queryByTestId("reply")).toBeNull();
 });
@@ -200,7 +196,6 @@ test("uses v2 title and part one content before metadata fallbacks", () => {
       }}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
 

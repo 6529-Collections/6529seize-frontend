@@ -474,6 +474,28 @@ describe("fetchWaveDropsFeedV2", () => {
     );
   });
 
+  it("preserves a Main Stage Meme card ID in the V2 submission context", () => {
+    const drop = mapLeaderboardDropV2({
+      drop: createEnrichableDrop({
+        submission_context: {
+          ...createEnrichableDrop().submission_context,
+          status: ApiSubmissionDropStatus.Winner,
+          meme_card_id: 521,
+        },
+      }) as unknown as ApiDropV2,
+      wave: {
+        id: "wave-1",
+        name: "Wave 1",
+        picture: null,
+        voting_credit_type: "TDH",
+      } as unknown as ApiWaveMin,
+    });
+
+    expect(drop.submission_context).toEqual(
+      expect.objectContaining({ meme_card_id: 521 })
+    );
+  });
+
   it("maps V2 submission voting totals into leaderboard legacy vote fields", () => {
     const drop = mapLeaderboardDropV2({
       drop: createEnrichableDrop() as unknown as ApiDropV2,
