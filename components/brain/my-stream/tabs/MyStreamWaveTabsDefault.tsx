@@ -1,9 +1,10 @@
 import React from "react";
 import {
   ChatBubbleLeftIcon,
+  LockClosedIcon,
+  PlusIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
-import { PlusIcon } from "@heroicons/react/24/solid";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
@@ -15,6 +16,7 @@ import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
+import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MyStreamWaveTabsHeader, {
   type MyStreamWaveTabsHeaderActionContext,
 } from "./MyStreamWaveTabsHeader";
@@ -67,7 +69,29 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 
     return (
       <>
-        {showChatSubmitDropAction && (
+        {showChatSubmitDropAction && !action.canOpen && headerIsCompact && (
+          <WaveHeaderRestrictionButton
+            label={action.label}
+            reason={chatSubmitDropTooltip ?? action.label}
+            className="tw-h-8 tw-w-8 tw-min-w-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+          >
+            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+            <span className="tw-sr-only">{action.compactLabel}</span>
+          </WaveHeaderRestrictionButton>
+        )}
+        {showChatSubmitDropAction && !action.canOpen && !headerIsCompact && (
+          <WaveHeaderRestrictionButton
+            label={action.label}
+            reason={chatSubmitDropTooltip ?? action.label}
+            className="tw-h-8 tw-min-w-0 tw-max-w-[10rem] tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 lg:tw-max-w-[14rem]"
+          >
+            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+            <span className="tw-min-w-0 tw-truncate">
+              {chatSubmitDropTooltip}
+            </span>
+          </WaveHeaderRestrictionButton>
+        )}
+        {showChatSubmitDropAction && action.canOpen && (
           <span
             className="tw-inline-flex"
             title={chatSubmitDropTitle}
@@ -76,12 +100,13 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           >
             <PrimaryButton
               loading={false}
-              disabled={!action.canOpen}
+              disabled={false}
               onClicked={action.onOpen}
+              size="sm"
               padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
               title={chatSubmitDropTitle}
               ariaLabel={action.label}
-              className="tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-auto sm:tw-w-auto sm:tw-min-w-0"
+              className="tw-h-8 tw-w-8 tw-min-w-8 sm:tw-w-auto sm:tw-min-w-0 sm:tw-max-w-[10rem]"
             >
               <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 sm:-tw-ml-1" />
               <span className="tw-sr-only sm:tw-not-sr-only sm:tw-inline">

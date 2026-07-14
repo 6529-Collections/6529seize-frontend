@@ -20,11 +20,14 @@ submit states are documented separately.
       `Submit Meme (Closes Soon!)`
     - narrower desktop widths can show compact labels (for example
       `Submit Work`)
+  - Native app wave header: icon-only submit action
+    - when submission is blocked, the action becomes a lock; select it to see
+      the exact restriction
   - Mobile leaderboard header: `Drop`
   - Mobile chat thread: floating `+` button (top-right)
 
-If submit controls are unavailable (not started, closed, not eligible, or limit
-reached), use
+If submission is unavailable (not started, closed, not eligible, or limit
+reached), select the header restriction control to see the reason, then use
 [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md).
 
 ## Entry Points
@@ -35,9 +38,13 @@ reached), use
     relabel this to `Submit Meme` or `Submit Meme (Closes Soon!)`)
   - mobile leaderboard header action (`Drop`)
   - mobile chat floating submit button (`+`, top-right)
-- If submission controls are hidden or disabled, use
+- If submission controls are hidden or show a restriction icon/label, select
+  the restriction control for the full reason and use
   [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md)
   for the gating states.
+- On The Memes Main Stage, the desktop `How to Submit` state shows live
+  MemesNominee REP progress and a `Get nominated` action. The native app lock
+  shows the same current REP requirement in its restriction details.
 
 ## User Journey
 
