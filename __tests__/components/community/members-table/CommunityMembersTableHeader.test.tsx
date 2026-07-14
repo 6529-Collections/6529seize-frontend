@@ -54,10 +54,11 @@ describe("CommunityMembersTableHeader", () => {
       </table>
     );
 
-    const tdhHeader = screen
-      .getByText(ApiCommunityMembersSortOption.Tdh)
-      .closest("th")!;
-    fireEvent.click(tdhHeader);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: ApiCommunityMembersSortOption.Tdh,
+      })
+    );
 
     expect(onSort).toHaveBeenCalledWith(ApiCommunityMembersSortOption.Tdh);
   });
