@@ -3542,6 +3542,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMemesExtendedDataPage"
+  /meme-cards/{meme_card_id}/drop:
+    get:
+      tags:
+        - Memes
+      summary: Get the Main Stage drop mapped to a Meme card
+      description: >-
+        Returns the explicit one-to-one mapping between a minted Meme card and
+        the winning Memes Main Stage submission that produced it.
+      operationId: getMemeCardDropMapping
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/memes/meme-card-drop-mappings.handlers"
+          name: handleGetMemeCardDropMapping
+      parameters:
+        - name: meme_card_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCardDropMapping"
+        "400":
+          description: Invalid Meme card ID
+        "404":
+          description: No Main Stage drop mapping exists for this Meme card
   /memes-mint-stats:
     get:
       tags:
@@ -14911,6 +14946,18 @@ components:
         - model/gltf-binary
         - video/quicktime
         - image/webp
+    ApiMemeCardDropMapping:
+      type: object
+      required:
+        - meme_card_id
+        - drop_id
+      properties:
+        meme_card_id:
+          type: integer
+          format: int64
+          minimum: 1
+        drop_id:
+          type: string
     ApiMemesExtendedData:
       type: object
       description: >-
@@ -18039,6 +18086,14 @@ components:
             unless the submission has won.
           type: integer
           format: int64
+        meme_card_id:
+          description: >-
+            The Memes card ID assigned to this winning Main Stage submission.
+            Omitted for active submissions, winners outside the configured Main
+            Stage wave, and legacy winners whose relationship is unavailable.
+          type: integer
+          format: int64
+          minimum: 1
     ApiSubmissionDropStatus:
       type: string
       enum:

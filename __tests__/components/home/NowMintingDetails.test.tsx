@@ -37,6 +37,11 @@ jest.mock("@/components/home/now-minting/NowMintingStatsGrid", () => ({
   default: () => <div data-testid="stats-grid" />,
 }));
 
+jest.mock("@/components/the-memes/MemePageMainStageSubmissionLink", () => ({
+  __esModule: true,
+  default: () => <div data-testid="main-stage-submission" />,
+}));
+
 jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
   __esModule: true,
   default: (props: LatestDropNextMintSubscribeMockProps) =>
@@ -88,6 +93,7 @@ describe("NowMintingDetails", () => {
       "data-status-source",
       "none"
     );
+    expect(screen.getByTestId("main-stage-submission")).toBeInTheDocument();
   });
 
   it("renders file metadata rows when image metadata is present", () => {
