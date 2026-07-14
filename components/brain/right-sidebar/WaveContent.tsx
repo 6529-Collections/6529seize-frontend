@@ -126,6 +126,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
   const isCompetitionWave = isRankWave || isApproveWave;
+  const visibleTabLimit = maxVisibleTabs ?? (isCompetitionWave ? 4 : undefined);
 
   const sidebarTabComponents: Partial<Record<SidebarTab, JSX.Element>> = {
     [SidebarTab.ABOUT]: (
@@ -174,13 +175,13 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   const activeSidebarComponent = sidebarTabComponents[activeSidebarTab];
 
   return (
-    <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col tw-overflow-hidden">
+    <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col tw-overflow-hidden tw-bg-iron-950">
       {showTabs && (
         <WaveContentTabs
           wave={wave}
           activeTab={activeSidebarTab}
           setActiveTab={setActiveTab}
-          maxVisibleTabs={maxVisibleTabs}
+          maxVisibleTabs={visibleTabLimit}
           variant={tabVariant}
           aboutTabLabel={aboutTabLabel}
         />
