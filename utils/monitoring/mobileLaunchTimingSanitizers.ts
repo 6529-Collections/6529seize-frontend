@@ -98,6 +98,8 @@ const STATIC_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "error",
   "feed",
   "gm-or-die-small-mp4",
+  "join",
+  "join-6529",
   "meme-accounting",
   "meme-calendar",
   "meme-gas",

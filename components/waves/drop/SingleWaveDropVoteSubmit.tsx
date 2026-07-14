@@ -22,7 +22,7 @@ import {
   SingleWaveDropVoteSize,
   SingleWaveDropVoteSubmissionMode,
 } from "./SingleWaveDropVote.types";
-import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
+import { applyWaveDropVoteUpdate } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 type ThemeColors = {
   primary: string;
@@ -128,8 +128,8 @@ const SingleWaveDropVoteSubmit = forwardRef<
             category: DEFAULT_DROP_RATE_CATEGORY,
           },
         }),
-      onSuccess: () => {
-        invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
+      onSuccess: (updatedDrop) => {
+        applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id);
       },
       onError: (error) => {
         setToast({

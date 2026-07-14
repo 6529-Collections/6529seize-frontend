@@ -11,9 +11,9 @@ This directory contains the AWS RUM integration for monitoring real user perform
 3. Create a new AppMonitor with these settings:
    - **Name**: `6529seize-frontend`
    - **Application domain**: Your domain (e.g., `seize.io`)
-   - **Enable X-Ray tracing**: Yes
-   - **Session sample rate**: 100% (adjust for production)
-   - **Telemetries**: Errors, Performance, HTTP, Interactions
+   - **Enable X-Ray tracing**: No
+   - **Session sample rate**: Match `AWS_RUM_SAMPLE_RATE` (default 20%)
+   - **Telemetries**: Errors, Performance, HTTP
 
 ### 2. Configure Environment Variables
 
@@ -39,7 +39,6 @@ The AWS RUM service will automatically create:
 - **JavaScript Errors**: Unhandled exceptions and error boundaries
 - **Performance Metrics**: Core Web Vitals (LCP, FID, CLS)
 - **HTTP Requests**: API calls and resource loading
-- **User Interactions**: Clicks, form submissions, page navigation
 - **Page Views**: SPA navigation tracking with hash and path changes
 
 ## Configuration Details
@@ -54,18 +53,18 @@ The AWS RUM service will automatically create:
   track/engage, and WalletConnect RPC/identity requests are excluded from HTTP
   telemetry. The provider's `urlsToExclude` list is the source of truth for the
   exact URL patterns.
-- `interaction`: User clicks and interactions
+- Custom-event ownership and compatibility status are catalogued in
+  `ops/telemetry/registry.json`.
 
 ### Session Management
 
-- **Sample Rate**: 100% (configurable via `sessionSampleRate`)
+- **Sample Rate**: configurable via `AWS_RUM_SAMPLE_RATE` (default 20%)
 - **Event Limit**: 200 events per session (cost control)
 - **Session Length**: 30 minutes (AWS default)
 
 ### Page Tracking
 
-- **Format**: `PATH_AND_HASH` for full SPA support
-- **Excluded Pages**: Admin and internal pages are filtered out
+- Automatic page views are enabled for browser performance analysis.
 
 ## Production Considerations
 
@@ -98,7 +97,7 @@ Access the RUM client globally for custom tracking:
 
 ```typescript
 // Available globally after initialization
-const rumClient = (window as any).awsRum;
+const rumClient = window.awsRum;
 
 // Record custom events (if custom events are enabled in AppMonitor)
 rumClient?.recordEvent('custom_event', { key: 'value' });
