@@ -99,6 +99,7 @@ export default function UserPageSubscriptionsEditionPreference(
           {!props.readonly && (
             <>
               <span aria-hidden="true"> · </span>
+              <span className="tw-sr-only">. </span>
               {isAllEditions
                 ? "Receive all editions you are eligible for"
                 : "Receive only one edition"}

@@ -13,9 +13,9 @@
 }
 
 .radioInput:checked {
-  border-color: #2563eb;
+  border-color: #528bff;
   border-width: 2px;
-  background-color: #2563eb;
+  background-color: #528bff;
 }
 
 .radioInput:checked::after {
@@ -31,6 +31,6 @@
 }
 
 .radioInput:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid #528bff;
   outline-offset: 2px;
 }

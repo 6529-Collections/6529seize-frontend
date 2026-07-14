@@ -109,6 +109,7 @@ export default function UserPageSubscriptionsMode(
           {!props.readonly && (
             <>
               <span aria-hidden="true"> · </span>
+              <span className="tw-sr-only">. </span>
               {isAuto
                 ? "Airdrops all eligible drops unless you opt out"
                 : "Opt in to each specific drop"}

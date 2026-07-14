@@ -418,15 +418,13 @@ export default function MemeSubscriptionRow(
             onChange={submit}
             ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
           />
-          {subscribed && (
-            <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-              {renderCountSelector({
-                selectClassName:
-                  "tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2 tw-py-1 tw-text-iron-300 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25",
-                disableWhenSingleOption: true,
-              })}
-            </span>
-          )}
+          <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
+            {renderCountSelector({
+              selectClassName:
+                "tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2 tw-py-1 tw-text-iron-300 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25",
+              disableWhenSingleOption: true,
+            })}
+          </span>
         </div>
       </div>
     </div>
