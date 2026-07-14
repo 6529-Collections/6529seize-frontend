@@ -9,9 +9,16 @@ const mockSetQueriesData = jest.fn();
 const mockSetQueryData = jest.fn();
 const mockCancelQueries = jest.fn().mockResolvedValue(undefined);
 const mockFindAll = jest.fn(() => []);
+const mockRefreshEligibility = jest.fn().mockResolvedValue(undefined);
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: () => ({ isConnected: true }),
+}));
+
+jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
+  useWaveEligibility: () => ({
+    refreshEligibility: mockRefreshEligibility,
+  }),
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -100,6 +107,7 @@ describe("useWaveRealtimeUpdater", () => {
       expectedReaction: null,
       serverReaction: null,
     });
+    mockRefreshEligibility.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -929,7 +937,7 @@ describe("useWaveRealtimeUpdater", () => {
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 
-  it("skips processing when wave is muted", async () => {
+  it("skips processing when an inactive wave is muted", async () => {
     const store = {
       wave1: { drops: [], latestFetchedSerialNo: 10 },
     };
@@ -950,5 +958,100 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.updateData).not.toHaveBeenCalled();
     expect(props.registerWave).not.toHaveBeenCalled();
     expect(props.syncNewestMessages).not.toHaveBeenCalled();
+  });
+
+  it("processes realtime drops when the active wave is muted", async () => {
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    props.isWaveMuted = jest.fn().mockReturnValue(true);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d12", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(props.isWaveMuted).toHaveBeenCalledWith("wave1");
+    expect(props.updateData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "wave1",
+        drops: [expect.objectContaining({ id: "d12" })],
+      })
+    );
+    expect(props.registerWave).not.toHaveBeenCalled();
+    expect(props.syncNewestMessages).toHaveBeenCalledWith(
+      "wave1",
+      10,
+      expect.any(AbortSignal)
+    );
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
+  it("stops muted drop processing when the wave becomes inactive during eligibility refresh", async () => {
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    props.isWaveMuted = jest.fn().mockReturnValue(true);
+
+    let resolveRefresh: (() => void) | undefined;
+    mockRefreshEligibility.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRefresh = resolve;
+        })
+    );
+
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    act(() => {
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    let processingPromise!: Promise<void>;
+    await act(async () => {
+      processingPromise = result.current.processIncomingDrop(
+        { id: "d13", wave: { id: "wave1" }, author: {} } as any,
+        ProcessIncomingDropType.DROP_INSERT
+      );
+      await flushPromises();
+    });
+
+    expect(mockRefreshEligibility).toHaveBeenCalledWith("wave1");
+
+    act(() => {
+      props.activeWaveId = "wave2";
+      rerender();
+    });
+
+    if (!resolveRefresh) {
+      throw new Error("Expected eligibility refresh to remain pending");
+    }
+    resolveRefresh();
+    await act(async () => processingPromise);
+
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(props.registerWave).not.toHaveBeenCalled();
+    expect(props.syncNewestMessages).not.toHaveBeenCalled();
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 });
