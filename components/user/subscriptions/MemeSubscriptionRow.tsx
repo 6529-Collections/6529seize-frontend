@@ -356,76 +356,79 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-py-2">
-      <div>
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
-            <span className="tw-flex tw-items-center tw-gap-2">
-              <span className="tw-font-medium">
-                {props.title} #{props.subscription.token_id}{" "}
-              </span>
-              {props.date && (
-                <>
-                  <span>
-                    - SZN
-                    {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
-                  </span>
-                  {" / "}
-                  {props.minting_today ? (
-                    <>
-                      <span
-                        data-tooltip-id={`minting-today-${props.subscription.token_id}`}
-                      >
-                        - Minting Today{" "}
-                        <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
-                      </span>
-                      <Tooltip
-                        id={`minting-today-${props.subscription.token_id}`}
-                        place="right"
-                        style={{
-                          backgroundColor: "#f8f9fa",
-                          color: "#212529",
-                          padding: "4px 8px",
-                        }}
-                      >
-                        No changes allowed on minting day
-                      </Tooltip>
-                    </>
-                  ) : (
-                    <span>{formatFullDate(props.date.utcDay, "utc")}</span>
-                  )}
-                </>
-              )}
+    <div className="tw-py-3">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+            <span className="tw-font-medium tw-text-iron-100">
+              {props.title} #{props.subscription.token_id}
             </span>
-            {finalWithMetadata && (
-              <span className="tw-text-sm tw-text-iron-400">
-                Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
-                {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
-                {finalWithMetadata.phaseSubscriptions.toLocaleString()} -
-                Airdrop Address:{" "}
-                {formatAddress(finalWithMetadata.airdropAddress)} - Subscription
-                Count: x{finalWithMetadata.subscribedCount}
+            {props.date && (
+              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-text-iron-300">
+                <span>
+                  SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+                </span>
+                <span aria-hidden="true">·</span>
+                {props.minting_today ? (
+                  <>
+                    <span
+                      className="tw-inline-flex tw-items-center tw-gap-1"
+                      data-tooltip-id={`minting-today-${props.subscription.token_id}`}
+                    >
+                      Minting Today
+                      <FontAwesomeIcon
+                        icon={faInfoCircle}
+                        className="tw-size-4"
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <Tooltip
+                      id={`minting-today-${props.subscription.token_id}`}
+                      place="right"
+                      style={{
+                        backgroundColor: "#f8f9fa",
+                        color: "#212529",
+                        padding: "4px 8px",
+                      }}
+                    >
+                      No changes allowed on minting day
+                    </Tooltip>
+                  </>
+                ) : (
+                  <span>{formatFullDate(props.date.utcDay, "utc")}</span>
+                )}
               </span>
             )}
           </div>
-          <div className="tw-flex tw-items-center tw-gap-2">
-            {isSubmitting && <Spinner />}
-            <Toggle
-              disabled={isToggleDisabled}
-              id={id}
-              checked={subscribed}
-              icons={false}
-              onChange={submit}
-              aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
-            />
+          {finalWithMetadata && (
+            <span className="tw-break-words tw-text-sm tw-leading-5 tw-text-iron-400">
+              Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
+              {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
+              {finalWithMetadata.phaseSubscriptions.toLocaleString()} - Airdrop
+              Address: {formatAddress(finalWithMetadata.airdropAddress)} -
+              Subscription Count: x{finalWithMetadata.subscribedCount}
+            </span>
+          )}
+        </div>
+        <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 sm:tw-w-auto">
+          {isSubmitting && <Spinner />}
+          <Toggle
+            disabled={isToggleDisabled}
+            id={id}
+            checked={subscribed}
+            icons={false}
+            onChange={submit}
+            aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+          />
+          {subscribed && (
             <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
               {renderCountSelector({
                 selectClassName:
-                  "tw-text-iron-400 tw-bg-transparent tw-border tw-border-iron-400 tw-rounded tw-px-1",
+                  "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
                 disableWhenSingleOption: true,
               })}
             </span>
-          </div>
+          )}
         </div>
       </div>
     </div>

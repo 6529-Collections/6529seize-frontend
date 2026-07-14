@@ -836,14 +836,16 @@
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
         "The tab shows balance, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
-        "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information."
+        "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
+        "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens."
       ],
       "canonical_path": "/{user}/subscriptions",
       "related_paths": ["/about/subscriptions", "/{user}/subscriptions"],
       "tags": ["profiles", "subscriptions"],
       "source_refs": [
         "ops/docs/profiles/tabs/feature-subscriptions-tab.md",
-        "components/subscriptions-report/SubscriptionsReport.tsx"
+        "components/user/subscriptions/UserPageSubscriptions.tsx",
+        "components/user/subscriptions/UserPageSubscriptionsHistory.tsx"
       ]
     },
     {

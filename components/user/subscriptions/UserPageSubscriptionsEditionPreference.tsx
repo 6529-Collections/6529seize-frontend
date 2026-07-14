@@ -23,6 +23,7 @@ export default function UserPageSubscriptionsEditionPreference(
   const [isAllEditions, setIsAllEditions] = useState<boolean>(false);
   const [isUpdatingAllEditions, setIsUpdatingAllEditions] =
     useState<boolean>(false);
+  const descriptionId = "subscription-edition-preference-description";
 
   const subscriptionEligibilityCount =
     props.details?.subscription_eligibility_count ?? 1;
@@ -77,51 +78,40 @@ export default function UserPageSubscriptionsEditionPreference(
   };
 
   return (
-    <div>
-      <div className="tw-pb-2">
-        <div>
-          <h5 className="tw-mb-0">
-            Edition Preference{" "}
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-400">
-              Eligibility x{subscriptionEligibilityCount}
-            </span>
-          </h5>
-        </div>
+    <div className="tw-min-w-0">
+      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
+        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+          Edition Preference
+        </h3>
+        <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+          Eligibility x{subscriptionEligibilityCount}
+        </span>
       </div>
-      <div className="tw-pt-1">
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <label
-            htmlFor={"subscription-all-editions-mode"}
-            className="tw-text-white"
-          >
-            <b>One edition</b>
-          </label>
-          <Toggle
-            disabled={props.readonly || isUpdatingAllEditions}
-            id={"subscription-all-editions-mode"}
-            checked={isAllEditions}
-            icons={false}
-            onChange={toggleAllEditions}
-          />
-          <label
-            htmlFor={"subscription-all-editions-mode"}
-            className="tw-text-white"
-          >
-            <b>All eligible</b>
-          </label>
-          {isUpdatingAllEditions && (
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          )}
-        </div>
+      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+        <span className="tw-font-semibold tw-text-white">One edition</span>
+        <Toggle
+          disabled={props.readonly || isUpdatingAllEditions}
+          id={"subscription-all-editions-mode"}
+          checked={isAllEditions}
+          icons={false}
+          onChange={toggleAllEditions}
+          aria-label="All eligible editions"
+          aria-describedby={props.readonly ? undefined : descriptionId}
+        />
+        <span className="tw-font-semibold tw-text-white">All eligible</span>
+        {isUpdatingAllEditions && (
+          <CircleLoader size={CircleLoaderSize.MEDIUM} />
+        )}
       </div>
       {!props.readonly && (
-        <div className="tw-pt-1">
-          <div className="tw-whitespace-nowrap">
-            {isAllEditions
-              ? "You will receive all editions you are eligible for"
-              : "You will receive only one edition"}
-          </div>
-        </div>
+        <p
+          id={descriptionId}
+          className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-400"
+        >
+          {isAllEditions
+            ? "You will receive all editions you are eligible for"
+            : "You will receive only one edition"}
+        </p>
       )}
     </div>
   );

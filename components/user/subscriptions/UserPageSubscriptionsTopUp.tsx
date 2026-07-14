@@ -40,6 +40,7 @@ import {
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import styles from "./UserPageSubscriptions.module.css";
+import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 function getEthForCards(count: number): number {
   return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
@@ -61,10 +62,10 @@ function getTopUpModalEmoji(
 }
 
 const TOP_UP_OPTION_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 sm:tw-gap-x-6";
+  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 sm:tw-gap-x-6";
 const TOP_UP_OPTION_GRID_PADDED_CLASS = `${TOP_UP_OPTION_GRID_CLASS} tw-pt-2`;
 const TOP_UP_RADIO_GRID_CLASS =
-  "tw-grid tw-grid-cols-[8.333333%_1fr] tw-items-center";
+  "tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)] tw-items-center tw-gap-3";
 
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
@@ -314,25 +315,16 @@ export default function UserPageSubscriptionsTopUp() {
     return <></>;
   }
 
-  const iOsContent = (
-    <div className="tw-pt-2">
-      <div>
-        <Link
-          href={window.location.href}
-          className="tw-block tw-py-2 tw-text-center"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <button
-            className="tw-w-full tw-rounded-lg tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-2 tw-font-semibold tw-text-iron-950"
-            type="button"
-          >
-            Top-up on 6529.io
-          </button>
-        </Link>
-      </div>
-    </div>
-  );
+  const iOsContent = mounted ? (
+    <Link
+      href={window.location.href}
+      className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-2 tw-font-semibold tw-text-iron-950 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Top-up on 6529.io
+    </Link>
+  ) : null;
 
   const printRemainingMints = (
     count: number,
@@ -382,7 +374,7 @@ export default function UserPageSubscriptionsTopUp() {
       {!showDeep && (
         <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
           <div className="tw-text-iron-400">
-            <div className="tw-pl-[calc(0.75rem+8.33%)]">
+            <div className="tw-text-center sm:tw-pl-8 sm:tw-text-left">
               <ShowMoreButton
                 expanded={showDeep}
                 setExpanded={setShowDeep}
@@ -409,7 +401,7 @@ export default function UserPageSubscriptionsTopUp() {
           </div>
           <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
             <div className="tw-text-iron-400">
-              <div className="tw-pl-[calc(0.75rem+8.33%)]">
+              <div className="tw-text-center sm:tw-pl-8 sm:tw-text-left">
                 <ShowMoreButton
                   expanded={showDeep}
                   setExpanded={setShowDeep}
@@ -423,40 +415,41 @@ export default function UserPageSubscriptionsTopUp() {
       )}
       <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
         <div className="tw-flex tw-items-center">
-          <button
-            type="button"
-            className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-p-3 tw-text-left tw-transition-colors ${
-              styles["cardCountOption"]
-            } ${
+          <div
+            className={`tw-w-full tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-left tw-text-iron-100 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${
               selectedOption === "other"
-                ? "tw-bg-iron-800"
-                : "tw-bg-transparent hover:tw-bg-iron-900"
+                ? "tw-border-primary-400/50 tw-bg-iron-800"
+                : "tw-border-iron-800 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900"
             }`}
-            onClick={handleSelectOther}
           >
             <div className={TOP_UP_RADIO_GRID_CLASS}>
               <div className="tw-flex tw-items-center tw-justify-center">
                 <input
+                  id="subscription-top-up-other"
                   type="radio"
+                  name="subscription-top-up-card-count"
+                  value="other"
                   checked={selectedOption === "other"}
                   onChange={handleSelectOther}
                   aria-label="Other card count"
                   className={styles["radioInput"]}
                 />
               </div>
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <span>Other</span>
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                <label
+                  htmlFor="subscription-top-up-other"
+                  className="tw-cursor-pointer"
+                >
+                  Other
+                </label>
                 <input
                   ref={otherInputRef}
                   type="number"
                   min={1}
                   placeholder="count"
+                  aria-label="Custom card count"
                   value={memeCount}
                   className="tw-w-[100px] tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-0.5 tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedOption("other");
-                  }}
                   onFocus={() => {
                     setSelectedOption("other");
                   }}
@@ -477,12 +470,12 @@ export default function UserPageSubscriptionsTopUp() {
                 </span>
               </div>
             </div>
-          </button>
+          </div>
         </div>
         <div className="tw-flex tw-items-center tw-justify-center tw-pt-2 sm:tw-pt-0">
           <button
             type="button"
-            className={`${styles["sendBtn"]} tw-w-full sm:tw-w-auto`}
+            className="tw-inline-flex tw-min-h-11 tw-w-full tw-min-w-32 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-8 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-primary-600 sm:tw-w-auto"
             onClick={handleSend}
             disabled={
               sendTransaction.isPending ||
@@ -502,34 +495,33 @@ export default function UserPageSubscriptionsTopUp() {
 
   return (
     <>
-      <div>
-        <div className="tw-pb-2">
-          <div className="tw-flex tw-items-end tw-gap-2 tw-whitespace-nowrap">
-            <h4 className="tw-mb-0 tw-font-semibold">Top Up</h4>
-            <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-text-[#9a9a9a]">
-              Sending to{" "}
-              <>
-                <span data-tooltip-id="subscription-address">
-                  {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
-                  {formatAddress(SUBSCRIPTIONS_ADDRESS)}
-                </span>
-                <Tooltip
-                  id="subscription-address"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  {SUBSCRIPTIONS_ADDRESS}
-                </Tooltip>
-              </>
+      <UserPageSubscriptionsSection
+        id="profile-subscriptions-top-up"
+        title="Top Up"
+        action={
+          <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-0.5">
+            <span>Sending to</span>
+            <span
+              className="tw-break-all tw-text-iron-300"
+              data-tooltip-id="subscription-address"
+            >
+              {SUBSCRIPTIONS_ADDRESS_ENS} {formatAddress(SUBSCRIPTIONS_ADDRESS)}
             </span>
-          </div>
-        </div>
-        <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
+            <Tooltip
+              id="subscription-address"
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            >
+              {SUBSCRIPTIONS_ADDRESS}
+            </Tooltip>
+          </span>
+        }
+      >
         {isIos ? iOsContent : topUpContent}
-      </div>
+      </UserPageSubscriptionsSection>
       {mounted &&
         createPortal(
           <AnimatePresence>
@@ -602,33 +594,44 @@ function CardCountOption(
     : `${props.count.toLocaleString()} ${cardLabel}`;
 
   return (
-    <button
-      type="button"
-      className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-p-3 tw-text-left tw-transition-colors ${
-        styles["cardCountOption"]
-      } ${
+    <label
+      className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-left tw-text-iron-100 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${
         props.selected
-          ? "tw-bg-iron-700"
-          : "tw-bg-transparent hover:tw-bg-iron-900"
+          ? "tw-border-primary-400/50 tw-bg-iron-800"
+          : "tw-border-iron-800 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900"
       }`}
-      onClick={props.onSelect}
     >
       <div className={TOP_UP_RADIO_GRID_CLASS}>
         <div className="tw-flex tw-items-center tw-justify-center">
           <input
             type="radio"
+            name="subscription-top-up-card-count"
+            value={props.count}
             checked={props.selected}
             onChange={props.onSelect}
             aria-label={labelText}
             className={styles["radioInput"]}
           />
         </div>
-        <div className="tw-flex tw-items-center">
-          {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
-          {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
-          {numberWithCommasFromString(getEthForCards(props.count))} ETH)
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-leading-5 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline sm:tw-gap-x-1">
+          {props.display && <span>{props.display}</span>}
+          {props.display && (
+            <span aria-hidden="true" className="tw-hidden sm:tw-inline">
+              —
+            </span>
+          )}
+          <span
+            className={
+              props.display
+                ? "tw-text-sm tw-text-iron-400 sm:tw-text-base sm:tw-text-iron-100"
+                : undefined
+            }
+          >
+            {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
+            {numberWithCommasFromString(getEthForCards(props.count))} ETH)
+          </span>
         </div>
       </div>
-    </button>
+    </label>
   );
 }

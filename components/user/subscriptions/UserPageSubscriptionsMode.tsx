@@ -22,6 +22,7 @@ export default function UserPageSubscriptionsMode(
 
   const [isAuto, setIsAuto] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const descriptionId = "subscription-mode-description";
 
   useEffect(() => {
     setIsAuto(props.details?.automatic ?? false);
@@ -76,54 +77,49 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <div>
-      <div className="tw-pb-2">
-        <div>
-          <h5 className="tw-mb-0">
-            Mode{" "}
-            {props.details && props.details.last_update > 0 && (
-              <span className="tw-text-sm tw-font-semibold tw-text-iron-400">
-                {new Date(props.details.last_update).toLocaleString("en-US", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                  timeZone: "UTC",
-                })}{" "}
-                UTC
-              </span>
-            )}
-          </h5>
-        </div>
+    <div className="tw-min-w-0">
+      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
+        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+          Mode
+        </h3>
+        {props.details && props.details.last_update > 0 && (
+          <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+            {new Date(props.details.last_update).toLocaleString("en-US", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+              timeZone: "UTC",
+            })}{" "}
+            UTC
+          </span>
+        )}
       </div>
-      <div className="tw-pt-1">
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <label htmlFor={"subscription-mode"} className="tw-text-white">
-            <b>Manual</b>
-          </label>
-          <Toggle
-            disabled={props.readonly || isUpdating}
-            id={"subscription-mode"}
-            checked={isAuto}
-            icons={false}
-            onChange={toggleMode}
-          />
-          <label htmlFor={"subscription-mode"} className="tw-text-white">
-            <b>Automatic</b>
-          </label>
-          {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
-        </div>
+      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+        <span className="tw-font-semibold tw-text-white">Manual</span>
+        <Toggle
+          disabled={props.readonly || isUpdating}
+          id={"subscription-mode"}
+          checked={isAuto}
+          icons={false}
+          onChange={toggleMode}
+          aria-label="Automatic subscription mode"
+          aria-describedby={props.readonly ? undefined : descriptionId}
+        />
+        <span className="tw-font-semibold tw-text-white">Automatic</span>
+        {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
       </div>
       {!props.readonly && (
-        <div className="tw-pt-1">
-          <div className="tw-whitespace-nowrap">
-            {isAuto
-              ? "Automatic airdrops of all eligible drops unless you opt-out"
-              : "You have to opt-in to each specific drop"}
-          </div>
-        </div>
+        <p
+          id={descriptionId}
+          className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-400"
+        >
+          {isAuto
+            ? "Automatic airdrops of all eligible drops unless you opt-out"
+            : "You have to opt-in to each specific drop"}
+        </p>
       )}
     </div>
   );

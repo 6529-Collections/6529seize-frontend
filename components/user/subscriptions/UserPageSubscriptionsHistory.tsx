@@ -10,27 +10,16 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
+import { ArchiveBoxIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
-import styles from "./UserPageSubscriptions.module.css";
+import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
-function className(...classNames: readonly (string | undefined)[]): string {
-  return classNames
-    .filter((value): value is string => value !== undefined && value !== "")
-    .join(" ");
-}
-
-const HISTORY_DISCLOSURE_SUMMARY_CLASS = className(
-  styles["topUpHistoryAccordionButton"],
-  "tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden"
-);
-const HISTORY_DISCLOSURE_CARET_CLASS =
-  "tw-h-2 tw-w-2 tw-shrink-0 tw-rotate-45 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-[225deg]";
-const HISTORY_DISCLOSURE_BODY_CLASS = className(
-  styles["topUpHistoryAccordionBody"],
-  "tw-px-5 tw-py-4"
-);
+const HISTORY_PAGE_SIZE = 10;
+const HISTORY_ENTRY_CLASS =
+  "tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-p-4";
 
 function getSubscriptionLogKey(log: SubscriptionLog, index: number): string {
   return log.id === undefined
@@ -43,151 +32,166 @@ export default function UserPageSubscriptionsHistory(
     topups: Page<SubscriptionTopUp>;
     redeemed: Page<RedeemedSubscription>;
     logs: Page<SubscriptionLog>;
+    topUpsLoading?: boolean | undefined;
+    redeemedLoading?: boolean | undefined;
+    logsLoading?: boolean | undefined;
     setRedeemedPage: (page: number) => void;
     setTopUpPage: (page: number) => void;
     setLogsPage: (page: number) => void;
   }>
 ) {
   return (
-    <div>
-      <div>
-        <div>
-          <h5 className="tw-mb-0 tw-font-semibold">Subscription History</h5>
-        </div>
+    <UserPageSubscriptionsSection
+      id="profile-subscriptions-history"
+      title="Subscription History"
+    >
+      <div className="tw-space-y-3">
+        <HistoryDisclosure
+          title="Redeemed Subscriptions"
+          loading={props.redeemedLoading === true}
+          isEmpty={props.redeemed.data.length === 0}
+          emptyMessage="No Redeemed Subscriptions found"
+          pagination={
+            <HistoryPagination
+              count={props.redeemed.count}
+              page={props.redeemed.page}
+              setPage={props.setRedeemedPage}
+            />
+          }
+        >
+          {props.redeemed.data.map((redeem) => (
+            <RedeemedEntry key={redeem.transaction} redeem={redeem} />
+          ))}
+        </HistoryDisclosure>
+
+        <HistoryDisclosure
+          title="Log History"
+          loading={props.logsLoading === true}
+          isEmpty={props.logs.data.length === 0}
+          emptyMessage="No logs found"
+          pagination={
+            <HistoryPagination
+              count={props.logs.count}
+              page={props.logs.page}
+              setPage={props.setLogsPage}
+            />
+          }
+        >
+          {props.logs.data.map((log, index) => (
+            <LogEntry key={getSubscriptionLogKey(log, index)} log={log} />
+          ))}
+        </HistoryDisclosure>
+
+        <HistoryDisclosure
+          title="Top Up History"
+          loading={props.topUpsLoading === true}
+          isEmpty={props.topups.data.length === 0}
+          emptyMessage="No Top Ups found"
+          pagination={
+            <HistoryPagination
+              count={props.topups.count}
+              page={props.topups.page}
+              setPage={props.setTopUpPage}
+            />
+          }
+        >
+          {props.topups.data.map((topUp) => (
+            <TopUpEntry key={topUp.hash} topUp={topUp} />
+          ))}
+        </HistoryDisclosure>
       </div>
-      <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
-      <div className="tw-pb-2">
-        <div>
-          <RedeemedSubscriptionsAccordion
-            history={props.redeemed}
-            setPage={props.setRedeemedPage}
-          />
-        </div>
+    </UserPageSubscriptionsSection>
+  );
+}
+
+function HistoryDisclosure({
+  title,
+  loading,
+  isEmpty,
+  emptyMessage,
+  pagination,
+  children,
+}: Readonly<{
+  title: string;
+  loading: boolean;
+  isEmpty: boolean;
+  emptyMessage: string;
+  pagination: ReactNode;
+  children: ReactNode;
+}>) {
+  let content: ReactNode = <div className="tw-space-y-2">{children}</div>;
+  if (loading) {
+    content = <HistoryLoadingState />;
+  } else if (isEmpty) {
+    content = <HistoryEmptyState>{emptyMessage}</HistoryEmptyState>;
+  }
+
+  return (
+    <details
+      className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+      aria-busy={loading}
+      open
+    >
+      <summary className="tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-bg-iron-900/70 tw-px-4 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 [&::-webkit-details-marker]:tw-hidden">
+        {title}
+        <ChevronDownIcon
+          className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-180"
+          aria-hidden="true"
+        />
+      </summary>
+      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-p-3 sm:tw-p-4">
+        {content}
+        {!loading && pagination}
       </div>
-      <div className="tw-py-2">
-        <div>
-          <LogAccordion logs={props.logs} setPage={props.setLogsPage} />
-        </div>
-      </div>
-      <div className="tw-py-2">
-        <div>
-          <TopUpAccordion history={props.topups} setPage={props.setTopUpPage} />
-        </div>
-      </div>
+    </details>
+  );
+}
+
+function HistoryLoadingState() {
+  return (
+    <div
+      aria-hidden="true"
+      className="tw-flex tw-min-h-20 tw-animate-pulse tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40 tw-p-4"
+    >
+      <div className="tw-h-3 tw-w-2/5 tw-rounded-full tw-bg-iron-800" />
     </div>
   );
 }
 
-function RedeemedSubscriptionsAccordion(
-  props: Readonly<{
-    history: Page<RedeemedSubscription>;
-    setPage: (page: number) => void;
-  }>
-) {
+function HistoryEmptyState({ children }: { readonly children: ReactNode }) {
   return (
-    <details className="tw-group" open>
-      <summary className={HISTORY_DISCLOSURE_SUMMARY_CLASS}>
-        <b>Redeemed Subscriptions</b>
-        <span aria-hidden="true" className={HISTORY_DISCLOSURE_CARET_CLASS} />
-      </summary>
-      <div className={HISTORY_DISCLOSURE_BODY_CLASS}>
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          {props.history.data.length > 0 ? (
-            props.history.data.map((redeem) => (
-              <RedeemedEntry key={redeem.transaction} redeem={redeem} />
-            ))
-          ) : (
-            <div className="tw-text-iron-400">
-              No Redeemed Subscriptions found
-            </div>
-          )}
-        </div>
-        {props.history.count > 0 && props.history.count / 10 > 1 && (
-          <div className="tw-mt-3 tw-text-center">
-            <Pagination
-              page={props.history.page}
-              pageSize={10}
-              totalResults={props.history.count}
-              setPage={props.setPage}
-            />
-          </div>
-        )}
-      </div>
-    </details>
+    <div className="tw-flex tw-min-h-20 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-800 tw-bg-iron-900/30 tw-p-4 tw-text-center">
+      <ArchiveBoxIcon
+        className="tw-size-5 tw-text-iron-500"
+        aria-hidden="true"
+      />
+      <span className="tw-text-sm tw-text-iron-400">{children}</span>
+    </div>
   );
 }
 
-function LogAccordion(
-  props: Readonly<{
-    logs: Page<SubscriptionLog>;
-    setPage: (page: number) => void;
-  }>
-) {
-  return (
-    <details className="tw-group" open>
-      <summary className={HISTORY_DISCLOSURE_SUMMARY_CLASS}>
-        <b>Log History</b>
-        <span aria-hidden="true" className={HISTORY_DISCLOSURE_CARET_CLASS} />
-      </summary>
-      <div className={HISTORY_DISCLOSURE_BODY_CLASS}>
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          {props.logs.data.length > 0 ? (
-            props.logs.data.map((log, index) => (
-              <LogEntry key={getSubscriptionLogKey(log, index)} log={log} />
-            ))
-          ) : (
-            <div className="tw-text-iron-400">No logs found</div>
-          )}
-          {props.logs.count > 0 && props.logs.count / 10 > 1 && (
-            <div className="tw-mt-3 tw-text-center">
-              <Pagination
-                page={props.logs.page}
-                pageSize={10}
-                totalResults={props.logs.count}
-                setPage={props.setPage}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    </details>
-  );
-}
+function HistoryPagination({
+  count,
+  page,
+  setPage,
+}: Readonly<{
+  count: number;
+  page: number;
+  setPage: (page: number) => void;
+}>) {
+  if (count <= HISTORY_PAGE_SIZE) {
+    return null;
+  }
 
-function TopUpAccordion(
-  props: Readonly<{
-    history: Page<SubscriptionTopUp>;
-    setPage: (page: number) => void;
-  }>
-) {
   return (
-    <details className="tw-group" open>
-      <summary className={HISTORY_DISCLOSURE_SUMMARY_CLASS}>
-        <b>Top Up History</b>
-        <span aria-hidden="true" className={HISTORY_DISCLOSURE_CARET_CLASS} />
-      </summary>
-      <div className={HISTORY_DISCLOSURE_BODY_CLASS}>
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          {props.history.data.length > 0 ? (
-            props.history.data.map((topUp) => (
-              <TopUpEntry key={topUp.hash} topUp={topUp} />
-            ))
-          ) : (
-            <div className="tw-text-iron-400">No Top Ups found</div>
-          )}
-        </div>
-        {props.history.count > 0 && props.history.count / 10 > 1 && (
-          <div className="tw-mt-3 tw-text-center">
-            <Pagination
-              page={props.history.page}
-              pageSize={10}
-              totalResults={props.history.count}
-              setPage={props.setPage}
-            />
-          </div>
-        )}
-      </div>
-    </details>
+    <div className="tw-mt-4 tw-text-center">
+      <Pagination
+        page={page}
+        pageSize={HISTORY_PAGE_SIZE}
+        totalResults={count}
+        setPage={setPage}
+      />
+    </div>
   );
 }
 
@@ -197,32 +201,34 @@ function TopUpEntry(
   }>
 ) {
   return (
-    <div className={styles["subscriptionHistoryEntry"]}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-        <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+    <div className={HISTORY_ENTRY_CLASS}>
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1 sm:tw-flex-row sm:tw-items-center sm:tw-gap-3">
+          <span className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
             <b>+ {props.topUp.amount}</b>
-            <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
+            <span className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
               <EthereumIcon />
-            </div>
-          </div>
-          <span>from: {props.topUp.from_wallet}</span>
+            </span>
+          </span>
+          <span className="tw-break-all tw-text-sm tw-text-iron-300">
+            from: {props.topUp.from_wallet}
+          </span>
         </div>
-        <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-whitespace-nowrap tw-text-iron-400">
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
+          <span className="tw-text-sm tw-text-iron-400">
             {getDateDisplay(new Date(props.topUp.transaction_date))}
-          </div>
-          <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
-            <a
-              className="tw-flex tw-items-center"
-              target="_blank"
-              rel="noopener noreferrer"
-              href={getTransactionLink(mainnet.id, props.topUp.hash)}
-              aria-label="View transaction on Etherscan"
-            >
+          </span>
+          <a
+            className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={getTransactionLink(mainnet.id, props.topUp.hash)}
+            aria-label="View transaction on Etherscan"
+          >
+            <span className="tw-size-5">
               <EtherscanIcon />
-            </a>
-          </div>
+            </span>
+          </a>
         </div>
       </div>
     </div>
@@ -235,22 +241,21 @@ function LogEntry(
   }>
 ) {
   return (
-    <div className={styles["subscriptionHistoryEntry"]}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-        <div className="tw-flex tw-flex-col tw-gap-1">
-          <div>{props.log.log}</div>
+    <div className={HISTORY_ENTRY_CLASS}>
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+        <div className="tw-min-w-0 tw-space-y-1">
+          <div className="tw-break-words tw-text-iron-200">{props.log.log}</div>
           {props.log.additional_info && (
-            <div className="tw-text-sm tw-text-iron-400">
+            <div className="tw-break-words tw-text-sm tw-text-iron-400">
               {props.log.additional_info}
             </div>
           )}
         </div>
-        <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-whitespace-nowrap tw-text-iron-400">
-            {props.log.created_at &&
-              getDateDisplay(new Date(props.log.created_at))}
-          </div>
-        </div>
+        {props.log.created_at && (
+          <span className="tw-flex-shrink-0 tw-text-sm tw-text-iron-400">
+            {getDateDisplay(new Date(props.log.created_at))}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -264,41 +269,39 @@ function RedeemedEntry(
   const contractName = areEqualAddresses(props.redeem.contract, MEMES_CONTRACT)
     ? "Meme"
     : `Contract ${formatAddress(props.redeem.contract)}`;
+  const transactionDate =
+    props.redeem.transaction_date ?? props.redeem.created_at;
 
   return (
-    <div className={styles["subscriptionHistoryEntry"]}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-        <div className="tw-flex tw-flex-col tw-gap-1">
-          <div>
+    <div className={HISTORY_ENTRY_CLASS}>
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+        <div className="tw-min-w-0 tw-space-y-1">
+          <div className="tw-break-words tw-text-iron-200">
             Redeemed Subscription for {contractName} #{props.redeem.token_id} x
             {props.redeem.count}
           </div>
-          <div className="tw-text-sm tw-text-iron-400">
+          <div className="tw-break-words tw-text-sm tw-text-iron-400">
             Airdrop Address: {formatAddress(props.redeem.address)} - Balance
             after redemption: {props.redeem.balance_after} ETH
           </div>
         </div>
-        <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-whitespace-nowrap tw-text-iron-400">
-            {(props.redeem.transaction_date ?? props.redeem.created_at) &&
-              getDateDisplay(
-                new Date(
-                  (props.redeem.transaction_date ??
-                    props.redeem.created_at) as Date
-                )
-              )}
-          </div>
-          <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
-            <a
-              className="tw-flex tw-items-center"
-              target="_blank"
-              rel="noopener noreferrer"
-              href={getTransactionLink(mainnet.id, props.redeem.transaction)}
-              aria-label="View transaction on Etherscan"
-            >
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
+          {transactionDate && (
+            <span className="tw-text-sm tw-text-iron-400">
+              {getDateDisplay(new Date(transactionDate))}
+            </span>
+          )}
+          <a
+            className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={getTransactionLink(mainnet.id, props.redeem.transaction)}
+            aria-label="View transaction on Etherscan"
+          >
+            <span className="tw-size-5">
               <EtherscanIcon />
-            </a>
-          </div>
+            </span>
+          </a>
         </div>
       </div>
     </div>

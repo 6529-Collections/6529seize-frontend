@@ -23,6 +23,7 @@ import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
 import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
+import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 
@@ -247,94 +248,72 @@ export default function UserPageSubscriptions(
   }
 
   return (
-    <div className="tw-pb-5">
-      <div className="tw-py-2">
-        <div>
-          <div>
-            <div>
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-                <h4 className="tw-mb-0 tw-font-semibold">Subscribe</h4>
-                <Link
-                  href="/about/subscriptions"
-                  className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
-                >
-                  Learn More
-                  <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-            <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
-            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2">
-              <div className="tw-pb-4">
-                <UserPageSubscriptionsBalance
-                  details={details}
-                  fetching={isFetching}
-                  refresh={refresh}
-                  show_refresh={isConnectedAccount}
-                />
-              </div>
-              <div className="tw-pb-4">
-                <UserPageSubscriptionsAirdropAddress
-                  show_edit={isConnectedAccount}
-                  airdrop={airdropResult}
-                />
-              </div>
-              <div className="tw-pb-4">
-                <UserPageSubscriptionsMode
-                  profileKey={profileKey}
-                  details={details}
-                  readonly={!isConnectedAccount}
-                  refresh={refresh}
-                />
-              </div>
-              <div className="tw-pb-4">
-                <UserPageSubscriptionsEditionPreference
-                  profileKey={profileKey}
-                  details={details}
-                  readonly={!isConnectedAccount}
-                  refresh={refresh}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {isConnectedAccount && (
-        <div className="tw-pb-2 tw-pt-4">
-          <div>
-            <UserPageSubscriptionsTopUp />
-          </div>
-        </div>
-      )}
-      <div className="tw-pb-2 tw-pt-4">
-        <div>
-          <UserPageSubscriptionsUpcoming
+    <div className="tw-space-y-5 tw-pb-5 sm:tw-space-y-6">
+      <UserPageSubscriptionsSection
+        id="profile-subscriptions-overview"
+        title="Subscribe"
+        action={
+          <Link
+            href="/about/subscriptions"
+            className="tw-inline-flex tw-items-center tw-gap-1.5 tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-text-primary-300"
+          >
+            Learn More
+            <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
+          </Link>
+        }
+      >
+        <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
+          <UserPageSubscriptionsBalance
+            details={details}
+            fetching={isFetching}
+            refresh={refresh}
+            show_refresh={isConnectedAccount}
+          />
+          <UserPageSubscriptionsAirdropAddress
+            show_edit={isConnectedAccount}
+            airdrop={airdropResult}
+            fetching={fetchingAirdropAddress}
+          />
+          <UserPageSubscriptionsMode
             profileKey={profileKey}
             details={details}
-            memes_subscriptions={memeSubscriptions}
+            readonly={!isConnectedAccount}
+            refresh={refresh}
+          />
+          <UserPageSubscriptionsEditionPreference
+            profileKey={profileKey}
+            details={details}
             readonly={!isConnectedAccount}
             refresh={refresh}
           />
         </div>
-      </div>
-      <div className="tw-pb-2 tw-pt-4">
-        <div>
-          <UserPageSubscriptionsHistory
-            topups={topUpHistory}
-            redeemed={redeemedHistory}
-            logs={subscriptionLogs}
-            setRedeemedPage={(page: number) => {
-              fetchRedeemHistory(page);
-            }}
-            setTopUpPage={(page: number) => {
-              fetchTopUpHistory(page);
-            }}
-            setLogsPage={(page: number) => {
-              fetchLogs(page);
-            }}
-          />
-        </div>
-      </div>
+      </UserPageSubscriptionsSection>
+      {isConnectedAccount && <UserPageSubscriptionsTopUp />}
+      <UserPageSubscriptionsUpcoming
+        profileKey={profileKey}
+        details={details}
+        memes_subscriptions={memeSubscriptions}
+        readonly={!isConnectedAccount}
+        refresh={refresh}
+        loading={fetchingMemeSubscriptions}
+      />
+      <UserPageSubscriptionsHistory
+        topups={topUpHistory}
+        redeemed={redeemedHistory}
+        logs={subscriptionLogs}
+        topUpsLoading={fetchingTopUpHistory}
+        redeemedLoading={fetchingRedeemedHistory}
+        logsLoading={fetchingSubscriptionLogs}
+        setRedeemedPage={(page: number) => {
+          fetchRedeemHistory(page);
+        }}
+        setTopUpPage={(page: number) => {
+          fetchTopUpHistory(page);
+        }}
+        setLogsPage={(page: number) => {
+          fetchLogs(page);
+        }}
+      />
     </div>
   );
 }
