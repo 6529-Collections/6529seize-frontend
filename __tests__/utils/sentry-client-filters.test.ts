@@ -159,8 +159,18 @@ describe("sentry-client-filters", () => {
           value: "Can't find variable: CONFIG",
           stacktrace: {
             frames: [
-              { filename: "app:///", abs_path: "app:///" },
-              { filename: "app:///", abs_path: "app:///" },
+              {
+                filename:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                abs_path:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+              },
+              {
+                filename:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                abs_path:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+              },
             ],
           },
         },
@@ -3293,7 +3303,7 @@ describe("sentry-client-filters", () => {
     expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
-  it("filters Twitter CONFIG reference errors with app URI frames", () => {
+  it("filters Twitter CONFIG reference errors with injected wave document frames", () => {
     // Arrange
     const event = createTwitterConfigEvent();
 
@@ -6474,7 +6484,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("does not filter Twitter CONFIG errors when frames are not all app URIs", () => {
+  it("does not filter app-owned Twitter CONFIG errors", () => {
     // Arrange
     const event = createTwitterConfigEvent({
       exception: {
@@ -6484,10 +6494,11 @@ describe("sentry-client-filters", () => {
             value: "Can't find variable: CONFIG",
             stacktrace: {
               frames: [
-                { filename: "app:///", abs_path: "app:///" },
                 {
-                  filename: "https://example.com/main.js",
-                  abs_path: "https://example.com/main.js",
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/waves/WaveLayout.tsx",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./components/waves/WaveLayout.tsx",
                 },
               ],
             },
