@@ -87,7 +87,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
             <p className="tw-m-0">
               {m(locale, "about.subscriptions.reference.funding.send")}
             </p>
-            <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-orange-500/20 tw-bg-orange-500/10 tw-p-4 tw-text-orange-400/80 sm:tw-mt-6">
+            <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-orange-500/20 tw-bg-orange-500/10 tw-p-4 tw-text-sm tw-text-orange-400/80 sm:tw-mt-6">
               <p className="tw-m-0 tw-flex tw-items-start tw-gap-2">
                 <FontAwesomeIcon
                   aria-hidden="true"

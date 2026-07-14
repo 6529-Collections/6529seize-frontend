@@ -101,12 +101,14 @@ function DisableEditPlugin({ disabled }: { disabled: boolean }) {
   return null;
 }
 
-interface SetMarkdownPluginHandles {
+interface EditorCommandsPluginHandles {
   setMarkdown: (markdown: string) => void;
+  focus: () => void;
+  blur: () => void;
 }
 
-const SetMarkdownPlugin = forwardRef<
-  SetMarkdownPluginHandles,
+const EditorCommandsPlugin = forwardRef<
+  EditorCommandsPluginHandles,
   { readonly canMentionAll: boolean }
 >(({ canMentionAll }, ref) => {
   const [editor] = useLexicalComposerContext();
@@ -114,6 +116,8 @@ const SetMarkdownPlugin = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
+      focus: () => editor.focus(),
+      blur: () => editor.blur(),
       setMarkdown: (markdown: string) => {
         editor.update(() => {
           $convertFromMarkdownString(markdown, [
@@ -133,7 +137,7 @@ const SetMarkdownPlugin = forwardRef<
 
   return null;
 });
-SetMarkdownPlugin.displayName = "SetMarkdownPlugin";
+EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
 
 function InitialMarkdownPlugin({
   initialMarkdown,
@@ -289,23 +293,22 @@ const CreateDropInput = forwardRef<
     }
 
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
-    const setMarkdownRef = useRef<SetMarkdownPluginHandles | null>(null);
-    const editorRef = useRef<HTMLDivElement>(null);
-    const clearEditorState = () => {
+    const editorCommandsRef = useRef<EditorCommandsPluginHandles | null>(null);
+    const clearEditorState = useCallback(() => {
       clearEditorRef.current?.clearEditorState();
-    };
-    const getEditorElement = () =>
-      editorRef.current?.querySelector<HTMLElement>(
-        '[contenteditable="true"]'
-      ) ?? null;
+    }, []);
 
-    useImperativeHandle(ref, () => ({
-      clearEditorState,
-      setMarkdown: (markdown: string) =>
-        setMarkdownRef.current?.setMarkdown(markdown),
-      focus: () => getEditorElement()?.focus(),
-      blur: () => getEditorElement()?.blur(),
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        clearEditorState,
+        setMarkdown: (markdown: string) =>
+          editorCommandsRef.current?.setMarkdown(markdown),
+        focus: () => editorCommandsRef.current?.focus(),
+        blur: () => editorCommandsRef.current?.blur(),
+      }),
+      [clearEditorState]
+    );
 
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
@@ -343,7 +346,7 @@ const CreateDropInput = forwardRef<
     const placeholderText = getPlaceHolderText();
 
     return (
-      <div className="tailwind-scope" ref={editorRef}>
+      <div className="tailwind-scope">
         <LexicalComposer initialConfig={editorConfig}>
           <div className="tw-flex tw-items-end tw-gap-x-3">
             <div className="tw-relative tw-w-full">
@@ -355,24 +358,6 @@ const CreateDropInput = forwardRef<
                       autoCorrect="on"
                       ariaLabel={placeholderText}
                       style={{ touchAction: "manipulation" }}
-                      onClick={(e) => {
-                        // Ensure the contenteditable is properly focused and ready for paste
-                        const target = e.currentTarget;
-                        if (!submitting) {
-                          // Use a microtask to ensure focus happens after any other handlers
-                          Promise.resolve().then(() => {
-                            target.focus();
-                            // If there's no selection, place cursor at end
-                            const selection = window.getSelection();
-                            if (selection?.rangeCount === 0) {
-                              const range = document.createRange();
-                              range.selectNodeContents(target);
-                              range.collapse(false);
-                              selection.addRange(range);
-                            }
-                          });
-                        }
-                      }}
                       onBlur={onEditorBlur}
                       className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-3 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm ${
                         submitting ? "tw-cursor-default tw-opacity-50" : ""
@@ -419,8 +404,8 @@ const CreateDropInput = forwardRef<
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
-              <SetMarkdownPlugin
-                ref={setMarkdownRef}
+              <EditorCommandsPlugin
+                ref={editorCommandsRef}
                 canMentionAll={canMentionAll}
               />
               <DisableEditPlugin disabled={submitting} />
