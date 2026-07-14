@@ -91,7 +91,20 @@ const TRANSIENT_ERROR_PATTERNS = [
   "network connection was lost",
   "network request failed",
   "network error",
+  "server with the specified hostname could not be found",
+  "timed out",
   "timeout",
+];
+const PERMANENT_PUSH_REGISTRATION_ERROR_PATTERNS = [
+  "permission denied",
+  "permission not granted",
+  "not authorized",
+  "unauthorized",
+  "invalid configuration",
+  "configuration is invalid",
+  "invalid token",
+  "invalid device token",
+  "token is invalid",
 ];
 const LOW_VALUE_PUSH_REGISTRATION_ERROR_PATTERNS = [
   "com.google.iid error -25291",
@@ -294,6 +307,15 @@ const isUnauthorizedPushRegistrationError = (error: unknown): boolean =>
   extractErrorStatusCode(error) === 401;
 
 const isTransientPushRegistrationError = (error: unknown): boolean => {
+  const normalizedMessage = toErrorMessage(error).toLowerCase();
+  const isExplicitlyPermanent =
+    PERMANENT_PUSH_REGISTRATION_ERROR_PATTERNS.some((pattern) =>
+      normalizedMessage.includes(pattern)
+    );
+  if (isExplicitlyPermanent) {
+    return false;
+  }
+
   if (isRateLimitError(error)) {
     return true;
   }
@@ -303,7 +325,6 @@ const isTransientPushRegistrationError = (error: unknown): boolean => {
     return statusCode === 408 || (statusCode >= 500 && statusCode < 600);
   }
 
-  const normalizedMessage = toErrorMessage(error).toLowerCase();
   return TRANSIENT_ERROR_PATTERNS.some((pattern) =>
     normalizedMessage.includes(pattern)
   );
