@@ -16,10 +16,12 @@ import {
   calculateTooltipLayout,
   getTooltipWindow,
   joinTooltipClassNames,
+  measureTooltipSize,
   resolveTooltipTriggerElement,
   type ResolvedTooltipPlacement,
   type TooltipCoordinates,
 } from "./tooltipPositioning";
+import { useTooltipReposition } from "./useTooltipReposition";
 
 interface CustomTooltipProps {
   readonly children: React.ReactElement;
@@ -194,10 +196,9 @@ export default function CustomTooltip({
     if (getTooltipWindow() === null) return;
 
     const childRect = childNode.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const layout = calculateTooltipLayout({
       childRect,
-      tooltipRect,
+      tooltipRect: measureTooltipSize(tooltipRef.current),
       placement,
       offset,
     });
@@ -359,31 +360,7 @@ export default function CustomTooltip({
     syncChildObserverNode,
   ]);
 
-  useEffect(() => {
-    if (!isVisible) return;
-    const browserWindow = getTooltipWindow();
-    if (browserWindow === null) return;
-
-    let rafId: number | null = null;
-    const handleReposition = () => {
-      if (rafId !== null) return;
-      rafId = browserWindow.requestAnimationFrame(() => {
-        rafId = null;
-        calculatePosition();
-      });
-    };
-
-    browserWindow.addEventListener("resize", handleReposition);
-    browserWindow.addEventListener("scroll", handleReposition, true);
-
-    return () => {
-      browserWindow.removeEventListener("resize", handleReposition);
-      browserWindow.removeEventListener("scroll", handleReposition, true);
-      if (rafId !== null) {
-        browserWindow.cancelAnimationFrame(rafId);
-      }
-    };
-  }, [isVisible, calculatePosition]);
+  useTooltipReposition(isVisible, calculatePosition);
 
   useEffect(() => {
     return () => {
