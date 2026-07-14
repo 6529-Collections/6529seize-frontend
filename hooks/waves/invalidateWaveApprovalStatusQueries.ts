@@ -62,17 +62,17 @@ export function applyWaveDropVoteUpdate(
   // Keep the updated leaderboard data in place. Mark its ordering stale so a
   // later natural refetch can reconcile ranks without refetching every loaded
   // page while the voter is still scrolling.
-  void queryClient.invalidateQueries({
+  queryClient.invalidateQueries({
     queryKey: [
       QueryKey.DROPS_LEADERBOARD,
       { waveId },
     ],
     refetchType: "none",
-  });
-  void queryClient.invalidateQueries({
+  }).catch(() => undefined);
+  queryClient.invalidateQueries({
     queryKey: [QueryKey.DROP_VOTERS, { dropId: updatedDrop.id }],
-  });
-  void queryClient.invalidateQueries({
+  }).catch(() => undefined);
+  queryClient.invalidateQueries({
     queryKey: [QueryKey.DROP_VOTE_LOGS, { dropId: updatedDrop.id }],
-  });
+  }).catch(() => undefined);
 }

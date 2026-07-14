@@ -123,7 +123,7 @@ export const useSingleWaveDropVoteRationale = (
         body: requestBody,
       }),
     onSuccess: (createdReply) => {
-      void addOptimisticDrop({ drop: createdReply });
+      addOptimisticDrop({ drop: createdReply }).catch(() => undefined);
     },
     onError: (error) => {
       setToast({

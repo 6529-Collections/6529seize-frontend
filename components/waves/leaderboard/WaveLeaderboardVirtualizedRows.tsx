@@ -276,7 +276,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     };
 
     updateColumns();
-    if (typeof globalThis.ResizeObserver === "undefined") {
+    if (globalThis.ResizeObserver === undefined) {
       globalThis.addEventListener("resize", updateColumns);
       return () => globalThis.removeEventListener("resize", updateColumns);
     }
@@ -304,7 +304,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     };
 
     updateScrollMargin();
-    if (typeof globalThis.ResizeObserver === "undefined") {
+    if (globalThis.ResizeObserver === undefined) {
       globalThis.addEventListener("resize", updateScrollMargin);
       return () =>
         globalThis.removeEventListener("resize", updateScrollMargin);
@@ -469,7 +469,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       ) : null}
 
       <div
-        role="list"
+        role={"list" /* NOSONAR -- virtual row wrappers require ARIA roles. */}
         aria-label={t(locale, "waves.leaderboard.listLabel")}
         className="tw-relative tw-w-full tw-min-w-0"
         style={{ height: virtualizer.getTotalSize() }}
@@ -507,7 +507,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
             >
               {showPreviousRetry ? (
                 <div
-                  role="listitem"
+                  role={
+                    "listitem" /* NOSONAR -- this retry is a virtual list entry. */
+                  }
                   className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
                   style={{
                     gridColumn: `span ${placeholderLogicalIndexes.length}`,
@@ -549,7 +551,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
                 return (
                   <div
                     key={itemId}
-                    role="listitem"
+                    role={
+                      "listitem" /* NOSONAR -- cards are virtual list entries. */
+                    }
                     aria-posinset={itemIndex + 1}
                     aria-setsize={ariaSetSize}
                     data-leaderboard-drop-id={itemId}
