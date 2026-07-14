@@ -18,11 +18,11 @@ export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
     canEditWave({ connectedProfile, activeProfileProxy, wave });
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-1">
+    <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
       {parentWave && parentWaveName && (
         <nav
           aria-label="Wave hierarchy"
-          className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5"
+          className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-4"
         >
           <span className="tw-shrink-0 tw-font-medium tw-text-iron-400">
             Subwave of
