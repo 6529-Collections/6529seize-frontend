@@ -6,14 +6,19 @@ export type AnalyticsProperties = Record<
   boolean | number | string | null | undefined
 >;
 
-export type AuthImpactEventName =
-  | "Auth Forced Logout"
-  | "Auth Reauth Prompt Shown"
-  | "Auth Session Refresh Recovered"
-  | "Auth Session Refresh Succeeded"
-  | "Auth Session Upgrade Prompt Shown"
-  | "Auth Validation Cancelled"
-  | "Auth Validation Failed While Connected";
+export const PAGE_VIEW_EVENT_NAME = "Page Viewed";
+
+export const AUTH_IMPACT_EVENT_NAMES = [
+  "Auth Forced Logout",
+  "Auth Reauth Prompt Shown",
+  "Auth Session Refresh Recovered",
+  "Auth Session Refresh Succeeded",
+  "Auth Session Upgrade Prompt Shown",
+  "Auth Validation Cancelled",
+  "Auth Validation Failed While Connected",
+] as const;
+
+export type AuthImpactEventName = (typeof AUTH_IMPACT_EVENT_NAMES)[number];
 
 export type AuthImpactReason =
   | "auth_validation_failed"
@@ -175,7 +180,7 @@ export const trackPageView = (
   const sanitizedProperties = sanitizeProperties(properties);
   const { path: _ignoredPath, ...pageViewProperties } = sanitizedProperties;
 
-  track("Page Viewed", {
+  track(PAGE_VIEW_EVENT_NAME, {
     ...pageViewProperties,
     path,
   });

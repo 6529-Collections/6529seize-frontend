@@ -88,7 +88,7 @@ export default function MixpanelSetup() {
     }
 
     lastTrackedPageKeyRef.current = pageView.trackingKey;
-    trackPageView(pathname, {
+    trackPageView(pageView.routePattern, {
       has_connected_profile:
         connectedProfile?.id !== undefined && connectedProfile.id !== null,
       logical_page: pageView.logicalPage,

@@ -20,6 +20,13 @@ import {
   buildMediaUrl,
   type ArtBlocksTokenIdentifier,
 } from "@/services/artblocks/url";
+import { bucketMs } from "@/utils/monitoring/mobileLaunchTimingBuckets";
+
+export const ART_BLOCKS_SIGNAL_NAMES = {
+  impression: "ab_card_impression",
+  linkOut: "ab_card_link_out",
+  liveOpen: "ab_card_live_open",
+} as const;
 
 interface ArtBlocksTokenCardProps {
   readonly href: string;
@@ -50,7 +57,13 @@ const recordArtBlocksEvent = (
 
   const rum = (
     window as unknown as {
-      awsRum?: { recordEvent?: Function | undefined } | undefined;
+      awsRum?:
+        | {
+            recordEvent?:
+              | ((eventName: string, detail: Record<string, unknown>) => void)
+              | undefined;
+          }
+        | undefined;
     }
   ).awsRum;
   if (rum && typeof rum.recordEvent === "function") {
@@ -76,14 +89,11 @@ export default function ArtBlocksTokenCard({
   const lastTriggerRef = useRef<HTMLElement | null>(null);
   const openedAtRef = useRef<number | null>(null);
 
-  const eventPayload = useMemo(
-    () => ({ href, tokenId: id.tokenId, contract: id.contract }),
-    [href, id.contract, id.tokenId]
-  );
-
   useEffect(() => {
-    recordArtBlocksEvent("ab_card_impression", eventPayload);
-  }, [eventPayload]);
+    recordArtBlocksEvent(ART_BLOCKS_SIGNAL_NAMES.impression, {
+      surface: "wave_artblocks_card",
+    });
+  }, [href, id.contract, id.tokenId]);
 
   useEffect(() => {
     setMeta(null);
@@ -157,9 +167,8 @@ export default function ArtBlocksTokenCard({
       typeof openedAt === "number" ? Math.max(Date.now() - openedAt, 0) : 0;
     openedAtRef.current = null;
 
-    recordArtBlocksEvent("ab_card_live_open", {
-      ...eventPayload,
-      dwell_ms: dwell,
+    recordArtBlocksEvent(ART_BLOCKS_SIGNAL_NAMES.liveOpen, {
+      dwell_bucket: bucketMs(dwell),
     });
 
     const focusTarget = lastTriggerRef.current;
@@ -167,7 +176,7 @@ export default function ArtBlocksTokenCard({
     if (focusTarget) {
       focusTarget.focus();
     }
-  }, [eventPayload, showLive]);
+  }, [showLive]);
 
   const openLiveViewer = useCallback(
     (trigger: HTMLElement | null) => {
@@ -181,13 +190,12 @@ export default function ArtBlocksTokenCard({
       }
 
       openedAtRef.current = Date.now();
-      recordArtBlocksEvent("ab_card_link_out", {
-        ...eventPayload,
+      recordArtBlocksEvent(ART_BLOCKS_SIGNAL_NAMES.linkOut, {
         target: "viewer",
       });
       setShowLive(true);
     },
-    [eventPayload, handleCloseLive, showLive]
+    [handleCloseLive, showLive]
   );
 
   useEffect(() => {
@@ -224,11 +232,10 @@ export default function ArtBlocksTokenCard({
   );
 
   const handleAnchorClick = useCallback(() => {
-    recordArtBlocksEvent("ab_card_link_out", {
-      ...eventPayload,
+    recordArtBlocksEvent(ART_BLOCKS_SIGNAL_NAMES.linkOut, {
       target: "artblocks",
     });
-  }, [eventPayload]);
+  }, []);
 
   return (
     <div
