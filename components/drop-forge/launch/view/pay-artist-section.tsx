@@ -8,6 +8,8 @@ import type { ApiMemesMintStat } from "@/generated/models/ApiMemesMintStat";
 import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAction";
 
 const MINT_STAT_LOADING_LABEL = "loading...";
+const PAY_ARTIST_INPUT_CLASS_NAME =
+  "tw-block tw-h-auto tw-w-full !tw-rounded-none !tw-border-0 !tw-bg-transparent !tw-p-0 !tw-text-base !tw-font-normal !tw-leading-6 !tw-text-white !tw-shadow-none [color-scheme:dark] placeholder:!tw-text-iron-500 focus:!tw-border-0 focus:!tw-bg-transparent focus:!tw-text-white focus:!tw-shadow-none focus:!tw-outline-none focus:!tw-ring-0";
 
 function getPayArtistSalesLabel(mintStat: ApiMemesMintStat | null): string {
   if (!mintStat) {
@@ -178,7 +180,7 @@ function DropForgePayArtistAmountField({
           value={payArtistAmountEth}
           onChange={(e) => onPayArtistAmountChange(e.target.value)}
           placeholder="Enter ETH Amount"
-          className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
+          className={PAY_ARTIST_INPUT_CLASS_NAME}
         />
       )}
     </DropForgeFieldBox>
@@ -221,7 +223,7 @@ function DropForgePayArtistAddressField({
             onAddressChange={onPayArtistResolvedAddressChange}
             onLoadingChange={onPayArtistAddressLoadingChange}
             onError={onPayArtistAddressEnsErrorChange}
-            className="tw-h-auto tw-w-full !tw-rounded-none !tw-border-0 !tw-bg-transparent !tw-p-0 !tw-text-white !tw-shadow-none [color-scheme:dark] placeholder:!tw-text-iron-500 focus:!tw-border-0 focus:!tw-bg-transparent focus:!tw-text-white focus:!tw-shadow-none focus:!tw-outline-none focus:!tw-ring-0"
+            className={PAY_ARTIST_INPUT_CLASS_NAME}
           />
         )}
       </DropForgeFieldBox>
