@@ -76,43 +76,23 @@ export const PreviewModalShell = ({
           <DialogBackdrop className="tw-fixed tw-inset-0 tw-border-0 tw-bg-iron-600/60 tw-p-0" />
         </TransitionChild>
 
-        <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[100] tw-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block">
-          <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
+        <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[100] tw-flex tw-overflow-hidden sm:tw-overflow-y-auto sm:tw-scrollbar-thin sm:tw-scrollbar-track-iron-800 sm:tw-scrollbar-thumb-iron-500 sm:hover:tw-scrollbar-thumb-iron-300">
+          <div className="tw-flex tw-min-h-full tw-w-full tw-items-end tw-justify-center tw-pt-10 sm:tw-items-center sm:tw-p-4">
             <TransitionChild
               as={Fragment}
-              enter="tw-duration-0"
-              enterFrom="tw-opacity-100"
-              enterTo="tw-opacity-100"
-              leave="tw-duration-0"
-              leaveFrom="tw-opacity-100"
-              leaveTo="tw-opacity-100"
+              enter="tw-transform tw-transition tw-duration-300 tw-ease-out sm:tw-duration-0"
+              enterFrom="tw-translate-y-full sm:tw-translate-y-0"
+              enterTo="tw-translate-y-0"
+              leave="tw-transform tw-transition tw-duration-300 tw-ease-in sm:tw-duration-0"
+              leaveFrom="tw-translate-y-0"
+              leaveTo="tw-translate-y-full sm:tw-translate-y-0"
             >
               <DialogPanel
-                className={`tw-pointer-events-auto tw-relative tw-m-0 tw-max-h-[90vh] tw-w-full ${MAX_WIDTH_CLASS[maxWidth]} tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-shadow-2xl tw-shadow-black/25`}
+                className={`tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform sm:tw-w-full ${MAX_WIDTH_CLASS[maxWidth]} sm:tw-rounded-xl sm:tw-border`}
               >
                 {children(false)}
               </DialogPanel>
             </TransitionChild>
-          </div>
-        </div>
-
-        <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-block tw-overflow-hidden sm:tw-hidden">
-          <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
-            <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
-              <TransitionChild
-                as={Fragment}
-                enter="tw-transform tw-transition tw-duration-300 tw-ease-out"
-                enterFrom="tw-translate-y-full"
-                enterTo="tw-translate-y-0"
-                leave="tw-transform tw-transition tw-duration-300 tw-ease-in"
-                leaveFrom="tw-translate-y-0"
-                leaveTo="tw-translate-y-full"
-              >
-                <DialogPanel className="tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform">
-                  {children(false)}
-                </DialogPanel>
-              </TransitionChild>
-            </div>
           </div>
         </div>
       </Dialog>
