@@ -406,6 +406,7 @@ describe("WaveDropsAll", () => {
   });
 
   afterEach(() => {
+    mockScrollContainerRef.current.remove();
     jest.useRealTimers();
     jest.clearAllMocks();
   });
@@ -1397,6 +1398,110 @@ describe("WaveDropsAll", () => {
 
       act(() => {
         jest.advanceTimersByTime(600);
+      });
+
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
+    });
+
+    it("waits beyond three seconds for a delayed target row to render", async () => {
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      mockFetchNextPage.mockResolvedValueOnce([]);
+      mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+
+      renderComponent({ initialDrop: 10 });
+
+      const scrollTo = jest.fn();
+      mockScrollContainerRef.current.style.flexDirection = "column-reverse";
+      Object.defineProperty(mockScrollContainerRef.current, "clientHeight", {
+        configurable: true,
+        value: 400,
+      });
+      Object.defineProperty(mockScrollContainerRef.current, "scrollHeight", {
+        configurable: true,
+        value: 1000,
+      });
+      mockScrollContainerRef.current.scrollTop = 20;
+      mockScrollContainerRef.current.scrollTo = scrollTo;
+      Object.defineProperty(
+        mockScrollContainerRef.current,
+        "getBoundingClientRect",
+        {
+          configurable: true,
+          value: () => ({
+            top: 100,
+            bottom: 500,
+            height: 400,
+            left: 0,
+            right: 300,
+            width: 300,
+          }),
+        }
+      );
+
+      await waitFor(() => {
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(4000);
+      });
+
+      expect(dropsProps.suspendLightDropHydration).toBe(true);
+      expect(scrollTo).not.toHaveBeenCalled();
+      expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 100, 100);
+
+      document.body.appendChild(mockScrollContainerRef.current);
+
+      const staleTargetElement = document.createElement("div");
+      Object.defineProperty(staleTargetElement, "getBoundingClientRect", {
+        configurable: true,
+        value: () => ({
+          top: 300,
+          bottom: 360,
+          height: 60,
+          left: 0,
+          right: 300,
+          width: 300,
+        }),
+      });
+      dropsProps.targetDropRef.current = staleTargetElement;
+
+      const targetElement = document.createElement("div");
+      targetElement.id = "drop-10";
+      Object.defineProperty(targetElement, "getBoundingClientRect", {
+        configurable: true,
+        value: () => ({
+          top: 150,
+          bottom: 210,
+          height: 60,
+          left: 0,
+          right: 300,
+          width: 300,
+        }),
+      });
+      mockScrollContainerRef.current.appendChild(targetElement);
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(100);
+      });
+
+      expect(scrollTo).toHaveBeenCalledWith({
+        behavior: "smooth",
+        top: -100,
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(600);
       });
 
       await waitFor(() => {
