@@ -41,7 +41,7 @@ export default function CommunityMembersTableHeaderSortableContent({
   );
   const showLoader = isLoading && isActive;
   return (
-    <>
+    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-align-middle">
       <span
         className={`${
           isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
@@ -50,11 +50,11 @@ export default function CommunityMembersTableHeaderSortableContent({
         {TITLE[sort]}
       </span>
       {showLoader ? (
-        <span className="tw-pl-2">
+        <span className="tw-flex tw-items-center">
           <CircleLoader size={CircleLoaderSize.SMALL} />
         </span>
       ) : (
-        <span className="-tw-mt-0.5 tw-ml-2">
+        <span className="tw-flex tw-items-center">
           <CommonTableSortIcon
             direction={direction}
             isActive={isActive}
@@ -62,6 +62,6 @@ export default function CommunityMembersTableHeaderSortableContent({
           />
         </span>
       )}
-    </>
+    </span>
   );
 }

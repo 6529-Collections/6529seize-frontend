@@ -102,6 +102,15 @@ const mockUseEmoji = useEmoji as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const setToastMock = jest.fn();
+const mockGetEligibility = jest.fn();
+const mockUpdateEligibility = jest.fn();
+
+jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
+  useWaveEligibility: jest.fn(() => ({
+    getEligibility: mockGetEligibility,
+    updateEligibility: mockUpdateEligibility,
+  })),
+}));
 const createStructuredReactionError = ({
   body,
   headers,
@@ -167,7 +176,7 @@ const createEmojiContextValue = (
 
 const createMockDrop = (overrides: Record<string, unknown> = {}) => ({
   id: "test-drop",
-  wave: { id: "test-wave" },
+  wave: { id: "test-wave", authenticated_user_eligible_to_chat: true },
   reactions: [],
   ...overrides,
 });
@@ -205,6 +214,7 @@ describe("WaveDropReactions", () => {
     mockQueryCacheFindAll.mockReset();
     mockQueryCacheFindAll.mockReturnValue([]);
     mockSetQueryData.mockReset();
+    mockGetEligibility.mockReturnValue(null);
     mockUseAuth.mockReturnValue({
       connectedProfile: { id: "profile-1", handle: "alice" },
       activeProfileProxy: null,
@@ -386,6 +396,44 @@ describe("WaveDropReactions", () => {
       endpoint: "drops/test-drop/reaction",
       errorMode: "structured",
     });
+  });
+
+  it("disables reaction chips when the current wave capability is disabled", () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
   });
 
   it("updates cached notification drops when removing a chip reaction", async () => {
