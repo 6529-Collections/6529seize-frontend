@@ -43,7 +43,7 @@ export default function CommunityMembersTableRow({
                 {member.pfp && (
                   <img
                     src={getScaledImageUri(member.pfp, ImageScale.W_AUTO_H_50)}
-                    alt="Network Table Profile Picture"
+                    alt=""
                     className="tw-h-full tw-w-full tw-bg-transparent tw-object-contain"
                   />
                 )}
