@@ -32,6 +32,7 @@ import { AdditionalActionPromiseBadge } from "@/components/waves/drops/Additiona
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly artFocused?: boolean | undefined;
   readonly activeSort?: WaveDropsLeaderboardSort | undefined;
   readonly animationKey?: number | undefined;
@@ -70,6 +71,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
   ({
     drop,
     onDropClick,
+    onVoteClick,
     artFocused = true,
     activeSort,
     animationKey = 0,
@@ -165,6 +167,10 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     };
 
     const handleVoteButtonClick = () => {
+      if (onVoteClick) {
+        onVoteClick(drop);
+        return;
+      }
       openVoteModal();
     };
 
@@ -282,19 +288,20 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           </div>
         </div>
 
-        {isMobileScreen ? (
-          <MobileVotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
-        ) : (
-          <VotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
-        )}
+        {!onVoteClick &&
+          (isMobileScreen ? (
+            <MobileVotingModal
+              drop={drop}
+              isOpen={isVoteModalOpen}
+              onClose={closeVoteModal}
+            />
+          ) : (
+            <VotingModal
+              drop={drop}
+              isOpen={isVoteModalOpen}
+              onClose={closeVoteModal}
+            />
+          ))}
       </div>
     );
   }

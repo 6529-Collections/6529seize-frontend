@@ -24,6 +24,7 @@ interface WaveLeaderboardGridItemProps {
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 const canOpenGridItemFromClick = ({
@@ -53,6 +54,7 @@ export const WaveLeaderboardGridItem: React.FC<
   winningThreshold,
   winningThresholdMinDurationMs,
   onDropClick,
+  onVoteClick,
 }) => {
   const isCompactMode = mode === "compact";
   const isContentOnlyMode = mode === "content_only";
@@ -81,8 +83,12 @@ export const WaveLeaderboardGridItem: React.FC<
     isContentOnlyMode && hasTouchScreen && hasMobileContentOnlyActions;
 
   const handleVoteButtonClick = useCallback(() => {
+    if (onVoteClick) {
+      onVoteClick(drop);
+      return;
+    }
     openVoteModal();
-  }, [openVoteModal]);
+  }, [drop, onVoteClick, openVoteModal]);
 
   const openDrop = useCallback(() => {
     startDropOpen({
@@ -168,7 +174,7 @@ export const WaveLeaderboardGridItem: React.FC<
         />
       )}
 
-      {(isCompactMode || isContentOnlyMode) && (
+      {!onVoteClick && (isCompactMode || isContentOnlyMode) && (
         <WaveLeaderboardGridItemVotingModal
           drop={drop}
           isOpen={isVoteModalOpen}

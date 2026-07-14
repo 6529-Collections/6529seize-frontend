@@ -3,10 +3,45 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { WaveLeaderboardGrid } from "@/components/waves/leaderboard/grid/WaveLeaderboardGrid";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
+const mockOpenVotingModal = jest.fn();
+
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   useWaveDropsLeaderboard: jest.fn(),
   WaveDropsLeaderboardSort: { RANK: "RANK" },
+  WAVE_DROPS_LEADERBOARD_MAX_PAGES: 10,
 }));
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVirtualizedRows",
+  () => ({
+    useLeaderboardLeadingItemCount: () => 0,
+    WaveLeaderboardVirtualizedRows: ({
+      items,
+      renderItem,
+      hasNextPage,
+      fetchNextPage,
+    }: any) => (
+      <div>
+        {items.map((item: any) => (
+          <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
+        ))}
+        {hasNextPage ? (
+          <button onClick={fetchNextPage}>Load more drops</button>
+        ) : null}
+      </div>
+    ),
+  })
+);
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVotingModal",
+  () => ({
+    useWaveLeaderboardVotingModal: () => ({
+      votingDrop: null,
+      openVotingModal: mockOpenVotingModal,
+      closeVotingModal: jest.fn(),
+    }),
+    WaveLeaderboardVotingModal: () => null,
+  })
+);
 
 jest.mock(
   "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem",
@@ -17,6 +52,7 @@ jest.mock(
       isVotingControlsLocked,
       mode,
       onDropClick,
+      onVoteClick,
     }: any) => (
       <div
         data-testid="grid-item"
@@ -25,6 +61,7 @@ jest.mock(
         onClick={() => onDropClick(drop)}
       >
         {drop.id}:{mode}
+        <button onClick={() => onVoteClick?.(drop)}>Vote on {drop.id}</button>
       </div>
     ),
   })
@@ -38,6 +75,12 @@ const wave = {
 } as any;
 
 describe("WaveLeaderboardGrid", () => {
+  const scrollContainerRef = React.createRef<HTMLDivElement>();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("shows loading state", () => {
     (useWaveDropsLeaderboard as jest.Mock).mockReturnValue({
       drops: [],
@@ -45,6 +88,8 @@ describe("WaveLeaderboardGrid", () => {
       hasNextPage: false,
       isFetching: true,
       isFetchingNextPage: false,
+      pageMetadata: [],
+      queryWindowKey: "test-window",
     });
 
     const { container } = render(
@@ -53,6 +98,7 @@ describe("WaveLeaderboardGrid", () => {
         sort="RANK"
         mode="compact"
         onDropClick={jest.fn()}
+        scrollContainerRef={scrollContainerRef}
       />
     );
 
@@ -77,6 +123,13 @@ describe("WaveLeaderboardGrid", () => {
       hasNextPage: true,
       isFetching: false,
       isFetchingNextPage: false,
+      isFetchingPreviousPage: false,
+      isFetchNextPageError: false,
+      isFetchPreviousPageError: false,
+      fetchPreviousPage: jest.fn(),
+      hasPreviousPage: false,
+      pageMetadata: [],
+      queryWindowKey: "test-window",
     });
 
     render(
@@ -87,6 +140,7 @@ describe("WaveLeaderboardGrid", () => {
         isVotingClosed={true}
         isVotingControlsLocked={true}
         onDropClick={onDropClick}
+        scrollContainerRef={scrollContainerRef}
       />
     );
 
@@ -105,5 +159,7 @@ describe("WaveLeaderboardGrid", () => {
     expect(fetchNextPage).toHaveBeenCalled();
     fireEvent.click(screen.getByTestId("grid-item"));
     expect(onDropClick).toHaveBeenCalledWith({ id: "d1" });
+    fireEvent.click(screen.getByRole("button", { name: "Vote on d1" }));
+    expect(mockOpenVotingModal).toHaveBeenCalledWith({ id: "d1" });
   });
 });
