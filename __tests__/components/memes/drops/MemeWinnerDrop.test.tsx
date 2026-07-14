@@ -98,7 +98,6 @@ test("renders actions when desktop hover actions are active", () => {
       drop={drop}
       showReplyAndQuote
       onReply={onReply}
-      onQuote={jest.fn()}
     />
   );
   expect(screen.getByTestId("identity")).toBeInTheDocument();
@@ -117,7 +116,6 @@ test("keeps actions for desktop hover mode even when the user agent is mobile", 
       drop={drop}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
 
@@ -130,7 +128,6 @@ test("renders vote details through meme vote stats", () => {
       drop={drop}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
 
@@ -148,7 +145,6 @@ test("links a mapped Main Stage winner to its Meme card", () => {
       drop={{ ...drop, submission_context: { meme_card_id: 521 } }}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
 
@@ -164,7 +160,6 @@ test("does not infer a Meme card link when the mapping is absent", () => {
       drop={{ ...drop, submission_context: {} }}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
 
@@ -179,7 +174,6 @@ test("does not trigger the mobile menu wrapper when vote details is clicked", ()
       drop={drop}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
 
@@ -205,7 +199,6 @@ test("hides desktop actions when touch sheet mode is active", () => {
       drop={drop}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
   expect(queryByTestId("reply")).toBeNull();
@@ -231,7 +224,6 @@ test("uses v2 title and part one content before metadata fallbacks", () => {
       }}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     />
   );
 
