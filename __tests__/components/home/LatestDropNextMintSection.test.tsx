@@ -1,3 +1,4 @@
+import LatestDropNextMintPanel from "@/components/home/now-minting/LatestDropNextMintPanel";
 import LatestDropNextMintSection from "@/components/home/now-minting/LatestDropNextMintSection";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { render, screen } from "@testing-library/react";
@@ -7,9 +8,15 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: () => ({ hasTouchScreen: false }),
 }));
 
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
+
 jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
   __esModule: true,
-  default: () => <div data-testid="subscribe" />,
+  default: ({ tokenId }: { readonly tokenId?: number }) => (
+    <div data-testid="subscribe" data-token-id={tokenId} />
+  ),
 }));
 
 jest.mock("next/image", () => ({
@@ -60,6 +67,11 @@ describe("LatestDropNextMintSection", () => {
       screen.getByRole("link", { name: "The Memes #488" })
     ).toHaveAttribute("href", "/the-memes/488");
     expect(screen.queryByText(/Card #/)).not.toBeInTheDocument();
+    expect(screen.getByTestId("subscribe")).toHaveAttribute(
+      "data-token-id",
+      "488"
+    );
+    expect(screen.getByText("Mint date")).toBeInTheDocument();
   });
 
   it("keeps the schedule label and does not infer a card link when unmapped", () => {
@@ -69,5 +81,17 @@ describe("LatestDropNextMintSection", () => {
       screen.queryByRole("link", { name: /The Memes #/ })
     ).not.toBeInTheDocument();
     expect(screen.getByText(/Card #/)).toBeInTheDocument();
+  });
+
+  it("renders the mapped Meme pill as static text on its own detail page", () => {
+    render(
+      <LatestDropNextMintPanel drop={createDrop(488)} linkMemeCard={false} />
+    );
+
+    const pill = screen.getByText("The Memes #488");
+    expect(pill.tagName).toBe("SPAN");
+    expect(
+      screen.queryByRole("link", { name: "The Memes #488" })
+    ).not.toBeInTheDocument();
   });
 });
