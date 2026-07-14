@@ -2,7 +2,10 @@
   "cp": {
     "transaction": "/messages/:wave",
     "request": {
-      "url": "https://6529.io/messages/00000000-0000-4000-8000-000000000001"
+      "url": "https://6529.io/messages/00000000-0000-4000-8000-000000000001",
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+      }
     },
     "exception": {
       "values": [

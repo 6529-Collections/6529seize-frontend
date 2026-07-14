@@ -62,6 +62,7 @@ import {
 } from "./app-frame-utils";
 
 const sentryBrowserPathTokens = ["@sentry/browser", "@sentry+browser"];
+const twitterUserAgentPattern = /(?:^|[\s;(])twitter(?:android)?\//i;
 
 function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined
@@ -205,6 +206,16 @@ function matchesContextToken(value: string, tokens: string[]): boolean {
   return tokens.some((token) => normalized.includes(token));
 }
 
+function isIosWebViewUserAgent(value: string): boolean {
+  const normalized = value.toLowerCase();
+  return (
+    /\b(?:iphone|ipad|ipod)\b/.test(normalized) &&
+    normalized.includes("applewebkit/") &&
+    normalized.includes("mobile/") &&
+    !normalized.includes("safari/")
+  );
+}
+
 export function hasMetaMaskMobileWebViewContext(
   event: SentryClientEvent
 ): boolean {
@@ -227,10 +238,15 @@ export function hasMetaMaskMobileWebViewContext(
 function hasMobileSafariWebViewContext(event: SentryClientEvent): boolean {
   const contextValues = getRouteParameterizationContextValues(event);
   const userAgentValues = getRouteParameterizationUserAgentValues(event);
-  const values = [...contextValues, ...userAgentValues];
-
-  return values.some((value) =>
-    matchesContextToken(value, mobileSafariWebViewContextTokens)
+  return (
+    contextValues.some((value) =>
+      matchesContextToken(value, mobileSafariWebViewContextTokens)
+    ) ||
+    userAgentValues.some(
+      (value) =>
+        matchesContextToken(value, mobileSafariWebViewContextTokens) ||
+        isIosWebViewUserAgent(value)
+    )
   );
 }
 
@@ -354,7 +370,10 @@ export function isTwitterBrowser(event: SentryClientEvent): boolean {
   }
 
   const browserTag = event.tags?.["browser"];
-  if (typeof browserTag === "string" && browserTag.startsWith("Twitter")) {
+  if (
+    typeof browserTag === "string" &&
+    (browserTag === "Twitter" || browserTag.startsWith("Twitter "))
+  ) {
     return true;
   }
 
@@ -363,8 +382,7 @@ export function isTwitterBrowser(event: SentryClientEvent): boolean {
     getRuntimeUserAgentString(),
   ];
   return userAgentValues.some(
-    (value) =>
-      typeof value === "string" && value.toLowerCase().includes("twitter")
+    (value) => typeof value === "string" && twitterUserAgentPattern.test(value)
   );
 }
 
@@ -531,12 +549,9 @@ export function shouldFilterSentryRouteParameterizationError(
     return false;
   }
 
-  if (hasSentryRouteParameterizationFrame(frames)) {
-    return true;
-  }
-
   return (
-    hasRouteParameterizationRouteEvidence(event) &&
+    (hasSentryRouteParameterizationFrame(frames) ||
+      hasRouteParameterizationRouteEvidence(event)) &&
     (hasMetaMaskMobileWebViewContext(event) ||
       hasMobileSafariWebViewContext(event))
   );

@@ -993,14 +993,43 @@ describe("instrumentation-client", () => {
 
   it("keeps cyclic JSON errors with app-owned frames", () => {
     const beforeSend = loadBeforeSend();
-    const event = createSentryRouteParameterizationEvent([
-      nativeJsonStringifyFrame,
+    const event = createSentryRouteParameterizationEvent(
+      [
+        {
+          filename:
+            "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+          function: "n",
+        },
+        nativeJsonStringifyFrame,
+        {
+          filename: "https://6529.io/_next/static/chunks/app-client.js",
+          function: "serializeWaveParams",
+          in_app: true,
+        },
+      ],
       {
-        filename: "https://6529.io/_next/static/chunks/app-client.js",
-        function: "serializeWaveParams",
-        in_app: true,
+        contexts: {},
+        tags: {},
+      }
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps Sentry route-parameterization cyclic JSON errors outside iOS webviews", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...noiseFilterFixtures.cp,
+      request: {
+        ...noiseFilterFixtures.cp.request,
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126.0.0.0 Safari/537.36",
+        },
       },
-    ]);
+    };
 
     const result = beforeSend(event);
 
@@ -1021,6 +1050,23 @@ describe("instrumentation-client", () => {
     const result = beforeSend(noiseFilterFixtures.b9);
 
     expect(result).toBeNull();
+  });
+
+  it("keeps B9-shaped events from Twitter-lookalike user agents", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...noiseFilterFixtures.b9,
+      request: {
+        ...noiseFilterFixtures.b9.request,
+        headers: {
+          "User-Agent": "ExampleTwitter/12.3 (iPhone; iOS 16.7.14)",
+        },
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the raw 9N Twitter currentInset event", () => {
