@@ -10,6 +10,7 @@ import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRoot
 import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import {
   type ManifoldClaim,
+  ManifoldPhase,
   ManifoldClaimStatus,
 } from "@/hooks/useManifoldClaim";
 
@@ -313,12 +314,14 @@ export function getLaunchListStatus({
   researchAirdropCompleted,
   payArtistCompleted,
   actionsLoaded = true,
+  useCoarseOnchainStatus = false,
 }: Readonly<{
   primaryStatus: ClaimPrimaryStatus;
   manifoldClaim: ManifoldClaim | null | undefined;
   researchAirdropCompleted: boolean;
   payArtistCompleted: boolean;
   actionsLoaded?: boolean;
+  useCoarseOnchainStatus?: boolean;
 }>): ClaimPrimaryStatus {
   if (primaryStatus.key !== "live" || !manifoldClaim) {
     return primaryStatus;
@@ -340,6 +343,14 @@ export function getLaunchListStatus({
       tone: "post_mint",
       reason: "Research airdrop is complete. Artist payment remains",
     };
+  }
+
+  if (
+    useCoarseOnchainStatus &&
+    (manifoldClaim.status !== ManifoldClaimStatus.ENDED ||
+      manifoldClaim.phase === ManifoldPhase.ALLOWLIST)
+  ) {
+    return primaryStatus;
   }
 
   if (manifoldClaim.status === ManifoldClaimStatus.ACTIVE) {
