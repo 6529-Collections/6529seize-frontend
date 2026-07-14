@@ -53,10 +53,10 @@ const MyStreamWaveTabsLeaderboard: React.FC<
         : "tw-border-transparent tw-bg-transparent active:tw-bg-white/[0.05]"
     }`;
   const getButtonTextClasses = (isActive: boolean) =>
-    `tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium sm:tw-max-w-44 ${
+    `tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-sm sm:tw-max-w-44 ${
       isActive
-        ? "tw-text-white"
-        : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-200 group-active:tw-text-iron-100"
+        ? "tw-font-semibold tw-text-white"
+        : "tw-font-medium tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-200 group-active:tw-text-iron-100"
     }`;
 
   return (
