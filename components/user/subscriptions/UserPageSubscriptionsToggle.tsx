@@ -30,7 +30,6 @@ export default function UserPageSubscriptionsToggle({
         checked={checked}
         disabled={disabled}
         onChange={onChange}
-        aria-label={ariaLabel}
         aria-describedby={describedBy}
         className="tw-peer tw-sr-only"
       />

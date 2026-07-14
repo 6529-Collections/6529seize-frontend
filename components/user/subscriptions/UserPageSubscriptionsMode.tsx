@@ -99,14 +99,13 @@ export default function UserPageSubscriptionsMode(
         )}
       </div>
       <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <label
-          htmlFor="subscription-mode"
+        <span
           className={`tw-font-semibold tw-transition-colors ${
-            isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-          } ${isAuto ? "tw-text-iron-400" : "tw-text-iron-50"}`}
+            isAuto ? "tw-text-iron-400" : "tw-text-iron-50"
+          }`}
         >
           Manual
-        </label>
+        </span>
         <UserPageSubscriptionsToggle
           disabled={isDisabled}
           id="subscription-mode"
@@ -115,14 +114,13 @@ export default function UserPageSubscriptionsMode(
           ariaLabel="Automatic subscription mode"
           describedBy={props.readonly ? undefined : descriptionId}
         />
-        <label
-          htmlFor="subscription-mode"
+        <span
           className={`tw-font-semibold tw-transition-colors ${
-            isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-          } ${isAuto ? "tw-text-iron-50" : "tw-text-iron-400"}`}
+            isAuto ? "tw-text-iron-50" : "tw-text-iron-400"
+          }`}
         >
           Automatic
-        </label>
+        </span>
         {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
       </div>
       {!props.readonly && (

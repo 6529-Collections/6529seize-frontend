@@ -89,14 +89,13 @@ export default function UserPageSubscriptionsEditionPreference(
         </span>
       </div>
       <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <label
-          htmlFor="subscription-all-editions-mode"
+        <span
           className={`tw-font-semibold tw-transition-colors ${
-            isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-          } ${isAllEditions ? "tw-text-iron-400" : "tw-text-iron-50"}`}
+            isAllEditions ? "tw-text-iron-400" : "tw-text-iron-50"
+          }`}
         >
           One edition
-        </label>
+        </span>
         <UserPageSubscriptionsToggle
           disabled={isDisabled}
           id="subscription-all-editions-mode"
@@ -105,14 +104,13 @@ export default function UserPageSubscriptionsEditionPreference(
           ariaLabel="All eligible editions"
           describedBy={props.readonly ? undefined : descriptionId}
         />
-        <label
-          htmlFor="subscription-all-editions-mode"
+        <span
           className={`tw-font-semibold tw-transition-colors ${
-            isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-          } ${isAllEditions ? "tw-text-iron-50" : "tw-text-iron-400"}`}
+            isAllEditions ? "tw-text-iron-50" : "tw-text-iron-400"
+          }`}
         >
           All eligible
-        </label>
+        </span>
         {isUpdatingAllEditions && (
           <CircleLoader size={CircleLoaderSize.MEDIUM} />
         )}
