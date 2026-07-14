@@ -16,8 +16,14 @@ type PnpmWorkspace = {
   overrides?: Record<string, string>;
 };
 
+// Keep the regression boundary explicit so dependency upgrades must re-evaluate
+// whether AppKit still needs this override before changing the expected stack.
 const affectedProvider = "@walletconnect/universal-provider@2.23.7";
 const patchedVersion = "2.23.9";
+const appKitVersion = "1.8.19";
+const appKitSnapshotKey = new RegExp(
+  `^@reown/appkit(?:-[^@]+)?@${appKitVersion.replaceAll(".", "\\.")}(?:\\(|$)`
+);
 
 function readYaml<T>(filename: string): T {
   return parse(readFileSync(resolve(process.cwd(), filename), "utf8")) as T;
@@ -32,9 +38,7 @@ describe("WalletConnect relay resilience", () => {
     expect(lockfile.overrides?.[affectedProvider]).toBe(patchedVersion);
 
     const appKitProviderVersions = Object.entries(lockfile.snapshots ?? {})
-      .filter(
-        ([key]) => key.startsWith("@reown/appkit") && key.includes("@1.8.19")
-      )
+      .filter(([key]) => appKitSnapshotKey.test(key))
       .flatMap(([, snapshot]) => {
         const version =
           snapshot.dependencies?.["@walletconnect/universal-provider"];
