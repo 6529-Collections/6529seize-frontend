@@ -116,6 +116,7 @@
         "/join redirects to /join-6529 for compatibility.",
         "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
         "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
+        "For logged-in profiles, Participate completes after at least one public Wave drop in the 365-day activity window, and Collect completes when Memes, NextGen, or Gradients holdings are positive.",
         "The focus area links to The Memes Main Stage Wave, Waves, the current user's subscriptions route when available, delegation, and @help6529."
       ],
       "canonical_path": "/join-6529",
@@ -1872,7 +1873,7 @@
       ],
       "facts": [
         "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
-        "For Rank and Approve waves, the desktop right sidebar also includes Voters and Activity.",
+        "For Rank and Approve waves, the desktop right sidebar exposes Voters and Activity from More after the four base sections.",
         "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
         "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
         "In the native app, More contains Settings and, for Rank and Approve waves, Voters and Activity.",

@@ -932,7 +932,7 @@ describe("SingleWaveDropVoteContent", () => {
     expect(mockOnVoteSuccess).toHaveBeenCalled();
   });
 
-  it("updates displayed vote stats and invalidates drops when vote is applied", () => {
+  it("updates displayed vote stats without broadly invalidating drops", () => {
     const drop = createMockDrop();
     const invalidateDrops = jest.fn();
 
@@ -954,7 +954,7 @@ describe("SingleWaveDropVoteContent", () => {
 
     expect(screen.getByTestId("current-rating")).toHaveTextContent("88");
     expect(screen.getByTestId("new-rating")).toHaveTextContent("88");
-    expect(invalidateDrops).toHaveBeenCalledTimes(1);
+    expect(invalidateDrops).not.toHaveBeenCalled();
   });
 
   it("works with different SingleWaveDropVoteSize values", () => {

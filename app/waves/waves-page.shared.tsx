@@ -29,6 +29,11 @@ import {
   buildWavePageJsonLd,
   buildWavesIndexPageJsonLd,
 } from "@/lib/structured-data/waves";
+import {
+  getServerRouteAuthCohort,
+  SERVER_ROUTE_SPAN_NAMES,
+  traceServerRouteData,
+} from "@/utils/monitoring/serverRouteTelemetry";
 
 export type WavesSearchParams = RouteSearchParams;
 
@@ -36,6 +41,15 @@ type WaveRequestContext = {
   readonly waveId: string | null;
   readonly wave: ApiWave | null;
   readonly headers: Record<string, string>;
+};
+
+type WaveFetchResult =
+  | { readonly ok: true; readonly wave: ApiWave | null }
+  | { readonly ok: false; readonly error: unknown };
+
+type WaveRequestContextResult = {
+  readonly context: WaveRequestContext;
+  readonly fetchResult: WaveFetchResult;
 };
 
 export const getFirstSearchParamValue = (
@@ -95,8 +109,10 @@ const fetchWaveCached = cache(
   async (
     waveId: string | null,
     headersKey: string
-  ): Promise<ApiWave | null> => {
-    if (waveId === null) return null;
+  ): Promise<WaveFetchResult> => {
+    if (waveId === null) {
+      return { ok: true, wave: null };
+    }
     let headers: Record<string, string> = {};
     try {
       headers = headersKey
@@ -106,13 +122,16 @@ const fetchWaveCached = cache(
       headers = {};
     }
     try {
-      return await commonApiFetch<ApiWave>({
-        endpoint: `waves/${waveId}`,
-        headers,
-      });
+      return {
+        ok: true,
+        wave: await commonApiFetch<ApiWave>({
+          endpoint: `waves/${waveId}`,
+          headers,
+        }),
+      };
     } catch (error) {
       console.warn("Failed to fetch wave", { waveId, error });
-      return null;
+      return { ok: false, error };
     }
   }
 );
@@ -147,18 +166,30 @@ const fetchDropOgMetadataCached = cache(
 export const isApiWaveDirectMessage = (wave: ApiWave): boolean =>
   wave.chat?.scope?.group?.is_direct_message === true;
 
-export async function fetchWaveContext(
-  waveId: string | null
-): Promise<WaveRequestContext> {
-  const headers = await getAppCommonHeaders();
+async function fetchWaveContextResult(
+  waveId: string | null,
+  providedHeaders?: Record<string, string>
+): Promise<WaveRequestContextResult> {
+  const headers = providedHeaders ?? (await getAppCommonHeaders());
   const headersKey = JSON.stringify(headers);
-  const wave = await fetchWaveCached(waveId, headersKey);
+  const fetchResult = await fetchWaveCached(waveId, headersKey);
 
   return {
-    waveId,
-    wave,
-    headers,
+    context: {
+      waveId,
+      wave: fetchResult.ok ? fetchResult.wave : null,
+      headers,
+    },
+    fetchResult,
   };
+}
+
+export async function fetchWaveContext(
+  waveId: string | null,
+  providedHeaders?: Record<string, string>
+): Promise<WaveRequestContext> {
+  const result = await fetchWaveContextResult(waveId, providedHeaders);
+  return result.context;
 }
 
 export async function renderWavesPageContent({
@@ -171,17 +202,46 @@ export async function renderWavesPageContent({
   routeContext?: "waves" | "messages" | undefined;
 }) {
   if (waveId === null) {
-    return (
-      <>
-        <JsonLdScript data={buildWavesIndexPageJsonLd()} />
-        <Suspense fallback={null}>
-          <WavesPageClient />
-        </Suspense>
-      </>
+    return traceServerRouteData(
+      {
+        name: SERVER_ROUTE_SPAN_NAMES.wavesIndexDataPath,
+        routeFamily: "/waves",
+        dataPath: "none",
+        apiRequestCount: 0,
+      },
+      () => (
+        <>
+          <JsonLdScript data={buildWavesIndexPageJsonLd()} />
+          <Suspense fallback={null}>
+            <WavesPageClient />
+          </Suspense>
+        </>
+      )
     );
   }
 
-  const context = await fetchWaveContext(waveId);
+  const headers = await getAppCommonHeaders();
+  let context: WaveRequestContext;
+  try {
+    context = await traceServerRouteData(
+      {
+        name: SERVER_ROUTE_SPAN_NAMES.wavesMetadataFetch,
+        routeFamily: "/waves/[wave]",
+        dataPath: "wave_metadata",
+        apiRequestCount: 1,
+        authCohort: getServerRouteAuthCohort(headers),
+      },
+      async () => {
+        const result = await fetchWaveContextResult(waveId, headers);
+        if (!result.fetchResult.ok) {
+          throw result.fetchResult.error;
+        }
+        return result.context;
+      }
+    );
+  } catch {
+    context = { waveId, wave: null, headers };
+  }
   const queryClient = new QueryClient();
 
   if (context.waveId && context.wave) {
@@ -251,7 +311,8 @@ export async function buildWavesMetadata(
     waveId.length > 12 ? `${waveId.slice(0, 8)}...${waveId.slice(-4)}` : waveId;
   const metadataHeaders = await getAppCommonHeaders();
   const metadataHeadersKey = JSON.stringify(metadataHeaders);
-  const wave = await fetchWaveCached(waveId, metadataHeadersKey);
+  const waveResult = await fetchWaveCached(waveId, metadataHeadersKey);
+  const wave = waveResult.ok ? waveResult.wave : null;
 
   if (wave === null) {
     return getAppMetadata({
