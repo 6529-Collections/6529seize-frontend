@@ -1,4 +1,5 @@
 import {
+  browserGlobalHandlerOnErrorMechanism,
   browserUnhandledRejectionMechanism,
   filenameExceptions,
   gifPickerTenorFailureMessage,
@@ -10,6 +11,8 @@ import {
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,
   tenorCategoriesPath,
+  twitterCurrentInsetReferenceErrorMessage,
+  twitterInjectedWaveDocumentPathPattern,
   webViewUserAgentTokens,
   routeParameterizationContextKeys,
   routeParameterizationTagKeys,
@@ -23,6 +26,7 @@ import {
   getBreadcrumbMessages,
   getBreadcrumbValues,
   getContextString,
+  getFramePaths,
   getHintExceptionMessage,
   getRequestHeaderString,
   getRequestPathname,
@@ -52,7 +56,6 @@ import {
   hasInjectedWasmCspFrameSignature,
   hasLikelyAppOwnedFrame,
   hasNativeJsonStringifyFrame,
-  hasOnlyAppUriFrames,
   hasReactDomNotFoundErrorSignature,
   hasSentryRouteParameterizationFrame,
   isSentryRouteParameterizationFrame,
@@ -351,7 +354,40 @@ export function isTwitterBrowser(event: SentryClientEvent): boolean {
   }
 
   const browserTag = event.tags?.["browser"];
-  return typeof browserTag === "string" && browserTag.startsWith("Twitter");
+  if (typeof browserTag === "string" && browserTag.startsWith("Twitter")) {
+    return true;
+  }
+
+  const userAgentValues = [
+    getRequestHeaderString(event, "user-agent"),
+    getRuntimeUserAgentString(),
+  ];
+  return userAgentValues.some(
+    (value) =>
+      typeof value === "string" && value.toLowerCase().includes("twitter")
+  );
+}
+
+function isTwitterInjectedWaveDocumentFrame(frame: SentryStackFrame): boolean {
+  const paths = getFramePaths(frame);
+  return (
+    paths.length > 0 &&
+    paths.every((path) => twitterInjectedWaveDocumentPathPattern.test(path))
+  );
+}
+
+function hasOnlyTwitterInjectedWaveDocumentFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.some(isTwitterInjectedWaveDocumentFrame) &&
+    frames.every(
+      (frame) =>
+        isTwitterInjectedWaveDocumentFrame(frame) ||
+        isSentryRouteParameterizationFrame(frame)
+    )
+  );
 }
 
 export function shouldFilterByFilenameExceptions(
@@ -379,7 +415,29 @@ export function shouldFilterTwitterConfigReferenceError(
     return false;
   }
 
-  return hasOnlyAppUriFrames(value.stacktrace?.frames);
+  return hasOnlyTwitterInjectedWaveDocumentFrames(value.stacktrace?.frames);
+}
+
+export function shouldFilterTwitterCurrentInsetReferenceError(
+  event: SentryClientEvent
+): boolean {
+  const value = event.exception?.values?.[0];
+  if (
+    value?.type !== "ReferenceError" ||
+    value.value !== twitterCurrentInsetReferenceErrorMessage
+  ) {
+    return false;
+  }
+
+  if (
+    value.mechanism?.type !== browserGlobalHandlerOnErrorMechanism ||
+    value.mechanism.handled !== false ||
+    !isTwitterBrowser(event)
+  ) {
+    return false;
+  }
+
+  return hasOnlyTwitterInjectedWaveDocumentFrames(value.stacktrace?.frames);
 }
 
 export function shouldFilterReactDomInsertBeforeNotFoundError(
@@ -473,9 +531,12 @@ export function shouldFilterSentryRouteParameterizationError(
     return false;
   }
 
+  if (hasSentryRouteParameterizationFrame(frames)) {
+    return true;
+  }
+
   return (
-    (hasRouteParameterizationRouteEvidence(event) ||
-      hasSentryRouteParameterizationFrame(frames)) &&
+    hasRouteParameterizationRouteEvidence(event) &&
     (hasMetaMaskMobileWebViewContext(event) ||
       hasMobileSafariWebViewContext(event))
   );

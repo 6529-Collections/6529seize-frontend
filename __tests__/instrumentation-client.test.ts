@@ -1,3 +1,5 @@
+import noiseFilterFixtures from "@/__tests__/fixtures/sentry-noise-filter-hardening.json";
+
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
 const mockCaptureRouterTransitionStart = jest.fn();
@@ -999,6 +1001,139 @@ describe("instrumentation-client", () => {
         in_app: true,
       },
     ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("drops the raw CP route-parameterization event before browser context enrichment", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(noiseFilterFixtures.cp);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the raw B9 Twitter CONFIG event with a Sentry wrapper frame", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(noiseFilterFixtures.b9);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the raw 9N Twitter currentInset event", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(noiseFilterFixtures.nineN);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the raw 3V injected sendMessage event with a Sentry helper frame", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(noiseFilterFixtures.threeV);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the raw DK Coinbase request-relay websocket event", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(noiseFilterFixtures.dk);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the intentional raw 2Y sampled first-party network event", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(noiseFilterFixtures.twoY);
+
+    expect(result).not.toBeNull();
+    expect(result?.tags?.["network_noise_sampled"]).toBe("true");
+  });
+
+  it("keeps app-owned Twitter currentInset errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...noiseFilterFixtures.nineN,
+      exception: {
+        values: [
+          {
+            ...noiseFilterFixtures.nineN.exception.values[0],
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/waves/WaveLayout.tsx",
+                  function: "updateCurrentInset",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps app-owned sendMessage failures", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...noiseFilterFixtures.threeV,
+      exception: {
+        values: [
+          {
+            ...noiseFilterFixtures.threeV.exception.values[0],
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+                  function: "sendMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps app-owned requestRelay websocket failures", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...noiseFilterFixtures.dk,
+      exception: {
+        values: [
+          {
+            ...noiseFilterFixtures.dk.exception.values[0],
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/websocket/requestRelay.ts",
+                  function: "handleRelayClose",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
 
     const result = beforeSend(event);
 
