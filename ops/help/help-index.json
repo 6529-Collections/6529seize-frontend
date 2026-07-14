@@ -2026,6 +2026,8 @@
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Reaction controls are disabled while a proxy profile is active.",
+        "Reaction controls are disabled when the current wave does not allow chatting and reactions.",
+        "If a reaction request times out, the app rolls back the optimistic state, refreshes the canonical drop state, and does not automatically retry the write.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
         "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",

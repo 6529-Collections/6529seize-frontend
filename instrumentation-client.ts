@@ -20,6 +20,7 @@ import {
   shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
+  shouldFilterBrowserExtensionSendMessageError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
@@ -33,6 +34,7 @@ import {
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
+  shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
   shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
@@ -153,6 +155,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterBrowserExtensionSendMessageError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
     return true;
   }
@@ -166,6 +172,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterTwitterConfigReferenceError(event)) {
+    return true;
+  }
+
+  if (shouldFilterTwitterCurrentInsetReferenceError(event)) {
     return true;
   }
 

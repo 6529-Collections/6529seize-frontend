@@ -6,6 +6,7 @@ import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { isWaveReactionDisabledApiError } from "@/utils/monitoring/dropReactionErrorClassification";
 
 type ReactionEntry = {
   reaction: string;
@@ -428,8 +429,14 @@ export const getReactionErrorMessage = (
   if (error !== null && typeof error === "object") {
     const structuredError = error as StructuredReactionError;
     const structuredStatus = getStructuredReactionStatus(structuredError);
+    if (isWaveReactionDisabledApiError(error)) {
+      return t(locale, "drops.reactions.capabilityDisabled");
+    }
     if (structuredStatus === 429) {
       return getRateLimitReactionMessage(structuredError, locale);
+    }
+    if (structuredStatus === 504) {
+      return t(locale, "drops.reactions.requestTimedOut");
     }
 
     const structuredResponse = structuredError.response;

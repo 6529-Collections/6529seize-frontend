@@ -29,6 +29,8 @@ overrides:
   react-toggle>react: $react
   react-toggle>react-dom: $react-dom
   shell-quote@>=1.1.0 <=1.8.3: 1.8.4
+  # AppKit 1.8.19 pins the affected relay client. WalletConnect 2.23.9 serializes reconnects and closes leaked sockets.
+  "@walletconnect/universal-provider@2.23.7": 2.23.9
   # uuid <11.1.1 has active advisories; 11.x keeps patched CJS-compatible APIs for wallet transitive deps.
   uuid@<11.1.1: 11.1.1
   ws@>=8.0.0 <8.20.1: 8.20.1
