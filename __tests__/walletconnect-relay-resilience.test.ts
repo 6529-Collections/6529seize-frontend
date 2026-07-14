@@ -18,15 +18,24 @@ type PnpmWorkspace = {
 
 // Keep the regression boundary explicit so dependency upgrades must re-evaluate
 // whether AppKit still needs this override before changing the expected stack.
-const affectedProvider = "@walletconnect/universal-provider@2.23.7";
+const affectedVersion = "2.23.7";
+const affectedProvider = `@walletconnect/universal-provider@${affectedVersion}`;
 const patchedVersion = "2.23.9";
 const appKitVersion = "1.8.19";
 const appKitSnapshotKey = new RegExp(
   `^@reown/appkit(?:-[^@]+)?@${appKitVersion.replaceAll(".", "\\.")}(?:\\(|$)`
 );
+const alignedRelayPackages = [
+  "core",
+  "sign-client",
+  "types",
+  "universal-provider",
+  "utils",
+] as const;
+const repoRoot = resolve(__dirname, "..");
 
 function readYaml<T>(filename: string): T {
-  return parse(readFileSync(resolve(process.cwd(), filename), "utf8")) as T;
+  return parse(readFileSync(resolve(repoRoot, filename), "utf8")) as T;
 }
 
 describe("WalletConnect relay resilience", () => {
@@ -47,7 +56,14 @@ describe("WalletConnect relay resilience", () => {
 
     expect(appKitProviderVersions.length).toBeGreaterThan(0);
     expect(new Set(appKitProviderVersions)).toEqual(new Set([patchedVersion]));
-    expect(lockfile.packages?.["@walletconnect/core@2.23.9"]).toBeDefined();
-    expect(lockfile.packages?.["@walletconnect/core@2.23.7"]).toBeUndefined();
+
+    for (const packageName of alignedRelayPackages) {
+      expect(
+        lockfile.packages?.[`@walletconnect/${packageName}@${patchedVersion}`]
+      ).toBeDefined();
+      expect(
+        lockfile.packages?.[`@walletconnect/${packageName}@${affectedVersion}`]
+      ).toBeUndefined();
+    }
   });
 });
