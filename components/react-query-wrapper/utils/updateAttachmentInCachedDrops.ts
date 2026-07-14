@@ -57,6 +57,7 @@ function isMatchingDrop(
 }
 
 interface DropReplacementOptions {
+  readonly mergeWithExisting?: boolean;
   readonly preferExistingPollVote?: boolean;
 }
 
@@ -76,11 +77,14 @@ function replaceDrop(
   }
 
   if (isMatchingDrop(value, drop.id)) {
+    const dropForReconciliation = options.mergeWithExisting
+      ? ({ ...value, ...drop } as ApiDrop)
+      : drop;
     const preferExistingPollVote = options.preferExistingPollVote;
     const reconciledDrop =
       preferExistingPollVote === undefined
-        ? reconcileDropAuthenticatedPollVote(drop, value)
-        : reconcileDropAuthenticatedPollVote(drop, value, {
+        ? reconcileDropAuthenticatedPollVote(dropForReconciliation, value)
+        : reconcileDropAuthenticatedPollVote(dropForReconciliation, value, {
             preferExistingVote: preferExistingPollVote,
           });
 

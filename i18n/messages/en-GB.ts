@@ -382,17 +382,6 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.uncastPower.votesVisible": "votes",
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
-  "waves.leaderboard.listLabel": "Leaderboard drops",
-  "waves.leaderboard.loadingEarlier": "Loading earlier drops",
-  "waves.leaderboard.previousLoadError":
-    "Earlier drops could not be loaded. Use the retry button to try again.",
-  "waves.leaderboard.retryEarlier": "Retry loading earlier drops",
-  "waves.leaderboard.loadingMore": "Loading more drops",
-  "waves.leaderboard.nextLoadError":
-    "More drops could not be loaded. Use the retry button to try again.",
-  "waves.leaderboard.retryMore": "Retry loading more drops",
-  "waves.leaderboard.loadMore": "Load more drops",
-  "waves.leaderboard.loadingMoreButton": "Loading more…",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   ...EN_GB_THE_MEMES_COLLECTORS_MESSAGES,

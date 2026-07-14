@@ -122,7 +122,12 @@ describe("invalidateWaveApprovalStatusQueries", () => {
         {
           page: 1,
           drops: [
-            { id: "drop-1", rating: 1 },
+            {
+              id: "drop-1",
+              rating: 1,
+              title: "Keep this title",
+              parts: [{ content: "Keep this content" }],
+            },
             { id: "drop-2", rating: 2 },
           ],
         },
@@ -144,7 +149,6 @@ describe("invalidateWaveApprovalStatusQueries", () => {
       {
         id: "drop-1",
         rating: 99,
-        wave: { id: "wave-from-response" },
       } as any,
       "wave-1"
     );
@@ -152,7 +156,12 @@ describe("invalidateWaveApprovalStatusQueries", () => {
     expect(
       queryClient.getQueryData<any>(leaderboardKey).pages[0].drops
     ).toEqual([
-      expect.objectContaining({ id: "drop-1", rating: 99 }),
+      expect.objectContaining({
+        id: "drop-1",
+        rating: 99,
+        title: "Keep this title",
+        parts: [{ content: "Keep this content" }],
+      }),
       { id: "drop-2", rating: 2 },
     ]);
     expect(queryClient.getQueryData(otherLeaderboardKey)).toEqual({

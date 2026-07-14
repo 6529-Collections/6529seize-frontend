@@ -225,6 +225,7 @@ describe("useSingleWaveDropVoteRationale", () => {
         signer_address: "0x123",
       },
     });
+    expect(addOptimisticDrop).toHaveBeenCalledTimes(1);
     expect(addOptimisticDrop).toHaveBeenCalledWith({ drop: createdReply });
   });
 });

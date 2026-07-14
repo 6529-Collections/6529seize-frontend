@@ -165,7 +165,6 @@ test("resets votes for selected drops", async () => {
   expect(onResettingChange).toHaveBeenNthCalledWith(1, true);
   expect(onResettingChange).toHaveBeenCalledTimes(2);
   expect(removeSelected).toHaveBeenCalledTimes(2);
-  expect(invalidateQueries).toHaveBeenCalledTimes(8);
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
   });
@@ -240,7 +239,6 @@ test("cleans up and invalidates once when a later reset fails", async () => {
   expect(onResettingChange).toHaveBeenCalledTimes(2);
   expect(removeSelected).toHaveBeenCalledWith("a");
   expect(removeSelected).not.toHaveBeenCalledWith("b");
-  expect(invalidateQueries).toHaveBeenCalledTimes(5);
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
   });

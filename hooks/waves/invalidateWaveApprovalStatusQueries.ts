@@ -49,7 +49,11 @@ export function applyWaveDropVoteUpdate(
   waveId: string,
   options: { readonly invalidateWaveSummary?: boolean } = {}
 ): void {
-  updateDropInCachedDrops(queryClient, updatedDrop);
+  // The API contract returns a complete ApiDrop. Merge defensively so a
+  // partial runtime response cannot erase richer cached card fields.
+  updateDropInCachedDrops(queryClient, updatedDrop, {
+    mergeWithExisting: true,
+  });
 
   if (options.invalidateWaveSummary !== false) {
     invalidateWaveApprovalSummaryQueries(queryClient, waveId);
