@@ -38,7 +38,7 @@ async function openWaveScoreFromSearch(page: Page, searchButton: Locator) {
   const searchInput = page.locator("#header-search-input");
   await expect(searchInput).toBeVisible();
   await searchInput.fill("wave score");
-  const result = page.getByRole("link", { name: WAVE_SCORE_RESULT }).first();
+  const result = page.getByRole("option", { name: WAVE_SCORE_RESULT }).first();
   await expect(result).toBeVisible();
   await result.click();
   await expectWaveScorePage(page);

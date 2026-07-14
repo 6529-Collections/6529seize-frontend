@@ -2,6 +2,8 @@
 
 import React from "react";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import {
   getSubmissionCount,
@@ -18,6 +20,11 @@ import { CurationWaveBadge } from "./CurationWaveBadge";
 import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
 import { useRouter } from "next/navigation";
+import {
+  WaveCompetitionBadges,
+  type WaveCompetitionPreviewTab,
+} from "./WaveCompetitionBadges";
+import { WaveCompetitionPreviewModal } from "./WaveCompetitionPreviewModal";
 
 interface DropAuthorBadgesProfile {
   readonly id?: string | null;
@@ -49,6 +56,10 @@ interface DropAuthorBadgesProfile {
     readonly profile_wave_name?: string | null;
     readonly profile_wave_pfp?: string | null;
   } | null;
+  readonly wave_participation?: {
+    readonly is_participant: boolean;
+    readonly is_winner: boolean;
+  } | null;
   readonly classification: ApiProfileClassification;
   readonly sub_classification: string | null;
 }
@@ -63,6 +74,7 @@ interface DropAuthorBadgesProps {
   readonly className?: string | undefined;
   readonly size?: "default" | "compact" | undefined;
   readonly showProfileWaveBadge?: boolean | undefined;
+  readonly wave?: ApiWaveMin | undefined;
   readonly onArtistPreviewOpen?:
     | ((params: {
         readonly user: ApiProfileMin;
@@ -140,9 +152,11 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   className = DEFAULT_CONTAINER_CLASS,
   size = "default",
   showProfileWaveBadge = true,
+  wave,
   onArtistPreviewOpen,
 }) => {
   const router = useRouter();
+  const seizeSettings = useSeizeSettingsOptional();
   const profileWaveId = getProfileWaveId(profile);
   const submissionCount = getSubmissionCount(profile);
   const trophyCount = getTrophyArtworkCount(profile);
@@ -151,8 +165,20 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   const profileWavePfp = getProfileWavePfp(profile);
   const hasProfileWaveBadge = showProfileWaveBadge && profileWaveId !== null;
   const profileWaveIdentity = getProfileWaveIdentity(profile);
+  const waveParticipation = wave ? profile.wave_participation : null;
+  const isWaveParticipant = waveParticipation?.is_participant === true;
+  const isWaveWinner = waveParticipation?.is_winner === true;
+  const isMainStageWave = wave
+    ? (seizeSettings?.isMemesWave(wave.id) ?? false)
+    : false;
+  const hasWaveCompetitionBadge =
+    !!wave && !isMainStageWave && (isWaveParticipant || isWaveWinner);
 
   const modalUser = React.useMemo(() => toApiProfileMin(profile), [profile]);
+  const [isWaveCompetitionPreviewOpen, setIsWaveCompetitionPreviewOpen] =
+    React.useState(false);
+  const [waveCompetitionTab, setWaveCompetitionTab] =
+    React.useState<WaveCompetitionPreviewTab>("active");
 
   const {
     isModalOpen: isArtistPreviewOpen,
@@ -188,13 +214,35 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
     );
   }, [profileWaveId, router]);
 
-  if (!hasActivityBadge && !hasProfileWaveBadge) {
+  const onWaveCompetitionBadgeClick = React.useCallback(
+    (tab: WaveCompetitionPreviewTab) => {
+      closeAllCustomTooltips();
+      setWaveCompetitionTab(tab);
+      setIsWaveCompetitionPreviewOpen(true);
+    },
+    []
+  );
+
+  const onWaveCompetitionPreviewClose = React.useCallback(() => {
+    setIsWaveCompetitionPreviewOpen(false);
+  }, []);
+
+  if (!hasActivityBadge && !hasProfileWaveBadge && !hasWaveCompetitionBadge) {
     return null;
   }
 
   return (
     <>
       <div className={className}>
+        {hasWaveCompetitionBadge && wave && (
+          <WaveCompetitionBadges
+            isParticipant={isWaveParticipant}
+            isWinner={isWaveWinner}
+            waveName={wave.name}
+            onBadgeClick={onWaveCompetitionBadgeClick}
+            tooltipIdPrefix={`${tooltipIdPrefix}-competition`}
+          />
+        )}
         {hasActivityBadge && (
           <ArtistActivityBadge
             submissionCount={submissionCount}
@@ -224,6 +272,19 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
           user={modalUser}
           activeTab={activeTab}
           onTabChange={handleArtistTabChange}
+        />
+      )}
+
+      {hasWaveCompetitionBadge && wave && (
+        <WaveCompetitionPreviewModal
+          isOpen={isWaveCompetitionPreviewOpen}
+          onClose={onWaveCompetitionPreviewClose}
+          user={modalUser}
+          wave={wave}
+          hasActiveEntries={isWaveParticipant}
+          hasWinningEntries={isWaveWinner}
+          activeTab={waveCompetitionTab}
+          onTabChange={setWaveCompetitionTab}
         />
       )}
     </>
