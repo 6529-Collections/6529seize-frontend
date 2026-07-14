@@ -349,6 +349,20 @@ const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
   "profileFeed.subtitle": "Featured drops from profile waves",
 } as const);
 
+const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
+  listLabel: "Leaderboard drops",
+  loadingEarlier: "Loading earlier drops",
+  previousLoadError:
+    "Earlier drops could not be loaded. Use the retry button to try again.",
+  retryEarlier: "Retry loading earlier drops",
+  loadingMore: "Loading more drops",
+  nextLoadError:
+    "More drops could not be loaded. Use the retry button to try again.",
+  retryMore: "Retry loading more drops",
+  loadMore: "Load more drops",
+  loadingMoreButton: "Loading more…",
+} as const);
+
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyText: "Copy text",
   copyLink: "Copy link",
@@ -1884,6 +1898,7 @@ export const EN_US_MESSAGES = {
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
+  ...WAVE_LEADERBOARD_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,

@@ -57,7 +57,36 @@ function isMatchingDrop(
 }
 
 interface DropReplacementOptions {
+  readonly mergeWithExisting?: boolean;
   readonly preferExistingPollVote?: boolean;
+}
+
+function replaceMatchingDrop(
+  value: Record<string, unknown>,
+  drop: ApiDrop,
+  options: DropReplacementOptions
+): ApiDrop {
+  const dropForReconciliation = options.mergeWithExisting
+    ? ({ ...value, ...drop } as ApiDrop)
+    : drop;
+  const preferExistingPollVote = options.preferExistingPollVote;
+  const reconciledDrop =
+    preferExistingPollVote === undefined
+      ? reconcileDropAuthenticatedPollVote(dropForReconciliation, value)
+      : reconcileDropAuthenticatedPollVote(dropForReconciliation, value, {
+          preferExistingVote: preferExistingPollVote,
+        });
+
+  return {
+    ...reconciledDrop,
+    ...(value["type"] !== undefined && { type: value["type"] }),
+    ...(value["stableKey"] !== undefined && {
+      stableKey: value["stableKey"],
+    }),
+    ...(value["stableHash"] !== undefined && {
+      stableHash: value["stableHash"],
+    }),
+  };
 }
 
 function replaceDrop(
@@ -76,24 +105,7 @@ function replaceDrop(
   }
 
   if (isMatchingDrop(value, drop.id)) {
-    const preferExistingPollVote = options.preferExistingPollVote;
-    const reconciledDrop =
-      preferExistingPollVote === undefined
-        ? reconcileDropAuthenticatedPollVote(drop, value)
-        : reconcileDropAuthenticatedPollVote(drop, value, {
-            preferExistingVote: preferExistingPollVote,
-          });
-
-    return {
-      ...reconciledDrop,
-      ...(value["type"] !== undefined && { type: value["type"] }),
-      ...(value["stableKey"] !== undefined && {
-        stableKey: value["stableKey"],
-      }),
-      ...(value["stableHash"] !== undefined && {
-        stableHash: value["stableHash"],
-      }),
-    };
+    return replaceMatchingDrop(value, drop, options);
   }
 
   let changed = false;

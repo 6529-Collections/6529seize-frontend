@@ -391,6 +391,18 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Feed de Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops destacados de profile waves",
+  "waves.leaderboard.listLabel": "Drops de la clasificación",
+  "waves.leaderboard.loadingEarlier": "Cargando drops anteriores",
+  "waves.leaderboard.previousLoadError":
+    "No se pudieron cargar los drops anteriores. Selecciona Reintentar para volver a intentarlo.",
+  "waves.leaderboard.retryEarlier":
+    "Reintentar la carga de drops anteriores",
+  "waves.leaderboard.loadingMore": "Cargando más drops",
+  "waves.leaderboard.nextLoadError":
+    "No se pudieron cargar más drops. Selecciona Reintentar para volver a intentarlo.",
+  "waves.leaderboard.retryMore": "Reintentar la carga de más drops",
+  "waves.leaderboard.loadMore": "Cargar más drops",
+  "waves.leaderboard.loadingMoreButton": "Cargando…",
   "waves.poll.actions.viewResults": "Ver resultados",
   "waves.poll.actions.vote": "Votar",
   "waves.poll.actions.changeVote": "Cambiar voto",

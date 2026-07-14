@@ -6,7 +6,6 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
 const hook = jest.fn();
-let intersectionCb: any;
 
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => {
   const actual = jest.requireActual(
@@ -19,12 +18,39 @@ jest.mock("@/hooks/useWaveDropsLeaderboard", () => {
   };
 });
 
-jest.mock("@/hooks/useIntersectionObserver", () => ({
-  useIntersectionObserver: (cb: any) => {
-    intersectionCb = cb;
-    return { current: null };
-  },
-}));
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVirtualizedRows",
+  () => ({
+    useLeaderboardLeadingItemCount: () => 0,
+    WaveLeaderboardVirtualizedRows: ({
+      items,
+      renderItem,
+      hasNextPage,
+      fetchNextPage,
+      autoLoadNext,
+    }: any) => (
+      <div>
+        {items.map((item: any) => (
+          <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
+        ))}
+        {autoLoadNext && hasNextPage ? (
+          <button onClick={fetchNextPage}>Trigger next page</button>
+        ) : null}
+      </div>
+    ),
+  })
+);
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVotingModal",
+  () => ({
+    useWaveLeaderboardVotingModal: () => ({
+      votingDrop: null,
+      openVotingModal: jest.fn(),
+      closeVotingModal: jest.fn(),
+    }),
+    WaveLeaderboardVotingModal: () => null,
+  })
+);
 
 jest.mock("@/components/waves/leaderboard/drops/WaveLeaderboardDrop", () => ({
   WaveLeaderboardDrop: (props: any) => (
@@ -50,10 +76,6 @@ jest.mock(
   "@/components/waves/leaderboard/drops/WaveLeaderboardLoading",
   () => ({ WaveLeaderboardLoading: () => <div data-testid="loading" /> })
 );
-jest.mock(
-  "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar",
-  () => ({ WaveLeaderboardLoadingBar: () => <div data-testid="bar" /> })
-);
 const wave = { id: "w1" } as ApiWave;
 
 const renderComp = (
@@ -64,7 +86,18 @@ const renderComp = (
     readonly isVotingControlsLocked?: boolean;
   } = {}
 ) => {
-  hook.mockReturnValue(hookReturn);
+  hook.mockReturnValue({
+    pageMetadata: [],
+    queryWindowKey: "test-window",
+    fetchPreviousPage: jest.fn(),
+    hasPreviousPage: false,
+    isFetchingPreviousPage: false,
+    isFetchNextPageError: false,
+    isFetchPreviousPageError: false,
+    refetch: jest.fn(),
+    ...hookReturn,
+  });
+  const scrollContainerRef = React.createRef<HTMLDivElement>();
   return render(
     <AuthContext.Provider value={{ connectedProfile: null } as any}>
       <WaveLeaderboardDrops
@@ -74,6 +107,7 @@ const renderComp = (
         onCreateDrop={jest.fn()}
         isVotingClosed={votingProps.isVotingClosed}
         isVotingControlsLocked={votingProps.isVotingControlsLocked}
+        scrollContainerRef={scrollContainerRef}
       />
     </AuthContext.Provider>
   );
@@ -102,7 +136,7 @@ describe("WaveLeaderboardDrops", () => {
     expect(screen.getByTestId("empty")).toBeInTheDocument();
   });
 
-  it("renders drops and loads next page on intersection", () => {
+  it("renders drops and enables automatic next-page loading", () => {
     const fetchNextPage = jest.fn();
     renderComp({
       drops: [{ id: "d1" }],
@@ -112,7 +146,7 @@ describe("WaveLeaderboardDrops", () => {
       hasNextPage: true,
     });
     expect(screen.getByText("d1")).toBeInTheDocument();
-    intersectionCb();
+    screen.getByRole("button", { name: "Trigger next page" }).click();
     expect(fetchNextPage).toHaveBeenCalled();
   });
 

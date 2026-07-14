@@ -43,10 +43,13 @@ linked section pages.
 
 ## Overflow and Keyboard Behavior
 
-- Desktop keeps every available section as a direct tab and scrolls the strip
-  horizontally when needed.
+- Desktop keeps the four base sections visible and moves competition-only
+  `Voters` and `Activity` into `More`, so the fixed-width panel never clips a
+  section label.
 - Native keeps three compact pills visible and moves remaining sections into
-  `More`, avoiding a compressed desktop tab row on narrow phones.
+  `More`, avoiding a compressed desktop-style tab row on narrow phones.
+- The contextual row and every section share the same panel canvas, including
+  the native app where the surrounding wave view uses a different background.
 - The native information and subwave bars use the same height, background,
   responsive insets, pill height, and label size, so switching the contextual
   row does not shift the content below it. Active information pills use a
@@ -63,8 +66,8 @@ linked section pages.
 
 1. Open a wave thread on `/waves/{waveId}` or `/messages/{waveId}`.
 2. Open the right sidebar.
-3. Select a desktop tab or native information pill. Use `More` for secondary
-   native sections.
+3. Select a desktop tab or native information pill. Use `More` for the
+   remaining sections.
 4. Sidebar content switches in place without route navigation. On native,
    selecting another main tab swaps the contextual row back to subwave pills.
 

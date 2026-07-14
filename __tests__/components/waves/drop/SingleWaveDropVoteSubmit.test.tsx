@@ -314,9 +314,16 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: mockDrop.wave.id }],
+      refetchType: "none",
+    });
+    expect(invalidateQueriesSpy).not.toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS, { waveId: mockDrop.wave.id }],
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: [QueryKey.DROPS, { waveId: mockDrop.wave.id }],
+      queryKey: [QueryKey.DROP_VOTERS, { dropId: mockDrop.id }],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROP_VOTE_LOGS, { dropId: mockDrop.id }],
     });
   });
 
@@ -515,8 +522,9 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: mockDrop.wave.id }],
+      refetchType: "none",
     });
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+    expect(invalidateQueriesSpy).not.toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS, { waveId: mockDrop.wave.id }],
     });
   });

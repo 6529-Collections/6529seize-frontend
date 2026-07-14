@@ -1,46 +1,23 @@
 "use client";
 
-import Address from "@/components/address/Address";
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 import { publicEnv } from "@/config/env";
-import {
-  DELEGATION_ALL_ADDRESS,
-  MEMES_CONTRACT,
-  NEVER_DATE,
-} from "@/constants/constants";
+import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Delegation, WalletConsolidation } from "@/entities/IDelegation";
 import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import {
-  faCheck,
-  faPlusCircle,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ALL_USE_CASES,
   MINTING_USE_CASE,
   SUB_DELEGATION_USE_CASE,
-  SUPPORTED_COLLECTIONS,
 } from "../delegation-constants";
 import styles from "./WalletChecker.module.css";
-
-const TABLE_CLASS =
-  "tw-w-full tw-min-w-[720px] tw-border-separate tw-border-spacing-y-1";
-const TABLE_HEADER_CELL_CLASS =
-  "tw-px-2 tw-py-1 tw-text-left tw-font-bold tw-text-iron-200";
-const TABLE_CELL_CLASS = "tw-px-2 tw-py-1 tw-align-middle";
-const TABLE_CENTER_CELL_CLASS = `${TABLE_CELL_CLASS} tw-text-center`;
-
-interface ConsolidationDisplay {
-  from: string;
-  from_display: string | undefined;
-  to: string;
-  to_display: string | undefined;
-}
+import WalletCheckerResults, {
+  type ConsolidatedWallet,
+  type ConsolidationDisplay,
+} from "./WalletCheckerResults";
 
 function resolveConsolidationDisplay(
   wallet: string,
@@ -59,27 +36,6 @@ function resolveConsolidationDisplay(
   }
 
   return fallback;
-}
-
-function CheckedWalletAddress(
-  props: Readonly<{
-    checkedAddress: string;
-    address: string;
-    display: string | undefined;
-  }>
-) {
-  const address = (
-    <Address
-      wallets={[props.address as `0x${string}`]}
-      display={props.display}
-    />
-  );
-
-  if (areEqualAddresses(props.checkedAddress, props.address)) {
-    return address;
-  }
-
-  return <span className={styles["supportingAddress"]}>{address}</span>;
 }
 
 export default function WalletCheckerComponent(
@@ -107,7 +63,7 @@ export default function WalletCheckerComponent(
     []
   );
   const [consolidatedWallets, setConsolidatedWallets] = useState<
-    { address: string; display: string | undefined }[]
+    ConsolidatedWallet[]
   >([]);
   const [consolidationsLoaded, setConsolidationsLoaded] = useState(false);
 
@@ -267,7 +223,7 @@ export default function WalletCheckerComponent(
     refetch: refetchConsolidatedWalletsRaw,
     data: consolidatedWalletsResponse,
     status: consolidatedWalletsStatus,
-  } = useQuery<{ address: string; display: string | undefined }[]>({
+  } = useQuery<ConsolidatedWallet[]>({
     queryKey: ["consolidated-wallets", fetchedAddress],
     queryFn: async () => {
       try {
@@ -275,10 +231,7 @@ export default function WalletCheckerComponent(
         const response: DBResponse<string> = await fetchUrl(url);
         const wallets = response.data;
 
-        const mappedWallets: {
-          address: string;
-          display: string | undefined;
-        }[] = [];
+        const mappedWallets: ConsolidatedWallet[] = [];
 
         for (const wallet of wallets) {
           mappedWallets.push({
@@ -406,59 +359,6 @@ export default function WalletCheckerComponent(
     fetchedAddress,
     refetchConsolidatedWallets,
   ]);
-
-  function getUseCaseDisplay(useCase: number) {
-    const resolved = ALL_USE_CASES.find((u) => u.use_case === useCase);
-    return resolved ? `#${useCase} - ${resolved.display}` : `#${useCase}`;
-  }
-
-  function getCollectionDisplay(collection: string) {
-    const resolved = SUPPORTED_COLLECTIONS.find((sc) =>
-      areEqualAddresses(sc.contract, collection)
-    );
-    return resolved ? resolved.title : collection;
-  }
-
-  function DelegationAddressCells(
-    cellProps: Readonly<{ checkedAddress: string; delegation: Delegation }>
-  ) {
-    return (
-      <>
-        <td className={TABLE_CELL_CLASS}>
-          <CheckedWalletAddress
-            checkedAddress={cellProps.checkedAddress}
-            address={cellProps.delegation.from_address}
-            display={cellProps.delegation.from_display}
-          />
-        </td>
-        <td className={TABLE_CELL_CLASS}>
-          <CheckedWalletAddress
-            checkedAddress={cellProps.checkedAddress}
-            address={cellProps.delegation.to_address}
-            display={cellProps.delegation.to_display}
-          />
-        </td>
-        <td className={TABLE_CELL_CLASS}>
-          {getCollectionDisplay(cellProps.delegation.collection)}
-        </td>
-      </>
-    );
-  }
-
-  function formatExpiry(myDate: number) {
-    const date = new Date(myDate * 1000);
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(date.getUTCDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
-  function getDateDisplay(myDate: number) {
-    if (myDate === NEVER_DATE) {
-      return `Never`;
-    }
-    return formatExpiry(myDate);
-  }
 
   useEffect(() => {
     if (!checking) {
@@ -635,276 +535,17 @@ export default function WalletCheckerComponent(
                 </button>
               </div>
             </div>
-            {delegationsLoaded && (
-              <>
-                <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-                  <div className="tw-w-full tw-px-3">
-                    <h5 className="tw-pb-2 tw-pt-2">
-                      Delegations ({delegations.length})
-                    </h5>
-                    {delegations.length > 0 ? (
-                      <div className="tw-overflow-x-auto">
-                        <table className={TABLE_CLASS}>
-                          <thead>
-                            <tr>
-                              <th className={TABLE_HEADER_CELL_CLASS}>From</th>
-                              <th className={TABLE_HEADER_CELL_CLASS}>To</th>
-                              <th className={TABLE_HEADER_CELL_CLASS}>
-                                Collection
-                              </th>
-                              <th className={TABLE_HEADER_CELL_CLASS}>
-                                Use Case
-                              </th>
-                              <th
-                                className={`${TABLE_HEADER_CELL_CLASS} tw-text-center`}
-                              >
-                                Tokens
-                              </th>
-                              <th
-                                className={`${TABLE_HEADER_CELL_CLASS} tw-text-center`}
-                              >
-                                Expiry
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {delegations.map((delegation, index) => (
-                              <tr key={`delegations-${index}`}>
-                                <DelegationAddressCells
-                                  checkedAddress={fetchedAddress}
-                                  delegation={delegation}
-                                />
-                                <td className={TABLE_CELL_CLASS}>
-                                  {getUseCaseDisplay(delegation.use_case)}
-                                </td>
-                                <td className={TABLE_CENTER_CELL_CLASS}>
-                                  {delegation.all_tokens
-                                    ? `All`
-                                    : delegation.token_id}
-                                </td>
-                                <td className={TABLE_CENTER_CELL_CLASS}>
-                                  {getDateDisplay(delegation.expiry)}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      `No delegations found`
-                    )}
-                  </div>
-                </section>
-                {activeDelegation && (
-                  <div className="tw-pt-2">
-                    <h5 className="tw-pb-2 tw-pt-2">
-                      Active Minting Delegation for The Memes
-                    </h5>
-                    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
-                      <span>
-                        To:{" "}
-                        <Address
-                          wallets={[
-                            activeDelegation.to_address as `0x${string}`,
-                          ]}
-                          display={activeDelegation.to_display}
-                        />
-                      </span>
-                      <span>
-                        Collection:{" "}
-                        <b>
-                          {getCollectionDisplay(activeDelegation.collection)}
-                        </b>
-                      </span>
-                      <span>
-                        Use Case:{" "}
-                        <b>{getUseCaseDisplay(activeDelegation.use_case)}</b>
-                      </span>
-                      {activeDelegation.expiry && (
-                        <span>
-                          &nbsp;&nbsp;Expiry:{" "}
-                          <b>
-                            {activeDelegation.expiry == NEVER_DATE
-                              ? `Never`
-                              : formatExpiry(activeDelegation.expiry)}
-                          </b>
-                        </span>
-                      )}
-                      <FontAwesomeIcon
-                        icon={faCheck}
-                        className={styles["activeDelegationIcon"]}
-                      />
-                    </div>
-                  </div>
-                )}
-                <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-                  <div className="tw-w-full tw-px-3">
-                    <h5 className="tw-pb-2 tw-pt-2">
-                      Delegation Managers ({subDelegations.length})
-                    </h5>
-                    {subDelegations.length > 0 ? (
-                      <div className="tw-overflow-x-auto">
-                        <table className={TABLE_CLASS}>
-                          <thead>
-                            <tr>
-                              <th className={TABLE_HEADER_CELL_CLASS}>From</th>
-                              <th className={TABLE_HEADER_CELL_CLASS}>To</th>
-                              <th className={TABLE_HEADER_CELL_CLASS}>
-                                Collection
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {subDelegations.map((delegation, index) => (
-                              <tr key={`sub-delegations-${index}`}>
-                                <DelegationAddressCells
-                                  checkedAddress={fetchedAddress}
-                                  delegation={delegation}
-                                />
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      `No delegation managers found`
-                    )}
-                  </div>
-                </section>
-              </>
-            )}
-            {consolidationsLoaded && (
-              <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-                <div className="tw-w-full tw-px-3">
-                  <h5 className="tw-pb-2 tw-pt-2">
-                    Consolidations ({consolidations.length})
-                  </h5>
-                  {consolidations.length > 0 ? (
-                    <div className="tw-overflow-x-auto">
-                      <table className="tw-w-full tw-min-w-[520px] tw-border-separate tw-border-spacing-y-1">
-                        <tbody>
-                          {consolidations.map((consolidation, index) => (
-                            <tr key={`consolidations-${index}`}>
-                              <td className="tw-flex tw-items-center tw-px-2 tw-py-1">
-                                <CheckedWalletAddress
-                                  checkedAddress={fetchedAddress}
-                                  address={consolidation.from}
-                                  display={consolidation.from_display}
-                                />
-                                <span className="tw-inline-flex tw-items-center tw-justify-center">
-                                  <span className={styles["arrowBody"]}></span>
-                                  <span className={styles["arrowHead"]}></span>
-                                </span>
-                                <CheckedWalletAddress
-                                  checkedAddress={fetchedAddress}
-                                  address={consolidation.to}
-                                  display={consolidation.to_display}
-                                />
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    `No consolidations found`
-                  )}
-                  {consolidations.length > 1 &&
-                    consolidatedWallets.length > 1 && (
-                      <div className="tw-pt-2">
-                        <h5 className="tw-pb-2 tw-pt-2">
-                          Active Consolidation
-                        </h5>
-                        <div className="tw-flex tw-flex-wrap tw-items-center">
-                          {consolidatedWallets.map((wallet, index) => (
-                            <Fragment key={`consolidated-wallets-${index}`}>
-                              {areEqualAddresses(
-                                fetchedAddress,
-                                wallet.address
-                              ) ? (
-                                <Address
-                                  wallets={[wallet.address as `0x${string}`]}
-                                  display={wallet.display}
-                                />
-                              ) : (
-                                <span className={styles["supportingAddress"]}>
-                                  <Address
-                                    wallets={[wallet.address as `0x${string}`]}
-                                    display={wallet.display}
-                                  />
-                                </span>
-                              )}
-                              {consolidatedWallets.length - 1 > index && (
-                                <FontAwesomeIcon
-                                  icon={faPlusCircle}
-                                  className={styles["consolidationPlusIcon"]}
-                                />
-                              )}
-                            </Fragment>
-                          ))}
-                          <FontAwesomeIcon
-                            icon={faCheck}
-                            className={styles["consolidationActiveIcon"]}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  {consolidationActions.length > 0 && (
-                    <>
-                      <div className="tw-flex tw-items-center tw-pb-2 tw-pt-2">
-                        <FontAwesomeIcon
-                          icon={faXmark}
-                          className={styles["consolidationRecommendationIcon"]}
-                        />
-                        Incomplete Consolidation
-                      </div>
-                      <div className="tw-pb-2 tw-pt-2">
-                        Recommended Actions:
-                        <ul
-                          className={`${styles["recommendationsList"]} tw-pt-2`}
-                        >
-                          {consolidationActions.map((c, index) => (
-                            <li
-                              key={`consolidated-wallets-${index}`}
-                              className="tw-flex tw-items-center tw-gap-2"
-                            >
-                              &bull;&nbsp;Register Consolidation from{" "}
-                              {areEqualAddresses(fetchedAddress, c.to) ? (
-                                <Address
-                                  wallets={[c.to as `0x${string}`]}
-                                  display={c.to_display}
-                                />
-                              ) : (
-                                <span className={styles["supportingAddress"]}>
-                                  <Address
-                                    wallets={[c.to as `0x${string}`]}
-                                    display={c.to_display}
-                                  />
-                                </span>
-                              )}{" "}
-                              to{" "}
-                              {areEqualAddresses(fetchedAddress, c.from) ? (
-                                <Address
-                                  wallets={[c.from as `0x${string}`]}
-                                  display={c.from_display}
-                                />
-                              ) : (
-                                <span className={styles["supportingAddress"]}>
-                                  <Address
-                                    wallets={[c.from as `0x${string}`]}
-                                    display={c.from_display}
-                                  />
-                                </span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </section>
-            )}
+            <WalletCheckerResults
+              fetchedAddress={fetchedAddress}
+              delegationsLoaded={delegationsLoaded}
+              delegations={delegations}
+              subDelegations={subDelegations}
+              activeDelegation={activeDelegation}
+              consolidationsLoaded={consolidationsLoaded}
+              consolidations={consolidations}
+              consolidatedWallets={consolidatedWallets}
+              consolidationActions={consolidationActions}
+            />
           </form>
         </div>
       </div>
