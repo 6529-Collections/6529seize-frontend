@@ -114,12 +114,12 @@ export function SummaryStat({
 }) {
   return (
     <div className="tw-min-w-0 tw-bg-iron-950 tw-px-2 tw-py-2">
-      <p className="tw-mb-0.5 tw-text-[0.5625rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+      <p className="tw-mb-0.5 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.1em]">
         {label}
       </p>
       <p
         title={value}
-        className={`tw-mb-0 tw-whitespace-nowrap tw-text-[0.8125rem] tw-font-semibold tw-tabular-nums ${toneClassName}`}
+        className={`tw-mb-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-tabular-nums ${toneClassName}`}
       >
         {value}
       </p>

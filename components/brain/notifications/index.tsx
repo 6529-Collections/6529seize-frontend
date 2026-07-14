@@ -7,7 +7,7 @@ import {
   type NotificationCause,
 } from "@/types/feed.types";
 import type { CSSProperties } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import { useNotificationsController } from "./hooks/useNotificationsController";
 import { useNotificationsScroll } from "./hooks/useNotificationsScroll";
@@ -15,6 +15,10 @@ import NotificationsContent from "./subcomponents/NotificationsContent";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { floatingDockClearanceClassName } from "./notifications.constants";
+import {
+  markMobileLaunchStep,
+  scheduleMobileLaunchFlush,
+} from "@/utils/monitoring/mobileLaunchTiming";
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
@@ -82,6 +86,18 @@ export default function Notifications({
     showErrorState: contentState.showErrorState,
     activeFilterKey,
   });
+  const hasFirstUsefulContent =
+    !contentState.isLoadingProfile && !contentState.showLoader;
+
+  useEffect(() => {
+    if (!hasFirstUsefulContent) {
+      return;
+    }
+
+    markMobileLaunchStep("route_first_useful_content");
+    scheduleMobileLaunchFlush("notifications_content_visible", 250);
+  }, [hasFirstUsefulContent]);
+
   let bottomPaddingClassName: string | undefined;
   let bottomPaddingStyle: CSSProperties | undefined;
   if (activeDrop) {
