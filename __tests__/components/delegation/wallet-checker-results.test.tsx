@@ -108,4 +108,27 @@ describe("WalletCheckerResults", () => {
     expect(screen.getAllByText("checked.eth").length).toBeGreaterThan(0);
     expect(screen.getAllByText("related.eth").length).toBeGreaterThan(0);
   });
+
+  it("does not leak a zero expiry value into the active delegation output", () => {
+    render(
+      <WalletCheckerResults
+        fetchedAddress={CHECKED_ADDRESS}
+        delegationsLoaded
+        delegations={[]}
+        subDelegations={[]}
+        activeDelegation={createDelegation({ expiry: 0 })}
+        consolidationsLoaded={false}
+        consolidations={[]}
+        consolidatedWallets={[]}
+        consolidationActions={[]}
+      />
+    );
+
+    const activeDelegationHeading = screen.getByText(
+      "Active Minting Delegation for The Memes"
+    );
+    expect(activeDelegationHeading.parentElement).not.toHaveTextContent(
+      "Expiry:"
+    );
+  });
 });

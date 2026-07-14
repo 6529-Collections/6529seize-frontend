@@ -184,7 +184,7 @@ function DelegationsResults(
               Use Case:{" "}
               <b>{getUseCaseDisplay(props.activeDelegation.use_case)}</b>
             </span>
-            {props.activeDelegation.expiry && (
+            {Boolean(props.activeDelegation.expiry) && (
               <span>
                 &nbsp;&nbsp;Expiry:{" "}
                 <b>
