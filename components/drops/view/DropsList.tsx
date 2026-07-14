@@ -54,7 +54,6 @@ interface DropsListProps {
     | BoostedDropsDisplayPreference
     | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
-  readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -84,7 +83,6 @@ const DropsList = memo(
     boostedDrops,
     boostedDropsDisplayPreference = DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
     onBoostedDropClick,
-    autoCollapseSerials,
     suspendLightDropHydration = false,
     winningThreshold,
     winningThresholdMinDurationMs,
@@ -326,10 +324,7 @@ const DropsList = memo(
               dropSerialNo={drop.serial_no}
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
               type={drop.type}
-              suspendLightDropHydration={
-                suspendLightDropHydration ||
-                (autoCollapseSerials?.has(drop.serial_no) ?? false)
-              }
+              suspendLightDropHydration={suspendLightDropHydration}
             >
               {dropContent}
             </VirtualScrollWrapper>
@@ -340,7 +335,6 @@ const DropsList = memo(
       });
     }, [
       orderedDrops,
-      autoCollapseSerials,
       getItemData,
       location,
       renderBoostCard,
