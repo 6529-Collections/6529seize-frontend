@@ -53,6 +53,7 @@ import { useWaveListSwipeBack } from "./mobile/useWaveListSwipeBack";
 import { SidebarTab } from "./right-sidebar/BrainRightSidebarTypes";
 import { WaveContentTabs } from "./right-sidebar/WaveContent";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { useLayout } from "./my-stream/layout/LayoutContext";
 
 interface Props {
   readonly children: ReactNode;
@@ -69,6 +70,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const { registerRef } = useLayout();
   const { connectedProfile, fetchingProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const quickVote = useMemesQuickVoteRuntimeLauncher();
@@ -138,9 +140,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     !waveId ||
     Boolean(
       wave &&
-        !fetchingProfile &&
-        !(isCompetitionWave && isWaveMetadataPending) &&
-        !isWavePollsPending
+      !fetchingProfile &&
+      !(isCompetitionWave && isWaveMetadataPending) &&
+      !isWavePollsPending
     );
   const { activeView, onViewChange } = useBrainMobileActiveView({
     firstDecisionDone,
@@ -176,6 +178,12 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       setAboutTabState({ waveId: currentWaveId, activeTab: tab });
     },
     [currentWaveId]
+  );
+  const setInformationTabsRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      registerRef?.("pinned", element);
+    },
+    [registerRef]
   );
 
   const onDropClick = (selectedDrop: ExtendedDrop) => {
@@ -298,16 +306,18 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       {isApp &&
         wave &&
         (activeView === BrainView.ABOUT ? (
-          <WaveContentTabs
-            wave={wave}
-            activeTab={activeAboutTab}
-            setActiveTab={onAboutTabChange}
-            maxVisibleTabs={3}
-            variant="compactPills"
-            aboutTabLabel={waveRightPanelText(
-              "waves.sidebar.rightPanel.tabs.overview"
-            )}
-          />
+          <div ref={setInformationTabsRef}>
+            <WaveContentTabs
+              wave={wave}
+              activeTab={activeAboutTab}
+              setActiveTab={onAboutTabChange}
+              maxVisibleTabs={3}
+              variant="compactPills"
+              aboutTabLabel={waveRightPanelText(
+                "waves.sidebar.rightPanel.tabs.overview"
+              )}
+            />
+          </div>
         ) : (
           <MobileWaveSubwavesBar wave={wave} />
         ))}
