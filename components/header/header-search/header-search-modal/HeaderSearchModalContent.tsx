@@ -20,6 +20,7 @@ import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useAuth } from "@/components/auth/Auth";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
@@ -226,6 +227,7 @@ function ScopedHeaderSearchModal({
   locale,
   storageScope,
 }: ScopedHeaderSearchModalProps) {
+  useLayoutViewportLock(true);
   const sessionQueryStorageKey = getScopedStorageKey(
     HEADER_SEARCH_SESSION_QUERY_KEY,
     storageScope

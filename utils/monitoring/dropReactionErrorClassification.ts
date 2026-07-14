@@ -2,6 +2,8 @@ import { extractErrorStatusCode } from "@/utils/errorStatus";
 
 const PROXY_REACTION_PERMISSION_DENIED_MESSAGE =
   "Proxy doesn't have permission to add reactions";
+const WAVE_REACTION_DISABLED_MESSAGE =
+  "Chatting and reacting is not enabled in this wave";
 
 type ReactionErrorKind =
   | "network"
@@ -81,6 +83,31 @@ export function classifyReactionError(error: unknown): {
   }
 
   return { statusCode, errorKind: "server" };
+}
+
+export function isWaveReactionDisabledApiError(error: unknown): boolean {
+  return (
+    extractErrorStatusCode(error) === 403 &&
+    toErrorMessage(error) === WAVE_REACTION_DISABLED_MESSAGE
+  );
+}
+
+export function isExpectedWaveReactionDisabledError({
+  dropId,
+  endpoint,
+  error,
+  method,
+}: {
+  readonly dropId: string;
+  readonly endpoint: string | null | undefined;
+  readonly error: unknown;
+  readonly method: string | null | undefined;
+}): boolean {
+  return (
+    endpoint === `drops/${dropId}/reaction` &&
+    (method === "POST" || method === "DELETE") &&
+    isWaveReactionDisabledApiError(error)
+  );
 }
 
 export function isExpectedStaleDropNotFoundError({
