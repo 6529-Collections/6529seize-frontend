@@ -31,51 +31,6 @@ jest.mock("@/components/utils/button/PrimaryButton", () => ({
   ),
 }));
 
-jest.mock("@/components/utils/button/InfoButton", () => ({
-  __esModule: true,
-  default: ({ children, fullWidth, className, ...props }: any) => (
-    <button
-      data-testid="info"
-      data-full-width={String(fullWidth)}
-      className={className}
-      {...props}
-    >
-      {children}
-    </button>
-  ),
-}));
-
-jest.mock("@/components/utils/button/ClosedButton", () => ({
-  __esModule: true,
-  default: ({ children, fullWidth, className, ...props }: any) => (
-    <button
-      data-testid="closed"
-      data-full-width={String(fullWidth)}
-      className={className}
-      {...props}
-    >
-      {children}
-    </button>
-  ),
-}));
-
-jest.mock("@/components/utils/icons/ClockIcon", () => ({
-  __esModule: true,
-  default: () => <svg data-testid="clock" />,
-}));
-jest.mock("@/components/utils/icons/CalendarClosedIcon", () => ({
-  __esModule: true,
-  default: () => <svg data-testid="calendar" />,
-}));
-jest.mock("@/components/utils/icons/LimitIcon", () => ({
-  __esModule: true,
-  default: () => <svg data-testid="limit" />,
-}));
-jest.mock("@/components/utils/icons/PermissionIcon", () => ({
-  __esModule: true,
-  default: () => <svg data-testid="permission" />,
-}));
-
 const baseInfo = {
   voting: {},
   chat: {},
@@ -111,9 +66,12 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
         endTime: now - 500,
       },
     });
+    expect(screen.getByTestId("closed")).toHaveAccessibleName(
+      "Submissions Closed"
+    );
     expect(screen.getByTestId("closed")).toHaveAttribute(
-      "title",
-      expect.stringContaining("Submissions closed")
+      "aria-haspopup",
+      "dialog"
     );
     expect(screen.getByTestId("closed")).toHaveAttribute(
       "data-full-width",
@@ -135,9 +93,12 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
         endTime: now + 7200,
       },
     });
+    expect(screen.getByTestId("info")).toHaveAccessibleName(
+      "Submissions Open Soon"
+    );
     expect(screen.getByTestId("info")).toHaveAttribute(
-      "title",
-      expect.stringContaining("Submissions open")
+      "aria-haspopup",
+      "dialog"
     );
     expect(screen.getByTestId("info")).toHaveAttribute(
       "data-full-width",
@@ -161,7 +122,6 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     const button = screen.getByRole("button", { name: "How to Submit" });
     expect(button).toHaveAttribute("aria-haspopup", "dialog");
     expect(button).not.toBeDisabled();
-    expect(screen.getByTestId("permission")).toBeInTheDocument();
     expect(screen.queryByTestId("info")).not.toBeInTheDocument();
     expect(screen.queryByText("Not Eligible")).not.toBeInTheDocument();
     expect(screen.queryByText("Not Eligible to Submit")).not.toBeInTheDocument();
@@ -180,14 +140,33 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
         endTime: 0,
       },
     });
-    expect(screen.getByTestId("info")).toHaveAttribute(
-      "title",
-      expect.stringContaining("maximum")
+    expect(screen.getByTestId("info")).toHaveAccessibleName(
+      "Submission Limit Reached"
     );
     expect(screen.getByText("Limit Reached")).toBeInTheDocument();
     expect(
       screen.getByText("Submission Limit Reached (2)")
     ).toBeInTheDocument();
+  });
+
+  it("labels an unavailable active submission as restricted", () => {
+    renderComponent({
+      ...baseInfo,
+      participation: {
+        status: SubmissionStatus.ACTIVE,
+        isEligible: true,
+        hasReachedLimit: false,
+        remainingSubmissions: null,
+        canSubmitNow: false,
+        isWithinPeriod: true,
+        startTime: 0,
+        endTime: 0,
+      },
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Submission Unavailable" })
+    ).toHaveAccessibleDescription("You cannot submit at this time");
   });
 
   it("renders active state with urgency and remaining badge", () => {
