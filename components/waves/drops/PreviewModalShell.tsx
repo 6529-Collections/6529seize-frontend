@@ -25,6 +25,9 @@ const MAX_WIDTH_CLASS = {
   "5xl": "tw-max-w-5xl",
 } as const;
 
+const DIALOG_PANEL_BASE_CLASS =
+  "tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform sm:tw-w-full sm:tw-rounded-xl sm:tw-border";
+
 export const PreviewModalShell = ({
   isOpen,
   onClose,
@@ -88,7 +91,7 @@ export const PreviewModalShell = ({
               leaveTo="tw-translate-y-full sm:tw-translate-y-0"
             >
               <DialogPanel
-                className={`tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform sm:tw-w-full ${MAX_WIDTH_CLASS[maxWidth]} sm:tw-rounded-xl sm:tw-border`}
+                className={`${DIALOG_PANEL_BASE_CLASS} ${MAX_WIDTH_CLASS[maxWidth]}`}
               >
                 {children(false)}
               </DialogPanel>
