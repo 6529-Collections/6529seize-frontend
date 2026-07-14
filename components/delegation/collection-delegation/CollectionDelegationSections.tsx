@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useMemo,
   type Dispatch,
   type ReactNode,
   type SetStateAction,
@@ -41,6 +42,24 @@ interface DisclosureState {
   setConsolidationKeys: Dispatch<SetStateAction<string[]>>;
   consolidationKeysChanged: boolean;
   setConsolidationKeysChanged: Dispatch<SetStateAction<boolean>>;
+}
+
+function groupDelegationsByType(delegations: ContractDelegation[]) {
+  return {
+    delegations: delegations.filter(
+      (delegation) =>
+        delegation.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
+        delegation.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
+    ),
+    subDelegations: delegations.filter(
+      (delegation) =>
+        delegation.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
+    ),
+    consolidations: delegations.filter(
+      (delegation) =>
+        delegation.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
+    ),
+  };
 }
 
 /**
@@ -87,50 +106,42 @@ export function CollectionDelegationSections(
     setConsolidationKeysChanged,
   } = props.disclosureState;
 
-  useEffect(() => {
-    const outDelegations = [...outgoingDelegations].filter(
-      (d) =>
-        d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
-        d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
-    );
-    const inDelegations = [...incomingDelegations].filter(
-      (d) =>
-        d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
-        d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
-    );
+  const {
+    delegations: outDelegations,
+    subDelegations: outSubDelegations,
+    consolidations: outConsolidations,
+  } = useMemo(
+    () => groupDelegationsByType(outgoingDelegations),
+    [outgoingDelegations]
+  );
+  const {
+    delegations: inDelegations,
+    subDelegations: inSubDelegations,
+    consolidations: inConsolidations,
+  } = useMemo(
+    () => groupDelegationsByType(incomingDelegations),
+    [incomingDelegations]
+  );
 
+  useEffect(() => {
     if (!delegationKeysChanged) {
       setDelegationKeys(getActiveKeys(outDelegations, inDelegations));
     }
     if (!subDelegationKeysChanged) {
-      setSubDelegationKeys(
-        getActiveKeys(
-          [...outgoingDelegations].filter(
-            (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
-          ),
-          [...incomingDelegations].filter(
-            (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
-          )
-        )
-      );
+      setSubDelegationKeys(getActiveKeys(outSubDelegations, inSubDelegations));
     }
     if (!consolidationKeysChanged) {
-      setConsolidationKeys(
-        getActiveKeys(
-          [...outgoingDelegations].filter(
-            (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
-          ),
-          [...incomingDelegations].filter(
-            (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
-          )
-        )
-      );
+      setConsolidationKeys(getActiveKeys(outConsolidations, inConsolidations));
     }
   }, [
-    incomingDelegations,
-    outgoingDelegations,
     consolidationKeysChanged,
     delegationKeysChanged,
+    inConsolidations,
+    inDelegations,
+    inSubDelegations,
+    outConsolidations,
+    outDelegations,
+    outSubDelegations,
     subDelegationKeysChanged,
   ]);
 
@@ -175,16 +186,6 @@ export function CollectionDelegationSections(
   }
 
   function printDelegations() {
-    const outDelegations = [...outgoingDelegations].filter(
-      (d) =>
-        d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
-        d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
-    );
-    const inDelegations = [...incomingDelegations].filter(
-      (d) =>
-        d.useCase.use_case != SUB_DELEGATION_USE_CASE.use_case &&
-        d.useCase.use_case != CONSOLIDATION_USE_CASE.use_case
-    );
     return (
       <>
         <h5 className="tw-pb-1 tw-pt-3">Delegations</h5>
@@ -244,12 +245,7 @@ export function CollectionDelegationSections(
               )
             }
           >
-            {printOutgoingDelegations(
-              "Delegation Managers",
-              [...outgoingDelegations].filter(
-                (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
-              )
-            )}
+            {printOutgoingDelegations("Delegation Managers", outSubDelegations)}
           </DelegationDisclosurePanel>
           <DelegationDisclosurePanel
             title="Incoming Manager Rights"
@@ -264,9 +260,7 @@ export function CollectionDelegationSections(
           >
             {printIncomingDelegations(
               "Delegation Managers",
-              [...incomingDelegations].filter(
-                (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
-              ),
+              inSubDelegations,
               true
             )}
           </DelegationDisclosurePanel>
@@ -295,12 +289,7 @@ export function CollectionDelegationSections(
               )
             }
           >
-            {printOutgoingDelegations(
-              "consolidations",
-              [...outgoingDelegations].filter(
-                (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
-              )
-            )}
+            {printOutgoingDelegations("consolidations", outConsolidations)}
           </DelegationDisclosurePanel>
           <DelegationDisclosurePanel
             title="Incoming Consolidations"
@@ -313,12 +302,7 @@ export function CollectionDelegationSections(
               )
             }
           >
-            {printIncomingDelegations(
-              "consolidations",
-              [...incomingDelegations].filter(
-                (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
-              )
-            )}
+            {printIncomingDelegations("consolidations", inConsolidations)}
           </DelegationDisclosurePanel>
         </div>
       </>
