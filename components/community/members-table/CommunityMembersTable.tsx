@@ -25,14 +25,14 @@ export default function CommunityMembersTable({
   return (
     <>
       <div className="tw-hidden sm:tw-block">
-        <table className="tw-min-w-full">
+        <table className="tw-min-w-full tw-border-collapse">
           <CommunityMembersTableHeader
             activeSort={activeSort}
             sortDirection={sortDirection}
             isLoading={isLoading}
             onSort={onSort}
           />
-          <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700">
+          <tbody>
             {members.map((member, index) => (
               <CommunityMembersTableRow
                 key={member.detail_view_key}

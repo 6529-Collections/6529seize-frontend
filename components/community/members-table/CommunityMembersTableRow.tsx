@@ -13,6 +13,9 @@ import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 
+const TABLE_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-xs tw-font-medium tw-leading-5 md:tw-px-4 md:tw-py-3 md:tw-text-sm";
+
 export default function CommunityMembersTableRow({
   member,
   rank,
@@ -26,33 +29,33 @@ export default function CommunityMembersTableRow({
   const textColorClass = isProfile ? "tw-text-iron-50" : "tw-text-iron-400";
   const path = `/${member.detail_view_key}`;
   return (
-    <tr className="tw-transition tw-duration-300 tw-ease-out even:tw-bg-iron-900">
-      <td className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-pl-6 sm:tw-text-base">
+    <tr className="tw-group odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70">
+      <td
+        className={`${TABLE_CELL_CLASS_NAME} tw-text-center tw-font-semibold tw-text-iron-100`}
+      >
         {rank}
       </td>
-      <td
-        className={`tw-group tw-whitespace-nowrap tw-py-4 tw-pr-4 tw-text-sm tw-font-medium sm:tw-text-base ${textColorClass}`}
-      >
-        <div className="tw-flex tw-items-center tw-gap-x-4">
-          <div className="tw-h-8 tw-w-8 tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+      <td className={`${TABLE_CELL_CLASS_NAME} tw-text-left ${textColorClass}`}>
+        <div className="tw-flex tw-items-center tw-gap-2 md:tw-gap-3">
+          <div className="tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 md:tw-h-10 md:tw-w-10">
             <div className="tw-h-full tw-w-full tw-max-w-full">
               <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-center">
                 {member.pfp && (
                   <img
                     src={getScaledImageUri(member.pfp, ImageScale.W_AUTO_H_50)}
-                    alt="Network Table Profile Picture"
-                    className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain"
+                    alt=""
+                    className="tw-h-full tw-w-full tw-bg-transparent tw-object-contain"
                   />
                 )}
               </div>
             </div>
           </div>
           <div
-            className={`tw-max-w-[6rem] tw-truncate sm:tw-max-w-[15rem] ${textColorClass}`}
+            className={`tw-max-w-[6rem] tw-truncate md:tw-max-w-[15rem] ${textColorClass}`}
           >
             <Link
               href={path}
-              className={`tw-no-underline tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-500 group-hover:tw-underline ${textColorClass}`}
+              className={`tw-text-[13px] tw-font-medium tw-leading-5 tw-no-underline tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-400 group-hover:tw-no-underline md:tw-text-sm ${textColorClass}`}
             >
               {member.display}
             </Link>
@@ -60,7 +63,7 @@ export default function CommunityMembersTableRow({
         </div>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-base ${
+        className={`${TABLE_CELL_CLASS_NAME} tw-text-center ${
           isNotProfile ? "tw-opacity-50" : ""
         }`}
       >
@@ -70,7 +73,7 @@ export default function CommunityMembersTableRow({
         />
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
+        className={`${TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums ${textColorClass}`}
       >
         <span
           data-tooltip-id={`tdh-tooltip-${member.detail_view_key}`}
@@ -97,7 +100,7 @@ export default function CommunityMembersTableRow({
         </Tooltip>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
+        className={`${TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums ${textColorClass}`}
       >
         <span
           data-tooltip-id={`xtdh-tooltip-${member.detail_view_key}`}
@@ -126,12 +129,12 @@ export default function CommunityMembersTableRow({
         </Tooltip>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
+        className={`${TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums ${textColorClass}`}
       >
         {formatNumberWithCommasOrDash(member.rep)}
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-text-base ${textColorClass}`}
+        className={`${TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums ${textColorClass}`}
       >
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2">
           {formatNumberWithCommasOrDash(member.cic)}
@@ -140,9 +143,7 @@ export default function CommunityMembersTableRow({
           </div>
         </div>
       </td>
-      <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-sm tw-font-medium sm:tw-pr-6 sm:tw-text-base ${textColorClass}`}
-      >
+      <td className={`${TABLE_CELL_CLASS_NAME} tw-text-left ${textColorClass}`}>
         {member.last_activity && (
           <span>
             {getTimeAgoShort(member.last_activity, Date.now(), true)} ago
