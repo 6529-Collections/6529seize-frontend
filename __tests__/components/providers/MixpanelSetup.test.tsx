@@ -122,22 +122,79 @@ describe("MixpanelSetup", () => {
 
     const { rerender } = render(<MixpanelSetup />);
 
-    expect(trackPageViewMock).toHaveBeenCalledWith("/waves/wave-1", {
-      has_connected_profile: false,
-      logical_page: "wave_drop_detail",
-      page_group: "waves",
-      route_pattern: "/waves/:waveId?drop=:dropId",
-    });
+    expect(trackPageViewMock).toHaveBeenCalledWith(
+      "/waves/:waveId?drop=:dropId",
+      {
+        has_connected_profile: false,
+        logical_page: "wave_drop_detail",
+        page_group: "waves",
+        route_pattern: "/waves/:waveId?drop=:dropId",
+      }
+    );
 
     searchParams = new URLSearchParams("drop=drop-2");
     rerender(<MixpanelSetup />);
 
     expect(trackPageViewMock).toHaveBeenCalledTimes(2);
-    expect(trackPageViewMock).toHaveBeenLastCalledWith("/waves/wave-1", {
+    expect(trackPageViewMock).toHaveBeenLastCalledWith(
+      "/waves/:waveId?drop=:dropId",
+      {
+        has_connected_profile: false,
+        logical_page: "wave_drop_detail",
+        page_group: "waves",
+        route_pattern: "/waves/:waveId?drop=:dropId",
+      }
+    );
+  });
+
+  it("normalizes dynamic fallback routes while keeping navigation tracking distinct", () => {
+    performanceConsent = true;
+    pathname = "/nextgen/token/private-token-one";
+
+    const { rerender } = render(<MixpanelSetup />);
+
+    expect(trackPageViewMock).toHaveBeenCalledWith(
+      "/nextgen/token/[token]/[[...view]]",
+      {
+        has_connected_profile: false,
+        logical_page: "nextgen_token_token_view",
+        page_group: "nextgen",
+        route_pattern: "/nextgen/token/[token]/[[...view]]",
+      }
+    );
+
+    pathname = "/nextgen/token/private-token-two";
+    rerender(<MixpanelSetup />);
+
+    expect(trackPageViewMock).toHaveBeenCalledTimes(2);
+    expect(trackPageViewMock).toHaveBeenLastCalledWith(
+      "/nextgen/token/[token]/[[...view]]",
+      {
+        has_connected_profile: false,
+        logical_page: "nextgen_token_token_view",
+        page_group: "nextgen",
+        route_pattern: "/nextgen/token/[token]/[[...view]]",
+      }
+    );
+    expect(JSON.stringify(trackPageViewMock.mock.calls)).not.toContain(
+      "private-token-one"
+    );
+    expect(JSON.stringify(trackPageViewMock.mock.calls)).not.toContain(
+      "private-token-two"
+    );
+  });
+
+  it("preserves static fallback route values", () => {
+    performanceConsent = true;
+    pathname = "/about/mission";
+
+    render(<MixpanelSetup />);
+
+    expect(trackPageViewMock).toHaveBeenCalledWith("/about/mission", {
       has_connected_profile: false,
-      logical_page: "wave_drop_detail",
-      page_group: "waves",
-      route_pattern: "/waves/:waveId?drop=:dropId",
+      logical_page: "about_mission",
+      page_group: "about",
+      route_pattern: "/about/mission",
     });
   });
 
@@ -147,7 +204,7 @@ describe("MixpanelSetup", () => {
 
     render(<MixpanelSetup />);
 
-    expect(trackPageViewMock).toHaveBeenCalledWith("/alice/collected", {
+    expect(trackPageViewMock).toHaveBeenCalledWith("/:handle/collected", {
       has_connected_profile: false,
       logical_page: "profile_collected",
       page_group: "profile",
@@ -167,7 +224,7 @@ describe("MixpanelSetup", () => {
 
     render(<MixpanelSetup />);
 
-    expect(trackPageViewMock).toHaveBeenCalledWith("/alice/collected", {
+    expect(trackPageViewMock).toHaveBeenCalledWith("/:handle/collected", {
       has_connected_profile: true,
       logical_page: "profile_collected",
       page_group: "profile",
@@ -187,7 +244,7 @@ describe("MixpanelSetup", () => {
 
     render(<MixpanelSetup />);
 
-    expect(trackPageViewMock).toHaveBeenCalledWith("/bob/collected", {
+    expect(trackPageViewMock).toHaveBeenCalledWith("/:handle/collected", {
       has_connected_profile: true,
       logical_page: "profile_collected",
       page_group: "profile",
@@ -214,7 +271,7 @@ describe("MixpanelSetup", () => {
     rerender(<MixpanelSetup />);
 
     expect(trackPageViewMock).toHaveBeenCalledTimes(1);
-    expect(trackPageViewMock).toHaveBeenCalledWith("/alice/collected", {
+    expect(trackPageViewMock).toHaveBeenCalledWith("/:handle/collected", {
       has_connected_profile: true,
       logical_page: "profile_collected",
       page_group: "profile",

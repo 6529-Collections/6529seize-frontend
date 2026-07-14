@@ -2,6 +2,12 @@
 
 import { startSpanManual } from "@sentry/nextjs";
 import type { Span } from "@sentry/nextjs";
+import { sanitizeRouteFamily } from "./mobileLaunchTimingSanitizers";
+
+export const DROP_OPEN_SIGNAL_NAMES = {
+  readyEvent: "drop_popup_ready",
+  span: "ui.drop_popup.open",
+} as const;
 
 type DropOpenSource =
   | "leaderboard_list"
@@ -16,10 +22,10 @@ type PendingDropOpen = {
   source: DropOpenSource;
   isMobile: boolean;
   span: Span | null;
-  timeoutId: TimeoutId | null;
+  timeoutId: TimeoutId;
 };
 
-type TimeoutId = ReturnType<typeof globalThis.setTimeout> | number;
+type TimeoutId = ReturnType<typeof globalThis.setTimeout>;
 
 const pendingOpens = new Map<string, PendingDropOpen>();
 const DROP_OPEN_TIMEOUT_MS = 30000;
@@ -29,20 +35,17 @@ const getNowMs = () =>
     ? performance.now()
     : Date.now();
 
-const getRoute = () => {
-  const win = globalThis.window ?? null;
-  if (!win || !win.location) {
-    return "";
-  }
-  return `${win.location.pathname}${win.location.search}`;
+const getRouteFamily = (): string => {
+  return sanitizeRouteFamily(globalThis.window.location.pathname);
 };
 
-const getRumClient = () => {
-  const win = globalThis.window ?? null;
-  if (!win) {
-    return undefined;
-  }
-  return (win as unknown as { awsRum?: { recordEvent?: Function } })?.awsRum;
+type RumClient = {
+  readonly recordEvent?: (name: string, data?: Record<string, unknown>) => void;
+};
+
+const getRumClient = (): RumClient | undefined => {
+  return (globalThis.window as unknown as { readonly awsRum?: RumClient })
+    .awsRum;
 };
 
 const endSentrySpan = (span: Span | null) => {
@@ -73,16 +76,12 @@ export const startDropOpen = (params: {
   source: DropOpenSource;
   isMobile: boolean;
 }) => {
-  const win = globalThis.window ?? null;
-
   const { dropId, waveId, source, isMobile } = params;
   const startMs = getNowMs();
 
   const existing = pendingOpens.get(dropId);
   if (existing) {
-    if (existing.timeoutId !== null) {
-      globalThis.clearTimeout(existing.timeoutId);
-    }
+    globalThis.clearTimeout(existing.timeoutId);
     endSentrySpan(existing.span);
     pendingOpens.delete(dropId);
   }
@@ -94,12 +93,10 @@ export const startDropOpen = (params: {
       pendingOpens.delete(dropId);
     };
 
-    const timeoutId =
-      win && typeof win.setTimeout === "function"
-        ? win.setTimeout(handleTimeout, DROP_OPEN_TIMEOUT_MS)
-        : typeof globalThis.setTimeout === "function"
-          ? globalThis.setTimeout(handleTimeout, DROP_OPEN_TIMEOUT_MS)
-          : null;
+    const timeoutId = globalThis.setTimeout(
+      handleTimeout,
+      DROP_OPEN_TIMEOUT_MS
+    );
 
     pendingOpens.set(dropId, {
       startMs,
@@ -115,14 +112,12 @@ export const startDropOpen = (params: {
   try {
     startSpanManual(
       {
-        name: "ui.drop_popup.open",
+        name: DROP_OPEN_SIGNAL_NAMES.span,
         op: "ui.action",
         attributes: {
-          drop_id: dropId,
-          wave_id: waveId,
           source,
           is_mobile: isMobile,
-          route: getRoute(),
+          "route.family": getRouteFamily(),
         },
       },
       (createdSpan) => {
@@ -139,7 +134,7 @@ export const markDropOpenReady = (params: {
   waveId: string;
 }) => {
   const entry = pendingOpens.get(params.dropId);
-  if (!entry || entry.waveId !== params.waveId) {
+  if (entry?.waveId !== params.waveId) {
     return;
   }
 
@@ -159,21 +154,16 @@ export const markDropOpenReady = (params: {
     const durationMs = Math.round(getNowMs() - activeEntry.startMs);
     const payload = {
       duration_ms: durationMs,
-      drop_id: activeEntry.dropId,
-      wave_id: activeEntry.waveId,
       source: activeEntry.source,
       is_mobile: activeEntry.isMobile,
-      route: getRoute(),
+      route_family: getRouteFamily(),
     };
 
-    const rum = getRumClient();
-    if (rum && typeof rum.recordEvent === "function") {
+    const recordEvent = getRumClient()?.recordEvent;
+    if (typeof recordEvent === "function") {
       try {
-        const recordEvent = rum.recordEvent as (
-          name: string,
-          data?: Record<string, unknown>
-        ) => void;
-        recordEvent("drop_popup_ready", payload);
+        // Compatibility destination until external AWS RUM usage is verified.
+        recordEvent(DROP_OPEN_SIGNAL_NAMES.readyEvent, payload);
       } catch {
         // ignore analytics errors
       }
@@ -182,16 +172,14 @@ export const markDropOpenReady = (params: {
     if (activeEntry.span) {
       try {
         activeEntry.span.setAttribute("duration_ms", durationMs);
-        activeEntry.span.setAttribute("route", payload.route);
+        activeEntry.span.setAttribute("route.family", payload.route_family);
         endSentrySpan(activeEntry.span);
       } catch {
         // ignore tracing errors
       }
     }
 
-    if (activeEntry.timeoutId !== null) {
-      globalThis.clearTimeout(activeEntry.timeoutId);
-    }
+    globalThis.clearTimeout(activeEntry.timeoutId);
     pendingOpens.delete(activeEntry.dropId);
   };
 

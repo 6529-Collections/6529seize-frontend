@@ -1,4 +1,5 @@
 import { USER_PAGE_TABS } from "@/components/user/layout/userTabs.config";
+import { sanitizeRouteFamily } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 
 type SearchParamsLike =
   | Pick<URLSearchParams, "get">
@@ -31,6 +32,7 @@ const RESERVED_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "delegation",
   "delegation-mapping-tool",
   "dispute-resolution",
+  "drop-forge",
   "education",
   "element_category",
   "email-signatures",
@@ -198,15 +200,15 @@ function classifyFallbackPage(
   pathname: string,
   segments: readonly string[]
 ): PageViewClassification {
+  const routePattern = sanitizeRouteFamily(pathname);
   const pageGroup =
     segments.length > 0 ? toAnalyticsIdentifier(segments[0] ?? "") : "home";
-  const logicalPage =
-    segments.length > 0 ? toAnalyticsIdentifier(segments.join("_")) : "home";
+  const logicalPage = toAnalyticsIdentifier(routePattern);
 
   return {
     logicalPage: logicalPage || "home",
     pageGroup: pageGroup || "home",
-    routePattern: pathname,
+    routePattern,
     trackingKey: pathname,
   };
 }

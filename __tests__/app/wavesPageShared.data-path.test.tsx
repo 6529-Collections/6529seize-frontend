@@ -6,12 +6,29 @@ import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getWaveQueryKey } from "@/services/api/wave-query";
 
+const mockTraceServerRouteData = jest.fn(
+  async (_options: unknown, task: () => Promise<unknown> | unknown) => task()
+);
+
 jest.mock("next/navigation", () => ({ redirect: jest.fn() }));
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn(),
 }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
+}));
+jest.mock("@/utils/monitoring/serverRouteTelemetry", () => ({
+  getServerRouteAuthCohort: jest.fn((headers: Record<string, string>) =>
+    headers["Authorization"] ? "authenticated" : "anonymous"
+  ),
+  SERVER_ROUTE_SPAN_NAMES: {
+    wavesIndexDataPath: "waves.index.server_data",
+    wavesMetadataFetch: "waves.metadata.fetch",
+  },
+  traceServerRouteData: (
+    options: unknown,
+    task: () => Promise<unknown> | unknown
+  ) => mockTraceServerRouteData(options, task),
 }));
 jest.mock("@/app/waves/page.client", () => ({
   __esModule: true,
@@ -36,6 +53,10 @@ describe("renderWavesPageContent data paths", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTraceServerRouteData.mockImplementation(
+      async (_options: unknown, task: () => Promise<unknown> | unknown) =>
+        task()
+    );
     (getAppCommonHeaders as jest.Mock).mockResolvedValue({
       Authorization: "Bearer token",
     });
@@ -59,6 +80,15 @@ describe("renderWavesPageContent data paths", () => {
     expect(setQueryData).not.toHaveBeenCalled();
     expect(prefetchQuery).not.toHaveBeenCalled();
     expect(prefetchInfiniteQuery).not.toHaveBeenCalled();
+    expect(mockTraceServerRouteData).toHaveBeenCalledWith(
+      {
+        name: "waves.index.server_data",
+        routeFamily: "/waves",
+        dataPath: "none",
+        apiRequestCount: 0,
+      },
+      expect.any(Function)
+    );
   });
 
   it("hydrates only the mounted wave metadata query for /waves/{waveId}", async () => {
@@ -78,6 +108,16 @@ describe("renderWavesPageContent data paths", () => {
     expect(setQueryData).toHaveBeenCalledWith(getWaveQueryKey(wave.id), wave);
     expect(prefetchQuery).not.toHaveBeenCalled();
     expect(prefetchInfiniteQuery).not.toHaveBeenCalled();
+    expect(mockTraceServerRouteData).toHaveBeenCalledWith(
+      {
+        name: "waves.metadata.fetch",
+        routeFamily: "/waves/[wave]",
+        dataPath: "wave_metadata",
+        apiRequestCount: 1,
+        authCohort: "authenticated",
+      },
+      expect.any(Function)
+    );
   });
 
   it("keeps the Wave detail preview available without authentication", async () => {

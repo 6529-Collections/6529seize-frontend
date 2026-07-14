@@ -29,6 +29,11 @@ import {
   buildWavePageJsonLd,
   buildWavesIndexPageJsonLd,
 } from "@/lib/structured-data/waves";
+import {
+  getServerRouteAuthCohort,
+  SERVER_ROUTE_SPAN_NAMES,
+  traceServerRouteData,
+} from "@/utils/monitoring/serverRouteTelemetry";
 
 export type WavesSearchParams = RouteSearchParams;
 
@@ -148,9 +153,10 @@ export const isApiWaveDirectMessage = (wave: ApiWave): boolean =>
   wave.chat?.scope?.group?.is_direct_message === true;
 
 export async function fetchWaveContext(
-  waveId: string | null
+  waveId: string | null,
+  providedHeaders?: Record<string, string>
 ): Promise<WaveRequestContext> {
-  const headers = await getAppCommonHeaders();
+  const headers = providedHeaders ?? (await getAppCommonHeaders());
   const headersKey = JSON.stringify(headers);
   const wave = await fetchWaveCached(waveId, headersKey);
 
@@ -171,17 +177,35 @@ export async function renderWavesPageContent({
   routeContext?: "waves" | "messages" | undefined;
 }) {
   if (waveId === null) {
-    return (
-      <>
-        <JsonLdScript data={buildWavesIndexPageJsonLd()} />
-        <Suspense fallback={null}>
-          <WavesPageClient />
-        </Suspense>
-      </>
+    return traceServerRouteData(
+      {
+        name: SERVER_ROUTE_SPAN_NAMES.wavesIndexDataPath,
+        routeFamily: "/waves",
+        dataPath: "none",
+        apiRequestCount: 0,
+      },
+      () => (
+        <>
+          <JsonLdScript data={buildWavesIndexPageJsonLd()} />
+          <Suspense fallback={null}>
+            <WavesPageClient />
+          </Suspense>
+        </>
+      )
     );
   }
 
-  const context = await fetchWaveContext(waveId);
+  const headers = await getAppCommonHeaders();
+  const context = await traceServerRouteData(
+    {
+      name: SERVER_ROUTE_SPAN_NAMES.wavesMetadataFetch,
+      routeFamily: "/waves/[wave]",
+      dataPath: "wave_metadata",
+      apiRequestCount: 1,
+      authCohort: getServerRouteAuthCohort(headers),
+    },
+    () => fetchWaveContext(waveId, headers)
+  );
   const queryClient = new QueryClient();
 
   if (context.waveId && context.wave) {

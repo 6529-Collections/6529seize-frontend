@@ -12,6 +12,20 @@ import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import type { TypedNotificationsResponse } from "@/types/feed.types";
 
+const mockTraceServerRouteData = jest.fn(
+  async (_options: unknown, task: () => Promise<unknown>) => task()
+);
+
+jest.mock("@/utils/monitoring/serverRouteTelemetry", () => ({
+  getServerRouteAuthCohort: jest.fn(() => "authenticated"),
+  SERVER_ROUTE_SPAN_NAMES: {
+    notificationsFeedPrefetch: "notifications.feed.prefetch",
+    notificationsProfilePrefetch: "notifications.profile.prefetch",
+  },
+  traceServerRouteData: (options: unknown, task: () => Promise<unknown>) =>
+    mockTraceServerRouteData(options, task),
+}));
+
 jest.mock("jwt-decode", () => ({ jwtDecode: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -38,6 +52,9 @@ const notifications = {
 describe("prefetchNotificationsPageData", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTraceServerRouteData.mockImplementation(
+      async (_options: unknown, task: () => Promise<unknown>) => task()
+    );
     (jwtDecode as jest.Mock).mockReturnValue({ sub: "0xABC" });
     (commonApiFetch as jest.Mock).mockResolvedValue(profile);
     (fetchNotificationsV2 as jest.Mock).mockResolvedValue(notifications);
@@ -88,6 +105,28 @@ describe("prefetchNotificationsPageData", () => {
     ]);
     expect(fetchWaveDropsFeedV2).not.toHaveBeenCalled();
     expect(fetchWavesV2Page).not.toHaveBeenCalled();
+    expect(mockTraceServerRouteData).toHaveBeenNthCalledWith(
+      1,
+      {
+        name: "notifications.profile.prefetch",
+        routeFamily: "/notifications",
+        dataPath: "profile",
+        apiRequestCount: 1,
+        authCohort: "authenticated",
+      },
+      expect.any(Function)
+    );
+    expect(mockTraceServerRouteData).toHaveBeenNthCalledWith(
+      2,
+      {
+        name: "notifications.feed.prefetch",
+        routeFamily: "/notifications",
+        dataPath: "notifications_feed",
+        apiRequestCount: 1,
+        authCohort: "authenticated",
+      },
+      expect.any(Function)
+    );
   });
 
   it("does not fetch or seed user data without authentication", async () => {

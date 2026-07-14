@@ -64,6 +64,61 @@ describe("classifyPageView", () => {
     });
   });
 
+  it.each([
+    [
+      "/nextgen/token/private-token",
+      "nextgen_token_token_view",
+      "nextgen",
+      "/nextgen/token/[token]/[[...view]]",
+    ],
+    [
+      "/rememes/private-contract/private-id",
+      "rememes_contract_id",
+      "rememes",
+      "/rememes/[contract]/[id]",
+    ],
+    ["/the-memes/123", "the_memes_id", "the_memes", "/the-memes/[id]"],
+    ["/meme-lab/456", "meme_lab_id", "meme_lab", "/meme-lab/[id]"],
+    [
+      "/drop-forge/craft/private-craft",
+      "drop_forge_craft_id",
+      "drop_forge",
+      "/drop-forge/craft/[id]",
+    ],
+    [
+      "/6529-gradient/private-gradient",
+      "6529_gradient_id",
+      "6529_gradient",
+      "/6529-gradient/[id]",
+    ],
+  ])(
+    "normalizes fallback dynamic route %s without changing its tracking key",
+    (pathname, logicalPage, pageGroup, routePattern) => {
+      expect(classifyPageView({ pathname })).toEqual({
+        logicalPage,
+        pageGroup,
+        routePattern,
+        trackingKey: pathname,
+      });
+    }
+  );
+
+  it.each([
+    ["/the-memes", "the_memes", "the_memes"],
+    ["/about/mission", "about_mission", "about"],
+    ["/notifications", "notifications", "notifications"],
+  ])(
+    "preserves static fallback route %s",
+    (pathname, logicalPage, pageGroup) => {
+      expect(classifyPageView({ pathname })).toEqual({
+        logicalPage,
+        pageGroup,
+        routePattern: pathname,
+        trackingKey: pathname,
+      });
+    }
+  );
+
   it("falls back to a generic profile subpage for unknown user subroutes", () => {
     expect(classifyPageView({ pathname: "/alice/followers" })).toEqual({
       logicalPage: "profile_subpage",

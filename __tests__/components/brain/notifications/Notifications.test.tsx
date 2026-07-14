@@ -5,6 +5,15 @@ const mutateAsyncMock = jest.fn();
 const requestAuthMock = jest.fn().mockResolvedValue({ success: true });
 const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
 const setToastMock = jest.fn();
+const mockMarkMobileLaunchStep = jest.fn();
+const mockScheduleMobileLaunchFlush = jest.fn();
+
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  markMobileLaunchStep: (...args: unknown[]) =>
+    mockMarkMobileLaunchStep(...args),
+  scheduleMobileLaunchFlush: (...args: unknown[]) =>
+    mockScheduleMobileLaunchFlush(...args),
+}));
 
 jest.mock("@tanstack/react-query", () => ({
   useMutation: () => ({ mutateAsync: mutateAsyncMock }),
@@ -146,6 +155,8 @@ describe("Notifications component", () => {
     setActiveProfileProxyMock.mockClear();
     setActiveProfileProxyMock.mockResolvedValue(undefined);
     setToastMock.mockClear();
+    mockMarkMobileLaunchStep.mockClear();
+    mockScheduleMobileLaunchFlush.mockClear();
     useDeviceInfoMock.mockReturnValue(getDefaultDeviceInfo());
   });
 
@@ -167,6 +178,13 @@ describe("Notifications component", () => {
     expect(
       screen.getByText("Loading notifications...", { selector: "div" })
     ).toBeInTheDocument();
+    expect(mockMarkMobileLaunchStep).not.toHaveBeenCalledWith(
+      "route_first_useful_content"
+    );
+    expect(mockScheduleMobileLaunchFlush).not.toHaveBeenCalledWith(
+      "notifications_content_visible",
+      250
+    );
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
@@ -179,6 +197,13 @@ describe("Notifications component", () => {
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+    expect(mockMarkMobileLaunchStep).toHaveBeenCalledWith(
+      "route_first_useful_content"
+    );
+    expect(mockScheduleMobileLaunchFlush).toHaveBeenCalledWith(
+      "notifications_content_visible",
+      250
+    );
     expect(
       document.querySelector('[data-mobile-bottom-nav-scroll-target="true"]')
     ).not.toHaveClass(floatingDockClearanceClassName);

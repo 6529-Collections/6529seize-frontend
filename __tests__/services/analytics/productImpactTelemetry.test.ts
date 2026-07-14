@@ -37,7 +37,7 @@ describe("productImpactTelemetry", () => {
   });
 
   it("tracks wave feed route families without raw wave or drop ids", async () => {
-    const { telemetry } = await loadProductImpactTelemetry();
+    const { telemetry, sentry } = await loadProductImpactTelemetry();
     globalThis.history.pushState(
       {},
       "",
@@ -64,6 +64,73 @@ describe("productImpactTelemetry", () => {
     expect(JSON.stringify(trackAnalyticsEventMock.mock.calls)).not.toContain(
       "private-drop-id"
     );
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "wave_feed_load_succeeded",
+      expect.objectContaining({
+        duration_ms: 1200,
+        route_family: "/waves/:waveId",
+      })
+    );
+    expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
+      "Wave Feed Load Succeeded",
+      expect.not.objectContaining({ duration_ms: expect.any(Number) })
+    );
+  });
+
+  it("keeps technical timing in Sentry while preserving Mixpanel compatibility", async () => {
+    const { telemetry, sentry } = await loadProductImpactTelemetry();
+
+    telemetry.trackWaveFeedLoadSucceeded({
+      dropCount: 1,
+      durationMs: 1234.6,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+    });
+
+    expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
+      "Wave Feed Load Succeeded",
+      expect.objectContaining({ duration_bucket: "1s_3s" })
+    );
+    expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
+      "Wave Feed Load Succeeded",
+      expect.not.objectContaining({ duration_ms: expect.any(Number) })
+    );
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "wave_feed_load_succeeded",
+      expect.objectContaining({ duration_ms: 1235 })
+    );
+  });
+
+  it("keeps destinations isolated when one provider throws", async () => {
+    const { telemetry, sentry } = await loadProductImpactTelemetry();
+    trackAnalyticsEventMock.mockImplementationOnce(() => {
+      throw new Error("Mixpanel unavailable");
+    });
+
+    expect(() =>
+      telemetry.trackWaveFeedLoadStarted({
+        hadCachedDrops: false,
+        isNative: false,
+        loadSource: "initial_visible",
+      })
+    ).not.toThrow();
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "wave_feed_load_started",
+      expect.any(Object)
+    );
+
+    sentry.logger.info.mockImplementationOnce(() => {
+      throw new Error("Sentry unavailable");
+    });
+    expect(() =>
+      telemetry.trackWaveFeedLoadStarted({
+        hadCachedDrops: true,
+        isNative: false,
+        loadSource: "cache",
+      })
+    ).not.toThrow();
+    expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(2);
   });
 
   it("tracks auth refresh route families without raw profile handles", async () => {
