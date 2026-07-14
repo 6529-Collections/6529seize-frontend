@@ -48,7 +48,6 @@ interface WaveDropsMessageListSectionProps {
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
   readonly onDismissUnread: () => void;
-  readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -86,7 +85,6 @@ export const WaveDropsMessageListSection: React.FC<
   onBoostedDropClick,
   onScrollToUnread,
   onDismissUnread,
-  autoCollapseSerials,
   suspendLightDropHydration = false,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -127,7 +125,6 @@ export const WaveDropsMessageListSection: React.FC<
           boostedDrops={boostedDrops}
           boostedDropsDisplayPreference={boostedDropsDisplayPreference}
           onBoostedDropClick={onBoostedDropClick}
-          autoCollapseSerials={autoCollapseSerials}
           suspendLightDropHydration={suspendLightDropHydration}
           winningThreshold={winningThreshold}
           winningThresholdMinDurationMs={winningThresholdMinDurationMs}
