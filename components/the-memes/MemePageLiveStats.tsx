@@ -30,6 +30,7 @@ import {
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
+import MemePageMainStageSubmissionLink from "./MemePageMainStageSubmissionLink";
 
 const SECTION_HEADER_TITLE_CLASS =
   "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
@@ -532,17 +533,15 @@ function MemeDistributionPlanLink({
   const distributionPlanLink = getDistributionPlanLink(nft, locale);
 
   return (
-    <section className="tw-pt-6">
-      <Link
-        href={distributionPlanLink}
-        target={nft.has_distribution ? "_self" : "_blank"}
-        rel={nft.has_distribution ? undefined : "noopener noreferrer"}
-        className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white"
-      >
-        <span>{t(locale, "distribution.planLink")}</span>
-        <ArrowUpRightIcon className="-tw-mr-1 tw-h-4 tw-w-4 tw-text-iron-500" />
-      </Link>
-    </section>
+    <Link
+      href={distributionPlanLink}
+      target={nft.has_distribution ? "_self" : "_blank"}
+      rel={nft.has_distribution ? undefined : "noopener noreferrer"}
+      className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+    >
+      <span>{t(locale, "distribution.planLink")}</span>
+      <ArrowUpRightIcon className="-tw-mr-1 tw-h-4 tw-w-4 tw-text-iron-500" />
+    </Link>
   );
 }
 
@@ -646,7 +645,10 @@ export function MemeNftLivePanel({
         />
         <MemeMarketplaceLinks nft={nft} />
       </div>
-      <MemeDistributionPlanLink nft={nft} locale={locale} />
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-pt-6">
+        <MemeDistributionPlanLink nft={nft} locale={locale} />
+        <MemePageMainStageSubmissionLink memeCardId={nft.id} locale={locale} />
+      </div>
     </section>
   );
 }
