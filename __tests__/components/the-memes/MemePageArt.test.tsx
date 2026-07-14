@@ -133,7 +133,6 @@ describe("MemePageArt", () => {
     expect(screen.getByText("C1")).toBeInTheDocument();
     expect(screen.getByText("Boosts")).toBeInTheDocument();
     expect(screen.getByText("+10%")).toBeInTheDocument();
-
   });
 
   it("uses locale-backed labels and number formatting", () => {
