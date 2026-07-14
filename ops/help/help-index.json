@@ -27,6 +27,7 @@
         "Visitors can browse the public home activity without connecting a wallet.",
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
@@ -3215,6 +3216,7 @@
       ],
       "facts": [
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
+        "Home uses explicit Main Stage mappings for its submission and Meme-card links and omits those links when a mapping is unavailable.",
         "Unresolved upcoming /the-memes/{id} pages show the next-mint calendar panel plus subscription awareness for that card.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
@@ -4803,13 +4805,25 @@
         "winners tab",
         "wave winners",
         "winning drops",
-        "decision winners"
+        "decision winners",
+        "which meme did this submission mint"
       ],
-      "keywords": ["waves", "leaderboard", "winners", "decision", "drops"],
+      "keywords": [
+        "waves",
+        "leaderboard",
+        "winners",
+        "decision",
+        "drops",
+        "memes",
+        "main stage",
+        "minted card"
+      ],
       "facts": [
         "Wave Winners tab behavior is documented under leaderboard features.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
-        "Single-decision and multi-decision waves have different winner display behavior."
+        "Single-decision and multi-decision waves have different winner display behavior.",
+        "Mapped winners in The Memes Main Stage show a The Memes #N link in the Winners tab and beside the Minted on The Memes outcome on the dedicated drop view; the frontend never guesses a Meme ID when the backend mapping is absent.",
+        "Mapped Meme card pages show a Main Stage Submission action beside Distribution Plan in the market overview panel to the right of the artwork; older unmapped cards omit the action."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -5271,6 +5285,7 @@
       "facts": [
         "The now-minting countdown is documented under media memes docs.",
         "It helps users understand current mint timing.",
+        "For mapped Latest Drops, Edition Details ends with Main Stage Submission -> View and opens the winning drop in the configured Main Stage wave.",
         "If a mint is not active, users may need the calendar or upcoming mint surfaces instead."
       ],
       "canonical_path": "/the-memes/mint",
