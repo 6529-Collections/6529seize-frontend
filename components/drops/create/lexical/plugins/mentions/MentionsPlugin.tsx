@@ -50,6 +50,7 @@ import type {
 import { $isCodeNode } from "@lexical/code";
 import { $isLinkNode } from "@lexical/link";
 import { AuthContext } from "@/components/auth/Auth";
+import { GROUP_MENTION_TEXT } from "@/helpers/waves/drop-group-mentions";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -403,20 +404,46 @@ const NewMentionsPlugin = forwardRef<
 
   const options = useMemo(() => {
     const normalizedQuery = (queryString ?? "").toLowerCase();
-    const allOption =
-      canMentionAll &&
-      normalizedQuery.length >= IDENTITY_SEARCH_MIN_HANDLE_LENGTH &&
-      "all".startsWith(normalizedQuery)
-        ? [
-            new MentionTypeaheadOption({
-              id: ApiDropGroupMention.All,
-              handle: "@all",
-              display: "Mention everyone",
-              picture: null,
-              type: "group",
-            }),
-          ]
-        : [];
+    const groupOptions = [
+      {
+        group: ApiDropGroupMention.All,
+        display: t(locale, "waves.composer.groupMentions.all"),
+        allowed: canMentionAll,
+      },
+      {
+        group: ApiDropGroupMention.Contributors,
+        display: t(locale, "waves.composer.groupMentions.contributors"),
+        allowed: true,
+      },
+      {
+        group: ApiDropGroupMention.Admins,
+        display: t(locale, "waves.composer.groupMentions.admins"),
+        allowed: true,
+      },
+      {
+        group: ApiDropGroupMention.Devs6529,
+        display: t(locale, "waves.composer.groupMentions.devs6529"),
+        allowed: true,
+      },
+    ]
+      .filter(({ group, allowed }) => {
+        const token = GROUP_MENTION_TEXT[group].slice(1);
+        return (
+          allowed &&
+          normalizedQuery.length >= IDENTITY_SEARCH_MIN_HANDLE_LENGTH &&
+          token.startsWith(normalizedQuery)
+        );
+      })
+      .map(
+        ({ group, display }) =>
+          new MentionTypeaheadOption({
+            id: group,
+            handle: GROUP_MENTION_TEXT[group],
+            display,
+            picture: null,
+            type: "group",
+          })
+      );
     const aliasOptions = aliases
       .filter(
         (alias) =>
@@ -441,7 +468,7 @@ const NewMentionsPlugin = forwardRef<
       );
     const identityLimit = Math.max(
       0,
-      SUGGESTION_LIST_LENGTH_LIMIT - allOption.length - aliasOptions.length
+      SUGGESTION_LIST_LENGTH_LIMIT - groupOptions.length - aliasOptions.length
     );
     const identityOptions = identities
       .map(
@@ -455,7 +482,7 @@ const NewMentionsPlugin = forwardRef<
       )
       .slice(0, identityLimit);
 
-    return [...allOption, ...aliasOptions, ...identityOptions].slice(
+    return [...groupOptions, ...aliasOptions, ...identityOptions].slice(
       0,
       SUGGESTION_LIST_LENGTH_LIMIT
     );
@@ -521,12 +548,15 @@ const NewMentionsPlugin = forwardRef<
     ) => {
       editor.update(() => {
         if (selectedOption.type === "group") {
-          const mentionNode = $createGroupMentionNode("@all");
+          const group = selectedOption.id as ApiDropGroupMention;
+          const mentionNode = $createGroupMentionNode(
+            GROUP_MENTION_TEXT[group]
+          );
           if (nodeToReplace) {
             nodeToReplace.replace(mentionNode);
           }
           mentionNode.select();
-          onSelectGroupMention?.(ApiDropGroupMention.All);
+          onSelectGroupMention?.(group);
           closeMenu();
           return;
         }

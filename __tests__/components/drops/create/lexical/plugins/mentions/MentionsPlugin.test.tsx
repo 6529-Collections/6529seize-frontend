@@ -166,6 +166,34 @@ describe("MentionsPlugin", () => {
     expect(close).toHaveBeenCalled();
   });
 
+  it.each([
+    ["CON", "@contributors", "CONTRIBUTORS"],
+    ["ADM", "@admins", "ADMINS"],
+    ["DEV", "@devs6529", "DEVS_6529"],
+  ])(
+    "offers %s global mentions to chat participants",
+    (query, token, group) => {
+      (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+      const onSelectGroupMention = jest.fn();
+      render(
+        <NewMentionsPlugin
+          waveId="w1"
+          onSelect={jest.fn()}
+          onSelectGroupMention={onSelectGroupMention}
+          ref={createRef()}
+        />
+      );
+
+      act(() => capturedProps.onQueryChange(query));
+      const option = capturedProps.options[0];
+      act(() => capturedProps.onSelectOption(option, null, jest.fn()));
+
+      expect(option.handle).toBe(token);
+      expect($createGroupMentionNode).toHaveBeenCalledWith(token);
+      expect(onSelectGroupMention).toHaveBeenCalledWith(group);
+    }
+  );
+
   it("adds case-insensitive personal shortcut options", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
     (useMentionAliases as jest.Mock).mockReturnValue({

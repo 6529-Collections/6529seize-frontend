@@ -1,15 +1,19 @@
 import type { TextMatchTransformer } from "@lexical/markdown";
 
-import { ALL_GROUP_MENTION_TEXT } from "@/helpers/waves/drop-group-mentions";
+import {
+  getMentionedGroupsFromText,
+  GROUP_MENTION_TEXT,
+} from "@/helpers/waves/drop-group-mentions";
 import {
   $createGroupMentionNode,
   $isGroupMentionNode,
   GroupMentionNode,
 } from "../nodes/GroupMentionNode";
 
-const GROUP_MENTION_IMPORT_REGEXP = /(^|[^A-Za-z0-9_@])(@all)(?![A-Za-z0-9_@])/;
+const GROUP_MENTION_IMPORT_REGEXP =
+  /(^|[^A-Za-z0-9_@])(@(?:all|contributors|admins|devs6529))(?![A-Za-z0-9_@])/i;
 const GROUP_MENTION_SHORTCUT_REGEXP =
-  /(^|[^A-Za-z0-9_@])(@all)(?![A-Za-z0-9_@])$/;
+  /(^|[^A-Za-z0-9_@])(@(?:all|contributors|admins|devs6529))(?![A-Za-z0-9_@])$/i;
 
 export const GROUP_MENTION_TRANSFORMER: TextMatchTransformer = {
   dependencies: [GroupMentionNode],
@@ -23,7 +27,7 @@ export const GROUP_MENTION_TRANSFORMER: TextMatchTransformer = {
   regExp: GROUP_MENTION_SHORTCUT_REGEXP,
   importRegExp: GROUP_MENTION_IMPORT_REGEXP,
   replace: (textNode, match) => {
-    const [, prefix = ""] = match;
+    const [, prefix = "", token = ""] = match;
 
     const nodeToReplace = prefix.length
       ? textNode.splitText(prefix.length)[1]
@@ -33,7 +37,9 @@ export const GROUP_MENTION_TRANSFORMER: TextMatchTransformer = {
       return;
     }
 
-    const groupMentionNode = $createGroupMentionNode(ALL_GROUP_MENTION_TEXT);
+    const [group] = getMentionedGroupsFromText(token, true);
+    if (!group) return;
+    const groupMentionNode = $createGroupMentionNode(GROUP_MENTION_TEXT[group]);
     nodeToReplace.replace(groupMentionNode);
   },
   trigger: "l",

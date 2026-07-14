@@ -1,29 +1,40 @@
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
-export const ALL_GROUP_MENTION_TEXT = "@all";
+export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
+  {
+    [ApiDropGroupMention.All]: "@all",
+    [ApiDropGroupMention.Contributors]: "@contributors",
+    [ApiDropGroupMention.Admins]: "@admins",
+    [ApiDropGroupMention.Devs6529]: "@devs6529",
+  };
 
-const createAllGroupMentionPattern = () =>
-  /(^|[^A-Za-z0-9_@])(@all)(?![A-Za-z0-9_@])/g;
+const createGroupMentionPattern = (group: ApiDropGroupMention) =>
+  new RegExp(
+    `(^|[^A-Za-z0-9_@])(${GROUP_MENTION_TEXT[group]})(?![A-Za-z0-9_@])`,
+    "gi"
+  );
+
+export const getMentionedGroupsFromText = (
+  content: string,
+  canMentionAll: boolean
+): ApiDropGroupMention[] =>
+  Object.values(ApiDropGroupMention).filter(
+    (group) =>
+      (group !== ApiDropGroupMention.All || canMentionAll) &&
+      createGroupMentionPattern(group).test(content)
+  );
 
 export const getMentionedGroupsFromParts = (
   parts: readonly {
-    readonly mentioned_groups?:
-      | readonly ApiDropGroupMention[]
-      | null
-      | undefined;
+    readonly mentioned_groups?: readonly ApiDropGroupMention[] | null;
   }[],
   canMentionAll: boolean
-): ApiDropGroupMention[] => {
-  if (!canMentionAll) {
-    return [];
-  }
-
-  return parts.some((part) =>
-    part.mentioned_groups?.includes(ApiDropGroupMention.All)
-  )
-    ? [ApiDropGroupMention.All]
-    : [];
-};
+): ApiDropGroupMention[] =>
+  Object.values(ApiDropGroupMention).filter(
+    (group) =>
+      (group !== ApiDropGroupMention.All || canMentionAll) &&
+      parts.some((part) => part.mentioned_groups?.includes(group))
+  );
 
 export const hasMentionedGroup = (
   mentionedGroups: readonly ApiDropGroupMention[] | null | undefined,
@@ -33,23 +44,19 @@ export const hasMentionedGroup = (
 export const areMentionedGroupsEqual = (
   a: readonly ApiDropGroupMention[],
   b: readonly ApiDropGroupMention[]
-) => {
-  if (a.length !== b.length) {
-    return false;
-  }
+) => a.length === b.length && a.every((group) => b.includes(group));
 
-  return a.every((group) => b.includes(group));
-};
-
-export const markAllGroupMentionTokens = ({
+export const markGroupMentionTokens = ({
   content,
+  group,
   marker,
 }: {
   readonly content: string;
+  readonly group: ApiDropGroupMention;
   readonly marker: string;
 }) =>
   content.replace(
-    createAllGroupMentionPattern(),
+    createGroupMentionPattern(group),
     (_match, prefix: string, token: string) =>
       `${prefix}${marker}${token}${marker}`
   );

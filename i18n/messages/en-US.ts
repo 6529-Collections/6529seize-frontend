@@ -535,6 +535,61 @@ const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
   } as const
 );
 
+const GROUP_MENTION_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.groupMentions",
+  {
+    all: "Global mention · everyone following this Wave",
+    contributors: "Global mention · profiles with Chat access",
+    admins: "Global mention · profiles with Admin access",
+    devs6529: "Global mention · 6529 developers",
+  } as const
+);
+
+const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
+  "user.mentionShortcuts",
+  {
+    title: "Mention shortcuts",
+    description:
+      "Create private shortcuts such as @frens. In a composer, the shortcut expands inline into the selected profile handles.",
+    private: "Mention shortcuts are private to their profile owner.",
+    new: "New shortcut",
+    create: "Create shortcut",
+    edit: "Edit shortcut",
+    editorDescription:
+      "It expands into ordinary profile mentions before a message is sent.",
+    cancel: "Cancel",
+    name: "Shortcut name",
+    nameError: "Use 3–15 letters, numbers, or underscores.",
+    reservedError:
+      "That shortcut is reserved. Try something a little more creative.",
+    addProfiles: "Add profiles ({count}/{max})",
+    searchLabel: "Search profiles by handle",
+    searchPlaceholder: "Search by handle",
+    searchPrompt: "Enter at least 3 characters to search profiles.",
+    searchResults: "{count} profiles available.",
+    searchResult: "1 profile available.",
+    removeProfile: "Remove @{handle}",
+    save: "Save shortcut",
+    saving: "Saving…",
+    created: "Mention shortcut created.",
+    updated: "Mention shortcut updated.",
+    saveErrorTitle: "Couldn't save mention shortcut.",
+    saveErrorDetails: "Unable to save mention shortcut",
+    deleteTitle: "Delete @{alias}?",
+    deleteWarning: "This cannot be undone.",
+    delete: "Delete shortcut",
+    deleting: "Deleting mention shortcut.",
+    deleted: "Mention shortcut deleted.",
+    deleteErrorTitle: "Couldn't delete mention shortcut.",
+    deleteErrorDetails: "Unable to delete mention shortcut",
+    loading: "Loading…",
+    loadError: "Mention shortcuts could not be loaded.",
+    empty: "You have no mention shortcuts yet.",
+    editAction: "Edit",
+    deleteAction: "Delete",
+  } as const
+);
+
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
   "dm.createFailed.title": "Couldn't create this direct message.",
@@ -1864,6 +1919,8 @@ export const EN_US_MESSAGES = {
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
   ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
+  ...GROUP_MENTION_COMPOSER_MESSAGES,
+  ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,

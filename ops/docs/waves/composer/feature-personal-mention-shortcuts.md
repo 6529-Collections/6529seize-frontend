@@ -32,11 +32,12 @@ case-insensitive.
 - Shortcuts do not expand inside links or inline/fenced code.
 - The posted message contains only the expanded profile mentions. The private
   shortcut name is not stored in the drop.
-- Global mentions such as `@all` remain visible and follow their own permission
-  and notification rules.
+- Global mentions such as `@all`, `@contributors`, `@admins`, and `@devs6529`
+  remain visible and follow their own permission and notification rules.
 
 ## Related Pages
 
 - [Wave Mentions](feature-wave-mentions.md)
+- [Global Mentions](feature-global-mentions.md)
 - [Wave Composer](README.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)

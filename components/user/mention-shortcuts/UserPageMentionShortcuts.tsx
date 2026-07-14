@@ -22,6 +22,8 @@ import {
 } from "@/services/api/mention-aliases-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext, useMemo, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const MAX_MEMBERS = 25;
 
@@ -49,6 +51,7 @@ function DeleteShortcutDialog({
   readonly onCancel: () => void;
   readonly onConfirm: () => void;
 }) {
+  const locale = useBrowserLocale();
   return (
     <dialog
       open
@@ -61,10 +64,12 @@ function DeleteShortcutDialog({
           id="delete-mention-shortcut-title"
           className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white"
         >
-          Delete @{alias.alias}?
+          {t(locale, "user.mentionShortcuts.deleteTitle", {
+            alias: alias.alias,
+          })}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
-          This cannot be undone.
+          {t(locale, "user.mentionShortcuts.deleteWarning")}
         </p>
         <div className="tw-mt-5 tw-flex tw-justify-end tw-gap-2">
           <button
@@ -72,7 +77,7 @@ function DeleteShortcutDialog({
             onClick={onCancel}
             className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
           >
-            Cancel
+            {t(locale, "user.mentionShortcuts.cancel")}
           </button>
           <button
             type="button"
@@ -81,7 +86,7 @@ function DeleteShortcutDialog({
             onClick={onConfirm}
             className="tw-rounded-lg tw-border-0 tw-bg-red tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white disabled:tw-opacity-50"
           >
-            Delete shortcut
+            {t(locale, "user.mentionShortcuts.delete")}
           </button>
         </div>
       </div>
@@ -96,6 +101,7 @@ function AliasEditor({
   readonly initialAlias: MentionAlias | null;
   readonly onClose: () => void;
 }) {
+  const locale = useBrowserLocale();
   const { setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const [alias, setAlias] = useState(initialAlias?.alias ?? "");
@@ -128,25 +134,32 @@ function AliasEditor({
       setToast({
         type: "success",
         message: initialAlias
-          ? "Mention shortcut updated."
-          : "Mention shortcut created.",
+          ? t(locale, "user.mentionShortcuts.updated")
+          : t(locale, "user.mentionShortcuts.created"),
       });
       onClose();
     },
     onError: (error) => {
       setToast({
         type: "error",
-        title: "Couldn't save mention shortcut.",
-        details: getToastErrorDetails(error, "Unable to save mention shortcut"),
+        title: t(locale, "user.mentionShortcuts.saveErrorTitle"),
+        details: getToastErrorDetails(
+          error,
+          t(locale, "user.mentionShortcuts.saveErrorDetails")
+        ),
       });
     },
   });
 
   const availableIdentities = getAvailableIdentities(identities, members);
-  let searchStatus = "Enter at least 3 characters to search profiles.";
+  let searchStatus = t(locale, "user.mentionShortcuts.searchPrompt");
   if (search.length >= 3) {
-    const resultLabel = availableIdentities.length === 1 ? "result" : "results";
-    searchStatus = `${availableIdentities.length} profile ${resultLabel} available.`;
+    searchStatus =
+      availableIdentities.length === 1
+        ? t(locale, "user.mentionShortcuts.searchResult")
+        : t(locale, "user.mentionShortcuts.searchResults", {
+            count: availableIdentities.length,
+          });
   }
 
   const addMember = (identity: ApiIdentity) => {
@@ -182,10 +195,12 @@ function AliasEditor({
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
         <div>
           <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white">
-            {initialAlias ? "Edit shortcut" : "Create shortcut"}
+            {initialAlias
+              ? t(locale, "user.mentionShortcuts.edit")
+              : t(locale, "user.mentionShortcuts.create")}
           </h2>
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-            It expands into ordinary profile mentions before a message is sent.
+            {t(locale, "user.mentionShortcuts.editorDescription")}
           </p>
         </div>
         <button
@@ -193,7 +208,7 @@ function AliasEditor({
           onClick={onClose}
           className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200"
         >
-          Cancel
+          {t(locale, "user.mentionShortcuts.cancel")}
         </button>
       </div>
 
@@ -201,14 +216,14 @@ function AliasEditor({
         htmlFor="mention-shortcut-name"
         className="tw-mt-5 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
       >
-        <span>Shortcut name</span>
+        <span>{t(locale, "user.mentionShortcuts.name")}</span>
         <div className="tw-mt-2 tw-flex tw-items-center tw-rounded-lg tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-primary-400">
           <span aria-hidden="true" className="tw-pl-3 tw-text-iron-500">
             @
           </span>
           <input
             id="mention-shortcut-name"
-            aria-label="Shortcut name"
+            aria-label={t(locale, "user.mentionShortcuts.name")}
             aria-invalid={aliasHasError}
             aria-describedby={aliasErrorDescription || undefined}
             value={alias}
@@ -225,7 +240,7 @@ function AliasEditor({
           role="alert"
           className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
         >
-          Use 3–15 letters, numbers, or underscores.
+          {t(locale, "user.mentionShortcuts.nameError")}
         </p>
       )}
       {reserved && (
@@ -234,7 +249,7 @@ function AliasEditor({
           role="alert"
           className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
         >
-          @{normalizedAlias} is reserved for a global mention.
+          {t(locale, "user.mentionShortcuts.reservedError")}
         </p>
       )}
 
@@ -243,14 +258,17 @@ function AliasEditor({
         className="tw-mt-5 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
       >
         <span>
-          Add profiles ({members.length}/{MAX_MEMBERS})
+          {t(locale, "user.mentionShortcuts.addProfiles", {
+            count: members.length,
+            max: MAX_MEMBERS,
+          })}
         </span>
         <input
           id="mention-shortcut-profile-search"
-          aria-label="Search profiles by handle"
+          aria-label={t(locale, "user.mentionShortcuts.searchLabel")}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search by handle"
+          placeholder={t(locale, "user.mentionShortcuts.searchPlaceholder")}
           autoComplete="off"
           className="tw-mt-2 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-white tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-ring-primary-400"
         />
@@ -285,7 +303,9 @@ function AliasEditor({
             type="button"
             key={member.profile_id}
             onClick={() => removeMember(member.profile_id)}
-            aria-label={`Remove @${member.handle}`}
+            aria-label={t(locale, "user.mentionShortcuts.removeProfile", {
+              handle: member.handle,
+            })}
             className="tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-text-iron-100"
           >
             @{member.handle} <span aria-hidden="true">×</span>
@@ -299,7 +319,9 @@ function AliasEditor({
         onClick={save}
         className="tw-mt-5 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
       >
-        {mutation.isPending ? "Saving…" : "Save shortcut"}
+        {mutation.isPending
+          ? t(locale, "user.mentionShortcuts.saving")
+          : t(locale, "user.mentionShortcuts.save")}
       </button>
     </section>
   );
@@ -310,6 +332,7 @@ export default function UserPageMentionShortcuts({
 }: {
   readonly profile: ApiIdentity;
 }) {
+  const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
   const queryClient = useQueryClient();
@@ -327,7 +350,10 @@ export default function UserPageMentionShortcuts({
       await queryClient.invalidateQueries({
         queryKey: [QueryKey.MENTION_ALIASES],
       });
-      setToast({ type: "success", message: "Mention shortcut deleted." });
+      setToast({
+        type: "success",
+        message: t(locale, "user.mentionShortcuts.deleted"),
+      });
       setAliasToDelete(null);
       setEditorAlias((current) =>
         current?.id === deletedId ? undefined : current
@@ -336,10 +362,10 @@ export default function UserPageMentionShortcuts({
     onError: (error) =>
       setToast({
         type: "error",
-        title: "Couldn't delete mention shortcut.",
+        title: t(locale, "user.mentionShortcuts.deleteErrorTitle"),
         details: getToastErrorDetails(
           error,
-          "Unable to delete mention shortcut"
+          t(locale, "user.mentionShortcuts.deleteErrorDetails")
         ),
       }),
   });
@@ -352,7 +378,7 @@ export default function UserPageMentionShortcuts({
   if (!isOwner) {
     return (
       <div className="tailwind-scope tw-py-8 tw-text-center tw-text-iron-400">
-        Mention shortcuts are private to their profile owner.
+        {t(locale, "user.mentionShortcuts.private")}
       </div>
     );
   }
@@ -370,11 +396,10 @@ export default function UserPageMentionShortcuts({
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
         <div>
           <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-white">
-            Mention shortcuts
+            {t(locale, "user.mentionShortcuts.title")}
           </h1>
           <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
-            Create private shortcuts such as @frens. In a composer, the shortcut
-            expands inline into the selected profile handles.
+            {t(locale, "user.mentionShortcuts.description")}
           </p>
         </div>
         {editorAlias === undefined && (
@@ -383,7 +408,7 @@ export default function UserPageMentionShortcuts({
             onClick={() => setEditorAlias(null)}
             className="tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white"
           >
-            New shortcut
+            {t(locale, "user.mentionShortcuts.new")}
           </button>
         )}
       </div>
@@ -400,17 +425,23 @@ export default function UserPageMentionShortcuts({
 
       <div className="tw-mt-6 tw-space-y-3">
         <p aria-live="polite" className="tw-sr-only">
-          {deleteMutation.isPending ? "Deleting mention shortcut." : ""}
+          {deleteMutation.isPending
+            ? t(locale, "user.mentionShortcuts.deleting")
+            : ""}
         </p>
-        {isPending && <p className="tw-text-sm tw-text-iron-400">Loading…</p>}
+        {isPending && (
+          <p className="tw-text-sm tw-text-iron-400">
+            {t(locale, "user.mentionShortcuts.loading")}
+          </p>
+        )}
         {isError && (
           <p role="alert" className="tw-text-sm tw-text-error">
-            Mention shortcuts could not be loaded.
+            {t(locale, "user.mentionShortcuts.loadError")}
           </p>
         )}
         {!isPending && !isError && sortedAliases.length === 0 && (
           <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-p-8 tw-text-center tw-text-sm tw-text-iron-400">
-            You have no mention shortcuts yet.
+            {t(locale, "user.mentionShortcuts.empty")}
           </div>
         )}
         {sortedAliases.map((item) => (
@@ -432,7 +463,7 @@ export default function UserPageMentionShortcuts({
                 onClick={() => setEditorAlias(item)}
                 className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100"
               >
-                Edit
+                {t(locale, "user.mentionShortcuts.editAction")}
               </button>
               <button
                 type="button"
@@ -441,7 +472,7 @@ export default function UserPageMentionShortcuts({
                 aria-busy={deleteMutation.isPending}
                 className="tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-red disabled:tw-opacity-50"
               >
-                Delete
+                {t(locale, "user.mentionShortcuts.deleteAction")}
               </button>
             </div>
           </article>
