@@ -1074,6 +1074,9 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 
 const COMMON_MESSAGES = objectMessages("common", {
   close: "Close",
+  "pagination.next": "Next",
+  "pagination.pageOf": "Page {current} of {total}",
+  "pagination.previous": "Previous",
 } as const);
 
 const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {

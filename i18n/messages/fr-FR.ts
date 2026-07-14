@@ -383,6 +383,9 @@ export const FR_FR_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Vous pouvez televerser un fichier GIF a la place.",
   "common.close": "Fermer",
+  "common.pagination.next": "Suivant",
+  "common.pagination.pageOf": "Page {current} sur {total}",
+  "common.pagination.previous": "Précédent",
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",

@@ -376,6 +376,9 @@ export const ES_ES_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Puedes subir un archivo GIF en su lugar.",
   "common.close": "Cerrar",
+  "common.pagination.next": "Siguiente",
+  "common.pagination.pageOf": "Página {current} de {total}",
+  "common.pagination.previous": "Anterior",
   "memes.quickVote.leftThisRound": "{count} restantes esta ronda",
   "memes.quickVote.unrated": "{count} sin valorar",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",

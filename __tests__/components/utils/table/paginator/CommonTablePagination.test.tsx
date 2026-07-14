@@ -1,8 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CommonTablePagination from '@/components/utils/table/paginator/CommonTablePagination';
+import { useBrowserLocale } from '@/hooks/useBrowserLocale';
+
+jest.mock('@/hooks/useBrowserLocale', () => ({
+  useBrowserLocale: jest.fn(),
+}));
+
+const useBrowserLocaleMock = jest.mocked(useBrowserLocale);
 
 describe('CommonTablePagination', () => {
+  beforeEach(() => {
+    useBrowserLocaleMock.mockReturnValue('en-US');
+  });
+
   it('handles previous and next clicks', async () => {
     const setPage = jest.fn();
     render(
@@ -49,5 +60,23 @@ describe('CommonTablePagination', () => {
     );
 
     expect(screen.getByText('Page 12,345 of 20,598')).toBeInTheDocument();
+  });
+
+  it('uses localized copy and number formatting', () => {
+    useBrowserLocaleMock.mockReturnValue('de-DE');
+
+    render(
+      <CommonTablePagination
+        small={false}
+        currentPage={12345}
+        setCurrentPage={jest.fn()}
+        totalPages={20598}
+        haveNextPage={true}
+      />
+    );
+
+    expect(screen.getByText('Seite 12.345 von 20.598')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Zurück' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Weiter' })).toBeInTheDocument();
   });
 });
