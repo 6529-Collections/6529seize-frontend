@@ -79,6 +79,22 @@ describe("WaveContent", () => {
     );
   });
 
+  it("can render content without its own tab row", () => {
+    render(
+      <WaveContent
+        wave={wave}
+        mode={Mode.CONTENT}
+        setMode={jest.fn()}
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={jest.fn()}
+        showTabs={false}
+      />
+    );
+
+    expect(screen.queryByTestId("tabs")).toBeNull();
+    expect(screen.getByText("content")).toBeInTheDocument();
+  });
+
   it("renders settings tab content", () => {
     render(
       <WaveContent

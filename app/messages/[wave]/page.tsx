@@ -7,8 +7,8 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
 import { getAppMetadata } from "@/components/providers/metadata";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getWaveRouteWithSearchParams } from "@/helpers/navigation.helpers";
+import { getWaveQueryKey } from "@/services/api/wave-query";
 import {
   fetchWaveContext,
   isApiWaveDirectMessage,
@@ -44,7 +44,7 @@ export default async function MessageWavePage({
 
   const queryClient = new QueryClient();
   if (context.wave) {
-    queryClient.setQueryData([QueryKey.WAVE, { wave_id: wave }], context.wave);
+    queryClient.setQueryData(getWaveQueryKey(wave), context.wave);
   }
 
   return (

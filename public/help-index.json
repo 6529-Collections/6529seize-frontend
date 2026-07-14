@@ -16,23 +16,35 @@
         "coming",
         "discover",
         "mission",
-        "subscriptions"
+        "subscriptions",
+        "start",
+        "connect",
+        "onboarding"
       ],
       "facts": [
         "The home page is the main 6529.io entry point.",
+        "Logged-out visitors see a prominent Start here link to /join-6529 and a visible Connect wallet action before home activity.",
+        "Visitors can browse the public home activity without connecting a wallet.",
+        "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",
       "related_paths": [
+        "/join-6529",
         "/the-memes",
         "/waves",
         "/about/subscriptions",
         "/{user}/subscriptions"
       ],
       "tags": ["home", "navigation"],
-      "source_refs": ["ops/docs/home/README.md"]
+      "source_refs": [
+        "components/home/newcomer/HomeNewcomerIntro.tsx",
+        "ops/docs/home/README.md",
+        "ops/docs/home/feature-home-header-and-mission.md",
+        "ops/docs/home/flow-home-landing-and-section-navigation.md"
+      ]
     },
     {
       "id": "navigation.sidebar",
@@ -565,16 +577,29 @@
       "title": "Header search",
       "aliases": [
         "search",
+        "search 6529",
+        "search messages",
         "find a user",
         "find a profile",
         "search modal",
         "header search"
       ],
-      "keywords": ["search", "header", "modal", "profile", "route", "find"],
+      "keywords": [
+        "search",
+        "header",
+        "modal",
+        "profile",
+        "NFT",
+        "Wave",
+        "message",
+        "route",
+        "find"
+      ],
       "facts": [
-        "Header search opens a modal for finding app targets such as profiles and navigable entities.",
-        "Use the search control in the app header when users ask how to find people or pages.",
-        "Search and direct route navigation are separate from Waves feed filtering."
+        "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
+        "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
+        "Arrow keys move through site results and Enter opens the selected result.",
+        "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
       "canonical_path": "/",
       "related_paths": ["/network"],
@@ -1590,6 +1615,30 @@
       "tags": ["waves", "drop", "glossary", "concept"]
     },
     {
+      "id": "waves.subwaves.unread-count",
+      "kind": "ui_affordance",
+      "title": "Parent wave unread subwave count",
+      "aliases": [
+        "subwave unread count",
+        "new subwave messages",
+        "hide subwaves new badge",
+        "parent wave new badge"
+      ],
+      "keywords": ["waves", "subwaves", "unread", "new", "badge", "sidebar"],
+      "facts": [
+        "The new badge beside a parent wave's subwave control totals unread drops across visible, unmuted subwaves where read state is available.",
+        "A subwave contributes to the parent badge whether or not the viewer has joined or followed it.",
+        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "subwaves", "unread", "sidebar"],
+      "source_refs": [
+        "ops/docs/waves/sidebars/feature-brain-list-last-drop-indicator.md",
+        "ops/docs/wave-subwave-interaction-model.md"
+      ]
+    },
+    {
       "id": "waves.create.entrypoint.sidebar",
       "kind": "ui_affordance",
       "title": "Create a wave from the Waves panel",
@@ -1754,6 +1803,50 @@
       ]
     },
     {
+      "id": "waves.about-sections",
+      "kind": "workflow",
+      "title": "Wave About sections",
+      "aliases": [
+        "wave about",
+        "wave overview",
+        "overview tab",
+        "wave information",
+        "wave settings",
+        "wave activity",
+        "top voters"
+      ],
+      "keywords": [
+        "wave",
+        "about",
+        "overview",
+        "rules",
+        "rep",
+        "settings",
+        "voters",
+        "top voters",
+        "activity",
+        "mobile",
+        "sidebar"
+      ],
+      "facts": [
+        "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
+        "For Rank and Approve waves, the desktop right sidebar also includes Voters and Activity.",
+        "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
+        "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
+        "In the native app, More contains Settings and, for Rank and Approve waves, Voters and Activity.",
+        "Selecting a section switches information for the active wave without navigating away from the thread."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "about", "navigation", "mobile", "sidebar"],
+      "source_refs": [
+        "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md",
+        "components/brain/BrainMobile.tsx",
+        "components/brain/mobile/BrainMobileAbout.tsx",
+        "components/brain/right-sidebar/WaveContent.tsx"
+      ]
+    },
+    {
       "id": "waves.rules",
       "kind": "workflow",
       "title": "Wave rules",
@@ -1888,6 +1981,7 @@
       "facts": [
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
+        "Reaction controls are disabled while a proxy profile is active.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
         "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
@@ -1903,6 +1997,44 @@
         "ops/docs/waves/drop-actions/feature-reactions-and-ratings.md",
         "ops/docs/waves/drop-actions/feature-vote-slider.md",
         "ops/docs/waves/drop-actions/feature-drop-boosting.md"
+      ]
+    },
+    {
+      "id": "waves.competition-badges",
+      "kind": "ui_affordance",
+      "title": "Wave competition participant and winner badges",
+      "aliases": [
+        "competition badge",
+        "participant badge",
+        "winner badge",
+        "wave winner medal",
+        "wave participant flag",
+        "competition entries badge"
+      ],
+      "keywords": [
+        "waves",
+        "competition",
+        "participant",
+        "winner",
+        "badge",
+        "entries",
+        "chat",
+        "vote"
+      ],
+      "facts": [
+        "A circular violet flag beside a drop author means that author has an active participatory entry in the current wave.",
+        "A circular emerald medal beside a drop author means that author has a winning entry in the current wave.",
+        "Competition badges can appear on chat, participatory, and winner drops and are scoped to the current wave.",
+        "Competition badges do not appear in other waves unless the author also qualifies there.",
+        "The wave competition badges are hidden in The Memes Main Stage, which keeps its existing artist badges.",
+        "Selecting either badge loads and opens that author's full entries for the current wave; users can switch active and winning sections when both exist.",
+        "The entry viewer offers voting only for participatory entries while voting is open, and normal voting eligibility and credit rules still apply."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "competition", "badges", "voting"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-wave-competition-badges.md"
       ]
     },
     {
@@ -2770,15 +2902,21 @@
         "up"
       ],
       "facts": [
-        "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
+        "The Memes subscriptions are an optional way to mint eligible Meme Cards remotely without being online at mint time, with estimated gas savings of about 80% for one card and up to 98% for ten cards funded by one ETH transfer.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
+        "The setup path is: connect a wallet, open the profile Subscriptions tab, add a completely non-refundable ETH balance, choose Automatic or Manual mode, and select or skip upcoming eligible cards.",
+        "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions", "/tools/subscriptions-report"],
       "tags": ["subscriptions", "memes", "glossary"],
       "source_refs": [
+        "components/about/AboutSubscriptions.tsx",
+        "components/about/AboutSubscriptionsReference.tsx",
         "ops/docs/open-data/feature-meme-subscriptions.md",
         "ops/docs/profiles/tabs/feature-subscriptions-tab.md"
       ]
@@ -2815,12 +2953,17 @@
       "facts": [
         "Subscriptions do not create extra eligibility.",
         "A subscription can only mint within the phase and allowlist access the profile would otherwise have.",
+        "Phase 0 subscription mints are guaranteed because Phase 0 is underallocated; Phase 1 and Phase 2 mints depend on card availability.",
+        "When a phase has more subscription mints than available cards, cards are airdropped in the order subscription payments were received.",
         "Top-ups must be received by 00:00 UTC the day before a Meme Card mint to be eligible for that mint."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions"],
       "tags": ["subscriptions", "eligibility"],
-      "source_refs": ["ops/docs/open-data/feature-meme-subscriptions.md"]
+      "source_refs": [
+        "components/about/AboutSubscriptionsReference.tsx",
+        "ops/docs/open-data/feature-meme-subscriptions.md"
+      ]
     },
     {
       "id": "subscriptions.top-up-troubleshooting",

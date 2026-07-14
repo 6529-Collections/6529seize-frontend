@@ -28,6 +28,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
         <WaveWinnersDropHeaderAuthorHandle winner={winner} />
         <DropAuthorBadges
           profile={winner.drop.author}
+          wave={winner.drop.wave}
           tooltipIdPrefix={`winner-author-badges-${winner.drop.id}`}
         />
         {isApprovalWave ? (

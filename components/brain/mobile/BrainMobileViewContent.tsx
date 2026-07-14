@@ -9,6 +9,9 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import BrainMobileWaves from "./BrainMobileWaves";
 import { BrainView } from "./brainMobileViews";
 import { useLayout } from "../my-stream/layout/LayoutContext";
+import { SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
+
+const ignoreAboutTabChange = (_tab: SidebarTab): void => undefined;
 
 function BrainMobileViewLoadingFallback() {
   return (
@@ -83,6 +86,8 @@ const WaveWinners = dynamic(
 interface BrainMobileViewContentProps {
   readonly activeView: BrainView;
   readonly activeWaveId: string | null;
+  readonly activeAboutTab?: SidebarTab | undefined;
+  readonly onAboutTabChange?: ((tab: SidebarTab) => void) | undefined;
   readonly children: ReactNode;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
@@ -267,6 +272,8 @@ function assertUnreachable(_value: never): null {
 export default function BrainMobileViewContent({
   activeView,
   activeWaveId,
+  activeAboutTab = SidebarTab.ABOUT,
+  onAboutTabChange = ignoreAboutTabChange,
   children,
   isCurationWave,
   isMemesWave,
@@ -285,7 +292,13 @@ export default function BrainMobileViewContent({
     case BrainView.DEFAULT:
       return children;
     case BrainView.ABOUT:
-      return <BrainMobileAbout activeWaveId={activeWaveId} />;
+      return (
+        <BrainMobileAbout
+          activeWaveId={activeWaveId}
+          activeTab={activeAboutTab}
+          setActiveTab={onAboutTabChange}
+        />
+      );
     case BrainView.LEADERBOARD:
       return (
         <BrainMobileLeaderboardView

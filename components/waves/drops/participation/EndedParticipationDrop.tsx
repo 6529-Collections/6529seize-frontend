@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
+import { DropAuthorBadges } from "../DropAuthorBadges";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
@@ -191,6 +192,12 @@ function EndedParticipationDropInner({
                 {drop.author.handle ?? drop.author.primary_address}
               </Link>
             </p>
+
+            <DropAuthorBadges
+              profile={drop.author}
+              wave={drop.wave}
+              tooltipIdPrefix={`ended-participation-author-badges-${drop.id}`}
+            />
 
             {!isStackedTimestamp && (
               <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>

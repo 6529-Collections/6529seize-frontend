@@ -26,6 +26,7 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
 const WaveDropContentMock = jest.fn(() => null);
 const WaveDropMobileMenuMock = jest.fn(() => null);
 const WaveDropMetadataMock = jest.fn(() => null);
+const DropAuthorBadgesMock = jest.fn(() => <div data-testid="author-badges" />);
 const ParticipationIdentityProfileCardMock = jest.fn(({ profile }: any) => (
   <div data-testid="identity-card">
     {profile.handle ?? profile.primary_address}
@@ -51,6 +52,12 @@ jest.mock("@/components/waves/drops/WaveDropMetadata", () => (props: any) => {
 jest.mock("@/components/waves/drops/WaveDropReactions", () => () => (
   <div data-testid="reactions" />
 ));
+jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
+  DropAuthorBadges: (props: any) => {
+    DropAuthorBadgesMock(props);
+    return <div data-testid="author-badges" />;
+  },
+}));
 jest.mock(
   "@/components/waves/drops/participation/ParticipationIdentityProfileCard",
   () => (props: any) => {
@@ -126,7 +133,29 @@ describe("EndedParticipationDrop", () => {
     WaveDropContentMock.mockClear();
     WaveDropMobileMenuMock.mockClear();
     WaveDropMetadataMock.mockClear();
+    DropAuthorBadgesMock.mockClear();
     ParticipationIdentityProfileCardMock.mockClear();
+  });
+
+  it("passes the current wave to participant author badges", () => {
+    render(
+      <EndedParticipationDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        location={DropLocation.WAVE}
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(DropAuthorBadgesMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        profile: drop.author,
+        wave: drop.wave,
+      })
+    );
   });
 
   it("opens mobile menu on long press", async () => {

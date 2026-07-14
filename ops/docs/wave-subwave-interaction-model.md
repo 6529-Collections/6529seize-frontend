@@ -7,7 +7,7 @@ This note records the frontend contract for root waves and subwaves. The goal is
 - A root wave is the navigation container for its subwaves in the left sidebar.
 - A subwave is its own destination for joins, mutes, Wave REP, score, unread state, drops, votes, boosts, and reactions.
 - Parent state does not silently cascade to subwaves unless the backend explicitly returns that state for each subwave.
-- Subwave state does not silently promote to the parent, except that the parent row can show aggregate hints such as hidden unread subwave activity.
+- Subwave state does not silently promote to the parent, except that the parent row can show aggregate hints such as unread subwave activity.
 
 ## Following
 
@@ -60,7 +60,7 @@ the parent and child:
 | Follows parent only | Parent stays visible from parent follow. | Child appears only when the parent is expanded or otherwise loaded. | Subwave posts do not enter the parent feed or create parent-scoped actions. |
 | Follows subwave only | Parent can appear as a container so the followed subwave is reachable. | Child should show the subwave's own unread/activity state once loaded. | Subwave posts belong to the subwave feed; parent state remains parent-specific. |
 | Follows both | Parent can sort by parent or aggregate activity, depending on backend data. | Child shows its own unread/activity state. | Parent and child feeds remain separate. |
-| Follows neither | Parent/subwave discovery is score/quality-driven. | Child appears only through parent expansion/discovery. | No followed-wave unread or notification state is implied. |
+| Follows neither | Parent/subwave discovery is score/quality-driven. The parent can still show an aggregate unread-subwave count after the viewer has established read state in a visible child. | Child appears only through parent expansion/discovery. | Aggregate unread state does not imply that the parent or child is followed or that notifications are enabled. |
 
 If the backend wants followed-subwave activity to move a parent container upward
 in the activity-first sections, it should return an explicit aggregate activity
@@ -89,10 +89,10 @@ API returns enough parent-container metadata to do so.
 - The API should expose enough child metadata for the followed subwave row to
   render after expansion: subwave id, parent id, followed state, muted state,
   unread counts, latest drop timestamp, picture/contributors, REP, and score.
-- If a followed subwave has unread drops while the parent is collapsed, the API
-  should either expose an aggregate hidden-subwave unread count/hint on the
-  parent container or return the followed child early enough for the frontend to
-  compute the hint after expansion.
+- If visible subwaves have unread drops while the parent is collapsed, the API
+  should expose an aggregate unread-subwave count on the parent container. The
+  aggregate must not depend on whether the viewer follows the parent or any of
+  its subwaves.
 - The frontend should sort activity-first parent containers using the explicit
   aggregate field when present. Without that field, it should preserve the
   backend order and should not locally promote the parent based on child posts.
@@ -102,7 +102,14 @@ API returns enough parent-container metadata to do so.
 ## Unread And Activity
 
 - Root waves and subwaves carry independent unread counts.
-- Collapsed parent rows may show a hidden-subwave unread indicator when loaded child rows have unread drops.
+- Parent rows show the total unread count across visible, unmuted subwaves for
+  which the viewer has established read state, regardless of whether those
+  subwaves are followed.
+- The aggregate excludes the viewer's own drops and drops from muted profiles.
+  Muting the parent or an individual subwave suppresses the applicable unread
+  presentation.
+- Before child rows are loaded, the parent uses the server aggregate. After
+  loading, newer child-row unread activity can increase the displayed count.
 - Subwaves are sorted by latest activity within an expanded parent.
 - Pinned and following root sections are activity-first; discovery sections are quality-first.
 - If a parent row is present only because a followed subwave needs a container,
