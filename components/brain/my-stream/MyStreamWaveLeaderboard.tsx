@@ -65,6 +65,7 @@ interface LeaderboardContentProps {
   readonly maxPrice: number | undefined;
   readonly priceCurrency: string | undefined;
   readonly onCreateDrop: (() => void) | undefined;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const isWaveLeaderboardSortPreference = (
@@ -179,6 +180,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
   maxPrice,
   priceCurrency,
   onCreateDrop,
+  scrollContainerRef,
 }) => {
   if (viewMode === "list") {
     return (
@@ -192,6 +194,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
         maxPrice={maxPrice}
         priceCurrency={priceCurrency}
         onCreateDrop={onCreateDrop}
+        scrollContainerRef={scrollContainerRef}
       />
     );
   }
@@ -208,6 +211,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
         priceCurrency={priceCurrency}
         mode={viewMode === "grid" ? "compact" : "content_only"}
         onDropClick={onDropClick}
+        scrollContainerRef={scrollContainerRef}
       />
     );
   }
@@ -222,6 +226,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
       maxPrice={maxPrice}
       priceCurrency={priceCurrency}
       onDropClick={onDropClick}
+      scrollContainerRef={scrollContainerRef}
     />
   );
 };
@@ -488,6 +493,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   return (
     <div
       ref={leaderboardContainerRef}
+      tabIndex={-1}
       className={containerClassName}
       style={leaderboardViewStyle}
     >
@@ -575,6 +581,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           maxPrice={maxPrice}
           priceCurrency={priceCurrency}
           onCreateDrop={createDropAction}
+          scrollContainerRef={leaderboardContainerRef}
         />
       </div>
     </div>

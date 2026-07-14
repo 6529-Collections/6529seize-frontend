@@ -399,6 +399,18 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Flux Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
+  "waves.leaderboard.listLabel": "Drops du classement",
+  "waves.leaderboard.loadingEarlier": "Chargement des drops précédents",
+  "waves.leaderboard.previousLoadError":
+    "Impossible de charger les drops précédents. Sélectionnez Réessayer pour relancer le chargement.",
+  "waves.leaderboard.retryEarlier":
+    "Réessayer de charger les drops précédents",
+  "waves.leaderboard.loadingMore": "Chargement de drops supplémentaires",
+  "waves.leaderboard.nextLoadError":
+    "Impossible de charger d’autres drops. Sélectionnez Réessayer pour relancer le chargement.",
+  "waves.leaderboard.retryMore": "Réessayer de charger d’autres drops",
+  "waves.leaderboard.loadMore": "Charger plus de drops",
+  "waves.leaderboard.loadingMoreButton": "Chargement…",
   "waves.poll.actions.viewResults": "Voir les résultats",
   "waves.poll.actions.vote": "Voter",
   "waves.poll.actions.changeVote": "Modifier le vote",

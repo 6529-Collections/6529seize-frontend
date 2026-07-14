@@ -1,0 +1,106 @@
+# Frontend Telemetry Ownership and Lifecycle
+
+`registry.json` is the operational inventory for frontend automatic providers
+and custom signals. It records the question, owner, producer, destinations,
+sampling, privacy contract, known external usage, lifecycle, replacement, and
+review date. Update it in the same change as any custom signal.
+
+## Provider ownership
+
+- AWS RUM owns real-user browser performance: Core Web Vitals,
+  browser/device cohorts, page views, and browser HTTP health.
+- Sentry owns errors, client/server traces, slow code paths, and exact
+  code-level spans and logs.
+- Mixpanel owns user actions, feature adoption, and product funnels. Exact
+  technical timings do not go to Mixpanel.
+- Google tag page analytics is a preserved legacy overlap. Its external usage
+  has not been verified, so this change does not remove it.
+
+Two providers may observe the same flow only when they answer different
+questions. The registry must say which question each destination owns. A
+temporary or compatibility destination needs a replacement/removal plan and a
+dated review.
+
+## This audit
+
+No runtime destination was removed. The repo Mixpanel runbook names the auth
+and Wave feed events, but live dashboard use could not be verified. The
+registry therefore documents owner versus compatibility/diagnostic roles while
+the runtime preserves every existing dual write. The runtime exports only the
+stable event-name list; destination ownership has one source of truth here.
+Wave feed success now adds exact `duration_ms` only to Sentry; Mixpanel keeps
+the existing bounded duration bucket and product outcome.
+
+Automatic page-view overlap is intentional for now: AWS RUM answers browser
+performance questions, Mixpanel answers product adoption questions, and the
+Google/Mixpanel product overlap remains unverified. Mixpanel's `path` property
+now carries the normalized `route_pattern` value instead of a raw pathname.
+Known Waves/profile aliases retain their existing colon-parameter contracts;
+fallback routes use the existing App Router-style bracket families. Fallback
+`logical_page` values are derived from the same safe family. This preserves the
+property names while removing handles and route identifiers; dashboards
+grouping by literal paths or raw fallback logical pages may need migration.
+
+The AWS RUM compatibility event `drop_popup_ready` and the legacy AWS RUM-owned
+events `ab_card_impression`, `ab_card_link_out`, and `ab_card_live_open` keep
+their stable event names. The Art Blocks signals answer product questions, but
+Mixpanel does not receive them today; moving them to Mixpanel is only an
+intended replacement after usage and volume are verified.
+Their attribute contracts changed to remove raw drop/wave/token/contract
+identifiers and full paths. `ab_card_live_open` now uses a duration bucket.
+External dashboards and alerts were not available for verification, so these
+attribute changes carry migration risk. The registry gives them an August
+sunset review rather than claiming compatibility is verified.
+
+## Performance measurement semantics
+
+The server route-data spans use the server-specific
+`function.nextjs.server_data` operation and are inactive child spans with
+`onlyIfParent: true`.
+They measure only the duration of the wrapped route-data task and inherit the
+existing sampled Sentry request trace and release. They do not make the span
+active, so this change does not force nested automatic fetch spans to become
+children. Task failures mark the span with Sentry's error status without
+attaching the error or its message, then preserve the original route error.
+Attributes are fixed route families, fixed data-path names, a bounded request
+count, and anonymous/authenticated server cohort where known.
+
+`route_first_useful_content` is a cold-launch milestone. Its clock starts in
+`instrumentation-client.ts`; it does not measure later client-side navigation.
+
+- On `/waves` and `/waves/[wave]`, it is the first non-loading visible Waves
+  content or terminal access gate. Existing metadata/message/drop milestones
+  remain available for Wave detail diagnosis.
+- On `/notifications`, it is the first settled user-visible state: a list,
+  empty state, error state, proxy-disabled state, or signed-out/profile gate.
+  Profile and Notifications loaders do not count.
+
+The launch log's normalized `route_family` separates Waves index, Wave detail,
+and Notifications cohorts. Adding `/notifications` to focused launch sampling
+is intentional: one cold-launch log is eligible for 100% capture on
+non-desktop Notifications launches, while desktop normal launches remain at
+5%. Slow, timeout, and error launches remain always-captured. No new loop or
+per-item log was added.
+
+## Add, change, or retire a signal
+
+1. Start with the monitoring or product question and choose its owning system.
+2. Reuse an existing helper; do not add another generic telemetry facade.
+3. Register the stable name and bounded attributes before adding the producer.
+4. Use route/endpoint families, buckets, booleans, small enums, and anonymous
+   cohorts. Never send secrets, wallet addresses, handles, content, raw IDs,
+   tokens, cookies, query strings, or uncontrolled-cardinality values.
+5. Keep telemetry failure non-blocking and document sampling/volume.
+6. For removal or attribute-contract changes, verify dashboards/alerts. If
+   verification is unavailable, retain a compatibility path or record a dated
+   migration/sunset plan.
+
+## Ranked follow-up audit debt
+
+1. Verify live Mixpanel, AWS RUM, Google, and Sentry dashboard/alert usage, then
+   retire compatibility destinations that have no owner.
+2. Migrate legacy reaction and push-notification diagnostic extras away from
+   raw code-level identifiers/error text. They are registered as temporary and
+   were deliberately not expanded into this narrow runtime change.
+3. Review temporary route-data spans after enough production traffic exists;
+   keep only measurements tied to a continuing performance decision.
