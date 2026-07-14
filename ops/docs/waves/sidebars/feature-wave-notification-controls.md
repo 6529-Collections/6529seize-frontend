@@ -54,10 +54,10 @@ behavior across thread header controls and sidebar wave rows.
 - Muted rows suppress unread-count badges.
 - Muted waves sort after non-muted waves in wave and DM lists.
 - Muted waves skip websocket unread/new-drop accumulation.
-- Muted active threads also skip realtime drop processing and typing-indicator
-  subscription.
-- After mute changes, if the active thread looks stale, reopen the wave or
-  reload to resync.
+- Open muted threads still receive realtime drop updates, so visible content
+  stays current without a refresh.
+- Inactive muted threads skip Wave message-store processing and sync when opened.
+- Muted threads keep typing-indicator subscription disabled.
 
 ## Failure and Recovery
 
