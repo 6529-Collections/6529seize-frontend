@@ -1,0 +1,121 @@
+import { QueryClient } from "@tanstack/react-query";
+
+import { renderWavesPageContent } from "@/app/waves/waves-page.shared";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import { getWaveQueryKey } from "@/services/api/wave-query";
+
+jest.mock("next/navigation", () => ({ redirect: jest.fn() }));
+jest.mock("@/helpers/server.app.helpers", () => ({
+  getAppCommonHeaders: jest.fn(),
+}));
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
+}));
+jest.mock("@/app/waves/page.client", () => ({
+  __esModule: true,
+  default: () => <div data-testid="waves-page-client" />,
+}));
+jest.mock("@/lib/structured-data/waves", () => ({
+  buildWavePageJsonLd: jest.fn(() => ({})),
+  buildWavesIndexPageJsonLd: jest.fn(() => ({})),
+}));
+
+const wave = {
+  id: "wave-detail-data-path",
+  name: "Data Path Wave",
+  author: {},
+  chat: { scope: { group: { is_direct_message: false } } },
+} as ApiWave;
+
+describe("renderWavesPageContent data paths", () => {
+  let prefetchQuery: jest.SpyInstance;
+  let prefetchInfiniteQuery: jest.SpyInstance;
+  let setQueryData: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (getAppCommonHeaders as jest.Mock).mockResolvedValue({
+      Authorization: "Bearer token",
+    });
+    prefetchQuery = jest.spyOn(QueryClient.prototype, "prefetchQuery");
+    prefetchInfiniteQuery = jest.spyOn(
+      QueryClient.prototype,
+      "prefetchInfiniteQuery"
+    );
+    setQueryData = jest.spyOn(QueryClient.prototype, "setQueryData");
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("does not block the /waves index on any server data query", async () => {
+    await renderWavesPageContent({ waveId: null, searchParams: {} });
+
+    expect(getAppCommonHeaders).not.toHaveBeenCalled();
+    expect(commonApiFetch).not.toHaveBeenCalled();
+    expect(setQueryData).not.toHaveBeenCalled();
+    expect(prefetchQuery).not.toHaveBeenCalled();
+    expect(prefetchInfiniteQuery).not.toHaveBeenCalled();
+  });
+
+  it("hydrates only the mounted wave metadata query for /waves/{waveId}", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue(wave);
+
+    await renderWavesPageContent({
+      waveId: wave.id,
+      searchParams: {},
+    });
+
+    expect(commonApiFetch).toHaveBeenCalledTimes(1);
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: `waves/${wave.id}`,
+      headers: { Authorization: "Bearer token" },
+    });
+    expect(getWaveQueryKey(wave.id)).toEqual(["WAVE", { wave_id: wave.id }]);
+    expect(setQueryData).toHaveBeenCalledWith(getWaveQueryKey(wave.id), wave);
+    expect(prefetchQuery).not.toHaveBeenCalled();
+    expect(prefetchInfiniteQuery).not.toHaveBeenCalled();
+  });
+
+  it("keeps the Wave detail preview available without authentication", async () => {
+    (getAppCommonHeaders as jest.Mock).mockResolvedValue({});
+    (commonApiFetch as jest.Mock).mockResolvedValue(wave);
+
+    await renderWavesPageContent({
+      waveId: wave.id,
+      searchParams: {},
+    });
+
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: `waves/${wave.id}`,
+      headers: {},
+    });
+    expect(setQueryData).toHaveBeenCalledWith(getWaveQueryKey(wave.id), wave);
+    expect(prefetchQuery).not.toHaveBeenCalled();
+    expect(prefetchInfiniteQuery).not.toHaveBeenCalled();
+  });
+
+  it("preserves the Wave route fallback when metadata loading fails", async () => {
+    const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
+    (commonApiFetch as jest.Mock).mockRejectedValue(new Error("wave failed"));
+
+    await expect(
+      renderWavesPageContent({
+        waveId: "wave-failure-data-path",
+        searchParams: { serialNo: "42" },
+      })
+    ).resolves.toBeDefined();
+
+    expect(setQueryData).not.toHaveBeenCalled();
+    expect(prefetchQuery).not.toHaveBeenCalled();
+    expect(prefetchInfiniteQuery).not.toHaveBeenCalled();
+    expect(warning).toHaveBeenCalledWith("Failed to fetch wave", {
+      waveId: "wave-failure-data-path",
+      error: expect.any(Error),
+    });
+    warning.mockRestore();
+  });
+});

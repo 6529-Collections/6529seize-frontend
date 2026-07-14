@@ -112,7 +112,7 @@ const createSidebarWave = ({
   latestDropTimestamp,
   latestFollowedSubwaveDropTimestamp = null,
   followedSubwavesCount = 0,
-  unreadFollowedSubwaveDrops = 0,
+  unreadSubwaveDrops = 0,
   isDirectMessage = false,
   type = ApiWaveType.Rank,
   pinned = false,
@@ -122,7 +122,7 @@ const createSidebarWave = ({
   readonly latestDropTimestamp: number;
   readonly latestFollowedSubwaveDropTimestamp?: number | null;
   readonly followedSubwavesCount?: number;
-  readonly unreadFollowedSubwaveDrops?: number;
+  readonly unreadSubwaveDrops?: number;
   readonly isDirectMessage?: boolean;
   readonly type?: ApiWaveType;
   readonly pinned?: boolean;
@@ -150,7 +150,7 @@ const createSidebarWave = ({
   firstUnreadFollowedSubwaveDropSerialNo: null,
   unreadDropsCount: 0,
   followedSubwavesCount,
-  unreadFollowedSubwaveDrops,
+  unreadSubwaveDrops,
   latestReadTimestamp: 0,
   pinned,
   muted: false,
@@ -877,7 +877,7 @@ test("orders followed-subwave parent containers by aggregate activity", () => {
     latestDropTimestamp: 10,
     latestFollowedSubwaveDropTimestamp: 900,
     followedSubwavesCount: 1,
-    unreadFollowedSubwaveDrops: 2,
+    unreadSubwaveDrops: 2,
     subscribed: false,
   });
   const oldSubwaveOnlyParent = createSidebarWave({
@@ -929,7 +929,7 @@ test("orders followed-subwave parent containers by aggregate activity", () => {
   ).toMatchObject({
     subscribed: false,
     followedSubwavesCount: 1,
-    unreadFollowedSubwaveDrops: 2,
+    unreadSubwaveDrops: 2,
     latestFollowedSubwaveDropTimestamp: 900,
     sidebarSection: "all",
   });

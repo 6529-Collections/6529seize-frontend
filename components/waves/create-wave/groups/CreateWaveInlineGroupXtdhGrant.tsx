@@ -10,11 +10,14 @@ import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGrou
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { useXtdhGrantQuery } from "@/hooks/useXtdhGrantQuery";
 import { useXtdhGrantsSearchQuery } from "@/hooks/useXtdhGrantsSearchQuery";
+import GroupCreateXtdhGrantSelection from "@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrantSelection";
 import GroupCreateXtdhGrantRow from "@/components/groups/page/create/config/xtdh-grant/subcomponents/GroupCreateXtdhGrantRow";
 import {
-  isSelectableNonGrantedStatus,
-  toShortGrantId,
-} from "@/components/groups/page/create/config/xtdh-grant/utils";
+  DEFAULT_BENEFICIARY_GRANT_MATCH_MODE,
+  getGrantCompatibleMatchMode,
+  useCompatibleXtdhGrantMatchMode,
+} from "@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrantMatchMode";
+import { isSelectableNonGrantedStatus } from "@/components/groups/page/create/config/xtdh-grant/utils";
 
 const STATUS_OPTIONS = [
   ApiXTdhGrantStatus.Granted,
@@ -32,11 +35,17 @@ const STATUS_LABELS: Record<ApiXTdhGrantStatus, string> = {
 
 export default function CreateWaveInlineGroupXtdhGrant({
   beneficiaryGrantId,
+  beneficiaryGrantMatchMode,
   setBeneficiaryGrantId,
+  setBeneficiaryGrantMatchMode,
 }: {
   readonly beneficiaryGrantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"];
+  readonly beneficiaryGrantMatchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"];
   readonly setBeneficiaryGrantId: (
     grantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"]
+  ) => void;
+  readonly setBeneficiaryGrantMatchMode: (
+    matchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"]
   ) => void;
 }) {
   const normalizedGrantId = beneficiaryGrantId?.trim() ?? "";
@@ -94,10 +103,20 @@ export default function CreateWaveInlineGroupXtdhGrant({
     isLookupFresh &&
     grant?.status !== undefined &&
     isSelectableNonGrantedStatus(grant.status);
+  const effectiveMatchMode = useCompatibleXtdhGrantMatchMode({
+    grant,
+    hasSelectedGrant,
+    isLookupFresh,
+    matchMode: beneficiaryGrantMatchMode,
+    setMatchMode: setBeneficiaryGrantMatchMode,
+  });
 
   const onInputChange = (nextValue: string) => {
     const normalized = nextValue.trim();
     setBeneficiaryGrantId(normalized.length ? normalized : null);
+    if (!normalized.length) {
+      setBeneficiaryGrantMatchMode(DEFAULT_BENEFICIARY_GRANT_MATCH_MODE);
+    }
   };
 
   const onResetFilters = () => {
@@ -152,43 +171,17 @@ export default function CreateWaveInlineGroupXtdhGrant({
         </button>
       </div>
 
-      {isFetching && !!lookupGrantId && (
-        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-font-medium tw-text-iron-400">
-          Validating grant...
-        </p>
-      )}
-
-      {showLookupError && (
-        <div className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/10 tw-p-3">
-          <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-red">
-            {errorMessage ?? "Unable to resolve grant ID."}
-          </p>
-          <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-red/90">
-            The ID will still be submitted as entered:{" "}
-            <span className="tw-font-semibold">
-              {toShortGrantId(lookupGrantId)}
-            </span>
-          </p>
-        </div>
-      )}
-
-      {isLookupFresh && !!grant && (
-        <GroupCreateXtdhGrantRow
-          grant={grant}
-          isSelected={true}
-          interactive={false}
-          className="tw-mt-3"
-        />
-      )}
-
-      {showNonGrantedWarning && (
-        <div className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-300/30 tw-bg-amber-300/10 tw-p-3">
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-amber-300">
-            Selected grant status is not GRANTED. This filter is still allowed
-            and will be submitted.
-          </p>
-        </div>
-      )}
+      <GroupCreateXtdhGrantSelection
+        errorMessage={errorMessage}
+        grant={grant}
+        isFetching={isFetching}
+        isLookupFresh={isLookupFresh}
+        lookupGrantId={lookupGrantId}
+        matchMode={effectiveMatchMode}
+        setMatchMode={setBeneficiaryGrantMatchMode}
+        showLookupError={showLookupError}
+        showNonGrantedWarning={showNonGrantedWarning}
+      />
 
       {showGrantFinder && (
         <div
@@ -303,6 +296,12 @@ export default function CreateWaveInlineGroupXtdhGrant({
                       onSelect={(selectedGrant) => {
                         setBeneficiaryGrantId(selectedGrant.id);
                         setLookupGrantId(selectedGrant.id);
+                        setBeneficiaryGrantMatchMode(
+                          getGrantCompatibleMatchMode(
+                            selectedGrant,
+                            effectiveMatchMode
+                          )
+                        );
                       }}
                     />
                   ))}

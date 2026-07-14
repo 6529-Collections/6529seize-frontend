@@ -53,6 +53,7 @@ rolls back if the request fails.
 ## Edge Cases
 
 - Temporary drops (`temp-*`) cannot be reacted to and do not show rating actions.
+- Reaction controls are disabled while a proxy profile is active.
 - Light placeholder drops do not render reaction or rating controls.
 - Chat drops do not show clap rating controls.
 - Memes-wave participatory drops hide clap rating controls.

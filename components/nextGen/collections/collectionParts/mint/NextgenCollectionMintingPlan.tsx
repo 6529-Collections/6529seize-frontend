@@ -220,7 +220,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           />
         </div>
       </div>
-      <div className="table-scroll-container">
+      <div className="tw-no-scrollbar tw-overflow-x-auto">
         <table className={styles["logsTable"]}>
           <thead>
             <tr>

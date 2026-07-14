@@ -3,12 +3,13 @@ import type { LinkHandler } from "../linkTypes";
 import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
 
 const TENOR_HOST = "media.tenor.com";
+const GIPHY_MEDIA_HOST_REGEX = /^media\d*\.giphy\.com$/;
 
-const isTenorGif = (href: string): boolean => {
+const isSupportedGif = (href: string): boolean => {
   try {
     const url = new URL(href);
     const hostname = url.hostname.toLowerCase();
-    if (hostname !== TENOR_HOST) {
+    if (hostname !== TENOR_HOST && !GIPHY_MEDIA_HOST_REGEX.test(hostname)) {
       return false;
     }
 
@@ -22,7 +23,7 @@ const isTenorGif = (href: string): boolean => {
 export const createGifHandler = (options?: {
   readonly linkPreviewVariant?: LinkPreviewVariant;
 }): LinkHandler => ({
-  match: isTenorGif,
+  match: isSupportedGif,
   render: (href) =>
     renderGifEmbed(href, {
       fixedSize: options?.linkPreviewVariant !== "home",

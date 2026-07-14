@@ -14,10 +14,13 @@ import {
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
+import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
+import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
+import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -38,6 +41,8 @@ function namespaceMessages<
 }
 
 type MessageMap = Record<string, string>;
+
+const PLEASE_TRY_AGAIN = "Please try again.";
 
 type ObjectMessages<Prefix extends string, Entries extends MessageMap> = {
   readonly [Entry in keyof Entries as `${Prefix}.${Entry & string}`]: Entries[Entry];
@@ -311,6 +316,13 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "subsection.developerOpenData": "Data & Developer Tools",
 } as const);
 
+const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  waveSections: "Wave sections",
+  appSections: "App sections",
+  loadingSections: "Loading wave sections",
+  fallbackCuration: "Curation",
+} as const);
+
 const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
   "back.wave": "Back to wave",
   "back.previous": "Back to previous page",
@@ -362,6 +374,78 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copied: "Copied!",
   copyFailed: "Copy failed",
 } as const);
+
+const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
+  "waves.competitionBadges",
+  {
+    participantTooltip: "View this participant’s competition entries in {wave}",
+    winnerTooltip: "View this winner’s competition entries in {wave}",
+    title: "{profile}'s competition entries",
+    profileFallback: "This member",
+    "tabs.active": "Active entries",
+    "tabs.winners": "Winning entries",
+    loading: "Loading competition entries…",
+    error: "Couldn’t load competition entries.",
+    emptyActive: "No active entries are available.",
+    emptyWinners: "No winning entries are available.",
+    retry: "Retry",
+    loadMore: "Load more entries",
+    loadingMore: "Loading more entries…",
+    close: "Close competition entries",
+    openEntry: "Open competition entry {title}",
+    untitled: "Untitled entry",
+    winner: "Winner",
+    rating: "{rating} total",
+  } as const
+);
+
+const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
+  explain: "Explain",
+  explainAriaLabel: "Reply with vote rationale",
+  fieldLabel: "Optional rationale reply",
+  fieldDescription:
+    "Editing this text turns on Vote with reply until you choose the switch setting yourself.",
+  switchLabel: "Vote with reply",
+  stateOn: "On",
+  stateOff: "Off",
+  emptyBlockReason: "Add rationale text or turn Vote with reply off.",
+  submitLabel: "Vote + reply",
+  postErrorTitle: "Vote saved, but couldn't post your rationale reply.",
+  postErrorRetry: "Please try posting the reply again.",
+  postErrorEmpty: "Add rationale text and try posting the reply again.",
+  postErrorNoTarget: "The voted drop has no reply target.",
+  prefixTotal: "Vote rationale ({voteTotal} at time of posting):\n\n",
+  prefixTotalAndChange:
+    "Vote rationale ({voteTotal} total, {voteChange} change at time of posting):\n\n",
+} as const);
+
+const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
+  "actions.viewResults": "View results",
+  "actions.vote": "Vote",
+  "actions.changeVote": "Change vote",
+  "status.voted": "Voted",
+  "status.updated": "Updated",
+} as const);
+
+const WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES = objectMessages(
+  "waves.submissionButtonLabel",
+  {
+    counter: "{count}/{max}",
+    defaultCreateProposal: "Create Proposal",
+    defaultDrop: "Drop",
+    defaultDropArt: "Drop Art",
+    defaultSubmitDrop: "Submit drop",
+    editLabel: "Edit submission button label",
+    errorTooLong: "Label must be {max} characters or fewer.",
+    label: "Submission button label",
+    rowLabel: "Submission button",
+    toastAuthFailed:
+      "Couldn't authenticate. Reconnect your wallet and try again.",
+    toastRetry: PLEASE_TRY_AGAIN,
+    toastSaveFailedTitle: "Couldn't save this submission button label.",
+    useDefault: "Use default",
+  } as const
+);
 
 const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.walletActivity",
@@ -445,7 +529,7 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
   "dm.createFailed.title": "Couldn't create this direct message.",
-  "dm.createFailed.description": "Please try again.",
+  "dm.createFailed.description": PLEASE_TRY_AGAIN,
   "name.profileEnabled": "Profile enabled: {date}",
   "pfp.alt": "{name}'s profile picture",
   "pfp.edit": "Edit {name}'s profile picture",
@@ -551,22 +635,248 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   chatLoadError: "Unable to load this conversation.",
 } as const);
 
+const NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES = objectMessages(
+  "notifications.followButton",
+  {
+    follow: "Follow",
+    following: "Following",
+    "error.missingHandleTitle": "Couldn't follow this profile.",
+    "error.missingHandleDescription": "This profile is missing a handle.",
+  } as const
+);
+
+const NOTIFICATIONS_WAVE_CREATED_MESSAGES = objectMessages(
+  "notifications.waveCreated",
+  {
+    normalCopy: "created a wave you can access:",
+    dmCopy: "started a DM with you:",
+    openDm: "Open DM",
+    joinWave: "Join wave",
+    joinedWave: "Joined",
+    followCreator: "Follow creator",
+    followingCreator: "Following creator",
+  } as const
+);
+
+const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
+  "notifications.waveFollowButton",
+  {
+    join: "Join",
+    joined: "Joined",
+  } as const
+);
+
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
-  "postsCount.one": "{count} Post",
-  "postsCount.other": "{count} Posts",
+  "postLabel.one": "Post",
+  "postLabel.other": "Posts",
+} as const);
+
+const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
+  "waves.notificationSettings",
+  [
+    ["trigger.tooltip", "Notification settings"],
+    ["trigger.ariaLabel", "Open notification settings"],
+    ["allMentions.label", "ALL mentions"],
+    ["allMentions.ariaLabel", "Receive ALL mention notifications"],
+    ["allMessages.label", "All messages"],
+    ["allMessages.ariaLabel", "Receive notifications for all messages"],
+    [
+      "allMessages.limit.unavailableDescription",
+      "Below {count} followers only.",
+    ],
+    [
+      "allMessages.limit.reenableDescription",
+      "Re-enable below {count} followers.",
+    ],
+    ["mute.label", "Mute"],
+    ["mute.activeLabel", "Muted"],
+    ["mute.ariaLabel", "Mute wave"],
+    ["mute.unmuteAriaLabel", "Unmute wave"],
+    ["mute.tooltip.enable", "Click to mute this wave"],
+    ["mute.tooltip.disable", "Click to unmute this wave"],
+    ["mute.error.muteTitle", "Couldn't mute this wave."],
+    ["mute.error.unmuteTitle", "Couldn't unmute this wave."],
+    ["mute.error.description", PLEASE_TRY_AGAIN],
+    ["mute.error.fallbackMute", "Unable to mute wave"],
+    ["mute.error.fallbackUnmute", "Unable to unmute wave"],
+    ["preferences.error.updateTitle", "Couldn't update notification settings."],
+    ["preferences.error.description", PLEASE_TRY_AGAIN],
+    [
+      "preferences.error.enableAllMentions",
+      "Unable to enable @ALL notifications",
+    ],
+    [
+      "preferences.error.disableAllMentions",
+      "Unable to disable @ALL notifications",
+    ],
+    [
+      "preferences.error.enableAllMessages",
+      "Unable to enable all-message notifications",
+    ],
+    [
+      "preferences.error.disableAllMessages",
+      "Unable to disable all-message notifications",
+    ],
+    ["retry.label", "Retry"],
+    ["retry.ariaLabel", "Retry notification settings"],
+  ] as const
+);
+
+const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
+  accessHelper:
+    "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
+  limitedAccessTitle: "Warning: Limited Access",
+  limitedAccessDescription:
+    'This wave is configured with restricted access. It can only be viewed by members of the "{viewGroupName}" group and managed by members of the "{adminGroupName}" group. If you are not in a group that can view it, you will not be able to access this wave.',
+  "inlineIdentities.emptyHelper":
+    "Add identities one by one to build this access group.",
+  "inlineIdentities.creatorExcludedWarning":
+    "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
+} as const);
+
+const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
+  "waves.create.rank.mode",
+  {
+    legend: "Ranking mode",
+    "announceWinners.title": "Announce Winners",
+    "announceWinners.description":
+      "Winners are announced on a schedule you'll set on the Dates step — a fixed timeline that ends the wave, or repeating cycles.",
+    "perpetualRanking.title": "Perpetual Ranking",
+    "perpetualRanking.description":
+      "Rankings update continuously with no winners and no end date — a live, always-on leaderboard.",
+  } as const
+);
+
+const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
+  identityDuplicatesRequireWinners:
+    "Perpetual ranking waves never announce winners, so identities can't be resubmitted “after a win”. Choose a different re-submission rule.",
+} as const);
+
+const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
+  title: "Outcomes",
+  showOutcomes: "Show outcomes",
+  "perpetual.title": "Outcome is leaderboard position",
+  "perpetual.description":
+    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
+} as const);
+
+const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
+  "waves.leaderboard.phase",
+  {
+    votingOngoing: "Voting ongoing",
+    droppingOngoing: "Dropping open",
+    noEndDate: "No end date",
+  } as const
+);
+
+const WAVE_RULES_SCHEDULE_MESSAGES = objectMessages("waves.rules.schedule", {
+  perpetualRankType: "Rank — Perpetual Ranking",
+  outcomesNotAvailable: "Not available (perpetual wave)",
+  "winnerAnnouncements.label": "Winner announcements",
+  "winnerAnnouncements.none": "None (ongoing ranking, no end date)",
+} as const);
+
+const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
+  "collection.gradients": "Gradients",
+  "collection.memelab": "Meme Lab",
+  "collection.memes": "Memes",
+  "collection.nextgen": "NextGen",
+  "matchMode.any": "Own any",
+  "matchMode.all": "Own all",
+  requirementLabel: "{collection} requirement",
+  tokenRequirementLabel: "{collection} token requirement",
+  description:
+    "Choose whether identities must own any selected token or all selected tokens.",
+  "card.tooltip": "Internal NFT ownership requirements for this group.",
+  "card.anyCollectionToken": "{collection}: any collection token",
+  "card.anySelected": "{collection}: any selected ({count})",
+  "card.allSelected": "{collection}: all selected ({count})",
 } as const);
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "replyTargetDeletedToast.title": "Reply removed.",
+  "replyTargetDeletedToast.description":
+    "The message you were replying to was deleted. Your draft is still here.",
+  "replyTargetUnavailableToast.title": "Reply not sent.",
+  "replyTargetUnavailableToast.descriptionRestored":
+    "The message you replied to is no longer available. Your draft was restored.",
+  "replyTargetUnavailableToast.descriptionKept":
+    "The message you replied to is no longer available. Your current draft was kept.",
+  "replyTargetUnavailableToast.detailsRestored":
+    "You can send it as a new message instead.",
+  "replyTargetUnavailableToast.detailsKept":
+    "Your current draft was not changed.",
+  "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
+} as const);
+
+const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
+  "access.anyone": "Anyone",
+  "access.anyoneWhenEnabled": "Anyone when enabled",
+  "access.label": "Chat access",
+  "groups.admin": "Admin",
+  "groups.drop": "Drop",
+  "groups.view": "View",
+  "groups.vote": "Vote",
+  "status.disabled": "Disabled",
+  "status.editLabel": "Edit chat status",
+  "status.enabled": "Enabled",
+  "status.enableHelp":
+    "The chat access group still controls who can chat when chat is enabled.",
+  "status.enableLabel": "Enable chat",
+  "status.label": "Chat status",
 } as const);
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
 
+const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
+  "waves.drops.searchModal",
+  {
+    authorFallback: "unknown author",
+    clear: "Clear search",
+    clearShort: "Clear",
+    close: "Close search",
+    descriptionPrefix: "in",
+    "empty.description": "Try a different word or phrase.",
+    "empty.title": "No messages found",
+    "error.description": "Change the query or reopen search to try again.",
+    "error.title": "Couldn't load results",
+    "error.retry": "Try again",
+    "error.retrying": "Trying again...",
+    "idle.description":
+      "Type at least {minLength} characters to search this wave.",
+    "idle.title": "Ready to search",
+    inputDescription:
+      "Type at least {minLength} characters to search messages in {waveName}.",
+    inputLabel: "Search messages in {waveName}",
+    loadMore: "Load more",
+    loadingMore: "Loading...",
+    "loading.description": "Looking through {waveName}.",
+    "loading.title": "Searching messages",
+    placeholder: "Search messages",
+    "result.open": "Open message {serialNo} by {author}",
+    "result.mediaOnly": "Message with media or an attachment",
+    "result.serial": "Message #{serialNo}",
+    "result.unavailable": "Message by {author} cannot be opened",
+    "results.count.one": "{count} result",
+    "results.count.other": "{count} results",
+    "results.queryPrefix": "for",
+    "results.status.one": '{count} result for "{query}"',
+    "results.status.other": '{count} results for "{query}"',
+    searchAll: "Search all 6529",
+    title: "Search messages",
+  } as const
+);
+
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
   dialogTitle: "GIF search",
+  searchPlaceholder: "Search GIFs",
+  noResults: "No GIFs found.",
+  poweredBy: "Powered by {brandName}",
+  poweredByPrefix: "Powered by",
   "status.checking": "Checking GIF search...",
   "status.ready": "GIF search is ready.",
   "unavailable.title": "GIF search is temporarily unavailable.",
@@ -654,10 +964,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "categories.title": "Categories",
   "categories.loading": "Loading",
   "categories.all": "All",
-  "categories.active": "Category",
-  "categories.activeAriaLabel": "Choose active Wave REP category",
-  "categories.browse": "Show all categories",
-  "categories.searchPlaceholder": "Search categories",
+  "categories.searchPlaceholder": "Search categories…",
   "categories.searchAriaLabel": "Search Wave REP categories",
   "categories.noMatches": "No matching categories",
   "categories.allAriaLabel":
@@ -669,6 +976,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "categories.loadMoreError": "Could not load more categories.",
   "categories.loadingMore": "Loading categories",
   "categories.loadMore": "Load more categories",
+  "categories.searchMore": "Search more categories",
   "view.ariaLabel": "Wave REP detail view",
   "view.contributors": "Contributors",
   "view.activity": "Activity",
@@ -676,8 +984,6 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "contributors.heading.category": "Contributors in {category}",
   "contributors.description.all": "{contributors}",
   "contributors.description.category": "{contributors}, {rep}",
-  "contributors.categoryFilter": "Category: {category}",
-  "contributors.categoryFilterAll": "All",
   "contributors.error": "Could not load contributors.",
   "contributors.empty.all": "No Wave REP yet.",
   "contributors.empty.category": "No contributors in {category} yet.",
@@ -752,6 +1058,10 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "walletAuth.same.assets": "You do not need to move tokens or assets.",
   "walletAuth.same.desktop":
     "The 6529 Desktop app continues using the existing connection flow during this rollout.",
+  "walletAuth.builders.title": "Building with the API",
+  "walletAuth.builders.body":
+    "External clients should use the session-v2 API authentication guide instead of the user upgrade notes on this page.",
+  "walletAuth.builders.link": "Open API authentication guide",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -768,7 +1078,87 @@ const COMMON_MESSAGES = objectMessages("common", {
   close: "Close",
 } as const);
 
+const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
+  add: "Add",
+  addAriaLabel: "Add identity filter",
+  apply: "Done",
+  clearAll: "Clear all",
+  description:
+    "Add handles, ENS names, or wallet addresses. Results update as filters change.",
+  duplicate: "That identity is already included.",
+  empty: "No identity filters added. Showing everyone.",
+  inputLabel: "Handle, ENS name, or wallet address",
+  open: "Filter by identity",
+  placeholder: "Handle, ENS, or wallet address",
+  remove: "Remove {identity} from filters",
+  "selected.one": "{count} identity selected",
+  "selected.other": "{count} identities selected",
+  title: "Filter by identity",
+} as const);
+
+const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  "search.emptyDescription":
+    "Try another collection name or clear the search to see all collections.",
+  "search.emptyTitle": "No collections found for “{query}”",
+} as const);
+
+const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
+  "category.all": "All",
+  "category.nfts": "NFTs",
+  "category.pages": "Pages",
+  "category.profiles": "Profiles",
+  "category.waves": "Waves",
+  "category.error": "Some results could not be loaded",
+  "category.loading": "Loading {category} results",
+  clear: "Clear search",
+  clearShort: "Clear",
+  close: "Close search",
+  "dialogTitle.site": "Search 6529",
+  "dialogTitle.wave": "Search this Wave",
+  "dialogDescription.site": "Find pages, NFTs, profiles, and Waves.",
+  error: "Something went wrong while searching. Please try again.",
+  "error.partial.one": "{category} results could not be loaded.",
+  "error.partial.other": "Some result types could not be loaded: {categories}.",
+  goBack: "Go back",
+  idle: "Start typing to search 6529.io",
+  "idleWithCountdown.one":
+    "Start typing to search 6529.io ({count} more character)",
+  "idleWithCountdown.other":
+    "Start typing to search 6529.io ({count} more characters)",
+  "inputDescription.site":
+    "Type at least {minLength} characters to search 6529.io.",
+  "inputDescription.wave":
+    "Type at least {minLength} characters to search messages in this Wave.",
+  inputLabel: "Search 6529",
+  loading: "Searching...",
+  loadingFor: 'Searching for "{query}"',
+  "mode.site": "Site-wide",
+  "mode.wave": "In this Wave",
+  noResults: "No results found",
+  noResultsFor: 'No matches in {category} for "{query}"',
+  noResultsHint:
+    "Check the spelling, try fewer words, or choose another result type.",
+  "placeholder.site": "Search 6529.io",
+  "placeholder.wave": "Search messages",
+  retry: "Try Again",
+  "results.count.one": "{count} result",
+  "results.count.other": "{count} results",
+  "results.queryPrefix": "for",
+  "results.panelLabel": "{category} results",
+  "results.status.one": '{count} result for "{query}"',
+  "results.status.other": '{count} results for "{query}"',
+  "recent.description": "Pick up where you left off.",
+  "recent.title": "Recent searches",
+  scopeLabel: "Result type",
+  "scope.allResults": "all results",
+  "status.keyboardHint":
+    "Use arrow keys to move through results and Enter to open.",
+  viewAllCategory: "View all {category}",
+} as const);
+
 export const EN_US_MESSAGES = {
+  ...IDENTITY_FILTER_MESSAGES,
+  ...XTDH_COLLECTION_MESSAGES,
   ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
@@ -849,12 +1239,10 @@ export const EN_US_MESSAGES = {
   "headerShare.modal.title": "Share",
   "headerShare.modal.closeAriaLabel": "Close share modal",
   "headerShare.menu.shareType": "Share Type",
-  "headerShare.menu.selectPlatform": "Select Platform",
   "headerShare.menu.openLinkIn": "Open Link In",
   "headerShare.menu.openUrlIn": "Open URL In",
   "headerShare.menu.connection": "Connection",
   "headerShare.menu.currentUrl": "Current URL",
-  "headerShare.menu.apps": "6529 Apps",
   "headerShare.menu.mobile": "6529 Mobile",
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.desktop": "6529 Desktop",
@@ -888,9 +1276,17 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
-  "tools.api.authentication.title": "Authentication",
+  "tools.api.authCallout.title": "v2 API authentication",
+  "tools.api.authCallout.description":
+    "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
+  "tools.api.authCallout.link": "Read the full external-client auth guide",
+  "tools.api.authentication.title": "Authentication quickstart",
   "tools.api.authentication.basedOnSignatures":
-    "Authentication is based on Ethereum signatures.",
+    "Authentication is based on Ethereum signatures. For scripts and other external clients, request a native session-v2 challenge.",
+  "tools.api.authentication.externalNote":
+    "This example shows the short native/script flow for external API clients.",
+  "tools.api.authentication.fullGuideLink":
+    "Use the full guide for refresh, logout, and security notes.",
   "tools.api.authentication.flowIntro": "The flow works as follows:",
   "tools.api.authentication.requestSessionMessage":
     "Request a session-v2 signable message for the wallet you want to authenticate.",
@@ -900,8 +1296,6 @@ export const EN_US_MESSAGES = {
     "Send the signature back to the server.",
   "tools.api.authentication.receiveToken":
     "Receive a JWT bearer token, which you can include in headers of subsequent requests.",
-  "tools.api.authentication.nodeExample":
-    "Here's a full example in Node.js using ethers and node-fetch:",
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted drop",
   "home.boostedDrop.boost": "Boost",
@@ -916,6 +1310,7 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  ...homeNewcomerMessages,
   "home.mintSubscriptions.balanceLabel": "Balance",
   "home.mintSubscriptions.infoLinkAriaLabel":
     "Learn more about The Memes subscriptions",
@@ -948,7 +1343,7 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
   "waveChat.boostedDrops.display.description":
-    "Choose how inserted boosted-drop cards appear in wave chat on this device.",
+    "How boosted-drop cards show in chat.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
   "waveChat.boostedDrops.display.hidden": "Hidden",
   "waveChat.boostedDrops.display.compact": "Compact",
@@ -1004,6 +1399,7 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.cardActivity": "Card Activity",
   "theMemes.detail.tabs.timeline": "Timeline",
   "theMemes.detail.tabs.yourTransactions": "Your Transactions",
+  ...EN_US_THE_MEMES_COLLECTORS_MESSAGES,
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,
@@ -1430,7 +1826,7 @@ export const EN_US_MESSAGES = {
     "Unmute notifications from this profile",
   "profile.mute.error.mute": "Couldn't mute this profile.",
   "profile.mute.error.unmute": "Couldn't unmute this profile.",
-  "profile.mute.error.description": "Please try again.",
+  "profile.mute.error.description": PLEASE_TRY_AGAIN,
   "profile.mute.status.muted": "Notifications from this profile are muted.",
   "profile.mute.status.unmuted":
     "Notifications from this profile are not muted.",
@@ -1460,11 +1856,25 @@ export const EN_US_MESSAGES = {
   ...USER_PROFILE_HEADER_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
+  ...wavesRightPanelMessages,
   ...QUICK_DM_MESSAGES,
+  ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
+  ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
+  ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
+  ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
+  ...WAVE_CREATE_GROUPS_MESSAGES,
+  ...WAVE_CREATE_RANK_MODE_MESSAGES,
+  ...WAVE_CREATE_DROPS_MESSAGES,
+  ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_LEADERBOARD_PHASE_MESSAGES,
+  ...WAVE_RULES_SCHEDULE_MESSAGES,
+  ...GROUP_NFT_OWNERSHIP_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
@@ -1483,14 +1893,20 @@ export const EN_US_MESSAGES = {
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
+  ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...WAVE_NAVIGATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_COMPETITION_BADGE_MESSAGES,
+  ...WAVE_VOTE_RATIONALE_MESSAGES,
+  ...WAVE_POLL_MESSAGES,
+  ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

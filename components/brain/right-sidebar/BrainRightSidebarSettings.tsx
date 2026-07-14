@@ -9,7 +9,7 @@ export default function BrainRightSidebarSettings({
   wave,
 }: BrainRightSidebarSettingsProps) {
   return (
-    <div className="tw-flex tw-flex-col tw-overflow-y-auto tw-bg-iron-950">
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-bg-iron-950">
       <WaveSettingsSections wave={wave} />
     </div>
   );

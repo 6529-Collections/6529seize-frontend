@@ -14,10 +14,9 @@ import {
   getWavesBaseRoute,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
-import { useViewContext } from "./ViewContext";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import { useExitActiveWave } from "./useExitActiveWave";
 
 export default function BackButton() {
   const router = useRouter();
@@ -27,7 +26,7 @@ export default function BackButton() {
   const [loading, setLoading] = useState(false);
   const { isApp } = useDeviceInfo();
   const myStream = useMyStreamOptional();
-  const { clearLastVisited } = useViewContext();
+  const exitActiveWave = useExitActiveWave();
   const { goBack } = useNavigationHistoryContext();
 
   const waveId =
@@ -82,7 +81,6 @@ export default function BackButton() {
     // Drop open → close drop (remove ?drop param)
     if (dropId) {
       beginClosingDrop(dropId);
-      markDropCloseNavigation();
       const params = new URLSearchParams(searchParamsString || "");
       params.delete("drop");
       const basePath =
@@ -100,8 +98,7 @@ export default function BackButton() {
 
     // Inside a wave → go back to wave list
     if (waveId) {
-      clearLastVisited(isDm ? "dm" : "wave");
-      myStream?.activeWave.set(null, { isDirectMessage: isDm });
+      exitActiveWave(isDm);
       return;
     }
 

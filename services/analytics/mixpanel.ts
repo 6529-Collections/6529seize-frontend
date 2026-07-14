@@ -1,10 +1,62 @@
 import { publicEnv } from "@/config/env";
 import mixpanel from "mixpanel-browser";
 
-type AnalyticsProperties = Record<
+export type AnalyticsProperties = Record<
   string,
   boolean | number | string | null | undefined
 >;
+
+export type AuthImpactEventName =
+  | "Auth Forced Logout"
+  | "Auth Reauth Prompt Shown"
+  | "Auth Session Refresh Recovered"
+  | "Auth Session Refresh Succeeded"
+  | "Auth Session Upgrade Prompt Shown"
+  | "Auth Validation Cancelled"
+  | "Auth Validation Failed While Connected";
+
+export type AuthImpactReason =
+  | "auth_validation_failed"
+  | "session_refresh"
+  | "session_upgrade_deadline_expired"
+  | "session_upgrade_required"
+  | "stored_auth_invalid"
+  | "wallet_not_authorized";
+
+export type AuthImpactRefreshOutcome =
+  | "cancelled"
+  | "empty"
+  | "failed"
+  | "local_valid_after_failure"
+  | "missing_wallet"
+  | "not_attempted"
+  | "success";
+
+export type AuthImpactAuthState =
+  | "authenticated"
+  | "auth_validation_failed"
+  | "logged_out"
+  | "reauth_prompt"
+  | "refresh_needed"
+  | "session_upgrade_prompt"
+  | "session_upgrade_required"
+  | "wallet_connected";
+
+type AuthImpactClientType = "desktop" | "native" | "web";
+
+export type AuthImpactProperties = {
+  readonly auth_state_after?: AuthImpactAuthState | undefined;
+  readonly auth_state_before?: AuthImpactAuthState | undefined;
+  readonly client_type?: AuthImpactClientType | undefined;
+  readonly endpoint_family?: "auth_session_refresh" | undefined;
+  readonly page_group?: string | undefined;
+  readonly product_failure?: boolean | undefined;
+  readonly reason?: AuthImpactReason | undefined;
+  readonly refresh_outcome?: AuthImpactRefreshOutcome | undefined;
+  readonly route_pattern?: string | undefined;
+  readonly status_bucket?: "2xx" | "aborted" | undefined;
+  readonly was_connected_wallet?: boolean | undefined;
+};
 
 const MIXPANEL_TOKEN = publicEnv.NEXT_PUBLIC_MIXPANEL_TOKEN;
 
@@ -68,6 +120,13 @@ const track = (eventName: string, properties?: AnalyticsProperties): void => {
   mixpanel.track(eventName, sanitizeProperties(properties));
 };
 
+export const trackAnalyticsEvent = (
+  eventName: string,
+  properties?: AnalyticsProperties
+): void => {
+  track(eventName, properties);
+};
+
 export const identify = (
   profileId: number | string,
   traits?: AnalyticsProperties
@@ -120,4 +179,11 @@ export const trackPageView = (
     ...pageViewProperties,
     path,
   });
+};
+
+export const trackAuthImpactEvent = (
+  eventName: AuthImpactEventName,
+  properties?: AuthImpactProperties
+): void => {
+  track(eventName, properties);
 };

@@ -8,14 +8,14 @@ leaving the thread.
 Users can:
 
 - Follow or unfollow (`Join` / `Joined`)
-- Use the speaker notification menu after following
-- Mute or unmute waves from the bell-slash control
+- Use the bell notification menu after following
+- Mute or unmute waves from the speaker-muted control
 - Open wave description from the info button
 - Open and close followers from the `Joined` count
 - Pin or unpin the wave
 - Open the wave name link
 - Rename the wave and update the picture (when edit-eligible on non-DM waves)
-- Open author options (`Mute` / `Unmute`, `Delete`)
+- Open author options such as profile-wave actions and `Delete`
 
 ## Location in the Site
 
@@ -37,16 +37,16 @@ Users can:
 - `Join`, notification settings, and pin require a connected non-proxy profile.
 - Rename and picture edit require a non-DM wave plus `canEditWave` eligibility:
   author or admin-eligible, connected, and non-proxy.
-- Owner options menu (`Mute` / `Unmute`, `Delete`) is only shown when the connected
-  handle matches the wave author.
+- Owner options menu is only shown when the connected handle matches the wave
+  author.
 
 ## User Journey
 
 1. Open `About` in an active wave.
 2. Select `Join` to follow (or `Joined` to unfollow).
-3. If followed, open the speaker button to choose `@ALL` mention notifications
+3. If followed, open the bell button to choose `@ALL` mention notifications
    or `Notify for all messages`.
-4. Use the bell-slash button to mute the wave before or after joining, or
+4. Use the speaker-muted button to mute the wave before or after joining, or
    unmute it when the wave is already muted.
 5. Use the info button to open the wave description panel.
 6. Close description with outside click, `Escape`, or the info button.
@@ -56,7 +56,7 @@ Users can:
 10. Open the wave name to go to `/waves/{waveId}`.
 11. If edit-eligible on a non-DM wave, use pencil actions to rename or update
     picture.
-12. If author, open `⋮` for `Mute` / `Unmute` and `Delete`.
+12. If author, open `⋮` for profile-wave actions and `Delete`.
 13. For `Delete`, confirm in modal. Success redirects to `/waves`.
 
 ## Common Scenarios
@@ -74,12 +74,12 @@ Users can:
 
 - Signed-out users and proxy sessions do not get follow, notification, pin,
   edit, or owner controls.
-- The speaker notification menu renders only when the wave is followed; the
-  bell-slash mute control can render before joining.
+- The bell notification menu renders only when the wave is followed; the
+  speaker-muted control can render before joining.
 - All-message notifications can be unavailable for high-follower waves unless
-  already enabled; the unavailable all-message row stays disabled in the speaker
-  menu.
-- When muted, the speaker notification menu is replaced by a bell-slash `Muted`
+  already enabled; the unavailable all-message row stays disabled in the
+  notification menu.
+- When muted, the bell notification menu is replaced by a speaker-muted `Muted`
   control that unmutes the wave.
 - Direct-message waves never show rename or picture-edit pencils, even when the
   connected user would otherwise pass `canEditWave`.

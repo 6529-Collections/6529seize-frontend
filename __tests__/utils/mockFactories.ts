@@ -35,7 +35,7 @@ export function createMockMinimalWave(
     sidebarSection: null,
     followedSubwavesCount: 0,
     latestFollowedSubwaveDropTimestamp: null,
-    unreadFollowedSubwaveDrops: 0,
+    unreadSubwaveDrops: 0,
     firstUnreadFollowedSubwaveDropSerialNo: null,
     sidebarActivityTimestamp: null,
     isFollowedSubwaveContainer: false,

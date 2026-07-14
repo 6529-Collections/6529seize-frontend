@@ -9,6 +9,50 @@ import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import type { WaveEligibility } from "../WaveEligibilityContext";
 import type { WaveMessagesUpdate } from "../hooks/types";
 
+interface FetchWaveMessagesOptions {
+  readonly limit?: number | undefined;
+  readonly onFailure?: ((error: unknown) => void) | undefined;
+}
+
+type WaveDropsFeedWave = Awaited<
+  ReturnType<typeof fetchWaveDropsFeedV2>
+>["wave"];
+
+const getWaveEligibilityUpdate = (
+  wave: WaveDropsFeedWave | undefined
+): Partial<WaveEligibility> | null => {
+  if (wave === undefined) {
+    return null;
+  }
+
+  return {
+    authenticated_user_eligible_to_chat:
+      wave.authenticated_user_eligible_to_chat,
+    authenticated_user_eligible_to_vote:
+      wave.authenticated_user_eligible_to_vote,
+    authenticated_user_eligible_to_participate:
+      wave.authenticated_user_eligible_to_participate,
+    authenticated_user_admin: wave.authenticated_user_admin,
+  };
+};
+
+const updateWaveEligibilityFromFeed = (
+  waveId: string,
+  wave: WaveDropsFeedWave | undefined,
+  updateEligibility:
+    | ((waveId: string, eligibility: Partial<WaveEligibility>) => void)
+    | undefined
+): void => {
+  if (updateEligibility === undefined) {
+    return;
+  }
+
+  const eligibility = getWaveEligibilityUpdate(wave);
+  if (eligibility !== null) {
+    updateEligibility(waveId, eligibility);
+  }
+};
+
 /**
  * Fetches wave messages (drops) for a specific wave
  * @param waveId The ID of the wave to fetch messages for
@@ -24,30 +68,20 @@ export async function fetchWaveMessages(
   updateEligibility?: (
     waveId: string,
     eligibility: Partial<WaveEligibility>
-  ) => void
+  ) => void,
+  options: FetchWaveMessagesOptions = {}
 ): Promise<ApiDrop[] | null> {
   try {
     const data = await fetchWaveDropsFeedV2({
       waveId,
-      limit: WAVE_DROPS_PARAMS.limit,
+      limit: options.limit ?? WAVE_DROPS_PARAMS.limit,
       serialNoLimit: serialNo,
       searchStrategy:
         serialNo === null ? undefined : ApiDropSearchStrategy.Older,
       signal,
     });
 
-    // Update centralized eligibility if callback provided
-    if (updateEligibility && data.wave) {
-      updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat:
-          data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote:
-          data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate:
-          data.wave.authenticated_user_eligible_to_participate,
-        authenticated_user_admin: data.wave.authenticated_user_admin,
-      });
-    }
+    updateWaveEligibilityFromFeed(waveId, data.wave, updateEligibility);
 
     return data.drops as ApiDrop[];
   } catch (error) {
@@ -60,6 +94,14 @@ export async function fetchWaveMessages(
       `[WaveDataManager] Failed to fetch messages for ${waveId}:`,
       error
     );
+    try {
+      options.onFailure?.(error);
+    } catch (callbackError) {
+      console.error(
+        `[WaveDataManager] Failed to report fetch failure for ${waveId}:`,
+        callbackError
+      );
+    }
     return null;
   }
 }
@@ -276,24 +318,29 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
       return b.serial_no - a.serial_no;
     }
 
-    const aIsTemp = a.id?.startsWith("temp-") ?? false;
-    const bIsTemp = b.id?.startsWith("temp-") ?? false;
-
-    if (aIsTemp || !bIsTemp) {
-      return (
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-    }
-
-    return b.serial_no - a.serial_no;
+    const createdAtDiff = getDropCreatedAtMillis(b) - getDropCreatedAtMillis(a);
+    return createdAtDiff || b.serial_no - a.serial_no;
   });
 
   return finalDrops;
 }
 
+function getDropCreatedAtMillis(drop: Drop): number {
+  if (drop.created_at === undefined || drop.created_at === null) {
+    return drop.serial_no;
+  }
+
+  const timestamp =
+    typeof drop.created_at === "number"
+      ? drop.created_at
+      : new Date(drop.created_at).getTime();
+
+  return Number.isFinite(timestamp) ? timestamp : drop.serial_no;
+}
+
 // Helper function to get the highest serial number from an array of drops
 function getHighestSerialNo(drops: ApiDrop[] | Drop[]): number | null {
-  if (!drops || drops.length === 0) {
+  if (drops.length === 0) {
     return null;
   }
   return Math.max(...drops.map((drop) => drop.serial_no));
@@ -328,18 +375,7 @@ export async function fetchNewestWaveMessages(
       withRetry: true,
     });
 
-    // Update centralized eligibility if callback provided
-    if (updateEligibility && data.wave) {
-      updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat:
-          data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote:
-          data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate:
-          data.wave.authenticated_user_eligible_to_participate,
-        authenticated_user_admin: data.wave.authenticated_user_admin,
-      });
-    }
+    updateWaveEligibilityFromFeed(waveId, data.wave, updateEligibility);
 
     const fetchedDrops = data.drops as ApiDrop[];
 
@@ -372,6 +408,7 @@ export const maxOrNull = (
 };
 
 const DROP_IDS_PAGE_LIMIT = 5000;
+const MAX_DROP_IDS_REQUESTS = 20;
 
 /**
  * Parameters for the /drop-ids API endpoint.
@@ -388,6 +425,89 @@ interface DropIdsApiParams {
   // Add any other specific, known query parameters for /drop-ids from openapi.yaml if they exist
 }
 
+const getDropIdsPageLimit = (limit?: number): number =>
+  typeof limit === "number" && limit > 0 && limit <= DROP_IDS_PAGE_LIMIT
+    ? limit
+    : DROP_IDS_PAGE_LIMIT;
+
+const buildDropIdsRequestParams = ({
+  apiParams,
+  currentMaxSerialForNextCall,
+  itemsPerRequest,
+}: {
+  readonly apiParams: DropIdsApiParams;
+  readonly currentMaxSerialForNextCall: number | null;
+  readonly itemsPerRequest: number;
+}): Record<string, string> => {
+  const params: Record<string, string> = {
+    wave_id: apiParams.wave_id,
+    min_serial_no: apiParams.min_serial_no.toString(),
+    limit: itemsPerRequest.toString(),
+  };
+
+  if (currentMaxSerialForNextCall !== null) {
+    params["max_serial_no"] = currentMaxSerialForNextCall.toString();
+  }
+
+  return params;
+};
+
+const getSmallestSerialNo = (drops: readonly ApiDropId[]): number =>
+  drops.reduce(
+    (smallest, drop) => Math.min(smallest, drop.serial_no),
+    Infinity
+  );
+
+const shouldStopDropIdsPagination = ({
+  currentBatchLength,
+  currentMaxSerialForNextCall,
+  itemsPerRequest,
+  smallestSerialInCurrentBatch,
+  targetSerialNo,
+}: {
+  readonly currentBatchLength: number;
+  readonly currentMaxSerialForNextCall: number | null;
+  readonly itemsPerRequest: number;
+  readonly smallestSerialInCurrentBatch: number;
+  readonly targetSerialNo: number;
+}): boolean => {
+  if (
+    currentBatchLength < itemsPerRequest &&
+    smallestSerialInCurrentBatch > targetSerialNo
+  ) {
+    return true;
+  }
+
+  if (
+    currentMaxSerialForNextCall !== null &&
+    smallestSerialInCurrentBatch >= currentMaxSerialForNextCall &&
+    currentBatchLength === itemsPerRequest
+  ) {
+    return true;
+  }
+
+  return smallestSerialInCurrentBatch < targetSerialNo;
+};
+
+const collectDropIds = (
+  drops: readonly ApiDropId[],
+  allFetchedDropsMap: Map<number, ApiDropId>,
+  targetSerialNo: number
+): boolean => {
+  let targetFound = false;
+
+  for (const drop of drops) {
+    if (!allFetchedDropsMap.has(drop.serial_no)) {
+      allFetchedDropsMap.set(drop.serial_no, drop);
+    }
+    if (drop.serial_no === targetSerialNo) {
+      targetFound = true;
+    }
+  }
+
+  return targetFound;
+};
+
 async function findDropIdsBySerialNoWithPagination(
   targetSerialNo: number,
   apiParams: DropIdsApiParams,
@@ -396,42 +516,26 @@ async function findDropIdsBySerialNoWithPagination(
   let currentMaxSerialForNextCall: number | null =
     apiParams.max_serial_no ?? null;
   let requestsMade = 0;
-  const MAX_REQUESTS = 20;
 
   const allFetchedDropsMap = new Map<number, ApiDropId>(); // Used to store unique drops by serial_no
   let targetFound = false;
 
-  if (!apiParams.wave_id) {
-    throw new Error("wave_id is required in apiParams");
-  }
-  if (!apiParams.min_serial_no) {
-    throw new Error("min_serial_no is required in apiParams");
+  if (!Number.isFinite(apiParams.min_serial_no)) {
+    throw new TypeError("min_serial_no is required in apiParams");
   }
 
-  const itemsPerRequest =
-    typeof apiParams.limit === "number" &&
-    apiParams.limit > 0 &&
-    apiParams.limit <= DROP_IDS_PAGE_LIMIT
-      ? apiParams.limit
-      : DROP_IDS_PAGE_LIMIT;
+  const itemsPerRequest = getDropIdsPageLimit(apiParams.limit);
 
-  while (requestsMade < MAX_REQUESTS && !targetFound) {
+  while (requestsMade < MAX_DROP_IDS_REQUESTS) {
     requestsMade++;
-
-    const paramsForCurrentRequest: Record<string, string> = {
-      wave_id: apiParams.wave_id,
-      min_serial_no: apiParams.min_serial_no.toString(),
-      limit: itemsPerRequest.toString(),
-    };
-
-    if (currentMaxSerialForNextCall !== null) {
-      paramsForCurrentRequest["max_serial_no"] =
-        currentMaxSerialForNextCall.toString();
-    }
 
     const currentBatch = await commonApiFetchWithRetry<ApiDropId[]>({
       endpoint: `drop-ids`,
-      params: paramsForCurrentRequest,
+      params: buildDropIdsRequestParams({
+        apiParams,
+        currentMaxSerialForNextCall,
+        itemsPerRequest,
+      }),
       signal,
       retryOptions: {
         maxRetries: 3,
@@ -441,70 +545,43 @@ async function findDropIdsBySerialNoWithPagination(
       },
     });
 
-    if (signal?.aborted) {
+    if (signal?.aborted === true) {
       throw new Error("Request aborted by signal.");
     }
 
-    if (!currentBatch || currentBatch.length === 0) {
-      if (!targetFound) {
-        // Only throw if target hasn't been found in a previous batch that was processed before an empty one
-        const maxSerialLabel = currentMaxSerialForNextCall ?? "newest";
-        const message = `Target serial number ${targetSerialNo} not found. No (more) items match criteria with wave_id=${apiParams.wave_id} and max_serial_no=${maxSerialLabel}.`;
-        throw new Error(message);
-      }
-      break; // Target was found, and now we got an empty batch, so we are done.
+    if (currentBatch.length === 0) {
+      const maxSerialLabel = currentMaxSerialForNextCall ?? "newest";
+      throw new Error(
+        `Target serial number ${targetSerialNo} not found. No (more) items match criteria with wave_id=${apiParams.wave_id} and max_serial_no=${maxSerialLabel}.`
+      );
     }
 
-    let smallestSerialInCurrentBatch = currentBatch[0]?.serial_no ?? null;
-    for (const drop of currentBatch) {
-      if (!allFetchedDropsMap.has(drop.serial_no)) {
-        allFetchedDropsMap.set(drop.serial_no, drop);
-      }
-      if (drop.serial_no === targetSerialNo) {
-        targetFound = true;
-      }
-      if (
-        smallestSerialInCurrentBatch === null ||
-        drop.serial_no < smallestSerialInCurrentBatch
-      ) {
-        smallestSerialInCurrentBatch = drop.serial_no;
-      }
-    }
+    targetFound = collectDropIds(
+      currentBatch,
+      allFetchedDropsMap,
+      targetSerialNo
+    );
+
+    const smallestSerialInCurrentBatch = getSmallestSerialNo(currentBatch);
 
     if (targetFound) {
       // If target is found, we have processed its batch. We can break and return relevant drops.
       break;
     }
 
-    if (smallestSerialInCurrentBatch === null) {
-      break;
-    }
-
-    // Prepare for next iteration or check if we should stop
     if (
-      currentBatch.length < itemsPerRequest &&
-      smallestSerialInCurrentBatch > targetSerialNo
-    ) {
-      // Last page fetched, it was smaller than limit, and the smallest item is still greater than target.
-      // This means target is not in the dataset in the range we are looking.
-      break; // Target not found, and no more data in the desired direction.
-    }
-
-    // Avoid infinite loops if the API returns the same lowest serial repeatedly.
-    if (
-      currentMaxSerialForNextCall !== null &&
-      smallestSerialInCurrentBatch >= currentMaxSerialForNextCall &&
-      currentBatch.length === itemsPerRequest
+      shouldStopDropIdsPagination({
+        currentBatchLength: currentBatch.length,
+        currentMaxSerialForNextCall,
+        itemsPerRequest,
+        smallestSerialInCurrentBatch,
+        targetSerialNo,
+      })
     ) {
       break;
     }
 
     currentMaxSerialForNextCall = smallestSerialInCurrentBatch;
-
-    if (currentMaxSerialForNextCall < targetSerialNo) {
-      // We've passed the target serial number range in pagination without finding it.
-      break;
-    }
   }
 
   if (!targetFound) {
@@ -517,9 +594,7 @@ async function findDropIdsBySerialNoWithPagination(
     );
   }
 
-  const finalDrops = Array.from(allFetchedDropsMap.values()).sort(
+  return Array.from(allFetchedDropsMap.values()).sort(
     (a, b) => b.serial_no - a.serial_no
   ); // Sort descending by serial_no
-
-  return finalDrops;
 }

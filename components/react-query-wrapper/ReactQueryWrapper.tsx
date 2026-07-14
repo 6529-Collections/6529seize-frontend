@@ -13,9 +13,7 @@ import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { wait } from "@/helpers/Helpers";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
-import { Time } from "@/helpers/time";
 import type { CountlessPage, Page } from "@/helpers/Types";
-import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
 import { type ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
 
 import {
@@ -23,9 +21,9 @@ import {
   type QueryClient,
   useQueryClient,
 } from "@tanstack/react-query";
-import Cookies from "js-cookie";
 import { createContext, useMemo } from "react";
 import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
+import { QueryKey } from "./query-keys";
 import { addDropToDrops } from "./utils/addDropsToDrops";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 import {
@@ -35,108 +33,7 @@ import {
 import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
 import type { SortDirection } from "@/entities/ISort";
 
-export enum QueryKey {
-  PROFILE = "PROFILE",
-  PROFILE_LOGS = "PROFILE_LOGS",
-  PROFILE_RATER_CIC_STATE = "PROFILE_RATER_CIC_STATE",
-  PROFILE_RATERS = "PROFILE_RATERS",
-  PROFILE_CIC_STATEMENTS = "PROFILE_CIC_STATEMENTS",
-  PROFILE_SEARCH = "PROFILE_SEARCH",
-  PROFILE_REP_RATINGS = "PROFILE_REP_RATINGS",
-  PROFILE_TRANSACTIONS = "PROFILE_TRANSACTIONS",
-  PROFILE_DISTRIBUTIONS = "PROFILE_DISTRIBUTIONS",
-  TDH_GRANTS = "TDH_GRANTS",
-  TDH_GRANT_TOKENS = "TDH_GRANT_TOKENS",
-  PROFILE_COLLECTED = "PROFILE_COLLECTED",
-  PROFILE_COLLECTED_TRANSFER = "PROFILE_COLLECTED_TRANSFER",
-  PROFILE_DROPS = "PROFILE_DROPS",
-  XTDH_TOKENS = "XTDH_TOKENS",
-  XTDH_TOKEN_CONTRIBUTORS = "XTDH_TOKEN_CONTRIBUTORS",
-  XTDH_RECEIVED_NFTS = "XTDH_RECEIVED_NFTS",
-  IDENTITY_TDH_STATS = "IDENTITY_TDH_STATS",
-  GLOBAL_TDH_STATS = "GLOBAL_TDH_STATS",
-  IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
-  IDENTITY_ACTIVITY = "IDENTITY_ACTIVITY",
-  IDENTITY_FOLLOWING_ACTIONS = "IDENTITY_FOLLOWING_ACTIONS",
-  IDENTITY_MUTE_STATE = "IDENTITY_MUTE_STATE",
-  IDENTITY_FOLLOWERS = "IDENTITY_FOLLOWERS",
-  IDENTITY_NOTIFICATIONS = "IDENTITY_NOTIFICATIONS",
-  CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS = "CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS",
-  DM_DROPS_UNREAD = "DM_DROPS_UNREAD",
-  IDENTITY_SEARCH = "IDENTITY_SEARCH",
-  IDENTITY_FAVOURITE_WAVES = "IDENTITY_FAVOURITE_WAVES",
-  WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
-  REP_CATEGORIES_SEARCH = "REP_CATEGORIES_SEARCH",
-  MEMES_LITE = "MEMES_LITE",
-  MEMES_LATEST = "MEMES_LATEST",
-  MEMELAB_LITE = "MEMELAB_LITE",
-  WALLET_CONSOLIDATIONS_CHECK = "WALLET_CONSOLIDATIONS_CHECK",
-  NEXTGEN_COLLECTIONS = "NEXTGEN_COLLECTIONS",
-  COMMUNITY_MEMBERS_TOP = "COMMUNITY_MEMBERS_TOP",
-  RESERVOIR_NFT = "RESERVOIR_NFT",
-  DROPS = "DROPS",
-  DROPS_LEADERBOARD = "DROPS_LEADERBOARD",
-  DROP_VOTERS = "DROP_VOTERS",
-  DROP_POLL_VOTERS = "DROP_POLL_VOTERS",
-  DROP_VOTE_LOGS = "DROP_VOTE_LOGS",
-  BOOSTED_DROPS = "BOOSTED_DROPS",
-  DROP = "DROP",
-  DROP_DISCUSSION = "DROP_DISCUSSION",
-  GROUPS = "GROUPS",
-  GROUPS_INFINITE = "GROUPS_INFINITE",
-  GROUP = "GROUP",
-  GROUP_WALLET_GROUP_WALLETS = "GROUP_WALLET_GROUP_WALLETS",
-  NFTS_SEARCH = "NFTS_SEARCH",
-  NFTS = "NFTS",
-  NFT_COLLECTION_SEARCH = "NFT_COLLECTION_SEARCH",
-  NFT_CONTRACT_OVERVIEW = "NFT_CONTRACT_OVERVIEW",
-  NFT_TOKEN_METADATA = "NFT_TOKEN_METADATA",
-  PROFILE_PROXY = "PROFILE_PROXY",
-  PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
-  EMMA_IDENTITY_ALLOWLISTS = "EMMA_IDENTITY_ALLOWLISTS",
-  EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
-  WAVES_OVERVIEW = "WAVES_OVERVIEW",
-  WAVES_OVERVIEW_PUBLIC = "WAVES_OVERVIEW_PUBLIC",
-  WAVES_V2 = "WAVES_V2",
-  WAVE_SUBWAVES = "WAVE_SUBWAVES",
-  OFFICIAL_WAVES = "OFFICIAL_WAVES",
-  WAVES = "WAVES",
-  WAVES_PUBLIC = "WAVES_PUBLIC",
-  WAVES_SEARCH = "WAVES_SEARCH",
-  WAVE = "WAVE",
-  WAVE_POLLS = "WAVE_POLLS",
-  WAVE_METADATA = "WAVE_METADATA",
-  WAVE_CURATIONS = "WAVE_CURATIONS",
-  WAVE_LOGS = "WAVE_LOGS",
-  WAVE_VOTERS = "WAVE_VOTERS",
-  WAVE_FOLLOWERS = "WAVE_FOLLOWERS",
-  WAVE_REP_RATING = "WAVE_REP_RATING",
-  WAVE_REP_CREDIT = "WAVE_REP_CREDIT",
-  WAVE_REP_OVERVIEW = "WAVE_REP_OVERVIEW",
-  WAVE_REP_CATEGORIES = "WAVE_REP_CATEGORIES",
-  WAVE_REP_CATEGORY_CONTRIBUTORS = "WAVE_REP_CATEGORY_CONTRIBUTORS",
-  WAVE_REP_LOGS = "WAVE_REP_LOGS",
-  FEED_ITEMS = "FEED_ITEMS",
-  WAVE_DECISIONS = "WAVE_DECISIONS",
-  WAVE_DECISIONS_SALES = "WAVE_DECISIONS_SALES",
-  WAVE_OUTCOMES = "WAVE_OUTCOMES",
-  WAVE_OUTCOME_DISTRIBUTION = "WAVE_OUTCOME_DISTRIBUTION",
-  WAVE_OUTCOME_DISTRIBUTION_PAGE = "WAVE_OUTCOME_DISTRIBUTION_PAGE",
-  COMMUNITY_METRICS = "COMMUNITY_METRICS",
-  COMMUNITY_METRICS_SERIES = "COMMUNITY_METRICS_SERIES",
-  MINT_METRICS = "MINT_METRICS",
-  MARKETPLACE_PREVIEW = "MARKETPLACE_PREVIEW",
-  REP_OVERVIEW = "REP_OVERVIEW",
-  REP_CATEGORIES = "REP_CATEGORIES",
-  GLOBAL_REP_CATEGORY_SEARCH = "GLOBAL_REP_CATEGORY_SEARCH",
-  GLOBAL_REP_CATEGORY_SUGGESTED = "GLOBAL_REP_CATEGORY_SUGGESTED",
-  GLOBAL_REP_CATEGORY_OVERVIEW = "GLOBAL_REP_CATEGORY_OVERVIEW",
-  GLOBAL_REP_CATEGORY_PAGE = "GLOBAL_REP_CATEGORY_PAGE",
-  GLOBAL_REP_CATEGORY_WAVE_OVERVIEW = "GLOBAL_REP_CATEGORY_WAVE_OVERVIEW",
-  GLOBAL_REP_CATEGORY_WAVES_PAGE = "GLOBAL_REP_CATEGORY_WAVES_PAGE",
-  GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE = "GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE",
-  CIC_OVERVIEW = "CIC_OVERVIEW",
-}
+export { QueryKey } from "./query-keys";
 
 interface ProfileRatersParams {
   readonly page: number;
@@ -1112,14 +1009,11 @@ const createReactQueryContextValue = (
   };
 
   const invalidateNotifications = () => {
+    // Notification read mutations use the active account's JWT. Other connected
+    // accounts keep their cached unread counts and continue their normal polling.
     queryClient
       .invalidateQueries({
         queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-      })
-      .catch(() => undefined);
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
       })
       .catch(() => undefined);
     invalidateWavesV2();
@@ -1168,17 +1062,6 @@ export default function ReactQueryWrapper({
   readonly children: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
-
-  useQueryKeyListener([QueryKey.FEED_ITEMS], () => {
-    Cookies.set([QueryKey.FEED_ITEMS].toString(), `${Time.now().toMillis()}`);
-  });
-
-  useQueryKeyListener([QueryKey.IDENTITY_NOTIFICATIONS], () => {
-    Cookies.set(
-      [QueryKey.IDENTITY_NOTIFICATIONS].toString(),
-      `${Time.now().toMillis()}`
-    );
-  });
 
   const value = useMemo(
     () => createReactQueryContextValue(queryClient),

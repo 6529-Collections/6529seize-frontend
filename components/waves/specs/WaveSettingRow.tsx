@@ -251,17 +251,17 @@ export default function WaveSettingRow({
     ? createPortal(selectedEditorSurface, globalThis.document.body)
     : null;
   const rowGridClasses = canEdit
-    ? "tw-grid-cols-[minmax(6.5rem,0.85fr)_minmax(0,1fr)_1.5rem]"
-    : "tw-grid-cols-[minmax(6.5rem,0.85fr)_minmax(0,1fr)]";
+    ? "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.5rem]"
+    : "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)]";
 
   return (
     <div
-      className={`tw-group tw-grid tw-min-h-8 tw-w-full ${rowGridClasses} tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1 tw-text-sm`}
+      className={`tw-group tw-grid tw-min-h-9 tw-w-full ${rowGridClasses} tw-items-start tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1.5 tw-text-sm`}
     >
-      <span className="tw-min-w-0 tw-font-normal tw-text-iron-500">
+      <span className="tw-min-w-0 tw-py-0.5 tw-font-normal tw-leading-5 tw-text-iron-500">
         {label}
       </span>
-      <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-text-iron-50">
+      <span className="tw-min-w-0 tw-break-words tw-py-0.5 tw-text-right tw-font-medium tw-leading-5 tw-text-iron-50">
         {valueLabel}
       </span>
       {canEdit && (
@@ -274,7 +274,7 @@ export default function WaveSettingRow({
           aria-haspopup="dialog"
           title={editLabel}
           onClick={toggleEditor}
-          className="tw-flex tw-h-6 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
+          className="tw-flex tw-h-6 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300"
         >
           <PencilIcon size={PencilIconSize.SMALL} />
         </button>

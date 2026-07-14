@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import ParticipationDropHeader from "@/components/waves/drops/participation/ParticipationDropHeader";
 
+const mockDropAuthorBadges = jest.fn();
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children, onClick, className }: any) => (
@@ -36,6 +38,12 @@ jest.mock("@/components/waves/approval/ApprovalStatusBadge", () => {
   MockApprovalStatusBadge.displayName = "MockApprovalStatusBadge";
   return MockApprovalStatusBadge;
 });
+jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
+  DropAuthorBadges: (props: any) => {
+    mockDropAuthorBadges(props);
+    return <div data-testid="author-badges" />;
+  },
+}));
 jest.mock("@/helpers/Helpers", () => ({ cicToType: jest.fn(() => "TYPE") }));
 
 describe("ParticipationDropHeader", () => {
@@ -59,6 +67,12 @@ describe("ParticipationDropHeader", () => {
       "/alice"
     );
     expect(screen.getByTestId("time")).toHaveTextContent("123");
+    expect(mockDropAuthorBadges).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        profile: drop.author,
+        wave: drop.wave,
+      })
+    );
     expect(screen.getByTestId("badge").textContent).toContain('"rank":2');
     expect(screen.getByTestId("badge").textContent).toContain(
       '"decisionTime":999'

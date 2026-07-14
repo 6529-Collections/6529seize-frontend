@@ -4,8 +4,11 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import {
   getApproveWaveTabLabelsFromMetadata,
+  getWaveSubmissionButtonLabelFromMetadata,
+  getWaveSubmissionButtonLabelOverrideFromMetadata,
   getWaveOutcomeVisibilityFromMetadata,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { fetchWaveMetadata } from "@/services/api/waves-v2-api";
@@ -61,4 +64,44 @@ export function useWaveOutcomeVisibility(
 
     return getWaveOutcomeVisibilityFromMetadata(data);
   }, [data, isCompetitionWave]);
+}
+
+export function useWaveSubmissionButtonLabel({
+  enabled = true,
+  submissionExperience,
+  waveId,
+}: {
+  readonly enabled?: boolean | undefined;
+  readonly submissionExperience: WaveSubmissionExperience;
+  readonly waveId: string | null | undefined;
+}): string {
+  const { data } = useWaveMetadata(waveId, {
+    enabled: Boolean(enabled && waveId),
+  });
+
+  return useMemo(
+    () =>
+      getWaveSubmissionButtonLabelFromMetadata({
+        metadata: data,
+        submissionExperience,
+      }),
+    [data, submissionExperience]
+  );
+}
+
+export function useWaveSubmissionButtonLabelOverride({
+  enabled = true,
+  waveId,
+}: {
+  readonly enabled?: boolean | undefined;
+  readonly waveId: string | null | undefined;
+}): string | null {
+  const { data } = useWaveMetadata(waveId, {
+    enabled: Boolean(enabled && waveId),
+  });
+
+  return useMemo(
+    () => getWaveSubmissionButtonLabelOverrideFromMetadata(data),
+    [data]
+  );
 }

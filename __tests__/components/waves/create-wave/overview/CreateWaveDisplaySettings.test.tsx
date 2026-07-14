@@ -7,6 +7,7 @@ describe("CreateWaveDisplaySettings", () => {
   const baseDisplay = {
     customRules: null,
     outcomesVisible: true,
+    submissionButtonLabel: null,
     approve: {
       approvalsTabLabel: "",
       approvedTabLabel: "",
@@ -27,6 +28,7 @@ describe("CreateWaveDisplaySettings", () => {
     expect(screen.getByText("Approved")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Proposals")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Approved")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Drop")).toBeInTheDocument();
   });
 
   it("updates custom label fields", () => {
@@ -53,7 +55,7 @@ describe("CreateWaveDisplaySettings", () => {
     });
   });
 
-  it("shows outcome toggle for rank waves without approve labels", () => {
+  it("updates the submission button label field", () => {
     const onChange = jest.fn();
     render(
       <CreateWaveDisplaySettings
@@ -64,15 +66,71 @@ describe("CreateWaveDisplaySettings", () => {
       />
     );
 
-    expect(screen.getByText("Show outcomes")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Approvals tab label")).toBeNull();
-
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.change(screen.getByLabelText("Submission button label"), {
+      target: { value: "Apply" },
+    });
 
     expect(onChange).toHaveBeenCalledWith({
       ...baseDisplay,
-      outcomesVisible: false,
+      submissionButtonLabel: "Apply",
     });
+  });
+
+  it("stores an empty submission button label as null", () => {
+    const onChange = jest.fn();
+    render(
+      <CreateWaveDisplaySettings
+        display={{
+          ...baseDisplay,
+          submissionButtonLabel: "Apply",
+        }}
+        errors={[]}
+        onChange={onChange}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Submission button label"), {
+      target: { value: "" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...baseDisplay,
+      submissionButtonLabel: null,
+    });
+  });
+
+  it("shows submission label length validation", () => {
+    render(
+      <CreateWaveDisplaySettings
+        display={{
+          ...baseDisplay,
+          submissionButtonLabel: "A".repeat(25),
+        }}
+        errors={[CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG]}
+        onChange={jest.fn()}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    expect(
+      screen.getByText("Label must be 24 characters or fewer.")
+    ).toBeInTheDocument();
+  });
+
+  it("hides approve labels and the outcome toggle for rank waves", () => {
+    render(
+      <CreateWaveDisplaySettings
+        display={baseDisplay}
+        errors={[]}
+        onChange={jest.fn()}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    // The outcomes-visibility toggle lives on the Outcomes step now.
+    expect(screen.queryByText("Show outcomes")).toBeNull();
+    expect(screen.queryByLabelText("Approvals tab label")).toBeNull();
   });
 
   it("shows duplicate label validation", () => {

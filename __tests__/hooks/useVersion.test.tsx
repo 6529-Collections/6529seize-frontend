@@ -1,10 +1,14 @@
 import { act, render } from "@testing-library/react";
 
 describe("useIsVersionStale", () => {
+  const CLIENT_VERSION_HEADER = "x-6529-client-version";
+
   beforeEach(() => {
     jest.useFakeTimers();
     globalThis.fetch = jest.fn();
     globalThis.history.replaceState(null, "", "/");
+    const { publicEnv } = require("@/config/env");
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT = undefined;
   });
 
   afterEach(() => {
@@ -21,7 +25,72 @@ describe("useIsVersionStale", () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.VERSION = "1.0.0";
     (globalThis.fetch as jest.Mock).mockResolvedValue({
-      json: async () => ({ version: "1.0.0" }),
+      json: async () => ({
+        announced_version: null,
+        stale: false,
+        version: "1.0.0",
+      }),
+    });
+    const { findByText } = render(<TestComponent interval={1000} />);
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(globalThis.fetch).toHaveBeenCalledWith("/api/version", {
+      cache: "no-store",
+      headers: {
+        [CLIENT_VERSION_HEADER]: "1.0.0",
+      },
+    });
+    expect(await findByText("fresh")).toBeInTheDocument();
+  });
+
+  it("shows stale when versions differ and no announcement endpoint is configured", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VERSION = "1.0.0";
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      json: async () => ({
+        announced_version: null,
+        stale: true,
+        version: "2.0.0",
+      }),
+    });
+    const { findByText } = render(<TestComponent interval={1000} />);
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(await findByText("stale")).toBeInTheDocument();
+  });
+
+  it("shows stale when the version endpoint marks the current bundle stale", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VERSION = "1.0.0";
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT =
+      "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json";
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      json: async () => ({
+        announced_version: "2.0.0",
+        stale: true,
+        version: "2.0.0",
+      }),
+    });
+    const { findByText } = render(<TestComponent interval={1000} />);
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(await findByText("stale")).toBeInTheDocument();
+  });
+
+  it("does not use instance version while waiting for a configured announcement", async () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.VERSION = "1.0.0";
+    publicEnv.ANNOUNCED_VERSION_ENDPOINT =
+      "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json";
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      json: async () => ({
+        announced_version: null,
+        stale: false,
+        version: "2.0.0",
+      }),
     });
     const { findByText } = render(<TestComponent interval={1000} />);
     await act(async () => {
@@ -30,17 +99,17 @@ describe("useIsVersionStale", () => {
     expect(await findByText("fresh")).toBeInTheDocument();
   });
 
-  it("shows stale when versions differ", async () => {
+  it("ignores malformed version responses", async () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.VERSION = "1.0.0";
     (globalThis.fetch as jest.Mock).mockResolvedValue({
-      json: async () => ({ version: "2.0.0" }),
+      json: async () => ({}),
     });
     const { findByText } = render(<TestComponent interval={1000} />);
     await act(async () => {
       jest.runOnlyPendingTimers();
     });
-    expect(await findByText("stale")).toBeInTheDocument();
+    expect(await findByText("fresh")).toBeInTheDocument();
   });
 
   it("shows stale when forced by query param", async () => {

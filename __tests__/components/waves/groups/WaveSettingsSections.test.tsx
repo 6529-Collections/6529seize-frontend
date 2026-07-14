@@ -54,12 +54,14 @@ const makeWave = (
   overrides: {
     readonly slowModeCooldownMs?: number | undefined;
     readonly canAdmin?: boolean | undefined;
+    readonly chatGroup?: any;
     readonly chatEnabled?: boolean | undefined;
     readonly linksDisabled?: boolean | undefined;
     readonly waveType?: ApiWaveType | undefined;
     readonly creditScope?: ApiWaveCreditScope | undefined;
     readonly winningThreshold?: number | null | undefined;
     readonly winningThresholdMinDurationMs?: number | null | undefined;
+    readonly decisionsStrategy?: any;
   } = {}
 ): any => ({
   id: "wave-1",
@@ -78,7 +80,7 @@ const makeWave = (
   },
   visibility: { scope: { group: null } },
   chat: {
-    scope: { group: null },
+    scope: { group: overrides.chatGroup ?? null },
     enabled: overrides.chatEnabled ?? true,
     authenticated_user_eligible: true,
     links_disabled: overrides.linksDisabled ?? false,
@@ -105,7 +107,18 @@ const makeWave = (
     max_votes_per_identity_to_drop: null,
     time_lock_ms: null,
     admin_group: { group: null },
-    decisions_strategy: null,
+    // Rank waves default to a scheduled decision strategy; pass
+    // decisionsStrategy: null explicitly to model a perpetual wave.
+    decisions_strategy:
+      overrides.decisionsStrategy !== undefined
+        ? overrides.decisionsStrategy
+        : overrides.waveType === ApiWaveType.Rank
+          ? {
+              first_decision_time: 123,
+              subsequent_decisions: [],
+              is_rolling: false,
+            }
+          : null,
     authenticated_user_eligible_for_admin: overrides.canAdmin ?? false,
   },
   metrics: { your_participation_drops_count: 0 },
@@ -232,6 +245,7 @@ describe("WaveSettingsSections", () => {
     expect(screen.getByText("Display")).toBeInTheDocument();
     expect(screen.getByText("Approval rule")).toBeInTheDocument();
     expect(screen.getByText("Chat")).toBeInTheDocument();
+    expect(screen.getByText("Chat status")).toBeInTheDocument();
     expect(screen.getByText("Access")).toBeInTheDocument();
     expect(screen.getByText("Custom rules")).toBeInTheDocument();
     expect(screen.getByText("Acceptance rules")).toBeInTheDocument();
@@ -239,6 +253,8 @@ describe("WaveSettingsSections", () => {
     expect(screen.getByText("Approved tab")).toBeInTheDocument();
     expect(screen.getByText("Outcomes")).toBeInTheDocument();
     expect(screen.getByText("Shown")).toBeInTheDocument();
+    expect(screen.getByText("Submission button")).toBeInTheDocument();
+    expect(screen.getByText("Drop")).toBeInTheDocument();
     expect(screen.getByText("Approve after")).toBeInTheDocument();
     expect(screen.getByText("12 approvals")).toBeInTheDocument();
     expect(screen.getByText("Hold time")).toBeInTheDocument();
@@ -252,6 +268,7 @@ describe("WaveSettingsSections", () => {
     expect(screen.getByText("Rules")).toBeInTheDocument();
     expect(screen.getByText("Custom rules")).toBeInTheDocument();
     expect(screen.getByText("Acceptance rules")).toBeInTheDocument();
+    expect(screen.getByText("Chat status")).toBeInTheDocument();
     expect(screen.getByText("Outcomes")).toBeInTheDocument();
     expect(screen.queryByText("Approval tabs")).not.toBeInTheDocument();
     expect(screen.queryByText("Approvals tab")).not.toBeInTheDocument();
@@ -260,10 +277,27 @@ describe("WaveSettingsSections", () => {
     expect(fetchWaveMetadataMock).toHaveBeenCalledWith({ waveId: "wave-1" });
   });
 
+  it("hides outcome visibility for perpetual rank waves", () => {
+    renderSettings({
+      wave: makeWave({
+        waveType: ApiWaveType.Rank,
+        decisionsStrategy: null,
+      }),
+    });
+
+    // A perpetual wave never produces outcomes, so there is nothing for the
+    // visibility toggle to show or hide.
+    expect(screen.queryByText("Outcomes")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Show outcomes")).not.toBeInTheDocument();
+  });
+
   it("shows rules settings for chat waves without display or approval settings", () => {
     renderSettings({ wave: makeWave({ waveType: ApiWaveType.Chat }) });
 
     expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.queryByText("Chat status")).not.toBeInTheDocument();
+    expect(screen.getByText("Slow mode")).toBeInTheDocument();
+    expect(screen.getByText("Disable links")).toBeInTheDocument();
     expect(screen.getByText("Custom rules")).toBeInTheDocument();
     expect(screen.queryByText("Acceptance rules")).not.toBeInTheDocument();
     expect(
@@ -274,6 +308,66 @@ describe("WaveSettingsSections", () => {
     expect(screen.queryByText("Approval tabs")).not.toBeInTheDocument();
     expect(screen.queryByText("Approval rule")).not.toBeInTheDocument();
     expect(fetchWaveMetadataMock).toHaveBeenCalledWith({ waveId: "wave-1" });
+  });
+
+  it("keeps chat status visible when chat is disabled", () => {
+    renderSettings({
+      wave: makeWave({
+        chatEnabled: false,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    expect(screen.getByText("Chat")).toBeInTheDocument();
+    expect(screen.getByText("Chat status")).toBeInTheDocument();
+    expect(screen.getByText("Disabled")).toBeInTheDocument();
+    expect(screen.queryByText("Slow mode")).not.toBeInTheDocument();
+    expect(screen.queryByText("Disable links")).not.toBeInTheDocument();
+  });
+
+  it("allows admins to re-enable disabled chat from settings", async () => {
+    const user = userEvent.setup();
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        chatEnabled: false,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    await user.click(screen.getByRole("button", { name: "Edit chat status" }));
+    await user.click(screen.getByLabelText("Enable chat"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(commonApiPostMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "waves/wave-1",
+          body: expect.objectContaining({
+            chat: expect.objectContaining({
+              enabled: true,
+              scope: { group_id: null },
+            }),
+          }),
+        })
+      );
+    });
+  });
+
+  it("does not expose chat status editing for direct message scopes", () => {
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        chatGroup: { id: "dm-group", is_direct_message: true },
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    expect(screen.getByText("Chat status")).toBeInTheDocument();
+    expect(screen.getByText("Enabled")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Edit chat status" })
+    ).not.toBeInTheDocument();
   });
 
   it("shows outcome visibility as read-only for non-admins", async () => {
@@ -332,6 +426,196 @@ describe("WaveSettingsSections", () => {
       expect(invalidateSpy).toHaveBeenCalledWith({
         queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
       });
+    });
+  });
+
+  it("saves custom submission button label metadata", async () => {
+    const user = userEvent.setup();
+    const { queryClient } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Edit submission button label",
+      })
+    );
+    await user.type(screen.getByLabelText("Submission button label"), "Apply");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "Apply",
+        },
+      });
+    });
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+    });
+  });
+
+  it("deletes submission button label metadata when reset to default", async () => {
+    const user = userEvent.setup();
+    waveMetadata = [
+      {
+        id: 7,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    ];
+
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    expect(await screen.findByText("Apply")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit submission button label" })
+    );
+    await user.click(screen.getByRole("button", { name: "Use default" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        metadataId: 7,
+      });
+    });
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
+  });
+
+  it("deletes existing submission button label metadata before creating a replacement", async () => {
+    const user = userEvent.setup();
+    let resolveDelete: (() => void) | undefined;
+    const deletePromise = new Promise<void>((resolve) => {
+      resolveDelete = resolve;
+    });
+    deleteWaveMetadataMock.mockReturnValueOnce(deletePromise);
+    waveMetadata = [
+      {
+        id: 7,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    ];
+
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    expect(await screen.findByText("Apply")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit submission button label" })
+    );
+    await user.clear(screen.getByLabelText("Submission button label"));
+    await user.type(
+      screen.getByLabelText("Submission button label"),
+      "Submission"
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        metadataId: 7,
+      });
+    });
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
+
+    resolveDelete?.();
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "Submission",
+        },
+      });
+    });
+  });
+
+  it("restores the previous submission button label when replacement creation fails", async () => {
+    const user = userEvent.setup();
+    const createError = new Error("metadata failed");
+    createWaveMetadataMock
+      .mockRejectedValueOnce(createError)
+      .mockResolvedValueOnce({
+        id: 8,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      });
+    waveMetadata = [
+      {
+        id: 7,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    ];
+    const { setToast, queryClient } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    expect(await screen.findByText("Apply")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit submission button label" })
+    );
+    await user.clear(screen.getByLabelText("Submission button label"));
+    await user.type(
+      screen.getByLabelText("Submission button label"),
+      "Submission"
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledTimes(2);
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 7,
+    });
+    expect(createWaveMetadataMock).toHaveBeenNthCalledWith(1, {
+      waveId: "wave-1",
+      body: {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Submission",
+      },
+    });
+    expect(createWaveMetadataMock).toHaveBeenNthCalledWith(2, {
+      waveId: "wave-1",
+      body: {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+        data_value: "Apply",
+      },
+    });
+    await waitFor(() => {
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: "Couldn't save this submission button label.",
+          description: "Please try again.",
+        })
+      );
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
     });
   });
 
@@ -491,8 +775,7 @@ describe("WaveSettingsSections", () => {
     await waitFor(() => {
       expect(setToast).toHaveBeenCalledWith({
         type: "error",
-        message:
-          "Couldn't authenticate. Reconnect your wallet and try again.",
+        message: "Couldn't authenticate. Reconnect your wallet and try again.",
       });
     });
     expect(

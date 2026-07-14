@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import type { DropTimestampLayout } from "./drop.types";
+import { DropAuthorBadges } from "./DropAuthorBadges";
 import WaveDropTime from "./time/WaveDropTime";
 
 interface DropMinimalIdentityRowProps {
@@ -54,6 +55,12 @@ export default function DropMinimalIdentityRow({
           </Link>
         </UserProfileTooltipWrapper>
       </p>
+      <DropAuthorBadges
+        profile={drop.author}
+        wave={drop.wave}
+        tooltipIdPrefix={`minimal-author-badges-${drop.id}`}
+        size="compact"
+      />
       {!isStackedTimestamp && (
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700" />
       )}

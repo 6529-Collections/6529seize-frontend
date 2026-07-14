@@ -42,12 +42,17 @@ then run `Test` or `Create`.
   - `NIC at least`, with optional identity and direction
   - `Rep at least`, with optional identity, direction, and category
 - NFT cards:
-  - `Required NFTs`: user must own all selected tokens.
+  - `Required NFTs`: creator chooses whether members must own any selected
+    token or all selected tokens.
   - `Collection Access`: user must own any token from selected collections.
   - Supported collections are `Gradients`, `Memes`, `Memelab`, and `Nextgen`.
 - Grant card:
   - `xTDH Grant Beneficiary` accepts a typed grant ID or `Find grant` picker.
   - Picker filters by grantor, collection name, and status.
+  - Token-specific xTDH grants can require members to own any specified token
+    or all specified tokens.
+  - Full-collection xTDH grants require members to own at least one collection
+    token.
 - Identity lists:
   - `Include Identities`
   - `Exclude Identities`
@@ -86,7 +91,8 @@ then run `Test` or `Create`.
 - Cloning another user’s group publishes a new copy and keeps the original
   group unchanged.
 - In edit mode, the selected group values are prefilled (name, privacy,
-  thresholds, NFTs, grant ID, include/exclude wallets).
+  thresholds, NFTs, grant ID, xTDH grant token requirement,
+  include/exclude wallets).
 - Save success toast is always `Group created.` (create, edit, and clone).
 
 ## Grant Lookup and Import Behavior

@@ -91,6 +91,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               />
               <DropAuthorBadges
                 profile={drop.author}
+                wave={drop.wave}
                 tooltipIdPrefix={`header-author-badges-${drop.id}`}
               />
               {!isStackedTimestamp && (

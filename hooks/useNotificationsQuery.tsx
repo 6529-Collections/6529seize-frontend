@@ -1,8 +1,10 @@
 "use client";
 
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
+import {
+  getIdentityNotificationsInfiniteQueryOptions,
+  NOTIFICATIONS_PAGE_LIMIT,
+} from "@/services/api/notifications-query";
 import type {
   NotificationCause,
   NotificationDisplayItem,
@@ -40,49 +42,11 @@ interface UseNotificationsQueryProps {
   readonly cause?: NotificationCause[] | null | undefined;
 }
 
-type NotificationsQueryParams = {
-  limit: string;
-  cause: NotificationCause[] | null;
-  pageParam?: number | null | undefined;
-  signal?: AbortSignal | undefined;
-};
-
-const getIdentityNotificationsQueryKey = (
-  identity: string | null | undefined,
-  limit: string,
-  cause: NotificationCause[] | null
-) =>
-  [
-    QueryKey.IDENTITY_NOTIFICATIONS,
-    {
-      identity,
-      limit,
-      cause: cause?.length
-        ? [...cause].sort((a, b) => a.localeCompare(b)).join(",")
-        : null,
-      version: "v2",
-    },
-  ] as const;
-
-const fetchNotifications = async ({
-  limit,
-  cause,
-  pageParam,
-  signal,
-}: NotificationsQueryParams) => {
-  return await fetchNotificationsV2({
-    limit,
-    cause,
-    pageParam,
-    signal,
-  });
-};
-
 export function useNotificationsQuery({
   reverse = false,
   identity,
   activeProfileProxy = false,
-  limit = "30",
+  limit = NOTIFICATIONS_PAGE_LIMIT,
   cause = null,
 }: UseNotificationsQueryProps) {
   const prefetch = usePrefetchNotifications();
@@ -104,18 +68,12 @@ export function useNotificationsQuery({
    * Now the actual Infinite Query for notifications
    */
   const query = useInfiniteQuery({
-    queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-    queryFn: ({
-      pageParam,
-      signal,
-    }: {
-      pageParam: number | null;
-      signal: AbortSignal | undefined;
-    }) => fetchNotifications({ limit, cause, pageParam, signal }),
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
+    ...getIdentityNotificationsInfiniteQueryOptions({
+      identity,
+      limit,
+      cause,
+    }),
     enabled: !!identity && !activeProfileProxy,
-    staleTime: 60000,
     placeholderData: (previousData, previousQuery) => {
       const previousParams = previousQuery?.queryKey?.[1] as
         | { identity?: string | null }
@@ -185,7 +143,7 @@ export function usePrefetchNotifications() {
     ({
       identity,
       cause = null,
-      limit = "30",
+      limit = NOTIFICATIONS_PAGE_LIMIT,
       pages = 3,
     }: {
       identity: string | null;
@@ -197,23 +155,12 @@ export function usePrefetchNotifications() {
         return;
       }
       queryClient.prefetchInfiniteQuery({
-        queryKey: getIdentityNotificationsQueryKey(
+        ...getIdentityNotificationsInfiniteQueryOptions({
           identity,
           limit,
-          cause?.length ? cause : null
-        ),
-        queryFn: ({
-          pageParam,
-          signal,
-        }: {
-          pageParam?: number | null | undefined;
-          signal?: AbortSignal | undefined;
-        }) => fetchNotifications({ limit, cause, pageParam, signal }),
-        initialPageParam: null,
-        getNextPageParam: (lastPage) =>
-          lastPage.notifications.at(-1)?.id ?? null,
+          cause: (cause?.length ?? 0) > 0 ? cause : null,
+        }),
         pages,
-        staleTime: 60000,
       });
     },
     [queryClient]

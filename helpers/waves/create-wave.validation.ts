@@ -1,4 +1,5 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -20,8 +21,10 @@ import { CreateWaveStep } from "@/types/waves.types";
 import { Time } from "@/helpers/time";
 import {
   APPROVE_WAVE_TAB_LABEL_MAX_LENGTH,
+  WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH,
   areApproveWaveTabLabelsDuplicate,
   doApproveWaveTabLabelsUseReservedLabels,
+  normalizeWaveSubmissionButtonLabel,
   normalizeWaveTabLabel,
 } from "./wave-metadata.helpers";
 
@@ -43,6 +46,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES",
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA",
   DROPS_SUBMISSION_STRATEGY_INVALID = "DROPS_SUBMISSION_STRATEGY_INVALID",
+  IDENTITY_DUPLICATES_REQUIRE_WINNERS = "IDENTITY_DUPLICATES_REQUIRE_WINNERS",
   APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE = "APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE",
   VOTING_TYPE_REQUIRED = "VOTING_TYPE_REQUIRED",
   CHAT_WAVE_CANNOT_HAVE_VOTING = "CHAT_WAVE_CANNOT_HAVE_VOTING",
@@ -63,6 +67,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   APPROVE_WAVE_TAB_LABEL_TOO_LONG = "APPROVE_WAVE_TAB_LABEL_TOO_LONG",
   APPROVE_WAVE_TAB_LABELS_DUPLICATE = "APPROVE_WAVE_TAB_LABELS_DUPLICATE",
   APPROVE_WAVE_TAB_LABEL_RESERVED = "APPROVE_WAVE_TAB_LABEL_RESERVED",
+  SUBMISSION_BUTTON_LABEL_TOO_LONG = "SUBMISSION_BUTTON_LABEL_TOO_LONG",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -81,6 +86,14 @@ const getOverviewValidationErrors = ({
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
   } else if (overview.name.length > MAX_NAME_LENGTH) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_TOO_LONG);
+  }
+
+  if (
+    overview.type !== ApiWaveType.Chat &&
+    normalizeWaveSubmissionButtonLabel(display?.submissionButtonLabel).length >
+      WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH
+  ) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG);
   }
 
   if (overview.type === ApiWaveType.Approve) {
@@ -149,6 +162,12 @@ const getDatesValidationErrors = ({
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
       );
+    }
+
+    // Ongoing (perpetual) Rank waves have no winner announcements and no end
+    // date, so there are no decision times to validate.
+    if (dates.ongoingRanking) {
+      return errors;
     }
 
     if (
@@ -244,9 +263,11 @@ const getUniqueCreditNftIdsCount = (voting: CreateWaveVotingConfig): number => {
 const getDropsValidationErrors = ({
   waveType,
   drops,
+  ongoingRanking,
 }: {
   readonly waveType: ApiWaveType;
   readonly drops: CreateWaveDropsConfig;
+  readonly ongoingRanking: boolean;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   const submissionStrategy = drops.submissionStrategy;
@@ -298,6 +319,19 @@ const getDropsValidationErrors = ({
     if (hasReservedIdentitySubmissionMetadataKey({ drops })) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY
+      );
+    }
+
+    // A perpetual rank wave never announces winners, so a "resubmit after it
+    // wins" duplicates rule could never unlock; require an explicit choice.
+    if (
+      waveType === ApiWaveType.Rank &&
+      ongoingRanking &&
+      submissionStrategy?.config?.duplicates ===
+        ApiWaveParticipationIdentitySubmissionAllowDuplicates.AllowAfterWin
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.IDENTITY_DUPLICATES_REQUIRE_WINNERS
       );
     }
   }
@@ -508,12 +542,18 @@ const getApprovalValidationErrors = ({
 const getOutcomesValidationErrors = ({
   waveType,
   outcomes,
+  ongoingRanking,
 }: {
   readonly waveType: ApiWaveType;
   readonly outcomes: CreateWaveOutcomeConfig[];
+  readonly ongoingRanking: boolean;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   if (waveType === ApiWaveType.Chat) {
+    return errors;
+  }
+  // Ongoing rank waves never announce winners, so awarding outcomes is optional.
+  if (waveType === ApiWaveType.Rank && ongoingRanking) {
     return errors;
   }
   if (!outcomes.length) {
@@ -582,6 +622,7 @@ export const getCreateWaveValidationErrors = ({
         ...getDropsValidationErrors({
           waveType: config.overview.type,
           drops: config.drops,
+          ongoingRanking: config.dates.ongoingRanking ?? false,
         })
       );
       break;
@@ -611,6 +652,7 @@ export const getCreateWaveValidationErrors = ({
         ...getOutcomesValidationErrors({
           waveType: config.overview.type,
           outcomes: config.outcomes,
+          ongoingRanking: config.dates.ongoingRanking ?? false,
         })
       );
       break;

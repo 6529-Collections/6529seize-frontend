@@ -1,15 +1,34 @@
 // @ts-nocheck
 import React from "react";
 import { render } from "@testing-library/react";
-import AuthorPage from "@/app/author/6529er6529-io/page";
-import CompanyPortfolio from "@/app/capital/company-portfolio/page";
-import EducationPage from "@/app/education/page";
-import FakeRares from "@/app/museum/6529-fund-szn1/fakerares/page";
-import Gazers from "@/app/museum/6529-fund-szn1/gazers/page";
-import RarePepe from "@/app/museum/6529-fund-szn1/rarepepe/page";
-import WildChild from "@/app/museum/6529-fund-szn1/wild-child-2022/page";
-import Bonafidehan from "@/app/museum/bonafidehan-museum/page";
-import AerialView from "@/app/museum/genesis/aerial-view/page";
+import AuthorPage, {
+  generateMetadata as generateAuthorMetadata,
+} from "@/app/author/6529er6529-io/page";
+import CompanyPortfolio, {
+  generateMetadata as generateCompanyPortfolioMetadata,
+} from "@/app/capital/company-portfolio/page";
+import EducationPage, {
+  generateMetadata as generateEducationMetadata,
+} from "@/app/education/page";
+import FakeRares, {
+  generateMetadata as generateFakeRaresMetadata,
+} from "@/app/museum/6529-fund-szn1/fakerares/page";
+import Gazers, {
+  generateMetadata as generateGazersMetadata,
+} from "@/app/museum/6529-fund-szn1/gazers/page";
+import RarePepe, {
+  generateMetadata as generateRarePepeMetadata,
+} from "@/app/museum/6529-fund-szn1/rarepepe/page";
+import WildChild, {
+  generateMetadata as generateWildChildMetadata,
+} from "@/app/museum/6529-fund-szn1/wild-child-2022/page";
+import Bonafidehan, {
+  generateMetadata as generateBonafidehanMetadata,
+} from "@/app/museum/bonafidehan-museum/page";
+import AerialView, {
+  generateMetadata as generateAerialViewMetadata,
+} from "@/app/museum/genesis/aerial-view/page";
+import { expectMigratedWordPressPageRenders } from "./migratedWordPressPageTestUtils";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("@/components/header/HeaderPlaceholder", () => () => (
@@ -32,79 +51,75 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 describe("static content pages render meta tags and headings", () => {
-  const pages = [
+  const migratedPages = [
     {
       Component: AuthorPage,
-      title: "6529er, Author at 6529.io",
-      canonical: "/author/6529er6529-io/",
+      generateMetadata: generateAuthorMetadata,
+      title: "6529er - 6529.io",
+      heading: /6529er/i,
     },
     {
       Component: CompanyPortfolio,
+      generateMetadata: generateCompanyPortfolioMetadata,
       title: "COMPANY PORTFOLIO - 6529.io",
-      canonical: "/capital/company-portfolio/",
       heading: /COMPANY PORTFOLIO/i,
     },
     {
-      Component: EducationPage,
-      title: "EDUCATION",
-      canonical: "/education/",
-      heading: /EDUCATION/i,
-    },
-    {
       Component: FakeRares,
+      generateMetadata: generateFakeRaresMetadata,
       title: "FAKERARES - 6529.io",
-      canonical: "/museum/6529-fund-szn1/fakerares/",
       heading: /FAKERARES/i,
     },
     {
       Component: Gazers,
+      generateMetadata: generateGazersMetadata,
       title: "GAZERS - 6529.io",
-      canonical: "/museum/6529-fund-szn1/gazers/",
       heading: /GAZERS/i,
     },
     {
       Component: RarePepe,
+      generateMetadata: generateRarePepeMetadata,
       title: "RAREPEPE - 6529.io",
-      canonical: "/museum/6529-fund-szn1/rarepepe/",
       heading: /RAREPEPE/i,
     },
     {
       Component: WildChild,
+      generateMetadata: generateWildChildMetadata,
       title: "WILD CHILD 2022 - 6529.io",
-      canonical: "/museum/6529-fund-szn1/wild-child-2022/",
       heading: /WILD CHILD 2022/i,
     },
     {
       Component: Bonafidehan,
+      generateMetadata: generateBonafidehanMetadata,
       title: "BONAFIDEHAN GALLERY - 6529.io",
-      canonical: "/museum/bonafidehan-museum/",
       heading: /BONAFIDEHAN GALLERY/i,
     },
     {
       Component: AerialView,
+      generateMetadata: generateAerialViewMetadata,
       title: "AERIAL VIEW - 6529.io",
-      canonical: "/museum/genesis/aerial-view/",
       heading: /AERIAL VIEW/i,
     },
   ];
 
-  pages.forEach(({ Component, title, canonical, heading }) => {
-    it(`renders ${title}`, () => {
-      render(<Component />);
-
-      const titleElement = document.querySelector("title");
-      expect(titleElement?.textContent).toBe(title);
-
-      const canonicalLink = document.querySelector('link[rel="canonical"]');
-      expect(canonicalLink?.getAttribute("href")).toBe(canonical);
-
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      expect(ogTitle?.getAttribute("content")).toBe(title);
-
-      if (heading) {
-        const h1 = document.querySelector("h1");
-        expect(h1?.textContent).toMatch(heading);
-      }
+  migratedPages.forEach(({ Component, generateMetadata, title, heading }) => {
+    it(`renders migrated ${title}`, async () => {
+      await expectMigratedWordPressPageRenders({
+        Component,
+        generateMetadata,
+        heading,
+        title,
+      });
     });
+  });
+
+  it("renders the migrated EDUCATION page via generateMetadata", () => {
+    render(<EducationPage />);
+
+    const metadata = generateEducationMetadata();
+    expect(metadata.title).toBe("EDUCATION - 6529.io");
+
+    const h1 = document.querySelector("h1");
+    expect(h1?.textContent).toMatch(/EDUCATION/i);
   });
 });

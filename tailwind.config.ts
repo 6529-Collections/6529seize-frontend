@@ -198,6 +198,14 @@ const tailwindConfig: Config = {
             transform: "translate3d(-50%, 0, 0)",
           },
         },
+        "hero-float": {
+          "0%, 100%": {
+            transform: "translate3d(0, 0, 0) rotate(var(--hero-rotate))",
+          },
+          "50%": {
+            transform: "translate3d(0, -12px, 0) rotate(var(--hero-rotate))",
+          },
+        },
       },
       animation: {
         "loading-bar": "loading-bar 1.5s infinite",
@@ -218,6 +226,7 @@ const tailwindConfig: Config = {
         "poll-result-stats-in": "poll-result-stats-in 0.5s ease-out forwards",
         "boosted-preview-marquee":
           "boosted-preview-marquee 14s linear infinite",
+        "hero-float": "hero-float 6s ease-in-out infinite",
       },
       backgroundSize: {
         "gradient-pos": "200% 200%",

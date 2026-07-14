@@ -57,7 +57,7 @@ export default function UserPageHeaderPfpWrapper({
 
         <div
           aria-hidden="true"
-          className="edit-profile tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-bg-black tw-bg-black/50 tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-bg-black tw-bg-black/50 tw-bg-opacity-50 tw-opacity-0 tw-transition-opacity tw-duration-300 tw-ease-out hover:tw-opacity-100"
         >
           <div className="tw-absolute tw-bottom-2 tw-right-2">
             <PencilIcon />

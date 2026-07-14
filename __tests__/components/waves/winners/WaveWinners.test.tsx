@@ -13,6 +13,7 @@ jest.mock("@/hooks/waves/useWaveDecisions", () => ({
 jest.mock("@/hooks/useWave");
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useWaveOutcomeVisibility: () => mockOutcomesVisible,
+  useWaveSubmissionButtonLabelOverride: () => null,
 }));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ winnersViewStyle: {} }),
