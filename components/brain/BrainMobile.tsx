@@ -140,9 +140,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     !waveId ||
     Boolean(
       wave &&
-        !fetchingProfile &&
-        !(isCompetitionWave && isWaveMetadataPending) &&
-        !isWavePollsPending
+      !fetchingProfile &&
+      !(isCompetitionWave && isWaveMetadataPending) &&
+      !isWavePollsPending
     );
   const { activeView, onViewChange } = useBrainMobileActiveView({
     firstDecisionDone,
