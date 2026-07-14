@@ -35,11 +35,6 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
-import {
-  clearWaveDraft,
-  readRestorableWaveDraft,
-  writeWaveDraft,
-} from "@/helpers/waves/wave-draft.helpers";
 import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
@@ -134,44 +129,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
-
-  // Persist an in-progress chat message across a full reload (e.g. the
-  // new-version toast). Keyed by wave and scoped to the PRIMARY composer:
-  // this stream composer is a single instance whose `activeDrop` can flip to
-  // reply/quote (see MyStreamWaveChat), so `draftWaveId` is derived live.
-  // The autosave effect below early-returns whenever it is null, which is
-  // what guarantees reply/quote/edit content is never written under the
-  // primary wave key — no cross-mode bleed. Restoration happens only at
-  // editor-creation time (initialConfig), so `initialDraftJson` is captured
-  // once at mount; the wave view remounts per wave (WavesView key).
-  const draftWaveId = activeDrop === null && !editingDropId ? wave.id : null;
-  const [initialDraftJson] = useState<string | null>(() =>
-    draftWaveId ? readRestorableWaveDraft(draftWaveId) : null
-  );
-  useEffect(() => {
-    if (!draftWaveId) {
-      return;
-    }
-    const handle = setTimeout(() => {
-      if (!editorState) {
-        clearWaveDraft(draftWaveId);
-        return;
-      }
-      let serialized: string | null = null;
-      try {
-        serialized = JSON.stringify(editorState.toJSON());
-      } catch {
-        serialized = null;
-      }
-      if (serialized) {
-        writeWaveDraft(draftWaveId, serialized);
-      } else {
-        clearWaveDraft(draftWaveId);
-      }
-    }, 400);
-    return () => clearTimeout(handle);
-  }, [editorState, draftWaveId]);
-
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [metadataOpenState, setMetadataOpenState] =
@@ -497,7 +454,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     getUpdatedDrop,
     createGifDrop,
     finalizeAndAddDropPart,
-    refreshState: baseRefreshState,
+    refreshState,
   } = useCreateDropDraftState({
     metadata,
     initialMetadata,
@@ -529,15 +486,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     closeOnNextInputRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,
   });
-
-  const refreshState = useCallback(() => {
-    baseRefreshState();
-    if (draftWaveId) {
-      // Drop the saved draft immediately (don't wait for the debounced
-      // empty-state write) so a reload right after submit can't restore it.
-      clearWaveDraft(draftWaveId);
-    }
-  }, [baseRefreshState, draftWaveId]);
 
   useCreateDropFocusBehavior({
     activeDrop,
@@ -807,9 +755,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       dropEditorRefreshKey={dropEditorRefreshKey}
       createDropInputRef={createDropInputRef}
       editorState={editorState}
-      initialEditorStateJson={
-        dropEditorRefreshKey === 0 ? initialDraftJson : null
-      }
       canMentionAll={canMentionAll}
       canSubmit={canSubmit}
       handleEditorStateChange={handleEditorStateChange}

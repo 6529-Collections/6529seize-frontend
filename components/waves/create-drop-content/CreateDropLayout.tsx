@@ -22,6 +22,7 @@ import CreateDropIdentityField from "../CreateDropIdentityField";
 import CreateDropIdentityPickerModal from "../CreateDropIdentityPickerModal";
 import type { CreateDropInputHandles } from "../CreateDropInput";
 import CreateDropInput from "../CreateDropInput";
+import { useWaveDraftPersistence } from "./useWaveDraftPersistence";
 import CreateDropMetadata from "../CreateDropMetadata";
 import CreateDropPoll, { type CreateDropPollDraft } from "../CreateDropPoll";
 import CreateDropReplyingWrapper from "../CreateDropReplyingWrapper";
@@ -84,7 +85,6 @@ interface CreateDropLayoutProps {
   readonly dropEditorRefreshKey: number;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly editorState: EditorState | null;
-  readonly initialEditorStateJson: string | null;
   readonly canMentionAll: boolean;
   readonly canSubmit: boolean;
   readonly handleEditorStateChange: (newEditorState: EditorState) => void;
@@ -169,7 +169,6 @@ export default function CreateDropLayout({
   dropEditorRefreshKey,
   createDropInputRef,
   editorState,
-  initialEditorStateJson,
   canMentionAll,
   canSubmit,
   handleEditorStateChange,
@@ -205,6 +204,12 @@ export default function CreateDropLayout({
   termsSignatureFlowEnabled,
   suppressInitialHeightAnimation = false,
 }: CreateDropLayoutProps) {
+  const { initialDraftJson } = useWaveDraftPersistence({
+    waveId: wave.id,
+    activeDrop,
+    editorState,
+    dropEditorRefreshKey,
+  });
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
 
@@ -311,7 +316,7 @@ export default function CreateDropLayout({
                   key={dropEditorRefreshKey}
                   ref={createDropInputRef}
                   editorState={editorState}
-                  initialEditorStateJson={initialEditorStateJson}
+                  initialEditorStateJson={initialDraftJson}
                   type={activeDrop?.action ?? null}
                   submitting={submitting}
                   isStormMode={isStormModeActive}
