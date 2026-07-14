@@ -28,6 +28,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
+import { useLoadPersistedExpandedSubwaves } from "@/hooks/useLoadPersistedExpandedSubwaves";
 import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -194,6 +195,7 @@ const UnifiedWavesListWaves = forwardRef<
       activeParentWaveId: effectiveActiveParentWaveId,
       waves,
     });
+    useLoadPersistedExpandedSubwaves({ waves });
 
     const { announcementWaves, highlyRatedWaves, pinnedWaves, allWaves } =
       useMemo(

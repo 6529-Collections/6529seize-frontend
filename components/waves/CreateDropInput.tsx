@@ -140,6 +140,32 @@ const EditorCommandsPlugin = forwardRef<
 });
 EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
 
+/**
+ * Pushes the editor's mount-time state up to the parent once. A draft
+ * restored through initialConfig.editorState never fires OnChangePlugin (it
+ * is the initial state, not an update), so without this the parent still
+ * believes the composer is empty — submit stays disabled until the user
+ * types. Rendered only when a restored draft seeded the editor.
+ */
+function NotifyInitialEditorStatePlugin({
+  onEditorState,
+}: {
+  readonly onEditorState: (editorState: EditorState) => void;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const notifiedRef = useRef(false);
+
+  useEffect(() => {
+    if (notifiedRef.current) {
+      return;
+    }
+    notifiedRef.current = true;
+    onEditorState(editor.getEditorState());
+  }, [editor, onEditorState]);
+
+  return null;
+}
+
 function InitialMarkdownPlugin({
   initialMarkdown,
   initialMarkdownKey,
@@ -407,6 +433,11 @@ const CreateDropInput = forwardRef<
               />
               <HistoryPlugin />
               <OnChangePlugin onChange={onEditorStateChange} />
+              {typeof initialEditorStateJson === "string" && (
+                <NotifyInitialEditorStatePlugin
+                  onEditorState={onEditorStateChange}
+                />
+              )}
               <RootBlockGuardPlugin />
               <NewMentionsPlugin
                 waveId={waveId}
