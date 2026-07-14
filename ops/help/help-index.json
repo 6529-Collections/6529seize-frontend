@@ -4334,7 +4334,10 @@
         "@all",
         "mention all",
         "mentioned groups",
-        "mentioned waves"
+        "mentioned waves",
+        "mention shortcut",
+        "personal mention alias",
+        "@frens"
       ],
       "keywords": [
         "waves",
@@ -4348,6 +4351,8 @@
       "facts": [
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The special @all group mention can submit mentioned_groups metadata when the current wave/drop context allows mentioning all.",
+        "Profiles can create private Mention shortcuts from their own profile; a shortcut such as @frens expands inline into ordinary profile mentions.",
+        "Personal mention shortcuts are case-insensitive, cannot use reserved global mention names, and are not stored in the posted drop after expansion.",
         "Mention behavior depends on composer state, supported metadata, and the user's eligibility in the current wave.",
         "The @help6529 helper bot trigger also uses mention detection, but the bot runtime is implemented in the backend."
       ],
@@ -4356,6 +4361,7 @@
       "tags": ["waves", "composer", "mentions"],
       "source_refs": [
         "ops/docs/waves/composer/feature-wave-mentions.md",
+        "ops/docs/waves/composer/feature-personal-mention-shortcuts.md",
         "helpers/waves/drop-group-mentions.ts",
         "components/waves/CreateDropContent.tsx"
       ]

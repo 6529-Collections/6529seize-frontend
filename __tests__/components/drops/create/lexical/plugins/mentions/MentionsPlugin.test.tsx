@@ -22,12 +22,16 @@ jest.mock("@/hooks/useIdentitiesSearch", () => ({
   IDENTITY_SEARCH_MIN_HANDLE_LENGTH: 3,
   useIdentitiesSearch: jest.fn(),
 }));
+jest.mock("@/hooks/useMentionAliases", () => ({
+  useMentionAliases: jest.fn(),
+}));
 
 jest.mock("@/components/drops/create/lexical/nodes/MentionNode", () => ({
   $createMentionNode: jest.fn(() => ({
     replace: jest.fn(),
     select: jest.fn(),
   })),
+  $isMentionNode: jest.fn(() => false),
 }));
 jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
   $createGroupMentionNode: jest.fn(() => ({
@@ -37,6 +41,7 @@ jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
 }));
 
 const { useIdentitiesSearch } = require("@/hooks/useIdentitiesSearch");
+const { useMentionAliases } = require("@/hooks/useMentionAliases");
 const {
   $createMentionNode,
 } = require("@/components/drops/create/lexical/nodes/MentionNode");
@@ -45,6 +50,10 @@ const {
 } = require("@/components/drops/create/lexical/nodes/GroupMentionNode");
 
 describe("MentionsPlugin", () => {
+  beforeEach(() => {
+    (useMentionAliases as jest.Mock).mockReturnValue({ aliases: [] });
+  });
+
   it("builds options from identities and exposes open state", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
       identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
@@ -152,5 +161,35 @@ describe("MentionsPlugin", () => {
     expect($createGroupMentionNode).toHaveBeenCalledWith("@all");
     expect(onSelectGroupMention).toHaveBeenCalledWith("ALL");
     expect(close).toHaveBeenCalled();
+  });
+
+  it("adds case-insensitive personal shortcut options", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [
+        {
+          id: "alias-1",
+          alias: "frens",
+          members: [
+            { profile_id: "1", handle: "alice", pfp: null },
+            { profile_id: "2", handle: "bob", pfp: null },
+          ],
+        },
+      ],
+    });
+
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+    act(() => capturedProps.onQueryChange("FRE"));
+
+    expect(capturedProps.options).toHaveLength(1);
+    expect(capturedProps.options[0]).toEqual(
+      expect.objectContaining({
+        type: "alias",
+        handle: "@frens",
+        display: "Mention shortcut · 2 profiles",
+      })
+    );
   });
 });

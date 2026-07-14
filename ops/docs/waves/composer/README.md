@@ -36,6 +36,7 @@ Use this area when you need behavior for:
 ### Mentions and Markdown
 
 - [Wave Mentions](feature-wave-mentions.md)
+- [Personal Mention Shortcuts](feature-personal-mention-shortcuts.md)
 - [Wave NFT Hashtag References](feature-nft-hashtag-references.md)
 - [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)

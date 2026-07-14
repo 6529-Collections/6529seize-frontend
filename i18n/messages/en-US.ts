@@ -521,6 +521,7 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   xtdh: "xTDH",
   subscriptions: "Subscriptions",
   proxy: "Proxy",
+  mentionShortcuts: "Mention shortcuts",
   "badges.beta": "Beta",
 } as const);
 

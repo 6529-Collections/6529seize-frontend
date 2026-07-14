@@ -491,11 +491,11 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   onCancel,
 }) => {
   const [editorState, setEditorState] = useState<EditorState | null>(null);
-  const [mentionedUsers, setMentionedUsers] =
-    useState<ApiDropMentionedUser[]>(initialMentions);
+  const mentionedUsersRef = useRef<ApiDropMentionedUser[]>(initialMentions);
   const [mentionedWaves, setMentionedWaves] =
     useState<ApiMentionedWave[]>(initialWaveMentions);
   const editorRef = useRef<HTMLDivElement>(null);
+  const editorStateRef = useRef<EditorState | null>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
   const waveMentionsRef = useRef<NewWaveMentionsPluginHandles>(null);
   const { isApp, isMobileDevice } = useDeviceInfo();
@@ -551,6 +551,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   };
 
   const handleEditorChange = useCallback((editorState: EditorState) => {
+    editorStateRef.current = editorState;
     setEditorState(editorState);
   }, []);
 
@@ -573,16 +574,16 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         handle_in_content: user.handle_in_content,
       };
 
-      setMentionedUsers((prev) => {
-        if (
-          prev.some(
-            (m) => m.mentioned_profile_id === newMention.mentioned_profile_id
-          )
-        ) {
-          return prev;
-        }
-        return [...prev, newMention];
-      });
+      if (
+        mentionedUsersRef.current.some(
+          (mention) =>
+            mention.mentioned_profile_id === newMention.mentioned_profile_id
+        )
+      ) {
+        return;
+      }
+      const next = [...mentionedUsersRef.current, newMention];
+      mentionedUsersRef.current = next;
     },
     []
   );
@@ -601,13 +602,17 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     });
   }, []);
 
-  const handleSave = useCallback(() => {
-    if (!editorState) return;
+  const handleSave = useCallback(async () => {
+    await mentionsRef.current?.expandMentionAliases();
+    const latestEditorState = editorStateRef.current ?? editorState;
+    if (!latestEditorState) return;
     if (isSaveBlockedByLinks) return;
 
-    const sanitizedMarkdown = currentMarkdown;
+    const sanitizedMarkdown = removeBlankLinePlaceholders(
+      exportDropMarkdown(latestEditorState, exportMarkdownTransformers)
+    );
     const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
-      editorState,
+      latestEditorState,
       canResolveAllGroupMention
     );
 
@@ -621,14 +626,13 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
 
     onSave(
       normalizeTypedEmojiShortcuts(sanitizedMarkdown),
-      mentionedUsers,
+      mentionedUsersRef.current,
       sanitizedMentionedGroups,
       mentionedWaves
     );
   }, [
     editorState,
     exportMarkdownTransformers,
-    mentionedUsers,
     mentionedWaves,
     canResolveAllGroupMention,
     initialGroupMentions,

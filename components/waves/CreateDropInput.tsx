@@ -74,6 +74,7 @@ import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/r
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
   setMarkdown: (markdown: string) => void;
+  expandMentionAliases: () => Promise<void>;
   focus: () => void;
   blur: () => void;
 }
@@ -294,6 +295,7 @@ const CreateDropInput = forwardRef<
 
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
     const editorCommandsRef = useRef<EditorCommandsPluginHandles | null>(null);
+    const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const clearEditorState = useCallback(() => {
       clearEditorRef.current?.clearEditorState();
     }, []);
@@ -304,13 +306,15 @@ const CreateDropInput = forwardRef<
         clearEditorState,
         setMarkdown: (markdown: string) =>
           editorCommandsRef.current?.setMarkdown(markdown),
+        expandMentionAliases: () =>
+          mentionsPluginRef.current?.expandMentionAliases() ??
+          Promise.resolve(),
         focus: () => editorCommandsRef.current?.focus(),
         blur: () => editorCommandsRef.current?.blur(),
       }),
       [clearEditorState]
     );
 
-    const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
     const waveMentionsPluginRef = useRef<NewWaveMentionsPluginHandles | null>(
       null

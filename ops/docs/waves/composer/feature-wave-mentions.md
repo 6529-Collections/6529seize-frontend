@@ -76,6 +76,7 @@ Wave and direct-message composers support tracked wave mentions.
 ## Related Pages
 
 - [Wave Composer Index](README.md)
+- [Personal Mention Shortcuts](feature-personal-mention-shortcuts.md)
 - [Wave NFT Hashtag References](feature-nft-hashtag-references.md)
 - [Waves Index](../README.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)

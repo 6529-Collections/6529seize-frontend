@@ -7,7 +7,14 @@ import {
   MenuOption,
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
-import type { TextNode } from "lexical";
+import {
+  $createTextNode,
+  $getRoot,
+  $isTextNode,
+  type LexicalEditor,
+  type LexicalNode,
+  type TextNode,
+} from "lexical";
 import {
   forwardRef,
   useCallback,
@@ -19,7 +26,10 @@ import {
 import * as ReactDOM from "react-dom";
 
 import { $createGroupMentionNode } from "@/components/drops/create/lexical/nodes/GroupMentionNode";
-import { $createMentionNode } from "@/components/drops/create/lexical/nodes/MentionNode";
+import {
+  $createMentionNode,
+  $isMentionNode,
+} from "@/components/drops/create/lexical/nodes/MentionNode";
 import MentionsTypeaheadMenu from "./MentionsTypeaheadMenu";
 import type { MentionedUser } from "@/entities/IDrop";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -28,6 +38,13 @@ import {
   useIdentitiesSearch,
 } from "@/hooks/useIdentitiesSearch";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
+import { useMentionAliases } from "@/hooks/useMentionAliases";
+import type {
+  MentionAlias,
+  MentionAliasMember,
+} from "@/entities/IMentionAlias";
+import { $isCodeNode } from "@lexical/code";
+import { $isLinkNode } from "@lexical/link";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -128,11 +145,12 @@ function getPossibleQueryMatch(text: string): MenuTextMatch | null {
 }
 
 export class MentionTypeaheadOption extends MenuOption {
-  type: "identity" | "group";
+  type: "identity" | "group" | "alias";
   id: string | null;
   handle: string;
   display: string | null;
   picture: string | null;
+  members: MentionAliasMember[];
 
   constructor({
     id,
@@ -140,12 +158,14 @@ export class MentionTypeaheadOption extends MenuOption {
     display,
     picture,
     type = "identity",
+    members = [],
   }: {
     id: string | null;
     handle: string;
     display: string | null;
     picture: string | null;
-    type?: "identity" | "group" | undefined;
+    type?: "identity" | "group" | "alias" | undefined;
+    members?: MentionAliasMember[] | undefined;
   }) {
     super(handle);
     this.type = type;
@@ -153,12 +173,153 @@ export class MentionTypeaheadOption extends MenuOption {
     this.handle = handle;
     this.display = display;
     this.picture = picture;
+    this.members = members;
   }
 }
 
 export interface NewMentionsPluginHandles {
   readonly isMentionsOpen: () => boolean;
+  readonly expandMentionAliases: () => Promise<void>;
 }
+
+const ALIAS_TOKEN_PATTERN =
+  /(^|[^A-Za-z0-9_@])@([A-Za-z0-9_]{3,15})(?=$|[^A-Za-z0-9_@])/g;
+
+const isInsideCodeOrLink = (node: LexicalNode): boolean => {
+  let parent = node.getParent();
+  while (parent) {
+    if ($isCodeNode(parent) || $isLinkNode(parent)) {
+      return true;
+    }
+    parent = parent.getParent();
+  }
+  return false;
+};
+
+const toMentionedUser = (member: MentionAliasMember) => ({
+  mentioned_profile_id: member.profile_id,
+  handle_in_content: member.handle,
+});
+
+const insertAliasMembers = ({
+  nodeToReplace,
+  members,
+  existingHandles,
+  onSelect,
+}: {
+  readonly nodeToReplace: TextNode;
+  readonly members: MentionAliasMember[];
+  readonly existingHandles: Set<string>;
+  readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
+}): TextNode | null => {
+  const insertableMembers = members.filter(
+    (member) => !existingHandles.has(member.handle.toLowerCase())
+  );
+  if (!insertableMembers.length) {
+    return null;
+  }
+  const nodes: TextNode[] = [];
+  insertableMembers.forEach((member, index) => {
+    if (index > 0) nodes.push($createTextNode(" "));
+    nodes.push($createMentionNode(`@${member.handle}`));
+    existingHandles.add(member.handle.toLowerCase());
+    onSelect(toMentionedUser(member));
+  });
+  nodeToReplace.replace(nodes[0]!);
+  let lastNode = nodes[0]!;
+  nodes.slice(1).forEach((node) => {
+    lastNode.insertAfter(node);
+    lastNode = node;
+  });
+  return lastNode;
+};
+
+const expandPlainAliasTokens = ({
+  editor,
+  aliases,
+  onSelect,
+}: {
+  readonly editor: LexicalEditor;
+  readonly aliases: MentionAlias[];
+  readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
+}): Promise<void> =>
+  new Promise((resolve) => {
+    if (!aliases.length) {
+      resolve();
+      return;
+    }
+    const aliasesByName = new Map(
+      aliases.map((alias) => [alias.alias.toLowerCase(), alias])
+    );
+    editor.update(
+      () => {
+        const existingHandles = new Set(
+          $getRoot()
+            .getAllTextNodes()
+            .filter($isMentionNode)
+            .map((node) => node.getTextContent().replace(/^@/, "").toLowerCase())
+        );
+        const textNodes = $getRoot()
+          .getAllTextNodes()
+          .filter(
+            (node) =>
+              $isTextNode(node) &&
+              !$isMentionNode(node) &&
+              !isInsideCodeOrLink(node)
+          );
+        textNodes.forEach((textNode) => {
+          const text = textNode.getTextContent();
+          const matches = Array.from(text.matchAll(ALIAS_TOKEN_PATTERN));
+          if (!matches.length) return;
+          const replacementNodes: TextNode[] = [];
+          let cursor = 0;
+          matches.forEach((match) => {
+            const fullMatch = match[0];
+            const prefix = match[1] ?? "";
+            const aliasName = (match[2] ?? "").toLowerCase();
+            const alias = aliasesByName.get(aliasName);
+            const matchStart = match.index;
+            const tokenStart = matchStart + prefix.length;
+            if (tokenStart > cursor) {
+              replacementNodes.push(
+                $createTextNode(text.slice(cursor, tokenStart))
+              );
+            }
+            if (!alias) {
+              replacementNodes.push($createTextNode(fullMatch.slice(prefix.length)));
+            } else {
+              const members = alias.members.filter(
+                (member) => !existingHandles.has(member.handle.toLowerCase())
+              );
+              members.forEach((member, index) => {
+                if (index > 0) replacementNodes.push($createTextNode(" "));
+                replacementNodes.push($createMentionNode(`@${member.handle}`));
+                existingHandles.add(member.handle.toLowerCase());
+                onSelect(toMentionedUser(member));
+              });
+              if (!members.length) {
+                replacementNodes.push(
+                  $createTextNode(fullMatch.slice(prefix.length))
+                );
+              }
+            }
+            cursor = matchStart + fullMatch.length;
+          });
+          if (cursor < text.length) {
+            replacementNodes.push($createTextNode(text.slice(cursor)));
+          }
+          if (!replacementNodes.length) return;
+          textNode.replace(replacementNodes[0]!);
+          let lastNode = replacementNodes[0]!;
+          replacementNodes.slice(1).forEach((node) => {
+            lastNode.insertAfter(node);
+            lastNode = node;
+          });
+        });
+      },
+      { onUpdate: resolve }
+    );
+  });
 
 const NewMentionsPlugin = forwardRef<
   NewMentionsPluginHandles,
@@ -177,6 +338,7 @@ const NewMentionsPlugin = forwardRef<
     handle: queryString ?? "",
     waveId,
   });
+  const { aliases } = useMentionAliases();
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -200,7 +362,25 @@ const NewMentionsPlugin = forwardRef<
             }),
           ]
         : [];
-    const identityLimit = SUGGESTION_LIST_LENGTH_LIMIT - allOption.length;
+    const aliasOptions = aliases
+      .filter((alias) => alias.alias.toLowerCase().startsWith(normalizedQuery))
+      .map(
+        (alias) =>
+          new MentionTypeaheadOption({
+            id: alias.id,
+            handle: `@${alias.alias}`,
+            display: `Mention shortcut · ${alias.members.length} profile${
+              alias.members.length === 1 ? "" : "s"
+            }`,
+            picture: null,
+            type: "alias",
+            members: alias.members,
+          })
+      );
+    const identityLimit = Math.max(
+      0,
+      SUGGESTION_LIST_LENGTH_LIMIT - allOption.length - aliasOptions.length
+    );
     const identityOptions = identities
       .map(
         (identity) =>
@@ -213,15 +393,20 @@ const NewMentionsPlugin = forwardRef<
       )
       .slice(0, identityLimit);
 
-    return [...allOption, ...identityOptions];
-  }, [canMentionAll, identities, queryString]);
+    return [...allOption, ...aliasOptions, ...identityOptions].slice(
+      0,
+      SUGGESTION_LIST_LENGTH_LIMIT
+    );
+  }, [aliases, canMentionAll, identities, queryString]);
 
   useImperativeHandle(
     ref,
     () => ({
       isMentionsOpen: () => isOpen && options.length > 0,
+      expandMentionAliases: () =>
+        expandPlainAliasTokens({ editor, aliases, onSelect }),
     }),
-    [isOpen, options.length]
+    [aliases, editor, isOpen, onSelect, options.length]
   );
 
   const onSelectOption = useCallback(
@@ -238,6 +423,28 @@ const NewMentionsPlugin = forwardRef<
           }
           mentionNode.select();
           onSelectGroupMention?.(ApiDropGroupMention.All);
+          closeMenu();
+          return;
+        }
+
+        if (selectedOption.type === "alias") {
+          if (nodeToReplace) {
+            const existingHandles = new Set(
+              $getRoot()
+                .getAllTextNodes()
+                .filter($isMentionNode)
+                .map((node) =>
+                  node.getTextContent().replace(/^@/, "").toLowerCase()
+                )
+            );
+            const lastNode = insertAliasMembers({
+              nodeToReplace,
+              members: selectedOption.members,
+              existingHandles,
+              onSelect,
+            });
+            lastNode?.select();
+          }
           closeMenu();
           return;
         }

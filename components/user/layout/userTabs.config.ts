@@ -59,6 +59,12 @@ const TAB_DEFINITIONS = [
     route: "proxy",
     isVisible: ({ isOwnProfile }: UserPageVisibilityContext) => isOwnProfile,
   },
+  {
+    id: "mention-shortcuts",
+    titleKey: "user.profile.tabs.mentionShortcuts",
+    route: "mention-shortcuts",
+    isVisible: ({ isOwnProfile }: UserPageVisibilityContext) => isOwnProfile,
+  },
 ] as const satisfies readonly UserPageTabDefinition[];
 
 const USER_PAGE_TAB_DEFINITIONS: readonly UserPageTabDefinition[] =
