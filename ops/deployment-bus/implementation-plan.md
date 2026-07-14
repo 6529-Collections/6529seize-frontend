@@ -1,4 +1,4 @@
-# Deployment Bus to Production — Implementation Plan
+# Deployment Bus for Staging and Production — Implementation Plan
 
 Status: proposed implementation specification.
 
@@ -15,35 +15,50 @@ The plan makes the following architectural decisions:
 - GitHub Actions performs builds, packaging, staging, E2E, and deployments.
 - A GitHub App is the release-bus machine identity.
 - A candidate is identified by immutable repository, branch, and head SHA.
-- Frontend and backend use separate release branches and PRs linked by one
-  release-train ID.
+- Frontend and backend use separate train branches linked by one train ID;
+  production trains also use separate release PRs.
 - Batching is dependency-aware rather than strict FIFO.
 - Codex may resolve narrowly defined merge conflicts on temporary release
   branches only.
-- At most one frozen train and one production deployment operation run at a
-  time.
+- At most one frozen train, one staging deployment operation, and one
+  production deployment operation run at a time.
 
-The no-human-intervention guarantee applies to the normal successful path. An
-unrecoverable production incident may pause the lane and require a developer
-fix.
+The no-human-intervention guarantee applies to the normal successful staging
+and production paths. An unrecoverable production incident may pause the lane
+and require a developer fix.
 
 ## 1. Objective
 
-After an authorized developer marks a branch ready, the system must:
+After an authorized developer marks an exact branch SHA ready for staging, the
+system must:
 
 1. Record its exact repository, branch, head SHA, dependencies, and backend
    deployment plan.
-2. Wait until all dependencies are eligible.
-3. Include it in the next possible release train.
+2. Wait until all staging dependencies are eligible.
+3. Include it in the next possible staging train.
 4. Combine all currently eligible independent developments.
-5. Build and validate the exact combined release.
-6. Deploy that exact release to staging.
+5. Build the exact combined staging candidate.
+6. Deploy required backend services first and frontend second.
 7. Run the required staging E2E packs.
-8. Merge and deploy backend changes first.
-9. Merge and deploy frontend changes after backend validation.
-10. Validate production.
-11. Mark candidates released and publish the release note.
-12. Do all of this without another human approval.
+8. Record the exact staging evidence and mark each passing candidate
+   `STAGING_VALIDATED`.
+9. Fast-forward `1a-staging` to the successfully validated train head.
+
+After staging validation, an authorized developer or agent may separately mark
+that same exact SHA ready for production. The system must then:
+
+1. Wait until all production dependencies are eligible.
+2. Include it in the next possible production train.
+3. Build and validate the exact combined production release from fresh
+   `main`.
+4. Restage that exact combined release set; older candidate-level staging
+   evidence alone is not sufficient.
+5. Merge and deploy backend changes first.
+6. Merge and deploy frontend changes after backend validation.
+7. Validate production and mark the candidates `PRODUCTION_VALIDATED`.
+8. Emit complete merge and deployment evidence for the independent autonomous
+   release-note bot.
+9. Do all of this without another human approval.
 
 An unrelated candidate must not be blocked merely because an older candidate
 has an unresolved dependency.
@@ -84,12 +99,13 @@ Already implemented:
 Not implemented:
 
 - The readiness queue.
+- Automated `1a-staging` branch ownership and staging deployment.
 - Immutable candidate handling.
 - Cross-repository dependency handling.
 - Automated batching.
 - Release branch construction.
 - Step Functions orchestration.
-- Production-wide locking.
+- Staging-wide and production-wide locking.
 - Automatic backend/frontend coordination.
 - Candidate failure isolation.
 - Codex conflict resolution.
@@ -99,26 +115,30 @@ Not implemented:
 
 ```mermaid
 flowchart TD
-    Ready["Developer marks exact branch SHA ready"] --> Ledger["Application DB release ledger"]
-    Ledger --> Starter["EventBridge starter/reconciler"]
-    Starter --> Collecting["Next train collecting"]
-    Collecting -->|"Production lane becomes free"| Freeze["Atomically freeze candidate set"]
-    Freeze --> DAG["Validate dependency and service DAGs"]
-    DAG --> Compose["Create FE and BE release branches/PRs"]
-    Compose --> Preflight["Build, test, package immutable artifacts"]
-    Preflight --> Staging["Deploy exact release SHAs to staging"]
-    Staging --> E2E["Run staging validation and E2E"]
-    E2E --> Backend["Merge BE PR and deploy BE units in order"]
+    StageReady["Developer marks exact SHA ready for staging"] --> Ledger["Application DB release ledger"]
+    Ledger --> StageTrain["Freeze dependency-safe staging train"]
+    StageTrain --> StageCompose["Compose exact FE and BE staging branches"]
+    StageCompose --> StageDeploy["Deploy BE first, FE second"]
+    StageDeploy --> StageE2E["Run staging validation and E2E"]
+    StageE2E --> StageValidated["Mark candidates STAGING_VALIDATED and advance 1a-staging"]
+    StageValidated --> ProdReady["Developer marks same exact SHA ready for production"]
+    ProdReady --> ProdTrain["Freeze dependency-safe production train"]
+    ProdTrain --> ProdCompose["Compose from fresh main and package immutable artifacts"]
+    ProdCompose --> Restage["Restage exact combined production release"]
+    Restage --> Backend["Merge BE PR and deploy BE units in order"]
     Backend --> Frontend["Merge FE PR and deploy FE artifact"]
     Frontend --> ProdValidation["Production E2E and health watch"]
-    ProdValidation --> Complete["Complete train, notify, release note"]
+    ProdValidation --> Complete["Complete train and emit deployment evidence"]
 
-    Compose -->|"Safe merge conflict"| Codex["Constrained Codex resolver"]
-    Codex --> Preflight
+    StageCompose -->|"Safe merge conflict"| StageCodex["Constrained Codex resolver"]
+    StageCodex --> StageDeploy
+    ProdCompose -->|"Safe merge conflict"| ProdCodex["Constrained Codex resolver"]
+    ProdCodex --> Restage
 
-    Preflight -->|"Candidate failure"| Isolate["Dependency-aware failure isolation"]
-    E2E -->|"Candidate failure"| Isolate
-    Isolate -->|"Independent candidates remain"| Compose
+    StageDeploy -->|"Candidate failure"| Isolate["Dependency-aware failure isolation"]
+    Restage -->|"Candidate failure"| Isolate
+    Isolate -->|"Independent candidates remain"| StageCompose
+    Isolate -->|"Independent production candidates remain"| ProdCompose
 ```
 
 ### 3.1 Backend components
@@ -139,7 +159,7 @@ flowchart TD
 - Codex merge-conflict workflows.
 - Exact-SHA staging support.
 - Immutable artifact deployment support.
-- Production authorization checks.
+- Staging and production authorization checks.
 - Production validation workflows.
 
 ## 4. Database Model
@@ -171,6 +191,7 @@ Follow backend conventions:
 | `release_train_operations` | Idempotent external operations |
 | `release_train_evidence` | Build, artifact, staging, E2E, and production evidence |
 | `release_deployment_lanes` | Global orchestration, staging, and production leases |
+| `release_bus_controls` | Durable pause state for all, staging, and production scopes |
 | `release_train_events` | Append-only audit history |
 
 ### 4.2 `release_ready_deployments`
@@ -183,11 +204,13 @@ Required fields:
 - `head_sha`
 - `pr_number`, nullable
 - `status`
-- `ready_by_github_login`
-- `ready_at`
+- `staging_ready_by_github_login`, nullable
+- `staging_ready_at`, nullable
+- `production_ready_by_github_login`, nullable
+- `production_ready_at`, nullable
 - `deploy_plan_json`
 - `metadata_version`
-- `claimed_train_id`, nullable
+- `current_train_id`, nullable
 - `hold_reason`, nullable
 - `invalidated_at`, nullable
 - `released_at`, nullable
@@ -204,17 +227,25 @@ Unique index:
 Candidate statuses:
 
 - `DRAFT`
-- `READY`
-- `CLAIMED`
+- `READY_FOR_STAGING`
+- `STAGING_CLAIMED`
+- `STAGING_VALIDATING`
+- `STAGING_VALIDATED`
+- `STAGING_FAILED`
+- `READY_FOR_PRODUCTION`
+- `PRODUCTION_CLAIMED`
+- `PRODUCTION_VALIDATING`
+- `PRODUCTION_VALIDATED`
 - `BLOCKED`
 - `SUPERSEDED`
 - `QUARANTINED`
-- `RELEASED`
 - `CANCELLED`
 
-A candidate row is immutable after becoming `READY`, except for lifecycle
-fields. Changing dependencies or deployment metadata means cancelling and
-marking the exact SHA ready again.
+A candidate row is immutable after becoming `READY_FOR_STAGING`, except for
+lifecycle fields. Changing dependencies or deployment metadata means
+cancelling and marking the exact SHA ready again. A candidate may transition
+to `READY_FOR_PRODUCTION` only after that exact SHA reaches
+`STAGING_VALIDATED`.
 
 ### 4.3 Dependencies
 
@@ -225,11 +256,17 @@ marking the exact SHA ready again.
 - `required_state`
 - timestamps
 
-For the first version, support one dependency completion state:
+Support dependency completion states for both lanes:
 
 ```text
+STAGING_VALIDATED
 PRODUCTION_VALIDATED
 ```
+
+A required state means the exact candidate has reached that state and has
+durable evidence for it; it does not require that value to remain the
+candidate's current lifecycle status after the candidate advances to a later
+lane.
 
 At readiness time, a dependency supplied as repository and branch is resolved
 to the dependency branch's current SHA. Create a `DRAFT` candidate for that
@@ -237,8 +274,10 @@ exact SHA if it does not exist.
 
 Therefore:
 
-- A can be ready while B is not ready.
-- A remains blocked until that exact B SHA becomes ready and is released.
+- A can be ready for staging or production while B is not ready for the same
+  lane.
+- A remains blocked until that exact B SHA is included in the same train or has
+  already reached the required validation state.
 - If B changes, the old dependency does not silently follow the branch.
 - A becomes `BLOCKED` with `DEPENDENCY_SUPERSEDED` until its metadata is
   reasserted.
@@ -283,13 +322,20 @@ Candidate dependencies and deploy-unit dependencies are two different DAGs:
 Each train records:
 
 - Train ID and revision.
+- Target lane: `STAGING` or `PRODUCTION`.
 - Frozen cutoff timestamp.
-- Frontend and backend base-main SHAs.
+- Frontend and backend target-branch base SHAs: `1a-staging` for staging trains
+  and `main` for production trains.
 - Frontend and backend release branches and PRs.
 - State machine execution ARN.
 - Pinned release-bus worker version.
 - Current status and failure reason.
 - Start and completion timestamps.
+
+`release_bus_controls` contains one row for each of `ALL`, `STAGING`, and
+`PRODUCTION`, with paused state, reason, GitHub actor, timestamp, and row
+version. The starter checks it before freezing a train, and the worker checks
+it before every irreversible branch movement, merge, or deployment operation.
 
 Each external effect gets an operation record:
 
@@ -331,6 +377,7 @@ The readiness request contains:
   "repository": "frontend",
   "branch": "feature/example",
   "expected_head_sha": "40-character-sha",
+  "target_lane": "STAGING",
   "dependencies": [
     {
       "repository": "backend",
@@ -343,6 +390,11 @@ The readiness request contains:
 
 For a backend candidate, `deploy_plan` is required unless changed files
 conclusively map to one service.
+
+`target_lane` is `STAGING` or `PRODUCTION`. A production-ready request is
+accepted only when the same repository, branch, and SHA already has
+`STAGING_VALIDATED` evidence. The production train still restages its exact
+combined release set before promotion.
 
 ### 5.2 Readiness processing
 
@@ -357,9 +409,11 @@ The API must:
 6. Resolve the source PR if one exists.
 7. Resolve dependency branches to immutable candidate SHAs.
 8. Validate candidate and service DAGs.
-9. Insert the candidate idempotently.
-10. Create or update a `Release Bus` commit status or check.
-11. Return the candidate ID, exact SHA, and current hold reason.
+9. Validate that the requested staging or production lifecycle transition is
+   allowed.
+10. Insert or transition the candidate idempotently.
+11. Create or update a `Release Bus` commit status or check.
+12. Return the candidate ID, exact SHA, lane, and current hold reason.
 
 The user cannot supply:
 
@@ -372,15 +426,29 @@ The user cannot supply:
 
 Add to the existing deploy UI:
 
-- A "Mark ready for production" action.
+- Separate "Mark ready for staging" and "Mark ready for production" actions.
 - Exact branch and SHA display.
 - Dependency picker.
 - Backend deploy-unit picker and ordering editor.
-- Ready, blocked, claimed, and released status.
+- Staging and production readiness, blocked, claimed, validating, and
+  validated status.
 - Candidate cancellation.
-- Current train and next-train queue.
+- Current staging and production trains and their next-train queues.
 - Per-operation workflow links.
-- Pause state and audited break-glass controls.
+- Operator-only pause, resume, reconciliation, and audited break-glass
+  controls.
+
+Anyone with write access to the relevant repository may mark a candidate
+ready. Pause, resume, stale-lane reconciliation, and break-glass controls
+require membership in a configured GitHub organization team such as
+`release-bus-operators`, or organization-owner status. Do not hardcode a user
+allowlist in application code.
+
+Pause and resume requests specify `ALL`, `STAGING`, or `PRODUCTION` plus an
+audited reason. A pause prevents the next irreversible operation from starting;
+it does not abruptly terminate an AWS deployment that is already mutating the
+environment. That operation reaches a safe terminal state, after which the
+train remains paused until an operator resumes or reconciles it.
 
 ## 6. Candidate Invalidation
 
@@ -388,7 +456,10 @@ Install a GitHub App webhook for branch push events.
 
 When a ready branch changes:
 
-- If the candidate is still `READY`, mark it `SUPERSEDED`.
+- If the candidate is waiting for staging or production, mark it
+  `SUPERSEDED`.
+- Invalidate all staging evidence for the old branch head as evidence for the
+  new head.
 - If it is only prospectively collecting, remove it from the prospective batch.
 - Update the source PR with a comment.
 - Require the new SHA to be marked ready explicitly.
@@ -398,7 +469,8 @@ Once a train is frozen:
 - Its candidate SHA never changes.
 - A later push to the developer branch does not change the running train.
 - The new head is a separate future candidate.
-- Cancellation after freeze creates a train-revision request.
+- Cancellation after a staging or production freeze creates a train-revision
+  request.
 - Once production merging has begun, cancellation is rejected as too late.
 
 The scheduled reconciler must also compare remote branch heads. Webhooks
@@ -425,13 +497,23 @@ Add the App as a ruleset bypass actor so it can merge release PRs without a
 human review. The bus must still explicitly require all configured checks to
 pass before invoking the bypass merge.
 
+Protect `1a-staging` in both repositories against direct developer updates,
+force pushes, and deletion. Its normal update actor is the GitHub App after a
+validated staging train. A configured release-operator team may bypass this
+only through the audited break-glass procedure.
+
 The App must only create or update:
 
 ```text
-release-bus/train-*
+release-bus/staging-train-*
+release-bus/production-train-*
+1a-staging
 ```
 
-It must never write to developer branches.
+Updates to `1a-staging` require successful exact-train staging evidence and an
+expected-old-SHA fast-forward. The App must never write to developer branches
+or push directly to `main`; production enters `main` only through the validated
+release PR path.
 
 Retain the existing user-token authentication only for determining who marked
 a candidate ready. Never store developer tokens.
@@ -448,6 +530,8 @@ Use deterministic keys such as:
 ```text
 train:{trainId}:revision:{revision}:compose:{repo}:{expectedSha}:attempt:1
 train:{trainId}:revision:{revision}:preflight:{repo}:{expectedSha}:attempt:1
+train:{trainId}:deploy:staging:{repo}:{service}:{artifactDigest}:attempt:1
+train:{trainId}:advance:1a-staging:{repo}:{expectedOldSha}:{newSha}:attempt:1
 train:{trainId}:deploy:prod:{repo}:{service}:{artifactDigest}:attempt:1
 train:{trainId}:merge:{repo}:{prNumber}:{expectedHeadSha}:attempt:1
 ```
@@ -491,54 +575,86 @@ itself.
 
 ## 9. Train Collection and Freezing
 
-### 9.1 While production is busy
+The bus maintains separate prospective staging and production queues while
+allowing only one frozen or executing train across both lanes. Production-ready
+work has priority when both queues can depart; otherwise staging departs as
+soon as the shared orchestration and staging lanes are free.
 
-Ready candidates accumulate without starting builds or creating aggregate
-branches.
+Ready candidates accumulate without creating aggregate branches while another
+train owns the orchestration lane. There may be:
 
-There may be:
+- One currently frozen or executing train.
+- One prospective `COLLECTING_STAGING` train.
+- One prospective `COLLECTING_PRODUCTION` train.
 
-- One currently executing train.
-- One prospective `COLLECTING` train.
+### 9.1 Staging freeze
 
-### 9.2 Freeze algorithm
+When the orchestration and staging lanes are available and no eligible
+production train is waiting:
 
-When the production and orchestration lane becomes available:
-
-1. Read current frontend and backend `main` SHAs.
+1. Read current frontend and backend `1a-staging` SHAs.
 2. Verify every prospective candidate's branch still matches its recorded SHA.
 3. Mark mismatches `SUPERSEDED`.
 4. Take a database cutoff timestamp.
-5. Select all `READY` candidates committed at or before the cutoff.
+5. Select all `READY_FOR_STAGING` candidates committed at or before the cutoff.
 6. Build the candidate DAG.
-7. Include candidates whose dependencies are already production validated and
-   still present in production, or are ready and included in the same train.
-8. Hold candidates with missing dependencies.
-9. Apply transitive holds.
-10. Keep unrelated candidates.
-11. Reject cycles.
-12. Topologically order candidates, using `ready_at, id` as the tie-breaker.
-13. Create train items and mark them `CLAIMED` atomically.
-14. Start one Step Functions execution.
+7. Include candidates whose dependencies are already `STAGING_VALIDATED`, or
+   are ready for staging and included in the same train.
+8. Hold candidates with missing dependencies and apply transitive holds.
+9. Keep unrelated candidates.
+10. Reject cycles.
+11. Topologically order candidates, using `staging_ready_at, id` as the
+    tie-breaker.
+12. Create train items and mark them `STAGING_CLAIMED` atomically.
+13. Start one Step Functions execution with target lane `STAGING`.
 
-Candidates committed after the cutoff wait for the next train.
+### 9.2 Production freeze
+
+When the orchestration and production lanes are available:
+
+1. Read current frontend and backend `main` SHAs.
+2. Verify every prospective candidate's branch still matches its recorded SHA.
+3. Require exact-SHA `STAGING_VALIDATED` evidence for every candidate.
+4. Mark mismatches `SUPERSEDED`.
+5. Take a database cutoff timestamp.
+6. Select all `READY_FOR_PRODUCTION` candidates committed at or before the
+   cutoff.
+7. Build the candidate DAG.
+8. Include candidates whose dependencies are already
+   `PRODUCTION_VALIDATED` and still present in production, or are ready for
+   production and included in the same train.
+9. Hold candidates with missing dependencies and apply transitive holds.
+10. Keep unrelated candidates and reject cycles.
+11. Topologically order candidates, using `production_ready_at, id` as the
+    tie-breaker.
+12. Create train items and mark them `PRODUCTION_CLAIMED` atomically.
+13. Start one Step Functions execution with target lane `PRODUCTION`.
+
+Candidates committed after either cutoff wait for the next train for that
+lane.
 
 ## 10. Release Branch Construction
 
 For every repository represented in the train, create:
 
 ```text
-release-bus/train-{trainId}-r{revision}
+release-bus/{targetLane}-train-{trainId}-r{revision}
 ```
 
-The release branch starts from the recorded fresh `main` SHA.
+A staging train branch starts from the recorded fresh `1a-staging` SHA. A
+production train branch starts from the recorded fresh `main` SHA.
 
 Merge candidate SHAs, not branch heads, in topological order. Merge commits
 must contain the release-bus identity and DCO signoff.
 
-Create one release PR per repository. Link both PRs using the train ID.
+Production trains create one release PR per repository and link both PRs using
+the train ID. Staging trains do not require a human-reviewed PR: after exact-SHA
+staging validation succeeds, the GitHub App fast-forwards each repository's
+`1a-staging` ref to the validated train head. The fast-forward must fail rather
+than overwrite if `1a-staging` moved after the train was composed; in that case
+create a new revision and rerun staging.
 
-The PR body must contain:
+Each production PR body, and every staging train manifest, must contain:
 
 - Train ID and revision.
 - Base-main SHA.
@@ -549,29 +665,32 @@ The PR body must contain:
 - Expected staging and production gates.
 - Links to the train UI.
 
-The original developer PR is not merged separately. After release:
+The original developer PR is not merged separately. After production release:
 
 - If its head still equals the released SHA, comment and close it as released
   by the train.
 - If its head has moved, comment that only the recorded SHA was released and
   leave the PR open.
 
-Before merging a release PR, verify:
+Before advancing `1a-staging` or merging a production release PR, verify:
 
 - Its head SHA is still the validated SHA.
-- Current `main` is still the expected base.
+- Current target branch is still the expected base.
 - Required checks are green.
 - The train still owns the production lane.
 
-If `main` moved, increment the train revision, rebuild the release branch from
-the new `main`, and rerun all gates.
+If `1a-staging` or `main` moved, increment the train revision, rebuild the train
+branch from the new target-branch head, and rerun all gates for that lane.
 
 ## 11. Preflight and Immutable Artifacts
 
 Do not build production code again after merging to `main`.
 
-The preflight must produce the exact immutable artifact later deployed to
-production.
+A staging train preflight produces immutable staging artifacts. A production
+train preflight produces both the staging-configured artifacts used to restage
+the combined release and the production-configured artifacts later deployed to
+production. Every artifact is bound to the same exact train SHA and its own
+environment-specific digest.
 
 ### 11.1 Frontend
 
@@ -579,8 +698,8 @@ Add a `release-bus-preflight.yml` workflow that:
 
 1. Checks out the exact release-branch SHA.
 2. Installs dependencies through the `6529` wrapper in frozen mode.
-3. Runs lint, type checking, tests, and production build.
-4. Produces the deployable production bundle.
+3. Runs lint, type checking, tests, and the requested environment build.
+4. Produces the deployable staging or production bundle.
 5. Calculates SHA-256.
 6. Uploads the artifact to the deployment-bus S3 prefix.
 7. Emits artifact URI, digest, source SHA, train ID, and operation key.
@@ -602,11 +721,12 @@ For every selected service:
 1. Check out the exact backend release SHA.
 2. Use frozen dependency installation.
 3. Build and test.
-4. Package the production deployment.
+4. Package the requested staging or production deployment.
 5. Upload the immutable package.
 6. Record digest and adapter metadata.
 
-Production deployment consumes the exact package.
+Staging and production deployments consume their exact environment-specific
+packages.
 
 Support adapters for:
 
@@ -626,10 +746,17 @@ deployment-bus/{trainId}/{revision}/{environment}/{repository}/{service}/{source
 Add retention and lifecycle rules, but retain evidence long enough for audits
 and rollback.
 
-## 12. Exact Staging Validation
+## 12. Bus-Owned Staging and Exact Validation
 
-Do not treat a normal merge into an ahead-of-main `1a-staging` branch as proof
-that the production candidate was tested.
+Developers and their agents do not normally merge branches into `1a-staging`
+or dispatch staging deployments. They mark an exact SHA ready for staging and
+wait for the bus to compose, deploy, validate, and report the staging train.
+Manual branch movement and staging dispatch remain available only through the
+audited operator break-glass path.
+
+Do not put an unvalidated train onto `1a-staging`. If E2E later fails, keeping
+the failed train out of the integration branch allows independent candidates
+to form a new staging train without inheriting the failure.
 
 Modify the staging workflows to accept bus-only inputs:
 
@@ -639,26 +766,33 @@ Modify the staging workflows to accept bus-only inputs:
 - `artifact_uri`
 - `artifact_sha256`
 
-Bus staging deploys the exact frozen release SHA and artifact directly to the
-shared staging environment.
-
-Keep the existing `1a-staging` flow for normal developer use, but route it
-through the same staging lane. If staging is busy:
-
-- Record the developer staging request as deferred.
-- Do not let it overwrite the bus candidate.
-- Redispatch the latest deferred staging SHA after the bus releases the lane.
+The bus deploys the exact temporary staging-train SHA and artifact directly to
+the shared staging environment. After every required check passes, it
+fast-forwards `1a-staging` to that already-validated train head. The normal push
+trigger must recognize the recorded successful bus operation and exit without
+redeploying the same SHA.
 
 ### 12.1 Staging order
 
-1. Deploy backend units in service-DAG order.
-2. Verify every backend deployment reports the expected SHA and artifact
+1. Freeze the dependency-safe `READY_FOR_STAGING` candidate set.
+2. Compose backend and frontend staging train branches from their respective
+   current `1a-staging` heads.
+3. Run preflight before changing either integration branch.
+4. Acquire `global-staging`.
+5. Deploy backend units from the exact backend train SHA in service-DAG order.
+6. Verify every backend deployment reports the expected SHA and artifact
    digest.
-3. Deploy frontend staging.
-4. Verify frontend `/api/version`.
-5. Run the existing three Playwright packs.
-6. Record run IDs, artifacts, and results.
-7. Mark the train `STAGING_VALIDATED`.
+7. Deploy frontend staging from the exact frontend train SHA.
+8. Verify frontend `/api/version`.
+9. Run the existing three Playwright packs.
+10. Record run IDs, artifacts, and results.
+11. Atomically mark train items `STAGING_VALIDATED`.
+12. Fast-forward backend `1a-staging`, then frontend `1a-staging`, to their
+    validated train heads using expected-old-SHA comparisons.
+13. Release the staging and orchestration lanes and notify candidate owners.
+
+If either `1a-staging` branch moved before the fast-forward, do not overwrite
+it. Recompose from the new branch head and rerun the staging gates.
 
 Reuse earlier staging evidence only when all of these match exactly:
 
@@ -670,11 +804,15 @@ Reuse earlier staging evidence only when all of these match exactly:
 - Staging deployment run IDs.
 - E2E run IDs and results.
 
-Individual candidate staging evidence is not sufficient for a newly combined
-batch.
+Candidate-level staging proves that a development is eligible to be marked
+ready for production. It is not by itself sufficient evidence for a newly
+combined production batch. Every production train is composed from fresh
+`main` and restaged as its exact combined release set before any production
+merge.
 
 After successful production completion, merge `main` back into `1a-staging`
-without resetting it.
+without resetting it. This sync is bus-owned and must not trigger a duplicate
+staging deployment when the deployed SHA and evidence are already current.
 
 ## 13. Production Sequence
 
@@ -692,10 +830,16 @@ Production order is:
 9. Run production read-only E2E.
 10. Run the post-deployment health watch.
 11. Complete the train.
-12. Publish one combined GelatoBot release note.
+12. Persist and emit complete merge, deployment, and validation evidence for
+    the independent autonomous release-note bot.
 13. Notify source PRs.
 14. Release all lanes.
 15. Clean temporary branches after a retention window.
+
+Release-note publication is outside the deployment bus. The existing
+autonomous release-note bot independently observes frontend and backend `main`
+and successful production deployments; the bus must neither invoke a personal
+skill nor publish a release note itself.
 
 Cross-repository dependencies that require frontend-before-backend are
 rejected. Such releases must be redesigned for backward compatibility.
@@ -727,7 +871,7 @@ The gate verifies:
 - The operation key matches.
 - The train owns the relevant lane.
 - The SHA and artifact digest match.
-- No other production operation is active.
+- No other operation is active in the target environment.
 
 A direct GitHub dispatch without a valid authorization must fail before
 deployment.
@@ -736,7 +880,7 @@ Keep a separate break-glass path:
 
 - Restricted to administrators.
 - Requires a reason.
-- Acquires the same production lane.
+- Acquires the same staging or production lane as an automated operation.
 - Writes the same audit and operation records.
 - Cannot silently overlap an automated train.
 
@@ -755,10 +899,25 @@ CREATE_REVISION
 COMPOSE_BACKEND
 COMPOSE_FRONTEND
 WAIT_FOR_COMPOSITION
-CREATE_RELEASE_PRS
 DISPATCH_PREFLIGHTS
 WAIT_FOR_PREFLIGHTS
 EVALUATE_PREFLIGHTS
+CHOOSE_TARGET_LANE
+
+# STAGING target
+ACQUIRE_STAGING
+DEPLOY_BACKEND_STAGING
+DEPLOY_FRONTEND_STAGING
+WAIT_FOR_STAGING_E2E
+VALIDATE_STAGING_EVIDENCE
+ADVANCE_BACKEND_1A_STAGING
+ADVANCE_FRONTEND_1A_STAGING
+FINALIZE_STAGING
+CLEANUP_STAGING
+END
+
+# PRODUCTION target
+CREATE_RELEASE_PRS
 ACQUIRE_STAGING
 DEPLOY_BACKEND_STAGING
 DEPLOY_FRONTEND_STAGING
@@ -773,8 +932,9 @@ MERGE_FRONTEND
 DEPLOY_FRONTEND_PRODUCTION
 VALIDATE_FRONTEND_PRODUCTION
 POST_DEPLOY_WATCH
-FINALIZE_RELEASE
-CLEANUP
+FINALIZE_PRODUCTION
+CLEANUP_PRODUCTION
+END
 ```
 
 Task Lambdas must return quickly. Waiting for GitHub or AWS happens through:
@@ -915,11 +1075,11 @@ Given:
 The sequence is:
 
 1. The old train continues to own `global-production`.
-2. A is inserted as `READY`.
-3. The starter sees production busy and ensures a prospective `COLLECTING`
-   train exists.
+2. A is inserted as `READY_FOR_PRODUCTION`.
+3. The starter sees production busy and ensures a prospective
+   `COLLECTING_PRODUCTION` train exists.
 4. It does not create aggregate branches or start builds.
-5. B and C are committed as `READY`.
+5. B and C are committed as `READY_FOR_PRODUCTION`.
 6. The old train completes its production validation.
 7. The bus releases the old production lease.
 8. The next starter run verifies all candidate SHAs.
@@ -935,6 +1095,11 @@ The sequence is:
 
 If the old production deployment fails, the next train remains collecting and
 does not advance until production is restored.
+
+The same cutoff and dependency rules apply to `READY_FOR_STAGING` candidates.
+Staging candidates wait whenever a production train owns the shared
+orchestration or staging lane, then depart as the next staging train when no
+eligible production train has priority.
 
 ## 20. Implementation Work Packages
 
@@ -957,7 +1122,8 @@ Backend:
 - Update validation and generator.
 - Split package and deploy responsibilities.
 - Add exact-SHA, artifact, train, and operation inputs.
-- Preserve the existing manual path temporarily.
+- Preserve the existing manual path only during the backward-compatible
+  rollout; it becomes operator-only break glass when the bus is enabled.
 
 Do not enforce gates yet.
 
@@ -979,10 +1145,13 @@ Deploy `dbMigrationsLoop` before any API or Lambda uses the tables.
 
 Backend:
 
-- Add readiness, cancel, list, and train endpoints.
+- Add staging-readiness, production-readiness, cancel, list, and train
+  endpoints.
 - Extend the existing deploy UI.
 - Add GitHub user permission verification.
 - Add commit statuses and PR notifications.
+- Add GitHub-team authorization for operator controls.
+- Add durable `ALL`, `STAGING`, and `PRODUCTION` pause controls.
 - Add `OFF`, `SHADOW`, `STAGING`, and `PRODUCTION` modes.
 
 Deploy the API with bus mode `OFF`.
@@ -1030,8 +1199,15 @@ Both repositories:
 ### 20.7 Package 7: staging coordination
 
 - Add the `global-staging` gate.
-- Make bus staging deploy exact train SHAs.
-- Queue or defer ordinary `1a-staging` requests while busy.
+- Add the `READY_FOR_STAGING` lifecycle and staging-train collector.
+- Make the bus compose and deploy exact staging-train SHAs.
+- Make the bus the normal owner of backend and frontend `1a-staging` branch
+  movement.
+- Fast-forward `1a-staging` only after exact train validation succeeds.
+- Make a post-validation `1a-staging` push a no-op instead of a duplicate
+  deployment.
+- Restrict manual `1a-staging` merges and staging dispatches to audited
+  operator break glass.
 - Correlate existing staging E2E to exact train evidence.
 - Verify backend unit versions.
 - Run full end-to-end tests in staging mode.
@@ -1044,7 +1220,8 @@ Both repositories:
 - Add frontend deployment after backend validation.
 - Add production E2E and health watch.
 - Add rollback adapters.
-- Add final manifest and GelatoBot release note.
+- Add the final manifest and deployment event consumed independently by the
+  autonomous release-note bot.
 - Enable `PRODUCTION` mode only after shadow and staging soak periods.
 
 ## 21. Zero-Downtime Rollout Order
@@ -1053,19 +1230,26 @@ Both repositories:
 2. Deploy release tables to staging through `dbMigrationsLoop`.
 3. Deploy backend API changes to staging.
 4. Deploy the release-bus Lambda and state machine to staging with mode `OFF`.
-5. Test readiness and orchestration against sandbox repositories.
-6. Enable `SHADOW`; create trains and operations without GitHub writes.
-7. Enable `STAGING`; allow composition and exact staging validation but no
-   production merges.
-8. Deploy the additive tables to production through `dbMigrationsLoop`.
-9. Deploy the production API.
-10. Deploy production release-bus infrastructure with mode `OFF`.
-11. Install GitHub App secrets and ruleset bypass.
-12. Enable production `SHADOW` mode.
-13. Compare shadow decisions with manual releases.
-14. Enable production authorization gates.
-15. Enable autonomous `PRODUCTION` mode.
-16. Retain break-glass deployment and global pause controls.
+5. Test readiness and orchestration with mocked GitHub operations and sandbox
+   repositories.
+6. Install the GitHub App and its secrets after the implementation is ready
+   for real integration testing.
+7. Enable `SHADOW`; create staging and production trains and operations without
+   GitHub writes.
+8. Enable `STAGING`; let the bus own staging trains and exact staging
+   validation while the old manual path remains available for rollback.
+9. After the staging mode is stable, restrict direct `1a-staging` movement and
+   staging dispatch to operator break glass.
+10. Deploy the additive tables to production through `dbMigrationsLoop`.
+11. Deploy the production API.
+12. Deploy production release-bus infrastructure with mode `OFF`.
+13. Add the GitHub App as the narrowly scoped ruleset-bypass actor.
+14. Enable production `SHADOW` mode.
+15. Compare shadow decisions with manual releases.
+16. Enable staging and production workflow authorization gates.
+17. Enable autonomous `PRODUCTION` mode only after the separately chosen
+    go-live threshold is met.
+18. Retain break-glass deployment and global pause controls.
 
 Gate enforcement must be the final switch. Do not make existing production
 workflows require bus authorization before the production bus is deployed and
@@ -1076,7 +1260,8 @@ healthy.
 ### 22.1 Backend unit and property tests
 
 - Candidate state transitions.
-- Immutable readiness.
+- Immutable staging and production readiness.
+- Production readiness rejection before exact-SHA staging validation.
 - Push invalidation.
 - DAG cycle detection.
 - Topological ordering.
@@ -1086,6 +1271,8 @@ healthy.
 - Idempotency key generation.
 - Operation reconciliation.
 - Lane lease acquisition and recovery.
+- Staging and production train priority.
+- Operator-team authorization and durable pause controls.
 - Production authorization.
 
 Use `fast-check` for DAG and state-transition properties where reasonable.
@@ -1101,6 +1288,8 @@ Use the existing Testcontainers pattern to test:
 - Ambiguous external-operation state.
 - A candidate arriving exactly around the cutoff.
 - One train completing while another is collecting.
+- Simultaneous staging-ready and production-ready queues.
+- An expected-old-SHA failure while advancing `1a-staging`.
 
 ### 22.3 Workflow tests
 
@@ -1109,7 +1298,10 @@ Use the existing Testcontainers pattern to test:
 - Artifact digest mismatch.
 - Wrong train or operation key.
 - Direct unauthorized deployment.
+- A direct unauthorized `1a-staging` update or staging dispatch.
+- A validated bus fast-forward that does not redeploy the same staging SHA.
 - Stale `main`.
+- Stale `1a-staging`.
 - Existing workflow-run reconciliation.
 - Codex safe and unsafe conflict fixtures.
 
@@ -1118,6 +1310,9 @@ Use the existing Testcontainers pattern to test:
 - Frontend-only candidate.
 - Backend-only candidate.
 - Combined backend and frontend candidate.
+- Ready-for-staging through `STAGING_VALIDATED` without a developer branch
+  merge or workflow dispatch.
+- Separate ready-for-production transition for the same exact SHA.
 - A depends on B across repositories.
 - A depends on missing B while independent C releases.
 - Backend service ordering.
@@ -1129,6 +1324,10 @@ Use the existing Testcontainers pattern to test:
 - Unsafe conflict held.
 - Build failure isolated.
 - Staging E2E failure isolated.
+- A failed staging train does not advance `1a-staging`, while independent work
+  can form the next train.
+- A production train restages its exact combined release instead of reusing
+  candidate-level staging evidence.
 - Backend production failure prevents frontend merge.
 - Successful rollback.
 - Release-bus worker update while an old train is running.
@@ -1155,7 +1354,6 @@ Add alarms for:
 - Repeated starter or worker failures.
 - A production deployment or validation failure.
 - A GitHub webhook authentication failure spike.
-- A release-note publication failure after a successful production release.
 
 Every train transition and external operation must append a redacted event to
 `release_train_events`. Do not place credentials, private URLs, raw production
@@ -1185,8 +1383,9 @@ Functions input, GitHub comments, or logs.
 After implementation:
 
 - Update `ops/docs/developer/deployment-bus-process.md` so its operating model
-  describes autonomous readiness as the production authorization rather than a
-  later human production approval.
+  describes bus-owned staging, exact-SHA staging readiness, and autonomous
+  production readiness rather than manual `1a-staging` movement or a later
+  human production approval.
 - Update `ops/docs/developer/deployment-bus-automation.md` with the implemented
   tables, states, workflows, APIs, and failure behavior.
 - Update the frontend and backend `deploy-6529` skills with the new bus and
@@ -1196,13 +1395,15 @@ After implementation:
 - Document GitHub App installation, Secrets Manager setup, ruleset bypass,
   pause and resume, rollback, lease recovery, and disaster recovery.
 - Remove or clearly label stale statements about manual Playwright execution,
-  queue collection, and human production promotion.
+  developer-owned `1a-staging` merges and staging dispatches, queue collection,
+  human production promotion, and release-note publication by the bus.
 
 ## 26. Definition of Done
 
 The bus is complete only when all of the following are proven:
 
-- A developer can mark a branch ready from `/deploy`.
+- A developer can separately mark an exact branch SHA ready for staging and,
+  after validation, ready for production from `/deploy`.
 - The recorded exact SHA cannot silently change.
 - Dependencies work across frontend and backend.
 - Service-level backend ordering works.
@@ -1211,6 +1412,11 @@ The bus is complete only when all of the following are proven:
 - Duplicate events cannot duplicate branches, PRs, merges, workflows,
   comments, or deployments.
 - The exact combined train is validated on staging.
+- Developers do not need to merge to `1a-staging` or dispatch staging
+  workflows on the normal path.
+- Failed staging trains do not advance `1a-staging`.
+- Successfully validated staging trains advance backend and frontend
+  `1a-staging` with expected-old-SHA protection and no duplicate deployment.
 - The exact prebuilt production artifacts are deployed.
 - Existing staging E2E results are machine-consumed.
 - Backend deploys and validates before dependent frontend code is merged.
@@ -1223,6 +1429,9 @@ The bus is complete only when all of the following are proven:
 - Production failure stops the train and invokes only declared rollback
   strategies.
 - Every decision and external effect is auditable.
-- Normal successful readiness-to-production requires no further human action.
+- Normal successful readiness-to-staging and readiness-to-production require
+  no further human action.
+- Production completion emits sufficient evidence for the independent
+  autonomous release-note bot without coupling the bus to personal skills.
 - The deployment-bus process and automation documents describe the implemented
   system rather than future intentions.
