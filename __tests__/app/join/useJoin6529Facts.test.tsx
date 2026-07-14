@@ -1,4 +1,5 @@
 import { useJoin6529Facts } from "@/app/join/useJoin6529Facts";
+import { STATS_QUERY_KEY } from "@/components/user/collected/stats/constants";
 import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
 import { useIdentityActivity } from "@/hooks/useIdentityActivity";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -40,7 +41,10 @@ const renderFacts = ({
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  return renderHook(() => useJoin6529Facts({ enabled, identity }), { wrapper });
+  return {
+    ...renderHook(() => useJoin6529Facts({ enabled, identity }), { wrapper }),
+    queryClient,
+  };
 };
 
 describe("useJoin6529Facts", () => {
@@ -81,5 +85,48 @@ describe("useJoin6529Facts", () => {
       identity: "",
     });
     expect(apiMock).not.toHaveBeenCalled();
+  });
+
+  it("does not enable either query for an empty identity", () => {
+    const { result } = renderFacts({ enabled: true, identity: "   " });
+
+    expect(result.current).toEqual({
+      hasCollected: false,
+      hasParticipated: false,
+    });
+    expect(activityMock).toHaveBeenCalledWith({
+      enabled: false,
+      identity: "",
+    });
+    expect(apiMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps collection pending while collected stats are loading", async () => {
+    apiMock.mockReturnValue(new Promise<ApiCollectedStats>(() => undefined));
+
+    const { result } = renderFacts({ enabled: true, identity: "punk6529" });
+
+    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(1));
+    expect(result.current.hasCollected).toBe(false);
+  });
+
+  it("keeps collection pending when collected stats are unavailable", async () => {
+    apiMock.mockRejectedValue(new Error("Collected stats unavailable"));
+
+    const { queryClient, result } = renderFacts({
+      enabled: true,
+      identity: "punk6529",
+    });
+
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryState([
+          STATS_QUERY_KEY,
+          "collected-stats",
+          "punk6529",
+        ])?.status
+      ).toBe("error")
+    );
+    expect(result.current.hasCollected).toBe(false);
   });
 });

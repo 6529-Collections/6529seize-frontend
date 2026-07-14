@@ -18,9 +18,10 @@ export function useJoin6529Facts({
   readonly identity: string | null;
 }): Join6529Facts {
   const canonicalIdentity = identity?.trim().toLowerCase() ?? "";
+  const canLoadFacts = enabled && canonicalIdentity.length > 0;
   const activityQuery = useIdentityActivity({
     identity: canonicalIdentity,
-    enabled,
+    enabled: canLoadFacts,
   });
   const collectedStatsQuery = useQuery<ApiCollectedStats, Error>({
     queryKey: [STATS_QUERY_KEY, "collected-stats", canonicalIdentity],
@@ -34,7 +35,7 @@ export function useJoin6529Facts({
         signal,
       });
     },
-    enabled: enabled && canonicalIdentity.length > 0,
+    enabled: canLoadFacts,
     retry: false,
   });
 
