@@ -13,13 +13,13 @@ export default function CommunityMembersTableSkeleton({
 
   return (
     <output className="tw-block" aria-label="Loading Network members">
-      <div className="tw-hidden tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-block sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
+      <div className="tw-hidden tw-overflow-hidden sm:tw-block">
         <div className="tw-animate-pulse">
-          <div className="tw-h-12 tw-border-b tw-border-iron-700 tw-bg-iron-900" />
+          <div className="tw-h-10 tw-border-b tw-border-iron-800" />
           {rowKeys.map((key) => (
             <div
               key={key}
-              className="tw-flex tw-h-16 tw-items-center tw-gap-4 tw-border-b tw-border-iron-800 tw-px-6"
+              className="tw-flex tw-h-16 tw-items-center tw-gap-4 tw-border-b tw-border-iron-800 tw-px-4 odd:tw-bg-iron-900/45"
             >
               <div className="tw-h-4 tw-w-8 tw-rounded tw-bg-iron-800" />
               <div className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-800" />
@@ -40,7 +40,7 @@ export default function CommunityMembersTableSkeleton({
         {rowKeys.map((key) => (
           <div
             key={key}
-            className="tw-flex tw-animate-pulse tw-flex-col tw-gap-y-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/80 tw-p-3 tw-shadow-sm tw-shadow-black/20 tw-backdrop-blur-md"
+            className="tw-flex tw-animate-pulse tw-flex-col tw-gap-y-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3"
           >
             <div className="tw-flex tw-w-full tw-justify-between">
               <div className="tw-flex tw-items-center tw-gap-x-2">

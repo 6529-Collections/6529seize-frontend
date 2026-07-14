@@ -487,9 +487,9 @@ export default function MyStreamWaveTabsHeader({
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
-            className="tw-text-primary-200 tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-transition tw-duration-150 hover:tw-border-primary-400/50 hover:tw-bg-primary-500/20 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
-            <MagnifyingGlassIcon className="tw-size-4.5 tw-flex-shrink-0" />
+            <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </button>
           {!isCompact && (
             <button

@@ -72,6 +72,59 @@ describe("MobileWrapperDialog", () => {
         document.querySelector(".tw-flex-1.tw-overflow-visible")
       ).toBeInTheDocument();
     });
+
+    it.each([
+      {
+        name: "enables dragging without rendering a handle",
+        props: { enableDragToClose: true },
+        canDrag: true,
+        showsHandle: false,
+      },
+      {
+        name: "lets an explicit false override the handle fallback",
+        props: { enableDragToClose: false, showDragHandle: true },
+        canDrag: false,
+        showsHandle: true,
+      },
+      {
+        name: "falls back to the legacy handle behavior",
+        props: { showDragHandle: true },
+        canDrag: true,
+        showsHandle: true,
+      },
+      {
+        name: "disables dragging when the dialog is not dismissible",
+        props: { dismissible: false, enableDragToClose: true },
+        canDrag: false,
+        showsHandle: false,
+      },
+      {
+        name: "disables dragging for tablet modals",
+        props: { enableDragToClose: true, tabletModal: true },
+        canDrag: false,
+        showsHandle: false,
+      },
+    ])("$name", ({ props, canDrag, showsHandle }) => {
+      render(
+        <MobileWrapperDialog {...defaultProps} {...props} isOpen={true} />
+      );
+
+      const dragSurface = document.querySelector<HTMLElement>(
+        ".mobile-wrapper-dialog"
+      );
+      expect(dragSurface).toBeInTheDocument();
+      expect(dragSurface?.style.transform).toBe(
+        canDrag ? "translate3d(0, 0px, 0)" : ""
+      );
+      const dragHandle = document.querySelector(
+        ".tw-h-1.tw-w-10.tw-rounded-full"
+      );
+      if (showsHandle) {
+        expect(dragHandle).toBeInTheDocument();
+      } else {
+        expect(dragHandle).not.toBeInTheDocument();
+      }
+    });
   });
 
   describe("user interactions", () => {
