@@ -48,6 +48,7 @@ type MobileWrapperDialogProps = {
   readonly headerActions?: ReactNode;
   readonly mobileCloseButtonClassName?: string | undefined;
   readonly showDragHandle?: boolean | undefined;
+  readonly enableDragToClose?: boolean | undefined;
   readonly showHeaderCloseButton?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
@@ -63,6 +64,7 @@ type DragTouchHandlers = Pick<
 type MobileDialogDragOptions = {
   readonly dismissible: boolean;
   readonly showDragHandle?: boolean | undefined;
+  readonly enableDragToClose?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
   readonly onAfterLeave?: (() => void) | undefined;
@@ -438,6 +440,7 @@ function getDismissDragOffset(): number {
 function useMobileDialogDrag({
   dismissible,
   showDragHandle,
+  enableDragToClose,
   tabletModal,
   onClose,
   onAfterLeave,
@@ -456,7 +459,8 @@ function useMobileDialogDrag({
     }
   }, [dismissible, onClose]);
 
-  const canDragToClose = dismissible && !!showDragHandle && !tabletModal;
+  const canDragToClose =
+    dismissible && (enableDragToClose ?? !!showDragHandle) && !tabletModal;
 
   const cancelScheduledDragFrame = useCallback(() => {
     if (dragFrameRef.current === null) {
@@ -632,6 +636,7 @@ export default function MobileWrapperDialog({
   headerActions,
   mobileCloseButtonClassName,
   showDragHandle,
+  enableDragToClose,
   showHeaderCloseButton,
   headerCloseButtonClassName,
   surfaceClassName,
@@ -649,6 +654,7 @@ export default function MobileWrapperDialog({
   } = useMobileDialogDrag({
     dismissible,
     showDragHandle,
+    enableDragToClose,
     tabletModal,
     onClose,
     onAfterLeave,

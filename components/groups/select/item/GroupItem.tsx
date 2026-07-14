@@ -90,7 +90,7 @@ export default function GroupItem({
                     <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-primary-400" />
                   )}
                   <p
-                    className={`tw-mb-0 tw-truncate tw-text-sm tw-font-bold ${
+                    className={`tw-m-0 tw-truncate tw-text-sm tw-font-bold ${
                       isActive
                         ? "tw-text-iron-50"
                         : "tw-text-iron-100 group-hover:tw-text-iron-50"
