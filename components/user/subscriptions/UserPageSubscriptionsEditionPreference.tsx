@@ -79,52 +79,56 @@ export default function UserPageSubscriptionsEditionPreference(
   };
 
   return (
-    <div className="tw-min-w-0">
-      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
-          Edition Preference
-        </h3>
-        <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-          Eligibility x{subscriptionEligibilityCount}
-        </span>
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-5">
+      <div className="tw-min-w-0">
+        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
+          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+            Edition Preference
+          </h3>
+          <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+            Eligibility x{subscriptionEligibilityCount}
+          </span>
+        </div>
+        {!props.readonly && (
+          <p
+            id={descriptionId}
+            className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-leading-5 tw-text-iron-400"
+          >
+            {isAllEditions
+              ? "You will receive all editions you are eligible for"
+              : "You will receive only one edition"}
+          </p>
+        )}
       </div>
-      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      <div className="tw-grid tw-w-full tw-flex-shrink-0 tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] tw-items-center tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[auto_auto_auto]">
         <span
-          className={`tw-font-semibold tw-transition-colors ${
+          className={`tw-text-right tw-text-sm tw-font-semibold tw-transition-colors ${
             isAllEditions ? "tw-text-iron-400" : "tw-text-iron-50"
           }`}
         >
           One edition
         </span>
-        <UserPageSubscriptionsToggle
-          disabled={isDisabled}
-          id="subscription-all-editions-mode"
-          checked={isAllEditions}
-          onChange={toggleAllEditions}
-          ariaLabel="All eligible editions"
-          describedBy={props.readonly ? undefined : descriptionId}
-        />
+        <span className="tw-flex tw-items-center tw-gap-2">
+          <UserPageSubscriptionsToggle
+            disabled={isDisabled}
+            id="subscription-all-editions-mode"
+            checked={isAllEditions}
+            onChange={toggleAllEditions}
+            ariaLabel="All eligible editions"
+            describedBy={props.readonly ? undefined : descriptionId}
+          />
+          {isUpdatingAllEditions && (
+            <CircleLoader size={CircleLoaderSize.MEDIUM} />
+          )}
+        </span>
         <span
-          className={`tw-font-semibold tw-transition-colors ${
+          className={`tw-text-sm tw-font-semibold tw-transition-colors ${
             isAllEditions ? "tw-text-iron-50" : "tw-text-iron-400"
           }`}
         >
           All eligible
         </span>
-        {isUpdatingAllEditions && (
-          <CircleLoader size={CircleLoaderSize.MEDIUM} />
-        )}
       </div>
-      {!props.readonly && (
-        <p
-          id={descriptionId}
-          className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-400"
-        >
-          {isAllEditions
-            ? "You will receive all editions you are eligible for"
-            : "You will receive only one edition"}
-        </p>
-      )}
     </div>
   );
 }

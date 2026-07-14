@@ -61,23 +61,22 @@ export default function UserPageSubscriptionsUpcoming(
   } else if (subscriptions.length > 0) {
     content = (
       <>
-        <div className="tw-divide-y tw-divide-white/10">
+        <div className="tw-space-y-2">
           {subscriptions.map((subscription, index) => (
-            <div key={subscription.token_id}>
-              <MemeSubscriptionRow
-                profileKey={props.profileKey}
-                title="The Memes"
-                subscription={subscription}
-                eligibilityCount={
-                  props.details?.subscription_eligibility_count ?? 1
-                }
-                readonly={props.readonly}
-                refresh={props.refresh}
-                minting_today={index === 0 && isMintingToday()}
-                first={index === 0}
-                date={rows[index] ?? null}
-              />
-            </div>
+            <MemeSubscriptionRow
+              key={subscription.token_id}
+              profileKey={props.profileKey}
+              title="The Memes"
+              subscription={subscription}
+              eligibilityCount={
+                props.details?.subscription_eligibility_count ?? 1
+              }
+              readonly={props.readonly}
+              refresh={props.refresh}
+              minting_today={index === 0 && isMintingToday()}
+              first={index === 0}
+              date={rows[index] ?? null}
+            />
           ))}
         </div>
         {props.memes_subscriptions.length > 3 && (

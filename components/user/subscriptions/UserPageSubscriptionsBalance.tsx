@@ -18,8 +18,8 @@ export default function UserPageSubscriptionsBalance(
 
   return (
     <div className="tw-min-w-0">
-      <div className="tw-flex tw-min-h-8 tw-items-center tw-gap-2">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+      <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3">
+        <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-400">
           Current Balance
         </h3>
         {props.show_refresh &&
@@ -42,18 +42,18 @@ export default function UserPageSubscriptionsBalance(
             </button>
           ))}
       </div>
-      <div className="tw-mt-2 tw-min-h-6">
+      <div className="tw-mt-3 tw-min-h-9">
         {props.fetching ? (
           <DotLoader />
         ) : (
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-iron-200">
-            <span className="tw-flex tw-items-center tw-gap-1">
-              <b>
+          <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-iron-100">
+            <span className="tw-flex tw-items-center tw-gap-1.5">
+              <b className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight">
                 {balance > 0
                   ? numberWithCommas(Math.round(balance * 1000000) / 1000000)
                   : 0}
               </b>
-              <span className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
+              <span className="tw-flex tw-size-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-300">
                 <EthereumIcon />
               </span>
             </span>

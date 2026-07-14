@@ -78,61 +78,65 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <div className="tw-min-w-0">
-      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
-          Mode
-        </h3>
-        {props.details && props.details.last_update > 0 && (
-          <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-            {new Date(props.details.last_update).toLocaleString("en-US", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-              timeZone: "UTC",
-            })}{" "}
-            UTC
-          </span>
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-5">
+      <div className="tw-min-w-0">
+        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
+          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+            Mode
+          </h3>
+          {props.details && props.details.last_update > 0 && (
+            <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+              {new Date(props.details.last_update).toLocaleString("en-US", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+                timeZone: "UTC",
+              })}{" "}
+              UTC
+            </span>
+          )}
+        </div>
+        {!props.readonly && (
+          <p
+            id={descriptionId}
+            className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-leading-5 tw-text-iron-400"
+          >
+            {isAuto
+              ? "Automatic airdrops of all eligible drops unless you opt-out"
+              : "You have to opt-in to each specific drop"}
+          </p>
         )}
       </div>
-      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      <div className="tw-grid tw-w-full tw-flex-shrink-0 tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] tw-items-center tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[auto_auto_auto]">
         <span
-          className={`tw-font-semibold tw-transition-colors ${
+          className={`tw-text-right tw-text-sm tw-font-semibold tw-transition-colors ${
             isAuto ? "tw-text-iron-400" : "tw-text-iron-50"
           }`}
         >
           Manual
         </span>
-        <UserPageSubscriptionsToggle
-          disabled={isDisabled}
-          id="subscription-mode"
-          checked={isAuto}
-          onChange={toggleMode}
-          ariaLabel="Automatic subscription mode"
-          describedBy={props.readonly ? undefined : descriptionId}
-        />
+        <span className="tw-flex tw-items-center tw-gap-2">
+          <UserPageSubscriptionsToggle
+            disabled={isDisabled}
+            id="subscription-mode"
+            checked={isAuto}
+            onChange={toggleMode}
+            ariaLabel="Automatic subscription mode"
+            describedBy={props.readonly ? undefined : descriptionId}
+          />
+          {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
+        </span>
         <span
-          className={`tw-font-semibold tw-transition-colors ${
+          className={`tw-text-sm tw-font-semibold tw-transition-colors ${
             isAuto ? "tw-text-iron-50" : "tw-text-iron-400"
           }`}
         >
           Automatic
         </span>
-        {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
       </div>
-      {!props.readonly && (
-        <p
-          id={descriptionId}
-          className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-400"
-        >
-          {isAuto
-            ? "Automatic airdrops of all eligible drops unless you opt-out"
-            : "You have to opt-in to each specific drop"}
-        </p>
-      )}
     </div>
   );
 }

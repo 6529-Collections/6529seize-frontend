@@ -62,10 +62,19 @@ function getTopUpModalEmoji(
 }
 
 const TOP_UP_OPTION_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 sm:tw-gap-x-6";
-const TOP_UP_OPTION_GRID_PADDED_CLASS = `${TOP_UP_OPTION_GRID_CLASS} tw-pt-2`;
-const TOP_UP_RADIO_GRID_CLASS =
-  "tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)] tw-items-center tw-gap-3";
+  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3";
+const TOP_UP_ACTION_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end";
+const TOP_UP_OPTION_CLASS =
+  "tw-relative tw-min-h-[7.5rem] tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-text-left tw-text-iron-100 tw-transition-all tw-duration-200 motion-reduce:tw-transition-none focus-within:tw-ring-2 focus-within:tw-ring-primary-400";
+
+function getTopUpOptionClass(selected: boolean): string {
+  return `${TOP_UP_OPTION_CLASS} ${
+    selected
+      ? "tw-border-primary-400/50 tw-bg-iron-900 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+      : "tw-border-white/[0.07] tw-bg-black/20 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/[0.03]"
+  }`;
+}
 
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
@@ -334,7 +343,7 @@ export default function UserPageSubscriptionsTopUp() {
   ) => {
     if (count > 0) {
       return (
-        <div className="tw-pt-2">
+        <div>
           <CardCountOption
             id={`subscription-top-up-${optionId}`}
             count={count}
@@ -355,7 +364,7 @@ export default function UserPageSubscriptionsTopUp() {
   const topUpContent = (
     <>
       <div className={TOP_UP_OPTION_GRID_CLASS}>
-        <div className="tw-pt-2">
+        <div>
           <CardCountOption
             id="subscription-top-up-1"
             count={1}
@@ -368,28 +377,22 @@ export default function UserPageSubscriptionsTopUp() {
           />
         </div>
         {printRemainingMints(remainingMintsForSeason, "SZN", szn, "szn")}
-      </div>
-      <div className={TOP_UP_OPTION_GRID_CLASS}>
         {printRemainingMints(remainingMintsForYear, "Year", year, "year")}
         {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch, "epoch")}
       </div>
       {!showDeep && (
-        <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
-          <div className="tw-text-iron-400">
-            <div className="tw-text-center sm:tw-pl-8 sm:tw-text-left">
-              <ShowMoreButton
-                expanded={showDeep}
-                setExpanded={setShowDeep}
-                showMoreLabel="Show Deep Time Subscriptions"
-                showLessLabel="Hide Deep Time Subscriptions"
-              />
-            </div>
-          </div>
+        <div className="tw-pt-3 tw-text-center tw-text-iron-400 sm:tw-text-left">
+          <ShowMoreButton
+            expanded={showDeep}
+            setExpanded={setShowDeep}
+            showMoreLabel="Show Deep Time Subscriptions"
+            showLessLabel="Hide Deep Time Subscriptions"
+          />
         </div>
       )}
       {showDeep && (
         <>
-          <div className={TOP_UP_OPTION_GRID_CLASS}>
+          <div className={`${TOP_UP_OPTION_GRID_CLASS} tw-mt-3`}>
             {printRemainingMints(
               remainingMintsForPeriod,
               "Period",
@@ -397,43 +400,29 @@ export default function UserPageSubscriptionsTopUp() {
               "period"
             )}
             {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
-          </div>
-          <div className={TOP_UP_OPTION_GRID_CLASS}>
             {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
           </div>
-          <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
-            <div className="tw-text-iron-400">
-              <div className="tw-text-center sm:tw-pl-8 sm:tw-text-left">
-                <ShowMoreButton
-                  expanded={showDeep}
-                  setExpanded={setShowDeep}
-                  showMoreLabel="Show Deep Time Subscriptions"
-                  showLessLabel="Hide Deep Time Subscriptions"
-                />
-              </div>
-            </div>
+          <div className="tw-pt-3 tw-text-center tw-text-iron-400 sm:tw-text-left">
+            <ShowMoreButton
+              expanded={showDeep}
+              setExpanded={setShowDeep}
+              showMoreLabel="Show Deep Time Subscriptions"
+              showLessLabel="Hide Deep Time Subscriptions"
+            />
           </div>
         </>
       )}
-      <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
+      <div className={TOP_UP_ACTION_GRID_CLASS}>
         <div className="tw-flex tw-items-center">
-          <div
-            className={`tw-relative tw-w-full tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-left tw-text-iron-100 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${
-              selectedOption === "other"
-                ? "tw-border-primary-400/50 tw-bg-iron-800"
-                : "tw-border-iron-800 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900"
-            }`}
-          >
+          <div className={getTopUpOptionClass(selectedOption === "other")}>
             <label
               htmlFor="subscription-top-up-other"
-              className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-lg"
+              className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-xl"
             >
               <span className="tw-sr-only">Select Other card count</span>
             </label>
-            <div
-              className={`${TOP_UP_RADIO_GRID_CLASS} tw-pointer-events-none tw-relative tw-z-10`}
-            >
-              <div className="tw-flex tw-items-center tw-justify-center">
+            <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-min-h-[5.5rem] tw-flex-col tw-justify-between tw-pr-8">
+              <span className="tw-pointer-events-auto tw-absolute tw-right-0 tw-top-0 tw-flex">
                 <input
                   id="subscription-top-up-other"
                   type="radio"
@@ -442,11 +431,13 @@ export default function UserPageSubscriptionsTopUp() {
                   checked={selectedOption === "other"}
                   onChange={handleSelectOther}
                   aria-label="Other card count"
-                  className={`${styles["radioInput"]} tw-pointer-events-auto`}
+                  className={styles["radioInput"]}
                 />
-              </div>
-              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-                <span>Other</span>
+              </span>
+              <span className="tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+                Other
+              </span>
+              <div className="tw-mt-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
                 <input
                   ref={otherInputRef}
                   type="number"
@@ -603,46 +594,37 @@ function CardCountOption(
     <label
       htmlFor={props.id}
       aria-label={labelText}
-      className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-left tw-text-iron-100 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${
-        props.selected
-          ? "tw-border-primary-400/50 tw-bg-iron-800"
-          : "tw-border-iron-800 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900"
-      }`}
+      className={`${getTopUpOptionClass(props.selected)} tw-block tw-cursor-pointer`}
     >
-      <div className={TOP_UP_RADIO_GRID_CLASS}>
-        <div className="tw-flex tw-items-center tw-justify-center">
-          <input
-            id={props.id}
-            type="radio"
-            name="subscription-top-up-card-count"
-            value={props.count}
-            checked={props.selected}
-            onClick={() => {
-              if (props.selected) {
-                props.onSelect();
-              }
-            }}
-            onChange={props.onSelect}
-            aria-label={labelText}
-            className={styles["radioInput"]}
-          />
-        </div>
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-leading-5 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline sm:tw-gap-x-1">
-          {props.display && <span>{props.display}</span>}
-          {props.display && (
-            <span aria-hidden="true" className="tw-hidden sm:tw-inline">
-              —
-            </span>
-          )}
-          <span
-            className={
-              props.display
-                ? "tw-text-sm tw-text-iron-400 sm:tw-text-base sm:tw-text-iron-100"
-                : undefined
+      <span className="tw-absolute tw-right-4 tw-top-4 tw-flex">
+        <input
+          id={props.id}
+          type="radio"
+          name="subscription-top-up-card-count"
+          value={props.count}
+          checked={props.selected}
+          onClick={() => {
+            if (props.selected) {
+              props.onSelect();
             }
-          >
-            {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
-            {numberWithCommasFromString(getEthForCards(props.count))} ETH)
+          }}
+          onChange={props.onSelect}
+          aria-label={labelText}
+          className={styles["radioInput"]}
+        />
+      </span>
+      <div className="tw-flex tw-min-h-[5.5rem] tw-min-w-0 tw-flex-col tw-justify-between tw-pr-8">
+        {props.display && (
+          <span className="tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-400">
+            {props.display}
+          </span>
+        )}
+        <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+          <span className="tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+            {props.count.toLocaleString()} Card{props.count > 1 && "s"}
+          </span>
+          <span className="tw-text-sm tw-leading-5 tw-text-iron-400">
+            {numberWithCommasFromString(getEthForCards(props.count))} ETH
           </span>
         </div>
       </div>

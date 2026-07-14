@@ -313,7 +313,7 @@ export default function MemeSubscriptionRow(
               <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
                 {renderCountSelector({
                   selectClassName:
-                    "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
+                    "tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2 tw-py-1 tw-text-iron-300 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25",
                   disableWhenSingleOption: false,
                 })}
               </span>
@@ -355,7 +355,7 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-py-3">
+    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/20 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.025] motion-reduce:tw-transition-none">
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
@@ -418,13 +418,15 @@ export default function MemeSubscriptionRow(
             onChange={submit}
             ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
           />
-          <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-            {renderCountSelector({
-              selectClassName:
-                "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
-              disableWhenSingleOption: true,
-            })}
-          </span>
+          {subscribed && (
+            <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
+              {renderCountSelector({
+                selectClassName:
+                  "tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2 tw-py-1 tw-text-iron-300 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25",
+                disableWhenSingleOption: true,
+              })}
+            </span>
+          )}
         </div>
       </div>
     </div>

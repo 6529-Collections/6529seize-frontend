@@ -28,6 +28,8 @@ import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 
 const HISTORY_PAGE_SIZE = 10;
+const SUBSCRIBE_GROUP_CLASS =
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/25 tw-p-4 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] sm:tw-p-5";
 
 function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
@@ -254,30 +256,36 @@ export default function UserPageSubscriptions(
           </Link>
         }
       >
-        <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
-          <UserPageSubscriptionsBalance
-            details={details}
-            fetching={fetchingDetails}
-            refresh={refresh}
-            show_refresh={isConnectedAccount}
-          />
-          <UserPageSubscriptionsAirdropAddress
-            show_edit={isConnectedAccount}
-            airdrop={airdropResult}
-            fetching={fetchingAirdropAddress}
-          />
-          <UserPageSubscriptionsMode
-            profileKey={profileKey}
-            details={details}
-            readonly={!isConnectedAccount}
-            refresh={refresh}
-          />
-          <UserPageSubscriptionsEditionPreference
-            profileKey={profileKey}
-            details={details}
-            readonly={!isConnectedAccount}
-            refresh={refresh}
-          />
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2">
+          <div className={SUBSCRIBE_GROUP_CLASS}>
+            <UserPageSubscriptionsBalance
+              details={details}
+              fetching={fetchingDetails}
+              refresh={refresh}
+              show_refresh={isConnectedAccount}
+            />
+            <div className="tw-my-5 tw-h-px tw-bg-white/[0.07]" />
+            <UserPageSubscriptionsAirdropAddress
+              show_edit={isConnectedAccount}
+              airdrop={airdropResult}
+              fetching={fetchingAirdropAddress}
+            />
+          </div>
+          <div className={SUBSCRIBE_GROUP_CLASS}>
+            <UserPageSubscriptionsMode
+              profileKey={profileKey}
+              details={details}
+              readonly={!isConnectedAccount}
+              refresh={refresh}
+            />
+            <div className="tw-my-5 tw-h-px tw-bg-white/[0.07]" />
+            <UserPageSubscriptionsEditionPreference
+              profileKey={profileKey}
+              details={details}
+              readonly={!isConnectedAccount}
+              refresh={refresh}
+            />
+          </div>
         </div>
       </UserPageSubscriptionsSection>
       {isConnectedAccount && <UserPageSubscriptionsTopUp />}
