@@ -4582,7 +4582,8 @@
         "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
         "The speaker control mutes waves before or after joining.",
         "When a wave is muted, the red speaker-muted Muted control unmutes it.",
-        "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually."
+        "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually.",
+        "When a muted wave is open, new drops still appear live while typing indicators remain disabled."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/messages"],
