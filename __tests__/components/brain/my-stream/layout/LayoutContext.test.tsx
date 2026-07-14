@@ -133,9 +133,13 @@ describe("LayoutProvider", () => {
       const waveView = screen.getByTestId("wave-view");
 
       expect(contentContainer.style.display).toBe("flex");
-      expect(contentContainer.style.height).toContain("100dvh");
-      expect(waveView.style.height).toContain("100dvh");
-      expect(waveView.style.maxHeight).toContain("100dvh");
+      expect(contentContainer.style.height).toContain(
+        "var(--layout-viewport-height)"
+      );
+      expect(waveView.style.height).toContain("var(--layout-viewport-height)");
+      expect(waveView.style.maxHeight).toContain(
+        "var(--layout-viewport-height)"
+      );
     } finally {
       global.requestAnimationFrame = originalRequestAnimationFrame;
     }
