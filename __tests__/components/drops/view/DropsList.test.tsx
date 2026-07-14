@@ -122,6 +122,39 @@ describe("DropsList", () => {
     expect(lightProps).toHaveLength(1);
   });
 
+  it("allows historical light drops to hydrate after serial scrolling settles", () => {
+    const props = {
+      scrollContainerRef: { current: null },
+      drops: [
+        {
+          stableKey: "historical-light",
+          serial_no: 2,
+          type: DropSize.LIGHT,
+          waveId: "w",
+        },
+      ] as any,
+      showWaveInfo: false,
+      activeDrop: null,
+      showReplyAndQuote: false,
+      onReply: jest.fn(),
+      onReplyClick: jest.fn(),
+      serialNo: null,
+      targetDropRef: null,
+      parentContainerRef: undefined,
+      onQuoteClick: jest.fn(),
+      onDropContentClick: jest.fn(),
+      dropViewDropId: null,
+      suspendLightDropHydration: false,
+      // Regression input: this marker previously kept the light row suspended forever.
+      autoCollapseSerials: new Set([2]),
+    };
+
+    render(<DropsList {...props} />);
+
+    expect(wrapperProps).toHaveLength(1);
+    expect(wrapperProps[0].suspendLightDropHydration).toBe(false);
+  });
+
   it("passes approve wave state to full drops", () => {
     const drops: any = [
       { stableKey: "a", serial_no: 1, type: DropSize.FULL, wave: { id: "w" } },
