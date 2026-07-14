@@ -1,4 +1,4 @@
-export const RESERVED_MENTION_ALIASES = new Set([
+const RESERVED_MENTION_ALIASES = new Set([
   "all",
   "everyone",
   "admin",

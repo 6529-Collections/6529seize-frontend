@@ -12,12 +12,14 @@ import {
   $getRoot,
   $isTextNode,
   type LexicalEditor,
+  type EditorState,
   type LexicalNode,
   type TextNode,
 } from "lexical";
 import {
   forwardRef,
   useCallback,
+  useContext,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -45,6 +47,7 @@ import type {
 } from "@/entities/IMentionAlias";
 import { $isCodeNode } from "@lexical/code";
 import { $isLinkNode } from "@lexical/link";
+import { AuthContext } from "@/components/auth/Auth";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -179,7 +182,12 @@ export class MentionTypeaheadOption extends MenuOption {
 
 export interface NewMentionsPluginHandles {
   readonly isMentionsOpen: () => boolean;
-  readonly expandMentionAliases: () => Promise<void>;
+  readonly expandMentionAliases: () => Promise<MentionAliasExpansionResult>;
+}
+
+export interface MentionAliasExpansionResult {
+  readonly completed: boolean;
+  readonly editorState: EditorState;
 }
 
 const ALIAS_TOKEN_PATTERN =
@@ -234,7 +242,7 @@ const insertAliasMembers = ({
   return lastNode;
 };
 
-const expandPlainAliasTokens = ({
+export const expandPlainAliasTokens = ({
   editor,
   aliases,
   onSelect,
@@ -242,10 +250,10 @@ const expandPlainAliasTokens = ({
   readonly editor: LexicalEditor;
   readonly aliases: MentionAlias[];
   readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
-}): Promise<void> =>
+}): Promise<EditorState> =>
   new Promise((resolve) => {
     if (!aliases.length) {
-      resolve();
+      resolve(editor.getEditorState());
       return;
     }
     const aliasesByName = new Map(
@@ -317,7 +325,7 @@ const expandPlainAliasTokens = ({
           });
         });
       },
-      { onUpdate: resolve }
+      { onUpdate: () => resolve(editor.getEditorState()) }
     );
   });
 
@@ -338,7 +346,9 @@ const NewMentionsPlugin = forwardRef<
     handle: queryString ?? "",
     waveId,
   });
-  const { aliases } = useMentionAliases();
+  const { setToast } = useContext(AuthContext);
+  const { aliases, enabled, isFetched, isError, refetch } =
+    useMentionAliases();
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -403,10 +413,45 @@ const NewMentionsPlugin = forwardRef<
     ref,
     () => ({
       isMentionsOpen: () => isOpen && options.length > 0,
-      expandMentionAliases: () =>
-        expandPlainAliasTokens({ editor, aliases, onSelect }),
+      expandMentionAliases: async () => {
+        let aliasesForExpansion = aliases;
+        if (enabled && (!isFetched || isError)) {
+          const result = await refetch();
+          if (result.error) {
+            setToast({
+              type: "error",
+              title: "Mention shortcuts couldn't be loaded.",
+              message: "Try again before sending this message.",
+            });
+            return {
+              completed: false,
+              editorState: editor.getEditorState(),
+            };
+          }
+          aliasesForExpansion = result.data ?? [];
+        }
+        return {
+          completed: true,
+          editorState: await expandPlainAliasTokens({
+            editor,
+            aliases: aliasesForExpansion,
+            onSelect,
+          }),
+        };
+      },
     }),
-    [aliases, editor, isOpen, onSelect, options.length]
+    [
+      aliases,
+      editor,
+      enabled,
+      isError,
+      isFetched,
+      isOpen,
+      onSelect,
+      options.length,
+      refetch,
+      setToast,
+    ]
   );
 
   const onSelectOption = useCallback(

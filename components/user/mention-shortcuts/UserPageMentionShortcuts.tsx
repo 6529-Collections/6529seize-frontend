@@ -43,6 +43,13 @@ function AliasEditor({
   const normalizedAlias = normalizeMentionAlias(alias);
   const aliasIsValid = /^\w{3,15}$/.test(normalizedAlias);
   const reserved = isReservedMentionAlias(normalizedAlias);
+  const aliasHasError = alias.length > 0 && (!aliasIsValid || reserved);
+  const aliasErrorDescription = [
+    !aliasIsValid && alias.length > 0 ? "mention-shortcut-name-error" : null,
+    reserved ? "mention-shortcut-reserved-error" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
   const canSave = aliasIsValid && !reserved && members.length > 0;
 
   const mutation = useMutation({
@@ -75,14 +82,20 @@ function AliasEditor({
       !!identity.handle &&
       !members.some((member) => member.profile_id === identity.id)
   );
+  let searchStatus = "Enter at least 3 characters to search profiles.";
+  if (search.length >= 3) {
+    const resultLabel = availableIdentities.length === 1 ? "result" : "results";
+    searchStatus = `${availableIdentities.length} profile ${resultLabel} available.`;
+  }
 
   const addMember = (identity: ApiIdentity) => {
-    if (!identity.id || !identity.handle || members.length >= MAX_MEMBERS) return;
+    const { id, handle } = identity;
+    if (!id || !handle || members.length >= MAX_MEMBERS) return;
     setMembers((current) => [
       ...current,
       {
-        profile_id: identity.id!,
-        handle: identity.handle!,
+        profile_id: id,
+        handle,
         pfp: identity.pfp ?? null,
       },
     ]);
@@ -117,11 +130,20 @@ function AliasEditor({
         </button>
       </div>
 
-      <label className="tw-mt-5 tw-block tw-text-sm tw-font-medium tw-text-iron-200">
-        Shortcut name
+      <label
+        htmlFor="mention-shortcut-name"
+        className="tw-mt-5 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+      >
+        <span>Shortcut name</span>
         <div className="tw-mt-2 tw-flex tw-items-center tw-rounded-lg tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-primary-400">
-          <span className="tw-pl-3 tw-text-iron-500">@</span>
+          <span aria-hidden="true" className="tw-pl-3 tw-text-iron-500">
+            @
+          </span>
           <input
+            id="mention-shortcut-name"
+            aria-label="Shortcut name"
+            aria-invalid={aliasHasError}
+            aria-describedby={aliasErrorDescription || undefined}
             value={alias}
             onChange={(event) => setAlias(event.target.value)}
             maxLength={15}
@@ -131,19 +153,34 @@ function AliasEditor({
         </div>
       </label>
       {!aliasIsValid && alias.length > 0 && (
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error">
+        <p
+          id="mention-shortcut-name-error"
+          role="alert"
+          className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
+        >
           Use 3–15 letters, numbers, or underscores.
         </p>
       )}
       {reserved && (
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error">
+        <p
+          id="mention-shortcut-reserved-error"
+          role="alert"
+          className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
+        >
           @{normalizedAlias} is reserved for a global mention.
         </p>
       )}
 
-      <label className="tw-mt-5 tw-block tw-text-sm tw-font-medium tw-text-iron-200">
-        Add profiles ({members.length}/{MAX_MEMBERS})
+      <label
+        htmlFor="mention-shortcut-profile-search"
+        className="tw-mt-5 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+      >
+        <span>
+          Add profiles ({members.length}/{MAX_MEMBERS})
+        </span>
         <input
+          id="mention-shortcut-profile-search"
+          aria-label="Search profiles by handle"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search by handle"
@@ -151,6 +188,9 @@ function AliasEditor({
           className="tw-mt-2 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-white tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-ring-primary-400"
         />
       </label>
+      <p aria-live="polite" className="tw-sr-only">
+        {searchStatus}
+      </p>
       {search.length >= 3 && availableIdentities.length > 0 && (
         <ul className="tw-mx-0 tw-mt-2 tw-list-none tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-iron-700">
           {availableIdentities.slice(0, 5).map((identity) => (
@@ -185,7 +225,7 @@ function AliasEditor({
             aria-label={`Remove @${member.handle}`}
             className="tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-text-iron-100"
           >
-            @{member.handle} ×
+            @{member.handle} <span aria-hidden="true">×</span>
           </button>
         ))}
       </div>
@@ -212,6 +252,7 @@ export default function UserPageMentionShortcuts({
   const queryClient = useQueryClient();
   const { aliases, isPending, isError } = useMentionAliases();
   const [editorAlias, setEditorAlias] = useState<MentionAlias | null | undefined>();
+  const [aliasToDelete, setAliasToDelete] = useState<MentionAlias | null>(null);
   const isOwner =
     !!profile.id && connectedProfile?.id === profile.id && !activeProfileProxy;
 
@@ -244,6 +285,48 @@ export default function UserPageMentionShortcuts({
 
   return (
     <div className="tailwind-scope tw-mx-auto tw-max-w-3xl tw-py-6">
+      {aliasToDelete && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-mention-shortcut-title"
+          className="tw-fixed tw-inset-0 tw-z-[1100] tw-flex tw-items-center tw-justify-center tw-bg-black/70 tw-p-4"
+        >
+          <div className="tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-900 tw-p-5 tw-shadow-xl tw-ring-1 tw-ring-iron-700">
+            <h2
+              id="delete-mention-shortcut-title"
+              className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white"
+            >
+              Delete @{aliasToDelete.alias}?
+            </h2>
+            <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+              This cannot be undone.
+            </p>
+            <div className="tw-mt-5 tw-flex tw-justify-end tw-gap-2">
+              <button
+                type="button"
+                onClick={() => setAliasToDelete(null)}
+                className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deleteMutation.isPending}
+                aria-busy={deleteMutation.isPending}
+                onClick={() => {
+                  deleteMutation.mutate(aliasToDelete.id, {
+                    onSuccess: () => setAliasToDelete(null),
+                  });
+                }}
+                className="tw-rounded-lg tw-border-0 tw-bg-red tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white disabled:tw-opacity-50"
+              >
+                Delete shortcut
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
         <div>
           <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-white">
@@ -276,6 +359,9 @@ export default function UserPageMentionShortcuts({
       )}
 
       <div className="tw-mt-6 tw-space-y-3">
+        <p aria-live="polite" className="tw-sr-only">
+          {deleteMutation.isPending ? "Deleting mention shortcut." : ""}
+        </p>
         {isPending && <p className="tw-text-sm tw-text-iron-400">Loading…</p>}
         {isError && (
           <p role="alert" className="tw-text-sm tw-text-error">
@@ -310,8 +396,9 @@ export default function UserPageMentionShortcuts({
               </button>
               <button
                 type="button"
-                onClick={() => deleteMutation.mutate(item.id)}
+                onClick={() => setAliasToDelete(item)}
                 disabled={deleteMutation.isPending}
+                aria-busy={deleteMutation.isPending}
                 className="tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-red disabled:tw-opacity-50"
               >
                 Delete

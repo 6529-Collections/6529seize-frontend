@@ -113,6 +113,20 @@ const BASE_EDIT_MARKDOWN_TRANSFORMERS = [
   WAVE_MENTION_TRANSFORMER,
 ];
 
+const areMentionedUsersEqual = (
+  left: ApiDropMentionedUser[],
+  right: ApiDropMentionedUser[]
+) => {
+  const toComparable = (mentions: ApiDropMentionedUser[]) =>
+    mentions
+      .map(
+        (mention) =>
+          `${mention.mentioned_profile_id}:${mention.handle_in_content.toLowerCase()}`
+      )
+      .sort();
+  return JSON.stringify(toComparable(left)) === JSON.stringify(toComparable(right));
+};
+
 const convertCodeNodesToFences = (root: RootNode) => {
   const stack: LexicalNode[] = [...root.getChildren()];
 
@@ -376,10 +390,6 @@ function KeyboardPlugin({
   isSaving,
   isSaveBlocked,
   isMobileOrApp,
-  initialContent,
-  initialGroupMentions,
-  canResolveAllGroupMention,
-  transformers,
   mentionsRef,
   waveMentionsRef,
 }: {
@@ -388,15 +398,10 @@ function KeyboardPlugin({
   isSaving: boolean;
   isSaveBlocked: boolean;
   isMobileOrApp: boolean;
-  initialContent: string;
-  initialGroupMentions: ApiDropGroupMention[];
-  canResolveAllGroupMention: boolean;
-  transformers: Transformer[];
   mentionsRef: React.RefObject<NewMentionsPluginHandles | null>;
   waveMentionsRef: React.RefObject<NewWaveMentionsPluginHandles | null>;
 }) {
   const [editor] = useLexicalComposerContext();
-  const sanitizedInitialContent = removeBlankLinePlaceholders(initialContent);
 
   useEffect(() => {
     const removeEscapeListener = editor.registerCommand(
@@ -427,28 +432,7 @@ function KeyboardPlugin({
         }
 
         if (!isSaving && !isSaveBlocked) {
-          const currentMarkdown = exportDropMarkdown(
-            editor.getEditorState(),
-            transformers
-          );
-          const sanitizedCurrentMarkdown =
-            removeBlankLinePlaceholders(currentMarkdown);
-          const currentMentionedGroups = getMentionedGroupsFromEditorState(
-            editor.getEditorState(),
-            canResolveAllGroupMention
-          );
-          if (
-            sanitizedCurrentMarkdown.trim() ===
-              sanitizedInitialContent.trim() &&
-            areMentionedGroupsEqual(
-              currentMentionedGroups,
-              initialGroupMentions
-            )
-          ) {
-            onCancel();
-          } else {
-            onSave();
-          }
+          onSave();
         }
         return true;
       },
@@ -466,13 +450,8 @@ function KeyboardPlugin({
     isSaving,
     isSaveBlocked,
     isMobileOrApp,
-    initialContent,
-    initialGroupMentions,
-    canResolveAllGroupMention,
-    transformers,
     mentionsRef,
     waveMentionsRef,
-    sanitizedInitialContent,
   ]);
 
   return null;
@@ -603,7 +582,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    await mentionsRef.current?.expandMentionAliases();
+    const expansion = await mentionsRef.current?.expandMentionAliases?.();
+    if (expansion && !expansion.completed) return;
     const latestEditorState = editorStateRef.current ?? editorState;
     if (!latestEditorState) return;
     if (isSaveBlockedByLinks) return;
@@ -618,7 +598,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
 
     if (
       sanitizedMarkdown.trim() === normalizedInitialContent.trim() &&
-      areMentionedGroupsEqual(sanitizedMentionedGroups, initialGroupMentions)
+      areMentionedGroupsEqual(sanitizedMentionedGroups, initialGroupMentions) &&
+      areMentionedUsersEqual(mentionedUsersRef.current, initialMentions)
     ) {
       onCancel();
       return;
@@ -636,6 +617,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     mentionedWaves,
     canResolveAllGroupMention,
     initialGroupMentions,
+    initialMentions,
     currentMarkdown,
     isSaveBlockedByLinks,
     onSave,
@@ -698,10 +680,6 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             isSaving={isSaving}
             isSaveBlocked={isSaveBlockedByLinks}
             isMobileOrApp={isMobileOrApp}
-            initialContent={normalizedInitialContent}
-            initialGroupMentions={initialGroupMentions}
-            canResolveAllGroupMention={canResolveAllGroupMention}
-            transformers={exportMarkdownTransformers}
             mentionsRef={mentionsRef}
             waveMentionsRef={waveMentionsRef}
           />

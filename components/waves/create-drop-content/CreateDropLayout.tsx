@@ -15,7 +15,6 @@ import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import type { EditorState } from "lexical";
 import dynamic from "next/dynamic";
 import type React from "react";
-import { useEffect, useRef } from "react";
 import CreateDropActions from "../CreateDropActions";
 import { CreateDropContentFiles } from "../CreateDropContentFiles";
 import CreateDropContentRequirements from "../CreateDropContentRequirements";
@@ -98,7 +97,7 @@ interface CreateDropLayoutProps {
   readonly handleRequestEditLastDrop: () => boolean;
   readonly initialMarkdown: string | null;
   readonly initialMarkdownKey: string | null;
-  readonly onDrop: () => Promise<void>;
+  readonly onDrop: (resolvedEditorState?: EditorState) => Promise<void>;
   readonly pollDraft: CreateDropPollDraft | null;
   readonly pollValidationError: string | null;
   readonly updatePollDraft: (value: CreateDropPollDraft) => void;
@@ -204,15 +203,11 @@ export default function CreateDropLayout({
   termsSignatureFlowEnabled,
   suppressInitialHeightAnimation = false,
 }: CreateDropLayoutProps) {
-  const onDropRef = useRef(onDrop);
-  useEffect(() => {
-    onDropRef.current = onDrop;
-  }, [onDrop]);
-
   const submitWithResolvedAliases = async () => {
-    await createDropInputRef.current?.expandMentionAliases();
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-    await onDropRef.current();
+    const expansion =
+      await createDropInputRef.current?.expandMentionAliases();
+    if (expansion && !expansion.completed) return;
+    await onDrop(expansion?.editorState);
   };
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;

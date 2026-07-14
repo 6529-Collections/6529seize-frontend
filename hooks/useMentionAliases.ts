@@ -19,6 +19,7 @@ export function useMentionAliases() {
 
   return {
     ...query,
+    enabled,
     aliases: enabled ? (query.data ?? []) : [],
   };
 }

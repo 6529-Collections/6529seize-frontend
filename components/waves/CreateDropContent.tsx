@@ -81,6 +81,22 @@ export type {
 
 const CONTAINER_WIDTH_THRESHOLD = 500;
 
+const exportComposerMarkdown = (
+  editorState: EditorState,
+  canMentionAll: boolean
+) =>
+  normalizeTypedEmojiShortcuts(
+    exportDropMarkdown(editorState, [
+      ...SAFE_MARKDOWN_TRANSFORMERS,
+      MENTION_TRANSFORMER,
+      ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
+      HASHTAG_TRANSFORMER,
+      WAVE_MENTION_TRANSFORMER,
+      IMAGE_TRANSFORMER,
+      EMOJI_TRANSFORMER,
+    ])
+  );
+
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
   onCancelReplyQuote,
@@ -289,19 +305,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const getMarkdown = useMemo(
     () =>
-      editorState
-        ? normalizeTypedEmojiShortcuts(
-            exportDropMarkdown(editorState, [
-              ...SAFE_MARKDOWN_TRANSFORMERS,
-              MENTION_TRANSFORMER,
-              ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-              HASHTAG_TRANSFORMER,
-              WAVE_MENTION_TRANSFORMER,
-              IMAGE_TRANSFORMER,
-              EMOJI_TRANSFORMER,
-            ])
-          )
-        : null,
+      editorState ? exportComposerMarkdown(editorState, canMentionAll) : null,
     [canMentionAll, editorState]
   );
   const collapseOptions = useCallback(() => {
@@ -575,6 +579,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldCollapseOptionsAfterMarkdownSyncRef,
   });
 
+  const onDropWithResolvedAliases = useCallback(
+    (resolvedEditorState?: EditorState) =>
+      onDrop(
+        resolvedEditorState
+          ? exportComposerMarkdown(resolvedEditorState, canMentionAll)
+          : undefined
+      ),
+    [canMentionAll, onDrop]
+  );
+
   const onSwitchToDropMode = useCallback(() => {
     if (!normalizedCurationDropUrl) {
       return;
@@ -766,7 +780,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       handleRequestEditLastDrop={handleRequestEditLastDrop}
       initialMarkdown={initialMarkdown}
       initialMarkdownKey={initialMarkdownKey}
-      onDrop={onDrop}
+      onDrop={onDropWithResolvedAliases}
       pollDraft={pollDraft}
       pollValidationError={pollValidation.error}
       updatePollDraft={updatePollDraft}

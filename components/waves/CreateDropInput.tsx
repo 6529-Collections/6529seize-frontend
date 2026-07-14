@@ -45,7 +45,10 @@ import ExampleTheme from "../drops/create/lexical/ExampleTheme";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import type { ClearEditorPluginHandles } from "../drops/create/lexical/plugins/ClearEditorPlugin";
 import ClearEditorPlugin from "../drops/create/lexical/plugins/ClearEditorPlugin";
-import type { NewMentionsPluginHandles } from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type {
+  MentionAliasExpansionResult,
+  NewMentionsPluginHandles,
+} from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import type { NewHastagsPluginHandles } from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
 import NewHashtagsPlugin from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
@@ -74,7 +77,7 @@ import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/r
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
   setMarkdown: (markdown: string) => void;
-  expandMentionAliases: () => Promise<void>;
+  expandMentionAliases: () => Promise<MentionAliasExpansionResult>;
   focus: () => void;
   blur: () => void;
 }
@@ -306,9 +309,13 @@ const CreateDropInput = forwardRef<
         clearEditorState,
         setMarkdown: (markdown: string) =>
           editorCommandsRef.current?.setMarkdown(markdown),
-        expandMentionAliases: () =>
-          mentionsPluginRef.current?.expandMentionAliases() ??
-          Promise.resolve(),
+        expandMentionAliases: async () => {
+          const mentionsPlugin = mentionsPluginRef.current;
+          if (!mentionsPlugin) {
+            throw new Error("Mention shortcuts are not ready yet.");
+          }
+          return mentionsPlugin.expandMentionAliases();
+        },
         focus: () => editorCommandsRef.current?.focus(),
         blur: () => editorCommandsRef.current?.blur(),
       }),
