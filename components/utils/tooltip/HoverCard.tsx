@@ -15,6 +15,7 @@ import {
   calculateTooltipLayout,
   getTooltipWindow,
   joinTooltipClassNames,
+  measureTooltipSize,
   resolveTooltipTriggerElement,
   type ResolvedTooltipPlacement,
   type TooltipCoordinates,
@@ -94,7 +95,7 @@ export default function HoverCard({
 
     const layout = calculateTooltipLayout({
       childRect: triggerNode.getBoundingClientRect(),
-      tooltipRect: cardRef.current.getBoundingClientRect(),
+      tooltipRect: measureTooltipSize(cardRef.current),
       placement,
       offset,
     });
@@ -388,12 +389,17 @@ export default function HoverCard({
       });
     };
 
+    const visualViewport = browserWindow.visualViewport;
     browserWindow.addEventListener("resize", handleReposition);
     browserWindow.addEventListener("scroll", handleReposition, true);
+    visualViewport?.addEventListener("resize", handleReposition);
+    visualViewport?.addEventListener("scroll", handleReposition);
 
     return () => {
       browserWindow.removeEventListener("resize", handleReposition);
       browserWindow.removeEventListener("scroll", handleReposition, true);
+      visualViewport?.removeEventListener("resize", handleReposition);
+      visualViewport?.removeEventListener("scroll", handleReposition);
       if (rafId !== null) {
         browserWindow.cancelAnimationFrame(rafId);
       }

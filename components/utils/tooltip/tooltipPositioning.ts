@@ -4,10 +4,19 @@ export type ResolvedTooltipPlacement = Exclude<TooltipPlacement, "auto">;
 
 export type TooltipCoordinates = { x: number; y: number };
 
+export type TooltipSize = { width: number; height: number };
+
 type TooltipLayout = {
   position: TooltipCoordinates;
   arrowPosition: TooltipCoordinates;
   placement: ResolvedTooltipPlacement;
+};
+
+type TooltipViewport = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
 };
 
 const VIEWPORT_PADDING = 8;
@@ -15,6 +24,33 @@ const ARROW_SIZE = 8;
 const ARROW_EDGE_PADDING = 16;
 
 export const getTooltipWindow = (): Window | null => globalThis.window ?? null;
+
+export function measureTooltipSize(element: HTMLElement): TooltipSize {
+  const rect = element.getBoundingClientRect();
+
+  return {
+    // Transforms affect getBoundingClientRect(). Layout dimensions keep the
+    // opening scale animation from making edge clamping underestimate size.
+    width: element.offsetWidth || rect.width,
+    height: element.offsetHeight || rect.height,
+  };
+}
+
+function getTooltipViewport(): TooltipViewport {
+  const browserWindow = getTooltipWindow();
+  const visualViewport = browserWindow?.visualViewport;
+  const left = visualViewport?.offsetLeft ?? 0;
+  const top = visualViewport?.offsetTop ?? 0;
+  const width = visualViewport?.width ?? browserWindow?.innerWidth ?? 0;
+  const height = visualViewport?.height ?? browserWindow?.innerHeight ?? 0;
+
+  return {
+    top,
+    right: left + width,
+    bottom: top + height,
+    left,
+  };
+}
 
 export const joinTooltipClassNames = (
   ...classNames: ReadonlyArray<string | undefined>
@@ -39,7 +75,7 @@ export function resolveTooltipTriggerElement(
 
 function getOptimalPlacement(
   childRect: DOMRect,
-  tooltipRect: DOMRect,
+  tooltipRect: TooltipSize,
   placement: TooltipPlacement,
   offset: number
 ): ResolvedTooltipPlacement {
@@ -47,14 +83,12 @@ function getOptimalPlacement(
     return placement;
   }
 
-  const browserWindow = getTooltipWindow();
-  const viewportHeight = browserWindow?.innerHeight ?? 0;
-  const viewportWidth = browserWindow?.innerWidth ?? 0;
+  const viewport = getTooltipViewport();
   const spaces = {
-    top: childRect.top - VIEWPORT_PADDING,
-    bottom: viewportHeight - childRect.bottom - VIEWPORT_PADDING,
-    left: childRect.left - VIEWPORT_PADDING,
-    right: viewportWidth - childRect.right - VIEWPORT_PADDING,
+    top: childRect.top - viewport.top - VIEWPORT_PADDING,
+    bottom: viewport.bottom - childRect.bottom - VIEWPORT_PADDING,
+    left: childRect.left - viewport.left - VIEWPORT_PADDING,
+    right: viewport.right - childRect.right - VIEWPORT_PADDING,
   };
 
   const requiredVerticalSpace = tooltipRect.height + offset + ARROW_SIZE;
@@ -84,7 +118,7 @@ function getOptimalPlacement(
 
 function calculateInitialPosition(
   childRect: DOMRect,
-  tooltipRect: DOMRect,
+  tooltipRect: TooltipSize,
   placement: ResolvedTooltipPlacement,
   offset: number
 ): TooltipCoordinates {
@@ -116,41 +150,50 @@ function calculateInitialPosition(
 function adjustPositionForViewport(
   initialPosition: TooltipCoordinates,
   childRect: DOMRect,
-  tooltipRect: DOMRect,
+  tooltipRect: TooltipSize,
   placement: ResolvedTooltipPlacement,
   offset: number
 ): { x: number; y: number; placement: ResolvedTooltipPlacement } {
-  const browserWindow = getTooltipWindow();
-  const viewportHeight = browserWindow?.innerHeight ?? 0;
-  const viewportWidth = browserWindow?.innerWidth ?? 0;
+  const viewport = getTooltipViewport();
   let { x, y } = initialPosition;
   let resolvedPlacement = placement;
 
-  const maxX = viewportWidth - tooltipRect.width - VIEWPORT_PADDING;
-  x = Math.max(VIEWPORT_PADDING, Math.min(x, maxX));
-
-  if (placement === "top" && y < VIEWPORT_PADDING) {
+  if (placement === "top" && y < viewport.top + VIEWPORT_PADDING) {
     resolvedPlacement = "bottom";
     y = childRect.bottom + offset;
   } else if (
     placement === "bottom" &&
-    y + tooltipRect.height > viewportHeight - VIEWPORT_PADDING
+    y + tooltipRect.height > viewport.bottom - VIEWPORT_PADDING
   ) {
     resolvedPlacement = "top";
     y = childRect.top - tooltipRect.height - offset;
-  } else if (placement === "left" && x < VIEWPORT_PADDING) {
+  } else if (
+    placement === "left" &&
+    x < viewport.left + VIEWPORT_PADDING
+  ) {
     resolvedPlacement = "right";
     x = childRect.right + offset;
   } else if (
     placement === "right" &&
-    x + tooltipRect.width > viewportWidth - VIEWPORT_PADDING
+    x + tooltipRect.width > viewport.right - VIEWPORT_PADDING
   ) {
     resolvedPlacement = "left";
     x = childRect.left - tooltipRect.width - offset;
   }
 
-  const maxY = viewportHeight - tooltipRect.height - VIEWPORT_PADDING;
-  y = Math.max(VIEWPORT_PADDING, Math.min(y, maxY));
+  const minX = viewport.left + VIEWPORT_PADDING;
+  const maxX = Math.max(
+    minX,
+    viewport.right - tooltipRect.width - VIEWPORT_PADDING
+  );
+  x = Math.max(minX, Math.min(x, maxX));
+
+  const minY = viewport.top + VIEWPORT_PADDING;
+  const maxY = Math.max(
+    minY,
+    viewport.bottom - tooltipRect.height - VIEWPORT_PADDING
+  );
+  y = Math.max(minY, Math.min(y, maxY));
 
   return { x, y, placement: resolvedPlacement };
 }
@@ -158,7 +201,7 @@ function adjustPositionForViewport(
 function calculateArrowPosition(
   tooltipPosition: TooltipCoordinates,
   childRect: DOMRect,
-  tooltipRect: DOMRect,
+  tooltipRect: TooltipSize,
   placement: ResolvedTooltipPlacement
 ): TooltipCoordinates {
   let arrowX = 0;
@@ -190,7 +233,7 @@ export function calculateTooltipLayout({
   offset,
 }: {
   childRect: DOMRect;
-  tooltipRect: DOMRect;
+  tooltipRect: TooltipSize;
   placement: TooltipPlacement;
   offset: number;
 }): TooltipLayout {

@@ -252,7 +252,7 @@ function CurationGroupRow({
           )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-1 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
+          <p className="tw-mt-0 tw-mb-1 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
             {group.name}
           </p>
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-[11px]">

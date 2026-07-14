@@ -16,6 +16,7 @@ import {
   calculateTooltipLayout,
   getTooltipWindow,
   joinTooltipClassNames,
+  measureTooltipSize,
   resolveTooltipTriggerElement,
   type ResolvedTooltipPlacement,
   type TooltipCoordinates,
@@ -194,10 +195,9 @@ export default function CustomTooltip({
     if (getTooltipWindow() === null) return;
 
     const childRect = childNode.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const layout = calculateTooltipLayout({
       childRect,
-      tooltipRect,
+      tooltipRect: measureTooltipSize(tooltipRef.current),
       placement,
       offset,
     });
@@ -373,12 +373,17 @@ export default function CustomTooltip({
       });
     };
 
+    const visualViewport = browserWindow.visualViewport;
     browserWindow.addEventListener("resize", handleReposition);
     browserWindow.addEventListener("scroll", handleReposition, true);
+    visualViewport?.addEventListener("resize", handleReposition);
+    visualViewport?.addEventListener("scroll", handleReposition);
 
     return () => {
       browserWindow.removeEventListener("resize", handleReposition);
       browserWindow.removeEventListener("scroll", handleReposition, true);
+      visualViewport?.removeEventListener("resize", handleReposition);
+      visualViewport?.removeEventListener("scroll", handleReposition);
       if (rafId !== null) {
         browserWindow.cancelAnimationFrame(rafId);
       }
