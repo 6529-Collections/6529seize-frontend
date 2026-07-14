@@ -93,13 +93,7 @@ beforeEach(() => {
 
 test("renders actions when desktop hover actions are active", () => {
   const onReply = jest.fn();
-  render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={onReply}
-    />
-  );
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={onReply} />);
   expect(screen.getByTestId("identity")).toBeInTheDocument();
   fireEvent.click(screen.getByTestId("reply"));
   expect(onReply).toHaveBeenCalled();
@@ -111,25 +105,13 @@ test("keeps actions for desktop hover mode even when the user agent is mobile", 
     canUseTouchActionSheet: false,
   });
 
-  render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={jest.fn()}
-    />
-  );
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />);
 
   expect(screen.getByTestId("reply")).toBeInTheDocument();
 });
 
 test("renders vote details through meme vote stats", () => {
-  render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={jest.fn()}
-    />
-  );
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />);
 
   expect(mockMemeDropVoteStats).toHaveBeenCalledWith({ drop });
   expect(
@@ -169,13 +151,7 @@ test("does not infer a Meme card link when the mapping is absent", () => {
 });
 
 test("does not trigger the mobile menu wrapper when vote details is clicked", () => {
-  render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={jest.fn()}
-    />
-  );
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />);
 
   const trigger = screen.getByTestId("winner-vote-details");
 
@@ -195,11 +171,7 @@ test("hides desktop actions when touch sheet mode is active", () => {
   });
 
   const { queryByTestId } = render(
-    <MemeWinnerDrop
-      drop={drop}
-      showReplyAndQuote
-      onReply={jest.fn()}
-    />
+    <MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />
   );
   expect(queryByTestId("reply")).toBeNull();
 });
