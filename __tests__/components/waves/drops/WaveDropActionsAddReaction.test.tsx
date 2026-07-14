@@ -22,10 +22,19 @@ const mockLoadNativeEmojis = jest.fn(() => Promise.resolve({}));
 const mockLoadEmojiData = jest.fn(() => Promise.resolve());
 const mockFindNativeEmoji = jest.fn();
 const mockFindCustomEmoji = jest.fn();
+const mockGetEligibility = jest.fn();
+const mockUpdateEligibility = jest.fn();
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
     applyOptimisticDropUpdate: applyOptimisticDropUpdateMock,
+  })),
+}));
+
+jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
+  useWaveEligibility: jest.fn(() => ({
+    getEligibility: mockGetEligibility,
+    updateEligibility: mockUpdateEligibility,
   })),
 }));
 
@@ -109,7 +118,7 @@ jest.mock("@/contexts/EmojiContext", () => ({
 
 const baseDrop = {
   id: "12345",
-  wave: { id: "wave-1" },
+  wave: { id: "wave-1", authenticated_user_eligible_to_chat: true },
   context_profile_context: { reaction: null },
   author: { handle: "author-handle" },
   parts: [],
@@ -146,6 +155,7 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 describe("WaveDropActionsAddReaction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetEligibility.mockReturnValue(null);
   });
 
   it("renders desktop button", () => {
@@ -168,6 +178,20 @@ describe("WaveDropActionsAddReaction", () => {
     renderWithQueryClient(<WaveDropActionsAddReaction drop={tempDrop} />);
     const button = screen.getByRole("button", { name: /add reaction/i });
     expect(button).toBeDisabled();
+  });
+
+  it("disables the picker when the current wave capability is disabled", () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+    });
+
+    renderWithQueryClient(<WaveDropActionsAddReaction drop={mockDrop} />);
+    const button = screen.getByRole("button", { name: /add reaction/i });
+
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(screen.queryByTestId("mock-picker")).not.toBeInTheDocument();
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
   });
 
   it("opens and closes picker on desktop button click", async () => {
