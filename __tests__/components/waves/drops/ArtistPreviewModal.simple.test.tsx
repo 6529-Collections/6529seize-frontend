@@ -97,9 +97,10 @@ describe("ArtistPreviewModal", () => {
     render(<ArtistPreviewModal {...defaultProps} />);
 
     expect(screen.getByTestId("dialog")).toBeInTheDocument();
-    expect(screen.getAllByTestId("artist-preview-modal-content")).toHaveLength(
-      2
-    );
+    expect(screen.getByTestId("dialog-panel")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("artist-preview-modal-content")
+    ).toBeInTheDocument();
   });
 
   it("locks body overflow on desktop and restores it on unmount", () => {
