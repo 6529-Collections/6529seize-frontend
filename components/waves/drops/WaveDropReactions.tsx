@@ -384,6 +384,25 @@ function WaveDropReaction({
     Boolean(connectedProfile?.handle) &&
     !activeProfileProxy &&
     (isEligibleToChat !== false || isSlowModeOnlyBlock);
+  const updateEligibilityAfterExpectedDisabledReaction = useCallback(
+    (error: unknown, method: "DELETE" | "POST") => {
+      if (
+        !isExpectedWaveReactionDisabledError({
+          dropId: drop.id,
+          endpoint: `drops/${drop.id}/reaction`,
+          error,
+          method,
+        })
+      ) {
+        return;
+      }
+
+      updateEligibility(drop.wave.id, {
+        authenticated_user_eligible_to_chat: false,
+      });
+    },
+    [drop.id, drop.wave.id, updateEligibility]
+  );
   const applyOptimisticReactionToNotificationQueries =
     useOptimisticNotificationDropReaction({
       connectedProfile,
@@ -733,18 +752,7 @@ function WaveDropReaction({
         return;
       }
 
-      if (
-        isExpectedWaveReactionDisabledError({
-          dropId: drop.id,
-          endpoint,
-          error,
-          method,
-        })
-      ) {
-        updateEligibility(waveId, {
-          authenticated_user_eligible_to_chat: false,
-        });
-      }
+      updateEligibilityAfterExpectedDisabledReaction(error, method);
 
       const msg = getReactionErrorMessage(
         error,
@@ -772,7 +780,7 @@ function WaveDropReaction({
     refreshCanonicalDropAfterLatestFailure,
     selected,
     setToast,
-    updateEligibility,
+    updateEligibilityAfterExpectedDisabledReaction,
     waveId,
     websocketStatus,
   ]);
