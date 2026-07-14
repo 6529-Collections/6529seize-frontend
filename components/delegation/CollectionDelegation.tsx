@@ -94,6 +94,15 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   const revocation = useDelegationRevocation({ showDelegationToast });
 
+  const [delegationKeys, setDelegationKeys] = useState<string[]>([]);
+  const [delegationKeysChanged, setDelegationKeysChanged] = useState(false);
+  const [subDelegationKeys, setSubDelegationKeys] = useState<string[]>([]);
+  const [subDelegationKeysChanged, setSubDelegationKeysChanged] =
+    useState(false);
+  const [consolidationKeys, setConsolidationKeys] = useState<string[]>([]);
+  const [consolidationKeysChanged, setConsolidationKeysChanged] =
+    useState(false);
+
   const locks = useCollectionLocks({
     address: accountResolution.address,
     isConnected: accountResolution.isConnected,
@@ -241,6 +250,20 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             setSubDelegationOriginalDelegator
                           }
                           onShowSubForm={handleShowSubForm}
+                          disclosureState={{
+                            delegationKeys,
+                            setDelegationKeys,
+                            delegationKeysChanged,
+                            setDelegationKeysChanged,
+                            subDelegationKeys,
+                            setSubDelegationKeys,
+                            subDelegationKeysChanged,
+                            setSubDelegationKeysChanged,
+                            consolidationKeys,
+                            setConsolidationKeys,
+                            consolidationKeysChanged,
+                            setConsolidationKeysChanged,
+                          }}
                         />
                         <CollectionDelegationLocks
                           collection={props.collection}

@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 
 import styles from "../Delegation.module.css";
 import type { ContractDelegation } from "../CollectionDelegation.utils";
@@ -23,6 +28,21 @@ import { OutgoingDelegationsTable } from "./OutgoingDelegationsTable";
 import type { CollectionDelegationReads } from "./useCollectionDelegationReads";
 import type { DelegationRevocation } from "./useDelegationRevocation";
 
+interface DisclosureState {
+  delegationKeys: string[];
+  setDelegationKeys: Dispatch<SetStateAction<string[]>>;
+  delegationKeysChanged: boolean;
+  setDelegationKeysChanged: Dispatch<SetStateAction<boolean>>;
+  subDelegationKeys: string[];
+  setSubDelegationKeys: Dispatch<SetStateAction<string[]>>;
+  subDelegationKeysChanged: boolean;
+  setSubDelegationKeysChanged: Dispatch<SetStateAction<boolean>>;
+  consolidationKeys: string[];
+  setConsolidationKeys: Dispatch<SetStateAction<string[]>>;
+  consolidationKeysChanged: boolean;
+  setConsolidationKeysChanged: Dispatch<SetStateAction<boolean>>;
+}
+
 /**
  * The three record sections of the collection-delegation screen
  * (Delegations, Consolidations, Delegation Managers), each with its
@@ -44,6 +64,7 @@ export function CollectionDelegationSections(
     subDelegationOriginalDelegator: string | undefined;
     onSetOriginalDelegator: (wallet: string | undefined) => void;
     onShowSubForm: (form: SubDelegationForm) => void;
+    disclosureState: DisclosureState;
   }>
 ) {
   const { collection, reads, revocation } = props;
@@ -51,15 +72,20 @@ export function CollectionDelegationSections(
   const { onEditDelegation, onSetOriginalDelegator, onShowSubForm } = props;
   const { subDelegationOriginalDelegator } = props;
   const { outgoingDelegations, incomingDelegations } = reads;
-
-  const [delegationKeys, setDelegationKeys] = useState<any[]>([]);
-  const [delegationKeysChanged, setDelegationKeysChanged] = useState(false);
-  const [subDelegationKeys, setSubDelegationKeys] = useState<any[]>([]);
-  const [subDelegationKeysChanged, setSubDelegationKeysChanged] =
-    useState(false);
-  const [consolidationKeys, setConsolidationKeys] = useState<any[]>([]);
-  const [consolidationKeysChanged, setConsolidationKeysChanged] =
-    useState(false);
+  const {
+    delegationKeys,
+    setDelegationKeys,
+    delegationKeysChanged,
+    setDelegationKeysChanged,
+    subDelegationKeys,
+    setSubDelegationKeys,
+    subDelegationKeysChanged,
+    setSubDelegationKeysChanged,
+    consolidationKeys,
+    setConsolidationKeys,
+    consolidationKeysChanged,
+    setConsolidationKeysChanged,
+  } = props.disclosureState;
 
   useEffect(() => {
     const outDelegations = [...outgoingDelegations].filter(
