@@ -37,6 +37,7 @@ import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly wave?: ApiWave | undefined;
   readonly location?: DropLocation | undefined;
   readonly onSourceDropDeleted?: (() => void) | undefined;
@@ -55,6 +56,7 @@ const getMetadataValue = (drop: ExtendedDrop, dataKey: string): string | null =>
 export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   drop,
   onDropClick,
+  onVoteClick,
   wave,
   location = DropLocation.WAVE,
   onSourceDropDeleted,
@@ -238,26 +240,33 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                     </div>
                     <VotingModalButton
                       drop={drop}
-                      onClick={() => setIsVotingModalOpen(true)}
+                      onClick={() => {
+                        if (onVoteClick) {
+                          onVoteClick(drop);
+                          return;
+                        }
+                        setIsVotingModalOpen(true);
+                      }}
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            {isMobileScreen ? (
-              <MobileVotingModal
-                drop={drop}
-                isOpen={isVotingModalOpen}
-                onClose={() => setIsVotingModalOpen(false)}
-              />
-            ) : (
-              <VotingModal
-                drop={drop}
-                isOpen={isVotingModalOpen}
-                onClose={() => setIsVotingModalOpen(false)}
-              />
-            )}
+            {!onVoteClick &&
+              (isMobileScreen ? (
+                <MobileVotingModal
+                  drop={drop}
+                  isOpen={isVotingModalOpen}
+                  onClose={() => setIsVotingModalOpen(false)}
+                />
+              ) : (
+                <VotingModal
+                  drop={drop}
+                  isOpen={isVotingModalOpen}
+                  onClose={() => setIsVotingModalOpen(false)}
+                />
+              ))}
           </MemesLeaderboardDropCard>
         </div>
 

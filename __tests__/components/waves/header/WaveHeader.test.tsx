@@ -201,7 +201,7 @@ describe("WaveHeader", () => {
     );
     expect(
       screen.getByTestId("wave-header-options").parentElement?.className
-    ).toContain("tw-mt-[22px]");
+    ).toContain("tw-mt-3.5");
     expect(screen.queryByTestId("wave-header-pin")).toBeNull();
   });
 

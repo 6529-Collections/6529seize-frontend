@@ -20,6 +20,7 @@ interface WaveLeaderboardDropRendererProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onSourceDropDeleted?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
@@ -54,6 +55,7 @@ const DefaultLeaderboardDropRenderer: React.FC<
 > = ({
   drop,
   onDropClick,
+  onVoteClick,
   isVotingClosed,
   isVotingControlsLocked,
   winningThreshold,
@@ -63,6 +65,7 @@ const DefaultLeaderboardDropRenderer: React.FC<
     <DefaultWaveLeaderboardDrop
       drop={drop}
       onDropClick={onDropClick}
+      onVoteClick={onVoteClick}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
@@ -77,6 +80,7 @@ const QuorumLeaderboardDropRenderer: React.FC<
 > = ({
   drop,
   onDropClick,
+  onVoteClick,
   isVotingClosed,
   isVotingControlsLocked,
   winningThreshold,
@@ -86,6 +90,7 @@ const QuorumLeaderboardDropRenderer: React.FC<
     <QuorumWaveLeaderboardDrop
       drop={drop}
       onDropClick={onDropClick}
+      onVoteClick={onVoteClick}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
@@ -96,12 +101,13 @@ const QuorumLeaderboardDropRenderer: React.FC<
 
 const MemesLeaderboardDropRenderer: React.FC<
   WaveLeaderboardDropRendererProps
-> = ({ drop, wave, onDropClick, onSourceDropDeleted }) => {
+> = ({ drop, wave, onDropClick, onVoteClick, onSourceDropDeleted }) => {
   return (
     <MemesLeaderboardDrop
       drop={drop}
       wave={wave}
       onDropClick={onDropClick}
+      onVoteClick={onVoteClick}
       onSourceDropDeleted={onSourceDropDeleted}
     />
   );
