@@ -66,6 +66,16 @@ right sidebar, and what users see for loading and empty states.
 ## Common Scenarios
 
 - Memes waves show media-rich winner cards with traits and vote context.
+- In The Memes Main Stage wave, mapped winners show a `The Memes #N` link that
+  opens the Meme card minted from that submission. The same link appears when
+  the winning drop is open directly, where the minted outcome and larger Meme
+  link use their own row below the drop metadata. The frontend uses only the
+  explicit mapping returned in the V2 submission context; it never infers a
+  Meme ID from winner order. The link is omitted when no mapping is known.
+- A mapped Meme card page also shows a `Main Stage Submission` action beside
+  `Distribution Plan` in the market overview panel to the right of the artwork.
+  It opens the winning drop in The Memes Main Stage. Older cards without an
+  explicit mapping do not show the action.
 - Non-memes waves show compact winner rows with rank, vote totals, voter
   counts, and outcome summaries.
 - Winner rank labels use ordinal place formatting (`1st`, `2nd`, `3rd`,

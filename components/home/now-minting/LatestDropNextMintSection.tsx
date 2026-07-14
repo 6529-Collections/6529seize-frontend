@@ -1,13 +1,16 @@
 "use client";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import MainStageMemeCardLink, {
+  isValidMemeCardId,
+} from "@/components/memes/drops/MainStageMemeCardLink";
 import {
   getCanonicalNextMintNumber,
   formatFullDateTime,
   getNextMintStart,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
@@ -19,7 +22,7 @@ import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface LatestDropNextMintSectionProps {
-  readonly drop: ApiDrop;
+  readonly drop: ApiDropV2View;
 }
 
 const formatDropTimestamp = (timestamp: number): string | null => {
@@ -65,7 +68,11 @@ export default function LatestDropNextMintSection({
   const nextMintStart = getNextMintStart(now);
   const nextMintCardNumber = getCanonicalNextMintNumber(now);
   const nextMintDateTime = formatFullDateTime(nextMintStart, "local");
-  const nextMintLabel = `Card #${nextMintCardNumber} - ${nextMintDateTime}`;
+  const mappedMemeCardId = drop.submission_context?.meme_card_id;
+  const hasMappedMemeCard = isValidMemeCardId(mappedMemeCardId);
+  const nextMintLabel = hasMappedMemeCard
+    ? nextMintDateTime
+    : `Card #${nextMintCardNumber} - ${nextMintDateTime}`;
 
   return (
     <section className="tw-relative tw-z-50 tw-px-4 tw-pb-4 tw-pt-6 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8">
@@ -110,6 +117,7 @@ export default function LatestDropNextMintSection({
                       NEXT MINT
                     </span>
                   </div>
+                  <MainStageMemeCardLink memeCardId={mappedMemeCardId} />
                 </div>
                 <span className="tw-mt-1 tw-font-mono tw-text-xs tw-text-white/50">
                   {nextMintLabel}
