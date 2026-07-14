@@ -1,3 +1,6 @@
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+
 export default function CommonTablePagination({
   small,
   currentPage,
@@ -28,7 +31,8 @@ export default function CommonTablePagination({
       <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
         {typeof totalPages === "number" ? (
           <div className="tw-mr-3 tw-text-sm tw-font-medium tw-text-iron-300">
-            Page {currentPage} of {totalPages}
+            Page {formatInteger(DEFAULT_LOCALE, currentPage)} of{" "}
+            {formatInteger(DEFAULT_LOCALE, totalPages)}
           </div>
         ) : (
           <div></div>
