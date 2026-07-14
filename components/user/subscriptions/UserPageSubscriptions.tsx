@@ -98,14 +98,6 @@ export default function UserPageSubscriptions(
   const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
     useState<boolean>(true);
 
-  const isFetching =
-    fetchingDetails ||
-    fetchingAirdropAddress ||
-    fetchingTopUpHistory ||
-    fetchingMemeSubscriptions ||
-    fetchingSubscriptionLogs ||
-    fetchingRedeemedHistory;
-
   function fetchDetails() {
     if (!profileKey) {
       return;
@@ -265,7 +257,7 @@ export default function UserPageSubscriptions(
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 md:tw-grid-cols-2">
           <UserPageSubscriptionsBalance
             details={details}
-            fetching={isFetching}
+            fetching={fetchingDetails}
             refresh={refresh}
             show_refresh={isConnectedAccount}
           />

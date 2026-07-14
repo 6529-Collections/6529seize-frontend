@@ -24,6 +24,7 @@ export default function UserPageSubscriptionsAirdropAddress(
   }>
 ) {
   const airdropAddress = props.airdrop?.airdrop_address;
+  const editHref = `/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
 
   return (
     <div className="tw-min-w-0">
@@ -34,7 +35,7 @@ export default function UserPageSubscriptionsAirdropAddress(
         {props.fetching ? (
           <DotLoader />
         ) : (
-          <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
             {airdropAddress && (
               <span className="tw-min-w-0 tw-break-all tw-text-iron-200">
                 <span
@@ -62,7 +63,7 @@ export default function UserPageSubscriptionsAirdropAddress(
             )}
             {airdropAddress && props.show_edit && (
               <Link
-                href={`/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`}
+                href={editHref}
                 aria-label="Change airdrop address"
                 className="tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
               >
@@ -72,6 +73,21 @@ export default function UserPageSubscriptionsAirdropAddress(
                   aria-hidden="true"
                 />
               </Link>
+            )}
+            {!airdropAddress && (
+              <>
+                <span className="tw-text-sm tw-text-iron-400">
+                  No airdrop address found
+                </span>
+                {props.show_edit && (
+                  <Link
+                    href={editHref}
+                    className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-md tw-px-1 tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  >
+                    Set airdrop address
+                  </Link>
+                )}
+              </>
             )}
           </div>
         )}

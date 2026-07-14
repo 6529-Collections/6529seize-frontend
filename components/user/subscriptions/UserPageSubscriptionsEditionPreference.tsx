@@ -7,8 +7,8 @@ import CircleLoader, {
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useState } from "react";
-import Toggle from "react-toggle";
+import { useContext, useEffect, useId, useState } from "react";
+import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 
 export default function UserPageSubscriptionsEditionPreference(
   props: Readonly<{
@@ -23,7 +23,8 @@ export default function UserPageSubscriptionsEditionPreference(
   const [isAllEditions, setIsAllEditions] = useState<boolean>(false);
   const [isUpdatingAllEditions, setIsUpdatingAllEditions] =
     useState<boolean>(false);
-  const descriptionId = "subscription-edition-preference-description";
+  const descriptionId = useId();
+  const isDisabled = props.readonly || isUpdatingAllEditions;
 
   const subscriptionEligibilityCount =
     props.details?.subscription_eligibility_count ?? 1;
@@ -90,22 +91,25 @@ export default function UserPageSubscriptionsEditionPreference(
       <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         <label
           htmlFor="subscription-all-editions-mode"
-          className="tw-cursor-pointer tw-font-semibold tw-text-white"
+          className={`tw-font-semibold tw-transition-colors ${
+            isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+          } ${isAllEditions ? "tw-text-iron-400" : "tw-text-iron-50"}`}
         >
           One edition
         </label>
-        <Toggle
-          disabled={props.readonly || isUpdatingAllEditions}
-          id={"subscription-all-editions-mode"}
+        <UserPageSubscriptionsToggle
+          disabled={isDisabled}
+          id="subscription-all-editions-mode"
           checked={isAllEditions}
-          icons={false}
           onChange={toggleAllEditions}
-          aria-label="All eligible editions"
-          aria-describedby={props.readonly ? undefined : descriptionId}
+          ariaLabel="All eligible editions"
+          describedBy={props.readonly ? undefined : descriptionId}
         />
         <label
           htmlFor="subscription-all-editions-mode"
-          className="tw-cursor-pointer tw-font-semibold tw-text-white"
+          className={`tw-font-semibold tw-transition-colors ${
+            isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+          } ${isAllEditions ? "tw-text-iron-50" : "tw-text-iron-400"}`}
         >
           All eligible
         </label>

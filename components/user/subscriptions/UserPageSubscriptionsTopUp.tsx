@@ -416,13 +416,21 @@ export default function UserPageSubscriptionsTopUp() {
       <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
         <div className="tw-flex tw-items-center">
           <div
-            className={`tw-w-full tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-left tw-text-iron-100 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${
+            className={`tw-relative tw-w-full tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-left tw-text-iron-100 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${
               selectedOption === "other"
                 ? "tw-border-primary-400/50 tw-bg-iron-800"
                 : "tw-border-iron-800 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900"
             }`}
           >
-            <div className={TOP_UP_RADIO_GRID_CLASS}>
+            <label
+              htmlFor="subscription-top-up-other"
+              className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-lg"
+            >
+              <span className="tw-sr-only">Select Other card count</span>
+            </label>
+            <div
+              className={`${TOP_UP_RADIO_GRID_CLASS} tw-pointer-events-none tw-relative tw-z-10`}
+            >
               <div className="tw-flex tw-items-center tw-justify-center">
                 <input
                   id="subscription-top-up-other"
@@ -432,16 +440,11 @@ export default function UserPageSubscriptionsTopUp() {
                   checked={selectedOption === "other"}
                   onChange={handleSelectOther}
                   aria-label="Other card count"
-                  className={styles["radioInput"]}
+                  className={`${styles["radioInput"]} tw-pointer-events-auto`}
                 />
               </div>
               <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-                <label
-                  htmlFor="subscription-top-up-other"
-                  className="tw-cursor-pointer"
-                >
-                  Other
-                </label>
+                <span>Other</span>
                 <input
                   ref={otherInputRef}
                   type="number"
@@ -449,7 +452,7 @@ export default function UserPageSubscriptionsTopUp() {
                   placeholder="count"
                   aria-label="Custom card count"
                   value={memeCount}
-                  className="tw-w-[100px] tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-0.5 tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
+                  className="tw-pointer-events-auto tw-w-[100px] tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-0.5 tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
                   onFocus={() => {
                     setSelectedOption("other");
                   }}
@@ -460,7 +463,7 @@ export default function UserPageSubscriptionsTopUp() {
                     setSelectedOption("other");
                   }}
                 />
-                <span className="tw-whitespace-nowrap">
+                <span aria-live="polite" className="tw-whitespace-nowrap">
                   {!Number.isNaN(Number.parseInt(memeCount, 10)) &&
                     Number.parseInt(memeCount, 10) > 0 && (
                       <>
@@ -609,6 +612,11 @@ function CardCountOption(
             name="subscription-top-up-card-count"
             value={props.count}
             checked={props.selected}
+            onClick={() => {
+              if (props.selected) {
+                props.onSelect();
+              }
+            }}
             onChange={props.onSelect}
             aria-label={labelText}
             className={styles["radioInput"]}

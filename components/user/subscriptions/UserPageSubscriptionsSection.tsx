@@ -16,7 +16,7 @@ export default function UserPageSubscriptionsSection({
   return (
     <section
       aria-labelledby={titleId}
-      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-black tw-py-4 sm:tw-py-5"
+      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-4 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] sm:tw-py-5"
     >
       <div className="tw-flex tw-flex-col tw-gap-2 tw-px-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-4 sm:tw-px-5">
         <h2

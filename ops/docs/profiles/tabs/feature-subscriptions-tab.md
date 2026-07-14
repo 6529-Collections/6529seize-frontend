@@ -85,6 +85,9 @@ are documented in
 - Balance, airdrop-address, upcoming-drop, and history content use stable
   loading indicators until their requests finish; empty messages are not shown
   while those sections are still loading.
+- When no airdrop address is available, the page shows
+  `No airdrop address found`; owners can use `Set airdrop address` to open the
+  existing delegation registration flow.
 - Auth rejection stops updates; no write call is submitted.
 - Failed settings or upcoming-drop updates keep current values and show an
   error toast.

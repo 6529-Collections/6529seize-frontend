@@ -16,11 +16,11 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
-import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
 import SubscriptionHeaderLinks, {
   SubscriptionBalanceLabel,
 } from "./SubscriptionHeaderLinks";
+import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 
 export default function MemeSubscriptionRow(
   props: Readonly<{
@@ -303,13 +303,12 @@ export default function MemeSubscriptionRow(
           ) : (
             <div className="tw-flex tw-items-center tw-gap-2">
               {isSubmitting && <Spinner />}
-              <Toggle
+              <UserPageSubscriptionsToggle
                 disabled={isToggleDisabled}
                 id={id}
                 checked={subscribed}
-                icons={false}
                 onChange={submit}
-                aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+                ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
               />
               <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
                 {renderCountSelector({
@@ -412,13 +411,12 @@ export default function MemeSubscriptionRow(
         </div>
         <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 sm:tw-w-auto">
           {isSubmitting && <Spinner />}
-          <Toggle
+          <UserPageSubscriptionsToggle
             disabled={isToggleDisabled}
             id={id}
             checked={subscribed}
-            icons={false}
             onChange={submit}
-            aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+            ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
           />
           <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
             {renderCountSelector({
