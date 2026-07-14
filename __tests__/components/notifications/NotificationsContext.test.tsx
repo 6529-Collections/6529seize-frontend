@@ -578,6 +578,70 @@ describe("push registration behavior", () => {
     );
   });
 
+  it("bounds retries for a persistent observed timeout and captures the final failure", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    const timeoutError = new Error("The request timed out.");
+
+    commonApiPost.mockRejectedValue(timeoutError);
+    const { registrationCallback } = await setupRegistrationCallback();
+
+    const setTimeoutSpy = jest
+      .spyOn(globalThis, "setTimeout")
+      .mockImplementation(((handler: TimerHandler) => {
+        if (typeof handler === "function") {
+          handler();
+        }
+        return 0 as unknown as NodeJS.Timeout;
+      }) as typeof globalThis.setTimeout);
+
+    try {
+      await act(async () => {
+        await registrationCallback({ value: "test-token" });
+      });
+    } finally {
+      setTimeoutSpy.mockRestore();
+    }
+
+    expect(commonApiPost).toHaveBeenCalledTimes(3);
+    expect(sentry.addBreadcrumb).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        message: "Push registration attempt failed. Retrying.",
+        data: expect.objectContaining({
+          attempt: 1,
+          max_attempts: 3,
+          error_message: "The request timed out.",
+        }),
+      })
+    );
+    expect(sentry.addBreadcrumb).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        message: "Push registration attempt failed. Retrying.",
+        data: expect.objectContaining({
+          attempt: 2,
+          max_attempts: 3,
+          error_message: "The request timed out.",
+        }),
+      })
+    );
+    expect(sentry.captureException).toHaveBeenCalledWith(
+      timeoutError,
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "registerPushNotification",
+        }),
+        extra: expect.objectContaining({
+          attempt: 3,
+          max_attempts: 3,
+          error_message: "The request timed out.",
+        }),
+      })
+    );
+  });
+
   it("skips duplicate registration for identical fingerprint", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const sentry = require("@sentry/nextjs");
@@ -627,6 +691,75 @@ describe("push registration behavior", () => {
       })
     );
   });
+
+  it.each([
+    "The request timed out.",
+    "A server with the specified hostname could not be found.",
+  ])(
+    "records observed transient native registration error %s as a warning breadcrumb",
+    async (errorMessage) => {
+      const sentry = require("@sentry/nextjs");
+      const nativeError = new Error(errorMessage);
+      const { registrationErrorCallback } = await setupRegistrationCallback();
+
+      act(() => {
+        registrationErrorCallback(nativeError);
+      });
+
+      expect(sentry.captureException).not.toHaveBeenCalled();
+      expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: "warning",
+          message: "Push registration transient error.",
+          data: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "pushRegistrationError",
+            retryable: true,
+            error_name: "Error",
+            error_message: errorMessage,
+          }),
+        })
+      );
+    }
+  );
+
+  it.each([
+    "Network error: push notification permission denied.",
+    "Network request failed: unauthorized.",
+    "The request timed out because the device token is invalid.",
+    "A server with the specified hostname could not be found because the push configuration is invalid.",
+  ])(
+    "captures permanent native registration near-miss %s",
+    async (errorMessage) => {
+      const sentry = require("@sentry/nextjs");
+      const nativeError = new Error(errorMessage);
+      const { registrationErrorCallback } = await setupRegistrationCallback();
+
+      act(() => {
+        registrationErrorCallback(nativeError);
+      });
+
+      expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Push registration transient error.",
+        })
+      );
+      expect(sentry.captureException).toHaveBeenCalledWith(
+        nativeError,
+        expect.objectContaining({
+          tags: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "pushRegistrationError",
+          }),
+          extra: expect.objectContaining({
+            retryable: false,
+            error_name: "Error",
+            error_message: errorMessage,
+          }),
+        })
+      );
+    }
+  );
 
   it.each(["-25291", "-25299"])(
     "records known low-value native registration error %s as an info breadcrumb",
