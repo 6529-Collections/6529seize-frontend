@@ -595,6 +595,7 @@ function CardCountOption(
 
   return (
     <label
+      aria-label={labelText}
       className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-left tw-text-iron-100 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${
         props.selected
           ? "tw-border-primary-400/50 tw-bg-iron-800"

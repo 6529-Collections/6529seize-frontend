@@ -45,7 +45,7 @@ export default function UserPageSubscriptionsHistory(
       id="profile-subscriptions-history"
       title="Subscription History"
     >
-      <div className="tw-space-y-3">
+      <div className="tw-divide-y tw-divide-white/10">
         <HistoryDisclosure
           title="Redeemed Subscriptions"
           loading={props.redeemedLoading === true}
@@ -127,19 +127,15 @@ function HistoryDisclosure({
   }
 
   return (
-    <details
-      className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
-      aria-busy={loading}
-      open
-    >
-      <summary className="tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-bg-iron-900/70 tw-px-4 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 [&::-webkit-details-marker]:tw-hidden">
+    <details className="tw-group" aria-busy={loading} open>
+      <summary className="tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-white [&::-webkit-details-marker]:tw-hidden">
         {title}
         <ChevronDownIcon
           className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-180"
           aria-hidden="true"
         />
       </summary>
-      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-p-3 sm:tw-p-4">
+      <div className="tw-pb-4">
         {content}
         {!loading && pagination}
       </div>

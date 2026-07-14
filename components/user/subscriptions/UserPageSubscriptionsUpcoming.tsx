@@ -60,14 +60,9 @@ export default function UserPageSubscriptionsUpcoming(
   } else if (subscriptions.length > 0) {
     content = (
       <>
-        <div className="tw-divide-y tw-divide-iron-800 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800">
+        <div className="tw-divide-y tw-divide-white/10">
           {subscriptions.map((subscription, index) => (
-            <div
-              key={subscription.token_id}
-              className={`tw-px-4 sm:tw-px-5 ${
-                index % 2 === 0 ? "tw-bg-iron-900" : "tw-bg-iron-950"
-              }`}
-            >
+            <div key={subscription.token_id}>
               <MemeSubscriptionRow
                 profileKey={props.profileKey}
                 title="The Memes"
