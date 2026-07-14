@@ -406,6 +406,7 @@ describe("WaveDropsAll", () => {
   });
 
   afterEach(() => {
+    mockScrollContainerRef.current.remove();
     jest.useRealTimers();
     jest.clearAllMocks();
   });
@@ -1458,6 +1459,8 @@ describe("WaveDropsAll", () => {
       expect(dropsProps.suspendLightDropHydration).toBe(true);
       expect(scrollTo).not.toHaveBeenCalled();
       expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 100, 100);
+
+      document.body.appendChild(mockScrollContainerRef.current);
 
       const staleTargetElement = document.createElement("div");
       Object.defineProperty(staleTargetElement, "getBoundingClientRect", {

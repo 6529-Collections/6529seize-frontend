@@ -230,12 +230,19 @@ export const useWaveDropsSerialScroll = ({
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior, targetSerialNo?: number) => {
       const container = scrollContainerRef.current;
-      const resolveTarget = (targetContainer: HTMLDivElement | null) =>
-        targetSerialNo !== undefined
-          ? (targetContainer?.querySelector<HTMLDivElement>(
-              `#drop-${targetSerialNo}`
-            ) ?? targetDropRef.current)
+      const resolveTarget = (targetContainer: HTMLDivElement | null) => {
+        if (targetSerialNo === undefined) {
+          return targetDropRef.current;
+        }
+
+        const matchingTarget =
+          targetContainer?.ownerDocument.getElementById(
+            `drop-${targetSerialNo}`
+          ) ?? null;
+        return matchingTarget && targetContainer?.contains(matchingTarget)
+          ? (matchingTarget as HTMLDivElement)
           : targetDropRef.current;
+      };
       const target = resolveTarget(container);
 
       if (target && container) {
@@ -304,7 +311,7 @@ export const useWaveDropsSerialScroll = ({
           return true;
         }
 
-        // Re-run revealDrop each interval as placeholder batches shift the target index.
+        // The local, idempotent reveal must rerun as placeholder batches shift the index.
         await waitAndRevealDrop(targetSerialNo, pollIntervalMs, pollIntervalMs);
         await delay(pollIntervalMs);
       }

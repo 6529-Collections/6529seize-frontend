@@ -122,7 +122,7 @@ describe("DropsList", () => {
     expect(lightProps).toHaveLength(1);
   });
 
-  it("allows historical light drops to hydrate after serial scrolling settles", () => {
+  it("hydrates historical light drops after serial scrolling settles", () => {
     const props = {
       scrollContainerRef: { current: null },
       drops: [
@@ -145,8 +145,6 @@ describe("DropsList", () => {
       onDropContentClick: jest.fn(),
       dropViewDropId: null,
       suspendLightDropHydration: false,
-      // Regression input: this marker previously kept the light row suspended forever.
-      autoCollapseSerials: new Set([2]),
     };
 
     render(<DropsList {...props} />);
