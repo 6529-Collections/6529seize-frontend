@@ -52,6 +52,7 @@ const mutateAsync = jest.fn();
 const useMutationMock = useMutation as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
 const invalidateQueries = jest.fn();
+const setQueriesData = jest.fn();
 (useDropInteractionRules as jest.Mock).mockReturnValue({
   voteState: DropVoteState.CAN_VOTE,
 });
@@ -82,11 +83,11 @@ describe("DropListItemRateGiveSubmit", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     auth.requestAuth.mockResolvedValue({ success: true });
-    useQueryClientMock.mockReturnValue({ invalidateQueries });
+    useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
     useMutationMock.mockImplementation((config: any) => ({
       mutateAsync: async (variables: any) => {
         mutateAsync(variables);
-        config.onSuccess?.({}, variables);
+        config.onSuccess?.(drop, variables);
         config.onSettled?.();
         return {};
       },
@@ -119,9 +120,16 @@ describe("DropListItemRateGiveSubmit", () => {
     });
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: "wave-1" }],
+      refetchType: "none",
+    });
+    expect(invalidateQueries).not.toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
     });
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
+      queryKey: [QueryKey.DROP_VOTERS, { dropId: "1" }],
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROP_VOTE_LOGS, { dropId: "1" }],
     });
   });
 

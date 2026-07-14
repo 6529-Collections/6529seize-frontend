@@ -10,7 +10,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { commonApiPost } from "@/services/api/common-api";
-import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
+import { applyWaveDropVoteUpdate } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -66,9 +66,9 @@ export default function DropListItemRateGiveSubmit({
           category: param.category,
         },
       }),
-    onSuccess: () => {
+    onSuccess: (updatedDrop) => {
       onSuccessfulRateChange();
-      invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
+      applyWaveDropVoteUpdate(queryClient, updatedDrop);
       optimisticRollbackRef.current = null;
     },
     onError: (error) => {

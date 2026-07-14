@@ -6,7 +6,40 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   useWaveDropsLeaderboard: jest.fn(),
   WaveDropsLeaderboardSort: { RANK: "RANK" },
+  WAVE_DROPS_LEADERBOARD_MAX_PAGES: 10,
 }));
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVirtualizedRows",
+  () => ({
+    useLeaderboardLeadingItemCount: () => 0,
+    WaveLeaderboardVirtualizedRows: ({
+      items,
+      renderItem,
+      hasNextPage,
+      fetchNextPage,
+    }: any) => (
+      <div>
+        {items.map((item: any) => (
+          <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
+        ))}
+        {hasNextPage ? (
+          <button onClick={fetchNextPage}>Load more drops</button>
+        ) : null}
+      </div>
+    ),
+  })
+);
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVotingModal",
+  () => ({
+    useWaveLeaderboardVotingModal: () => ({
+      votingDrop: null,
+      openVotingModal: jest.fn(),
+      closeVotingModal: jest.fn(),
+    }),
+    WaveLeaderboardVotingModal: () => null,
+  })
+);
 
 jest.mock(
   "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem",
@@ -38,6 +71,8 @@ const wave = {
 } as any;
 
 describe("WaveLeaderboardGrid", () => {
+  const scrollContainerRef = React.createRef<HTMLDivElement>();
+
   it("shows loading state", () => {
     (useWaveDropsLeaderboard as jest.Mock).mockReturnValue({
       drops: [],
@@ -45,6 +80,8 @@ describe("WaveLeaderboardGrid", () => {
       hasNextPage: false,
       isFetching: true,
       isFetchingNextPage: false,
+      pageMetadata: [],
+      queryWindowKey: "test-window",
     });
 
     const { container } = render(
@@ -53,6 +90,7 @@ describe("WaveLeaderboardGrid", () => {
         sort="RANK"
         mode="compact"
         onDropClick={jest.fn()}
+        scrollContainerRef={scrollContainerRef}
       />
     );
 
@@ -77,6 +115,13 @@ describe("WaveLeaderboardGrid", () => {
       hasNextPage: true,
       isFetching: false,
       isFetchingNextPage: false,
+      isFetchingPreviousPage: false,
+      isFetchNextPageError: false,
+      isFetchPreviousPageError: false,
+      fetchPreviousPage: jest.fn(),
+      hasPreviousPage: false,
+      pageMetadata: [],
+      queryWindowKey: "test-window",
     });
 
     render(
@@ -87,6 +132,7 @@ describe("WaveLeaderboardGrid", () => {
         isVotingClosed={true}
         isVotingControlsLocked={true}
         onDropClick={onDropClick}
+        scrollContainerRef={scrollContainerRef}
       />
     );
 

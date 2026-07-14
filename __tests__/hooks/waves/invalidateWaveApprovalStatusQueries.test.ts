@@ -1,7 +1,10 @@
 import { QueryClient } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
+import {
+  applyWaveDropVoteUpdate,
+  invalidateWaveApprovalStatusQueries,
+} from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 describe("invalidateWaveApprovalStatusQueries", () => {
   let queryClient: QueryClient;
@@ -91,5 +94,72 @@ describe("invalidateWaveApprovalStatusQueries", () => {
     invalidateWaveApprovalStatusQueries(queryClient, "");
 
     expect(invalidateQueries).not.toHaveBeenCalled();
+  });
+
+  it("patches only the voted drop and defers leaderboard refetching", () => {
+    const leaderboardKey = [
+      QueryKey.DROPS_LEADERBOARD,
+      { waveId: "wave-1", page_size: 50, sort: "RANK" },
+    ] as const;
+    const otherLeaderboardKey = [
+      QueryKey.DROPS_LEADERBOARD,
+      { waveId: "wave-2", page_size: 50, sort: "RANK" },
+    ] as const;
+    const votersKey = [
+      QueryKey.DROP_VOTERS,
+      { dropId: "drop-1", pageSize: 20 },
+    ] as const;
+    const dropsKey = [
+      QueryKey.DROPS,
+      { waveId: "wave-1", limit: 50 },
+    ] as const;
+    const otherVotersKey = [
+      QueryKey.DROP_VOTERS,
+      { dropId: "drop-2", pageSize: 20 },
+    ] as const;
+    queryClient.setQueryData(leaderboardKey, {
+      pages: [
+        {
+          page: 1,
+          drops: [
+            { id: "drop-1", rating: 1 },
+            { id: "drop-2", rating: 2 },
+          ],
+        },
+      ],
+      pageParams: [null],
+    });
+    queryClient.setQueryData(otherLeaderboardKey, {
+      pages: [{ page: 1, drops: [{ id: "drop-3", rating: 3 }] }],
+      pageParams: [null],
+    });
+    queryClient.setQueryData(votersKey, { pages: [] });
+    queryClient.setQueryData(dropsKey, {
+      pages: [{ data: [{ id: "drop-1", rating: 1 }] }],
+    });
+    queryClient.setQueryData(otherVotersKey, { pages: [] });
+
+    applyWaveDropVoteUpdate(queryClient, {
+      id: "drop-1",
+      rating: 99,
+      wave: { id: "wave-1" },
+    } as any);
+
+    expect(
+      queryClient.getQueryData<any>(leaderboardKey).pages[0].drops
+    ).toEqual([
+      expect.objectContaining({ id: "drop-1", rating: 99 }),
+      { id: "drop-2", rating: 2 },
+    ]);
+    expect(queryClient.getQueryData(otherLeaderboardKey)).toEqual({
+      pages: [{ page: 1, drops: [{ id: "drop-3", rating: 3 }] }],
+      pageParams: [null],
+    });
+    expect(queryClient.getQueryState(leaderboardKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(dropsKey)?.isInvalidated).toBe(false);
+    expect(queryClient.getQueryState(votersKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(otherVotersKey)?.isInvalidated).toBe(
+      false
+    );
   });
 });

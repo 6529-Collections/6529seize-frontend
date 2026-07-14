@@ -24,7 +24,7 @@ const useAuthMock = jest.mocked(useAuth);
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
 const commonApiPostMock = jest.mocked(commonApiPost);
 const setToast = jest.fn();
-const invalidateDrops = jest.fn();
+const addOptimisticDrop = jest.fn().mockResolvedValue(undefined);
 
 const drop = {
   id: "drop-1",
@@ -39,7 +39,7 @@ describe("useSingleWaveDropVoteRationale", () => {
     <QueryClientProvider client={queryClient}>
       <ReactQueryWrapperContext.Provider
         value={
-          { invalidateDrops } as React.ContextType<
+          { addOptimisticDrop } as React.ContextType<
             typeof ReactQueryWrapperContext
           >
         }
@@ -220,6 +220,6 @@ describe("useSingleWaveDropVoteRationale", () => {
         signer_address: "0x123",
       },
     });
-    expect(invalidateDrops).toHaveBeenCalledTimes(1);
+    expect(addOptimisticDrop).toHaveBeenCalledWith({ drop });
   });
 });

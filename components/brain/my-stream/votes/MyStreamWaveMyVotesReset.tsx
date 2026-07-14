@@ -10,7 +10,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
+import {
+  applyWaveDropVoteUpdate,
+  invalidateWaveApprovalSummaryQueries,
+} from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 interface MyStreamWaveMyVotesResetProps {
   readonly waveId: string;
@@ -55,6 +58,9 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
         },
       }),
     onSuccess: (response: ApiDrop) => {
+      applyWaveDropVoteUpdate(queryClient, response, {
+        invalidateWaveSummary: false,
+      });
       removeSelected(response.id);
     },
     onError: (error) => {
@@ -97,7 +103,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     }
 
     if (didResetAnyDrop) {
-      invalidateWaveApprovalStatusQueries(queryClient, waveId);
+      invalidateWaveApprovalSummaryQueries(queryClient, waveId);
     }
   };
 

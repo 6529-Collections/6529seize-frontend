@@ -80,7 +80,7 @@ export const useSingleWaveDropVoteRationale = (
   const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const { isSafeWallet, address } = useSeizeConnectContext();
-  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
+  const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const generatedRationaleText = getVoteRationaleReplyMarkdown({
     voteTotal,
     voteChange,
@@ -122,8 +122,8 @@ export const useSingleWaveDropVoteRationale = (
         endpoint: "drops",
         body: requestBody,
       }),
-    onSuccess: () => {
-      invalidateDrops();
+    onSuccess: (createdReply) => {
+      void addOptimisticDrop({ drop: createdReply });
     },
     onError: (error) => {
       setToast({

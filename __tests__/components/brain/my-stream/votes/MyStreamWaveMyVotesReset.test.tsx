@@ -35,16 +35,17 @@ jest.mock("@/services/api/common-api", () => ({
 const useMutationMock = useMutation as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
 const invalidateQueries = jest.fn();
+const setQueriesData = jest.fn();
 
 const auth = { setToast: jest.fn(), connectedProfile: { handle: "me" } } as any;
 const rqContext = { onDropRateChange: jest.fn() } as any;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useQueryClientMock.mockReturnValue({ invalidateQueries });
+  useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
   useMutationMock.mockImplementation((config: any) => ({
     mutateAsync: async (param: any) => {
-      const result = { id: param.dropId };
+      const result = { id: param.dropId, wave: { id: "wave-1" } };
       // Simulate the onSuccess callback
       if (config.onSuccess) {
         config.onSuccess(result);
@@ -164,7 +165,7 @@ test("resets votes for selected drops", async () => {
   expect(onResettingChange).toHaveBeenNthCalledWith(1, true);
   expect(onResettingChange).toHaveBeenCalledTimes(2);
   expect(removeSelected).toHaveBeenCalledTimes(2);
-  expect(invalidateQueries).toHaveBeenCalledTimes(6);
+  expect(invalidateQueries).toHaveBeenCalledTimes(8);
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
   });
@@ -173,15 +174,16 @@ test("resets votes for selected drops", async () => {
   });
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: "wave-1" }],
+    refetchType: "none",
   });
-  expect(invalidateQueries).toHaveBeenCalledWith({
+  expect(invalidateQueries).not.toHaveBeenCalledWith({
     queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
   });
   expect(invalidateQueries).toHaveBeenCalledWith({
-    queryKey: [QueryKey.DROP_VOTERS],
+    queryKey: [QueryKey.DROP_VOTERS, { dropId: "a" }],
   });
   expect(invalidateQueries).toHaveBeenCalledWith({
-    queryKey: [QueryKey.DROP_VOTE_LOGS],
+    queryKey: [QueryKey.DROP_VOTE_LOGS, { dropId: "b" }],
   });
   // onDropRateChange is handled by React Query elsewhere, not directly by this component
 });
@@ -200,7 +202,7 @@ test("cleans up and invalidates once when a later reset fails", async () => {
           throw error;
         }
 
-        const result = { id: param.dropId };
+        const result = { id: param.dropId, wave: { id: "wave-1" } };
         config.onSuccess?.(result);
         return result;
       },
@@ -238,7 +240,7 @@ test("cleans up and invalidates once when a later reset fails", async () => {
   expect(onResettingChange).toHaveBeenCalledTimes(2);
   expect(removeSelected).toHaveBeenCalledWith("a");
   expect(removeSelected).not.toHaveBeenCalledWith("b");
-  expect(invalidateQueries).toHaveBeenCalledTimes(6);
+  expect(invalidateQueries).toHaveBeenCalledTimes(5);
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
   });
@@ -247,15 +249,16 @@ test("cleans up and invalidates once when a later reset fails", async () => {
   });
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: "wave-1" }],
+    refetchType: "none",
   });
-  expect(invalidateQueries).toHaveBeenCalledWith({
+  expect(invalidateQueries).not.toHaveBeenCalledWith({
     queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
   });
   expect(invalidateQueries).toHaveBeenCalledWith({
-    queryKey: [QueryKey.DROP_VOTERS],
+    queryKey: [QueryKey.DROP_VOTERS, { dropId: "a" }],
   });
   expect(invalidateQueries).toHaveBeenCalledWith({
-    queryKey: [QueryKey.DROP_VOTE_LOGS],
+    queryKey: [QueryKey.DROP_VOTE_LOGS, { dropId: "a" }],
   });
   expect(screen.getByTestId("progress")).toHaveAttribute(
     "data-is-resetting",

@@ -1,5 +1,8 @@
 import { renderHook, act } from "@testing-library/react";
-import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
+import {
+  useWaveDropsLeaderboard,
+  WAVE_DROPS_LEADERBOARD_MAX_PAGES,
+} from "@/hooks/useWaveDropsLeaderboard";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 jest.mock("@tanstack/react-query", () => ({
@@ -32,10 +35,15 @@ const mockInfiniteQueryReturn = ({
   (useInfiniteQuery as jest.Mock).mockReturnValue({
     data,
     fetchNextPage,
+    fetchPreviousPage: jest.fn(),
     hasNextPage,
+    hasPreviousPage: false,
     isError,
+    isFetchNextPageError: false,
+    isFetchPreviousPageError: false,
     isFetching: false,
     isFetchingNextPage: false,
+    isFetchingPreviousPage: false,
     refetch: jest.fn(),
   });
 };
@@ -124,5 +132,30 @@ describe("useWaveDropsLeaderboard", () => {
 
     expect(getLatestInfiniteQueryOptions().enabled).toBe(false);
     expect(result.current.isFetching).toBe(false);
+  });
+
+  it("keeps a bounded bidirectional page window", () => {
+    renderHook(() =>
+      useWaveDropsLeaderboard({
+        waveId: "1",
+        maxPages: WAVE_DROPS_LEADERBOARD_MAX_PAGES,
+      })
+    );
+
+    const options = getLatestInfiniteQueryOptions();
+    expect(options.maxPages).toBe(WAVE_DROPS_LEADERBOARD_MAX_PAGES);
+    expect(options.queryKey[1].page_window).toBe(
+      WAVE_DROPS_LEADERBOARD_MAX_PAGES
+    );
+    expect(options.getPreviousPageParam({ page: 3 })).toBe(2);
+    expect(options.getPreviousPageParam({ page: 1 })).toBeNull();
+  });
+
+  it("leaves non-leaderboard consumers unbounded", () => {
+    renderHook(() => useWaveDropsLeaderboard({ waveId: "1" }));
+
+    const options = getLatestInfiniteQueryOptions();
+    expect(options).not.toHaveProperty("maxPages");
+    expect(options.queryKey[1].page_window).toBeNull();
   });
 });

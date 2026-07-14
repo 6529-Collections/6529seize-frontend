@@ -43,9 +43,14 @@ beforeEach(() => {
   (useInfiniteQuery as jest.Mock).mockReturnValue({
     data: { pages: [] },
     fetchNextPage,
+    fetchPreviousPage: jest.fn(),
     hasNextPage: true,
+    hasPreviousPage: false,
+    isFetchNextPageError: false,
+    isFetchPreviousPageError: false,
     isFetching: false,
     isFetchingNextPage: false,
+    isFetchingPreviousPage: false,
     refetch: jest.fn(),
   });
 });
@@ -61,9 +66,14 @@ describe("useWaveDropsLeaderboard extra", () => {
     (useInfiniteQuery as jest.Mock).mockReturnValue({
       data: { pages: [{ wave: {}, drops: [{ id: "a" }, { id: "b" }] }] },
       fetchNextPage,
+      fetchPreviousPage: jest.fn(),
       hasNextPage: true,
+      hasPreviousPage: false,
+      isFetchNextPageError: false,
+      isFetchPreviousPageError: false,
       isFetching: false,
       isFetchingNextPage: false,
+      isFetchingPreviousPage: false,
       refetch: jest.fn(),
     });
     const { result } = renderHook(() =>
@@ -72,6 +82,37 @@ describe("useWaveDropsLeaderboard extra", () => {
     await waitFor(() => result.current.drops.length === 2);
     expect(result.current.drops).toEqual([{ id: "a" }, { id: "b" }]);
     expect(result.current.isFetching).toBe(false);
+  });
+
+  it("does not render a drop twice when ranking changes cross page bounds", () => {
+    (useInfiniteQuery as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          { page: 1, wave: {}, drops: [{ id: "a" }] },
+          { page: 2, wave: {}, drops: [{ id: "a" }, { id: "b" }] },
+        ],
+      },
+      fetchNextPage,
+      fetchPreviousPage: jest.fn(),
+      hasNextPage: true,
+      hasPreviousPage: false,
+      isFetchNextPageError: false,
+      isFetchPreviousPageError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isFetchingPreviousPage: false,
+      refetch: jest.fn(),
+    });
+
+    const { result } = renderHook(() =>
+      useWaveDropsLeaderboard({ waveId: "1" })
+    );
+
+    expect(result.current.drops).toEqual([{ id: "a" }, { id: "b" }]);
+    expect(result.current.pageMetadata).toEqual([
+      { page: 1, dropIds: ["a"] },
+      { page: 2, dropIds: ["b"] },
+    ]);
   });
 
   it("uses the correct sort in the main query key", () => {
