@@ -1,5 +1,8 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { faCaretLeft, faCaretRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -30,10 +33,15 @@ const ICON_DISABLED_CLASS = "tw-cursor-default tw-opacity-60";
 const GO_TO_LAST_CLASS =
   "tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit tw-[font:inherit] hover:tw-text-[rgb(179,179,179)] hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-[#528bff] disabled:tw-cursor-default disabled:tw-text-inherit disabled:tw-no-underline";
 const PAGE_INPUT_CLASS =
-  "tw-w-[35px] tw-border-0 tw-border-b tw-border-solid tw-border-white tw-bg-transparent tw-text-center";
+  "tw-w-[60px] tw-border-0 tw-border-b tw-border-solid tw-border-white tw-bg-transparent tw-text-center";
+const CURRENT_PAGE_TOKEN = "__CURRENT_PAGE__";
+const TOTAL_PAGE_TOKEN = "__TOTAL_PAGE__";
+const PAGE_TOKEN_PATTERN = /(__CURRENT_PAGE__|__TOTAL_PAGE__)/;
 
 export default function Pagination(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const [inputPage, setInputPage] = useState<string>(props.page.toString());
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     setInputPage(props.page.toString());
@@ -82,6 +90,12 @@ export default function Pagination(props: Readonly<Props>) {
     setInputPage(newValue);
   }
 
+  const lastPage = getLastPage();
+  const pageLabelParts = t(locale, "common.pagination.currentOfTotal", {
+    current: CURRENT_PAGE_TOKEN,
+    total: TOTAL_PAGE_TOKEN,
+  }).split(PAGE_TOKEN_PATTERN);
+
   return (
     <>
       {props.totalResults > props.pageSize && (
@@ -92,37 +106,62 @@ export default function Pagination(props: Readonly<Props>) {
             className={`${ICON_BUTTON_CLASS} ${
               props.page > 1 ? ICON_ENABLED_CLASS : ICON_DISABLED_CLASS
             }`}
-            aria-label="Previous page"
+            aria-label={t(locale, "common.pagination.previousPage")}
             disabled={props.page <= 1}
           >
             <FontAwesomeIcon icon={faCaretLeft} />
           </button>
-          <input
-            id="page-number"
-            type="text"
-            className={PAGE_INPUT_CLASS}
-            onKeyDown={enterValue}
-            onChange={setValue}
-            value={inputPage}
-            aria-label="Page number"
-          />
-          {" of "}
-          <button
-            type="button"
-            onClick={goToLast}
-            className={GO_TO_LAST_CLASS}
-            aria-label="Go to last page"
-            disabled={isLastPage()}
-          >
-            {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
-          </button>
+          {pageLabelParts.map((part, index) => {
+            if (part === CURRENT_PAGE_TOKEN) {
+              return (
+                <input
+                  key={part}
+                  id="page-number"
+                  type="text"
+                  inputMode="numeric"
+                  className={PAGE_INPUT_CLASS}
+                  onFocus={() => {
+                    setInputPage(props.page.toString());
+                    setIsEditing(true);
+                  }}
+                  onBlur={() => {
+                    setInputPage(props.page.toString());
+                    setIsEditing(false);
+                  }}
+                  onKeyDown={enterValue}
+                  onChange={setValue}
+                  value={
+                    isEditing ? inputPage : formatInteger(locale, props.page)
+                  }
+                  aria-label={t(locale, "common.pagination.pageNumber")}
+                />
+              );
+            }
+
+            if (part === TOTAL_PAGE_TOKEN) {
+              return (
+                <button
+                  key={part}
+                  type="button"
+                  onClick={goToLast}
+                  className={GO_TO_LAST_CLASS}
+                  aria-label={t(locale, "common.pagination.goToLastPage")}
+                  disabled={isLastPage()}
+                >
+                  {formatInteger(locale, lastPage)}
+                </button>
+              );
+            }
+
+            return <span key={`${part}-${index}`}>{part}</span>;
+          })}
           <button
             type="button"
             onClick={pageNext}
             className={`${ICON_BUTTON_CLASS} ${
               isLastPage() ? ICON_DISABLED_CLASS : ICON_ENABLED_CLASS
             }`}
-            aria-label="Next page"
+            aria-label={t(locale, "common.pagination.nextPage")}
             disabled={isLastPage()}
           >
             <FontAwesomeIcon icon={faCaretRight} />
