@@ -31,6 +31,14 @@ import type { DelegationToastState } from "../DelegationToast";
 import { LOCK_SELECT_CLASS } from "./collection-delegation-helpers";
 import type { CollectionLocks } from "./useCollectionLocks";
 
+interface CollectionDelegationLocksProps {
+  collection: DelegationCollection;
+  locks: CollectionLocks;
+  chainsMatch: () => boolean;
+  getSwitchToMessage: () => ReactNode;
+  showDelegationToast: (toast: DelegationToastState) => void;
+}
+
 /**
  * Maps a selected use-case number to its index in the lock-status
  * multicall arrays. NOTE: the special use cases land one position before
@@ -76,18 +84,60 @@ function CollectionLockUseCaseOptions(
   });
 }
 
+function CollectionWalletLockButton(
+  props: Readonly<CollectionDelegationLocksProps>
+) {
+  const { collection, locks, chainsMatch, getSwitchToMessage } = props;
+  const { showDelegationToast } = props;
+
+  return (
+    <button
+      className={`${styles["lockDelegationBtn"]} ${
+        locks.collectionLockReadGlobal?.data
+          ? styles["lockDelegationBtnDisabled"]
+          : ""
+      }`}
+      onClick={() => {
+        const title = `${
+          locks.collectionLockRead.data ? `Unlocking` : `Locking`
+        } Wallet`;
+        let message: ReactNode = "Confirm in your wallet...";
+        locks.collectionLockToastTitleRef.current = title;
+        if (chainsMatch()) {
+          locks.collectionLockWrite.writeContract({
+            address: DELEGATION_CONTRACT.contract,
+            abi: DELEGATION_ABI,
+            chainId: DELEGATION_CONTRACT.chain_id,
+            args: [collection.contract, !locks.collectionLockRead.data],
+            functionName: "setCollectionLock",
+          });
+        } else {
+          message = getSwitchToMessage();
+        }
+        showDelegationToast({ title, message });
+      }}
+    >
+      <FontAwesomeIcon
+        icon={locks.collectionLockRead.data ? faLock : faLockOpen}
+        className={styles["buttonIcon"]}
+      />
+      {locks.collectionLockRead.data ? "Unlock" : "Lock"} Wallet
+      {locks.collectionLockReadGlobal?.data &&
+      !areEqualAddresses(collection.contract, DELEGATION_ALL_ADDRESS)
+        ? ` *`
+        : ``}
+      {(locks.collectionLockWrite.isPending ||
+        locks.waitCollectionLockWrite.isLoading) && <Spinner />}
+    </button>
+  );
+}
+
 /**
  * The "Locks" section of the collection-delegation screen: the wallet-level
  * lock button and the per-use-case lock select/button pair.
  */
 export function CollectionDelegationLocks(
-  props: Readonly<{
-    collection: DelegationCollection;
-    locks: CollectionLocks;
-    chainsMatch: () => boolean;
-    getSwitchToMessage: () => ReactNode;
-    showDelegationToast: (toast: DelegationToastState) => void;
-  }>
+  props: Readonly<CollectionDelegationLocksProps>
 ) {
   const { collection, locks, chainsMatch, getSwitchToMessage } = props;
   const { showDelegationToast } = props;
@@ -125,44 +175,7 @@ export function CollectionDelegationLocks(
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-2">
         <div className="tw-w-full tw-px-3">
-          <button
-            className={`${styles["lockDelegationBtn"]} ${
-              locks.collectionLockReadGlobal?.data
-                ? styles["lockDelegationBtnDisabled"]
-                : ""
-            }`}
-            onClick={() => {
-              const title = `${
-                locks.collectionLockRead.data ? `Unlocking` : `Locking`
-              } Wallet`;
-              let message: ReactNode = "Confirm in your wallet...";
-              locks.collectionLockToastTitleRef.current = title;
-              if (chainsMatch()) {
-                locks.collectionLockWrite.writeContract({
-                  address: DELEGATION_CONTRACT.contract,
-                  abi: DELEGATION_ABI,
-                  chainId: DELEGATION_CONTRACT.chain_id,
-                  args: [collection.contract, !locks.collectionLockRead.data],
-                  functionName: "setCollectionLock",
-                });
-              } else {
-                message = getSwitchToMessage();
-              }
-              showDelegationToast({ title, message });
-            }}
-          >
-            <FontAwesomeIcon
-              icon={locks.collectionLockRead.data ? faLock : faLockOpen}
-              className={styles["buttonIcon"]}
-            />
-            {locks.collectionLockRead.data ? "Unlock" : "Lock"} Wallet
-            {locks.collectionLockReadGlobal?.data &&
-            !areEqualAddresses(collection.contract, DELEGATION_ALL_ADDRESS)
-              ? ` *`
-              : ``}
-            {(locks.collectionLockWrite.isPending ||
-              locks.waitCollectionLockWrite.isLoading) && <Spinner />}
-          </button>
+          <CollectionWalletLockButton {...props} />
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-3">
