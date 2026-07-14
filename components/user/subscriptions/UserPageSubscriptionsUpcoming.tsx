@@ -48,9 +48,7 @@ export default function UserPageSubscriptionsUpcoming(
   if (props.loading) {
     content = (
       <div aria-busy="true" className="tw-space-y-2">
-        <span role="status" className="tw-sr-only">
-          Loading upcoming drops
-        </span>
+        <output className="tw-sr-only">Loading upcoming drops</output>
         {UPCOMING_SKELETON_ROWS.map((row) => (
           <div
             key={row}

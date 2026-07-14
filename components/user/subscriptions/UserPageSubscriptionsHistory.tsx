@@ -146,9 +146,7 @@ function HistoryDisclosure({
 function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
   return (
     <div className="tw-flex tw-min-h-20 tw-animate-pulse tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40 tw-p-4">
-      <span role="status" className="tw-sr-only">
-        Loading {title}
-      </span>
+      <output className="tw-sr-only">Loading {title}</output>
       <div
         aria-hidden="true"
         className="tw-h-3 tw-w-2/5 tw-rounded-full tw-bg-iron-800"

@@ -17,7 +17,6 @@ export default function UserPageSubscriptionsToggle({
 }: UserPageSubscriptionsToggleProps) {
   return (
     <label
-      htmlFor={id}
       className={`tw-relative tw-inline-flex tw-min-h-11 tw-min-w-12 tw-flex-shrink-0 tw-items-center tw-rounded-full ${
         disabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
       }`}

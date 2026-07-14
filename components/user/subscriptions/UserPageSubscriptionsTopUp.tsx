@@ -336,6 +336,7 @@ export default function UserPageSubscriptionsTopUp() {
       return (
         <div className="tw-pt-2">
           <CardCountOption
+            id={`subscription-top-up-${optionId}`}
             count={count}
             display={`Remaining ${label} ${value.toLocaleString()}`}
             selected={selectedOption === optionId}
@@ -356,6 +357,7 @@ export default function UserPageSubscriptionsTopUp() {
       <div className={TOP_UP_OPTION_GRID_CLASS}>
         <div className="tw-pt-2">
           <CardCountOption
+            id="subscription-top-up-1"
             count={1}
             selected={selectedOption === "1"}
             onSelect={() => {
@@ -585,6 +587,7 @@ export default function UserPageSubscriptionsTopUp() {
 
 function CardCountOption(
   props: Readonly<{
+    id: string;
     count: number;
     display?: string | undefined;
     selected: boolean;
@@ -598,6 +601,7 @@ function CardCountOption(
 
   return (
     <label
+      htmlFor={props.id}
       aria-label={labelText}
       className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-left tw-text-iron-100 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${
         props.selected
@@ -608,6 +612,7 @@ function CardCountOption(
       <div className={TOP_UP_RADIO_GRID_CLASS}>
         <div className="tw-flex tw-items-center tw-justify-center">
           <input
+            id={props.id}
             type="radio"
             name="subscription-top-up-card-count"
             value={props.count}
