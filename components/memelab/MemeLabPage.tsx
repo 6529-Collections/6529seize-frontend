@@ -974,7 +974,7 @@ export default function MemeLabPageComponent({
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
-                    className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
                     aria-label={t(locale, "memeLab.detail.heading.ariaLabel", {
                       tokenId: nft.id,
                       name: nft.name,
